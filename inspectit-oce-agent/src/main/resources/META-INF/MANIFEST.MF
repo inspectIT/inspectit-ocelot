@@ -1,0 +1,4 @@
+Agent-Class: rocks.inspectit.oce.agent.main.Agent
+Premain-Class: rocks.inspectit.oce.agent.main.Agent
+Can-Redefine-Classes: true
+Can-Retransform-Classes: true

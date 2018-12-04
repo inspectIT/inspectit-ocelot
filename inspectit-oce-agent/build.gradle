@@ -1,0 +1,94 @@
+plugins {
+    id 'java'
+    id "me.champeau.gradle.jmh" version "0.4.7"
+    id 'jacoco'
+}
+
+compileJava {
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+}
+compileTestJava {
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+}
+
+configurations {
+    //these dependencies will be placed in the bootstrap classloader (not yet implemented)
+    bootstrapDependencies
+    //these dependencies will be hidden from the instrumented application (placed in the agents classloader)
+    privateDependencies
+
+    implementation.extendsFrom bootstrapDependencies
+    implementation.extendsFrom privateDependencies
+
+    buildTools
+}
+
+/**
+ * JMH-Perf tests.
+ */
+jmhJar {
+    doFirst {
+        duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+    }
+}
+jmh {
+    /**
+     * Use -PjmhInclude='regular expression' to specify what tests to run with JMH.
+     */
+    if (project.hasProperty('jmhInclude')) {
+        def regex = project.getProperty('jmhInclude')
+        println "Filtering for JMH-Tests matching to regex "+regex
+        include = [regex]
+    }
+    humanOutputFile = file("$buildDir/jmh/human.txt")
+    resultsFile = file("$buildDir/jmh/results.txt")
+    duplicateClassesStrategy = DuplicatesStrategy.EXCLUDE
+    jmhVersion = '1.21'
+}
+
+dependencies {
+    //bootstrapDependencies(
+            //'groupid:artifactid:version'
+    //)
+    //privateDependencies(
+    //       'groupid:artifactid:version'
+    //)
+    buildTools 'jarcheck:jarcheck:1.5'
+}
+
+// use jarCheck to make sure all classes in our dependencies are at maximum in version 1.8
+task checkDependencyJavaVersions {
+    doFirst {
+        def jarCheckOutput = new File("$buildDir/jarCheck")
+        jarCheckOutput.mkdirs()
+        configurations.runtimeClasspath.each { file ->
+            println file.name
+            def name = file.name
+            javaexec {
+                classpath configurations.buildTools
+                main = 'com.mindprod.jarcheck.JarCheck'
+                args = ["$file", "1.0", "1.8"]
+                standardOutput = new File(jarCheckOutput, "$name-check.log").newOutputStream()
+            }
+        }
+    }
+}
+
+jar {
+    dependsOn checkDependencyJavaVersions
+
+    destinationDir = buildDir
+    archivesBaseName = "${project.name}-${releaseVersion}"
+
+    manifest {
+        from file("src/main/resources/META-INF/MANIFEST.MF")
+    }
+
+    into('libs') {
+        from configurations.privateDependencies
+        //TODO: pack bootstrap dependencies separately
+        from configurations.bootstrapDependencies
+    }
+}
