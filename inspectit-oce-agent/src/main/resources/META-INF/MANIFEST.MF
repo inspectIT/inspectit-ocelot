@@ -1,4 +1,4 @@
-Agent-Class: rocks.inspectit.oce.agent.main.AgentMain
-Premain-Class: rocks.inspectit.oce.agent.main.AgentMain
+Agent-Class: rocks.inspectit.oce.agent.AgentMain
+Premain-Class: rocks.inspectit.oce.agent.AgentMain
 Can-Redefine-Classes: true
 Can-Retransform-Classes: true

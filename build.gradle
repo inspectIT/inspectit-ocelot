@@ -1,4 +1,5 @@
-allprojects {
+subprojects {
+
     repositories {
         mavenCentral()
         maven {
@@ -6,4 +7,48 @@ allprojects {
             url "http://repository.novatec-gmbh.de/content/repositories/3rd_party_libs/"
         }
     }
+
+    apply plugin: 'java'
+    apply plugin: 'jacoco'
+
+    configurations {
+        buildTools
+    }
+    dependencies {
+        buildTools(
+            'jarcheck:jarcheck:1.5'
+        )
+    }
+
+    compileJava {
+        sourceCompatibility = 1.8
+        targetCompatibility = 1.8
+    }
+    compileTestJava {
+        sourceCompatibility = 1.8
+        targetCompatibility = 1.8
+    }
+
+    // use jarCheck to make sure all classes in our dependencies are at maximum in version 1.8
+    task checkDependencyJavaVersions {
+
+        def jarCheckPath = "$buildDir/jarCheck"
+        outputs.dir jarCheckPath
+
+        doFirst {
+            def jarCheckOutput = new File(jarCheckPath)
+            jarCheckOutput.mkdirs()
+            configurations.runtimeClasspath.each { file ->
+                def name = file.name
+                println name
+                javaexec {
+                    classpath configurations.buildTools
+                    main = 'com.mindprod.jarcheck.JarCheck'
+                    args = ["$file", "1.0", "1.8"]
+                    standardOutput = new File(jarCheckOutput, "$name-check.log").newOutputStream()
+                }
+            }
+        }
+    }
+    jar.dependsOn checkDependencyJavaVersions
 }

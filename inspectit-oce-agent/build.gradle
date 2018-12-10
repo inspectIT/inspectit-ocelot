@@ -1,174 +1,28 @@
 import java.nio.file.Files
 import java.nio.file.Paths
 
-plugins {
-    id 'java'
-    id "me.champeau.gradle.jmh" version "0.4.7"
-    id 'jacoco'
-}
 
-//the root package of all agent classes
-def agentRootPackage = "rocks.inspectit"
-def agentRootPackageDir = agentRootPackage.replace('.', '/') + "/"
-//all classes from this package get placed directly in the agent jar
-def agentMainPackage = "rocks.inspectit.oce.agent.main"
-def agentMainPackageDir = agentMainPackage.replace('.', '/') + "/"
-//all classes from this package get placed in a nested jar which is loaded by the bootstrap loader
-def agentBootstrapPackage = "rocks.inspectit.oce.agent.bootstrap"
-def agentBootstrapPackageDir = agentBootstrapPackage.replace('.', '/') + "/"
-//all other classes are placed in a nested jar which is loaded by a private classloader
-def jarGenerationTempPath = "$buildDir/jarGen/"
-
-compileJava {
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
-}
-compileTestJava {
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
-}
-
-configurations {
-    //these dependencies will be placed in the bootstrap classloader (not yet implemented)
-    bootstrapDependencies
-    //these dependencies will be hidden from the instrumented application (placed in the agents classloader)
-    privateDependencies
-
-    implementation.extendsFrom bootstrapDependencies
-    implementation.extendsFrom privateDependencies
-
-    buildTools
-}
-
-/**
- * JMH-Perf tests.
- */
-jmhJar {
-    doFirst {
-        duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
-    }
-}
-jmh {
-    /**
-     * Use -PjmhInclude='regular expression' to specify what tests to run with JMH.
-     */
-    if (project.hasProperty('jmhInclude')) {
-        def regex = project.getProperty('jmhInclude')
-        println "Filtering for JMH-Tests matching to regex " + regex
-        include = [regex]
-    }
-    humanOutputFile = file("$buildDir/jmh/human.txt")
-    resultsFile = file("$buildDir/jmh/results.txt")
-    duplicateClassesStrategy = DuplicatesStrategy.EXCLUDE
-    jmhVersion = '1.21'
-}
+version = "${releaseVersion}"
 
 dependencies {
-    bootstrapDependencies(
-            'io.opencensus:opencensus-impl:0.18.0',
+    compileOnly(
+            project(':inspectit-oce-bootstrap'),
     )
-    privateDependencies(
-            'org.slf4j:slf4j-api:1.7.25'
-    )
-    buildTools(
-            'jarcheck:jarcheck:1.5'
-    )
-}
-
-// use jarCheck to make sure all classes in our dependencies are at maximum in version 1.8
-task checkDependencyJavaVersions {
-
-    def jarCheckPath = "$buildDir/jarCheck"
-    outputs.dir jarCheckPath
-
-    doFirst {
-        def jarCheckOutput = new File(jarCheckPath)
-        jarCheckOutput.mkdirs()
-        configurations.runtimeClasspath.each { file ->
-            def name = file.name
-            javaexec {
-                classpath configurations.buildTools
-                main = 'com.mindprod.jarcheck.JarCheck'
-                args = ["$file", "1.0", "1.8"]
-                standardOutput = new File(jarCheckOutput, "$name-check.log").newOutputStream()
-            }
-        }
-    }
-}
-
-/**
- * Generates the "inspectit-jars.txt" file listing all jar files packed into the agent jar.
- * This includes inspectits bootstrap and core jar
- */
-task generateJarContentFile {
-
-    dependsOn compileJava
-    def outFile = jarGenerationTempPath + "inspectit-jars.txt";
-    outputs.file outFile
-
-    def contents = [
-            "bootstrap/inspectit-bootstrap.jar",
-            "libs/inspectit-core.jar"
-    ]
-    doFirst {
-        configurations.bootstrapDependencies.each { jar ->
-            contents.add "bootstrap/" + jar.name
-        }
-        configurations.privateDependencies.each { jar ->
-            contents.add "libs/" + jar.name
-        }
-
-        def outPath = Paths.get(outFile)
-        Files.createDirectories(outPath.getParent())
-        Files.write(outPath, contents)
-    }
-}
-
-task generateBootstrapJar(type: Jar) {
-    destinationDir = file(jarGenerationTempPath + "bootstrap")
-    baseName = "inspectit-bootstrap"
-
-    from sourceSets.main.output
-    include agentBootstrapPackageDir
-}
-
-task generatePrivateCoreJar(type: Jar) {
-    destinationDir = file(jarGenerationTempPath + "libs")
-    baseName = "inspectit-core"
-
-    from sourceSets.main.output
-    exclude agentBootstrapPackageDir
-    exclude agentMainPackageDir
 }
 
 jar {
-    dependsOn checkDependencyJavaVersions
-    dependsOn generateJarContentFile
-    dependsOn generateBootstrapJar
-    dependsOn generatePrivateCoreJar
-
     destinationDir = buildDir
-    archivesBaseName = "${project.name}-${releaseVersion}"
+    archivesBaseName = "${project.name}"
 
     manifest {
         from file("src/main/resources/META-INF/MANIFEST.MF")
     }
 
-    //include the content lsit and our generated jar files
-    from jarGenerationTempPath
+    from project(':inspectit-oce-bootstrap').jar.outputs
+    from project(':inspectit-oce-core').jar.outputs
 
-    into('bootstrap') {
-        from configurations.bootstrapDependencies
-    }
-    into('libs') {
-        from configurations.privateDependencies
-    }
-
-    //exclude all files from this inspectit package except for "main" classes
-    eachFile { file ->
-        def fpath = file.relativePath.pathString
-        if (fpath.startsWith(agentRootPackageDir) && !fpath.startsWith(agentMainPackageDir)) {
-            file.exclude()
-        }
+    //include all "implementation" dependencies in fat jar
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
 }
