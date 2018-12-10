@@ -40,7 +40,6 @@ subprojects {
             jarCheckOutput.mkdirs()
             configurations.runtimeClasspath.each { file ->
                 def name = file.name
-                println name
                 javaexec {
                     classpath configurations.buildTools
                     main = 'com.mindprod.jarcheck.JarCheck'
