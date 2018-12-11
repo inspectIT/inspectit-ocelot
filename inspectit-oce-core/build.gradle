@@ -1,0 +1,46 @@
+
+plugins {
+    id "me.champeau.gradle.jmh" version "0.4.7"
+}
+
+/**
+ * JMH-Perf tests.
+ */
+jmhJar {
+    doFirst {
+        duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+    }
+}
+jmh {
+    /**
+     * Use -PjmhInclude='regular expression' to specify what tests to run with JMH.
+     */
+    if (project.hasProperty('jmhInclude')) {
+        def regex = project.getProperty('jmhInclude')
+        println "Filtering for JMH-Tests matching to regex " + regex
+        include = [regex]
+    }
+    humanOutputFile = file("$buildDir/jmh/human.txt")
+    resultsFile = file("$buildDir/jmh/results.txt")
+    duplicateClassesStrategy = DuplicatesStrategy.EXCLUDE
+    jmhVersion = '1.21'
+}
+
+dependencies {
+    compileOnly(
+            project(':inspectit-oce-bootstrap')
+    )
+
+    implementation(
+            'org.slf4j:slf4j-api:1.7.25'
+    )
+}
+
+jar {
+    archivesBaseName = "${project.name}"
+
+    //include all "implementation" dependencies in fat jar
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}

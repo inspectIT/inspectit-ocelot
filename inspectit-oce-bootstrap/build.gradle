@@ -1,0 +1,14 @@
+dependencies {
+    implementation(
+            'io.opencensus:opencensus-impl:0.18.0'
+    )
+}
+
+jar {
+    archivesBaseName = "${project.name}"
+
+    //include all "implementation" dependencies in fat jar
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
