@@ -26,6 +26,7 @@ public class AgentImpl implements IAgent {
         log.info("Starting Agent...");
         ctx = new AnnotationConfigApplicationContext();
         ctx.setClassLoader(AgentImpl.class.getClassLoader());
+        ctx.registerShutdownHook();
 
         //Allows to use autowiring to acquire the Instrumentation instance
         ctx.getBeanFactory().registerSingleton("instrumentation", instrumentation);
