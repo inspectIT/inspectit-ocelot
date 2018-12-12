@@ -33,7 +33,7 @@ public class AgentMain {
     public static void premain(String agentArgs, Instrumentation inst) {
         try {
             ClassLoader icl = initializeClasspath(inst);
-            AgentManager.startOrReplaceInspectitCore(icl);
+            AgentManager.startOrReplaceInspectitCore(icl, agentArgs, inst);
         } catch (Exception e) {
             e.printStackTrace();
         }
