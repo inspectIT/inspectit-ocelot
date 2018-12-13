@@ -1,16 +1,14 @@
 package rocks.inspectit.oce.core.config.model;
 
 import lombok.Data;
-import org.springframework.boot.context.properties.bind.Binder;
-import org.springframework.core.env.Environment;
-import rocks.inspectit.oce.core.config.ConfigurationCenter;
 import rocks.inspectit.oce.core.config.model.config.ConfigSettings;
 
 /**
  * Root element of the configuration model for inspectIT.
- * The loading of the configuration is managed by the {@link ConfigurationCenter}.
+ * The loading of the configuration is managed by the {@link rocks.inspectit.oce.core.config.InspectitEnvironment}.
  * <p>
  * The default values and the structure of the configuration can be found in the /config/default.yml file.
+ * Note that in configuration files fields have tobe referred to in kebab-case instead of camelCase!
  * <p>
  * Instances of this class should be treated as values, therefore the setters should never be called!
  * The setters have to be there to work with  the {@link org.springframework.boot.context.properties.bind.Binder}.
@@ -30,7 +28,4 @@ public class InspectitConfig {
      */
     ConfigSettings config;
 
-    public static InspectitConfig createFromEnvironment(Environment env) {
-        return Binder.get(env).bind("inspectit", InspectitConfig.class).get();
-    }
 }

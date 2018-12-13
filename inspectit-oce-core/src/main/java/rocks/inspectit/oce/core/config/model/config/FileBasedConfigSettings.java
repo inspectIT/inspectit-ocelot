@@ -19,4 +19,9 @@ public class FileBasedConfigSettings {
      * Can be used to disable the file based config while the path is still specified.
      */
     boolean enabled;
+
+    /**
+     * If true, a {@link rocks.inspectit.oce.core.config.filebased.ConfigurationDirectoriesWatcher} will be started to reload the configuration from the directory on changes.
+     */
+    boolean watch;
 }

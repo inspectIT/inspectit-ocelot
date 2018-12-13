@@ -14,3 +14,5 @@ inspectit:
       path:
       # can be used to disable the file based configuration while the path is still specified
       enabled: true
+      # if true the directory will be watched for changes. When changes occur, the configuration is automatically reloaded
+      watch: true
