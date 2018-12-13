@@ -20,6 +20,7 @@ public class PropertyFileUtils {
      */
     public static Properties readYamlFiles(AbstractResource... resources) {
         YamlPropertiesFactoryBean properties = new YamlPropertiesFactoryBean();
+        properties.setSingleton(false);
         properties.setResources(resources);
         return properties.getObject();
     }

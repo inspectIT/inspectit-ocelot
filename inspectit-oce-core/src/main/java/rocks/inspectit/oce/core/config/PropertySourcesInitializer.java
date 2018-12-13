@@ -11,6 +11,8 @@ import rocks.inspectit.oce.core.config.filebased.DirectoryPropertySource;
 import rocks.inspectit.oce.core.config.filebased.PropertyFileUtils;
 import rocks.inspectit.oce.core.config.model.InspectitConfig;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
@@ -52,8 +54,8 @@ public class PropertySourcesInitializer {
             initializer.accept(env.getPropertySources(), InspectitConfig.createFromEnvironment(env));
         }
 
-        log.info("-----Registered Configuration Sources-----");
-        env.getPropertySources().stream().forEach(ps -> log.info(ps.getName()));
+        log.info("Registered Configuration Sources:");
+        env.getPropertySources().stream().forEach(ps -> log.info("  {}", ps.getName()));
     }
 
     private static void addAgentDefaultYaml(MutablePropertySources propsList) {
@@ -64,8 +66,9 @@ public class PropertySourcesInitializer {
 
     private static void addFileBasedConfiguration(MutablePropertySources propsList, InspectitConfig currentConfig) {
         String path = currentConfig.getConfig().getFileBased().getPath();
+        Path dirPath = Paths.get(path);
         Boolean enabled = currentConfig.getConfig().getFileBased().isEnabled();
-        boolean fileBasedConfigEnabled = enabled && path != null && !path.isEmpty();
+        boolean fileBasedConfigEnabled = enabled && path != null && !path.isEmpty() && Files.exists(dirPath) && Files.isDirectory(dirPath);
         if (fileBasedConfigEnabled) {
             log.info("initializing file based configuration from dir: {}", path);
             val dps = new DirectoryPropertySource("fileBasedConfig", Paths.get(path));

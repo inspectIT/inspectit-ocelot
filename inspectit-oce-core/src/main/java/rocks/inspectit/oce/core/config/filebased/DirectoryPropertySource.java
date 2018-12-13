@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -66,14 +65,12 @@ public class DirectoryPropertySource extends EnumerablePropertySource<Void> {
     }
 
     private void removeChildrenFromContainer(MutablePropertySources container) {
-        Collection<ChildFilePropertySource> childSources = container.stream()
+        container.stream()
                 .filter(ps -> ps instanceof ChildFilePropertySource)
                 .map(ps -> (ChildFilePropertySource) ps)
                 .filter(ps -> ps.getOwner() == this)
-                .collect(Collectors.toList());
-        for (PropertySource<?> ps : childSources) {
-            container.remove(ps.getName());
-        }
+                .map(PropertySource::getName)
+                .forEach(container::remove);
     }
 
     private List<ChildFilePropertySource> loadContentsToPropertySources() {
@@ -90,7 +87,7 @@ public class DirectoryPropertySource extends EnumerablePropertySource<Void> {
             if (doesFileHaveEnding(file, PROPERTIES_ENDINGS)) {
                 loadPropertiesFile(file).ifPresent(fileSources::add);
             } else if (doesFileHaveEnding(file, YAML_ENDINGS)) {
-                fileSources.add(loadYamlFile(file));
+                loadYamlFile(file).ifPresent(fileSources::add);
             }
         });
         return fileSources;
@@ -101,14 +98,19 @@ public class DirectoryPropertySource extends EnumerablePropertySource<Void> {
             String name = getCombinedName(file);
             return Optional.of(new ChildFilePropertySource(name, PropertyFileUtils.readPropertyFiles(new FileSystemResource(file))));
         } catch (Exception e) {
-            logger.error("Unable to load config file!", e);
+            logger.error("Unable to load config file " + file.getFileName() + "!", e);
             return Optional.empty();
         }
     }
 
-    private ChildFilePropertySource loadYamlFile(Path file) {
-        String name = getCombinedName(file);
-        return new ChildFilePropertySource(name, PropertyFileUtils.readYamlFiles(new FileSystemResource(file)));
+    private Optional<ChildFilePropertySource> loadYamlFile(Path file) {
+        try {
+            String name = getCombinedName(file);
+            return Optional.of(new ChildFilePropertySource(name, PropertyFileUtils.readYamlFiles(new FileSystemResource(file))));
+        } catch (Exception e) {
+            logger.error("Unable to load config file " + file.getFileName() + "!", e);
+            return Optional.empty();
+        }
     }
 
 

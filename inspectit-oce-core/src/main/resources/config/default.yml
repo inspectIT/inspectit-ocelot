@@ -1,15 +1,16 @@
 inspectit:
 
-  service-name: "InspectIT Agent" #the name of the service which is being instrumented
+  # the name of the service which is being instrumented
+  service-name: "InspectIT Agent"
 
-  #all configurations sources
+  # all configurations sources
   config:
-    #file based configuration - has the highest priority
-    #loads all .yaml/yml and .properties files in alphabetical order from the given path
-    #is active when path is not empty or null and enabled is set to true
+    # file based configuration - has the highest priority
+    # loads all .yaml/yml and .properties files in alphabetical order from the given path
+    # is active when path is not empty or null and enabled is set to true
     file-based:
-      #the path to the directory to scan for configuration files
-      #scanning happens non-recursive meaning that no subdirectories will be parsed
+      # the path to the directory to scan for configuration files
+      # scanning happens non-recursive meaning that no subdirectories will be parsed
       path:
-      #can be used to disable the file based configuration while the path is still specified
+      # can be used to disable the file based configuration while the path is still specified
       enabled: true
