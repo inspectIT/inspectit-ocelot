@@ -32,7 +32,9 @@ dependencies {
     )
 
     implementation(
-            'org.slf4j:slf4j-api:1.7.25'
+            'org.springframework.boot:spring-boot:2.1.1.RELEASE',
+            'org.yaml:snakeyaml:1.23',
+            'ch.qos.logback:logback-classic:1.2.3'
     )
 }
 
