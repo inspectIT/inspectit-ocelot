@@ -1,11 +1,11 @@
-package rocks.inspectit.oce.core.rocks.inspectit.oce.core.config;
+package rocks.inspectit.oce.core.config;
 
 
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.stereotype.Component;
+import rocks.inspectit.oce.core.config.model.InspectitConfig;
 
 import javax.annotation.PostConstruct;
 
@@ -30,7 +30,8 @@ public class ConfigurationCenter {
      */
     @PostConstruct
     public void reloadConfiguration() {
-        currentConfiguration = Binder.get(env).bind("inspectit", InspectitConfig.class).get();
+        currentConfiguration = InspectitConfig.createFromEnvironment(env);
+        System.out.println(currentConfiguration);
         //TODO: compare with previous config: if any changes are present send an event
     }
 }

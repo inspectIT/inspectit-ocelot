@@ -3,9 +3,8 @@ package rocks.inspectit.oce.core;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import rocks.inspectit.oce.bootstrap.IAgent;
-import rocks.inspectit.oce.core.rocks.inspectit.oce.core.config.ConfigurationCenter;
-import rocks.inspectit.oce.core.rocks.inspectit.oce.core.config.PropertySourcesInitializer;
-import rocks.inspectit.oce.core.rocks.inspectit.oce.core.config.SpringConfiguration;
+import rocks.inspectit.oce.core.config.PropertySourcesInitializer;
+import rocks.inspectit.oce.core.config.SpringConfiguration;
 
 import java.lang.instrument.Instrumentation;
 
@@ -23,7 +22,7 @@ public class AgentImpl implements IAgent {
     @Override
     public void start(String cmdArgs, Instrumentation instrumentation) {
 
-        log.info("Starting Agent...");
+        log.info("Starting inspectIT OCE Agent...");
         ctx = new AnnotationConfigApplicationContext();
         ctx.setClassLoader(AgentImpl.class.getClassLoader());
         ctx.registerShutdownHook();
@@ -31,7 +30,7 @@ public class AgentImpl implements IAgent {
         //Allows to use autowiring to acquire the Instrumentation instance
         ctx.getBeanFactory().registerSingleton("instrumentation", instrumentation);
 
-        PropertySourcesInitializer.configurePropertySources(ctx, cmdArgs);
+        PropertySourcesInitializer.configurePropertySources(ctx);
 
         ctx.register(SpringConfiguration.class);
         ctx.refresh();
@@ -40,7 +39,7 @@ public class AgentImpl implements IAgent {
 
     @Override
     public void destroy() {
-        log.info("Shutting down Agent");
+        log.info("Shutting down inspectIT OCE Agent");
         ctx.close();
     }
 }
