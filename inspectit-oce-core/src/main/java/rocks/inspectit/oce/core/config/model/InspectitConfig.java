@@ -3,6 +3,8 @@ package rocks.inspectit.oce.core.config.model;
 import lombok.Data;
 import rocks.inspectit.oce.core.config.model.config.ConfigSettings;
 
+import javax.validation.constraints.Min;
+
 /**
  * Root element of the configuration model for inspectIT.
  * The loading of the configuration is managed by the {@link rocks.inspectit.oce.core.config.InspectitEnvironment}.
@@ -27,5 +29,11 @@ public class InspectitConfig {
      * Defines all configuration sources.
      */
     ConfigSettings config;
+
+    /**
+     * Defines how many threads inspectIT may start for its internal tasks.
+     */
+    @Min(1)
+    int threadPoolSize;
 
 }

@@ -42,7 +42,7 @@ public class InspectitEnvironment extends StandardEnvironment {
      * This means that configurations loaded from items appearing earlier in the list overwrite configurations from items appearing later in the list.
      * In contrast items appearing first in the list can provide information for loading items appearing later in the list.
      */
-    private static final List<BiConsumer<MutablePropertySources, InspectitConfig>> configurationInitializationSteps = Arrays.asList(
+    private static final List<BiConsumer<MutablePropertySources, InspectitConfig>> CONFIGURATION_INIT_STEPS = Arrays.asList(
             InspectitEnvironment::addFileBasedConfiguration
     );
 
@@ -55,7 +55,7 @@ public class InspectitEnvironment extends StandardEnvironment {
     /**
      * Event drain for publishing {@link InspectitConfigChangedEvent}s.
      */
-    private ApplicationEventPublisher eventDrain;
+    private final ApplicationEventPublisher eventDrain;
 
     public InspectitEnvironment(ApplicationEventPublisher eventDrain) {
         this.eventDrain = eventDrain;
@@ -102,7 +102,7 @@ public class InspectitEnvironment extends StandardEnvironment {
         addAgentDefaultYaml(propsList);
 
         reloadConfig();
-        for (val initializer : configurationInitializationSteps) {
+        for (val initializer : CONFIGURATION_INIT_STEPS) {
             initializer.accept(propsList, currentConfig);
             reloadConfig();
         }
@@ -120,7 +120,7 @@ public class InspectitEnvironment extends StandardEnvironment {
     private static void addFileBasedConfiguration(MutablePropertySources propsList, InspectitConfig currentConfig) {
         String path = currentConfig.getConfig().getFileBased().getPath();
         Path dirPath = Paths.get(path);
-        Boolean enabled = currentConfig.getConfig().getFileBased().isEnabled();
+        boolean enabled = currentConfig.getConfig().getFileBased().isEnabled();
         boolean fileBasedConfigEnabled = enabled && path != null && !path.isEmpty();
         if (fileBasedConfigEnabled) {
             if (Files.exists(dirPath) && Files.isDirectory(dirPath)) {

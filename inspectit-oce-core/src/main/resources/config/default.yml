@@ -16,3 +16,6 @@ inspectit:
       enabled: true
       # if true the directory will be watched for changes. When changes occur, the configuration is automatically reloaded
       watch: true
+
+  # defines how many threads inspectIT may start for its internal tasks
+  thread-pool-size: 2

@@ -1,13 +1,10 @@
 package rocks.inspectit.oce.core.config.filebased;
 
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Service;
 import rocks.inspectit.oce.core.config.InspectitEnvironment;
 import rocks.inspectit.oce.core.config.service.ActivationConfigCondition;
-import rocks.inspectit.oce.core.config.service.ActivationConfigConditionMet;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -15,6 +12,9 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import static java.nio.file.StandardWatchEventKinds.*;
 
@@ -25,13 +25,21 @@ import static java.nio.file.StandardWatchEventKinds.*;
 @Service
 @Slf4j
 @ActivationConfigCondition("config.fileBased.watch")
-@Conditional(ActivationConfigConditionMet.class)
 public class ConfigurationDirectoriesWatcher {
+
+    /**
+     * Defines how often is the watch service polled.
+     */
+    private static final int POLL_FREQUENCY_MS = 500;
 
     @Autowired
     InspectitEnvironment env;
 
+    @Autowired
+    ScheduledExecutorService executor;
+
     private WatchService ws = null;
+    private ScheduledFuture<?> watchingTask = null;
 
     private Map<WatchKey, DirectoryPropertySource> watchKeyToPropertySourceMap = new HashMap<>();
 
@@ -62,40 +70,37 @@ public class ConfigurationDirectoriesWatcher {
             log.info("Terminating config directory watch service as no valid directory was registered");
             stopWatchService();
         } else {
-            startWatcherThread();
+            startWatcherTask();
         }
     }
 
     @PreDestroy
     private void stopWatchService() {
         if (ws != null) {
+            log.info("Stopping config directory watch service.");
             try {
+                if (watchingTask != null) {
+                    watchingTask.cancel(true);
+                }
                 ws.close();
             } catch (IOException e) {
                 log.error("Unable to close watch service", e);
-                return;
             }
         }
     }
 
-    private void startWatcherThread() {
-        val watchingThread = new Thread(() -> {
+    private void startWatcherTask() {
+        watchingTask = executor.scheduleWithFixedDelay(() -> {
             try {
-                while (true) {
-                    WatchKey key;
-                    try {
-                        key = ws.take();
-                    } catch (InterruptedException x) {
-                        log.info("Stopping watcher thread due to interrupt");
-                        return;
-                    }
+                WatchKey key = ws.poll();
+                if (key != null) {
                     env.updatePropertySources(propertySources -> {
                         WatchKey currentKey = key;
                         while (currentKey != null) {
-                            currentKey.pollEvents(); //remove all events from watch key
-                            DirectoryPropertySource dps = watchKeyToPropertySourceMap.get(key);
+                            DirectoryPropertySource dps = watchKeyToPropertySourceMap.get(currentKey);
                             log.info("reloading " + dps.getRootDir().toString());
                             dps.reload(propertySources);
+                            currentKey.pollEvents();
                             currentKey.reset();
 
                             currentKey = ws.poll();
@@ -103,10 +108,10 @@ public class ConfigurationDirectoriesWatcher {
                     });
                 }
             } catch (ClosedWatchServiceException e) {
-                log.info("Stopping watcher thread due to closed watch service");
+                //this exception is expected
+            } catch (Exception e) {
+                log.error("Error checking configs directories for updates", e);
             }
-        });
-        watchingThread.setDaemon(true);
-        watchingThread.start();
+        }, 0, POLL_FREQUENCY_MS, TimeUnit.MILLISECONDS);
     }
 }
