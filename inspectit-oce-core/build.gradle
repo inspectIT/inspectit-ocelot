@@ -33,11 +33,11 @@ configurations{
 dependencies {
     compileOnly(
             project(':inspectit-oce-bootstrap'),
-            'io.opencensus:opencensus-api:0.18.0'
+            "io.opencensus:opencensus-api:${openCensusVersion}"
     )
 
     opencensus(
-            'io.opencensus:opencensus-impl:0.18.0'
+            "io.opencensus:opencensus-impl:${openCensusVersion}"
     )
 
     implementation(

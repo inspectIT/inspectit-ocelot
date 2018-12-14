@@ -71,7 +71,7 @@ public class AgentImpl implements IAgent {
             log.info("Loading OpenCensus to the bootstrap classloader.");
             instr.appendToBootstrapClassLoaderSearch(new JarFile(jarFile.toFile()));
         } else {
-            log.info("Loading OpenCensus in private classloader.");
+            log.info("Loading OpenCensus in inspectIT classloader.");
             classloader.getClass()
                     .getMethod("addURL", URL.class)
                     .invoke(classloader, jarFile.toUri().toURL());
