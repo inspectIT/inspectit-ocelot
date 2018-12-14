@@ -74,10 +74,18 @@ public class AgentMain {
     /**
      * private inspectIT classloader to ensure our classes are hidden from other application classes
      */
-    private static class InspectITClassLoader extends URLClassLoader {
+    public static class InspectITClassLoader extends URLClassLoader {
 
         InspectITClassLoader(URL[] urls) {
             super(urls, findParentClassLoader());
+        }
+
+        /**
+         * Visibility changed to public.
+         */
+        @Override
+        public void addURL(URL url) {
+            super.addURL(url);
         }
 
         /**
