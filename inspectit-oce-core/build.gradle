@@ -26,9 +26,18 @@ jmh {
     jmhVersion = '1.21'
 }
 
+configurations{
+    opencensus
+}
+
 dependencies {
     compileOnly(
-            project(':inspectit-oce-bootstrap')
+            project(':inspectit-oce-bootstrap'),
+            "io.opencensus:opencensus-api:${openCensusVersion}"
+    )
+
+    opencensus(
+            "io.opencensus:opencensus-impl:${openCensusVersion}"
     )
 
     implementation(
@@ -39,8 +48,20 @@ dependencies {
     )
 }
 
+task buildOpencensusFatJar(type: Jar) {
+    archiveName = "opencensus-fat.jar"
+    destinationDir = file("$buildDir/jarGen")
+    from {
+        configurations.opencensus.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
 jar {
     archivesBaseName = "${project.name}"
+
+    //include the open-census dependencies as a fat jar
+    dependsOn buildOpencensusFatJar
+    from "$buildDir/jarGen"
 
     //include all "implementation" dependencies in fat jar
     from {

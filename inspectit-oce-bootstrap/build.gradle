@@ -1,7 +1,5 @@
 dependencies {
-    implementation(
-            'io.opencensus:opencensus-impl:0.18.0'
-    )
+   //No bootstrap dependencies so far...
 }
 
 jar {

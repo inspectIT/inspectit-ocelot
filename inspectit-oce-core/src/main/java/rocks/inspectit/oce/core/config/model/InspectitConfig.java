@@ -36,4 +36,10 @@ public class InspectitConfig {
     @Min(1)
     int threadPoolSize;
 
+    /**
+     * If true, the OpenCensus API and Implementation will be loaded by the bootstrap classloader.
+     * Otherwise they will be loaded by the private inspectIT classloader.
+     */
+    boolean publishOpencensusToBootstrap;
+
 }
