@@ -44,6 +44,12 @@ public class InspectitConfig {
     private ExportersSettings exporters = new ExportersSettings();
 
     /**
+     * General metrics settings.
+     */
+    @Valid
+    private MetricsSettings metrics = new MetricsSettings();
+
+    /**
      * Defines how many threads inspectIT may start for its internal tasks.
      */
     @Min(1)

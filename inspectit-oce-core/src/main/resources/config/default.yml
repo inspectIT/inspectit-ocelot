@@ -17,19 +17,24 @@ inspectit:
       # if true the directory will be watched for changes. When changes occur, the configuration is automatically reloaded
       watch: true
 
-  #settings for configuring OpenCensus stats and trace exporters
+  # settings for configuring OpenCensus stats and trace exporters
   exporters:
-    #settings for metrics exporters
+    # settings for metrics exporters
     metrics:
-      #settings for the prometheus exporter (https://github.com/census-instrumentation/opencensus-java/tree/master/exporters/stats/prometheus)
+      # settings for the prometheus exporter (https://github.com/census-instrumentation/opencensus-java/tree/master/exporters/stats/prometheus)
       prometheus:
-        #if true, the agent will try to start the Prometheus stats exporter
+        # if true, the agent will try to start the Prometheus stats exporter
         enabled: false
-        #The hostname or IP-address on which the /metrics endpoint of prometheus will be started.
+        # the hostname or IP-address on which the /metrics endpoint of prometheus will be started.
         host: localhost
-        #The port on which the /metrics endpoint of prometheus will be started.
+        # the port on which the /metrics endpoint of prometheus will be started
         port: 8888
 
+  # general settings regarding metrics capturing
+  metrics:
+    # master switch for metrics capturing. When set to false the following happens:
+    #  - all metrics exporters are disabled
+    enabled: true
 
   # defines how many threads inspectIT may start for its internal tasks
   thread-pool-size: 2

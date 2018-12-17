@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 /**
  * Base class for services which can be dynamically enabled and disabled based on the {@link InspectitConfig}.
- * This class handels the waiting for changes in the configuration.
+ * This class handles the waiting for changes in the configuration.
  * If relevant changes to the configuration occur, this class ensures that the service is properly restarted.
  */
 public abstract class DynamicallyActivatableService {
@@ -38,7 +38,7 @@ public abstract class DynamicallyActivatableService {
     /**
      * Constructor.
      *
-     * @param configDependencies The list of configuration properties this service depends on.
+     * @param configDependencies The list of configuration properties in camelCase this service depends on.
      *                           For example "exporters.metrics.prometheus" specifies a dependency
      *                           to {@link rocks.inspectit.oce.core.config.model.exporters.metrics.PrometheusExporterSettings}
      *                           and all its children.

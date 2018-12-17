@@ -22,12 +22,12 @@ public class PrometheusExporterService extends DynamicallyActivatableService {
     private HTTPServer prometheusClient = null;
 
     public PrometheusExporterService() {
-        super("exporters.metrics.prometheus");
+        super("exporters.metrics.prometheus", "metrics.enabled");
     }
 
     @Override
     protected boolean checkEnabledForConfig(InspectitConfig conf) {
-        return conf.getExporters().getMetrics().getPrometheus().isEnabled();
+        return conf.getExporters().getMetrics().getPrometheus().isEnabled() && conf.getMetrics().isEnabled();
     }
 
     @Override
@@ -38,7 +38,7 @@ public class PrometheusExporterService extends DynamicallyActivatableService {
             int port = config.getPort();
             log.info("Starting Prometheus Exporter on {}:{}", host, port);
             PrometheusStatsCollector.createAndRegister(PrometheusStatsConfiguration.builder().setRegistry(defaultRegistry).build());
-            prometheusClient = new HTTPServer(/*host*/ host, /*port*/  port, /*daemon*/ true);
+            prometheusClient = new HTTPServer(host, port, true);
         } catch (Exception e) {
             log.error("Error Starting Prometheus HTTP Endpoint!", e);
             defaultRegistry.clear();
