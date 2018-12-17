@@ -1,4 +1,3 @@
-
 plugins {
     id "me.champeau.gradle.jmh" version "0.4.7"
 }
@@ -43,9 +42,21 @@ dependencies {
     implementation(
             'org.springframework.boot:spring-boot:2.1.1.RELEASE',
             'org.yaml:snakeyaml:1.23',
+
+            //data validation
             'javax.validation:validation-api:2.0.0.Final',
-            'ch.qos.logback:logback-classic:1.2.3'
+            'org.hibernate.validator:hibernate-validator:6.0.2.Final',
+            'org.hibernate.validator:hibernate-validator-annotation-processor:6.0.2.Final',
+            'javax.el:javax.el-api:3.0.0',
+            'org.glassfish.web:javax.el:2.2.6',
+
+            'ch.qos.logback:logback-classic:1.2.3',
+            'javax.annotation:javax.annotation-api:1.3.2', //Required for @PostConstruct and @PreDestroy to work in Java9+
+            //OpenCensus exporters
+            "io.opencensus:opencensus-exporter-stats-prometheus:${openCensusVersion}",
+            "io.prometheus:simpleclient_httpserver:${prometheusClientVersion}"
     )
+
 }
 
 task buildOpencensusFatJar(type: Jar) {

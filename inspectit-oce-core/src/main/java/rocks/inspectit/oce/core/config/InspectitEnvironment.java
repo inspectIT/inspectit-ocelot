@@ -14,6 +14,9 @@ import rocks.inspectit.oce.core.config.filebased.DirectoryPropertySource;
 import rocks.inspectit.oce.core.config.filebased.PropertyFileUtils;
 import rocks.inspectit.oce.core.config.model.InspectitConfig;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -57,6 +60,11 @@ public class InspectitEnvironment extends StandardEnvironment {
      */
     private final ApplicationEventPublisher eventDrain;
 
+    /**
+     * Validator used for validating configurations.
+     */
+    private Validator validator;
+
     public InspectitEnvironment(ApplicationEventPublisher eventDrain) {
         this.eventDrain = eventDrain;
     }
@@ -91,7 +99,24 @@ public class InspectitEnvironment extends StandardEnvironment {
     }
 
     private void reloadConfig() {
-        currentConfig = Binder.get(this).bind("inspectit", InspectitConfig.class).get();
+        InspectitConfig newConfig = Binder.get(this).bind("inspectit", InspectitConfig.class).get();
+        Validator validator = getValidator();
+        val violations = validator.validate(newConfig);
+        if (violations.isEmpty()) {
+            currentConfig = newConfig;
+        } else {
+            log.error("The given configuration is not valid! The currently active configuration will be kept.");
+            for (ConstraintViolation<InspectitConfig> vio : violations) {
+                log.error("{} (={}) => {}", CaseUtils.camelCaseToKebabCase(vio.getPropertyPath().toString()), vio.getInvalidValue(), vio.getMessage());
+            }
+        }
+    }
+
+    private Validator getValidator() {
+        if (validator == null) {
+            validator = Validation.buildDefaultValidatorFactory().getValidator();
+        }
+        return validator;
     }
 
     @Override

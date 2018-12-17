@@ -1,9 +1,13 @@
 package rocks.inspectit.oce.core.config.model;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import rocks.inspectit.oce.core.config.model.config.ConfigSettings;
+import rocks.inspectit.oce.core.config.model.exporters.ExportersSettings;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
 
 /**
  * Root element of the configuration model for inspectIT.
@@ -18,28 +22,37 @@ import javax.validation.constraints.Min;
  * @author Jonas Kunz
  */
 @Data
+@NoArgsConstructor
 public class InspectitConfig {
 
     /**
      * The (symbolic) name of the service being instrumented
      */
-    String serviceName;
+    @NotBlank
+    private String serviceName;
 
     /**
      * Defines all configuration sources.
      */
-    ConfigSettings config;
+    @Valid
+    private ConfigSettings config = new ConfigSettings();
+
+    /**
+     * Settings for all OpenCensus exporters.
+     */
+    @Valid
+    private ExportersSettings exporters = new ExportersSettings();
 
     /**
      * Defines how many threads inspectIT may start for its internal tasks.
      */
     @Min(1)
-    int threadPoolSize;
+    private int threadPoolSize;
 
     /**
      * If true, the OpenCensus API and Implementation will be loaded by the bootstrap classloader.
      * Otherwise they will be loaded by the private inspectIT classloader.
      */
-    boolean publishOpencensusToBootstrap;
+    private boolean publishOpencensusToBootstrap;
 
 }

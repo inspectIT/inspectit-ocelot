@@ -1,16 +1,18 @@
 package rocks.inspectit.oce.core.config.model.config;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * Defines the settings for all configuration sources
  */
 @Data
+@NoArgsConstructor
 public class ConfigSettings {
 
     /**
      * Settings for file-based configuration input.
      */
-    FileBasedConfigSettings fileBased;
+    private FileBasedConfigSettings fileBased;
 
 }
