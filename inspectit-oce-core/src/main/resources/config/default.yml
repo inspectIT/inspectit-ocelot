@@ -24,7 +24,7 @@ inspectit:
       # settings for the prometheus exporter (https://github.com/census-instrumentation/opencensus-java/tree/master/exporters/stats/prometheus)
       prometheus:
         # if true, the agent will try to start the Prometheus stats exporter
-        enabled: false
+        enabled: true
         # the hostname or IP-address on which the /metrics endpoint of prometheus will be started.
         host: localhost
         # the port on which the /metrics endpoint of prometheus will be started
