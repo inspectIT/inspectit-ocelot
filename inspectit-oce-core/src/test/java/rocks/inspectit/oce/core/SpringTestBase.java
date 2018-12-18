@@ -98,7 +98,6 @@ public class SpringTestBase {
 
             InspectitEnvironment env = new TestInspectitEnvironment(ctx);
             ctx.setEnvironment(env);
-            //TODO: mock Instrumentation class and add to the context
         }
     }
 

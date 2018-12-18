@@ -15,7 +15,7 @@ import rocks.inspectit.oce.core.SpringTestBase;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class PrometheusExporterTest extends SpringTestBase {
+public class PrometheusExporterIntTest extends SpringTestBase {
 
     private static final int HTTP_TIMEOUT = 1000;
 
