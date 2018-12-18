@@ -94,12 +94,17 @@ task systemTest {
 
             executable = javaExecutable
 
+            jacoco {
+                includeNoLocationClasses = true
+                includes = ["rocks/inspectit/*"]
+            }
+
             // The JaCoCo agent must be specified first so that it can instrument our agent.
             // This is a work around for the issue that the JaCoCo agent is added last, cf.
             // https://discuss.gradle.org/t/jacoco-gradle-adds-the-agent-last-to-jvm-args/7124.
             doFirst {
                 jvmArgs "-Dinspectit.publish-opencensus-to-bootstrap=true"  // configure inspectIT to push openCensus to the bootstrap
-                jvmArgs jacoco.asJvmArg  // JaCoCo agent first.
+                jvmArgs jacoco.asJvmArg + ",inclbootstrapclasses=true"  // JaCoCo agent first + bootstrap instrumentaiton
                 jvmArgs "-javaagent:${agentJarPath}"  // Our agent second.
                 jacoco.enabled = false  // Don't add the JaCoCo agent again.
             }
@@ -112,13 +117,16 @@ task systemTest {
 }
 
 check.dependsOn systemTest
-systemTest.mustRunAfter test
+
 
 // Merge JaCoCo's execution data from all tests into the main test's execution data file.
 task jacocoMerge(type: JacocoMerge) {
+    dependsOn systemTest
     tasks.withType(Test).each { testTask ->
-        dependsOn testTask
-        executionData testTask.jacoco.destinationFile
+        if(testTask != test) {
+            dependsOn testTask
+            executionData testTask.jacoco.destinationFile
+        }
     }
     doLast {
         destinationFile.renameTo test.jacoco.destinationFile
