@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import rocks.inspectit.oce.core.config.InspectitEnvironment;
-import rocks.inspectit.oce.core.config.service.ActivationConfigCondition;
+import rocks.inspectit.oce.core.service.ActivationConfigCondition;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;

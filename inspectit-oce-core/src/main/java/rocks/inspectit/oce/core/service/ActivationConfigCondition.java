@@ -1,4 +1,4 @@
-package rocks.inspectit.oce.core.config.service;
+package rocks.inspectit.oce.core.service;
 
 import org.springframework.context.annotation.Conditional;
 import rocks.inspectit.oce.core.config.model.config.FileBasedConfigSettings;

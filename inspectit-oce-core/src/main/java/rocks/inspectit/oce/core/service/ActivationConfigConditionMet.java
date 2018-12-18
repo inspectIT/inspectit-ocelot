@@ -1,4 +1,4 @@
-package rocks.inspectit.oce.core.config.service;
+package rocks.inspectit.oce.core.service;
 
 import lombok.val;
 import org.springframework.context.annotation.Condition;
