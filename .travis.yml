@@ -10,5 +10,6 @@ cache:
     - $HOME/.gradle/wrapper/
     
 script:
-  -  $TRAVIS_BUILD_DIR/install-jdk.sh --install openjdk11 --target $HOME/openjdk11
+  - jdk_switcher use openjdk8
+  - $TRAVIS_BUILD_DIR/install-jdk.sh --install openjdk11 --target $HOME/openjdk11
   - ./gradlew check -PsystemTestJavaHomes="$JAVA_HOME;$HOME/openjdk11"
