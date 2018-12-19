@@ -3,7 +3,6 @@ package rocks.inspectit.oce.core.exporter;
 import ch.qos.logback.classic.Level;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.junit.jupiter.api.AfterAll;
@@ -12,15 +11,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.test.annotation.DirtiesContext;
 import rocks.inspectit.oce.core.SpringTestBase;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import java.io.IOException;
 
-public class PrometheusExporterIntTest extends SpringTestBase {
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
+
+public class PrometheusExporterServiceIntTest extends SpringTestBase {
 
     private static final int HTTP_TIMEOUT = 1000;
 
-    static CloseableHttpClient testClient;
-
+    private static CloseableHttpClient testClient;
 
     @BeforeAll
     static void initClient() {
@@ -39,17 +39,20 @@ public class PrometheusExporterIntTest extends SpringTestBase {
     }
 
     void assertGet200(String url) throws Exception {
-        assertEquals(200, testClient.execute(new HttpGet(url)).getStatusLine().getStatusCode(), "Status code was not 200");
+        int statusCode = testClient.execute(new HttpGet(url)).getStatusLine().getStatusCode();
+
+        assertThat(statusCode).isEqualTo(200);
     }
 
     void assertUnavailable(String url) throws Exception {
-        assertThrows(ConnectTimeoutException.class,
-                () -> testClient.execute(new HttpGet(url)).getStatusLine().getStatusCode(), "Service was expected to be unavailable!");
+        Throwable throwable = catchThrowable(() -> testClient.execute(new HttpGet(url)).getStatusLine().getStatusCode());
+
+        assertThat(throwable).isInstanceOf(IOException.class);
     }
 
     @Test
     void testDefaultSettings() throws Exception {
-        assertGet200("http://localhost:8888");
+        assertGet200("http://localhost:8888/metrics");
         assertNoLogsOfLevelorGreater(Level.WARN);
     }
 
@@ -60,7 +63,7 @@ public class PrometheusExporterIntTest extends SpringTestBase {
         updateProperties(props -> {
             props.setProperty("inspectit.metrics.enabled", "false");
         });
-        assertUnavailable("http://localhost:8888");
+        assertUnavailable("http://localhost:8888/metrics");
         assertNoLogsOfLevelorGreater(Level.WARN);
     }
 
@@ -70,7 +73,7 @@ public class PrometheusExporterIntTest extends SpringTestBase {
         updateProperties(props -> {
             props.setProperty("inspectit.exporters.metrics.prometheus.enabled", "false");
         });
-        assertUnavailable("http://localhost:8888");
+        assertUnavailable("http://localhost:8888/metrics");
         assertNoLogsOfLevelorGreater(Level.WARN);
     }
 
@@ -81,8 +84,8 @@ public class PrometheusExporterIntTest extends SpringTestBase {
         updateProperties(props -> {
             props.setProperty("inspectit.exporters.metrics.prometheus.port", "8899");
         });
-        assertUnavailable("http://localhost:8888");
-        assertGet200("http://localhost:8899");
+        assertUnavailable("http://localhost:8888/metrics");
+        assertGet200("http://localhost:8899/metrics");
         assertNoLogsOfLevelorGreater(Level.WARN);
     }
 }
