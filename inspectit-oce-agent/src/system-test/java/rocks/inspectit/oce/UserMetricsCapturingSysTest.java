@@ -28,7 +28,6 @@ public class UserMetricsCapturingSysTest {
         }
 
         MetricProducerManager metricProducerManager = Metrics.getExportComponent().getMetricProducerManager();
-        System.out.println("sdafsdfsdf");
         assertThat(metricProducerManager.getAllMetricProducer()).anyMatch(mp ->
                 mp.getMetrics().stream().filter(m -> m.getMetricDescriptor().getName() == "test/view/test_measure").count() == 1
         );

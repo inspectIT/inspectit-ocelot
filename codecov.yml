@@ -2,5 +2,5 @@ comment: off
 coverage:
   precision: 2
   round: nearest
-  range: "10...90"
+  range: "25...75"
         
