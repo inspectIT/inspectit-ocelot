@@ -22,3 +22,130 @@ jar {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
 }
+
+//----------------------------------------------------------------------------------------------------------------------
+// Based on the integration tests of https://github.com/census-instrumentation/opencensus-java/tree/master/contrib/agent
+//----------------------------------------------------------------------------------------------------------------------
+
+sourceSets {
+    systemTest {
+        java {
+            srcDir file('src/system-test/java')
+        }
+        resources.srcDir file('src/system-test/resources')
+    }
+}
+
+configurations {
+    systemTestCompile.extendsFrom testImplementation
+}
+
+dependencies {
+
+    systemTestImplementation(
+            "io.opencensus:opencensus-testing:${openCensusVersion}",
+            "io.opencensus:opencensus-api:${openCensusVersion}",
+            'org.junit.jupiter:junit-jupiter-engine:5.3.1',
+            'org.junit.jupiter:junit-jupiter-api:5.3.1',
+            'org.assertj:assertj-core:3.11.1',
+
+            'org.apache.httpcomponents:httpclient:4.5.6'
+    )
+}
+
+if (!project.hasProperty("systemTestJavaHomes")) {
+    ext.systemTestJavaHomes = "$System.env.JAVA_HOME"
+}
+
+task systemTest {
+
+    group = 'Verification'
+    description = "Runs system tests with the agent attached as javaagent for all JDKs configured via the 'systemTestJavaHomes' property."
+
+    def javaExecutables = ("${systemTestJavaHomes}")
+            .tokenize(File.pathSeparator)
+            .collect { org.apache.tools.ant.taskdefs.condition.Os.isFamily(
+            org.apache.tools.ant.taskdefs.condition.Os.FAMILY_WINDOWS)
+            ? "${it}/bin/java.exe"
+            : "${it}/bin/java" }
+    .collect { new File(it).getCanonicalPath() }
+            .unique()
+
+    assert javaExecutables.size > 0 :
+            'No Java executables found for running system tests'
+
+    def agentJarPath = jar.archivePath.toString()
+
+    javaExecutables.eachWithIndex { javaExecutable, index ->
+        def paths = "${javaExecutable}".tokenize(File.separator)
+        def javaName = "${index}"
+        if(paths.size > 3) {
+            javaName =  paths[paths.size - 4] + "_" + paths[paths.size - 3]
+        } else if(paths.length > 2) {
+            javaName = paths[paths.size - 3]
+        }
+
+        def perVersionSystemTest = task("systemTest_${javaName}", type: Test) {
+
+            group = 'Verification'
+            description = "Runs system tests on ${javaExecutable}"
+
+
+            useJUnitPlatform()
+
+            testLogging {
+                // Let Gradle output the stdout and stderr from tests, too. This is useful for investigating
+                // test failures on Travis, where we can't view Gradle's test reports.
+                showStandardStreams = true
+
+                // Include the exception message and full stacktrace for failed tests.
+                exceptionFormat 'full'
+            }
+
+            dependsOn jar
+
+            testClassesDirs = sourceSets.systemTest.output.classesDirs
+            classpath = sourceSets.systemTest.runtimeClasspath
+
+            executable = javaExecutable
+
+            jacoco {
+                includeNoLocationClasses = true
+                includes = ["rocks/inspectit/*"]
+            }
+
+            // The JaCoCo agent must be specified first so that it can instrument our agent.
+            // This is a work around for the issue that the JaCoCo agent is added last, cf.
+            // https://discuss.gradle.org/t/jacoco-gradle-adds-the-agent-last-to-jvm-args/7124.
+            doFirst {
+                jvmArgs "-Dinspectit.publish-opencensus-to-bootstrap=true"  // configure inspectIT to push openCensus to the bootstrap
+                jvmArgs jacoco.asJvmArg + ",inclbootstrapclasses=true"  // JaCoCo agent first + bootstrap instrumentaiton
+                jvmArgs "-javaagent:${agentJarPath}"  // Our agent second.
+                jacoco.enabled = false  // Don't add the JaCoCo agent again.
+            }
+
+            doFirst { logger.lifecycle("Running system tests using ${javaExecutable}.") }
+        }
+
+        systemTest.dependsOn perVersionSystemTest
+    }
+}
+
+check.dependsOn systemTest
+
+
+// Merge JaCoCo's execution data from all tests into the main test's execution data file.
+task jacocoMerge(type: JacocoMerge) {
+    dependsOn systemTest
+    tasks.withType(Test).each { testTask ->
+        if(testTask != test) {
+            dependsOn testTask
+            executionData testTask.jacoco.destinationFile
+        }
+    }
+    doLast {
+        destinationFile.renameTo test.jacoco.destinationFile
+    }
+}
+
+jacocoTestReport.dependsOn jacocoMerge

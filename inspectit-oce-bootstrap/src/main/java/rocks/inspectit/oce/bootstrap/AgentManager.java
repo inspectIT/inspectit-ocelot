@@ -19,16 +19,22 @@ public class AgentManager {
      * @param  instrumentation the {@link Instrumentation} to pass to the Agent
      */
     public static synchronized void startOrReplaceInspectitCore(ClassLoader inspectITClassLoader, String agentCmdArgs, Instrumentation instrumentation) {
-        if (agentInstance != null) {
-            agentInstance.destroy();
-            agentInstance = null;
-        }
+        ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(inspectITClassLoader);
         try {
-            Class<?> implClass = Class.forName("rocks.inspectit.oce.core.AgentImpl", true, inspectITClassLoader);
-            agentInstance = (IAgent) implClass.newInstance();
-            agentInstance.start(agentCmdArgs, instrumentation);
-        } catch (Exception e) {
-            e.printStackTrace();
+            if (agentInstance != null) {
+                agentInstance.destroy();
+                agentInstance = null;
+            }
+            try {
+                Class<?> implClass = Class.forName("rocks.inspectit.oce.core.AgentImpl", true, inspectITClassLoader);
+                agentInstance = (IAgent) implClass.newInstance();
+                agentInstance.start(agentCmdArgs, instrumentation);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } finally {
+            Thread.currentThread().setContextClassLoader(contextClassLoader);
         }
 
     }
