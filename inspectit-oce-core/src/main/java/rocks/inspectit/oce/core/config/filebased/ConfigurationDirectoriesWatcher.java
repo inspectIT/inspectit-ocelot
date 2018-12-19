@@ -83,6 +83,7 @@ public class ConfigurationDirectoriesWatcher {
                     watchingTask.cancel(true);
                 }
                 ws.close();
+                ws = null;
             } catch (IOException e) {
                 log.error("Unable to close watch service", e);
             }
