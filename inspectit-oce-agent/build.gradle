@@ -59,6 +59,9 @@ if (!project.hasProperty("systemTestJavaHomes")) {
 
 task systemTest {
 
+    group = 'Verification'
+    description = "Runs system tests with the agent attached as javaagent for all JDKs configured via the 'systemTestJavaHomes' property."
+
     def javaExecutables = ("${systemTestJavaHomes}")
             .tokenize(File.pathSeparator)
             .collect { org.apache.tools.ant.taskdefs.condition.Os.isFamily(
@@ -74,7 +77,19 @@ task systemTest {
     def agentJarPath = jar.archivePath.toString()
 
     javaExecutables.eachWithIndex { javaExecutable, index ->
-        def perVersionSystemTest = task("systemTest_${index}", type: Test) {
+        def paths = "${javaExecutable}".tokenize(File.separator)
+        def javaName = "${index}"
+        if(paths.size > 3) {
+            javaName =  paths[paths.size - 4] + "_" + paths[paths.size - 3]
+        } else if(paths.length > 2) {
+            javaName = paths[paths.size - 3]
+        }
+
+        def perVersionSystemTest = task("systemTest_${javaName}", type: Test) {
+
+            group = 'Verification'
+            description = "Runs system tests on ${javaExecutable}"
+
 
             useJUnitPlatform()
 
