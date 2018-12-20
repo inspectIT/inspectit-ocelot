@@ -7,7 +7,6 @@ import ch.qos.logback.core.Appender;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,9 +55,7 @@ public class SpringTestBase {
      * @param propsCustomizer the lambda for customizing the properties.
      */
     public void updateProperties(Consumer<MockPropertySource> propsCustomizer) {
-        env.updatePropertySources((propsList) -> {
-            propsCustomizer.accept(env.mockProperties);
-        });
+        env.updatePropertySources((propsList) -> propsCustomizer.accept(env.mockProperties));
     }
 
     static class TestContextInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
@@ -121,8 +118,7 @@ public class SpringTestBase {
      *
      * @param level the level to compare against.
      */
-    public void assertNoLogsOfLevelorGreater(Level level) {
-        ArgumentCaptor<ILoggingEvent> sentLogs = ArgumentCaptor.forClass(ILoggingEvent.class);
+    public void assertNoLogsOfLevelOrGreater(Level level) {
         verify(mockAppender, times(0)).doAppend(argThat(
                 (le) -> le.getLevel().isGreaterOrEqual(level)));
     }

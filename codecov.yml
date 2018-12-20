@@ -1,0 +1,6 @@
+comment: off
+coverage:
+  precision: 2
+  round: nearest
+  range: "25...75"
+        

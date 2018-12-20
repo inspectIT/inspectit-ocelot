@@ -130,22 +130,5 @@ task systemTest {
         systemTest.dependsOn perVersionSystemTest
     }
 }
-
+systemTest.mustRunAfter test
 check.dependsOn systemTest
-
-
-// Merge JaCoCo's execution data from all tests into the main test's execution data file.
-task jacocoMerge(type: JacocoMerge) {
-    dependsOn systemTest
-    tasks.withType(Test).each { testTask ->
-        if(testTask != test) {
-            dependsOn testTask
-            executionData testTask.jacoco.destinationFile
-        }
-    }
-    doLast {
-        destinationFile.renameTo test.jacoco.destinationFile
-    }
-}
-
-jacocoTestReport.dependsOn jacocoMerge

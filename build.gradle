@@ -1,4 +1,4 @@
-subprojects {
+allprojects {
 
     repositories {
         mavenCentral()
@@ -7,9 +7,13 @@ subprojects {
             url "http://repository.novatec-gmbh.de/content/repositories/3rd_party_libs/"
         }
     }
+    apply plugin: 'jacoco'
+}
+
+subprojects {
+
 
     apply plugin: 'java'
-    apply plugin: 'jacoco'
 
     configurations {
         buildTools
@@ -59,4 +63,27 @@ subprojects {
         }
     }
     jar.dependsOn checkDependencyJavaVersions
+}
+
+task codeCoverageReport(type: JacocoReport) {
+    group = 'Verification'
+    description ='Generates a combined report from all subprojects'
+
+    executionData fileTree(project.rootDir.absolutePath).include("**/build/jacoco/*.exec")
+
+    subprojects.each {
+        sourceSets it.sourceSets.main
+    }
+
+    reports {
+        xml.enabled true
+        xml.destination file("${buildDir}/reports/jacoco/report.xml")
+        html.enabled true
+        html.destination file("${buildDir}/reports/jacoco/html")
+        csv.enabled false
+    }
+}
+codeCoverageReport.dependsOn {
+    subprojects*.test
+    project(':inspectit-oce-agent').systemTest
 }

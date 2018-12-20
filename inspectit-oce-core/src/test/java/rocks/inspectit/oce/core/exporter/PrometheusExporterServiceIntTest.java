@@ -53,7 +53,7 @@ public class PrometheusExporterServiceIntTest extends SpringTestBase {
     @Test
     void testDefaultSettings() throws Exception {
         assertGet200("http://localhost:8888/metrics");
-        assertNoLogsOfLevelorGreater(Level.WARN);
+        assertNoLogsOfLevelOrGreater(Level.WARN);
     }
 
 
@@ -64,7 +64,7 @@ public class PrometheusExporterServiceIntTest extends SpringTestBase {
             props.setProperty("inspectit.metrics.enabled", "false");
         });
         assertUnavailable("http://localhost:8888/metrics");
-        assertNoLogsOfLevelorGreater(Level.WARN);
+        assertNoLogsOfLevelOrGreater(Level.WARN);
     }
 
     @DirtiesContext
@@ -74,7 +74,7 @@ public class PrometheusExporterServiceIntTest extends SpringTestBase {
             props.setProperty("inspectit.exporters.metrics.prometheus.enabled", "false");
         });
         assertUnavailable("http://localhost:8888/metrics");
-        assertNoLogsOfLevelorGreater(Level.WARN);
+        assertNoLogsOfLevelOrGreater(Level.WARN);
     }
 
 
@@ -86,6 +86,6 @@ public class PrometheusExporterServiceIntTest extends SpringTestBase {
         });
         assertUnavailable("http://localhost:8888/metrics");
         assertGet200("http://localhost:8899/metrics");
-        assertNoLogsOfLevelorGreater(Level.WARN);
+        assertNoLogsOfLevelOrGreater(Level.WARN);
     }
 }
