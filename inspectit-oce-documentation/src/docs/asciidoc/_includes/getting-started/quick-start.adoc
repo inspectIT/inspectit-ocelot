@@ -1,0 +1,20 @@
+=== Quick Start
+
+You can find and download all released versions of inspectIT OCE in our https://github.com/inspectIT/inspectit-oce/releases[GitHub] repository.
+You can get the current version on the following link:
+
+[subs=attributes+]
+```bash
+$ wget https://github.com/inspectIT/inspectit-oce/releases/download/{inspectit-oce-version}/inspectit-oce-agent-{inspectit-oce-version}.jar
+```
+
+The best way to start using inspectIT OCE is to attach the java agent when starting your Java program.
+Use the `-javaagent` command-line option to reference the inspectIT OCE jar:
+
+[subs=attributes+]
+```bash
+$ java -javaagent:inspectit-oce-agent-{inspectit-oce-version}.jar -jar my-java-program.jar
+```
+
+The <<Installation>> section further describes what options are available for installing the agent, as well as how you can attach the agent to the already started JVM.
+In the <<Configuration>> part you can find more details on how to configure the inspectIT OCE agent.

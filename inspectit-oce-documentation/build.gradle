@@ -1,0 +1,28 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'org.asciidoctor:asciidoctor-gradle-plugin:1.5.+'
+    }
+}
+
+apply plugin: 'org.asciidoctor.convert'
+
+version = "${releaseVersion}"
+
+asciidoctor {
+    attributes 'inspectit-oce-version' : project.version,
+            'opencensus-version' : "${openCensusVersion}",
+            revnumber : project.version
+}
+
+task packageDocumentation(type: Zip) {
+    from (asciidoctor.outputDir) {
+        into project.version
+    }
+
+}
+packageDocumentation.mustRunAfter asciidoctor
+build.dependsOn packageDocumentation

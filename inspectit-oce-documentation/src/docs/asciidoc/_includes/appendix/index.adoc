@@ -1,0 +1,8 @@
+== Appendix
+
+=== All Configuration Options
+
+[source,yaml]
+----
+include::../{resource-dir}/default.yaml[]
+----

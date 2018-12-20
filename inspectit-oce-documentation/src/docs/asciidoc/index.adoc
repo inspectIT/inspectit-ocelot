@@ -1,0 +1,28 @@
+= inspectIT OpenCensus Edition Reference
+Jonas Kunz; Marius Oehler; Ivan Senić; Alexander Wert
+:include-dir: _includes
+:resource-dir: ../../../main/resources
+:imagesdir: images
+:icons: font
+:source-highlighter: coderay
+:toc: preamble
+:toclevels: 3
+:source-indent: 0
+:tabsize: 4
+:sectanchors:
+
+inspectIT OpenCensus Edition is a Java agent that provides the automatic collection of metrics and traces using OpenCensus standard.
+Using Java Instrumentation API, the inspectIT OCE agent is capable to instrument any JVM-based application with a zero-configuration approach.
+It overcomes the problem of instrumentation libraries like OpenCensus that require you to manually instrument your application and change the source code.
+
+include::{include-dir}/introduction/index.adoc[]
+
+include::{include-dir}/getting-started/index.adoc[]
+
+include::{include-dir}/installation/index.adoc[]
+
+include::{include-dir}/configuration/index.adoc[]
+
+include::{include-dir}/metrics/index.adoc[]
+
+include::{include-dir}/appendix/index.adoc[]
