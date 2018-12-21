@@ -1,0 +1,8 @@
+== Appendix
+
+=== All Configuration Options
+
+[source,yaml]
+----
+include::{gradle-rootdir-absolute}/inspectit-oce-core/src/main/resources/config/default.yml[]
+----

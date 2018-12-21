@@ -1,0 +1,6 @@
+=== Docker Compose Example
+
+If you would like to check inspectIT OCE in action with a demo application, you can use our docker compose example.
+This example will...
+
+`// TODO Alex write about this docker example stuff..`

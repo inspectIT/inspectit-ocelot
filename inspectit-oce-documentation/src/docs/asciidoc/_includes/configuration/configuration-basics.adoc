@@ -1,0 +1,69 @@
+=== Configuration Basics
+
+inspectIT OCE tries to implement the zero-configuration approach but lets you externalize the configuration and influence every bit of its configuration if this is required.
+Internally it uses the Spring-based `PropertySource` order to allow overriding of configuration values.
+Configuration properties are considered in inspectIT OCE in the following order:
+
+. <<Java System properties,Java System properties>>
+. <<OS Environment Variables,OS environment variables>>
+. Supported <<Externalized Configuration Methods,externalized configuration methods>>
+.. <<File-based Configuration,File-based configuration>>
+. <<All Configuration Options,inspectIT OCE defaults>>
+
+The overview of all available inspectIT OCE configuration properties is given in the <<All Configuration Options>> section.
+
+==== Java System Properties
+
+You can pass any configuration property as the Java System property to the Java command that you use to start your Java application.
+For example, to override the service name used to identify your application reporting the performance data, you can change the `inspectit.service-name` property:
+
+[subs=attributes+]
+```bash
+$ java -Dinspectit.service-name="My Custom Service" -javaagent:/path/to/inspectit-oce-agent-{inspectit-oce-version}.jar -jar my-java-program.jar
+```
+
+==== OS Environment Variables
+
+Similar to the Java System properties, inspectIT OCE will also consider all the available operating system environment variables.
+Due to the relaxed bindings, you can use upper case format, which is recommended when using system environment variables.
+
+[subs=attributes+]
+```bash
+$ INSPECTIT_SERVICE_NAME="My Custom Service" java -javaagent:/path/to/inspectit-oce-agent-{inspectit-oce-version}.jar -jar my-java-program.jar
+```
+
+==== Relaxed Bindings
+
+Note that due to the Spring-powered configuration approach, the inspectIT OCE agent uses Spring support for relaxed bindings.
+This means that a property can be specified in different formats depending on the property source.
+As suggested by Spring, the allowed formats are:
+
+[cols="2,3",options="header"]
+.Relaxed binding options for properties
+|===
+|Property |Note
+|```inspectit.service-name```
+|kebab-case, which is recommended for use in .properties and .yml files.
+|```inspectit.serviceName```
+|Standard camelCase syntax.
+|```inspectit.service_name```
+|Underscore notation (snake_case), which is an alternative format for use in .properties and .yml files.
+|```INSPECTIT_SERVICE_NAME```
+|UPPER_CASE format, which is recommended when using system environment variables.
+|===
+
+The formats should be used in the following way, based on the type of property source:
+
+[cols="2,3",options="header"]
+.Relaxed binding rules
+|===
+|Property Source |Format
+|System properties
+|Camel case, kebab case, or underscore notation
+|Environment Variables
+|Upper case format with the underscore as the delimiter.
+|Property files (```.properties```)
+|Camel case, kebab case, or underscore notation
+|YAML files (```.yaml```, ```.yml```)
+|Camel case, kebab case, or underscore notation
+|===
