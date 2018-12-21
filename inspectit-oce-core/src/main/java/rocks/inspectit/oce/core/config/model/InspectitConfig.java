@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import rocks.inspectit.oce.core.config.model.config.ConfigSettings;
 import rocks.inspectit.oce.core.config.model.exporters.ExportersSettings;
+import rocks.inspectit.oce.core.config.model.logging.LoggingSettings;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
@@ -48,6 +49,12 @@ public class InspectitConfig {
      */
     @Valid
     private MetricsSettings metrics = new MetricsSettings();
+
+    /**
+     * General logging settings.
+     */
+    @Valid
+    private LoggingSettings logging;
 
     /**
      * Defines how many threads inspectIT may start for its internal tasks.

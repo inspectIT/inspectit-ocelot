@@ -44,7 +44,6 @@ public class SpringTestBase {
 
     private Appender<ILoggingEvent> mockAppender;
 
-
     /**
      * Allows to customize properties while the Context is open.
      * This method is based on {@link InspectitEnvironment#updatePropertySources(Consumer)},

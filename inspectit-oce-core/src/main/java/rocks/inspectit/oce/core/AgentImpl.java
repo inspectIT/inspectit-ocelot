@@ -5,6 +5,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import rocks.inspectit.oce.bootstrap.IAgent;
 import rocks.inspectit.oce.core.config.InspectitEnvironment;
 import rocks.inspectit.oce.core.config.SpringConfiguration;
+import rocks.inspectit.oce.core.logback.LogbackInitializer;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,7 +18,7 @@ import java.util.jar.JarFile;
 
 /**
  * Implementation for the {@link IAgent} interface.
- * This clas sis responsible forsetting up the spring context for inspectIT.
+ * This class is responsible for setting up the spring context for inspectIT.
  *
  * @author Jonas Kunz
  */
@@ -30,15 +31,17 @@ public class AgentImpl implements IAgent {
 
     @Override
     public void start(String cmdArgs, Instrumentation instrumentation) {
+        ClassLoader classloader = AgentImpl.class.getClassLoader();
 
         log.info("Starting inspectIT OCE Agent...");
-
-        ClassLoader classloader = AgentImpl.class.getClassLoader();
 
         ctx = new AnnotationConfigApplicationContext();
         ctx.setClassLoader(classloader);
         InspectitEnvironment environment = new InspectitEnvironment(ctx);
         ctx.setEnvironment(environment);
+
+        // once we have the environment, init the logging
+        LogbackInitializer.initLogging(environment.getCurrentConfig());
 
         try {
             boolean pushOCtoBootstrap = environment.getCurrentConfig().isPublishOpencensusToBootstrap();

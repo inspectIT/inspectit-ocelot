@@ -50,12 +50,12 @@ public class PrometheusExporterServiceIntTest extends SpringTestBase {
         assertThat(throwable).isInstanceOf(IOException.class);
     }
 
+    @DirtiesContext
     @Test
     void testDefaultSettings() throws Exception {
         assertGet200("http://localhost:8888/metrics");
         assertNoLogsOfLevelOrGreater(Level.WARN);
     }
-
 
     @DirtiesContext
     @Test
@@ -77,7 +77,6 @@ public class PrometheusExporterServiceIntTest extends SpringTestBase {
         assertNoLogsOfLevelOrGreater(Level.WARN);
     }
 
-
     @DirtiesContext
     @Test
     void testChangePort() throws Exception {
@@ -88,4 +87,5 @@ public class PrometheusExporterServiceIntTest extends SpringTestBase {
         assertGet200("http://localhost:8899/metrics");
         assertNoLogsOfLevelOrGreater(Level.WARN);
     }
+
 }
