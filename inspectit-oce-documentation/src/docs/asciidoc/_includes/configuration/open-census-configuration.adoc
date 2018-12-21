@@ -1,6 +1,6 @@
 === Using OpenCensus Library with inspectIT OCE
 
-If you plan to use the OpenCensus library in an application which will, later on, be instrumented with inspectIT OCE, some special rules do apply.
+If you plan to use the OpenCensus library in an application which will be instrumented later on with inspectIT OCE, some special rules do apply.
 Following these rules will make sure that there are no run-time problems in your application.
 Furthermore, a correct configuration will make it possible to combine metrics and traces that you manually collect using the OpenCensus instrumentation library with the ones collected by the inspectIT OCE agent.
 
@@ -18,10 +18,12 @@ Please adapt any OpenCensus dependency in your application to this version to av
 ```
 . Set the `inspectit.publish-opencensus-to-bootstrap` property to `true`
 +
-Setting the above property to `true` is telling inspectIT OCE that you plan to use the OpenCensus library in combination to the agent.
+Setting the above property to `true` tells inspectIT OCE that you plan to use the OpenCensus library in combination with the agent.
 The inspectIT OCE agent will make sure that all OpenCensus classes are then loaded by the bootstrap class loader.
 This ensures that OpenCensus implementation is shared between your manual instrumentation and the agent instrumentation, making the combing of data possible.
-. Add agent to the start of JVM
+. Add the agent to the start of a JVM
 +
-You can only install the agent at the <<Adding the Agent to the JVM,start of the JVM>>.
-You can not attach the agent during the run-time, as at this point it's already too late for the inspectIT OCE agent to perform needed setup described in the previous point.
+You should install the agent at the <<Adding the Agent to the JVM,start of the JVM>>.
+You should avoid attaching the agent during the run-time, as at this point it's already too late for the inspectIT OCE agent to perform needed setup described in the previous point.
+If you anyhow do attach the agent, metrics and traces collected by inspectIT OCE will not be combined with the manual instrumentation.
+In such case you can also omit setting the `inspectit.publish-opencensus-to-bootstrap` property to `true`.

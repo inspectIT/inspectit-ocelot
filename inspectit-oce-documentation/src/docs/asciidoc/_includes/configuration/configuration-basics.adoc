@@ -2,7 +2,7 @@
 
 inspectIT OCE tries to implement the zero-configuration approach but lets you externalize the configuration and influence every bit of its configuration if this is required.
 Internally it uses the Spring-based `PropertySource` order to allow overriding of configuration values.
-Configuration properties are considered in inspectIT OCE in the following order of priority:
+Configuration properties are considered in inspectIT OCE in the following order:
 
 . <<Java System properties,Java System properties>>
 . <<OS Environment Variables,OS environment variables>>
@@ -19,7 +19,7 @@ For example, to override the service name used to identify your application repo
 
 [subs=attributes+]
 ```bash
-$ java -Dinspectit.service-name=my-custom-service -javaagent:inspectit-oce-agent-{inspectit-oce-version}.jar -jar my-java-program.jar
+$ java -Dinspectit.service-name="My Custom Service" -javaagent:/path/to/inspectit-oce-agent-{inspectit-oce-version}.jar -jar my-java-program.jar
 ```
 
 ==== OS Environment Variables
@@ -29,7 +29,7 @@ Due to the relaxed bindings, you can use upper case format, which is recommended
 
 [subs=attributes+]
 ```bash
-$ INSPECTIT_SERVICE_NAME=my-custom-service java -Dinspectit.service-name= -javaagent:inspectit-oce-agent-{inspectit-oce-version}.jar -jar my-java-program.jar
+$ INSPECTIT_SERVICE_NAME="My Custom Service" java -javaagent:/path/to/inspectit-oce-agent-{inspectit-oce-version}.jar -jar my-java-program.jar
 ```
 
 ==== Relaxed Bindings
@@ -43,13 +43,13 @@ As suggested by Spring, the allowed formats are:
 |===
 |Property |Note
 |```inspectit.service-name```
-|Kebab case, which is recommended for use in .properties and .yml files.
+|kebab-case, which is recommended for use in .properties and .yml files.
 |```inspectit.serviceName```
-|Standard camel case syntax.
+|Standard camelCase syntax.
 |```inspectit.service_name```
-|Underscore notation, which is an alternative format for use in .properties and .yml files.
+|Underscore notation (snake_case), which is an alternative format for use in .properties and .yml files.
 |```INSPECTIT_SERVICE_NAME```
-|Upper case format, which is recommended when using system environment variables.
+|UPPER_CASE format, which is recommended when using system environment variables.
 |===
 
 The formats should be used in the following way, based on the type of property source:

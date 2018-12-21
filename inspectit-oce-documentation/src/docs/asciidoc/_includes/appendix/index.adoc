@@ -4,5 +4,5 @@
 
 [source,yaml]
 ----
-include::../{resource-dir}/default.yaml[]
+include::{gradle-rootdir-absolute}/inspectit-oce-core/src/main/resources/config/default.yml[]
 ----

@@ -9,27 +9,27 @@ The agent works with different JRE distributions including Oracle, openJDK, Azul
 
 === Adding the Agent to the JVM
 
-The best option for using the inspectIT OCE is to include it to the start of the JVM by using the `-javagent` command-line option.
+The best option for using the inspectIT OCE is to include it to the start of the JVM by using the `-javaagent` command-line option.
 This way the agent will be initialized before your application starts.
 
 
 [subs=attributes+]
 ```bash
-$ java -javaagent:inspectit-oce-agent-{inspectit-oce-version}.jar -jar my-java-program.jar
+$ java -javaagent:"/path/to/inspectit-oce-agent-{inspectit-oce-version}.jar" -jar my-java-program.jar
 ```
 
-NOTE: Some application servers have dedicated scripts that are used to lunch the actual JVM that runs the application. In such cases, you must alter the start-up scripts in order to instrument the correct JVM.
+NOTE: Some application servers have dedicated scripts that are used to launch the actual JVM that runs the application. In such cases, you must alter the start-up scripts in order to instrument the correct JVM.
 
 === Attaching the Agent to an already started JVM
 
-The inspectIT OCE also supports attaching the agent to an already running JVMs.
-In such scenario collection of the metric and traces will start from the point of the attachment.
+inspectIT OCE also supports attaching the agent to an already running JVM.
+In such a scenario the collection of metrics and traces will start from the point of the attachment.
 
 The attaching can easily be done with utilities like https://github.com/apangin/jattach[jattach]:
 
 [subs=attributes+]
 ```bash
-$ ./jattach.sh <pid> load instrument inspectit-oce-agent-{inspectit-oce-version}.jar
+$ ./jattach.sh <pid> load instrument /path/to/inspectit-oce-agent-{inspectit-oce-version}.jar
 ```
 
 In order to find the process ID of a running JVM, you can use the `jcmd` to list all the running Java processes on your machine:

@@ -14,7 +14,7 @@ cache:
 script:
   - wget https://raw.githubusercontent.com/sormuras/bach/76983e2f99497738b6f3e9f86bd42fd3a759a275/install-jdk.sh -O $TRAVIS_BUILD_DIR/install-jdk.sh
   - bash $TRAVIS_BUILD_DIR/install-jdk.sh --feature 11 -L GPL --target $HOME/openjdk11
-  - ./gradlew check codeCoverageReport asciidoctor -PsystemTestJavaHomes="$JAVA_HOME:$HOME/openjdk11"
+  - ./gradlew build codeCoverageReport -PsystemTestJavaHomes="$JAVA_HOME:$HOME/openjdk11"
 after_success:
   # upload coverage report
   - bash <(curl -s https://codecov.io/bash)
