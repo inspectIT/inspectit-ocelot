@@ -1,7 +1,6 @@
 = inspectIT OpenCensus Edition Reference
 Jonas Kunz; Marius Oehler; Ivan Senić; Alexander Wert
 :include-dir: _includes
-:resource-dir: ../../../main/resources
 :imagesdir: images
 :icons: font
 :source-highlighter: coderay
