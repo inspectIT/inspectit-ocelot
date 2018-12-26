@@ -3,6 +3,23 @@ inspectit:
   # the name of the service which is being instrumented
   service-name: "InspectIT Agent"
 
+  # defines common tags to be be set on the metrics
+  tags:
+    # different tag providers that can be configured
+    providers:
+      # environment provider adds 'service-name', 'host' and 'host-address' tags
+      environment:
+        # if environment provider is enabled
+        enabled: true
+        # should the host name be resolved using InetAddress.getLocalHost(), if false 'host' tag is not added by env provider
+        resolve-host-name: true
+        # should the host address be resolved using InetAddress.getLocalHost(), if false 'host-address' tag is not added by env provider
+        resolve-host-address: true
+
+    # specifies user defined tag keys and values as a map
+    # these tag values would overwrite any value added by the providers, thus you can easily overwrite tags values by your own
+    # extra:
+
   # all configurations sources
   config:
     # file based configuration - has the highest priority

@@ -5,6 +5,8 @@ import lombok.NoArgsConstructor;
 import rocks.inspectit.oce.core.config.model.config.ConfigSettings;
 import rocks.inspectit.oce.core.config.model.exporters.ExportersSettings;
 import rocks.inspectit.oce.core.config.model.logging.LoggingSettings;
+import rocks.inspectit.oce.core.config.model.metrics.MetricsSettings;
+import rocks.inspectit.oce.core.config.model.tags.TagsSettings;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
@@ -31,6 +33,12 @@ public class InspectitConfig {
      */
     @NotBlank
     private String serviceName;
+
+    /**
+     * Common tags settings.
+     */
+    @Valid
+    private TagsSettings tags;
 
     /**
      * Defines all configuration sources.
