@@ -1,4 +1,4 @@
-package rocks.inspectit.oce.core.logback;
+package rocks.inspectit.oce.core.logging.logback;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -60,7 +60,7 @@ class LogbackInitializerIntTest {
         void logMessage() throws Exception {
             LogbackInitializer.initLogging(environment.getCurrentConfig());
 
-            String testMessage = "trace message";
+            String testMessage = "info message";
             Logger logger = LoggerFactory.getLogger(OverwrittenDefaults.class);
             logger.info(testMessage);
 
@@ -135,6 +135,43 @@ class LogbackInitializerIntTest {
                     });
         }
 
+        @Test
+        void logTraceMessage() throws Exception {
+            LogbackInitializer.initLogging(environment.getCurrentConfig());
+            updateProperties(properties -> properties.withProperty("inspectit.logging.trace", Boolean.TRUE));
+
+            String testMessage = "trace message";
+            Logger logger = LoggerFactory.getLogger(OverwrittenDefaults.class);
+            logger.trace(testMessage);
+
+            Path output = Paths.get(TMP_DIR, "inspectit-oce");
+            Optional<Path> agentLog = Files.walk(output)
+                    .filter(p -> p.endsWith(AGENT_LOG_FILE))
+                    .findFirst();
+            assertThat(agentLog)
+                    .isPresent()
+                    .hasValueSatisfying(p -> {
+                        try {
+                            assertThat(Files.lines(p).anyMatch(l -> l.contains(testMessage))).isTrue();
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+
+            // nothing to error log due to the level
+            Optional<Path> errorLog = Files.walk(output)
+                    .filter(p -> p.endsWith(EXCEPTIONS_LOG_FILE))
+                    .findFirst();
+            assertThat(errorLog)
+                    .isPresent()
+                    .hasValueSatisfying(p -> {
+                        try {
+                            assertThat(Files.readAllLines(p)).isEmpty();
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+        }
 
         @AfterEach
         void clean() throws Exception {

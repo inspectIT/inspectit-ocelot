@@ -1,4 +1,4 @@
-package rocks.inspectit.oce.core.logback;
+package rocks.inspectit.oce.core.logging.logback;
 
 import ch.qos.logback.core.Context;
 import ch.qos.logback.core.joran.event.SaxEvent;

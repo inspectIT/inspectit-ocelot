@@ -1,4 +1,4 @@
-package rocks.inspectit.oce.core.logback;
+package rocks.inspectit.oce.core.logging.logback;
 
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;

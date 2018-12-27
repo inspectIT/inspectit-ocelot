@@ -7,7 +7,7 @@ The <<Default Logback Configuration,default logback configuration>> appends insp
 . `agent.log` - includes the complete log
 . `exceptions.log` - includes only `WARN` and `ERROR` level messages
 
-The file appenders use the rolling policy with max file size of 20MB and history of 30 files.
+The file appenders use the rolling policy with a max file size of 20MB and a history of 30 files.
 
 The available properties for manipulating the default logging configuration are the following:
 
@@ -38,7 +38,7 @@ The available properties for manipulating the default logging configuration are 
 |Sets a path where `agent.log` and `exceptions.log` files are created. By default, the path is resolved to `$java.io.tmp/inspectit-oce` directory, falling back to `/tmp/inspectit-oce` if `$java.io.tmp` System property is not defined.
 |```inspectit.logging.file.include-service-name```
 |`true`
-|When `true` includes the service name defined in the `inspectit.service-name` to the log messages appended to files.
+|When `true` the service name defined in the `inspectit.service-name` is included in the log messages appended to files.
 |===
 
 If you are not satisfied with default logback configuration options you can supply your own logback config file in the property `inspectit.logging.config-file`.

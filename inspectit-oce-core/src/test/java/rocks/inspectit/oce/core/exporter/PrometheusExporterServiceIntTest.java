@@ -50,7 +50,6 @@ public class PrometheusExporterServiceIntTest extends SpringTestBase {
         assertThat(throwable).isInstanceOf(IOException.class);
     }
 
-    @DirtiesContext
     @Test
     void testDefaultSettings() throws Exception {
         assertGet200("http://localhost:8888/metrics");

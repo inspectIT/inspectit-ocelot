@@ -7,7 +7,7 @@
 
     <!-- Console output -->
     <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
-        <filter class="rocks.inspectit.oce.core.logback.LogbackInitializer$ConsoleFilter" />
+        <filter class="rocks.inspectit.oce.core.logging.logback.LogbackInitializer$ConsoleFilter" />
         <Target>System.out</Target>
         <encoder>
             <pattern>${consoleLogPattern}</pattern>
@@ -17,7 +17,7 @@
     <!-- Enriched Sysout -->
     <!-- Rollover every day or when file reaches 20MB -->
     <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <filter class="rocks.inspectit.oce.core.logback.LogbackInitializer$FileFilter" />
+        <filter class="rocks.inspectit.oce.core.logging.logback.LogbackInitializer$FileFilter" />
         <file>${logDir}/agent.log</file>
         <encoder>
             <pattern>${fileLogPattern}</pattern>
@@ -33,7 +33,7 @@
     <!-- Rollover every day or when file reaches 20MB -->
     <!-- Only warn & error levels-->
     <appender name="exceptions" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <filter class="rocks.inspectit.oce.core.logback.LogbackInitializer$FileFilter" />
+        <filter class="rocks.inspectit.oce.core.logging.logback.LogbackInitializer$FileFilter" />
         <file>${logDir}/exceptions.log</file>
         <encoder>
             <pattern>${fileLogPattern}</pattern>
@@ -58,6 +58,6 @@
     <!-- deactivate all other loggers, except for errors -->
     <logger name="org" level="error" />
     <logger name="com" level="error" />
-    <logger name="rocks.inspectit" level="info" />
+    <logger name="rocks.inspectit" level="${INSPECTIT_LOG_LEVEL:-INFO}" />
 
 </configuration>
