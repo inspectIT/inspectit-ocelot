@@ -2,6 +2,7 @@ package rocks.inspectit.oce.core.tags;
 
 import io.opencensus.common.Scope;
 import io.opencensus.tags.*;
+import lombok.Getter;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -21,6 +22,7 @@ public class CommonTagsManager {
     /**
      * OpenCensus tag context representing common tag context.
      */
+    @Getter
     private TagContext commonTagContext;
 
     /**
@@ -49,15 +51,6 @@ public class CommonTagsManager {
      */
     public Scope withCommonTagScope() {
         return Tags.getTagger().withTagContext(commonTagContext);
-    }
-
-    /**
-     * Returns common tag context.
-     *
-     * @return Returns common tag context.
-     */
-    public TagContext getCommonTagContext() {
-        return commonTagContext;
     }
 
     /**

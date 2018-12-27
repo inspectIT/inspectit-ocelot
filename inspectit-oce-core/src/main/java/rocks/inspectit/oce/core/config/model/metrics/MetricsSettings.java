@@ -3,6 +3,8 @@ package rocks.inspectit.oce.core.config.model.metrics;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.Valid;
+
 @Data
 @NoArgsConstructor
 public class MetricsSettings {
@@ -13,4 +15,7 @@ public class MetricsSettings {
      * - all metrics exporters are disabled
      */
     boolean enabled;
+
+    @Valid
+    DiskMetricsSettings disk;
 }

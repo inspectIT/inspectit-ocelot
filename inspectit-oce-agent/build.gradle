@@ -119,6 +119,7 @@ task systemTest {
             // https://discuss.gradle.org/t/jacoco-gradle-adds-the-agent-last-to-jvm-args/7124.
             doFirst {
                 jvmArgs "-Dinspectit.publish-opencensus-to-bootstrap=true"  // configure inspectIT to push openCensus to the bootstrap
+                jvmArgs "-Dinspectit.config.file-based.path=./"  // make inspectIT scan the workdir for configs
                 jvmArgs jacoco.asJvmArg + ",inclbootstrapclasses=true"  // JaCoCo agent first + bootstrap instrumentaiton
                 jvmArgs "-javaagent:${agentJarPath}"  // Our agent second.
                 jacoco.enabled = false  // Don't add the JaCoCo agent again.

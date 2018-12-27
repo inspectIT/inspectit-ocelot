@@ -52,6 +52,14 @@ inspectit:
     # master switch for metrics capturing. When set to false the following happens:
     #  - all metrics exporters are disabled
     enabled: true
+    # settings regarding disk related metrics
+    disk:
+      # if true, the free disk space will be measured and the view "disk/free" is registered
+      free: false
+      # if true, the total disk space will be measured and the view "disk/total" is registered
+      total: false
+      # specifies the frequency in milliseconds with which the disk metrics should be polled and recorded
+      frequency-ms: 1000
 
   # logging settings
   logging:
