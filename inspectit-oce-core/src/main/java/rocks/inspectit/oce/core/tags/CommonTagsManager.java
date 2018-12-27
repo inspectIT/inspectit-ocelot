@@ -52,11 +52,11 @@ public class CommonTagsManager {
     }
 
     /**
-     * Returns default tag context. For testing.
+     * Returns common tag context.
      *
-     * @return Returns default tag context.
+     * @return Returns common tag context.
      */
-    TagContext getCommonTagContext() {
+    public TagContext getCommonTagContext() {
         return commonTagContext;
     }
 
@@ -68,7 +68,7 @@ public class CommonTagsManager {
     public void register(ITagsProvider tagsProvider) {
         if (!providers.contains(tagsProvider)) {
             providers.add(tagsProvider);
-            createDefaults();
+            createCommonTagContext();
         }
     }
 
@@ -80,14 +80,14 @@ public class CommonTagsManager {
     public void unregister(ITagsProvider tagsProvider) {
         if (providers.contains(tagsProvider)) {
             providers.remove(tagsProvider);
-            createDefaults();
+            createCommonTagContext();
         }
     }
 
     /**
-     * Processes all {@link #providers} on the start-up.
+     * Processes all {@link #providers} and creates common context based on the providers priority.
      */
-    protected void createDefaults() {
+    private void createCommonTagContext() {
         // first create map of tags based on the providers priority
         Map<String, String> all = new HashMap<>();
         providers.stream()
