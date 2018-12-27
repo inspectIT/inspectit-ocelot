@@ -1,0 +1,147 @@
+version: '2'
+services:
+  config-server:
+    image: openapm/spring-petclinic-config-server:inspectit-oce-demo
+    container_name: config-server
+    environment:
+     - INSPECTIT_SERVICE_NAME=config-server
+     - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_ENABLED=true
+     - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_HOST=0.0.0.0
+     - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_PORT=9096
+    mem_limit: 512M
+    entrypoint: ["sh", "-c","
+      wget --no-check-certificate https://github.com/inspectIT/inspectit-oce/releases/download/0.1.M1/inspectit-oce-agent-0.1.M1.jar -O inspectit-oce-agent-0.1.M1.jar
+      && java -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Djava.security.egd=file:/dev/./urandom
+      -javaagent:/inspectit-oce-agent-0.1.M1.jar
+      -jar /app.jar"]
+    ports:
+     - 8888:8888
+     - 9096:9096
+
+  discovery-server:
+    image: openapm/spring-petclinic-discovery-server:inspectit-oce-demo
+    container_name: discovery-server
+    environment:
+     - INSPECTIT_SERVICE_NAME=discovery-server
+     - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_ENABLED=true
+     - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_HOST=0.0.0.0
+     - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_PORT=9095
+    mem_limit: 512M
+    depends_on:
+      - config-server
+    entrypoint: ["sh", "-c","
+      wget --no-check-certificate https://github.com/inspectIT/inspectit-oce/releases/download/0.1.M1/inspectit-oce-agent-0.1.M1.jar -O inspectit-oce-agent-0.1.M1.jar
+      && ./dockerize -wait=tcp://config-server:8888 -timeout=60s -- &&
+      java -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Djava.security.egd=file:/dev/./urandom
+      -javaagent:/inspectit-oce-agent-0.1.M1.jar
+      -jar /app.jar"]
+    ports:
+     - 8761:8761
+     - 9095:9095
+
+  customers-service:
+    image: openapm/spring-petclinic-customers-service:inspectit-oce-demo
+    container_name: customers-service
+    environment:
+     - INSPECTIT_SERVICE_NAME=customers-service
+     - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_ENABLED=true
+     - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_HOST=0.0.0.0
+     - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_PORT=9091
+    mem_limit: 512M
+    depends_on:
+     - config-server
+     - discovery-server
+    entrypoint: ["sh", "-c","
+      wget --no-check-certificate https://github.com/inspectIT/inspectit-oce/releases/download/0.1.M1/inspectit-oce-agent-0.1.M1.jar -O inspectit-oce-agent-0.1.M1.jar
+      && ./dockerize -wait=tcp://discovery-server:8761 -timeout=60s -- &&
+      java -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Djava.security.egd=file:/dev/./urandom
+      -javaagent:/inspectit-oce-agent-0.1.M1.jar
+      -jar /app.jar"]
+    ports:
+     - 8081:8081
+     - 9091:9091
+
+  visits-service:
+    image: openapm/spring-petclinic-visits-service:inspectit-oce-demo
+    container_name: visits-service
+    environment:
+     - INSPECTIT_SERVICE_NAME=visits-service
+     - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_ENABLED=true
+     - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_HOST=0.0.0.0
+     - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_PORT=9092
+    mem_limit: 512M
+    depends_on:
+     - config-server
+     - discovery-server
+    entrypoint: ["sh", "-c","
+      wget --no-check-certificate https://github.com/inspectIT/inspectit-oce/releases/download/0.1.M1/inspectit-oce-agent-0.1.M1.jar -O inspectit-oce-agent-0.1.M1.jar
+      && ./dockerize -wait=tcp://discovery-server:8761 -timeout=60s -- &&
+      java -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Djava.security.egd=file:/dev/./urandom
+      -javaagent:/inspectit-oce-agent-0.1.M1.jar
+      -jar /app.jar"]
+    ports:
+     - 8082:8082
+     - 9092:9092
+
+  vets-service:
+    image: openapm/spring-petclinic-vets-service:inspectit-oce-demo
+    container_name: vets-service
+    environment:
+     - INSPECTIT_SERVICE_NAME=vets-service
+     - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_ENABLED=true
+     - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_HOST=0.0.0.0
+     - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_PORT=9093
+    mem_limit: 512M
+    depends_on:
+     - config-server
+     - discovery-server
+    entrypoint: ["sh", "-c","
+      wget --no-check-certificate https://github.com/inspectIT/inspectit-oce/releases/download/0.1.M1/inspectit-oce-agent-0.1.M1.jar -O inspectit-oce-agent-0.1.M1.jar
+      && ./dockerize -wait=tcp://discovery-server:8761 -timeout=60s -- &&
+      java -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Djava.security.egd=file:/dev/./urandom
+      -javaagent:/inspectit-oce-agent-0.1.M1.jar
+      -jar /app.jar"]
+    ports:
+     - 8083:8083
+     - 9093:9093
+
+  api-gateway:
+    image: openapm/spring-petclinic-api-gateway:inspectit-oce-demo
+    container_name: api-gateway
+    environment:
+     - INSPECTIT_SERVICE_NAME=api-gateway
+     - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_ENABLED=true
+     - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_HOST=0.0.0.0
+     - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_PORT=9094
+    mem_limit: 512M
+    depends_on:
+     - config-server
+     - discovery-server
+    entrypoint: ["sh", "-c","
+      wget --no-check-certificate https://github.com/inspectIT/inspectit-oce/releases/download/0.1.M1/inspectit-oce-agent-0.1.M1.jar -O inspectit-oce-agent-0.1.M1.jar
+      && ./dockerize -wait=tcp://discovery-server:8761 -timeout=60s -- &&
+      java -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Djava.security.egd=file:/dev/./urandom
+      -javaagent:/inspectit-oce-agent-0.1.M1.jar
+      -jar /app.jar"]
+    ports:
+     - 8080:8080
+     - 9094:9094
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    volumes:
+     - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+     - 9090:9090
+
+  grafana:
+    image: openapm/grafana:inspectit-oce-demo
+    container_name: grafana
+    environment:
+     - GF_SECURITY_ADMIN_PASSWORD=demo
+     - GF_PATHS_PROVISIONING=/usr/share/grafana/custom/
+    volumes:
+     - ./grafana/provisioning/prometheus:/usr/share/grafana/custom/
+    ports:
+     - 3001:3000

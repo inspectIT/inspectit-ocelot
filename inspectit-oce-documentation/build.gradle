@@ -17,7 +17,8 @@ asciidoctor {
     attributes 'inspectit-oce-version': project.version,
             'opencensus-version': "${openCensusVersion}",
             'gradle-rootdir-absolute': rootDir.absolutePath,
-            revnumber: project.version
+            revnumber: project.version,
+            toc: 'left'
 }
 
 task packageDocumentation(type: Zip) {
