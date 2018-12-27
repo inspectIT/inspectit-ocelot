@@ -56,7 +56,6 @@ public class PrometheusExporterServiceIntTest extends SpringTestBase {
         assertNoLogsOfLevelOrGreater(Level.WARN);
     }
 
-
     @DirtiesContext
     @Test
     void testMasterSwitch() throws Exception {
@@ -77,7 +76,6 @@ public class PrometheusExporterServiceIntTest extends SpringTestBase {
         assertNoLogsOfLevelOrGreater(Level.WARN);
     }
 
-
     @DirtiesContext
     @Test
     void testChangePort() throws Exception {
@@ -88,4 +86,5 @@ public class PrometheusExporterServiceIntTest extends SpringTestBase {
         assertGet200("http://localhost:8899/metrics");
         assertNoLogsOfLevelOrGreater(Level.WARN);
     }
+
 }

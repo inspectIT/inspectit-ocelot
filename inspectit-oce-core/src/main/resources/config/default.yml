@@ -36,6 +36,34 @@ inspectit:
     #  - all metrics exporters are disabled
     enabled: true
 
+  # logging settings
+  logging:
+      # path to a custom user-specified logback config file that should be used
+      config-file:
+      # properties below only work if the default inspectIT OCE logback config file is used
+      # sets the inspectIT OCE log level to TRACE
+      trace: false
+      # sets the level to DEBUG (only if trace is false)
+      debug: false
+      # settings for the console output
+      console:
+        # defines if the console output is enabled
+        enabled: true
+        # defines a custom pattern to output to the console
+        pattern:
+      # settings for the file-based log output
+      # inspectIT OCE will create two log files: agent.log and exceptions.log
+      file:
+        # defines if the file-based log output is enabled
+        enabled: true
+        # defines a custom pattern to output to the console
+        pattern:
+        # defines a custom path where log files should be placed (defaults to /tmp/inspectit-oce)
+        path:
+        # if the default pattern should include the service name (specified with inspectit.service-name)
+        # helpful when you run more than one service on the same host
+        include-service-name: true
+
   # defines how many threads inspectIT may start for its internal tasks
   thread-pool-size: 2
 

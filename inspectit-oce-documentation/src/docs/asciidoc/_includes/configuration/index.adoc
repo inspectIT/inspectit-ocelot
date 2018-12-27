@@ -8,3 +8,5 @@ include::externalized-configuration-methods.adoc[]
 
 include::open-census-configuration.adoc[]
 
+include::logging-configuration.adoc[]
+
