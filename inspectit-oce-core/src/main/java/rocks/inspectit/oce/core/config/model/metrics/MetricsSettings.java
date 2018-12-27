@@ -1,4 +1,4 @@
-package rocks.inspectit.oce.core.config.model;
+package rocks.inspectit.oce.core.config.model.metrics;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

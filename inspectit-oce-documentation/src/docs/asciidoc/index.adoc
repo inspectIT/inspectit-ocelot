@@ -24,4 +24,6 @@ include::{include-dir}/configuration/index.adoc[]
 
 include::{include-dir}/metrics/index.adoc[]
 
+include::{include-dir}/monitoring-environment/index.adoc[]
+
 include::{include-dir}/appendix/index.adoc[]
