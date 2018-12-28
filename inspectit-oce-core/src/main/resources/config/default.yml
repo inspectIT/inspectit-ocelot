@@ -74,6 +74,19 @@ inspectit:
         unloaded: true
         # specifies the frequency with which the classloader metrics should be polled and recorded
       frequency: ${inspectit.metrics.frequency}
+    # settings regarding the capturing of processor related metrics
+    processor:
+      enabled:
+        # if true, the number of processors available to the jvm will be captured
+        count: true
+        # if true, the average load of the last minute of the system load will be captured
+        system.average: true
+        # if true, the current cpu usage of the system will be captured
+        system.usage: true
+        # if true, the current cpu usage of this process will be captured
+        process.usage: true
+        # specifies the frequency with which the processor metrics should be polled and recorded
+      frequency: ${inspectit.metrics.frequency}
 
   # logging settings
   logging:

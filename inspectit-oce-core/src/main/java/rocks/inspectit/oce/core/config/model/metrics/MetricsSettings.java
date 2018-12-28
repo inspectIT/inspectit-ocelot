@@ -13,12 +13,25 @@ public class MetricsSettings {
      * Master switch for disabling metrics capturing and exporting.
      * If disabled the following happens:
      * - all metrics exporters are disabled
+     * - all metrics recorders are disabled
      */
-    boolean enabled;
+    private boolean enabled;
 
+    /**
+     * Settings for {@link rocks.inspectit.oce.core.metrics.DiskMetricsRecorder}
+     */
     @Valid
-    private DiskMetricsSettings disk;
+    private StandardPollingMetricsRecorderSettings disk;
 
+    /**
+     * Settings for {@link rocks.inspectit.oce.core.metrics.ClassLoaderMetricsRecorder}
+     */
     @Valid
-    private ClassLoaderMetricsSettings classloader;
+    private StandardPollingMetricsRecorderSettings classloader;
+
+    /**
+     * Settings for {@link rocks.inspectit.oce.core.metrics.ProcessorMetricsRecorder}
+     */
+    @Valid
+    private StandardPollingMetricsRecorderSettings processor;
 }

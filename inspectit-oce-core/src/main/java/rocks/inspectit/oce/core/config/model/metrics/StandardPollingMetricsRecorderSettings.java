@@ -8,11 +8,11 @@ import java.time.Duration;
 import java.util.Map;
 
 /**
- * Settings for the @{@link rocks.inspectit.oce.core.metrics.DiskMetricsRecorder}.
+ * Common settings for polling metrics recorders
  */
 @Data
 @NoArgsConstructor
-public class DiskMetricsSettings {
+public class StandardPollingMetricsRecorderSettings {
 
     /**
      * Contains the enabling flag for each metric.
@@ -20,7 +20,8 @@ public class DiskMetricsSettings {
     private Map<String, Boolean> enabled;
 
     /**
-     * Specifies the frequency in milliseconds with which the classloader metrics should be polled and recorded.
+     * Specifies the frequency in milliseconds with which the metrics should be polled and recorded.
+     * Should default to ${inspectit.metrics.frequency}
      */
     @NonNull
     private Duration frequency;
