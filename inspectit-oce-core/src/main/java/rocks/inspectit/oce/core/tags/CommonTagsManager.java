@@ -2,6 +2,8 @@ package rocks.inspectit.oce.core.tags;
 
 import io.opencensus.common.Scope;
 import io.opencensus.tags.*;
+import lombok.Getter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -21,12 +23,13 @@ public class CommonTagsManager {
     /**
      * OpenCensus tag context representing common tag context.
      */
-    private TagContext commonTagContext;
+    @Getter
+    private TagContext commonTagContext = Tags.getTagger().emptyBuilder().build();
 
     /**
      * List of common tag keys that can be used when creating the views.
      */
-    private List<TagKey> commonTagKeys;
+    private List<TagKey> commonTagKeys = Collections.emptyList();
 
     /**
      * Returns common tags keys that all view should register.
@@ -52,15 +55,6 @@ public class CommonTagsManager {
     }
 
     /**
-     * Returns common tag context.
-     *
-     * @return Returns common tag context.
-     */
-    public TagContext getCommonTagContext() {
-        return commonTagContext;
-    }
-
-    /**
      * Registers a tag provider.
      *
      * @param tagsProvider ITagProvider
@@ -82,6 +76,15 @@ public class CommonTagsManager {
             providers.remove(tagsProvider);
             createCommonTagContext();
         }
+    }
+
+    /**
+     * Utility to ensure that all ITagsProviders register themselves before the CommonTagsManager is used somewhere else.
+     *
+     * @param providers
+     */
+    @Autowired
+    void setAllTagsProviders(List<ITagsProvider> providers) {
     }
 
     /**

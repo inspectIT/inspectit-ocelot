@@ -51,7 +51,20 @@ inspectit:
   metrics:
     # master switch for metrics capturing. When set to false the following happens:
     #  - all metrics exporters are disabled
+    #  - all metrics recorders are disabled
     enabled: true
+    # root setting for the polling frequency of all metrics
+    # when a metrics has no frequency defined separately, this frequency will be used
+    frequency: 15s
+    # settings regarding disk related metrics
+    disk:
+      enabled:
+        # if true, the free disk space will be measured and the view "disk/free" is registered
+        free: true
+        # if true, the total disk space will be measured and the view "disk/total" is registered
+        total: true
+      # specifies the frequency with which the disk metrics should be polled and recorded
+      frequency: ${inspectit.metrics.frequency}
 
   # logging settings
   logging:
