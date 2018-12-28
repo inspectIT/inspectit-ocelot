@@ -6,6 +6,7 @@ import rocks.inspectit.oce.core.config.model.config.ConfigSettings;
 import rocks.inspectit.oce.core.config.model.exporters.ExportersSettings;
 import rocks.inspectit.oce.core.config.model.logging.LoggingSettings;
 import rocks.inspectit.oce.core.config.model.metrics.MetricsSettings;
+import rocks.inspectit.oce.core.config.model.selfmonitoring.SelfMonitoringSettings;
 import rocks.inspectit.oce.core.config.model.tags.TagsSettings;
 
 import javax.validation.Valid;
@@ -63,6 +64,12 @@ public class InspectitConfig {
      */
     @Valid
     private LoggingSettings logging;
+
+    /**
+     * Settings for the self monitoring.
+     */
+    @Valid
+    private SelfMonitoringSettings selfMonitoring;
 
     /**
      * Defines how many threads inspectIT may start for its internal tasks.

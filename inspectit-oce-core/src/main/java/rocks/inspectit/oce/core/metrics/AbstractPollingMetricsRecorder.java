@@ -1,12 +1,12 @@
 package rocks.inspectit.oce.core.metrics;
 
-import io.opencensus.common.Scope;
 import io.opencensus.stats.MeasureMap;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import rocks.inspectit.oce.core.config.model.InspectitConfig;
 import rocks.inspectit.oce.core.config.model.metrics.MetricsSettings;
+import rocks.inspectit.oce.core.selfmonitoring.SelfMonitoringService;
 
 import java.time.Duration;
 import java.util.concurrent.ScheduledExecutorService;
@@ -21,6 +21,9 @@ public abstract class AbstractPollingMetricsRecorder extends AbstractMetricsReco
 
     @Autowired
     protected ScheduledExecutorService executor;
+
+    @Autowired
+    protected SelfMonitoringService selfMonitoringService;
 
     private ScheduledFuture<?> pollingTask;
 
@@ -51,10 +54,10 @@ public abstract class AbstractPollingMetricsRecorder extends AbstractMetricsReco
         log.info("Enabling {}.", getClass().getSimpleName());
         val conf = configuration.getMetrics();
         pollingTask = executor.scheduleWithFixedDelay(() -> {
-            try (Scope sc = commonTags.withCommonTagScope()) {
+            try (val scope = selfMonitoringService.withSelfMonitoring(getClass().getSimpleName())) {
                 val mm = recorder.newMeasureMap();
                 takeMeasurement(conf, mm);
-                mm.record();
+                mm.record(commonTags.getCommonTagContext());
             } catch (Exception e) {
                 log.error("Error taking measurement", e);
             }
