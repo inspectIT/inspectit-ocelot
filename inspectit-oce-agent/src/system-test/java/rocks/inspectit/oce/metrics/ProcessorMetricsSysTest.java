@@ -16,7 +16,6 @@ public class ProcessorMetricsSysTest extends MetricsSysTestBase {
 
     @Test
     public void testProcessorCountCapturing() throws Exception {
-        //Thread.sleep(1000);
         ViewData procCountData = viewManager.getView(View.Name.create("system/cpu/count"));
         assertThat(procCountData.getAggregationMap()).isNotEmpty();
 

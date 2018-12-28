@@ -73,7 +73,7 @@ public abstract class AbstractMetricsRecorder extends DynamicallyActivatableServ
     protected Measure.MeasureLong getOrCreateMeasureLongWithView(String name, String description, String unit, Supplier<Aggregation> aggregation) {
         return createdMeasureLongs.computeIfAbsent(name, (n) -> {
             val measure = Measure.MeasureLong.create(name, description, unit);
-            val view = View.create(View.Name.create(measure.getName()), measure.getDescription(),
+            val view = View.create(View.Name.create(measure.getName()), measure.getDescription() + " [" + measure.getUnit() + "]",
                     measure, aggregation.get(), commonTags.getCommonTagKeys());
             viewManager.registerView(view);
             return measure;
