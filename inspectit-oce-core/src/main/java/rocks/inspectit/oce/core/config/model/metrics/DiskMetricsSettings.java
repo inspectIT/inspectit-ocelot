@@ -20,7 +20,7 @@ public class DiskMetricsSettings {
     Map<String, Boolean> enabled;
 
     /**
-     * Specifies the frequency in milliseconds with which the disk metrics should be polled and recorded.
+     * Specifies the frequency in milliseconds with which the classloader metrics should be polled and recorded.
      */
     @NonNull
     Duration frequency;
