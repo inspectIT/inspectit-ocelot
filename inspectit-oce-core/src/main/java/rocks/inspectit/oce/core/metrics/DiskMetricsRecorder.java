@@ -19,8 +19,8 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class DiskMetricsRecorder extends DynamicallyActivatableService {
 
-
-    private static final StatsRecorder STATS_RECORDER = Stats.getStatsRecorder();
+    @Autowired
+    protected StatsRecorder statsRecorder;
 
     @Autowired
     protected ScheduledExecutorService executor;
@@ -34,6 +34,44 @@ public class DiskMetricsRecorder extends DynamicallyActivatableService {
 
     public DiskMetricsRecorder() {
         super("metrics.enabled", "metrics.disk");
+    }
+
+    @Override
+
+    protected boolean checkEnabledForConfig(InspectitConfig conf) {
+        val metrics = conf.getMetrics();
+        return metrics.isEnabled()
+                && (metrics.getDisk().getEnabled().containsValue(true));
+    }
+
+    @Override
+    protected boolean doEnable(InspectitConfig configuration) {
+        log.info("Enabling disk space recorder.");
+        val conf = configuration.getMetrics().getDisk();
+        pollingTask = executor.scheduleWithFixedDelay(() -> {
+            try {
+                val mm = statsRecorder.newMeasureMap();
+                if (conf.getEnabled().getOrDefault("free", false)) {
+                    mm.put(getFreeDiskSpaceMeasure(), new File("/").getFreeSpace());
+                }
+                if (conf.getEnabled().getOrDefault("total", false)) {
+                    mm.put(getTotalDiskSpaceMeasure(), new File("/").getTotalSpace());
+                }
+                TagContext commonTagContext = commonTagsManager.getCommonTagContext();
+                mm.record(commonTagContext);
+            } catch (Exception e) {
+                log.error("Error polling disk metrics", e);
+            }
+        }, 0, conf.getFrequency().toMillis(), TimeUnit.MILLISECONDS);
+        //The initial delay is used to ensure that
+        return true;
+    }
+
+    @Override
+    protected boolean doDisable() {
+        log.info("Disabling disk space recorder.");
+        pollingTask.cancel(true);
+        return true;
     }
 
     /**
@@ -68,38 +106,5 @@ public class DiskMetricsRecorder extends DynamicallyActivatableService {
             );
         }
         return totalDiskSpaceMeasure;
-    }
-
-    @Override
-
-    protected boolean checkEnabledForConfig(InspectitConfig conf) {
-        val metrics = conf.getMetrics();
-        return metrics.isEnabled()
-                && (metrics.getDisk().isFree() || metrics.getDisk().isTotal());
-    }
-
-    @Override
-    protected boolean doEnable(InspectitConfig configuration) {
-        log.info("Enabling disk space recorder.");
-        val conf = configuration.getMetrics().getDisk();
-        pollingTask = executor.scheduleWithFixedDelay(() -> {
-            val mm = STATS_RECORDER.newMeasureMap();
-            if (conf.isFree()) {
-                mm.put(getFreeDiskSpaceMeasure(), new File("/").getFreeSpace());
-            }
-            if (conf.isTotal()) {
-                mm.put(getTotalDiskSpaceMeasure(), new File("/").getTotalSpace());
-            }
-            TagContext commonTagContext = commonTagsManager.getCommonTagContext();
-            mm.record(commonTagContext);
-        }, conf.getFrequencyMs(), conf.getFrequencyMs(), TimeUnit.MILLISECONDS);
-        return true;
-    }
-
-    @Override
-    protected boolean doDisable() {
-        log.info("Disabling disk space recorder.");
-        pollingTask.cancel(true);
-        return true;
     }
 }

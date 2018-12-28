@@ -1,0 +1,3 @@
+# overwrite settings from default.yml for system tests
+inspectit:
+  publish-opencensus-to-bootstrap: true

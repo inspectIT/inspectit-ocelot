@@ -2,8 +2,10 @@ package rocks.inspectit.oce.core.config.model.metrics;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.lang.NonNull;
 
-import javax.validation.constraints.Min;
+import java.time.Duration;
+import java.util.Map;
 
 /**
  * Settings for the @{@link rocks.inspectit.oce.core.metrics.DiskMetricsRecorder}.
@@ -13,19 +15,14 @@ import javax.validation.constraints.Min;
 public class DiskMetricsSettings {
 
     /**
-     * if true, the free disk space will be measured and the view "disk/free" is registered.
+     * Contains the enabling flag for each metric.
      */
-    boolean free;
-
-    /**
-     * if true, the total disk space will be measured and the view "disk/total" is registered.
-     */
-    boolean total;
+    Map<String, Boolean> enabled;
 
     /**
      * Specifies the frequency in milliseconds with which the disk metrics should be polled and recorded.
      */
-    @Min(1)
-    int frequencyMs;
+    @NonNull
+    Duration frequency;
 
 }
