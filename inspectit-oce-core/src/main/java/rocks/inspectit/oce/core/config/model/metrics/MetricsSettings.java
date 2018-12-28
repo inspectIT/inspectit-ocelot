@@ -18,4 +18,7 @@ public class MetricsSettings {
 
     @Valid
     DiskMetricsSettings disk;
+
+    @Valid
+    ClassLoaderMetricsSettings classloader;
 }
