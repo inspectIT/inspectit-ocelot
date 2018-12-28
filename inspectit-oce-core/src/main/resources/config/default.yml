@@ -43,7 +43,7 @@ inspectit:
         # if true, the agent will try to start the Prometheus stats exporter
         enabled: true
         # the hostname or IP-address on which the /metrics endpoint of prometheus will be started.
-        host: localhost
+        host: 0.0.0.0
         # the port on which the /metrics endpoint of prometheus will be started
         port: 8888
 

@@ -32,7 +32,7 @@ The server is by default started on the port `8888` and metrics can then be acce
 |`true`
 |If true, the inspectIT OCE agent will try to start the Prometheus metrics exporter and Prometheus HTTP server.
 |```inspectit.exporters.metrics.prometheus.host```
-|`localhost`
+|`0.0.0.0`
 |The hostname or network address to which the Prometheus HTTP server should bind.
 |```inspectit.exporters.metrics.prometheus.port```
 |`8888`
