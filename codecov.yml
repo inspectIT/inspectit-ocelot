@@ -3,4 +3,11 @@ coverage:
   precision: 2
   round: nearest
   range: "25...75"
+  status:
+    project:
+      default:
+        target: 50%
+    patch:
+      default:
+        target: 25%
         

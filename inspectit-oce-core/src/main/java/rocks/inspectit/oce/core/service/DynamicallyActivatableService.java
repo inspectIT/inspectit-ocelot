@@ -52,11 +52,18 @@ public abstract class DynamicallyActivatableService {
 
     @PostConstruct
     void initialize() {
+        init();
         if (checkEnabledForConfig(env.getCurrentConfig())) {
             enabled = enable();
         } else {
             enabled = false;
         }
+    }
+
+    /**
+     * Initialization, guaranteed to be called exactly once prior to the first invocation of doEnable() and checkEnabledForConfig();
+     */
+    protected void init() {
     }
 
     /**
