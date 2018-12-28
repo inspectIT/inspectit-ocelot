@@ -33,8 +33,7 @@ public class ClassLoaderMetricsSysTest {
         long loadedVal = ((AggregationData.LastValueDataLong) loaded.getValue()).getLastValue();
         long unloadedVal = ((AggregationData.LastValueDataLong) unloaded.getValue()).getLastValue();
 
-        assertThat(loadedVal).isGreaterThan(100);
-        assertThat(loadedVal).isLessThanOrEqualTo(ManagementFactory.getClassLoadingMXBean().getLoadedClassCount()); //no unloading should happen
-        assertThat(unloadedVal).isEqualTo(0);
+        assertThat(loadedVal).isLessThanOrEqualTo(ManagementFactory.getClassLoadingMXBean().getTotalLoadedClassCount());
+        assertThat(unloadedVal).isLessThanOrEqualTo(ManagementFactory.getClassLoadingMXBean().getUnloadedClassCount());
     }
 }

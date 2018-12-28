@@ -17,12 +17,12 @@ public class ClassLoaderMetricsSettings {
     /**
      * Contains the enabling flag for each metric.
      */
-    Map<String, Boolean> enabled;
+    private Map<String, Boolean> enabled;
 
     /**
      * Specifies the frequency in milliseconds with which the disk metrics should be polled and recorded.
      */
     @NonNull
-    Duration frequency;
+    private Duration frequency;
 
 }
