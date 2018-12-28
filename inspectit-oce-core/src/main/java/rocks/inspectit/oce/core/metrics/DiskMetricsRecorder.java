@@ -1,110 +1,56 @@
 package rocks.inspectit.oce.core.metrics;
 
-import io.opencensus.stats.*;
-import io.opencensus.tags.TagContext;
+import io.opencensus.stats.Aggregation;
+import io.opencensus.stats.Measure;
+import io.opencensus.stats.MeasureMap;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import rocks.inspectit.oce.core.config.model.InspectitConfig;
-import rocks.inspectit.oce.core.service.DynamicallyActivatableService;
-import rocks.inspectit.oce.core.tags.CommonTagsManager;
+import rocks.inspectit.oce.core.config.model.metrics.MetricsSettings;
 
 import java.io.File;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
 
 @Service
 @Slf4j
-public class DiskMetricsRecorder extends DynamicallyActivatableService {
+public class DiskMetricsRecorder extends AbstractPollingMetricsRecorder {
 
-    @Autowired
-    protected StatsRecorder statsRecorder;
+    private static final String METRIC_NAME_PREFIX = "disk/";
 
-    @Autowired
-    protected ScheduledExecutorService executor;
+    private static final String FREE_METRIC_NAME = "free";
+    private static final String FREE_METRIC_DESCRIPTION = "Free disk space";
 
-    @Autowired
-    protected CommonTagsManager commonTagsManager;
+    private static final String TOTAL_METRIC_NAME = "total";
+    private static final String TOTAL_METRIC_DESCRIPTION = "Total disk space";
 
-    private Measure.MeasureLong freeDiskSpaceMeasure;
-    private Measure.MeasureLong totalDiskSpaceMeasure;
-    private ScheduledFuture<?> pollingTask;
+    private static final String METRIC_UNIT = "bytes";
 
     public DiskMetricsRecorder() {
-        super("metrics.enabled", "metrics.disk");
+        super("metrics.disk");
     }
 
     @Override
-
-    protected boolean checkEnabledForConfig(InspectitConfig conf) {
-        val metrics = conf.getMetrics();
-        return metrics.isEnabled()
-                && (metrics.getDisk().getEnabled().containsValue(true));
+    protected boolean checkEnabledForConfig(MetricsSettings conf) {
+        return conf.getDisk().getEnabled().containsValue(true);
     }
 
     @Override
-    protected boolean doEnable(InspectitConfig configuration) {
-        log.info("Enabling disk space recorder.");
-        val conf = configuration.getMetrics().getDisk();
-        pollingTask = executor.scheduleWithFixedDelay(() -> {
-            try {
-                val mm = statsRecorder.newMeasureMap();
-                if (conf.getEnabled().getOrDefault("free", false)) {
-                    mm.put(getFreeDiskSpaceMeasure(), new File("/").getFreeSpace());
-                }
-                if (conf.getEnabled().getOrDefault("total", false)) {
-                    mm.put(getTotalDiskSpaceMeasure(), new File("/").getTotalSpace());
-                }
-                TagContext commonTagContext = commonTagsManager.getCommonTagContext();
-                mm.record(commonTagContext);
-            } catch (Exception e) {
-                log.error("Error polling disk metrics", e);
-            }
-        }, 0, conf.getFrequency().toMillis(), TimeUnit.MILLISECONDS);
-        //The initial delay is used to ensure that
-        return true;
+    protected Duration getFrequency(MetricsSettings config) {
+        return config.getDisk().getFrequency();
     }
 
     @Override
-    protected boolean doDisable() {
-        log.info("Disabling disk space recorder.");
-        pollingTask.cancel(true);
-        return true;
-    }
-
-    /**
-     * Lazily initalizes the free disk space measure and its view on first call.
-     *
-     * @return the measure for the free disk space
-     */
-    private Measure.MeasureLong getFreeDiskSpaceMeasure() {
-        if (freeDiskSpaceMeasure == null) {
-            freeDiskSpaceMeasure = Measure.MeasureLong.create("disk/free", "Free disk space", "bytes");
-            Stats.getViewManager().registerView(
-                    View.create(View.Name.create(freeDiskSpaceMeasure.getName()),
-                            freeDiskSpaceMeasure.getDescription(),
-                            freeDiskSpaceMeasure, Aggregation.LastValue.create(), commonTagsManager.getCommonTagKeys())
-            );
+    protected void takeMeasurement(MetricsSettings config, MeasureMap mm) {
+        val disk = config.getDisk();
+        if (disk.getEnabled().getOrDefault(FREE_METRIC_NAME, false)) {
+            Measure.MeasureLong free = getOrCreateMeasureLongWithView(METRIC_NAME_PREFIX + FREE_METRIC_NAME,
+                    FREE_METRIC_DESCRIPTION, METRIC_UNIT, Aggregation.LastValue::create);
+            mm.put(free, new File("/").getFreeSpace());
         }
-        return freeDiskSpaceMeasure;
-    }
-
-    /**
-     * Lazily initalizes the total disk space measure and its view on first call.
-     *
-     * @return the measure for the total disk space
-     */
-    private Measure.MeasureLong getTotalDiskSpaceMeasure() {
-        if (totalDiskSpaceMeasure == null) {
-            totalDiskSpaceMeasure = Measure.MeasureLong.create("disk/total", "Total disk space", "bytes");
-            Stats.getViewManager().registerView(
-                    View.create(View.Name.create(totalDiskSpaceMeasure.getName()),
-                            totalDiskSpaceMeasure.getDescription(),
-                            totalDiskSpaceMeasure, Aggregation.LastValue.create(), commonTagsManager.getCommonTagKeys())
-            );
+        if (disk.getEnabled().getOrDefault(TOTAL_METRIC_NAME, false)) {
+            Measure.MeasureLong free = getOrCreateMeasureLongWithView(METRIC_NAME_PREFIX + TOTAL_METRIC_NAME,
+                    TOTAL_METRIC_DESCRIPTION, METRIC_UNIT, Aggregation.LastValue::create);
+            mm.put(free, new File("/").getTotalSpace());
         }
-        return totalDiskSpaceMeasure;
     }
 }

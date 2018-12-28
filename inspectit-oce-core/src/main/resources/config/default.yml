@@ -65,6 +65,15 @@ inspectit:
         total: true
       # specifies the frequency with which the disk metrics should be polled and recorded
       frequency: ${inspectit.metrics.frequency}
+    # settings regarding the measurement of the loaded classes
+    classloader:
+      enabled:
+        # if true, the number of loaded classes will be captured
+        loaded: true
+        # if true, the number of unloaded classes will be captures
+        unloaded: true
+        # specifies the frequency with which the classloader metrics should be polled and recorded
+      frequency: ${inspectit.metrics.frequency}
 
   # logging settings
   logging:

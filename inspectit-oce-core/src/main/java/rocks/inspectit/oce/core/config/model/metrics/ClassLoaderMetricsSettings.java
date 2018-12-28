@@ -8,11 +8,11 @@ import java.time.Duration;
 import java.util.Map;
 
 /**
- * Settings for the @{@link rocks.inspectit.oce.core.metrics.DiskMetricsRecorder}.
+ * Settings for the @{@link rocks.inspectit.oce.core.metrics.ClassLoaderMetricsRecorder}.
  */
 @Data
 @NoArgsConstructor
-public class DiskMetricsSettings {
+public class ClassLoaderMetricsSettings {
 
     /**
      * Contains the enabling flag for each metric.
@@ -20,7 +20,7 @@ public class DiskMetricsSettings {
     private Map<String, Boolean> enabled;
 
     /**
-     * Specifies the frequency in milliseconds with which the classloader metrics should be polled and recorded.
+     * Specifies the frequency in milliseconds with which the disk metrics should be polled and recorded.
      */
     @NonNull
     private Duration frequency;

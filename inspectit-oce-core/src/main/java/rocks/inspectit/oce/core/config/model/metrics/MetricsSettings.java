@@ -17,5 +17,8 @@ public class MetricsSettings {
     boolean enabled;
 
     @Valid
-    DiskMetricsSettings disk;
+    private DiskMetricsSettings disk;
+
+    @Valid
+    private ClassLoaderMetricsSettings classloader;
 }
