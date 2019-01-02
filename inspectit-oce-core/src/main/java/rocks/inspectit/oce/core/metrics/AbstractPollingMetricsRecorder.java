@@ -32,14 +32,30 @@ public abstract class AbstractPollingMetricsRecorder extends AbstractMetricsReco
     }
 
     /**
-     * Called to take a measurement.
+     * Called to take a measurement by {@link #takeMeasurement(MetricsSettings, MeasureMap)}.
      * This method is invoked with the frequency returned by {@link #getFrequency(MetricsSettings)} when enabled.
      * The {@link MeasureMap#record()} method invocation is handled by {@link AbstractPollingMetricsRecorder}!
+     * This method is called within a common tag scope, meaning that tags to additional MeasureMaps are automatically added
      *
      * @param config      the current configuration
      * @param measurement the {@link MeasureMap} to store the measurements in
      */
-    protected abstract void takeMeasurement(MetricsSettings config, MeasureMap measurement);
+    protected void takeMeasurement(MetricsSettings config, MeasureMap measurement) {
+    }
+
+    /**
+     * Called to take a measurement.
+     * This method is invoked with the frequency returned by {@link #getFrequency(MetricsSettings)} when enabled.
+     * This method should be overwritten when custom tags are required for the MeasurementMap.
+     * The default implementation simply invokes {@link #takeMeasurement(MetricsSettings, MeasureMap)}.
+     *
+     * @param config the current configuration
+     */
+    protected void takeMeasurement(MetricsSettings config) {
+        val mm = recorder.newMeasureMap();
+        takeMeasurement(config, mm);
+        mm.record();
+    }
 
     /**
      * Extracts the polling frequency from the given metrics configuration.
@@ -55,9 +71,9 @@ public abstract class AbstractPollingMetricsRecorder extends AbstractMetricsReco
         val conf = configuration.getMetrics();
         pollingTask = executor.scheduleWithFixedDelay(() -> {
             try (val scope = selfMonitoringService.withSelfMonitoring(getClass().getSimpleName())) {
-                val mm = recorder.newMeasureMap();
-                takeMeasurement(conf, mm);
-                mm.record(commonTags.getCommonTagContext());
+                try (val tags = commonTags.withCommonTagScope()) {
+                    takeMeasurement(conf);
+                }
             } catch (Exception e) {
                 log.error("Error taking measurement", e);
             }

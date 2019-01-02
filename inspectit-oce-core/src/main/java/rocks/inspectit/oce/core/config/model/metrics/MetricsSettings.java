@@ -34,4 +34,22 @@ public class MetricsSettings {
      */
     @Valid
     private StandardPollingMetricsRecorderSettings processor;
+
+    /**
+     * Settings for {@link rocks.inspectit.oce.core.metrics.ThreadMetricsRecorder}
+     */
+    @Valid
+    private StandardPollingMetricsRecorderSettings threads;
+
+    /**
+     * Settings for {@link rocks.inspectit.oce.core.metrics.GCMetricsRecorder}
+     */
+    @Valid
+    private GCMetricsSettings gc;
+
+    /**
+     * Settings for {@link rocks.inspectit.oce.core.metrics.MemoryMetricsRecorder}
+     */
+    @Valid
+    private StandardPollingMetricsRecorderSettings memory;
 }
