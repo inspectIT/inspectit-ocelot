@@ -21,24 +21,24 @@ public class ProcessorMetricsRecorder extends AbstractPollingMetricsRecorder {
     private static final String CPU_COUNT_METRIC_NAME = "count";
     private static final String CPU_COUNT_METRIC_FULL_NAME = "system/cpu/count";
     private static final String CPU_COUNT_METRIC_DESCRIPTION = "The number of processors available to the JVM";
-    private static final String CPU_COUNT_METRIC_UNIT = "1";
+    private static final String CPU_COUNT_METRIC_UNIT = "cores";
 
     private static final String AVERAGE_LOAD_METRIC_NAME = "system.average";
     private static final String AVERAGE_LOAD_METRIC_FULL_NAME = "system/load/average/1m";
     private static final String AVERAGE_LOAD_METRIC_DESCRIPTION =
             "The sum of the number of runnable entities queued to available processors and the number" +
                     "of runnable entities running on the available processors averaged over a period of time";
-    private static final String AVERAGE_LOAD_METRIC_UNIT = "1";
+    private static final String AVERAGE_LOAD_METRIC_UNIT = "percentage";
 
     private static final String SYSTEM_USAGE_METRIC_NAME = "system.usage";
     private static final String SYSTEM_USAGE_METRIC_FULL_NAME = "system/cpu/usage";
     private static final String SYSTEM_USAGE_METRIC_DESCRIPTION = "The recent cpu usage for the whole system";
-    private static final String SYSTEM_USAGE_METRIC_UNIT = "1";
+    private static final String SYSTEM_USAGE_METRIC_UNIT = "percentage";
 
     private static final String PROCESS_USAGE_METRIC_NAME = "process.usage";
     private static final String PROCESS_USAGE_METRIC_FULL_NAME = "process/cpu/usage";
     private static final String PROCESS_USAGE_METRIC_DESCRIPTION = "The recent cpu usage for the JVM's process";
-    private static final String PROCESS_USAGE_METRIC_UNIT = "1";
+    private static final String PROCESS_USAGE_METRIC_UNIT = "percentage";
 
     private static final List<String> OPERATING_SYSTEM_BEAN_CLASS_NAMES = Arrays.asList(
             "com.sun.management.OperatingSystemMXBean", // HotSpot

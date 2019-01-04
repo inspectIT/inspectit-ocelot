@@ -21,7 +21,7 @@ public class ClassLoaderMetricsRecorder extends AbstractPollingMetricsRecorder {
     private static final String UNLOADED_METRIC_NAME = "unloaded";
     private static final String UNLOADED_METRIC_DESCRIPTION = "Total number of classes which have been unloaded since the start of the JVM";
 
-    private static final String METRIC_UNIT = "1";
+    private static final String METRIC_UNIT = "classes";
 
     private ClassLoadingMXBean classLoadingBean = ManagementFactory.getClassLoadingMXBean();
 

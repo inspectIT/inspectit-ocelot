@@ -34,6 +34,7 @@ public class ThreadMetricsRecorder extends AbstractPollingMetricsRecorder {
     private static final String STATE_METRIC_DESCRIPTION = "Number of live threads for each state";
 
     private static final String STATE_TAG_NAME = "state";
+    private static final String METRIC_THREAD_UNIT = "threads";
 
     private TagKey stateTag;
 
@@ -53,17 +54,17 @@ public class ThreadMetricsRecorder extends AbstractPollingMetricsRecorder {
         val enabled = config.getThreads().getEnabled();
         if (enabled.getOrDefault(PEAK_METRIC_NAME, false)) {
             val measure = getOrCreateMeasureLongWithView(METRIC_NAME_PREFIX + PEAK_METRIC_NAME,
-                    PEAK_METRIC_DESCRIPTION, "1", Aggregation.LastValue::create);
+                    PEAK_METRIC_DESCRIPTION, METRIC_THREAD_UNIT, Aggregation.LastValue::create);
             measurement.put(measure, threadBean.getPeakThreadCount());
         }
         if (enabled.getOrDefault(DAEMON_METRIC_NAME, false)) {
             val measure = getOrCreateMeasureLongWithView(METRIC_NAME_PREFIX + DAEMON_METRIC_NAME,
-                    DAEMON_METRIC_DESCRIPTION, "1", Aggregation.LastValue::create);
+                    DAEMON_METRIC_DESCRIPTION, METRIC_THREAD_UNIT, Aggregation.LastValue::create);
             measurement.put(measure, threadBean.getDaemonThreadCount());
         }
         if (enabled.getOrDefault(LIVE_METRIC_NAME, false)) {
             val measure = getOrCreateMeasureLongWithView(METRIC_NAME_PREFIX + LIVE_METRIC_NAME,
-                    LIVE_METRIC_DESCRIPTION, "1", Aggregation.LastValue::create);
+                    LIVE_METRIC_DESCRIPTION, METRIC_THREAD_UNIT, Aggregation.LastValue::create);
             measurement.put(measure, threadBean.getThreadCount());
         }
         if (enabled.getOrDefault(STATE_METRIC_NAME, false)) {
@@ -83,7 +84,7 @@ public class ThreadMetricsRecorder extends AbstractPollingMetricsRecorder {
 
     private void recordStateMetric() {
         val measure = getOrCreateMeasureLongWithView(METRIC_NAME_PREFIX + STATE_METRIC_NAME,
-                STATE_METRIC_DESCRIPTION, "1", Aggregation.LastValue::create, stateTag);
+                STATE_METRIC_DESCRIPTION, METRIC_THREAD_UNIT, Aggregation.LastValue::create, stateTag);
         for (val state : Thread.State.values()) {
             TagContextBuilder contextBuilder = tagger.currentBuilder().put(stateTag, TagValue.create(state.name()));
             try (val scope = contextBuilder.buildScoped()) {

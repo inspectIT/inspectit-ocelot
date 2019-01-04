@@ -39,7 +39,7 @@ public class MemoryMetricsRecorder extends AbstractPollingMetricsRecorder {
     private static final String BUFFER_COUNT_METRIC_NAME = "buffer.count";
     private static final String BUFFER_COUNT_METRIC_FULL_NAME = "jvm/buffer/count";
     private static final String BUFFER_COUNT_METRIC_DESCRIPTION = "An estimate of the number of buffers in the pool";
-    private static final String BUFFER_COUNT_UNIT = "1";
+    private static final String BUFFER_COUNT_UNIT = "buffers";
 
     private static final String BUFFER_USED_METRIC_NAME = "buffer.used";
     private static final String BUFFER_USED_METRIC_FULL_NAME = "jvm/buffer/memory/used";
