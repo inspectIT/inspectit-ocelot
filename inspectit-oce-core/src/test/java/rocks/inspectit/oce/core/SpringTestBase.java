@@ -92,8 +92,7 @@ public class SpringTestBase {
                     .filter(ps -> ps.getName() != StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME)
                     .collect(Collectors.toList());
 
-            InspectitEnvironment env = new TestInspectitEnvironment(ctx);
-            ctx.setEnvironment(env);
+            new TestInspectitEnvironment(ctx);
         }
     }
 

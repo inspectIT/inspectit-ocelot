@@ -10,6 +10,11 @@ Configuration properties are considered in inspectIT OCE in the following order:
 .. <<File-based Configuration,File-based configuration>>
 . <<All Configuration Options,inspectIT OCE defaults>>
 
+When an invalid configuration is given to inspectIT on startup, the agent will use a fallback configuration.
+In this fallback configuration, the agent is inactive with the exception of listening for configuration updates.
+
+When giving an invalid configuration through a runtime update to the agent, the agent will simply retain the previous configuration.
+
 The overview of all available inspectIT OCE configuration properties is given in the <<All Configuration Options>> section.
 
 ==== Java System Properties
