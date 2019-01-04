@@ -10,8 +10,10 @@ Disabling of metrics completly in the agent can be done by setting the `inspecti
 This way any default inspectIT setting or anything else defined for metrics collection will be overruled.
 If used, the switch makes sure that the inspectIT OCE agent:
 
+. disables all metrics recorders
 . does not set up any metrics exporter
-. disables all metrics collectors
 ====
+
+include::metrics-recorders.adoc[]
 
 include::metrics-exporters.adoc[]
