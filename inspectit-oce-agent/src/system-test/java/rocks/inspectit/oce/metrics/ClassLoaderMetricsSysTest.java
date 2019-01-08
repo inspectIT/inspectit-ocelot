@@ -12,8 +12,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class ClassLoaderMetricsSysTest extends MetricsSysTestBase {
 
-
-    //acquire the impl for clearing recorded stats for test purposes
     private static final ViewManager viewManager = Stats.getViewManager();
 
     @Test
