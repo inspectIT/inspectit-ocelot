@@ -3,7 +3,10 @@ package rocks.inspectit.oce.metrics;
 import io.opencensus.stats.*;
 import io.opencensus.tags.TagValue;
 import org.junit.jupiter.api.Test;
+import org.junit.platform.commons.logging.Logger;
+import org.junit.platform.commons.logging.LoggerFactory;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +14,8 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class GCMetricsSysTest extends MetricsSysTestBase {
+
+    private static final Logger log = LoggerFactory.getLogger(GCMetricsSysTest.class);
 
     private static final ViewManager viewManager = Stats.getViewManager();
 
@@ -24,8 +29,26 @@ public class GCMetricsSysTest extends MetricsSysTestBase {
         for (int i = 0; i < 1000000; i++) {
             new ArrayList<>();
         }
-        System.gc();
-        Thread.sleep(1000);
+
+        //try to force a GC
+        Object obj = new Object();
+        WeakReference<Object> objRef = new WeakReference<>(obj);
+        obj = null;
+        for (int i = 0; i < 20; i++) {
+            System.gc();
+            System.runFinalization();
+            if (objRef.get() != null) {
+                Thread.sleep(500);
+            } else {
+                break;
+            }
+        }
+        if (objRef.get() != null) {
+            log.warn(() -> "Could not force GC! Aborting test.");
+            return;
+        }
+        //we need to wait for the GC events to be fired and handled
+        Thread.sleep(500);
 
         ViewData pauseData = viewManager.getView(View.Name.create("jvm/gc/pause"));
 

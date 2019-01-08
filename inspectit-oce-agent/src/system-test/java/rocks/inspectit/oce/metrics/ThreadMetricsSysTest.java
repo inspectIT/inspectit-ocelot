@@ -38,7 +38,6 @@ public class ThreadMetricsSysTest extends MetricsSysTestBase {
                         .mapToLong(d -> d.getLastValue())
                         .sum();
 
-        assertThat(live).isGreaterThan(0);
         assertThat(live).isEqualTo(statesCount);
         assertThat(peak).isGreaterThanOrEqualTo(live);
         assertThat(daemon).isLessThan(live);

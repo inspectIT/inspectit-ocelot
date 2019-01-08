@@ -1,6 +1,5 @@
 package rocks.inspectit.oce.core.metrics;
 
-import io.opencensus.stats.MeasureMap;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,31 +30,14 @@ public abstract class AbstractPollingMetricsRecorder extends AbstractMetricsReco
         super(configDependency);
     }
 
-    /**
-     * Called to take a measurement by {@link #takeMeasurement(MetricsSettings, MeasureMap)}.
-     * This method is invoked with the frequency returned by {@link #getFrequency(MetricsSettings)} when enabled.
-     * The {@link MeasureMap#record()} method invocation is handled by {@link AbstractPollingMetricsRecorder}!
-     * This method is called within a common tag scope, meaning that tags to additional MeasureMaps are automatically added
-     *
-     * @param config      the current configuration
-     * @param measurement the {@link MeasureMap} to store the measurements in
-     */
-    protected void takeMeasurement(MetricsSettings config, MeasureMap measurement) {
-    }
 
     /**
-     * Called to take a measurement.
+     * Called to take a measurement. This method is invoked in a scope where the common tags are set.
      * This method is invoked with the frequency returned by {@link #getFrequency(MetricsSettings)} when enabled.
-     * This method should be overwritten when custom tags are required for the MeasurementMap.
-     * The default implementation simply invokes {@link #takeMeasurement(MetricsSettings, MeasureMap)}.
      *
      * @param config the current configuration
      */
-    protected void takeMeasurement(MetricsSettings config) {
-        val mm = recorder.newMeasureMap();
-        takeMeasurement(config, mm);
-        mm.record();
-    }
+    protected abstract void takeMeasurement(MetricsSettings config);
 
     /**
      * Extracts the polling frequency from the given metrics configuration.

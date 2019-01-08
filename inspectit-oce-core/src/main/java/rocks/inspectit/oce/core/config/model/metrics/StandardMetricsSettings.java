@@ -5,9 +5,12 @@ import lombok.NoArgsConstructor;
 
 import java.util.Map;
 
+/**
+ * Common settings for most metrics recorders.
+ */
 @Data
 @NoArgsConstructor
-public class GCMetricsSettings {
+public class StandardMetricsSettings {
 
     /**
      * Contains the enabling flag for each metric.

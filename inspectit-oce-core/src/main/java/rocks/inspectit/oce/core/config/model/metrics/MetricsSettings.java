@@ -45,7 +45,7 @@ public class MetricsSettings {
      * Settings for {@link rocks.inspectit.oce.core.metrics.GCMetricsRecorder}
      */
     @Valid
-    private GCMetricsSettings gc;
+    private StandardMetricsSettings gc;
 
     /**
      * Settings for {@link rocks.inspectit.oce.core.metrics.MemoryMetricsRecorder}

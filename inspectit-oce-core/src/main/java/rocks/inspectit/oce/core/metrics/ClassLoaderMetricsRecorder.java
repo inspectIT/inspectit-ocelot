@@ -1,7 +1,6 @@
 package rocks.inspectit.oce.core.metrics;
 
 import io.opencensus.stats.Aggregation;
-import io.opencensus.stats.MeasureMap;
 import lombok.val;
 import org.springframework.stereotype.Service;
 import rocks.inspectit.oce.core.config.model.metrics.MetricsSettings;
@@ -30,7 +29,8 @@ public class ClassLoaderMetricsRecorder extends AbstractPollingMetricsRecorder {
     }
 
     @Override
-    protected void takeMeasurement(MetricsSettings config, MeasureMap mm) {
+    protected void takeMeasurement(MetricsSettings config) {
+        val mm = recorder.newMeasureMap();
         val cl = config.getClassloader();
         if (cl.getEnabled().getOrDefault(LOADED_METRIC_NAME, false)) {
             val measure = getOrCreateMeasureLongWithView(METRIC_NAME_PREFIX + LOADED_METRIC_NAME,
@@ -42,6 +42,7 @@ public class ClassLoaderMetricsRecorder extends AbstractPollingMetricsRecorder {
                     UNLOADED_METRIC_DESCRIPTION, METRIC_UNIT, Aggregation.LastValue::create);
             mm.put(measure, classLoadingBean.getUnloadedClassCount());
         }
+        mm.record();
     }
 
     @Override

@@ -55,7 +55,7 @@ public class MemoryMetricsRecorder extends AbstractPollingMetricsRecorder {
     private TagKey areaTagKey = TagKey.create("area");
 
     @Autowired
-    Tagger tagger;
+    private Tagger tagger;
 
     public MemoryMetricsRecorder() {
         super("metrics.memory");

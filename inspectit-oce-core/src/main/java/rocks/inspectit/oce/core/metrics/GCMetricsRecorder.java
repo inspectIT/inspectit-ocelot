@@ -12,8 +12,8 @@ import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import rocks.inspectit.oce.core.config.model.InspectitConfig;
-import rocks.inspectit.oce.core.config.model.metrics.GCMetricsSettings;
 import rocks.inspectit.oce.core.config.model.metrics.MetricsSettings;
+import rocks.inspectit.oce.core.config.model.metrics.StandardMetricsSettings;
 import rocks.inspectit.oce.core.selfmonitoring.SelfMonitoringService;
 
 import javax.management.ListenerNotFoundException;
@@ -27,7 +27,6 @@ import java.lang.management.MemoryPoolMXBean;
 import java.lang.management.MemoryUsage;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 @Slf4j
@@ -68,17 +67,17 @@ public class GCMetricsRecorder extends AbstractMetricsRecorder {
     private static final boolean MANAGEMENT_EXTENSIONS_PRESENT = isManagementExtensionsPresent();
 
     private final NotificationListener notificationListener = this::handleNotification;
-    private GCMetricsSettings config;
+    private StandardMetricsSettings config;
 
     private final TagKey actionTagKey = TagKey.create("action");
     private final TagKey causeTagKey = TagKey.create("cause");
 
     private String youngGenPoolName;
     private String oldGenPoolName;
-    final AtomicLong youngGenSizeAfter = new AtomicLong(0L);
+    private long youngGenSizeAfter = 0L;
 
     @Autowired
-    Tagger tagger;
+    private Tagger tagger;
 
     @Autowired
     protected SelfMonitoringService selfMonitoringService;
@@ -132,7 +131,6 @@ public class GCMetricsRecorder extends AbstractMetricsRecorder {
                 oldGenPoolName = mbean.getName();
             }
         }
-        youngGenSizeAfter.set(0L);
     }
 
     private void handleNotification(Notification notification, Object handback) {
@@ -204,8 +202,8 @@ public class GCMetricsRecorder extends AbstractMetricsRecorder {
         if (youngGenPoolName != null) {
             long youngBefore = before.get(youngGenPoolName).getUsed();
             long youngAfter = after.get(youngGenPoolName).getUsed();
-            long delta = youngBefore - youngGenSizeAfter.get();
-            youngGenSizeAfter.set(youngAfter);
+            long delta = youngBefore - youngGenSizeAfter;
+            youngGenSizeAfter = youngAfter;
             if (delta > 0L) {
                 if (config.getEnabled().getOrDefault(MEMORY_ALLOCATED_METRIC_NAME, false)) {
                     recordAllocatedBytes(delta);

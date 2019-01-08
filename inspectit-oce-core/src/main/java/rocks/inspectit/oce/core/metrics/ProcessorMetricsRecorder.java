@@ -1,7 +1,6 @@
 package rocks.inspectit.oce.core.metrics;
 
 import io.opencensus.stats.Aggregation;
-import io.opencensus.stats.MeasureMap;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.stereotype.Service;
@@ -77,7 +76,8 @@ public class ProcessorMetricsRecorder extends AbstractPollingMetricsRecorder {
     }
 
     @Override
-    protected void takeMeasurement(MetricsSettings config, MeasureMap mm) {
+    protected void takeMeasurement(MetricsSettings config) {
+        val mm = recorder.newMeasureMap();
         Map<String, Boolean> enabled = config.getProcessor().getEnabled();
         if (enabled.getOrDefault(CPU_COUNT_METRIC_NAME, false)) {
             val measure = getOrCreateMeasureLongWithView(CPU_COUNT_METRIC_FULL_NAME, CPU_COUNT_METRIC_DESCRIPTION,
@@ -107,7 +107,7 @@ public class ProcessorMetricsRecorder extends AbstractPollingMetricsRecorder {
                 log.error("Error reading system cpu usage", e);
             }
         }
-
+        mm.record();
     }
 
     @Override

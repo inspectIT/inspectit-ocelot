@@ -1,7 +1,6 @@
 package rocks.inspectit.oce.core.metrics;
 
 import io.opencensus.stats.Aggregation;
-import io.opencensus.stats.MeasureMap;
 import io.opencensus.tags.TagContextBuilder;
 import io.opencensus.tags.TagKey;
 import io.opencensus.tags.TagValue;
@@ -41,7 +40,7 @@ public class ThreadMetricsRecorder extends AbstractPollingMetricsRecorder {
     private ThreadMXBean threadBean;
 
     @Autowired
-    Tagger tagger;
+    private Tagger tagger;
 
     public ThreadMetricsRecorder() {
         super("metrics.threads");
@@ -50,7 +49,8 @@ public class ThreadMetricsRecorder extends AbstractPollingMetricsRecorder {
     }
 
     @Override
-    protected void takeMeasurement(MetricsSettings config, MeasureMap measurement) {
+    protected void takeMeasurement(MetricsSettings config) {
+        val measurement = recorder.newMeasureMap();
         val enabled = config.getThreads().getEnabled();
         if (enabled.getOrDefault(PEAK_METRIC_NAME, false)) {
             val measure = getOrCreateMeasureLongWithView(METRIC_NAME_PREFIX + PEAK_METRIC_NAME,
@@ -70,6 +70,7 @@ public class ThreadMetricsRecorder extends AbstractPollingMetricsRecorder {
         if (enabled.getOrDefault(STATE_METRIC_NAME, false)) {
             recordStateMetric();
         }
+        measurement.record();
     }
 
     @Override
