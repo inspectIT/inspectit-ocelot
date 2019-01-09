@@ -1,6 +1,6 @@
 === Metrics Exporters
 
-Metrics exporters are responsible for passing the collected metrics to a metric storage.
+Metrics exporters are responsible for passing the recorded metrics to a metric storage.
 They can implement a push approach where metrics are sent to a collector or a pull approach where metrics are scraped by an external system.
 
 If an exporter supports run-time updates it means that it can be enabled/disabled during the run-time or that any property related to the exporter can be changed.
