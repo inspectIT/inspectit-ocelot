@@ -1,0 +1,8 @@
+#------------------------
+# This file contains fallback configuration overwrites in case the agent is started with an invalid configuration
+# In this case, the agent tries to preserve the inspecit.config settings and to attach them to the fallback configuration
+# to make sure that runtime configuration updated are possible without a restart
+#------------------------
+inspectit:
+  metrics:
+    enabled: false
