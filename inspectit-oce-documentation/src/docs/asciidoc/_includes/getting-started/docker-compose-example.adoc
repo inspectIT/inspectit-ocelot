@@ -119,3 +119,24 @@ https://grafana.com/dashboards/9598[Prometheus Version]
 a| image::demo-dashboard-jvm.png[link=images/demo-dashboard-jvm.png]
 
 |===
+
+==== Changing Agent Configurations
+
+In all demo scenarios the inspectIT OCE agents already have their service names and used ports set up.
+However, if you want to customize any other configuration option you can provide custom configuration files.
+
+The demo starts the following services, of which each is instrumented with an inspectIT OCE Agent:
+
+- *config-server*
+- *discovery-server*
+- *customers-service*
+- *visits-service*
+- *vets-service*
+- *api-gateway*
+
+For each service you can put your own agent configuration files in the
+correspondingly named subfolders in ```inspectit-oce-demo/agentconfig/```.
+For example, if you want to change the configuration of the inspectIT OCE
+agent attached to the *vets-service*, you can put a YAML-file into ```inspectit-oce-demo/agentconfig/vets-service```.
+
+Note that it is not required to restart the demo! The agents listen for updates of the corresponding directories and reconfigure themselves when required.
