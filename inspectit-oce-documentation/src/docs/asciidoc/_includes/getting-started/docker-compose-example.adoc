@@ -8,7 +8,7 @@ To demonstrate the flexibility of the OpenCensus bases inspectIT agent, we provi
 
 .Demo Scenarios
 |===
-|docker-compose file | Landscape | Description
+|Docker-compose file | Landscape | Description
 
 | docker-compose-influxdb.yml
 a| image::demo-landscape-influxdb.png[link=https://openapm.io/landscape?agent=inspectit-oce-agent&instrumentation-lib=opencensus&collector=influx-telegraf&storage=influx-db&dashboarding=grafana]
