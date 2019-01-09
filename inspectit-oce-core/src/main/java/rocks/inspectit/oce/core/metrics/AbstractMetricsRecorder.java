@@ -1,6 +1,7 @@
 package rocks.inspectit.oce.core.metrics;
 
 import io.opencensus.stats.*;
+import io.opencensus.tags.TagKey;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import rocks.inspectit.oce.core.config.model.InspectitConfig;
@@ -8,8 +9,7 @@ import rocks.inspectit.oce.core.config.model.metrics.MetricsSettings;
 import rocks.inspectit.oce.core.service.DynamicallyActivatableService;
 import rocks.inspectit.oce.core.tags.CommonTagsManager;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Supplier;
 
 /**
@@ -70,11 +70,13 @@ public abstract class AbstractMetricsRecorder extends DynamicallyActivatableServ
      * @param aggregation the aggregation of the view
      * @return
      */
-    protected Measure.MeasureLong getOrCreateMeasureLongWithView(String name, String description, String unit, Supplier<Aggregation> aggregation) {
+    protected Measure.MeasureLong getOrCreateMeasureLongWithView(String name, String description, String unit, Supplier<Aggregation> aggregation, TagKey... additionalTags) {
         return createdMeasureLongs.computeIfAbsent(name, (n) -> {
             val measure = Measure.MeasureLong.create(name, description, unit);
+            List<TagKey> allTags = new ArrayList<>(commonTags.getCommonTagKeys());
+            allTags.addAll(Arrays.asList(additionalTags));
             val view = View.create(View.Name.create(measure.getName()), measure.getDescription() + " [" + measure.getUnit() + "]",
-                    measure, aggregation.get(), commonTags.getCommonTagKeys());
+                    measure, aggregation.get(), allTags);
             viewManager.registerView(view);
             return measure;
         });
@@ -89,11 +91,13 @@ public abstract class AbstractMetricsRecorder extends DynamicallyActivatableServ
      * @param aggregation the aggregation of the view
      * @return
      */
-    protected Measure.MeasureDouble getOrCreateMeasureDoubleWithView(String name, String description, String unit, Supplier<Aggregation> aggregation) {
+    protected Measure.MeasureDouble getOrCreateMeasureDoubleWithView(String name, String description, String unit, Supplier<Aggregation> aggregation, TagKey... additionalTags) {
         return createdMeasureDoubles.computeIfAbsent(name, (n) -> {
             val measure = Measure.MeasureDouble.create(name, description, unit);
+            List<TagKey> allTags = new ArrayList<>(commonTags.getCommonTagKeys());
+            allTags.addAll(Arrays.asList(additionalTags));
             val view = View.create(View.Name.create(measure.getName()), measure.getDescription() + " [" + measure.getUnit() + "]",
-                    measure, aggregation.get(), commonTags.getCommonTagKeys());
+                    measure, aggregation.get(), allTags);
             viewManager.registerView(view);
             return measure;
         });

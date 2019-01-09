@@ -1,6 +1,5 @@
 package rocks.inspectit.oce.core.metrics;
 
-import io.opencensus.stats.MeasureMap;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,15 +30,14 @@ public abstract class AbstractPollingMetricsRecorder extends AbstractMetricsReco
         super(configDependency);
     }
 
+
     /**
-     * Called to take a measurement.
+     * Called to take a measurement. This method is invoked in a scope where the common tags are set.
      * This method is invoked with the frequency returned by {@link #getFrequency(MetricsSettings)} when enabled.
-     * The {@link MeasureMap#record()} method invocation is handled by {@link AbstractPollingMetricsRecorder}!
      *
-     * @param config      the current configuration
-     * @param measurement the {@link MeasureMap} to store the measurements in
+     * @param config the current configuration
      */
-    protected abstract void takeMeasurement(MetricsSettings config, MeasureMap measurement);
+    protected abstract void takeMeasurement(MetricsSettings config);
 
     /**
      * Extracts the polling frequency from the given metrics configuration.
@@ -55,9 +53,9 @@ public abstract class AbstractPollingMetricsRecorder extends AbstractMetricsReco
         val conf = configuration.getMetrics();
         pollingTask = executor.scheduleWithFixedDelay(() -> {
             try (val scope = selfMonitoringService.withSelfMonitoring(getClass().getSimpleName())) {
-                val mm = recorder.newMeasureMap();
-                takeMeasurement(conf, mm);
-                mm.record(commonTags.getCommonTagContext());
+                try (val tags = commonTags.withCommonTagScope()) {
+                    takeMeasurement(conf);
+                }
             } catch (Exception e) {
                 log.error("Error taking measurement", e);
             }

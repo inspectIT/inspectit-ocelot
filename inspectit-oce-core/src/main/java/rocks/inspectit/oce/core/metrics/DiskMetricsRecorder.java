@@ -2,7 +2,6 @@ package rocks.inspectit.oce.core.metrics;
 
 import io.opencensus.stats.Aggregation;
 import io.opencensus.stats.Measure;
-import io.opencensus.stats.MeasureMap;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.stereotype.Service;
@@ -40,7 +39,8 @@ public class DiskMetricsRecorder extends AbstractPollingMetricsRecorder {
     }
 
     @Override
-    protected void takeMeasurement(MetricsSettings config, MeasureMap mm) {
+    protected void takeMeasurement(MetricsSettings config) {
+        val mm = recorder.newMeasureMap();
         val disk = config.getDisk();
         if (disk.getEnabled().getOrDefault(FREE_METRIC_NAME, false)) {
             Measure.MeasureLong free = getOrCreateMeasureLongWithView(METRIC_NAME_PREFIX + FREE_METRIC_NAME,
@@ -52,5 +52,6 @@ public class DiskMetricsRecorder extends AbstractPollingMetricsRecorder {
                     TOTAL_METRIC_DESCRIPTION, METRIC_UNIT, Aggregation.LastValue::create);
             mm.put(free, new File("/").getTotalSpace());
         }
+        mm.record();
     }
 }
