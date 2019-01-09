@@ -1,19 +1,19 @@
-=== Available Metrics
+=== Metrics Recorders
 
 Metrics recorders are responsible for capturing system metrics, such as processor or memory usage. All metrics recorders provided by inspectIT OCE publish the recorded data through the OpenCensus API.
-Therefore all recorded metrics can be exported via any of the provided metrics exporters.
+Therefore all recorded metrics can be exported via any of the  exported via any of the <<Metrics Exporters,supported metrics exporters>>.
 Currently the inspectIT OCE agent is capable of recording the following metrics:
 
-* <<Processor Metrics,Processor>> (usage and processor count)
+* <<Processor Metrics,CPU>> (usage and number of cores)
 * <<Disk Space Metrics,Disk Space>> (used and total)
 * <<Memory Metrics,Memory>> (used and availalbe for various regions)
 * <<Thread Metrics,Threads>> (counts and states)
-* <<Garbage Collection Metrics,Garbage Collection>> (Pause times and collected amounts)
+* <<Garbage Collection Metrics,Garbage Collection>> (Pause times and collection statistics)
 * <<Class Loading Metrics,Class Loading>> (loaded and unloaded counts)
 
 [TIP]
 ====
-The metrics and their capturing logic are based on the open-source https://micrometer.io/[micrometer] project.
+The metrics above and their capturing logic are based on the open-source https://micrometer.io/[micrometer] project.
 ====
 
 In the following sections we provide detailed information on the collected metrics and how they can be configured.
@@ -40,14 +40,14 @@ inspectit:
 ----
 ====
 
-==== Processor Metrics
+==== CPU Metrics
 
 Processor metrics are recorded by the ```inspectit.metrics.processor``` recorder.
 This recorder polls the captured data from the system with a frequency specified by ```inspectit.metrics.processor.frequency``` which defaults to ```inspectit.metrics.frequency```.
 The available metrics are explained in the table below.
 
 [cols="3,8,2,5%",options="header"]
-.Processor metrics
+.CPU metrics
 |===
 |Metric
 |Description
@@ -67,12 +67,12 @@ The available metrics are explained in the table below.
 |```system/load/average/1m```
 
 |```system.usage```
-|The recent cpu usage for the whole system
+|The recent CPU usage for the whole system
 |percentage
 |```system/cpu/usage```
 
 |```process.usage```
-|The recent cpu usage for the JVM's process
+|The recent CPU usage for the JVM's process
 |percentage
 |```process/cpu/usage```
 |===
@@ -141,7 +141,7 @@ The first set of available metrics are general JVM memory metrics:
 For all these metrics inspectIT adds two tags in addition to the <<Common Tags,common tags>>: Firstly ```area``` which either is ```heap``` or ```nonheap```.
 Secondly an ```id``` tag is added specifying the exact memory region, for example ```PS Old Gen``` depending on the used garbage collector.
 
-Most JVMs also provide metrics regarding the usage of https://docs.oracle.com/javase/8/docs/api/java/nio/ByteBuffer.html[buffer] pools, which are reflected in the following metrics provided by inspectIT:
+Most JVMs also provide metrics regarding the usage of https://docs.oracle.com/javase/8/docs/api/java/nio/ByteBuffer.html[buffer] pools, which are reflected in the following metrics provided by inspectIT OCE:
 
 [cols="3,8,2,5%",options="header"]
 .JVM buffer pool metrics
@@ -206,9 +206,8 @@ The available thread metrics are explained in the table below.
 
 |===
 
-For the ```states``` metric an additional ```state``` tag is added specifying the state for which the metric measured the number of live threads.
-The available states correspond to the Java https://docs.oracle.com/javase/7/docs/api/java/lang/Thread.State.html[Thread.State enum].
-
+The ```states``` metric provides the amount of threads grouped by their state.
+For this purpose, an additional tag ```state``` is added whose values correspond to the Java https://docs.oracle.com/javase/7/docs/api/java/lang/Thread.State.html[Thread.State enum].
 
 ==== Garbage Collection Metrics
 
@@ -232,12 +231,12 @@ The recorder offers the following timing related metrics:
 |OpenCensus Metric Name
 
 |```pause```
-|The total time spent for Garbage Collection Pauses.
+|The total time spent for Garbage Collection Pauses
 |milliseconds
 |```jvm/gc/pause```
 
 |```concurrent.phase.time```
-|The total time spent in concurrent phases of the Garbage Collector.
+|The total time spent in concurrent phases of the Garbage Collector
 |milliseconds
 |```jvm/gc/concurrent/phase/time```
 
@@ -245,7 +244,7 @@ The recorder offers the following timing related metrics:
 
 Whether ```pause``` or ```concurrent.phase.time``` are captured depends on the concurrency of the garbage collector with which the JVM was started.
 For both metrics an ```action``` and a ```cause``` tag is added. The ```action``` specifies what was was done, e.g. a minor or a major collection.
-The ```cause``` gives information on what circumstance triggered the collection.
+The ```cause``` tag provides information on the circumstances which triggered the collection.
 
 The following additional garbage collection metrics are also available:
 
@@ -281,12 +280,12 @@ The following additional garbage collection metrics are also available:
 
 ==== Class Loading Metrics
 
-Class Loading metrics are recorded by the ```inspectit.metrics.classloader``` recorder.
+Class loading metrics are recorded by the ```inspectit.metrics.classloader``` recorder.
 This recorder polls the captured data from the system with a frequency specified by ```inspectit.metrics.classloader.frequency``` which defaults to ```inspectit.metrics.frequency```.
 The available metrics are explained in the table below.
 
 [cols="3,8,2,5%",options="header"]
-.Class Loader metrics
+.Class loader metrics
 |===
 |Metric
 |Description
