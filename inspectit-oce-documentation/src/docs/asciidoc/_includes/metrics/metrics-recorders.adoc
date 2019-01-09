@@ -6,7 +6,7 @@ Currently the inspectIT OCE agent is capable of recording the following metrics:
 
 * <<Processor Metrics,CPU>> (usage and number of cores)
 * <<Disk Space Metrics,Disk Space>> (used and total)
-* <<Memory Metrics,Memory>> (used and availalbe for various regions)
+* <<Memory Metrics,Memory>> (used and available for various regions)
 * <<Thread Metrics,Threads>> (counts and states)
 * <<Garbage Collection Metrics,Garbage Collection>> (Pause times and collection statistics)
 * <<Class Loading Metrics,Class Loading>> (loaded and unloaded counts)
@@ -138,7 +138,7 @@ The first set of available metrics are general JVM memory metrics:
 |```jvm/memory/max```
 |===
 
-For all these metrics inspectIT adds two tags in addition to the <<Common Tags,common tags>>: Firstly ```area``` which either is ```heap``` or ```nonheap```.
+For all these metrics inspectIT adds two tags in addition to the <<Common Tags,common tags>>: Firstly ```area``` which either is ```heap``` or ```non-heap```.
 Secondly an ```id``` tag is added specifying the exact memory region, for example ```PS Old Gen``` depending on the used garbage collector.
 
 Most JVMs also provide metrics regarding the usage of https://docs.oracle.com/javase/8/docs/api/java/nio/ByteBuffer.html[buffer] pools, which are reflected in the following metrics provided by inspectIT OCE:
