@@ -4,8 +4,6 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.slf4j.LoggerFactory;
@@ -42,8 +40,6 @@ public class SpringTestBase {
     @Autowired
     private TestContextInitializer.TestInspectitEnvironment env;
 
-    private Appender<ILoggingEvent> mockAppender;
-
     /**
      * Allows to customize properties while the Context is open.
      * This method is based on {@link InspectitEnvironment#updatePropertySources(Consumer)},
@@ -55,6 +51,7 @@ public class SpringTestBase {
      */
     public void updateProperties(Consumer<MockPropertySource> propsCustomizer) {
         env.updatePropertySources((propsList) -> propsCustomizer.accept(env.mockProperties));
+        env.addMockAppender();
     }
 
     static class TestContextInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
@@ -69,9 +66,13 @@ public class SpringTestBase {
 
             MockPropertySource mockProperties;
 
+            Appender<ILoggingEvent> mockAppender = Mockito.mock(Appender.class);
+
 
             public TestInspectitEnvironment(ConfigurableApplicationContext ctx) {
                 super(ctx);
+                when(mockAppender.getName()).thenReturn("MOCK");
+                addMockAppender();
             }
 
             @Override
@@ -80,6 +81,13 @@ public class SpringTestBase {
                 propsList.addFirst(mockProperties);
                 testPropertySources.forEach(propsList::addLast);
                 super.customizePropertySources(propsList);
+            }
+
+            void addMockAppender() {
+                Logger root = (Logger) LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
+                if (root.getAppender("MOCK") == null) {
+                    root.addAppender(mockAppender);
+                }
             }
         }
 
@@ -96,28 +104,23 @@ public class SpringTestBase {
         }
     }
 
-    @BeforeEach
-    void addMockAppender() {
-        mockAppender = Mockito.mock(Appender.class);
-        Logger root = (Logger) LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
-        when(mockAppender.getName()).thenReturn("MOCK");
-        root.addAppender(mockAppender);
-        reset(mockAppender);
-    }
-
-    @AfterEach
-    void removeMockAppender() {
-        Logger root = (Logger) LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
-        root.detachAppender(mockAppender);
-    }
-
     /**
      * Asserts that no log output greater or equal to the given level are produced by the given test.
      *
      * @param level the level to compare against.
      */
     public void assertNoLogsOfLevelOrGreater(Level level) {
-        verify(mockAppender, times(0)).doAppend(argThat(
+        verify(env.mockAppender, times(0)).doAppend(argThat(
+                (le) -> le.getLevel().isGreaterOrEqual(level)));
+    }
+
+    /**
+     * Asserts that log output greater or equal to the given level is produced by the given test.
+     *
+     * @param level the level to compare against.
+     */
+    public void assertLogsOfLevelOrGreater(Level level) {
+        verify(env.mockAppender, atLeastOnce()).doAppend(argThat(
                 (le) -> le.getLevel().isGreaterOrEqual(level)));
     }
 
