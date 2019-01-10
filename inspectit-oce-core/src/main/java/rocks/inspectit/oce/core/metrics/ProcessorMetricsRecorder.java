@@ -93,7 +93,10 @@ public class ProcessorMetricsRecorder extends AbstractPollingMetricsRecorder {
             val measure = getOrCreateMeasureDoubleWithView(SYSTEM_USAGE_METRIC_FULL_NAME, SYSTEM_USAGE_METRIC_DESCRIPTION,
                     SYSTEM_USAGE_METRIC_UNIT, Aggregation.LastValue::create);
             try {
-                mm.put(measure, (Double) systemCpuUsage.get().invoke(operatingSystemBean));
+                double value = (double) systemCpuUsage.get().invoke(operatingSystemBean);
+                if (value >= 0D) {
+                    mm.put(measure, value);
+                }
             } catch (Exception e) {
                 log.error("Error reading system cpu usage", e);
             }
@@ -102,7 +105,10 @@ public class ProcessorMetricsRecorder extends AbstractPollingMetricsRecorder {
             val measure = getOrCreateMeasureDoubleWithView(PROCESS_USAGE_METRIC_FULL_NAME, PROCESS_USAGE_METRIC_DESCRIPTION,
                     PROCESS_USAGE_METRIC_UNIT, Aggregation.LastValue::create);
             try {
-                mm.put(measure, (Double) processCpuUsage.get().invoke(operatingSystemBean));
+                double value = (double) processCpuUsage.get().invoke(operatingSystemBean);
+                if (value >= 0D) {
+                    mm.put(measure, value);
+                }
             } catch (Exception e) {
                 log.error("Error reading system cpu usage", e);
             }

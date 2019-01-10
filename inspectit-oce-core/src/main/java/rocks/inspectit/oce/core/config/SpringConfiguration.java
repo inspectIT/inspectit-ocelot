@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class SpringConfiguration {
 
     @Bean
-    public ScheduledExecutorService getScheduledExecutorService(@Value("${inspectit.thread-pool-size}") int poolSize) {
+    public ScheduledExecutorService getScheduledExecutorService(@Value("#{#inspectit.threadPoolSize}") int poolSize) {
         AtomicInteger threadCount = new AtomicInteger();
         return Executors.newScheduledThreadPool(poolSize, (runnable) -> {
             Thread t = Executors.defaultThreadFactory().newThread(runnable);

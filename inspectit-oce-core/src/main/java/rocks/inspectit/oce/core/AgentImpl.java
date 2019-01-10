@@ -38,7 +38,6 @@ public class AgentImpl implements IAgent {
         ctx = new AnnotationConfigApplicationContext();
         ctx.setClassLoader(classloader);
         InspectitEnvironment environment = new InspectitEnvironment(ctx);
-        ctx.setEnvironment(environment);
 
         // once we have the environment, init the logging
         LogbackInitializer.initLogging(environment.getCurrentConfig());
