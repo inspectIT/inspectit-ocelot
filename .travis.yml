@@ -94,4 +94,4 @@ jobs:
 stages:
   - test
   - name: deploy
-    if: repo = "inspectit/inspectit-oce"
+    if: repo = inspectIT/inspectit-oce
