@@ -26,7 +26,6 @@ public class GCMetricsSysTest extends MetricsSysTestBase {
      */
     @Test
     public void testGCPauseCapturing() throws Exception {
-
         //we try triggering a (non-concurrent) GC with stuff to do
         for (int i = 0; i < 1000000; i++) {
             blackhole = new ArrayList<>();
@@ -36,24 +35,19 @@ public class GCMetricsSysTest extends MetricsSysTestBase {
         Object obj = new Object();
         WeakReference<Object> objRef = new WeakReference<>(obj);
         obj = null;
-        for (int i = 0; i < 20; i++) {
+
+        while (objRef.get() != null) {
             System.gc();
             System.runFinalization();
-            if (objRef.get() != null) {
-                // even more trash
-                for (int x = 0; x < 1000000; x++) {
-                    blackhole = new ArrayList<>();
-                }
 
-                Thread.sleep(500);
-            } else {
-                break;
+            // even more trash
+            for (int x = 0; x < 1000000; x++) {
+                blackhole = new ArrayList<>();
             }
+
+            Thread.sleep(10);
         }
-        if (objRef.get() != null) {
-            log.warn(() -> "Could not force GC! Aborting test.");
-            return;
-        }
+
         //we need to wait for the GC events to be fired and handled
         Thread.sleep(500);
 
