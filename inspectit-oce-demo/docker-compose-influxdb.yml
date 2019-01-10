@@ -3,7 +3,6 @@ services:
   config-server:
     image: openapm/spring-petclinic-config-server:inspectit-oce-demo
     container_name: config-server
-    hostname: ${DEMO_HOST_NAME}
     environment:
      - INSPECTIT_SERVICE_NAME=config-server
      - INSPECTIT_CONFIG_FILE_BASED_PATH=/agentconfig
@@ -23,7 +22,6 @@ services:
   discovery-server:
     image: openapm/spring-petclinic-discovery-server:inspectit-oce-demo
     container_name: discovery-server
-    hostname: ${DEMO_HOST_NAME}
     environment:
      - INSPECTIT_SERVICE_NAME=discovery-server
      - INSPECTIT_CONFIG_FILE_BASED_PATH=/agentconfig
@@ -46,7 +44,6 @@ services:
   customers-service:
     image: openapm/spring-petclinic-customers-service:inspectit-oce-demo
     container_name: customers-service
-    hostname: ${DEMO_HOST_NAME}
     environment:
      - INSPECTIT_SERVICE_NAME=customers-service
      - INSPECTIT_CONFIG_FILE_BASED_PATH=/agentconfig
@@ -70,7 +67,6 @@ services:
   visits-service:
     image: openapm/spring-petclinic-visits-service:inspectit-oce-demo
     container_name: visits-service
-    hostname: ${DEMO_HOST_NAME}
     environment:
      - INSPECTIT_SERVICE_NAME=visits-service
      - INSPECTIT_CONFIG_FILE_BASED_PATH=/agentconfig
@@ -94,7 +90,6 @@ services:
   vets-service:
     image: openapm/spring-petclinic-vets-service:inspectit-oce-demo
     container_name: vets-service
-    hostname: ${DEMO_HOST_NAME}
     environment:
      - INSPECTIT_SERVICE_NAME=vets-service
      - INSPECTIT_CONFIG_FILE_BASED_PATH=/agentconfig
@@ -118,7 +113,6 @@ services:
   api-gateway:
     image: openapm/spring-petclinic-api-gateway:inspectit-oce-demo
     container_name: api-gateway
-    hostname: ${DEMO_HOST_NAME}
     environment:
      - INSPECTIT_SERVICE_NAME=api-gateway
      - INSPECTIT_CONFIG_FILE_BASED_PATH=/agentconfig
