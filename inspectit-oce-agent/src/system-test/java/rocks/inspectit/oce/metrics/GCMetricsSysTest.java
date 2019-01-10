@@ -1,15 +1,19 @@
 package rocks.inspectit.oce.metrics;
 
+import com.sun.management.GarbageCollectionNotificationInfo;
 import io.opencensus.stats.*;
 import io.opencensus.tags.TagValue;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.logging.Logger;
 import org.junit.platform.commons.logging.LoggerFactory;
 
-import java.lang.ref.WeakReference;
+import javax.management.NotificationEmitter;
+import java.lang.management.GarbageCollectorMXBean;
+import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -31,12 +35,18 @@ public class GCMetricsSysTest extends MetricsSysTestBase {
             blackhole = new ArrayList<>();
         }
 
-        //try to force a GC
-        Object obj = new Object();
-        WeakReference<Object> objRef = new WeakReference<>(obj);
-        obj = null;
-
-        while (objRef.get() != null) {
+        AtomicBoolean gcOccurred = new AtomicBoolean(false);
+        for (GarbageCollectorMXBean mbean : ManagementFactory.getGarbageCollectorMXBeans()) {
+            if (mbean instanceof NotificationEmitter) {
+                ((NotificationEmitter) mbean).addNotificationListener((not, hb) -> {
+                    if (not.getType().equals(GarbageCollectionNotificationInfo.GARBAGE_COLLECTION_NOTIFICATION)) {
+                        gcOccurred.set(true);
+                    }
+                }, null, null);
+            }
+        }
+        int tries = 0;
+        while (!gcOccurred.get() && tries < 10000) {
             System.gc();
             System.runFinalization();
 
@@ -46,10 +56,17 @@ public class GCMetricsSysTest extends MetricsSysTestBase {
             }
 
             Thread.sleep(10);
+            tries++;
+        }
+
+        if (!gcOccurred.get()) {
+            log.warn(() -> "Unable to trigger a GC in time! Aborting test");
+            return;
         }
 
         //we need to wait for the GC events to be fired and handled
         Thread.sleep(500);
+        flushMetrics();
 
         ViewData pauseData = viewManager.getView(View.Name.create("jvm/gc/pause"));
 
