@@ -19,6 +19,8 @@ public class GCMetricsSysTest extends MetricsSysTestBase {
 
     private static final ViewManager viewManager = Stats.getViewManager();
 
+    public static List blackhole;
+
     /**
      * This test assumes that the JVM was started with a non-concurrent GC
      */
@@ -27,7 +29,7 @@ public class GCMetricsSysTest extends MetricsSysTestBase {
 
         //we try triggering a (non-concurrent) GC with stuff to do
         for (int i = 0; i < 1000000; i++) {
-            new ArrayList<>();
+            blackhole = new ArrayList<>();
         }
 
         //try to force a GC
@@ -38,6 +40,11 @@ public class GCMetricsSysTest extends MetricsSysTestBase {
             System.gc();
             System.runFinalization();
             if (objRef.get() != null) {
+                // even more trash
+                for (int x = 0; x < 1000000; x++) {
+                    blackhole = new ArrayList<>();
+                }
+
                 Thread.sleep(500);
             } else {
                 break;
