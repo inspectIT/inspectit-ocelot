@@ -192,7 +192,7 @@ public class GCMetricsRecorder extends AbstractMetricsRecorder {
                     recordLiveDataSize(oldAfter);
                 }
                 if (config.getEnabled().getOrDefault(MAX_DATA_SIZE_METRIC_NAME, false)) {
-                    recordMaxDataSize(after.get(oldGenPoolName).getMax());
+                    recordMaxDataSize(Math.max(after.get(oldGenPoolName).getMax(), 0L));
                 }
             }
         }
