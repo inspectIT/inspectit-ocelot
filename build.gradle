@@ -8,6 +8,12 @@ allprojects {
         }
     }
     apply plugin: 'jacoco'
+
+    if (!project.hasProperty('buildVersion') || project.getProperty('buildVersion').empty) {
+        ext.buildVersion = 'SNAPSHOT'
+    }
+
+    version = "$buildVersion"
 }
 
 subprojects {
@@ -25,7 +31,7 @@ subprojects {
 
     dependencies {
         buildTools(
-            'jarcheck:jarcheck:1.5'
+                'jarcheck:jarcheck:1.5'
         )
         compileOnly 'org.projectlombok:lombok:1.18.4'
         annotationProcessor 'org.projectlombok:lombok:1.18.4'
@@ -67,7 +73,7 @@ subprojects {
 
 task codeCoverageReport(type: JacocoReport) {
     group = 'Verification'
-    description ='Generates a combined report from all subprojects'
+    description = 'Generates a combined report from all subprojects'
 
     executionData fileTree(project.rootDir.absolutePath).include("**/build/jacoco/*.exec")
 
