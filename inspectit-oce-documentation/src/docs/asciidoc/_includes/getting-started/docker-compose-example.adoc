@@ -29,6 +29,7 @@ All of the demo scenarios are fully configured with predefined dashboards, *so y
 ==== Launching the Demo
 
 *Pre-requisites:* To launch the demo, https://www.docker.com/[Docker] needs to be installed on your system.
+If you use Docker-for-Windows or run Docker in a virtual machine, ensure that Docker has at least 4gb main memory assigned.
 
 
 Either https://github.com/inspectIT/inspectit-oce/archive/master.zip[download] or https://github.com/inspectIT/inspectit-oce[clone the inspectit-oce GitHub repository].
