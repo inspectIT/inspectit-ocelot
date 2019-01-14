@@ -1,5 +1,6 @@
 package rocks.inspectit.oce.core.selfmonitoring;
 
+import io.opencensus.common.Scope;
 import io.opencensus.stats.*;
 import io.opencensus.tags.TagKey;
 import io.opencensus.tags.TagValue;
@@ -49,15 +50,15 @@ public class SelfMonitoringService extends DynamicallyActivatableService {
     /**
      * Provides an auto-closable that can be used in try-with-resource form.
      * <p>
-     * If self monitoring is enabled the {@link Scope} instance is create that handles time measuring and measure recording.
+     * If self monitoring is enabled the {@link SelfMonitoringScope} instance is create that handles time measuring and measure recording.
      * If self monitoring is disabled, return no-ops closable.
      *
      * @param componentName
      * @return
      */
-    public AutoCloseable withSelfMonitoring(String componentName) {
+    public Scope withSelfMonitoring(String componentName) {
         if (super.isEnabled()) {
-            return new Scope(componentName, System.nanoTime());
+            return new SelfMonitoringScope(componentName, System.nanoTime());
         } else {
             return () -> {
             };
@@ -120,7 +121,7 @@ public class SelfMonitoringService extends DynamicallyActivatableService {
     }
 
     @Data
-    private class Scope implements AutoCloseable {
+    public class SelfMonitoringScope implements Scope {
 
         private final String componentName;
         private final long start;

@@ -1,4 +1,4 @@
-package rocks.inspectit.oce.core.config;
+package rocks.inspectit.oce.core.config.spring;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
