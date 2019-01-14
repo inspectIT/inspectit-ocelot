@@ -19,9 +19,11 @@ import org.springframework.mock.env.MockPropertySource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import rocks.inspectit.oce.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.oce.core.config.InspectitEnvironment;
-import rocks.inspectit.oce.core.config.SpringConfiguration;
+import rocks.inspectit.oce.core.config.spring.SpringConfiguration;
 
+import java.lang.instrument.Instrumentation;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -42,10 +44,13 @@ public class SpringTestBase {
     @Autowired
     private TestContextInitializer.TestInspectitEnvironment env;
 
+    @Autowired
+    protected Instrumentation mockInstrumentation;
+
     /**
      * Allows to customize properties while the Context is open.
      * This method is based on {@link InspectitEnvironment#updatePropertySources(Consumer)},
-     * which therefore also triggers {@link rocks.inspectit.oce.core.config.InspectitConfigChangedEvent}s.
+     * which therefore also triggers {@link InspectitConfigChangedEvent}s.
      * <p>
      * Any test using this method should also hav the {@link org.springframework.test.annotation.DirtiesContext} annotation.
      *
@@ -100,6 +105,13 @@ public class SpringTestBase {
             }
         }
 
+        private Instrumentation initInstrumentationMock() {
+            Instrumentation instr = Mockito.mock(Instrumentation.class);
+            when(instr.isRetransformClassesSupported()).thenReturn(true);
+            when(instr.getAllLoadedClasses()).thenReturn(new Class<?>[]{});
+            return instr;
+        }
+
         @Override
         public void initialize(ConfigurableApplicationContext ctx) {
             ConfigurableEnvironment defaultEnv = ctx.getEnvironment();
@@ -110,6 +122,8 @@ public class SpringTestBase {
                     .collect(Collectors.toList());
 
             new TestInspectitEnvironment(ctx);
+            ctx.addBeanFactoryPostProcessor(fac -> fac.registerSingleton("instrumentation", initInstrumentationMock()));
+
         }
     }
 

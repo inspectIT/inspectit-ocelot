@@ -34,6 +34,23 @@ inspectit:
       # if true the directory will be watched for changes. When changes occur, the configuration is automatically reloaded
       watch: true
 
+  # settings regarding the instrumentation performed on the target application
+  instrumentation:
+    internal:
+
+      class-configuration-check-batch-size: 1000
+      class-configuration-check-inter-batch-delay: 50ms
+
+      class-retransform-batch-size: 100
+      class-retransform-inter-batch-delay: 50ms
+
+      new-class-discovery-interval: 2s
+      max-class-definition-delay: 60s
+    # settings for special sensors
+    special:
+      # enables or disables the instrumentation to ensure data, tag and trace propagation across java.util.concurrent.Executor instances
+      executor-context-propagation: true
+
   # settings for configuring OpenCensus stats and trace exporters
   exporters:
     # settings for metrics exporters
