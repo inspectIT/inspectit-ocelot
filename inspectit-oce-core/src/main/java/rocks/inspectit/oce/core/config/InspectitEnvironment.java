@@ -12,9 +12,10 @@ import org.springframework.core.env.*;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import rocks.inspectit.oce.core.config.filebased.DirectoryPropertySource;
-import rocks.inspectit.oce.core.config.filebased.PropertyFileUtils;
 import rocks.inspectit.oce.core.config.model.InspectitConfig;
 import rocks.inspectit.oce.core.config.model.config.ConfigSettings;
+import rocks.inspectit.oce.core.config.util.CaseUtils;
+import rocks.inspectit.oce.core.config.util.PropertyUtils;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
@@ -47,6 +48,8 @@ public class InspectitEnvironment extends StandardEnvironment {
 
     private static final String FALLBACK_CONFIG_PATH = "/config/fallback.yml";
     private static final String FALLBACK_CONFIG_PROPERTYSOURCE_NAME = "inspectitFallbackOverwrites";
+
+    private static final String CMD_ARGS_PROPERTYSOURCE_NAME = "javaagentArguments";
 
     /**
      * The variable under which {@link #currentConfig)} is available in bean expressions, such as @Value annotations
@@ -83,9 +86,11 @@ public class InspectitEnvironment extends StandardEnvironment {
     /**
      * Creates and applies an InspectitEnvironment onto the given context.
      *
-     * @param ctx the context to apply this environemnt onto
+     * @param ctx         the context to apply this environment onto
+     * @param cmdLineArgs the command line arguments, which gets interpreted as JSON configuration
      */
-    public InspectitEnvironment(ConfigurableApplicationContext ctx) {
+    public InspectitEnvironment(ConfigurableApplicationContext ctx, Optional<String> cmdLineArgs) {
+        configurePropertySources(cmdLineArgs);
         eventDrain = ctx;
         ctx.setEnvironment(this);
         ctx.addBeanFactoryPostProcessor(fac -> fac.setBeanExpressionResolver(getBeanExpressionResolver()));
@@ -123,14 +128,13 @@ public class InspectitEnvironment extends StandardEnvironment {
     }
 
     /**
-     * Initialization of all configuration source
-     *
-     * @param propsList
+     * Initialization of all configuration sources
+     * We do not use {@link #customizePropertySources(MutablePropertySources)}, beacuse there it is not possible to access the command line arguments
      */
-    @Override
-    protected void customizePropertySources(MutablePropertySources propsList) {
-        //include the standard sources (e.g. environment variables and properties)
-        super.customizePropertySources(propsList);
+    protected void configurePropertySources(Optional<String> cmdLineArgs) {
+        val propsList = getPropertySources();
+
+        loadCmdLineArgumentsPropertySource(cmdLineArgs, propsList);
 
         PropertySource defaultSettings = loadAgentResourceYaml(DEFAULT_CONFIG_PATH, DEFAULT_CONFIG_PROPERTYSOURCE_NAME);
         propsList.addLast(defaultSettings);
@@ -158,6 +162,18 @@ public class InspectitEnvironment extends StandardEnvironment {
             currentSources.forEach(ps -> propsList.addLast(ps));
 
             appliedConfigSettings.ifPresent(currentConfig::setConfig);
+        }
+    }
+
+    private void loadCmdLineArgumentsPropertySource(Optional<String> cmdLineArgs, MutablePropertySources propsList) {
+        if (cmdLineArgs.isPresent() && !cmdLineArgs.get().isEmpty()) {
+            try {
+                Properties config = PropertyUtils.readJson(cmdLineArgs.get());
+                PropertiesPropertySource pps = new PropertiesPropertySource(CMD_ARGS_PROPERTYSOURCE_NAME, config);
+                propsList.addFirst(pps);
+            } catch (Exception e) {
+                log.error("Could not load javaagent arguments as configuration JSON", e);
+            }
         }
     }
 
@@ -214,7 +230,7 @@ public class InspectitEnvironment extends StandardEnvironment {
 
     private static PropertiesPropertySource loadAgentResourceYaml(String resourcePath, String propertySourceName) {
         ClassPathResource defaultYamlResource = new ClassPathResource(resourcePath, InspectitEnvironment.class.getClassLoader());
-        Properties defaultProps = PropertyFileUtils.readYamlFiles(defaultYamlResource);
+        Properties defaultProps = PropertyUtils.readYamlFiles(defaultYamlResource);
         return new PropertiesPropertySource(propertySourceName, defaultProps);
     }
 

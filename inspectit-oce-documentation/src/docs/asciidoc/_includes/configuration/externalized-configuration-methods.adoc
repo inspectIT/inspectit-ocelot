@@ -24,7 +24,7 @@ You can have more than one method active at the same time, thus pulling the conf
 
 ==== File-based Configuration
 
-The file-based configuration loads all ```.yaml```/```.yml``` and ```.properties``` files in alphabetical order from the given directory path in non-recursive mode.
+The file-based configuration loads all ```.yaml```/```.yml```, ```.json```  and ```.properties``` files in alphabetical order from the given directory path in non-recursive mode.
 The alphabetical order of files defines their priority, thus if the same property exists in `my.properties` and `yours.properties` files, then the one from the `my.properties` file will be used.
 
 The file-based configuration is activated by specifying the path to an existing directory in the `inspectit.config.file-based.path` property.

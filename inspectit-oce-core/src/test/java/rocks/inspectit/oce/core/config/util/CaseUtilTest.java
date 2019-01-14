@@ -1,4 +1,4 @@
-package rocks.inspectit.oce.core.config;
+package rocks.inspectit.oce.core.config.util;
 
 import org.junit.jupiter.api.Test;
 

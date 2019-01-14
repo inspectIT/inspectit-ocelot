@@ -7,7 +7,9 @@ import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.env.PropertySource;
+import org.springframework.core.io.AbstractResource;
 import org.springframework.core.io.FileSystemResource;
+import rocks.inspectit.oce.core.config.util.PropertyUtils;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -28,8 +30,14 @@ import java.util.stream.Stream;
 public class DirectoryPropertySource extends EnumerablePropertySource<Void> {
 
 
+    private static final List<String> JSON_ENDINGS = Arrays.asList(".json");
     private static final List<String> PROPERTIES_ENDINGS = Arrays.asList(".properties");
     private static final List<String> YAML_ENDINGS = Arrays.asList(".yml", ".yaml");
+
+    @FunctionalInterface
+    private interface PropertiesLoader {
+        Properties load(AbstractResource res) throws Exception;
+    }
 
     @Getter
     private Path rootDir;
@@ -85,28 +93,20 @@ public class DirectoryPropertySource extends EnumerablePropertySource<Void> {
         List<ChildFilePropertySource> fileSources = new ArrayList<>();
         files.sorted(Comparator.naturalOrder()).forEachOrdered(file -> {
             if (doesFileHaveEnding(file, PROPERTIES_ENDINGS)) {
-                loadPropertiesFile(file).ifPresent(fileSources::add);
+                loadAndHandleExceptions(file, PropertyUtils::readPropertyFiles).ifPresent(fileSources::add);
             } else if (doesFileHaveEnding(file, YAML_ENDINGS)) {
-                loadYamlFile(file).ifPresent(fileSources::add);
+                loadAndHandleExceptions(file, PropertyUtils::readYamlFiles).ifPresent(fileSources::add);
+            } else if (doesFileHaveEnding(file, JSON_ENDINGS)) {
+                loadAndHandleExceptions(file, PropertyUtils::readJsonFile).ifPresent(fileSources::add);
             }
         });
         return fileSources;
     }
 
-    private Optional<ChildFilePropertySource> loadPropertiesFile(Path file) {
+    private Optional<ChildFilePropertySource> loadAndHandleExceptions(Path file, PropertiesLoader loader) {
         try {
             String name = getCombinedName(file);
-            return Optional.of(new ChildFilePropertySource(name, PropertyFileUtils.readPropertyFiles(new FileSystemResource(file))));
-        } catch (Exception e) {
-            logger.error("Unable to load config file " + file.getFileName() + "!", e);
-            return Optional.empty();
-        }
-    }
-
-    private Optional<ChildFilePropertySource> loadYamlFile(Path file) {
-        try {
-            String name = getCombinedName(file);
-            return Optional.of(new ChildFilePropertySource(name, PropertyFileUtils.readYamlFiles(new FileSystemResource(file))));
+            return Optional.of(new ChildFilePropertySource(name, loader.load(new FileSystemResource(file))));
         } catch (Exception e) {
             logger.error("Unable to load config file " + file.getFileName() + "!", e);
             return Optional.empty();

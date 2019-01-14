@@ -14,6 +14,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.Optional;
 import java.util.jar.JarFile;
 
 /**
@@ -37,7 +38,7 @@ public class AgentImpl implements IAgent {
 
         ctx = new AnnotationConfigApplicationContext();
         ctx.setClassLoader(classloader);
-        InspectitEnvironment environment = new InspectitEnvironment(ctx);
+        InspectitEnvironment environment = new InspectitEnvironment(ctx, Optional.ofNullable(cmdArgs));
 
         // once we have the environment, init the logging
         LogbackInitializer.initLogging(environment.getCurrentConfig());
@@ -54,7 +55,7 @@ public class AgentImpl implements IAgent {
         ctx.registerShutdownHook();
 
         //Allows to use autowiring to acquire the Instrumentation instance
-        ctx.getBeanFactory().registerSingleton("instrumentation", instrumentation);
+        ctx.addBeanFactoryPostProcessor(bf -> bf.registerSingleton("instrumentation", instrumentation));
 
         ctx.register(SpringConfiguration.class);
         ctx.refresh();
