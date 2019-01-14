@@ -4,7 +4,6 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
-import lombok.val;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.slf4j.LoggerFactory;
@@ -12,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.mock.env.MockPropertySource;
@@ -78,7 +78,7 @@ public class SpringTestBase {
 
             @Override
             protected void configurePropertySources(Optional<String> cmdArgs) {
-                val propsList = getPropertySources();
+                MutablePropertySources propsList = getPropertySources();
                 mockProperties = new MockPropertySource();
                 propsList.addFirst(mockProperties);
                 testPropertySources.forEach(propsList::addLast);
