@@ -10,8 +10,6 @@ buildscript {
 
 apply plugin: 'org.asciidoctor.convert'
 
-version = "${releaseVersion}"
-
 asciidoctor {
     // TODO fail the task on asciidoctor warnings when updating to v2.+
     attributes 'inspectit-oce-version': project.version,

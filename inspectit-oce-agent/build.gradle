@@ -1,5 +1,3 @@
-version = "${releaseVersion}"
-
 dependencies {
     compileOnly(
             project(':inspectit-oce-bootstrap'),
