@@ -67,7 +67,9 @@ jobs:
         - gem install rspec
         - gem install github_changelog_generator
         - chmod +x ./resources/github-release-script.sh
-        - if [ -z "${TRAVIS_TAG}" ]; then echo "Not release build."; else ./resources/github-release-script.sh;fi
+        - if [ -z "${TRAVIS_TAG}" ]; then echo "Not release build - skipping changelog generation."; else ./resources/github-release-script.sh;fi
+        - chmod +x ./resources/generate-documentation-sitemap.sh
+        - if [ -z "${TRAVIS_TAG}" ]; then echo "Not release build - skipping sitemap generation."; else ./resources/generate-documentation-sitemap.sh;fi
       deploy:
         #############################
         # MASTER BUILDS
@@ -85,6 +87,7 @@ jobs:
         #############################
         # RELEASE BUILDS
         # > Documentation
+        # > Sitemap
         - provider: s3
           access_key_id: $AWS_ACCESS_KEY_ID
           secret_access_key: $AWS_SECRET_ACCESS_KEY
@@ -104,6 +107,16 @@ jobs:
           skip_cleanup: true
           local_dir: inspectit-oce-documentation/build/asciidoc/html5
           upload-dir: releases/$TRAVIS_TAG
+          on:
+            tags: true
+            branch: master
+        - provider: s3
+          access_key_id: $AWS_ACCESS_KEY_ID
+          secret_access_key: $AWS_SECRET_ACCESS_KEY
+          bucket: "docs.inspectit.rocks"
+          region: eu-west-1
+          skip_cleanup: true
+          local_dir: sitemap
           on:
             tags: true
             branch: master
