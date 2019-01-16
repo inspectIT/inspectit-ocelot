@@ -19,7 +19,7 @@ cache:
 
 install: true
 script:
-  - ./gradlew :inspectit-oce-agent:systemTest
+  - ./gradlew test systemTest
 
 jobs:
   include:
