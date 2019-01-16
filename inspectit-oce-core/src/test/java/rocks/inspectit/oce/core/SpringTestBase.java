@@ -4,6 +4,7 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.slf4j.LoggerFactory;
@@ -53,6 +54,12 @@ public class SpringTestBase {
     public void updateProperties(Consumer<MockPropertySource> propsCustomizer) {
         env.updatePropertySources((propsList) -> propsCustomizer.accept(env.mockProperties));
         env.addMockAppender();
+    }
+
+
+    @BeforeEach
+    public void clearTrackedLogs() {
+        Mockito.reset(env.mockAppender);
     }
 
     static class TestContextInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
