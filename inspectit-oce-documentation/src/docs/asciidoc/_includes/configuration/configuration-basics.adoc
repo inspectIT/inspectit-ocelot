@@ -4,8 +4,8 @@ inspectIT OCE tries to implement the zero-configuration approach but lets you ex
 Internally it uses the Spring-based `PropertySource` order to allow overriding of configuration values.
 Configuration properties are considered in inspectIT OCE in the following order:
 
-. <<Java Agent arguments,Java Agent arguments>>
-. <<Java System properties,Java System properties>>
+. <<Java Agent Arguments,Java Agent Arguments>>
+. <<Java System Properties,Java System Properties>>
 . <<OS Environment Variables,OS environment variables>>
 . Supported <<Externalized Configuration Methods,externalized configuration methods>>
 .. <<File-based Configuration,File-based configuration>>

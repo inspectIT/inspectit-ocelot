@@ -53,13 +53,13 @@ public class PropertyUtils {
         }
     }
 
-    public static Properties readJson(String json) throws JsonParseException, IOException {
+    public static Properties readJson(String json) throws IOException {
         try (ByteArrayInputStream is = new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8))) {
             return readJsonFromStream(is);
         }
     }
 
-    private static Properties readJsonFromStream(InputStream is) throws JsonParseException, IOException {
+    private static Properties readJsonFromStream(InputStream is) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
         try {

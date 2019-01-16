@@ -129,7 +129,7 @@ public class InspectitEnvironment extends StandardEnvironment {
 
     /**
      * Initialization of all configuration sources
-     * We do not use {@link #customizePropertySources(MutablePropertySources)}, beacuse there it is not possible to access the command line arguments
+     * We do not use {@link #customizePropertySources(MutablePropertySources)}, because there it is not possible to access the command line arguments
      */
     protected void configurePropertySources(Optional<String> cmdLineArgs) {
         val propsList = getPropertySources();

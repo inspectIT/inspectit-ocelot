@@ -4,8 +4,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * This class flattens nested structures of Maps and Lists to a single Map from String to Object.
+ * The keys in the result map follow the typical naming scheme used by spring for nested properties.
+ */
 public class MapListTreeFlattener {
 
+    /**
+     * Flattens the given List or Map
+     *
+     * @param root the root list or map
+     * @return the flattened map.
+     */
     public static Map<String, Object> flatten(Object root) {
         Map<String, Object> results = new HashMap<>();
         flatten("", root, results);

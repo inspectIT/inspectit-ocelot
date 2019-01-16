@@ -91,19 +91,20 @@ public class DirectoryPropertySource extends EnumerablePropertySource<Void> {
         }
         //alphabetical order, last loaded file wins
         List<ChildFilePropertySource> fileSources = new ArrayList<>();
-        files.sorted(Comparator.naturalOrder()).forEachOrdered(file -> {
-            if (doesFileHaveEnding(file, PROPERTIES_ENDINGS)) {
-                loadAndHandleExceptions(file, PropertyUtils::readPropertyFiles).ifPresent(fileSources::add);
-            } else if (doesFileHaveEnding(file, YAML_ENDINGS)) {
-                loadAndHandleExceptions(file, PropertyUtils::readYamlFiles).ifPresent(fileSources::add);
-            } else if (doesFileHaveEnding(file, JSON_ENDINGS)) {
-                loadAndHandleExceptions(file, PropertyUtils::readJsonFile).ifPresent(fileSources::add);
-            }
-        });
+        files.sorted(Comparator.comparing(Path::toString, String.CASE_INSENSITIVE_ORDER))
+                .forEachOrdered(file -> {
+                    if (doesFileHaveEnding(file, PROPERTIES_ENDINGS)) {
+                        loadProperties(file, PropertyUtils::readPropertyFiles).ifPresent(fileSources::add);
+                    } else if (doesFileHaveEnding(file, YAML_ENDINGS)) {
+                        loadProperties(file, PropertyUtils::readYamlFiles).ifPresent(fileSources::add);
+                    } else if (doesFileHaveEnding(file, JSON_ENDINGS)) {
+                        loadProperties(file, PropertyUtils::readJsonFile).ifPresent(fileSources::add);
+                    }
+                });
         return fileSources;
     }
 
-    private Optional<ChildFilePropertySource> loadAndHandleExceptions(Path file, PropertiesLoader loader) {
+    private Optional<ChildFilePropertySource> loadProperties(Path file, PropertiesLoader loader) {
         try {
             String name = getCombinedName(file);
             return Optional.of(new ChildFilePropertySource(name, loader.load(new FileSystemResource(file))));
