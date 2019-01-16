@@ -4,7 +4,8 @@ inspectIT OCE tries to implement the zero-configuration approach but lets you ex
 Internally it uses the Spring-based `PropertySource` order to allow overriding of configuration values.
 Configuration properties are considered in inspectIT OCE in the following order:
 
-. <<Java System properties,Java System properties>>
+. <<Java Agent Arguments,Java Agent Arguments>>
+. <<Java System Properties,Java System Properties>>
 . <<OS Environment Variables,OS environment variables>>
 . Supported <<Externalized Configuration Methods,externalized configuration methods>>
 .. <<File-based Configuration,File-based configuration>>
@@ -17,10 +18,29 @@ When giving an invalid configuration through a runtime update to the agent, the 
 
 The overview of all available inspectIT OCE configuration properties is given in the <<All Configuration Options>> section.
 
+==== Java Agent Arguments
+
+You can pass a JSON object as string to the agent via its command line arguments.
+For example, to override the service name used to identify your application reporting the performance data,
+you can change the `inspectit.service-name` property as follows:
+
+[subs=attributes+]
+```bash
+$ java -javaagent:/path/to/inspectit-oce-agent-{inspectit-oce-version}.jar="{ \"inspectit\": { \"service-name\": \"My Custom Service\" }}" -jar my-java-program.jar
+```
+
+Note that you have to escape the quotes within your JSON string. On linux you can just use the more readable single quotes notation:
+
+[subs=attributes+]
+```bash
+$ java -javaagent:/path/to/inspectit-oce-agent-{inspectit-oce-version}.jar='{ "inspectit": { "service-name": "My Custom Service" }}' -jar my-java-program.jar
+```
+
+
 ==== Java System Properties
 
 You can pass any configuration property as the Java System property to the Java command that you use to start your Java application.
-For example, to override the service name used to identify your application reporting the performance data, you can change the `inspectit.service-name` property:
+Using this approach you can change the `inspectit.service-name` property as follows:
 
 [subs=attributes+]
 ```bash

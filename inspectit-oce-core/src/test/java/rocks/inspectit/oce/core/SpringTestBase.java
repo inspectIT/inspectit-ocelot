@@ -4,6 +4,7 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.slf4j.LoggerFactory;
@@ -22,6 +23,7 @@ import rocks.inspectit.oce.core.config.InspectitEnvironment;
 import rocks.inspectit.oce.core.config.SpringConfiguration;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -54,6 +56,12 @@ public class SpringTestBase {
         env.addMockAppender();
     }
 
+
+    @BeforeEach
+    public void clearTrackedLogs() {
+        Mockito.reset(env.mockAppender);
+    }
+
     static class TestContextInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
         /**
@@ -70,17 +78,18 @@ public class SpringTestBase {
 
 
             public TestInspectitEnvironment(ConfigurableApplicationContext ctx) {
-                super(ctx);
+                super(ctx, Optional.empty());
                 when(mockAppender.getName()).thenReturn("MOCK");
                 addMockAppender();
             }
 
             @Override
-            protected void customizePropertySources(MutablePropertySources propsList) {
+            protected void configurePropertySources(Optional<String> cmdArgs) {
+                MutablePropertySources propsList = getPropertySources();
                 mockProperties = new MockPropertySource();
                 propsList.addFirst(mockProperties);
                 testPropertySources.forEach(propsList::addLast);
-                super.customizePropertySources(propsList);
+                super.configurePropertySources(cmdArgs);
             }
 
             void addMockAppender() {
