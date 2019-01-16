@@ -3,7 +3,7 @@ dependencies {
 }
 
 jar {
-    archivesBaseName = "${project.name}"
+    archiveName = "${project.name}.jar"
 
     //include all "implementation" dependencies in fat jar
     from {

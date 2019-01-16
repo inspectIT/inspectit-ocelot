@@ -81,7 +81,7 @@ task buildOpencensusFatJar(type: Jar) {
 }
 
 jar {
-    archivesBaseName = "${project.name}"
+    archiveName = "${project.name}.jar"
 
     //include the open-census dependencies as a fat jar
     dependsOn buildOpencensusFatJar

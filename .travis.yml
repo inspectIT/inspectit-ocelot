@@ -49,11 +49,29 @@ jobs:
         # upload coverage report
         - bash <(curl -s https://codecov.io/bash)
 
-    - name: "Documentation Deployment"
+    - name: "Create and Release Artifacts"
       jdk: oraclejdk8
-      install: ./gradlew :inspectit-oce-documentation:asciidoctor
+      sudo: true
+      rvm:
+        - 2.4
+      before_install:
+        - if [ -z "${TRAVIS_TAG}" ]; then RELEASE_VERSION="SNAPSHOT-${TRAVIS_BUILD_NUMBER}"; else RELEASE_VERSION="${TRAVIS_TAG}";fi
+        - echo "Setting version to $RELEASE_VERSION"
+      install: ./gradlew -PbuildVersion=$RELEASE_VERSION assemble packageDocumentation
       script: skip
+      before_deploy:
+        - mkdir -p ~/bin && curl -sSL -o ~/bin/jq https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 && chmod +x ~/bin/jq
+        - export PATH=$PATH:~/bin
+        - jq --version
+        - gem install bundler
+        - gem install rspec
+        - gem install github_changelog_generator
+        - chmod +x ./resources/github-release-script.sh
+        - if [ -z "${TRAVIS_TAG}" ]; then echo "Not release build - skipping changelog generation."; else ./resources/github-release-script.sh;fi
+        - chmod +x ./resources/generate-documentation-sitemap.sh
+        - if [ -z "${TRAVIS_TAG}" ]; then echo "Not release build - skipping sitemap generation."; else ./resources/generate-documentation-sitemap.sh;fi
       deploy:
+        #############################
         # MASTER BUILDS
         - provider: s3
           access_key_id: $AWS_ACCESS_KEY_ID
@@ -66,7 +84,10 @@ jobs:
           on:
             tags: false
             branch: master
+        #############################
         # RELEASE BUILDS
+        # > Documentation
+        # > Sitemap
         - provider: s3
           access_key_id: $AWS_ACCESS_KEY_ID
           secret_access_key: $AWS_SECRET_ACCESS_KEY
@@ -86,6 +107,27 @@ jobs:
           skip_cleanup: true
           local_dir: inspectit-oce-documentation/build/asciidoc/html5
           upload-dir: releases/$TRAVIS_TAG
+          on:
+            tags: true
+            branch: master
+        - provider: s3
+          access_key_id: $AWS_ACCESS_KEY_ID
+          secret_access_key: $AWS_SECRET_ACCESS_KEY
+          bucket: "docs.inspectit.rocks"
+          region: eu-west-1
+          skip_cleanup: true
+          local_dir: sitemap
+          on:
+            tags: true
+            branch: master
+        # > Github Release
+        - provider: releases
+          api_key: "${GITHUB_TOKEN}"
+          name: "Version $RELEASE_VERSION"
+          file:
+           - "inspectit-oce-agent/build/inspectit-oce-agent-$RELEASE_VERSION.jar"
+           - "inspectit-oce-documentation/build/distributions/inspectit-oce-documentation-$RELEASE_VERSION.zip"
+          skip_cleanup: true
           on:
             tags: true
             branch: master
