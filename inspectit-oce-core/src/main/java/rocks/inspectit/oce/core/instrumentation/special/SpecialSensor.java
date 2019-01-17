@@ -19,9 +19,9 @@ public interface SpecialSensor {
      * !! Note that {@link AgentBuilder#ignore(ElementMatcher, ElementMatcher)} must not be called !!
      * Ignores are set up by the {@link rocks.inspectit.oce.core.instrumentation.InstrumentationManager}
      *
-     * @param conf        the current configuration
-     * @param baseBuilder the builder t oextend
+     * @param conf         the current configuration
+     * @param agentBuilder the builder t oextend
      * @return
      */
-    AgentBuilder instrument(InstrumentationSettings conf, AgentBuilder baseBuilder);
+    AgentBuilder instrument(InstrumentationSettings conf, AgentBuilder agentBuilder);
 }

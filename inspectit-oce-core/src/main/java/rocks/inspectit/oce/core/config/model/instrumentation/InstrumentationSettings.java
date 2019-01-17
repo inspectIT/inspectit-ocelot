@@ -19,6 +19,9 @@ public class InstrumentationSettings {
      */
     private Duration interBatchPause;
 
+    /**
+     * The configuration for the special sensors.
+     */
     private SpecialSettings special;
 
 }
