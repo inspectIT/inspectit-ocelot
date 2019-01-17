@@ -37,7 +37,7 @@ public class ExecutorContextPropagationSensor implements SpecialSensor {
 
     private static class ExecutorAdvice {
         /**
-         * Wraps the given runnable of {@link java.util.concurrent.Executor#execute(Runnable)} via {@link BootstrapInitializer#wrap(Runnable)}
+         * Wraps the given runnable of {@link java.util.concurrent.Executor#execute(Runnable)} via {@link rocks.inspectit.oce.bootstrap.context.ContextManager#wrap(Runnable)}
          *
          * @param runnable
          */
