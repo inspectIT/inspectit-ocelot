@@ -10,6 +10,12 @@ import java.util.Set;
  */
 public class CommonUtils {
 
+    /**
+     * Return true if the JVM is shutting down.
+     * Note: This method is expensive! Only call it in destructions methods and don't call it within loops!
+     *
+     * @return true if the JVM is shutting down, false otherwise
+     */
     public static boolean isJVMShuttingDown() {
         Thread dummyHook = new Thread(() -> {
         });
@@ -26,6 +32,8 @@ public class CommonUtils {
      * Tries to get (and NOT remove) a single element from a set which might be concurrently modified.
      * Null values in the set are not supported.
      * The set should still be concurrent or synchronized via {@link java.util.Collections#synchronizedSet(Set)}.
+     * <p>
+     * This method tries to read a element using a iterator and simply retries in case of a concurrent modification.
      *
      * @param set
      * @param <T>

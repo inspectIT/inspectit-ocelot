@@ -36,20 +36,28 @@ inspectit:
 
   # settings regarding the instrumentation performed on the target application
   instrumentation:
-    internal:
-
-      class-configuration-check-batch-size: 1000
-      class-configuration-check-inter-batch-delay: 50ms
-
-      class-retransform-batch-size: 100
-      class-retransform-inter-batch-delay: 50ms
-
-      new-class-discovery-interval: 2s
-      max-class-definition-delay: 60s
     # settings for special sensors
     special:
       # enables or disables the instrumentation to ensure data, tag and trace propagation across java.util.concurrent.Executor instances
       executor-context-propagation: true
+    # settings for fine-tuning the instrumentation process
+    internal:
+      # defines how many classes are checked at once for updates of their configuration
+      class-configuration-check-batch-size: 1000
+      # the time to pause between executing batches of class instrumentation configuration checks
+      class-configuration-check-inter-batch-delay: 50ms
+
+      # defines how many classes are retransformed at once
+      class-retransform-batch-size: 100
+      # defines the time to pause between calls to Instrumentation.retransform
+      class-retransform-inter-batch-delay: 50ms
+
+      # defines how often the agent should check if new classes have been defined.
+      # this check is only performed if Classloader.defineClass was called less than ${max-class-definition-delay} seconds ago
+      new-class-discovery-interval: 10s
+      # defines how long after the invocation of ClassFileTransform the class is guaranteed to be present in Instrumentation.getAllLoadedClasses.
+      # this influences if newly created classes are discovered by inspectIT.
+      max-class-definition-delay: 60s
 
   # settings for configuring OpenCensus stats and trace exporters
   exporters:

@@ -13,7 +13,7 @@ import javax.annotation.PreDestroy;
  * The reason for not using {@link org.springframework.stereotype.Component} or {@link org.springframework.stereotype.Service}
  * on such beans is that Spring is unable to resolve their implemented interfaces as they are on the bootstrap.
  * <p>
- * Any class requiring the corresponding Bootstrap Interface to be intiialized should use a {@link org.springframework.context.annotation.DependsOn}
+ * Any class requiring the corresponding bootstrap interface to be initialized should use a {@link org.springframework.context.annotation.DependsOn}
  * annotation.
  */
 @Configuration

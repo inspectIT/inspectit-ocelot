@@ -35,7 +35,7 @@ public class ExecutorContextPropagationSensor implements SpecialSensor {
     }
 
     @Override
-    public DynamicType.Builder instrument(TypeDescription type, InstrumentationSettings settings, DynamicType.Builder builder) {
+    public DynamicType.Builder instrument(Class<?> clazz, TypeDescription type, InstrumentationSettings settings, DynamicType.Builder builder) {
         return builder.visit(
                 Advice.to(ExecutorAdvice.class)
                         .on(named("execute").and(takesArgument(0, Runnable.class))));
@@ -43,7 +43,7 @@ public class ExecutorContextPropagationSensor implements SpecialSensor {
 
     private static class ExecutorAdvice {
         /**
-         * Wraps the given runnable of {@link java.util.concurrent.Executor#execute(Runnable)} via {@link BootstrapInitializer#wrap(Runnable)}
+         * Wraps the given runnable of {@link java.util.concurrent.Executor#execute(Runnable)} via {@link ContextManagerImpl#wrap(Runnable)}}
          *
          * @param runnable
          */

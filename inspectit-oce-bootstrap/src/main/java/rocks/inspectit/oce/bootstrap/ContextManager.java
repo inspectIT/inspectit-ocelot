@@ -1,7 +1,7 @@
 package rocks.inspectit.oce.bootstrap;
 
 /**
- * Manages the context, maning:
+ * Manages the context, meaning:
  * - the trace / span state
  * - the tags
  * - the data-set
@@ -9,7 +9,7 @@ package rocks.inspectit.oce.bootstrap;
 public interface ContextManager {
 
     /**
-     * Wraps the given runnable so that it is started with the current GRPC context.
+     * Wraps the given runnable so that current context is used when the runnable is invoked.
      *
      * @param r the runnable to wrap
      * @return the wrapped runnable

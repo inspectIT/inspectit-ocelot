@@ -1,9 +1,11 @@
 package rocks.inspectit.oce.core.instrumentation;
 
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import rocks.inspectit.oce.core.config.InspectitEnvironment;
+import rocks.inspectit.oce.core.utils.StopWatch;
 
 import javax.annotation.PostConstruct;
 import java.lang.instrument.Instrumentation;
@@ -36,8 +38,10 @@ public class NewClassDiscoveryService {
     private Set<Consumer<Set<Class<?>>>> classDiscoveryListeners = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
     private Runnable updateCheckTask = () -> {
-        long timePassed = System.currentTimeMillis() - transformer.getLastNewClassDefinitionTimestamp().get();
-        if (timePassed < env.getCurrentConfig().getInstrumentation().getInternal().getMaxClassDefinitionDelay().toMillis()) {
+        long timeSinceLastClassDefinition = System.currentTimeMillis() - transformer.getLastNewClassDefinitionTimestamp().get();
+        if (timeSinceLastClassDefinition < env.getCurrentConfig().getInstrumentation().getInternal().getMaxClassDefinitionDelay().toMillis()) {
+            val watch = new StopWatch();
+
             log.debug("Checking for new classes...");
             Set<Class<?>> newClasses = new HashSet<>();
             for (Class<?> clazz : instrumentation.getAllLoadedClasses()) {
@@ -47,10 +51,10 @@ public class NewClassDiscoveryService {
                 }
             }
             if (!newClasses.isEmpty()) {
-                log.debug("{} new classes found (last class define {} ms ago)", newClasses.size(), timePassed);
+                log.debug("{} new classes found, check took {} ms (last class define {} ms ago)", newClasses.size(), watch.getElapsedMillis(), timeSinceLastClassDefinition);
                 classDiscoveryListeners.forEach(lis -> lis.accept(newClasses));
             } else {
-                log.debug("No new classes found (last class define {} ms ago)", timePassed);
+                log.debug("No new classes found  check took {} ms (last class define {} ms ago)", watch.getElapsedMillis(), timeSinceLastClassDefinition);
             }
         }
         scheduleUpdateCheck();
