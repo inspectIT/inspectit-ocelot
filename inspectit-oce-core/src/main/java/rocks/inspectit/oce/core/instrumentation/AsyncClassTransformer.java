@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.oce.core.config.InspectitEnvironment;
+import rocks.inspectit.oce.core.instrumentation.config.ClassInstrumentationConfiguration;
+import rocks.inspectit.oce.core.instrumentation.config.InstrumentationConfigurationResolver;
 import rocks.inspectit.oce.core.instrumentation.special.SpecialSensor;
 import rocks.inspectit.oce.core.utils.CommonUtils;
 
@@ -42,10 +44,7 @@ public class AsyncClassTransformer implements ClassFileTransformer {
     private Instrumentation instrumentation;
 
     @Autowired
-    private IgnoredClassesManager ignoredClasses;
-
-    @Autowired
-    private List<SpecialSensor> specialSensors;
+    private InstrumentationConfigurationResolver configResolver;
 
     @Autowired
     private List<IClassDefinitionListener> classDefinitionListeners;
@@ -160,11 +159,10 @@ public class AsyncClassTransformer implements ClassFileTransformer {
      * @return
      */
     private ClassInstrumentationConfiguration updateAndGetActiveConfiguration(Class<?> classBeingRedefined, TypeDescription type) {
-        val instrConf = env.getCurrentConfig().getInstrumentation();
-        ClassInstrumentationConfiguration classConf = ClassInstrumentationConfiguration.getFor(type, instrConf, specialSensors);
+        ClassInstrumentationConfiguration classConf = configResolver.getClassInstrumentationConfiguration(classBeingRedefined);
 
         synchronized (shutDownLock) {
-            if (shuttingDown || ignoredClasses.isIgnoredClass(classBeingRedefined)) {
+            if (shuttingDown) {
                 classConf = ClassInstrumentationConfiguration.NO_INSTRUMENTATION;
             }
             if (classConf.isSameAs(type, ClassInstrumentationConfiguration.NO_INSTRUMENTATION)) {

@@ -10,9 +10,10 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import rocks.inspectit.oce.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.oce.core.config.InspectitEnvironment;
-import rocks.inspectit.oce.core.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.InternalSettings;
-import rocks.inspectit.oce.core.instrumentation.special.SpecialSensor;
+import rocks.inspectit.oce.core.instrumentation.config.ClassInstrumentationConfiguration;
+import rocks.inspectit.oce.core.instrumentation.config.InstrumentationConfigurationChangedEvent;
+import rocks.inspectit.oce.core.instrumentation.config.InstrumentationConfigurationResolver;
 import rocks.inspectit.oce.core.service.BatchJobExecutorService;
 import rocks.inspectit.oce.core.utils.StopWatch;
 
@@ -41,9 +42,6 @@ public class InstrumentationManager implements IClassDiscoveryListener {
     private InspectitEnvironment env;
 
     @Autowired
-    private List<SpecialSensor> specialSensors;
-
-    @Autowired
     private NewClassDiscoveryService classDisoveryService;
 
     /**
@@ -57,7 +55,7 @@ public class InstrumentationManager implements IClassDiscoveryListener {
     private Instrumentation instrumentation;
 
     @Autowired
-    private IgnoredClassesManager ignoredClasses;
+    private InstrumentationConfigurationResolver configResolver;
 
     /**
      * For each class we remember the applied instrumentation.
@@ -129,18 +127,16 @@ public class InstrumentationManager implements IClassDiscoveryListener {
 
     @EventListener
     private void configEventListener(InspectitConfigChangedEvent ev) {
-        val oldInstrumentation = ev.getOldConfig().getInstrumentation();
-        val newInstrumentation = ev.getNewConfig().getInstrumentation();
 
-        //if the instrumentation configuration has changed all classes need to be reevaluated
-        if (!Objects.equals(oldInstrumentation, newInstrumentation)) {
-            pendingClasses.addAll(loadedClasses);
-        }
-
-        InternalSettings newInternal = newInstrumentation.getInternal();
+        InternalSettings newInternal = ev.getNewConfig().getInstrumentation().getInternal();
         val batchSizes = new BatchSize(newInternal.getClassConfigurationCheckBatchSize(), newInternal.getClassRetransformBatchSize());
         classInstrumentationJob.setBatchSizes(batchSizes);
         classInstrumentationJob.setInterBatchDelay(newInternal.getInterBatchDelay());
+    }
+
+    @EventListener
+    private void instrumentationConfigEventListener(InstrumentationConfigurationChangedEvent ev) {
+        pendingClasses.addAll(loadedClasses);
     }
 
 
@@ -206,17 +202,8 @@ public class InstrumentationManager implements IClassDiscoveryListener {
 
     private boolean doesClassRequireRetransformation(Class<?> clazz) {
         val typeDescr = TypeDescription.ForLoadedType.of(clazz);
-        InstrumentationSettings instrSettings = env.getCurrentConfig().getInstrumentation();
-
-        ClassInstrumentationConfiguration requestedConfig;
-        if (ignoredClasses.isIgnoredClass(clazz)) {
-            requestedConfig = ClassInstrumentationConfiguration.NO_INSTRUMENTATION;
-        } else {
-            requestedConfig = ClassInstrumentationConfiguration.getFor(typeDescr, instrSettings, specialSensors);
-        }
-
+        ClassInstrumentationConfiguration requestedConfig = configResolver.getClassInstrumentationConfiguration(clazz);
         val activeConfig = activeInstrumentations.getOrDefault(clazz, ClassInstrumentationConfiguration.NO_INSTRUMENTATION);
-
         return !activeConfig.isSameAs(typeDescr, requestedConfig);
     }
 }

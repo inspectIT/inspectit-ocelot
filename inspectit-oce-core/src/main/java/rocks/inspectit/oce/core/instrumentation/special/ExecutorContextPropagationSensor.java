@@ -9,7 +9,7 @@ import net.bytebuddy.matcher.ElementMatcher;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.oce.bootstrap.Instances;
-import rocks.inspectit.oce.core.config.model.instrumentation.InstrumentationSettings;
+import rocks.inspectit.oce.core.instrumentation.config.InstrumentationConfiguration;
 import rocks.inspectit.oce.core.instrumentation.context.ContextManagerImpl;
 
 import java.util.concurrent.Executor;
@@ -29,18 +29,18 @@ public class ExecutorContextPropagationSensor implements SpecialSensor {
             named("execute").and(takesArgument(0, Runnable.class));
 
     @Override
-    public boolean shouldInstrument(TypeDescription type, InstrumentationSettings settings) {
-        return settings.getSpecial().isExecutorContextPropagation() &&
+    public boolean shouldInstrument(TypeDescription type, InstrumentationConfiguration settings) {
+        return settings.getSource().getSpecial().isExecutorContextPropagation() &&
                 EXECUTER_CLASSES_MATCHER.matches(type);
     }
 
     @Override
-    public boolean requiresInstrumentationChange(TypeDescription type, InstrumentationSettings first, InstrumentationSettings second) {
+    public boolean requiresInstrumentationChange(TypeDescription type, InstrumentationConfiguration first, InstrumentationConfiguration second) {
         return false; //if the sensor stays active it never requires changes
     }
 
     @Override
-    public DynamicType.Builder instrument(Class<?> clazz, TypeDescription type, InstrumentationSettings settings, DynamicType.Builder builder) {
+    public DynamicType.Builder instrument(Class<?> clazz, TypeDescription type, InstrumentationConfiguration conf, DynamicType.Builder builder) {
         return builder.visit(
                 Advice.to(ExecutorAdvice.class)
                         .on(EXECUTER_EXECUTE_METHOD_MATCHER));
