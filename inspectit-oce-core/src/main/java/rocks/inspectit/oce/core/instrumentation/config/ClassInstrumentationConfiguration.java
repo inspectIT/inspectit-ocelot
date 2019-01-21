@@ -30,7 +30,7 @@ public class ClassInstrumentationConfiguration {
     @Getter
     private final InstrumentationConfiguration activeConfiguration;
 
-    ClassInstrumentationConfiguration(Set<SpecialSensor> activeSpecialSensors, InstrumentationConfiguration activeConfiguration) {
+    public ClassInstrumentationConfiguration(Set<SpecialSensor> activeSpecialSensors, InstrumentationConfiguration activeConfiguration) {
         this.activeSpecialSensors = activeSpecialSensors;
         this.activeConfiguration = activeConfiguration;
     }

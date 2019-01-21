@@ -47,7 +47,7 @@ public class AsyncClassTransformer implements ClassFileTransformer {
     private InstrumentationConfigurationResolver configResolver;
 
     @Autowired
-    private List<IClassDefinitionListener> classDefinitionListeners;
+    List<IClassDefinitionListener> classDefinitionListeners;
 
     /**
      * Detects if the instrumenter is in the process of shutting down.
@@ -80,7 +80,7 @@ public class AsyncClassTransformer implements ClassFileTransformer {
     }
 
     @PostConstruct
-    private void init() {
+    void init() {
         instrumentation.addTransformer(this, true);
     }
 
@@ -88,7 +88,7 @@ public class AsyncClassTransformer implements ClassFileTransformer {
      * Removes all applied instrumentations if the JVM is not shutting down but the agent is.
      */
     @PreDestroy
-    private void destroy() {
+    void destroy() {
         // this look guarantees through updateAndGetActiveConfiguration that no instrumentation is added after the lock is released
         synchronized (shutDownLock) {
             shuttingDown = true;
