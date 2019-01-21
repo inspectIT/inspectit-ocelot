@@ -1,10 +1,11 @@
 package rocks.inspectit.oce.core.instrumentation.special;
 
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import net.bytebuddy.asm.Advice;
+import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
+import net.bytebuddy.matcher.ElementMatcher;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.oce.bootstrap.Instances;
@@ -19,14 +20,18 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
 @DependsOn(ContextManagerImpl.BEAN_NAME)
 @Slf4j
 public class ExecutorContextPropagationSensor implements SpecialSensor {
+
+    private static final ElementMatcher<TypeDescription> EXECUTER_CLASSES_MATCHER =
+            isSubTypeOf(Executor.class)
+                    .and(not(isAbstract()));
+
+    private static final ElementMatcher<MethodDescription> EXECUTER_EXECUTE_METHOD_MATCHER =
+            named("execute").and(takesArgument(0, Runnable.class));
+
     @Override
     public boolean shouldInstrument(TypeDescription type, InstrumentationSettings settings) {
-        val matcher = isSubTypeOf(Executor.class)
-                .and(not(isAbstract()))
-                .and(not(nameStartsWith("io.grpc.Context$")
-                        .and(
-                                nameEndsWith("CurrentContextExecutor").or(nameEndsWith("FixedContextExecutor")))));
-        return settings.getSpecial().isExecutorContextPropagation() && matcher.matches(type);
+        return settings.getSpecial().isExecutorContextPropagation() &&
+                EXECUTER_CLASSES_MATCHER.matches(type);
     }
 
     @Override
@@ -38,7 +43,7 @@ public class ExecutorContextPropagationSensor implements SpecialSensor {
     public DynamicType.Builder instrument(Class<?> clazz, TypeDescription type, InstrumentationSettings settings, DynamicType.Builder builder) {
         return builder.visit(
                 Advice.to(ExecutorAdvice.class)
-                        .on(named("execute").and(takesArgument(0, Runnable.class))));
+                        .on(EXECUTER_EXECUTE_METHOD_MATCHER));
     }
 
     private static class ExecutorAdvice {

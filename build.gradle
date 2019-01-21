@@ -64,9 +64,9 @@ subprojects {
             jarCheckOutput.mkdirs()
             configurations.runtimeClasspath.each { file ->
                 def name = file.name
-                def isExcluded = excludes.stream().filter({ excl ->
+                def isExcluded = excludes.stream().anyMatch({ excl ->
                     name.contains(excl)
-                }).findAny().isPresent()
+                })
                 if (!isExcluded) {
                     javaexec {
                         classpath configurations.buildTools

@@ -1,6 +1,6 @@
 package rocks.inspectit.oce.core.instrumentation;
 
-import lombok.Value;
+import lombok.Getter;
 import net.bytebuddy.description.type.TypeDescription;
 import rocks.inspectit.oce.core.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.oce.core.instrumentation.special.SpecialSensor;
@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 /**
  * Defines the actual or requested state of the instrumentation of a single class.
  */
-@Value
 class ClassInstrumentationConfiguration {
 
     /**
@@ -24,13 +23,20 @@ class ClassInstrumentationConfiguration {
     /**
      * The sensors which are active for the target class.
      */
-    Set<SpecialSensor> activeSensors;
+    @Getter
+    private final Set<SpecialSensor> activeSpecialSensors;
 
     /**
      * The inspectIT configuration used to derive this configuration object.
      * Can be null, but only if no sensors active.
      */
-    InstrumentationSettings activeConfiguration;
+    @Getter
+    private final InstrumentationSettings activeConfiguration;
+
+    private ClassInstrumentationConfiguration(Set<SpecialSensor> activeSpecialSensors, InstrumentationSettings activeConfiguration) {
+        this.activeSpecialSensors = activeSpecialSensors;
+        this.activeConfiguration = activeConfiguration;
+    }
 
     /**
      * Compares this instrumentation configuration against another.
@@ -41,10 +47,10 @@ class ClassInstrumentationConfiguration {
      * @return true if both are the same, false otherwise
      */
     public boolean isSameAs(TypeDescription forType, ClassInstrumentationConfiguration other) {
-        if (!activeSensors.equals(other.activeSensors)) {
+        if (!activeSpecialSensors.equals(other.activeSpecialSensors)) {
             return false;
         }
-        for (SpecialSensor sensor : activeSensors) {
+        for (SpecialSensor sensor : activeSpecialSensors) {
             if (sensor.requiresInstrumentationChange(forType, activeConfiguration, other.activeConfiguration)) {
                 return false;
             }

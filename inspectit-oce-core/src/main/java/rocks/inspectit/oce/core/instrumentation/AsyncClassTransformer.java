@@ -1,5 +1,6 @@
 package rocks.inspectit.oce.core.instrumentation;
 
+import com.google.common.cache.CacheBuilder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -8,6 +9,7 @@ import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.ClassFileLocator;
 import net.bytebuddy.dynamic.DynamicType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.oce.core.config.InspectitEnvironment;
 import rocks.inspectit.oce.core.instrumentation.special.SpecialSensor;
@@ -21,9 +23,6 @@ import java.lang.instrument.Instrumentation;
 import java.lang.instrument.UnmodifiableClassException;
 import java.security.ProtectionDomain;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.BiConsumer;
 
 /**
  * A class transformer applying all inspectIT instrumentations.
@@ -32,106 +31,52 @@ import java.util.function.BiConsumer;
 @Component
 @Slf4j
 public class AsyncClassTransformer implements ClassFileTransformer {
-    /**
-     * These classes are ignored when found on the bootstrap.
-     * Those are basically the inspectIT classes and OpenCensus with its dependencies
-     */
-    private static final List<String> IGNORED_BOOTSTRAP_PACKAGES = Arrays.asList(
-            "rocks.inspectit.",
-            "io.opencensus.",
-            "io.grpc.",
-            "com.lmax.disruptor.",
-            "com.google."
-    );
-
-    private static final ClassLoader INSPECTIT_CLASSLOADER = AsyncClassTransformer.class.getClassLoader();
 
     @Autowired
-    InspectitEnvironment env;
+    private InspectitEnvironment env;
+
+    @Autowired
+    private ApplicationContext ctx;
 
     @Autowired
     private Instrumentation instrumentation;
 
     @Autowired
-    private List<SpecialSensor> sensors;
+    private IgnoredClassesManager ignoredClasses;
+
+    @Autowired
+    private List<SpecialSensor> specialSensors;
+
+    @Autowired
+    private List<IClassDefinitionListener> classDefinitionListeners;
 
     /**
      * Detects if the instrumenter is in the process of shutting down.
      * When it is shutting down, no new instrumentations are added anymore, instead all existing instrumentations are removed.
      */
     @Getter
-    private boolean shuttingDown = false;
+    private volatile boolean shuttingDown = false;
 
     /**
-     * A lock for safely accessing {@link #shuttingDown} in combination with {@link #activeConfigurations}.
+     * A lock for safely accessing {@link #shuttingDown} in combination with {@link #instrumentedClasses}.
      */
     private Object shutDownLock = new Object();
 
     /**
-     * Stores all registered listeners.
+     * Stores all classes which have been instrumented with a configuration different
+     * than {@link ClassInstrumentationConfiguration#NO_INSTRUMENTATION}.
      */
-    private Set<BiConsumer<Class<?>, ClassInstrumentationConfiguration>> postInstrumentationListeners =
-            Collections.newSetFromMap(new ConcurrentHashMap<>());
+    private Set<Class<?>> instrumentedClasses = Collections.newSetFromMap(
+            CacheBuilder.newBuilder().weakKeys().<Class<?>, Boolean>build().asMap());
 
-    /**
-     * Stores the currently active instrumentations for each class.
-     * If a class is not present here, this means that it is not instrumented.
-     * This is equal to having {@link ClassInstrumentationConfiguration#NO_INSTRUMENTATION} as config.
-     */
-    private Map<Class<?>, ClassInstrumentationConfiguration> activeConfigurations = Collections.synchronizedMap(new WeakHashMap<>());
-
-    /**
-     * Specifies the most recent time stamp when {@link #transform(ClassLoader, String, Class, ProtectionDomain, byte[])} was called for an initial definition of a class.
-     */
-    @Getter
-    private AtomicLong lastNewClassDefinitionTimestamp = new AtomicLong(0);
-
-
-    /**
-     * Registers a listener which is called after a class has been instrumented or deinstrumented.
-     * Note that it is not guaranteed that the given instrumentation is already active!
-     *
-     * @param listener the listener to add, accepting the instrumented class and its new configuration
-     */
-    public void addPostInstrumentationListener(BiConsumer<Class<?>, ClassInstrumentationConfiguration> listener) {
-        postInstrumentationListeners.add(listener);
-    }
-
-    public boolean isIgnoredClass(Class<?> clazz) {
-        if (clazz.getClassLoader() == INSPECTIT_CLASSLOADER) {
-            return true;
-        } else if (clazz.getClassLoader() == null) {
-            String name = clazz.getName();
-            return IGNORED_BOOTSTRAP_PACKAGES.stream()
-                    .filter(prefix -> name.startsWith(prefix))
-                    .findAny().isPresent()
-                    || !instrumentation.isModifiableClass(clazz);
-        }
-        return !instrumentation.isModifiableClass(clazz);
-    }
-
-    /**
-     * Returns the most recently applied instrumentation configuration for a given class.
-     * Note that it is neither guaranteed that the instrumentation is already active or remains active after this call!
-     *
-     * @param clazz the clazz to query
-     * @return the most recently applied instrumentation on this class
-     */
-    public ClassInstrumentationConfiguration getActiveClassInstrumentationConfiguration(Class<?> clazz) {
-        return activeConfigurations.getOrDefault(clazz, ClassInstrumentationConfiguration.NO_INSTRUMENTATION);
-    }
 
     @Override
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] bytecode) throws IllegalClassFormatException {
         if (classBeingRedefined == null) { // class is not loaded yet! we only redefine only loaded classes to prevent blocking
-            lastNewClassDefinitionTimestamp.set(System.currentTimeMillis());
+            classDefinitionListeners.forEach(lis -> lis.newClassDefined(className, loader));
             return bytecode; //leave the class unchanged for now
         } else {
-            if (isIgnoredClass(classBeingRedefined)) {
-                return bytecode;
-            } else {
-                return applyInstrumentation(classBeingRedefined, bytecode);
-            }
+            return applyInstrumentation(classBeingRedefined, bytecode);
         }
     }
 
@@ -144,75 +89,90 @@ public class AsyncClassTransformer implements ClassFileTransformer {
      * Removes all applied instrumentations if the JVM is not shutting down but the agent is.
      */
     @PreDestroy
-    private void destory() {
+    private void destroy() {
         // this look guarantees through updateAndGetActiveConfiguration that no instrumentation is added after the lock is released
         synchronized (shutDownLock) {
             shuttingDown = true;
         }
         if (!CommonUtils.isJVMShuttingDown()) {
+            deinstrumentAllClasses();
+        }
+        instrumentation.removeTransformer(this);
+    }
 
-            while (!activeConfigurations.isEmpty()) {
-                try {
-                    instrumentation.retransformClasses(activeConfigurations.keySet().toArray(new Class[]{}));
-                } catch (UnmodifiableClassException e) {
-                    log.error("Error removing applied transformations", e);
-                }
+    private void deinstrumentAllClasses() {
+        while (!instrumentedClasses.isEmpty()) {
+            List<Class<?>> batchClasses = new ArrayList<>();
+            int maxBatchSize = env.getCurrentConfig().getInstrumentation().getInternal().getClassRetransformBatchSize();
+
+            Iterator<Class<?>> it = instrumentedClasses.iterator();
+            for (int i = 0; i < maxBatchSize && it.hasNext(); i++) {
+                batchClasses.add(it.next());
             }
-            instrumentation.removeTransformer(this);
+
+            try {
+                instrumentation.retransformClasses(batchClasses.toArray(new Class[]{}));
+            } catch (UnmodifiableClassException e) {
+                log.error("Error removing applied transformations", e);
+            }
         }
     }
 
-
-    private byte[] applyInstrumentation(Class<?> classBeingRedefined, byte[] bytecode) {
+    private byte[] applyInstrumentation(Class<?> classBeingRedefined, byte[] originalByteCode) {
         try {
             TypeDescription type = TypeDescription.ForLoadedType.of(classBeingRedefined);
 
-            ClassInstrumentationConfiguration classConf;
-            classConf = updateAndGetActiveConfiguration(classBeingRedefined, type);
+            ClassInstrumentationConfiguration classConf = updateAndGetActiveConfiguration(classBeingRedefined, type);
 
-            ClassFileLocator byteCodeClassFileLocator = ClassFileLocator.Simple.of(classBeingRedefined.getName(), bytecode);
-            DynamicType.Builder<?> parsed = new ByteBuddy().redefine(classBeingRedefined, byteCodeClassFileLocator);
+            byte[] resultBytes;
+            if (classConf.isSameAs(type, ClassInstrumentationConfiguration.NO_INSTRUMENTATION)) {
+                resultBytes = originalByteCode;
+            } else {
+                ClassFileLocator byteCodeClassFileLocator = ClassFileLocator.Simple.of(classBeingRedefined.getName(), originalByteCode);
+                DynamicType.Builder<?> parsed = new ByteBuddy().redefine(classBeingRedefined, byteCodeClassFileLocator);
 
-            for (SpecialSensor specs : classConf.getActiveSensors()) {
-                parsed = specs.instrument(classBeingRedefined, type, classConf.getActiveConfiguration(), parsed);
+                for (SpecialSensor specs : classConf.getActiveSpecialSensors()) {
+                    parsed = specs.instrument(classBeingRedefined, type, classConf.getActiveConfiguration(), parsed);
+                }
+                DynamicType.Unloaded<?> made = parsed.make();
+                resultBytes = made.getBytes();
             }
-            DynamicType.Unloaded<?> made = parsed.make();
-            byte[] bytes = made.getBytes();
 
-            postInstrumentationListeners.forEach(lis -> lis.accept(classBeingRedefined, classConf));
 
-            return bytes;
+            val event = new ClassInstrumentedEvent(this, classBeingRedefined, type, classConf);
+            ctx.publishEvent(event);
+
+            return resultBytes;
         } catch (Exception e) {
             log.error("Error generating instrumented bytecode", e);
-            return bytecode;
+            return originalByteCode;
         }
     }
 
     /**
      * Derives the {@link ClassInstrumentationConfiguration} based on the latest environment configuration for a given type.
-     * In addition it marks this configuration as the currently active configuration for the given type.
-     * If the class transformer is shutting down, this return {@link ClassInstrumentationConfiguration#NO_INSTRUMENTATION}
+     * In addition the class is added to {@link #instrumentedClasses} if it is instrumented or removed from the set otherwise.
+     * If the class transformer is shutting down, this returns {@link ClassInstrumentationConfiguration#NO_INSTRUMENTATION}
      * for every class (= all classes should be deinstrumented).
      *
-     * @param classBeingRedefined
-     * @param type
+     * @param classBeingRedefined the class to check for
+     * @param type                the classes type description
      * @return
      */
     private ClassInstrumentationConfiguration updateAndGetActiveConfiguration(Class<?> classBeingRedefined, TypeDescription type) {
-        ClassInstrumentationConfiguration classConf;
         val instrConf = env.getCurrentConfig().getInstrumentation();
+        ClassInstrumentationConfiguration classConf = ClassInstrumentationConfiguration.getFor(type, instrConf, specialSensors);
+
         synchronized (shutDownLock) {
-            if (shuttingDown) {
+            if (shuttingDown || ignoredClasses.isIgnoredClass(classBeingRedefined)) {
                 classConf = ClassInstrumentationConfiguration.NO_INSTRUMENTATION;
-            } else {
-                classConf = ClassInstrumentationConfiguration.getFor(type, instrConf, sensors);
             }
             if (classConf.isSameAs(type, ClassInstrumentationConfiguration.NO_INSTRUMENTATION)) {
                 log.debug("Removing instrumentation of {}", classBeingRedefined);
-                activeConfigurations.remove(classBeingRedefined);
+                instrumentedClasses.remove(classBeingRedefined);
             } else {
                 log.debug("Applying instrumentation of {}", classBeingRedefined);
-                activeConfigurations.put(classBeingRedefined, classConf);
+                instrumentedClasses.add(classBeingRedefined);
             }
         }
         return classConf;

@@ -14,23 +14,18 @@ import java.time.Duration;
 public class InternalSettings {
 
     /**
-     * The time to pause between executing batches of class instrumentation configuration checks
+     * The time to pause between executing batches of class instrumentation updates
      */
-    private Duration classConfigurationCheckInterBatchDelay;
+    private Duration interBatchDelay;
 
     /**
-     * Defines how many classes are checked at once for updates of their configuration
+     * Defines the maximum number classes which are checked at once for updates of their configuration per batch
      */
     @Min(50)
     private int classConfigurationCheckBatchSize;
 
     /**
-     * Defines the time to pause between calls to Instrumentation.retransform
-     */
-    private Duration classRetransformInterBatchDelay;
-
-    /**
-     * Defines how many classes are retransformed at once
+     * Defines the maximum number classes which are retransformed at once per batch
      */
     @Min(1)
     private int classRetransformBatchSize;
@@ -46,4 +41,10 @@ public class InternalSettings {
      * This influences if newly created classes are discovered by inspectIT.
      */
     private Duration maxClassDefinitionDelay;
+
+    /**
+     * Defines how long after the invocation of ClassFileTransform the agent should wait with trying to discover new classes.
+     * The default value is set to zero for cases where the application constantly keeps defining new classes.
+     */
+    private Duration minClassDefinitionDelay;
 }

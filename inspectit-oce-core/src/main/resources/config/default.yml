@@ -40,17 +40,15 @@ inspectit:
     special:
       # enables or disables the instrumentation to ensure data, tag and trace propagation across java.util.concurrent.Executor instances
       executor-context-propagation: true
+
     # settings for fine-tuning the instrumentation process
     internal:
+      # the time to pause between executing batches of class instrumentation updates
+      inter-batch-delay: 50ms
       # defines how many classes are checked at once for updates of their configuration
       class-configuration-check-batch-size: 1000
-      # the time to pause between executing batches of class instrumentation configuration checks
-      class-configuration-check-inter-batch-delay: 50ms
-
-      # defines how many classes are retransformed at once
-      class-retransform-batch-size: 100
-      # defines the time to pause between calls to Instrumentation.retransform
-      class-retransform-inter-batch-delay: 50ms
+      # defines the maximum number of classes which are retransformed at once per batch
+      class-retransform-batch-size: 10
 
       # defines how often the agent should check if new classes have been defined.
       # this check is only performed if Classloader.defineClass was called less than ${max-class-definition-delay} seconds ago
@@ -58,6 +56,17 @@ inspectit:
       # defines how long after the invocation of ClassFileTransform the class is guaranteed to be present in Instrumentation.getAllLoadedClasses.
       # this influences if newly created classes are discovered by inspectIT.
       max-class-definition-delay: 60s
+      # defines how long after the invocation of ClassFileTransform the agent should wait with trying to discover new classes.
+      # the default value is set to zero for cases where the application constantly keeps defining new classes.
+      min-class-definition-delay: 0s
+
+    # defines all bootstrap packages whose classes and subpackages should be ignored
+    ignored-bootstrap-packages:
+        rocks.inspectit : true
+        io.opencensus : true
+        io.grpc : true
+        com.lmax.disruptor : true
+        com.google : true
 
   # settings for configuring OpenCensus stats and trace exporters
   exporters:
