@@ -29,7 +29,7 @@ The attaching can easily be done with utilities like https://github.com/apangin/
 
 [subs=attributes+]
 ```bash
-$ ./jattach.sh <pid> load instrument /path/to/inspectit-oce-agent-{inspectit-oce-version}.jar
+$ ./jattach.sh <pid> load instrument false /path/to/inspectit-oce-agent-{inspectit-oce-version}.jar
 ```
 
 In order to find the process ID of a running JVM, you can use the `jcmd` to list all the running Java processes on your machine:
