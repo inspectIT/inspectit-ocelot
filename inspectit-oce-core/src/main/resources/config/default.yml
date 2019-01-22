@@ -38,8 +38,10 @@ inspectit:
   instrumentation:
     # settings for special sensors
     special:
-      # enables or disables the instrumentation to ensure data, tag and trace propagation across java.util.concurrent.Executor instances
+      # enables or disables the instrumentation to ensure context propagation across java.util.concurrent.Executor instances
       executor-context-propagation: true
+      # enables or disables the instrumentation to ensure context propagation across java.lang.Thread instances
+      thread-start-context-propagation: true
 
     # settings for fine-tuning the instrumentation process
     internal:

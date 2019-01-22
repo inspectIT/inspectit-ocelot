@@ -1,0 +1,34 @@
+### Special Sensors
+
+A _Special Sensor_ is a sensor that does not collect data, but which is needed to enable certain functionality.
+Each of them can be deactivated, but this is not recommended because certain features require them as a prerequisite.
+For example, tracing across multiple threads is made possible by specific special sensors.
+Should these sensors be deactivated, this feature would no longer be automatically available.
+
+[TIP]
+====
+The special sensors can be disabled using the following configuration:
+[source,YAML]
+----
+inspectit:
+  instrumentation:
+    special:
+      # See the default configuration for all existing special sensor keys
+      SPECIAL_SENSOR_KEY: false
+----
+====
+
+#### Context Propagation Sensors
+
+The context propagation sensors are necessary to enable tracing and passing data (like tags) between multiple threads by passing the current context.
+By doing this, tags and scopes can be correlated to another in case of switching threads.
+
+The following context propagation sensors are provided out-of-the-box.
+
+Thread-Start Context Propagation Sensor::
+This sensor enables passing the current context via simple ``java.lang.Thread`` instances.
+Note that the context is passed which is the current context at the time of calling the thread's ``start`` method and not the one during construction time.
+
+Executor Context Propagation Sensor::
+This sensor enables passing the current context via implementations of the ``java.util.concurrent.Executor`` interface.
+The context is attached to the ``java.lang.Runnable`` instance which is passed to the Executor's ``execute`` method.
