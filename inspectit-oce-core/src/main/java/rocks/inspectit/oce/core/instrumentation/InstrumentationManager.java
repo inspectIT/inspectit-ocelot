@@ -1,5 +1,7 @@
 package rocks.inspectit.oce.core.instrumentation;
 
+import com.google.common.base.Stopwatch;
+import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
@@ -11,17 +13,22 @@ import org.springframework.stereotype.Service;
 import rocks.inspectit.oce.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.oce.core.config.InspectitEnvironment;
 import rocks.inspectit.oce.core.config.model.instrumentation.InternalSettings;
-import rocks.inspectit.oce.core.instrumentation.config.ClassInstrumentationConfiguration;
-import rocks.inspectit.oce.core.instrumentation.config.InstrumentationConfigurationChangedEvent;
 import rocks.inspectit.oce.core.instrumentation.config.InstrumentationConfigurationResolver;
+import rocks.inspectit.oce.core.instrumentation.config.event.InstrumentationConfigurationChangedEvent;
+import rocks.inspectit.oce.core.instrumentation.config.model.ClassInstrumentationConfiguration;
+import rocks.inspectit.oce.core.instrumentation.event.ClassInstrumentedEvent;
+import rocks.inspectit.oce.core.instrumentation.event.IClassDiscoveryListener;
 import rocks.inspectit.oce.core.service.BatchJobExecutorService;
-import rocks.inspectit.oce.core.utils.StopWatch;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.lang.instrument.Instrumentation;
 import java.time.Duration;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This class is responsible for making sure that for every class the instrumentation
@@ -41,9 +48,6 @@ public class InstrumentationManager implements IClassDiscoveryListener {
     @Autowired
     private InspectitEnvironment env;
 
-    @Autowired
-    private NewClassDiscoveryService classDisoveryService;
-
     /**
      * Required to detect if the transformer is shutting down.
      * In this case no further retransforms will be triggered.
@@ -61,30 +65,18 @@ public class InstrumentationManager implements IClassDiscoveryListener {
      * For each class we remember the applied instrumentation.
      * This allows us to check if a retransform is required.
      */
-    private Map<Class<?>, ClassInstrumentationConfiguration> activeInstrumentations =
-            CacheBuilder.newBuilder().weakKeys().<Class<?>, ClassInstrumentationConfiguration>build().asMap();
-
-    /**
-     * A set containing all loaded classes.
-     * This required because in case of a config change we need to reevalaute the intrumentation for each class.
-     */
-    private Set<Class<?>> loadedClasses = Collections.newSetFromMap(
-            CacheBuilder.newBuilder().weakKeys().<Class<?>, Boolean>build().asMap());
+    private Cache<Class<?>, ClassInstrumentationConfiguration> activeInstrumentations =
+            CacheBuilder.newBuilder().weakKeys().build();
 
     /**
      * The set of classes which might need instrumentation updates.
      * This service works through this set in batches.
+     * Package-private for testing.
      */
-    private Set<Class<?>> pendingClasses = Collections.newSetFromMap(
-            CacheBuilder.newBuilder().weakKeys().<Class<?>, Boolean>build().asMap());
+    Cache<Class<?>, Boolean> pendingClasses =
+            CacheBuilder.newBuilder().weakKeys().build();
 
     private BatchJobExecutorService.BatchJob<BatchSize> classInstrumentationJob;
-
-    @Value
-    private static class BatchSize {
-        private int maxClassesToCheck;
-        private int maxClassesToRetransform;
-    }
 
 
     @PostConstruct
@@ -102,9 +94,10 @@ public class InstrumentationManager implements IClassDiscoveryListener {
     }
 
     @Override
-    public void newClassesDiscovered(Set<Class<?>> newClasses) {
-        loadedClasses.addAll(newClasses);
-        pendingClasses.addAll(newClasses);
+    public void onNewClassesDiscovered(Set<Class<?>> newClasses) {
+        for (Class<?> clazz : newClasses) {
+            pendingClasses.put(clazz, Boolean.TRUE);
+        }
     }
 
     @EventListener
@@ -114,7 +107,7 @@ public class InstrumentationManager implements IClassDiscoveryListener {
         Class<?> clazz = event.getInstrumentedClass();
 
         if (ClassInstrumentationConfiguration.NO_INSTRUMENTATION.isSameAs(type, config)) {
-            activeInstrumentations.remove(clazz);
+            activeInstrumentations.invalidate(clazz);
         } else {
             activeInstrumentations.put(clazz, config);
         }
@@ -122,7 +115,7 @@ public class InstrumentationManager implements IClassDiscoveryListener {
         //there might be race conditions when a class is being retransformed
         //and we considered it up-to-date at the same time
         //for this reason we have to recheck every class after it has been instrumented
-        pendingClasses.add(clazz);
+        pendingClasses.put(clazz, Boolean.TRUE);
     }
 
     @EventListener
@@ -136,15 +129,15 @@ public class InstrumentationManager implements IClassDiscoveryListener {
 
     @EventListener
     private void instrumentationConfigEventListener(InstrumentationConfigurationChangedEvent ev) {
-        pendingClasses.addAll(loadedClasses);
+        for (Class<?> clazz : instrumentation.getAllLoadedClasses()) {
+            pendingClasses.put(clazz, Boolean.TRUE);
+        }
     }
-
 
     /**
      * Processes a given amount of classes from {@link #pendingClasses}.
      * For the classes where it is required a retransform is triggered.
-     * <p>
-     * This method is package-private for testing.
+     * package-private for testing.
      *
      * @param batchSize the number of classes to take from {@link #pendingClasses} and to retransform per batch
      */
@@ -155,11 +148,11 @@ public class InstrumentationManager implements IClassDiscoveryListener {
 
         List<Class<?>> classesToRetransform = getBatchOfClassesToRetransform(batchSize);
 
-        val watch = new StopWatch();
+        val watch = Stopwatch.createStarted();
         if (!classesToRetransform.isEmpty()) {
             try {
                 instrumentation.retransformClasses(classesToRetransform.toArray(new Class<?>[]{}));
-                log.debug("Retransformed {} classes in {} ms", classesToRetransform.size(), watch.getElapsedMillis());
+                log.debug("Retransformed {} classes in {} ms", classesToRetransform.size(), watch.elapsed(TimeUnit.MILLISECONDS));
             } catch (Exception e) {
                 log.error("Error retransforming classes!", e);
             }
@@ -167,15 +160,22 @@ public class InstrumentationManager implements IClassDiscoveryListener {
 
     }
 
-    private List<Class<?>> getBatchOfClassesToRetransform(BatchSize batchSize) {
+    /**
+     * Takes the configured amounts from {@link #pendingClasses} and checks if they need a retransformation.
+     * Package private for testing.
+     *
+     * @param batchSize the configured batch sizes
+     * @return the classes which need retransformation
+     */
+    List<Class<?>> getBatchOfClassesToRetransform(BatchSize batchSize) {
         List<Class<?>> classesToRetransform = new ArrayList<>();
 
-        StopWatch watch = new StopWatch();
+        val watch = Stopwatch.createStarted();
         try {
 
             int checkedClassesCount = 0;
 
-            Iterator<Class<?>> queueIterator = pendingClasses.iterator();
+            Iterator<Class<?>> queueIterator = pendingClasses.asMap().keySet().iterator();
             while (queueIterator.hasNext()) {
 
                 Class<?> clazz = queueIterator.next();
@@ -186,13 +186,14 @@ public class InstrumentationManager implements IClassDiscoveryListener {
                     classesToRetransform.add(clazz);
                 }
 
-                if (checkedClassesCount == batchSize.maxClassesToCheck
-                        || classesToRetransform.size() == batchSize.maxClassesToRetransform) {
+                if (checkedClassesCount >= batchSize.maxClassesToCheck
+                        || classesToRetransform.size() >= batchSize.maxClassesToRetransform) {
                     break;
                 }
             }
             if (checkedClassesCount > 0) {
-                log.debug("Checked configuration of {} classes in {} ms, {} classes left to check", checkedClassesCount, watch.getElapsedMillis(), pendingClasses.size());
+                log.debug("Checked configuration of {} classes in {} ms, {} classes left to check",
+                        checkedClassesCount, watch.elapsed(TimeUnit.MILLISECONDS), pendingClasses.size());
             }
         } catch (Exception e) {
             log.error("Error checking for class instrumentation configuration updates", e);
@@ -200,10 +201,23 @@ public class InstrumentationManager implements IClassDiscoveryListener {
         return classesToRetransform;
     }
 
-    private boolean doesClassRequireRetransformation(Class<?> clazz) {
+    boolean doesClassRequireRetransformation(Class<?> clazz) {
         val typeDescr = TypeDescription.ForLoadedType.of(clazz);
         ClassInstrumentationConfiguration requestedConfig = configResolver.getClassInstrumentationConfiguration(clazz);
-        val activeConfig = activeInstrumentations.getOrDefault(clazz, ClassInstrumentationConfiguration.NO_INSTRUMENTATION);
-        return !activeConfig.isSameAs(typeDescr, requestedConfig);
+        val activeConfig = activeInstrumentations.getIfPresent(clazz);
+        if (activeConfig == null) {
+            return !requestedConfig.isNoInstrumentation();
+        } else {
+            return !activeConfig.isSameAs(typeDescr, requestedConfig);
+        }
+    }
+
+    /**
+     * package private for testing.
+     */
+    @Value
+    static class BatchSize {
+        private int maxClassesToCheck;
+        private int maxClassesToRetransform;
     }
 }

@@ -2,7 +2,7 @@ package rocks.inspectit.oce.core.instrumentation.special;
 
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
-import rocks.inspectit.oce.core.instrumentation.config.InstrumentationConfiguration;
+import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationConfiguration;
 
 public interface SpecialSensor {
 

@@ -1,7 +1,8 @@
-package rocks.inspectit.oce.core.instrumentation.config;
+package rocks.inspectit.oce.core.instrumentation.config.model;
 
 import lombok.Value;
 import rocks.inspectit.oce.core.config.model.instrumentation.InstrumentationSettings;
+import rocks.inspectit.oce.core.instrumentation.config.InstrumentationConfigurationResolver;
 
 /**
  * Contains the resolved instrumentation settings.

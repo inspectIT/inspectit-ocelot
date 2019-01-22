@@ -1,4 +1,4 @@
-package rocks.inspectit.oce.core.instrumentation;
+package rocks.inspectit.oce.core.instrumentation.event;
 
 import java.util.Set;
 
@@ -12,5 +12,5 @@ public interface IClassDiscoveryListener {
      *
      * @param newClasses the set of newly discovered classes
      */
-    void newClassesDiscovered(Set<Class<?>> newClasses);
+    void onNewClassesDiscovered(Set<Class<?>> newClasses);
 }

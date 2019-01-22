@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class SpecialSettings {
+public class SpecialSensorSettings {
 
     /**
      * Enable or disables the @{@link rocks.inspectit.oce.core.instrumentation.special.ExecutorContextPropagationSensor}.

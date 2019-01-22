@@ -1,8 +1,9 @@
-package rocks.inspectit.oce.core.instrumentation.config;
+package rocks.inspectit.oce.core.instrumentation.config.model;
 
 import lombok.Getter;
 import net.bytebuddy.description.type.TypeDescription;
 import rocks.inspectit.oce.core.instrumentation.special.SpecialSensor;
+import rocks.inspectit.oce.core.utils.CommonUtils;
 
 import java.util.Collections;
 import java.util.Set;
@@ -38,13 +39,15 @@ public class ClassInstrumentationConfiguration {
     /**
      * Compares this instrumentation configuration against another.
      * Two instrumentations are considered to be the "same" if they result in the same bytecode changes.
+     * To check if a given configuration represents "no instrumentation" you should rather use {@link #isNoInstrumentation()}
+     * isntead of comparing against {@link #NO_INSTRUMENTATION}.
      *
      * @param forType the type for which this configuration is meant.
      * @param other   the other configuration to compare against
      * @return true if both are the same, false otherwise
      */
     public boolean isSameAs(TypeDescription forType, ClassInstrumentationConfiguration other) {
-        if (!activeSpecialSensors.equals(other.activeSpecialSensors)) {
+        if (!CommonUtils.contentsEqual(activeSpecialSensors, other.activeSpecialSensors)) {
             return false;
         }
         for (SpecialSensor sensor : activeSpecialSensors) {
@@ -53,6 +56,17 @@ public class ClassInstrumentationConfiguration {
             }
         }
         return true;
+    }
+
+    /**
+     * Checks if this configuration induces no bytecode changes to the target class.
+     * This is the same as invoking {@link #isSameAs(TypeDescription, ClassInstrumentationConfiguration)}
+     * with {@link #NO_INSTRUMENTATION}, but faster.
+     *
+     * @return true iof this configuratio nrepresents "no instrumentation"
+     */
+    public boolean isNoInstrumentation() {
+        return activeSpecialSensors.isEmpty();
     }
 
 }

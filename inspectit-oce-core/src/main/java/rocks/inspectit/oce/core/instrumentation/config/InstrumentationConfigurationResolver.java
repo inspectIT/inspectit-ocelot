@@ -11,17 +11,22 @@ import rocks.inspectit.oce.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.oce.core.config.InspectitEnvironment;
 import rocks.inspectit.oce.core.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.oce.core.instrumentation.AsyncClassTransformer;
+import rocks.inspectit.oce.core.instrumentation.config.event.InstrumentationConfigurationChangedEvent;
+import rocks.inspectit.oce.core.instrumentation.config.model.ClassInstrumentationConfiguration;
+import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationConfiguration;
 import rocks.inspectit.oce.core.instrumentation.special.SpecialSensor;
 
 import javax.annotation.PostConstruct;
 import java.lang.instrument.Instrumentation;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * This class is responsible for deriving the {@link InstrumentationConfiguration} from teh {@link InstrumentationSettings}.
+ * This class is responsible for deriving the {@link InstrumentationConfiguration} from
+ * the {@link InstrumentationSettings}.
  */
 @Service
 public class InstrumentationConfigurationResolver {
@@ -107,8 +112,8 @@ public class InstrumentationConfigurationResolver {
         if (clazz.getClassLoader() == null) {
             String name = clazz.getName();
             boolean isIgnored = env.getCurrentConfig().getInstrumentation().getIgnoredBootstrapPackages().entrySet().stream()
-                    .filter(e -> e.getValue() == true)
-                    .anyMatch(e -> name.startsWith(e.getKey() + "."));
+                    .filter(Map.Entry::getValue)
+                    .anyMatch(e -> name.startsWith(e.getKey()));
             if (isIgnored) {
                 return true;
             }

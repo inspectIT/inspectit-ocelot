@@ -2,6 +2,7 @@ package rocks.inspectit.oce.instrumentation.special;
 
 import io.opencensus.common.Scope;
 import io.opencensus.tags.*;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Iterator;
@@ -16,6 +17,12 @@ public class ExecutorContextPropagationTest {
 
     private static final Tagger tagger = Tags.getTagger();
 
+    @BeforeEach
+    void watiForInstrumentation() throws Exception {
+        //TODO: wait until the instrumentation is complete as soon as selfmonitoring is added to monitor the instrumentation queues
+        Thread.sleep(5000);
+    }
+
     @Test
     public void testContextPropagationAcrossExecutorForRunnables() throws Exception {
         ExecutorService es = Executors.newFixedThreadPool(2);
@@ -24,9 +31,6 @@ public class ExecutorContextPropagationTest {
         AtomicReference<String> tagValue = new AtomicReference<>(null);
 
         Future<?> taskFuture;
-
-        //TODO: wait until the instrumentation is complete as soon as selfmonitoring is added to monitor the instrumentation queues
-        Thread.sleep(5000);
 
         try (Scope s = tagger.currentBuilder().put(keyToPropagate, TagValue.create("myval")).buildScoped()) {
             taskFuture = es.submit(() -> {
@@ -52,10 +56,6 @@ public class ExecutorContextPropagationTest {
 
 
         Future<String> taskFuture;
-
-        //TODO: wait until the instrumentation is complete as soon as selfmonitoring is added to monitor the instrumentation queues
-        Thread.sleep(5000);
-
         try (Scope s = tagger.currentBuilder().put(keyToPropagate, TagValue.create("myval")).buildScoped()) {
             taskFuture = es.submit(() -> {
                 Iterator<Tag> it = InternalUtils.getTags(tagger.getCurrentTagContext());

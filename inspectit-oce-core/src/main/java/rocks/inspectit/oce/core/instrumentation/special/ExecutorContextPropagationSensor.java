@@ -1,6 +1,5 @@
 package rocks.inspectit.oce.core.instrumentation.special;
 
-import lombok.extern.slf4j.Slf4j;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
@@ -9,7 +8,7 @@ import net.bytebuddy.matcher.ElementMatcher;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.oce.bootstrap.Instances;
-import rocks.inspectit.oce.core.instrumentation.config.InstrumentationConfiguration;
+import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationConfiguration;
 import rocks.inspectit.oce.core.instrumentation.context.ContextManagerImpl;
 
 import java.util.concurrent.Executor;
@@ -18,7 +17,6 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
 
 @Component
 @DependsOn(ContextManagerImpl.BEAN_NAME)
-@Slf4j
 public class ExecutorContextPropagationSensor implements SpecialSensor {
 
     private static final ElementMatcher<TypeDescription> EXECUTER_CLASSES_MATCHER =

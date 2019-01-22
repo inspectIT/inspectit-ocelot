@@ -23,7 +23,7 @@ public class InstrumentationSettings {
      * The configuration for all special sensors.
      */
     @Valid
-    private SpecialSettings special;
+    private SpecialSensorSettings special;
 
     /**
      * Defines which packages of the bootstrap should not be instrumented.

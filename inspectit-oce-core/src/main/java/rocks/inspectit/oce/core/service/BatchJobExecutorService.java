@@ -105,7 +105,7 @@ public class BatchJobExecutorService {
      * @return the started {@link BatchJob}
      */
     public <T> BatchJob<T> startJob(BatchProcessor<T> task, T batchSizes, Duration startDelay, Duration interBatchDelay) {
-        BatchJob job = new BatchJob(task, batchSizes, interBatchDelay);
+        BatchJob<T> job = new BatchJob<>(task, batchSizes, interBatchDelay);
         job.scheduleNextBatch(startDelay);
         return job;
     }

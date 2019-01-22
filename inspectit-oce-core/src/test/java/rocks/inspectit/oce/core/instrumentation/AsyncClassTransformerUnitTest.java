@@ -13,8 +13,10 @@ import rocks.inspectit.oce.core.config.InspectitEnvironment;
 import rocks.inspectit.oce.core.config.model.InspectitConfig;
 import rocks.inspectit.oce.core.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.InternalSettings;
-import rocks.inspectit.oce.core.instrumentation.config.ClassInstrumentationConfiguration;
 import rocks.inspectit.oce.core.instrumentation.config.InstrumentationConfigurationResolver;
+import rocks.inspectit.oce.core.instrumentation.config.model.ClassInstrumentationConfiguration;
+import rocks.inspectit.oce.core.instrumentation.event.ClassInstrumentedEvent;
+import rocks.inspectit.oce.core.instrumentation.event.IClassDefinitionListener;
 import rocks.inspectit.oce.core.instrumentation.special.SpecialSensor;
 
 import java.io.ByteArrayOutputStream;
@@ -141,7 +143,7 @@ public class AsyncClassTransformerUnitTest {
         ClassLoader loader = clazz.getClassLoader();
         transformer.transform(loader, className, null, null, bytecodeOfTest);
 
-        verify(listener, times(1)).newClassDefined(className, loader);
+        verify(listener, times(1)).onNewClassDefined(className, loader);
 
     }
 
@@ -161,7 +163,7 @@ public class AsyncClassTransformerUnitTest {
         ClassLoader loader = clazz.getClassLoader();
         transformer.transform(loader, className, getClass(), null, bytecodeOfTest);
 
-        verify(listener, never()).newClassDefined(any(), any());
+        verify(listener, never()).onNewClassDefined(any(), any());
     }
 
 }

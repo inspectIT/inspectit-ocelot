@@ -1,5 +1,6 @@
 package rocks.inspectit.oce.core.instrumentation;
 
+import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -12,8 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.oce.core.config.InspectitEnvironment;
-import rocks.inspectit.oce.core.instrumentation.config.ClassInstrumentationConfiguration;
 import rocks.inspectit.oce.core.instrumentation.config.InstrumentationConfigurationResolver;
+import rocks.inspectit.oce.core.instrumentation.config.model.ClassInstrumentationConfiguration;
+import rocks.inspectit.oce.core.instrumentation.event.ClassInstrumentedEvent;
+import rocks.inspectit.oce.core.instrumentation.event.IClassDefinitionListener;
 import rocks.inspectit.oce.core.instrumentation.special.SpecialSensor;
 import rocks.inspectit.oce.core.utils.CommonUtils;
 
@@ -24,7 +27,9 @@ import java.lang.instrument.IllegalClassFormatException;
 import java.lang.instrument.Instrumentation;
 import java.lang.instrument.UnmodifiableClassException;
 import java.security.ProtectionDomain;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * A class transformer applying all inspectIT instrumentations.
@@ -65,14 +70,13 @@ public class AsyncClassTransformer implements ClassFileTransformer {
      * Stores all classes which have been instrumented with a configuration different
      * than {@link ClassInstrumentationConfiguration#NO_INSTRUMENTATION}.
      */
-    private Set<Class<?>> instrumentedClasses = Collections.newSetFromMap(
-            CacheBuilder.newBuilder().weakKeys().<Class<?>, Boolean>build().asMap());
+    private Cache<Class<?>, Boolean> instrumentedClasses = CacheBuilder.newBuilder().weakKeys().build();
 
 
     @Override
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] bytecode) throws IllegalClassFormatException {
         if (classBeingRedefined == null) { // class is not loaded yet! we only redefine only loaded classes to prevent blocking
-            classDefinitionListeners.forEach(lis -> lis.newClassDefined(className, loader));
+            classDefinitionListeners.forEach(lis -> lis.onNewClassDefined(className, loader));
             return bytecode; //leave the class unchanged for now
         } else {
             return applyInstrumentation(classBeingRedefined, bytecode);
@@ -99,18 +103,24 @@ public class AsyncClassTransformer implements ClassFileTransformer {
         instrumentation.removeTransformer(this);
     }
 
+    /**
+     * Triggers a retransformation for all instrumented classes until none is instrumented anymore.
+     * Therefore this class expects that {@link #shuttingDown} is already set to true.
+     * When {@link #shuttingDown} is true, for every retransformed class any instrumentation is removed automatically.
+     */
     private void deinstrumentAllClasses() {
-        while (!instrumentedClasses.isEmpty()) {
+        //elements are removed from instrumentedClasses by the updateAndGetActiveConfiguration method
+        while (instrumentedClasses.size() > 0) {
             List<Class<?>> batchClasses = new ArrayList<>();
             int maxBatchSize = env.getCurrentConfig().getInstrumentation().getInternal().getClassRetransformBatchSize();
 
-            Iterator<Class<?>> it = instrumentedClasses.iterator();
+            Iterator<Class<?>> it = instrumentedClasses.asMap().keySet().iterator();
             for (int i = 0; i < maxBatchSize && it.hasNext(); i++) {
                 batchClasses.add(it.next());
             }
-
             try {
                 instrumentation.retransformClasses(batchClasses.toArray(new Class[]{}));
+                Thread.yield(); //yield to allow the target application to do stuff between the batches
             } catch (UnmodifiableClassException e) {
                 log.error("Error removing applied transformations", e);
             }
@@ -119,25 +129,29 @@ public class AsyncClassTransformer implements ClassFileTransformer {
 
     private byte[] applyInstrumentation(Class<?> classBeingRedefined, byte[] originalByteCode) {
         try {
+            //load the type description and the desired instrumentation
             TypeDescription type = TypeDescription.ForLoadedType.of(classBeingRedefined);
-
             ClassInstrumentationConfiguration classConf = updateAndGetActiveConfiguration(classBeingRedefined, type);
 
             byte[] resultBytes;
-            if (classConf.isSameAs(type, ClassInstrumentationConfiguration.NO_INSTRUMENTATION)) {
+            if (classConf.isNoInstrumentation()) {
+                // we do not want to isntrument this -> we return the original byte code
                 resultBytes = originalByteCode;
             } else {
+                //Make a ByteBuddy builder based on the input bytecode
                 ClassFileLocator byteCodeClassFileLocator = ClassFileLocator.Simple.of(classBeingRedefined.getName(), originalByteCode);
-                DynamicType.Builder<?> parsed = new ByteBuddy().redefine(classBeingRedefined, byteCodeClassFileLocator);
+                DynamicType.Builder<?> builder = new ByteBuddy().redefine(classBeingRedefined, byteCodeClassFileLocator);
 
-                for (SpecialSensor specs : classConf.getActiveSpecialSensors()) {
-                    parsed = specs.instrument(classBeingRedefined, type, classConf.getActiveConfiguration(), parsed);
+                //Apply the actual instrumentation onto the builders
+                for (SpecialSensor specialSensor : classConf.getActiveSpecialSensors()) {
+                    builder = specialSensor.instrument(classBeingRedefined, type, classConf.getActiveConfiguration(), builder);
                 }
-                DynamicType.Unloaded<?> made = parsed.make();
-                resultBytes = made.getBytes();
+                //"Compile" the builder to bytecode
+                DynamicType.Unloaded<?> instrumentedClass = builder.make();
+                resultBytes = instrumentedClass.getBytes();
             }
 
-
+            //Notify listeners that this class has been instrumented (or deinstrumented)
             val event = new ClassInstrumentedEvent(this, classBeingRedefined, type, classConf);
             ctx.publishEvent(event);
 
@@ -165,12 +179,12 @@ public class AsyncClassTransformer implements ClassFileTransformer {
             if (shuttingDown) {
                 classConf = ClassInstrumentationConfiguration.NO_INSTRUMENTATION;
             }
-            if (classConf.isSameAs(type, ClassInstrumentationConfiguration.NO_INSTRUMENTATION)) {
+            if (classConf.isNoInstrumentation()) {
                 log.debug("Removing instrumentation of {}", classBeingRedefined);
-                instrumentedClasses.remove(classBeingRedefined);
+                instrumentedClasses.invalidate(classBeingRedefined);
             } else {
                 log.debug("Applying instrumentation of {}", classBeingRedefined);
-                instrumentedClasses.add(classBeingRedefined);
+                instrumentedClasses.put(classBeingRedefined, Boolean.TRUE);
             }
         }
         return classConf;

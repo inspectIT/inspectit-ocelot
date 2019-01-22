@@ -1,10 +1,11 @@
-package rocks.inspectit.oce.core.instrumentation;
+package rocks.inspectit.oce.core.instrumentation.event;
 
 
 import lombok.Getter;
 import net.bytebuddy.description.type.TypeDescription;
 import org.springframework.context.ApplicationEvent;
-import rocks.inspectit.oce.core.instrumentation.config.ClassInstrumentationConfiguration;
+import rocks.inspectit.oce.core.instrumentation.AsyncClassTransformer;
+import rocks.inspectit.oce.core.instrumentation.config.model.ClassInstrumentationConfiguration;
 
 /**
  * Fired by the {@link AsyncClassTransformer} whenever a class has been instrumented or deinstrumented.

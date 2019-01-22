@@ -14,13 +14,13 @@ import javax.annotation.PreDestroy;
  * on such beans is that Spring is unable to resolve their implemented interfaces as they are on the bootstrap.
  * <p>
  * Any class requiring the corresponding bootstrap interface to be initialized should use a {@link org.springframework.context.annotation.DependsOn}
- * annotation.
+ * annotation referring to this interface.
  */
 @Configuration
 public class BootstrapInitializerConfiguration {
 
     @Bean(ContextManagerImpl.BEAN_NAME)
-    ContextManagerImpl getContextManager() {
+    public ContextManagerImpl getContextManager() {
         ContextManagerImpl contextManager = new ContextManagerImpl();
         Instances.contextManager = contextManager;
         return contextManager;

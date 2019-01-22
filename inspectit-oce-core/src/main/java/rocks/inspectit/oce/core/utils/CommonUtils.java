@@ -1,5 +1,7 @@
 package rocks.inspectit.oce.core.utils;
 
+import java.util.Set;
+
 /**
  * A generic utility class.
  */
@@ -21,6 +23,13 @@ public class CommonUtils {
             return true;
         }
         return false;
+    }
+
+    public static boolean contentsEqual(Set<?> setA, Set<?> setB) {
+        if (setA.size() != setB.size()) {
+            return false;
+        }
+        return !setA.stream().anyMatch(elem -> !setB.contains(elem));
     }
 
 }
