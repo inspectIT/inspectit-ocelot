@@ -32,3 +32,7 @@ Note that the context is only passed when calling the thread's ``start`` method 
 Executor Context Propagation Sensor::
 This sensor enables passing the current context via implementations of the ``java.util.concurrent.Executor`` interface.
 The context is attached to the ``java.lang.Runnable`` used to invoke the Executor's ``execute`` method.
+
+Scheduled Executor Context Propagation Sensor::
+This sensor enables passing the current context via implementations of the ``java.util.concurrent.ScheduledExecutorService`` interface.
+The context is attached to the ``java.lang.Runnable`` or ``java.util.concurrent.Callable`` used to invoke the Executor's ``schedule``, ``scheduleAtFixedRate`` and ``scheduleWithFixedDelay`` method.

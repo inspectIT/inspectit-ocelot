@@ -2,6 +2,8 @@ package rocks.inspectit.oce.bootstrap.noop;
 
 import rocks.inspectit.oce.bootstrap.context.ContextManager;
 
+import java.util.concurrent.Callable;
+
 /**
  * No-operations implementation of the {@link ContextManager}. This will be used if there is no inspectIT agent available.
  */
@@ -15,6 +17,11 @@ public class NoopContextManager implements ContextManager {
     @Override
     public Runnable wrap(Runnable runnable) {
         return runnable;
+    }
+
+    @Override
+    public <T> Callable<T> wrap(Callable<T> callable) {
+        return callable;
     }
 
     @Override

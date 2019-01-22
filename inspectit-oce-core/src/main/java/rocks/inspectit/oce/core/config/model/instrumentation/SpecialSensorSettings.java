@@ -20,4 +20,9 @@ public class SpecialSensorSettings {
      * Enables or disables the {@link rocks.inspectit.oce.core.instrumentation.special.ThreadStartContextPropagationSensor}.
      */
     private boolean threadStartContextPropagation;
+
+    /**
+     * Enables or disables the @{@link rocks.inspectit.oce.core.instrumentation.special.ScheduledExecutorContextPropagationSensor}.
+     */
+    private boolean scheduledExecutorContextPropagation;
 }
