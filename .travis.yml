@@ -18,8 +18,11 @@ cache:
     - $HOME/ibm-jdk-installer/
 
 install: true
-script:
-  - ./gradlew test systemTest
+script: ./gradlew test systemTest
+
+after_failure:
+  - chmod +x ./resources/upload-test-reports.sh
+  - ./resources/upload-test-reports.sh
 
 jobs:
   include:
@@ -39,7 +42,10 @@ jobs:
         - sudo update-alternatives --set "javac" "$HOME/ibm-jdk-8/bin/javac"
         - export JAVA_HOME=$HOME/ibm-jdk-8
         - java -version
-      script: ./gradlew :inspectit-oce-agent:systemTest
+      script: ./gradlew test systemTest
+      after_failure:
+        - chmod +x ./resources/upload-test-reports.sh
+        - ./resources/upload-test-reports.sh
 
     - stage: deploy
       name: "Code Coverage Reporting"
