@@ -27,6 +27,8 @@ public class UserMetricsCapturingSysTest {
             statsRecorder.newMeasureMap().put(myMeasure, 7L).record();
         }
 
+        TestUtils.waitForOpenCensusQueueToBeProcessed();
+
         MetricProducerManager metricProducerManager = Metrics.getExportComponent().getMetricProducerManager();
         assertThat(metricProducerManager.getAllMetricProducer()).anyMatch(mp ->
                 mp.getMetrics().stream().filter(m -> m.getMetricDescriptor().getName() == "test/view/test_measure").count() == 1

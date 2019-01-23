@@ -40,6 +40,10 @@ configurations {
 
 dependencies {
 
+    systemTestCompileOnly(
+            "io.opencensus:opencensus-impl:${openCensusVersion}"
+    )
+
     systemTestImplementation(
             "io.opencensus:opencensus-testing:${openCensusVersion}",
             "io.opencensus:opencensus-api:${openCensusVersion}",
