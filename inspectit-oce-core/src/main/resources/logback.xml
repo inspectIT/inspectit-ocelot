@@ -2,7 +2,7 @@
 <configuration>
     <property name="logDir" value="${INSPECTIT_LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}/inspectit-oce}" />
     <property name="serviceName" value="${INSPECTIT_LOG_SERVICE_NAME:-[boot]}" />
-    <property name="consoleLogPattern" value="${INSPECTIT_LOG_CONSOLE_PATTERN:-%d{ISO8601} %-5p %-6r --- [inspectIT] [%15.15t] %-40.40logger{39} : %m%n%nopex}"/>
+    <property name="consoleLogPattern" value="${INSPECTIT_LOG_CONSOLE_PATTERN:-%d{ISO8601} %-5p %-6r --- [inspectIT] [%15.15t] %-40.40logger{39} : %m%n%rEx}"/>
     <property name="fileLogPattern" value="${INSPECTIT_LOG_FILE_PATTERN:-%d{ISO8601} %-5p %-6r --- ${serviceName} [%15.15t] %-40.40logger{39} : %m%n%rEx}"/>
 
     <!-- Console output -->
