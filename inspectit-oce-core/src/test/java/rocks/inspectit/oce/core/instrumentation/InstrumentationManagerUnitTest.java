@@ -6,16 +6,18 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import rocks.inspectit.oce.core.instrumentation.config.InstrumentationConfigurationResolver;
+import rocks.inspectit.oce.core.instrumentation.config.model.ClassInstrumentationConfiguration;
+import rocks.inspectit.oce.core.instrumentation.special.SpecialSensor;
 
 import java.lang.instrument.Instrumentation;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -32,7 +34,12 @@ public class InstrumentationManagerUnitTest {
     @Mock
     AsyncClassTransformer transformer;
 
-    @Spy
+    @Mock
+    InstrumentationConfigurationResolver resolver;
+
+    @Mock
+    SpecialSensor dummySensor;
+
     @InjectMocks
     InstrumentationManager manager;
 
@@ -46,10 +53,13 @@ public class InstrumentationManagerUnitTest {
             TESTING_CLASSES.stream().forEach(cl -> manager.pendingClasses.put(cl, true));
             List<Class<?>> classesToInstrument = Arrays.asList(String.class, Character.class);
 
-            for (Class<?> clazz : TESTING_CLASSES) {
-                doReturn(classesToInstrument.contains(clazz)).when(manager)
-                        .doesClassRequireRetransformation(eq(clazz));
-            }
+            doAnswer((invoc) -> {
+                if (classesToInstrument.contains(invoc.getArgument(0))) {
+                    return new ClassInstrumentationConfiguration(new HashSet<>(Arrays.asList(dummySensor)), null);
+                } else {
+                    return ClassInstrumentationConfiguration.NO_INSTRUMENTATION;
+                }
+            }).when(resolver).getClassInstrumentationConfiguration(any());
 
             manager.checkClassesForConfigurationUpdates(
                     new InstrumentationManager.BatchSize(100, 100));
@@ -67,7 +77,10 @@ public class InstrumentationManagerUnitTest {
             TESTING_CLASSES.stream().forEach(cl -> manager.pendingClasses.put(cl, true));
 
 
-            doReturn(true).when(manager).doesClassRequireRetransformation(any());
+            doAnswer((invoc) ->
+                    new ClassInstrumentationConfiguration(new HashSet<>(Arrays.asList(dummySensor)), null)
+            ).when(resolver).getClassInstrumentationConfiguration(any());
+
             doThrow(new RuntimeException()).when(instrumentation).retransformClasses(any());
 
             manager.checkClassesForConfigurationUpdates(
@@ -83,7 +96,9 @@ public class InstrumentationManagerUnitTest {
 
             TESTING_CLASSES.stream().forEach(cl -> manager.pendingClasses.put(cl, true));
 
-            doReturn(false).when(manager).doesClassRequireRetransformation(any());
+            doAnswer((invoc) ->
+                    ClassInstrumentationConfiguration.NO_INSTRUMENTATION
+            ).when(resolver).getClassInstrumentationConfiguration(any());
 
             manager.checkClassesForConfigurationUpdates(
                     new InstrumentationManager.BatchSize(100, 100));
@@ -99,7 +114,9 @@ public class InstrumentationManagerUnitTest {
         @Test
         void testQueueCapped() {
             TESTING_CLASSES.stream().forEach(cl -> manager.pendingClasses.put(cl, true));
-            doReturn(true).when(manager).doesClassRequireRetransformation(any());
+            doAnswer((invoc) ->
+                    new ClassInstrumentationConfiguration(new HashSet<>(Arrays.asList(dummySensor)), null)
+            ).when(resolver).getClassInstrumentationConfiguration(any());
 
             List<Class<?>> classesSelectedForRetransform =
                     manager.getBatchOfClassesToRetransform(
@@ -112,7 +129,9 @@ public class InstrumentationManagerUnitTest {
         @Test
         void testRetransformationLimitCapped() {
             TESTING_CLASSES.stream().forEach(cl -> manager.pendingClasses.put(cl, true));
-            doReturn(true).when(manager).doesClassRequireRetransformation(any());
+            doAnswer((invoc) ->
+                    new ClassInstrumentationConfiguration(new HashSet<>(Arrays.asList(dummySensor)), null)
+            ).when(resolver).getClassInstrumentationConfiguration(any());
 
             List<Class<?>> classesSelectedForRetransform =
                     manager.getBatchOfClassesToRetransform(
@@ -128,7 +147,9 @@ public class InstrumentationManagerUnitTest {
         @Test
         void testCheckLimitCapped() {
             TESTING_CLASSES.stream().forEach(cl -> manager.pendingClasses.put(cl, true));
-            doReturn(true).when(manager).doesClassRequireRetransformation(any());
+            doAnswer((invoc) ->
+                    new ClassInstrumentationConfiguration(new HashSet<>(Arrays.asList(dummySensor)), null)
+            ).when(resolver).getClassInstrumentationConfiguration(any());
 
             List<Class<?>> classesSelectedForRetransform =
                     manager.getBatchOfClassesToRetransform(

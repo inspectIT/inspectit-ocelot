@@ -1,6 +1,7 @@
 package rocks.inspectit.oce.core.instrumentation;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -66,104 +67,114 @@ public class NewClassDiscoveryServiceUnitTest {
         when(env.getCurrentConfig()).thenReturn(conf);
     }
 
-    @Test
-    void initialNotificationSentForAlreadyLoadedClasses() {
-        HashSet<Class<?>> classes = new HashSet<>(Arrays.asList(String.class, Integer.class));
-        when(instrumentation.getAllLoadedClasses()).thenReturn(classes.toArray(new Class[]{}));
-        discovery.init();
-        if (scheduledRunnable != null) {
-            scheduledRunnable.run();
+    @Nested
+    public class Init {
+
+        @Test
+        void initialNotificationSentForAlreadyLoadedClasses() {
+            HashSet<Class<?>> classes = new HashSet<>(Arrays.asList(String.class, Integer.class));
+            when(instrumentation.getAllLoadedClasses()).thenReturn(classes.toArray(new Class[]{}));
+            discovery.init();
+            if (scheduledRunnable != null) {
+                scheduledRunnable.run();
+            }
+            verify(mockListener, times(1)).onNewClassesDiscovered(eq(classes));
         }
-        verify(mockListener, times(1)).onNewClassesDiscovered(eq(classes));
     }
 
-    @Test
-    void verifyTaskCanceledOnShutdown() {
-        when(instrumentation.getAllLoadedClasses()).thenReturn(new Class[]{});
-        discovery.init();
-        discovery.destroy();
-        verify(scheduledFuture, times(1)).cancel(anyBoolean());
+    @Nested
+    public class Destroy {
+
+        @Test
+        void verifyTaskCanceledOnShutdown() {
+            when(instrumentation.getAllLoadedClasses()).thenReturn(new Class[]{});
+            discovery.init();
+            discovery.destroy();
+            verify(scheduledFuture, times(1)).cancel(anyBoolean());
+        }
     }
 
+    @Nested
+    public class UpdateCheckTask {
+        @Test
+        void newNotificationSentForNewClasses() {
+            discovery.timestampMS = () -> 100L;
+            HashSet<Class<?>> classes = new HashSet<>(Arrays.asList(String.class, Integer.class));
+            when(instrumentation.getAllLoadedClasses()).thenReturn(classes.toArray(new Class[]{}));
+            discovery.init();
+            if (scheduledRunnable != null) {
+                scheduledRunnable.run();
+            }
+            verify(mockListener, times(1)).onNewClassesDiscovered(eq(classes));
 
-    @Test
-    void newNotificationSentForNewClasses() {
-        discovery.timestampMS = () -> 100L;
-        HashSet<Class<?>> classes = new HashSet<>(Arrays.asList(String.class, Integer.class));
-        when(instrumentation.getAllLoadedClasses()).thenReturn(classes.toArray(new Class[]{}));
-        discovery.init();
-        if (scheduledRunnable != null) {
-            scheduledRunnable.run();
+            discovery.onNewClassDefined(Long.class.getName(), null);
+            classes.add(Long.class);
+            when(instrumentation.getAllLoadedClasses()).thenReturn(classes.toArray(new Class[]{}));
+            discovery.timestampMS = () -> 200L;
+
+            if (scheduledRunnable != null) {
+                scheduledRunnable.run();
+            }
+            verify(mockListener, times(1)).onNewClassesDiscovered(
+                    eq(new HashSet<>(Arrays.asList(Long.class))));
         }
-        verify(mockListener, times(1)).onNewClassesDiscovered(eq(classes));
-
-        discovery.onNewClassDefined(Long.class.getName(), null);
-        classes.add(Long.class);
-        when(instrumentation.getAllLoadedClasses()).thenReturn(classes.toArray(new Class[]{}));
-        discovery.timestampMS = () -> 200L;
-
-        if (scheduledRunnable != null) {
-            scheduledRunnable.run();
-        }
-        verify(mockListener, times(1)).onNewClassesDiscovered(
-                eq(new HashSet<>(Arrays.asList(Long.class))));
-    }
 
 
-    @Test
-    void testInactivityAfterConfiguredTime() {
-        discovery.timestampMS = () -> 100L;
-        timingsConfiguration.setMinClassDefinitionDelay(Duration.ofMillis(10));
+        @Test
+        void testInactivityAfterConfiguredTime() {
+            discovery.timestampMS = () -> 100L;
+            timingsConfiguration.setMinClassDefinitionDelay(Duration.ofMillis(10));
 
-        when(instrumentation.getAllLoadedClasses()).thenReturn(new Class[]{});
-        discovery.init();
-        if (scheduledRunnable != null) {
+            when(instrumentation.getAllLoadedClasses()).thenReturn(new Class[]{});
+            discovery.init();
+            if (scheduledRunnable != null) {
+                Runnable r = scheduledRunnable;
+                scheduledRunnable = null;
+                r.run();
+            }
+
+            discovery.onNewClassDefined(null, null);
             Runnable r = scheduledRunnable;
             scheduledRunnable = null;
             r.run();
+
+            Mockito.reset(instrumentation);
+            discovery.timestampMS = () -> 10000L;
+            r = scheduledRunnable;
+            scheduledRunnable = null;
+            r.run();
+
+            verify(instrumentation, never()).getAllLoadedClasses();
         }
 
-        discovery.onNewClassDefined(null, null);
-        Runnable r = scheduledRunnable;
-        scheduledRunnable = null;
-        r.run();
 
-        Mockito.reset(instrumentation);
-        discovery.timestampMS = () -> 10000L;
-        r = scheduledRunnable;
-        scheduledRunnable = null;
-        r.run();
+        @Test
+        void testInactivityUntilConfiguredDelay() {
+            discovery.timestampMS = () -> 100L;
+            timingsConfiguration.setMinClassDefinitionDelay(Duration.ofMillis(200));
 
-        verify(instrumentation, never()).getAllLoadedClasses();
-    }
+            when(instrumentation.getAllLoadedClasses()).thenReturn(new Class[]{});
+            discovery.init();
+            if (scheduledRunnable != null) {
+                Runnable r = scheduledRunnable;
+                scheduledRunnable = null;
+                r.run();
+            }
 
+            Mockito.reset(instrumentation);
+            when(instrumentation.getAllLoadedClasses()).thenReturn(new Class[]{});
 
-    @Test
-    void testInactivityUntilConfiguredDelay() {
-        discovery.timestampMS = () -> 100L;
-        timingsConfiguration.setMinClassDefinitionDelay(Duration.ofMillis(200));
-
-        when(instrumentation.getAllLoadedClasses()).thenReturn(new Class[]{});
-        discovery.init();
-        if (scheduledRunnable != null) {
+            discovery.onNewClassDefined(null, null);
             Runnable r = scheduledRunnable;
             scheduledRunnable = null;
             r.run();
+            verify(instrumentation, never()).getAllLoadedClasses();
+
+            discovery.timestampMS = () -> 500L;
+            r = scheduledRunnable;
+            scheduledRunnable = null;
+            r.run();
+            verify(instrumentation, times(1)).getAllLoadedClasses();
         }
-
-        Mockito.reset(instrumentation);
-        when(instrumentation.getAllLoadedClasses()).thenReturn(new Class[]{});
-
-        discovery.onNewClassDefined(null, null);
-        Runnable r = scheduledRunnable;
-        scheduledRunnable = null;
-        r.run();
-        verify(instrumentation, never()).getAllLoadedClasses();
-
-        discovery.timestampMS = () -> 500L;
-        r = scheduledRunnable;
-        scheduledRunnable = null;
-        r.run();
-        verify(instrumentation, times(1)).getAllLoadedClasses();
     }
 }
