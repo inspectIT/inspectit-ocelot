@@ -119,9 +119,8 @@ public class SpringTestBase {
      * @param level the level to compare against.
      */
     public void assertNoLogsOfLevelOrGreater(Level level) {
-        //TODO: remove ignore for existing view errors as soon as we are able to unregister views in OpenCensus
         verify(env.mockAppender, times(0)).doAppend(argThat(
-                (le) -> le.getLevel().isGreaterOrEqual(level) && !le.getMessage().contains("View with the name ")));
+                (le) -> le.getLevel().isGreaterOrEqual(level)));
     }
 
     /**
@@ -130,9 +129,8 @@ public class SpringTestBase {
      * @param level the level to compare against.
      */
     public void assertLogsOfLevelOrGreater(Level level) {
-        //TODO: remove ignore for existing view errors as soon as we are able to unregister views in OpenCensus
         verify(env.mockAppender, atLeastOnce()).doAppend(argThat(
-                (le) -> le.getLevel().isGreaterOrEqual(level) && !le.getMessage().contains("View with the name ")));
+                (le) -> le.getLevel().isGreaterOrEqual(level)));
     }
 
 

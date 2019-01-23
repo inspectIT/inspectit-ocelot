@@ -83,7 +83,7 @@ public abstract class AbstractMetricsRecorder extends DynamicallyActivatableServ
                         measure, aggregation.get(), allTags);
                 viewManager.registerView(view);
             } else {
-                log.error("View with the name {} is already existent in OpenCensus, no new view is registered", name);
+                log.info("View with the name {} is already existent in OpenCensus, no new view is registered", name);
             }
             return measure;
         });
@@ -109,7 +109,7 @@ public abstract class AbstractMetricsRecorder extends DynamicallyActivatableServ
                         measure, aggregation.get(), allTags);
                 viewManager.registerView(view);
             } else {
-                log.error("View with the name {} is already existent in OpenCensus, no new view is registered", name);
+                log.info("View with the name {} is already existent in OpenCensus, no new view is registered", name);
             }
             return measure;
         });
