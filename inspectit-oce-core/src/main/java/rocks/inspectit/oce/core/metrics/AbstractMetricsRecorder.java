@@ -2,6 +2,7 @@ package rocks.inspectit.oce.core.metrics;
 
 import io.opencensus.stats.*;
 import io.opencensus.tags.TagKey;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import rocks.inspectit.oce.core.config.model.InspectitConfig;
@@ -15,6 +16,7 @@ import java.util.function.Supplier;
 /**
  * Base class for dynamically enableable metrics recorders.
  */
+@Slf4j
 public abstract class AbstractMetricsRecorder extends DynamicallyActivatableService {
 
     @Autowired
@@ -75,9 +77,14 @@ public abstract class AbstractMetricsRecorder extends DynamicallyActivatableServ
             val measure = Measure.MeasureLong.create(name, description, unit);
             List<TagKey> allTags = new ArrayList<>(commonTags.getCommonTagKeys());
             allTags.addAll(Arrays.asList(additionalTags));
-            val view = View.create(View.Name.create(measure.getName()), measure.getDescription() + " [" + measure.getUnit() + "]",
-                    measure, aggregation.get(), allTags);
-            viewManager.registerView(view);
+            View.Name viewName = View.Name.create(measure.getName());
+            if (viewManager.getView(viewName) == null) {
+                val view = View.create(viewName, measure.getDescription() + " [" + measure.getUnit() + "]",
+                        measure, aggregation.get(), allTags);
+                viewManager.registerView(view);
+            } else {
+                log.error("View with the name {} is already existent in OpenCensus, no new view is registered", name);
+            }
             return measure;
         });
     }
@@ -96,9 +103,14 @@ public abstract class AbstractMetricsRecorder extends DynamicallyActivatableServ
             val measure = Measure.MeasureDouble.create(name, description, unit);
             List<TagKey> allTags = new ArrayList<>(commonTags.getCommonTagKeys());
             allTags.addAll(Arrays.asList(additionalTags));
-            val view = View.create(View.Name.create(measure.getName()), measure.getDescription() + " [" + measure.getUnit() + "]",
-                    measure, aggregation.get(), allTags);
-            viewManager.registerView(view);
+            View.Name viewName = View.Name.create(measure.getName());
+            if (viewManager.getView(viewName) == null) {
+                val view = View.create(viewName, measure.getDescription() + " [" + measure.getUnit() + "]",
+                        measure, aggregation.get(), allTags);
+                viewManager.registerView(view);
+            } else {
+                log.error("View with the name {} is already existent in OpenCensus, no new view is registered", name);
+            }
             return measure;
         });
     }

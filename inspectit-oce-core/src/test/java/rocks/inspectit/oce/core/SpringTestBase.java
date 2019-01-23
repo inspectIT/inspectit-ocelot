@@ -4,6 +4,8 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
+import io.opencensus.implcore.stats.ViewManagerImpl;
+import io.opencensus.stats.Stats;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -22,6 +24,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import rocks.inspectit.oce.core.config.InspectitEnvironment;
 import rocks.inspectit.oce.core.config.SpringConfiguration;
 
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -100,8 +103,21 @@ public class SpringTestBase {
             }
         }
 
+
+        void clearOpenCensusViews() {
+            Method clearStats = null;
+            try {
+                clearStats = ViewManagerImpl.class.getDeclaredMethod("clearStats");
+                clearStats.setAccessible(true);
+                clearStats.invoke(((ViewManagerImpl) Stats.getViewManager()));
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         @Override
         public void initialize(ConfigurableApplicationContext ctx) {
+            clearOpenCensusViews();
             ConfigurableEnvironment defaultEnv = ctx.getEnvironment();
 
             testPropertySources = defaultEnv.getPropertySources().stream()
