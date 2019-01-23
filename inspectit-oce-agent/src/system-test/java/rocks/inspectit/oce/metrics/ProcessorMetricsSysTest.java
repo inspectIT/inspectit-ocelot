@@ -6,26 +6,30 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 public class ProcessorMetricsSysTest extends MetricsSysTestBase {
 
     private static final ViewManager viewManager = Stats.getViewManager();
 
     @Test
-    public void testProcessorCountCapturing() throws Exception {
-        ViewData procCountData = viewManager.getView(View.Name.create("system/cpu/count"));
-        assertThat(procCountData.getAggregationMap()).isNotEmpty();
+    public void testProcessorCountCapturing() {
+        await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
+            ViewData procCountData = viewManager.getView(View.Name.create("system/cpu/count"));
+            assertThat(procCountData.getAggregationMap()).isNotEmpty();
 
-        Map.Entry<List<TagValue>, AggregationData> procCount = procCountData.getAggregationMap().entrySet().stream().findFirst().get();
+            Map.Entry<List<TagValue>, AggregationData> procCount = procCountData.getAggregationMap().entrySet().stream().findFirst().get();
 
-        //ensure that tags are present
-        assertThat(procCount.getKey()).isNotEmpty();
+            //ensure that tags are present
+            assertThat(procCount.getKey()).isNotEmpty();
 
-        //ensure that the values are sane
-        long processorCount = ((AggregationData.LastValueDataLong) procCount.getValue()).getLastValue();
+            //ensure that the values are sane
+            long processorCount = ((AggregationData.LastValueDataLong) procCount.getValue()).getLastValue();
 
-        assertThat(processorCount).isEqualTo(Runtime.getRuntime().availableProcessors());
+            assertThat(processorCount).isEqualTo(Runtime.getRuntime().availableProcessors());
+        });
     }
 }

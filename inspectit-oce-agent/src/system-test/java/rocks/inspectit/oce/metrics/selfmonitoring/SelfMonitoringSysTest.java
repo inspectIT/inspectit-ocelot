@@ -7,8 +7,10 @@ import rocks.inspectit.oce.metrics.MetricsSysTestBase;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 class SelfMonitoringSysTest extends MetricsSysTestBase {
 
@@ -17,21 +19,24 @@ class SelfMonitoringSysTest extends MetricsSysTestBase {
 
     @Test
     void metricsRecorders() {
-        ViewData inspectITDuration = viewManager.getView(View.Name.create("inspectit/self/duration"));
 
-        Map<List<TagValue>, AggregationData> aggregationMap = inspectITDuration.getAggregationMap();
+        await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
+            ViewData inspectITDuration = viewManager.getView(View.Name.create("inspectit/self/duration"));
 
-        assertThat(aggregationMap).isNotNull().isNotEmpty();
-        assertThat(aggregationMap.keySet())
-                .flatExtracting(tags -> tags)
-                .contains(TagValue.create("ProcessorMetricsRecorder"))
-                .contains(TagValue.create("ClassLoaderMetricsRecorder"))
-                .contains(TagValue.create("DiskMetricsRecorder"));
+            Map<List<TagValue>, AggregationData> aggregationMap = inspectITDuration.getAggregationMap();
+
+            assertThat(aggregationMap).isNotNull().isNotEmpty();
+            assertThat(aggregationMap.keySet())
+                    .flatExtracting(tags -> tags)
+                    .contains(TagValue.create("ProcessorMetricsRecorder"))
+                    .contains(TagValue.create("ClassLoaderMetricsRecorder"))
+                    .contains(TagValue.create("DiskMetricsRecorder"));
 
 
-        assertThat(aggregationMap.values()).allSatisfy(data -> {
-            assertThat(data).isInstanceOf(AggregationData.SumDataDouble.class);
-            assertThat(((AggregationData.SumDataDouble) data).getSum()).isNotNegative().isNotZero();
+            assertThat(aggregationMap.values()).allSatisfy(data -> {
+                assertThat(data).isInstanceOf(AggregationData.SumDataDouble.class);
+                assertThat(((AggregationData.SumDataDouble) data).getSum()).isNotNegative().isNotZero();
+            });
         });
     }
 
