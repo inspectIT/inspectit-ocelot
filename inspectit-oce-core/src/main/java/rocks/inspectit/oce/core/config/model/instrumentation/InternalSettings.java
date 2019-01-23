@@ -37,14 +37,8 @@ public class InternalSettings {
     private Duration newClassDiscoveryInterval;
 
     /**
-     * Defines how long after the invocation of ClassFileTransform the class is guaranteed to be present in Instrumentation.getAllLoadedClasses.
-     * This influences if newly created classes are discovered by inspectIT.
+     * Defines how often after the last invocation of a ClassFileTransformer the agent scans for new classes.
      */
-    private Duration maxClassDefinitionDelay;
+    private int numClassDiscoveryTrials;
 
-    /**
-     * Defines how long after the invocation of ClassFileTransform the agent should wait with trying to discover new classes.
-     * The default value is set to zero for cases where the application constantly keeps defining new classes.
-     */
-    private Duration minClassDefinitionDelay;
 }

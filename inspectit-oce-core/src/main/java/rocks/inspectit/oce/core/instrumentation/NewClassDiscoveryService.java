@@ -1,7 +1,6 @@
 package rocks.inspectit.oce.core.instrumentation;
 
 import com.google.common.base.Stopwatch;
-import com.google.common.base.Supplier;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +17,7 @@ import java.util.*;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 @Slf4j
@@ -38,13 +38,6 @@ public class NewClassDiscoveryService implements IClassDefinitionListener {
     @Autowired
     List<IClassDiscoveryListener> listeners;
 
-    /**
-     * The function to get a timestamp in milliseconds.
-     * package private for unit testing
-     */
-    Supplier<Long> timestampMS = System::currentTimeMillis;
-
-
     private Set<Class<?>> knownClasses = Collections.newSetFromMap(new WeakHashMap<>());
 
     private volatile boolean isShuttingDown = false;
@@ -57,13 +50,11 @@ public class NewClassDiscoveryService implements IClassDefinitionListener {
     /**
      * Stores the timestamp for the last time a class was defined.
      */
-    private volatile long lastNewClassDefinitionTimestamp = 0;
+    private AtomicLong numTrialsSinceLastClassDefinition = new AtomicLong(0);
 
     private Runnable updateCheckTask = () -> {
-        long timeSinceLastClassDefinition = timestampMS.get() - lastNewClassDefinitionTimestamp;
-        long maxDelay = env.getCurrentConfig().getInstrumentation().getInternal().getMaxClassDefinitionDelay().toMillis();
-        long minDelay = env.getCurrentConfig().getInstrumentation().getInternal().getMinClassDefinitionDelay().toMillis();
-        if (timeSinceLastClassDefinition >= minDelay && timeSinceLastClassDefinition <= maxDelay) {
+        long maxTrials = env.getCurrentConfig().getInstrumentation().getInternal().getNumClassDiscoveryTrials();
+        if (numTrialsSinceLastClassDefinition.incrementAndGet() <= maxTrials) {
             val watch = Stopwatch.createStarted();
 
             log.debug("Checking for new classes...");
@@ -76,12 +67,10 @@ public class NewClassDiscoveryService implements IClassDefinitionListener {
             }
             long elapsedMS = watch.elapsed(TimeUnit.MILLISECONDS);
             if (!newClasses.isEmpty()) {
-                log.debug("{} new classes found, check took {} ms (last class define {} ms ago)",
-                        newClasses.size(), elapsedMS, timeSinceLastClassDefinition);
+                log.debug("{} new classes found, check took {} ms", newClasses.size(), elapsedMS);
                 listeners.forEach(lis -> lis.onNewClassesDiscovered(newClasses));
             } else {
-                log.debug("No new classes found, check took {} ms (last class define {} ms ago)",
-                        elapsedMS, timeSinceLastClassDefinition);
+                log.debug("No new classes found, check took {} ms", elapsedMS);
             }
         }
         if (!isShuttingDown) {
@@ -92,7 +81,7 @@ public class NewClassDiscoveryService implements IClassDefinitionListener {
 
     @Override
     public void onNewClassDefined(String className, ClassLoader loader) {
-        lastNewClassDefinitionTimestamp = timestampMS.get();
+        numTrialsSinceLastClassDefinition.set(0L);
     }
 
     /**

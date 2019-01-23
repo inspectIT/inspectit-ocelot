@@ -103,12 +103,12 @@ public class AsyncClassTransformerUnitTest {
 
             Class<AsyncClassTransformerUnitTest> clazz = AsyncClassTransformerUnitTest.class;
             String className = clazz.getName().replace('.', '/');
-            transformer.transform(clazz.getClassLoader(), className, getClass(), null, bytecodeOfTest);
+            transformer.transform(clazz.getClassLoader(), className, clazz, null, bytecodeOfTest);
 
             verify(mockSensor, times(1)).instrument(any(), any(), any(), any());
 
             Mockito.reset(mockSensor);
-            doAnswer((inv) -> transformer.transform(clazz.getClassLoader(), className, getClass(), null, bytecodeOfTest))
+            doAnswer((inv) -> transformer.transform(clazz.getClassLoader(), className, clazz, null, bytecodeOfTest))
                     .when(instrumentation).retransformClasses(clazz);
 
             transformer.destroy();

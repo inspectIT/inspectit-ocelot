@@ -153,7 +153,10 @@ public class AsyncClassTransformer implements ClassFileTransformer {
 
             //Notify listeners that this class has been instrumented (or deinstrumented)
             val event = new ClassInstrumentedEvent(this, classBeingRedefined, type, classConf);
-            ctx.publishEvent(event);
+
+            if (!shuttingDown) {
+                ctx.publishEvent(event);
+            }
 
             return resultBytes;
         } catch (Exception e) {

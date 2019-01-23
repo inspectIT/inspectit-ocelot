@@ -62,8 +62,7 @@ public class NewClassDiscoveryServiceUnitTest {
         timingsConfiguration = new InternalSettings();
         instr.setInternal(timingsConfiguration);
         timingsConfiguration.setNewClassDiscoveryInterval(Duration.ofMillis(100));
-        timingsConfiguration.setMinClassDefinitionDelay(Duration.ofMillis(0));
-        timingsConfiguration.setMaxClassDefinitionDelay(Duration.ofMillis(1000));
+        timingsConfiguration.setNumClassDiscoveryTrials(1);
         when(env.getCurrentConfig()).thenReturn(conf);
     }
 
@@ -98,7 +97,6 @@ public class NewClassDiscoveryServiceUnitTest {
     public class UpdateCheckTask {
         @Test
         void newNotificationSentForNewClasses() {
-            discovery.timestampMS = () -> 100L;
             HashSet<Class<?>> classes = new HashSet<>(Arrays.asList(String.class, Integer.class));
             when(instrumentation.getAllLoadedClasses()).thenReturn(classes.toArray(new Class[]{}));
             discovery.init();
@@ -110,7 +108,7 @@ public class NewClassDiscoveryServiceUnitTest {
             discovery.onNewClassDefined(Long.class.getName(), null);
             classes.add(Long.class);
             when(instrumentation.getAllLoadedClasses()).thenReturn(classes.toArray(new Class[]{}));
-            discovery.timestampMS = () -> 200L;
+
 
             if (scheduledRunnable != null) {
                 scheduledRunnable.run();
@@ -121,37 +119,9 @@ public class NewClassDiscoveryServiceUnitTest {
 
 
         @Test
-        void testInactivityAfterConfiguredTime() {
-            discovery.timestampMS = () -> 100L;
-            timingsConfiguration.setMinClassDefinitionDelay(Duration.ofMillis(10));
+        void testInactivityAfterConfiguredTrials() {
 
-            when(instrumentation.getAllLoadedClasses()).thenReturn(new Class[]{});
-            discovery.init();
-            if (scheduledRunnable != null) {
-                Runnable r = scheduledRunnable;
-                scheduledRunnable = null;
-                r.run();
-            }
-
-            discovery.onNewClassDefined(null, null);
-            Runnable r = scheduledRunnable;
-            scheduledRunnable = null;
-            r.run();
-
-            Mockito.reset(instrumentation);
-            discovery.timestampMS = () -> 10000L;
-            r = scheduledRunnable;
-            scheduledRunnable = null;
-            r.run();
-
-            verify(instrumentation, never()).getAllLoadedClasses();
-        }
-
-
-        @Test
-        void testInactivityUntilConfiguredDelay() {
-            discovery.timestampMS = () -> 100L;
-            timingsConfiguration.setMinClassDefinitionDelay(Duration.ofMillis(200));
+            timingsConfiguration.setNumClassDiscoveryTrials(2);
 
             when(instrumentation.getAllLoadedClasses()).thenReturn(new Class[]{});
             discovery.init();
@@ -168,13 +138,19 @@ public class NewClassDiscoveryServiceUnitTest {
             Runnable r = scheduledRunnable;
             scheduledRunnable = null;
             r.run();
-            verify(instrumentation, never()).getAllLoadedClasses();
 
-            discovery.timestampMS = () -> 500L;
             r = scheduledRunnable;
             scheduledRunnable = null;
             r.run();
-            verify(instrumentation, times(1)).getAllLoadedClasses();
+
+            verify(instrumentation, times(2)).getAllLoadedClasses();
+
+            r = scheduledRunnable;
+            scheduledRunnable = null;
+            r.run();
+
+            verify(instrumentation, times(2)).getAllLoadedClasses();
         }
+
     }
 }

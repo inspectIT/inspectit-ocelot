@@ -79,13 +79,27 @@ public class InstrumentationConfigurationResolver {
 
     @EventListener
     private void inspectitConfigChanged(InspectitConfigChangedEvent ev) {
-        if (!Objects.equals(ev.getNewConfig().getInstrumentation(), currentConfig.getSource())) {
+
+        if (haveInstrumentationRelatedSettingsChanged(ev)) {
             val oldConfig = currentConfig;
             updateConfiguration(ev.getNewConfig().getInstrumentation());
 
             val event = new InstrumentationConfigurationChangedEvent(this, oldConfig, currentConfig);
             ctx.publishEvent(event);
         }
+    }
+
+    private boolean haveInstrumentationRelatedSettingsChanged(InspectitConfigChangedEvent ev) {
+        InstrumentationSettings oldC = ev.getOldConfig().getInstrumentation();
+        InstrumentationSettings newC = ev.getNewConfig().getInstrumentation();
+        
+        if (!Objects.equals(oldC.getIgnoredBootstrapPackages(), newC.getIgnoredBootstrapPackages())) {
+            return true;
+        }
+        if (!Objects.equals(oldC.getSpecial(), newC.getSpecial())) {
+            return true;
+        }
+        return false;
     }
 
     private void updateConfiguration(InstrumentationSettings source) {
