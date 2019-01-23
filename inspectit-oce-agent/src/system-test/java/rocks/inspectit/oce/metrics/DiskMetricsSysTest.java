@@ -6,31 +6,36 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 public class DiskMetricsSysTest extends MetricsSysTestBase {
 
     private static final ViewManager viewManager = Stats.getViewManager();
 
     @Test
-    public void testDiskMetricCapturing() throws Exception {
-        ViewData freeData = viewManager.getView(View.Name.create("disk/free"));
-        ViewData totalData = viewManager.getView(View.Name.create("disk/total"));
-        assertThat(freeData.getAggregationMap()).isNotEmpty();
-        assertThat(totalData.getAggregationMap()).isNotEmpty();
+    public void testDiskMetricCapturing() {
 
-        Map.Entry<List<TagValue>, AggregationData> free = freeData.getAggregationMap().entrySet().stream().findFirst().get();
-        Map.Entry<List<TagValue>, AggregationData> total = totalData.getAggregationMap().entrySet().stream().findFirst().get();
+        await().atMost(20, TimeUnit.SECONDS).untilAsserted(() -> {
+            ViewData freeData = viewManager.getView(View.Name.create("disk/free"));
+            ViewData totalData = viewManager.getView(View.Name.create("disk/total"));
+            assertThat(freeData.getAggregationMap()).isNotEmpty();
+            assertThat(totalData.getAggregationMap()).isNotEmpty();
 
-        //ensure that tags are present
-        assertThat(free.getKey()).isNotEmpty();
-        assertThat(total.getKey()).isNotEmpty();
+            Map.Entry<List<TagValue>, AggregationData> free = freeData.getAggregationMap().entrySet().stream().findFirst().get();
+            Map.Entry<List<TagValue>, AggregationData> total = totalData.getAggregationMap().entrySet().stream().findFirst().get();
 
-        //ensure that the values are sane
-        long freeVal = ((AggregationData.LastValueDataLong) free.getValue()).getLastValue();
-        long totalVal = ((AggregationData.LastValueDataLong) total.getValue()).getLastValue();
-        assertThat(freeVal).isGreaterThanOrEqualTo(0);
-        assertThat(freeVal).isLessThan(totalVal);
+            //ensure that tags are present
+            assertThat(free.getKey()).isNotEmpty();
+            assertThat(total.getKey()).isNotEmpty();
+
+            //ensure that the values are sane
+            long freeVal = ((AggregationData.LastValueDataLong) free.getValue()).getLastValue();
+            long totalVal = ((AggregationData.LastValueDataLong) total.getValue()).getLastValue();
+            assertThat(freeVal).isGreaterThanOrEqualTo(0);
+            assertThat(freeVal).isLessThan(totalVal);
+        });
     }
 }

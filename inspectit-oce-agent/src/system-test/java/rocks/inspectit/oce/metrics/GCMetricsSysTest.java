@@ -81,7 +81,7 @@ public class GCMetricsSysTest extends MetricsSysTestBase {
                 .findFirst().get();
 
 
-        assertThat(((AggregationData.SumDataLong) minorTime.getValue()).getSum()).isGreaterThan(0);
+        assertThat(((AggregationData.SumDataLong) minorTime.getValue()).getSum()).isGreaterThanOrEqualTo(0);
         assertThat(((AggregationData.SumDataLong) majorTime.getValue()).getSum()).isGreaterThan(0);
     }
 }
