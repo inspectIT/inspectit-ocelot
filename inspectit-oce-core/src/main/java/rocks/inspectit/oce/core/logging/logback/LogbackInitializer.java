@@ -52,13 +52,20 @@ public class LogbackInitializer {
     static boolean consoleEnabled = true;
     static boolean fileEnabled = true;
 
+
+    public static void initDefaultLogging() {
+        initLogging(null);
+    }
+
     /**
      * (Re-)initializes the logback configuration.
      *
      * @param config inspectIT config to read values from
      */
     public static void initLogging(InspectitConfig config) {
-        setPropertiesFromConfig(config);
+        if (null != config) {
+            setPropertiesFromConfig(config);
+        }
 
         LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
         try {
@@ -75,7 +82,9 @@ public class LogbackInitializer {
     }
 
     private static InputStream getConfigFileInputStream(InspectitConfig config) {
-        return Optional.ofNullable(config.getLogging().getConfigFile())
+        return Optional.ofNullable(config)
+                .map(InspectitConfig::getLogging)
+                .map(LoggingSettings::getConfigFile)
                 .filter(Resource::exists)
                 .filter(Resource::isFile)
                 .filter(Resource::isReadable)
@@ -86,7 +95,7 @@ public class LogbackInitializer {
                         return Optional.empty();
                     }
                 })
-                .orElse(LogbackInitializer.class.getResourceAsStream("/logback.xml"));
+                .orElse(LogbackInitializer.class.getResourceAsStream("/inspectit-logback.xml"));
     }
 
     private static void setPropertiesFromConfig(InspectitConfig config) {
