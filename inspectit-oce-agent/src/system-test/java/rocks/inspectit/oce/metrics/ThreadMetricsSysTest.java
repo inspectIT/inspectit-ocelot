@@ -17,7 +17,7 @@ public class ThreadMetricsSysTest extends MetricsSysTestBase {
 
     @Test
     public void testThreadMetricsCapturing() {
-        await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
+        await().atMost(20, TimeUnit.SECONDS).untilAsserted(() -> {
             ViewData liveData = viewManager.getView(View.Name.create("jvm/threads/live"));
             ViewData peakData = viewManager.getView(View.Name.create("jvm/threads/peak"));
             ViewData daemonData = viewManager.getView(View.Name.create("jvm/threads/daemon"));

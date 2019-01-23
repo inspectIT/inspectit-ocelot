@@ -18,7 +18,7 @@ public class ClassLoaderMetricsSysTest extends MetricsSysTestBase {
 
     @Test
     public void testClassLoaderMetricCapturing() {
-        await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
+        await().atMost(20, TimeUnit.SECONDS).untilAsserted(() -> {
             ViewData loadedData = viewManager.getView(View.Name.create("jvm/classes/loaded"));
             ViewData unloadedData = viewManager.getView(View.Name.create("jvm/classes/unloaded"));
             assertThat(loadedData.getAggregationMap()).isNotEmpty();

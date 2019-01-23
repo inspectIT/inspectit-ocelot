@@ -18,7 +18,7 @@ public class DiskMetricsSysTest extends MetricsSysTestBase {
     @Test
     public void testDiskMetricCapturing() {
 
-        await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
+        await().atMost(20, TimeUnit.SECONDS).untilAsserted(() -> {
             ViewData freeData = viewManager.getView(View.Name.create("disk/free"));
             ViewData totalData = viewManager.getView(View.Name.create("disk/total"));
             assertThat(freeData.getAggregationMap()).isNotEmpty();

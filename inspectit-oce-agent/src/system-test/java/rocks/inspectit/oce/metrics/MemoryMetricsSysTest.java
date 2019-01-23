@@ -20,7 +20,7 @@ public class MemoryMetricsSysTest extends MetricsSysTestBase {
      */
     @Test
     public void testMemoryCapturing() {
-        await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
+        await().atMost(20, TimeUnit.SECONDS).untilAsserted(() -> {
             ViewData usedData = viewManager.getView(View.Name.create("jvm/memory/used"));
             ViewData committedData = viewManager.getView(View.Name.create("jvm/memory/committed"));
             ViewData maxData = viewManager.getView(View.Name.create("jvm/memory/max"));

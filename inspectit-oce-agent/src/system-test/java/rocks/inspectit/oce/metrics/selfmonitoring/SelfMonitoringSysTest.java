@@ -20,7 +20,8 @@ class SelfMonitoringSysTest extends MetricsSysTestBase {
     @Test
     void metricsRecorders() {
 
-        await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
+        await().atMost(20, TimeUnit.SECONDS).untilAsserted(() -> {
+
             ViewData inspectITDuration = viewManager.getView(View.Name.create("inspectit/self/duration"));
 
             Map<List<TagValue>, AggregationData> aggregationMap = inspectITDuration.getAggregationMap();

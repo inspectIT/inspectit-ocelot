@@ -17,7 +17,7 @@ public class ProcessorMetricsSysTest extends MetricsSysTestBase {
 
     @Test
     public void testProcessorCountCapturing() {
-        await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
+        await().atMost(20, TimeUnit.SECONDS).untilAsserted(() -> {
             ViewData procCountData = viewManager.getView(View.Name.create("system/cpu/count"));
             assertThat(procCountData.getAggregationMap()).isNotEmpty();
 
