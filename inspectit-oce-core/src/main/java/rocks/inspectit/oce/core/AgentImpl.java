@@ -1,6 +1,7 @@
 package rocks.inspectit.oce.core;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import rocks.inspectit.oce.bootstrap.IAgent;
 import rocks.inspectit.oce.core.config.InspectitEnvironment;
@@ -23,31 +24,44 @@ import java.util.jar.JarFile;
  *
  * @author Jonas Kunz
  */
-@Slf4j
 public class AgentImpl implements IAgent {
+
+    // statically initialize our default logging before doing anything
+    static {
+        LogbackInitializer.initDefaultLogging();
+        LOGGER = LoggerFactory.getLogger(AgentImpl.class);
+    }
 
     private static final String OPENCENSUS_FAR_JAR_PATH = "/opencensus-fat.jar";
 
+    /**
+     * Logger that is initialized in the static init block
+     */
+    private static final Logger LOGGER;
+
+    /**
+     * Created application context.
+     */
     private AnnotationConfigApplicationContext ctx;
 
     @Override
     public void start(String cmdArgs, Instrumentation instrumentation) {
         ClassLoader classloader = AgentImpl.class.getClassLoader();
 
-        log.info("Starting inspectIT OCE Agent...");
+        LOGGER.info("Starting inspectIT OCE Agent...");
 
         ctx = new AnnotationConfigApplicationContext();
         ctx.setClassLoader(classloader);
         InspectitEnvironment environment = new InspectitEnvironment(ctx, Optional.ofNullable(cmdArgs));
 
-        // once we have the environment, init the logging
+        // once we have the environment, init the logging with the config
         LogbackInitializer.initLogging(environment.getCurrentConfig());
 
         try {
             boolean pushOCtoBootstrap = environment.getCurrentConfig().isPublishOpencensusToBootstrap();
             loadOpenCensus(pushOCtoBootstrap, instrumentation, classloader);
         } catch (Exception e) {
-            log.error("Error loading opencensus classes, terminating agent", e);
+            LOGGER.error("Error loading opencensus classes, terminating agent", e);
             destroy();
             return;
         }
@@ -64,17 +78,17 @@ public class AgentImpl implements IAgent {
 
     @Override
     public void destroy() {
-        log.info("Shutting down inspectIT OCE Agent");
+        LOGGER.info("Shutting down inspectIT OCE Agent");
         ctx.close();
     }
 
     private void loadOpenCensus(boolean publishOpencensusToBootstrap, Instrumentation instr, ClassLoader classloader) throws Exception {
         Path jarFile = copyResourceToTempJarFile(OPENCENSUS_FAR_JAR_PATH);
         if (publishOpencensusToBootstrap) {
-            log.info("Loading OpenCensus to the bootstrap classloader.");
+            LOGGER.info("Loading OpenCensus to the bootstrap classloader.");
             instr.appendToBootstrapClassLoaderSearch(new JarFile(jarFile.toFile()));
         } else {
-            log.info("Loading OpenCensus in inspectIT classloader.");
+            LOGGER.info("Loading OpenCensus in inspectIT classloader.");
             classloader.getClass()
                     .getMethod("addURL", URL.class)
                     .invoke(classloader, jarFile.toUri().toURL());
