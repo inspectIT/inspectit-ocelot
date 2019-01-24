@@ -19,6 +19,7 @@ import rocks.inspectit.oce.core.instrumentation.config.model.ClassInstrumentatio
 import rocks.inspectit.oce.core.instrumentation.event.ClassInstrumentedEvent;
 import rocks.inspectit.oce.core.instrumentation.event.IClassDefinitionListener;
 import rocks.inspectit.oce.core.instrumentation.special.SpecialSensor;
+import rocks.inspectit.oce.core.selfmonitoring.SelfMonitoringService;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -41,6 +42,9 @@ public class AsyncClassTransformerUnitTest {
 
     @Mock
     Instrumentation instrumentation;
+
+    @Mock
+    SelfMonitoringService selfMonitoring;
 
     @Mock
     InstrumentationConfigurationResolver configResolver;

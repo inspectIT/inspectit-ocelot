@@ -2,6 +2,7 @@ package rocks.inspectit.oce.core.instrumentation;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import io.opencensus.stats.Aggregation;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -11,13 +12,16 @@ import net.bytebuddy.dynamic.ClassFileLocator;
 import net.bytebuddy.dynamic.DynamicType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+import rocks.inspectit.oce.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.oce.core.config.InspectitEnvironment;
 import rocks.inspectit.oce.core.instrumentation.config.InstrumentationConfigurationResolver;
 import rocks.inspectit.oce.core.instrumentation.config.model.ClassInstrumentationConfiguration;
 import rocks.inspectit.oce.core.instrumentation.event.ClassInstrumentedEvent;
 import rocks.inspectit.oce.core.instrumentation.event.IClassDefinitionListener;
 import rocks.inspectit.oce.core.instrumentation.special.SpecialSensor;
+import rocks.inspectit.oce.core.selfmonitoring.SelfMonitoringService;
 import rocks.inspectit.oce.core.utils.CommonUtils;
 
 import javax.annotation.PostConstruct;
@@ -50,6 +54,9 @@ public class AsyncClassTransformer implements ClassFileTransformer {
 
     @Autowired
     private InstrumentationConfigurationResolver configResolver;
+
+    @Autowired
+    SelfMonitoringService selfMonitoring;
 
     @Autowired
     List<IClassDefinitionListener> classDefinitionListeners;
@@ -190,7 +197,22 @@ public class AsyncClassTransformer implements ClassFileTransformer {
                 instrumentedClasses.put(classBeingRedefined, Boolean.TRUE);
             }
         }
+        selfMonitorInstrumentedClassesCount();
         return classConf;
+    }
+
+
+    @EventListener(classes = {InspectitConfigChangedEvent.class},
+            condition = "#root.event.newConfig.selfMonitoring.enabled")
+    void selfMonitorInstrumentedClassesCount() {
+        if (selfMonitoring.isSelfMonitoringEnabled()) {
+            val measure = selfMonitoring.getSelfMonitoringMeasureLong(
+                    "instrumented-classes",
+                    "The number of currently by inspectIT instrumented classes",
+                    "classes",
+                    Aggregation.LastValue::create);
+            selfMonitoring.recordMeasurement(measure, instrumentedClasses.size());
+        }
     }
 
 }

@@ -80,17 +80,17 @@ public class ProcessorMetricsRecorder extends AbstractPollingMetricsRecorder {
         val mm = recorder.newMeasureMap();
         Map<String, Boolean> enabled = config.getProcessor().getEnabled();
         if (enabled.getOrDefault(CPU_COUNT_METRIC_NAME, false)) {
-            val measure = getOrCreateMeasureLongWithView(CPU_COUNT_METRIC_FULL_NAME, CPU_COUNT_METRIC_DESCRIPTION,
+            val measure = measureProvider.getOrCreateMeasureLongWithViewAndCommonTags(CPU_COUNT_METRIC_FULL_NAME, CPU_COUNT_METRIC_DESCRIPTION,
                     CPU_COUNT_METRIC_UNIT, Aggregation.LastValue::create);
             mm.put(measure, runtime.availableProcessors());
         }
         if (enabled.getOrDefault(AVERAGE_LOAD_METRIC_NAME, false) && averageLoadAvailable) {
-            val measure = getOrCreateMeasureDoubleWithView(AVERAGE_LOAD_METRIC_FULL_NAME, AVERAGE_LOAD_METRIC_DESCRIPTION,
+            val measure = measureProvider.getOrCreateMeasureDoubleWithViewAndCommonTags(AVERAGE_LOAD_METRIC_FULL_NAME, AVERAGE_LOAD_METRIC_DESCRIPTION,
                     AVERAGE_LOAD_METRIC_UNIT, Aggregation.LastValue::create);
             mm.put(measure, operatingSystemBean.getSystemLoadAverage());
         }
         if (enabled.getOrDefault(SYSTEM_USAGE_METRIC_NAME, false) && systemCpuUsage.isPresent()) {
-            val measure = getOrCreateMeasureDoubleWithView(SYSTEM_USAGE_METRIC_FULL_NAME, SYSTEM_USAGE_METRIC_DESCRIPTION,
+            val measure = measureProvider.getOrCreateMeasureDoubleWithViewAndCommonTags(SYSTEM_USAGE_METRIC_FULL_NAME, SYSTEM_USAGE_METRIC_DESCRIPTION,
                     SYSTEM_USAGE_METRIC_UNIT, Aggregation.LastValue::create);
             try {
                 double value = (double) systemCpuUsage.get().invoke(operatingSystemBean);
@@ -102,7 +102,7 @@ public class ProcessorMetricsRecorder extends AbstractPollingMetricsRecorder {
             }
         }
         if (enabled.getOrDefault(PROCESS_USAGE_METRIC_NAME, false) && processCpuUsage.isPresent()) {
-            val measure = getOrCreateMeasureDoubleWithView(PROCESS_USAGE_METRIC_FULL_NAME, PROCESS_USAGE_METRIC_DESCRIPTION,
+            val measure = measureProvider.getOrCreateMeasureDoubleWithViewAndCommonTags(PROCESS_USAGE_METRIC_FULL_NAME, PROCESS_USAGE_METRIC_DESCRIPTION,
                     PROCESS_USAGE_METRIC_UNIT, Aggregation.LastValue::create);
             try {
                 double value = (double) processCpuUsage.get().invoke(operatingSystemBean);

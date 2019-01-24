@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import rocks.inspectit.oce.core.config.InspectitEnvironment;
 import rocks.inspectit.oce.core.instrumentation.event.IClassDefinitionListener;
 import rocks.inspectit.oce.core.instrumentation.event.IClassDiscoveryListener;
+import rocks.inspectit.oce.core.selfmonitoring.SelfMonitoringService;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -32,6 +33,9 @@ public class NewClassDiscoveryService implements IClassDefinitionListener {
     @Autowired
     private ScheduledExecutorService exec;
 
+    @Autowired
+    private SelfMonitoringService selfMonitoring;
+
     /**
      * package private for unit testing
      */
@@ -53,28 +57,30 @@ public class NewClassDiscoveryService implements IClassDefinitionListener {
     private AtomicLong numTrialsSinceLastClassDefinition = new AtomicLong(0);
 
     private Runnable updateCheckTask = () -> {
-        long maxTrials = env.getCurrentConfig().getInstrumentation().getInternal().getNumClassDiscoveryTrials();
-        if (numTrialsSinceLastClassDefinition.incrementAndGet() <= maxTrials) {
-            val watch = Stopwatch.createStarted();
+        try (val ss = selfMonitoring.withDurationSelfMonitoring("new-classes-discovery")) {
+            long maxTrials = env.getCurrentConfig().getInstrumentation().getInternal().getNumClassDiscoveryTrials();
+            if (numTrialsSinceLastClassDefinition.incrementAndGet() <= maxTrials) {
+                val watch = Stopwatch.createStarted();
 
-            log.debug("Checking for new classes...");
-            Set<Class<?>> newClasses = new HashSet<>();
-            for (Class<?> clazz : instrumentation.getAllLoadedClasses()) {
-                if (!knownClasses.contains(clazz)) {
-                    knownClasses.add(clazz);
-                    newClasses.add(clazz);
+                log.debug("Checking for new classes...");
+                Set<Class<?>> newClasses = new HashSet<>();
+                for (Class<?> clazz : instrumentation.getAllLoadedClasses()) {
+                    if (!knownClasses.contains(clazz)) {
+                        knownClasses.add(clazz);
+                        newClasses.add(clazz);
+                    }
+                }
+                long elapsedMS = watch.elapsed(TimeUnit.MILLISECONDS);
+                if (!newClasses.isEmpty()) {
+                    log.debug("{} new classes found, check took {} ms", newClasses.size(), elapsedMS);
+                    listeners.forEach(lis -> lis.onNewClassesDiscovered(newClasses));
+                } else {
+                    log.debug("No new classes found, check took {} ms", elapsedMS);
                 }
             }
-            long elapsedMS = watch.elapsed(TimeUnit.MILLISECONDS);
-            if (!newClasses.isEmpty()) {
-                log.debug("{} new classes found, check took {} ms", newClasses.size(), elapsedMS);
-                listeners.forEach(lis -> lis.onNewClassesDiscovered(newClasses));
-            } else {
-                log.debug("No new classes found, check took {} ms", elapsedMS);
+            if (!isShuttingDown) {
+                scheduleUpdateCheck();
             }
-        }
-        if (!isShuttingDown) {
-            scheduleUpdateCheck();
         }
     };
 

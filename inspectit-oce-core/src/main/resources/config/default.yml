@@ -198,7 +198,7 @@ inspectit:
     # if self monitoring is enabled
     enabled: false
     # what should be the prefix for the self monitoring measures
-    measure-name: inspectit/self/duration
+    measure-prefix: inspectit/self/
 
   # defines how many threads inspectIT may start for its internal tasks
   thread-pool-size: 2

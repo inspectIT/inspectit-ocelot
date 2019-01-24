@@ -10,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.oce.core.instrumentation.config.InstrumentationConfigurationResolver;
 import rocks.inspectit.oce.core.instrumentation.config.model.ClassInstrumentationConfiguration;
 import rocks.inspectit.oce.core.instrumentation.special.SpecialSensor;
+import rocks.inspectit.oce.core.selfmonitoring.SelfMonitoringService;
 
 import java.lang.instrument.Instrumentation;
 import java.util.Arrays;
@@ -36,6 +37,9 @@ public class InstrumentationManagerUnitTest {
 
     @Mock
     InstrumentationConfigurationResolver resolver;
+
+    @Mock
+    SelfMonitoringService selfMonitoring;
 
     @Mock
     SpecialSensor dummySensor;

@@ -52,7 +52,7 @@ public abstract class AbstractPollingMetricsRecorder extends AbstractMetricsReco
         log.info("Enabling {}.", getClass().getSimpleName());
         val conf = configuration.getMetrics();
         pollingTask = executor.scheduleWithFixedDelay(() -> {
-            try (val scope = selfMonitoringService.withSelfMonitoring(getClass().getSimpleName())) {
+            try (val scope = selfMonitoringService.withDurationSelfMonitoring(getClass().getSimpleName())) {
                 try (val tags = commonTags.withCommonTagScope()) {
                     takeMeasurement(conf);
                 }

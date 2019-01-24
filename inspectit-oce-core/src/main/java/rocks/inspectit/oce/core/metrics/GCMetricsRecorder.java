@@ -137,7 +137,7 @@ public class GCMetricsRecorder extends AbstractMetricsRecorder {
         if (!isEnabled()) {
             return;
         }
-        try (val sm = selfMonitoringService.withSelfMonitoring(getClass().getSimpleName())) {
+        try (val sm = selfMonitoringService.withDurationSelfMonitoring(getClass().getSimpleName())) {
 
             String type = notification.getType();
             if (type.equals(GarbageCollectionNotificationInfo.GARBAGE_COLLECTION_NOTIFICATION)) {
@@ -213,7 +213,7 @@ public class GCMetricsRecorder extends AbstractMetricsRecorder {
     }
 
     private void recordConcurrentPhaseTime(GarbageCollectionNotificationInfo notificationInfo) {
-        val measure = getOrCreateMeasureLongWithView(CONCURRENT_PHASE_TIME_METRIC_FULL_NAME,
+        val measure = measureProvider.getOrCreateMeasureLongWithViewAndCommonTags(CONCURRENT_PHASE_TIME_METRIC_FULL_NAME,
                 CONCURRENT_PHASE_TIME_METRIC_DESCRIPTION, CONCURRENT_PHASE_TIME_UNIT,
                 Aggregation.Sum::create, actionTagKey, causeTagKey);
 
@@ -228,7 +228,7 @@ public class GCMetricsRecorder extends AbstractMetricsRecorder {
     }
 
     private void recordGCPause(GarbageCollectionNotificationInfo notificationInfo) {
-        val measure = getOrCreateMeasureLongWithView(PAUSE_METRIC_FULL_NAME,
+        val measure = measureProvider.getOrCreateMeasureLongWithViewAndCommonTags(PAUSE_METRIC_FULL_NAME,
                 PAUSE_METRIC_DESCRIPTION, PAUSE_UNIT,
                 Aggregation.Sum::create, actionTagKey, causeTagKey);
 
@@ -243,7 +243,7 @@ public class GCMetricsRecorder extends AbstractMetricsRecorder {
     }
 
     private void recordPromotedBytes(long bytes) {
-        val measure = getOrCreateMeasureLongWithView(MEMORY_PROMOTED_METRIC_FULL_NAME,
+        val measure = measureProvider.getOrCreateMeasureLongWithViewAndCommonTags(MEMORY_PROMOTED_METRIC_FULL_NAME,
                 MEMORY_PROMOTED_METRIC_DESCRIPTION, MEMORY_PROMOTED_UNIT,
                 Aggregation.Sum::create);
 
@@ -253,7 +253,7 @@ public class GCMetricsRecorder extends AbstractMetricsRecorder {
     }
 
     private void recordAllocatedBytes(long bytes) {
-        val measure = getOrCreateMeasureLongWithView(MEMORY_ALLOCATED_METRIC_FULL_NAME,
+        val measure = measureProvider.getOrCreateMeasureLongWithViewAndCommonTags(MEMORY_ALLOCATED_METRIC_FULL_NAME,
                 MEMORY_ALLOCATED_METRIC_DESCRIPTION, MEMORY_ALLOCATED_UNIT,
                 Aggregation.Sum::create);
 
@@ -263,7 +263,7 @@ public class GCMetricsRecorder extends AbstractMetricsRecorder {
     }
 
     private void recordLiveDataSize(long bytes) {
-        val measure = getOrCreateMeasureLongWithView(LIVE_DATA_SIZE_METRIC_FULL_NAME,
+        val measure = measureProvider.getOrCreateMeasureLongWithViewAndCommonTags(LIVE_DATA_SIZE_METRIC_FULL_NAME,
                 LIVE_DATA_SIZE_METRIC_DESCRIPTION, LIVE_DATA_SIZE_UNIT,
                 Aggregation.LastValue::create);
 
@@ -273,7 +273,7 @@ public class GCMetricsRecorder extends AbstractMetricsRecorder {
     }
 
     private void recordMaxDataSize(long bytes) {
-        val measure = getOrCreateMeasureLongWithView(MAX_DATA_SIZE_METRIC_FULL_NAME,
+        val measure = measureProvider.getOrCreateMeasureLongWithViewAndCommonTags(MAX_DATA_SIZE_METRIC_FULL_NAME,
                 MAX_DATA_SIZE_METRIC_DESCRIPTION, MAX_DATA_SIZE_UNIT,
                 Aggregation.LastValue::create);
 

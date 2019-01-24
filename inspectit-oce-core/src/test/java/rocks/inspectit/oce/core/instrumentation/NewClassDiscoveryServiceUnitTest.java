@@ -13,6 +13,7 @@ import rocks.inspectit.oce.core.config.model.InspectitConfig;
 import rocks.inspectit.oce.core.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.InternalSettings;
 import rocks.inspectit.oce.core.instrumentation.event.IClassDiscoveryListener;
+import rocks.inspectit.oce.core.selfmonitoring.SelfMonitoringService;
 
 import java.lang.instrument.Instrumentation;
 import java.time.Duration;
@@ -36,6 +37,9 @@ public class NewClassDiscoveryServiceUnitTest {
 
     @Mock
     Instrumentation instrumentation;
+
+    @Mock
+    SelfMonitoringService selfMonitoring;
 
     @Mock
     InspectitEnvironment env;
