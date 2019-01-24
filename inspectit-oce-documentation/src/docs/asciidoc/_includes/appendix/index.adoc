@@ -11,5 +11,5 @@ include::{gradle-rootdir-absolute}/inspectit-oce-core/src/main/resources/config/
 
 [source,xml]
 ----
-include::{gradle-rootdir-absolute}/inspectit-oce-core/src/main/resources/logback.xml[]
+include::{gradle-rootdir-absolute}/inspectit-oce-core/src/main/resources/inspectit-logback.xml[]
 ----
