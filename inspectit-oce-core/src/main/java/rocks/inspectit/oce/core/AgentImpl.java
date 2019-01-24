@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import rocks.inspectit.oce.bootstrap.IAgent;
 import rocks.inspectit.oce.core.config.InspectitEnvironment;
-import rocks.inspectit.oce.core.config.SpringConfiguration;
+import rocks.inspectit.oce.core.config.spring.SpringConfiguration;
 import rocks.inspectit.oce.core.logging.logback.LogbackInitializer;
 
 import java.io.IOException;

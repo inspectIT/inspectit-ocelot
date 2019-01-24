@@ -1,4 +1,4 @@
-package rocks.inspectit.oce.core.config;
+package rocks.inspectit.oce.core.config.spring;
 
 import io.opencensus.stats.Stats;
 import io.opencensus.stats.StatsRecorder;

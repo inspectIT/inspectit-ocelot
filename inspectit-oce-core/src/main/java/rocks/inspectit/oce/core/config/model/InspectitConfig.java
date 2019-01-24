@@ -2,8 +2,10 @@ package rocks.inspectit.oce.core.config.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import rocks.inspectit.oce.core.config.InspectitEnvironment;
 import rocks.inspectit.oce.core.config.model.config.ConfigSettings;
 import rocks.inspectit.oce.core.config.model.exporters.ExportersSettings;
+import rocks.inspectit.oce.core.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.oce.core.config.model.logging.LoggingSettings;
 import rocks.inspectit.oce.core.config.model.metrics.MetricsSettings;
 import rocks.inspectit.oce.core.config.model.selfmonitoring.SelfMonitoringSettings;
@@ -15,7 +17,7 @@ import javax.validation.constraints.NotBlank;
 
 /**
  * Root element of the configuration model for inspectIT.
- * The loading of the configuration is managed by the {@link rocks.inspectit.oce.core.config.InspectitEnvironment}.
+ * The loading of the configuration is managed by the {@link InspectitEnvironment}.
  * <p>
  * The default values and the structure of the configuration can be found in the /config/default.yml file.
  * Note that in configuration files fields have tobe referred to in kebab-case instead of camelCase!
@@ -70,6 +72,9 @@ public class InspectitConfig {
      */
     @Valid
     private SelfMonitoringSettings selfMonitoring;
+
+    @Valid
+    private InstrumentationSettings instrumentation;
 
     /**
      * Defines how many threads inspectIT may start for its internal tasks.

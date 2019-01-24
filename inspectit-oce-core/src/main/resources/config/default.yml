@@ -34,6 +34,38 @@ inspectit:
       # if true the directory will be watched for changes. When changes occur, the configuration is automatically reloaded
       watch: true
 
+  # settings regarding the instrumentation performed on the target application
+  instrumentation:
+    # settings for special sensors
+    special:
+      # enables or disables the instrumentation to ensure data, tag and trace propagation across java.util.concurrent.Executor instances
+      executor-context-propagation: true
+
+    # settings for fine-tuning the instrumentation process
+    internal:
+      # the time to pause between executing batches of class instrumentation updates
+      inter-batch-delay: 50ms
+      # defines how many classes are checked at once for updates of their configuration
+      class-configuration-check-batch-size: 1000
+      # defines the maximum number of classes which are retransformed at once per batch
+      class-retransform-batch-size: 10
+
+      # defines how often the agent should check if new classes have been defined.
+      # this check is only performed if Classloader.defineClass was called less than ${max-class-definition-delay} seconds ago
+      new-class-discovery-interval: 10s
+      # defines how often after the last invocation of a ClassFileTransformer the agent scans for new classes
+      num-class-discovery-trials: 2
+
+    # defines all bootstrap packages whose classes and subpackages should be ignored
+    # the given strings are matches as prefixes for classes, therefore packages have to end with a dot
+    # however, for the trailing dots to be interpreted correctly you need to enclose the package in '[<package>]'
+    ignored-bootstrap-packages:
+      '[rocks.inspectit.]' : true
+      '[io.opencensus.]' : true
+      '[io.grpc.]' : true
+      '[com.lmax.disruptor.]' : true
+      '[com.google.]' : true
+
   # settings for configuring OpenCensus stats and trace exporters
   exporters:
     # settings for metrics exporters
