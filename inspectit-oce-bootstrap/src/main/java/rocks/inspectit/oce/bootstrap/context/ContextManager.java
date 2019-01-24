@@ -1,4 +1,4 @@
-package rocks.inspectit.oce.bootstrap;
+package rocks.inspectit.oce.bootstrap.context;
 
 /**
  * Manages the context, meaning:
@@ -16,15 +16,7 @@ public interface ContextManager {
      */
     Runnable wrap(Runnable r);
 
-    /**
-     * No-Operation implementation in case no inspectIT-core is active
-     */
-    ContextManager NOOP = new ContextManager() {
+    void storeContextForThread(Thread thread);
 
-        @Override
-        public Runnable wrap(Runnable r) {
-            return r;
-        }
-    };
-
+    void attachContextToThread(Thread thread);
 }
