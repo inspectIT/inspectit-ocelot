@@ -81,7 +81,7 @@ public class NewClassDiscoveryService implements IClassDefinitionListener {
 
     @Override
     public void onNewClassDefined(String className, ClassLoader loader) {
-        numTrialsSinceLastClassDefinition.set(0L);
+        numTrialsSinceLastClassDefinition.lazySet(0L);
     }
 
     /**
