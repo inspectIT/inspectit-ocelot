@@ -1,7 +1,7 @@
 package rocks.inspectit.oce.bootstrap;
 
 import rocks.inspectit.oce.bootstrap.context.ContextManager;
-import rocks.inspectit.oce.bootstrap.context.NoopContextManager;
+import rocks.inspectit.oce.bootstrap.noop.NoopContextManager;
 
 /**
  * Accessor for implementations of the interfaces.

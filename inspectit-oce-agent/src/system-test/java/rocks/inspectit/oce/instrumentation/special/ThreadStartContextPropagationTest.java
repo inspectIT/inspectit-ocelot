@@ -4,6 +4,8 @@ import io.opencensus.common.Scope;
 import io.opencensus.tags.*;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -46,6 +48,33 @@ public class ThreadStartContextPropagationTest {
     }
 
     @Test
+    public void verifyNoContextProgapationViaRun() throws Exception {
+        TagKey tagKey = TagKey.create("test-tag-key");
+        TagValue tagValue = TagValue.create("test-tag-value");
+
+        AtomicReference<Iterator<Tag>> refTags = new AtomicReference<>();
+
+        Class<?> instances = Class.forName("rocks.inspectit.oce.bootstrap.Instances");
+        Field contextManager = instances.getDeclaredField("contextManager");
+        Object contextManagerInstance = contextManager.get(null);
+        Class contextManagerClass = contextManagerInstance.getClass();
+        Method storeContextForThread = contextManagerClass.getDeclaredMethod("storeContextForThread", Thread.class);
+
+        Thread thread = new Thread(() -> {
+            Iterator<Tag> iter = InternalUtils.getTags(tagger.getCurrentTagContext());
+            refTags.set(iter);
+        });
+
+        try (Scope s = tagger.currentBuilder().put(tagKey, tagValue).buildScoped()) {
+            storeContextForThread.invoke(contextManagerInstance, thread);
+        }
+
+        thread.run();
+
+        assertThat(refTags.get()).isEmpty();
+    }
+
+    @Test
     public void verifyContextProgapationUsingSubClasses() throws InterruptedException {
         TagKey tagKey = TagKey.create("test-tag-key");
         TagValue tagValue = TagValue.create("test-tag-value");
@@ -62,7 +91,6 @@ public class ThreadStartContextPropagationTest {
         }) {
             @Override
             public synchronized void start() {
-                System.out.println("Custom Implementation");
                 super.start();
             }
         };

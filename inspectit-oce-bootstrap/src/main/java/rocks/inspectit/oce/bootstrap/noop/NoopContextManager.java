@@ -1,4 +1,6 @@
-package rocks.inspectit.oce.bootstrap.context;
+package rocks.inspectit.oce.bootstrap.noop;
+
+import rocks.inspectit.oce.bootstrap.context.ContextManager;
 
 /**
  * No-operations implementation of the {@link ContextManager}. This will be used if there is no inspectIT agent available.
