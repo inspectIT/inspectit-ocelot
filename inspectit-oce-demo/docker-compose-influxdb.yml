@@ -1,163 +1,179 @@
 version: '2'
 services:
+  agent:
+    image: inspectit/inspectit-oce-agent:${INSPECTIT_OCE_VERSION}
+    container_name: agent
+    mem_limit: 512M
+    volumes:
+      - agent-vol:/agent
+
   config-server:
     image: openapm/spring-petclinic-config-server:inspectit-oce-demo
     container_name: config-server
+    depends_on:
+      - agent
     environment:
-     - INSPECTIT_SERVICE_NAME=config-server
-     - INSPECTIT_CONFIG_FILE_BASED_PATH=/agentconfig
-     - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_PORT=9096
+      - INSPECTIT_SERVICE_NAME=config-server
+      - INSPECTIT_CONFIG_FILE_BASED_PATH=/agentconfig
+      - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_PORT=9096
     mem_limit: 512M
     entrypoint: ["sh", "-c","
-      wget --no-check-certificate https://github.com/inspectIT/inspectit-oce/releases/download/${INSPECTIT_OCE_VERSION}/inspectit-oce-agent-${INSPECTIT_OCE_VERSION}.jar -O inspectit-oce-agent.jar
-      && java -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Djava.security.egd=file:/dev/./urandom
-      -javaagent:/inspectit-oce-agent.jar
+      java -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Djava.security.egd=file:/dev/./urandom
+      -javaagent:/agent/inspectit-oce-agent.jar
       -jar /app.jar"]
     volumes:
       - ./agentconfig/config-server:/agentconfig
+      - agent-vol:/agent
     ports:
-     - 8888:8888
-     - 9096:9096
+      - 8888:8888
+      - 9096:9096
 
   discovery-server:
     image: openapm/spring-petclinic-discovery-server:inspectit-oce-demo
     container_name: discovery-server
     environment:
-     - INSPECTIT_SERVICE_NAME=discovery-server
-     - INSPECTIT_CONFIG_FILE_BASED_PATH=/agentconfig
-     - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_PORT=9095
+      - INSPECTIT_SERVICE_NAME=discovery-server
+      - INSPECTIT_CONFIG_FILE_BASED_PATH=/agentconfig
+      - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_PORT=9095
     mem_limit: 512M
     depends_on:
+      - agent
       - config-server
     entrypoint: ["sh", "-c","
-      wget --no-check-certificate https://github.com/inspectIT/inspectit-oce/releases/download/${INSPECTIT_OCE_VERSION}/inspectit-oce-agent-${INSPECTIT_OCE_VERSION}.jar -O inspectit-oce-agent.jar
-      && ./dockerize -wait=tcp://config-server:8888 -timeout=60s -- &&
+      ./dockerize -wait=tcp://config-server:8888 -timeout=60s -- &&
       java -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Djava.security.egd=file:/dev/./urandom
-      -javaagent:/inspectit-oce-agent.jar
+      -javaagent:/agent/inspectit-oce-agent.jar
       -jar /app.jar"]
     volumes:
       - ./agentconfig/discovery-server:/agentconfig
+      - agent-vol:/agent
     ports:
-     - 8761:8761
-     - 9095:9095
+      - 8761:8761
+      - 9095:9095
 
   customers-service:
     image: openapm/spring-petclinic-customers-service:inspectit-oce-demo
     container_name: customers-service
     environment:
-     - INSPECTIT_SERVICE_NAME=customers-service
-     - INSPECTIT_CONFIG_FILE_BASED_PATH=/agentconfig
-     - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_PORT=9091
+      - INSPECTIT_SERVICE_NAME=customers-service
+      - INSPECTIT_CONFIG_FILE_BASED_PATH=/agentconfig
+      - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_PORT=9091
     mem_limit: 512M
     depends_on:
-     - config-server
-     - discovery-server
+      - agent
+      - config-server
+      - discovery-server
     entrypoint: ["sh", "-c","
-      wget --no-check-certificate https://github.com/inspectIT/inspectit-oce/releases/download/${INSPECTIT_OCE_VERSION}/inspectit-oce-agent-${INSPECTIT_OCE_VERSION}.jar -O inspectit-oce-agent.jar
-      && ./dockerize -wait=tcp://discovery-server:8761 -timeout=60s -- &&
+      ./dockerize -wait=tcp://discovery-server:8761 -timeout=60s -- &&
       java -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Djava.security.egd=file:/dev/./urandom
-      -javaagent:/inspectit-oce-agent.jar
+      -javaagent:/agent/inspectit-oce-agent.jar
       -jar /app.jar"]
     volumes:
       - ./agentconfig/customers-service:/agentconfig
+      - agent-vol:/agent
     ports:
-     - 8081:8081
-     - 9091:9091
+      - 8081:8081
+      - 9091:9091
 
   visits-service:
     image: openapm/spring-petclinic-visits-service:inspectit-oce-demo
     container_name: visits-service
     environment:
-     - INSPECTIT_SERVICE_NAME=visits-service
-     - INSPECTIT_CONFIG_FILE_BASED_PATH=/agentconfig
-     - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_PORT=9092
+      - INSPECTIT_SERVICE_NAME=visits-service
+      - INSPECTIT_CONFIG_FILE_BASED_PATH=/agentconfig
+      - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_PORT=9092
     mem_limit: 512M
     depends_on:
-     - config-server
-     - discovery-server
+      - agent
+      - config-server
+      - discovery-server
     entrypoint: ["sh", "-c","
-      wget --no-check-certificate https://github.com/inspectIT/inspectit-oce/releases/download/${INSPECTIT_OCE_VERSION}/inspectit-oce-agent-${INSPECTIT_OCE_VERSION}.jar -O inspectit-oce-agent.jar
-      && ./dockerize -wait=tcp://discovery-server:8761 -timeout=60s -- &&
+      ./dockerize -wait=tcp://discovery-server:8761 -timeout=60s -- &&
       java -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Djava.security.egd=file:/dev/./urandom
-      -javaagent:/inspectit-oce-agent.jar
+      -javaagent:/agent/inspectit-oce-agent.jar
       -jar /app.jar"]
     volumes:
       - ./agentconfig/visits-service:/agentconfig
+      - agent-vol:/agent
     ports:
-     - 8082:8082
-     - 9092:9092
+      - 8082:8082
+      - 9092:9092
 
   vets-service:
     image: openapm/spring-petclinic-vets-service:inspectit-oce-demo
     container_name: vets-service
     environment:
-     - INSPECTIT_SERVICE_NAME=vets-service
-     - INSPECTIT_CONFIG_FILE_BASED_PATH=/agentconfig
-     - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_PORT=9093
+      - INSPECTIT_SERVICE_NAME=vets-service
+      - INSPECTIT_CONFIG_FILE_BASED_PATH=/agentconfig
+      - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_PORT=9093
     mem_limit: 512M
     depends_on:
-     - config-server
-     - discovery-server
+      - agent
+      - config-server
+      - discovery-server
     entrypoint: ["sh", "-c","
-      wget --no-check-certificate https://github.com/inspectIT/inspectit-oce/releases/download/${INSPECTIT_OCE_VERSION}/inspectit-oce-agent-${INSPECTIT_OCE_VERSION}.jar -O inspectit-oce-agent.jar
-      && ./dockerize -wait=tcp://discovery-server:8761 -timeout=60s -- &&
+      ./dockerize -wait=tcp://discovery-server:8761 -timeout=60s -- &&
       java -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Djava.security.egd=file:/dev/./urandom
-      -javaagent:/inspectit-oce-agent.jar
+      -javaagent:/agent/inspectit-oce-agent.jar
       -jar /app.jar"]
     volumes:
       - ./agentconfig/vets-service:/agentconfig
+      - agent-vol:/agent
     ports:
-     - 8083:8083
-     - 9093:9093
+      - 8083:8083
+      - 9093:9093
 
   api-gateway:
     image: openapm/spring-petclinic-api-gateway:inspectit-oce-demo
     container_name: api-gateway
     environment:
-     - INSPECTIT_SERVICE_NAME=api-gateway
-     - INSPECTIT_CONFIG_FILE_BASED_PATH=/agentconfig
-     - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_PORT=9094
+      - INSPECTIT_SERVICE_NAME=api-gateway
+      - INSPECTIT_CONFIG_FILE_BASED_PATH=/agentconfig
+      - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_PORT=9094
     mem_limit: 512M
     depends_on:
-     - config-server
-     - discovery-server
+      - agent
+      - config-server
+      - discovery-server
     entrypoint: ["sh", "-c","
-      wget --no-check-certificate https://github.com/inspectIT/inspectit-oce/releases/download/${INSPECTIT_OCE_VERSION}/inspectit-oce-agent-${INSPECTIT_OCE_VERSION}.jar -O inspectit-oce-agent.jar
-      && ./dockerize -wait=tcp://discovery-server:8761 -timeout=60s -- &&
+      ./dockerize -wait=tcp://discovery-server:8761 -timeout=60s -- &&
       java -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Djava.security.egd=file:/dev/./urandom
-      -javaagent:/inspectit-oce-agent.jar
+      -javaagent:/agent/inspectit-oce-agent.jar
       -jar /app.jar"]
     volumes:
       - ./agentconfig/api-gateway:/agentconfig
+      - agent-vol:/agent
     ports:
-     - 8080:8080
-     - 9094:9094
+      - 8080:8080
+      - 9094:9094
 
   influxdb:
     image: influxdb
     container_name: influxdb
     environment:
-     - INFLUXDB_HTTP_FLUX_ENABLED=true
-     - INFLUXDB_HTTP_LOG_ENABLED=false
-     - INFLUXDB_DATA_QUERY_LOG_ENABLED=false
+      - INFLUXDB_HTTP_FLUX_ENABLED=true
+      - INFLUXDB_HTTP_LOG_ENABLED=false
+      - INFLUXDB_DATA_QUERY_LOG_ENABLED=false
     mem_limit: 512M
     ports:
-     - 8086:8086
+      - 8086:8086
 
   telegraf:
     image: telegraf
     container_name: telegraf
     volumes:
-     - ./telegraf/telegraf-influx.conf:/etc/telegraf/telegraf.conf:ro
+      - ./telegraf/telegraf-influx.conf:/etc/telegraf/telegraf.conf:ro
     mem_limit: 512M
 
   grafana:
     image: openapm/grafana:inspectit-oce-demo
     container_name: grafana
     environment:
-     - GF_SECURITY_ADMIN_PASSWORD=demo
-     - GF_PATHS_PROVISIONING=/usr/share/grafana/custom/
+      - GF_SECURITY_ADMIN_PASSWORD=demo
+      - GF_PATHS_PROVISIONING=/usr/share/grafana/custom/
     volumes:
-     - ./grafana/provisioning/influxdb:/usr/share/grafana/custom/
+      - ./grafana/provisioning/influxdb:/usr/share/grafana/custom/
     ports:
-     - 3001:3000
+      - 3001:3000
+volumes:
+  agent-vol:

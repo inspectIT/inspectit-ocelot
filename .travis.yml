@@ -63,7 +63,9 @@ jobs:
       before_install:
         - if [ -z "${TRAVIS_TAG}" ]; then RELEASE_VERSION="SNAPSHOT-${TRAVIS_BUILD_NUMBER}"; else RELEASE_VERSION="${TRAVIS_TAG}";fi
         - echo "Setting version to $RELEASE_VERSION"
-      install: ./gradlew -PbuildVersion=$RELEASE_VERSION assemble packageDocumentation
+        - if [ -z "${TRAVIS_TAG}" ]; then echo "Not release build - skipping docker login."; else ./resources/docker-login.sh;fi
+      # if it is a release build package demo and push agent docker image
+      install: if [ -z "${TRAVIS_TAG}" ]; then ./gradlew -PbuildVersion=$RELEASE_VERSION assemble packageDocumentation; else ./gradlew -PbuildVersion=$RELEASE_VERSION assemble packageDocumentation packageDemo dockerPush;fi
       script: skip
       before_deploy:
         - mkdir -p ~/bin && curl -sSL -o ~/bin/jq https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 && chmod +x ~/bin/jq
@@ -133,6 +135,7 @@ jobs:
           file:
            - "inspectit-oce-agent/build/inspectit-oce-agent-$RELEASE_VERSION.jar"
            - "inspectit-oce-documentation/build/distributions/inspectit-oce-documentation-$RELEASE_VERSION.zip"
+           - "inspectit-oce-demo/build/inspectit-oce-demo-$RELEASE_VERSION.zip"
           skip_cleanup: true
           on:
             tags: true
