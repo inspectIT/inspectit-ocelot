@@ -147,6 +147,9 @@ public class AsyncClassTransformer implements ClassFileTransformer {
                 // we do not want to isntrument this -> we return the original byte code
                 resultBytes = originalByteCode;
             } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("Redefining class: {}", classBeingRedefined.getName());
+                }
                 //Make a ByteBuddy builder based on the input bytecode
                 ClassFileLocator byteCodeClassFileLocator = ClassFileLocator.Simple.of(classBeingRedefined.getName(), originalByteCode);
                 DynamicType.Builder<?> builder = new ByteBuddy().redefine(classBeingRedefined, byteCodeClassFileLocator);

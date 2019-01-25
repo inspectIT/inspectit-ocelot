@@ -36,6 +36,61 @@ inspectit:
 
   # settings regarding the instrumentation performed on the target application
   instrumentation:
+
+    available-sensors:
+      test-sensor:
+        targets:
+          - name-pattern: "stopwatch"
+            matcher-mode: "ENDS_WITH_IGNORE_CASE"
+        methods:
+          - is-public: true
+            name-pattern: "elapsed"
+            matcher-mode: "EQUALS_FULLY"
+            arguments:
+              "0": java.util.concurrent.TimeUnit
+
+      http-sensor:
+        # properties:
+        #  - what should be executed?
+        targets:
+          - is-interface: false
+            is-abstract: false
+            name-pattern: ".*Dummy"
+            matcher-mode: "MATCHES"
+          - name-pattern: "rocks.inspectit.oce.core.Dummy"
+            matcher-mode: "EQUALS_FULLY"
+        methods:
+          - is-constructor: false
+            is-synchronized: false
+            is-public: true
+            is-protected: true
+            is-package-private: true
+            is-private: true
+            name-pattern: "start"
+            matcher-mode: "EQUALS_FULLY"
+
+      http-sensor-2:
+        targets:
+          - name-pattern: ".*Dummy"
+            matcher-mode: "MATCHES"
+        methods:
+          - name-pattern: "asd"
+            matcher-mode: "EQUALS_FULLY"
+
+    instrumentation-profiles:
+       - name: "My first Profile"
+         enabled: true
+         priority: 1
+         sensors:
+           http-sensor: true
+           http-sensor-2: false
+       - name: "Marius"
+         enabled: true
+         priority: 1
+         sensors:
+           test-sensor: true
+
+
     # settings for special sensors
     special:
       # enables or disables the instrumentation to ensure context propagation across java.util.concurrent.Executor instances
@@ -56,7 +111,13 @@ inspectit:
 
       # defines how often the agent should check if new classes have been defined.
       # this check is only performed if Classloader.defineClass was called less than ${max-class-definition-delay} seconds ago
-      new-class-discovery-interval: 10s
+      new-class-discovery-interval: 1s
+      # defines how long after the invocation of ClassFileTransform the class is guaranteed to be present in Instrumentation.getAllLoadedClasses.
+      # this influences if newly created classes are discovered by inspectIT.
+      max-class-definition-delay: 60s
+      # defines how long after the invocation of ClassFileTransform the agent should wait with trying to discover new classes.
+      # the default value is set to zero for cases where the application constantly keeps defining new classes.
+      min-class-definition-delay: 0s
       # defines how often after the last invocation of a ClassFileTransformer the agent scans for new classes
       num-class-discovery-trials: 2
 
