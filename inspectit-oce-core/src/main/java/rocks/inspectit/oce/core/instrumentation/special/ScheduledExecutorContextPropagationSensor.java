@@ -31,7 +31,7 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
 @DependsOn(ContextManagerImpl.BEAN_NAME)
 public class ScheduledExecutorContextPropagationSensor implements SpecialSensor {
 
-    private static final ElementMatcher<TypeDescription> CLASSES_MATCHER = isSubTypeOf(ScheduledExecutorService.class);
+    private static final ElementMatcher<TypeDescription> CLASSES_MATCHER = isSubTypeOf(ScheduledExecutorService.class).and(not(isAbstract()));
 
     @Override
     public boolean shouldInstrument(TypeDescription type, InstrumentationConfiguration settings) {

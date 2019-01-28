@@ -20,19 +20,10 @@ public class ScheduledExecutorContextPropagationTest {
     public void verifyCtxPropagationViaScheduleRunnable() throws Exception {
         TagKey tagKey = TagKey.create("test-tag-key");
         TagValue tagValue = TagValue.create("test-tag-value");
-
         ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
-
         AtomicReference<Iterator<Tag>> refTags = new AtomicReference<>();
 
-        Runnable runnable = () -> {
-            Iterator<Tag> iter = InternalUtils.getTags(tagger.getCurrentTagContext());
-            refTags.set(iter);
-
-            synchronized (refTags) {
-                refTags.notifyAll();
-            }
-        };
+        Runnable runnable = () -> refTags.set(InternalUtils.getTags(tagger.getCurrentTagContext()));
 
         ScheduledFuture<?> schedule;
         try (Scope s = tagger.currentBuilder().put(tagKey, tagValue).buildScoped()) {
@@ -49,7 +40,6 @@ public class ScheduledExecutorContextPropagationTest {
     public void verifyCtxPropagationViaScheduleCallable() throws Exception {
         TagKey tagKey = TagKey.create("test-tag-key");
         TagValue tagValue = TagValue.create("test-tag-value");
-
         ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
 
         Callable<Iterator<Tag>> callable = () -> InternalUtils.getTags(tagger.getCurrentTagContext());
@@ -58,46 +48,40 @@ public class ScheduledExecutorContextPropagationTest {
         try (Scope s = tagger.currentBuilder().put(tagKey, tagValue).buildScoped()) {
             future = executorService.schedule(callable, 50, TimeUnit.MILLISECONDS);
         }
+        Iterator<Tag> result = future.get();
 
-        assertThat(future.get()).hasSize(1)
+        assertThat(result).hasSize(1)
                 .extracting("key", "value")
                 .contains(tuple(tagKey, tagValue));
     }
 
     @Test
     public void verifyCtxPropagationViaScheduleFixedDelay() throws Exception {
+        int iterations = 5;
         TagKey tagKey = TagKey.create("test-tag-key");
         TagValue tagValue = TagValue.create("test-tag-value");
-        int executions = 5;
+        CountDownLatch interationCount = new CountDownLatch(iterations);
 
         ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
         List<Iterator<Tag>> iteratorList = new CopyOnWriteArrayList<>();
 
         Runnable runnable = () -> {
             Iterator<Tag> iter = InternalUtils.getTags(tagger.getCurrentTagContext());
-
             iteratorList.add(iter);
-
-            synchronized (iteratorList) {
-                iteratorList.notifyAll();
-            }
+            interationCount.countDown();
         };
 
-        ScheduledFuture<Object> future;
+        ScheduledFuture future;
         try (Scope s = tagger.currentBuilder().put(tagKey, tagValue).buildScoped()) {
-            future = (ScheduledFuture<Object>) executorService.scheduleWithFixedDelay(runnable, 0, 50, TimeUnit.MILLISECONDS);
+            future = executorService.scheduleWithFixedDelay(runnable, 0, 50, TimeUnit.MILLISECONDS);
         }
 
-        synchronized (iteratorList) {
-            while (iteratorList.size() < executions) {
-                iteratorList.wait();
-            }
-        }
+        interationCount.await();
 
         future.cancel(true);
         executorService.shutdown();
 
-        assertThat(iteratorList).hasSize(executions);
+        assertThat(iteratorList).hasSize(iterations);
         iteratorList.forEach(tagIterator -> assertThat(tagIterator)
                 .hasSize(1)
                 .extracting("key", "value")
@@ -106,38 +90,31 @@ public class ScheduledExecutorContextPropagationTest {
 
     @Test
     public void verifyCtxPropagationViaScheduleFixedRate() throws Exception {
+        int iterations = 5;
         TagKey tagKey = TagKey.create("test-tag-key");
         TagValue tagValue = TagValue.create("test-tag-value");
-        int executions = 5;
+        CountDownLatch interationCount = new CountDownLatch(iterations);
 
         ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
         List<Iterator<Tag>> iteratorList = new CopyOnWriteArrayList<>();
 
         Runnable runnable = () -> {
             Iterator<Tag> iter = InternalUtils.getTags(tagger.getCurrentTagContext());
-
             iteratorList.add(iter);
-
-            synchronized (iteratorList) {
-                iteratorList.notifyAll();
-            }
+            interationCount.countDown();
         };
 
-        ScheduledFuture<Object> future;
+        ScheduledFuture future;
         try (Scope s = tagger.currentBuilder().put(tagKey, tagValue).buildScoped()) {
-            future = (ScheduledFuture<Object>) executorService.scheduleAtFixedRate(runnable, 0, 50, TimeUnit.MILLISECONDS);
+            future = executorService.scheduleAtFixedRate(runnable, 0, 50, TimeUnit.MILLISECONDS);
         }
 
-        synchronized (iteratorList) {
-            while (iteratorList.size() < executions) {
-                iteratorList.wait();
-            }
-        }
+        interationCount.await();
 
         future.cancel(true);
         executorService.shutdown();
 
-        assertThat(iteratorList).hasSize(executions);
+        assertThat(iteratorList).hasSize(iterations);
         iteratorList.forEach(tagIterator -> assertThat(tagIterator)
                 .hasSize(1)
                 .extracting("key", "value")

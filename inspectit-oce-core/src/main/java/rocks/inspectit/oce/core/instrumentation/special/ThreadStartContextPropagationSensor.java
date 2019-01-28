@@ -20,7 +20,7 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
 @DependsOn(ContextManagerImpl.BEAN_NAME)
 public class ThreadStartContextPropagationSensor implements SpecialSensor {
 
-    private static final ElementMatcher<TypeDescription> CLASSES_MATCHER = is(Thread.class).or(isSubTypeOf(Thread.class));
+    private static final ElementMatcher<TypeDescription> CLASSES_MATCHER = not(isAbstract()).and(is(Thread.class).or(isSubTypeOf(Thread.class)));
 
     @Override
     public boolean shouldInstrument(TypeDescription type, InstrumentationConfiguration settings) {
