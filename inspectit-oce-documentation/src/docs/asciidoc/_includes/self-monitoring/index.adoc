@@ -15,9 +15,9 @@ inspectit_self_duration{component_name="instrumentation-retransformation",host="
 inspectit_self_duration{component_name="class-discovery",host="myhostname",host_address="10.0.75.1",service_name="my-service",} 17145.0
 inspectit_self_duration{component_name="instrumentation-analysis",host="myhostname",host_address="10.0.75.1",service_name="my-service",} 64426.0
 
-# HELP inspectit_self_intrumentation_check_queue_size The number of pending classes inspectIT has to check if they require instrumentation updates [classes]
-# TYPE inspectit_self_intrumentation_check_queue_size gauge
-inspectit_self_intrumentation_check_queue_size{host="myhostname",host_address="10.0.75.1",service_name="my-service",} 3746.0
+# HELP inspectit_self_instrumentation_analysis_queue_size The number of pending classes inspectIT has to check if they require instrumentation updates [classes]
+# TYPE inspectit_self_instrumentation_analysis_queue_size gauge
+inspectit_self_instrumentation_analysis_queue_size{host="myhostname",host_address="10.0.75.1",service_name="my-service",} 3746.0
 
 # HELP inspectit_self_instrumented_classes The number of currently by inspectIT instrumented classes [classes]
 # TYPE inspectit_self_instrumented_classes gauge

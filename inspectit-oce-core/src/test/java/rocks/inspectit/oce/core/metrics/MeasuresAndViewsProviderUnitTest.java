@@ -274,7 +274,6 @@ public class MeasuresAndViewsProviderUnitTest {
 
             verify(viewManager, times(1)).registerView(any());
             verify(viewManager, times(1)).getView(any());
-
         }
 
     }
