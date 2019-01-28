@@ -81,7 +81,7 @@ public class ScheduledExecutorContextPropagationTest {
         future.cancel(true);
         executorService.shutdown();
 
-        assertThat(iteratorList).hasSize(iterations);
+        assertThat(iteratorList).size().isGreaterThanOrEqualTo(iterations);
         iteratorList.forEach(tagIterator -> assertThat(tagIterator)
                 .hasSize(1)
                 .extracting("key", "value")
@@ -114,7 +114,7 @@ public class ScheduledExecutorContextPropagationTest {
         future.cancel(true);
         executorService.shutdown();
 
-        assertThat(iteratorList).hasSize(iterations);
+        assertThat(iteratorList).size().isGreaterThanOrEqualTo(iterations);
         iteratorList.forEach(tagIterator -> assertThat(tagIterator)
                 .hasSize(1)
                 .extracting("key", "value")
