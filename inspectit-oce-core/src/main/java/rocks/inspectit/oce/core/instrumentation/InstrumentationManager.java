@@ -219,7 +219,7 @@ public class InstrumentationManager implements IClassDiscoveryListener {
     private void selfMonitorQueueSize() {
         if (selfMonitoring.isSelfMonitoringEnabled()) {
             val measure = selfMonitoring.getSelfMonitoringMeasureLong(
-                    "intrumentation-analysis-queue-size",
+                    "instrumentation-analysis-queue-size",
                     "The number of pending classes inspectIT has to check if they require instrumentation updates",
                     "classes",
                     Aggregation.LastValue::create);
