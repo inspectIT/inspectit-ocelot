@@ -89,7 +89,6 @@ public class ThreadStartContextPropagationTest {
         Thread thread = new Thread(() -> {
             Iterator<Tag> iter = InternalUtils.getTags(tagger.getCurrentTagContext());
             refTags.set(iter);
-
             latch.countDown();
         });
 

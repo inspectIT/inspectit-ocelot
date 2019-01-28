@@ -2,30 +2,22 @@ package rocks.inspectit.oce;
 
 import io.opencensus.impl.internal.DisruptorEventQueue;
 
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 public class TestUtils {
 
     /**
-     * Opencensus internally manages a queue of events.
-     * We simply add a event to the queue and wait unti it is processed.
+     * OpenCensus internally manages a queue of events.
+     * We simply add an event to the queue and wait until it is processed.
      */
     public static void waitForOpenCensusQueueToBeProcessed() {
-        AtomicBoolean entryProcessed = new AtomicBoolean(false);
-        DisruptorEventQueue.getInstance().enqueue(() -> {
-            synchronized (entryProcessed) {
-                entryProcessed.set(true);
-                entryProcessed.notify();
-            }
-        });
-        synchronized (entryProcessed) {
-            while (!entryProcessed.get()) {
-                try {
-                    entryProcessed.wait();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
+        CountDownLatch latch = new CountDownLatch(1);
+        DisruptorEventQueue.getInstance().enqueue(latch::countDown);
+        try {
+            latch.await(10, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 }
