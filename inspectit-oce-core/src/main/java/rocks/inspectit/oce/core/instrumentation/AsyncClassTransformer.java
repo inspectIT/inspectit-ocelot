@@ -20,6 +20,7 @@ import rocks.inspectit.oce.core.instrumentation.config.InstrumentationConfigurat
 import rocks.inspectit.oce.core.instrumentation.config.model.ClassInstrumentationConfiguration;
 import rocks.inspectit.oce.core.instrumentation.event.ClassInstrumentedEvent;
 import rocks.inspectit.oce.core.instrumentation.event.IClassDefinitionListener;
+import rocks.inspectit.oce.core.instrumentation.event.TransformerShutdownEvent;
 import rocks.inspectit.oce.core.instrumentation.special.SpecialSensor;
 import rocks.inspectit.oce.core.selfmonitoring.SelfMonitoringService;
 import rocks.inspectit.oce.core.utils.CommonUtils;
@@ -56,7 +57,7 @@ public class AsyncClassTransformer implements ClassFileTransformer {
     private InstrumentationConfigurationResolver configResolver;
 
     @Autowired
-    SelfMonitoringService selfMonitoring;
+    private SelfMonitoringService selfMonitoring;
 
     @Autowired
     List<IClassDefinitionListener> classDefinitionListeners;
@@ -71,7 +72,7 @@ public class AsyncClassTransformer implements ClassFileTransformer {
     /**
      * A lock for safely accessing {@link #shuttingDown} in combination with {@link #instrumentedClasses}.
      */
-    private Object shutDownLock = new Object();
+    private final Object shutDownLock = new Object();
 
     /**
      * Stores all classes which have been instrumented with a configuration different
@@ -104,6 +105,7 @@ public class AsyncClassTransformer implements ClassFileTransformer {
         synchronized (shutDownLock) {
             shuttingDown = true;
         }
+        ctx.publishEvent(new TransformerShutdownEvent(this));
         if (!CommonUtils.isJVMShuttingDown()) {
             deinstrumentAllClasses();
         }
@@ -203,12 +205,12 @@ public class AsyncClassTransformer implements ClassFileTransformer {
 
 
     @EventListener(classes = {InspectitConfigChangedEvent.class},
-            condition = "#root.event.newConfig.selfMonitoring.enabled")
-    void selfMonitorInstrumentedClassesCount() {
+            condition = "!#root.event.oldConfig.selfMonitoring.enabled")
+    private void selfMonitorInstrumentedClassesCount() {
         if (selfMonitoring.isSelfMonitoringEnabled()) {
             val measure = selfMonitoring.getSelfMonitoringMeasureLong(
                     "instrumented-classes",
-                    "The number of currently by inspectIT instrumented classes",
+                    "The number of classes currently instrumented by inspectIT",
                     "classes",
                     Aggregation.LastValue::create);
             selfMonitoring.recordMeasurement(measure, instrumentedClasses.size());

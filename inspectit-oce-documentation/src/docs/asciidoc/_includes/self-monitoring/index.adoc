@@ -9,11 +9,11 @@ The metric is split by the tag containing the component name and also includes a
 
 .Exposed self-monitoring metric using the Prometheus exporter
 ```
-# HELP inspectit_self_duration inspectIT OCE self-monitoring duration [Î¼s]
+# HELP inspectit_self_duration inspectIT OCE self-monitoring duration [us]
 # TYPE inspectit_self_duration counter
-inspectit_self_duration{component_name="instrumentation-application",host="myhostname",host_address="10.0.75.1",service_name="my-service",} 224652.0
-inspectit_self_duration{component_name="new-classes-discovery",host="myhostname",host_address="10.0.75.1",service_name="my-service",} 17145.0
-inspectit_self_duration{component_name="instrumentation-class-inspection",host="myhostname",host_address="10.0.75.1",service_name="my-service",} 64426.0
+inspectit_self_duration{component_name="instrumentation-retransformation",host="myhostname",host_address="10.0.75.1",service_name="my-service",} 224652.0
+inspectit_self_duration{component_name="class-discovery",host="myhostname",host_address="10.0.75.1",service_name="my-service",} 17145.0
+inspectit_self_duration{component_name="instrumentation-analysis",host="myhostname",host_address="10.0.75.1",service_name="my-service",} 64426.0
 
 # HELP inspectit_self_intrumentation_check_queue_size The number of pending classes inspectIT has to check if they require instrumentation updates [classes]
 # TYPE inspectit_self_intrumentation_check_queue_size gauge

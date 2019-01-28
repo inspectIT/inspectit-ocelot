@@ -57,7 +57,7 @@ public class NewClassDiscoveryService implements IClassDefinitionListener {
     private AtomicLong numTrialsSinceLastClassDefinition = new AtomicLong(0);
 
     private Runnable updateCheckTask = () -> {
-        try (val ss = selfMonitoring.withDurationSelfMonitoring("new-classes-discovery")) {
+        try (val sm = selfMonitoring.withDurationSelfMonitoring("class-discovery")) {
             long maxTrials = env.getCurrentConfig().getInstrumentation().getInternal().getNumClassDiscoveryTrials();
             if (numTrialsSinceLastClassDefinition.incrementAndGet() <= maxTrials) {
                 val watch = Stopwatch.createStarted();

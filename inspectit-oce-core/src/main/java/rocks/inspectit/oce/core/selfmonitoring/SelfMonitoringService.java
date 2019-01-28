@@ -28,7 +28,7 @@ public class SelfMonitoringService {
 
     private static final String DURATION_MEASURE_NAME = "duration";
     private static final String DURATION_MEASURE_DESCRIPTION = "inspectIT OCE self-monitoring duration";
-    private static final String DURATION_MEASURE_UNIT = "μs";
+    private static final String DURATION_MEASURE_UNIT = "us";
 
     private static final TagKey COMPONENT_TAG_KEY = TagKey.create("component-name");
 

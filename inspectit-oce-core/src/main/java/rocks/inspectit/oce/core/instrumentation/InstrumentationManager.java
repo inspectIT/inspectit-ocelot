@@ -19,6 +19,7 @@ import rocks.inspectit.oce.core.instrumentation.config.event.InstrumentationConf
 import rocks.inspectit.oce.core.instrumentation.config.model.ClassInstrumentationConfiguration;
 import rocks.inspectit.oce.core.instrumentation.event.ClassInstrumentedEvent;
 import rocks.inspectit.oce.core.instrumentation.event.IClassDiscoveryListener;
+import rocks.inspectit.oce.core.instrumentation.event.TransformerShutdownEvent;
 import rocks.inspectit.oce.core.selfmonitoring.SelfMonitoringService;
 import rocks.inspectit.oce.core.service.BatchJobExecutorService;
 
@@ -50,13 +51,6 @@ public class InstrumentationManager implements IClassDiscoveryListener {
     @Autowired
     private InspectitEnvironment env;
 
-    /**
-     * Required to detect if the transformer is shutting down.
-     * In this case no further retransforms will be triggered.
-     */
-    @Autowired
-    private AsyncClassTransformer transformer;
-
     @Autowired
     private Instrumentation instrumentation;
 
@@ -68,7 +62,7 @@ public class InstrumentationManager implements IClassDiscoveryListener {
 
     /**
      * For each class we remember the applied instrumentation.
-     * This allows us to check if a retransform is required.
+     * This allows us to check if a retransformation is required.
      */
     private Cache<Class<?>, ClassInstrumentationConfiguration> activeInstrumentations =
             CacheBuilder.newBuilder().weakKeys().build();
@@ -93,6 +87,7 @@ public class InstrumentationManager implements IClassDiscoveryListener {
         classInstrumentationJob = executor.startJob(this::checkClassesForConfigurationUpdates, batchSizes, delay, delay);
     }
 
+    @EventListener(TransformerShutdownEvent.class)
     @PreDestroy
     private void destroy() {
         classInstrumentationJob.cancel();
@@ -150,13 +145,9 @@ public class InstrumentationManager implements IClassDiscoveryListener {
      * @param batchSize the number of classes to take from {@link #pendingClasses} and to retransform per batch
      */
     void checkClassesForConfigurationUpdates(BatchSize batchSize) {
-        if (transformer.isShuttingDown()) {
-            return; //nothing to do anymore
-        }
-
         List<Class<?>> classesToRetransform = getBatchOfClassesToRetransform(batchSize);
 
-        try (val sm = selfMonitoring.withDurationSelfMonitoring("instrumentation-application")) {
+        try (val sm = selfMonitoring.withDurationSelfMonitoring("instrumentation-retransformation")) {
             val watch = Stopwatch.createStarted();
             if (!classesToRetransform.isEmpty()) {
                 try {
@@ -224,11 +215,11 @@ public class InstrumentationManager implements IClassDiscoveryListener {
     }
 
     @EventListener(classes = {InspectitConfigChangedEvent.class},
-            condition = "#root.event.newConfig.selfMonitoring.enabled")
-    void selfMonitorQueueSize() {
+            condition = "!#root.event.oldConfig.selfMonitoring.enabled")
+    private void selfMonitorQueueSize() {
         if (selfMonitoring.isSelfMonitoringEnabled()) {
             val measure = selfMonitoring.getSelfMonitoringMeasureLong(
-                    "intrumentation-check-queue-size",
+                    "intrumentation-analysis",
                     "The number of pending classes inspectIT has to check if they require instrumentation updates",
                     "classes",
                     Aggregation.LastValue::create);
