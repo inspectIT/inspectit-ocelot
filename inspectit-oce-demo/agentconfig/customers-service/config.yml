@@ -1,2 +1,27 @@
 # See https://github.com/inspectIT/inspectit-oce/blob/0.1.M1/inspectit-oce-core/src/main/resources/config/default.yml
 # for all the configuration options.
+inspectit:
+  self-monitoring:
+    enabled: true
+#  instrumentation:
+#    # settings for special sensors
+#    special:
+#      # enables or disables the instrumentation to ensure context propagation across java.util.concurrent.Executor instances
+#      executor-context-propagation: true
+#      # enables or disables the instrumentation to ensure context propagation across java.lang.Thread instances
+#      thread-start-context-propagation: true
+#    # settings for fine-tuning the instrumentation process
+#    internal:
+#      # the time to pause between executing batches of class instrumentation updates
+#      inter-batch-delay: 1s
+#      # defines how many classes are checked at once for updates of their configuration
+#      class-configuration-check-batch-size: 100
+#      # defines the maximum number of classes which are retransformed at once per batch
+#      class-retransform-batch-size: 10
+#
+#      # defines how often the agent should check if new classes have been defined.
+#      # this check is only performed if Classloader.defineClass was called less than ${max-class-definition-delay} seconds ago
+#      new-class-discovery-interval: 10s
+#      # defines how often after the last invocation of a ClassFileTransformer the agent scans for new classes
+#      num-class-discovery-trials: 2
+#      # general settings regarding metrics capturing

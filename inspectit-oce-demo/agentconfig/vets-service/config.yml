@@ -1,2 +1,5 @@
 # See https://github.com/inspectIT/inspectit-oce/blob/0.1.M1/inspectit-oce-core/src/main/resources/config/default.yml
 # for all the configuration options.
+inspectit:
+  self-monitoring:
+    enabled: true
