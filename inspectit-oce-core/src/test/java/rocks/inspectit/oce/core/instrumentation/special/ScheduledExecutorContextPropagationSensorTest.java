@@ -1,13 +1,13 @@
 package rocks.inspectit.oce.core.instrumentation.special;
 
 import net.bytebuddy.asm.Advice;
+import org.apache.commons.lang3.reflect.MethodUtils;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import rocks.inspectit.oce.bootstrap.Instances;
 import rocks.inspectit.oce.bootstrap.context.ContextManager;
-import rocks.inspectit.oce.core.TestUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -29,7 +29,7 @@ class ScheduledExecutorContextPropagationSensorTest {
             Instances.contextManager = contextManager;
 
             Class<?> adviceClazz = Class.forName("rocks.inspectit.oce.core.instrumentation.special.ScheduledExecutorContextPropagationSensor$ScheduledExecutorRunnableAdvice");
-            Method method = TestUtils.resolveMethodsByAnnotation(adviceClazz, Advice.OnMethodEnter.class).get(0);
+            Method method = MethodUtils.getMethodsWithAnnotation(adviceClazz, Advice.OnMethodEnter.class)[0];
 
             Runnable runnable = mock(Runnable.class);
 
@@ -49,7 +49,7 @@ class ScheduledExecutorContextPropagationSensorTest {
             Instances.contextManager = contextManager;
 
             Class<?> adviceClazz = Class.forName("rocks.inspectit.oce.core.instrumentation.special.ScheduledExecutorContextPropagationSensor$ScheduledExecutorCallableAdvice");
-            Method method = TestUtils.resolveMethodsByAnnotation(adviceClazz, Advice.OnMethodEnter.class).get(0);
+            Method method = MethodUtils.getMethodsWithAnnotation(adviceClazz, Advice.OnMethodEnter.class)[0];
 
             Callable callable = mock(Callable.class);
 

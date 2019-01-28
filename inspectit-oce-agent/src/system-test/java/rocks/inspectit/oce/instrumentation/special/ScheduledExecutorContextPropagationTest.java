@@ -27,7 +27,7 @@ public class ScheduledExecutorContextPropagationTest {
 
         ScheduledFuture<?> schedule;
         try (Scope s = tagger.currentBuilder().put(tagKey, tagValue).buildScoped()) {
-            schedule = executorService.schedule(runnable, 50, TimeUnit.MILLISECONDS);
+            schedule = executorService.schedule(runnable, 1, TimeUnit.MILLISECONDS);
         }
         schedule.get();
 
@@ -46,7 +46,7 @@ public class ScheduledExecutorContextPropagationTest {
 
         ScheduledFuture<Iterator<Tag>> future;
         try (Scope s = tagger.currentBuilder().put(tagKey, tagValue).buildScoped()) {
-            future = executorService.schedule(callable, 50, TimeUnit.MILLISECONDS);
+            future = executorService.schedule(callable, 1, TimeUnit.MILLISECONDS);
         }
         Iterator<Tag> result = future.get();
 
@@ -73,7 +73,7 @@ public class ScheduledExecutorContextPropagationTest {
 
         ScheduledFuture future;
         try (Scope s = tagger.currentBuilder().put(tagKey, tagValue).buildScoped()) {
-            future = executorService.scheduleWithFixedDelay(runnable, 0, 50, TimeUnit.MILLISECONDS);
+            future = executorService.scheduleWithFixedDelay(runnable, 0, 1, TimeUnit.MILLISECONDS);
         }
 
         interationCount.await();
@@ -106,7 +106,7 @@ public class ScheduledExecutorContextPropagationTest {
 
         ScheduledFuture future;
         try (Scope s = tagger.currentBuilder().put(tagKey, tagValue).buildScoped()) {
-            future = executorService.scheduleAtFixedRate(runnable, 0, 50, TimeUnit.MILLISECONDS);
+            future = executorService.scheduleAtFixedRate(runnable, 0, 1, TimeUnit.MILLISECONDS);
         }
 
         interationCount.await();
