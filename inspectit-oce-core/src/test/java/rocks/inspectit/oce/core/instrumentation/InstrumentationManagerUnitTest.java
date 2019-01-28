@@ -33,9 +33,6 @@ public class InstrumentationManagerUnitTest {
     Instrumentation instrumentation;
 
     @Mock
-    AsyncClassTransformer transformer;
-
-    @Mock
     InstrumentationConfigurationResolver resolver;
 
     @Mock
@@ -52,8 +49,6 @@ public class InstrumentationManagerUnitTest {
 
         @Test
         void ensureRequestedClassesRetransformed() throws Exception {
-            when(transformer.isShuttingDown()).thenReturn(false);
-
             TESTING_CLASSES.stream().forEach(cl -> manager.pendingClasses.put(cl, true));
             List<Class<?>> classesToInstrument = Arrays.asList(String.class, Character.class);
 
@@ -76,8 +71,6 @@ public class InstrumentationManagerUnitTest {
 
         @Test
         void ensureTransformationExceptionsHandled() throws Exception {
-            when(transformer.isShuttingDown()).thenReturn(false);
-
             TESTING_CLASSES.stream().forEach(cl -> manager.pendingClasses.put(cl, true));
 
 
@@ -96,8 +89,6 @@ public class InstrumentationManagerUnitTest {
 
         @Test
         void ensureNoRetransformCallIfNotRequired() throws Exception {
-            when(transformer.isShuttingDown()).thenReturn(false);
-
             TESTING_CLASSES.stream().forEach(cl -> manager.pendingClasses.put(cl, true));
 
             doAnswer((invoc) ->
