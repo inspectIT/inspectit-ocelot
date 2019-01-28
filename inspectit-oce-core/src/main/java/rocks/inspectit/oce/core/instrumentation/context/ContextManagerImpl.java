@@ -6,6 +6,8 @@ import io.grpc.Context;
 import rocks.inspectit.oce.bootstrap.context.ContextManager;
 import rocks.inspectit.oce.core.config.spring.BootstrapInitializerConfiguration;
 
+import java.util.concurrent.Callable;
+
 /**
  * This class is based on the ContextStrategyImpl (https://github.com/census-instrumentation/opencensus-java/blob/master/contrib/agent/src/main/java/io/opencensus/contrib/agent/instrumentation/ContextStrategyImpl.java)
  * class from the opencensus-java repository.
@@ -26,6 +28,11 @@ public class ContextManagerImpl implements ContextManager {
     @Override
     public Runnable wrap(Runnable r) {
         return Context.current().wrap(r);
+    }
+
+    @Override
+    public <T> Callable<T> wrap(Callable<T> callable) {
+        return Context.current().wrap(callable);
     }
 
     @Override
