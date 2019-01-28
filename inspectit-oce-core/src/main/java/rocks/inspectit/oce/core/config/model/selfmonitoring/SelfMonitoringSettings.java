@@ -15,9 +15,9 @@ public class SelfMonitoringSettings {
     private boolean enabled;
 
     /**
-     * Name of the inspectIT self-monitoring measure.
+     * Prefix for all self-monitoring measures and views.
      */
     @NotEmpty
-    private String measureName;
+    private String measurePrefix;
 
 }

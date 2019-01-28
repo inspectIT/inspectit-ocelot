@@ -92,19 +92,19 @@ public class MemoryMetricsRecorder extends AbstractPollingMetricsRecorder {
 
                 val mm = recorder.newMeasureMap();
                 if (usedEnabled) {
-                    val usedM = getOrCreateMeasureLongWithView(USED_METRIC_FULL_NAME,
+                    val usedM = measureProvider.getOrCreateMeasureLongWithViewAndCommonTags(USED_METRIC_FULL_NAME,
                             USED_METRIC_DESCRIPTION, USED_UNIT, Aggregation.LastValue::create,
                             idTagKey, areaTagKey);
                     mm.put(usedM, memoryPoolBean.getUsage().getUsed());
                 }
                 if (committedEnabled) {
-                    val committedM = getOrCreateMeasureLongWithView(COMMITTED_METRIC_FULL_NAME,
+                    val committedM = measureProvider.getOrCreateMeasureLongWithViewAndCommonTags(COMMITTED_METRIC_FULL_NAME,
                             COMMITTED_METRIC_DESCRIPTION, COMMITTED_UNIT, Aggregation.LastValue::create,
                             idTagKey, areaTagKey);
                     mm.put(committedM, memoryPoolBean.getUsage().getCommitted());
                 }
                 if (maxEnabled) {
-                    val maxM = getOrCreateMeasureLongWithView(MAX_METRIC_FULL_NAME,
+                    val maxM = measureProvider.getOrCreateMeasureLongWithViewAndCommonTags(MAX_METRIC_FULL_NAME,
                             MAX_METRIC_DESCRIPTION, MAX_UNIT, Aggregation.LastValue::create,
                             idTagKey, areaTagKey);
                     long max = memoryPoolBean.getUsage().getMax();
@@ -131,19 +131,19 @@ public class MemoryMetricsRecorder extends AbstractPollingMetricsRecorder {
 
                 val mm = recorder.newMeasureMap();
                 if (bufferCountEnabled) {
-                    val countM = getOrCreateMeasureLongWithView(BUFFER_COUNT_METRIC_FULL_NAME,
+                    val countM = measureProvider.getOrCreateMeasureLongWithViewAndCommonTags(BUFFER_COUNT_METRIC_FULL_NAME,
                             BUFFER_COUNT_METRIC_DESCRIPTION, BUFFER_COUNT_UNIT, Aggregation.LastValue::create,
                             idTagKey);
                     mm.put(countM, bufferPoolBean.getCount());
                 }
                 if (bufferUsedEnabled) {
-                    val usedM = getOrCreateMeasureLongWithView(BUFFER_USED_METRIC_FULL_NAME,
+                    val usedM = measureProvider.getOrCreateMeasureLongWithViewAndCommonTags(BUFFER_USED_METRIC_FULL_NAME,
                             BUFFER_USED_METRIC_DESCRIPTION, BUFFER_USED_UNIT, Aggregation.LastValue::create,
                             idTagKey);
                     mm.put(usedM, bufferPoolBean.getMemoryUsed());
                 }
                 if (bufferCapacityEnabled) {
-                    val capacityM = getOrCreateMeasureLongWithView(BUFFER_CAPACITY_METRIC_FULL_NAME,
+                    val capacityM = measureProvider.getOrCreateMeasureLongWithViewAndCommonTags(BUFFER_CAPACITY_METRIC_FULL_NAME,
                             BUFFER_CAPACITY_METRIC_DESCRIPTION, BUFFER_CAPACITY_UNIT, Aggregation.LastValue::create,
                             idTagKey);
                     mm.put(capacityM, bufferPoolBean.getTotalCapacity());

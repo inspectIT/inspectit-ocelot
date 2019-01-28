@@ -1,63 +1,62 @@
 package rocks.inspectit.oce.core.selfmonitoring;
 
 import io.opencensus.common.Scope;
-import io.opencensus.stats.*;
+import io.opencensus.stats.Aggregation;
+import io.opencensus.stats.Measure;
+import io.opencensus.stats.StatsRecorder;
 import io.opencensus.tags.TagKey;
 import io.opencensus.tags.TagValue;
 import io.opencensus.tags.Tags;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
-import rocks.inspectit.oce.core.config.model.InspectitConfig;
-import rocks.inspectit.oce.core.service.DynamicallyActivatableService;
+import rocks.inspectit.oce.core.config.InspectitConfigChangedEvent;
+import rocks.inspectit.oce.core.config.InspectitEnvironment;
+import rocks.inspectit.oce.core.config.model.selfmonitoring.SelfMonitoringSettings;
+import rocks.inspectit.oce.core.metrics.MeasuresAndViewsProvider;
+import rocks.inspectit.oce.core.tags.CommonTagsManager;
 
-import java.util.Collections;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
 @Component
 @Slf4j
-public class SelfMonitoringService extends DynamicallyActivatableService {
+public class SelfMonitoringService {
+
+    private static final String DURATION_MEASURE_NAME = "duration";
+    private static final String DURATION_MEASURE_DESCRIPTION = "inspectIT OCE self-monitoring duration";
+    private static final String DURATION_MEASURE_UNIT = "us";
 
     private static final TagKey COMPONENT_TAG_KEY = TagKey.create("component-name");
 
-    private static final AtomicReference<Measure.MeasureDouble> MEASURE_ATOMIC_REFERENCE = new AtomicReference<>();
+
+    @Autowired
+    private InspectitEnvironment env;
 
     @Autowired
     private StatsRecorder statsRecorder;
 
     @Autowired
-    private ViewManager viewManager;
+    private MeasuresAndViewsProvider measureProvider;
 
-    /**
-     * Measure name.
-     */
-    private String measureName;
+    @Autowired
+    private CommonTagsManager commonTags;
 
-    /**
-     * Created measure.
-     */
-    private Measure.MeasureDouble measure;
-
-    /**
-     * Default constructor.
-     */
-    public SelfMonitoringService() {
-        super("selfMonitoring");
-    }
 
     /**
      * Provides an auto-closable that can be used in try-with-resource form.
      * <p>
      * If self monitoring is enabled the {@link SelfMonitoringScope} instance is create that handles time measuring and measure recording.
-     * If self monitoring is disabled, return no-ops closable.
+     * If self monitoring is disabled, returns a no-ops closable.
      *
      * @param componentName
      * @return
      */
-    public Scope withSelfMonitoring(String componentName) {
-        if (super.isEnabled()) {
+    public Scope withDurationSelfMonitoring(String componentName) {
+        if (isSelfMonitoringEnabled()) {
             return new SelfMonitoringScope(componentName, System.nanoTime());
         } else {
             return () -> {
@@ -66,58 +65,94 @@ public class SelfMonitoringService extends DynamicallyActivatableService {
     }
 
     /**
-     * {@inheritDoc}
+     * @return true, if the configuration states that self monitoring should be performed
      */
-    @Override
-    protected boolean checkEnabledForConfig(InspectitConfig conf) {
-        return conf.getSelfMonitoring().isEnabled();
+    public boolean isSelfMonitoringEnabled() {
+        return env.getCurrentConfig().getSelfMonitoring().isEnabled();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected boolean doEnable(InspectitConfig configuration) {
-        measureName = configuration.getSelfMonitoring().getMeasureName();
-        log.info("Enabling self monitoring.");
-        return true;
-    }
 
     /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected boolean doDisable() {
-        log.info("Disabling self monitoring.");
-        return true;
-    }
-
-    /**
-     * Create the self monitoring measure lazy.
-     * <p>
-     * We use the help of the atomic reference to make sure only one thread creates the measure and registerer the view.
-     * Later on, the access to the measure is non-atomic as the measure should be immutable.
+     * Prints info logs when the configuration changes the self monitoring enabled state.
      *
-     * @return Measure.MeasureDouble
+     * @param ev the config change event
      */
-    private Measure.MeasureDouble getSelfMonitoringMeasure() {
-        if (null == measure) {
-            Measure.MeasureDouble measureDouble = Measure.MeasureDouble.create(measureName, "inspectIT OCE self-monitoring duration", "μs");
-            if (MEASURE_ATOMIC_REFERENCE.compareAndSet(null, measureDouble)) {
-                viewManager.registerView(View.create(
-                        View.Name.create(measureDouble.getName()),
-                        measureDouble.getDescription() + String.format(" [%s]", measureDouble.getUnit()),
-                        measureDouble,
-                        Aggregation.Sum.create(),
-                        Collections.singletonList(COMPONENT_TAG_KEY)
-                ));
-                measure = measureDouble;
-                return measureDouble;
-            } else {
-                return MEASURE_ATOMIC_REFERENCE.get();
-            }
+    @EventListener
+    private void printInfoOnStateChange(InspectitConfigChangedEvent ev) {
+        SelfMonitoringSettings newS = ev.getNewConfig().getSelfMonitoring();
+        SelfMonitoringSettings oldS = ev.getOldConfig().getSelfMonitoring();
+        if (newS.isEnabled() && !oldS.isEnabled()) {
+            log.info("Enabling self monitoring.");
+        } else if (!newS.isEnabled() && oldS.isEnabled()) {
+            log.info("Disabling self monitoring.");
         }
-        return measure;
+    }
+
+    /**
+     * Utility function to record a measurement with the common tags.
+     *
+     * @param measure the measure, derived via {@link #getSelfMonitoringMeasureLong(String, String, String, Supplier, TagKey...)}
+     * @param value   the actual value
+     */
+    public void recordMeasurement(Measure.MeasureLong measure, long value) {
+        try (val ct = commonTags.withCommonTagScope()) {
+            statsRecorder.newMeasureMap()
+                    .put(measure, value)
+                    .record();
+        }
+    }
+
+    /**
+     * Utility function to record a measurement with the common tags.
+     *
+     * @param measure the measure, derived via {@link #getSelfMonitoringMeasureDouble(String, String, String, Supplier, TagKey...)}
+     * @param value   the actual value
+     */
+    public void recordMeasurement(Measure.MeasureDouble measure, double value) {
+        try (val ct = commonTags.withCommonTagScope()) {
+            statsRecorder.newMeasureMap()
+                    .put(measure, value)
+                    .record();
+        }
+    }
+
+    /**
+     * Gets or creates a new self monitoring measure and view with the given name.
+     * The name is prefixed with the configured self monitoring prefix and all common tags are added to the view.
+     *
+     * @param measureName        the name of the measure, will be prefixed with {@link SelfMonitoringSettings#getMeasurePrefix()}
+     * @param description        the description of the measure and view
+     * @param unit               the unit of the measure
+     * @param aggregation        the aggregation to use for the view
+     * @param additionalViewTags additional tags to add to the view
+     * @return the created or existing measure
+     */
+    public Measure.MeasureLong getSelfMonitoringMeasureLong(String measureName, String description, String unit, Supplier<Aggregation> aggregation, TagKey... additionalViewTags) {
+        String fullName = env.getCurrentConfig().getSelfMonitoring().getMeasurePrefix() + measureName;
+        return measureProvider.getOrCreateMeasureLongWithViewAndCommonTags(
+                fullName, description, unit, aggregation, additionalViewTags);
+
+    }
+
+    /**
+     * Gets or creates a new self monitoring measure and view with the given name.
+     * The name is prefixed with the configured self monitoring prefix and all common tags are added to the view.
+     *
+     * @param measureName        the name of the measure, will be prefixed with {@link SelfMonitoringSettings#getMeasurePrefix()}
+     * @param description        the description of the measure and view
+     * @param unit               the unit of the measure
+     * @param aggregation        the aggregation to use for the view
+     * @param additionalViewTags additional tags to add to the view
+     * @return the created or existing measure
+     */
+    public Measure.MeasureDouble getSelfMonitoringMeasureDouble(String measureName, String description, String unit, Supplier<Aggregation> aggregation, TagKey... additionalViewTags) {
+        String fullName = env.getCurrentConfig().getSelfMonitoring().getMeasurePrefix() + measureName;
+        return measureProvider.getOrCreateMeasureDoubleWithViewAndCommonTags(
+                fullName, description, unit, aggregation, additionalViewTags);
+    }
+
+    private Measure.MeasureDouble getSelfMonitoringDurationMeasure() {
+        return getSelfMonitoringMeasureDouble(DURATION_MEASURE_NAME, DURATION_MEASURE_DESCRIPTION, DURATION_MEASURE_UNIT, Aggregation.Sum::create, COMPONENT_TAG_KEY);
     }
 
     @Data
@@ -130,8 +165,10 @@ public class SelfMonitoringService extends DynamicallyActivatableService {
         public void close() {
             double durationInMicros = TimeUnit.NANOSECONDS.toMicros(System.nanoTime() - start);
             statsRecorder.newMeasureMap()
-                    .put(getSelfMonitoringMeasure(), durationInMicros)
-                    .record(Tags.getTagger().emptyBuilder().put(COMPONENT_TAG_KEY, TagValue.create(componentName)).build());
+                    .put(getSelfMonitoringDurationMeasure(), durationInMicros)
+                    .record(Tags.getTagger().toBuilder(commonTags.getCommonTagContext())
+                            .put(COMPONENT_TAG_KEY, TagValue.create(componentName)).build());
+
 
             if (log.isTraceEnabled()) {
                 log.trace(String.format("%s reported %.1fμs", componentName, durationInMicros));
