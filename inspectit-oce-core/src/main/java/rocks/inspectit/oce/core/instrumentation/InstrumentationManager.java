@@ -169,7 +169,7 @@ public class InstrumentationManager implements IClassDiscoveryListener {
      * @return the classes which need retransformation
      */
     List<Class<?>> getBatchOfClassesToRetransform(BatchSize batchSize) {
-        try (val sm = selfMonitoring.withDurationSelfMonitoring("instrumentation-class-inspection")) {
+        try (val sm = selfMonitoring.withDurationSelfMonitoring("instrumentation-analysis")) {
             List<Class<?>> classesToRetransform = new ArrayList<>();
             val watch = Stopwatch.createStarted();
             try {
@@ -219,7 +219,7 @@ public class InstrumentationManager implements IClassDiscoveryListener {
     private void selfMonitorQueueSize() {
         if (selfMonitoring.isSelfMonitoringEnabled()) {
             val measure = selfMonitoring.getSelfMonitoringMeasureLong(
-                    "intrumentation-analysis",
+                    "intrumentation-analysis-queue-size",
                     "The number of pending classes inspectIT has to check if they require instrumentation updates",
                     "classes",
                     Aggregation.LastValue::create);

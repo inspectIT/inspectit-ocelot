@@ -25,10 +25,10 @@ import java.util.function.Supplier;
 public class MeasuresAndViewsProvider {
 
     @Autowired
-    ViewManager viewManager;
+    private ViewManager viewManager;
 
     @Autowired
-    CommonTagsManager commonTags;
+    private CommonTagsManager commonTags;
 
     /**
      * Caches all creates long measures.
