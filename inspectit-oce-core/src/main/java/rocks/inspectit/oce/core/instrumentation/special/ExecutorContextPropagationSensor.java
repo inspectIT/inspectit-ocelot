@@ -19,9 +19,7 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
 @DependsOn(ContextManagerImpl.BEAN_NAME)
 public class ExecutorContextPropagationSensor implements SpecialSensor {
 
-    private static final ElementMatcher<TypeDescription> EXECUTER_CLASSES_MATCHER =
-            isSubTypeOf(Executor.class)
-                    .and(not(isAbstract()));
+    private static final ElementMatcher<TypeDescription> EXECUTER_CLASSES_MATCHER = isSubTypeOf(Executor.class);
 
     private static final ElementMatcher<MethodDescription> EXECUTER_EXECUTE_METHOD_MATCHER =
             named("execute").and(takesArgument(0, Runnable.class));

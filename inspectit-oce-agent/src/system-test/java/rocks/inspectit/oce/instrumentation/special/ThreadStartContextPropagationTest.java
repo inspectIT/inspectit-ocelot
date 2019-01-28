@@ -2,11 +2,14 @@ package rocks.inspectit.oce.instrumentation.special;
 
 import io.opencensus.common.Scope;
 import io.opencensus.tags.*;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Iterator;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -16,31 +19,85 @@ public class ThreadStartContextPropagationTest {
 
     private static final Tagger tagger = Tags.getTagger();
 
-    @Test
-    public void verifyContextProgapation() throws InterruptedException {
-        TagKey tagKey = TagKey.create("test-tag-key");
-        TagValue tagValue = TagValue.create("test-tag-value");
+    /**
+     * Abstract thread class.
+     */
+    private abstract class AbstractThread extends Thread {
 
+        protected Runnable run;
+
+        public AbstractThread(Runnable runnable) {
+            run = runnable;
+        }
+
+        @Override
+        public synchronized void start() {
+            super.start();
+        }
+
+        @Override
+        public void run() {
+            run.run();
+        }
+    }
+
+    private class SubThread extends AbstractThread {
+        public SubThread(Runnable runnable) {
+            super(runnable);
+            setName("dummy-thread");
+        }
+    }
+
+    @BeforeAll
+    public static void before() throws InterruptedException {
+        // Waiting for instrumentation
+        Thread.sleep(5000);
+    }
+
+    @Test
+    public void verifyContextProgapationViaAbstractThreads() throws InterruptedException {
+        long rand = System.nanoTime();
+        TagKey tagKey = TagKey.create("test-tag-key-" + rand);
+        TagValue tagValue = TagValue.create("test-tag-value-" + rand);
+        CountDownLatch latch = new CountDownLatch(1);
         AtomicReference<Iterator<Tag>> refTags = new AtomicReference<>();
 
-        Thread thread = new Thread(() -> {
+        Thread thread = new SubThread(() -> {
             Iterator<Tag> iter = InternalUtils.getTags(tagger.getCurrentTagContext());
             refTags.set(iter);
-
-            synchronized (refTags) {
-                refTags.notifyAll();
-            }
+            latch.countDown();
         });
 
         try (Scope s = tagger.currentBuilder().put(tagKey, tagValue).buildScoped()) {
             thread.start();
         }
 
-        synchronized (refTags) {
-            while (refTags.get() == null) {
-                refTags.wait();
-            }
+        latch.await(5, TimeUnit.SECONDS);
+
+        assertThat(refTags.get()).hasSize(1)
+                .extracting("key", "value")
+                .contains(tuple(tagKey, tagValue));
+    }
+
+    @Test
+    public void verifyContextProgapation() throws InterruptedException {
+        TagKey tagKey = TagKey.create("test-tag-key");
+        TagValue tagValue = TagValue.create("test-tag-value");
+        CountDownLatch latch = new CountDownLatch(1);
+        AtomicReference<Iterator<Tag>> refTags = new AtomicReference<>();
+
+        Thread thread = new Thread(() -> {
+            Iterator<Tag> iter = InternalUtils.getTags(tagger.getCurrentTagContext());
+            refTags.set(iter);
+
+            latch.countDown();
+        });
+
+        try (Scope s = tagger.currentBuilder().put(tagKey, tagValue).buildScoped()) {
+            thread.start();
         }
+
+        latch.await(5, TimeUnit.SECONDS);
 
         assertThat(refTags.get()).hasSize(1)
                 .extracting("key", "value")
@@ -51,7 +108,7 @@ public class ThreadStartContextPropagationTest {
     public void verifyNoContextProgapationViaRun() throws Exception {
         TagKey tagKey = TagKey.create("test-tag-key");
         TagValue tagValue = TagValue.create("test-tag-value");
-
+        CountDownLatch latch = new CountDownLatch(1);
         AtomicReference<Iterator<Tag>> refTags = new AtomicReference<>();
 
         Class<?> instances = Class.forName("rocks.inspectit.oce.bootstrap.Instances");
@@ -78,16 +135,13 @@ public class ThreadStartContextPropagationTest {
     public void verifyContextProgapationUsingSubClasses() throws InterruptedException {
         TagKey tagKey = TagKey.create("test-tag-key");
         TagValue tagValue = TagValue.create("test-tag-value");
-
+        CountDownLatch latch = new CountDownLatch(1);
         AtomicReference<Iterator<Tag>> refTags = new AtomicReference<>();
 
         Thread thread = new Thread(() -> {
             Iterator<Tag> iter = InternalUtils.getTags(tagger.getCurrentTagContext());
             refTags.set(iter);
-
-            synchronized (refTags) {
-                refTags.notifyAll();
-            }
+            latch.countDown();
         }) {
             @Override
             public synchronized void start() {
@@ -99,11 +153,7 @@ public class ThreadStartContextPropagationTest {
             thread.start();
         }
 
-        synchronized (refTags) {
-            while (refTags.get() == null) {
-                refTags.wait();
-            }
-        }
+        latch.await(5, TimeUnit.SECONDS);
 
         assertThat(refTags.get()).hasSize(1)
                 .extracting("key", "value")
@@ -114,7 +164,7 @@ public class ThreadStartContextPropagationTest {
     public void noContextProgapationViaConstructor() throws InterruptedException {
         TagKey tagKey = TagKey.create("test-tag-key");
         TagValue tagValue = TagValue.create("test-tag-value");
-
+        CountDownLatch latch = new CountDownLatch(1);
         AtomicReference<Iterator<Tag>> refTags = new AtomicReference<>();
 
         Thread thread;
@@ -123,20 +173,13 @@ public class ThreadStartContextPropagationTest {
             thread = new Thread(() -> {
                 Iterator<Tag> iter = InternalUtils.getTags(tagger.getCurrentTagContext());
                 refTags.set(iter);
-
-                synchronized (refTags) {
-                    refTags.notifyAll();
-                }
+                latch.countDown();
             });
         }
 
         thread.start();
 
-        synchronized (refTags) {
-            while (refTags.get() == null) {
-                refTags.wait();
-            }
-        }
+        latch.await(5, TimeUnit.SECONDS);
 
         assertThat(refTags.get()).hasSize(0);
     }
