@@ -9,9 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import rocks.inspectit.oce.core.SpringTestBase;
+import rocks.inspectit.oce.core.testutils.DummyClassLoader;
 
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashSet;
 
@@ -25,14 +24,6 @@ import static org.mockito.Mockito.*;
         "inspectit.instrumentation.internal.inter-batch-delay=1ms" //for faster responses of the test
 })
 public class InstrumentationManagerIntTest extends SpringTestBase {
-
-    static class DummyClassLoader extends ClassLoader {
-
-        public DummyClassLoader(String classname, byte[] code) {
-            super(null);
-            defineClass(classname, code, 0, code.length);
-        }
-    }
 
     private static Class<?>[] classesWithInstrumentableExecuter;
     private static Class<?>[] classesWithoutInstrumentableExecuter;
@@ -56,18 +47,12 @@ public class InstrumentationManagerIntTest extends SpringTestBase {
 
     @BeforeAll
     static void intitializeFakeExecutor() throws Exception {
-        InputStream in = AsyncClassTransformerUnitTest.class.getResourceAsStream("FakeExecutor.class");
-        ByteArrayOutputStream data = new ByteArrayOutputStream();
-        while (in.available() > 0) {
-            byte[] buffer = new byte[1024];
-            int read = in.read(buffer);
-            data.write(buffer, 0, read);
-        }
-        bytecodeOfInstrumentableExecuter = data.toByteArray();
+
+        bytecodeOfInstrumentableExecuter = DummyClassLoader.readByteCode(FakeExecutor.class);
 
         String className = FakeExecutor.class.getName();
         // we need to load the target class from a different classloader because the "this" classloader is ignored
-        instrumentableExecutorClass = Class.forName(className, true, new DummyClassLoader(className, bytecodeOfInstrumentableExecuter));
+        instrumentableExecutorClass = Class.forName(className, true, new DummyClassLoader(FakeExecutor.class));
 
 
         classesWithInstrumentableExecuter = new Class[]{
