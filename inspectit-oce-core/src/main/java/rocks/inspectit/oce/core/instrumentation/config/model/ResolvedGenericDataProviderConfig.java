@@ -1,13 +1,14 @@
 package rocks.inspectit.oce.core.instrumentation.config.model;
 
 import lombok.Builder;
+import lombok.Singular;
 import lombok.Value;
-import org.apache.commons.lang3.tuple.Pair;
 import rocks.inspectit.oce.bootstrap.instrumentation.IGenericDataProvider;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
 
 /**
  * Contains all properties necessary for defining a {@link IGenericDataProvider}.
@@ -27,8 +28,8 @@ public class ResolvedGenericDataProviderConfig {
      * A map defining which call arguments of the instrumented method the provider requires and what he expects as their type.
      * These are usually defined using the input parameters named "arg0","arg1" etc
      */
-    @Builder.Default
-    private HashMap<Integer, String> expectedArgumentTypes = new HashMap<>();
+    @Singular
+    private Map<Integer, String> expectedArgumentTypes;
 
     /**
      * The type of the return value of the instrumented method the data provider expects.
@@ -54,15 +55,15 @@ public class ResolvedGenericDataProviderConfig {
     private boolean usesArgsArray;
 
     /**
-     * A list of the additional arguments passed to the provider.
+     * A sorted map of the additional arguments passed to the provider.
      * Additional arguments are usually either constants or "data" taken from the context.
      * <p>
-     * The first element of the pair is the name of the argument, the second one being the type.
-     * The order the arguments appear corresponds to the order the additionalArgs are passed to
+     * The key is the name of the argument, the value is the type.
+     * The order the arguments appear in the sorted map corresponds to the order the additionalArgs are passed to
      * {@link IGenericDataProvider#execute(Object[], Object, Object, Throwable, Object[])}
      */
-    @Builder.Default
-    private List<Pair<String, String>> additionalArgumentTypes = new ArrayList<>();
+    @Singular
+    private SortedMap<String, String> additionalArgumentTypes;
 
     /**
      * Allows to import packages, so that it is not required to use the Full-Qualified name when referencing types.

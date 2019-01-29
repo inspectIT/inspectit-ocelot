@@ -27,7 +27,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class InstrumentationConfigurationResolverTest {
+class InstrumentationConfigurationResolverUnitTest {
 
     @Mock
     private List<SpecialSensor> specialSensors;
@@ -46,7 +46,8 @@ class InstrumentationConfigurationResolverTest {
 
         @Test
         public void emptyRules() throws IllegalAccessException {
-            InstrumentationConfiguration configuration = new InstrumentationConfiguration(null, Collections.emptySet());
+            InstrumentationConfiguration configuration =
+                    InstrumentationConfiguration.builder().build();
             FieldUtils.writeDeclaredField(resolver, "currentConfig", configuration, true);
 
             when(instrumentation.isModifiableClass(any())).thenReturn(true);
@@ -63,7 +64,7 @@ class InstrumentationConfigurationResolverTest {
         public void matchingRule() throws IllegalAccessException {
             InstrumentationScope scope = new InstrumentationScope(ElementMatchers.any(), ElementMatchers.any());
             InstrumentationRule rule = new InstrumentationRule("name", Collections.singleton(scope));
-            InstrumentationConfiguration configuration = new InstrumentationConfiguration(null, Collections.singleton(rule));
+            InstrumentationConfiguration configuration = InstrumentationConfiguration.builder().rule(rule).build();
             FieldUtils.writeDeclaredField(resolver, "currentConfig", configuration, true);
 
             when(instrumentation.isModifiableClass(any())).thenReturn(true);
@@ -85,7 +86,7 @@ class InstrumentationConfigurationResolverTest {
             InstrumentationScope scopeA = new InstrumentationScope(ElementMatchers.nameEndsWithIgnoreCase("object"), ElementMatchers.any());
             InstrumentationScope scopeB = new InstrumentationScope(ElementMatchers.named("not.Matching"), ElementMatchers.any());
             InstrumentationRule rule = new InstrumentationRule("name", new HashSet<>(Arrays.asList(scopeA, scopeB)));
-            InstrumentationConfiguration configuration = new InstrumentationConfiguration(null, Collections.singleton(rule));
+            InstrumentationConfiguration configuration = InstrumentationConfiguration.builder().rule(rule).build();
             FieldUtils.writeDeclaredField(resolver, "currentConfig", configuration, true);
 
             when(instrumentation.isModifiableClass(any())).thenReturn(true);

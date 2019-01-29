@@ -168,11 +168,12 @@ public class DataProviderGenerator {
             buildVariableDefinition(methodBody, type, varName, value);
         });
         val additionalArgs = providerConfig.getAdditionalArgumentTypes();
+        val iterator = additionalArgs.entrySet().iterator();
         for (int id = 0; id < additionalArgs.size(); id++) {
             String value = ADDITIONAL_ARGS + "[" + id + "]";
-            val argsDef = additionalArgs.get(id);
-            val varName = argsDef.getLeft();
-            val varType = argsDef.getRight();
+            val argsDef = iterator.next();
+            val varName = argsDef.getKey();
+            val varType = argsDef.getValue();
             buildVariableDefinition(methodBody, varType, varName, value);
         }
         methodBody.append(providerConfig.getValueBody());
