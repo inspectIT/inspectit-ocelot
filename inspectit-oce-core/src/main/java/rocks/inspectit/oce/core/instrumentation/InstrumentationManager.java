@@ -204,6 +204,9 @@ public class InstrumentationManager implements IClassDiscoveryListener {
     }
 
     boolean doesClassRequireRetransformation(Class<?> clazz) {
+        if (clazz.getName().endsWith("Dummy")) {
+            log.debug("");
+        }
         val typeDescr = TypeDescription.ForLoadedType.of(clazz);
         ClassInstrumentationConfiguration requestedConfig = configResolver.getClassInstrumentationConfiguration(clazz);
         val activeConfig = activeInstrumentations.getIfPresent(clazz);

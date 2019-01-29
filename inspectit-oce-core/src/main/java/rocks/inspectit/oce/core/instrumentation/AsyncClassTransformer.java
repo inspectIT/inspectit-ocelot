@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import net.bytebuddy.ByteBuddy;
+import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.ClassFileLocator;
 import net.bytebuddy.dynamic.DynamicType;
@@ -18,9 +19,12 @@ import rocks.inspectit.oce.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.oce.core.config.InspectitEnvironment;
 import rocks.inspectit.oce.core.instrumentation.config.InstrumentationConfigurationResolver;
 import rocks.inspectit.oce.core.instrumentation.config.model.ClassInstrumentationConfiguration;
+import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationRule;
+import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationScope;
 import rocks.inspectit.oce.core.instrumentation.event.ClassInstrumentedEvent;
 import rocks.inspectit.oce.core.instrumentation.event.IClassDefinitionListener;
 import rocks.inspectit.oce.core.instrumentation.event.TransformerShutdownEvent;
+import rocks.inspectit.oce.core.instrumentation.hook.DispatchHookAdvice;
 import rocks.inspectit.oce.core.instrumentation.special.SpecialSensor;
 import rocks.inspectit.oce.core.selfmonitoring.SelfMonitoringService;
 import rocks.inspectit.oce.core.utils.CommonUtils;
@@ -158,6 +162,19 @@ public class AsyncClassTransformer implements ClassFileTransformer {
                 for (SpecialSensor specialSensor : classConf.getActiveSpecialSensors()) {
                     builder = specialSensor.instrument(classBeingRedefined, type, classConf.getActiveConfiguration(), builder);
                 }
+
+                // Apply the hook if necessary (TODO: optimize code - use only matching scopes)
+//                classConf.getActiveRules().stream()
+//                        .map(InstrumentationRule::getScopes)
+//                        .flatMap(Collection::stream)
+//                        .map(InstrumentationScope::getMethodMatcher)
+                for (InstrumentationRule rule : classConf.getActiveRules()) {
+                    log.debug("Added hook to {} due to rule '{}'.", classBeingRedefined, rule.getName());
+                    for (InstrumentationScope scope : rule.getScopes()) {
+                        builder = builder.visit(Advice.to(DispatchHookAdvice.class).on(scope.getMethodMatcher()));
+                    }
+                }
+
                 //"Compile" the builder to bytecode
                 DynamicType.Unloaded<?> instrumentedClass = builder.make();
                 resultBytes = instrumentedClass.getBytes();
