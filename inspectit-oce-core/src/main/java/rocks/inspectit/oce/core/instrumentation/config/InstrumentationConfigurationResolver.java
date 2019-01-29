@@ -79,46 +79,23 @@ public class InstrumentationConfigurationResolver {
                     .filter(s -> s.shouldInstrument(description, config))
                     .collect(Collectors.toSet());
 
-//            Set<InstrumentationRule> activeRules = new HashSet<>();
-//            for (InstrumentationRule rule : currentConfig.getRules()) {
-////                for (InstrumentationScope scope : rule.getScopes()) {
-////                    if (scope.getTypeMatcher().matches(description) ) {
-////
-////                    }
-////                }
-//                Set<InstrumentationScope> matchingScopes = rule.getScopes().stream()
-//                        .filter(s -> s.getTypeMatcher().matches(description))
-//                        .collect(Collectors.toSet());
-//
-////                Set<InstrumentationScope> matchingScopes = rule.getScopes().stream()
-////                        .filter(s -> s.getTypeMatcher().matches(description))
-////                        .collect(Collectors.toSet());
-//
-//                if (!matchingScopes.isEmpty()) {
-//                    activeRules.add(new InstrumentationRule(rule.getName(), matchingScopes));
-//                }
-//            }
+            Set<InstrumentationRule> narrowedRules = getNarrowedRulesFor(description);
 
-            Set<InstrumentationRule> activeRules = currentConfig.getRules().stream()
-                    .map(rule -> Pair.of(
-                            rule.getName(),
-                            rule.getScopes()
-                                    .stream()
-                                    .filter(s -> s.getTypeMatcher().matches(description))
-                                    .collect(Collectors.toSet())))
-                    .filter(p -> !p.getRight().isEmpty())
-                    .map(p -> new InstrumentationRule(p.getLeft(), p.getRight()))
-                    .collect(Collectors.toSet());
-
-
-//            Set<InstrumentationRule> activeRules = currentConfig.getRules().stream()
-//                    .filter(r -> r.getScopes()
-//                            .stream()
-//                            .anyMatch(s -> s.getTypeMatcher().matches(description)))
-//                    .collect(Collectors.toSet());
-
-            return new ClassInstrumentationConfiguration(activeSensors, activeRules, config);
+            return new ClassInstrumentationConfiguration(activeSensors, narrowedRules, config);
         }
+    }
+
+    private Set<InstrumentationRule> getNarrowedRulesFor(TypeDescription typeDescription) {
+        return currentConfig.getRules().stream()
+                .map(rule -> Pair.of(
+                        rule.getName(),
+                        rule.getScopes()
+                                .stream()
+                                .filter(s -> s.getTypeMatcher().matches(typeDescription))
+                                .collect(Collectors.toSet())))
+                .filter(p -> !p.getRight().isEmpty())
+                .map(p -> new InstrumentationRule(p.getLeft(), p.getRight()))
+                .collect(Collectors.toSet());
     }
 
     @EventListener
@@ -134,27 +111,25 @@ public class InstrumentationConfigurationResolver {
     }
 
     private boolean haveInstrumentationRelatedSettingsChanged(InspectitConfigChangedEvent ev) {
-        InstrumentationSettings oldC = ev.getOldConfig().getInstrumentation();
-        InstrumentationSettings newC = ev.getNewConfig().getInstrumentation();
+        InstrumentationSettings oldConfig = ev.getOldConfig().getInstrumentation();
+        InstrumentationSettings newConfig = ev.getNewConfig().getInstrumentation();
 
-        if (!Objects.equals(oldC.getIgnoredBootstrapPackages(), newC.getIgnoredBootstrapPackages())) {
+        if (!Objects.equals(oldConfig.getIgnoredBootstrapPackages(), newConfig.getIgnoredBootstrapPackages())) {
             return true;
         }
-        if (!Objects.equals(oldC.getSpecial(), newC.getSpecial())) {
+        if (!Objects.equals(oldConfig.getSpecial(), newConfig.getSpecial())) {
             return true;
         }
-        if (!Objects.equals(oldC.getRules(), newC.getRules())) {
+        if (!Objects.equals(oldConfig.getRules(), newConfig.getRules())) {
             return true;
         }
-        if (!Objects.equals(oldC.getScopes(), newC.getScopes())) {
+        if (!Objects.equals(oldConfig.getScopes(), newConfig.getScopes())) {
             return true;
         }
         return false;
     }
 
     private void updateConfiguration(InstrumentationSettings source) {
-        //Not much to do yet here
-        //in the future we can for example process the active profiles here
         Set<InstrumentationRule> rules = ruleResolver.resolve(source);
 
         currentConfig = new InstrumentationConfiguration(source, rules);
