@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import rocks.inspectit.oce.bootstrap.instrumentation.IGenericDataProvider;
 import rocks.inspectit.oce.core.instrumentation.config.model.ResolvedGenericDataProviderConfig;
 import rocks.inspectit.oce.core.instrumentation.injection.ClassInjector;
 import rocks.inspectit.oce.core.instrumentation.injection.InjectedClass;

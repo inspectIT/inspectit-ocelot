@@ -156,6 +156,10 @@ public class InstrumentationConfigurationResolver {
             return true;
         }
 
+        if (DoNotInstrumentMarker.class.isAssignableFrom(clazz)) {
+            return true;
+        }
+
         if (clazz.getClassLoader() == INSPECTIT_CLASSLOADER) {
             return true;
         }

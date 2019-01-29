@@ -3,7 +3,7 @@ package rocks.inspectit.oce.core.instrumentation.config.model;
 import lombok.Builder;
 import lombok.Value;
 import org.apache.commons.lang3.tuple.Pair;
-import rocks.inspectit.oce.core.instrumentation.dataprovider.generic.IGenericDataProvider;
+import rocks.inspectit.oce.bootstrap.instrumentation.IGenericDataProvider;
 
 import java.util.ArrayList;
 import java.util.HashMap;

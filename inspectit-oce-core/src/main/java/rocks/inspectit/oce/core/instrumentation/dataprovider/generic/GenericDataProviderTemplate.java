@@ -1,6 +1,9 @@
 package rocks.inspectit.oce.core.instrumentation.dataprovider.generic;
 
-public class GenericDataProviderTemplate implements IGenericDataProvider {
+import rocks.inspectit.oce.bootstrap.instrumentation.DoNotInstrumentMarker;
+import rocks.inspectit.oce.bootstrap.instrumentation.IGenericDataProvider;
+
+public class GenericDataProviderTemplate implements IGenericDataProvider, DoNotInstrumentMarker {
 
     public static final IGenericDataProvider INSTANCE = new GenericDataProviderTemplate();
 
