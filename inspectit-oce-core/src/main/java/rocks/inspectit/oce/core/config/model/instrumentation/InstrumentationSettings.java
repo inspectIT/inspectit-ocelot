@@ -2,6 +2,7 @@ package rocks.inspectit.oce.core.config.model.instrumentation;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import rocks.inspectit.oce.core.config.model.instrumentation.data.DataSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.dataproviders.GenericDataProviderSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.rules.InstrumentationRuleSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.scope.InstrumentationScopeSettings;
@@ -13,7 +14,9 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Configuration object for all settings regarding the instrumentation.
@@ -58,6 +61,7 @@ public class InstrumentationSettings {
     @NotNull
     private Map<@NotBlank String, @Valid GenericDataProviderSettings> dataProviders = Collections.emptyMap();
 
+
     /**
      * The configuration of the defined scopes. The map's key represents an unique id for the related instrumentation scope.
      */
@@ -69,6 +73,24 @@ public class InstrumentationSettings {
      */
     @NotNull
     private Map<@NotBlank String, @Valid InstrumentationRuleSettings> rules = Collections.emptyMap();
+
+    /**
+     * Defines the behaviour of the data regarding context propagation.
+     * E.g. is data propagated up and/or down, is it visible as a Tag for metrics collection?
+     */
+    @NotNull
+    private Map<@NotBlank String, @Valid DataSettings> data = Collections.emptyMap();
+
+    /**
+     * Returns all data keys which have been mentioned at any location in this configuration.
+     *
+     * @return the set of keys
+     */
+    public Set<String> getAllDataKeys() {
+        HashSet<String> result = new HashSet<>(data.keySet());
+        rules.forEach((n, r) -> result.addAll(r.getAllDataKeys()));
+        return result;
+    }
 
     @AdditionalValidation
     public void performValidation(ViolationBuilder vios) {

@@ -3,8 +3,11 @@ package rocks.inspectit.oce.core.instrumentation.context;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import io.grpc.Context;
+import lombok.val;
 import rocks.inspectit.oce.bootstrap.context.ContextManager;
 import rocks.inspectit.oce.core.config.spring.BootstrapInitializerConfiguration;
+import rocks.inspectit.oce.core.instrumentation.config.InstrumentationConfigurationResolver;
+import rocks.inspectit.oce.core.tags.CommonTagsManager;
 
 import java.util.concurrent.Callable;
 
@@ -20,24 +23,43 @@ public class ContextManagerImpl implements ContextManager {
      */
     public static final String BEAN_NAME = "contextManager";
 
+    private CommonTagsManager commonTags;
+
+    private InstrumentationConfigurationResolver configProvider;
+
     /**
      * Cache for storing the context objects.
      */
     private final Cache<Thread, Context> storedContexts = CacheBuilder.newBuilder().weakKeys().build();
 
+    public ContextManagerImpl(CommonTagsManager commonTags, InstrumentationConfigurationResolver configProvider) {
+        this.commonTags = commonTags;
+        this.configProvider = configProvider;
+    }
+
     @Override
     public Runnable wrap(Runnable r) {
-        return Context.current().wrap(r);
+        Runnable result;
+        try (val upPropagationBarrier = enterNewContext()) {
+            result = Context.current().wrap(r);
+        }
+        return result;
     }
 
     @Override
     public <T> Callable<T> wrap(Callable<T> callable) {
-        return Context.current().wrap(callable);
+        Callable<T> result;
+        try (val upPropagationBarrier = enterNewContext()) {
+            result = Context.current().wrap(callable);
+        }
+        return result;
     }
 
     @Override
     public void storeContextForThread(Thread thread) {
-        storedContexts.put(thread, Context.current());
+        try (val upPropagationBarrier = enterNewContext()) {
+            storedContexts.put(thread, Context.current());
+        }
     }
 
     @Override
@@ -47,5 +69,9 @@ public class ContextManagerImpl implements ContextManager {
             storedContexts.invalidate(thread);
             context.attach();
         }
+    }
+
+    public InspectitContext enterNewContext() {
+        return InspectitContext.createAndEnter(commonTags, configProvider.getCurrentConfig().getDataProperties());
     }
 }
