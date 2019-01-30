@@ -4,6 +4,11 @@ import net.bytebuddy.matcher.ElementMatcher;
 
 import static net.bytebuddy.matcher.ElementMatchers.not;
 
+/**
+ * Helper class for building and linking {@link ElementMatcher}s.
+ *
+ * @param <T> The matchers generic type. Most of the time it will be TypeDescription or MethodDescription.
+ */
 public class MatcherBuilder<T> {
 
     private ElementMatcher.Junction<T> matcher = null;

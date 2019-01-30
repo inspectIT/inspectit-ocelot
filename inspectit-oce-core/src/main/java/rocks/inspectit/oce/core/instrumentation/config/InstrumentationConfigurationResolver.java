@@ -16,6 +16,7 @@ import rocks.inspectit.oce.core.instrumentation.config.event.InstrumentationConf
 import rocks.inspectit.oce.core.instrumentation.config.model.ClassInstrumentationConfiguration;
 import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationConfiguration;
 import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationRule;
+import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationScope;
 import rocks.inspectit.oce.core.instrumentation.special.SpecialSensor;
 
 import javax.annotation.PostConstruct;
@@ -85,6 +86,14 @@ public class InstrumentationConfigurationResolver {
         }
     }
 
+    /**
+     * Narrows a rule for a specific type. The rules existing in the returned set are containing only {@link InstrumentationScope}s
+     * which are matching for the given type.
+     *
+     * @param config          the configuration which is used as basis for the rules
+     * @param typeDescription the class which are the rules targeting
+     * @return Returns a set containing rules with scopes targeting only the given type.
+     */
     private Set<InstrumentationRule> getNarrowedRulesFor(InstrumentationConfiguration config, TypeDescription typeDescription) {
         return config.getRules().stream()
                 .map(rule -> Pair.of(

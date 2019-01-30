@@ -14,6 +14,10 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * This class is used to resolve the {@link InstrumentationRule}s which are defined by {@link InstrumentationRuleSettings}
+ * contained in the configuration.
+ */
 @Component
 @Slf4j
 public class InstrumentationRuleResolver {
@@ -21,6 +25,13 @@ public class InstrumentationRuleResolver {
     @Autowired
     private InstrumentationScopeResolver scopeResolver;
 
+    /**
+     * Creates a set containing {@link InstrumentationRule}s which are based on the {@link InstrumentationRuleSettings}
+     * contained in the given {@link InstrumentationSettings}.
+     *
+     * @param source the configuration which is used as basis for the rules
+     * @return A set containing the resolved rules.
+     */
     public Set<InstrumentationRule> resolve(InstrumentationSettings source) {
         if (source == null || source.getRules() == null) {
             return Collections.emptySet();
@@ -38,6 +49,9 @@ public class InstrumentationRuleResolver {
         return rules;
     }
 
+    /**
+     * Creating the {@link InstrumentationRule} instance and linking the scopes to it.
+     */
     private InstrumentationRule resolveRule(Map<String, InstrumentationScope> scopeMap, Map.Entry<String, InstrumentationRuleSettings> ruleEntry) {
         Set<InstrumentationScope> scopes = ruleEntry.getValue().getScopes().entrySet()
                 .stream()

@@ -10,10 +10,7 @@ import net.bytebuddy.matcher.StringMatcher;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.oce.core.config.model.instrumentation.InstrumentationSettings;
-import rocks.inspectit.oce.core.config.model.instrumentation.rules.scope.AccessModifier;
-import rocks.inspectit.oce.core.config.model.instrumentation.rules.scope.InstrumentationScopeSettings;
-import rocks.inspectit.oce.core.config.model.instrumentation.rules.scope.MethodMatcherSettings;
-import rocks.inspectit.oce.core.config.model.instrumentation.rules.scope.NameMatcherSettings;
+import rocks.inspectit.oce.core.config.model.instrumentation.rules.scope.*;
 import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationScope;
 
 import java.util.Arrays;
@@ -23,10 +20,21 @@ import java.util.Map;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
+/**
+ * This class is used to resolve the {@link InstrumentationScope} based on the {@link InstrumentationScopeSettings} contained
+ * in the configuration.
+ */
 @Component
 @Slf4j
 public class InstrumentationScopeResolver {
 
+    /**
+     * Creates the {@link InstrumentationScope} instances based on the {@link InstrumentationScopeSettings} contained in
+     * the given {@link InstrumentationSettings}.
+     *
+     * @param source the configuration used as basis for the {@link InstrumentationScope}s
+     * @return Returns a map containing {@link InstrumentationScope} instances. The keys are representing a unique identifier for each scope.
+     */
     public Map<String, InstrumentationScope> resolve(InstrumentationSettings source) {
         Map<String, InstrumentationScope> scopeMap = new HashMap<>();
 
@@ -52,6 +60,11 @@ public class InstrumentationScopeResolver {
         return scopeMap;
     }
 
+    /**
+     * Resolving the {@link InstrumentationScope} for the given parameters.
+     *
+     * @return The resolve {@link InstrumentationScope}.
+     */
     private InstrumentationScope resolveScope(String key, InstrumentationScopeSettings scopeSettings) {
         ElementMatcher.Junction<TypeDescription> typeMatcher = buildTypeMatcher(scopeSettings);
         ElementMatcher.Junction<MethodDescription> methodMatcher = buildMethodMatcher(scopeSettings, typeMatcher);
@@ -64,6 +77,9 @@ public class InstrumentationScopeResolver {
         return new InstrumentationScope(typeMatcher, methodMatcher);
     }
 
+    /**
+     * Creating an {@link ElementMatcher} which matches the specified methods.
+     */
     private ElementMatcher.Junction<MethodDescription> buildMethodMatcher(InstrumentationScopeSettings scopeSettings, ElementMatcher.Junction<TypeDescription> typeMatcher) {
         MatcherBuilder<MethodDescription> builder = new MatcherBuilder<>();
 
@@ -97,6 +113,9 @@ public class InstrumentationScopeResolver {
         return matcher;
     }
 
+    /**
+     * Processing a single {@link MethodMatcherSettings} and adding it to the given {@link MatcherBuilder}.
+     */
     private void processMethod(MatcherBuilder<MethodDescription> builder, MethodMatcherSettings matcherSettings) {
         MatcherBuilder<MethodDescription> innerBuilder = new MatcherBuilder<>();
 
@@ -115,6 +134,10 @@ public class InstrumentationScopeResolver {
         builder.or(innerBuilder.build());
     }
 
+    /**
+     * Creating an {@link ElementMatcher} matching methods which takes arguments equals to the given array. The array consists
+     * of String representing full qualified class names.
+     */
     private ElementMatcher.Junction<MethodDescription> buildArgumentMatcher(String[] arguments) {
         if (arguments == null) {
             return null;
@@ -131,6 +154,9 @@ public class InstrumentationScopeResolver {
         }
     }
 
+    /**
+     * Creating an {@link ElementMatcher} matching methods with the given access modifiers.
+     */
     private ElementMatcher.Junction<MethodDescription> buildVisibilityMatcher(AccessModifier[] modifiers) {
         if (modifiers == null) {
             return null;
@@ -167,6 +193,9 @@ public class InstrumentationScopeResolver {
         return builder.build();
     }
 
+    /**
+     * Creates an {@link ElementMatcher} matching items with the given name settings.
+     */
     private <N extends NamedElement> ElementMatcher.Junction<N> buildNameMatcher(NameMatcherSettings matcherSettings) {
         String namePattern = matcherSettings.getNamePattern();
 
@@ -178,6 +207,9 @@ public class InstrumentationScopeResolver {
         }
     }
 
+    /**
+     * Creates the {@link ElementMatcher} which is matching the scope's type specified in the configuration.
+     */
     private ElementMatcher.Junction<TypeDescription> buildTypeMatcher(InstrumentationScopeSettings scopeSettings) {
         if (scopeSettings.getTypeScope() == null) {
             return null;
@@ -202,11 +234,17 @@ public class InstrumentationScopeResolver {
         return builder.build();
     }
 
+    /**
+     * Processing the interface and superclass settings of the {@link TypeScope}.
+     */
     private void processSuperType(MatcherBuilder<TypeDescription> builder, NameMatcherSettings matcherSettings) {
         ElementMatcher.Junction<TypeDescription> nameMatcher = buildNameMatcher(matcherSettings);
         builder.and(hasSuperType(nameMatcher));
     }
 
+    /**
+     * Processing the class settings of the {@link TypeScope}.
+     */
     private void processClass(MatcherBuilder<TypeDescription> builder, NameMatcherSettings matcherSettings) {
         ElementMatcher.Junction<TypeDescription> nameMatcher = buildNameMatcher(matcherSettings);
         builder.and(nameMatcher);
