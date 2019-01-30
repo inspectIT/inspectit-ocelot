@@ -148,7 +148,7 @@ public class AsyncClassTransformer implements ClassFileTransformer {
 
             byte[] resultBytes;
             if (classConf.isNoInstrumentation()) {
-                // we do not want to isntrument this -> we return the original byte code
+                // we do not want to instrument this -> we return the original byte code
                 resultBytes = originalByteCode;
             } else {
                 if (log.isDebugEnabled()) {
@@ -163,14 +163,15 @@ public class AsyncClassTransformer implements ClassFileTransformer {
                     builder = specialSensor.instrument(classBeingRedefined, type, classConf.getActiveConfiguration(), builder);
                 }
 
-                // Apply the hook if necessary (TODO: optimize code - use only matching scopes)
-//                classConf.getActiveRules().stream()
-//                        .map(InstrumentationRule::getScopes)
-//                        .flatMap(Collection::stream)
-//                        .map(InstrumentationScope::getMethodMatcher)
+                // Apply the hook if necessary
                 for (InstrumentationRule rule : classConf.getActiveRules()) {
-                    log.debug("Added hook to {} due to rule '{}'.", classBeingRedefined, rule.getName());
+                    if (log.isDebugEnabled()) {
+                        log.debug("Added hook to {} due to rule '{}'.", classBeingRedefined, rule.getName());
+                    }
                     for (InstrumentationScope scope : rule.getScopes()) {
+                        if (log.isTraceEnabled()) {
+                            log.trace("|> {}", scope.getTypeMatcher());
+                        }
                         builder = builder.visit(Advice.to(DispatchHookAdvice.class).on(scope.getMethodMatcher()));
                     }
                 }

@@ -10,6 +10,7 @@ import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationScop
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -21,7 +22,7 @@ public class InstrumentationRuleResolver {
     private InstrumentationScopeResolver scopeResolver;
 
     public Set<InstrumentationRule> resolve(InstrumentationSettings source) {
-        if (source.getRules() == null) {
+        if (source == null || source.getRules() == null) {
             return Collections.emptySet();
         }
 
@@ -43,6 +44,7 @@ public class InstrumentationRuleResolver {
                 .filter(Map.Entry::getValue)
                 .map(Map.Entry::getKey)
                 .map(scopeMap::get)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
 
         return new InstrumentationRule(ruleEntry.getKey(), scopes);

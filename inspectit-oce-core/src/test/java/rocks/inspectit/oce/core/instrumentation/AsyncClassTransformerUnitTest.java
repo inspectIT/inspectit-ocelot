@@ -16,6 +16,7 @@ import rocks.inspectit.oce.core.config.model.instrumentation.InstrumentationSett
 import rocks.inspectit.oce.core.config.model.instrumentation.InternalSettings;
 import rocks.inspectit.oce.core.instrumentation.config.InstrumentationConfigurationResolver;
 import rocks.inspectit.oce.core.instrumentation.config.model.ClassInstrumentationConfiguration;
+import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationRule;
 import rocks.inspectit.oce.core.instrumentation.event.ClassInstrumentedEvent;
 import rocks.inspectit.oce.core.instrumentation.event.IClassDefinitionListener;
 import rocks.inspectit.oce.core.instrumentation.special.SpecialSensor;
@@ -26,7 +27,7 @@ import java.io.InputStream;
 import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.Collections;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -100,8 +101,10 @@ public class AsyncClassTransformerUnitTest {
             when(mockSensor.shouldInstrument(any(), any())).thenReturn(true);
             when(mockSensor.requiresInstrumentationChange(any(), any(), any())).thenReturn(true);
             when(mockSensor.instrument(any(), any(), any(), any())).then(invocation -> invocation.getArgument(3));
+            InstrumentationRule rule = mock(InstrumentationRule.class);
+
             ClassInstrumentationConfiguration mockedConfig = new ClassInstrumentationConfiguration(
-                    new HashSet<>(Arrays.asList(mockSensor)), null
+                    Collections.singleton(mockSensor), Collections.singleton(rule), null
             );
             when(configResolver.getClassInstrumentationConfiguration(any())).thenReturn(mockedConfig);
 
@@ -135,8 +138,9 @@ public class AsyncClassTransformerUnitTest {
 
             SpecialSensor mockSensor = Mockito.mock(SpecialSensor.class);
             when(mockSensor.instrument(any(), any(), any(), any())).then(invocation -> invocation.getArgument(3));
+            InstrumentationRule rule = mock(InstrumentationRule.class);
             ClassInstrumentationConfiguration mockedConfig = new ClassInstrumentationConfiguration(
-                    new HashSet<>(Arrays.asList(mockSensor)), null
+                    Collections.singleton(mockSensor), Collections.singleton(rule), null
             );
             when(configResolver.getClassInstrumentationConfiguration(any())).thenReturn(mockedConfig);
 
