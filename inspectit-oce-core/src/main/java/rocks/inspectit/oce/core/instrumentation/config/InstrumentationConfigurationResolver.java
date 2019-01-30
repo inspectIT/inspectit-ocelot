@@ -79,14 +79,14 @@ public class InstrumentationConfigurationResolver {
                     .filter(s -> s.shouldInstrument(description, config))
                     .collect(Collectors.toSet());
 
-            Set<InstrumentationRule> narrowedRules = getNarrowedRulesFor(description);
+            Set<InstrumentationRule> narrowedRules = getNarrowedRulesFor(config, description);
 
             return new ClassInstrumentationConfiguration(activeSensors, narrowedRules, config);
         }
     }
 
-    private Set<InstrumentationRule> getNarrowedRulesFor(TypeDescription typeDescription) {
-        return currentConfig.getRules().stream()
+    private Set<InstrumentationRule> getNarrowedRulesFor(InstrumentationConfiguration config, TypeDescription typeDescription) {
+        return config.getRules().stream()
                 .map(rule -> Pair.of(
                         rule.getName(),
                         rule.getScopes()
