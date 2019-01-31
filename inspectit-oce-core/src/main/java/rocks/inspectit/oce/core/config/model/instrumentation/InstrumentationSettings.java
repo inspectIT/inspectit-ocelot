@@ -33,9 +33,15 @@ public class InstrumentationSettings {
      */
     private Map<String, Boolean> ignoredBootstrapPackages;
 
+    /**
+     * The configuration of the defined scopes. The map's key represents an unique id for the related instrumentation scope.
+     */
     @Valid
     private Map<String, InstrumentationScopeSettings> scopes;
 
+    /**
+     * The configuration of the defined rules. The map's key represents an unique id for the related instrumentation rule.
+     */
     @Valid
     private Map<String, InstrumentationRuleSettings> rules;
 }
