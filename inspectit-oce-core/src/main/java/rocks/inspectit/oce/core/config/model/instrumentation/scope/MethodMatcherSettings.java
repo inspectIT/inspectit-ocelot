@@ -1,4 +1,4 @@
-package rocks.inspectit.oce.core.config.model.instrumentation.rules.scope;
+package rocks.inspectit.oce.core.config.model.instrumentation.scope;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -14,6 +14,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class MethodMatcherSettings extends NameMatcherSettings {
+
+    /**
+     * Enum for access modifiers which can be used in the instrumentation configuration.
+     */
+    public enum AccessModifier {
+        PUBLIC, PROTECTED, PACKAGE, PRIVATE
+    }
 
     /**
      * Whether the method is a constructor or not.

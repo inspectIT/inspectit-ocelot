@@ -1,4 +1,4 @@
-package rocks.inspectit.oce.core.config.model.instrumentation.rules.scope;
+package rocks.inspectit.oce.core.config.model.instrumentation.scope;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;

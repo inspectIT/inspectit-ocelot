@@ -10,7 +10,10 @@ import net.bytebuddy.matcher.StringMatcher;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.oce.core.config.model.instrumentation.InstrumentationSettings;
-import rocks.inspectit.oce.core.config.model.instrumentation.rules.scope.*;
+import rocks.inspectit.oce.core.config.model.instrumentation.scope.InstrumentationScopeSettings;
+import rocks.inspectit.oce.core.config.model.instrumentation.scope.MethodMatcherSettings;
+import rocks.inspectit.oce.core.config.model.instrumentation.scope.NameMatcherSettings;
+import rocks.inspectit.oce.core.config.model.instrumentation.scope.TypeScope;
 import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationScope;
 
 import java.util.Arrays;
@@ -19,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
+import static rocks.inspectit.oce.core.config.model.instrumentation.scope.MethodMatcherSettings.AccessModifier;
 
 /**
  * This class is used to resolve the {@link InstrumentationScope} based on the {@link InstrumentationScopeSettings} contained
