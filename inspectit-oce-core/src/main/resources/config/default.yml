@@ -37,59 +37,50 @@ inspectit:
   # settings regarding the instrumentation performed on the target application
   instrumentation:
 
-    available-sensors:
-      test-sensor:
-        targets:
-          - name-pattern: "stopwatch"
-            matcher-mode: "ENDS_WITH_IGNORE_CASE"
-        methods:
-          - is-public: true
-            name-pattern: "elapsed"
-            matcher-mode: "EQUALS_FULLY"
-            arguments:
-              "0": java.util.concurrent.TimeUnit
+#    # specifying instrumentation scopes which are used by rules for targeting classes and methods
+#    # please see the documentation for detailed information about this configuration item
+#    scopes:
+#      # the id of the following defined scope element - this example scope targets the ArrayList's contains method
+#      example-list-scope:
+#        # the targeted type - classes which should be instrumented have to match ALL of the specified elements within the type scope
+#        type-scope:
+#          # interfaces which have to be implemented
+#          interfaces:
+#            - name-pattern: "java.util.List"
+#              matcher-mode: "EQUALS_FULLY"
+#          # the superclass which has to be extended
+#          superclass:
+#            name-pattern: "java.util.AbstractList"
+#            matcher-mode: "EQUALS_FULLY"
+#          # matcher describing the class' name (full qualified)
+#          classes:
+#            - name-pattern: "ArrayList"
+#              matcher-mode: "ENDS_WITH"
+#        # the targeted method - each method which matches at least one of the defined matchers will be instrumented
+#        method-scope:
+#          - name-pattern: "contains"
+#            matcher-mode: "EQUALS_FULLY"
+#            visibility: [PUBLIC]
+#            arguments: ["java.lang.Object"]
+#            is-synchronized: false
+#          - is-constructor: true
+#            arguments: []
+#        # advances settings which can be used to specify and narrow the instrumentation
+#        advanced:
+#          instrument-only-inherited-methods: false
+#          instrument-only-abstract-classes: false
 
-      http-sensor:
-        # properties:
-        #  - what should be executed?
-        targets:
-          - is-interface: false
-            is-abstract: false
-            name-pattern: ".*Dummy"
-            matcher-mode: "MATCHES"
-          - name-pattern: "rocks.inspectit.oce.core.Dummy"
-            matcher-mode: "EQUALS_FULLY"
-        methods:
-          - is-constructor: false
-            is-synchronized: false
-            is-public: true
-            is-protected: true
-            is-package-private: true
-            is-private: true
-            name-pattern: "start"
-            matcher-mode: "EQUALS_FULLY"
-
-      http-sensor-2:
-        targets:
-          - name-pattern: ".*Dummy"
-            matcher-mode: "MATCHES"
-        methods:
-          - name-pattern: "asd"
-            matcher-mode: "EQUALS_FULLY"
-
-    instrumentation-profiles:
-       - name: "My first Profile"
-         enabled: true
-         priority: 1
-         sensors:
-           http-sensor: true
-           http-sensor-2: false
-       - name: "Marius"
-         enabled: true
-         priority: 1
-         sensors:
-           test-sensor: true
-
+#    # definition of the instrumentation rules
+#    # please see the documentation for detailed information about this configuration item
+#    rules:
+#      # the id of the following defined rule element - this is an example rule
+#      example-rule:
+#        # specifies whether the rule is enabled or not
+#        enabled: true
+#        # the scopes used by this rule
+#        scopes:
+#          example-list-scope: true
+#          example-runnable-scope: true
 
     # settings for special sensors
     special:

@@ -42,7 +42,7 @@ public class InstrumentationScopeResolver {
             for (Map.Entry<String, InstrumentationScopeSettings> scopeEntry : source.getScopes().entrySet()) {
                 InstrumentationScopeSettings scopeSettings = scopeEntry.getValue();
                 if (scopeSettings.getTypeScope() == null) {
-                    log.warn("Processing of scope '{}' skipped. Empty type-scope is not allowed!");
+                    log.warn("Processing of scope '{}' skipped. Empty type-scope is not allowed!", scopeEntry.getKey());
                     continue;
                 }
 
