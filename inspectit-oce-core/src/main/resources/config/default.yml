@@ -80,7 +80,6 @@ inspectit:
 #        # the scopes used by this rule
 #        scopes:
 #          example-list-scope: true
-#          example-runnable-scope: true
 
     # settings for special sensors
     special:

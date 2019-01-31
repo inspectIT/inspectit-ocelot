@@ -80,7 +80,7 @@ public class InstrumentationConfigurationResolver {
                     .filter(s -> s.shouldInstrument(description, config))
                     .collect(Collectors.toSet());
 
-            Set<InstrumentationRule> narrowedRules = getNarrowedRulesFor(config, description);
+            Set<InstrumentationRule> narrowedRules = getNarrowedRulesFor(description, config);
 
             return new ClassInstrumentationConfiguration(activeSensors, narrowedRules, config);
         }
@@ -88,13 +88,13 @@ public class InstrumentationConfigurationResolver {
 
     /**
      * Narrows a rule for a specific type. The rules existing in the returned set are containing only {@link InstrumentationScope}s
-     * which are matching for the given type.
+     * which are matching for the given type. This prevents that method matchers will be applied to the wrong types.
      *
-     * @param config          the configuration which is used as basis for the rules
      * @param typeDescription the class which are the rules targeting
+     * @param config          the configuration which is used as basis for the rules
      * @return Returns a set containing rules with scopes targeting only the given type.
      */
-    private Set<InstrumentationRule> getNarrowedRulesFor(InstrumentationConfiguration config, TypeDescription typeDescription) {
+    private Set<InstrumentationRule> getNarrowedRulesFor(TypeDescription typeDescription, InstrumentationConfiguration config) {
         return config.getRules().stream()
                 .map(rule -> Pair.of(
                         rule.getName(),

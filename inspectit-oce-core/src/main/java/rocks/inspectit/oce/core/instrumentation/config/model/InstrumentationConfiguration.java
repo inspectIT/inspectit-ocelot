@@ -20,5 +20,8 @@ public class InstrumentationConfiguration {
      */
     private InstrumentationSettings source;
 
+    /**
+     * The currently active instrumentation rules.
+     */
     private Set<InstrumentationRule> rules;
 }
