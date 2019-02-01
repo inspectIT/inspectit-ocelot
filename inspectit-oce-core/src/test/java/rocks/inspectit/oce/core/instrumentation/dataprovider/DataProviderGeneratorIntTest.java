@@ -141,6 +141,20 @@ public class DataProviderGeneratorIntTest extends SpringTestBase {
 
     @Test
     @DirtiesContext
+    void testPrimitveArrayReturnValue() {
+        ResolvedGenericDataProviderConfig config = ResolvedGenericDataProviderConfig.builder()
+                .name("my-provider")
+                .expectedReturnValueType("int[]")
+                .valueBody("return new Integer(returnValue[0] + returnValue[1] +returnValue[2]);")
+                .build();
+
+        InjectedClass<? extends IGenericDataProvider> provider = generator.getOrGenerateDataProvider(config, dummyClass);
+        assertThat(getInstance(provider).execute(null, null, new int[]{1, 2, 3}, null, null)).isEqualTo(6);
+    }
+
+
+    @Test
+    @DirtiesContext
     void testExceptionPassing() {
         ResolvedGenericDataProviderConfig config = ResolvedGenericDataProviderConfig.builder()
                 .name("my-provider")

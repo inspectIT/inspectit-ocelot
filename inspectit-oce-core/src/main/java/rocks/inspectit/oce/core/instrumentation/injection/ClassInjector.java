@@ -97,20 +97,21 @@ public class ClassInjector {
             String className = classToReuse.map(Class::getName).orElse(getUniqueNameInSamePackage(neighborClass));
             byte[] byteCode = byteCodeGenerator.generateBytecode(className);
             InjectedClass<?> result;
-
+            Class<?> resultClass;
             if (classToReuse.isPresent()) {
-                ClassDefinition def = new ClassDefinition(classToReuse.get(), byteCode);
+                resultClass = classToReuse.get();
+                ClassDefinition def = new ClassDefinition(resultClass, byteCode);
                 log.debug("Reusing orphan generated class {}", className);
                 instrumentation.redefineClasses(def);
-                result = new InjectedClass<Object>(classToReuse.get());
+                result = new InjectedClass<>(resultClass);
             } else {
                 log.debug("Injecting new class {}", className);
-                Class<?> resultClass = injectClass(neighborClass, className, byteCode);
+                resultClass = injectClass(neighborClass, className, byteCode);
                 result = new InjectedClass<Object>(resultClass);
             }
             //This reference lets us no when all references to the InjectedClass object are lost
             // as soon as this happens we assume that the underlying class can be recycled
-            activeReferences.add(new InjectedClassReference(classStructureIdentifier, result, unusedInjectedClassesQueue));
+            activeReferences.add(new InjectedClassReference(classStructureIdentifier, result, resultClass, unusedInjectedClassesQueue));
             return result;
         } catch (Throwable t) {
             classToReuse.ifPresent(clazz -> markClassForReuse(classStructureIdentifier, clazz));
@@ -121,8 +122,8 @@ public class ClassInjector {
     private Class<?> injectClass(Class<?> neighborClass, String className, byte[] byteCode) throws Exception {
         ClassLoader loader = neighborClass.getClassLoader();
         if (loader == null) {
-            //for bootstrap classes the standard injection does not work probably
-            //however it also is not necessary has a reference to the bootstrap loader won't cause a memoryleak anyway
+            //for bootstrap classes the standard injection does not work properly
+            //however it also is not necessary as a reference to the bootstrap loader won't cause a memoryleak anyway
             return bootstrapChildLoader.defineNewClass(className, byteCode);
         } else {
             return ClassDefinitionUtils.defineClass(className, byteCode, neighborClass, loader);
@@ -206,10 +207,9 @@ public class ClassInjector {
         private final WeakReference<Class> injectedClassObject;
         private final String classStructureIdentifier;
 
-        public InjectedClassReference(String classStructureIdentifier, InjectedClass<?> referent, ReferenceQueue<? super InjectedClass<?>> q) {
+        public InjectedClassReference(String classStructureIdentifier, InjectedClass<?> referent, Class<?> targetClass, ReferenceQueue<? super InjectedClass<?>> q) {
             super(referent, q);
             this.classStructureIdentifier = classStructureIdentifier;
-            Class<?> targetClass = referent.getInjectedClassObject().orElse(null);
             injectedClassObject = new WeakReference<>(targetClass);
         }
     }
