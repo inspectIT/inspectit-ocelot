@@ -15,11 +15,18 @@ public class AdvancedScopeSettings {
     /**
      * Defines whether only abstract classes should be targeted by the scope's type matcher.
      */
-    private Boolean instrumentOnlyAbstractClasses = false;
+    private boolean instrumentOnlyAbstractClasses = false;
 
     /**
-     * Defines whether only inherited method should be targeted by the scope's method matcher.
+     * Defines whether only method should be targeted by the scope's method matcher which are declared in one of the
+     * defined interfaces or superclass.
      */
-    private Boolean instrumentOnlyInheritedMethods = false;
+    private boolean instrumentOnlyInheritedMethods = false;
+
+    /**
+     * By default, the instrumentation configuration has some restrictions to prevent any negative impact on the target
+     * system (e.g. instrumenting all classes). This safety mechanisms can be disabled for the current scope using this flag.
+     */
+    private boolean disableSafetyMechanisms = false;
 
 }

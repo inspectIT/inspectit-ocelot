@@ -23,4 +23,21 @@ public class NameMatcherSettings {
      */
     private StringMatcher.Mode matcherMode = StringMatcher.Mode.EQUALS_FULLY;
 
+    /**
+     * Returns whether this matcher will match basically anything.
+     *
+     * @return Returns true if it will match basically anything.
+     */
+    public boolean isAnyMatcher() {
+        return (matcherMode == StringMatcher.Mode.MATCHES && namePattern.equals(".*"))
+                || (namePattern.isEmpty() && (
+                matcherMode == StringMatcher.Mode.STARTS_WITH
+                        || matcherMode == StringMatcher.Mode.STARTS_WITH_IGNORE_CASE
+                        || matcherMode == StringMatcher.Mode.CONTAINS
+                        || matcherMode == StringMatcher.Mode.CONTAINS_IGNORE_CASE
+                        || matcherMode == StringMatcher.Mode.ENDS_WITH
+                        || matcherMode == StringMatcher.Mode.ENDS_WITH_IGNORE_CASE
+        )
+        );
+    }
 }

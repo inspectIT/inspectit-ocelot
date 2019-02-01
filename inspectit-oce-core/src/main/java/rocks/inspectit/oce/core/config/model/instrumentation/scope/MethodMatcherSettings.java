@@ -25,10 +25,10 @@ public class MethodMatcherSettings extends NameMatcherSettings {
     /**
      * Whether the method is a constructor or not.
      */
-    private Boolean isConstructor = false;
+    private boolean isConstructor = false;
 
     /**
-     * Whether the method is synchronized or not.
+     * Whether the method is synchronized or not. If this property is `null` the synchronize keyword will be ignored.
      */
     private Boolean isSynchronized;
 

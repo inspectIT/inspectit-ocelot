@@ -8,9 +8,11 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.asm.Advice;
+import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.ClassFileLocator;
 import net.bytebuddy.dynamic.DynamicType;
+import net.bytebuddy.matcher.ElementMatcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.EventListener;
@@ -163,17 +165,10 @@ public class AsyncClassTransformer implements ClassFileTransformer {
                     builder = specialSensor.instrument(classBeingRedefined, type, classConf.getActiveConfiguration(), builder);
                 }
 
-                // Apply the hook if necessary
-                for (InstrumentationRule rule : classConf.getActiveRules()) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Added hook to {} due to rule '{}'.", classBeingRedefined, rule.getName());
-                    }
-                    for (InstrumentationScope scope : rule.getScopes()) {
-                        if (log.isTraceEnabled()) {
-                            log.trace("|> {}", scope.getTypeMatcher());
-                        }
-                        builder = builder.visit(Advice.to(DispatchHookAdvice.class).on(scope.getMethodMatcher()));
-                    }
+                // Apply the instrumentation hook
+                ElementMatcher.Junction<MethodDescription> methodMatcher = getCombinedMethodMatcher(classBeingRedefined, classConf);
+                if (methodMatcher != null) {
+                    builder = builder.visit(Advice.to(DispatchHookAdvice.class).on(methodMatcher));
                 }
 
                 //"Compile" the builder to bytecode
@@ -193,6 +188,32 @@ public class AsyncClassTransformer implements ClassFileTransformer {
             log.error("Error generating instrumented bytecode", e);
             return originalByteCode;
         }
+    }
+
+    /**
+     * Combining all method matchers of the matching rules in order to prevent multiple injections of the advice.
+     */
+    private ElementMatcher.Junction<MethodDescription> getCombinedMethodMatcher(Class<?> clazz, ClassInstrumentationConfiguration classConfig) {
+        ElementMatcher.Junction<MethodDescription> methodMatcher = null;
+
+        for (InstrumentationRule rule : classConfig.getActiveRules()) {
+            if (log.isDebugEnabled()) {
+                log.debug("Added hook to {} due to rule '{}'.", clazz, rule.getName());
+            }
+            for (InstrumentationScope scope : rule.getScopes()) {
+                if (log.isTraceEnabled()) {
+                    log.trace("|> {}", scope.getTypeMatcher());
+                }
+
+                if (methodMatcher == null) {
+                    methodMatcher = scope.getMethodMatcher();
+                } else {
+                    methodMatcher = methodMatcher.or(scope.getMethodMatcher());
+                }
+            }
+        }
+
+        return methodMatcher;
     }
 
     /**

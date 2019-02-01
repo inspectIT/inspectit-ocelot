@@ -178,7 +178,7 @@ public class InspectitEnvironment extends StandardEnvironment {
     }
 
     /**
-     * Loads and validates a given bean from the environemnts proeprties.
+     * Loads and validates a given bean from the environments properties.
      *
      * @param prefix      the prefix to use, e.g. "inspectit" for the root config object
      * @param configClazz the class of the config to load

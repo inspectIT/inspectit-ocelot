@@ -56,13 +56,6 @@ class InstrumentationScopeResolverTest {
         }
 
         @Test
-        public void nullSettings() {
-            Map<String, InstrumentationScope> result = scopeResolver.resolve(null);
-
-            assertThat(result).isEmpty();
-        }
-
-        @Test
         public void nullRulesAndScopes() {
             Map<String, InstrumentationScope> result = scopeResolver.resolve(settings);
 
@@ -111,12 +104,13 @@ class InstrumentationScopeResolverTest {
 
         @Test
         public void ruleWithEmptyScope() {
+            String scopeKey = "scope-key";
             setRuleSettings("rule-key", true, Collections.singletonMap("scope-key", true));
-            setScopeSettings("scope-key", null, null, null);
+            setScopeSettings(scopeKey, null, null, null);
 
             Map<String, InstrumentationScope> result = scopeResolver.resolve(settings);
 
-            assertThat(result).isEmpty();
+            assertThat(result).flatExtracting(scopeKey).contains(new InstrumentationScope(ElementMatchers.any(), ElementMatchers.any()));
         }
 
         @Test
@@ -228,7 +222,7 @@ class InstrumentationScopeResolverTest {
             setRuleSettings("rule-key", true, Collections.singletonMap(scopeKey, true));
             TypeScope typeScope = new TypeScope();
             MethodMatcherSettings methodSettings = new MethodMatcherSettings();
-            methodSettings.setIsConstructor(true);
+            methodSettings.setConstructor(true);
             methodSettings.setVisibility(new AccessModifier[]{AccessModifier.PUBLIC});
             methodSettings.setArguments(new String[]{"any.Class"});
             methodSettings.setMatcherMode(StringMatcher.Mode.MATCHES);
@@ -241,7 +235,7 @@ class InstrumentationScopeResolverTest {
             ElementMatcher.Junction<MethodDescription> methodMatcher = ElementMatchers
                     .isConstructor()
                     .and(ElementMatchers.isPublic())
-                    .and(ElementMatchers.takesArgument(0, ElementMatchers.named("any.Class")));
+                    .and(ElementMatchers.takesArguments(1).and(ElementMatchers.takesArgument(0, ElementMatchers.named("any.Class"))));
 
             assertThat(result).containsOnlyKeys(scopeKey);
             assertThat(result.get(scopeKey))
@@ -297,8 +291,8 @@ class InstrumentationScopeResolverTest {
             Map<String, InstrumentationScope> result = scopeResolver.resolve(settings);
 
             ElementMatcher.Junction<TypeDescription> typeMatcher = ElementMatchers
-                    .hasSuperType(ElementMatchers.named("any.Superclass"))
-                    .and(ElementMatchers.hasSuperType(ElementMatchers.named("any.Interface")));
+                    .hasSuperType(ElementMatchers.not(ElementMatchers.isInterface()).and(ElementMatchers.named("any.Superclass")))
+                    .and(ElementMatchers.hasSuperType(ElementMatchers.isInterface().and(ElementMatchers.named("any.Interface"))));
 
             ElementMatcher.Junction<MethodDescription> methodMatcher = ElementMatchers
                     .isOverriddenFrom(
@@ -328,7 +322,7 @@ class InstrumentationScopeResolverTest {
             Map<String, InstrumentationScope> result = scopeResolver.resolve(settings);
 
             ElementMatcher.Junction<TypeDescription> typeMatcher = ElementMatchers
-                    .hasSuperType(ElementMatchers.named("any.Superclass"));
+                    .hasSuperType(ElementMatchers.not(ElementMatchers.isInterface()).and(ElementMatchers.named("any.Superclass")));
 
             assertThat(result).containsOnlyKeys(scopeKey);
             assertThat(result.get(scopeKey))
@@ -349,7 +343,7 @@ class InstrumentationScopeResolverTest {
             Map<String, InstrumentationScope> result = scopeResolver.resolve(settings);
 
             ElementMatcher.Junction<TypeDescription> typeMatcher = ElementMatchers
-                    .hasSuperType(ElementMatchers.named("any.Interface"));
+                    .hasSuperType(ElementMatchers.isInterface().and(ElementMatchers.named("any.Interface")));
 
             assertThat(result).containsOnlyKeys(scopeKey);
             assertThat(result.get(scopeKey))

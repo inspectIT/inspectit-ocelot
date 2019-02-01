@@ -42,17 +42,13 @@ public class InstrumentationScopeResolver {
     public Map<String, InstrumentationScope> resolve(InstrumentationSettings source) {
         Map<String, InstrumentationScope> scopeMap = new HashMap<>();
 
-        if (source != null && source.getScopes() != null) {
+        if (source.getScopes() != null) {
             for (Map.Entry<String, InstrumentationScopeSettings> scopeEntry : source.getScopes().entrySet()) {
                 InstrumentationScopeSettings scopeSettings = scopeEntry.getValue();
-                if (scopeSettings.getTypeScope() == null) {
-                    log.warn("Processing of scope '{}' skipped. Empty type-scope is not allowed!", scopeEntry.getKey());
-                    continue;
-                }
 
                 log.debug("Processing scope '{}'.", scopeEntry.getKey());
 
-                InstrumentationScope scope = resolveScope(scopeEntry.getKey(), scopeSettings);
+                InstrumentationScope scope = resolveScope(scopeSettings);
 
                 log.debug("|> Type scope: {}", scope.getTypeMatcher() != null ? scope.getTypeMatcher().toString() : "-");
                 log.debug("|> Method scope: {}", scope.getMethodMatcher() != null ? scope.getMethodMatcher().toString() : "-");
@@ -69,13 +65,12 @@ public class InstrumentationScopeResolver {
      *
      * @return The resolve {@link InstrumentationScope}.
      */
-    private InstrumentationScope resolveScope(String key, InstrumentationScopeSettings scopeSettings) {
+    private InstrumentationScope resolveScope(InstrumentationScopeSettings scopeSettings) {
         ElementMatcher.Junction<TypeDescription> typeMatcher = buildTypeMatcher(scopeSettings);
         ElementMatcher.Junction<MethodDescription> methodMatcher = buildMethodMatcher(scopeSettings, typeMatcher);
 
         if (typeMatcher == null) {
             typeMatcher = any();
-            log.warn("|> The defined scope '{}' is not narrowing the type-scope, thus, matching ANY types! This may cause a negative performance impact!", key);
         }
 
         return new InstrumentationScope(typeMatcher, methodMatcher);
@@ -97,7 +92,7 @@ public class InstrumentationScopeResolver {
 
         ElementMatcher.Junction<MethodDescription> matcher = builder.build();
 
-        if (scopeSettings.getAdvanced() != null && scopeSettings.getAdvanced().getInstrumentOnlyInheritedMethods()) {
+        if (scopeSettings.getAdvanced() != null && scopeSettings.getAdvanced().isInstrumentOnlyInheritedMethods()) {
             MatcherBuilder<TypeDescription> superBuilder = new MatcherBuilder<>();
 
             if (scopeSettings.getTypeScope().getInterfaces() != null) {
@@ -123,11 +118,11 @@ public class InstrumentationScopeResolver {
     private void processMethod(MatcherBuilder<MethodDescription> builder, MethodMatcherSettings matcherSettings) {
         MatcherBuilder<MethodDescription> innerBuilder = new MatcherBuilder<>();
 
-        innerBuilder.and(matcherSettings.getIsConstructor(), isConstructor());
+        innerBuilder.and(matcherSettings.isConstructor(), isConstructor());
         innerBuilder.and(buildVisibilityMatcher(matcherSettings.getVisibility()));
         innerBuilder.and(buildArgumentMatcher(matcherSettings.getArguments()));
 
-        if (!matcherSettings.getIsConstructor()) {
+        if (!matcherSettings.isConstructor()) {
             ElementMatcher.Junction<MethodDescription> nameMatcher = buildNameMatcher(matcherSettings);
             innerBuilder.and(nameMatcher);
             if (matcherSettings.getIsSynchronized() != null) {
@@ -149,6 +144,7 @@ public class InstrumentationScopeResolver {
             return takesArguments(0);
         } else {
             MatcherBuilder<MethodDescription> builder = new MatcherBuilder<>();
+            builder.and(takesArguments(arguments.length));
 
             for (int i = 0; i < arguments.length; i++) {
                 builder.and(takesArgument(i, named(arguments[i])));
@@ -222,16 +218,16 @@ public class InstrumentationScopeResolver {
         MatcherBuilder<TypeDescription> builder = new MatcherBuilder<>();
 
         if (scopeSettings.getTypeScope().getSuperclass() != null) {
-            processSuperType(builder, scopeSettings.getTypeScope().getSuperclass());
+            processSuperclass(builder, scopeSettings.getTypeScope().getSuperclass());
         }
         if (scopeSettings.getTypeScope().getInterfaces() != null) {
-            scopeSettings.getTypeScope().getInterfaces().forEach(i -> processSuperType(builder, i));
+            scopeSettings.getTypeScope().getInterfaces().forEach(i -> processInterfaces(builder, i));
         }
         if (scopeSettings.getTypeScope().getClasses() != null) {
             scopeSettings.getTypeScope().getClasses().forEach(c -> processClass(builder, c));
         }
 
-        if (scopeSettings.getAdvanced() != null && scopeSettings.getAdvanced().getInstrumentOnlyAbstractClasses()) {
+        if (scopeSettings.getAdvanced() != null && scopeSettings.getAdvanced().isInstrumentOnlyAbstractClasses()) {
             builder.and(isAbstract());
         }
 
@@ -241,9 +237,17 @@ public class InstrumentationScopeResolver {
     /**
      * Processing the interface and superclass settings of the {@link TypeScope}.
      */
-    private void processSuperType(MatcherBuilder<TypeDescription> builder, NameMatcherSettings matcherSettings) {
+    private void processSuperclass(MatcherBuilder<TypeDescription> builder, NameMatcherSettings matcherSettings) {
         ElementMatcher.Junction<TypeDescription> nameMatcher = buildNameMatcher(matcherSettings);
-        builder.and(hasSuperType(nameMatcher));
+        builder.and(hasSuperType(not(isInterface()).and(nameMatcher)));
+    }
+
+    /**
+     * Processing the interface and superclass settings of the {@link TypeScope}.
+     */
+    private void processInterfaces(MatcherBuilder<TypeDescription> builder, NameMatcherSettings matcherSettings) {
+        ElementMatcher.Junction<TypeDescription> nameMatcher = buildNameMatcher(matcherSettings);
+        builder.and(hasSuperType(isInterface().and(nameMatcher)));
     }
 
     /**
