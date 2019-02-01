@@ -25,7 +25,7 @@ public class ResolvedGenericDataProviderConfig {
 
     /**
      * A map defining which call arguments of the instrumented method the provider requires and what he expects as their type.
-     * These are usually defined using the input paramters anmed "arg0","arg1" etc
+     * These are usually defined using the input parameters named "arg0","arg1" etc
      */
     @Builder.Default
     private HashMap<Integer, String> expectedArgumentTypes = new HashMap<>();
@@ -43,16 +43,12 @@ public class ResolvedGenericDataProviderConfig {
     private String expectedThisType;
 
     /**
-     * The type of the thrown exception the data provider expects.
-     * If the data provider does not make use of the thrown exception, this field is null.
-     * <p>
-     * In contrast to the other fields, this type implies control flow.
-     * If a throwable is thrown, which is not a subtype of this type, the provider automatically return null.
+     * If true, the data provider uses the java.lang.Throwable thrown, giving access to the thrown exception (if any was thrown).
      */
-    private String expectedThrowableType;
+    private boolean usesThrown;
 
     /**
-     * If true, the data provider uses the Objet[] args array, giving direct access to theuncasted method parameters
+     * If true, the data provider uses the Object[] args array, giving direct access to theuncasted method parameters
      * of the instrumented method
      */
     private boolean usesArgsArray;

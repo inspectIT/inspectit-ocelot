@@ -30,7 +30,7 @@ public class DataProviderGenerator {
      * Guava seems to not allow null keys.
      * Therefore we just use this object as replacement for the bootstrap loader.
      */
-    private static final ClassLoader BOOTSTRAP_LOADER = new URLClassLoader(new URL[]{});
+    private static final ClassLoader BOOTSTRAP_LOADER_MARKER = new URLClassLoader(new URL[]{});
 
     private static final String GENERIC_PROVIDER_STRUCTURAL_ID = "genericDataProvider";
 
@@ -69,12 +69,12 @@ public class DataProviderGenerator {
      */
     @SuppressWarnings("unchecked")
     public InjectedClass<? extends IGenericDataProvider> getOrGenerateDataProvider(ResolvedGenericDataProviderConfig providerConfig, Class<?> classToUseProviderOn) {
-        ClassLoader loader = Optional.ofNullable(classToUseProviderOn.getClassLoader()).orElse(BOOTSTRAP_LOADER);
+        ClassLoader loader = Optional.ofNullable(classToUseProviderOn.getClassLoader()).orElse(BOOTSTRAP_LOADER_MARKER);
         providersCache.cleanUp();
         Cache<ResolvedGenericDataProviderConfig, InjectedClass<? extends IGenericDataProvider>> clCache;
         try {
             clCache = providersCache.get(loader);
-            clCache.cleanUp();
+            clCache.cleanUp(); //cleanup to make sure unused InjectedClasses are released
             try {
                 return clCache.get(providerConfig, () ->
                         (InjectedClass<? extends IGenericDataProvider>)
@@ -82,7 +82,7 @@ public class DataProviderGenerator {
                                         buildGenericDataProviderByteCode(providerConfig, loader, className)
                                 ));
             } catch (ExecutionException | ExecutionError e) {
-                log.error("Error creating data provider {} in context of class {}! Using a No-Operation data provider instead!",
+                log.error("Error creating data provider '{}' in context of class {}! Using a No-Operation data provider instead!",
                         providerConfig.getName(), classToUseProviderOn.getName(), e);
                 return clCache.get(providerConfig, () -> new InjectedClass<IGenericDataProvider>(GenericDataProviderTemplate.class));
             }
@@ -95,7 +95,7 @@ public class DataProviderGenerator {
     private byte[] buildGenericDataProviderByteCode(ResolvedGenericDataProviderConfig providerConfig, ClassLoader loader, String className) throws NotFoundException, CannotCompileException, IOException {
         ClassPool cp = new ClassPool();
         cp.insertClassPath(new ClassClassPath(GenericDataProviderTemplate.class));
-        if (loader != BOOTSTRAP_LOADER) {
+        if (loader != BOOTSTRAP_LOADER_MARKER) {
             cp.insertClassPath(new LoaderClassPath(loader));
         }
 
@@ -112,6 +112,42 @@ public class DataProviderGenerator {
         return provider.toBytecode();
     }
 
+    /**
+     * Builds the Java source code used to replace {@link GenericDataProviderTemplate#executeImpl(Object[], Object, Object, Throwable, Object[])}.
+     * <p>
+     * Example configuration:
+     * <pre>
+     * {@code
+     * my-provider:
+     *   input:
+     *     x: boolean
+     *     y: java.lang.Object
+     *     arg0: java.lang.String
+     *     arg2: int
+     *     returnValue: my.domain.Object
+     *     thrown: java.lang.Throwable
+     *   value: "Hello World!"
+     * }
+     * </pre>
+     * This configuration results in the following output:
+     * <pre>
+     * {@code
+     *  {
+     *     boolean x = ((Boolean)$5[0]).booleanValue();         //$5 refers in javassist to the fifth argument, which is Object[] additionalArgs
+     *     java.lang.Object y = (java.lang.Object) $5[1];
+     *     java.lang.String arg0 = (java.lang.Object) $1[0];    //$1 refers to the parameter Object[] methodArgs
+     *     int arg2 = ((java.lang.Integer) $1[2]).intValue();
+     *     my.domain.Object returnValue = (my.domain.Object) $3;
+     *     java.lang.Throwable thrown = (java.lang.Throwable) $4;
+     *
+     *     return "Hello World!";
+     *  }
+     * }
+     * </pre>
+     *
+     * @param providerConfig
+     * @return
+     */
     private String buildProviderMethod(ResolvedGenericDataProviderConfig providerConfig) {
         StringBuilder methodBody = new StringBuilder("{");
         if (providerConfig.getExpectedThisType() != null) {
@@ -120,10 +156,8 @@ public class DataProviderGenerator {
         if (providerConfig.getExpectedReturnValueType() != null) {
             buildVariableDefinition(methodBody, providerConfig.getExpectedReturnValueType(), RETURN_VALUE_VARIABLE, RETURN_VALUE);
         }
-        if (providerConfig.getExpectedThrowableType() != null) {
-            String type = providerConfig.getExpectedThrowableType();
-            methodBody.append("if (!(").append(THROWN).append(" instanceof ").append(type).append(")){ return null; }\n");
-            buildVariableDefinition(methodBody, type, THROWN_VARIABLE, THROWN);
+        if (providerConfig.isUsesThrown()) {
+            buildVariableDefinition(methodBody, "java.lang.Throwable", THROWN_VARIABLE, THROWN);
         }
         if (providerConfig.isUsesArgsArray()) {
             buildVariableDefinition(methodBody, "Object[]", ARGS_VARIABLE, METHOD_ARGS);
@@ -149,6 +183,15 @@ public class DataProviderGenerator {
     /**
      * Builds a variable definition where another variable is casted from a Object variable.
      * If the target type is a primitive, unboxing is performed.
+     * <p>
+     * For object types this results in the following string:
+     * <p>
+     * 'type.of.Variable variableName = (type.of.Variable) (value); \n'
+     * <p>
+     * If the target type is a primitive, the value is cast to the corresponding wrapper and unboxed.
+     * E.g. for an "int":
+     * <p>
+     * 'int variableName = ((java.lang.Integer) (value)).intValue(); \n'
      *
      * @param buf      the stringbuffer to write the assignment to
      * @param type     the target type of the variable, can be a class or a primitive

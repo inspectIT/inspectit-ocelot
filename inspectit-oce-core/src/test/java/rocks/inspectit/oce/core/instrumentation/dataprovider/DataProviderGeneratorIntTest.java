@@ -14,7 +14,6 @@ import rocks.inspectit.oce.core.instrumentation.injection.InjectedClass;
 import rocks.inspectit.oce.core.testutils.DummyClassLoader;
 import rocks.inspectit.oce.core.testutils.GcUtils;
 
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -158,20 +157,14 @@ public class DataProviderGeneratorIntTest extends SpringTestBase {
     void testExceptionPassing() {
         ResolvedGenericDataProviderConfig config = ResolvedGenericDataProviderConfig.builder()
                 .name("my-provider")
-                .expectedThrowableType("RuntimeException")
+                .usesThrown(true)
                 .valueBody("return thrown.getMessage();")
                 .build();
 
         InjectedClass<? extends IGenericDataProvider> provider = generator.getOrGenerateDataProvider(config, dummyClass);
         RuntimeException re = new RuntimeException("runtime");
-        ArithmeticException ae = new ArithmeticException("arithemtic");
-        IOException io = new IOException("io"); //this exception is not a subtype of RuntimeException, therefore the provider should return null.
         assertThat(getInstance(provider).execute(null, null, null, re, null))
                 .isEqualTo("runtime");
-        assertThat(getInstance(provider).execute(null, null, null, ae, null))
-                .isEqualTo("arithemtic");
-        assertThat(getInstance(provider).execute(null, null, null, io, null))
-                .isNull();
     }
 
 

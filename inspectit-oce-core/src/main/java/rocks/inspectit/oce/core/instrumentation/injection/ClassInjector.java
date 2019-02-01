@@ -58,18 +58,6 @@ public class ClassInjector {
      */
     private Set<InjectedClassReference> activeReferences = new HashSet<>();
 
-    public interface ByteCodeProvider {
-        /**
-         * The function providing the bytecode which shall be injected.
-         * The name is provided by the caller which (a) ensures that it is unique and (b) that the class gets put in a package in which classes can be injected.
-         *
-         * @param className the name of the class to use in the bytecode.
-         * @return the bytecode to use
-         * @throws Exception if something went wrong during the bytecode generation, this exception is passed through by {@link #inject(String, Class, ByteCodeProvider)}
-         */
-        byte[] generateBytecode(String className) throws Exception;
-    }
-
     /**
      * Injects a custom class into a target classloader.
      * A unique name for the target class is automatically generated.
@@ -198,6 +186,19 @@ public class ClassInjector {
         }
     }
 
+    @FunctionalInterface
+    public interface ByteCodeProvider {
+        /**
+         * The function providing the bytecode which shall be injected.
+         * The name is provided by the caller which (a) ensures that it is unique and (b) that the class gets put in a package in which classes can be injected.
+         *
+         * @param className the name of the class to use in the bytecode.
+         * @return the bytecode to use
+         * @throws Exception if something went wrong during the bytecode generation, this exception is passed through by {@link #inject(String, Class, ByteCodeProvider)}
+         */
+        byte[] generateBytecode(String className) throws Exception;
+    }
+
     /**
      * A specialized {@link WeakReference} to an {@link InjectedClass}, which preserves the actual class object and its structural identifier,
      * even when the {@link InjectedClass} is garbage collected.
@@ -216,9 +217,9 @@ public class ClassInjector {
 
     private static class InjectionClassLoader extends ClassLoader {
 
-        public Class<?> defineNewClass(String classname, byte[] code) throws Exception {
-            super.defineClass(classname, code, 0, code.length);
-            return Class.forName(classname, false, this);
+        public Class<?> defineNewClass(String className, byte[] code) throws Exception {
+            super.defineClass(className, code, 0, code.length);
+            return Class.forName(className, false, this);
         }
     }
 }
