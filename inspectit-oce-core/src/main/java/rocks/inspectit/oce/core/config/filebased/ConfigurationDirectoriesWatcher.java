@@ -4,10 +4,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import rocks.inspectit.oce.core.config.InspectitEnvironment;
-import rocks.inspectit.oce.core.service.ActivationConfigCondition;
+import rocks.inspectit.oce.core.config.model.InspectitConfig;
+import rocks.inspectit.oce.core.config.model.config.FileBasedConfigSettings;
+import rocks.inspectit.oce.core.service.DynamicallyActivatableService;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.HashMap;
@@ -24,8 +24,7 @@ import static java.nio.file.StandardWatchEventKinds.*;
  */
 @Service
 @Slf4j
-@ActivationConfigCondition("config.fileBased.watch")
-public class ConfigurationDirectoriesWatcher {
+public class ConfigurationDirectoriesWatcher extends DynamicallyActivatableService {
 
     /**
      * Defines how often is the watch service polled.
@@ -43,14 +42,24 @@ public class ConfigurationDirectoriesWatcher {
 
     private Map<WatchKey, DirectoryPropertySource> watchKeyToPropertySourceMap = new HashMap<>();
 
-    @PostConstruct
-    private void init() {
+    public ConfigurationDirectoriesWatcher() {
+        super("config.fileBased");
+    }
+
+    @Override
+    protected boolean checkEnabledForConfig(InspectitConfig conf) {
+        FileBasedConfigSettings fileBased = conf.getConfig().getFileBased();
+        return fileBased.isWatch() && fileBased.getFrequency().toMillis() == 0;
+    }
+
+    @Override
+    protected boolean doEnable(InspectitConfig conf) {
         log.info("Starting config directory watch service..");
         try {
             ws = FileSystems.getDefault().newWatchService();
         } catch (IOException e) {
             log.error("Unable to create watch service", e);
-            return;
+            return false;
         }
         env.readPropertySources(propertySources ->
                 propertySources.stream()
@@ -68,14 +77,17 @@ public class ConfigurationDirectoriesWatcher {
         );
         if (watchKeyToPropertySourceMap.isEmpty()) {
             log.info("Terminating config directory watch service as no valid directory was registered");
-            stopWatchService();
+            doDisable();
+            return false;
         } else {
             startWatcherTask();
+            return true;
         }
     }
 
-    @PreDestroy
-    private void stopWatchService() {
+
+    @Override
+    protected boolean doDisable() {
         if (ws != null) {
             log.info("Stopping config directory watch service.");
             try {
@@ -88,6 +100,7 @@ public class ConfigurationDirectoriesWatcher {
                 log.error("Unable to close watch service", e);
             }
         }
+        return true;
     }
 
     private void startWatcherTask() {
