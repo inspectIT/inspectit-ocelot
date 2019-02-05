@@ -1,4 +1,4 @@
-package rocks.inspectit.oce.core.instrumentation.config.util;
+package rocks.inspectit.oce.core.instrumentation.config.matcher;
 
 import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.matcher.ElementMatchers;

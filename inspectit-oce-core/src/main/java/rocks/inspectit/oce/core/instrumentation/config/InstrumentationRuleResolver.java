@@ -3,6 +3,7 @@ package rocks.inspectit.oce.core.instrumentation.config;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import rocks.inspectit.oce.core.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.rules.InstrumentationRuleSettings;
 import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationRule;
@@ -33,7 +34,7 @@ public class InstrumentationRuleResolver {
      * @return A set containing the resolved rules.
      */
     public Set<InstrumentationRule> resolve(InstrumentationSettings source) {
-        if (source == null || source.getRules() == null) {
+        if (CollectionUtils.isEmpty(source.getRules())) {
             return Collections.emptySet();
         }
 

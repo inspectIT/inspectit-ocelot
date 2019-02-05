@@ -30,15 +30,6 @@ class InstrumentationRuleResolverTest {
     public class Resolve {
 
         @Test
-        public void nullSettings() {
-
-            Set<InstrumentationRule> result = ruleResolver.resolve(null);
-
-            assertThat(result).isEmpty();
-
-        }
-
-        @Test
         public void emptySettings() {
             InstrumentationSettings settings = new InstrumentationSettings();
 

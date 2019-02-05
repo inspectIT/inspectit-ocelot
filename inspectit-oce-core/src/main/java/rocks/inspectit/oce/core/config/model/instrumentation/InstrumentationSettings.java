@@ -6,6 +6,8 @@ import rocks.inspectit.oce.core.config.model.instrumentation.rules.Instrumentati
 import rocks.inspectit.oce.core.config.model.instrumentation.scope.InstrumentationScopeSettings;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -37,11 +39,13 @@ public class InstrumentationSettings {
      * The configuration of the defined scopes. The map's key represents an unique id for the related instrumentation scope.
      */
     @Valid
-    private Map<String, InstrumentationScopeSettings> scopes;
+    @NotNull
+    private Map<String, InstrumentationScopeSettings> scopes = Collections.emptyMap();
 
     /**
      * The configuration of the defined rules. The map's key represents an unique id for the related instrumentation rule.
      */
     @Valid
-    private Map<String, InstrumentationRuleSettings> rules;
+    @NotNull
+    private Map<String, InstrumentationRuleSettings> rules = Collections.emptyMap();
 }

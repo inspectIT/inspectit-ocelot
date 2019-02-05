@@ -10,15 +10,14 @@ import rocks.inspectit.oce.core.config.model.instrumentation.InstrumentationSett
 import rocks.inspectit.oce.core.config.model.instrumentation.scope.InstrumentationScopeSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.scope.MethodMatcherSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.scope.NameMatcherSettings;
-import rocks.inspectit.oce.core.config.model.instrumentation.scope.TypeScope;
+import rocks.inspectit.oce.core.instrumentation.config.matcher.MatcherChainBuilder;
 import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationScope;
-import rocks.inspectit.oce.core.instrumentation.config.util.MatcherChainBuilder;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
-import static rocks.inspectit.oce.core.instrumentation.config.util.SpecialElementMatchers.*;
+import static rocks.inspectit.oce.core.instrumentation.config.matcher.SpecialElementMatchers.*;
 
 /**
  * This class is used to resolve the {@link InstrumentationScope} based on the {@link InstrumentationScopeSettings} contained
@@ -38,23 +37,19 @@ public class InstrumentationScopeResolver {
     public Map<String, InstrumentationScope> resolve(InstrumentationSettings source) {
         Map<String, InstrumentationScope> scopeMap = new HashMap<>();
 
-        if (source.getScopes() != null) {
-            for (Map.Entry<String, InstrumentationScopeSettings> scopeEntry : source.getScopes().entrySet()) {
-                InstrumentationScopeSettings scopeSettings = scopeEntry.getValue();
+        for (Map.Entry<String, InstrumentationScopeSettings> scopeEntry : source.getScopes().entrySet()) {
+            InstrumentationScopeSettings scopeSettings = scopeEntry.getValue();
 
-                if (log.isDebugEnabled()) {
-                    log.debug("Processing scope '{}'.", scopeEntry.getKey());
-                }
+            log.debug("Processing scope '{}'.", scopeEntry.getKey());
 
-                InstrumentationScope scope = resolveScope(scopeSettings);
+            InstrumentationScope scope = resolveScope(scopeSettings);
 
-                if (log.isDebugEnabled()) {
-                    log.debug("|> Type scope: {}", scope.getTypeMatcher().toString());
-                    log.debug("|> Method scope: {}", scope.getMethodMatcher().toString());
-                }
-
-                scopeMap.put(scopeEntry.getKey(), scope);
+            if (log.isDebugEnabled()) {
+                log.debug("|> Type scope: {}", scope.getTypeMatcher().toString());
+                log.debug("|> Method scope: {}", scope.getMethodMatcher().toString());
             }
+
+            scopeMap.put(scopeEntry.getKey(), scope);
         }
 
         return scopeMap;
@@ -93,21 +88,17 @@ public class InstrumentationScopeResolver {
             processSuperclass(builder, scopeSettings.getTypeScope().getSuperclass());
         }
         if (scopeSettings.getTypeScope().getInterfaces() != null) {
-            scopeSettings.getTypeScope().getInterfaces().forEach(i -> processInterfaces(builder, i));
+            scopeSettings.getTypeScope().getInterfaces().forEach(i -> processInterface(builder, i));
         }
-        if (scopeSettings.getTypeScope().getTypes() != null) {
-            scopeSettings.getTypeScope().getTypes().forEach(c -> processType(builder, c));
-        }
-
-        if (scopeSettings.getAdvanced() != null && scopeSettings.getAdvanced().isInstrumentOnlyAbstractClasses()) {
-            builder.and(isAbstract());
+        if (scopeSettings.getTypeScope().getType() != null) {
+            scopeSettings.getTypeScope().getType().forEach(c -> processType(builder, c));
         }
 
         return builder.build();
     }
 
     /**
-     * Processing the interface and superclass settings of the {@link TypeScope}.
+     * Creating a matcher for the given {@link NameMatcherSettings} which represents a superclass.
      */
     private void processSuperclass(MatcherChainBuilder<TypeDescription> builder, NameMatcherSettings nameSettings) {
         ElementMatcher.Junction<NamedElement> nameMatcher = nameIs(nameSettings);
@@ -117,9 +108,9 @@ public class InstrumentationScopeResolver {
     }
 
     /**
-     * Processing the interface and superclass settings of the {@link TypeScope}.
+     * Creating a matcher for the given {@link NameMatcherSettings} which represents an interface.
      */
-    private void processInterfaces(MatcherChainBuilder<TypeDescription> builder, NameMatcherSettings nameSettings) {
+    private void processInterface(MatcherChainBuilder<TypeDescription> builder, NameMatcherSettings nameSettings) {
         ElementMatcher.Junction<NamedElement> nameMatcher = nameIs(nameSettings);
         if (nameMatcher != null) {
             builder.and(hasSuperType(isInterface().and(nameMatcher)));
@@ -127,7 +118,7 @@ public class InstrumentationScopeResolver {
     }
 
     /**
-     * Processing the class settings of the {@link TypeScope}.
+     * Creating a matcher for the given {@link NameMatcherSettings} which represents concrete classes.
      */
     private void processType(MatcherChainBuilder<TypeDescription> builder, NameMatcherSettings nameSettings) {
         ElementMatcher.Junction<TypeDescription> nameMatcher = nameIs(nameSettings);
@@ -162,11 +153,11 @@ public class InstrumentationScopeResolver {
     private void processMethod(MatcherChainBuilder<MethodDescription> builder, MethodMatcherSettings matcherSettings) {
         MatcherChainBuilder<MethodDescription> innerBuilder = new MatcherChainBuilder<>();
 
-        innerBuilder.and(matcherSettings.isConstructor(), isConstructor());
+        innerBuilder.and(matcherSettings.getIsConstructor(), isConstructor());
         innerBuilder.and(visibilityIs(matcherSettings.getVisibility()));
         innerBuilder.and(argumentsAre(matcherSettings.getArguments()));
 
-        if (!matcherSettings.isConstructor()) {
+        if (!matcherSettings.getIsConstructor()) {
             innerBuilder.and(nameIs(matcherSettings));
 
             if (matcherSettings.getIsSynchronized() != null) {

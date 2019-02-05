@@ -13,11 +13,6 @@ import lombok.NoArgsConstructor;
 public class AdvancedScopeSettings {
 
     /**
-     * Defines whether only abstract classes should be targeted by the scope's type matcher.
-     */
-    private boolean instrumentOnlyAbstractClasses = false;
-
-    /**
      * Defines whether only method should be targeted by the scope's method matcher which are declared in one of the
      * defined interfaces or superclass.
      */

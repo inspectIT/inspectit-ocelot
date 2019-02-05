@@ -53,7 +53,7 @@ inspectit:
 #            name: "java.util.AbstractList"
 #            matcher-mode: "EQUALS_FULLY"
 #          # matcher describing the class' name (full qualified)
-#          types:
+#          type:
 #            - name: "ArrayList"
 #              matcher-mode: "ENDS_WITH"
 #        # the targeted method - each method which matches at least one of the defined matchers will be instrumented
@@ -68,7 +68,6 @@ inspectit:
 #        # advances settings which can be used to specify and narrow the instrumentation
 #        advanced:
 #          instrument-only-inherited-methods: false
-#          instrument-only-abstract-classes: false
 #          disable-safety-mechanisms: false
 
 #    # definition of the instrumentation rules

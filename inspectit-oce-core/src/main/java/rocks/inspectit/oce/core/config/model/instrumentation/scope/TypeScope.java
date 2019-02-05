@@ -30,6 +30,6 @@ public class TypeScope {
     /**
      * Matcher which have to match the type's name.
      */
-    private List<NameMatcherSettings> types;
+    private List<NameMatcherSettings> type;
 
 }

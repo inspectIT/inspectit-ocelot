@@ -1,4 +1,4 @@
-package rocks.inspectit.oce.core.instrumentation.config.util;
+package rocks.inspectit.oce.core.instrumentation.config.matcher;
 
 import net.bytebuddy.description.NamedElement;
 import net.bytebuddy.description.method.MethodDescription;
@@ -10,7 +10,9 @@ import rocks.inspectit.oce.core.config.model.instrumentation.scope.MethodMatcher
 import rocks.inspectit.oce.core.config.model.instrumentation.scope.NameMatcherSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.scope.TypeScope;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -61,16 +63,14 @@ class SpecialElementMatchersTest {
 
         @Test
         public void emptyArguments() {
-            String[] arguments = new String[0];
-
-            ElementMatcher.Junction<MethodDescription> result = SpecialElementMatchers.argumentsAre(arguments);
+            ElementMatcher.Junction<MethodDescription> result = SpecialElementMatchers.argumentsAre(Collections.emptyList());
 
             assertThat(result).isEqualTo(takesArguments(0));
         }
 
         @Test
         public void singleArgument() {
-            String[] arguments = new String[]{"class0"};
+            List<String> arguments = Arrays.asList("class0");
 
             ElementMatcher.Junction<MethodDescription> result = SpecialElementMatchers.argumentsAre(arguments);
 
@@ -80,7 +80,7 @@ class SpecialElementMatchersTest {
 
         @Test
         public void multipleArguments() {
-            String[] arguments = new String[]{"class0", "class1"};
+            List<String> arguments = Arrays.asList("class0", "class1");
 
             ElementMatcher.Junction<MethodDescription> result = SpecialElementMatchers.argumentsAre(arguments);
 
@@ -101,16 +101,14 @@ class SpecialElementMatchersTest {
 
         @Test
         public void emptyModifier() {
-            AccessModifier[] modifiers = new AccessModifier[0];
-
-            ElementMatcher.Junction<MethodDescription> result = SpecialElementMatchers.visibilityIs(modifiers);
+            ElementMatcher.Junction<MethodDescription> result = SpecialElementMatchers.visibilityIs(Collections.emptyList());
 
             assertThat(result).isNull();
         }
 
         @Test
         public void onlyPublic() {
-            AccessModifier[] modifiers = new AccessModifier[]{AccessModifier.PUBLIC};
+            List<AccessModifier> modifiers = Collections.singletonList(AccessModifier.PUBLIC);
 
             ElementMatcher.Junction<MethodDescription> result = SpecialElementMatchers.visibilityIs(modifiers);
 
@@ -120,7 +118,7 @@ class SpecialElementMatchersTest {
 
         @Test
         public void onlyPrivate() {
-            AccessModifier[] modifiers = new AccessModifier[]{AccessModifier.PRIVATE};
+            List<AccessModifier> modifiers = Collections.singletonList(AccessModifier.PRIVATE);
 
             ElementMatcher.Junction<MethodDescription> result = SpecialElementMatchers.visibilityIs(modifiers);
 
@@ -130,7 +128,7 @@ class SpecialElementMatchersTest {
 
         @Test
         public void onlyProtected() {
-            AccessModifier[] modifiers = new AccessModifier[]{AccessModifier.PROTECTED};
+            List<AccessModifier> modifiers = Collections.singletonList(AccessModifier.PROTECTED);
 
             ElementMatcher.Junction<MethodDescription> result = SpecialElementMatchers.visibilityIs(modifiers);
 
@@ -140,7 +138,7 @@ class SpecialElementMatchersTest {
 
         @Test
         public void onlyPackage() {
-            AccessModifier[] modifiers = new AccessModifier[]{AccessModifier.PACKAGE};
+            List<AccessModifier> modifiers = Collections.singletonList(AccessModifier.PACKAGE);
 
             ElementMatcher.Junction<MethodDescription> result = SpecialElementMatchers.visibilityIs(modifiers);
 
@@ -150,7 +148,7 @@ class SpecialElementMatchersTest {
 
         @Test
         public void multipleModifiers() {
-            AccessModifier[] modifiers = new AccessModifier[]{AccessModifier.PUBLIC, AccessModifier.PRIVATE};
+            List<AccessModifier> modifiers = Arrays.asList(AccessModifier.PUBLIC, AccessModifier.PRIVATE);
 
             ElementMatcher.Junction<MethodDescription> result = SpecialElementMatchers.visibilityIs(modifiers);
 
@@ -160,7 +158,7 @@ class SpecialElementMatchersTest {
 
         @Test
         public void eachModifier() {
-            AccessModifier[] modifiers = new AccessModifier[]{AccessModifier.PUBLIC, AccessModifier.PRIVATE, AccessModifier.PROTECTED, AccessModifier.PACKAGE};
+            List<AccessModifier> modifiers = Arrays.asList(AccessModifier.PUBLIC, AccessModifier.PRIVATE, AccessModifier.PROTECTED, AccessModifier.PACKAGE);
 
             ElementMatcher.Junction<MethodDescription> result = SpecialElementMatchers.visibilityIs(modifiers);
 
@@ -169,7 +167,7 @@ class SpecialElementMatchersTest {
 
         @Test
         public void duplicateModifiers() {
-            AccessModifier[] modifiers = new AccessModifier[]{AccessModifier.PUBLIC, AccessModifier.PUBLIC};
+            List<AccessModifier> modifiers = Arrays.asList(AccessModifier.PUBLIC, AccessModifier.PUBLIC);
 
             Object result = SpecialElementMatchers.visibilityIs(modifiers);
 

@@ -4,6 +4,10 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotNull;
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Data container for settings which will be used as basis for the {@link rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationScope}
  * and its method matcher.
@@ -25,7 +29,8 @@ public class MethodMatcherSettings extends NameMatcherSettings {
     /**
      * Whether the method is a constructor or not.
      */
-    private boolean isConstructor = false;
+    @NotNull
+    private Boolean isConstructor = false;
 
     /**
      * Whether the method is synchronized or not. If this property is `null` the synchronize keyword will be ignored.
@@ -35,10 +40,11 @@ public class MethodMatcherSettings extends NameMatcherSettings {
     /**
      * The arguments which have to match the method's signature.
      */
-    private String[] arguments;
+    private List<String> arguments;
 
     /**
      * The methods visibility. On of the specified matcher has to match.
      */
-    private AccessModifier[] visibility;
+    @NotNull
+    private List<AccessModifier> visibility = Arrays.asList(AccessModifier.PUBLIC, AccessModifier.PROTECTED, AccessModifier.PACKAGE, AccessModifier.PRIVATE);
 }
