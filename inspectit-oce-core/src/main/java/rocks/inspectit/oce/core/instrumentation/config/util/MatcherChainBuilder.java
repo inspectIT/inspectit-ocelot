@@ -1,15 +1,16 @@
-package rocks.inspectit.oce.core.instrumentation.config;
+package rocks.inspectit.oce.core.instrumentation.config.util;
 
 import net.bytebuddy.matcher.ElementMatcher;
 
 import static net.bytebuddy.matcher.ElementMatchers.not;
 
 /**
- * Helper class for building and linking {@link ElementMatcher}s.
+ * Helper class for building and linking {@link ElementMatcher}s. All of the methods are null-safe. Adding a null matcher
+ * will not have an effect on the matcher in construction.
  *
  * @param <T> The matchers generic type. Most of the time it will be TypeDescription or MethodDescription.
  */
-public class MatcherBuilder<T> {
+public class MatcherChainBuilder<T> {
 
     private ElementMatcher.Junction<T> matcher = null;
 

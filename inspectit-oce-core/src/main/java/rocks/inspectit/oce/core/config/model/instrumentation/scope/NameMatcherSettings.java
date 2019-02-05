@@ -5,6 +5,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import net.bytebuddy.matcher.StringMatcher;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * Data container which is used as basis for name matcher used in the {@link rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationScope}.
  */
@@ -16,11 +18,12 @@ public class NameMatcherSettings {
     /**
      * The pattern of the class or method name.
      */
-    private String namePattern;
+    private String name;
 
     /**
      * The matcher mode.
      */
+    @NotNull
     private StringMatcher.Mode matcherMode = StringMatcher.Mode.EQUALS_FULLY;
 
     /**
@@ -29,8 +32,8 @@ public class NameMatcherSettings {
      * @return Returns true if it will match basically anything.
      */
     public boolean isAnyMatcher() {
-        return (matcherMode == StringMatcher.Mode.MATCHES && namePattern.equals(".*"))
-                || (namePattern.isEmpty() && (
+        return (matcherMode == StringMatcher.Mode.MATCHES && name.equals(".*"))
+                || (name.isEmpty() && (
                 matcherMode == StringMatcher.Mode.STARTS_WITH
                         || matcherMode == StringMatcher.Mode.STARTS_WITH_IGNORE_CASE
                         || matcherMode == StringMatcher.Mode.CONTAINS

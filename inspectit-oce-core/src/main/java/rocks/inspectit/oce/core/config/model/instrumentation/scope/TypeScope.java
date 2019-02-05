@@ -28,8 +28,8 @@ public class TypeScope {
     private NameMatcherSettings superclass;
 
     /**
-     * Matcher which have to match the class name.
+     * Matcher which have to match the type's name.
      */
-    private List<NameMatcherSettings> classes;
+    private List<NameMatcherSettings> types;
 
 }

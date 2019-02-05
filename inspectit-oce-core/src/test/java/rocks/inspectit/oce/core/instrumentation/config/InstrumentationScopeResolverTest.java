@@ -3,7 +3,6 @@ package rocks.inspectit.oce.core.instrumentation.config;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
-import net.bytebuddy.matcher.ElementMatchers;
 import net.bytebuddy.matcher.StringMatcher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -21,6 +20,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static net.bytebuddy.matcher.ElementMatchers.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static rocks.inspectit.oce.core.config.model.instrumentation.scope.MethodMatcherSettings.AccessModifier;
 
@@ -110,7 +110,7 @@ class InstrumentationScopeResolverTest {
 
             Map<String, InstrumentationScope> result = scopeResolver.resolve(settings);
 
-            assertThat(result).flatExtracting(scopeKey).contains(new InstrumentationScope(ElementMatchers.any(), ElementMatchers.any()));
+            assertThat(result).flatExtracting(scopeKey).contains(new InstrumentationScope(any(), any()));
         }
 
         @Test
@@ -119,13 +119,13 @@ class InstrumentationScopeResolverTest {
             setRuleSettings("rule-key", true, Collections.singletonMap(scopeKey, true));
             NameMatcherSettings classMatcher = new NameMatcherSettings();
             TypeScope typeScope = new TypeScope();
-            typeScope.setClasses(Collections.singletonList(classMatcher));
+            typeScope.setTypes(Collections.singletonList(classMatcher));
             setScopeSettings(scopeKey, typeScope, null, null);
 
             Map<String, InstrumentationScope> result = scopeResolver.resolve(settings);
 
             assertThat(result).containsOnlyKeys(scopeKey);
-            assertThat(result).flatExtracting(scopeKey).contains(new InstrumentationScope(ElementMatchers.any(), ElementMatchers.any()));
+            assertThat(result).flatExtracting(scopeKey).contains(new InstrumentationScope(any(), any()));
         }
 
         @Test
@@ -133,9 +133,9 @@ class InstrumentationScopeResolverTest {
             String scopeKey = "scope-key";
             setRuleSettings("rule-key", true, Collections.singletonMap(scopeKey, true));
             NameMatcherSettings classMatcher = new NameMatcherSettings();
-            classMatcher.setNamePattern("class.Class");
+            classMatcher.setName("class.Class");
             TypeScope typeScope = new TypeScope();
-            typeScope.setClasses(Collections.singletonList(classMatcher));
+            typeScope.setTypes(Collections.singletonList(classMatcher));
             setScopeSettings(scopeKey, typeScope, null, null);
 
             Map<String, InstrumentationScope> result = scopeResolver.resolve(settings);
@@ -143,7 +143,7 @@ class InstrumentationScopeResolverTest {
             assertThat(result).containsOnlyKeys(scopeKey);
             assertThat(result.get(scopeKey))
                     .extracting(InstrumentationScope::getTypeMatcher, InstrumentationScope::getMethodMatcher)
-                    .containsExactly(ElementMatchers.named("class.Class"), ElementMatchers.any());
+                    .containsExactly(named("class.Class"), any());
         }
 
         @Test
@@ -151,11 +151,11 @@ class InstrumentationScopeResolverTest {
             String scopeKey = "scope-key";
             setRuleSettings("rule-key", true, Collections.singletonMap(scopeKey, true));
             NameMatcherSettings classMatcher = new NameMatcherSettings();
-            classMatcher.setNamePattern("class.Class");
+            classMatcher.setName("class.Class");
             TypeScope typeScope = new TypeScope();
-            typeScope.setClasses(Collections.singletonList(classMatcher));
+            typeScope.setTypes(Collections.singletonList(classMatcher));
             MethodMatcherSettings methodSettings = new MethodMatcherSettings();
-            methodSettings.setNamePattern("method");
+            methodSettings.setName("method");
             setScopeSettings(scopeKey, typeScope, Collections.singletonList(methodSettings), null);
 
             Map<String, InstrumentationScope> result = scopeResolver.resolve(settings);
@@ -163,7 +163,7 @@ class InstrumentationScopeResolverTest {
             assertThat(result).containsOnlyKeys(scopeKey);
             assertThat(result.get(scopeKey))
                     .extracting(InstrumentationScope::getTypeMatcher, InstrumentationScope::getMethodMatcher)
-                    .containsExactly(ElementMatchers.named("class.Class"), ElementMatchers.not(ElementMatchers.isConstructor()).and(ElementMatchers.named("method")));
+                    .containsExactly(named("class.Class"), not(isConstructor()).and(named("method")));
         }
 
         @Test
@@ -171,11 +171,11 @@ class InstrumentationScopeResolverTest {
             String scopeKey = "scope-key";
             setRuleSettings("rule-key", true, Collections.singletonMap(scopeKey, true));
             NameMatcherSettings classMatcher = new NameMatcherSettings();
-            classMatcher.setNamePattern("class.Class");
+            classMatcher.setName("class.Class");
             TypeScope typeScope = new TypeScope();
-            typeScope.setClasses(Collections.singletonList(classMatcher));
+            typeScope.setTypes(Collections.singletonList(classMatcher));
             MethodMatcherSettings methodSettings = new MethodMatcherSettings();
-            methodSettings.setNamePattern("method");
+            methodSettings.setName("method");
             AdvancedScopeSettings advancedScope = new AdvancedScopeSettings();
             advancedScope.setInstrumentOnlyAbstractClasses(true);
             setScopeSettings(scopeKey, typeScope, Collections.singletonList(methodSettings), advancedScope);
@@ -185,7 +185,7 @@ class InstrumentationScopeResolverTest {
             assertThat(result).containsOnlyKeys(scopeKey);
             assertThat(result.get(scopeKey))
                     .extracting(InstrumentationScope::getTypeMatcher, InstrumentationScope::getMethodMatcher)
-                    .containsExactly(ElementMatchers.named("class.Class").and(ElementMatchers.isAbstract()), ElementMatchers.not(ElementMatchers.isConstructor()).and(ElementMatchers.named("method")));
+                    .containsExactly(named("class.Class").and(isAbstract()), not(isConstructor()).and(named("method")));
         }
 
         @Test
@@ -197,23 +197,22 @@ class InstrumentationScopeResolverTest {
             methodSettings.setVisibility(new AccessModifier[]{AccessModifier.PUBLIC});
             methodSettings.setArguments(new String[0]);
             methodSettings.setMatcherMode(StringMatcher.Mode.MATCHES);
-            methodSettings.setNamePattern("method");
+            methodSettings.setName("method");
             methodSettings.setIsSynchronized(true);
             setScopeSettings(scopeKey, typeScope, Collections.singletonList(methodSettings), null);
 
             Map<String, InstrumentationScope> result = scopeResolver.resolve(settings);
 
-            ElementMatcher.Junction<MethodDescription> methodMatcher = ElementMatchers
-                    .not(ElementMatchers.isConstructor())
-                    .and(ElementMatchers.isPublic())
-                    .and(ElementMatchers.takesArguments(0))
-                    .and(ElementMatchers.nameMatches("method"))
-                    .and(ElementMatchers.isSynchronized());
+            ElementMatcher.Junction<MethodDescription> methodMatcher = not(isConstructor())
+                    .and(isPublic())
+                    .and(takesArguments(0))
+                    .and(nameMatches("method"))
+                    .and(isSynchronized());
 
             assertThat(result).containsOnlyKeys(scopeKey);
             assertThat(result.get(scopeKey))
                     .extracting(InstrumentationScope::getTypeMatcher, InstrumentationScope::getMethodMatcher)
-                    .containsExactly(ElementMatchers.any(), methodMatcher);
+                    .containsExactly(any(), methodMatcher);
         }
 
         @Test
@@ -226,21 +225,20 @@ class InstrumentationScopeResolverTest {
             methodSettings.setVisibility(new AccessModifier[]{AccessModifier.PUBLIC});
             methodSettings.setArguments(new String[]{"any.Class"});
             methodSettings.setMatcherMode(StringMatcher.Mode.MATCHES);
-            methodSettings.setNamePattern("method");
+            methodSettings.setName("method");
             methodSettings.setIsSynchronized(true);
             setScopeSettings(scopeKey, typeScope, Collections.singletonList(methodSettings), null);
 
             Map<String, InstrumentationScope> result = scopeResolver.resolve(settings);
 
-            ElementMatcher.Junction<MethodDescription> methodMatcher = ElementMatchers
-                    .isConstructor()
-                    .and(ElementMatchers.isPublic())
-                    .and(ElementMatchers.takesArguments(1).and(ElementMatchers.takesArgument(0, ElementMatchers.named("any.Class"))));
+            ElementMatcher.Junction<MethodDescription> methodMatcher = isConstructor()
+                    .and(isPublic())
+                    .and(takesArguments(1).and(takesArgument(0, named("any.Class"))));
 
             assertThat(result).containsOnlyKeys(scopeKey);
             assertThat(result.get(scopeKey))
                     .extracting(InstrumentationScope::getTypeMatcher, InstrumentationScope::getMethodMatcher)
-                    .containsExactly(ElementMatchers.any(), methodMatcher);
+                    .containsExactly(any(), methodMatcher);
         }
 
         @Test
@@ -250,25 +248,24 @@ class InstrumentationScopeResolverTest {
             TypeScope typeScope = new TypeScope();
             MethodMatcherSettings methodSettingsA = new MethodMatcherSettings();
             methodSettingsA.setVisibility(new AccessModifier[]{AccessModifier.PUBLIC, AccessModifier.PROTECTED, AccessModifier.PACKAGE, AccessModifier.PRIVATE});
-            methodSettingsA.setNamePattern("methodA");
+            methodSettingsA.setName("methodA");
             MethodMatcherSettings methodSettingsB = new MethodMatcherSettings();
-            methodSettingsB.setNamePattern("methodB");
+            methodSettingsB.setName("methodB");
             setScopeSettings(scopeKey, typeScope, Arrays.asList(methodSettingsA, methodSettingsB), null);
 
             Map<String, InstrumentationScope> result = scopeResolver.resolve(settings);
 
-            ElementMatcher.Junction<MethodDescription> methodMatcher = ElementMatchers
-                    .not(ElementMatchers.isConstructor())
-                    .and(ElementMatchers.named("methodA"))
+            ElementMatcher.Junction<MethodDescription> methodMatcher = not(isConstructor())
+                    .and(named("methodA"))
                     .or(
-                            ElementMatchers.not(ElementMatchers.isConstructor())
-                                    .and(ElementMatchers.named("methodB"))
+                            not(isConstructor())
+                                    .and(named("methodB"))
                     );
 
             assertThat(result).containsOnlyKeys(scopeKey);
             assertThat(result.get(scopeKey))
                     .extracting(InstrumentationScope::getTypeMatcher, InstrumentationScope::getMethodMatcher)
-                    .containsExactly(ElementMatchers.any(), methodMatcher);
+                    .containsExactly(any(), methodMatcher);
         }
 
         @Test
@@ -276,32 +273,29 @@ class InstrumentationScopeResolverTest {
             String scopeKey = "scope-key";
             setRuleSettings("rule-key", true, Collections.singletonMap(scopeKey, true));
             NameMatcherSettings superMatcher = new NameMatcherSettings();
-            superMatcher.setNamePattern("any.Superclass");
+            superMatcher.setName("any.Superclass");
             NameMatcherSettings interfaceMatcher = new NameMatcherSettings();
-            interfaceMatcher.setNamePattern("any.Interface");
+            interfaceMatcher.setName("any.Interface");
             TypeScope typeScope = new TypeScope();
             typeScope.setSuperclass(superMatcher);
             typeScope.setInterfaces(Collections.singletonList(interfaceMatcher));
             MethodMatcherSettings methodSettings = new MethodMatcherSettings();
-            methodSettings.setNamePattern("methodA");
+            methodSettings.setName("methodA");
             AdvancedScopeSettings advancedSettings = new AdvancedScopeSettings();
             advancedSettings.setInstrumentOnlyInheritedMethods(true);
             setScopeSettings(scopeKey, typeScope, Collections.singletonList(methodSettings), advancedSettings);
 
             Map<String, InstrumentationScope> result = scopeResolver.resolve(settings);
 
-            ElementMatcher.Junction<TypeDescription> typeMatcher = ElementMatchers
-                    .hasSuperType(ElementMatchers.not(ElementMatchers.isInterface()).and(ElementMatchers.named("any.Superclass")))
-                    .and(ElementMatchers.hasSuperType(ElementMatchers.isInterface().and(ElementMatchers.named("any.Interface"))));
+            ElementMatcher.Junction<TypeDescription> typeMatcher = hasSuperType(not(isInterface()).and(named("any.Superclass")))
+                    .and(hasSuperType(isInterface().and(named("any.Interface"))));
 
-            ElementMatcher.Junction<MethodDescription> methodMatcher = ElementMatchers
-                    .isOverriddenFrom(
-                            ElementMatchers.named("any.Interface")
-                                    .or(ElementMatchers.named("any.Superclass")))
-                    .and(
-                            ElementMatchers.not(ElementMatchers.isConstructor())
-                                    .and(ElementMatchers.named("methodA"))
-                    );
+            ElementMatcher.Junction<MethodDescription> methodMatcher = not(isConstructor())
+                    .and(named("methodA"))
+                    .and(isOverriddenFrom(
+                            named("any.Interface").and(isInterface())
+                                    .or(named("any.Superclass").and(not(isInterface())))
+                    ));
 
             assertThat(result).containsOnlyKeys(scopeKey);
             assertThat(result.get(scopeKey))
@@ -314,20 +308,19 @@ class InstrumentationScopeResolverTest {
             String scopeKey = "scope-key";
             setRuleSettings("rule-key", true, Collections.singletonMap(scopeKey, true));
             NameMatcherSettings superMatcher = new NameMatcherSettings();
-            superMatcher.setNamePattern("any.Superclass");
+            superMatcher.setName("any.Superclass");
             TypeScope typeScope = new TypeScope();
             typeScope.setSuperclass(superMatcher);
             setScopeSettings(scopeKey, typeScope, null, null);
 
             Map<String, InstrumentationScope> result = scopeResolver.resolve(settings);
 
-            ElementMatcher.Junction<TypeDescription> typeMatcher = ElementMatchers
-                    .hasSuperType(ElementMatchers.not(ElementMatchers.isInterface()).and(ElementMatchers.named("any.Superclass")));
+            ElementMatcher.Junction<TypeDescription> typeMatcher = hasSuperType(not(isInterface()).and(named("any.Superclass")));
 
             assertThat(result).containsOnlyKeys(scopeKey);
             assertThat(result.get(scopeKey))
                     .extracting(InstrumentationScope::getTypeMatcher, InstrumentationScope::getMethodMatcher)
-                    .containsExactly(typeMatcher, ElementMatchers.any());
+                    .containsExactly(typeMatcher, any());
         }
 
         @Test
@@ -335,20 +328,19 @@ class InstrumentationScopeResolverTest {
             String scopeKey = "scope-key";
             setRuleSettings("rule-key", true, Collections.singletonMap(scopeKey, true));
             NameMatcherSettings superMatcher = new NameMatcherSettings();
-            superMatcher.setNamePattern("any.Interface");
+            superMatcher.setName("any.Interface");
             TypeScope typeScope = new TypeScope();
             typeScope.setInterfaces(Collections.singletonList(superMatcher));
             setScopeSettings(scopeKey, typeScope, null, null);
 
             Map<String, InstrumentationScope> result = scopeResolver.resolve(settings);
 
-            ElementMatcher.Junction<TypeDescription> typeMatcher = ElementMatchers
-                    .hasSuperType(ElementMatchers.isInterface().and(ElementMatchers.named("any.Interface")));
+            ElementMatcher.Junction<TypeDescription> typeMatcher = hasSuperType(isInterface().and(named("any.Interface")));
 
             assertThat(result).containsOnlyKeys(scopeKey);
             assertThat(result.get(scopeKey))
                     .extracting(InstrumentationScope::getTypeMatcher, InstrumentationScope::getMethodMatcher)
-                    .containsExactly(typeMatcher, ElementMatchers.any());
+                    .containsExactly(typeMatcher, any());
         }
     }
 }

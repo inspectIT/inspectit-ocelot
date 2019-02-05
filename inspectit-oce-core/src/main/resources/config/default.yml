@@ -46,19 +46,19 @@ inspectit:
 #        type-scope:
 #          # interfaces which have to be implemented
 #          interfaces:
-#            - name-pattern: "java.util.List"
+#            - name: "java.util.List"
 #              matcher-mode: "EQUALS_FULLY"
 #          # the superclass which has to be extended
 #          superclass:
-#            name-pattern: "java.util.AbstractList"
+#            name: "java.util.AbstractList"
 #            matcher-mode: "EQUALS_FULLY"
 #          # matcher describing the class' name (full qualified)
-#          classes:
-#            - name-pattern: "ArrayList"
+#          types:
+#            - name: "ArrayList"
 #              matcher-mode: "ENDS_WITH"
 #        # the targeted method - each method which matches at least one of the defined matchers will be instrumented
 #        method-scope:
-#          - name-pattern: "contains"
+#          - name: "contains"
 #            matcher-mode: "EQUALS_FULLY"
 #            visibility: [PUBLIC]
 #            arguments: ["java.lang.Object"]

@@ -5,9 +5,6 @@ import net.bytebuddy.description.NamedElement;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
-import net.bytebuddy.matcher.NameMatcher;
-import net.bytebuddy.matcher.StringMatcher;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.oce.core.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.scope.InstrumentationScopeSettings;
@@ -15,14 +12,13 @@ import rocks.inspectit.oce.core.config.model.instrumentation.scope.MethodMatcher
 import rocks.inspectit.oce.core.config.model.instrumentation.scope.NameMatcherSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.scope.TypeScope;
 import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationScope;
+import rocks.inspectit.oce.core.instrumentation.config.util.MatcherChainBuilder;
 
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
-import static rocks.inspectit.oce.core.config.model.instrumentation.scope.MethodMatcherSettings.AccessModifier;
+import static rocks.inspectit.oce.core.instrumentation.config.util.SpecialElementMatchers.*;
 
 /**
  * This class is used to resolve the {@link InstrumentationScope} based on the {@link InstrumentationScopeSettings} contained
@@ -46,12 +42,16 @@ public class InstrumentationScopeResolver {
             for (Map.Entry<String, InstrumentationScopeSettings> scopeEntry : source.getScopes().entrySet()) {
                 InstrumentationScopeSettings scopeSettings = scopeEntry.getValue();
 
-                log.debug("Processing scope '{}'.", scopeEntry.getKey());
+                if (log.isDebugEnabled()) {
+                    log.debug("Processing scope '{}'.", scopeEntry.getKey());
+                }
 
                 InstrumentationScope scope = resolveScope(scopeSettings);
 
-                log.debug("|> Type scope: {}", scope.getTypeMatcher() != null ? scope.getTypeMatcher().toString() : "-");
-                log.debug("|> Method scope: {}", scope.getMethodMatcher() != null ? scope.getMethodMatcher().toString() : "-");
+                if (log.isDebugEnabled()) {
+                    log.debug("|> Type scope: {}", scope.getTypeMatcher().toString());
+                    log.debug("|> Method scope: {}", scope.getMethodMatcher().toString());
+                }
 
                 scopeMap.put(scopeEntry.getKey(), scope);
             }
@@ -72,139 +72,11 @@ public class InstrumentationScopeResolver {
         if (typeMatcher == null) {
             typeMatcher = any();
         }
+        if (methodMatcher == null) {
+            methodMatcher = any();
+        }
 
         return new InstrumentationScope(typeMatcher, methodMatcher);
-    }
-
-    /**
-     * Creating an {@link ElementMatcher} which matches the specified methods.
-     */
-    private ElementMatcher.Junction<MethodDescription> buildMethodMatcher(InstrumentationScopeSettings scopeSettings, ElementMatcher.Junction<TypeDescription> typeMatcher) {
-        MatcherBuilder<MethodDescription> builder = new MatcherBuilder<>();
-
-        if (scopeSettings.getMethodScope() != null) {
-            scopeSettings.getMethodScope().forEach(m -> processMethod(builder, m));
-        }
-
-        if (builder.isEmpty()) {
-            builder.and(any());
-        }
-
-        ElementMatcher.Junction<MethodDescription> matcher = builder.build();
-
-        if (scopeSettings.getAdvanced() != null && scopeSettings.getAdvanced().isInstrumentOnlyInheritedMethods()) {
-            MatcherBuilder<TypeDescription> superBuilder = new MatcherBuilder<>();
-
-            if (scopeSettings.getTypeScope().getInterfaces() != null) {
-                scopeSettings.getTypeScope()
-                        .getInterfaces()
-                        .forEach(i -> superBuilder.or(buildNameMatcher(i)));
-            }
-            if (scopeSettings.getTypeScope().getSuperclass() != null) {
-                superBuilder.or(buildNameMatcher(scopeSettings.getTypeScope().getSuperclass()));
-            }
-
-            if (!superBuilder.isEmpty()) {
-                matcher = isOverriddenFrom(superBuilder.build()).and(builder.build());
-            }
-        }
-
-        return matcher;
-    }
-
-    /**
-     * Processing a single {@link MethodMatcherSettings} and adding it to the given {@link MatcherBuilder}.
-     */
-    private void processMethod(MatcherBuilder<MethodDescription> builder, MethodMatcherSettings matcherSettings) {
-        MatcherBuilder<MethodDescription> innerBuilder = new MatcherBuilder<>();
-
-        innerBuilder.and(matcherSettings.isConstructor(), isConstructor());
-        innerBuilder.and(buildVisibilityMatcher(matcherSettings.getVisibility()));
-        innerBuilder.and(buildArgumentMatcher(matcherSettings.getArguments()));
-
-        if (!matcherSettings.isConstructor()) {
-            ElementMatcher.Junction<MethodDescription> nameMatcher = buildNameMatcher(matcherSettings);
-            innerBuilder.and(nameMatcher);
-            if (matcherSettings.getIsSynchronized() != null) {
-                innerBuilder.and(matcherSettings.getIsSynchronized(), isSynchronized());
-            }
-        }
-
-        builder.or(innerBuilder.build());
-    }
-
-    /**
-     * Creating an {@link ElementMatcher} matching methods which takes arguments equals to the given array. The array consists
-     * of String representing full qualified class names.
-     */
-    private ElementMatcher.Junction<MethodDescription> buildArgumentMatcher(String[] arguments) {
-        if (arguments == null) {
-            return null;
-        } else if (arguments.length == 0) {
-            return takesArguments(0);
-        } else {
-            MatcherBuilder<MethodDescription> builder = new MatcherBuilder<>();
-            builder.and(takesArguments(arguments.length));
-
-            for (int i = 0; i < arguments.length; i++) {
-                builder.and(takesArgument(i, named(arguments[i])));
-            }
-
-            return builder.build();
-        }
-    }
-
-    /**
-     * Creating an {@link ElementMatcher} matching methods with the given access modifiers.
-     */
-    private ElementMatcher.Junction<MethodDescription> buildVisibilityMatcher(AccessModifier[] modifiers) {
-        if (modifiers == null) {
-            return null;
-        }
-
-        List<AccessModifier> accessModifiers = Arrays.asList(modifiers);
-        boolean isPublic = accessModifiers.contains(AccessModifier.PUBLIC);
-        boolean isProtected = accessModifiers.contains(AccessModifier.PROTECTED);
-        boolean isPackage = accessModifiers.contains(AccessModifier.PACKAGE);
-        boolean isPrivate = accessModifiers.contains(AccessModifier.PRIVATE);
-        if (isPublic && isProtected && isPackage && isPrivate) {
-            return null;
-        }
-
-        MatcherBuilder<MethodDescription> builder = new MatcherBuilder<>();
-
-        for (AccessModifier modifier : modifiers) {
-            switch (modifier) {
-                case PUBLIC:
-                    builder.or(isPublic());
-                    break;
-                case PROTECTED:
-                    builder.or(isProtected());
-                    break;
-                case PACKAGE:
-                    builder.or(isPackagePrivate());
-                    break;
-                case PRIVATE:
-                    builder.or(isPrivate());
-                    break;
-            }
-        }
-
-        return builder.build();
-    }
-
-    /**
-     * Creates an {@link ElementMatcher} matching items with the given name settings.
-     */
-    private <N extends NamedElement> ElementMatcher.Junction<N> buildNameMatcher(NameMatcherSettings matcherSettings) {
-        String namePattern = matcherSettings.getNamePattern();
-
-        if (StringUtils.isNotEmpty(namePattern)) {
-            StringMatcher.Mode matcherMode = matcherSettings.getMatcherMode();
-            return new NameMatcher<>(new StringMatcher(namePattern, matcherMode));
-        } else {
-            return null;
-        }
     }
 
     /**
@@ -215,7 +87,7 @@ public class InstrumentationScopeResolver {
             return null;
         }
 
-        MatcherBuilder<TypeDescription> builder = new MatcherBuilder<>();
+        MatcherChainBuilder<TypeDescription> builder = new MatcherChainBuilder<>();
 
         if (scopeSettings.getTypeScope().getSuperclass() != null) {
             processSuperclass(builder, scopeSettings.getTypeScope().getSuperclass());
@@ -223,8 +95,8 @@ public class InstrumentationScopeResolver {
         if (scopeSettings.getTypeScope().getInterfaces() != null) {
             scopeSettings.getTypeScope().getInterfaces().forEach(i -> processInterfaces(builder, i));
         }
-        if (scopeSettings.getTypeScope().getClasses() != null) {
-            scopeSettings.getTypeScope().getClasses().forEach(c -> processClass(builder, c));
+        if (scopeSettings.getTypeScope().getTypes() != null) {
+            scopeSettings.getTypeScope().getTypes().forEach(c -> processType(builder, c));
         }
 
         if (scopeSettings.getAdvanced() != null && scopeSettings.getAdvanced().isInstrumentOnlyAbstractClasses()) {
@@ -237,25 +109,71 @@ public class InstrumentationScopeResolver {
     /**
      * Processing the interface and superclass settings of the {@link TypeScope}.
      */
-    private void processSuperclass(MatcherBuilder<TypeDescription> builder, NameMatcherSettings matcherSettings) {
-        ElementMatcher.Junction<TypeDescription> nameMatcher = buildNameMatcher(matcherSettings);
-        builder.and(hasSuperType(not(isInterface()).and(nameMatcher)));
+    private void processSuperclass(MatcherChainBuilder<TypeDescription> builder, NameMatcherSettings nameSettings) {
+        ElementMatcher.Junction<NamedElement> nameMatcher = nameIs(nameSettings);
+        if (nameMatcher != null) {
+            builder.and(hasSuperType(not(isInterface()).and(nameMatcher)));
+        }
     }
 
     /**
      * Processing the interface and superclass settings of the {@link TypeScope}.
      */
-    private void processInterfaces(MatcherBuilder<TypeDescription> builder, NameMatcherSettings matcherSettings) {
-        ElementMatcher.Junction<TypeDescription> nameMatcher = buildNameMatcher(matcherSettings);
-        builder.and(hasSuperType(isInterface().and(nameMatcher)));
+    private void processInterfaces(MatcherChainBuilder<TypeDescription> builder, NameMatcherSettings nameSettings) {
+        ElementMatcher.Junction<NamedElement> nameMatcher = nameIs(nameSettings);
+        if (nameMatcher != null) {
+            builder.and(hasSuperType(isInterface().and(nameMatcher)));
+        }
     }
 
     /**
      * Processing the class settings of the {@link TypeScope}.
      */
-    private void processClass(MatcherBuilder<TypeDescription> builder, NameMatcherSettings matcherSettings) {
-        ElementMatcher.Junction<TypeDescription> nameMatcher = buildNameMatcher(matcherSettings);
-        builder.and(nameMatcher);
+    private void processType(MatcherChainBuilder<TypeDescription> builder, NameMatcherSettings nameSettings) {
+        ElementMatcher.Junction<TypeDescription> nameMatcher = nameIs(nameSettings);
+        if (nameMatcher != null) {
+            builder.and(nameMatcher);
+        }
     }
 
+    /**
+     * Creating an {@link ElementMatcher} which matches the specified methods.
+     */
+    private ElementMatcher.Junction<MethodDescription> buildMethodMatcher(InstrumentationScopeSettings scopeSettings, ElementMatcher.Junction<TypeDescription> typeMatcher) {
+        MatcherChainBuilder<MethodDescription> builder = new MatcherChainBuilder<>();
+
+        if (scopeSettings.getMethodScope() != null) {
+            scopeSettings.getMethodScope().forEach(m -> processMethod(builder, m));
+        }
+
+        if (scopeSettings.getAdvanced() != null && scopeSettings.getAdvanced().isInstrumentOnlyInheritedMethods()) {
+            ElementMatcher.Junction<MethodDescription> overrideMatcher = onlyOverridenMethodsOf(scopeSettings.getTypeScope());
+            if (overrideMatcher != null) {
+                builder.and(overrideMatcher);
+            }
+        }
+
+        return builder.build();
+    }
+
+    /**
+     * Processing a single {@link MethodMatcherSettings} and adding it to the given {@link MatcherChainBuilder}.
+     */
+    private void processMethod(MatcherChainBuilder<MethodDescription> builder, MethodMatcherSettings matcherSettings) {
+        MatcherChainBuilder<MethodDescription> innerBuilder = new MatcherChainBuilder<>();
+
+        innerBuilder.and(matcherSettings.isConstructor(), isConstructor());
+        innerBuilder.and(visibilityIs(matcherSettings.getVisibility()));
+        innerBuilder.and(argumentsAre(matcherSettings.getArguments()));
+
+        if (!matcherSettings.isConstructor()) {
+            innerBuilder.and(nameIs(matcherSettings));
+
+            if (matcherSettings.getIsSynchronized() != null) {
+                innerBuilder.and(matcherSettings.getIsSynchronized(), isSynchronized());
+            }
+        }
+
+        builder.or(innerBuilder.build());
+    }
 }

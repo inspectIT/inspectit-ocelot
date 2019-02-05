@@ -44,7 +44,7 @@ public class InstrumentationScopeSettings {
 
         List<NameMatcherSettings> interfaces = typeScope.getInterfaces();
         NameMatcherSettings superclass = typeScope.getSuperclass();
-        List<NameMatcherSettings> classes = typeScope.getClasses();
+        List<NameMatcherSettings> classes = typeScope.getTypes();
 
         // No scope
         if (typeScope == null) {
