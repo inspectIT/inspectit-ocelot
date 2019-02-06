@@ -23,9 +23,8 @@ import rocks.inspectit.oce.core.instrumentation.event.ClassInstrumentedEvent;
 import rocks.inspectit.oce.core.instrumentation.event.IClassDefinitionListener;
 import rocks.inspectit.oce.core.instrumentation.special.SpecialSensor;
 import rocks.inspectit.oce.core.selfmonitoring.SelfMonitoringService;
+import rocks.inspectit.oce.core.testutils.DummyClassLoader;
 
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -58,15 +57,8 @@ public class AsyncClassTransformerUnitTest {
     private static byte[] bytecodeOfTest;
 
     @BeforeAll
-    static void readByteCode() throws Exception {
-        InputStream in = AsyncClassTransformerUnitTest.class.getResourceAsStream("AsyncClassTransformerUnitTest.class");
-        ByteArrayOutputStream data = new ByteArrayOutputStream();
-        while (in.available() > 0) {
-            byte[] buffer = new byte[1024];
-            int read = in.read(buffer);
-            data.write(buffer, 0, read);
-        }
-        bytecodeOfTest = data.toByteArray();
+    static void readByteCode() {
+        bytecodeOfTest = DummyClassLoader.readByteCode(AsyncClassTransformerUnitTest.class);
     }
 
     @BeforeEach
