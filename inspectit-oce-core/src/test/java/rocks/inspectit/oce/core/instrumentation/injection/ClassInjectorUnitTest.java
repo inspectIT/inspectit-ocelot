@@ -30,7 +30,7 @@ public class ClassInjectorUnitTest {
     Instrumentation instrumentation;
 
     @InjectMocks
-    ClassInjector injector = new ClassInjector();
+    ClassInjector injector;
 
     byte[] getByteCodeAndRename(Class<?> clazz, String name) {
         try {

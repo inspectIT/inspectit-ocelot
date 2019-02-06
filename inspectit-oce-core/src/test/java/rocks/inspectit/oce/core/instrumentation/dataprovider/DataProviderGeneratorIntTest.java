@@ -100,6 +100,7 @@ public class DataProviderGeneratorIntTest extends SpringTestBase {
         InjectedClass<? extends IGenericDataProvider> providerB = generator.getOrGenerateDataProvider(configB, dummyClass);
 
         assertThat(providerB.getInjectedClassObject().get()).isSameAs(providerAClass);
+        //we cannot check the return value because redefineClass is mocked
         verify(mockInstrumentation, atLeastOnce()).redefineClasses(any());
     }
 
