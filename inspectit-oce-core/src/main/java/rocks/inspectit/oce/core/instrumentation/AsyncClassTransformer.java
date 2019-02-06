@@ -82,8 +82,10 @@ public class AsyncClassTransformer implements ClassFileTransformer {
     /**
      * Stores all classes which have been instrumented with a configuration different
      * than {@link ClassInstrumentationConfiguration#NO_INSTRUMENTATION}.
+     * <p>
+     * Package private for testing.
      */
-    private Cache<Class<?>, Boolean> instrumentedClasses = CacheBuilder.newBuilder().weakKeys().build();
+    Cache<Class<?>, Boolean> instrumentedClasses = CacheBuilder.newBuilder().weakKeys().build();
 
 
     @Override
@@ -132,6 +134,12 @@ public class AsyncClassTransformer implements ClassFileTransformer {
             for (int i = 0; i < maxBatchSize && it.hasNext(); i++) {
                 batchClasses.add(it.next());
             }
+            removeInstrumentationForBatch(batchClasses);
+        }
+    }
+
+    private void removeInstrumentationForBatch(List<Class<?>> batchClasses) {
+        if (!batchClasses.isEmpty()) {
             try {
                 instrumentation.retransformClasses(batchClasses.toArray(new Class[]{}));
                 Thread.yield(); //yield to allow the target application to do stuff between the batches
@@ -143,10 +151,13 @@ public class AsyncClassTransformer implements ClassFileTransformer {
                             instrumentation.retransformClasses(clazz);
                         } catch (Exception e2) {
                             log.error("Error removing applied transformations of class '{}'", clazz.getName(), e2);
+                            instrumentedClasses.invalidate(clazz);
                         }
                     }
                 } else {
-                    log.error("Error removing applied transformations of class '{}'", batchClasses.get(0).getName(), e);
+                    Class<?> clazz = batchClasses.get(0);
+                    log.error("Error removing applied transformations of class '{}'", clazz.getName(), e);
+                    instrumentedClasses.invalidate(clazz);
                 }
             }
         }
@@ -236,8 +247,7 @@ public class AsyncClassTransformer implements ClassFileTransformer {
      * @param type                the classes type description
      * @return
      */
-    private ClassInstrumentationConfiguration updateAndGetActiveConfiguration
-    (Class<?> classBeingRedefined, TypeDescription type) {
+    private ClassInstrumentationConfiguration updateAndGetActiveConfiguration(Class<?> classBeingRedefined, TypeDescription type) {
         ClassInstrumentationConfiguration classConf = configResolver.getClassInstrumentationConfiguration(classBeingRedefined);
 
         synchronized (shutDownLock) {

@@ -121,6 +121,42 @@ public class AsyncClassTransformerUnitTest {
             verify(instrumentation).removeTransformer(transformer);
         }
 
+
+        @Test
+        void testRetransformErrorHandling() throws Exception {
+
+            InternalSettings internalSettings = new InternalSettings();
+            internalSettings.setClassRetransformBatchSize(100);
+            InstrumentationSettings settings = new InstrumentationSettings();
+            settings.setInternal(internalSettings);
+            InspectitConfig conf = new InspectitConfig();
+            conf.setInstrumentation(settings);
+            when(env.getCurrentConfig()).thenReturn(conf);
+
+            DummyClassLoader loader = new DummyClassLoader();
+            loader.loadCopiesOfClasses(AsyncClassTransformerUnitTest.class, FakeExecutor.class);
+
+            transformer.instrumentedClasses.put(AsyncClassTransformerUnitTest.class, true);
+            transformer.instrumentedClasses.put(FakeExecutor.class, true);
+
+            doAnswer(invoc -> {
+                Object[] definitons = invoc.getArguments();
+                if (Arrays.stream(definitons).anyMatch(c -> c == FakeExecutor.class)) {
+                    transformer.instrumentedClasses.invalidate(FakeExecutor.class);
+                }
+                if (Arrays.stream(definitons).anyMatch(c -> c == AsyncClassTransformerUnitTest.class)) {
+                    throw new RuntimeException();
+                }
+                return null;
+            }).when(instrumentation).retransformClasses(any());
+
+
+            transformer.destroy();
+
+            verify(instrumentation, times(1)).retransformClasses(any(), any());
+            verify(instrumentation, times(3)).retransformClasses(any());
+        }
+
     }
 
     @Nested
@@ -136,7 +172,7 @@ public class AsyncClassTransformerUnitTest {
             when(mockSensor.instrument(any(), any(), any(), any())).then(invocation -> invocation.getArgument(3));
             InstrumentationScope scope = new InstrumentationScope(ElementMatchers.any(), ElementMatchers.any());
             InstrumentationRule rule = new InstrumentationRule(null, Collections.singleton(scope));
-            
+
             ClassInstrumentationConfiguration mockedConfig = new ClassInstrumentationConfiguration(
                     Collections.singleton(mockSensor), Collections.singleton(rule), null
             );
