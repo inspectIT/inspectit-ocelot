@@ -3,6 +3,7 @@ package rocks.inspectit.oce.core.instrumentation.config;
 import lombok.Getter;
 import lombok.val;
 import net.bytebuddy.description.type.TypeDescription;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.EventListener;
@@ -14,6 +15,8 @@ import rocks.inspectit.oce.core.instrumentation.AsyncClassTransformer;
 import rocks.inspectit.oce.core.instrumentation.config.event.InstrumentationConfigurationChangedEvent;
 import rocks.inspectit.oce.core.instrumentation.config.model.ClassInstrumentationConfiguration;
 import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationConfiguration;
+import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationRule;
+import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationScope;
 import rocks.inspectit.oce.core.instrumentation.special.SpecialSensor;
 
 import javax.annotation.PostConstruct;
@@ -45,6 +48,9 @@ public class InstrumentationConfigurationResolver {
     @Autowired
     private List<SpecialSensor> specialSensors;
 
+    @Autowired
+    private InstrumentationRuleResolver ruleResolver;
+
     /**
      * Holds the currently active instrumentation configuration.
      */
@@ -73,8 +79,32 @@ public class InstrumentationConfigurationResolver {
             Set<SpecialSensor> activeSensors = specialSensors.stream()
                     .filter(s -> s.shouldInstrument(description, config))
                     .collect(Collectors.toSet());
-            return new ClassInstrumentationConfiguration(activeSensors, config);
+
+            Set<InstrumentationRule> narrowedRules = getNarrowedRulesFor(description, config);
+
+            return new ClassInstrumentationConfiguration(activeSensors, narrowedRules, config);
         }
+    }
+
+    /**
+     * Narrows a rule for a specific type. The rules existing in the returned set are containing only {@link InstrumentationScope}s
+     * which are matching for the given type. This prevents that method matchers will be applied to the wrong types.
+     *
+     * @param typeDescription the class which are the rules targeting
+     * @param config          the configuration which is used as basis for the rules
+     * @return Returns a set containing rules with scopes targeting only the given type.
+     */
+    private Set<InstrumentationRule> getNarrowedRulesFor(TypeDescription typeDescription, InstrumentationConfiguration config) {
+        return config.getRules().stream()
+                .map(rule -> Pair.of(
+                        rule.getName(),
+                        rule.getScopes()
+                                .stream()
+                                .filter(s -> s.getTypeMatcher().matches(typeDescription))
+                                .collect(Collectors.toSet())))
+                .filter(p -> !p.getRight().isEmpty())
+                .map(p -> new InstrumentationRule(p.getLeft(), p.getRight()))
+                .collect(Collectors.toSet());
     }
 
     @EventListener
@@ -90,22 +120,28 @@ public class InstrumentationConfigurationResolver {
     }
 
     private boolean haveInstrumentationRelatedSettingsChanged(InspectitConfigChangedEvent ev) {
-        InstrumentationSettings oldC = ev.getOldConfig().getInstrumentation();
-        InstrumentationSettings newC = ev.getNewConfig().getInstrumentation();
-        
-        if (!Objects.equals(oldC.getIgnoredBootstrapPackages(), newC.getIgnoredBootstrapPackages())) {
+        InstrumentationSettings oldConfig = ev.getOldConfig().getInstrumentation();
+        InstrumentationSettings newConfig = ev.getNewConfig().getInstrumentation();
+
+        if (!Objects.equals(oldConfig.getIgnoredBootstrapPackages(), newConfig.getIgnoredBootstrapPackages())) {
             return true;
         }
-        if (!Objects.equals(oldC.getSpecial(), newC.getSpecial())) {
+        if (!Objects.equals(oldConfig.getSpecial(), newConfig.getSpecial())) {
+            return true;
+        }
+        if (!Objects.equals(oldConfig.getRules(), newConfig.getRules())) {
+            return true;
+        }
+        if (!Objects.equals(oldConfig.getScopes(), newConfig.getScopes())) {
             return true;
         }
         return false;
     }
 
     private void updateConfiguration(InstrumentationSettings source) {
-        //Not much to do yet here
-        //in the future we can for example process the active profiles here
-        currentConfig = new InstrumentationConfiguration(source);
+        Set<InstrumentationRule> rules = ruleResolver.resolve(source);
+
+        currentConfig = new InstrumentationConfiguration(source, rules);
     }
 
     /**

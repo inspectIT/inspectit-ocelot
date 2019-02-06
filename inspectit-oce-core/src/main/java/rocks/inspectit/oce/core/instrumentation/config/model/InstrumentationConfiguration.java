@@ -4,6 +4,8 @@ import lombok.Value;
 import rocks.inspectit.oce.core.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.oce.core.instrumentation.config.InstrumentationConfigurationResolver;
 
+import java.util.Set;
+
 /**
  * Contains the resolved instrumentation settings.
  * The difference between resolved and unresolved configurations (= {@link rocks.inspectit.oce.core.config.model.instrumentation.InstrumentationSettings}
@@ -17,4 +19,9 @@ public class InstrumentationConfiguration {
      * The instrumentation settings which have been used to derive this configuration.
      */
     private InstrumentationSettings source;
+
+    /**
+     * The currently active instrumentation rules.
+     */
+    private Set<InstrumentationRule> rules;
 }

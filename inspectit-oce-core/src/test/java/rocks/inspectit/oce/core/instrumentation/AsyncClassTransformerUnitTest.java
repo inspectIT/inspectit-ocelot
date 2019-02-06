@@ -1,5 +1,6 @@
 package rocks.inspectit.oce.core.instrumentation;
 
+import net.bytebuddy.matcher.ElementMatchers;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -16,6 +17,8 @@ import rocks.inspectit.oce.core.config.model.instrumentation.InstrumentationSett
 import rocks.inspectit.oce.core.config.model.instrumentation.InternalSettings;
 import rocks.inspectit.oce.core.instrumentation.config.InstrumentationConfigurationResolver;
 import rocks.inspectit.oce.core.instrumentation.config.model.ClassInstrumentationConfiguration;
+import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationRule;
+import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationScope;
 import rocks.inspectit.oce.core.instrumentation.event.ClassInstrumentedEvent;
 import rocks.inspectit.oce.core.instrumentation.event.IClassDefinitionListener;
 import rocks.inspectit.oce.core.instrumentation.special.SpecialSensor;
@@ -26,7 +29,7 @@ import java.io.InputStream;
 import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.Collections;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -77,7 +80,7 @@ public class AsyncClassTransformerUnitTest {
         @Test
         void testTransfomerSetup() {
             transformer.init();
-            verify(instrumentation, times(1)).addTransformer(transformer, true);
+            verify(instrumentation).addTransformer(transformer, true);
         }
 
     }
@@ -100,8 +103,12 @@ public class AsyncClassTransformerUnitTest {
             when(mockSensor.shouldInstrument(any(), any())).thenReturn(true);
             when(mockSensor.requiresInstrumentationChange(any(), any(), any())).thenReturn(true);
             when(mockSensor.instrument(any(), any(), any(), any())).then(invocation -> invocation.getArgument(3));
+
+            InstrumentationScope scope = new InstrumentationScope(ElementMatchers.any(), ElementMatchers.any());
+            InstrumentationRule rule = new InstrumentationRule(null, Collections.singleton(scope));
+
             ClassInstrumentationConfiguration mockedConfig = new ClassInstrumentationConfiguration(
-                    new HashSet<>(Arrays.asList(mockSensor)), null
+                    Collections.singleton(mockSensor), Collections.singleton(rule), null
             );
             when(configResolver.getClassInstrumentationConfiguration(any())).thenReturn(mockedConfig);
 
@@ -109,7 +116,7 @@ public class AsyncClassTransformerUnitTest {
             String className = clazz.getName().replace('.', '/');
             transformer.transform(clazz.getClassLoader(), className, clazz, null, bytecodeOfTest);
 
-            verify(mockSensor, times(1)).instrument(any(), any(), any(), any());
+            verify(mockSensor).instrument(any(), any(), any(), any());
 
             Mockito.reset(mockSensor);
             doAnswer((inv) -> transformer.transform(clazz.getClassLoader(), className, clazz, null, bytecodeOfTest))
@@ -118,8 +125,8 @@ public class AsyncClassTransformerUnitTest {
             transformer.destroy();
 
             verify(mockSensor, never()).instrument(any(), any(), any(), any());
-            verify(instrumentation, times(1)).retransformClasses(clazz);
-            verify(instrumentation, times(1)).removeTransformer(transformer);
+            verify(instrumentation).retransformClasses(clazz);
+            verify(instrumentation).removeTransformer(transformer);
         }
 
     }
@@ -135,8 +142,11 @@ public class AsyncClassTransformerUnitTest {
 
             SpecialSensor mockSensor = Mockito.mock(SpecialSensor.class);
             when(mockSensor.instrument(any(), any(), any(), any())).then(invocation -> invocation.getArgument(3));
+            InstrumentationScope scope = new InstrumentationScope(ElementMatchers.any(), ElementMatchers.any());
+            InstrumentationRule rule = new InstrumentationRule(null, Collections.singleton(scope));
+            
             ClassInstrumentationConfiguration mockedConfig = new ClassInstrumentationConfiguration(
-                    new HashSet<>(Arrays.asList(mockSensor)), null
+                    Collections.singleton(mockSensor), Collections.singleton(rule), null
             );
             when(configResolver.getClassInstrumentationConfiguration(any())).thenReturn(mockedConfig);
 
@@ -144,8 +154,8 @@ public class AsyncClassTransformerUnitTest {
             String className = clazz.getName().replace('.', '/');
             transformer.transform(clazz.getClassLoader(), className, getClass(), null, bytecodeOfTest);
 
-            verify(mockSensor, times(1)).instrument(any(), any(), any(), any());
-            verify(ctx, times(1)).publishEvent(isA(ClassInstrumentedEvent.class));
+            verify(mockSensor).instrument(any(), any(), any(), any());
+            verify(ctx).publishEvent(isA(ClassInstrumentedEvent.class));
 
         }
 
@@ -161,7 +171,7 @@ public class AsyncClassTransformerUnitTest {
             ClassLoader loader = clazz.getClassLoader();
             transformer.transform(loader, className, null, null, bytecodeOfTest);
 
-            verify(listener, times(1)).onNewClassDefined(className, loader);
+            verify(listener).onNewClassDefined(className, loader);
 
         }
 

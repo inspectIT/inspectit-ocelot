@@ -9,11 +9,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.oce.core.instrumentation.config.InstrumentationConfigurationResolver;
 import rocks.inspectit.oce.core.instrumentation.config.model.ClassInstrumentationConfiguration;
+import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationRule;
 import rocks.inspectit.oce.core.instrumentation.special.SpecialSensor;
 import rocks.inspectit.oce.core.selfmonitoring.SelfMonitoringService;
 
 import java.lang.instrument.Instrumentation;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
@@ -41,6 +43,9 @@ public class InstrumentationManagerUnitTest {
     @Mock
     SpecialSensor dummySensor;
 
+    @Mock
+    InstrumentationRule mockRule;
+
     @InjectMocks
     InstrumentationManager manager;
 
@@ -54,7 +59,7 @@ public class InstrumentationManagerUnitTest {
 
             doAnswer((invoc) -> {
                 if (classesToInstrument.contains(invoc.getArgument(0))) {
-                    return new ClassInstrumentationConfiguration(new HashSet<>(Arrays.asList(dummySensor)), null);
+                    return new ClassInstrumentationConfiguration(new HashSet<>(Arrays.asList(dummySensor)), Collections.singleton(mockRule), null);
                 } else {
                     return ClassInstrumentationConfiguration.NO_INSTRUMENTATION;
                 }
@@ -75,7 +80,7 @@ public class InstrumentationManagerUnitTest {
 
 
             doAnswer((invoc) ->
-                    new ClassInstrumentationConfiguration(new HashSet<>(Arrays.asList(dummySensor)), null)
+                    new ClassInstrumentationConfiguration(new HashSet<>(Arrays.asList(dummySensor)), Collections.singleton(mockRule), null)
             ).when(resolver).getClassInstrumentationConfiguration(any());
 
             doThrow(new RuntimeException()).when(instrumentation).retransformClasses(any());
@@ -110,7 +115,7 @@ public class InstrumentationManagerUnitTest {
         void testQueueCapped() {
             TESTING_CLASSES.stream().forEach(cl -> manager.pendingClasses.put(cl, true));
             doAnswer((invoc) ->
-                    new ClassInstrumentationConfiguration(new HashSet<>(Arrays.asList(dummySensor)), null)
+                    new ClassInstrumentationConfiguration(new HashSet<>(Arrays.asList(dummySensor)), Collections.singleton(mockRule), null)
             ).when(resolver).getClassInstrumentationConfiguration(any());
 
             List<Class<?>> classesSelectedForRetransform =
@@ -125,7 +130,7 @@ public class InstrumentationManagerUnitTest {
         void testRetransformationLimitCapped() {
             TESTING_CLASSES.stream().forEach(cl -> manager.pendingClasses.put(cl, true));
             doAnswer((invoc) ->
-                    new ClassInstrumentationConfiguration(new HashSet<>(Arrays.asList(dummySensor)), null)
+                    new ClassInstrumentationConfiguration(new HashSet<>(Arrays.asList(dummySensor)), Collections.singleton(mockRule), null)
             ).when(resolver).getClassInstrumentationConfiguration(any());
 
             List<Class<?>> classesSelectedForRetransform =
@@ -143,7 +148,7 @@ public class InstrumentationManagerUnitTest {
         void testCheckLimitCapped() {
             TESTING_CLASSES.stream().forEach(cl -> manager.pendingClasses.put(cl, true));
             doAnswer((invoc) ->
-                    new ClassInstrumentationConfiguration(new HashSet<>(Arrays.asList(dummySensor)), null)
+                    new ClassInstrumentationConfiguration(new HashSet<>(Arrays.asList(dummySensor)), Collections.singleton(mockRule), null)
             ).when(resolver).getClassInstrumentationConfiguration(any());
 
             List<Class<?>> classesSelectedForRetransform =

@@ -7,9 +7,12 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import net.bytebuddy.ByteBuddy;
+import net.bytebuddy.asm.Advice;
+import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.ClassFileLocator;
 import net.bytebuddy.dynamic.DynamicType;
+import net.bytebuddy.matcher.ElementMatcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.EventListener;
@@ -18,9 +21,12 @@ import rocks.inspectit.oce.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.oce.core.config.InspectitEnvironment;
 import rocks.inspectit.oce.core.instrumentation.config.InstrumentationConfigurationResolver;
 import rocks.inspectit.oce.core.instrumentation.config.model.ClassInstrumentationConfiguration;
+import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationRule;
+import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationScope;
 import rocks.inspectit.oce.core.instrumentation.event.ClassInstrumentedEvent;
 import rocks.inspectit.oce.core.instrumentation.event.IClassDefinitionListener;
 import rocks.inspectit.oce.core.instrumentation.event.TransformerShutdownEvent;
+import rocks.inspectit.oce.core.instrumentation.hook.DispatchHookAdvice;
 import rocks.inspectit.oce.core.instrumentation.special.SpecialSensor;
 import rocks.inspectit.oce.core.selfmonitoring.SelfMonitoringService;
 import rocks.inspectit.oce.core.utils.CommonUtils;
@@ -144,9 +150,12 @@ public class AsyncClassTransformer implements ClassFileTransformer {
 
             byte[] resultBytes;
             if (classConf.isNoInstrumentation()) {
-                // we do not want to isntrument this -> we return the original byte code
+                // we do not want to instrument this -> we return the original byte code
                 resultBytes = originalByteCode;
             } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("Redefining class: {}", classBeingRedefined.getName());
+                }
                 //Make a ByteBuddy builder based on the input bytecode
                 ClassFileLocator byteCodeClassFileLocator = ClassFileLocator.Simple.of(classBeingRedefined.getName(), originalByteCode);
                 DynamicType.Builder<?> builder = new ByteBuddy().redefine(classBeingRedefined, byteCodeClassFileLocator);
@@ -155,6 +164,13 @@ public class AsyncClassTransformer implements ClassFileTransformer {
                 for (SpecialSensor specialSensor : classConf.getActiveSpecialSensors()) {
                     builder = specialSensor.instrument(classBeingRedefined, type, classConf.getActiveConfiguration(), builder);
                 }
+
+                // Apply the instrumentation hook
+                ElementMatcher.Junction<MethodDescription> methodMatcher = getCombinedMethodMatcher(classBeingRedefined, classConf);
+                if (methodMatcher != null) {
+                    builder = builder.visit(Advice.to(DispatchHookAdvice.class).on(methodMatcher));
+                }
+
                 //"Compile" the builder to bytecode
                 DynamicType.Unloaded<?> instrumentedClass = builder.make();
                 resultBytes = instrumentedClass.getBytes();
@@ -172,6 +188,32 @@ public class AsyncClassTransformer implements ClassFileTransformer {
             log.error("Error generating instrumented bytecode", e);
             return originalByteCode;
         }
+    }
+
+    /**
+     * Combining all method matchers of the matching rules in order to prevent multiple injections of the advice.
+     */
+    private ElementMatcher.Junction<MethodDescription> getCombinedMethodMatcher(Class<?> clazz, ClassInstrumentationConfiguration classConfig) {
+        ElementMatcher.Junction<MethodDescription> methodMatcher = null;
+
+        for (InstrumentationRule rule : classConfig.getActiveRules()) {
+            if (log.isDebugEnabled()) {
+                log.debug("Added hook to {} due to rule '{}'.", clazz, rule.getName());
+            }
+            for (InstrumentationScope scope : rule.getScopes()) {
+                if (log.isTraceEnabled()) {
+                    log.trace("|> {}", scope.getTypeMatcher());
+                }
+
+                if (methodMatcher == null) {
+                    methodMatcher = scope.getMethodMatcher();
+                } else {
+                    methodMatcher = methodMatcher.or(scope.getMethodMatcher());
+                }
+            }
+        }
+
+        return methodMatcher;
     }
 
     /**
