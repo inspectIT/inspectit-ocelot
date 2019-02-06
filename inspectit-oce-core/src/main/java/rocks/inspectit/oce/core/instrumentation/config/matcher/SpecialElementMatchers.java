@@ -127,4 +127,9 @@ public class SpecialElementMatchers {
             return isOverriddenFrom(builder.build());
         }
     }
+
+    public static <T extends TypeDescription> WrappedHasAnnotationMatcher<T> hasAnnotation(NameMatcherSettings matcherSettings) {
+        ElementMatcher.Junction<NamedElement> nameMatcher = nameIs(matcherSettings);
+        return WrappedHasAnnotationMatcher.of(annotationType(nameMatcher));
+    }
 }

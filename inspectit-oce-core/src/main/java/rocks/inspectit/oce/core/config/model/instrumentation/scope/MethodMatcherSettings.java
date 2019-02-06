@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotNull;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -47,4 +48,10 @@ public class MethodMatcherSettings extends NameMatcherSettings {
      */
     @NotNull
     private List<AccessModifier> visibility = Arrays.asList(AccessModifier.PUBLIC, AccessModifier.PROTECTED, AccessModifier.PACKAGE, AccessModifier.PRIVATE);
+
+    /**
+     * Matcher which have to match the used annotations.
+     */
+    @NotNull
+    private List<NameMatcherSettings> annotations = Collections.emptyList();
 }

@@ -5,6 +5,7 @@ import net.bytebuddy.description.NamedElement;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
+import net.bytebuddy.matcher.ElementMatchers;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.oce.core.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.scope.InstrumentationScopeSettings;
@@ -17,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
+import static rocks.inspectit.oce.core.instrumentation.config.matcher.SpecialElementMatchers.hasAnnotation;
 import static rocks.inspectit.oce.core.instrumentation.config.matcher.SpecialElementMatchers.*;
 
 /**
@@ -89,12 +91,15 @@ public class InstrumentationScopeResolver {
         if (scopeSettings.getType() != null) {
             processType(builder, scopeSettings.getType());
         }
+        if (scopeSettings.getTypeScope().getAnnotations() != null) {
+            scopeSettings.getTypeScope().getAnnotations().forEach(a -> processAnnotation(builder, a));
+        }
 
         return builder.build();
     }
 
     /**
-     * Creating a matcher for the given {@link NameMatcherSettings} which represents a superclass.
+     * Creating and adding a matcher for the given {@link NameMatcherSettings} which represents a superclass.
      */
     private void processSuperclass(MatcherChainBuilder<TypeDescription> builder, NameMatcherSettings nameSettings) {
         ElementMatcher.Junction<NamedElement> nameMatcher = nameIs(nameSettings);
@@ -104,7 +109,7 @@ public class InstrumentationScopeResolver {
     }
 
     /**
-     * Creating a matcher for the given {@link NameMatcherSettings} which represents an interface.
+     * Creating and adding a matcher for the given {@link NameMatcherSettings} which represents an interface.
      */
     private void processInterface(MatcherChainBuilder<TypeDescription> builder, NameMatcherSettings nameSettings) {
         ElementMatcher.Junction<NamedElement> nameMatcher = nameIs(nameSettings);
@@ -114,13 +119,19 @@ public class InstrumentationScopeResolver {
     }
 
     /**
-     * Creating a matcher for the given {@link NameMatcherSettings} which represents concrete classes.
+     * Creating and adding a matcher for the given {@link NameMatcherSettings} which represents concrete classes.
      */
     private void processType(MatcherChainBuilder<TypeDescription> builder, NameMatcherSettings nameSettings) {
         ElementMatcher.Junction<TypeDescription> nameMatcher = nameIs(nameSettings);
-        if (nameMatcher != null) {
-            builder.and(nameMatcher);
-        }
+        builder.and(nameMatcher);
+    }
+
+    /**
+     * Creating and adding a matcher for the given {@link NameMatcherSettings} which represents an annotation.
+     */
+    private void processAnnotation(MatcherChainBuilder<TypeDescription> builder, NameMatcherSettings nameSettings) {
+        ElementMatcher.Junction<TypeDescription> annotationMatcher = hasAnnotation(nameSettings);
+        builder.and(annotationMatcher);
     }
 
     /**
@@ -140,7 +151,11 @@ public class InstrumentationScopeResolver {
             }
         }
 
-        return builder.build();
+        if (builder.isEmpty()) {
+            return ElementMatchers.any();
+        } else {
+            return builder.build();
+        }
     }
 
     /**
@@ -152,6 +167,10 @@ public class InstrumentationScopeResolver {
         innerBuilder.and(matcherSettings.getIsConstructor(), isConstructor());
         innerBuilder.and(visibilityIs(matcherSettings.getVisibility()));
         innerBuilder.and(argumentsAre(matcherSettings.getArguments()));
+
+        for (NameMatcherSettings annotationSettings : matcherSettings.getAnnotations()) {
+            innerBuilder.and(isAnnotatedWith(nameIs(annotationSettings)));
+        }
 
         if (!matcherSettings.getIsConstructor()) {
             innerBuilder.and(nameIs(matcherSettings));
