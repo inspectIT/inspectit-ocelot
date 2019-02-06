@@ -2,6 +2,7 @@ package rocks.inspectit.oce.instrumentation.special;
 
 import io.opencensus.common.Scope;
 import io.opencensus.tags.*;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.Iterator;
@@ -11,10 +12,16 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
+import static rocks.inspectit.oce.TestUtils.waitForInstrumentationToComplete;
 
 public class ScheduledExecutorContextPropagationTest {
 
     private static final Tagger tagger = Tags.getTagger();
+
+    @BeforeAll
+    static void waitForInstrumentation() {
+        waitForInstrumentationToComplete();
+    }
 
     @Test
     public void verifyCtxPropagationViaScheduleRunnable() throws Exception {

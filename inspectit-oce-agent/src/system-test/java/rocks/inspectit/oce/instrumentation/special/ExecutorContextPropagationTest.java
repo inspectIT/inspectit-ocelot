@@ -12,15 +12,15 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static rocks.inspectit.oce.TestUtils.waitForInstrumentationToComplete;
 
 public class ExecutorContextPropagationTest {
 
     private static final Tagger tagger = Tags.getTagger();
 
     @BeforeAll
-    static void waitForInstrumentation() throws Exception {
-        //TODO: wait until the instrumentation is complete as soon as selfmonitoring is added to monitor the instrumentation queues
-        Thread.sleep(5000);
+    static void waitForInstrumentation() {
+        waitForInstrumentationToComplete();
     }
 
     @Test

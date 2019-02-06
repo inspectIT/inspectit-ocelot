@@ -14,6 +14,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
+import static rocks.inspectit.oce.TestUtils.waitForInstrumentationToComplete;
 
 public class ThreadStartContextPropagationTest {
 
@@ -49,10 +50,10 @@ public class ThreadStartContextPropagationTest {
     }
 
     @BeforeAll
-    public static void before() throws InterruptedException {
-        // Waiting for instrumentation
-        Thread.sleep(5000);
+    static void waitForInstrumentation() throws Exception {
+        waitForInstrumentationToComplete();
     }
+
 
     @Test
     public void verifyContextProgapationViaAbstractThreads() throws InterruptedException {
