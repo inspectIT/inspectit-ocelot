@@ -2,6 +2,7 @@ package rocks.inspectit.oce.core.instrumentation.config.matcher;
 
 import net.bytebuddy.description.ModifierReviewable;
 import net.bytebuddy.description.NamedElement;
+import net.bytebuddy.description.annotation.AnnotationSource;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
@@ -10,6 +11,7 @@ import net.bytebuddy.matcher.StringMatcher;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 import rocks.inspectit.oce.core.config.model.instrumentation.scope.InstrumentationScopeSettings;
+import rocks.inspectit.oce.core.config.model.instrumentation.scope.DescriptionMatcherSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.scope.NameMatcherSettings;
 
 import java.util.List;
@@ -41,6 +43,17 @@ public class SpecialElementMatchers {
         } else {
             return null;
         }
+    }
+
+
+    @SuppressWarnings("unchecked")
+    public static ElementMatcher.Junction describedBy(DescriptionMatcherSettings settings) {
+        MatcherChainBuilder builder = new MatcherChainBuilder<>();
+
+        builder.and(nameIs(settings));
+        builder.and(annotatedWith(settings.getAnnotation()));
+
+        return builder.build();
     }
 
     /**
@@ -128,8 +141,11 @@ public class SpecialElementMatchers {
         }
     }
 
-    public static <T extends TypeDescription> WrappedHasAnnotationMatcher<T> hasAnnotation(NameMatcherSettings matcherSettings) {
+    public static <T extends AnnotationSource> ElementMatcher.Junction<T> annotatedWith(NameMatcherSettings matcherSettings) {
         ElementMatcher.Junction<NamedElement> nameMatcher = nameIs(matcherSettings);
-        return WrappedHasAnnotationMatcher.of(annotationType(nameMatcher));
+        if (nameMatcher != null) {
+            return IsAnnotatedMatcher.of(nameMatcher);
+        }
+        return null;
     }
 }

@@ -8,6 +8,7 @@ import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.matcher.ElementMatchers;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.oce.core.config.model.instrumentation.InstrumentationSettings;
+import rocks.inspectit.oce.core.config.model.instrumentation.scope.DescriptionMatcherSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.scope.InstrumentationScopeSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.scope.MethodMatcherSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.scope.NameMatcherSettings;
@@ -18,7 +19,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
-import static rocks.inspectit.oce.core.instrumentation.config.matcher.SpecialElementMatchers.hasAnnotation;
 import static rocks.inspectit.oce.core.instrumentation.config.matcher.SpecialElementMatchers.*;
 
 /**
@@ -91,9 +91,6 @@ public class InstrumentationScopeResolver {
         if (scopeSettings.getType() != null) {
             processType(builder, scopeSettings.getType());
         }
-        if (scopeSettings.getTypeScope().getAnnotations() != null) {
-            scopeSettings.getTypeScope().getAnnotations().forEach(a -> processAnnotation(builder, a));
-        }
 
         return builder.build();
     }
@@ -101,10 +98,10 @@ public class InstrumentationScopeResolver {
     /**
      * Creating and adding a matcher for the given {@link NameMatcherSettings} which represents a superclass.
      */
-    private void processSuperclass(MatcherChainBuilder<TypeDescription> builder, NameMatcherSettings nameSettings) {
-        ElementMatcher.Junction<NamedElement> nameMatcher = nameIs(nameSettings);
-        if (nameMatcher != null) {
-            builder.and(hasSuperType(not(isInterface()).and(nameMatcher)));
+    private void processSuperclass(MatcherChainBuilder<TypeDescription> builder, DescriptionMatcherSettings descriptionSettings) {
+        ElementMatcher.Junction<TypeDescription> matcher = describedBy(descriptionSettings);
+        if (matcher != null) {
+            builder.and(hasSuperType(not(isInterface()).and(matcher)));
         }
     }
 
@@ -121,17 +118,9 @@ public class InstrumentationScopeResolver {
     /**
      * Creating and adding a matcher for the given {@link NameMatcherSettings} which represents concrete classes.
      */
-    private void processType(MatcherChainBuilder<TypeDescription> builder, NameMatcherSettings nameSettings) {
-        ElementMatcher.Junction<TypeDescription> nameMatcher = nameIs(nameSettings);
+    private void processType(MatcherChainBuilder<TypeDescription> builder, DescriptionMatcherSettings descriptionSettings) {
+        ElementMatcher.Junction<TypeDescription> nameMatcher = describedBy(descriptionSettings);
         builder.and(nameMatcher);
-    }
-
-    /**
-     * Creating and adding a matcher for the given {@link NameMatcherSettings} which represents an annotation.
-     */
-    private void processAnnotation(MatcherChainBuilder<TypeDescription> builder, NameMatcherSettings nameSettings) {
-        ElementMatcher.Junction<TypeDescription> annotationMatcher = hasAnnotation(nameSettings);
-        builder.and(annotationMatcher);
     }
 
     /**
@@ -167,10 +156,7 @@ public class InstrumentationScopeResolver {
         innerBuilder.and(matcherSettings.getIsConstructor(), isConstructor());
         innerBuilder.and(visibilityIs(matcherSettings.getVisibility()));
         innerBuilder.and(argumentsAre(matcherSettings.getArguments()));
-
-        for (NameMatcherSettings annotationSettings : matcherSettings.getAnnotations()) {
-            innerBuilder.and(isAnnotatedWith(nameIs(annotationSettings)));
-        }
+        innerBuilder.and(annotatedWith(matcherSettings.getAnnotation()));
 
         if (!matcherSettings.getIsConstructor()) {
             innerBuilder.and(nameIs(matcherSettings));

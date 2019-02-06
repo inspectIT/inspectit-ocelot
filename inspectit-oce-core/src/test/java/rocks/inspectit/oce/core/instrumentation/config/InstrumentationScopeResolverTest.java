@@ -135,7 +135,7 @@ class InstrumentationScopeResolverTest {
         public void ruleWithScope_emptyMethodEmptyAdvanced() {
             String scopeKey = "scope-key";
             setRuleSettings("rule-key", true, Collections.singletonMap(scopeKey, true));
-            NameMatcherSettings classMatcher = new NameMatcherSettings();
+            DescriptionMatcherSettings classMatcher = new DescriptionMatcherSettings();
             classMatcher.setName("class.Class");
             setScopeSettings(scopeKey, null, null, classMatcher, null, null);
 
@@ -151,7 +151,7 @@ class InstrumentationScopeResolverTest {
         public void ruleWithScope_emptyAdvanced() {
             String scopeKey = "scope-key";
             setRuleSettings("rule-key", true, Collections.singletonMap(scopeKey, true));
-            NameMatcherSettings classMatcher = new NameMatcherSettings();
+            DescriptionMatcherSettings classMatcher = new DescriptionMatcherSettings();
             classMatcher.setName("class.Class");
             MethodMatcherSettings methodSettings = new MethodMatcherSettings();
             methodSettings.setName("method");
@@ -169,7 +169,7 @@ class InstrumentationScopeResolverTest {
         public void ruleWithScope() {
             String scopeKey = "scope-key";
             setRuleSettings("rule-key", true, Collections.singletonMap(scopeKey, true));
-            NameMatcherSettings classMatcher = new NameMatcherSettings();
+            DescriptionMatcherSettings classMatcher = new DescriptionMatcherSettings();
             classMatcher.setName("class.Class");
             MethodMatcherSettings methodSettings = new MethodMatcherSettings();
             methodSettings.setName("method");
@@ -264,9 +264,9 @@ class InstrumentationScopeResolverTest {
         public void methodMatcherProperties_onlyInherited() {
             String scopeKey = "scope-key";
             setRuleSettings("rule-key", true, Collections.singletonMap(scopeKey, true));
-            NameMatcherSettings superMatcher = new NameMatcherSettings();
+            DescriptionMatcherSettings superMatcher = new DescriptionMatcherSettings();
             superMatcher.setName("any.Superclass");
-            NameMatcherSettings interfaceMatcher = new NameMatcherSettings();
+            DescriptionMatcherSettings interfaceMatcher = new DescriptionMatcherSettings();
             interfaceMatcher.setName("any.Interface");
             MethodMatcherSettings methodSettings = new MethodMatcherSettings();
             methodSettings.setName("methodA");
@@ -296,7 +296,7 @@ class InstrumentationScopeResolverTest {
         public void typeTargets_superclass() {
             String scopeKey = "scope-key";
             setRuleSettings("rule-key", true, Collections.singletonMap(scopeKey, true));
-            NameMatcherSettings superMatcher = new NameMatcherSettings();
+            DescriptionMatcherSettings superMatcher = new DescriptionMatcherSettings();
             superMatcher.setName("any.Superclass");
             setScopeSettings(scopeKey, null, superMatcher, null, null, null);
 
@@ -314,7 +314,7 @@ class InstrumentationScopeResolverTest {
         public void typeTargets_interfaces() {
             String scopeKey = "scope-key";
             setRuleSettings("rule-key", true, Collections.singletonMap(scopeKey, true));
-            NameMatcherSettings superMatcher = new NameMatcherSettings();
+            DescriptionMatcherSettings superMatcher = new DescriptionMatcherSettings();
             superMatcher.setName("any.Interface");
             setScopeSettings(scopeKey, Collections.singletonList(superMatcher), null, null, null, null);
 

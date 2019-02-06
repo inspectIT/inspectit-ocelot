@@ -7,6 +7,7 @@ import net.bytebuddy.matcher.StringMatcher;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import rocks.inspectit.oce.core.config.model.instrumentation.scope.InstrumentationScopeSettings;
+import rocks.inspectit.oce.core.config.model.instrumentation.scope.DescriptionMatcherSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.scope.MethodMatcherSettings.AccessModifier;
 import rocks.inspectit.oce.core.config.model.instrumentation.scope.NameMatcherSettings;
 
@@ -189,7 +190,7 @@ class SpecialElementMatchersTest {
 
         @Test
         public void onlyInterface() {
-            NameMatcherSettings interfaceSettings = new NameMatcherSettings();
+            DescriptionMatcherSettings interfaceSettings = new DescriptionMatcherSettings();
             interfaceSettings.setName("interface1");
 
             InstrumentationScopeSettings scope = new InstrumentationScopeSettings();
@@ -203,7 +204,7 @@ class SpecialElementMatchersTest {
 
         @Test
         public void onlySuperclass() {
-            NameMatcherSettings superclassSettings = new NameMatcherSettings();
+            DescriptionMatcherSettings superclassSettings = new DescriptionMatcherSettings();
             superclassSettings.setName("superclass1");
 
             InstrumentationScopeSettings scope = new InstrumentationScopeSettings();
@@ -217,9 +218,9 @@ class SpecialElementMatchersTest {
 
         @Test
         public void fullScope() {
-            NameMatcherSettings interfaceSettings = new NameMatcherSettings();
+            DescriptionMatcherSettings interfaceSettings = new DescriptionMatcherSettings();
             interfaceSettings.setName("interface1");
-            NameMatcherSettings superclassSettings = new NameMatcherSettings();
+            DescriptionMatcherSettings superclassSettings = new DescriptionMatcherSettings();
             superclassSettings.setName("superclass1");
 
             InstrumentationScopeSettings scope = new InstrumentationScopeSettings();
