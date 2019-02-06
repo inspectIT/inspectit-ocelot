@@ -119,7 +119,7 @@ class InstrumentationScopeResolverTest {
             setRuleSettings("rule-key", true, Collections.singletonMap(scopeKey, true));
             NameMatcherSettings classMatcher = new NameMatcherSettings();
             TypeScope typeScope = new TypeScope();
-            typeScope.setType(Collections.singletonList(classMatcher));
+            typeScope.setType(classMatcher);
             setScopeSettings(scopeKey, typeScope, null, null);
 
             Map<String, InstrumentationScope> result = scopeResolver.resolve(settings);
@@ -135,7 +135,7 @@ class InstrumentationScopeResolverTest {
             NameMatcherSettings classMatcher = new NameMatcherSettings();
             classMatcher.setName("class.Class");
             TypeScope typeScope = new TypeScope();
-            typeScope.setType(Collections.singletonList(classMatcher));
+            typeScope.setType(classMatcher);
             setScopeSettings(scopeKey, typeScope, null, null);
 
             Map<String, InstrumentationScope> result = scopeResolver.resolve(settings);
@@ -153,7 +153,7 @@ class InstrumentationScopeResolverTest {
             NameMatcherSettings classMatcher = new NameMatcherSettings();
             classMatcher.setName("class.Class");
             TypeScope typeScope = new TypeScope();
-            typeScope.setType(Collections.singletonList(classMatcher));
+            typeScope.setType(classMatcher);
             MethodMatcherSettings methodSettings = new MethodMatcherSettings();
             methodSettings.setName("method");
             setScopeSettings(scopeKey, typeScope, Collections.singletonList(methodSettings), null);
@@ -173,7 +173,7 @@ class InstrumentationScopeResolverTest {
             NameMatcherSettings classMatcher = new NameMatcherSettings();
             classMatcher.setName("class.Class");
             TypeScope typeScope = new TypeScope();
-            typeScope.setType(Collections.singletonList(classMatcher));
+            typeScope.setType(classMatcher);
             MethodMatcherSettings methodSettings = new MethodMatcherSettings();
             methodSettings.setName("method");
             AdvancedScopeSettings advancedScope = new AdvancedScopeSettings();

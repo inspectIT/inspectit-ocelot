@@ -44,26 +44,14 @@ public class InstrumentationScopeSettings {
 
         List<NameMatcherSettings> interfaces = typeScope.getInterfaces();
         NameMatcherSettings superclass = typeScope.getSuperclass();
-        List<NameMatcherSettings> classes = typeScope.getType();
+        NameMatcherSettings type = typeScope.getType();
 
         // No scope
         if (typeScope == null) {
             return false;
         }
-        // No super classes and...
-        if (CollectionUtils.isEmpty(interfaces) && superclass == null) {
-            // ...no classes
-            if (CollectionUtils.isEmpty(classes)) {
-                return false;
-            }
 
-            // ...any-matcher
-            boolean anyMatch = classes.stream().anyMatch(NameMatcherSettings::isAnyMatcher);
-            if (anyMatch) {
-                return false;
-            }
-        }
-        return true;
+        return !CollectionUtils.isEmpty(interfaces) || superclass != null || (type != null && !type.isAnyMatcher());
     }
 
 }

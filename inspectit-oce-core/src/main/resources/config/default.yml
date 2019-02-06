@@ -54,8 +54,8 @@ inspectit:
 #            matcher-mode: "EQUALS_FULLY"
 #          # matcher describing the class' name (full qualified)
 #          type:
-#            - name: "ArrayList"
-#              matcher-mode: "ENDS_WITH"
+#            name: "ArrayList"
+#            matcher-mode: "ENDS_WITH"
 #        # the targeted method - each method which matches at least one of the defined matchers will be instrumented
 #        method-scope:
 #          - name: "contains"

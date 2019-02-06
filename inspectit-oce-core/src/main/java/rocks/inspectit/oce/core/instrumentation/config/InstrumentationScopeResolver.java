@@ -91,7 +91,7 @@ public class InstrumentationScopeResolver {
             scopeSettings.getTypeScope().getInterfaces().forEach(i -> processInterface(builder, i));
         }
         if (scopeSettings.getTypeScope().getType() != null) {
-            scopeSettings.getTypeScope().getType().forEach(c -> processType(builder, c));
+            processType(builder, scopeSettings.getTypeScope().getType());
         }
 
         return builder.build();
