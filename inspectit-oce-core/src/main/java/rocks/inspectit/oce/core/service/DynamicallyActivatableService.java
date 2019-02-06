@@ -140,7 +140,7 @@ public abstract class DynamicallyActivatableService {
      * Called when the service is running and should be stopped.
      * This is guaranteed to be only called when previously {@link #doEnable(InspectitConfig)} was called and was successful.
      *
-     * @return true, if te disabling was successful. false if the service could not be disabled and is still running.
+     * @return true, if the disabling was successful. false if the service could not be disabled and is still running.
      */
     protected abstract boolean doDisable();
 

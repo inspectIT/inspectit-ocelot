@@ -2,6 +2,9 @@ package rocks.inspectit.oce.core.config.model.config;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
+
+import java.time.Duration;
 
 /**
  * If path is not null and enabled is true a {@link rocks.inspectit.oce.core.config.filebased.DirectoryPropertySource}
@@ -26,4 +29,11 @@ public class FileBasedConfigSettings {
      * If true, a {@link rocks.inspectit.oce.core.config.filebased.ConfigurationDirectoriesWatcher} will be started to reload the configuration from the directory on changes.
      */
     private boolean watch;
+
+    /**
+     * The frequency at which the target folder should be polled for changes if {@link #watch} is true.
+     * If the frequency is set to zero, the java {@link java.nio.file.WatchService} is used instead of polling.
+     */
+    @NonNull
+    private Duration frequency;
 }

@@ -55,6 +55,7 @@ dependencies {
 
             // utils
             "org.apache.commons:commons-lang3:3.+",
+            'commons-io:commons-io:2.6',
             'piccolo:piccolo:1.0.3',
             'com.fasterxml.jackson.core:jackson-databind:2.9.7',
 

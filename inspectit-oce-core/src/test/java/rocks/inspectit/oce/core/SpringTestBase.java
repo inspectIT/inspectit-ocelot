@@ -17,7 +17,6 @@ import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.mock.env.MockPropertySource;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import rocks.inspectit.oce.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.oce.core.config.InspectitEnvironment;
@@ -36,9 +35,6 @@ import static org.mockito.Mockito.*;
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = SpringConfiguration.class, initializers = SpringTestBase.TestContextInitializer.class)
-@TestPropertySource(properties = {
-        "inspectit.config.file-based.watch=false"
-})
 public class SpringTestBase {
 
     @Autowired

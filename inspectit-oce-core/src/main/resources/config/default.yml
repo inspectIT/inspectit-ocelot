@@ -33,6 +33,10 @@ inspectit:
       enabled: true
       # if true the directory will be watched for changes. When changes occur, the configuration is automatically reloaded
       watch: true
+      # The frequency at which the target folder should be polled for changes if 'watch' is true.
+      # If the frequency is set to zero, a OS notification based approach is used instead of polling.
+      # However, depending on the filesystem OS notification might not work, e.g. for network filesystems.
+      frequency: 5s
 
   # settings regarding the instrumentation performed on the target application
   instrumentation:
