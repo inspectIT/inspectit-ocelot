@@ -89,7 +89,11 @@ public class InstrumentationManagerUnitTest {
                     new InstrumentationManager.BatchSize(100, 100));
 
             assertThat(manager.pendingClasses.size()).isEqualTo(0);
-            verify(instrumentation, times(1)).retransformClasses(any());
+            //the classes are first retransformed in a batch and afterwards retransformed one by one
+            verify(instrumentation, times(1 + TESTING_CLASSES.size())).retransformClasses(any());
+            for (Class<?> clazz : TESTING_CLASSES) {
+                verify(instrumentation, times(1)).retransformClasses(same(clazz));
+            }
         }
 
         @Test

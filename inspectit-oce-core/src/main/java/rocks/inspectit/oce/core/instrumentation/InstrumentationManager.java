@@ -154,7 +154,18 @@ public class InstrumentationManager implements IClassDiscoveryListener {
                     instrumentation.retransformClasses(classesToRetransform.toArray(new Class<?>[]{}));
                     log.debug("Retransformed {} classes in {} ms", classesToRetransform.size(), watch.elapsed(TimeUnit.MILLISECONDS));
                 } catch (Exception e) {
-                    log.error("Error retransforming classes!", e);
+                    if (classesToRetransform.size() == 1) {
+                        log.error("Error retransforming class '{}'", classesToRetransform.get(0).getName(), e);
+                    } else {
+                        log.error("Error retransforming batch of classes, retrying classes one by one.", e);
+                        for (Class<?> clazz : classesToRetransform) {
+                            try {
+                                instrumentation.retransformClasses(clazz);
+                            } catch (Exception e2) {
+                                log.error("Error retransforming class '{}'", clazz.getName(), e2);
+                            }
+                        }
+                    }
                 }
             }
         }

@@ -36,7 +36,6 @@ import javax.annotation.PreDestroy;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.lang.instrument.Instrumentation;
-import java.lang.instrument.UnmodifiableClassException;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -136,8 +135,19 @@ public class AsyncClassTransformer implements ClassFileTransformer {
             try {
                 instrumentation.retransformClasses(batchClasses.toArray(new Class[]{}));
                 Thread.yield(); //yield to allow the target application to do stuff between the batches
-            } catch (UnmodifiableClassException e) {
-                log.error("Error removing applied transformations", e);
+            } catch (Exception e) {
+                if (batchClasses.size() > 1) {
+                    log.error("Error removing applied transformations for batch, retrying classes one by one", e);
+                    for (Class<?> clazz : batchClasses) {
+                        try {
+                            instrumentation.retransformClasses(clazz);
+                        } catch (Exception e2) {
+                            log.error("Error removing applied transformations of class '{}'", clazz.getName(), e2);
+                        }
+                    }
+                } else {
+                    log.error("Error removing applied transformations of class '{}'", batchClasses.get(0).getName(), e);
+                }
             }
         }
     }
@@ -226,7 +236,8 @@ public class AsyncClassTransformer implements ClassFileTransformer {
      * @param type                the classes type description
      * @return
      */
-    private ClassInstrumentationConfiguration updateAndGetActiveConfiguration(Class<?> classBeingRedefined, TypeDescription type) {
+    private ClassInstrumentationConfiguration updateAndGetActiveConfiguration
+    (Class<?> classBeingRedefined, TypeDescription type) {
         ClassInstrumentationConfiguration classConf = configResolver.getClassInstrumentationConfiguration(classBeingRedefined);
 
         synchronized (shutDownLock) {
