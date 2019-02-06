@@ -36,7 +36,6 @@ import javax.annotation.PreDestroy;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.lang.instrument.Instrumentation;
-import java.lang.instrument.UnmodifiableClassException;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -83,8 +82,10 @@ public class AsyncClassTransformer implements ClassFileTransformer {
     /**
      * Stores all classes which have been instrumented with a configuration different
      * than {@link ClassInstrumentationConfiguration#NO_INSTRUMENTATION}.
+     * <p>
+     * Package private for testing.
      */
-    private Cache<Class<?>, Boolean> instrumentedClasses = CacheBuilder.newBuilder().weakKeys().build();
+    Cache<Class<?>, Boolean> instrumentedClasses = CacheBuilder.newBuilder().weakKeys().build();
 
 
     @Override
@@ -133,11 +134,31 @@ public class AsyncClassTransformer implements ClassFileTransformer {
             for (int i = 0; i < maxBatchSize && it.hasNext(); i++) {
                 batchClasses.add(it.next());
             }
+            removeInstrumentationForBatch(batchClasses);
+        }
+    }
+
+    private void removeInstrumentationForBatch(List<Class<?>> batchClasses) {
+        if (!batchClasses.isEmpty()) {
             try {
                 instrumentation.retransformClasses(batchClasses.toArray(new Class[]{}));
                 Thread.yield(); //yield to allow the target application to do stuff between the batches
-            } catch (UnmodifiableClassException e) {
-                log.error("Error removing applied transformations", e);
+            } catch (Exception e) {
+                if (batchClasses.size() > 1) {
+                    log.error("Error removing applied transformations for batch, retrying classes one by one", e);
+                    for (Class<?> clazz : batchClasses) {
+                        try {
+                            instrumentation.retransformClasses(clazz);
+                        } catch (Exception e2) {
+                            log.error("Error removing applied transformations of class '{}'", clazz.getName(), e2);
+                            instrumentedClasses.invalidate(clazz);
+                        }
+                    }
+                } else {
+                    Class<?> clazz = batchClasses.get(0);
+                    log.error("Error removing applied transformations of class '{}'", clazz.getName(), e);
+                    instrumentedClasses.invalidate(clazz);
+                }
             }
         }
     }
