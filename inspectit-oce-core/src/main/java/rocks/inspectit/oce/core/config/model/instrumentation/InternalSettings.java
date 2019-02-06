@@ -22,13 +22,13 @@ public class InternalSettings {
      * Defines the maximum number classes which are checked at once for updates of their configuration per batch
      */
     @Min(50)
-    private int classConfigurationCheckBatchSize;
+    private int classConfigurationCheckBatchSize = 50; //default value for testing
 
     /**
      * Defines the maximum number classes which are retransformed at once per batch
      */
     @Min(1)
-    private int classRetransformBatchSize;
+    private int classRetransformBatchSize = 1; //default value for testing
 
     /**
      * Defines how often the Agent should check if new classes have been defined.

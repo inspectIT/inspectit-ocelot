@@ -6,7 +6,6 @@ import rocks.inspectit.oce.core.config.model.instrumentation.InstrumentationSett
 import rocks.inspectit.oce.core.config.model.instrumentation.dataproviders.GenericDataProviderSettings;
 import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationConfiguration;
 import rocks.inspectit.oce.core.instrumentation.config.model.ResolvedGenericDataProviderConfig;
-import rocks.inspectit.oce.core.instrumentation.dataprovider.generic.DataProviderGenerator;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -57,18 +56,18 @@ public class DataProviderResolver {
         while (entryIterator.hasNext()) {
             val varEntry = entryIterator.next();
             String varName = varEntry.getKey();
-            if (varName.matches(DataProviderGenerator.ARG_VARIABLE_PREFIX + "\\d+")) {
+            if (GenericDataProviderSettings.ARG_VARIABLE_PATTERN.matcher(varName).matches()) {
                 entryIterator.remove();
-                int index = Integer.parseInt(varName.substring(DataProviderGenerator.ARG_VARIABLE_PREFIX.length()));
+                int index = Integer.parseInt(varName.substring(GenericDataProviderSettings.ARG_VARIABLE_PREFIX.length()));
                 result.expectedArgumentType(index, varEntry.getValue());
             }
         }
     }
 
     private void resolveSpecialVariables(HashMap<String, String> inputs, ResolvedGenericDataProviderConfig.ResolvedGenericDataProviderConfigBuilder result) {
-        result.expectedThisType(inputs.remove(DataProviderGenerator.THIZ_VARIABLE))
-                .expectedReturnValueType(inputs.remove(DataProviderGenerator.RETURN_VALUE_VARIABLE))
-                .usesThrown(inputs.remove(DataProviderGenerator.THROWN_VARIABLE) != null)
-                .usesArgsArray(inputs.remove(DataProviderGenerator.ARGS_VARIABLE) != null);
+        result.expectedThisType(inputs.remove(GenericDataProviderSettings.THIZ_VARIABLE))
+                .expectedReturnValueType(inputs.remove(GenericDataProviderSettings.RETURN_VALUE_VARIABLE))
+                .usesThrown(inputs.remove(GenericDataProviderSettings.THROWN_VARIABLE) != null)
+                .usesArgsArray(inputs.remove(GenericDataProviderSettings.ARGS_VARIABLE) != null);
     }
 }

@@ -2,11 +2,13 @@ package rocks.inspectit.oce.core.utils;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class AutoboxingHelper {
 
     private static final Map<Class<?>, Class<?>> primitiveClassesToWrapperClassesMap;
     private static final Map<String, String> primitivesToWrappersMap;
+    private static final Map<String, Class<?>> primitivesToPrimitiveClassesMap;
     private static final Map<String, String> wrappersToPrimitivesMap;
 
     private static final Map<String, String> wrappersSimpleNametoFQNMap;
@@ -21,6 +23,9 @@ public class AutoboxingHelper {
         primitiveClassesToWrapperClassesMap.put(double.class, Double.class);
         primitiveClassesToWrapperClassesMap.put(char.class, Character.class);
 
+        primitivesToPrimitiveClassesMap = new HashMap<>();
+        primitiveClassesToWrapperClassesMap.forEach((p, w) -> primitivesToPrimitiveClassesMap.put(p.getName(), p));
+
         primitivesToWrappersMap = new HashMap<>();
         primitiveClassesToWrapperClassesMap.forEach((p, w) -> primitivesToWrappersMap.put(p.getName(), w.getName()));
 
@@ -29,6 +34,38 @@ public class AutoboxingHelper {
 
         wrappersSimpleNametoFQNMap = new HashMap<>();
         primitiveClassesToWrapperClassesMap.values().forEach(w -> wrappersSimpleNametoFQNMap.put(w.getSimpleName(), w.getName()));
+
+    }
+
+    public static Set<String> getPrimitives() {
+        return primitivesToWrappersMap.keySet();
+    }
+
+    public static Set<String> getWrapperFQNs() {
+        return wrappersToPrimitivesMap.keySet();
+    }
+
+    public static Set<String> getWrapperSimpleNames() {
+        return wrappersToPrimitivesMap.keySet();
+    }
+
+    /**
+     * Returns the corresponding Wrapper class for the given type
+     *
+     * @param typeName the primitive or the corresponding wrapper class name, either simple or FQN
+     * @return the corresponding wrapper class
+     */
+    public static Class<?> getWrapperClass(String typeName) {
+        String primitiveType = null;
+        if (isPrimitiveType(typeName)) {
+            primitiveType = typeName;
+        } else if (wrappersSimpleNametoFQNMap.containsKey(typeName)) {
+            primitiveType = wrappersToPrimitivesMap.get(wrappersSimpleNametoFQNMap.get(typeName));
+        } else {
+            primitiveType = wrappersSimpleNametoFQNMap.get(typeName);
+        }
+        Class<?> primClass = primitivesToPrimitiveClassesMap.get(primitiveType);
+        return primitiveClassesToWrapperClassesMap.get(primClass);
     }
 
     /**
