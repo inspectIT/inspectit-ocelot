@@ -191,15 +191,15 @@ public class DataProviderGeneratorIntTest extends SpringTestBase {
     @DirtiesContext
     void testCustomArgumentPassingAndCasting() {
         List<Pair<String, String>> argumentTypes = new ArrayList<>();
-        argumentTypes.add(Pair.of("x", "long"));
-        argumentTypes.add(Pair.of("myvalue", "int"));
         ResolvedGenericDataProviderConfig config = ResolvedGenericDataProviderConfig.builder()
                 .name("my-provider")
-                .additionalArgumentTypes(argumentTypes)
+                //Alphabetical order, so that this order corresponds to the index
+                .additionalArgumentType("myvalue", "int")
+                .additionalArgumentType("x", "long")
                 .valueBody("return new Long(x * myvalue);")
                 .build();
 
-        Object[] args = new Object[]{3L, 12};
+        Object[] args = new Object[]{12, 3L};
         InjectedClass<? extends IGenericDataProvider> provider = generator.getOrGenerateDataProvider(config, dummyClass);
         assertThat(getInstance(provider).execute(null, null, null, null, args)).isEqualTo(36L);
     }

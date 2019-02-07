@@ -26,7 +26,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class NewClassDiscoveryServiceUnitTest {
+public class NewClassDiscoveryServiceTest {
 
     @Mock
     ScheduledExecutorService executor;

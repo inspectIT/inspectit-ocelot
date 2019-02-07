@@ -17,7 +17,6 @@ import rocks.inspectit.oce.core.instrumentation.config.event.InstrumentationConf
 import rocks.inspectit.oce.core.instrumentation.config.model.ClassInstrumentationConfiguration;
 import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationConfiguration;
 import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationRule;
-import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationScope;
 import rocks.inspectit.oce.core.instrumentation.special.SpecialSensor;
 
 import javax.annotation.PostConstruct;
@@ -51,6 +50,9 @@ public class InstrumentationConfigurationResolver {
 
     @Autowired
     private InstrumentationRuleResolver ruleResolver;
+
+    @Autowired
+    private DataProviderResolver dataProviderResolver;
 
     /**
      * Holds the currently active instrumentation configuration.
@@ -136,14 +138,20 @@ public class InstrumentationConfigurationResolver {
         if (!Objects.equals(oldConfig.getScopes(), newConfig.getScopes())) {
             return true;
         }
+        if (!Objects.equals(oldConfig.getDataProviders(), newConfig.getDataProviders())) {
+            return true;
+        }
         return false;
     }
 
     private void updateConfiguration(InstrumentationSettings source) {
-        Set<InstrumentationRule> rules = ruleResolver.resolve(source);
-
-        currentConfig = new InstrumentationConfiguration(source, rules);
+        currentConfig = InstrumentationConfiguration.builder()
+                .source(source)
+                .rules(ruleResolver.resolve(source))
+                .dataProviders(dataProviderResolver.resolveProviders(source))
+                .build();
     }
+
 
     /**
      * Checks if the given class should not be instrumented based on the given configuration.

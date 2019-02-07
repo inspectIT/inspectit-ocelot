@@ -34,7 +34,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class AsyncClassTransformerUnitTest {
+public class AsyncClassTransformerTest {
 
     @Mock
     InspectitEnvironment env;
@@ -58,7 +58,7 @@ public class AsyncClassTransformerUnitTest {
 
     @BeforeAll
     static void readByteCode() {
-        bytecodeOfTest = DummyClassLoader.readByteCode(AsyncClassTransformerUnitTest.class);
+        bytecodeOfTest = DummyClassLoader.readByteCode(AsyncClassTransformerTest.class);
     }
 
     @BeforeEach
@@ -104,7 +104,7 @@ public class AsyncClassTransformerUnitTest {
             );
             when(configResolver.getClassInstrumentationConfiguration(any())).thenReturn(mockedConfig);
 
-            Class<AsyncClassTransformerUnitTest> clazz = AsyncClassTransformerUnitTest.class;
+            Class<AsyncClassTransformerTest> clazz = AsyncClassTransformerTest.class;
             String className = clazz.getName().replace('.', '/');
             transformer.transform(clazz.getClassLoader(), className, clazz, null, bytecodeOfTest);
 
@@ -134,9 +134,9 @@ public class AsyncClassTransformerUnitTest {
             when(env.getCurrentConfig()).thenReturn(conf);
 
             DummyClassLoader loader = new DummyClassLoader();
-            loader.loadCopiesOfClasses(AsyncClassTransformerUnitTest.class, FakeExecutor.class);
+            loader.loadCopiesOfClasses(AsyncClassTransformerTest.class, FakeExecutor.class);
 
-            transformer.instrumentedClasses.put(AsyncClassTransformerUnitTest.class, true);
+            transformer.instrumentedClasses.put(AsyncClassTransformerTest.class, true);
             transformer.instrumentedClasses.put(FakeExecutor.class, true);
 
             doAnswer(invoc -> {
@@ -144,7 +144,7 @@ public class AsyncClassTransformerUnitTest {
                 if (Arrays.stream(definitons).anyMatch(c -> c == FakeExecutor.class)) {
                     transformer.instrumentedClasses.invalidate(FakeExecutor.class);
                 }
-                if (Arrays.stream(definitons).anyMatch(c -> c == AsyncClassTransformerUnitTest.class)) {
+                if (Arrays.stream(definitons).anyMatch(c -> c == AsyncClassTransformerTest.class)) {
                     throw new RuntimeException();
                 }
                 return null;
@@ -178,7 +178,7 @@ public class AsyncClassTransformerUnitTest {
             );
             when(configResolver.getClassInstrumentationConfiguration(any())).thenReturn(mockedConfig);
 
-            Class<AsyncClassTransformerUnitTest> clazz = AsyncClassTransformerUnitTest.class;
+            Class<AsyncClassTransformerTest> clazz = AsyncClassTransformerTest.class;
             String className = clazz.getName().replace('.', '/');
             transformer.transform(clazz.getClassLoader(), className, getClass(), null, bytecodeOfTest);
 
@@ -194,7 +194,7 @@ public class AsyncClassTransformerUnitTest {
 
             transformer.init();
 
-            Class<AsyncClassTransformerUnitTest> clazz = AsyncClassTransformerUnitTest.class;
+            Class<AsyncClassTransformerTest> clazz = AsyncClassTransformerTest.class;
             String className = clazz.getName().replace('.', '/');
             ClassLoader loader = clazz.getClassLoader();
             transformer.transform(loader, className, null, null, bytecodeOfTest);
@@ -214,7 +214,7 @@ public class AsyncClassTransformerUnitTest {
 
             transformer.init();
 
-            Class<AsyncClassTransformerUnitTest> clazz = AsyncClassTransformerUnitTest.class;
+            Class<AsyncClassTransformerTest> clazz = AsyncClassTransformerTest.class;
             String className = clazz.getName().replace('.', '/');
             ClassLoader loader = clazz.getClassLoader();
             transformer.transform(loader, className, getClass(), null, bytecodeOfTest);

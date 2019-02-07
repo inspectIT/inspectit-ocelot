@@ -1,4 +1,4 @@
-package rocks.inspectit.oce.selfmonitoring;
+package rocks.inspectit.oce.metrics.selfmonitoring;
 
 import io.opencensus.stats.*;
 import io.opencensus.tags.TagValue;
