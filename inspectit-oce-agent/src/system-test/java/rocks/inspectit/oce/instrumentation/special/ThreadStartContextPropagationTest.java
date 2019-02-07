@@ -2,8 +2,8 @@ package rocks.inspectit.oce.instrumentation.special;
 
 import io.opencensus.common.Scope;
 import io.opencensus.tags.*;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import rocks.inspectit.oce.instrumentation.InstrumentationSysTestBase;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -14,9 +14,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
-import static rocks.inspectit.oce.TestUtils.waitForInstrumentationToComplete;
 
-public class ThreadStartContextPropagationTest {
+public class ThreadStartContextPropagationTest extends InstrumentationSysTestBase {
 
     private static final Tagger tagger = Tags.getTagger();
 
@@ -47,11 +46,6 @@ public class ThreadStartContextPropagationTest {
             super(runnable);
             setName("dummy-thread");
         }
-    }
-
-    @BeforeAll
-    static void waitForInstrumentation() throws Exception {
-        waitForInstrumentationToComplete();
     }
 
 
