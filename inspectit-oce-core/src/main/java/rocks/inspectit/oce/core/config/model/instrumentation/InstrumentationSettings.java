@@ -50,14 +50,12 @@ public class InstrumentationSettings {
     /**
      * The configuration of the defined scopes. The map's key represents an unique id for the related instrumentation scope.
      */
-    @Valid
     @NotNull
-    private Map<@NotBlank String, InstrumentationScopeSettings> scopes = Collections.emptyMap();
+    private Map<@NotBlank String, @Valid InstrumentationScopeSettings> scopes = Collections.emptyMap();
 
     /**
      * The configuration of the defined rules. The map's key represents an unique id for the related instrumentation rule.
      */
-    @Valid
     @NotNull
-    private Map<@NotBlank String, InstrumentationRuleSettings> rules = Collections.emptyMap();
+    private Map<@NotBlank String, @Valid InstrumentationRuleSettings> rules = Collections.emptyMap();
 }

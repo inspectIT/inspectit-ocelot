@@ -24,9 +24,7 @@ public class DataProviderResolver {
      */
     Map<String, ResolvedGenericDataProviderConfig> resolveProviders(InstrumentationSettings source) {
         Map<String, ResolvedGenericDataProviderConfig> resultMap = new HashMap<>();
-        for (val entry : source.getDataProviders().entrySet()) {
-            String name = entry.getKey();
-            val conf = entry.getValue();
+        source.getDataProviders().forEach((name, conf) -> {
 
             HashMap<String, String> additionalInputs = new HashMap<>(conf.getInput());
 
@@ -36,11 +34,12 @@ public class DataProviderResolver {
 
             resolveSpecialVariables(additionalInputs, result);
             resolveArgumentVariables(additionalInputs, result);
-            resolveAdditionalInputs(additionalInputs, result);
+            //everything remeinaing is a additional input variable
+            additionalInputs.forEach(result::additionalArgumentType);
             resolveBody(conf, result);
 
             resultMap.put(name, result.build());
-        }
+        });
         return resultMap;
     }
 
@@ -52,12 +51,6 @@ public class DataProviderResolver {
         }
     }
 
-    private void resolveAdditionalInputs(HashMap<String, String> additionalInputs, ResolvedGenericDataProviderConfig.ResolvedGenericDataProviderConfigBuilder result) {
-        //everything that has not been removed is an additional argument
-        for (val additionalVarEntry : additionalInputs.entrySet()) {
-            result.additionalArgumentType(additionalVarEntry.getKey(), additionalVarEntry.getValue());
-        }
-    }
 
     private void resolveArgumentVariables(HashMap<String, String> inputs, ResolvedGenericDataProviderConfig.ResolvedGenericDataProviderConfigBuilder result) {
         val entryIterator = inputs.entrySet().iterator();

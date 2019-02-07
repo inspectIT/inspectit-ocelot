@@ -6,8 +6,10 @@ import org.springframework.util.StringUtils;
 import rocks.inspectit.oce.core.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.oce.core.instrumentation.dataprovider.generic.DataProviderGenerator;
 
+import javax.validation.constraints.AssertFalse;
 import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +24,7 @@ import java.util.Map;
 @NoArgsConstructor
 public class GenericDataProviderSettings {
 
+    public static final String PACKAGE_REGEX = "[a-zA-Z]\\w*(\\.[a-zA-Z]\\w*)*";
     /**
      * Defines the input variables used by this data provider.
      * The key is the name of the variable, the value is the type of the corresponding variable.
@@ -43,7 +46,7 @@ public class GenericDataProviderSettings {
      * If a classname is not found, the given packages will be scanned in the given order to locate the class.
      * This allows the User to use classes without the need to specify the FQN.
      */
-    private List<@NotBlank String> imports = new ArrayList<>();
+    private List<@Pattern(regexp = PACKAGE_REGEX) String> imports = new ArrayList<>();
 
     /**
      * A single Java-statement (without return) defining the value of this data provider.
@@ -61,11 +64,14 @@ public class GenericDataProviderSettings {
     private String valueBody;
 
 
-    @AssertTrue(message = "Either 'value' or 'valueBody' must be present (and not both)!")
+    @AssertFalse(message = "Either 'value' or 'valueBody' must be present")
     private boolean isEitherValueOrValueBodyPresent() {
-        boolean valueEmpty = StringUtils.isEmpty(value);
-        boolean valueBodyEmpty = StringUtils.isEmpty(valueBody);
-        return (!valueEmpty && valueBodyEmpty) || (valueEmpty && !valueBodyEmpty);
+        return StringUtils.isEmpty(value) && StringUtils.isEmpty(valueBody);
+    }
+
+    @AssertFalse(message = "'value' and 'valueBody' cannot be both specified!")
+    private boolean isNotValueAndValueBodyPresent() {
+        return !StringUtils.isEmpty(value) && !StringUtils.isEmpty(valueBody);
     }
 
     @AssertTrue(message = "The 'args' input must have the type 'Object[]'")
