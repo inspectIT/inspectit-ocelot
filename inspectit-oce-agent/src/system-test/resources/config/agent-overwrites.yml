@@ -3,3 +3,10 @@ inspectit:
   publish-opencensus-to-bootstrap: true
   self-monitoring:
     enabled: true
+  instrumentation:
+    internal:
+      # defines how often the agent should check if new classes have been defined.
+      # this check is only performed if Classloader.defineClass was called less than ${max-class-definition-delay} seconds ago
+      new-class-discovery-interval: 100ms
+      # defines how often after the last invocation of a ClassFileTransformer the agent scans for new classes
+      num-class-discovery-trials: 5

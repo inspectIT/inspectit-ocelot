@@ -2,8 +2,8 @@ package rocks.inspectit.oce.instrumentation.special;
 
 import io.opencensus.common.Scope;
 import io.opencensus.tags.*;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import rocks.inspectit.oce.instrumentation.InstrumentationSysTestBase;
 
 import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
@@ -13,15 +13,9 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ExecutorContextPropagationTest {
+public class ExecutorContextPropagationTest extends InstrumentationSysTestBase {
 
     private static final Tagger tagger = Tags.getTagger();
-
-    @BeforeAll
-    static void waitForInstrumentation() throws Exception {
-        //TODO: wait until the instrumentation is complete as soon as selfmonitoring is added to monitor the instrumentation queues
-        Thread.sleep(5000);
-    }
 
     @Test
     public void testContextPropagationAcrossExecutorForRunnables() throws Exception {
