@@ -45,12 +45,14 @@ public class SpecialElementMatchers {
         }
     }
 
-
+    /**
+     * Creates an {@link ElementMatcher} matching items with the name and annotation settings contained in the given {@link DescriptionMatcherSettings}.
+     */
     public static ElementMatcher.Junction<TypeDescription> describedBy(DescriptionMatcherSettings settings) {
         MatcherChainBuilder<TypeDescription> builder = new MatcherChainBuilder<>();
 
         builder.and(nameIs(settings));
-        builder.and(annotatedWith(settings.getAnnotation()));
+        builder.and(annotatedWith(settings.getAnnotations()));
 
         return builder.build();
     }
@@ -140,11 +142,19 @@ public class SpecialElementMatchers {
         }
     }
 
-    public static <T extends AnnotationSource> ElementMatcher.Junction<T> annotatedWith(NameMatcherSettings matcherSettings) {
-        ElementMatcher.Junction<NamedElement> nameMatcher = nameIs(matcherSettings);
-        if (nameMatcher != null) {
-            return IsAnnotatedMatcher.of(nameMatcher);
+    /**
+     * Creates an {@link ElementMatcher} matching elements which are annotated with the annotation specified in the given
+     * {@link NameMatcherSettings}. The resulting matcher will not consider inherited annotations.
+     */
+    public static <T extends AnnotationSource> ElementMatcher.Junction<T> annotatedWith(List<NameMatcherSettings> matcherSettings) {
+        if (CollectionUtils.isEmpty(matcherSettings)) {
+            return null;
         }
-        return null;
+
+        MatcherChainBuilder<T> builder = new MatcherChainBuilder<>();
+
+        matcherSettings.forEach(settings -> builder.and(IsAnnotatedMatcher.of(nameIs(settings))));
+
+        return builder.build();
     }
 }

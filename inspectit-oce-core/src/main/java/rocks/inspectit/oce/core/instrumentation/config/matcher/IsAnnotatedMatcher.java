@@ -19,6 +19,9 @@ public class IsAnnotatedMatcher<N extends AnnotationSource> extends DeclaringAnn
      * Creates a new matcher for the inherited annotations of a type description.
      */
     public static <T extends AnnotationSource> ElementMatcher.Junction<T> of(ElementMatcher<? super TypeDescription> matcher) {
+        if (matcher == null) {
+            return null;
+        }
         return new IsAnnotatedMatcher<>(new CollectionItemMatcher<>(annotationType(matcher)));
     }
 

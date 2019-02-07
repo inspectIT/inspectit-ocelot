@@ -155,7 +155,7 @@ public class InstrumentationScopeResolver {
         innerBuilder.and(matcherSettings.getIsConstructor(), isConstructor());
         innerBuilder.and(visibilityIs(matcherSettings.getVisibility()));
         innerBuilder.and(argumentsAre(matcherSettings.getArguments()));
-        innerBuilder.and(annotatedWith(matcherSettings.getAnnotation()));
+        innerBuilder.and(annotatedWith(matcherSettings.getAnnotations()));
 
         if (!matcherSettings.getIsConstructor()) {
             innerBuilder.and(nameIs(matcherSettings));
