@@ -13,13 +13,13 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class DataProviderResolverUnitTest {
+public class DataProviderResolverTest {
 
     @InjectMocks
     private DataProviderResolver resolver = new DataProviderResolver();
 
     @Nested
-    public class ResolveDataProviders {
+    public class ResolveProviders {
 
         private static final String PROVIDER_NAME = "My-Provider1";
         private static final String PROVIDER_VALUE_BODY = "return new Integer(42);";
@@ -36,7 +36,7 @@ public class DataProviderResolverUnitTest {
         }
 
         @Test
-        void verifyCaseSensitivity() {
+        void verifyNamePreserved() {
             Map<String, ResolvedGenericDataProviderConfig> result = resolver.resolveProviders(config);
 
             assertThat(result).hasSize(1);

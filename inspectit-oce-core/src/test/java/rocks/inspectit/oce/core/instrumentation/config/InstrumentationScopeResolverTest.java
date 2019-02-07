@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static rocks.inspectit.oce.core.config.model.instrumentation.scope.MethodMatcherSettings.AccessModifier;
 
 @ExtendWith(MockitoExtension.class)
-class InstrumentationScopeResolverUnitTest {
+class InstrumentationScopeResolverTest {
 
     @InjectMocks
     private InstrumentationScopeResolver scopeResolver;
