@@ -49,6 +49,9 @@ public class SpecialElementMatchers {
      * Creates an {@link ElementMatcher} matching items with the name and annotation settings contained in the given {@link DescriptionMatcherSettings}.
      */
     public static ElementMatcher.Junction<TypeDescription> describedBy(DescriptionMatcherSettings settings) {
+        if (settings == null) {
+            return null;
+        }
         MatcherChainBuilder<TypeDescription> builder = new MatcherChainBuilder<>();
 
         builder.and(nameIs(settings));
@@ -143,7 +146,7 @@ public class SpecialElementMatchers {
     }
 
     /**
-     * Creates an {@link ElementMatcher} matching elements which are annotated with the annotation specified in the given
+     * Creates an {@link ElementMatcher} matching elements which are annotated with all of the annotation specified in the given
      * {@link NameMatcherSettings}. The resulting matcher will not consider inherited annotations.
      */
     public static <T extends AnnotationSource> ElementMatcher.Junction<T> annotatedWith(List<NameMatcherSettings> matcherSettings) {

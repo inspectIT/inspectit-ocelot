@@ -8,9 +8,14 @@ import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.CollectionItemMatcher;
 import net.bytebuddy.matcher.DeclaringAnnotationMatcher;
 import net.bytebuddy.matcher.ElementMatcher;
+import net.bytebuddy.matcher.ElementMatchers;
 
 import static net.bytebuddy.matcher.ElementMatchers.annotationType;
 
+/**
+ * This class represents an {@link ElementMatcher} equal to {@link ElementMatchers#isAnnotatedWith(ElementMatcher)}
+ * but catching any exceptions which occur during the matching process (calling the {@link #matches(AnnotationSource)} method.
+ */
 @HashCodeAndEqualsPlugin.Enhance
 @Slf4j
 public class IsAnnotatedMatcher<N extends AnnotationSource> extends DeclaringAnnotationMatcher<N> {

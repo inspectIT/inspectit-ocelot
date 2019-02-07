@@ -2,12 +2,13 @@ package rocks.inspectit.oce.core.instrumentation.config.matcher;
 
 import net.bytebuddy.description.NamedElement;
 import net.bytebuddy.description.method.MethodDescription;
+import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.matcher.StringMatcher;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import rocks.inspectit.oce.core.config.model.instrumentation.scope.InstrumentationScopeSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.scope.DescriptionMatcherSettings;
+import rocks.inspectit.oce.core.config.model.instrumentation.scope.InstrumentationScopeSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.scope.MethodMatcherSettings.AccessModifier;
 import rocks.inspectit.oce.core.config.model.instrumentation.scope.NameMatcherSettings;
 
@@ -230,6 +231,80 @@ class SpecialElementMatchersTest {
             ElementMatcher.Junction<MethodDescription> result = SpecialElementMatchers.onlyOverridenMethodsOf(scope);
 
             Object expectedResult = isOverriddenFrom(named("interface1").and(isInterface()).or(named("superclass1").and(not(isInterface()))));
+            assertThat(result).isEqualTo(expectedResult);
+        }
+    }
+
+    @Nested
+    public class DescribedBy {
+
+        @Test
+        public void nullArgument() {
+            ElementMatcher.Junction<TypeDescription> result = SpecialElementMatchers.describedBy(null);
+
+            assertThat(result).isNull();
+        }
+
+        @Test
+        public void emptySettings() {
+            DescriptionMatcherSettings settings = new DescriptionMatcherSettings();
+
+            ElementMatcher.Junction<TypeDescription> result = SpecialElementMatchers.describedBy(settings);
+
+            assertThat(result).isNull();
+        }
+
+        @Test
+        public void onlyName() {
+            DescriptionMatcherSettings settings = new DescriptionMatcherSettings();
+            settings.setName("name1");
+
+            ElementMatcher.Junction<TypeDescription> result = SpecialElementMatchers.describedBy(settings);
+
+            Object expectedResult = named("name1");
+            assertThat(result).isEqualTo(expectedResult);
+        }
+
+        @Test
+        public void onlyAnnotation() {
+            NameMatcherSettings annotationMatcher = new NameMatcherSettings();
+            annotationMatcher.setName("annotation1");
+            DescriptionMatcherSettings settings = new DescriptionMatcherSettings();
+            settings.setAnnotations(Collections.singletonList(annotationMatcher));
+
+            ElementMatcher.Junction<TypeDescription> result = SpecialElementMatchers.describedBy(settings);
+
+            Object expectedResult = IsAnnotatedMatcher.of(named("annotation1"));
+            assertThat(result).isEqualTo(expectedResult);
+        }
+
+        @Test
+        public void nameAndAnnotation() {
+            NameMatcherSettings annotationMatcher = new NameMatcherSettings();
+            annotationMatcher.setName("annotation1");
+            DescriptionMatcherSettings settings = new DescriptionMatcherSettings();
+            settings.setName("name1");
+            settings.setAnnotations(Collections.singletonList(annotationMatcher));
+
+            ElementMatcher.Junction<TypeDescription> result = SpecialElementMatchers.describedBy(settings);
+
+            Object expectedResult = named("name1").and(IsAnnotatedMatcher.of(named("annotation1")));
+            assertThat(result).isEqualTo(expectedResult);
+        }
+
+
+        @Test
+        public void multipleAnnotations() {
+            NameMatcherSettings annotationMatcher1 = new NameMatcherSettings();
+            annotationMatcher1.setName("annotation1");
+            NameMatcherSettings annotationMatcher2 = new NameMatcherSettings();
+            annotationMatcher2.setName("annotation2");
+            DescriptionMatcherSettings settings = new DescriptionMatcherSettings();
+            settings.setAnnotations(Arrays.asList(annotationMatcher1, annotationMatcher2));
+
+            ElementMatcher.Junction<TypeDescription> result = SpecialElementMatchers.describedBy(settings);
+
+            Object expectedResult = IsAnnotatedMatcher.of(named("annotation1")).and(IsAnnotatedMatcher.of(named("annotation2")));
             assertThat(result).isEqualTo(expectedResult);
         }
 
