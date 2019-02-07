@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import net.bytebuddy.matcher.StringMatcher;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.validation.constraints.NotNull;
 
@@ -32,8 +33,8 @@ public class NameMatcherSettings {
      * @return Returns true if it will match basically anything.
      */
     public boolean isAnyMatcher() {
-        return (matcherMode == StringMatcher.Mode.MATCHES && name.equals(".*"))
-                || (name.isEmpty() && (
+        return (matcherMode == StringMatcher.Mode.MATCHES && StringUtils.equals(name, ".*"))
+                || (StringUtils.isEmpty(name) && (
                 matcherMode == StringMatcher.Mode.STARTS_WITH
                         || matcherMode == StringMatcher.Mode.STARTS_WITH_IGNORE_CASE
                         || matcherMode == StringMatcher.Mode.CONTAINS

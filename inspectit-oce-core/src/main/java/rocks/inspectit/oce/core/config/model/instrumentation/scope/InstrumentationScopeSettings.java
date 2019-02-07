@@ -10,6 +10,10 @@ import java.util.List;
 
 /**
  * Data container for settings which are used as basis for {@link rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationScope}.
+ * Instances of this class will result in a matcher specifying which types and methods are targeted by an instrumentation.
+ * <p>
+ * Note: the conjunction of all defined matchers in interfaces, superclass and type will be used to for matching the type.
+ * The disjunction of the defined matchers in methods is used for targeting methods.
  */
 @Data
 @NoArgsConstructor
@@ -17,14 +21,24 @@ import java.util.List;
 public class InstrumentationScopeSettings {
 
     /**
-     * Defines which classes are targeted by this scope.
+     * Interfaces which have to be implemented.
      */
-    private TypeScope typeScope;
+    private List<NameMatcherSettings> interfaces;
+
+    /**
+     * Superclass which has to be extended.
+     */
+    private NameMatcherSettings superclass;
+
+    /**
+     * Matcher which have to match the type's name.
+     */
+    private NameMatcherSettings type;
 
     /**
      * Defines which methods are targeted by this scope.
      */
-    private List<MethodMatcherSettings> methodScope;
+    private List<MethodMatcherSettings> methods;
 
     /**
      * The scope's advanced settings.
@@ -42,16 +56,6 @@ public class InstrumentationScopeSettings {
             return true;
         }
 
-        List<NameMatcherSettings> interfaces = typeScope.getInterfaces();
-        NameMatcherSettings superclass = typeScope.getSuperclass();
-        NameMatcherSettings type = typeScope.getType();
-
-        // No scope
-        if (typeScope == null) {
-            return false;
-        }
-
         return !CollectionUtils.isEmpty(interfaces) || superclass != null || (type != null && !type.isAnyMatcher());
     }
-
 }

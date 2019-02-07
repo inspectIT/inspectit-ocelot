@@ -46,22 +46,20 @@ inspectit:
 #    scopes:
 #      # the id of the following defined scope element - this example scope targets the ArrayList's contains method
 #      example-list-scope:
-#        # the targeted type - classes which should be instrumented have to match ALL of the specified elements within the type scope
-#        type-scope:
-#          # interfaces which have to be implemented
-#          interfaces:
-#            - name: "java.util.List"
-#              matcher-mode: "EQUALS_FULLY"
-#          # the superclass which has to be extended
-#          superclass:
-#            name: "java.util.AbstractList"
+#        # interfaces which have to be implemented
+#        interfaces:
+#          - name: "java.util.List"
 #            matcher-mode: "EQUALS_FULLY"
-#          # matcher describing the class' name (full qualified)
-#          type:
-#            name: "ArrayList"
-#            matcher-mode: "ENDS_WITH"
+#        # the superclass which has to be extended
+#        superclass:
+#          name: "java.util.AbstractList"
+#          matcher-mode: "EQUALS_FULLY"
+#        # matcher describing the class' name (full qualified)
+#        type:
+#          name: "ArrayList"
+#          matcher-mode: "ENDS_WITH"
 #        # the targeted method - each method which matches at least one of the defined matchers will be instrumented
-#        method-scope:
+#        methods:
 #          - name: "contains"
 #            matcher-mode: "EQUALS_FULLY"
 #            visibility: [PUBLIC]
