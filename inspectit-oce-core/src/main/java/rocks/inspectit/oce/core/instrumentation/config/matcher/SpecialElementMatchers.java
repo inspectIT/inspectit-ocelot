@@ -9,8 +9,8 @@ import net.bytebuddy.matcher.NameMatcher;
 import net.bytebuddy.matcher.StringMatcher;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
+import rocks.inspectit.oce.core.config.model.instrumentation.scope.InstrumentationScopeSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.scope.NameMatcherSettings;
-import rocks.inspectit.oce.core.config.model.instrumentation.scope.TypeScope;
 
 import java.util.List;
 
@@ -102,15 +102,11 @@ public class SpecialElementMatchers {
     /**
      * Matches any virtual method with a signature that is compatible to a method that is declared by a type that matches the supplied type scope.
      */
-    public static <T extends MethodDescription> ElementMatcher.Junction<T> onlyOverridenMethodsOf(TypeScope typeScope) {
-        if (typeScope == null) {
-            return null;
-        }
-
+    public static <T extends MethodDescription> ElementMatcher.Junction<T> onlyOverridenMethodsOf(InstrumentationScopeSettings scopeSettings) {
         MatcherChainBuilder<TypeDescription> builder = new MatcherChainBuilder<>();
 
-        if (typeScope.getInterfaces() != null) {
-            typeScope.getInterfaces().forEach(i -> {
+        if (scopeSettings.getInterfaces() != null) {
+            scopeSettings.getInterfaces().forEach(i -> {
                 ElementMatcher.Junction<NamedElement> interfaceMatcher = nameIs(i);
                 if (interfaceMatcher != null) {
                     builder.or(interfaceMatcher.and(isInterface()));
@@ -118,8 +114,8 @@ public class SpecialElementMatchers {
             });
         }
 
-        if (typeScope.getSuperclass() != null) {
-            ElementMatcher.Junction<NamedElement> superclassMatcher = nameIs(typeScope.getSuperclass());
+        if (scopeSettings.getSuperclass() != null) {
+            ElementMatcher.Junction<NamedElement> superclassMatcher = nameIs(scopeSettings.getSuperclass());
             if (superclassMatcher != null) {
                 builder.or(superclassMatcher.and(not(isInterface())));
             }

@@ -78,20 +78,16 @@ public class InstrumentationScopeResolver {
      * Creates the {@link ElementMatcher} which is matching the scope's type specified in the configuration.
      */
     private ElementMatcher.Junction<TypeDescription> buildTypeMatcher(InstrumentationScopeSettings scopeSettings) {
-        if (scopeSettings.getTypeScope() == null) {
-            return null;
-        }
-
         MatcherChainBuilder<TypeDescription> builder = new MatcherChainBuilder<>();
 
-        if (scopeSettings.getTypeScope().getSuperclass() != null) {
-            processSuperclass(builder, scopeSettings.getTypeScope().getSuperclass());
+        if (scopeSettings.getSuperclass() != null) {
+            processSuperclass(builder, scopeSettings.getSuperclass());
         }
-        if (scopeSettings.getTypeScope().getInterfaces() != null) {
-            scopeSettings.getTypeScope().getInterfaces().forEach(i -> processInterface(builder, i));
+        if (scopeSettings.getInterfaces() != null) {
+            scopeSettings.getInterfaces().forEach(i -> processInterface(builder, i));
         }
-        if (scopeSettings.getTypeScope().getType() != null) {
-            processType(builder, scopeSettings.getTypeScope().getType());
+        if (scopeSettings.getType() != null) {
+            processType(builder, scopeSettings.getType());
         }
 
         return builder.build();
@@ -133,12 +129,12 @@ public class InstrumentationScopeResolver {
     private ElementMatcher.Junction<MethodDescription> buildMethodMatcher(InstrumentationScopeSettings scopeSettings, ElementMatcher.Junction<TypeDescription> typeMatcher) {
         MatcherChainBuilder<MethodDescription> builder = new MatcherChainBuilder<>();
 
-        if (scopeSettings.getMethodScope() != null) {
-            scopeSettings.getMethodScope().forEach(m -> processMethod(builder, m));
+        if (scopeSettings.getMethods() != null) {
+            scopeSettings.getMethods().forEach(m -> processMethod(builder, m));
         }
 
         if (scopeSettings.getAdvanced() != null && scopeSettings.getAdvanced().isInstrumentOnlyInheritedMethods()) {
-            ElementMatcher.Junction<MethodDescription> overrideMatcher = onlyOverridenMethodsOf(scopeSettings.getTypeScope());
+            ElementMatcher.Junction<MethodDescription> overrideMatcher = onlyOverridenMethodsOf(scopeSettings);
             if (overrideMatcher != null) {
                 builder.and(overrideMatcher);
             }

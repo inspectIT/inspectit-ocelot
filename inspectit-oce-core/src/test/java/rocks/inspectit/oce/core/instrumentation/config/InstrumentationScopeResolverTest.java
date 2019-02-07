@@ -12,7 +12,10 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.oce.core.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.rules.InstrumentationRuleSettings;
-import rocks.inspectit.oce.core.config.model.instrumentation.scope.*;
+import rocks.inspectit.oce.core.config.model.instrumentation.scope.AdvancedScopeSettings;
+import rocks.inspectit.oce.core.config.model.instrumentation.scope.InstrumentationScopeSettings;
+import rocks.inspectit.oce.core.config.model.instrumentation.scope.MethodMatcherSettings;
+import rocks.inspectit.oce.core.config.model.instrumentation.scope.NameMatcherSettings;
 import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationScope;
 
 import java.util.Arrays;
@@ -47,10 +50,12 @@ class InstrumentationScopeResolverTest {
             settings.setRules(Collections.singletonMap(ruleKey, ruleSettings));
         }
 
-        private void setScopeSettings(String scopeKey, TypeScope typeScope, List<MethodMatcherSettings> methodScope, AdvancedScopeSettings advancedSettings) {
+        private void setScopeSettings(String scopeKey, List<NameMatcherSettings> interfaces, NameMatcherSettings superclass, NameMatcherSettings type, List<MethodMatcherSettings> methodScope, AdvancedScopeSettings advancedSettings) {
             InstrumentationScopeSettings scopeSettings = new InstrumentationScopeSettings();
-            scopeSettings.setTypeScope(typeScope);
-            scopeSettings.setMethodScope(methodScope);
+            scopeSettings.setInterfaces(interfaces);
+            scopeSettings.setSuperclass(superclass);
+            scopeSettings.setType(type);
+            scopeSettings.setMethods(methodScope);
             scopeSettings.setAdvanced(advancedSettings);
             settings.setScopes(Collections.singletonMap(scopeKey, scopeSettings));
         }
@@ -106,7 +111,7 @@ class InstrumentationScopeResolverTest {
         public void ruleWithEmptyScope() {
             String scopeKey = "scope-key";
             setRuleSettings("rule-key", true, Collections.singletonMap("scope-key", true));
-            setScopeSettings(scopeKey, null, null, null);
+            setScopeSettings(scopeKey, null, null, null, null, null);
 
             Map<String, InstrumentationScope> result = scopeResolver.resolve(settings);
 
@@ -118,9 +123,7 @@ class InstrumentationScopeResolverTest {
             String scopeKey = "scope-key";
             setRuleSettings("rule-key", true, Collections.singletonMap(scopeKey, true));
             NameMatcherSettings classMatcher = new NameMatcherSettings();
-            TypeScope typeScope = new TypeScope();
-            typeScope.setType(classMatcher);
-            setScopeSettings(scopeKey, typeScope, null, null);
+            setScopeSettings(scopeKey, null, null, classMatcher, null, null);
 
             Map<String, InstrumentationScope> result = scopeResolver.resolve(settings);
 
@@ -134,9 +137,7 @@ class InstrumentationScopeResolverTest {
             setRuleSettings("rule-key", true, Collections.singletonMap(scopeKey, true));
             NameMatcherSettings classMatcher = new NameMatcherSettings();
             classMatcher.setName("class.Class");
-            TypeScope typeScope = new TypeScope();
-            typeScope.setType(classMatcher);
-            setScopeSettings(scopeKey, typeScope, null, null);
+            setScopeSettings(scopeKey, null, null, classMatcher, null, null);
 
             Map<String, InstrumentationScope> result = scopeResolver.resolve(settings);
 
@@ -152,11 +153,9 @@ class InstrumentationScopeResolverTest {
             setRuleSettings("rule-key", true, Collections.singletonMap(scopeKey, true));
             NameMatcherSettings classMatcher = new NameMatcherSettings();
             classMatcher.setName("class.Class");
-            TypeScope typeScope = new TypeScope();
-            typeScope.setType(classMatcher);
             MethodMatcherSettings methodSettings = new MethodMatcherSettings();
             methodSettings.setName("method");
-            setScopeSettings(scopeKey, typeScope, Collections.singletonList(methodSettings), null);
+            setScopeSettings(scopeKey, null, null, classMatcher, Collections.singletonList(methodSettings), null);
 
             Map<String, InstrumentationScope> result = scopeResolver.resolve(settings);
 
@@ -172,12 +171,10 @@ class InstrumentationScopeResolverTest {
             setRuleSettings("rule-key", true, Collections.singletonMap(scopeKey, true));
             NameMatcherSettings classMatcher = new NameMatcherSettings();
             classMatcher.setName("class.Class");
-            TypeScope typeScope = new TypeScope();
-            typeScope.setType(classMatcher);
             MethodMatcherSettings methodSettings = new MethodMatcherSettings();
             methodSettings.setName("method");
             AdvancedScopeSettings advancedScope = new AdvancedScopeSettings();
-            setScopeSettings(scopeKey, typeScope, Collections.singletonList(methodSettings), advancedScope);
+            setScopeSettings(scopeKey, null, null, classMatcher, Collections.singletonList(methodSettings), advancedScope);
 
             Map<String, InstrumentationScope> result = scopeResolver.resolve(settings);
 
@@ -191,14 +188,13 @@ class InstrumentationScopeResolverTest {
         public void methodMatcherProperties_normalMethod() {
             String scopeKey = "scope-key";
             setRuleSettings("rule-key", true, Collections.singletonMap(scopeKey, true));
-            TypeScope typeScope = new TypeScope();
             MethodMatcherSettings methodSettings = new MethodMatcherSettings();
             methodSettings.setVisibility(Collections.singletonList(AccessModifier.PUBLIC));
             methodSettings.setArguments(Collections.emptyList());
             methodSettings.setMatcherMode(StringMatcher.Mode.MATCHES);
             methodSettings.setName("method");
             methodSettings.setIsSynchronized(true);
-            setScopeSettings(scopeKey, typeScope, Collections.singletonList(methodSettings), null);
+            setScopeSettings(scopeKey, null, null, null, Collections.singletonList(methodSettings), null);
 
             Map<String, InstrumentationScope> result = scopeResolver.resolve(settings);
 
@@ -218,7 +214,6 @@ class InstrumentationScopeResolverTest {
         public void methodMatcherProperties_constructor() {
             String scopeKey = "scope-key";
             setRuleSettings("rule-key", true, Collections.singletonMap(scopeKey, true));
-            TypeScope typeScope = new TypeScope();
             MethodMatcherSettings methodSettings = new MethodMatcherSettings();
             methodSettings.setIsConstructor(true);
             methodSettings.setVisibility(Collections.singletonList(AccessModifier.PUBLIC));
@@ -226,7 +221,7 @@ class InstrumentationScopeResolverTest {
             methodSettings.setMatcherMode(StringMatcher.Mode.MATCHES);
             methodSettings.setName("method");
             methodSettings.setIsSynchronized(true);
-            setScopeSettings(scopeKey, typeScope, Collections.singletonList(methodSettings), null);
+            setScopeSettings(scopeKey, null, null, null, Collections.singletonList(methodSettings), null);
 
             Map<String, InstrumentationScope> result = scopeResolver.resolve(settings);
 
@@ -244,12 +239,11 @@ class InstrumentationScopeResolverTest {
         public void methodMatcherProperties_multipleMethods() {
             String scopeKey = "scope-key";
             setRuleSettings("rule-key", true, Collections.singletonMap(scopeKey, true));
-            TypeScope typeScope = new TypeScope();
             MethodMatcherSettings methodSettingsA = new MethodMatcherSettings();
             methodSettingsA.setName("methodA");
             MethodMatcherSettings methodSettingsB = new MethodMatcherSettings();
             methodSettingsB.setName("methodB");
-            setScopeSettings(scopeKey, typeScope, Arrays.asList(methodSettingsA, methodSettingsB), null);
+            setScopeSettings(scopeKey, null, null, null, Arrays.asList(methodSettingsA, methodSettingsB), null);
 
             Map<String, InstrumentationScope> result = scopeResolver.resolve(settings);
 
@@ -274,14 +268,11 @@ class InstrumentationScopeResolverTest {
             superMatcher.setName("any.Superclass");
             NameMatcherSettings interfaceMatcher = new NameMatcherSettings();
             interfaceMatcher.setName("any.Interface");
-            TypeScope typeScope = new TypeScope();
-            typeScope.setSuperclass(superMatcher);
-            typeScope.setInterfaces(Collections.singletonList(interfaceMatcher));
             MethodMatcherSettings methodSettings = new MethodMatcherSettings();
             methodSettings.setName("methodA");
             AdvancedScopeSettings advancedSettings = new AdvancedScopeSettings();
             advancedSettings.setInstrumentOnlyInheritedMethods(true);
-            setScopeSettings(scopeKey, typeScope, Collections.singletonList(methodSettings), advancedSettings);
+            setScopeSettings(scopeKey, Collections.singletonList(interfaceMatcher), superMatcher, null, Collections.singletonList(methodSettings), advancedSettings);
 
             Map<String, InstrumentationScope> result = scopeResolver.resolve(settings);
 
@@ -307,9 +298,7 @@ class InstrumentationScopeResolverTest {
             setRuleSettings("rule-key", true, Collections.singletonMap(scopeKey, true));
             NameMatcherSettings superMatcher = new NameMatcherSettings();
             superMatcher.setName("any.Superclass");
-            TypeScope typeScope = new TypeScope();
-            typeScope.setSuperclass(superMatcher);
-            setScopeSettings(scopeKey, typeScope, null, null);
+            setScopeSettings(scopeKey, null, superMatcher, null, null, null);
 
             Map<String, InstrumentationScope> result = scopeResolver.resolve(settings);
 
@@ -327,9 +316,7 @@ class InstrumentationScopeResolverTest {
             setRuleSettings("rule-key", true, Collections.singletonMap(scopeKey, true));
             NameMatcherSettings superMatcher = new NameMatcherSettings();
             superMatcher.setName("any.Interface");
-            TypeScope typeScope = new TypeScope();
-            typeScope.setInterfaces(Collections.singletonList(superMatcher));
-            setScopeSettings(scopeKey, typeScope, null, null);
+            setScopeSettings(scopeKey, Collections.singletonList(superMatcher), null, null, null, null);
 
             Map<String, InstrumentationScope> result = scopeResolver.resolve(settings);
 

@@ -6,9 +6,9 @@ import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.matcher.StringMatcher;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import rocks.inspectit.oce.core.config.model.instrumentation.scope.InstrumentationScopeSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.scope.MethodMatcherSettings.AccessModifier;
 import rocks.inspectit.oce.core.config.model.instrumentation.scope.NameMatcherSettings;
-import rocks.inspectit.oce.core.config.model.instrumentation.scope.TypeScope;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -179,15 +179,8 @@ class SpecialElementMatchersTest {
     public class OnlyOverridenMethodsOf {
 
         @Test
-        public void nullArgument() {
-            ElementMatcher.Junction<MethodDescription> result = SpecialElementMatchers.onlyOverridenMethodsOf(null);
-
-            assertThat(result).isNull();
-        }
-
-        @Test
         public void nullInterfacesAndSuperclass() {
-            TypeScope scope = new TypeScope();
+            InstrumentationScopeSettings scope = new InstrumentationScopeSettings();
 
             ElementMatcher.Junction<MethodDescription> result = SpecialElementMatchers.onlyOverridenMethodsOf(scope);
 
@@ -199,7 +192,7 @@ class SpecialElementMatchersTest {
             NameMatcherSettings interfaceSettings = new NameMatcherSettings();
             interfaceSettings.setName("interface1");
 
-            TypeScope scope = new TypeScope();
+            InstrumentationScopeSettings scope = new InstrumentationScopeSettings();
             scope.setInterfaces(Collections.singletonList(interfaceSettings));
 
             ElementMatcher.Junction<MethodDescription> result = SpecialElementMatchers.onlyOverridenMethodsOf(scope);
@@ -213,7 +206,7 @@ class SpecialElementMatchersTest {
             NameMatcherSettings superclassSettings = new NameMatcherSettings();
             superclassSettings.setName("superclass1");
 
-            TypeScope scope = new TypeScope();
+            InstrumentationScopeSettings scope = new InstrumentationScopeSettings();
             scope.setSuperclass(superclassSettings);
 
             ElementMatcher.Junction<MethodDescription> result = SpecialElementMatchers.onlyOverridenMethodsOf(scope);
@@ -229,7 +222,7 @@ class SpecialElementMatchersTest {
             NameMatcherSettings superclassSettings = new NameMatcherSettings();
             superclassSettings.setName("superclass1");
 
-            TypeScope scope = new TypeScope();
+            InstrumentationScopeSettings scope = new InstrumentationScopeSettings();
             scope.setInterfaces(Collections.singletonList(interfaceSettings));
             scope.setSuperclass(superclassSettings);
 
