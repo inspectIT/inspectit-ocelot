@@ -13,9 +13,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.oce.core.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.rules.InstrumentationRuleSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.scope.AdvancedScopeSettings;
+import rocks.inspectit.oce.core.config.model.instrumentation.scope.DescriptionMatcherSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.scope.InstrumentationScopeSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.scope.MethodMatcherSettings;
-import rocks.inspectit.oce.core.config.model.instrumentation.scope.NameMatcherSettings;
 import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationScope;
 
 import java.util.Arrays;
@@ -50,7 +50,7 @@ class InstrumentationScopeResolverTest {
             settings.setRules(Collections.singletonMap(ruleKey, ruleSettings));
         }
 
-        private void setScopeSettings(String scopeKey, List<NameMatcherSettings> interfaces, NameMatcherSettings superclass, NameMatcherSettings type, List<MethodMatcherSettings> methodScope, AdvancedScopeSettings advancedSettings) {
+        private void setScopeSettings(String scopeKey, List<DescriptionMatcherSettings> interfaces, DescriptionMatcherSettings superclass, DescriptionMatcherSettings type, List<MethodMatcherSettings> methodScope, AdvancedScopeSettings advancedSettings) {
             InstrumentationScopeSettings scopeSettings = new InstrumentationScopeSettings();
             scopeSettings.setInterfaces(interfaces);
             scopeSettings.setSuperclass(superclass);
@@ -122,7 +122,7 @@ class InstrumentationScopeResolverTest {
         public void ruleWithScope_emptyTypeEmptyMethodEmptyAdvanced() {
             String scopeKey = "scope-key";
             setRuleSettings("rule-key", true, Collections.singletonMap(scopeKey, true));
-            NameMatcherSettings classMatcher = new NameMatcherSettings();
+            DescriptionMatcherSettings classMatcher = new DescriptionMatcherSettings();
             setScopeSettings(scopeKey, null, null, classMatcher, null, null);
 
             Map<String, InstrumentationScope> result = scopeResolver.resolve(settings);

@@ -23,17 +23,17 @@ public class InstrumentationScopeSettings {
     /**
      * Interfaces which have to be implemented.
      */
-    private List<NameMatcherSettings> interfaces;
+    private List<DescriptionMatcherSettings> interfaces;
 
     /**
      * Superclass which has to be extended.
      */
-    private NameMatcherSettings superclass;
+    private DescriptionMatcherSettings superclass;
 
     /**
      * Matcher which have to match the type's name.
      */
-    private NameMatcherSettings type;
+    private DescriptionMatcherSettings type;
 
     /**
      * Defines which methods are targeted by this scope.
@@ -56,6 +56,8 @@ public class InstrumentationScopeSettings {
             return true;
         }
 
-        return !CollectionUtils.isEmpty(interfaces) || superclass != null || (type != null && !type.isAnyMatcher());
+        return !CollectionUtils.isEmpty(interfaces)
+                || superclass != null
+                || (type != null && !type.isAnyMatcher());
     }
 }

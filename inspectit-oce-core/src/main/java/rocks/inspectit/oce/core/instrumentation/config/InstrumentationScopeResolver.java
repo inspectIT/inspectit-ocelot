@@ -1,7 +1,6 @@
 package rocks.inspectit.oce.core.instrumentation.config;
 
 import lombok.extern.slf4j.Slf4j;
-import net.bytebuddy.description.NamedElement;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
@@ -108,10 +107,10 @@ public class InstrumentationScopeResolver {
     /**
      * Creating and adding a matcher for the given {@link NameMatcherSettings} which represents an interface.
      */
-    private void processInterface(MatcherChainBuilder<TypeDescription> builder, NameMatcherSettings nameSettings) {
-        ElementMatcher.Junction<NamedElement> nameMatcher = nameIs(nameSettings);
-        if (nameMatcher != null) {
-            builder.and(hasSuperType(isInterface().and(nameMatcher)));
+    private void processInterface(MatcherChainBuilder<TypeDescription> builder, DescriptionMatcherSettings descriptionSettings) {
+        ElementMatcher.Junction<TypeDescription> matcher = describedBy(descriptionSettings);
+        if (matcher != null) {
+            builder.and(hasSuperType(isInterface().and(matcher)));
         }
     }
 

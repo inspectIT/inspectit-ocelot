@@ -10,8 +10,8 @@ import net.bytebuddy.matcher.NameMatcher;
 import net.bytebuddy.matcher.StringMatcher;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
-import rocks.inspectit.oce.core.config.model.instrumentation.scope.InstrumentationScopeSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.scope.DescriptionMatcherSettings;
+import rocks.inspectit.oce.core.config.model.instrumentation.scope.InstrumentationScopeSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.scope.NameMatcherSettings;
 
 import java.util.List;
@@ -46,9 +46,8 @@ public class SpecialElementMatchers {
     }
 
 
-    @SuppressWarnings("unchecked")
-    public static ElementMatcher.Junction describedBy(DescriptionMatcherSettings settings) {
-        MatcherChainBuilder builder = new MatcherChainBuilder<>();
+    public static ElementMatcher.Junction<TypeDescription> describedBy(DescriptionMatcherSettings settings) {
+        MatcherChainBuilder<TypeDescription> builder = new MatcherChainBuilder<>();
 
         builder.and(nameIs(settings));
         builder.and(annotatedWith(settings.getAnnotation()));
