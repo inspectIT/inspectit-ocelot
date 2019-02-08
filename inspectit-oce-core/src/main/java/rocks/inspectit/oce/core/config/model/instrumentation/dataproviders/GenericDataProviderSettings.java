@@ -8,13 +8,8 @@ import rocks.inspectit.oce.core.config.model.instrumentation.InstrumentationSett
 import javax.validation.constraints.AssertFalse;
 import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.NotBlank;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.*;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 /**
  * Settings defining a generic data provider.
@@ -106,17 +101,4 @@ public class GenericDataProviderSettings {
         return SPECIAL_VARIABLES_REGEXES.stream().anyMatch(p -> p.matcher(varName).matches());
     }
 
-    public Class<?> locateTypeWithinImports(String typename, ClassLoader context) {
-        return Stream.concat(Stream.concat(
-                Stream.of(""),
-                imports.stream().map(s -> s + ".")),
-                Stream.of("java.lang."))
-                .flatMap(prefix -> {
-                    try {
-                        return Stream.of(Class.forName(prefix + typename, false, context));
-                    } catch (Exception e) {
-                        return Stream.empty();
-                    }
-                }).findFirst().orElse(null);
-    }
 }

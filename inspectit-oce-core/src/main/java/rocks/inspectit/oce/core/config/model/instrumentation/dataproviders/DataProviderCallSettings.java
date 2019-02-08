@@ -9,6 +9,7 @@ import org.springframework.core.convert.ConversionService;
 import rocks.inspectit.oce.core.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.oce.core.config.model.validation.ViolationBuilder;
 import rocks.inspectit.oce.core.utils.AutoboxingHelper;
+import rocks.inspectit.oce.core.utils.CommonUtils;
 
 import javax.validation.constraints.NotBlank;
 import java.util.Collections;
@@ -132,7 +133,7 @@ public class DataProviderCallSettings {
                         .buildAndPublish();
             }
         } else {
-            typeClass = providerConf.locateTypeWithinImports(type, null);
+            typeClass = CommonUtils.locateTypeWithinImports(type, null, providerConf.getImports());
         }
         if (typeClass == null) {
             vios.message("The input '{var}' of '{provider}' cannot be specified as a non-null constant value, as it has type '{type}'!")
