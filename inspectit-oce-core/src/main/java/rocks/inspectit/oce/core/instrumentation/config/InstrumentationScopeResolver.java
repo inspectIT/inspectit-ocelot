@@ -7,7 +7,7 @@ import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.matcher.ElementMatchers;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.oce.core.config.model.instrumentation.InstrumentationSettings;
-import rocks.inspectit.oce.core.config.model.instrumentation.scope.DescriptionMatcherSettings;
+import rocks.inspectit.oce.core.config.model.instrumentation.scope.ElementDescriptionMatcherSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.scope.InstrumentationScopeSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.scope.MethodMatcherSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.scope.NameMatcherSettings;
@@ -97,7 +97,7 @@ public class InstrumentationScopeResolver {
     /**
      * Creating and adding a matcher for the given {@link NameMatcherSettings} which represents a superclass.
      */
-    private void processSuperclass(MatcherChainBuilder<TypeDescription> builder, DescriptionMatcherSettings descriptionSettings) {
+    private void processSuperclass(MatcherChainBuilder<TypeDescription> builder, ElementDescriptionMatcherSettings descriptionSettings) {
         ElementMatcher.Junction<TypeDescription> matcher = describedBy(descriptionSettings);
         if (matcher != null) {
             builder.and(hasSuperType(not(isInterface()).and(matcher)));
@@ -107,7 +107,7 @@ public class InstrumentationScopeResolver {
     /**
      * Creating and adding a matcher for the given {@link NameMatcherSettings} which represents an interface.
      */
-    private void processInterface(MatcherChainBuilder<TypeDescription> builder, DescriptionMatcherSettings descriptionSettings) {
+    private void processInterface(MatcherChainBuilder<TypeDescription> builder, ElementDescriptionMatcherSettings descriptionSettings) {
         ElementMatcher.Junction<TypeDescription> matcher = describedBy(descriptionSettings);
         if (matcher != null) {
             builder.and(hasSuperType(isInterface().and(matcher)));
@@ -117,9 +117,9 @@ public class InstrumentationScopeResolver {
     /**
      * Creating and adding a matcher for the given {@link NameMatcherSettings} which represents concrete classes.
      */
-    private void processType(MatcherChainBuilder<TypeDescription> builder, DescriptionMatcherSettings descriptionSettings) {
-        ElementMatcher.Junction<TypeDescription> nameMatcher = describedBy(descriptionSettings);
-        builder.and(nameMatcher);
+    private void processType(MatcherChainBuilder<TypeDescription> builder, ElementDescriptionMatcherSettings descriptionSettings) {
+        ElementMatcher.Junction<TypeDescription> matcher = describedBy(descriptionSettings);
+        builder.and(matcher);
     }
 
     /**

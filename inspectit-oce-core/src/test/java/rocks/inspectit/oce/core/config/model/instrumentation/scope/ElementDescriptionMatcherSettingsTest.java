@@ -8,14 +8,14 @@ import java.util.Collections;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-class DescriptionMatcherSettingsTest {
+class ElementDescriptionMatcherSettingsTest {
 
     @Nested
     public class IsAnyMatcher {
 
         @Test
         public void emptySettings() {
-            DescriptionMatcherSettings settings = new DescriptionMatcherSettings();
+            ElementDescriptionMatcherSettings settings = new ElementDescriptionMatcherSettings();
             settings.setMatcherMode(StringMatcher.Mode.STARTS_WITH);
 
             boolean result = settings.isAnyMatcher();
@@ -25,7 +25,7 @@ class DescriptionMatcherSettingsTest {
 
         @Test
         public void specificAnnotationMatcher() {
-            DescriptionMatcherSettings settings = new DescriptionMatcherSettings();
+            ElementDescriptionMatcherSettings settings = new ElementDescriptionMatcherSettings();
             settings.setMatcherMode(StringMatcher.Mode.STARTS_WITH);
             NameMatcherSettings matcher = new NameMatcherSettings();
             matcher.setName("annotation");
@@ -38,7 +38,7 @@ class DescriptionMatcherSettingsTest {
 
         @Test
         public void allAnnotationMatcher() {
-            DescriptionMatcherSettings settings = new DescriptionMatcherSettings();
+            ElementDescriptionMatcherSettings settings = new ElementDescriptionMatcherSettings();
             settings.setMatcherMode(StringMatcher.Mode.STARTS_WITH);
             NameMatcherSettings matcher = new NameMatcherSettings();
             matcher.setMatcherMode(StringMatcher.Mode.STARTS_WITH);
@@ -46,12 +46,12 @@ class DescriptionMatcherSettingsTest {
 
             boolean result = settings.isAnyMatcher();
 
-            assertThat(result).isTrue();
+            assertThat(result).isFalse();
         }
 
         @Test
         public void allAnnotationMatcherButSpecificClassMatcher() {
-            DescriptionMatcherSettings settings = new DescriptionMatcherSettings();
+            ElementDescriptionMatcherSettings settings = new ElementDescriptionMatcherSettings();
             settings.setName("class");
             NameMatcherSettings matcher = new NameMatcherSettings();
             matcher.setMatcherMode(StringMatcher.Mode.STARTS_WITH);

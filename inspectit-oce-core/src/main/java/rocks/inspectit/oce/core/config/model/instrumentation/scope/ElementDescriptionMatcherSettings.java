@@ -5,6 +5,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springframework.util.CollectionUtils;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.Collections;
 import java.util.List;
@@ -16,17 +17,18 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class DescriptionMatcherSettings extends NameMatcherSettings {
+public class ElementDescriptionMatcherSettings extends NameMatcherSettings {
 
     /**
      * Matcher which have to match the used annotations.
      */
+    @Valid
     @NotNull
     private List<NameMatcherSettings> annotations = Collections.emptyList();
 
     @Override
     public boolean isAnyMatcher() {
         return super.isAnyMatcher()
-                && (CollectionUtils.isEmpty(annotations) || annotations.stream().anyMatch(NameMatcherSettings::isAnyMatcher));
+                && CollectionUtils.isEmpty(annotations);
     }
 }

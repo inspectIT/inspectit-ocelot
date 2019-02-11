@@ -7,7 +7,7 @@ import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.matcher.StringMatcher;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import rocks.inspectit.oce.core.config.model.instrumentation.scope.DescriptionMatcherSettings;
+import rocks.inspectit.oce.core.config.model.instrumentation.scope.ElementDescriptionMatcherSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.scope.InstrumentationScopeSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.scope.MethodMatcherSettings.AccessModifier;
 import rocks.inspectit.oce.core.config.model.instrumentation.scope.NameMatcherSettings;
@@ -191,7 +191,7 @@ class SpecialElementMatchersTest {
 
         @Test
         public void onlyInterface() {
-            DescriptionMatcherSettings interfaceSettings = new DescriptionMatcherSettings();
+            ElementDescriptionMatcherSettings interfaceSettings = new ElementDescriptionMatcherSettings();
             interfaceSettings.setName("interface1");
 
             InstrumentationScopeSettings scope = new InstrumentationScopeSettings();
@@ -205,7 +205,7 @@ class SpecialElementMatchersTest {
 
         @Test
         public void onlySuperclass() {
-            DescriptionMatcherSettings superclassSettings = new DescriptionMatcherSettings();
+            ElementDescriptionMatcherSettings superclassSettings = new ElementDescriptionMatcherSettings();
             superclassSettings.setName("superclass1");
 
             InstrumentationScopeSettings scope = new InstrumentationScopeSettings();
@@ -219,9 +219,9 @@ class SpecialElementMatchersTest {
 
         @Test
         public void fullScope() {
-            DescriptionMatcherSettings interfaceSettings = new DescriptionMatcherSettings();
+            ElementDescriptionMatcherSettings interfaceSettings = new ElementDescriptionMatcherSettings();
             interfaceSettings.setName("interface1");
-            DescriptionMatcherSettings superclassSettings = new DescriptionMatcherSettings();
+            ElementDescriptionMatcherSettings superclassSettings = new ElementDescriptionMatcherSettings();
             superclassSettings.setName("superclass1");
 
             InstrumentationScopeSettings scope = new InstrumentationScopeSettings();
@@ -247,7 +247,7 @@ class SpecialElementMatchersTest {
 
         @Test
         public void emptySettings() {
-            DescriptionMatcherSettings settings = new DescriptionMatcherSettings();
+            ElementDescriptionMatcherSettings settings = new ElementDescriptionMatcherSettings();
 
             ElementMatcher.Junction<TypeDescription> result = SpecialElementMatchers.describedBy(settings);
 
@@ -256,7 +256,7 @@ class SpecialElementMatchersTest {
 
         @Test
         public void onlyName() {
-            DescriptionMatcherSettings settings = new DescriptionMatcherSettings();
+            ElementDescriptionMatcherSettings settings = new ElementDescriptionMatcherSettings();
             settings.setName("name1");
 
             ElementMatcher.Junction<TypeDescription> result = SpecialElementMatchers.describedBy(settings);
@@ -269,7 +269,7 @@ class SpecialElementMatchersTest {
         public void onlyAnnotation() {
             NameMatcherSettings annotationMatcher = new NameMatcherSettings();
             annotationMatcher.setName("annotation1");
-            DescriptionMatcherSettings settings = new DescriptionMatcherSettings();
+            ElementDescriptionMatcherSettings settings = new ElementDescriptionMatcherSettings();
             settings.setAnnotations(Collections.singletonList(annotationMatcher));
 
             ElementMatcher.Junction<TypeDescription> result = SpecialElementMatchers.describedBy(settings);
@@ -282,7 +282,7 @@ class SpecialElementMatchersTest {
         public void nameAndAnnotation() {
             NameMatcherSettings annotationMatcher = new NameMatcherSettings();
             annotationMatcher.setName("annotation1");
-            DescriptionMatcherSettings settings = new DescriptionMatcherSettings();
+            ElementDescriptionMatcherSettings settings = new ElementDescriptionMatcherSettings();
             settings.setName("name1");
             settings.setAnnotations(Collections.singletonList(annotationMatcher));
 
@@ -299,7 +299,7 @@ class SpecialElementMatchersTest {
             annotationMatcher1.setName("annotation1");
             NameMatcherSettings annotationMatcher2 = new NameMatcherSettings();
             annotationMatcher2.setName("annotation2");
-            DescriptionMatcherSettings settings = new DescriptionMatcherSettings();
+            ElementDescriptionMatcherSettings settings = new ElementDescriptionMatcherSettings();
             settings.setAnnotations(Arrays.asList(annotationMatcher1, annotationMatcher2));
 
             ElementMatcher.Junction<TypeDescription> result = SpecialElementMatchers.describedBy(settings);

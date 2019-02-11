@@ -14,8 +14,8 @@ public class DispatchHookAdvice {
      * The content of this method is added before the target method! See {@link Advice} for existing parameter annotations.
      */
     @Advice.OnMethodEnter
-    public static void onEnter(@Advice.Origin Object origin, @Advice.This Object thiz) {
-        System.out.println("\tEntering: " + origin + " // " + thiz);
+    public static void onEnter(@Advice.Origin Object origin) {
+        System.out.println("\tEntering: " + origin);
     }
 
     /**
