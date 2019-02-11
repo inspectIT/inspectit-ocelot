@@ -42,8 +42,9 @@ public class InspectitContext implements AutoCloseable {
         TagContext parentTags = Tags.getTagger().getCurrentTagContext();
 
         InspectitContext result = new InspectitContext();
-        result.parent = parent;
+
         result.dataProperties = dataProperties;
+        result.parent = parent;
         if (parent == null) {
             result.data.putAll(commonTags.getCommonTagValueMap());
         } else {
@@ -101,6 +102,11 @@ public class InspectitContext implements AutoCloseable {
         if (parent != null && writtenUpPropagatingKeys != null) {
             parent.performUpPropagation(data, writtenUpPropagatingKeys);
         }
+        // Event though this context is closed it might be referenced by async calls which where triggered
+        // for this reason we need to clear the parent to prevent memory leaks
+        // comment these lines out and run the unit tests to see what the issue is
+        parent = null;
+        parentGRPCContext = null;
     }
 
     public void enterTagContextWithOnlyDownPropagatedData() {

@@ -9,7 +9,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.oce.core.instrumentation.config.model.ResolvedDataProperties;
 import rocks.inspectit.oce.core.tags.CommonTagsManager;
+import rocks.inspectit.oce.core.testutils.GcUtils;
 
+import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -142,6 +144,28 @@ public class InspectitContextUnitTest {
             ctxA.close();
 
             assertThat(InspectitContext.INSPECTIT_KEY.get()).isNull();
+        }
+
+
+        @Test
+        void verifyNoMemoryLeakForAsyncCalls() {
+
+            when(commonTags.getCommonTagValueMap()).thenReturn(Collections.emptyMap());
+
+            InspectitContext firstContext = InspectitContext.createAndEnter(commonTags, propagation);
+
+            InspectitContext upPropagationBarrierContext = InspectitContext.createAndEnter(commonTags, propagation);
+            WeakReference<InspectitContext> firstContextWeak = new WeakReference<>(firstContext);
+
+            InspectitContext asyncContext = InspectitContext.createAndEnter(commonTags, propagation);
+
+            upPropagationBarrierContext.close();
+            firstContext.close();
+            firstContext = null;
+
+            GcUtils.waitUntilCleared(firstContextWeak);
+            asyncContext.close();
+
         }
 
     }
