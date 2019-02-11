@@ -1,12 +1,13 @@
 package rocks.inspectit.oce.core.instrumentation.config;
 
 import lombok.extern.slf4j.Slf4j;
-import net.bytebuddy.description.NamedElement;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
+import net.bytebuddy.matcher.ElementMatchers;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.oce.core.config.model.instrumentation.InstrumentationSettings;
+import rocks.inspectit.oce.core.config.model.instrumentation.scope.ElementDescriptionMatcherSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.scope.InstrumentationScopeSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.scope.MethodMatcherSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.scope.NameMatcherSettings;
@@ -94,33 +95,31 @@ public class InstrumentationScopeResolver {
     }
 
     /**
-     * Creating a matcher for the given {@link NameMatcherSettings} which represents a superclass.
+     * Creating and adding a matcher for the given {@link NameMatcherSettings} which represents a superclass.
      */
-    private void processSuperclass(MatcherChainBuilder<TypeDescription> builder, NameMatcherSettings nameSettings) {
-        ElementMatcher.Junction<NamedElement> nameMatcher = nameIs(nameSettings);
-        if (nameMatcher != null) {
-            builder.and(hasSuperType(not(isInterface()).and(nameMatcher)));
+    private void processSuperclass(MatcherChainBuilder<TypeDescription> builder, ElementDescriptionMatcherSettings descriptionSettings) {
+        ElementMatcher.Junction<TypeDescription> matcher = describedBy(descriptionSettings);
+        if (matcher != null) {
+            builder.and(hasSuperType(not(isInterface()).and(matcher)));
         }
     }
 
     /**
-     * Creating a matcher for the given {@link NameMatcherSettings} which represents an interface.
+     * Creating and adding a matcher for the given {@link NameMatcherSettings} which represents an interface.
      */
-    private void processInterface(MatcherChainBuilder<TypeDescription> builder, NameMatcherSettings nameSettings) {
-        ElementMatcher.Junction<NamedElement> nameMatcher = nameIs(nameSettings);
-        if (nameMatcher != null) {
-            builder.and(hasSuperType(isInterface().and(nameMatcher)));
+    private void processInterface(MatcherChainBuilder<TypeDescription> builder, ElementDescriptionMatcherSettings descriptionSettings) {
+        ElementMatcher.Junction<TypeDescription> matcher = describedBy(descriptionSettings);
+        if (matcher != null) {
+            builder.and(hasSuperType(isInterface().and(matcher)));
         }
     }
 
     /**
-     * Creating a matcher for the given {@link NameMatcherSettings} which represents concrete classes.
+     * Creating and adding a matcher for the given {@link NameMatcherSettings} which represents concrete classes.
      */
-    private void processType(MatcherChainBuilder<TypeDescription> builder, NameMatcherSettings nameSettings) {
-        ElementMatcher.Junction<TypeDescription> nameMatcher = nameIs(nameSettings);
-        if (nameMatcher != null) {
-            builder.and(nameMatcher);
-        }
+    private void processType(MatcherChainBuilder<TypeDescription> builder, ElementDescriptionMatcherSettings descriptionSettings) {
+        ElementMatcher.Junction<TypeDescription> matcher = describedBy(descriptionSettings);
+        builder.and(matcher);
     }
 
     /**
@@ -140,7 +139,11 @@ public class InstrumentationScopeResolver {
             }
         }
 
-        return builder.build();
+        if (builder.isEmpty()) {
+            return ElementMatchers.any();
+        } else {
+            return builder.build();
+        }
     }
 
     /**
@@ -152,6 +155,7 @@ public class InstrumentationScopeResolver {
         innerBuilder.and(matcherSettings.getIsConstructor(), isConstructor());
         innerBuilder.and(visibilityIs(matcherSettings.getVisibility()));
         innerBuilder.and(argumentsAre(matcherSettings.getArguments()));
+        innerBuilder.and(annotatedWith(matcherSettings.getAnnotations()));
 
         if (!matcherSettings.getIsConstructor()) {
             innerBuilder.and(nameIs(matcherSettings));

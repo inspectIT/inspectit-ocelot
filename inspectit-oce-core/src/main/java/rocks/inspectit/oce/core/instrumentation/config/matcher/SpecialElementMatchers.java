@@ -2,6 +2,7 @@ package rocks.inspectit.oce.core.instrumentation.config.matcher;
 
 import net.bytebuddy.description.ModifierReviewable;
 import net.bytebuddy.description.NamedElement;
+import net.bytebuddy.description.annotation.AnnotationSource;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
@@ -9,6 +10,7 @@ import net.bytebuddy.matcher.NameMatcher;
 import net.bytebuddy.matcher.StringMatcher;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
+import rocks.inspectit.oce.core.config.model.instrumentation.scope.ElementDescriptionMatcherSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.scope.InstrumentationScopeSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.scope.NameMatcherSettings;
 
@@ -41,6 +43,21 @@ public class SpecialElementMatchers {
         } else {
             return null;
         }
+    }
+
+    /**
+     * Creates an {@link ElementMatcher} matching items with the name and annotation settings contained in the given {@link ElementDescriptionMatcherSettings}.
+     */
+    public static ElementMatcher.Junction<TypeDescription> describedBy(ElementDescriptionMatcherSettings settings) {
+        if (settings == null) {
+            return null;
+        }
+        MatcherChainBuilder<TypeDescription> builder = new MatcherChainBuilder<>();
+
+        builder.and(nameIs(settings));
+        builder.and(annotatedWith(settings.getAnnotations()));
+
+        return builder.build();
     }
 
     /**
@@ -126,5 +143,21 @@ public class SpecialElementMatchers {
         } else {
             return isOverriddenFrom(builder.build());
         }
+    }
+
+    /**
+     * Creates an {@link ElementMatcher} matching elements which are annotated with all of the annotation specified in the given
+     * {@link NameMatcherSettings}. The resulting matcher will not consider inherited annotations.
+     */
+    public static <T extends AnnotationSource> ElementMatcher.Junction<T> annotatedWith(List<NameMatcherSettings> matcherSettings) {
+        if (CollectionUtils.isEmpty(matcherSettings)) {
+            return null;
+        }
+
+        MatcherChainBuilder<T> builder = new MatcherChainBuilder<>();
+
+        matcherSettings.forEach(settings -> builder.and(IsAnnotatedMatcher.of(nameIs(settings))));
+
+        return builder.build();
     }
 }

@@ -17,7 +17,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class MethodMatcherSettings extends NameMatcherSettings {
+public class MethodMatcherSettings extends ElementDescriptionMatcherSettings {
 
     /**
      * Enum for access modifiers which can be used in the instrumentation configuration.

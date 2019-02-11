@@ -5,7 +5,10 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springframework.util.CollectionUtils;
 
+import javax.validation.Valid;
 import javax.validation.constraints.AssertTrue;
+import javax.validation.constraints.NotNull;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -23,22 +26,28 @@ public class InstrumentationScopeSettings {
     /**
      * Interfaces which have to be implemented.
      */
-    private List<NameMatcherSettings> interfaces;
+    @Valid
+    @NotNull
+    private List<ElementDescriptionMatcherSettings> interfaces = Collections.emptyList();
 
     /**
      * Superclass which has to be extended.
      */
-    private NameMatcherSettings superclass;
+    @Valid
+    private ElementDescriptionMatcherSettings superclass;
 
     /**
      * Matcher which have to match the type's name.
      */
-    private NameMatcherSettings type;
+    @Valid
+    private ElementDescriptionMatcherSettings type;
 
     /**
      * Defines which methods are targeted by this scope.
      */
-    private List<MethodMatcherSettings> methods;
+    @Valid
+    @NotNull
+    private List<MethodMatcherSettings> methods = Collections.emptyList();
 
     /**
      * The scope's advanced settings.
@@ -56,6 +65,8 @@ public class InstrumentationScopeSettings {
             return true;
         }
 
-        return !CollectionUtils.isEmpty(interfaces) || superclass != null || (type != null && !type.isAnyMatcher());
+        return !CollectionUtils.isEmpty(interfaces)
+                || superclass != null
+                || (type != null && !type.isAnyMatcher());
     }
 }
