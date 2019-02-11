@@ -41,7 +41,7 @@ public class CommonUtils {
      *
      * @param typename the name of the type, can also be fully qualified
      * @param context  the classloader to search in
-     * @param packages the improted packages, e.g. "java.util", "javax.servlet"
+     * @param packages the imported packages, e.g. "java.util", "javax.servlet"
      * @return the Class if it was found, null otherwise
      */
     public static Class<?> locateTypeWithinImports(String typename, ClassLoader context, Collection<String> packages) {

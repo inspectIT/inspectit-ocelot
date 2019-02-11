@@ -59,7 +59,7 @@ public class ViolationBuilder {
     }
 
     /**
-     * Finishes the building of this violation and publises it, so that it is returned as a {@link javax.validation.ConstraintViolation}
+     * Finishes the building of this violation and publishes it, so that it is returned as a {@link javax.validation.ConstraintViolation}
      * by the validator.
      */
     public void buildAndPublish() {
