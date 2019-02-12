@@ -22,13 +22,17 @@ public class InternalSettings {
      * Defines the maximum number classes which are checked at once for updates of their configuration per batch
      */
     @Min(50)
-    private int classConfigurationCheckBatchSize;
+    // default value is there for testing to ensure a default constructed InternalSettings is valid.
+    // The actual default value is defined in the default.yml
+    private int classConfigurationCheckBatchSize = 50;
 
     /**
      * Defines the maximum number classes which are retransformed at once per batch
      */
     @Min(1)
-    private int classRetransformBatchSize;
+    // default value is there for testing to ensure a default constructed InternalSettings is valid.
+    // The actual default value is defined in the default.yml
+    private int classRetransformBatchSize = 1; //default value for testing
 
     /**
      * Defines how often the Agent should check if new classes have been defined.

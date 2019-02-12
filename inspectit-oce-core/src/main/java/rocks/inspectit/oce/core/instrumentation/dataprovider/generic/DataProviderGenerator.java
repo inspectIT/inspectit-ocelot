@@ -11,6 +11,7 @@ import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.oce.bootstrap.instrumentation.IGenericDataProvider;
+import rocks.inspectit.oce.core.config.model.instrumentation.dataproviders.GenericDataProviderSettings;
 import rocks.inspectit.oce.core.instrumentation.config.model.ResolvedGenericDataProviderConfig;
 import rocks.inspectit.oce.core.instrumentation.injection.ClassInjector;
 import rocks.inspectit.oce.core.instrumentation.injection.InjectedClass;
@@ -39,12 +40,6 @@ public class DataProviderGenerator {
     private static final String RETURN_VALUE = "$3";
     private static final String THROWN = "$4";
     private static final String ADDITIONAL_ARGS = "$5";
-
-    public static final String THIZ_VARIABLE = "thiz";
-    public static final String ARGS_VARIABLE = "args";
-    public static final String ARG_VARIABLE_PREFIX = "arg";
-    public static final String THROWN_VARIABLE = "thrown";
-    public static final String RETURN_VALUE_VARIABLE = "returnValue";
 
     @Autowired
     private ClassInjector classInjector;
@@ -151,20 +146,20 @@ public class DataProviderGenerator {
     private String buildProviderMethod(ResolvedGenericDataProviderConfig providerConfig) {
         StringBuilder methodBody = new StringBuilder("{");
         if (providerConfig.getExpectedThisType() != null) {
-            buildVariableDefinition(methodBody, providerConfig.getExpectedThisType(), THIZ_VARIABLE, THIZ);
+            buildVariableDefinition(methodBody, providerConfig.getExpectedThisType(), GenericDataProviderSettings.THIZ_VARIABLE, THIZ);
         }
         if (providerConfig.getExpectedReturnValueType() != null) {
-            buildVariableDefinition(methodBody, providerConfig.getExpectedReturnValueType(), RETURN_VALUE_VARIABLE, RETURN_VALUE);
+            buildVariableDefinition(methodBody, providerConfig.getExpectedReturnValueType(), GenericDataProviderSettings.RETURN_VALUE_VARIABLE, RETURN_VALUE);
         }
         if (providerConfig.isUsesThrown()) {
-            buildVariableDefinition(methodBody, "java.lang.Throwable", THROWN_VARIABLE, THROWN);
+            buildVariableDefinition(methodBody, "java.lang.Throwable", GenericDataProviderSettings.THROWN_VARIABLE, THROWN);
         }
         if (providerConfig.isUsesArgsArray()) {
-            buildVariableDefinition(methodBody, "Object[]", ARGS_VARIABLE, METHOD_ARGS);
+            buildVariableDefinition(methodBody, "Object[]", GenericDataProviderSettings.ARGS_VARIABLE, METHOD_ARGS);
         }
         providerConfig.getExpectedArgumentTypes().forEach((id, type) -> {
             String value = METHOD_ARGS + "[" + id + "]";
-            String varName = ARG_VARIABLE_PREFIX + id;
+            String varName = GenericDataProviderSettings.ARG_VARIABLE_PREFIX + id;
             buildVariableDefinition(methodBody, type, varName, value);
         });
         val additionalArgs = providerConfig.getAdditionalArgumentTypes();

@@ -4,16 +4,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.util.StringUtils;
 import rocks.inspectit.oce.core.config.model.instrumentation.InstrumentationSettings;
-import rocks.inspectit.oce.core.instrumentation.dataprovider.generic.DataProviderGenerator;
 
 import javax.validation.constraints.AssertFalse;
 import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Pattern;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * Settings defining a generic data provider.
@@ -25,6 +21,20 @@ import java.util.Map;
 public class GenericDataProviderSettings {
 
     public static final String PACKAGE_REGEX = "[a-zA-Z]\\w*(\\.[a-zA-Z]\\w*)*";
+    public static final String THIZ_VARIABLE = "thiz";
+    public static final String ARGS_VARIABLE = "args";
+    public static final String THROWN_VARIABLE = "thrown";
+    public static final String RETURN_VALUE_VARIABLE = "returnValue";
+    public static final String ARG_VARIABLE_PREFIX = "arg";
+    public static final Pattern ARG_VARIABLE_PATTERN = Pattern.compile(ARG_VARIABLE_PREFIX + "(\\d+)");
+
+    private static final List<Pattern> SPECIAL_VARIABLES_REGEXES = Arrays.asList(
+            Pattern.compile(THIZ_VARIABLE),
+            Pattern.compile(ARGS_VARIABLE),
+            Pattern.compile(THROWN_VARIABLE),
+            Pattern.compile(RETURN_VALUE_VARIABLE),
+            ARG_VARIABLE_PATTERN);
+
     /**
      * Defines the input variables used by this data provider.
      * The key is the name of the variable, the value is the type of the corresponding variable.
@@ -46,7 +56,8 @@ public class GenericDataProviderSettings {
      * If a classname is not found, the given packages will be scanned in the given order to locate the class.
      * This allows the User to use classes without the need to specify the FQN.
      */
-    private List<@Pattern(regexp = PACKAGE_REGEX) String> imports = new ArrayList<>();
+    private List<@javax.validation.constraints.Pattern(regexp = PACKAGE_REGEX)
+            String> imports = new ArrayList<>();
 
     /**
      * A single Java-statement (without return) defining the value of this data provider.
@@ -76,13 +87,18 @@ public class GenericDataProviderSettings {
 
     @AssertTrue(message = "The 'args' input must have the type 'Object[]'")
     private boolean isArgsArrayTypeCorrect() {
-        String argsType = input.get(DataProviderGenerator.ARGS_VARIABLE);
+        String argsType = input.get(ARGS_VARIABLE);
         return argsType == null || argsType.equals("Object[]") || argsType.equals("java.lang.Object[]");
     }
 
     @AssertTrue(message = "The 'thrown' input must have the type 'Throwable'")
     private boolean isThrownTypeCorrect() {
-        String thrownType = input.get(DataProviderGenerator.THROWN_VARIABLE);
+        String thrownType = input.get(THROWN_VARIABLE);
         return thrownType == null || thrownType.equals("java.lang.Throwable") || thrownType.equals("Throwable");
     }
+
+    public static boolean isSpecialVariable(String varName) {
+        return SPECIAL_VARIABLES_REGEXES.stream().anyMatch(p -> p.matcher(varName).matches());
+    }
+
 }

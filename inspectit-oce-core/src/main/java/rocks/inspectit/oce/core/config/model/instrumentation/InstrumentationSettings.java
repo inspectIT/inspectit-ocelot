@@ -5,6 +5,9 @@ import lombok.NoArgsConstructor;
 import rocks.inspectit.oce.core.config.model.instrumentation.dataproviders.GenericDataProviderSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.rules.InstrumentationRuleSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.scope.InstrumentationScopeSettings;
+import rocks.inspectit.oce.core.config.model.validation.AdditionalValidation;
+import rocks.inspectit.oce.core.config.model.validation.AdditionalValidations;
+import rocks.inspectit.oce.core.config.model.validation.ViolationBuilder;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
@@ -17,6 +20,7 @@ import java.util.Map;
  */
 @Data
 @NoArgsConstructor
+@AdditionalValidations
 public class InstrumentationSettings {
 
     /**
@@ -38,14 +42,14 @@ public class InstrumentationSettings {
      * All classes from the given packages and their subpackages will be ignored.
      */
     @NotNull
-    private Map<@NotBlank String, Boolean> ignoredBootstrapPackages;
+    private Map<@NotBlank String, Boolean> ignoredBootstrapPackages = Collections.emptyMap();
 
     /**
      * Defines which packages of all class loaders should not be instrumented.
      * All classes from the given packages and their subpackages will be ignored.
      */
     @NotNull
-    private Map<@NotBlank String, Boolean> ignoredPackages;
+    private Map<@NotBlank String, Boolean> ignoredPackages = Collections.emptyMap();
 
     /**
      * All defined custom data providers, the key defines their name.
@@ -65,4 +69,11 @@ public class InstrumentationSettings {
      */
     @NotNull
     private Map<@NotBlank String, @Valid InstrumentationRuleSettings> rules = Collections.emptyMap();
+
+    @AdditionalValidation
+    public void performValidation(ViolationBuilder vios) {
+        rules.forEach((name, r) ->
+                r.performValidation(this, vios.atProperty("rules").atProperty(name)));
+    }
+
 }

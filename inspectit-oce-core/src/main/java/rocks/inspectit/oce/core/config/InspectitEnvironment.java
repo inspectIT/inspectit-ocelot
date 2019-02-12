@@ -23,6 +23,7 @@ import javax.validation.Validator;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -200,7 +201,14 @@ public class InspectitEnvironment extends StandardEnvironment {
         } else {
             log.error("Error loading the configuration '{}'.", prefix);
             for (ConstraintViolation<T> vio : violations) {
-                log.error("{} (={}) => {}", CaseUtils.camelCaseToKebabCase(vio.getPropertyPath().toString()), vio.getInvalidValue(), vio.getMessage());
+                String property = CaseUtils.camelCaseToKebabCase(vio.getPropertyPath().toString());
+                if (vio.getInvalidValue() instanceof CharSequence
+                        || vio.getInvalidValue() instanceof Number
+                        || vio.getInvalidValue() instanceof Duration) {
+                    log.error("{} (={}) => {}", property, vio.getInvalidValue(), vio.getMessage());
+                } else {
+                    log.error("{} => {}", property, vio.getMessage());
+                }
             }
             return Optional.empty();
         }
