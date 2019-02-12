@@ -34,7 +34,7 @@ public class DataProviderCallSettings {
      * The given string literals are converted to the corresponding primitive type or directly used as a string.
      * Constant input only works for inputs which have a primitive type, a corresponding wrapper type or are strings.
      */
-    private Map<@NotBlank String, String> constantInput = Collections.emptyMap();
+    private Map<@NotBlank String, Object> constantInput = Collections.emptyMap();
 
     /**
      * Defines input values for the provider based on data from the context.
@@ -121,11 +121,11 @@ public class DataProviderCallSettings {
         });
     }
 
-    private void checkConstantAssignmentForNonNullValue(GenericDataProviderSettings providerConf, ViolationBuilder vios, @NotBlank String varName, String value, String type) {
+    private void checkConstantAssignmentForNonNullValue(GenericDataProviderSettings providerConf, ViolationBuilder vios, @NotBlank String varName, Object value, String type) {
         Class<?> typeClass;
         if (AutoboxingHelper.isPrimitiveType(type) || AutoboxingHelper.isWrapperType(type)) {
             typeClass = AutoboxingHelper.getWrapperClass(type);
-            if (value.isEmpty()) {
+            if (value instanceof String && ((String) value).isEmpty()) {
                 vios.message("The input '{var}' of '{provider}' cannot be empty as it is a primitive or wrapper type ('{type}')!")
                         .parameter("var", varName)
                         .parameter("provider", provider)
@@ -136,7 +136,7 @@ public class DataProviderCallSettings {
             typeClass = CommonUtils.locateTypeWithinImports(type, null, providerConf.getImports());
         }
         if (typeClass == null) {
-            vios.message("The input '{var}' of '{provider}' cannot be specified as a non-null constant value, as it has type '{type}'!")
+            vios.message("The input '{var}' of '{provider}' cannot be specified as a non-null constant value, as it has the unknown type '{type}'!")
                     .parameter("var", varName)
                     .parameter("provider", provider)
                     .parameter("type", type)
@@ -145,25 +145,25 @@ public class DataProviderCallSettings {
             try {
                 getConstantInputAsType(varName, typeClass);
             } catch (Exception e) {
-                vios.message("The given value '{value}' for input '{var}' of '{provider}' cannot be converted to '{type}': {message}")
+                vios.message("The given value '{value}' for input '{var}' of '{provider}' cannot be converted to '{type}': {errorMsg}")
                         .parameter("value", value)
                         .parameter("var", varName)
                         .parameter("provider", provider)
                         .parameter("type", type)
-                        .parameter("message", e.getMessage())
+                        .parameter("errorMsg", e.getMessage())
                         .buildAndPublish();
             }
         }
     }
 
     public <T> T getConstantInputAsType(String variable, Class<T> targetType) throws ConversionException {
-        String value = constantInput.get(variable);
+        Object value = constantInput.get(variable);
         if (value == null) {
             return null;
         } else {
             ConversionService conversionService = new ApplicationConversionService();
-            if (!conversionService.canConvert(String.class, targetType)) {
-                throw new IllegalArgumentException("Cannot parse '" + targetType.getName() + "' from a String!");
+            if (!conversionService.canConvert(value.getClass(), targetType)) {
+                throw new IllegalArgumentException("Cannot parse '" + targetType.getName() + "' from a '" + value.getClass() + "'!");
             }
             return conversionService.convert(value, targetType);
         }

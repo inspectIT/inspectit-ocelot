@@ -285,5 +285,29 @@ public class DataProviderCallSettingsValidationUnitTest {
             List<ConstraintViolation<InstrumentationSettings>> violations = new ArrayList<>(validator.validate(instr));
             assertThat(violations).hasSize(0);
         }
+
+        @Test
+        void testMapToListAssignment() {
+            provider.setImports(Arrays.asList("java.time"));
+            HashMap<String, String> nested = new HashMap<>();
+            nested.put("0", "firstEntry");
+            nested.put("1", "secondEntry");
+            provider.getInput().put("p1", "java.util.List");
+            call.getConstantInput().put("p1", nested);
+            List<ConstraintViolation<InstrumentationSettings>> violations = new ArrayList<>(validator.validate(instr));
+            assertThat(violations).hasSize(0);
+        }
+
+        @Test
+        void testMapToMapAssignment() {
+            provider.setImports(Arrays.asList("java.time"));
+            HashMap<String, String> nested = new HashMap<>();
+            nested.put("firstKey", "firstEntry");
+            nested.put("secondKey", "secondEntry");
+            provider.getInput().put("p1", "java.util.Map");
+            call.getConstantInput().put("p1", nested);
+            List<ConstraintViolation<InstrumentationSettings>> violations = new ArrayList<>(validator.validate(instr));
+            assertThat(violations).hasSize(0);
+        }
     }
 }
