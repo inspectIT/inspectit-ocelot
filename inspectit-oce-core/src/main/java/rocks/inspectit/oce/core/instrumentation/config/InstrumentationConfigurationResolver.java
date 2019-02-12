@@ -1,5 +1,6 @@
 package rocks.inspectit.oce.core.instrumentation.config;
 
+import com.google.common.annotations.VisibleForTesting;
 import lombok.Getter;
 import lombok.val;
 import net.bytebuddy.description.type.TypeDescription;
@@ -160,7 +161,9 @@ public class InstrumentationConfigurationResolver {
      * @param config configuration to check for
      * @return true, if the class is ignored (=it should not be instrumented)
      */
-    private boolean isIgnoredClass(Class<?> clazz, InstrumentationConfiguration config) {
+    @VisibleForTesting
+    boolean isIgnoredClass(Class<?> clazz, InstrumentationConfiguration config) {
+
         if (!instrumentation.isModifiableClass(clazz)) {
             return true;
         }
@@ -174,7 +177,7 @@ public class InstrumentationConfigurationResolver {
         }
 
         String name = clazz.getName();
-        boolean isIgnored = env.getCurrentConfig().getInstrumentation().getIgnoredPackages().entrySet().stream()
+        boolean isIgnored = config.getSource().getIgnoredPackages().entrySet().stream()
                 .filter(Map.Entry::getValue)
                 .anyMatch(e -> name.startsWith(e.getKey()));
         if (isIgnored) {
@@ -182,7 +185,7 @@ public class InstrumentationConfigurationResolver {
         }
 
         if (clazz.getClassLoader() == null) {
-            boolean isIgnoredOnBootstrap = env.getCurrentConfig().getInstrumentation().getIgnoredBootstrapPackages().entrySet().stream()
+            boolean isIgnoredOnBootstrap = config.getSource().getIgnoredBootstrapPackages().entrySet().stream()
                     .filter(Map.Entry::getValue)
                     .anyMatch(e -> name.startsWith(e.getKey()));
             if (isIgnoredOnBootstrap) {
