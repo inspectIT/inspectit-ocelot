@@ -41,6 +41,13 @@ public class InstrumentationSettings {
     private Map<@NotBlank String, Boolean> ignoredBootstrapPackages;
 
     /**
+     * Defines which packages of all class loaders should not be instrumented.
+     * All classes from the given packages and their subpackages will be ignored.
+     */
+    @NotNull
+    private Map<@NotBlank String, Boolean> ignoredPackages;
+
+    /**
      * All defined custom data providers, the key defines their name.
      * The name is case sensitive!
      */

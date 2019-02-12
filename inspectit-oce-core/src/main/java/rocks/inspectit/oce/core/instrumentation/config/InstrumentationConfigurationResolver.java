@@ -1,5 +1,6 @@
 package rocks.inspectit.oce.core.instrumentation.config;
 
+import com.google.common.annotations.VisibleForTesting;
 import lombok.Getter;
 import lombok.val;
 import net.bytebuddy.description.type.TypeDescription;
@@ -90,7 +91,7 @@ public class InstrumentationConfigurationResolver {
     }
 
     /**
-     * Narrows a rule for a specific type. The rules existing in the returned set are containing only {@link InstrumentationScope}s
+     * Narrows a rule for a specific type. The rules existing in the returned set are containing only {@link rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationScope}s
      * which are matching for the given type. This prevents that method matchers will be applied to the wrong types.
      *
      * @param typeDescription the class which are the rules targeting
@@ -160,7 +161,9 @@ public class InstrumentationConfigurationResolver {
      * @param config configuration to check for
      * @return true, if the class is ignored (=it should not be instrumented)
      */
-    private boolean isIgnoredClass(Class<?> clazz, InstrumentationConfiguration config) {
+    @VisibleForTesting
+    boolean isIgnoredClass(Class<?> clazz, InstrumentationConfiguration config) {
+
         if (!instrumentation.isModifiableClass(clazz)) {
             return true;
         }
@@ -172,12 +175,20 @@ public class InstrumentationConfigurationResolver {
         if (clazz.getClassLoader() == INSPECTIT_CLASSLOADER) {
             return true;
         }
+
+        String name = clazz.getName();
+        boolean isIgnored = config.getSource().getIgnoredPackages().entrySet().stream()
+                .filter(Map.Entry::getValue)
+                .anyMatch(e -> name.startsWith(e.getKey()));
+        if (isIgnored) {
+            return true;
+        }
+
         if (clazz.getClassLoader() == null) {
-            String name = clazz.getName();
-            boolean isIgnored = env.getCurrentConfig().getInstrumentation().getIgnoredBootstrapPackages().entrySet().stream()
+            boolean isIgnoredOnBootstrap = config.getSource().getIgnoredBootstrapPackages().entrySet().stream()
                     .filter(Map.Entry::getValue)
                     .anyMatch(e -> name.startsWith(e.getKey()));
-            if (isIgnored) {
+            if (isIgnoredOnBootstrap) {
                 return true;
             }
         }
