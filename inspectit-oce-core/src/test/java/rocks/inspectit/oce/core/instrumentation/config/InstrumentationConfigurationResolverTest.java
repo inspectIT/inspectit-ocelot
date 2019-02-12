@@ -44,17 +44,26 @@ class InstrumentationConfigurationResolverTest {
     @InjectMocks
     private InstrumentationConfigurationResolver resolver;
 
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    InstrumentationSettings settings;
+
+    InstrumentationConfiguration config;
+
+    @BeforeEach
+    void setupInstrumentationMock() {
+        when(instrumentation.isModifiableClass(any())).thenReturn(true);
+        when(settings.getIgnoredBootstrapPackages()).thenReturn(Collections.emptyMap());
+        when(settings.getIgnoredPackages()).thenReturn(Collections.emptyMap());
+
+        config = InstrumentationConfiguration.builder().source(settings).build();
+    }
+
     @Nested
     public class GetClassInstrumentationConfiguration {
 
         @Test
         public void emptyRules() throws IllegalAccessException {
-            InstrumentationConfiguration configuration =
-                    InstrumentationConfiguration.builder().build();
-            FieldUtils.writeDeclaredField(resolver, "currentConfig", configuration, true);
-
-            when(instrumentation.isModifiableClass(any())).thenReturn(true);
-            when(env.getCurrentConfig().getInstrumentation().getIgnoredBootstrapPackages()).thenReturn(Collections.emptyMap());
+            FieldUtils.writeDeclaredField(resolver, "currentConfig", config, true);
 
             ClassInstrumentationConfiguration result = resolver.getClassInstrumentationConfiguration(Object.class);
 
@@ -67,11 +76,8 @@ class InstrumentationConfigurationResolverTest {
         public void matchingRule() throws IllegalAccessException {
             InstrumentationScope scope = new InstrumentationScope(ElementMatchers.any(), ElementMatchers.any());
             InstrumentationRule rule = new InstrumentationRule("name", Collections.singleton(scope));
-            InstrumentationConfiguration configuration = InstrumentationConfiguration.builder().rule(rule).build();
-            FieldUtils.writeDeclaredField(resolver, "currentConfig", configuration, true);
-
-            when(instrumentation.isModifiableClass(any())).thenReturn(true);
-            when(env.getCurrentConfig().getInstrumentation().getIgnoredBootstrapPackages()).thenReturn(Collections.emptyMap());
+            config = InstrumentationConfiguration.builder().source(settings).rule(rule).build();
+            FieldUtils.writeDeclaredField(resolver, "currentConfig", config, true);
 
             ClassInstrumentationConfiguration result = resolver.getClassInstrumentationConfiguration(Object.class);
 
@@ -89,11 +95,8 @@ class InstrumentationConfigurationResolverTest {
             InstrumentationScope scopeA = new InstrumentationScope(ElementMatchers.nameEndsWithIgnoreCase("object"), ElementMatchers.any());
             InstrumentationScope scopeB = new InstrumentationScope(ElementMatchers.named("not.Matching"), ElementMatchers.any());
             InstrumentationRule rule = new InstrumentationRule("name", new HashSet<>(Arrays.asList(scopeA, scopeB)));
-            InstrumentationConfiguration configuration = InstrumentationConfiguration.builder().rule(rule).build();
-            FieldUtils.writeDeclaredField(resolver, "currentConfig", configuration, true);
-
-            when(instrumentation.isModifiableClass(any())).thenReturn(true);
-            when(env.getCurrentConfig().getInstrumentation().getIgnoredBootstrapPackages()).thenReturn(Collections.emptyMap());
+            config = InstrumentationConfiguration.builder().source(settings).rule(rule).build();
+            FieldUtils.writeDeclaredField(resolver, "currentConfig", config, true);
 
             ClassInstrumentationConfiguration result = resolver.getClassInstrumentationConfiguration(Object.class);
 
@@ -110,21 +113,6 @@ class InstrumentationConfigurationResolverTest {
 
     @Nested
     class IsIgnoredClass {
-
-
-        @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-        InstrumentationSettings settings;
-
-        InstrumentationConfiguration config;
-
-        @BeforeEach
-        void setupInstrumentationMock() {
-            when(instrumentation.isModifiableClass(any())).thenReturn(true);
-            when(settings.getIgnoredBootstrapPackages()).thenReturn(Collections.emptyMap());
-            when(settings.getIgnoredPackages()).thenReturn(Collections.emptyMap());
-
-            config = InstrumentationConfiguration.builder().source(settings).build();
-        }
 
         @Test
         void testNonModifiableCLassesIgnored() {
