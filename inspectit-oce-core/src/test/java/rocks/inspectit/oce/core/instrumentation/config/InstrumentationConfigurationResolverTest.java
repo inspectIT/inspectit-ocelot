@@ -10,6 +10,7 @@ import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import rocks.inspectit.oce.bootstrap.instrumentation.DoNotInstrumentMarker;
 import rocks.inspectit.oce.core.config.InspectitEnvironment;
 import rocks.inspectit.oce.core.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.oce.core.instrumentation.FakeExecutor;
@@ -160,5 +161,23 @@ class InstrumentationConfigurationResolverTest {
             assertThat(resolver.isIgnoredClass(copied, config)).isTrue();
         }
 
+        @Test
+        void testDoNotInstrumentMarkerWorks() throws Exception {
+            DummyClassLoader dcl = new DummyClassLoader(getClass().getClassLoader(), IgnoredClass.class, NotIgnoredClass.class);
+            Class<?> ignored = Class.forName(IgnoredClass.class.getName(), false, dcl);
+            Class<?> notIgnored = Class.forName(NotIgnoredClass.class.getName(), false, dcl);
+
+            assertThat(resolver.isIgnoredClass(ignored, config)).isTrue();
+            assertThat(resolver.isIgnoredClass(notIgnored, config)).isFalse();
+        }
+
     }
+}
+
+class IgnoredClass implements DoNotInstrumentMarker {
+
+}
+
+class NotIgnoredClass {
+
 }
