@@ -49,7 +49,7 @@ public class InstrumentationSettings {
      * All classes from the given packages and their subpackages will be ignored.
      */
     @NotNull
-    private Map<@NotBlank String, Boolean> ignoredPackages;
+    private Map<@NotBlank String, Boolean> ignoredPackages = Collections.emptyMap();
 
     /**
      * All defined custom data providers, the key defines their name.

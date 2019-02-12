@@ -19,7 +19,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-public class DataProviderCallSettingsValidationUnitTest {
+public class DataProviderCallSettingsTest {
 
     private static Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
@@ -27,6 +27,7 @@ public class DataProviderCallSettingsValidationUnitTest {
     InstrumentationSettings instr;
 
     DataProviderCallSettings call;
+
     GenericDataProviderSettings provider;
 
     @BeforeEach
@@ -56,7 +57,9 @@ public class DataProviderCallSettingsValidationUnitTest {
         @Test
         void testNonExistingProvider() {
             call.setProvider("blabla");
+
             List<ConstraintViolation<InstrumentationSettings>> violations = new ArrayList<>(validator.validate(instr));
+
             assertThat(violations).hasSize(1);
             assertThat(violations.get(0).getMessage()).containsIgnoringCase("blabla");
             assertThat(violations.get(0).getMessage()).containsIgnoringCase("provider");
@@ -72,7 +75,9 @@ public class DataProviderCallSettingsValidationUnitTest {
             provider.getInput().put("my-prop", "String");
             call.getConstantInput().put("my-prop", "value");
             call.getDataInput().put("my-prop", "my_data_key");
+
             List<ConstraintViolation<InstrumentationSettings>> violations = new ArrayList<>(validator.validate(instr));
+
             assertThat(violations).hasSize(1);
             assertThat(violations.get(0).getMessage()).containsIgnoringCase("same variable");
         }
@@ -86,7 +91,9 @@ public class DataProviderCallSettingsValidationUnitTest {
             provider.getInput().put("my-prop", "String");
             provider.getInput().put("other-prop", "String");
             call.getConstantInput().put("my-prop", "value");
+
             List<ConstraintViolation<InstrumentationSettings>> violations = new ArrayList<>(validator.validate(instr));
+
             assertThat(violations).hasSize(1);
             assertThat(violations.get(0).getMessage()).containsIgnoringCase("other-prop");
         }
@@ -94,7 +101,9 @@ public class DataProviderCallSettingsValidationUnitTest {
         @Test
         void testSpecialNotCountedAsAssignment() {
             provider.getInput().put("returnValue", "String");
+
             List<ConstraintViolation<InstrumentationSettings>> violations = new ArrayList<>(validator.validate(instr));
+
             assertThat(violations).hasSize(0);
         }
     }
@@ -107,7 +116,9 @@ public class DataProviderCallSettingsValidationUnitTest {
             provider.getInput().put("p1", "String");
             call.getConstantInput().put("p1", "value");
             call.getConstantInput().put("P1", "other-value");
+
             List<ConstraintViolation<InstrumentationSettings>> violations = new ArrayList<>(validator.validate(instr));
+
             assertThat(violations).hasSize(1);
             assertThat(violations.get(0).getMessage()).containsIgnoringCase("P1");
         }
@@ -115,7 +126,9 @@ public class DataProviderCallSettingsValidationUnitTest {
         @Test
         void testSpecialNotCountedAsAssignment() {
             provider.getInput().put("returnValue", "String");
+
             List<ConstraintViolation<InstrumentationSettings>> violations = new ArrayList<>(validator.validate(instr));
+
             assertThat(violations).hasSize(0);
         }
     }
@@ -131,7 +144,9 @@ public class DataProviderCallSettingsValidationUnitTest {
             call.getConstantInput().put("my-prop", "value");
             call.getConstantInput().put("arg3", "value");
             call.getDataInput().put("thrown", "my_data_key");
+
             List<ConstraintViolation<InstrumentationSettings>> violations = new ArrayList<>(validator.validate(instr));
+
             assertThat(violations).hasSize(2);
             assertThat(violations.get(0).getMessage()).containsIgnoringCase("special");
             assertThat(violations.get(1).getMessage()).containsIgnoringCase("special");
@@ -145,7 +160,9 @@ public class DataProviderCallSettingsValidationUnitTest {
         void testConstantStringAssignment() {
             provider.getInput().put("my-prop", "String");
             call.getConstantInput().put("my-prop", "myValue");
+
             List<ConstraintViolation<InstrumentationSettings>> violations = new ArrayList<>(validator.validate(instr));
+
             assertThat(violations).hasSize(0);
         }
 
@@ -153,7 +170,9 @@ public class DataProviderCallSettingsValidationUnitTest {
         void testNullStringAssignment() {
             provider.getInput().put("my-prop", "String");
             call.getConstantInput().put("my-prop", null);
+
             List<ConstraintViolation<InstrumentationSettings>> violations = new ArrayList<>(validator.validate(instr));
+
             assertThat(violations).hasSize(0);
         }
 
@@ -162,7 +181,9 @@ public class DataProviderCallSettingsValidationUnitTest {
         void testFloatToDoubleWrapperAssignment() {
             provider.getInput().put("p1", "Double");
             call.getConstantInput().put("p1", "2.05E-5f");
+
             List<ConstraintViolation<InstrumentationSettings>> violations = new ArrayList<>(validator.validate(instr));
+
             assertThat(violations).hasSize(0);
         }
 
@@ -171,7 +192,9 @@ public class DataProviderCallSettingsValidationUnitTest {
         void testFloatToDoublePrimitiveAssignment() {
             provider.getInput().put("p1", "double");
             call.getConstantInput().put("p1", "2.05E-5f");
+
             List<ConstraintViolation<InstrumentationSettings>> violations = new ArrayList<>(validator.validate(instr));
+
             assertThat(violations).hasSize(0);
         }
 
@@ -180,7 +203,9 @@ public class DataProviderCallSettingsValidationUnitTest {
         void testDoubleToFloatPrimitiveAssignment() {
             provider.getInput().put("p1", "double");
             call.getConstantInput().put("p1", " -2.05E5 ");
+
             List<ConstraintViolation<InstrumentationSettings>> violations = new ArrayList<>(validator.validate(instr));
+
             assertThat(violations).hasSize(0);
         }
 
@@ -188,7 +213,9 @@ public class DataProviderCallSettingsValidationUnitTest {
         void testNullToPrimitiveAssignment() {
             provider.getInput().put("p1", "byte");
             call.getConstantInput().put("p1", null);
+
             List<ConstraintViolation<InstrumentationSettings>> violations = new ArrayList<>(validator.validate(instr));
+
             assertThat(violations).hasSize(1);
             assertThat(violations.get(0).getMessage()).containsIgnoringCase("null");
             assertThat(violations.get(0).getMessage()).containsIgnoringCase("primitive");
@@ -198,7 +225,9 @@ public class DataProviderCallSettingsValidationUnitTest {
         void testNullToWrapperAssignment() {
             provider.getInput().put("p1", "java.lang.Byte");
             call.getConstantInput().put("p1", null);
+
             List<ConstraintViolation<InstrumentationSettings>> violations = new ArrayList<>(validator.validate(instr));
+
             assertThat(violations).hasSize(0);
         }
 
@@ -206,7 +235,9 @@ public class DataProviderCallSettingsValidationUnitTest {
         void testEmptyIntegerAssignment() {
             provider.getInput().put("p1", "Integer");
             call.getConstantInput().put("p1", "");
+
             List<ConstraintViolation<InstrumentationSettings>> violations = new ArrayList<>(validator.validate(instr));
+
             assertThat(violations).hasSize(1);
         }
 
@@ -214,7 +245,9 @@ public class DataProviderCallSettingsValidationUnitTest {
         void testInvalidIntegerAssignment() {
             provider.getInput().put("p1", "Integer");
             call.getConstantInput().put("p1", "14notanumber5");
+
             List<ConstraintViolation<InstrumentationSettings>> violations = new ArrayList<>(validator.validate(instr));
+
             assertThat(violations).hasSize(1);
         }
 
@@ -223,7 +256,9 @@ public class DataProviderCallSettingsValidationUnitTest {
         void testCorrectCharacterAssignment() {
             provider.getInput().put("p1", "char");
             call.getConstantInput().put("p1", "X");
+
             List<ConstraintViolation<InstrumentationSettings>> violations = new ArrayList<>(validator.validate(instr));
+
             assertThat(violations).hasSize(0);
         }
 
@@ -231,7 +266,9 @@ public class DataProviderCallSettingsValidationUnitTest {
         void testEmptyCharacterAssignment() {
             provider.getInput().put("p1", "char");
             call.getConstantInput().put("p1", "");
+
             List<ConstraintViolation<InstrumentationSettings>> violations = new ArrayList<>(validator.validate(instr));
+
             assertThat(violations).hasSize(1);
         }
 
@@ -239,7 +276,9 @@ public class DataProviderCallSettingsValidationUnitTest {
         void testTooLongCharacterAssignment() {
             provider.getInput().put("p1", "char");
             call.getConstantInput().put("p1", "AB");
+
             List<ConstraintViolation<InstrumentationSettings>> violations = new ArrayList<>(validator.validate(instr));
+
             assertThat(violations).hasSize(1);
         }
 
@@ -247,7 +286,9 @@ public class DataProviderCallSettingsValidationUnitTest {
         void testUnknownTypeNonNullAssignment() {
             provider.getInput().put("p1", "my.package.DomainObject");
             call.getConstantInput().put("p1", "blabla");
+
             List<ConstraintViolation<InstrumentationSettings>> violations = new ArrayList<>(validator.validate(instr));
+
             assertThat(violations).hasSize(1);
         }
 
@@ -255,7 +296,9 @@ public class DataProviderCallSettingsValidationUnitTest {
         void testUnknownTypeNullAssignment() {
             provider.getInput().put("p1", "my.package.DomainObject");
             call.getConstantInput().put("p1", null);
+
             List<ConstraintViolation<InstrumentationSettings>> violations = new ArrayList<>(validator.validate(instr));
+
             assertThat(violations).hasSize(0);
         }
 
@@ -264,7 +307,9 @@ public class DataProviderCallSettingsValidationUnitTest {
             provider.setImports(Arrays.asList("java.util"));
             provider.getInput().put("p1", "Map");
             call.getConstantInput().put("p1", "I'm a map");
+
             List<ConstraintViolation<InstrumentationSettings>> violations = new ArrayList<>(validator.validate(instr));
+
             assertThat(violations).hasSize(1);
         }
 
@@ -273,7 +318,9 @@ public class DataProviderCallSettingsValidationUnitTest {
             provider.setImports(Arrays.asList("java.util"));
             provider.getInput().put("p1", "Date");
             call.getConstantInput().put("p1", "22/05/1950 10:00:42");
+
             List<ConstraintViolation<InstrumentationSettings>> violations = new ArrayList<>(validator.validate(instr));
+
             assertThat(violations).hasSize(0);
         }
 
@@ -282,7 +329,9 @@ public class DataProviderCallSettingsValidationUnitTest {
             provider.setImports(Arrays.asList("java.time"));
             provider.getInput().put("p1", "Duration");
             call.getConstantInput().put("p1", "15s");
+
             List<ConstraintViolation<InstrumentationSettings>> violations = new ArrayList<>(validator.validate(instr));
+
             assertThat(violations).hasSize(0);
         }
 
@@ -294,7 +343,9 @@ public class DataProviderCallSettingsValidationUnitTest {
             nested.put("1", "secondEntry");
             provider.getInput().put("p1", "java.util.List");
             call.getConstantInput().put("p1", nested);
+
             List<ConstraintViolation<InstrumentationSettings>> violations = new ArrayList<>(validator.validate(instr));
+
             assertThat(violations).hasSize(0);
         }
 
@@ -306,7 +357,9 @@ public class DataProviderCallSettingsValidationUnitTest {
             nested.put("secondKey", "secondEntry");
             provider.getInput().put("p1", "java.util.Map");
             call.getConstantInput().put("p1", nested);
+
             List<ConstraintViolation<InstrumentationSettings>> violations = new ArrayList<>(validator.validate(instr));
+
             assertThat(violations).hasSize(0);
         }
     }
