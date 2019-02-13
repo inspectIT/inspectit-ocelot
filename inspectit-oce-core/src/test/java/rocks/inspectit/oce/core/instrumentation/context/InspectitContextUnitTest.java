@@ -48,7 +48,8 @@ public class InspectitContextUnitTest {
             tags.put("tagB", "valueB");
             when(commonTags.getCommonTagValueMap()).thenReturn(tags);
 
-            InspectitContext ctx = InspectitContext.createAndEnter(commonTags, propagation);
+            InspectitContext ctx = InspectitContext.createFromCurrent(commonTags, propagation, true);
+            ctx.makeCurrent(true);
 
             assertThat(ctx.getData("tagA")).isEqualTo("valueA");
             assertThat(ctx.getData("tagB")).isEqualTo("valueB");
@@ -66,9 +67,12 @@ public class InspectitContextUnitTest {
             when(commonTags.getCommonTagValueMap()).thenReturn(tags);
             when(propagation.isPropagatedDownWithinJVM(any())).thenReturn(true);
 
-            InspectitContext ctxA = InspectitContext.createAndEnter(commonTags, propagation);
+            InspectitContext ctxA = InspectitContext.createFromCurrent(commonTags, propagation, true);
             ctxA.setData("tagB", "overwritten");
-            InspectitContext ctxB = InspectitContext.createAndEnter(commonTags, propagation);
+            ctxA.makeCurrent(true);
+
+            InspectitContext ctxB = InspectitContext.createFromCurrent(commonTags, propagation, true);
+            ctxB.makeCurrent(true);
 
             assertThat(ctxB.getData("tagA")).isEqualTo("valueA");
             assertThat(ctxB.getData("tagB")).isEqualTo("overwritten");
@@ -85,12 +89,17 @@ public class InspectitContextUnitTest {
             when(commonTags.getCommonTagValueMap()).thenReturn(Collections.emptyMap());
             when(propagation.isPropagatedDownWithinJVM(any())).thenReturn(true);
 
-            InspectitContext ctxA = InspectitContext.createAndEnter(commonTags, propagation);
+            InspectitContext ctxA = InspectitContext.createFromCurrent(commonTags, propagation, true);
             ctxA.setData("keyA", "ctxA_valueA");
             ctxA.setData("keyB", "ctxA_valueB");
-            InspectitContext ctxB = InspectitContext.createAndEnter(commonTags, propagation);
+            ctxA.makeCurrent(true);
+
+            InspectitContext ctxB = InspectitContext.createFromCurrent(commonTags, propagation, true);
             ctxB.setData("keyB", "ctxB_valueB");
-            InspectitContext ctxC = InspectitContext.createAndEnter(commonTags, propagation);
+            ctxB.makeCurrent(true);
+
+            InspectitContext ctxC = InspectitContext.createFromCurrent(commonTags, propagation, true);
+            ctxC.makeCurrent(true);
 
             assertThat(ctxA.getData("keyA")).isEqualTo("ctxA_valueA");
             assertThat(ctxA.getData("keyB")).isEqualTo("ctxA_valueB");
@@ -119,12 +128,17 @@ public class InspectitContextUnitTest {
             doReturn(true).when(propagation).isPropagatedDownWithinJVM(eq("keyA"));
             doReturn(false).when(propagation).isPropagatedDownWithinJVM(eq("keyB"));
 
-            InspectitContext ctxA = InspectitContext.createAndEnter(commonTags, propagation);
+            InspectitContext ctxA = InspectitContext.createFromCurrent(commonTags, propagation, true);
             ctxA.setData("keyA", "ctxA_valueA");
             ctxA.setData("keyB", "ctxA_valueB");
-            InspectitContext ctxB = InspectitContext.createAndEnter(commonTags, propagation);
+            ctxA.makeCurrent(true);
+
+            InspectitContext ctxB = InspectitContext.createFromCurrent(commonTags, propagation, true);
             ctxB.setData("keyB", "ctxB_valueB");
-            InspectitContext ctxC = InspectitContext.createAndEnter(commonTags, propagation);
+            ctxB.makeCurrent(true);
+
+            InspectitContext ctxC = InspectitContext.createFromCurrent(commonTags, propagation, true);
+            ctxC.makeCurrent(true);
 
             assertThat(ctxA.getData("keyA")).isEqualTo("ctxA_valueA");
             assertThat(ctxA.getData("keyB")).isEqualTo("ctxA_valueB");
@@ -152,18 +166,22 @@ public class InspectitContextUnitTest {
 
             when(commonTags.getCommonTagValueMap()).thenReturn(Collections.emptyMap());
 
-            InspectitContext firstContext = InspectitContext.createAndEnter(commonTags, propagation);
+            InspectitContext firstContext = InspectitContext.createFromCurrent(commonTags, propagation, true);
+            firstContext.makeCurrent(true);
 
-            InspectitContext upPropagationBarrierContext = InspectitContext.createAndEnter(commonTags, propagation);
+            InspectitContext childContext = InspectitContext.createFromCurrent(commonTags, propagation, true);
+            childContext.makeCurrent(true);
             WeakReference<InspectitContext> firstContextWeak = new WeakReference<>(firstContext);
 
-            InspectitContext asyncContext = InspectitContext.createAndEnter(commonTags, propagation);
+            InspectitContext asyncContext = InspectitContext.createFromCurrent(commonTags, propagation, true);
 
-            upPropagationBarrierContext.close();
+            childContext.close();
             firstContext.close();
             firstContext = null;
 
             GcUtils.waitUntilCleared(firstContextWeak);
+
+            asyncContext.makeCurrent(true);
             asyncContext.close();
 
         }
@@ -180,9 +198,12 @@ public class InspectitContextUnitTest {
             doReturn(true).when(propagation).isPropagatedUpWithinJVM(eq("tag1"));
             doReturn(false).when(propagation).isPropagatedUpWithinJVM(eq("tag2"));
 
-            InspectitContext ctxA = InspectitContext.createAndEnter(commonTags, propagation);
-            InspectitContext ctxB = InspectitContext.createAndEnter(commonTags, propagation);
-            InspectitContext ctxC = InspectitContext.createAndEnter(commonTags, propagation);
+            InspectitContext ctxA = InspectitContext.createFromCurrent(commonTags, propagation, true);
+            ctxA.makeCurrent(true);
+            InspectitContext ctxB = InspectitContext.createFromCurrent(commonTags, propagation, true);
+            ctxB.makeCurrent(true);
+            InspectitContext ctxC = InspectitContext.createFromCurrent(commonTags, propagation, true);
+            ctxC.makeCurrent(true);
 
             ctxC.setData("tag1", "ctxC_value1");
             ctxC.setData("tag2", "ctxC_value2");
@@ -227,14 +248,16 @@ public class InspectitContextUnitTest {
             doReturn(true).when(propagation).isPropagatedDownWithinJVM(eq("tag1"));
             doReturn(false).when(propagation).isPropagatedDownWithinJVM(eq("tag2"));
 
-            InspectitContext ctxA = InspectitContext.createAndEnter(commonTags, propagation);
+            InspectitContext ctxA = InspectitContext.createFromCurrent(commonTags, propagation, true);
             ctxA.setData("tag2", "ctxA_value2");
-            InspectitContext ctxB = InspectitContext.createAndEnter(commonTags, propagation);
+            ctxA.makeCurrent(true);
+            InspectitContext ctxB = InspectitContext.createFromCurrent(commonTags, propagation, true);
             ctxB.setData("tag2", "ctxB_value2");
-            InspectitContext ctxC = InspectitContext.createAndEnter(commonTags, propagation);
+            ctxB.makeCurrent(true);
+            InspectitContext ctxC = InspectitContext.createFromCurrent(commonTags, propagation, true);
             ctxC.setData("tag2", "ctxC_value2");
-
             ctxC.setData("tag1", "ctxC_value1");
+            ctxC.makeCurrent(true);
 
             assertThat(ctxA.getData("tag1")).isNull();
             assertThat(ctxA.getData("tag2")).isEqualTo("ctxA_value2");
@@ -253,10 +276,12 @@ public class InspectitContextUnitTest {
             assertThat(ctxB.getData("tag1")).isEqualTo("ctxC_value1");
             assertThat(ctxB.getData("tag2")).isEqualTo("ctxB_value2");
 
-            InspectitContext ctxC2 = InspectitContext.createAndEnter(commonTags, propagation);
+            InspectitContext ctxC2 = InspectitContext.createFromCurrent(commonTags, propagation, true);
+            ctxC2.makeCurrent(true);
 
             assertThat(ctxB.getData("tag1")).isEqualTo("ctxC_value1");
-            assertThat(ctxC2.getData("tag1")).isEqualTo("ctxC_value1");
+            //up propagation is not visible to newly opened children
+            assertThat(ctxC2.getData("tag1")).isNull();
             assertThat(ctxC2.getData("tag2")).isNull();
 
             ctxC2.setData("tag1", "ctxC2_value1");
@@ -288,13 +313,13 @@ public class InspectitContextUnitTest {
             TagContextBuilder tcb = Tags.getTagger().emptyBuilder()
                     .put(TagKey.create("myTag"), TagValue.create("myValue"));
             try (Scope tc = tcb.buildScoped()) {
-                InspectitContext ctxA = InspectitContext.createAndEnter(commonTags, propagation);
+                InspectitContext ctxA = InspectitContext.createFromCurrent(commonTags, propagation, true);
                 assertThat(ctxA.getData("myTag")).isEqualTo("myValue");
 
-                ctxA.enterTagContextWithOnlyDownPropagatedData();
+                ctxA.makeCurrent(true);
+
                 assertThat(getCurrentTagsAsMap()).hasSize(1);
                 assertThat(getCurrentTagsAsMap()).containsEntry("myTag", "myValue");
-                ctxA.exitTagContextWithOnlyDownPropagation();
 
                 ctxA.close();
             }
@@ -308,27 +333,25 @@ public class InspectitContextUnitTest {
             doReturn(true).when(propagation).isPropagatedDownWithinJVM(any());
             doReturn(true).when(propagation).isTag(any());
 
-            InspectitContext root = InspectitContext.createAndEnter(commonTags, propagation);
+            InspectitContext root = InspectitContext.createFromCurrent(commonTags, propagation, true);
             root.setData("rootKey", "rootValue");
 
-            root.enterTagContextWithOnlyDownPropagatedData();
+            root.makeCurrent(true);
 
             TagContextBuilder tcb = Tags.getTagger().emptyBuilder()
                     .put(TagKey.create("myTag"), TagValue.create("myValue"));
             try (Scope tc = tcb.buildScoped()) {
-                InspectitContext ctxA = InspectitContext.createAndEnter(commonTags, propagation);
+                InspectitContext ctxA = InspectitContext.createFromCurrent(commonTags, propagation, true);
                 assertThat(ctxA.getData("myTag")).isEqualTo("myValue");
 
-                ctxA.enterTagContextWithOnlyDownPropagatedData();
+                ctxA.makeCurrent(true);
                 assertThat(getCurrentTagsAsMap()).hasSize(2);
                 assertThat(getCurrentTagsAsMap()).containsEntry("myTag", "myValue");
                 assertThat(getCurrentTagsAsMap()).containsEntry("rootKey", "rootValue");
-                ctxA.exitTagContextWithOnlyDownPropagation();
 
                 ctxA.close();
             }
 
-            root.exitTagContextWithOnlyDownPropagation();
             root.close();
             assertThat(InspectitContext.INSPECTIT_KEY.get()).isNull();
         }
@@ -340,16 +363,15 @@ public class InspectitContextUnitTest {
             doReturn(true).when(propagation).isPropagatedDownWithinJVM(any());
             doReturn(true).when(propagation).isTag(eq("my_tag"));
 
-            InspectitContext root = InspectitContext.createAndEnter(commonTags, propagation);
+            InspectitContext root = InspectitContext.createFromCurrent(commonTags, propagation, true);
             root.setData("my_tag", "tagValue");
             root.setData("my_hidden", "hiddenValue");
 
-            root.enterTagContextWithOnlyDownPropagatedData();
+            root.makeCurrent(true);
 
             assertThat(getCurrentTagsAsMap()).hasSize(1);
             assertThat(getCurrentTagsAsMap()).containsEntry("my_tag", "tagValue");
 
-            root.exitTagContextWithOnlyDownPropagation();
             root.close();
             assertThat(InspectitContext.INSPECTIT_KEY.get()).isNull();
         }
@@ -361,12 +383,12 @@ public class InspectitContextUnitTest {
             doReturn(true).when(propagation).isPropagatedDownWithinJVM(any());
             doReturn(true).when(propagation).isTag(any());
 
-            InspectitContext root = InspectitContext.createAndEnter(commonTags, propagation);
+            InspectitContext root = InspectitContext.createFromCurrent(commonTags, propagation, true);
             root.setData("rootKey", "rootValue");
             root.setData("myTag", "rootValue");
             root.setData("longKey", 42L);
 
-            root.enterTagContextWithOnlyDownPropagatedData();
+            root.makeCurrent(true);
 
             TagContextBuilder tcb = Tags.getTagger().currentBuilder()
                     .put(TagKey.create("myTag"), TagValue.create("myValue"));
@@ -375,7 +397,8 @@ public class InspectitContextUnitTest {
                 Map<String, String> currentTagsAsMap = getCurrentTagsAsMap();
                 assertThat(currentTagsAsMap).containsEntry("longKey", "42");
 
-                InspectitContext ctxA = InspectitContext.createAndEnter(commonTags, propagation);
+                InspectitContext ctxA = InspectitContext.createFromCurrent(commonTags, propagation, true);
+                ctxA.makeCurrent(true);
                 assertThat(ctxA.getData("myTag")).isEqualTo("myValue");
                 assertThat(ctxA.getData("rootKey")).isEqualTo("rootValue");
                 assertThat(ctxA.getData("longKey")).isEqualTo(42L);
@@ -383,7 +406,6 @@ public class InspectitContextUnitTest {
                 ctxA.close();
             }
 
-            root.exitTagContextWithOnlyDownPropagation();
             root.close();
             assertThat(InspectitContext.INSPECTIT_KEY.get()).isNull();
         }
@@ -398,14 +420,13 @@ public class InspectitContextUnitTest {
             doReturn(true).when(propagation).isPropagatedDownWithinJVM(any());
             doReturn(true).when(propagation).isTag(any());
 
-            InspectitContext ctx = InspectitContext.createAndEnter(commonTags, propagation);
-            ctx.enterTagContextWithOnlyDownPropagatedData();
+            InspectitContext ctx = InspectitContext.createFromCurrent(commonTags, propagation, true);
+            ctx.makeCurrent(true);
 
             assertThat(getCurrentTagsAsMap()).hasSize(2);
             assertThat(getCurrentTagsAsMap()).containsEntry("tagA", "valueA");
             assertThat(getCurrentTagsAsMap()).containsEntry("tagB", "valueB");
 
-            ctx.exitTagContextWithOnlyDownPropagation();
             ctx.close();
             assertThat(InspectitContext.INSPECTIT_KEY.get()).isNull();
         }
@@ -418,17 +439,16 @@ public class InspectitContextUnitTest {
             doReturn(true).when(propagation).isPropagatedDownWithinJVM(eq("global"));
             doReturn(true).when(propagation).isTag(any());
 
-            InspectitContext ctx = InspectitContext.createAndEnter(commonTags, propagation);
+            InspectitContext ctx = InspectitContext.createFromCurrent(commonTags, propagation, true);
             ctx.setData("local", "localValue");
             ctx.setData("global", "globalValue");
 
-            ctx.enterTagContextWithOnlyDownPropagatedData();
+            ctx.makeCurrent(true);
 
             assertThat(getCurrentTagsAsMap()).hasSize(1);
             assertThat(getCurrentTagsAsMap()).containsEntry("global", "globalValue");
 
-            ctx.exitTagContextWithOnlyDownPropagation();
-            try (Scope scope = ctx.enterTagScopeWithAllData()) {
+            try (Scope scope = ctx.enterTagScopeWithOverrides()) {
                 assertThat(getCurrentTagsAsMap()).hasSize(2);
                 assertThat(getCurrentTagsAsMap()).containsEntry("local", "localValue");
                 assertThat(getCurrentTagsAsMap()).containsEntry("global", "globalValue");
@@ -440,75 +460,32 @@ public class InspectitContextUnitTest {
 
 
         @Test
-        void verifyUpPropagatedValuesAvailable() {
+        void verifyUpPropagatedValuesNotAvailable() {
             when(commonTags.getCommonTagValueMap()).thenReturn(Collections.emptyMap());
             doReturn(true).when(propagation).isPropagatedDownWithinJVM(any());
             doReturn(true).when(propagation).isPropagatedUpWithinJVM(any());
             doReturn(true).when(propagation).isTag(any());
 
-            InspectitContext ctx = InspectitContext.createAndEnter(commonTags, propagation);
+            InspectitContext ctx = InspectitContext.createFromCurrent(commonTags, propagation, true);
             ctx.setData("rootKey1", "rootValue1");
             ctx.setData("rootKey2", "rootValue2");
 
-            ctx.enterTagContextWithOnlyDownPropagatedData();
+            ctx.makeCurrent(true);
 
             assertThat(getCurrentTagsAsMap()).hasSize(2);
             assertThat(getCurrentTagsAsMap()).containsEntry("rootKey1", "rootValue1");
             assertThat(getCurrentTagsAsMap()).containsEntry("rootKey2", "rootValue2");
 
-            InspectitContext nested = InspectitContext.createAndEnter(commonTags, propagation);
+            InspectitContext nested = InspectitContext.createFromCurrent(commonTags, propagation, true);
+            nested.makeCurrent(true);
             nested.setData("rootKey1", "nestedValue1");
             nested.setData("nestedKey2", "nestedValue2");
             nested.close();
 
-            assertThat(getCurrentTagsAsMap()).hasSize(3);
-            assertThat(getCurrentTagsAsMap()).containsEntry("rootKey1", "nestedValue1");
+            assertThat(getCurrentTagsAsMap()).hasSize(2);
+            assertThat(getCurrentTagsAsMap()).containsEntry("rootKey1", "rootValue1");
             assertThat(getCurrentTagsAsMap()).containsEntry("rootKey2", "rootValue2");
-            assertThat(getCurrentTagsAsMap()).containsEntry("nestedKey2", "nestedValue2");
 
-            ctx.exitTagContextWithOnlyDownPropagation();
-            ctx.close();
-            assertThat(InspectitContext.INSPECTIT_KEY.get()).isNull();
-        }
-
-        @Test
-        void verifyUpPropagatedInterferenceHandled() {
-            //this test case test how the context deals with the problem that values cannot be upropagated correctly
-            // due to the fact that a custom user tagcontext was opened in between
-            when(commonTags.getCommonTagValueMap()).thenReturn(Collections.emptyMap());
-
-            doReturn(true).when(propagation).isPropagatedDownWithinJVM(any());
-            doReturn(true).when(propagation).isPropagatedUpWithinJVM(any());
-            doReturn(true).when(propagation).isTag(any());
-
-            InspectitContext ctx = InspectitContext.createAndEnter(commonTags, propagation);
-            ctx.setData("rootKey1", "rootValue1");
-            ctx.setData("rootKey2", "rootValue2");
-
-            ctx.enterTagContextWithOnlyDownPropagatedData();
-
-            try (Scope ts = Tags.getTagger().currentBuilder().put(TagKey.create("customKey"), TagValue.create("customValue")).buildScoped()) {
-                InspectitContext nested = InspectitContext.createAndEnter(commonTags, propagation);
-                nested.setData("rootKey1", "nestedValue1");
-                nested.setData("nestedKey2", "nestedValue2");
-                nested.close();
-
-                InspectitContext nested2 = InspectitContext.createAndEnter(commonTags, propagation);
-
-                nested2.enterTagContextWithOnlyDownPropagatedData();
-                assertThat(getCurrentTagsAsMap()).hasSize(4);
-                assertThat(getCurrentTagsAsMap()).containsEntry("rootKey1", "nestedValue1");
-                assertThat(getCurrentTagsAsMap()).containsEntry("rootKey2", "rootValue2");
-                assertThat(getCurrentTagsAsMap()).containsEntry("nestedKey2", "nestedValue2");
-                assertThat(getCurrentTagsAsMap()).containsEntry("customKey", "customValue");
-
-                nested2.exitTagContextWithOnlyDownPropagation();
-                nested2.close();
-
-            }
-
-
-            ctx.exitTagContextWithOnlyDownPropagation();
             ctx.close();
             assertThat(InspectitContext.INSPECTIT_KEY.get()).isNull();
         }
@@ -519,14 +496,14 @@ public class InspectitContextUnitTest {
             doReturn(true).when(propagation).isPropagatedDownWithinJVM(any());
             doReturn(true).when(propagation).isTag(any());
 
-            InspectitContext ctx = InspectitContext.createAndEnter(commonTags, propagation);
+            InspectitContext ctx = InspectitContext.createFromCurrent(commonTags, propagation, true);
             ctx.setData("d1", "string");
             ctx.setData("d2", 1);
             ctx.setData("d3", 2L);
             ctx.setData("d4", 2.0);
             ctx.setData("d5", new HashMap<>());
 
-            ctx.enterTagContextWithOnlyDownPropagatedData();
+            ctx.makeCurrent(true);
 
             assertThat(getCurrentTagsAsMap()).hasSize(4);
             assertThat(getCurrentTagsAsMap()).containsEntry("d1", "string");
@@ -534,8 +511,7 @@ public class InspectitContextUnitTest {
             assertThat(getCurrentTagsAsMap()).containsEntry("d3", "2");
             assertThat(getCurrentTagsAsMap()).containsEntry("d4", "2.0");
 
-            ctx.exitTagContextWithOnlyDownPropagation();
-            try (Scope scope = ctx.enterTagScopeWithAllData()) {
+            try (Scope scope = ctx.enterTagScopeWithOverrides()) {
 
                 assertThat(getCurrentTagsAsMap()).hasSize(4);
                 assertThat(getCurrentTagsAsMap()).containsEntry("d1", "string");

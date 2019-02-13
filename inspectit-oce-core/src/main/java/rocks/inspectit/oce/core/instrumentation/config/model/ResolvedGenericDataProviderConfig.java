@@ -13,7 +13,7 @@ import java.util.SortedMap;
 /**
  * Contains all properties necessary for defining a {@link IGenericDataProvider}.
  * Instances of this class are derived by the {@link rocks.inspectit.oce.core.instrumentation.config.InstrumentationConfigurationResolver} from
- * corresponding {@link rocks.inspectit.oce.core.config.model.instrumentation.GenericDataProviderConfig} objects.
+ * corresponding {@link rocks.inspectit.oce.core.config.model.instrumentation.dataproviders.GenericDataProviderSettings} objects.
  */
 @Value
 @Builder

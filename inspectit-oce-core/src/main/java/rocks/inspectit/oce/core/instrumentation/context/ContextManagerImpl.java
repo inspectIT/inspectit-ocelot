@@ -3,7 +3,6 @@ package rocks.inspectit.oce.core.instrumentation.context;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import io.grpc.Context;
-import lombok.val;
 import rocks.inspectit.oce.bootstrap.context.ContextManager;
 import rocks.inspectit.oce.core.config.spring.BootstrapInitializerConfiguration;
 import rocks.inspectit.oce.core.instrumentation.config.InstrumentationConfigurationResolver;
@@ -39,27 +38,17 @@ public class ContextManagerImpl implements ContextManager {
 
     @Override
     public Runnable wrap(Runnable r) {
-        Runnable result;
-        try (val upPropagationBarrier = enterNewContext()) {
-            result = Context.current().wrap(r);
-        }
-        return result;
+        return Context.current().wrap(r);
     }
 
     @Override
     public <T> Callable<T> wrap(Callable<T> callable) {
-        Callable<T> result;
-        try (val upPropagationBarrier = enterNewContext()) {
-            result = Context.current().wrap(callable);
-        }
-        return result;
+        return Context.current().wrap(callable);
     }
 
     @Override
     public void storeContextForThread(Thread thread) {
-        try (val upPropagationBarrier = enterNewContext()) {
-            storedContexts.put(thread, Context.current());
-        }
+        storedContexts.put(thread, Context.current());
     }
 
     @Override
@@ -71,7 +60,7 @@ public class ContextManagerImpl implements ContextManager {
         }
     }
 
-    public InspectitContext enterNewContext() {
-        return InspectitContext.createAndEnter(commonTags, configProvider.getCurrentConfig().getDataProperties());
+    public InspectitContext createFromCurrent() {
+        return InspectitContext.createFromCurrent(commonTags, configProvider.getCurrentConfig().getDataProperties(), true);
     }
 }
