@@ -59,8 +59,4 @@ public class ContextManager implements IContextManager {
             context.attach();
         }
     }
-
-    public InspectitContext createFromCurrent() {
-        return InspectitContext.createFromCurrent(commonTagsManager, configProvider.getCurrentConfig().getDataProperties(), true);
-    }
 }

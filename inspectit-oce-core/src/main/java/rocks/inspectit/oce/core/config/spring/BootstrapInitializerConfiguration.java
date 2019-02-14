@@ -1,6 +1,5 @@
 package rocks.inspectit.oce.core.config.spring;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import rocks.inspectit.oce.bootstrap.Instances;
@@ -23,7 +22,7 @@ import javax.annotation.PreDestroy;
 public class BootstrapInitializerConfiguration {
 
     @Bean(ContextManager.BEAN_NAME)
-    public ContextManager getContextManager(@Autowired CommonTagsManager commonTagsManager, @Autowired InstrumentationConfigurationResolver config) {
+    public ContextManager getContextManager(CommonTagsManager commonTagsManager, InstrumentationConfigurationResolver config) {
         ContextManager contextManager = new ContextManager(commonTagsManager, config);
         Instances.contextManager = contextManager;
         return contextManager;

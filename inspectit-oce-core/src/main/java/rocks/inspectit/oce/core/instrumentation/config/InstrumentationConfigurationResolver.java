@@ -13,7 +13,6 @@ import rocks.inspectit.oce.bootstrap.instrumentation.DoNotInstrumentMarker;
 import rocks.inspectit.oce.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.oce.core.config.InspectitEnvironment;
 import rocks.inspectit.oce.core.config.model.instrumentation.InstrumentationSettings;
-import rocks.inspectit.oce.core.config.model.instrumentation.data.DataSettings;
 import rocks.inspectit.oce.core.instrumentation.AsyncClassTransformer;
 import rocks.inspectit.oce.core.instrumentation.config.event.InstrumentationConfigurationChangedEvent;
 import rocks.inspectit.oce.core.instrumentation.config.model.ClassInstrumentationConfiguration;
@@ -161,10 +160,8 @@ public class InstrumentationConfigurationResolver {
 
     @VisibleForTesting
     ResolvedDataProperties resolveDataProperties(InstrumentationSettings source) {
-        val defaultSettings = new DataSettings();
         val builder = ResolvedDataProperties.builder();
         source.getData().entrySet().stream()
-                .filter(e -> !defaultSettings.equals(e.getValue()))
                 .forEach(e -> builder.data(e.getKey(), e.getValue()));
         return builder.build();
     }

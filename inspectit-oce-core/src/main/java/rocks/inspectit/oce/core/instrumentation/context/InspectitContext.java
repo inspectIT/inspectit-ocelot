@@ -22,10 +22,10 @@ import java.util.stream.Stream;
  * This context inherits all down-propagated data from the currently active context as well as all tags from the active TagContext.
  * In the entry phase, the contexts data can be altered via {@link #setData(String, Object)}, even though the context is not yet active.
  * <p>
- * When {@link #makeActive(boolean)} is called, the current context transitions from the "Entry" to the "Active" state.
+ * When {@link #makeActive()} is called, the current context transitions from the "Entry" to the "Active" state.
  * This means that the data the context stores is now immutable and also published as TagContext.
  * In addition, the context now replaces its parent in GRPC, so that all newly created contexts will be children of this one.
- * There is one exception to the data immutabiltiy: child contexts perform the data up-propagation during this contexts active phase.
+ * There is one exception to the data immutability: child contexts perform the data up-propagation during this contexts active phase.
  * <p>
  * All synchronous child contexts are opened and closed during the "active" phase of their parent.
  * When such a child context is closed, it writes the up-propagated data it changed to the parent by calling {@link #performUpPropagation(Map)}.
@@ -44,21 +44,21 @@ import java.util.stream.Stream;
  * This behaviour was chosen to prevent potential race conditions for asynchronous contexts.
  *
  * <p>
- * Finally the context wil lenter teh "Exit" phase after its method has terminated.
+ * Finally the context will enter the "Exit" phase after its method has terminated.
  * At this point, all synchronous child contexts have been created and closed, meaning that their values have been up-propagated.
  * During the exit phase, the contexts data can be modified again.
  * Note again that for any asynchronous child at any point of time the parent data will be visible as it was after the parents entry phase.
  * <p>
  * As noted previously the tag context opened by the context at the end of its entry phase will be stale for teh exit phase:
  * It does not contain any up-propagated data, neither does it contain any changes performed during the exit phase.
- * For this reason, an up-to-date tag context can be acquired using {@link #enterNewTagScope()} within which then metrics can be collected.
+ * For this reason, an up-to-date tag context can be acquired using {@link #enterFullTagScope()} within which then metrics can be collected.
  * <p>
  * Finally a context finishes the exit phase with a call to {@link #close()}
  * If the context is synchronous, it will perform its up-propagation.
  * In addition ,the tag-context opened by the call to makeActive will be closed and the
  * previous parent will be registered back in GRPC as active context.
  */
-public class InspectitContext implements AutoCloseable {
+public class InspectitContext {
 
     /**
      * We only allow "data" of the following types to be used as tags
@@ -71,24 +71,41 @@ public class InspectitContext implements AutoCloseable {
     static final Context.Key<InspectitContext> INSPECTIT_KEY = Context.key("inspectit-context");
 
     /**
-     * Points to the parent from which this context inherits its data and t owhich potential up-propagation is performed.
+     * Points to the parent from which this context inherits its data and to which potential up-propagation is performed.
+     * Is effectively final and never changes, except that it is set to null in {@link #close()} to prevent memory leaks.
      */
     private InspectitContext parent;
 
-    /**
-     * Holds the previosu GRPC context which was overriden when attaching this context as active in GRPC.
-     */
-    private Context overridenGrpcContext;
+    private final ResolvedDataProperties propagation;
 
     /**
-     * Holds the tag context which was opened by this context with the call to {@link #makeActive(boolean)}.
+     * Defines whether the context should interact with TagContexts opened by the instrumented application.
+     * <p>
+     * If this is true, the context will inherit all values from the current {@link TagContext} which was opened by the target application.
+     * In addition if this value is true makeActive will open a TagContext containing all down propagated tags stored in this InspectIT context.
+     */
+    private final boolean interactWithApplicationTagContexts;
+
+    /**
+     * Contains the thread in which this context was created.
+     * This is used to identify async traces by comparing their thread against the thread of their parent.
+     */
+    private final Thread openingThread;
+
+    /**
+     * Holds the previous GRPC context which was overridden when attaching this context as active in GRPC.
+     */
+    private Context overriddenGrpcContext;
+
+    /**
+     * Holds the tag context which was opened by this context with the call to {@link #makeActive()}.
      * If none was opened, this variable is null.
      * Note that this tag context is not necessarily owned by this {@link InspectitContext}.
      * If it did not change any value, the context can simply keep the current context and reference it using this variable.
      * <p>
      * The tag context is guaranteed to contain the same tags as returned by {@link #getPostEntryPhaseTags()}
      */
-    private TagContext activePhaseDownPropagationTagContext = null;
+    private TagContext activePhaseDownPropagationTagContext;
 
     /**
      * Marker variable to indicate that {@link #activePhaseDownPropagationTagContext} is stale.
@@ -96,32 +113,32 @@ public class InspectitContext implements AutoCloseable {
      * This variable is used to indicate for child contexts that they should not reuse activePhaseDownPropagationTagContext
      * but instead should open a new tag context.
      */
-    private boolean isActivePhaseDownPropagationTagContextStale = false;
+    private boolean isActivePhaseDownPropagationTagContextStale;
 
     /**
-     * If this context opened a new {@link #activePhaseDownPropagationTagContext} during {@link #makeActive(boolean)},
+     * If this context opened a new {@link #activePhaseDownPropagationTagContext} during {@link #makeActive()},
      * the corresponding scope is stored in this variable and will be used in {@link #close()} to clean up the context.
      */
-    private Scope openedDownPropagationScope = null;
+    private Scope openedDownPropagationScope;
 
     /**
      * When a new context is created, this map contains the down-propagated data it inherited from its parent context.
      * During the entry phase, data updates are written to {@link #dataOverwrites}
-     * When the entry phase terminates with a call to {@link #makeActive(boolean)}, this map is replaced with a new
-     * one containing also the down-proapgated data which has been newly written during the entry phase.
+     * When the entry phase terminates with a call to {@link #makeActive()}, this map is replaced with a new
+     * one containing also the down-propagated data which has been newly written during the entry phase.
      * <p>
-     * The underlying map must noch change after the entry phase has termianted!
+     * The underlying map must not change after the entry phase has terminated!
      * Asynchronous child context will use this map as source for down-propagated data!
      * <p>
      * Also, this map will never contain null values.
-     * When a data key is assigned the valeu "null", the key will simply be not present in this map.
+     * When a data key is assigned the value "null", the key will simply be not present in this map.
      */
     private Map<String, Object> postEntryPhaseDownPropagatedData;
 
     /**
-     * Contains all writes performed via {@link #setData(String, Object)} durign any life-cycle pahse of the context.
-     * This means that this map represents all data which has been altered durting the lifetiem of this context.
-     * This also incldues any writes performed due to the up-propagation of children.
+     * Contains all writes performed via {@link #setData(String, Object)} during any life-cycle phase of the context.
+     * This means that this map represents all data which has been altered during the lifetime of this context.
+     * This also includes any writes performed due to the up-propagation of children.
      * <p>
      * The combination of {@link #postEntryPhaseDownPropagatedData} overwritten by this map therefore presents all current data.
      * <p>
@@ -145,24 +162,17 @@ public class InspectitContext implements AutoCloseable {
      */
     private Map<String, Object> cachedActivePhaseDownPropagatedData = null;
 
-    private final ResolvedDataProperties propagation;
-
-    /**
-     * Contains the thread in which this context was created.
-     * This is used to identify async traces by comparing their thread against the thread of their parent.
-     */
-    private final Thread openingThread;
-
-    private InspectitContext(InspectitContext parent, ResolvedDataProperties propagation) {
+    private InspectitContext(InspectitContext parent, ResolvedDataProperties propagation, boolean interactWithApplicationTagContexts) {
         this.parent = parent;
         this.propagation = propagation;
+        this.interactWithApplicationTagContexts = interactWithApplicationTagContexts;
         dataOverwrites = new HashMap<>();
         openingThread = Thread.currentThread();
 
         if (parent == null) {
             postEntryPhaseDownPropagatedData = Collections.emptyMap();
         } else {
-            if (isAsync()) {
+            if (isInDifferentThreadThanParentOrIsParentClosed()) {
                 postEntryPhaseDownPropagatedData = parent.postEntryPhaseDownPropagatedData;
             } else {
                 //no copying required as the returned object is guaranteed to be immutable
@@ -177,18 +187,18 @@ public class InspectitContext implements AutoCloseable {
      *
      * @param commonTagsManager                  the provider for common tags used to populate the data if this is a root context
      * @param propagation                        the data propagation settings
-     * @param inheritValuesFromCurrentTagContext if true, data from the currently active {@link TagContext} will be inherited.
-     * @return
+     * @param interactWithApplicationTagContexts if true, data from the currently active {@link TagContext} will be inherited and makeActive will publish the data as a TagContext
+     * @return the newly created context
      */
-    public static InspectitContext createFromCurrent(CommonTagsManager commonTagsManager, ResolvedDataProperties propagation, boolean inheritValuesFromCurrentTagContext) {
+    public static InspectitContext createFromCurrent(CommonTagsManager commonTagsManager, ResolvedDataProperties propagation, boolean interactWithApplicationTagContexts) {
         InspectitContext parent = INSPECTIT_KEY.get();
-        InspectitContext result = new InspectitContext(parent, propagation);
+        InspectitContext result = new InspectitContext(parent, propagation, interactWithApplicationTagContexts);
 
         if (parent == null) {
             commonTagsManager.getCommonTagValueMap().forEach(result::setData);
         }
 
-        if (inheritValuesFromCurrentTagContext) {
+        if (interactWithApplicationTagContexts) {
             result.readOverridesFromCurrentTagContext();
         }
 
@@ -197,10 +207,8 @@ public class InspectitContext implements AutoCloseable {
 
     /**
      * Terminates this contexts entry-phase and makes it the currently active context.
-     *
-     * @param openTagContext if true, this context will open a {@link TagContext} containing its data for the active lifecycle phase.
      */
-    public void makeActive(boolean openTagContext) {
+    public void makeActive() {
 
         boolean anyDownPropagatedDataOverwritten = dataOverwrites.keySet().stream()
                 .anyMatch(propagation::isPropagatedDownWithinJVM);
@@ -211,9 +219,9 @@ public class InspectitContext implements AutoCloseable {
         }
         cachedActivePhaseDownPropagatedData = postEntryPhaseDownPropagatedData;
 
-        overridenGrpcContext = Context.current().withValue(INSPECTIT_KEY, this).attach();
+        overriddenGrpcContext = Context.current().withValue(INSPECTIT_KEY, this).attach();
 
-        if (openTagContext) {
+        if (interactWithApplicationTagContexts) {
             Tagger tagger = Tags.getTagger();
             //check if we can reuse the parent context
             if (anyDownPropagatedDataOverwritten || (parent != null && parent.isActivePhaseDownPropagationTagContextStale)) {
@@ -239,29 +247,30 @@ public class InspectitContext implements AutoCloseable {
     }
 
     /**
-     * @return true, if {@link #makeActive(boolean)} was called but {@link #close()} was not called yet
+     * @return true, if {@link #makeActive()} was called but {@link #close()} was not called yet
      */
     public boolean isInActiveOrExitPhase() {
-        return overridenGrpcContext != null;
+        return overriddenGrpcContext != null;
     }
 
     /**
-     * @return true, if this context is asynchronous and therefore performs no up propagation and only
-     * inherits the {@link #postEntryPhaseDownPropagatedData} from its parent.
+     * @return true, if this context should perform NO up propagation and only
+     * inherit the {@link #postEntryPhaseDownPropagatedData} from its parent.
      */
-    public boolean isAsync() {
+    private boolean isInDifferentThreadThanParentOrIsParentClosed() {
         return parent != null &&
                 (parent.openingThread != openingThread || !parent.isInActiveOrExitPhase());
     }
 
     /**
      * Enters a new tag scope, which contains the tags currently present in {@link #getData()}.
-     * In contrast to the tag scope opened by {@link #makeActive(boolean)} this tag scope will reflect
+     * In contrast to the tag scope opened by {@link #makeActive()} this tag scope will reflect
      * all recent updates performed through setData or via up-propagation.
+     * In addition, this tag scopes contains all tags for which down-propagation is set to false.
      *
      * @return the newly opened tag scope.
      */
-    public Scope enterNewTagScope() {
+    public Scope enterFullTagScope() {
         TagContextBuilder builder = Tags.getTagger().emptyBuilder();
         getDataAsStream()
                 .filter(e -> propagation.isTag(e.getKey()))
@@ -298,22 +307,21 @@ public class InspectitContext implements AutoCloseable {
 
     /**
      * Closes this context.
-     * If any {@link TagContext} was opened during {@link #makeActive(boolean)}, this context is also closed.
+     * If any {@link TagContext} was opened during {@link #makeActive()}, this context is also closed.
      * In addition up-propagation is performed if this context is not asynchronous.
      */
-    @Override
     public void close() {
         if (openedDownPropagationScope != null) {
             openedDownPropagationScope.close();
         }
-        Context.current().detach(overridenGrpcContext);
+        Context.current().detach(overriddenGrpcContext);
 
-        if (parent != null && !isAsync()) {
+        if (parent != null && !isInDifferentThreadThanParentOrIsParentClosed()) {
             parent.performUpPropagation(dataOverwrites);
         }
         //clear the references to prevent memory leaks
         parent = null;
-        overridenGrpcContext = null;
+        overriddenGrpcContext = null;
     }
 
     private void performUpPropagation(Map<String, Object> dataWrittenByChild) {
@@ -350,7 +358,7 @@ public class InspectitContext implements AutoCloseable {
                     setData(tag.getKey().getName(), tag.getValue().asString());
                 }
             } else {
-                // a new context was opeend between our parent and ourselves
+                // a new context was opened between our parent and ourselves
                 // we look for all values which have changed and inherit them
                 if (currentTags != parent.activePhaseDownPropagationTagContext) {
                     for (Iterator<Tag> it = InternalUtils.getTags(currentTags); it.hasNext(); ) {
