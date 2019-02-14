@@ -159,7 +159,8 @@ public class InstrumentationConfigurationResolver {
                 .build();
     }
 
-    private ResolvedDataProperties resolveDataProperties(InstrumentationSettings source) {
+    @VisibleForTesting
+    ResolvedDataProperties resolveDataProperties(InstrumentationSettings source) {
         val defaultSettings = new DataSettings();
         val builder = ResolvedDataProperties.builder();
         source.getData().entrySet().stream()
