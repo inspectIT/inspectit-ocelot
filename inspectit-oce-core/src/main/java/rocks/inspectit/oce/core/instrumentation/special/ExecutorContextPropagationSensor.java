@@ -9,14 +9,14 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.oce.bootstrap.Instances;
 import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationConfiguration;
-import rocks.inspectit.oce.core.instrumentation.context.ContextManagerImpl;
+import rocks.inspectit.oce.core.instrumentation.context.ContextManager;
 
 import java.util.concurrent.Executor;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
 @Component
-@DependsOn(ContextManagerImpl.BEAN_NAME)
+@DependsOn(ContextManager.BEAN_NAME)
 public class ExecutorContextPropagationSensor implements SpecialSensor {
 
     private static final ElementMatcher<TypeDescription> EXECUTER_CLASSES_MATCHER = isSubTypeOf(Executor.class);
@@ -44,7 +44,7 @@ public class ExecutorContextPropagationSensor implements SpecialSensor {
 
     private static class ExecutorAdvice {
         /**
-         * Wraps the given runnable of {@link java.util.concurrent.Executor#execute(Runnable)} via {@link ContextManagerImpl#wrap(Runnable)}}
+         * Wraps the given runnable of {@link java.util.concurrent.Executor#execute(Runnable)} via {@link ContextManager#wrap(Runnable)}}
          *
          * @param runnable
          */

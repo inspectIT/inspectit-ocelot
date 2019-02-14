@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import rocks.inspectit.oce.bootstrap.Instances;
-import rocks.inspectit.oce.bootstrap.context.ContextManager;
+import rocks.inspectit.oce.bootstrap.context.IContextManager;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -18,7 +18,7 @@ import static org.mockito.Mockito.*;
 class ScheduledExecutorContextPropagationSensorTest {
 
     @Mock
-    ContextManager contextManager;
+    IContextManager contextManager;
 
     @Nested
     public class ScheduledExecutorRunnableAdviceTest {

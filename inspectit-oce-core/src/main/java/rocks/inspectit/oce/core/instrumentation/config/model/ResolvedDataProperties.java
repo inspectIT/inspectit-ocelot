@@ -64,7 +64,7 @@ public class ResolvedDataProperties {
     public static class ResolvedDataPropertiesBuilder {
 
         public ResolvedDataPropertiesBuilder data(String key, DataSettings settings) {
-            if (!settings.getIsTag()) {
+            if (!settings.isTag()) {
                 notATag(key);
             }
             switch (settings.getDownPropagation()) {

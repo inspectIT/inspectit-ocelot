@@ -14,9 +14,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Configuration object for all settings regarding the instrumentation.
@@ -80,17 +78,6 @@ public class InstrumentationSettings {
      */
     @NotNull
     private Map<@NotBlank String, @Valid DataSettings> data = Collections.emptyMap();
-
-    /**
-     * Returns all data keys which have been mentioned at any location in this configuration.
-     *
-     * @return the set of keys
-     */
-    public Set<String> getAllDataKeys() {
-        HashSet<String> result = new HashSet<>(data.keySet());
-        rules.forEach((n, r) -> result.addAll(r.getAllDataKeys()));
-        return result;
-    }
 
     @AdditionalValidation
     public void performValidation(ViolationBuilder vios) {

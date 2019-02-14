@@ -13,12 +13,13 @@ import rocks.inspectit.oce.bootstrap.instrumentation.DoNotInstrumentMarker;
 import rocks.inspectit.oce.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.oce.core.config.InspectitEnvironment;
 import rocks.inspectit.oce.core.config.model.instrumentation.InstrumentationSettings;
+import rocks.inspectit.oce.core.config.model.instrumentation.data.DataSettings;
 import rocks.inspectit.oce.core.instrumentation.AsyncClassTransformer;
 import rocks.inspectit.oce.core.instrumentation.config.event.InstrumentationConfigurationChangedEvent;
 import rocks.inspectit.oce.core.instrumentation.config.model.ClassInstrumentationConfiguration;
 import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationConfiguration;
 import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationRule;
-import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationScope;
+import rocks.inspectit.oce.core.instrumentation.config.model.ResolvedDataProperties;
 import rocks.inspectit.oce.core.instrumentation.special.SpecialSensor;
 
 import javax.annotation.PostConstruct;
@@ -55,9 +56,6 @@ public class InstrumentationConfigurationResolver {
 
     @Autowired
     private DataProviderResolver dataProviderResolver;
-
-    @Autowired
-    private DataPropertiesResolver dataPropertiesResolver;
 
     /**
      * Holds the currently active instrumentation configuration.
@@ -157,8 +155,17 @@ public class InstrumentationConfigurationResolver {
                 .source(source)
                 .rules(ruleResolver.resolve(source))
                 .dataProviders(dataProviderResolver.resolveProviders(source))
-                .dataProperties(dataPropertiesResolver.resolve(source))
+                .dataProperties(resolveDataProperties(source))
                 .build();
+    }
+
+    private ResolvedDataProperties resolveDataProperties(InstrumentationSettings source) {
+        val defaultSettings = new DataSettings();
+        val builder = ResolvedDataProperties.builder();
+        source.getData().entrySet().stream()
+                .filter(e -> !defaultSettings.equals(e.getValue()))
+                .forEach(e -> builder.data(e.getKey(), e.getValue()));
+        return builder.build();
     }
 
 

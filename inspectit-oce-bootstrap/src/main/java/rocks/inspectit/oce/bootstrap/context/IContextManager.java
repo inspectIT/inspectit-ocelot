@@ -8,7 +8,7 @@ import java.util.concurrent.Callable;
  * - the tags
  * - the data-set
  */
-public interface ContextManager {
+public interface IContextManager {
 
     /**
      * Wraps the given runnable so that current context is used when the runnable is invoked.

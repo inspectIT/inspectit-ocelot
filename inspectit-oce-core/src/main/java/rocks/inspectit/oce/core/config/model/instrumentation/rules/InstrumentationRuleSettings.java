@@ -12,7 +12,6 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Data container for the configuration of a instrumentation rule. {@link rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationRule}
@@ -74,17 +73,6 @@ public class InstrumentationRuleSettings {
                             .parameter("scope", name)
                             .buildAndPublish();
                 });
-    }
-
-
-    /**
-     * Returns all data keys which have been mentioned at any location in this rule.
-     *
-     * @return the set of keys
-     */
-    public Set<String> getAllDataKeys() {
-        //TODO: perform implementation
-        return Collections.emptySet();
     }
 
 }
