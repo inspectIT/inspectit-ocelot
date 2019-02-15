@@ -1,6 +1,6 @@
 package rocks.inspectit.oce.bootstrap;
 
-import rocks.inspectit.oce.bootstrap.context.ContextManager;
+import rocks.inspectit.oce.bootstrap.context.IContextManager;
 import rocks.inspectit.oce.bootstrap.noop.NoopContextManager;
 
 /**
@@ -9,6 +9,6 @@ import rocks.inspectit.oce.bootstrap.noop.NoopContextManager;
  */
 public class Instances {
 
-    public static ContextManager contextManager = NoopContextManager.INSTANCE;
+    public static IContextManager contextManager = NoopContextManager.INSTANCE;
 
 }

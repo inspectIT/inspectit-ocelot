@@ -4,7 +4,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import rocks.inspectit.oce.bootstrap.Instances;
 import rocks.inspectit.oce.bootstrap.noop.NoopContextManager;
-import rocks.inspectit.oce.core.instrumentation.context.ContextManagerImpl;
+import rocks.inspectit.oce.core.instrumentation.config.InstrumentationConfigurationResolver;
+import rocks.inspectit.oce.core.instrumentation.context.ContextManager;
+import rocks.inspectit.oce.core.tags.CommonTagsManager;
 
 import javax.annotation.PreDestroy;
 
@@ -19,9 +21,9 @@ import javax.annotation.PreDestroy;
 @Configuration
 public class BootstrapInitializerConfiguration {
 
-    @Bean(ContextManagerImpl.BEAN_NAME)
-    public ContextManagerImpl getContextManager() {
-        ContextManagerImpl contextManager = new ContextManagerImpl();
+    @Bean(ContextManager.BEAN_NAME)
+    public ContextManager getContextManager(CommonTagsManager commonTagsManager, InstrumentationConfigurationResolver config) {
+        ContextManager contextManager = new ContextManager(commonTagsManager, config);
         Instances.contextManager = contextManager;
         return contextManager;
     }

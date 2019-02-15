@@ -18,6 +18,7 @@ import rocks.inspectit.oce.core.instrumentation.config.event.InstrumentationConf
 import rocks.inspectit.oce.core.instrumentation.config.model.ClassInstrumentationConfiguration;
 import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationConfiguration;
 import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationRule;
+import rocks.inspectit.oce.core.instrumentation.config.model.ResolvedDataProperties;
 import rocks.inspectit.oce.core.instrumentation.special.SpecialSensor;
 
 import javax.annotation.PostConstruct;
@@ -142,6 +143,9 @@ public class InstrumentationConfigurationResolver {
         if (!Objects.equals(oldConfig.getDataProviders(), newConfig.getDataProviders())) {
             return true;
         }
+        if (!Objects.equals(oldConfig.getData(), newConfig.getData())) {
+            return true;
+        }
         return false;
     }
 
@@ -150,7 +154,16 @@ public class InstrumentationConfigurationResolver {
                 .source(source)
                 .rules(ruleResolver.resolve(source))
                 .dataProviders(dataProviderResolver.resolveProviders(source))
+                .dataProperties(resolveDataProperties(source))
                 .build();
+    }
+
+    @VisibleForTesting
+    ResolvedDataProperties resolveDataProperties(InstrumentationSettings source) {
+        val builder = ResolvedDataProperties.builder();
+        source.getData().entrySet().stream()
+                .forEach(e -> builder.data(e.getKey(), e.getValue()));
+        return builder.build();
     }
 
 

@@ -107,6 +107,10 @@ inspectit:
       # defines how often after the last invocation of a ClassFileTransformer the agent scans for new classes
       num-class-discovery-trials: 2
 
+    data:
+      method_name:
+        down-propagation: NONE
+
     #definition of commonly used data providers
     data-providers:
 

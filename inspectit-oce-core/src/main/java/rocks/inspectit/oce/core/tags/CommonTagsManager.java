@@ -21,6 +21,12 @@ public class CommonTagsManager {
     private final List<ITagsProvider> providers = new CopyOnWriteArrayList<>();
 
     /**
+     * All common tags a simple String map.
+     */
+    @Getter
+    private Map<String, String> commonTagValueMap;
+
+    /**
      * OpenCensus tag context representing common tag context.
      */
     @Getter
@@ -92,19 +98,21 @@ public class CommonTagsManager {
      */
     private void createCommonTagContext() {
         // first create map of tags based on the providers priority
-        Map<String, String> all = new HashMap<>();
+        Map<String, String> newCommonTagValueMap = new HashMap<>();
         providers.stream()
                 .sorted(Comparator.comparingInt(ITagsProvider::getPriority).reversed())
-                .forEach(provider -> provider.getTags().forEach(all::putIfAbsent));
+                .forEach(provider -> provider.getTags().forEach(newCommonTagValueMap::putIfAbsent));
 
         // then create key/value tags pairs for resolved map
-        commonTagKeys = new ArrayList<>();
+        List<TagKey> newCommonTagKeys = new ArrayList<>();
         TagContextBuilder tagContextBuilder = Tags.getTagger().emptyBuilder();
-        all.forEach((k, v) -> {
+        newCommonTagValueMap.forEach((k, v) -> {
             TagKey key = TagKey.create(k);
-            commonTagKeys.add(key);
+            newCommonTagKeys.add(key);
             tagContextBuilder.put(key, TagValue.create(v));
         });
+        commonTagKeys = newCommonTagKeys;
+        commonTagValueMap = newCommonTagValueMap;
         commonTagContext = tagContextBuilder.build();
     }
 

@@ -9,7 +9,7 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.oce.bootstrap.Instances;
 import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationConfiguration;
-import rocks.inspectit.oce.core.instrumentation.context.ContextManagerImpl;
+import rocks.inspectit.oce.core.instrumentation.context.ContextManager;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ScheduledExecutorService;
@@ -28,7 +28,7 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
  * </ul><p>
  */
 @Component
-@DependsOn(ContextManagerImpl.BEAN_NAME)
+@DependsOn(ContextManager.BEAN_NAME)
 public class ScheduledExecutorContextPropagationSensor implements SpecialSensor {
 
     private static final ElementMatcher<TypeDescription> CLASSES_MATCHER = isSubTypeOf(ScheduledExecutorService.class);

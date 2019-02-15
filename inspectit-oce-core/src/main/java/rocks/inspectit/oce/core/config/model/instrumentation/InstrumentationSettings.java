@@ -2,6 +2,7 @@ package rocks.inspectit.oce.core.config.model.instrumentation;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import rocks.inspectit.oce.core.config.model.instrumentation.data.DataSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.dataproviders.GenericDataProviderSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.rules.InstrumentationRuleSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.scope.InstrumentationScopeSettings;
@@ -58,6 +59,7 @@ public class InstrumentationSettings {
     @NotNull
     private Map<@NotBlank String, @Valid GenericDataProviderSettings> dataProviders = Collections.emptyMap();
 
+
     /**
      * The configuration of the defined scopes. The map's key represents an unique id for the related instrumentation scope.
      */
@@ -69,6 +71,13 @@ public class InstrumentationSettings {
      */
     @NotNull
     private Map<@NotBlank String, @Valid InstrumentationRuleSettings> rules = Collections.emptyMap();
+
+    /**
+     * Defines the behaviour of the data regarding context propagation.
+     * E.g. is data propagated up and/or down, is it visible as a Tag for metrics collection?
+     */
+    @NotNull
+    private Map<@NotBlank String, @Valid DataSettings> data = Collections.emptyMap();
 
     @AdditionalValidation
     public void performValidation(ViolationBuilder vios) {

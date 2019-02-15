@@ -1,15 +1,15 @@
 package rocks.inspectit.oce.bootstrap.noop;
 
-import rocks.inspectit.oce.bootstrap.context.ContextManager;
+import rocks.inspectit.oce.bootstrap.context.IContextManager;
 
 import java.util.concurrent.Callable;
 
 /**
- * No-operations implementation of the {@link ContextManager}. This will be used if there is no inspectIT agent available.
+ * No-operations implementation of the {@link IContextManager}. This will be used if there is no inspectIT agent available.
  */
-public class NoopContextManager implements ContextManager {
+public class NoopContextManager implements IContextManager {
 
-    public static final ContextManager INSTANCE = new NoopContextManager();
+    public static final IContextManager INSTANCE = new NoopContextManager();
 
     private NoopContextManager() {
     }
