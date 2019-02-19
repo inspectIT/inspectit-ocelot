@@ -154,7 +154,7 @@ public class HookManager implements IClassDiscoveryListener {
                     checkedClassesCount, watch.elapsed(TimeUnit.MILLISECONDS), pendingClasses.size());
         }
 
-        // selfMonitorQueueSize();
+        selfMonitorQueueSize();
     }
 
     private void updateHooksForClass(Class<?> clazz) {
