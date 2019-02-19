@@ -1,4 +1,4 @@
-package rocks.inspectit.oce.core.instrumentation.hook;
+package rocks.inspectit.oce.core.testutils;
 
 public class Dummy {
 

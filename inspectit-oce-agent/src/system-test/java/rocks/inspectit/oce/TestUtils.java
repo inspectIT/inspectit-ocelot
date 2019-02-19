@@ -5,7 +5,11 @@ import io.opencensus.stats.AggregationData;
 import io.opencensus.stats.Stats;
 import io.opencensus.stats.View;
 import io.opencensus.stats.ViewManager;
+import io.opencensus.tags.InternalUtils;
+import io.opencensus.tags.Tags;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -32,10 +36,19 @@ public class TestUtils {
         await().atMost(30, TimeUnit.SECONDS).ignoreExceptions().untilAsserted(() -> {
             assertThat(getInstrumentationClassesCount()).isGreaterThan(0);
             assertThat(getInstrumentationQueueLength()).isZero();
+            assertThat(getHookingQueueLength()).isZero();
             Thread.sleep(200); //to ensure that new-class-discovery has been executed
             assertThat(getInstrumentationQueueLength()).isZero();
+            assertThat(getHookingQueueLength()).isZero();
         });
 
+    }
+
+    public static Map<String, String> getCurrentTagsAsMap() {
+        Map<String, String> result = new HashMap<>();
+        InternalUtils.getTags(Tags.getTagger().getCurrentTagContext())
+                .forEachRemaining(t -> result.put(t.getKey().getName(), t.getValue().asString()));
+        return result;
     }
 
     private static long getInstrumentationQueueLength() {
@@ -43,6 +56,17 @@ public class TestUtils {
         AggregationData.LastValueDataLong queueSize =
                 (AggregationData.LastValueDataLong)
                         viewManager.getView(View.Name.create("inspectit/self/instrumentation-analysis-queue-size"))
+                                .getAggregationMap().values().stream()
+                                .findFirst()
+                                .get();
+        return queueSize.getLastValue();
+    }
+
+    private static long getHookingQueueLength() {
+        ViewManager viewManager = Stats.getViewManager();
+        AggregationData.LastValueDataLong queueSize =
+                (AggregationData.LastValueDataLong)
+                        viewManager.getView(View.Name.create("inspectit/self/instrumentation-hooking-queue-size"))
                                 .getAggregationMap().values().stream()
                                 .findFirst()
                                 .get();

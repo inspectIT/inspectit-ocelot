@@ -1,7 +1,11 @@
 package rocks.inspectit.oce.core.instrumentation.config.model;
 
 import lombok.Builder;
+import lombok.Singular;
 import lombok.Value;
+import org.apache.commons.lang3.tuple.Pair;
+
+import java.util.List;
 
 /**
  * The configuration used to build a {@link rocks.inspectit.oce.core.instrumentation.hook.MethodHook}
@@ -10,4 +14,18 @@ import lombok.Value;
 @Builder
 @Value
 public class MethodHookConfiguration {
+
+    /**
+     * The ordered list of data assignments performed on method entry.
+     * The first argument of the pair is the key of the data, the second is the data provider.
+     */
+    @Singular
+    List<Pair<String, ResolvedDataProviderCall>> entryProviders;
+
+    /**
+     * The ordered list of data assignments performed on method exit.
+     * The first argument of the pair is the key of the data, the second is the data provider.
+     */
+    @Singular
+    List<Pair<String, ResolvedDataProviderCall>> exitProviders;
 }

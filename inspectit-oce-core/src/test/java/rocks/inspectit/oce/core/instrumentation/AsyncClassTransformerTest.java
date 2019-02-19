@@ -97,7 +97,7 @@ public class AsyncClassTransformerTest {
             when(mockSensor.instrument(any(), any(), any(), any())).then(invocation -> invocation.getArgument(3));
 
             InstrumentationScope scope = new InstrumentationScope(ElementMatchers.any(), ElementMatchers.any());
-            InstrumentationRule rule = new InstrumentationRule(null, Collections.singleton(scope));
+            InstrumentationRule rule = InstrumentationRule.builder().scope(scope).build();
 
             ClassInstrumentationConfiguration mockedConfig = new ClassInstrumentationConfiguration(
                     Collections.singleton(mockSensor), Collections.singleton(rule), null
@@ -171,7 +171,7 @@ public class AsyncClassTransformerTest {
             SpecialSensor mockSensor = Mockito.mock(SpecialSensor.class);
             when(mockSensor.instrument(any(), any(), any(), any())).then(invocation -> invocation.getArgument(3));
             InstrumentationScope scope = new InstrumentationScope(ElementMatchers.any(), ElementMatchers.any());
-            InstrumentationRule rule = new InstrumentationRule(null, Collections.singleton(scope));
+            InstrumentationRule rule = InstrumentationRule.builder().scope(scope).build();
 
             ClassInstrumentationConfiguration mockedConfig = new ClassInstrumentationConfiguration(
                     Collections.singleton(mockSensor), Collections.singleton(rule), null

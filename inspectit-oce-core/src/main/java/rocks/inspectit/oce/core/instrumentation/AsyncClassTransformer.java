@@ -174,10 +174,10 @@ public class AsyncClassTransformer implements ClassFileTransformer {
                 resultBytes = originalByteCode;
             } else {
                 if (log.isDebugEnabled()) {
-                    log.debug("Redefining class: {}", classBeingRedefined.getName());
+                    log.debug("Redefining class: {}", type.getName());
                 }
                 //Make a ByteBuddy builder based on the input bytecode
-                ClassFileLocator byteCodeClassFileLocator = ClassFileLocator.Simple.of(classBeingRedefined.getName(), originalByteCode);
+                ClassFileLocator byteCodeClassFileLocator = ClassFileLocator.Simple.of(type.getName(), originalByteCode);
                 DynamicType.Builder<?> builder = new ByteBuddy().redefine(classBeingRedefined, byteCodeClassFileLocator);
 
                 //Apply the actual instrumentation onto the builders
@@ -254,8 +254,10 @@ public class AsyncClassTransformer implements ClassFileTransformer {
                 classConf = ClassInstrumentationConfiguration.NO_INSTRUMENTATION;
             }
             if (classConf.isNoInstrumentation()) {
-                log.debug("Removing instrumentation of {}", classBeingRedefined);
-                instrumentedClasses.invalidate(classBeingRedefined);
+                if (instrumentedClasses.getIfPresent(classBeingRedefined) != null) {
+                    log.debug("Removing instrumentation of {}", classBeingRedefined);
+                    instrumentedClasses.invalidate(classBeingRedefined);
+                }
             } else {
                 log.debug("Applying instrumentation of {}", classBeingRedefined);
                 instrumentedClasses.put(classBeingRedefined, Boolean.TRUE);
