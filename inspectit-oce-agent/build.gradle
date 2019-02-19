@@ -1,3 +1,8 @@
+plugins {
+    id "me.champeau.gradle.jmh" version "0.4.7"
+}
+
+
 dependencies {
     compileOnly(
             project(':inspectit-oce-bootstrap'),
@@ -36,6 +41,7 @@ sourceSets {
 
 configurations {
     systemTestCompile.extendsFrom testImplementation
+    jmh.extendsFrom systemTestImplementation
 }
 
 dependencies {
@@ -56,11 +62,17 @@ dependencies {
 
             'org.apache.httpcomponents:httpclient:4.5.6'
     )
+
+    jmh(
+        sourceSets.systemTest.output,
+        project(':inspectit-oce-bootstrap')
+    )
 }
 
 if (!project.hasProperty("systemTestJavaHomes")) {
     ext.systemTestJavaHomes = "$System.env.JAVA_HOME"
 }
+def agentJarPath = jar.archivePath.toString()
 
 task systemTest {
 
@@ -78,8 +90,6 @@ task systemTest {
 
     assert javaExecutables.size > 0 :
             'No Java executables found for running system tests'
-
-    def agentJarPath = jar.archivePath.toString()
 
     javaExecutables.eachWithIndex { javaExecutable, index ->
         def paths = "${javaExecutable}".tokenize(File.separator)
@@ -137,3 +147,54 @@ task systemTest {
 }
 systemTest.mustRunAfter test
 check.dependsOn systemTest
+
+jmh {
+
+    /**
+     * Use -PjmhInclude='regular expression' to specify what tests to run with JMH.
+     */
+    if (project.hasProperty('jmhInclude')) {
+        String regex = project.getProperty('jmhInclude')
+        println "Filtering for JMH-Tests matching to regex: " + regex
+        include = [regex]
+    }
+
+    /**
+     * Use -jmhProfiler='profiler name and settings' to specify what profiler to run with JMH.
+     */
+    if (project.hasProperty('jmhProfiler')) {
+        String profiler = project.getProperty('jmhProfiler')
+        println "Using profiler for JMH tests: " + profiler
+        profilers = [profiler]
+    }
+
+    /**
+     * Use -jmhFlightRecorder=true to add Flight recorder options to the JVM args. You'll need openJDK 11 or OracleJDK 8.
+     */
+    def allJmvArgs = []
+    if (project.hasProperty('jmhFlightRecorder')) {
+        def recordingFile = "rec-jmh-${project.name}-${System.currentTimeMillis()}.jfr"
+        def frProperties = "-XX:StartFlightRecording=duration=10s,delay=10s,filename=${recordingFile}".toString()
+        allJmvArgs.addAll(['-XX:+UnlockCommercialFeatures', '-XX:+FlightRecorder', '-XX:+UnlockDiagnosticVMOptions', '-XX:+DebugNonSafepoints', frProperties, '-Djavax.xml.parsers.SAXParserFactory=com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl'])
+    }
+
+    String loggingPath = "-Dinspectit.logging.file.path=$buildDir/jmh/inspectit-logs".toString()
+    String configPath = "-Dinspectit.config.file-based.path=$projectDir/src/jmh/resources/config".toString()
+    String agentSetup = "-javaagent:${agentJarPath}".toString()
+
+    allJmvArgs.addAll([loggingPath, configPath, agentSetup])
+    jvmArgs = allJmvArgs
+
+    // output of results and duplicateClassesStrategy
+    humanOutputFile = file("$buildDir/jmh/human.txt")
+    resultsFile = file("$buildDir/jmh/results.txt")
+    duplicateClassesStrategy = DuplicatesStrategy.EXCLUDE
+
+    // shared settings if not defined on the class level
+    warmupIterations = 3
+    warmup = '3s'
+    iterations = 5
+    timeOnIteration = '3s'
+    fork = 1
+}
+tasks.jmh.dependsOn jar

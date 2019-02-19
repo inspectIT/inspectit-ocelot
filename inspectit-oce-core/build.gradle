@@ -2,29 +2,6 @@ plugins {
     id "me.champeau.gradle.jmh" version "0.4.7"
 }
 
-/**
- * JMH-Perf tests.
- */
-jmhJar {
-    doFirst {
-        duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
-    }
-}
-jmh {
-    /**
-     * Use -PjmhInclude='regular expression' to specify what tests to run with JMH.
-     */
-    if (project.hasProperty('jmhInclude')) {
-        def regex = project.getProperty('jmhInclude')
-        println "Filtering for JMH-Tests matching to regex " + regex
-        include = [regex]
-    }
-    humanOutputFile = file("$buildDir/jmh/human.txt")
-    resultsFile = file("$buildDir/jmh/results.txt")
-    duplicateClassesStrategy = DuplicatesStrategy.EXCLUDE
-    jmhVersion = '1.21'
-}
-
 configurations{
     opencensus
     testImplementation.extendsFrom opencensus
@@ -78,6 +55,10 @@ dependencies {
             'org.awaitility:awaitility:3.1.5'
     )
 
+    jmh (
+            project(':inspectit-oce-bootstrap')
+    )
+
 }
 
 task buildOpencensusFatJar(type: Jar) {
@@ -99,4 +80,54 @@ jar {
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
+}
+
+/**
+ * JMH-Perf tests.
+ */
+jmhJar {
+    doFirst {
+        duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+    }
+}
+jmh {
+
+    /**
+     * Use -PjmhInclude='regular expression' to specify what tests to run with JMH.
+     */
+    if (project.hasProperty('jmhInclude')) {
+        String regex = project.getProperty('jmhInclude')
+        println "Filtering for JMH-Tests matching to regex: " + regex
+        include = [regex]
+    }
+
+    /**
+     * Use -jmhProfiler='profiler name and settings' to specify what profiler to run with JMH.
+     */
+    if (project.hasProperty('jmhProfiler')) {
+        String profiler = project.getProperty('jmhProfiler')
+        println "Using profiler for JMH tests: " + profiler
+        profilers = [profiler]
+    }
+
+    /**
+     * Use -jmhFlightRecorder=true to add Flight recorder options to the JVM args. You'll need openJDK 11 or OracleJDK 8.
+     */
+    if (project.hasProperty('jmhFlightRecorder')) {
+        def recordingFile = "rec-jmh-${project.name}-${System.currentTimeMillis()}.jfr"
+        def frProperties = "-XX:StartFlightRecording=duration=10s,delay=3s,filename=${recordingFile}".toString()
+        jvmArgs = ['-XX:+UnlockCommercialFeatures', '-XX:+FlightRecorder', '-XX:+UnlockDiagnosticVMOptions', '-XX:+DebugNonSafepoints', frProperties, '-Djavax.xml.parsers.SAXParserFactory=com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl']
+    }
+
+    // output of results and duplicateClassesStrategy
+    humanOutputFile = file("$buildDir/jmh/human.txt")
+    resultsFile = file("$buildDir/jmh/results.txt")
+    duplicateClassesStrategy = DuplicatesStrategy.EXCLUDE
+
+    // shared settings if not defined on the class level
+    warmupIterations = 3
+    warmup = '1s'
+    iterations = 10
+    timeOnIteration = '1s'
+    fork = 1
 }

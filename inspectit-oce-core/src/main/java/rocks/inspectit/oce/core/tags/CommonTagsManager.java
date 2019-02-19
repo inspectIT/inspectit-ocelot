@@ -24,7 +24,7 @@ public class CommonTagsManager {
      * All common tags a simple String map.
      */
     @Getter
-    private Map<String, String> commonTagValueMap;
+    private Map<String, String> commonTagValueMap = Collections.emptyMap();
 
     /**
      * OpenCensus tag context representing common tag context.

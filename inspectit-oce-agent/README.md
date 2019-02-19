@@ -18,3 +18,10 @@ The "system test" is a JUnit test where the Java agent is attached to.
 By doing this, the JUnit test functions as test application which is monitored by the agent.
 
 Using the unit tests which are executed, it is verified that the agent is collecting data and, in addition, the collected data is also verified.
+
+## Performance (JMH) Tests
+
+This project contains performance tests, which can measure the overhead of the attached inspectIT OCE agent to an application.
+Similar to the system tests, here the JMH tests are executed after the Java agent is attached to the application and complete instrumentation is performed.
+
+General information on how to run performance tests can be found in [the separate document](../resources/internal-docs/PERFTESTS.md).
