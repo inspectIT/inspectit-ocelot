@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import net.bytebuddy.ByteBuddy;
-import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.ClassFileLocator;
@@ -26,7 +25,7 @@ import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationScop
 import rocks.inspectit.oce.core.instrumentation.event.ClassInstrumentedEvent;
 import rocks.inspectit.oce.core.instrumentation.event.IClassDefinitionListener;
 import rocks.inspectit.oce.core.instrumentation.event.TransformerShutdownEvent;
-import rocks.inspectit.oce.core.instrumentation.hook.DispatchHookAdvice;
+import rocks.inspectit.oce.core.instrumentation.hook.DispatchHookAdvices;
 import rocks.inspectit.oce.core.instrumentation.special.SpecialSensor;
 import rocks.inspectit.oce.core.selfmonitoring.SelfMonitoringService;
 import rocks.inspectit.oce.core.utils.CommonUtils;
@@ -189,7 +188,7 @@ public class AsyncClassTransformer implements ClassFileTransformer {
                 // Apply the instrumentation hook
                 ElementMatcher.Junction<MethodDescription> methodMatcher = getCombinedMethodMatcher(classBeingRedefined, classConf);
                 if (methodMatcher != null) {
-                    builder = builder.visit(Advice.to(DispatchHookAdvice.class).on(methodMatcher));
+                    builder = DispatchHookAdvices.adviceOn(builder, methodMatcher);
                 }
 
                 //"Compile" the builder to bytecode

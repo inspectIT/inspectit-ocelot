@@ -1,6 +1,7 @@
-package rocks.inspectit.oce.bootstrap.noop;
+package rocks.inspectit.oce.bootstrap.context.noop;
 
 import rocks.inspectit.oce.bootstrap.context.IContextManager;
+import rocks.inspectit.oce.bootstrap.context.IInspectitContext;
 
 import java.util.concurrent.Callable;
 
@@ -31,4 +32,10 @@ public class NoopContextManager implements IContextManager {
     @Override
     public void attachContextToThread(Thread thread) {
     }
+
+    @Override
+    public IInspectitContext enterNewContext() {
+        return NoopContext.INSTANCE;
+    }
+
 }

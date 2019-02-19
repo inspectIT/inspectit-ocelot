@@ -3,7 +3,7 @@ package rocks.inspectit.oce.core.config.spring;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import rocks.inspectit.oce.bootstrap.Instances;
-import rocks.inspectit.oce.bootstrap.noop.NoopContextManager;
+import rocks.inspectit.oce.bootstrap.context.noop.NoopContextManager;
 import rocks.inspectit.oce.core.instrumentation.config.InstrumentationConfigurationResolver;
 import rocks.inspectit.oce.core.instrumentation.context.ContextManager;
 import rocks.inspectit.oce.core.tags.CommonTagsManager;

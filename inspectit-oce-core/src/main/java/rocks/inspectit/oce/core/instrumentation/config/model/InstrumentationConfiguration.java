@@ -3,6 +3,7 @@ package rocks.inspectit.oce.core.instrumentation.config.model;
 import lombok.Builder;
 import lombok.Singular;
 import lombok.Value;
+import lombok.experimental.NonFinal;
 import rocks.inspectit.oce.core.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.oce.core.instrumentation.config.InstrumentationConfigurationResolver;
 
@@ -17,6 +18,7 @@ import java.util.Set;
  */
 @Value
 @Builder
+@NonFinal //for testing
 public class InstrumentationConfiguration {
 
     /**

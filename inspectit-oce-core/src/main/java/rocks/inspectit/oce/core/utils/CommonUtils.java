@@ -1,5 +1,8 @@
 package rocks.inspectit.oce.core.utils;
 
+import net.bytebuddy.description.method.MethodDescription;
+import net.bytebuddy.description.type.TypeDescription;
+
 import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -58,6 +61,28 @@ public class CommonUtils {
                 return Stream.empty();
             }
         }).findFirst().orElse(null);
+    }
+
+    /**
+     * returnts the signature for the given method for the given method or constructor, does not contain the return type.
+     *
+     * @param m the method to query the signature for
+     * @return the signature string
+     */
+    public static String getSignature(MethodDescription m) {
+        MethodDescription.SignatureToken sig = m.asSignatureToken();
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(sig.getName()).append('(');
+        boolean first = true;
+        for (TypeDescription parameterType : sig.getParameterTypes()) {
+            if (first) {
+                first = false;
+            } else {
+                stringBuilder.append(',');
+            }
+            stringBuilder.append(parameterType.getName());
+        }
+        return stringBuilder.append(')').toString();
     }
 
 }

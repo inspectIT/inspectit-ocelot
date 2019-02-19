@@ -4,6 +4,7 @@ import io.grpc.Context;
 import io.opencensus.common.Scope;
 import io.opencensus.tags.*;
 import lombok.val;
+import rocks.inspectit.oce.bootstrap.context.IInspectitContext;
 import rocks.inspectit.oce.core.instrumentation.config.model.ResolvedDataProperties;
 import rocks.inspectit.oce.core.tags.CommonTagsManager;
 
@@ -58,7 +59,7 @@ import java.util.stream.Stream;
  * In addition ,the tag-context opened by the call to makeActive will be closed and the
  * previous parent will be registered back in GRPC as active context.
  */
-public class InspectitContext {
+public class InspectitContext implements IInspectitContext {
 
     /**
      * We only allow "data" of the following types to be used as tags
@@ -242,6 +243,7 @@ public class InspectitContext {
      *
      * @return a view on all the data available in this context.
      */
+    @Override
     public Iterable<Map.Entry<String, Object>> getData() {
         return () -> getDataAsStream().iterator();
     }
@@ -283,6 +285,7 @@ public class InspectitContext {
      * @param key the name of the data to query
      * @return the most recent value for data, which either was inherited form the parent context, set via {@link #setData(String, Object)} or changed due to an up-propagation.
      */
+    @Override
     public Object getData(String key) {
         if (dataOverwrites.containsKey(key)) {
             return dataOverwrites.get(key);
@@ -300,6 +303,7 @@ public class InspectitContext {
      * @param key   the key of the data to set
      * @param value the value to set
      */
+    @Override
     public void setData(String key, Object value) {
         dataOverwrites.put(key, value);
     }
@@ -310,6 +314,7 @@ public class InspectitContext {
      * If any {@link TagContext} was opened during {@link #makeActive()}, this context is also closed.
      * In addition up-propagation is performed if this context is not asynchronous.
      */
+    @Override
     public void close() {
         if (openedDownPropagationScope != null) {
             openedDownPropagationScope.close();
