@@ -66,8 +66,10 @@ public class MethodHookGenerator {
         entryActions.add(new IHookAction() {
             @Override
             public void execute(IHookAction.ExecutionContext ctx) {
-                log.info("###Entering {}", ctx.getHook().getMethodName());
-                ctx.getInspectitContext().getData().forEach(e -> log.info("###   {}={}", e.getKey(), e.getValue()));
+                if (log.isTraceEnabled()) {
+                    log.trace("###Entering {}", ctx.getHook().getMethodName());
+                    ctx.getInspectitContext().getData().forEach(e -> log.trace("###   {}={}", e.getKey(), e.getValue()));
+                }
             }
 
             @Override
@@ -79,8 +81,10 @@ public class MethodHookGenerator {
         exitActions.add(new IHookAction() {
             @Override
             public void execute(IHookAction.ExecutionContext ctx) {
-                log.info("###exiting {}", ctx.getHook().getMethodName());
-                ctx.getInspectitContext().getData().forEach(e -> log.info("###   {}={}", e.getKey(), e.getValue()));
+                if (log.isTraceEnabled()) {
+                    log.trace("###exiting {}", ctx.getHook().getMethodName());
+                    ctx.getInspectitContext().getData().forEach(e -> log.trace("###   {}={}", e.getKey(), e.getValue()));
+                }
             }
 
             @Override

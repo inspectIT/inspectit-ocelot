@@ -211,9 +211,7 @@ public class InspectitContext implements IInspectitContext {
      */
     @Override
     public void makeActive() {
-
-        boolean anyDownPropagatedDataOverwritten = dataOverwrites.keySet().stream()
-                .anyMatch(propagation::isPropagatedDownWithinJVM);
+        boolean anyDownPropagatedDataOverwritten = anyDownPropagatedDataOverridden();
 
         //only copy if any down-propagating value has been written
         if (anyDownPropagatedDataOverwritten) {
@@ -236,6 +234,15 @@ public class InspectitContext implements IInspectitContext {
             }
             activePhaseDownPropagationTagContext = tagger.getCurrentTagContext();
         }
+    }
+
+    private boolean anyDownPropagatedDataOverridden() {
+        for (String key : dataOverwrites.keySet()) {
+            if (propagation.isPropagatedDownWithinJVM(key)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -331,21 +338,21 @@ public class InspectitContext implements IInspectitContext {
     }
 
     private void performUpPropagation(Map<String, Object> dataWrittenByChild) {
-        dataWrittenByChild.entrySet().stream()
-                .filter(e -> propagation.isPropagatedUpWithinJVM(e.getKey()))
-                .forEach(e -> {
-                    String key = e.getKey();
-                    Object value = e.getValue();
-                    dataOverwrites.put(key, value);
-                    if (propagation.isPropagatedDownWithinJVM(key)) {
-                        if (propagation.isTag(key)) {
-                            isActivePhaseDownPropagationTagContextStale = true;
-                        }
-                        if (cachedActivePhaseDownPropagatedData != null && cachedActivePhaseDownPropagatedData.get(key) != value) {
-                            cachedActivePhaseDownPropagatedData = null;
-                        }
+        for (Map.Entry<String, Object> entry : dataWrittenByChild.entrySet()) {
+            if (propagation.isPropagatedUpWithinJVM(entry.getKey())) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
+                dataOverwrites.put(key, value);
+                if (propagation.isPropagatedDownWithinJVM(key)) {
+                    if (propagation.isTag(key)) {
+                        isActivePhaseDownPropagationTagContextStale = true;
                     }
-                });
+                    if (cachedActivePhaseDownPropagatedData != null && cachedActivePhaseDownPropagatedData.get(key) != value) {
+                        cachedActivePhaseDownPropagatedData = null;
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -384,12 +391,10 @@ public class InspectitContext implements IInspectitContext {
 
     private Stream<Map.Entry<String, Object>> getDataAsStream() {
         return Stream.concat(
-                postEntryPhaseDownPropagatedData.entrySet().stream()
-                        .filter(e -> !dataOverwrites.containsKey(e.getKey())),
-                dataOverwrites.entrySet().stream()
-                        .filter(e -> e.getValue() != null));
+                postEntryPhaseDownPropagatedData.entrySet().stream().filter(e -> !dataOverwrites.containsKey(e.getKey())),
+                dataOverwrites.entrySet().stream().filter(e -> e.getValue() != null)
+        );
     }
-
 
     private Map<String, Object> getOrComputeActivePhaseDownPropagatedData() {
         if (cachedActivePhaseDownPropagatedData == null) {
@@ -400,16 +405,19 @@ public class InspectitContext implements IInspectitContext {
 
     private HashMap<String, Object> getDownPropagatedDataAsNewMap() {
         val result = new HashMap<>(postEntryPhaseDownPropagatedData);
-        dataOverwrites.entrySet().stream()
-                .filter(e -> propagation.isPropagatedDownWithinJVM(e.getKey()))
-                .forEach(e -> {
-                    val value = e.getValue();
-                    if (value != null) {
-                        result.put(e.getKey(), e.getValue());
-                    } else {
-                        result.remove(e.getKey());
-                    }
-                });
+
+        for (Map.Entry<String, Object> e : dataOverwrites.entrySet()) {
+            val key = e.getKey();
+            if (propagation.isPropagatedDownWithinJVM(key)) {
+                val value = e.getValue();
+                if (value != null) {
+                    result.put(key, value);
+                } else {
+                    result.remove(key);
+                }
+            }
+        }
+
         return result;
     }
 
@@ -420,4 +428,5 @@ public class InspectitContext implements IInspectitContext {
                 .map(e -> Tag.create(TagKey.create(e.getKey()), TagValue.create(e.getValue().toString())))
                 .iterator();
     }
+
 }
