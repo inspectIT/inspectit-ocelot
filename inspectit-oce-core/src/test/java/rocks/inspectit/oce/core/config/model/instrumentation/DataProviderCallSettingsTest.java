@@ -47,7 +47,7 @@ public class DataProviderCallSettingsTest {
         call.setConstantInput(new HashMap<>());
 
         InstrumentationRuleSettings rule = new InstrumentationRuleSettings();
-        rule.setEntryData(Maps.newHashMap("my_data", call));
+        rule.setEntry(Maps.newHashMap("my_data", call));
         instr.setRules(Maps.newHashMap("my-rule", rule));
     }
 

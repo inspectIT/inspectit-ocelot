@@ -133,10 +133,10 @@ inspectit:
 
     rules:
       method-response-time:
-        entry-data:
+        entry:
           method_entry_time: { provider: timestamp-nanos }
 
-        exit-data:
+        exit:
           method_duration:
             provider: elapsed-millis
             data-input:

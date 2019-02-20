@@ -65,8 +65,8 @@ public class InstrumentationRuleSettingsTest {
             exitCall.setProvider("someProvider");
             doNothing().when(exitCall).performValidation(any(), any());
 
-            rule.setEntryData(Collections.singletonMap("entry_data", entryCall));
-            rule.setExitData(Collections.singletonMap("exit_data", exitCall));
+            rule.setEntry(Collections.singletonMap("entry_data", entryCall));
+            rule.setExit(Collections.singletonMap("exit_data", exitCall));
 
             List<ConstraintViolation<InstrumentationSettings>> violations = new ArrayList<>(validator.validate(instr));
 

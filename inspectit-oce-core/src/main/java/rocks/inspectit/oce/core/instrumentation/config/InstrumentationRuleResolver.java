@@ -68,11 +68,11 @@ public class InstrumentationRuleResolver {
                 .filter(Objects::nonNull)
                 .forEach(result::scope);
 
-        settings.getEntryData().forEach((data, call) ->
+        settings.getEntry().forEach((data, call) ->
                 result.entryProvider(data, resolveCall(call, dataProviders))
         );
 
-        settings.getExitData().forEach((data, call) ->
+        settings.getExit().forEach((data, call) ->
                 result.exitProvider(data, resolveCall(call, dataProviders))
         );
 

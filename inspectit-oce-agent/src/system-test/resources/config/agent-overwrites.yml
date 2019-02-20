@@ -78,7 +78,7 @@ inspectit:
       DataProvidersTest-argumentAccessTest:
         scopes:
           DataProvidersTest-argumentAccessTest: true
-        entry-data:
+        entry:
           name_via_arg0: {provider: readNameViaArg0}
           name_via_args: {provider: readNameViaArgs}
           name_reversed: {provider: reverse, data-input: {str : name_via_arg0}}
@@ -86,7 +86,7 @@ inspectit:
       DataProvidersTest-constantParsingTest:
         scopes:
           DataProvidersTest-constantParsingTest: true
-        entry-data:
+        entry:
           result:
             provider: addDurationToArg
             constant-input:
@@ -96,6 +96,6 @@ inspectit:
       InstrumentationScopesTest-read-name-of-NamedElement:
         scopes:
           NamedElement-doSomething: true
-        entry-data:
+        entry:
           name: { provider: readNameViaThis }
 

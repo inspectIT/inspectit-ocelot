@@ -35,18 +35,18 @@ public class InstrumentationRuleSettings {
     private Map<@NotBlank String, Boolean> scopes = Collections.emptyMap();
 
     /**
-     * Defines which data is collected at the entryData of the methods instrumented with this rule.
+     * Defines which data is collected at the entry of the methods instrumented with this rule.
      * The key defines the name of the data which is collected, the value defines how it is collected.
      */
     @NotNull
-    private Map<@NotBlank String, @NotNull @Valid DataProviderCallSettings> entryData = Collections.emptyMap();
+    private Map<@NotBlank String, @NotNull @Valid DataProviderCallSettings> entry = Collections.emptyMap();
 
     /**
-     * Defines which data is collected at the exitData of the methods instrumented with this rule.
+     * Defines which data is collected at the exit of the methods instrumented with this rule.
      * The key defines the name of the data which is collected, the value defines how it is collected.
      */
     @NotNull
-    private Map<@NotBlank String, @NotNull @Valid DataProviderCallSettings> exitData = Collections.emptyMap();
+    private Map<@NotBlank String, @NotNull @Valid DataProviderCallSettings> exit = Collections.emptyMap();
 
     /**
      * Validates this rule, invoked by {@link InstrumentationSettings#performValidation(ViolationBuilder)}
@@ -56,10 +56,10 @@ public class InstrumentationRuleSettings {
      */
     public void performValidation(InstrumentationSettings container, ViolationBuilder vios) {
         checkScopesExist(container, vios);
-        entryData.forEach((data, call) -> call.performValidation(container,
-                vios.atProperty("entryData").atProperty(data)));
-        exitData.forEach((data, call) -> call.performValidation(container,
-                vios.atProperty("exitData").atProperty(data)));
+        entry.forEach((data, call) -> call.performValidation(container,
+                vios.atProperty("entry").atProperty(data)));
+        exit.forEach((data, call) -> call.performValidation(container,
+                vios.atProperty("exit").atProperty(data)));
     }
 
     private void checkScopesExist(InstrumentationSettings container, ViolationBuilder vios) {
