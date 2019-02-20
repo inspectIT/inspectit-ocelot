@@ -3,6 +3,7 @@ package rocks.inspectit.oce.core.instrumentation.config;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.Getter;
 import lombok.val;
+import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,18 +16,12 @@ import rocks.inspectit.oce.core.config.InspectitEnvironment;
 import rocks.inspectit.oce.core.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.oce.core.instrumentation.AsyncClassTransformer;
 import rocks.inspectit.oce.core.instrumentation.config.event.InstrumentationConfigurationChangedEvent;
-import rocks.inspectit.oce.core.instrumentation.config.model.ClassInstrumentationConfiguration;
-import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationConfiguration;
-import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationRule;
-import rocks.inspectit.oce.core.instrumentation.config.model.ResolvedDataProperties;
+import rocks.inspectit.oce.core.instrumentation.config.model.*;
 import rocks.inspectit.oce.core.instrumentation.special.SpecialSensor;
 
 import javax.annotation.PostConstruct;
 import java.lang.instrument.Instrumentation;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -55,6 +50,10 @@ public class InstrumentationConfigurationResolver {
 
     @Autowired
     private DataProviderResolver dataProviderResolver;
+
+    @Autowired
+    private MethodHookConfigurationResolver hookResolver;
+
 
     /**
      * Holds the currently active instrumentation configuration.
@@ -89,6 +88,37 @@ public class InstrumentationConfigurationResolver {
 
             return new ClassInstrumentationConfiguration(activeSensors, narrowedRules, config);
         }
+    }
+
+    /**
+     * Finds out for each method of the given class which rules apply and builds a {@link MethodHookConfiguration} for each instrumented method.
+     *
+     * @param clazz the class to check
+     * @return a map mapping hook configurations to the methods which they should be applied on.
+     */
+    public Map<MethodDescription, MethodHookConfiguration> getHookConfigurations(Class<?> clazz) {
+        val config = currentConfig;
+        TypeDescription type = TypeDescription.ForLoadedType.of(clazz);
+        Set<InstrumentationRule> narrowedRules = getNarrowedRulesFor(type, config);
+
+        Set<InstrumentationScope> involvedScopes = narrowedRules.stream()
+                .flatMap(r -> r.getScopes().stream())
+                .collect(Collectors.toSet());
+
+        if (!involvedScopes.isEmpty()) {
+            Map<MethodDescription, MethodHookConfiguration> result = new HashMap<>();
+            for (val method : type.getDeclaredMethods()) {
+                val scopesMatchingOnMethod = involvedScopes.stream().filter(scope -> scope.getMethodMatcher().matches(method)).collect(Collectors.toSet());
+                val rulesMatchingOnMethod = narrowedRules.stream().filter(r -> !Collections.disjoint(r.getScopes(), scopesMatchingOnMethod)).collect(Collectors.toSet());
+                if (!rulesMatchingOnMethod.isEmpty()) {
+                    result.put(method, hookResolver.buildHookConfiguration(method, rulesMatchingOnMethod));
+                }
+            }
+            return result;
+        } else {
+            return Collections.emptyMap();
+        }
+
     }
 
     /**

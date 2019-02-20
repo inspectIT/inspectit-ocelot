@@ -1,7 +1,9 @@
 package rocks.inspectit.oce.bootstrap;
 
 import rocks.inspectit.oce.bootstrap.context.IContextManager;
-import rocks.inspectit.oce.bootstrap.noop.NoopContextManager;
+import rocks.inspectit.oce.bootstrap.context.noop.NoopContextManager;
+import rocks.inspectit.oce.bootstrap.instrumentation.IHookManager;
+import rocks.inspectit.oce.bootstrap.instrumentation.noop.NoopHookManager;
 
 /**
  * Accessor for implementations of the interfaces.
@@ -10,5 +12,7 @@ import rocks.inspectit.oce.bootstrap.noop.NoopContextManager;
 public class Instances {
 
     public static IContextManager contextManager = NoopContextManager.INSTANCE;
+
+    public static IHookManager hookManager = NoopHookManager.INSTANCE;
 
 }

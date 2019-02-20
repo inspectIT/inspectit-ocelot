@@ -40,4 +40,13 @@ public interface IContextManager {
      * @param thread The given thread which context should be restored.
      */
     void attachContextToThread(Thread thread);
+
+    /**
+     * Creates a new context which is not yet active.
+     * After the initial data collection has been performed {@link IInspectitContext#makeActive()} neeeds to be called
+     *
+     * @return the newly created context
+     */
+    IInspectitContext enterNewContext();
+
 }

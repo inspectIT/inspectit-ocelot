@@ -1,5 +1,7 @@
 package rocks.inspectit.oce.core.instrumentation.config;
 
+import net.bytebuddy.description.method.MethodDescription;
+import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.matcher.ElementMatchers;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.assertj.core.util.Maps;
@@ -22,13 +24,13 @@ import rocks.inspectit.oce.core.instrumentation.special.SpecialSensor;
 import rocks.inspectit.oce.core.testutils.DummyClassLoader;
 
 import java.lang.instrument.Instrumentation;
+import java.lang.reflect.Method;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.same;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class InstrumentationConfigurationResolverTest {
@@ -41,6 +43,9 @@ class InstrumentationConfigurationResolverTest {
 
     @Mock
     private Instrumentation instrumentation;
+
+    @Mock
+    MethodHookConfigurationResolver hookResolver;
 
     @InjectMocks
     private InstrumentationConfigurationResolver resolver;
@@ -108,6 +113,118 @@ class InstrumentationConfigurationResolverTest {
                     .flatExtracting(InstrumentationRule::getScopes)
                     .flatExtracting(InstrumentationScope::getTypeMatcher, InstrumentationScope::getMethodMatcher)
                     .containsExactly(ElementMatchers.nameEndsWithIgnoreCase("object"), ElementMatchers.any());
+        }
+
+    }
+
+
+    @Nested
+    class GetHookConfigurations {
+
+        final Method testCase_methodA = TestCase.class.getDeclaredMethod("methodA");
+        final Method testCase_methodB = TestCase.class.getDeclaredMethod("methodB");
+
+        GetHookConfigurations() throws NoSuchMethodException {
+        }
+
+        class TestCase {
+
+            void methodA() {
+            }
+
+            void methodB() {
+            }
+        }
+
+        @Test
+        void testTypeMatchingButNoMethodsMatching() throws Exception {
+            InstrumentationScope noMethodScope = new InstrumentationScope(ElementMatchers.any(), ElementMatchers.none());
+            InstrumentationRule r1 = new InstrumentationRule("r1", Collections.singleton(noMethodScope));
+
+
+            config = InstrumentationConfiguration.builder().source(settings).rule(r1).build();
+            FieldUtils.writeDeclaredField(resolver, "currentConfig", config, true);
+
+            Map<MethodDescription, MethodHookConfiguration> result = resolver.getHookConfigurations(TestCase.class);
+
+            assertThat(result).isEmpty();
+            verify(hookResolver, never()).buildHookConfiguration(any(), any());
+        }
+
+        @Test
+        void testTypeNotMatchingButMethodMatching() throws Exception {
+            InstrumentationScope noMethodScope = new InstrumentationScope(ElementMatchers.none(), ElementMatchers.any());
+            InstrumentationRule r1 = new InstrumentationRule("r1", Collections.singleton(noMethodScope));
+
+
+            config = InstrumentationConfiguration.builder().source(settings).rule(r1).build();
+            FieldUtils.writeDeclaredField(resolver, "currentConfig", config, true);
+
+            Map<MethodDescription, MethodHookConfiguration> result = resolver.getHookConfigurations(TestCase.class);
+
+            assertThat(result).isEmpty();
+            verify(hookResolver, never()).buildHookConfiguration(any(), any());
+        }
+
+
+        @Test
+        void testSingleRuleForMethodMatches() throws Exception {
+            ElementMatcher.Junction<MethodDescription> method = ElementMatchers.is(testCase_methodA);
+            InstrumentationScope methodScope = new InstrumentationScope(ElementMatchers.any(), method);
+            InstrumentationScope noMethodScope = new InstrumentationScope(ElementMatchers.any(), ElementMatchers.none());
+            InstrumentationRule r1 = new InstrumentationRule("r1", Collections.singleton(methodScope));
+            InstrumentationRule r2 = new InstrumentationRule("r2", Collections.singleton(noMethodScope));
+
+
+            config = InstrumentationConfiguration.builder().source(settings).rule(r1).rule(r2).build();
+            FieldUtils.writeDeclaredField(resolver, "currentConfig", config, true);
+
+            Map<MethodDescription, MethodHookConfiguration> result = resolver.getHookConfigurations(TestCase.class);
+
+            assertThat(result).hasSize(1);
+            verify(hookResolver, times(1)).buildHookConfiguration(any(), any());
+            verify(hookResolver, times(1)).buildHookConfiguration(argThat(method::matches), eq(Collections.singleton(r1)));
+        }
+
+
+        @Test
+        void testMultipleRulesWithSameScopeMatching() throws Exception {
+            ElementMatcher.Junction<MethodDescription> method = ElementMatchers.is(testCase_methodA);
+            InstrumentationScope methodScope = new InstrumentationScope(ElementMatchers.any(), method);
+            InstrumentationRule r1 = new InstrumentationRule("r1", Collections.singleton(methodScope));
+            InstrumentationRule r2 = new InstrumentationRule("r2", Collections.singleton(methodScope));
+
+
+            config = InstrumentationConfiguration.builder().source(settings).rule(r1).rule(r2).build();
+            FieldUtils.writeDeclaredField(resolver, "currentConfig", config, true);
+
+            Map<MethodDescription, MethodHookConfiguration> result = resolver.getHookConfigurations(TestCase.class);
+
+            assertThat(result).hasSize(1);
+            verify(hookResolver, times(1)).buildHookConfiguration(any(), any());
+            verify(hookResolver, times(1)).buildHookConfiguration(argThat(method::matches), eq(new HashSet<>(Arrays.asList(r1, r2))));
+        }
+
+
+        @Test
+        void testMultipleRulesWithDifferentScopeMatching() throws Exception {
+            ElementMatcher.Junction<MethodDescription> methodA = ElementMatchers.is(testCase_methodA);
+            ElementMatcher.Junction<MethodDescription> methodB = ElementMatchers.is(testCase_methodB);
+            InstrumentationScope methodScope = new InstrumentationScope(ElementMatchers.any(), methodA);
+            InstrumentationScope allScope = new InstrumentationScope(ElementMatchers.any(), methodA.or(methodB));
+            InstrumentationRule r1 = new InstrumentationRule("r1", Collections.singleton(methodScope));
+            InstrumentationRule r2 = new InstrumentationRule("r2", Collections.singleton(allScope));
+
+
+            config = InstrumentationConfiguration.builder().source(settings).rule(r1).rule(r2).build();
+            FieldUtils.writeDeclaredField(resolver, "currentConfig", config, true);
+
+            Map<MethodDescription, MethodHookConfiguration> result = resolver.getHookConfigurations(TestCase.class);
+
+            assertThat(result).hasSize(2);
+            verify(hookResolver, times(2)).buildHookConfiguration(any(), any());
+            verify(hookResolver, times(1)).buildHookConfiguration(argThat(methodA::matches), eq(new HashSet<>(Arrays.asList(r1, r2))));
+            verify(hookResolver, times(1)).buildHookConfiguration(argThat(methodB::matches), eq(new HashSet<>(Arrays.asList(r2))));
         }
 
     }

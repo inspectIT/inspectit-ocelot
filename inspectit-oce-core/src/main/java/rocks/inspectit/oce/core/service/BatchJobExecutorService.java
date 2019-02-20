@@ -81,8 +81,8 @@ public class BatchJobExecutorService {
             boolean done = false;
             try {
                 done = processorToExecute.processBatch(batchSizes);
-            } catch (Exception e) {
-                log.error("Error processing batch!", e);
+            } catch (Throwable t) {
+                log.error("Error processing batch!", t);
             }
             if (!done && !canceled) {
                 scheduleNextBatch(interBatchDelay);

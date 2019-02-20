@@ -3,7 +3,9 @@ package rocks.inspectit.oce.core.instrumentation.context;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import io.grpc.Context;
+import io.opencensus.tags.Tags;
 import rocks.inspectit.oce.bootstrap.context.IContextManager;
+import rocks.inspectit.oce.bootstrap.context.IInspectitContext;
 import rocks.inspectit.oce.core.config.spring.BootstrapInitializerConfiguration;
 import rocks.inspectit.oce.core.instrumentation.config.InstrumentationConfigurationResolver;
 import rocks.inspectit.oce.core.tags.CommonTagsManager;
@@ -21,6 +23,8 @@ public class ContextManager implements IContextManager {
      * Can be used in {@link org.springframework.context.annotation.DependsOn} annotation to ensure correct initialization order.
      */
     public static final String BEAN_NAME = "contextManager";
+
+    private static final boolean IS_OPEN_CENSUS_ON_BOOTSTRAP = Tags.class.getClassLoader() == null;
 
     private CommonTagsManager commonTagsManager;
 
@@ -59,4 +63,10 @@ public class ContextManager implements IContextManager {
             context.attach();
         }
     }
+
+    @Override
+    public IInspectitContext enterNewContext() {
+        return InspectitContext.createFromCurrent(commonTagsManager, configProvider.getCurrentConfig().getDataProperties(), IS_OPEN_CENSUS_ON_BOOTSTRAP);
+    }
+
 }

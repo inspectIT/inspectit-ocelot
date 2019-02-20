@@ -19,7 +19,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class BatchJobExecuterTest {
+public class BatchJobExecutorServiceTest {
 
     @Mock
     ScheduledExecutorService scheduledExecutor;
@@ -146,7 +146,7 @@ public class BatchJobExecuterTest {
                 case 3:
                     return true;
                 default:
-                    throw new RuntimeException();
+                    throw new Error();
 
             }
         }, 42, delay, delay);

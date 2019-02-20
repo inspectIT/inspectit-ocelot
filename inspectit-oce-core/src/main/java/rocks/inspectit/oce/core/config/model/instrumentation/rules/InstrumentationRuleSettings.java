@@ -25,7 +25,7 @@ public class InstrumentationRuleSettings {
     /**
      * Defines whether the rule is enabled.
      */
-    private boolean enabled;
+    private boolean enabled = true;
 
     /**
      * Defines which scope is used by this rule and whether it is enabled or not. The map's key represents the id of a scope.
