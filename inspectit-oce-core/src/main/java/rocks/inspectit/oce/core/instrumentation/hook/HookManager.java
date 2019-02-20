@@ -34,10 +34,14 @@ import java.lang.instrument.Instrumentation;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+/**
+ * Implementation for {@link rocks.inspectit.oce.bootstrap.instrumentation.IHookManager}.
+ * However, this class does not directly implement the interface to avoid issues with spring annotation scanning.
+ * Instead it assigns a lambda referring to HookManager{@link #getHook(Class, String)} to {@link Instances#hookManager}.
+ */
 @Slf4j
 @Service
 public class HookManager implements IClassDiscoveryListener {
@@ -60,7 +64,7 @@ public class HookManager implements IClassDiscoveryListener {
     @Autowired
     private MethodHookGenerator hookGenerator;
 
-    private LoadingCache<Class<?>, ConcurrentHashMap<String, MethodHook>> hooks = CacheBuilder.newBuilder().weakKeys().build(
+    private final LoadingCache<Class<?>, ConcurrentHashMap<String, MethodHook>> hooks = CacheBuilder.newBuilder().weakKeys().build(
             new CacheLoader<Class<?>, ConcurrentHashMap<String, MethodHook>>() {
                 @Override
                 public ConcurrentHashMap<String, MethodHook> load(Class<?> key) throws Exception {
@@ -74,7 +78,7 @@ public class HookManager implements IClassDiscoveryListener {
      * This service works through this set in batches.
      */
     @VisibleForTesting
-    Cache<Class<?>, Boolean> pendingClasses =
+    final Cache<Class<?>, Boolean> pendingClasses =
             CacheBuilder.newBuilder().weakKeys().build();
 
 
@@ -86,7 +90,6 @@ public class HookManager implements IClassDiscoveryListener {
 
         InternalSettings conf = env.getCurrentConfig().getInstrumentation().getInternal();
         Duration delay = conf.getInterBatchDelay();
-
         classInstrumentationJob = executor.startJob(this::checkClassesForConfigurationUpdates, conf.getClassConfigurationCheckBatchSize(), delay, delay);
     }
 
@@ -96,22 +99,43 @@ public class HookManager implements IClassDiscoveryListener {
         classInstrumentationJob.cancel();
     }
 
-
+    /**
+     * Actual implementation for {@link rocks.inspectit.oce.bootstrap.instrumentation.IHookManager#getHook(Class, String)}.
+     *
+     * @param clazz           the name of the class to which the method to query the hook for belongs
+     * @param methodSignature the signature of the method in the form of name(parametertype,parametertype,..)
+     * @return
+     */
     private IMethodHook getHook(Class<?> clazz, String methodSignature) {
-        try {
-            val hook = hooks.get(clazz).get(methodSignature);
-            return hook == null ? NoopMethodHook.INSTANCE : hook;
-        } catch (ExecutionException e) {
-            //Should in theory never occur, as we only call new ConcurrentHashMap() in the cache loader
-            log.error("Error in cache", e);
-            return NoopMethodHook.INSTANCE;
-        }
+        val hook = hooks.getUnchecked(clazz).get(methodSignature);
+        return hook == null ? NoopMethodHook.INSTANCE : hook;
     }
 
 
+    /**
+     * When classes are newly loaded, their configuration needs to be checked.
+     *
+     * @param newClasses the set of newly discovered classes
+     */
     @Override
     public void onNewClassesDiscovered(Set<Class<?>> newClasses) {
-        for (Class<?> clazz : newClasses) {
+        addClassesToQueue(newClasses);
+    }
+
+    /**
+     * When the configuration changes we need to recheck all classes.
+     *
+     * @param ev
+     */
+    @EventListener
+    @SuppressWarnings("unchecked")
+    private void instrumentationConfigEventListener(InstrumentationConfigurationChangedEvent ev) {
+        List<Class<?>> classes = Arrays.asList(instrumentation.getAllLoadedClasses());
+        addClassesToQueue(classes);
+    }
+
+    private void addClassesToQueue(Collection<Class<?>> classes) {
+        for (Class<?> clazz : classes) {
             pendingClasses.put(clazz, Boolean.TRUE);
         }
         selfMonitorQueueSize();
@@ -124,14 +148,12 @@ public class HookManager implements IClassDiscoveryListener {
         classInstrumentationJob.setInterBatchDelay(newInternal.getInterBatchDelay());
     }
 
-    @EventListener
-    private void instrumentationConfigEventListener(InstrumentationConfigurationChangedEvent ev) {
-        for (Class<?> clazz : instrumentation.getAllLoadedClasses()) {
-            pendingClasses.put(clazz, Boolean.TRUE);
-        }
-        selfMonitorQueueSize();
-    }
 
+    /**
+     * Takes batch-size classes from the queue and updates the hooks where required.
+     *
+     * @param batchSize the number of classes to process in this batch.
+     */
     private void checkClassesForConfigurationUpdates(int batchSize) {
 
         Stopwatch watch = Stopwatch.createStarted();
@@ -160,24 +182,17 @@ public class HookManager implements IClassDiscoveryListener {
     private void updateHooksForClass(Class<?> clazz) {
         Map<MethodDescription, MethodHookConfiguration> hookConfigs = configResolver.getHookConfigurations(clazz);
 
-        ConcurrentHashMap<String, MethodHook> activeHooks;
-        try {
-            activeHooks = hooks.get(clazz);
-        } catch (Exception e) {
-            //should actually never occur
-            log.error("Error updating method hook", e);
-            return;
-        }
+        val activeClassHooks = hooks.getUnchecked(clazz);
 
-        deactivateRemovedHooks(clazz, hookConfigs, activeHooks);
-        addOrReplaceHoks(clazz, hookConfigs, activeHooks);
+        deactivateRemovedHooks(clazz, hookConfigs, activeClassHooks);
+        addOrReplaceHooks(clazz, hookConfigs, activeClassHooks);
 
     }
 
-    private void addOrReplaceHoks(Class<?> clazz, Map<MethodDescription, MethodHookConfiguration> hookConfigs, ConcurrentHashMap<String, MethodHook> activeHooks) {
+    private void addOrReplaceHooks(Class<?> clazz, Map<MethodDescription, MethodHookConfiguration> hookConfigs, ConcurrentHashMap<String, MethodHook> activeClassHooks) {
         hookConfigs.forEach((method, config) -> {
             String signature = CommonUtils.getSignature(method);
-            MethodHookConfiguration previous = Optional.ofNullable(activeHooks.get(signature))
+            MethodHookConfiguration previous = Optional.ofNullable(activeClassHooks.get(signature))
                     .map(MethodHook::getSourceConfiguration)
                     .orElse(null);
             if (!Objects.equals(config, previous)) {
@@ -185,24 +200,26 @@ public class HookManager implements IClassDiscoveryListener {
                     log.debug("Adding/updating hook for {} of {}", signature, clazz.getName());
                 }
                 try {
-                    activeHooks.put(signature, hookGenerator.buildHook(clazz, method, config));
+                    activeClassHooks.put(signature, hookGenerator.buildHook(clazz, method, config));
                 } catch (Throwable t) {
                     log.error("Error generating hook for {} of {}. Method will not be hooked.", signature, clazz.getName());
-                    activeHooks.remove(signature);
+                    activeClassHooks.remove(signature);
                 }
             }
         });
     }
 
-    private void deactivateRemovedHooks(Class<?> clazz, Map<MethodDescription, MethodHookConfiguration> hookConfigs, ConcurrentHashMap<String, MethodHook> activeHooks) {
-        Set<String> hookedMethodSignature = hookConfigs.keySet().stream().map(m -> CommonUtils.getSignature(m)).collect(Collectors.toSet());
+    private void deactivateRemovedHooks(Class<?> clazz, Map<MethodDescription, MethodHookConfiguration> hookConfigs, ConcurrentHashMap<String, MethodHook> activeClassHooks) {
+        Set<String> hookedMethodSignatures = hookConfigs.keySet().stream()
+                .map(CommonUtils::getSignature)
+                .collect(Collectors.toSet());
         if (log.isDebugEnabled()) {
-            activeHooks.keySet().stream()
-                    .filter(signature -> !hookedMethodSignature.contains(signature))
+            activeClassHooks.keySet().stream()
+                    .filter(signature -> !hookedMethodSignatures.contains(signature))
                     .forEach(sig -> log.debug("Removing hook for {} of {}", sig, clazz.getName()));
         }
         //remove hooks of methods which have been deinstrumented
-        activeHooks.keySet().removeIf(signature -> !hookedMethodSignature.contains(signature));
+        activeClassHooks.keySet().removeIf(signature -> !hookedMethodSignatures.contains(signature));
     }
 
 

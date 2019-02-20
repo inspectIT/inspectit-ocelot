@@ -8,6 +8,9 @@ public class NoopMethodHook implements IMethodHook {
 
     public static NoopMethodHook INSTANCE = new NoopMethodHook();
 
+    private NoopMethodHook() {
+    }
+
     @Override
     public IInspectitContext onEnter(Object[] instrumentedMethodArgs, Object thiz) {
         return NoopContext.INSTANCE;

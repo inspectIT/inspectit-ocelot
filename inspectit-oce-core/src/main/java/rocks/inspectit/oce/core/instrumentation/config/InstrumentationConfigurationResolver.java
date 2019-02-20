@@ -90,29 +90,35 @@ public class InstrumentationConfigurationResolver {
         }
     }
 
+    /**
+     * Finds out for each method of the given class which rules apply and builds a {@link MethodHookConfiguration} for each instrumented method.
+     *
+     * @param clazz the class to check
+     * @return a map mapping hook configurations to the methods which they should be applied on.
+     */
     public Map<MethodDescription, MethodHookConfiguration> getHookConfigurations(Class<?> clazz) {
         val config = currentConfig;
         TypeDescription type = TypeDescription.ForLoadedType.of(clazz);
         Set<InstrumentationRule> narrowedRules = getNarrowedRulesFor(type, config);
 
-        Set<InstrumentationScope> matchesScopes = narrowedRules.stream()
+        Set<InstrumentationScope> involvedScopes = narrowedRules.stream()
                 .flatMap(r -> r.getScopes().stream())
-                .distinct()
-                .filter(scope -> scope.getTypeMatcher().matches(type))
                 .collect(Collectors.toSet());
 
-        Map<MethodDescription, MethodHookConfiguration> result = new HashMap<>();
-        if (!matchesScopes.isEmpty()) {
+        if (!involvedScopes.isEmpty()) {
+            Map<MethodDescription, MethodHookConfiguration> result = new HashMap<>();
             for (val method : type.getDeclaredMethods()) {
-                val matchedScopes = matchesScopes.stream().filter(scope -> scope.getMethodMatcher().matches(method)).collect(Collectors.toSet());
-                val matchedRules = narrowedRules.stream().filter(r -> !Collections.disjoint(r.getScopes(), matchedScopes)).collect(Collectors.toSet());
-                if (!matchedRules.isEmpty()) {
-                    result.put(method, hookResolver.buildHookConfiguration(method, matchedRules));
+                val scopesMatchingOnMethod = involvedScopes.stream().filter(scope -> scope.getMethodMatcher().matches(method)).collect(Collectors.toSet());
+                val rulesMatchingOnMethod = narrowedRules.stream().filter(r -> !Collections.disjoint(r.getScopes(), scopesMatchingOnMethod)).collect(Collectors.toSet());
+                if (!rulesMatchingOnMethod.isEmpty()) {
+                    result.put(method, hookResolver.buildHookConfiguration(method, rulesMatchingOnMethod));
                 }
             }
+            return result;
+        } else {
+            return Collections.emptyMap();
         }
 
-        return result;
     }
 
     /**

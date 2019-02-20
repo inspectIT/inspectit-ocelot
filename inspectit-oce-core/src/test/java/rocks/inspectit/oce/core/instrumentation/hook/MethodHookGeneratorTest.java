@@ -51,7 +51,7 @@ public class MethodHookGeneratorTest {
 
             MethodHook result = generator.buildHook(Dummy.class, constructor, config);
 
-            assertThat(result.getMethodSignature()).isEqualTo("<init>(java.lang.String,int)");
+            assertThat(result.getMethodName()).isEqualTo("<init>(java.lang.String,int)");
         }
 
         @Test
@@ -63,7 +63,7 @@ public class MethodHookGeneratorTest {
 
             MethodHook result = generator.buildHook(Dummy.class, method, config);
 
-            assertThat(result.getMethodSignature()).isEqualTo("doSomething(long,java.lang.String)");
+            assertThat(result.getMethodName()).isEqualTo("doSomething(long,java.lang.String)");
         }
 
         @Test
@@ -76,9 +76,9 @@ public class MethodHookGeneratorTest {
 
             MethodHook result = generator.buildHook(Dummy.class, constructor, config);
 
-            assertThat(result.getHookedClass().get()).isSameAs(Dummy.class);
+            assertThat(result.getHookedClass()).isSameAs(Dummy.class);
             Constructor<Dummy> declaredConstructor = Dummy.class.getDeclaredConstructor();
-            assertThat(result.getHookedConstructor().get()).isEqualTo(declaredConstructor);
+            assertThat(result.getHookedConstructor()).isEqualTo(declaredConstructor);
             assertThat(result.getHookedMethod()).isNull();
         }
 
@@ -91,9 +91,9 @@ public class MethodHookGeneratorTest {
 
             MethodHook result = generator.buildHook(Dummy.class, method, config);
 
-            assertThat(result.getHookedClass().get()).isSameAs(Dummy.class);
+            assertThat(result.getHookedClass()).isSameAs(Dummy.class);
             assertThat(result.getHookedConstructor()).isNull();
-            assertThat(result.getHookedMethod().get()).isEqualTo(Dummy.class.getDeclaredMethod("doSomething", long.class, String.class));
+            assertThat(result.getHookedMethod()).isEqualTo(Dummy.class.getDeclaredMethod("doSomething", long.class, String.class));
         }
 
     }

@@ -64,10 +64,11 @@ public class CommonUtils {
     }
 
     /**
-     * returnts the signature for the given method for the given method or constructor, does not contain the return type.
+     * Returns the signature for the given method for the given method or constructor, does not contain the return type.
+     * The signature does not contain any spaces.
      *
      * @param m the method to query the signature for
-     * @return the signature string
+     * @return the signature string in the form methodname(paramtype,paramtype)
      */
     public static String getSignature(MethodDescription m) {
         MethodDescription.SignatureToken sig = m.asSignatureToken();

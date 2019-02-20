@@ -29,7 +29,7 @@ public class MethodHookGenerator {
     public MethodHook buildHook(Class<?> declaringClass, MethodDescription method, MethodHookConfiguration config) {
         val builder = MethodHook.builder()
                 .inspectitContextManager(contextManager)
-                .methodSignature(CommonUtils.getSignature(method))
+                .methodName(CommonUtils.getSignature(method))
                 .sourceConfiguration(config);
 
         addReflectionInformationToHook(declaringClass, method, builder);
@@ -38,7 +38,7 @@ public class MethodHookGenerator {
         builder.entryActions(new CopyOnWriteArrayList<>(Arrays.asList(new IHookAction() {
             @Override
             public void execute(IHookAction.ExecutionContext ctx) {
-                log.info("###Entering {}", ctx.getHook().getMethodSignature());
+                log.info("###Entering {}", ctx.getHook().getMethodName());
                 ctx.getInspectitContext().getData().forEach(e -> log.info("###   {}={}", e.getKey(), e.getValue()));
             }
 
@@ -51,7 +51,7 @@ public class MethodHookGenerator {
         builder.exitActions(new CopyOnWriteArrayList<>(Arrays.asList(new IHookAction() {
             @Override
             public void execute(IHookAction.ExecutionContext ctx) {
-                log.info("###exiting {}", ctx.getHook().getMethodSignature());
+                log.info("###exiting {}", ctx.getHook().getMethodName());
                 ctx.getInspectitContext().getData().forEach(e -> log.info("###   {}={}", e.getKey(), e.getValue()));
             }
 

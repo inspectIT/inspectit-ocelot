@@ -8,8 +8,25 @@ import java.util.Map;
 public interface IInspectitContext extends AutoCloseable {
 
 
+    /**
+     * Assigns the given value to the given data key.
+     * Depending on how the propagation is configured for the given key, the value will be propagated up or down.
+     * All changes made through this method before {@link #makeActive()} is called will be visible for
+     * all child contexts. If this method is called after {@link #makeActive()}, the changes will only be visible
+     * for synchronous child contexts.
+     *
+     * @param key   the name of the data to assign the value to
+     * @param value the value to assign, can be null meaning that the data should be cleared
+     */
     void setData(String key, Object value);
 
+    /**
+     * Returns the last value assigned for the given data key.
+     * The value was either defined via {@link #setData(String, Object)}, down or up propagation.
+     *
+     * @param key the name of the data to query
+     * @return the value assigned to the data or null if no value is assigned
+     */
     Object getData(String key);
 
     /**
