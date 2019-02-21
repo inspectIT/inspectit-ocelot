@@ -48,6 +48,7 @@ inspectit:
           durationToAdd: Duration
         value: new Long( ((Duration)(args[argIndex])).toMillis() + durationToAdd.toMillis() )
 #-----------------------DataProvidersTest.testDefaultMethodInstrumented ------------------------
+#---------------------- also used in InstrumentationScopesTest ---------------------------------
       readNameViaThis:
         imports:
           - rocks.inspectit.oce.instrumentation

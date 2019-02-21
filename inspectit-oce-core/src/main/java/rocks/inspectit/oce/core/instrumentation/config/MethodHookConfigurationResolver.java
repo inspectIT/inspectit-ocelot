@@ -54,23 +54,38 @@ public class MethodHookConfigurationResolver {
     private List<Pair<String, ResolvedDataProviderCall>> combineAndOrderProviderCalls(Set<InstrumentationRule> rules, Function<InstrumentationRule, Map<String, ResolvedDataProviderCall>> providersGetter)
             throws ConflictingDataDefinitionsException, CyclicDataDependencyException {
 
+        // Maps each data key written by this hook to the corresponding provider call
+        // The calls are combined from all rules which are active on this method
         Map<String, ResolvedDataProviderCall> dataDefinitions = combineProvidersFromRules(rules, providersGetter);
 
-        Function<String, Collection<String>> getDependencies = key -> dataDefinitions.get(key).getCallSettings().getDataInput().values().stream()
-                //using the same data as in & outout is allowed
-                //this means that a down-propagated value is used as input
-                .filter(otherKey -> !key.equals(otherKey))
-                //only consider the relevant keys as dependencies
-                .filter(dataDefinitions::containsKey)
-                .collect(Collectors.toSet());
-        List<String> sortedDataAssignments = getInTopologicalOrder(dataDefinitions.keySet(), getDependencies);
+        //this function maps each data key to the data keys it depends on
+        //if a data key (A) depends on a data key (B), the hook ensures that the provider of (B) is executed before the one of (A)
+        //the dependencies are derived on the "data-inputs" specified for the data providers
+        Function<String, Collection<String>> getDependencies = key ->
+                dataDefinitions.get(key).getCallSettings().getDataInput().values().stream()
+                        //using the same data as in & output for a data-provider is allowed and does not count as dependency
+                        //this means that a down-propagated value is used as input
+                        .filter(otherKey -> !key.equals(otherKey))
+                        //only consider the keys written within this hook as dependencies
+                        .filter(dataDefinitions::containsKey)
+                        .collect(Collectors.toSet());
 
-        return sortedDataAssignments.stream()
+        List<String> sortedDataKeys = getInTopologicalOrder(dataDefinitions.keySet(), getDependencies);
+
+        return sortedDataKeys.stream()
                 .map(key -> Pair.of(key, dataDefinitions.get(key)))
                 .collect(Collectors.toList());
 
     }
 
+    /**
+     * Combines all data provider calls from the given rules to a single map
+     *
+     * @param rules           the rules whose data-provider calls should be merged
+     * @param providersGetter the getter to access the rules to process, e.g. {@link InstrumentationRule#getEntryProviders()}
+     * @return a map mapping the data keys to the provider call which define the values
+     * @throws ConflictingDataDefinitionsException if the same data key is defined with different data-provder calls
+     */
     private Map<String, ResolvedDataProviderCall> combineProvidersFromRules(Set<InstrumentationRule> rules, Function<InstrumentationRule, Map<String, ResolvedDataProviderCall>> providersGetter) throws ConflictingDataDefinitionsException {
         Map<String, InstrumentationRule> dataOrigins = new HashMap<>();
         Map<String, ResolvedDataProviderCall> dataDefinitions = new HashMap<>();
@@ -80,6 +95,7 @@ public class MethodHookConfigurationResolver {
                 String dataKey = dataDefinition.getKey();
                 ResolvedDataProviderCall call = dataDefinition.getValue();
 
+                //check if we have previously already encountered a differing definition for the key
                 if (dataOrigins.containsKey(dataKey) && !call.equals(dataDefinitions.get(dataKey))) {
                     throw new ConflictingDataDefinitionsException(dataKey, dataOrigins.get(dataKey), rule);
                 }
@@ -96,12 +112,14 @@ public class MethodHookConfigurationResolver {
      * Topological order means that the dependencies of a data appear prior to the data itself.
      *
      * @param dataKeys     the data keys to sort
-     * @param dependencies maps every data key to its dependencies
+     * @param dependencies a function maps every data key to the data keys which it depends on
      * @return a sorted list containing all data keys
      * @throws CyclicDataDependencyException if there is a cyclic dependency, topological sorting is not possible
      */
     @VisibleForTesting
     List<String> getInTopologicalOrder(Collection<String> dataKeys, Function<String, Collection<String>> dependencies) throws CyclicDataDependencyException {
+        //simply transform dependencies to a map for a more efficient access
+        //the map maps each data key to the data keys it depends on
         Map<String, Set<String>> dependenciesMap =
                 dataKeys.stream()
                         .collect(Collectors.toMap(

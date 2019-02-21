@@ -148,6 +148,14 @@ public class MethodHookGenerator {
         return BoundDataProvider.bind(dataKey, providerConfig, injectedProviderClass, constantAssignments, dynamicAssignments);
     }
 
+    /**
+     * Reads the constant assignments performed by the given provider call into a map.
+     * The data is immediately converted to the expected input type using a conversion service.
+     *
+     * @param providerCallConfig the call whose constant assignments should be queried
+     * @param context            the classloader within which the data provider is executed, used to find the correct types
+     * @return a map mapping the name of the parameters to the constant value they are assigned
+     */
     private Map<String, Object> getConstantInputAssignments(ResolvedDataProviderCall providerCallConfig, ClassLoader context) {
         ResolvedGenericDataProviderConfig providerConfig = providerCallConfig.getProvider();
         Map<String, Object> constantAssignments = new HashMap<>();
@@ -155,6 +163,7 @@ public class MethodHookGenerator {
         providerCallConfig.getCallSettings().getConstantInput()
                 .forEach((argName, value) -> {
                     String expectedTypeName = providerConfig.getAdditionalArgumentTypes().get(argName);
+                    //we don't want to give a primitive type to the conversion service
                     if (AutoboxingHelper.isPrimitiveType(expectedTypeName)) {
                         expectedTypeName = AutoboxingHelper.getWrapperForPrimitive(expectedTypeName);
                     }
@@ -165,6 +174,14 @@ public class MethodHookGenerator {
         return constantAssignments;
     }
 
+    /**
+     * Reads the dynamic assignments performed by the given provider call into a map.
+     * Currently the only dynamic assignments are "data-inputs".
+     *
+     * @param providerCallConfig the call whose dynamic assignments should be queried
+     * @return a map mapping the parameter names to functions which are evaluated during
+     * {@link IHookAction#execute(IHookAction.ExecutionContext)}  to find the concrete value for the parameter.
+     */
     private Map<String, Function<IHookAction.ExecutionContext, Object>> getDynamicInputAssignments(ResolvedDataProviderCall providerCallConfig) {
         Map<String, Function<IHookAction.ExecutionContext, Object>> dynamicAssignments = new HashMap<>();
         providerCallConfig.getCallSettings().getDataInput()

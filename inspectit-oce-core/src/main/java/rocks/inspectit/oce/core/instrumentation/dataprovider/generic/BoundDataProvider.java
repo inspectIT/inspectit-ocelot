@@ -87,15 +87,20 @@ public abstract class BoundDataProvider implements IHookAction {
 
 class ConstantOnlyBoundDataProvider extends BoundDataProvider {
 
-    private Object[] arguments;
+    private final Object[] arguments;
 
     public ConstantOnlyBoundDataProvider(String dataKey, ResolvedGenericDataProviderConfig providerConfig,
                                          InjectedClass<?> provider, Map<String, Object> constantAssignments) {
         super(dataKey, providerConfig, provider);
 
-        arguments = providerConfig.getAdditionalArgumentTypes().keySet().stream().map(
-                constantAssignments::get
-        ).toArray();
+        // the additionalArgumentTypes is a sorted map
+        // the order in which the arguments appear in this map correspond to the order in which their values
+        // have to be placed in the arguments array
+        arguments = providerConfig.getAdditionalArgumentTypes()
+                .keySet().stream()
+                .map(
+                        constantAssignments::get
+                ).toArray();
     }
 
     @Override
@@ -110,13 +115,16 @@ class DynamicBoundDataProvider extends BoundDataProvider {
 
     /**
      * A template containing the already assigned constant arguments for this data provider.
-     * As the same {@link DynamicBoundDataProvider} isntance could potentially be used by multiple threads,
+     * As the same {@link DynamicBoundDataProvider} instance could potentially be used by multiple threads,
      * this array needs to be copied before the dynamicAssignments can be performed.
      */
-    private Object[] argumentsTemplate;
+    private final Object[] argumentsTemplate;
 
     /**
-     * An array containing (a) the index of the input to assign and (b) a function for defining the value.
+     * An array containing (a) the index of the addition input to assign and (b) a function for defining the value.
+     * The index corresponds to the index of the parameter in {@link ResolvedGenericDataProviderConfig#getAdditionalArgumentTypes()}.
+     * Therefore the index corresponds to the position in the additionalArgumetns array with which the
+     * {@link IGenericDataProvider#execute(Object[], Object, Object, Throwable, Object[])} function is called.
      */
     private Pair<Integer, Function<ExecutionContext, Object>>[] dynamicAssignments;
 
@@ -126,10 +134,19 @@ class DynamicBoundDataProvider extends BoundDataProvider {
                                     Map<String, Function<ExecutionContext, Object>> dynamicAssignments) {
         super(dataKey, providerConfig, provider);
 
+        // the sorted additionalArgumentTypes map defines the number and the order of the additional input
+        // parameters the data provider expects
+        // therefore we can already reserve the exact amount of space needed for the argumentsTemplate
         int numArgs = providerConfig.getAdditionalArgumentTypes().size();
         argumentsTemplate = new Object[numArgs];
 
         List<Pair<Integer, Function<ExecutionContext, Object>>> dynamicAssignmentsWithIndices = new ArrayList<>();
+
+        //we now loop over the additionalArgumentTypes map and remember the index of the corresponding parameter
+        //If the parameter is defined through a constant assignment we simply place it in the argumentsTemplate at the
+        //index of the parameter.
+        //if the parameter is defined throug ha dynamic assignment we cannot directly store the value already in the template.
+        //Instead we remember the idnex and the function used to perform the assignment in dynamicAssignments.
 
         int idx = 0;
         val argsIterator = providerConfig.getAdditionalArgumentTypes().entrySet().iterator();
