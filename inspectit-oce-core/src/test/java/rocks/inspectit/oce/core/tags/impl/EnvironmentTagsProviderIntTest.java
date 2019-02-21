@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import rocks.inspectit.oce.core.SpringTestBase;
+import rocks.inspectit.oce.core.config.InspectitEnvironment;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -21,12 +22,14 @@ class EnvironmentTagsProviderIntTest {
         static final String SERVICE_NAME = "SERVICE_NAME";
 
         @Autowired
-        EnvironmentTagsProvider provider;
+        EnvironmentCommonTagsProvider provider;
+
+        @Autowired
+        InspectitEnvironment env;
 
         @Test
         public void happyPath() {
-            assertThat(provider.isEnabled()).isTrue();
-            assertThat(provider.getTags())
+            assertThat(provider.getTags(env.getCurrentConfig()))
                     .hasSize(3)
                     .containsEntry("service-name", SERVICE_NAME)
                     .containsKey("host")
@@ -44,12 +47,14 @@ class EnvironmentTagsProviderIntTest {
     class Overwritten extends SpringTestBase {
 
         @Autowired
-        EnvironmentTagsProvider provider;
+        InspectitEnvironment env;
+
+        @Autowired
+        EnvironmentCommonTagsProvider provider;
 
         @Test
         public void happyPath() {
-            assertThat(provider.isEnabled()).isTrue();
-            assertThat(provider.getTags())
+            assertThat(provider.getTags(env.getCurrentConfig()))
                     .hasSize(1)
                     .containsKeys("service-name");
         }
@@ -64,11 +69,14 @@ class EnvironmentTagsProviderIntTest {
     class Disabled extends SpringTestBase {
 
         @Autowired
-        EnvironmentTagsProvider provider;
+        InspectitEnvironment env;
+
+        @Autowired
+        EnvironmentCommonTagsProvider provider;
 
         @Test
         public void happyPath() {
-            assertThat(provider.isEnabled()).isFalse();
+            assertThat(provider.getTags(env.getCurrentConfig())).isEmpty();
         }
 
     }
@@ -81,14 +89,16 @@ class EnvironmentTagsProviderIntTest {
     class Update extends SpringTestBase {
 
         @Autowired
-        EnvironmentTagsProvider provider;
+        EnvironmentCommonTagsProvider provider;
+
+        @Autowired
+        InspectitEnvironment env;
 
         @Test
         public void enable() {
             updateProperties(properties -> properties.withProperty("inspectit.tags.providers.environment.enabled", Boolean.TRUE));
 
-            assertThat(provider.isEnabled()).isTrue();
-            assertThat(provider.getTags()).hasSize(3);
+            assertThat(provider.getTags(env.getCurrentConfig())).hasSize(3);
         }
 
     }
@@ -98,19 +108,19 @@ class EnvironmentTagsProviderIntTest {
     class UpdateServiceName extends SpringTestBase {
 
         @Autowired
-        EnvironmentTagsProvider provider;
+        InspectitEnvironment env;
+
+        @Autowired
+        EnvironmentCommonTagsProvider provider;
 
         @Test
         public void happyPath() {
-            assertThat(provider.isEnabled()).isTrue();
-
             updateProperties(
                     properties -> properties
                             .withProperty("inspectit.service-name", "updatedName")
             );
 
-            assertThat(provider.isEnabled()).isTrue();
-            assertThat(provider.getTags()).hasSize(3)
+            assertThat(provider.getTags(env.getCurrentConfig())).hasSize(3)
                     .containsEntry("service-name", "updatedName");
         }
 

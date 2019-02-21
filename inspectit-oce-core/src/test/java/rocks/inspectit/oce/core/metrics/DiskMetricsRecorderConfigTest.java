@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import rocks.inspectit.oce.core.SpringTestBase;
+import rocks.inspectit.oce.core.metrics.system.DiskMetricsRecorder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

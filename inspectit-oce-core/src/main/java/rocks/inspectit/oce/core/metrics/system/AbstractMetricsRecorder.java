@@ -1,4 +1,4 @@
-package rocks.inspectit.oce.core.metrics;
+package rocks.inspectit.oce.core.metrics.system;
 
 import io.opencensus.stats.Measure;
 import io.opencensus.stats.StatsRecorder;
@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import rocks.inspectit.oce.core.config.model.InspectitConfig;
 import rocks.inspectit.oce.core.config.model.metrics.MetricsSettings;
+import rocks.inspectit.oce.core.metrics.MeasuresAndViewsManager;
 import rocks.inspectit.oce.core.service.DynamicallyActivatableService;
 import rocks.inspectit.oce.core.tags.CommonTagsManager;
 
@@ -26,7 +27,7 @@ public abstract class AbstractMetricsRecorder extends DynamicallyActivatableServ
     protected ViewManager viewManager;
 
     @Autowired
-    protected MeasuresAndViewsProvider measureProvider;
+    protected MeasuresAndViewsManager measureManager;
 
     @Autowired
     protected CommonTagsManager commonTags;
@@ -65,6 +66,5 @@ public abstract class AbstractMetricsRecorder extends DynamicallyActivatableServ
      * @return true if the recorder should be enabled
      */
     protected abstract boolean checkEnabledForConfig(MetricsSettings ms);
-
 
 }

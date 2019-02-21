@@ -2,7 +2,6 @@ package rocks.inspectit.oce.core.instrumentation;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import io.opencensus.stats.Aggregation;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -271,14 +270,7 @@ public class AsyncClassTransformer implements ClassFileTransformer {
     @EventListener(classes = {InspectitConfigChangedEvent.class},
             condition = "!#root.event.oldConfig.selfMonitoring.enabled")
     private void selfMonitorInstrumentedClassesCount() {
-        if (selfMonitoring.isSelfMonitoringEnabled()) {
-            val measure = selfMonitoring.getSelfMonitoringMeasureLong(
-                    "instrumented-classes",
-                    "The number of classes currently instrumented by inspectIT",
-                    "classes",
-                    Aggregation.LastValue::create);
-            selfMonitoring.recordMeasurement(measure, instrumentedClasses.size());
-        }
+        selfMonitoring.recordMeasurement("instrumented-classes", instrumentedClasses.size());
     }
 
 }
