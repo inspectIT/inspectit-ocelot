@@ -13,7 +13,7 @@ import rocks.inspectit.oce.core.config.model.instrumentation.dataproviders.DataP
  */
 @Value
 @Builder
-public class ResolvedDataProviderCall {
+public class DataProviderCallConfig {
 
     /**
      * The input assignments to use for calling the data provider.
@@ -25,6 +25,6 @@ public class ResolvedDataProviderCall {
      * The definition of the data provider which shall be called.
      * It is guaranteed that the provider name specified {@link #callSettings} is the name of the provider defined by {@link #provider}.
      */
-    private ResolvedGenericDataProviderConfig provider;
+    private GenericDataProviderConfig provider;
 }
 

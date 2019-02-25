@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import rocks.inspectit.oce.core.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.dataproviders.GenericDataProviderSettings;
-import rocks.inspectit.oce.core.instrumentation.config.model.ResolvedGenericDataProviderConfig;
+import rocks.inspectit.oce.core.instrumentation.config.model.GenericDataProviderConfig;
 
 import java.util.Map;
 
@@ -37,7 +37,7 @@ public class DataProviderResolverTest {
 
         @Test
         void verifyNamePreserved() {
-            Map<String, ResolvedGenericDataProviderConfig> result = resolver.resolveProviders(config);
+            Map<String, GenericDataProviderConfig> result = resolver.resolveProviders(config);
 
             assertThat(result).hasSize(1);
             assertThat(result).containsKey(PROVIDER_NAME);
@@ -48,12 +48,12 @@ public class DataProviderResolverTest {
         void verifyThizTypeExtracted() {
             inputProvider.getInput().put("thiz", "MyClass");
 
-            Map<String, ResolvedGenericDataProviderConfig> result = resolver.resolveProviders(config);
+            Map<String, GenericDataProviderConfig> result = resolver.resolveProviders(config);
 
             assertThat(result).hasSize(1);
             assertThat(result).containsKey(PROVIDER_NAME);
 
-            ResolvedGenericDataProviderConfig rc = result.get(PROVIDER_NAME);
+            GenericDataProviderConfig rc = result.get(PROVIDER_NAME);
             assertThat(rc.getExpectedThisType()).isEqualTo("MyClass");
             assertThat(rc.getName()).isEqualTo(PROVIDER_NAME);
             assertThat(rc.getAdditionalArgumentTypes()).isEmpty();
@@ -70,12 +70,12 @@ public class DataProviderResolverTest {
             inputProvider.getInput().put("arg1", "MyClass");
             inputProvider.getInput().put("arg3", "MyOtherClass");
 
-            Map<String, ResolvedGenericDataProviderConfig> result = resolver.resolveProviders(config);
+            Map<String, GenericDataProviderConfig> result = resolver.resolveProviders(config);
 
             assertThat(result).hasSize(1);
             assertThat(result).containsKey(PROVIDER_NAME);
 
-            ResolvedGenericDataProviderConfig rc = result.get(PROVIDER_NAME);
+            GenericDataProviderConfig rc = result.get(PROVIDER_NAME);
             assertThat(rc.getExpectedThisType()).isNull();
             assertThat(rc.getName()).isEqualTo(PROVIDER_NAME);
             assertThat(rc.getAdditionalArgumentTypes()).isEmpty();
@@ -94,12 +94,12 @@ public class DataProviderResolverTest {
             inputProvider.getInput().put("argument", "MyClass");
             inputProvider.getInput().put("x", "MyOtherClass");
 
-            Map<String, ResolvedGenericDataProviderConfig> result = resolver.resolveProviders(config);
+            Map<String, GenericDataProviderConfig> result = resolver.resolveProviders(config);
 
             assertThat(result).hasSize(1);
             assertThat(result).containsKey(PROVIDER_NAME);
 
-            ResolvedGenericDataProviderConfig rc = result.get(PROVIDER_NAME);
+            GenericDataProviderConfig rc = result.get(PROVIDER_NAME);
             assertThat(rc.getExpectedThisType()).isNull();
             assertThat(rc.getName()).isEqualTo(PROVIDER_NAME);
             assertThat(rc.getExpectedArgumentTypes()).isEmpty();
@@ -116,12 +116,12 @@ public class DataProviderResolverTest {
         void verifyReturnValueTypeExtracted() {
             inputProvider.getInput().put("returnValue", "MyClass");
 
-            Map<String, ResolvedGenericDataProviderConfig> result = resolver.resolveProviders(config);
+            Map<String, GenericDataProviderConfig> result = resolver.resolveProviders(config);
 
             assertThat(result).hasSize(1);
             assertThat(result).containsKey(PROVIDER_NAME);
 
-            ResolvedGenericDataProviderConfig rc = result.get(PROVIDER_NAME);
+            GenericDataProviderConfig rc = result.get(PROVIDER_NAME);
             assertThat(rc.getExpectedThisType()).isNull();
             assertThat(rc.getName()).isEqualTo(PROVIDER_NAME);
             assertThat(rc.getAdditionalArgumentTypes()).isEmpty();
@@ -136,12 +136,12 @@ public class DataProviderResolverTest {
         void verifyThrownExtracted() {
             inputProvider.getInput().put("thrown", "java.lang.Throwable");
 
-            Map<String, ResolvedGenericDataProviderConfig> result = resolver.resolveProviders(config);
+            Map<String, GenericDataProviderConfig> result = resolver.resolveProviders(config);
 
             assertThat(result).hasSize(1);
             assertThat(result).containsKey(PROVIDER_NAME);
 
-            ResolvedGenericDataProviderConfig rc = result.get(PROVIDER_NAME);
+            GenericDataProviderConfig rc = result.get(PROVIDER_NAME);
             assertThat(rc.getExpectedThisType()).isNull();
             assertThat(rc.getName()).isEqualTo(PROVIDER_NAME);
             assertThat(rc.getAdditionalArgumentTypes()).isEmpty();
@@ -157,12 +157,12 @@ public class DataProviderResolverTest {
             inputProvider.getImports().add("my.package");
             inputProvider.getImports().add("my.other.package");
 
-            Map<String, ResolvedGenericDataProviderConfig> result = resolver.resolveProviders(config);
+            Map<String, GenericDataProviderConfig> result = resolver.resolveProviders(config);
 
             assertThat(result).hasSize(1);
             assertThat(result).containsKey(PROVIDER_NAME);
 
-            ResolvedGenericDataProviderConfig rc = result.get(PROVIDER_NAME);
+            GenericDataProviderConfig rc = result.get(PROVIDER_NAME);
             assertThat(rc.getExpectedThisType()).isNull();
             assertThat(rc.getName()).isEqualTo(PROVIDER_NAME);
             assertThat(rc.getAdditionalArgumentTypes()).isEmpty();
@@ -178,12 +178,12 @@ public class DataProviderResolverTest {
             inputProvider.setValueBody(null);
             inputProvider.setValue("\"Test\"");
 
-            Map<String, ResolvedGenericDataProviderConfig> result = resolver.resolveProviders(config);
+            Map<String, GenericDataProviderConfig> result = resolver.resolveProviders(config);
 
             assertThat(result).hasSize(1);
             assertThat(result).containsKey(PROVIDER_NAME);
 
-            ResolvedGenericDataProviderConfig rc = result.get(PROVIDER_NAME);
+            GenericDataProviderConfig rc = result.get(PROVIDER_NAME);
             assertThat(rc.getExpectedThisType()).isNull();
             assertThat(rc.getName()).isEqualTo(PROVIDER_NAME);
             assertThat(rc.getAdditionalArgumentTypes()).isEmpty();

@@ -108,11 +108,13 @@ public class InstrumentationConfigurationResolver {
                 .flatMap(r -> r.getScopes().stream())
                 .collect(Collectors.toSet());
 
-        if (!involvedScopes.isEmpty()) {
+        if (!narrowedRules.isEmpty()) {
             Map<MethodDescription, MethodHookConfiguration> result = new HashMap<>();
             for (val method : type.getDeclaredMethods()) {
-                val scopesMatchingOnMethod = involvedScopes.stream().filter(scope -> scope.getMethodMatcher().matches(method)).collect(Collectors.toSet());
-                val rulesMatchingOnMethod = narrowedRules.stream().filter(r -> !Collections.disjoint(r.getScopes(), scopesMatchingOnMethod)).collect(Collectors.toSet());
+                val rulesMatchingOnMethod = narrowedRules.stream()
+                        .filter(rule -> rule.getScopes().stream()
+                                .anyMatch(scope -> scope.getMethodMatcher().matches(method)))
+                        .collect(Collectors.toSet());
                 if (!rulesMatchingOnMethod.isEmpty()) {
                     try {
                         result.put(method, hookResolver.buildHookConfiguration(clazz, method, rulesMatchingOnMethod));
@@ -180,8 +182,8 @@ public class InstrumentationConfigurationResolver {
     }
 
     @VisibleForTesting
-    ResolvedDataProperties resolveDataProperties(InstrumentationSettings source) {
-        val builder = ResolvedDataProperties.builder();
+    DataProperties resolveDataProperties(InstrumentationSettings source) {
+        val builder = DataProperties.builder();
         source.getData().forEach(builder::data);
         return builder.build();
     }

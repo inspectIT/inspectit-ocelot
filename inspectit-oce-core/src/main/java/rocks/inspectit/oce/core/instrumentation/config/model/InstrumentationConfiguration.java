@@ -25,7 +25,7 @@ public class InstrumentationConfiguration {
      */
     private InstrumentationSettings source;
 
-    private ResolvedDataProperties dataProperties;
+    private DataProperties dataProperties;
 
     /**
      * The currently active instrumentation rules.

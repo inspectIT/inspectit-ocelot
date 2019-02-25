@@ -20,12 +20,12 @@ public class MethodHookConfiguration {
      * The first argument of the pair is the key of the data, the second is the data provider.
      */
     @Singular
-    List<Pair<String, ResolvedDataProviderCall>> entryProviders;
+    List<Pair<String, DataProviderCallConfig>> entryProviders;
 
     /**
      * The ordered list of data assignments performed on method exit.
      * The first argument of the pair is the key of the data, the second is the data provider.
      */
     @Singular
-    List<Pair<String, ResolvedDataProviderCall>> exitProviders;
+    List<Pair<String, DataProviderCallConfig>> exitProviders;
 }

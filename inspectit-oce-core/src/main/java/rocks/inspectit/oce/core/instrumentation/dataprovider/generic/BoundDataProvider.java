@@ -4,7 +4,7 @@ import lombok.experimental.NonFinal;
 import lombok.val;
 import org.apache.commons.lang3.tuple.Pair;
 import rocks.inspectit.oce.bootstrap.instrumentation.IGenericDataProvider;
-import rocks.inspectit.oce.core.instrumentation.config.model.ResolvedGenericDataProviderConfig;
+import rocks.inspectit.oce.core.instrumentation.config.model.GenericDataProviderConfig;
 import rocks.inspectit.oce.core.instrumentation.hook.IHookAction;
 import rocks.inspectit.oce.core.instrumentation.injection.InjectedClass;
 
@@ -44,7 +44,7 @@ public abstract class BoundDataProvider implements IHookAction {
     protected final IGenericDataProvider provider;
 
 
-    protected BoundDataProvider(String dataKey, ResolvedGenericDataProviderConfig providerConfig, InjectedClass<?> providerClass) {
+    protected BoundDataProvider(String dataKey, GenericDataProviderConfig providerConfig, InjectedClass<?> providerClass) {
         this.dataKey = dataKey;
         providerName = providerConfig.getName();
         this.providerClass = providerClass;
@@ -72,7 +72,7 @@ public abstract class BoundDataProvider implements IHookAction {
      * @return
      */
     public static BoundDataProvider bind(String dataKey,
-                                         ResolvedGenericDataProviderConfig providerConfig,
+                                         GenericDataProviderConfig providerConfig,
                                          InjectedClass<?> provider,
                                          Map<String, Object> constantAssignments,
                                          Map<String, Function<ExecutionContext, Object>> dynamicAssignments) {
@@ -89,7 +89,7 @@ class ConstantOnlyBoundDataProvider extends BoundDataProvider {
 
     private final Object[] arguments;
 
-    public ConstantOnlyBoundDataProvider(String dataKey, ResolvedGenericDataProviderConfig providerConfig,
+    public ConstantOnlyBoundDataProvider(String dataKey, GenericDataProviderConfig providerConfig,
                                          InjectedClass<?> provider, Map<String, Object> constantAssignments) {
         super(dataKey, providerConfig, provider);
 
@@ -122,14 +122,14 @@ class DynamicBoundDataProvider extends BoundDataProvider {
 
     /**
      * An array containing (a) the index of the addition input to assign and (b) a function for defining the value.
-     * The index corresponds to the index of the parameter in {@link ResolvedGenericDataProviderConfig#getAdditionalArgumentTypes()}.
+     * The index corresponds to the index of the parameter in {@link GenericDataProviderConfig#getAdditionalArgumentTypes()}.
      * Therefore the index corresponds to the position in the additionalArgumetns array with which the
      * {@link IGenericDataProvider#execute(Object[], Object, Object, Throwable, Object[])} function is called.
      */
     private Pair<Integer, Function<ExecutionContext, Object>>[] dynamicAssignments;
 
     @SuppressWarnings("unchecked")
-    public DynamicBoundDataProvider(String dataKey, ResolvedGenericDataProviderConfig providerConfig,
+    public DynamicBoundDataProvider(String dataKey, GenericDataProviderConfig providerConfig,
                                     InjectedClass<?> provider, Map<String, Object> constantAssignments,
                                     Map<String, Function<ExecutionContext, Object>> dynamicAssignments) {
         super(dataKey, providerConfig, provider);
@@ -145,13 +145,11 @@ class DynamicBoundDataProvider extends BoundDataProvider {
         //we now loop over the additionalArgumentTypes map and remember the index of the corresponding parameter
         //If the parameter is defined through a constant assignment we simply place it in the argumentsTemplate at the
         //index of the parameter.
-        //if the parameter is defined throug ha dynamic assignment we cannot directly store the value already in the template.
-        //Instead we remember the idnex and the function used to perform the assignment in dynamicAssignments.
+        //if the parameter is defined through a dynamic assignment we cannot directly store the value already in the template.
+        //Instead we remember the index and the function used to perform the assignment in dynamicAssignments.
 
         int idx = 0;
-        val argsIterator = providerConfig.getAdditionalArgumentTypes().entrySet().iterator();
-        while (argsIterator.hasNext()) {
-            String argName = argsIterator.next().getKey();
+        for (String argName : providerConfig.getAdditionalArgumentTypes().keySet()) {
             if (constantAssignments.containsKey(argName)) {
                 argumentsTemplate[idx] = constantAssignments.get(argName);
             } else if (dynamicAssignments.containsKey(argName)) {

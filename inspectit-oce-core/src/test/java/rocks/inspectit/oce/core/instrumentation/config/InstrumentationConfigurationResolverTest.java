@@ -291,7 +291,7 @@ class InstrumentationConfigurationResolverTest {
 
         @Test
         void defaultSettingsForUnmentionedKeyCorrect() {
-            ResolvedDataProperties dataProps = resolver.resolveDataProperties(testSettings);
+            DataProperties dataProps = resolver.resolveDataProperties(testSettings);
             assertThat(dataProps.isPropagatedDownWithinJVM("my_key")).isTrue();
             assertThat(dataProps.isPropagatedDownGlobally("my_key")).isFalse();
 
@@ -307,7 +307,7 @@ class InstrumentationConfigurationResolverTest {
             ds.setDownPropagation(PropagationMode.NONE);
             testSettings.setData(Maps.newHashMap("my_key", ds));
 
-            ResolvedDataProperties dataProps = resolver.resolveDataProperties(testSettings);
+            DataProperties dataProps = resolver.resolveDataProperties(testSettings);
 
             assertThat(dataProps.isPropagatedDownWithinJVM("my_key")).isFalse();
             assertThat(dataProps.isPropagatedDownGlobally("my_key")).isFalse();
@@ -319,7 +319,7 @@ class InstrumentationConfigurationResolverTest {
             ds.setDownPropagation(PropagationMode.JVM_LOCAL);
             testSettings.setData(Maps.newHashMap("my_key", ds));
 
-            ResolvedDataProperties dataProps = resolver.resolveDataProperties(testSettings);
+            DataProperties dataProps = resolver.resolveDataProperties(testSettings);
 
             assertThat(dataProps.isPropagatedDownWithinJVM("my_key")).isTrue();
             assertThat(dataProps.isPropagatedDownGlobally("my_key")).isFalse();
@@ -331,7 +331,7 @@ class InstrumentationConfigurationResolverTest {
             ds.setDownPropagation(PropagationMode.GLOBAL);
             testSettings.setData(Maps.newHashMap("my_key", ds));
 
-            ResolvedDataProperties dataProps = resolver.resolveDataProperties(testSettings);
+            DataProperties dataProps = resolver.resolveDataProperties(testSettings);
 
             assertThat(dataProps.isPropagatedDownWithinJVM("my_key")).isTrue();
             assertThat(dataProps.isPropagatedDownGlobally("my_key")).isTrue();
@@ -343,7 +343,7 @@ class InstrumentationConfigurationResolverTest {
             ds.setUpPropagation(PropagationMode.NONE);
             testSettings.setData(Maps.newHashMap("my_key", ds));
 
-            ResolvedDataProperties dataProps = resolver.resolveDataProperties(testSettings);
+            DataProperties dataProps = resolver.resolveDataProperties(testSettings);
 
             assertThat(dataProps.isPropagatedUpWithinJVM("my_key")).isFalse();
             assertThat(dataProps.isPropagatedUpGlobally("my_key")).isFalse();
@@ -355,7 +355,7 @@ class InstrumentationConfigurationResolverTest {
             ds.setUpPropagation(PropagationMode.JVM_LOCAL);
             testSettings.setData(Maps.newHashMap("my_key", ds));
 
-            ResolvedDataProperties dataProps = resolver.resolveDataProperties(testSettings);
+            DataProperties dataProps = resolver.resolveDataProperties(testSettings);
 
             assertThat(dataProps.isPropagatedUpWithinJVM("my_key")).isTrue();
             assertThat(dataProps.isPropagatedUpGlobally("my_key")).isFalse();
@@ -367,7 +367,7 @@ class InstrumentationConfigurationResolverTest {
             ds.setUpPropagation(PropagationMode.GLOBAL);
             testSettings.setData(Maps.newHashMap("my_key", ds));
 
-            ResolvedDataProperties dataProps = resolver.resolveDataProperties(testSettings);
+            DataProperties dataProps = resolver.resolveDataProperties(testSettings);
 
             assertThat(dataProps.isPropagatedUpWithinJVM("my_key")).isTrue();
             assertThat(dataProps.isPropagatedUpGlobally("my_key")).isTrue();

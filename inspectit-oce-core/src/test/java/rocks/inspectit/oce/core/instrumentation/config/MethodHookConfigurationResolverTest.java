@@ -12,10 +12,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.oce.core.config.model.instrumentation.dataproviders.DataProviderCallSettings;
+import rocks.inspectit.oce.core.instrumentation.config.model.DataProviderCallConfig;
+import rocks.inspectit.oce.core.instrumentation.config.model.GenericDataProviderConfig;
 import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationRule;
 import rocks.inspectit.oce.core.instrumentation.config.model.MethodHookConfiguration;
-import rocks.inspectit.oce.core.instrumentation.config.model.ResolvedDataProviderCall;
-import rocks.inspectit.oce.core.instrumentation.config.model.ResolvedGenericDataProviderConfig;
 import rocks.inspectit.oce.core.testutils.Dummy;
 
 import java.util.HashMap;
@@ -41,37 +41,37 @@ public class MethodHookConfigurationResolverTest {
     @Nested
     class BuildHookConfiguration {
 
-        ResolvedGenericDataProviderConfig providerA;
-        ResolvedDataProviderCall callToA1;
-        ResolvedDataProviderCall callToA2;
-        ResolvedGenericDataProviderConfig providerB;
-        ResolvedDataProviderCall callToB;
+        GenericDataProviderConfig providerA;
+        DataProviderCallConfig callToA1;
+        DataProviderCallConfig callToA2;
+        GenericDataProviderConfig providerB;
+        DataProviderCallConfig callToB;
 
         @BeforeEach
         void initTestData() {
-            providerA = ResolvedGenericDataProviderConfig.builder()
+            providerA = GenericDataProviderConfig.builder()
                     .name("providerA")
                     .build();
 
             DataProviderCallSettings seta1 = new DataProviderCallSettings();
             seta1.setProvider("providerA");
-            callToA1 = ResolvedDataProviderCall.builder()
+            callToA1 = DataProviderCallConfig.builder()
                     .callSettings(seta1)
                     .provider(providerA).build();
 
             DataProviderCallSettings seta2 = new DataProviderCallSettings();
             seta2.setProvider("providerA");
-            callToA2 = ResolvedDataProviderCall.builder()
+            callToA2 = DataProviderCallConfig.builder()
                     .callSettings(seta2)
                     .provider(providerA).build();
 
-            providerB = ResolvedGenericDataProviderConfig.builder()
+            providerB = GenericDataProviderConfig.builder()
                     .name("providerB")
                     .build();
 
             DataProviderCallSettings setb1 = new DataProviderCallSettings();
             setb1.setProvider("providerB");
-            callToB = ResolvedDataProviderCall.builder()
+            callToB = DataProviderCallConfig.builder()
                     .callSettings(setb1)
                     .provider(providerB).build();
         }
@@ -100,14 +100,14 @@ public class MethodHookConfigurationResolverTest {
             DataProviderCallSettings dependingOnFirst = new DataProviderCallSettings();
             dependingOnFirst.setProvider("providerA");
             dependingOnFirst.setDataInput(Maps.newHashMap("someArgument", "first_key"));
-            ResolvedDataProviderCall depFirst = ResolvedDataProviderCall.builder()
+            DataProviderCallConfig depFirst = DataProviderCallConfig.builder()
                     .callSettings(dependingOnFirst)
                     .provider(providerA).build();
 
             DataProviderCallSettings dependingOnSecond = new DataProviderCallSettings();
             dependingOnSecond.setProvider("providerA");
             dependingOnSecond.setDataInput(Maps.newHashMap("someArgument", "second_key"));
-            ResolvedDataProviderCall depSecond = ResolvedDataProviderCall.builder()
+            DataProviderCallConfig depSecond = DataProviderCallConfig.builder()
                     .callSettings(dependingOnSecond)
                     .provider(providerA).build();
 

@@ -8,10 +8,10 @@ import org.springframework.util.CollectionUtils;
 import rocks.inspectit.oce.core.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.dataproviders.DataProviderCallSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.rules.InstrumentationRuleSettings;
+import rocks.inspectit.oce.core.instrumentation.config.model.DataProviderCallConfig;
+import rocks.inspectit.oce.core.instrumentation.config.model.GenericDataProviderConfig;
 import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationRule;
 import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationScope;
-import rocks.inspectit.oce.core.instrumentation.config.model.ResolvedDataProviderCall;
-import rocks.inspectit.oce.core.instrumentation.config.model.ResolvedGenericDataProviderConfig;
 
 import java.util.Collections;
 import java.util.Map;
@@ -37,7 +37,7 @@ public class InstrumentationRuleResolver {
      * @param source the configuration which is used as basis for the rules
      * @return A set containing the resolved rules.
      */
-    public Set<InstrumentationRule> resolve(InstrumentationSettings source, Map<String, ResolvedGenericDataProviderConfig> dataProviders) {
+    public Set<InstrumentationRule> resolve(InstrumentationSettings source, Map<String, GenericDataProviderConfig> dataProviders) {
         if (CollectionUtils.isEmpty(source.getRules())) {
             return Collections.emptySet();
         }
@@ -57,7 +57,7 @@ public class InstrumentationRuleResolver {
     /**
      * Creating the {@link InstrumentationRule} instance and linking the scopes as well as the data providers to it.
      */
-    private InstrumentationRule resolveRule(String name, InstrumentationRuleSettings settings, Map<String, InstrumentationScope> scopeMap, Map<String, ResolvedGenericDataProviderConfig> dataProviders) {
+    private InstrumentationRule resolveRule(String name, InstrumentationRuleSettings settings, Map<String, InstrumentationScope> scopeMap, Map<String, GenericDataProviderConfig> dataProviders) {
         val result = InstrumentationRule.builder();
         result.name(name);
         settings.getScopes().entrySet()
@@ -80,16 +80,16 @@ public class InstrumentationRuleResolver {
     }
 
     /**
-     * Resolves a {@link DataProviderCallSettings} instance into a {@link ResolvedDataProviderCall}.
-     * As this involves linking the {@link ResolvedGenericDataProviderConfig} of the provider which is used,
+     * Resolves a {@link DataProviderCallSettings} instance into a {@link DataProviderCallConfig}.
+     * As this involves linking the {@link GenericDataProviderConfig} of the provider which is used,
      * the map of known providers is required as input.
      *
      * @param dataProviders a map mapping the names of data providers to their resolved configuration.
      * @param call
      * @return
      */
-    private ResolvedDataProviderCall resolveCall(DataProviderCallSettings call, Map<String, ResolvedGenericDataProviderConfig> dataProviders) {
-        return ResolvedDataProviderCall.builder()
+    private DataProviderCallConfig resolveCall(DataProviderCallSettings call, Map<String, GenericDataProviderConfig> dataProviders) {
+        return DataProviderCallConfig.builder()
                 .provider(dataProviders.get(call.getProvider()))
                 .callSettings(call)
                 .build();

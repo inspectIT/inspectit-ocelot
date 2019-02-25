@@ -31,12 +31,12 @@ public class InstrumentationRule {
      * These assignments are performed in the method-entry part.
      */
     @Singular
-    private Map<String, ResolvedDataProviderCall> entryProviders;
+    private Map<String, DataProviderCallConfig> entryProviders;
 
     /**
      * Maps data keys to the data provider call defining the value.
      * These assignments are performed in the method-exit part.
      */
     @Singular
-    private Map<String, ResolvedDataProviderCall> exitProviders;
+    private Map<String, DataProviderCallConfig> exitProviders;
 }

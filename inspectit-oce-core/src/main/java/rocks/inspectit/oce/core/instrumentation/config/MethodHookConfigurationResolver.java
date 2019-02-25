@@ -9,9 +9,9 @@ import net.bytebuddy.description.method.MethodDescription;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import rocks.inspectit.oce.core.instrumentation.config.model.DataProviderCallConfig;
 import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationRule;
 import rocks.inspectit.oce.core.instrumentation.config.model.MethodHookConfiguration;
-import rocks.inspectit.oce.core.instrumentation.config.model.ResolvedDataProviderCall;
 import rocks.inspectit.oce.core.instrumentation.dataprovider.generic.DataProviderGenerator;
 
 import java.util.*;
@@ -51,12 +51,12 @@ public class MethodHookConfigurationResolver {
      * @throws ConflictingDataDefinitionsException
      * @throws CyclicDataDependencyException
      */
-    private List<Pair<String, ResolvedDataProviderCall>> combineAndOrderProviderCalls(Set<InstrumentationRule> rules, Function<InstrumentationRule, Map<String, ResolvedDataProviderCall>> providersGetter)
+    private List<Pair<String, DataProviderCallConfig>> combineAndOrderProviderCalls(Set<InstrumentationRule> rules, Function<InstrumentationRule, Map<String, DataProviderCallConfig>> providersGetter)
             throws ConflictingDataDefinitionsException, CyclicDataDependencyException {
 
         // Maps each data key written by this hook to the corresponding provider call
         // The calls are combined from all rules which are active on this method
-        Map<String, ResolvedDataProviderCall> dataDefinitions = combineProvidersFromRules(rules, providersGetter);
+        Map<String, DataProviderCallConfig> dataDefinitions = combineProvidersFromRules(rules, providersGetter);
 
         //this function maps each data key to the data keys it depends on
         //if a data key (A) depends on a data key (B), the hook ensures that the provider of (B) is executed before the one of (A)
@@ -86,14 +86,14 @@ public class MethodHookConfigurationResolver {
      * @return a map mapping the data keys to the provider call which define the values
      * @throws ConflictingDataDefinitionsException if the same data key is defined with different data-provder calls
      */
-    private Map<String, ResolvedDataProviderCall> combineProvidersFromRules(Set<InstrumentationRule> rules, Function<InstrumentationRule, Map<String, ResolvedDataProviderCall>> providersGetter) throws ConflictingDataDefinitionsException {
+    private Map<String, DataProviderCallConfig> combineProvidersFromRules(Set<InstrumentationRule> rules, Function<InstrumentationRule, Map<String, DataProviderCallConfig>> providersGetter) throws ConflictingDataDefinitionsException {
         Map<String, InstrumentationRule> dataOrigins = new HashMap<>();
-        Map<String, ResolvedDataProviderCall> dataDefinitions = new HashMap<>();
+        Map<String, DataProviderCallConfig> dataDefinitions = new HashMap<>();
         for (val rule : rules) {
-            Map<String, ResolvedDataProviderCall> providers = providersGetter.apply(rule);
+            Map<String, DataProviderCallConfig> providers = providersGetter.apply(rule);
             for (val dataDefinition : providers.entrySet()) {
                 String dataKey = dataDefinition.getKey();
-                ResolvedDataProviderCall call = dataDefinition.getValue();
+                DataProviderCallConfig call = dataDefinition.getValue();
 
                 //check if we have previously already encountered a differing definition for the key
                 if (dataOrigins.containsKey(dataKey) && !call.equals(dataDefinitions.get(dataKey))) {

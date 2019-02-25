@@ -9,7 +9,7 @@ import java.util.Set;
 @Value
 @Builder
 @NonFinal //To allow mocking for testing
-public class ResolvedDataProperties {
+public class DataProperties {
 
     @Getter(value = AccessLevel.NONE)
     @Singular("notATag")
@@ -61,9 +61,9 @@ public class ResolvedDataProperties {
         return !noneTagKeys.contains(dataKey);
     }
 
-    public static class ResolvedDataPropertiesBuilder {
+    public static class DataPropertiesBuilder {
 
-        public ResolvedDataPropertiesBuilder data(String key, DataSettings settings) {
+        public DataPropertiesBuilder data(String key, DataSettings settings) {
             if (!settings.isTag()) {
                 notATag(key);
             }

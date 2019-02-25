@@ -7,9 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.convert.ApplicationConversionService;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
+import rocks.inspectit.oce.core.instrumentation.config.model.DataProviderCallConfig;
+import rocks.inspectit.oce.core.instrumentation.config.model.GenericDataProviderConfig;
 import rocks.inspectit.oce.core.instrumentation.config.model.MethodHookConfiguration;
-import rocks.inspectit.oce.core.instrumentation.config.model.ResolvedDataProviderCall;
-import rocks.inspectit.oce.core.instrumentation.config.model.ResolvedGenericDataProviderConfig;
 import rocks.inspectit.oce.core.instrumentation.context.ContextManager;
 import rocks.inspectit.oce.core.instrumentation.dataprovider.generic.BoundDataProvider;
 import rocks.inspectit.oce.core.instrumentation.dataprovider.generic.DataProviderGenerator;
@@ -138,8 +138,8 @@ public class MethodHookGenerator {
      * @param providerCallConfig the specification of the call to the data provider
      * @return the executable data provider
      */
-    private BoundDataProvider generateAndBindDataProvider(Class<?> contextClass, String dataKey, ResolvedDataProviderCall providerCallConfig) {
-        ResolvedGenericDataProviderConfig providerConfig = providerCallConfig.getProvider();
+    private BoundDataProvider generateAndBindDataProvider(Class<?> contextClass, String dataKey, DataProviderCallConfig providerCallConfig) {
+        GenericDataProviderConfig providerConfig = providerCallConfig.getProvider();
         val injectedProviderClass = dataProviderGenerator.getOrGenerateDataProvider(providerConfig, contextClass);
 
         val dynamicAssignments = getDynamicInputAssignments(providerCallConfig);
@@ -156,8 +156,8 @@ public class MethodHookGenerator {
      * @param context            the classloader within which the data provider is executed, used to find the correct types
      * @return a map mapping the name of the parameters to the constant value they are assigned
      */
-    private Map<String, Object> getConstantInputAssignments(ResolvedDataProviderCall providerCallConfig, ClassLoader context) {
-        ResolvedGenericDataProviderConfig providerConfig = providerCallConfig.getProvider();
+    private Map<String, Object> getConstantInputAssignments(DataProviderCallConfig providerCallConfig, ClassLoader context) {
+        GenericDataProviderConfig providerConfig = providerCallConfig.getProvider();
         Map<String, Object> constantAssignments = new HashMap<>();
 
         providerCallConfig.getCallSettings().getConstantInput()
@@ -182,7 +182,7 @@ public class MethodHookGenerator {
      * @return a map mapping the parameter names to functions which are evaluated during
      * {@link IHookAction#execute(IHookAction.ExecutionContext)}  to find the concrete value for the parameter.
      */
-    private Map<String, Function<IHookAction.ExecutionContext, Object>> getDynamicInputAssignments(ResolvedDataProviderCall providerCallConfig) {
+    private Map<String, Function<IHookAction.ExecutionContext, Object>> getDynamicInputAssignments(DataProviderCallConfig providerCallConfig) {
         Map<String, Function<IHookAction.ExecutionContext, Object>> dynamicAssignments = new HashMap<>();
         providerCallConfig.getCallSettings().getDataInput()
                 .forEach((argName, dataName) ->
