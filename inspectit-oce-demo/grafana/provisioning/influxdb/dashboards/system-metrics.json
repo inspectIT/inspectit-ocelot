@@ -15,7 +15,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1546608990350,
+  "id": 2,
+  "iteration": 1550817819867,
   "links": [],
   "panels": [
     {
@@ -31,9 +32,9 @@
       "repeat": "host",
       "scopedVars": {
         "host": {
-          "selected": true,
-          "text": "4d8670ccd24b",
-          "value": "4d8670ccd24b"
+          "selected": false,
+          "text": "0c20975f0231",
+          "value": "0c20975f0231"
         }
       },
       "title": "$host",
@@ -94,9 +95,9 @@
       "repeatDirection": "h",
       "scopedVars": {
         "host": {
-          "selected": true,
-          "text": "4d8670ccd24b",
-          "value": "4d8670ccd24b"
+          "selected": false,
+          "text": "0c20975f0231",
+          "value": "0c20975f0231"
         }
       },
       "sparkline": {
@@ -196,9 +197,9 @@
       "renderer": "flot",
       "scopedVars": {
         "host": {
-          "selected": true,
-          "text": "4d8670ccd24b",
-          "value": "4d8670ccd24b"
+          "selected": false,
+          "text": "0c20975f0231",
+          "value": "0c20975f0231"
         }
       },
       "seriesOverrides": [
@@ -399,9 +400,9 @@
       "repeatDirection": "h",
       "scopedVars": {
         "host": {
-          "selected": true,
-          "text": "4d8670ccd24b",
-          "value": "4d8670ccd24b"
+          "selected": false,
+          "text": "0c20975f0231",
+          "value": "0c20975f0231"
         }
       },
       "sparkline": {
@@ -466,9 +467,9 @@
       "renderer": "flot",
       "scopedVars": {
         "host": {
-          "selected": true,
-          "text": "4d8670ccd24b",
-          "value": "4d8670ccd24b"
+          "selected": false,
+          "text": "0c20975f0231",
+          "value": "0c20975f0231"
         }
       },
       "seriesOverrides": [],
@@ -581,9 +582,9 @@
       ],
       "scopedVars": {
         "host": {
-          "selected": true,
-          "text": "4d8670ccd24b",
-          "value": "4d8670ccd24b"
+          "selected": false,
+          "text": "0c20975f0231",
+          "value": "0c20975f0231"
         }
       },
       "sparkline": {
@@ -707,9 +708,3909 @@
       ],
       "scopedVars": {
         "host": {
-          "selected": true,
-          "text": "4d8670ccd24b",
-          "value": "4d8670ccd24b"
+          "selected": false,
+          "text": "0c20975f0231",
+          "value": "0c20975f0231"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "system_cpu_count",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "from(bucket: \"telegraf\")\n  |> range(start: -1m)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\"])\n  |> last()",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "gauge"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "service_name",
+              "operator": "=~",
+              "value": "/^$service$/"
+            }
+          ]
+        }
+      ],
+      "thresholds": "500000,200000",
+      "title": "Disk Free",
+      "transparent": false,
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "avg"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 7
+      },
+      "id": 14,
+      "panels": [],
+      "repeat": null,
+      "repeatIteration": 1550817819867,
+      "repeatPanelId": 7,
+      "scopedVars": {
+        "host": {
+          "selected": false,
+          "text": "0c3ef30136a2",
+          "value": "0c3ef30136a2"
+        }
+      },
+      "title": "$host",
+      "type": "row"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": true,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#bf1b00"
+      ],
+      "datasource": "Flux",
+      "format": "percentunit",
+      "gauge": {
+        "maxValue": 1,
+        "minValue": 0,
+        "show": true,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 0,
+        "y": 8
+      },
+      "id": 15,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatDirection": "h",
+      "repeatIteration": 1550817819867,
+      "repeatPanelId": 5,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "host": {
+          "selected": false,
+          "text": "0c3ef30136a2",
+          "value": "0c3ef30136a2"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "system_cpu_usage",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "from(bucket: \"telegraf\")\n|> range(start: -1m)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_usage\" AND\n  r.host == \"$host\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\"])",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "gauge"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": "0.9,0.95",
+      "title": "CPU Usage",
+      "transparent": false,
+      "type": "singlestat",
+      "valueFontSize": "50%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
+      "aliasColors": {
+        "CPU Utilization": "#82b5d8",
+        "Load Average": "#bf1b00"
+      },
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "LocalInflux",
+      "fill": 2,
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 3,
+        "y": 8
+      },
+      "id": 16,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 3,
+      "links": [],
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "repeatIteration": 1550817819867,
+      "repeatPanelId": 11,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "host": {
+          "selected": false,
+          "text": "0c3ef30136a2",
+          "value": "0c3ef30136a2"
+        }
+      },
+      "seriesOverrides": [
+        {
+          "alias": "Load Average",
+          "fill": 0,
+          "linewidth": 3,
+          "yaxis": 2
+        }
+      ],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "alias": "CPU Utilization",
+          "groupBy": [
+            {
+              "params": [
+                "15s"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "system_cpu_usage",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_usage\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\"])",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "gauge"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
+        },
+        {
+          "alias": "Load Average",
+          "groupBy": [
+            {
+              "params": [
+                "15s"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "system_load_average_1m",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "gauge"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "CPU Usage",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "decimals": null,
+          "format": "percentunit",
+          "label": null,
+          "logBase": 1,
+          "max": "1.05",
+          "min": "0",
+          "show": true
+        },
+        {
+          "format": "none",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "datasource": "Flux",
+      "format": "percentunit",
+      "gauge": {
+        "maxValue": 1,
+        "minValue": 0,
+        "show": true,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 12,
+        "y": 8
+      },
+      "id": 17,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeat": null,
+      "repeatDirection": "h",
+      "repeatIteration": 1550817819867,
+      "repeatPanelId": 4,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "host": {
+          "selected": false,
+          "text": "0c3ef30136a2",
+          "value": "0c3ef30136a2"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "query": "usedPerc = () => {\ntotal = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_total\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service_name\"])\n  \nfree = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service_name\"])\n  \nreturn join(tables:{total:total, free:free},on:[\"_time\",\"_stop\",\"_start\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_total - r._value_free)/r._value_total\n        \n    }))\n}\n\nusedPerc()",
+          "refId": "A"
+        }
+      ],
+      "thresholds": "0.9,0.95",
+      "title": "Disk Usage",
+      "type": "singlestat",
+      "valueFontSize": "50%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
+      "aliasColors": {
+        "disk_free ": "#629e51",
+        "disk_used ": "#1f78c1"
+      },
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "Flux",
+      "fill": 7,
+      "gridPos": {
+        "h": 6,
+        "w": 9,
+        "x": 15,
+        "y": 8
+      },
+      "id": 18,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "repeatIteration": 1550817819867,
+      "repeatPanelId": 13,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "host": {
+          "selected": false,
+          "text": "0c3ef30136a2",
+          "value": "0c3ef30136a2"
+        }
+      },
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": true,
+      "steppedLine": false,
+      "targets": [
+        {
+          "query": "usedPerc = () => {\ntotal = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_total\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \nfree = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \nreturn join(tables:{total:total, free:free},on:[\"_time\",\"_stop\",\"_start\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_total - r._value_free),\n        _measurement: \"disk_used\"\n    }))\n}\n\nusedPerc()",
+          "refId": "A"
+        },
+        {
+          "query": "from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n",
+          "refId": "B"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Disk Usage",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "decimals": null,
+          "format": "decbytes",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "datasource": "Flux",
+      "format": "none",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 3,
+        "x": 0,
+        "y": 12
+      },
+      "id": 19,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatIteration": 1550817819867,
+      "repeatPanelId": 9,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "host": {
+          "selected": false,
+          "text": "0c3ef30136a2",
+          "value": "0c3ef30136a2"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "system_cpu_count",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "from(bucket: \"telegraf\")\n|> range(start: -1m)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_count\" AND\n  r.host == \"$host\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\"])\n|> last()",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "gauge"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "service_name",
+              "operator": "=~",
+              "value": "/^$service$/"
+            }
+          ]
+        }
+      ],
+      "thresholds": "",
+      "title": "# CPUs",
+      "transparent": false,
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "avg"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": true,
+      "colors": [
+        "#d44a3a",
+        "rgba(237, 129, 40, 0.89)",
+        "#299c46"
+      ],
+      "datasource": "Flux",
+      "decimals": null,
+      "format": "decbytes",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 3,
+        "x": 12,
+        "y": 12
+      },
+      "id": 20,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatIteration": 1550817819867,
+      "repeatPanelId": 12,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "host": {
+          "selected": false,
+          "text": "0c3ef30136a2",
+          "value": "0c3ef30136a2"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "system_cpu_count",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "from(bucket: \"telegraf\")\n  |> range(start: -1m)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\"])\n  |> last()",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "gauge"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "service_name",
+              "operator": "=~",
+              "value": "/^$service$/"
+            }
+          ]
+        }
+      ],
+      "thresholds": "500000,200000",
+      "title": "Disk Free",
+      "transparent": false,
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "avg"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 14
+      },
+      "id": 21,
+      "panels": [],
+      "repeat": null,
+      "repeatIteration": 1550817819867,
+      "repeatPanelId": 7,
+      "scopedVars": {
+        "host": {
+          "selected": false,
+          "text": "4facbde295c2",
+          "value": "4facbde295c2"
+        }
+      },
+      "title": "$host",
+      "type": "row"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": true,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#bf1b00"
+      ],
+      "datasource": "Flux",
+      "format": "percentunit",
+      "gauge": {
+        "maxValue": 1,
+        "minValue": 0,
+        "show": true,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 0,
+        "y": 15
+      },
+      "id": 22,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatDirection": "h",
+      "repeatIteration": 1550817819867,
+      "repeatPanelId": 5,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "host": {
+          "selected": false,
+          "text": "4facbde295c2",
+          "value": "4facbde295c2"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "system_cpu_usage",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "from(bucket: \"telegraf\")\n|> range(start: -1m)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_usage\" AND\n  r.host == \"$host\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\"])",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "gauge"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": "0.9,0.95",
+      "title": "CPU Usage",
+      "transparent": false,
+      "type": "singlestat",
+      "valueFontSize": "50%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
+      "aliasColors": {
+        "CPU Utilization": "#82b5d8",
+        "Load Average": "#bf1b00"
+      },
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "LocalInflux",
+      "fill": 2,
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 3,
+        "y": 15
+      },
+      "id": 23,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 3,
+      "links": [],
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "repeatIteration": 1550817819867,
+      "repeatPanelId": 11,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "host": {
+          "selected": false,
+          "text": "4facbde295c2",
+          "value": "4facbde295c2"
+        }
+      },
+      "seriesOverrides": [
+        {
+          "alias": "Load Average",
+          "fill": 0,
+          "linewidth": 3,
+          "yaxis": 2
+        }
+      ],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "alias": "CPU Utilization",
+          "groupBy": [
+            {
+              "params": [
+                "15s"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "system_cpu_usage",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_usage\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\"])",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "gauge"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
+        },
+        {
+          "alias": "Load Average",
+          "groupBy": [
+            {
+              "params": [
+                "15s"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "system_load_average_1m",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "gauge"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "CPU Usage",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "decimals": null,
+          "format": "percentunit",
+          "label": null,
+          "logBase": 1,
+          "max": "1.05",
+          "min": "0",
+          "show": true
+        },
+        {
+          "format": "none",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "datasource": "Flux",
+      "format": "percentunit",
+      "gauge": {
+        "maxValue": 1,
+        "minValue": 0,
+        "show": true,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 12,
+        "y": 15
+      },
+      "id": 24,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeat": null,
+      "repeatDirection": "h",
+      "repeatIteration": 1550817819867,
+      "repeatPanelId": 4,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "host": {
+          "selected": false,
+          "text": "4facbde295c2",
+          "value": "4facbde295c2"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "query": "usedPerc = () => {\ntotal = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_total\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service_name\"])\n  \nfree = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service_name\"])\n  \nreturn join(tables:{total:total, free:free},on:[\"_time\",\"_stop\",\"_start\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_total - r._value_free)/r._value_total\n        \n    }))\n}\n\nusedPerc()",
+          "refId": "A"
+        }
+      ],
+      "thresholds": "0.9,0.95",
+      "title": "Disk Usage",
+      "type": "singlestat",
+      "valueFontSize": "50%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
+      "aliasColors": {
+        "disk_free ": "#629e51",
+        "disk_used ": "#1f78c1"
+      },
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "Flux",
+      "fill": 7,
+      "gridPos": {
+        "h": 6,
+        "w": 9,
+        "x": 15,
+        "y": 15
+      },
+      "id": 25,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "repeatIteration": 1550817819867,
+      "repeatPanelId": 13,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "host": {
+          "selected": false,
+          "text": "4facbde295c2",
+          "value": "4facbde295c2"
+        }
+      },
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": true,
+      "steppedLine": false,
+      "targets": [
+        {
+          "query": "usedPerc = () => {\ntotal = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_total\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \nfree = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \nreturn join(tables:{total:total, free:free},on:[\"_time\",\"_stop\",\"_start\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_total - r._value_free),\n        _measurement: \"disk_used\"\n    }))\n}\n\nusedPerc()",
+          "refId": "A"
+        },
+        {
+          "query": "from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n",
+          "refId": "B"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Disk Usage",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "decimals": null,
+          "format": "decbytes",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "datasource": "Flux",
+      "format": "none",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 3,
+        "x": 0,
+        "y": 19
+      },
+      "id": 26,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatIteration": 1550817819867,
+      "repeatPanelId": 9,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "host": {
+          "selected": false,
+          "text": "4facbde295c2",
+          "value": "4facbde295c2"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "system_cpu_count",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "from(bucket: \"telegraf\")\n|> range(start: -1m)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_count\" AND\n  r.host == \"$host\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\"])\n|> last()",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "gauge"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "service_name",
+              "operator": "=~",
+              "value": "/^$service$/"
+            }
+          ]
+        }
+      ],
+      "thresholds": "",
+      "title": "# CPUs",
+      "transparent": false,
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "avg"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": true,
+      "colors": [
+        "#d44a3a",
+        "rgba(237, 129, 40, 0.89)",
+        "#299c46"
+      ],
+      "datasource": "Flux",
+      "decimals": null,
+      "format": "decbytes",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 3,
+        "x": 12,
+        "y": 19
+      },
+      "id": 27,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatIteration": 1550817819867,
+      "repeatPanelId": 12,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "host": {
+          "selected": false,
+          "text": "4facbde295c2",
+          "value": "4facbde295c2"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "system_cpu_count",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "from(bucket: \"telegraf\")\n  |> range(start: -1m)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\"])\n  |> last()",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "gauge"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "service_name",
+              "operator": "=~",
+              "value": "/^$service$/"
+            }
+          ]
+        }
+      ],
+      "thresholds": "500000,200000",
+      "title": "Disk Free",
+      "transparent": false,
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "avg"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 21
+      },
+      "id": 28,
+      "panels": [],
+      "repeat": null,
+      "repeatIteration": 1550817819867,
+      "repeatPanelId": 7,
+      "scopedVars": {
+        "host": {
+          "selected": false,
+          "text": "68e45ec619b3",
+          "value": "68e45ec619b3"
+        }
+      },
+      "title": "$host",
+      "type": "row"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": true,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#bf1b00"
+      ],
+      "datasource": "Flux",
+      "format": "percentunit",
+      "gauge": {
+        "maxValue": 1,
+        "minValue": 0,
+        "show": true,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 0,
+        "y": 22
+      },
+      "id": 29,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatDirection": "h",
+      "repeatIteration": 1550817819867,
+      "repeatPanelId": 5,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "host": {
+          "selected": false,
+          "text": "68e45ec619b3",
+          "value": "68e45ec619b3"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "system_cpu_usage",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "from(bucket: \"telegraf\")\n|> range(start: -1m)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_usage\" AND\n  r.host == \"$host\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\"])",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "gauge"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": "0.9,0.95",
+      "title": "CPU Usage",
+      "transparent": false,
+      "type": "singlestat",
+      "valueFontSize": "50%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
+      "aliasColors": {
+        "CPU Utilization": "#82b5d8",
+        "Load Average": "#bf1b00"
+      },
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "LocalInflux",
+      "fill": 2,
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 3,
+        "y": 22
+      },
+      "id": 30,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 3,
+      "links": [],
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "repeatIteration": 1550817819867,
+      "repeatPanelId": 11,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "host": {
+          "selected": false,
+          "text": "68e45ec619b3",
+          "value": "68e45ec619b3"
+        }
+      },
+      "seriesOverrides": [
+        {
+          "alias": "Load Average",
+          "fill": 0,
+          "linewidth": 3,
+          "yaxis": 2
+        }
+      ],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "alias": "CPU Utilization",
+          "groupBy": [
+            {
+              "params": [
+                "15s"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "system_cpu_usage",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_usage\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\"])",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "gauge"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
+        },
+        {
+          "alias": "Load Average",
+          "groupBy": [
+            {
+              "params": [
+                "15s"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "system_load_average_1m",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "gauge"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "CPU Usage",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "decimals": null,
+          "format": "percentunit",
+          "label": null,
+          "logBase": 1,
+          "max": "1.05",
+          "min": "0",
+          "show": true
+        },
+        {
+          "format": "none",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "datasource": "Flux",
+      "format": "percentunit",
+      "gauge": {
+        "maxValue": 1,
+        "minValue": 0,
+        "show": true,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 12,
+        "y": 22
+      },
+      "id": 31,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeat": null,
+      "repeatDirection": "h",
+      "repeatIteration": 1550817819867,
+      "repeatPanelId": 4,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "host": {
+          "selected": false,
+          "text": "68e45ec619b3",
+          "value": "68e45ec619b3"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "query": "usedPerc = () => {\ntotal = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_total\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service_name\"])\n  \nfree = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service_name\"])\n  \nreturn join(tables:{total:total, free:free},on:[\"_time\",\"_stop\",\"_start\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_total - r._value_free)/r._value_total\n        \n    }))\n}\n\nusedPerc()",
+          "refId": "A"
+        }
+      ],
+      "thresholds": "0.9,0.95",
+      "title": "Disk Usage",
+      "type": "singlestat",
+      "valueFontSize": "50%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
+      "aliasColors": {
+        "disk_free ": "#629e51",
+        "disk_used ": "#1f78c1"
+      },
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "Flux",
+      "fill": 7,
+      "gridPos": {
+        "h": 6,
+        "w": 9,
+        "x": 15,
+        "y": 22
+      },
+      "id": 32,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "repeatIteration": 1550817819867,
+      "repeatPanelId": 13,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "host": {
+          "selected": false,
+          "text": "68e45ec619b3",
+          "value": "68e45ec619b3"
+        }
+      },
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": true,
+      "steppedLine": false,
+      "targets": [
+        {
+          "query": "usedPerc = () => {\ntotal = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_total\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \nfree = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \nreturn join(tables:{total:total, free:free},on:[\"_time\",\"_stop\",\"_start\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_total - r._value_free),\n        _measurement: \"disk_used\"\n    }))\n}\n\nusedPerc()",
+          "refId": "A"
+        },
+        {
+          "query": "from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n",
+          "refId": "B"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Disk Usage",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "decimals": null,
+          "format": "decbytes",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "datasource": "Flux",
+      "format": "none",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 3,
+        "x": 0,
+        "y": 26
+      },
+      "id": 33,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatIteration": 1550817819867,
+      "repeatPanelId": 9,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "host": {
+          "selected": false,
+          "text": "68e45ec619b3",
+          "value": "68e45ec619b3"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "system_cpu_count",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "from(bucket: \"telegraf\")\n|> range(start: -1m)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_count\" AND\n  r.host == \"$host\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\"])\n|> last()",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "gauge"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "service_name",
+              "operator": "=~",
+              "value": "/^$service$/"
+            }
+          ]
+        }
+      ],
+      "thresholds": "",
+      "title": "# CPUs",
+      "transparent": false,
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "avg"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": true,
+      "colors": [
+        "#d44a3a",
+        "rgba(237, 129, 40, 0.89)",
+        "#299c46"
+      ],
+      "datasource": "Flux",
+      "decimals": null,
+      "format": "decbytes",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 3,
+        "x": 12,
+        "y": 26
+      },
+      "id": 34,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatIteration": 1550817819867,
+      "repeatPanelId": 12,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "host": {
+          "selected": false,
+          "text": "68e45ec619b3",
+          "value": "68e45ec619b3"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "system_cpu_count",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "from(bucket: \"telegraf\")\n  |> range(start: -1m)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\"])\n  |> last()",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "gauge"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "service_name",
+              "operator": "=~",
+              "value": "/^$service$/"
+            }
+          ]
+        }
+      ],
+      "thresholds": "500000,200000",
+      "title": "Disk Free",
+      "transparent": false,
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "avg"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 28
+      },
+      "id": 35,
+      "panels": [],
+      "repeat": null,
+      "repeatIteration": 1550817819867,
+      "repeatPanelId": 7,
+      "scopedVars": {
+        "host": {
+          "selected": false,
+          "text": "8543d3197916",
+          "value": "8543d3197916"
+        }
+      },
+      "title": "$host",
+      "type": "row"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": true,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#bf1b00"
+      ],
+      "datasource": "Flux",
+      "format": "percentunit",
+      "gauge": {
+        "maxValue": 1,
+        "minValue": 0,
+        "show": true,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 0,
+        "y": 29
+      },
+      "id": 36,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatDirection": "h",
+      "repeatIteration": 1550817819867,
+      "repeatPanelId": 5,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "host": {
+          "selected": false,
+          "text": "8543d3197916",
+          "value": "8543d3197916"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "system_cpu_usage",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "from(bucket: \"telegraf\")\n|> range(start: -1m)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_usage\" AND\n  r.host == \"$host\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\"])",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "gauge"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": "0.9,0.95",
+      "title": "CPU Usage",
+      "transparent": false,
+      "type": "singlestat",
+      "valueFontSize": "50%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
+      "aliasColors": {
+        "CPU Utilization": "#82b5d8",
+        "Load Average": "#bf1b00"
+      },
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "LocalInflux",
+      "fill": 2,
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 3,
+        "y": 29
+      },
+      "id": 37,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 3,
+      "links": [],
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "repeatIteration": 1550817819867,
+      "repeatPanelId": 11,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "host": {
+          "selected": false,
+          "text": "8543d3197916",
+          "value": "8543d3197916"
+        }
+      },
+      "seriesOverrides": [
+        {
+          "alias": "Load Average",
+          "fill": 0,
+          "linewidth": 3,
+          "yaxis": 2
+        }
+      ],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "alias": "CPU Utilization",
+          "groupBy": [
+            {
+              "params": [
+                "15s"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "system_cpu_usage",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_usage\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\"])",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "gauge"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
+        },
+        {
+          "alias": "Load Average",
+          "groupBy": [
+            {
+              "params": [
+                "15s"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "system_load_average_1m",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "gauge"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "CPU Usage",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "decimals": null,
+          "format": "percentunit",
+          "label": null,
+          "logBase": 1,
+          "max": "1.05",
+          "min": "0",
+          "show": true
+        },
+        {
+          "format": "none",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "datasource": "Flux",
+      "format": "percentunit",
+      "gauge": {
+        "maxValue": 1,
+        "minValue": 0,
+        "show": true,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 12,
+        "y": 29
+      },
+      "id": 38,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeat": null,
+      "repeatDirection": "h",
+      "repeatIteration": 1550817819867,
+      "repeatPanelId": 4,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "host": {
+          "selected": false,
+          "text": "8543d3197916",
+          "value": "8543d3197916"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "query": "usedPerc = () => {\ntotal = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_total\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service_name\"])\n  \nfree = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service_name\"])\n  \nreturn join(tables:{total:total, free:free},on:[\"_time\",\"_stop\",\"_start\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_total - r._value_free)/r._value_total\n        \n    }))\n}\n\nusedPerc()",
+          "refId": "A"
+        }
+      ],
+      "thresholds": "0.9,0.95",
+      "title": "Disk Usage",
+      "type": "singlestat",
+      "valueFontSize": "50%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
+      "aliasColors": {
+        "disk_free ": "#629e51",
+        "disk_used ": "#1f78c1"
+      },
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "Flux",
+      "fill": 7,
+      "gridPos": {
+        "h": 6,
+        "w": 9,
+        "x": 15,
+        "y": 29
+      },
+      "id": 39,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "repeatIteration": 1550817819867,
+      "repeatPanelId": 13,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "host": {
+          "selected": false,
+          "text": "8543d3197916",
+          "value": "8543d3197916"
+        }
+      },
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": true,
+      "steppedLine": false,
+      "targets": [
+        {
+          "query": "usedPerc = () => {\ntotal = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_total\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \nfree = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \nreturn join(tables:{total:total, free:free},on:[\"_time\",\"_stop\",\"_start\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_total - r._value_free),\n        _measurement: \"disk_used\"\n    }))\n}\n\nusedPerc()",
+          "refId": "A"
+        },
+        {
+          "query": "from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n",
+          "refId": "B"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Disk Usage",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "decimals": null,
+          "format": "decbytes",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "datasource": "Flux",
+      "format": "none",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 3,
+        "x": 0,
+        "y": 33
+      },
+      "id": 40,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatIteration": 1550817819867,
+      "repeatPanelId": 9,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "host": {
+          "selected": false,
+          "text": "8543d3197916",
+          "value": "8543d3197916"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "system_cpu_count",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "from(bucket: \"telegraf\")\n|> range(start: -1m)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_count\" AND\n  r.host == \"$host\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\"])\n|> last()",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "gauge"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "service_name",
+              "operator": "=~",
+              "value": "/^$service$/"
+            }
+          ]
+        }
+      ],
+      "thresholds": "",
+      "title": "# CPUs",
+      "transparent": false,
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "avg"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": true,
+      "colors": [
+        "#d44a3a",
+        "rgba(237, 129, 40, 0.89)",
+        "#299c46"
+      ],
+      "datasource": "Flux",
+      "decimals": null,
+      "format": "decbytes",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 3,
+        "x": 12,
+        "y": 33
+      },
+      "id": 41,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatIteration": 1550817819867,
+      "repeatPanelId": 12,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "host": {
+          "selected": false,
+          "text": "8543d3197916",
+          "value": "8543d3197916"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "system_cpu_count",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "from(bucket: \"telegraf\")\n  |> range(start: -1m)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\"])\n  |> last()",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "gauge"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "service_name",
+              "operator": "=~",
+              "value": "/^$service$/"
+            }
+          ]
+        }
+      ],
+      "thresholds": "500000,200000",
+      "title": "Disk Free",
+      "transparent": false,
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "avg"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 35
+      },
+      "id": 42,
+      "panels": [],
+      "repeat": null,
+      "repeatIteration": 1550817819867,
+      "repeatPanelId": 7,
+      "scopedVars": {
+        "host": {
+          "selected": false,
+          "text": "8b0320ce0a5a",
+          "value": "8b0320ce0a5a"
+        }
+      },
+      "title": "$host",
+      "type": "row"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": true,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#bf1b00"
+      ],
+      "datasource": "Flux",
+      "format": "percentunit",
+      "gauge": {
+        "maxValue": 1,
+        "minValue": 0,
+        "show": true,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 0,
+        "y": 36
+      },
+      "id": 43,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatDirection": "h",
+      "repeatIteration": 1550817819867,
+      "repeatPanelId": 5,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "host": {
+          "selected": false,
+          "text": "8b0320ce0a5a",
+          "value": "8b0320ce0a5a"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "system_cpu_usage",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "from(bucket: \"telegraf\")\n|> range(start: -1m)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_usage\" AND\n  r.host == \"$host\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\"])",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "gauge"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": "0.9,0.95",
+      "title": "CPU Usage",
+      "transparent": false,
+      "type": "singlestat",
+      "valueFontSize": "50%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
+      "aliasColors": {
+        "CPU Utilization": "#82b5d8",
+        "Load Average": "#bf1b00"
+      },
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "LocalInflux",
+      "fill": 2,
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 3,
+        "y": 36
+      },
+      "id": 44,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 3,
+      "links": [],
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "repeatIteration": 1550817819867,
+      "repeatPanelId": 11,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "host": {
+          "selected": false,
+          "text": "8b0320ce0a5a",
+          "value": "8b0320ce0a5a"
+        }
+      },
+      "seriesOverrides": [
+        {
+          "alias": "Load Average",
+          "fill": 0,
+          "linewidth": 3,
+          "yaxis": 2
+        }
+      ],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "alias": "CPU Utilization",
+          "groupBy": [
+            {
+              "params": [
+                "15s"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "system_cpu_usage",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_usage\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\"])",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "gauge"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
+        },
+        {
+          "alias": "Load Average",
+          "groupBy": [
+            {
+              "params": [
+                "15s"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "system_load_average_1m",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "gauge"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "CPU Usage",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "decimals": null,
+          "format": "percentunit",
+          "label": null,
+          "logBase": 1,
+          "max": "1.05",
+          "min": "0",
+          "show": true
+        },
+        {
+          "format": "none",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "datasource": "Flux",
+      "format": "percentunit",
+      "gauge": {
+        "maxValue": 1,
+        "minValue": 0,
+        "show": true,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 12,
+        "y": 36
+      },
+      "id": 45,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeat": null,
+      "repeatDirection": "h",
+      "repeatIteration": 1550817819867,
+      "repeatPanelId": 4,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "host": {
+          "selected": false,
+          "text": "8b0320ce0a5a",
+          "value": "8b0320ce0a5a"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "query": "usedPerc = () => {\ntotal = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_total\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service_name\"])\n  \nfree = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service_name\"])\n  \nreturn join(tables:{total:total, free:free},on:[\"_time\",\"_stop\",\"_start\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_total - r._value_free)/r._value_total\n        \n    }))\n}\n\nusedPerc()",
+          "refId": "A"
+        }
+      ],
+      "thresholds": "0.9,0.95",
+      "title": "Disk Usage",
+      "type": "singlestat",
+      "valueFontSize": "50%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
+      "aliasColors": {
+        "disk_free ": "#629e51",
+        "disk_used ": "#1f78c1"
+      },
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "Flux",
+      "fill": 7,
+      "gridPos": {
+        "h": 6,
+        "w": 9,
+        "x": 15,
+        "y": 36
+      },
+      "id": 46,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "repeatIteration": 1550817819867,
+      "repeatPanelId": 13,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "host": {
+          "selected": false,
+          "text": "8b0320ce0a5a",
+          "value": "8b0320ce0a5a"
+        }
+      },
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": true,
+      "steppedLine": false,
+      "targets": [
+        {
+          "query": "usedPerc = () => {\ntotal = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_total\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \nfree = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \nreturn join(tables:{total:total, free:free},on:[\"_time\",\"_stop\",\"_start\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_total - r._value_free),\n        _measurement: \"disk_used\"\n    }))\n}\n\nusedPerc()",
+          "refId": "A"
+        },
+        {
+          "query": "from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n",
+          "refId": "B"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Disk Usage",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "decimals": null,
+          "format": "decbytes",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "datasource": "Flux",
+      "format": "none",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 3,
+        "x": 0,
+        "y": 40
+      },
+      "id": 47,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatIteration": 1550817819867,
+      "repeatPanelId": 9,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "host": {
+          "selected": false,
+          "text": "8b0320ce0a5a",
+          "value": "8b0320ce0a5a"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "system_cpu_count",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "from(bucket: \"telegraf\")\n|> range(start: -1m)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_count\" AND\n  r.host == \"$host\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\"])\n|> last()",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "gauge"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "service_name",
+              "operator": "=~",
+              "value": "/^$service$/"
+            }
+          ]
+        }
+      ],
+      "thresholds": "",
+      "title": "# CPUs",
+      "transparent": false,
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "avg"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": true,
+      "colors": [
+        "#d44a3a",
+        "rgba(237, 129, 40, 0.89)",
+        "#299c46"
+      ],
+      "datasource": "Flux",
+      "decimals": null,
+      "format": "decbytes",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 3,
+        "x": 12,
+        "y": 40
+      },
+      "id": 48,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatIteration": 1550817819867,
+      "repeatPanelId": 12,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "host": {
+          "selected": false,
+          "text": "8b0320ce0a5a",
+          "value": "8b0320ce0a5a"
         }
       },
       "sparkline": {
@@ -789,18 +4690,18 @@
         "allValue": null,
         "current": {
           "tags": [],
-          "text": "4d8670ccd24b",
-          "value": "4d8670ccd24b"
+          "text": "All",
+          "value": "$__all"
         },
         "datasource": "Flux",
-        "definition": "from(bucket:\"telegraf\")     |> range(start: -1d)     |> filter(fn:(r) => r._measurement == \"disk_total\")     |> group(by:[\"host\"])     |> distinct(column:\"host\")     |> group(none:true)",
+        "definition": "from(bucket:\"telegraf\")     |> range(start: -1h)     |> filter(fn:(r) => r._measurement == \"disk_total\")     |> group(by:[\"host\"])     |> distinct(column:\"host\")     |> group(none:true)",
         "hide": 0,
         "includeAll": true,
         "label": null,
         "multi": false,
         "name": "host",
         "options": [],
-        "query": "from(bucket:\"telegraf\")     |> range(start: -1d)     |> filter(fn:(r) => r._measurement == \"disk_total\")     |> group(by:[\"host\"])     |> distinct(column:\"host\")     |> group(none:true)",
+        "query": "from(bucket:\"telegraf\")     |> range(start: -1h)     |> filter(fn:(r) => r._measurement == \"disk_total\")     |> group(by:[\"host\"])     |> distinct(column:\"host\")     |> group(none:true)",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,

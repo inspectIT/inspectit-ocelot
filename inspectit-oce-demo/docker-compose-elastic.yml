@@ -40,7 +40,7 @@ services:
       - agent
       - config-server
     entrypoint: ["sh", "-c","
-      ./dockerize -wait=tcp://config-server:8888 -timeout=60s -- &&
+      ./dockerize -wait=tcp://config-server:8888 -timeout=120s -- &&
       java -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Djava.security.egd=file:/dev/./urandom
       -javaagent:/agent/inspectit-oce-agent.jar
       -jar /app.jar"]
@@ -64,7 +64,7 @@ services:
       - config-server
       - discovery-server
     entrypoint: ["sh", "-c","
-      ./dockerize -wait=tcp://discovery-server:8761 -timeout=60s -- &&
+      ./dockerize -wait=tcp://discovery-server:8761 -timeout=120s -- &&
       java -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Djava.security.egd=file:/dev/./urandom
       -javaagent:/agent/inspectit-oce-agent.jar
       -jar /app.jar"]
@@ -88,7 +88,7 @@ services:
       - config-server
       - discovery-server
     entrypoint: ["sh", "-c","
-      ./dockerize -wait=tcp://discovery-server:8761 -timeout=60s -- &&
+      ./dockerize -wait=tcp://discovery-server:8761 -timeout=120s -- &&
       java -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Djava.security.egd=file:/dev/./urandom
       -javaagent:/agent/inspectit-oce-agent.jar
       -jar /app.jar"]
@@ -112,7 +112,7 @@ services:
       - config-server
       - discovery-server
     entrypoint: ["sh", "-c","
-      ./dockerize -wait=tcp://discovery-server:8761 -timeout=60s -- &&
+      ./dockerize -wait=tcp://discovery-server:8761 -timeout=120s -- &&
       java -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Djava.security.egd=file:/dev/./urandom
       -javaagent:/agent/inspectit-oce-agent.jar
       -jar /app.jar"]
@@ -136,7 +136,7 @@ services:
       - config-server
       - discovery-server
     entrypoint: ["sh", "-c","
-      ./dockerize -wait=tcp://discovery-server:8761 -timeout=60s -- &&
+      ./dockerize -wait=tcp://discovery-server:8761 -timeout=120s -- &&
       java -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Djava.security.egd=file:/dev/./urandom
       -javaagent:/agent/inspectit-oce-agent.jar
       -jar /app.jar"]
@@ -162,7 +162,7 @@ services:
 
 
   telegraf:
-    image: telegraf
+    image: telegraf:1.9.4
     container_name: telegraf
     volumes:
       - ./telegraf/telegraf-elastic.conf:/etc/telegraf/telegraf.conf:ro
