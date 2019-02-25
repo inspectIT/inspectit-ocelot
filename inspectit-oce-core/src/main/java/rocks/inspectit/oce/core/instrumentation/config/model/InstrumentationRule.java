@@ -1,9 +1,8 @@
 package rocks.inspectit.oce.core.instrumentation.config.model;
 
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
+import lombok.*;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -13,6 +12,7 @@ import java.util.Set;
 @Getter
 @AllArgsConstructor
 @EqualsAndHashCode
+@Builder(toBuilder = true)
 public class InstrumentationRule {
 
     /**
@@ -23,5 +23,20 @@ public class InstrumentationRule {
     /**
      * The scope of this rule. This represents a matcher of types and methods that should be instrumented.
      */
+    @Singular
     private Set<InstrumentationScope> scopes;
+
+    /**
+     * Maps data keys to the data provider call defining the value.
+     * These assignments are performed in the method-entry part.
+     */
+    @Singular
+    private Map<String, DataProviderCallConfig> entryProviders;
+
+    /**
+     * Maps data keys to the data provider call defining the value.
+     * These assignments are performed in the method-exit part.
+     */
+    @Singular
+    private Map<String, DataProviderCallConfig> exitProviders;
 }

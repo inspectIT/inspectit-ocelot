@@ -33,7 +33,7 @@ class InstrumentationRuleResolverTest {
         public void emptySettings() {
             InstrumentationSettings settings = new InstrumentationSettings();
 
-            Set<InstrumentationRule> result = ruleResolver.resolve(settings);
+            Set<InstrumentationRule> result = ruleResolver.resolve(settings, Collections.emptyMap());
 
             assertThat(result).isEmpty();
         }
@@ -48,7 +48,7 @@ class InstrumentationRuleResolverTest {
 
             when(scopeResolver.resolve(settings)).thenReturn(Collections.emptyMap());
 
-            Set<InstrumentationRule> result = ruleResolver.resolve(settings);
+            Set<InstrumentationRule> result = ruleResolver.resolve(settings, Collections.emptyMap());
 
             assertThat(result).hasSize(1);
             assertThat(result).flatExtracting(InstrumentationRule::getName).contains("rule-key");
@@ -69,7 +69,7 @@ class InstrumentationRuleResolverTest {
 
             when(scopeResolver.resolve(settings)).thenReturn(Collections.singletonMap("scope-key", scope));
 
-            Set<InstrumentationRule> result = ruleResolver.resolve(settings);
+            Set<InstrumentationRule> result = ruleResolver.resolve(settings, Collections.emptyMap());
 
             assertThat(result).hasSize(1);
             assertThat(result).flatExtracting(InstrumentationRule::getName).contains("rule-key");
@@ -90,7 +90,7 @@ class InstrumentationRuleResolverTest {
 
             when(scopeResolver.resolve(settings)).thenReturn(Collections.singletonMap("scope-key", scope));
 
-            Set<InstrumentationRule> result = ruleResolver.resolve(settings);
+            Set<InstrumentationRule> result = ruleResolver.resolve(settings, Collections.emptyMap());
 
             assertThat(result).hasSize(1);
             assertThat(result).flatExtracting(InstrumentationRule::getName).contains("rule-key");

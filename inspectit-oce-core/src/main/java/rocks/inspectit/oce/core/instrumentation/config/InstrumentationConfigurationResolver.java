@@ -2,6 +2,7 @@ package rocks.inspectit.oce.core.instrumentation.config;
 
 import com.google.common.annotations.VisibleForTesting;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
@@ -18,6 +19,7 @@ import rocks.inspectit.oce.core.instrumentation.AsyncClassTransformer;
 import rocks.inspectit.oce.core.instrumentation.config.event.InstrumentationConfigurationChangedEvent;
 import rocks.inspectit.oce.core.instrumentation.config.model.*;
 import rocks.inspectit.oce.core.instrumentation.special.SpecialSensor;
+import rocks.inspectit.oce.core.utils.CommonUtils;
 
 import javax.annotation.PostConstruct;
 import java.lang.instrument.Instrumentation;
@@ -29,6 +31,7 @@ import java.util.stream.Collectors;
  * the {@link InstrumentationSettings}.
  */
 @Service
+@Slf4j
 public class InstrumentationConfigurationResolver {
 
     private static final ClassLoader INSPECTIT_CLASSLOADER = AsyncClassTransformer.class.getClassLoader();
@@ -63,7 +66,7 @@ public class InstrumentationConfigurationResolver {
 
     @PostConstruct
     private void init() {
-        updateConfiguration(env.getCurrentConfig().getInstrumentation());
+        currentConfig = resolveConfiguration(env.getCurrentConfig().getInstrumentation());
     }
 
     /**
@@ -105,13 +108,23 @@ public class InstrumentationConfigurationResolver {
                 .flatMap(r -> r.getScopes().stream())
                 .collect(Collectors.toSet());
 
-        if (!involvedScopes.isEmpty()) {
+        if (!narrowedRules.isEmpty()) {
             Map<MethodDescription, MethodHookConfiguration> result = new HashMap<>();
             for (val method : type.getDeclaredMethods()) {
-                val scopesMatchingOnMethod = involvedScopes.stream().filter(scope -> scope.getMethodMatcher().matches(method)).collect(Collectors.toSet());
-                val rulesMatchingOnMethod = narrowedRules.stream().filter(r -> !Collections.disjoint(r.getScopes(), scopesMatchingOnMethod)).collect(Collectors.toSet());
+                val rulesMatchingOnMethod = narrowedRules.stream()
+                        .filter(rule -> rule.getScopes().stream()
+                                .anyMatch(scope -> scope.getMethodMatcher().matches(method)))
+                        .collect(Collectors.toSet());
                 if (!rulesMatchingOnMethod.isEmpty()) {
-                    result.put(method, hookResolver.buildHookConfiguration(method, rulesMatchingOnMethod));
+                    try {
+                        result.put(method, hookResolver.buildHookConfiguration(clazz, method, rulesMatchingOnMethod));
+                    } catch (MethodHookConfigurationResolver.CyclicDataDependencyException e) {
+                        log.error("Could not build hook for {} of class {} due to cyclic dependency between data assignments: {}",
+                                CommonUtils.getSignature(method), clazz.getName(), e.getDependencyCycle().toString());
+                    } catch (MethodHookConfigurationResolver.ConflictingDataDefinitionsException e) {
+                        log.error("Could not build hook for {} of class {} due to conflicting data assignments for data {} of rule {} and rule {}.",
+                                CommonUtils.getSignature(method), clazz.getName(), e.getDataKey(), e.getFirst().getName(), e.getSecond().getName());
+                    }
                 }
             }
             return result;
@@ -132,67 +145,46 @@ public class InstrumentationConfigurationResolver {
     private Set<InstrumentationRule> getNarrowedRulesFor(TypeDescription typeDescription, InstrumentationConfiguration config) {
         return config.getRules().stream()
                 .map(rule -> Pair.of(
-                        rule.getName(),
+                        rule,
                         rule.getScopes()
                                 .stream()
                                 .filter(s -> s.getTypeMatcher().matches(typeDescription))
                                 .collect(Collectors.toSet())))
                 .filter(p -> !p.getRight().isEmpty())
-                .map(p -> new InstrumentationRule(p.getLeft(), p.getRight()))
+                .map(p -> p.getLeft().toBuilder().clearScopes().scopes(p.getRight()).build())
                 .collect(Collectors.toSet());
     }
 
     @EventListener
     private void inspectitConfigChanged(InspectitConfigChangedEvent ev) {
 
-        if (haveInstrumentationRelatedSettingsChanged(ev)) {
+        InstrumentationSettings oldSettings = ev.getOldConfig().getInstrumentation();
+        InstrumentationSettings newSettings = ev.getNewConfig().getInstrumentation();
+
+        if (!Objects.equals(oldSettings, newSettings)) {
             val oldConfig = currentConfig;
-            updateConfiguration(ev.getNewConfig().getInstrumentation());
-
-            val event = new InstrumentationConfigurationChangedEvent(this, oldConfig, currentConfig);
-            ctx.publishEvent(event);
+            val newConfig = resolveConfiguration(ev.getNewConfig().getInstrumentation());
+            if (!Objects.equals(oldConfig, newConfig)) {
+                currentConfig = newConfig;
+                val event = new InstrumentationConfigurationChangedEvent(this, oldConfig, currentConfig);
+                ctx.publishEvent(event);
+            }
         }
     }
 
-    private boolean haveInstrumentationRelatedSettingsChanged(InspectitConfigChangedEvent ev) {
-        InstrumentationSettings oldConfig = ev.getOldConfig().getInstrumentation();
-        InstrumentationSettings newConfig = ev.getNewConfig().getInstrumentation();
-
-        if (!Objects.equals(oldConfig.getIgnoredBootstrapPackages(), newConfig.getIgnoredBootstrapPackages())) {
-            return true;
-        }
-        if (!Objects.equals(oldConfig.getSpecial(), newConfig.getSpecial())) {
-            return true;
-        }
-        if (!Objects.equals(oldConfig.getRules(), newConfig.getRules())) {
-            return true;
-        }
-        if (!Objects.equals(oldConfig.getScopes(), newConfig.getScopes())) {
-            return true;
-        }
-        if (!Objects.equals(oldConfig.getDataProviders(), newConfig.getDataProviders())) {
-            return true;
-        }
-        if (!Objects.equals(oldConfig.getData(), newConfig.getData())) {
-            return true;
-        }
-        return false;
-    }
-
-    private void updateConfiguration(InstrumentationSettings source) {
-        currentConfig = InstrumentationConfiguration.builder()
+    private InstrumentationConfiguration resolveConfiguration(InstrumentationSettings source) {
+        val dataProviders = dataProviderResolver.resolveProviders(source);
+        return InstrumentationConfiguration.builder()
                 .source(source)
-                .rules(ruleResolver.resolve(source))
-                .dataProviders(dataProviderResolver.resolveProviders(source))
+                .rules(ruleResolver.resolve(source, dataProviders))
                 .dataProperties(resolveDataProperties(source))
                 .build();
     }
 
     @VisibleForTesting
-    ResolvedDataProperties resolveDataProperties(InstrumentationSettings source) {
-        val builder = ResolvedDataProperties.builder();
-        source.getData().entrySet().stream()
-                .forEach(e -> builder.data(e.getKey(), e.getValue()));
+    DataProperties resolveDataProperties(InstrumentationSettings source) {
+        val builder = DataProperties.builder();
+        source.getData().forEach(builder::data);
         return builder.build();
     }
 

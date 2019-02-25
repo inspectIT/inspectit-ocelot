@@ -7,7 +7,6 @@ import lombok.experimental.NonFinal;
 import rocks.inspectit.oce.core.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.oce.core.instrumentation.config.InstrumentationConfigurationResolver;
 
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -26,20 +25,11 @@ public class InstrumentationConfiguration {
      */
     private InstrumentationSettings source;
 
-    private ResolvedDataProperties dataProperties;
+    private DataProperties dataProperties;
 
     /**
      * The currently active instrumentation rules.
      */
     @Singular
     private Set<InstrumentationRule> rules;
-
-    /**
-     * A map mapping the name of each data provider to its resolved configuration.
-     * This map does not include special builtin providers!
-     * <p>
-     * The key is stored in lower-case to allow an case insensitive matching.
-     */
-    @Singular
-    private Map<String, ResolvedGenericDataProviderConfig> dataProviders;
 }

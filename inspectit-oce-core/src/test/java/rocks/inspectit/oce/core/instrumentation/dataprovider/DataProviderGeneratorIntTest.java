@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import rocks.inspectit.oce.bootstrap.instrumentation.IGenericDataProvider;
 import rocks.inspectit.oce.core.SpringTestBase;
-import rocks.inspectit.oce.core.instrumentation.config.model.ResolvedGenericDataProviderConfig;
+import rocks.inspectit.oce.core.instrumentation.config.model.GenericDataProviderConfig;
 import rocks.inspectit.oce.core.instrumentation.dataprovider.generic.DataProviderGenerator;
 import rocks.inspectit.oce.core.instrumentation.dataprovider.generic.GenericDataProviderTemplate;
 import rocks.inspectit.oce.core.instrumentation.injection.InjectedClass;
@@ -50,7 +50,7 @@ public class DataProviderGeneratorIntTest extends SpringTestBase {
     @Test
     @DirtiesContext
     void testSyntaxErrorHandling() {
-        ResolvedGenericDataProviderConfig config = ResolvedGenericDataProviderConfig.builder()
+        GenericDataProviderConfig config = GenericDataProviderConfig.builder()
                 .name("my-provider")
                 .valueBody("i am not java code")
                 .build();
@@ -62,7 +62,7 @@ public class DataProviderGeneratorIntTest extends SpringTestBase {
     @Test
     @DirtiesContext
     void testProviderCaching() {
-        ResolvedGenericDataProviderConfig config = ResolvedGenericDataProviderConfig.builder()
+        GenericDataProviderConfig config = GenericDataProviderConfig.builder()
                 .name("my-provider")
                 .valueBody("return \"dummyresult\";")
                 .build();
@@ -78,7 +78,7 @@ public class DataProviderGeneratorIntTest extends SpringTestBase {
     @Test
     @DirtiesContext
     void testProviderReuse() throws Exception {
-        ResolvedGenericDataProviderConfig configA = ResolvedGenericDataProviderConfig.builder()
+        GenericDataProviderConfig configA = GenericDataProviderConfig.builder()
                 .name("my-provider")
                 .valueBody("return \"providerA\";")
                 .build();
@@ -92,7 +92,7 @@ public class DataProviderGeneratorIntTest extends SpringTestBase {
 
         GcUtils.waitUntilCleared(providerAWeak);
 
-        ResolvedGenericDataProviderConfig configB = ResolvedGenericDataProviderConfig.builder()
+        GenericDataProviderConfig configB = GenericDataProviderConfig.builder()
                 .name("my-provider")
                 .valueBody("return \"providerB\";")
                 .build();
@@ -111,7 +111,7 @@ public class DataProviderGeneratorIntTest extends SpringTestBase {
         HashMap<Integer, String> argumentTypes = new HashMap<>();
         argumentTypes.put(0, "String");
         argumentTypes.put(2, "int");
-        ResolvedGenericDataProviderConfig config = ResolvedGenericDataProviderConfig.builder()
+        GenericDataProviderConfig config = GenericDataProviderConfig.builder()
                 .name("my-provider")
                 .expectedArgumentTypes(argumentTypes)
                 .valueBody("return new Integer(arg0.length() + arg2);")
@@ -127,7 +127,7 @@ public class DataProviderGeneratorIntTest extends SpringTestBase {
     @Test
     @DirtiesContext
     void testArgsArrayPassing() {
-        ResolvedGenericDataProviderConfig config = ResolvedGenericDataProviderConfig.builder()
+        GenericDataProviderConfig config = GenericDataProviderConfig.builder()
                 .name("my-provider")
                 .usesArgsArray(true)
                 .valueBody("return new Integer(((String)args[0]).length() + ((Integer)args[2]).intValue());")
@@ -142,7 +142,7 @@ public class DataProviderGeneratorIntTest extends SpringTestBase {
     @Test
     @DirtiesContext
     void testPrimitveArrayReturnValue() {
-        ResolvedGenericDataProviderConfig config = ResolvedGenericDataProviderConfig.builder()
+        GenericDataProviderConfig config = GenericDataProviderConfig.builder()
                 .name("my-provider")
                 .expectedReturnValueType("int[]")
                 .valueBody("return new Integer(returnValue[0] + returnValue[1] +returnValue[2]);")
@@ -156,7 +156,7 @@ public class DataProviderGeneratorIntTest extends SpringTestBase {
     @Test
     @DirtiesContext
     void testExceptionPassing() {
-        ResolvedGenericDataProviderConfig config = ResolvedGenericDataProviderConfig.builder()
+        GenericDataProviderConfig config = GenericDataProviderConfig.builder()
                 .name("my-provider")
                 .usesThrown(true)
                 .valueBody("return thrown.getMessage();")
@@ -175,7 +175,7 @@ public class DataProviderGeneratorIntTest extends SpringTestBase {
         dummyClass.getField("MY_VALUE").set(null, 42);
         assertThat(MyDummyClass.MY_VALUE).isNotEqualTo(42);
 
-        ResolvedGenericDataProviderConfig config = ResolvedGenericDataProviderConfig.builder()
+        GenericDataProviderConfig config = GenericDataProviderConfig.builder()
                 .name("my-provider")
                 .importedPackages(Arrays.asList(MyDummyClass.class.getPackage().getName()))
                 .valueBody("return new Integer(MyDummyClass.MY_VALUE);")
@@ -191,7 +191,7 @@ public class DataProviderGeneratorIntTest extends SpringTestBase {
     @DirtiesContext
     void testCustomArgumentPassingAndCasting() {
         List<Pair<String, String>> argumentTypes = new ArrayList<>();
-        ResolvedGenericDataProviderConfig config = ResolvedGenericDataProviderConfig.builder()
+        GenericDataProviderConfig config = GenericDataProviderConfig.builder()
                 .name("my-provider")
                 //Alphabetical order, so that this order corresponds to the index
                 .additionalArgumentType("myvalue", "int")
@@ -207,7 +207,7 @@ public class DataProviderGeneratorIntTest extends SpringTestBase {
     @Test
     @DirtiesContext
     void testThizPassingAndCasting() {
-        ResolvedGenericDataProviderConfig config = ResolvedGenericDataProviderConfig.builder()
+        GenericDataProviderConfig config = GenericDataProviderConfig.builder()
                 .name("my-provider")
                 .expectedThisType("String")
                 .valueBody("return thiz + \"!\";")
@@ -222,7 +222,7 @@ public class DataProviderGeneratorIntTest extends SpringTestBase {
     @Test
     @DirtiesContext
     void testReturnValuePassingAndCasting() {
-        ResolvedGenericDataProviderConfig config = ResolvedGenericDataProviderConfig.builder()
+        GenericDataProviderConfig config = GenericDataProviderConfig.builder()
                 .name("my-provider")
                 .expectedReturnValueType("String")
                 .valueBody("return returnValue + \"!\";")

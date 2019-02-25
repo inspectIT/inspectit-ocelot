@@ -9,6 +9,7 @@ import rocks.inspectit.oce.bootstrap.Instances;
 import rocks.inspectit.oce.bootstrap.instrumentation.IMethodHook;
 import rocks.inspectit.oce.bootstrap.instrumentation.noop.NoopMethodHook;
 import rocks.inspectit.oce.core.SpringTestBase;
+import rocks.inspectit.oce.core.testutils.Dummy;
 import rocks.inspectit.oce.core.testutils.DummyClassLoader;
 
 import java.util.Collections;
@@ -20,10 +21,10 @@ import static org.mockito.Mockito.when;
 
 @TestPropertySource(properties = {
         "inspectit.instrumentation.internal.inter-batch-delay=1ms", //for faster responses of the test
-        "inspectit.instrumentation.scopes.scA.type.name=rocks.inspectit.oce.core.instrumentation.hook.Dummy",
+        "inspectit.instrumentation.scopes.scA.type.name=rocks.inspectit.oce.core.testutils.Dummy",
         "inspectit.instrumentation.scopes.scA.methods[0].name=methodA",
 
-        "inspectit.instrumentation.scopes.scB.type.name=rocks.inspectit.oce.core.instrumentation.hook.Dummy",
+        "inspectit.instrumentation.scopes.scB.type.name=rocks.inspectit.oce.core.testutils.Dummy",
 
         "inspectit.instrumentation.rules.r1.scopes.scA=true"
 

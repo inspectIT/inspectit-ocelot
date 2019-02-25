@@ -17,7 +17,7 @@ import java.util.SortedMap;
  */
 @Value
 @Builder
-public class ResolvedGenericDataProviderConfig {
+public class GenericDataProviderConfig {
 
     /**
      * The name uniquely identifying this provider.

@@ -4,8 +4,7 @@ import lombok.val;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.oce.core.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.dataproviders.GenericDataProviderSettings;
-import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationConfiguration;
-import rocks.inspectit.oce.core.instrumentation.config.model.ResolvedGenericDataProviderConfig;
+import rocks.inspectit.oce.core.instrumentation.config.model.GenericDataProviderConfig;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,20 +13,18 @@ import java.util.Map;
 public class DataProviderResolver {
 
     /**
-     * Resolves {@link InstrumentationConfiguration#getDataProviders()}.
      * Returns a map mapping the names of providers to their resolved configurations
      *
-     * @param builder the builder to resolve
-     * @param source  the input configuration
+     * @param source the input configuration
      * @return the updated builder
      */
-    Map<String, ResolvedGenericDataProviderConfig> resolveProviders(InstrumentationSettings source) {
-        Map<String, ResolvedGenericDataProviderConfig> resultMap = new HashMap<>();
+    Map<String, GenericDataProviderConfig> resolveProviders(InstrumentationSettings source) {
+        Map<String, GenericDataProviderConfig> resultMap = new HashMap<>();
         source.getDataProviders().forEach((name, conf) -> {
 
             HashMap<String, String> additionalInputs = new HashMap<>(conf.getInput());
 
-            val result = ResolvedGenericDataProviderConfig.builder()
+            val result = GenericDataProviderConfig.builder()
                     .name(name)
                     .importedPackages(conf.getImports());
 
@@ -42,7 +39,7 @@ public class DataProviderResolver {
         return resultMap;
     }
 
-    private void resolveBody(GenericDataProviderSettings conf, ResolvedGenericDataProviderConfig.ResolvedGenericDataProviderConfigBuilder result) {
+    private void resolveBody(GenericDataProviderSettings conf, GenericDataProviderConfig.GenericDataProviderConfigBuilder result) {
         if (conf.getValue() != null) {
             result.valueBody("return " + conf.getValue() + ";");
         } else {
@@ -51,7 +48,7 @@ public class DataProviderResolver {
     }
 
 
-    private void resolveArgumentVariables(HashMap<String, String> inputs, ResolvedGenericDataProviderConfig.ResolvedGenericDataProviderConfigBuilder result) {
+    private void resolveArgumentVariables(HashMap<String, String> inputs, GenericDataProviderConfig.GenericDataProviderConfigBuilder result) {
         val entryIterator = inputs.entrySet().iterator();
         while (entryIterator.hasNext()) {
             val varEntry = entryIterator.next();
@@ -64,7 +61,7 @@ public class DataProviderResolver {
         }
     }
 
-    private void resolveSpecialVariables(HashMap<String, String> inputs, ResolvedGenericDataProviderConfig.ResolvedGenericDataProviderConfigBuilder result) {
+    private void resolveSpecialVariables(HashMap<String, String> inputs, GenericDataProviderConfig.GenericDataProviderConfigBuilder result) {
         result.expectedThisType(inputs.remove(GenericDataProviderSettings.THIZ_VARIABLE))
                 .expectedReturnValueType(inputs.remove(GenericDataProviderSettings.RETURN_VALUE_VARIABLE))
                 .usesThrown(inputs.remove(GenericDataProviderSettings.THROWN_VARIABLE) != null)

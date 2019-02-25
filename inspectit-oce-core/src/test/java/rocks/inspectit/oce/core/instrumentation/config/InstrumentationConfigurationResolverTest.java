@@ -81,7 +81,7 @@ class InstrumentationConfigurationResolverTest {
         @Test
         public void matchingRule() throws IllegalAccessException {
             InstrumentationScope scope = new InstrumentationScope(ElementMatchers.any(), ElementMatchers.any());
-            InstrumentationRule rule = new InstrumentationRule("name", Collections.singleton(scope));
+            InstrumentationRule rule = InstrumentationRule.builder().name("name").scope(scope).build();
             config = InstrumentationConfiguration.builder().source(settings).rule(rule).build();
             FieldUtils.writeDeclaredField(resolver, "currentConfig", config, true);
 
@@ -100,7 +100,7 @@ class InstrumentationConfigurationResolverTest {
         public void narrowingRule() throws IllegalAccessException {
             InstrumentationScope scopeA = new InstrumentationScope(ElementMatchers.nameEndsWithIgnoreCase("object"), ElementMatchers.any());
             InstrumentationScope scopeB = new InstrumentationScope(ElementMatchers.named("not.Matching"), ElementMatchers.any());
-            InstrumentationRule rule = new InstrumentationRule("name", new HashSet<>(Arrays.asList(scopeA, scopeB)));
+            InstrumentationRule rule = InstrumentationRule.builder().name("name").scope(scopeA).scope(scopeB).build();
             config = InstrumentationConfiguration.builder().source(settings).rule(rule).build();
             FieldUtils.writeDeclaredField(resolver, "currentConfig", config, true);
 
@@ -139,7 +139,7 @@ class InstrumentationConfigurationResolverTest {
         @Test
         void testTypeMatchingButNoMethodsMatching() throws Exception {
             InstrumentationScope noMethodScope = new InstrumentationScope(ElementMatchers.any(), ElementMatchers.none());
-            InstrumentationRule r1 = new InstrumentationRule("r1", Collections.singleton(noMethodScope));
+            InstrumentationRule r1 = InstrumentationRule.builder().name("r1").scope(noMethodScope).build();
 
 
             config = InstrumentationConfiguration.builder().source(settings).rule(r1).build();
@@ -148,13 +148,13 @@ class InstrumentationConfigurationResolverTest {
             Map<MethodDescription, MethodHookConfiguration> result = resolver.getHookConfigurations(TestCase.class);
 
             assertThat(result).isEmpty();
-            verify(hookResolver, never()).buildHookConfiguration(any(), any());
+            verify(hookResolver, never()).buildHookConfiguration(any(), any(), any());
         }
 
         @Test
         void testTypeNotMatchingButMethodMatching() throws Exception {
             InstrumentationScope noMethodScope = new InstrumentationScope(ElementMatchers.none(), ElementMatchers.any());
-            InstrumentationRule r1 = new InstrumentationRule("r1", Collections.singleton(noMethodScope));
+            InstrumentationRule r1 = InstrumentationRule.builder().name("r1").scope(noMethodScope).build();
 
 
             config = InstrumentationConfiguration.builder().source(settings).rule(r1).build();
@@ -163,7 +163,7 @@ class InstrumentationConfigurationResolverTest {
             Map<MethodDescription, MethodHookConfiguration> result = resolver.getHookConfigurations(TestCase.class);
 
             assertThat(result).isEmpty();
-            verify(hookResolver, never()).buildHookConfiguration(any(), any());
+            verify(hookResolver, never()).buildHookConfiguration(any(), any(), any());
         }
 
 
@@ -172,8 +172,8 @@ class InstrumentationConfigurationResolverTest {
             ElementMatcher.Junction<MethodDescription> method = ElementMatchers.is(testCase_methodA);
             InstrumentationScope methodScope = new InstrumentationScope(ElementMatchers.any(), method);
             InstrumentationScope noMethodScope = new InstrumentationScope(ElementMatchers.any(), ElementMatchers.none());
-            InstrumentationRule r1 = new InstrumentationRule("r1", Collections.singleton(methodScope));
-            InstrumentationRule r2 = new InstrumentationRule("r2", Collections.singleton(noMethodScope));
+            InstrumentationRule r1 = InstrumentationRule.builder().name("r1").scope(methodScope).build();
+            InstrumentationRule r2 = InstrumentationRule.builder().name("r2").scope(noMethodScope).build();
 
 
             config = InstrumentationConfiguration.builder().source(settings).rule(r1).rule(r2).build();
@@ -182,8 +182,9 @@ class InstrumentationConfigurationResolverTest {
             Map<MethodDescription, MethodHookConfiguration> result = resolver.getHookConfigurations(TestCase.class);
 
             assertThat(result).hasSize(1);
-            verify(hookResolver, times(1)).buildHookConfiguration(any(), any());
-            verify(hookResolver, times(1)).buildHookConfiguration(argThat(method::matches), eq(Collections.singleton(r1)));
+            verify(hookResolver, times(1)).buildHookConfiguration(any(), any(), any());
+            verify(hookResolver, times(1))
+                    .buildHookConfiguration(eq(testCase_methodA.getDeclaringClass()), argThat(method::matches), eq(Collections.singleton(r1)));
         }
 
 
@@ -191,8 +192,8 @@ class InstrumentationConfigurationResolverTest {
         void testMultipleRulesWithSameScopeMatching() throws Exception {
             ElementMatcher.Junction<MethodDescription> method = ElementMatchers.is(testCase_methodA);
             InstrumentationScope methodScope = new InstrumentationScope(ElementMatchers.any(), method);
-            InstrumentationRule r1 = new InstrumentationRule("r1", Collections.singleton(methodScope));
-            InstrumentationRule r2 = new InstrumentationRule("r2", Collections.singleton(methodScope));
+            InstrumentationRule r1 = InstrumentationRule.builder().name("r1").scope(methodScope).build();
+            InstrumentationRule r2 = InstrumentationRule.builder().name("r2").scope(methodScope).build();
 
 
             config = InstrumentationConfiguration.builder().source(settings).rule(r1).rule(r2).build();
@@ -201,8 +202,9 @@ class InstrumentationConfigurationResolverTest {
             Map<MethodDescription, MethodHookConfiguration> result = resolver.getHookConfigurations(TestCase.class);
 
             assertThat(result).hasSize(1);
-            verify(hookResolver, times(1)).buildHookConfiguration(any(), any());
-            verify(hookResolver, times(1)).buildHookConfiguration(argThat(method::matches), eq(new HashSet<>(Arrays.asList(r1, r2))));
+            verify(hookResolver, times(1)).buildHookConfiguration(any(), any(), any());
+            verify(hookResolver, times(1))
+                    .buildHookConfiguration(eq(testCase_methodA.getDeclaringClass()), argThat(method::matches), eq(new HashSet<>(Arrays.asList(r1, r2))));
         }
 
 
@@ -212,8 +214,8 @@ class InstrumentationConfigurationResolverTest {
             ElementMatcher.Junction<MethodDescription> methodB = ElementMatchers.is(testCase_methodB);
             InstrumentationScope methodScope = new InstrumentationScope(ElementMatchers.any(), methodA);
             InstrumentationScope allScope = new InstrumentationScope(ElementMatchers.any(), methodA.or(methodB));
-            InstrumentationRule r1 = new InstrumentationRule("r1", Collections.singleton(methodScope));
-            InstrumentationRule r2 = new InstrumentationRule("r2", Collections.singleton(allScope));
+            InstrumentationRule r1 = InstrumentationRule.builder().name("r1").scope(methodScope).build();
+            InstrumentationRule r2 = InstrumentationRule.builder().name("r2").scope(allScope).build();
 
 
             config = InstrumentationConfiguration.builder().source(settings).rule(r1).rule(r2).build();
@@ -222,9 +224,11 @@ class InstrumentationConfigurationResolverTest {
             Map<MethodDescription, MethodHookConfiguration> result = resolver.getHookConfigurations(TestCase.class);
 
             assertThat(result).hasSize(2);
-            verify(hookResolver, times(2)).buildHookConfiguration(any(), any());
-            verify(hookResolver, times(1)).buildHookConfiguration(argThat(methodA::matches), eq(new HashSet<>(Arrays.asList(r1, r2))));
-            verify(hookResolver, times(1)).buildHookConfiguration(argThat(methodB::matches), eq(new HashSet<>(Arrays.asList(r2))));
+            verify(hookResolver, times(2)).buildHookConfiguration(any(), any(), any());
+            verify(hookResolver, times(1))
+                    .buildHookConfiguration(eq(testCase_methodA.getDeclaringClass()), argThat(methodA::matches), eq(new HashSet<>(Arrays.asList(r1, r2))));
+            verify(hookResolver, times(1))
+                    .buildHookConfiguration(eq(testCase_methodB.getDeclaringClass()), argThat(methodB::matches), eq(new HashSet<>(Arrays.asList(r2))));
         }
 
     }
@@ -287,7 +291,7 @@ class InstrumentationConfigurationResolverTest {
 
         @Test
         void defaultSettingsForUnmentionedKeyCorrect() {
-            ResolvedDataProperties dataProps = resolver.resolveDataProperties(testSettings);
+            DataProperties dataProps = resolver.resolveDataProperties(testSettings);
             assertThat(dataProps.isPropagatedDownWithinJVM("my_key")).isTrue();
             assertThat(dataProps.isPropagatedDownGlobally("my_key")).isFalse();
 
@@ -303,7 +307,7 @@ class InstrumentationConfigurationResolverTest {
             ds.setDownPropagation(PropagationMode.NONE);
             testSettings.setData(Maps.newHashMap("my_key", ds));
 
-            ResolvedDataProperties dataProps = resolver.resolveDataProperties(testSettings);
+            DataProperties dataProps = resolver.resolveDataProperties(testSettings);
 
             assertThat(dataProps.isPropagatedDownWithinJVM("my_key")).isFalse();
             assertThat(dataProps.isPropagatedDownGlobally("my_key")).isFalse();
@@ -315,7 +319,7 @@ class InstrumentationConfigurationResolverTest {
             ds.setDownPropagation(PropagationMode.JVM_LOCAL);
             testSettings.setData(Maps.newHashMap("my_key", ds));
 
-            ResolvedDataProperties dataProps = resolver.resolveDataProperties(testSettings);
+            DataProperties dataProps = resolver.resolveDataProperties(testSettings);
 
             assertThat(dataProps.isPropagatedDownWithinJVM("my_key")).isTrue();
             assertThat(dataProps.isPropagatedDownGlobally("my_key")).isFalse();
@@ -327,7 +331,7 @@ class InstrumentationConfigurationResolverTest {
             ds.setDownPropagation(PropagationMode.GLOBAL);
             testSettings.setData(Maps.newHashMap("my_key", ds));
 
-            ResolvedDataProperties dataProps = resolver.resolveDataProperties(testSettings);
+            DataProperties dataProps = resolver.resolveDataProperties(testSettings);
 
             assertThat(dataProps.isPropagatedDownWithinJVM("my_key")).isTrue();
             assertThat(dataProps.isPropagatedDownGlobally("my_key")).isTrue();
@@ -339,7 +343,7 @@ class InstrumentationConfigurationResolverTest {
             ds.setUpPropagation(PropagationMode.NONE);
             testSettings.setData(Maps.newHashMap("my_key", ds));
 
-            ResolvedDataProperties dataProps = resolver.resolveDataProperties(testSettings);
+            DataProperties dataProps = resolver.resolveDataProperties(testSettings);
 
             assertThat(dataProps.isPropagatedUpWithinJVM("my_key")).isFalse();
             assertThat(dataProps.isPropagatedUpGlobally("my_key")).isFalse();
@@ -351,7 +355,7 @@ class InstrumentationConfigurationResolverTest {
             ds.setUpPropagation(PropagationMode.JVM_LOCAL);
             testSettings.setData(Maps.newHashMap("my_key", ds));
 
-            ResolvedDataProperties dataProps = resolver.resolveDataProperties(testSettings);
+            DataProperties dataProps = resolver.resolveDataProperties(testSettings);
 
             assertThat(dataProps.isPropagatedUpWithinJVM("my_key")).isTrue();
             assertThat(dataProps.isPropagatedUpGlobally("my_key")).isFalse();
@@ -363,7 +367,7 @@ class InstrumentationConfigurationResolverTest {
             ds.setUpPropagation(PropagationMode.GLOBAL);
             testSettings.setData(Maps.newHashMap("my_key", ds));
 
-            ResolvedDataProperties dataProps = resolver.resolveDataProperties(testSettings);
+            DataProperties dataProps = resolver.resolveDataProperties(testSettings);
 
             assertThat(dataProps.isPropagatedUpWithinJVM("my_key")).isTrue();
             assertThat(dataProps.isPropagatedUpGlobally("my_key")).isTrue();

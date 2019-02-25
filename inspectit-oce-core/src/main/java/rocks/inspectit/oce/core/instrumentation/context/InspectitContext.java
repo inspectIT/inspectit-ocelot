@@ -5,7 +5,7 @@ import io.opencensus.common.Scope;
 import io.opencensus.tags.*;
 import lombok.val;
 import rocks.inspectit.oce.bootstrap.context.IInspectitContext;
-import rocks.inspectit.oce.core.instrumentation.config.model.ResolvedDataProperties;
+import rocks.inspectit.oce.core.instrumentation.config.model.DataProperties;
 import rocks.inspectit.oce.core.tags.CommonTagsManager;
 
 import java.util.*;
@@ -77,7 +77,7 @@ public class InspectitContext implements IInspectitContext {
      */
     private InspectitContext parent;
 
-    private final ResolvedDataProperties propagation;
+    private final DataProperties propagation;
 
     /**
      * Defines whether the context should interact with TagContexts opened by the instrumented application.
@@ -163,7 +163,7 @@ public class InspectitContext implements IInspectitContext {
      */
     private Map<String, Object> cachedActivePhaseDownPropagatedData = null;
 
-    private InspectitContext(InspectitContext parent, ResolvedDataProperties propagation, boolean interactWithApplicationTagContexts) {
+    private InspectitContext(InspectitContext parent, DataProperties propagation, boolean interactWithApplicationTagContexts) {
         this.parent = parent;
         this.propagation = propagation;
         this.interactWithApplicationTagContexts = interactWithApplicationTagContexts;
@@ -191,7 +191,7 @@ public class InspectitContext implements IInspectitContext {
      * @param interactWithApplicationTagContexts if true, data from the currently active {@link TagContext} will be inherited and makeActive will publish the data as a TagContext
      * @return the newly created context
      */
-    public static InspectitContext createFromCurrent(CommonTagsManager commonTagsManager, ResolvedDataProperties propagation, boolean interactWithApplicationTagContexts) {
+    public static InspectitContext createFromCurrent(CommonTagsManager commonTagsManager, DataProperties propagation, boolean interactWithApplicationTagContexts) {
         InspectitContext parent = INSPECTIT_KEY.get();
         InspectitContext result = new InspectitContext(parent, propagation, interactWithApplicationTagContexts);
 
@@ -209,6 +209,7 @@ public class InspectitContext implements IInspectitContext {
     /**
      * Terminates this contexts entry-phase and makes it the currently active context.
      */
+    @Override
     public void makeActive() {
 
         boolean anyDownPropagatedDataOverwritten = dataOverwrites.keySet().stream()
@@ -348,7 +349,7 @@ public class InspectitContext implements IInspectitContext {
     }
 
     /**
-     * Only invoked by {@link #createFromCurrent(CommonTagsManager, ResolvedDataProperties, boolean)}
+     * Only invoked by {@link #createFromCurrent(CommonTagsManager, DataProperties, boolean)}
      * <p>
      * Reads the currently active tag context and makes this context inherit all values which
      * have changed in comparison to the values published by the parent context.

@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.oce.bootstrap.instrumentation.IGenericDataProvider;
 import rocks.inspectit.oce.core.config.model.instrumentation.dataproviders.GenericDataProviderSettings;
-import rocks.inspectit.oce.core.instrumentation.config.model.ResolvedGenericDataProviderConfig;
+import rocks.inspectit.oce.core.instrumentation.config.model.GenericDataProviderConfig;
 import rocks.inspectit.oce.core.instrumentation.injection.ClassInjector;
 import rocks.inspectit.oce.core.instrumentation.injection.InjectedClass;
 import rocks.inspectit.oce.core.utils.AutoboxingHelper;
@@ -44,11 +44,11 @@ public class DataProviderGenerator {
     @Autowired
     private ClassInjector classInjector;
 
-    private LoadingCache<ClassLoader, Cache<ResolvedGenericDataProviderConfig, InjectedClass<? extends IGenericDataProvider>>> providersCache
+    private LoadingCache<ClassLoader, Cache<GenericDataProviderConfig, InjectedClass<? extends IGenericDataProvider>>> providersCache
             = CacheBuilder.newBuilder().weakKeys().build(
-            new CacheLoader<ClassLoader, Cache<ResolvedGenericDataProviderConfig, InjectedClass<? extends IGenericDataProvider>>>() {
+            new CacheLoader<ClassLoader, Cache<GenericDataProviderConfig, InjectedClass<? extends IGenericDataProvider>>>() {
                 @Override
-                public Cache<ResolvedGenericDataProviderConfig, InjectedClass<? extends IGenericDataProvider>> load(ClassLoader key) {
+                public Cache<GenericDataProviderConfig, InjectedClass<? extends IGenericDataProvider>> load(ClassLoader key) {
                     return CacheBuilder.newBuilder().weakValues().build();
                 }
             });
@@ -63,10 +63,10 @@ public class DataProviderGenerator {
      * @throws ExecutionException
      */
     @SuppressWarnings("unchecked")
-    public InjectedClass<? extends IGenericDataProvider> getOrGenerateDataProvider(ResolvedGenericDataProviderConfig providerConfig, Class<?> classToUseProviderOn) {
+    public InjectedClass<? extends IGenericDataProvider> getOrGenerateDataProvider(GenericDataProviderConfig providerConfig, Class<?> classToUseProviderOn) {
         ClassLoader loader = Optional.ofNullable(classToUseProviderOn.getClassLoader()).orElse(BOOTSTRAP_LOADER_MARKER);
         providersCache.cleanUp();
-        Cache<ResolvedGenericDataProviderConfig, InjectedClass<? extends IGenericDataProvider>> clCache;
+        Cache<GenericDataProviderConfig, InjectedClass<? extends IGenericDataProvider>> clCache;
         try {
             clCache = providersCache.get(loader);
             clCache.cleanUp(); //cleanup to make sure unused InjectedClasses are released
@@ -87,7 +87,7 @@ public class DataProviderGenerator {
         }
     }
 
-    private byte[] buildGenericDataProviderByteCode(ResolvedGenericDataProviderConfig providerConfig, ClassLoader loader, String className) throws NotFoundException, CannotCompileException, IOException {
+    private byte[] buildGenericDataProviderByteCode(GenericDataProviderConfig providerConfig, ClassLoader loader, String className) throws NotFoundException, CannotCompileException, IOException {
         ClassPool cp = new ClassPool();
         cp.insertClassPath(new ClassClassPath(GenericDataProviderTemplate.class));
         if (loader != BOOTSTRAP_LOADER_MARKER) {
@@ -143,7 +143,7 @@ public class DataProviderGenerator {
      * @param providerConfig
      * @return
      */
-    private String buildProviderMethod(ResolvedGenericDataProviderConfig providerConfig) {
+    private String buildProviderMethod(GenericDataProviderConfig providerConfig) {
         StringBuilder methodBody = new StringBuilder("{");
         if (providerConfig.getExpectedThisType() != null) {
             buildVariableDefinition(methodBody, providerConfig.getExpectedThisType(), GenericDataProviderSettings.THIZ_VARIABLE, THIZ);

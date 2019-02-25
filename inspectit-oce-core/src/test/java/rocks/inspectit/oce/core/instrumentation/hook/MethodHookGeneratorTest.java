@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.oce.core.instrumentation.config.model.MethodHookConfiguration;
 import rocks.inspectit.oce.core.instrumentation.context.ContextManager;
+import rocks.inspectit.oce.core.testutils.Dummy;
 
 import java.lang.reflect.Constructor;
 

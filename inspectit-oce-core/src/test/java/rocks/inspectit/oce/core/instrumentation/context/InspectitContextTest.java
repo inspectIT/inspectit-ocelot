@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import rocks.inspectit.oce.core.instrumentation.config.model.ResolvedDataProperties;
+import rocks.inspectit.oce.core.instrumentation.config.model.DataProperties;
 import rocks.inspectit.oce.core.tags.CommonTagsManager;
 import rocks.inspectit.oce.core.testutils.GcUtils;
 
@@ -30,7 +30,7 @@ public class InspectitContextTest {
     CommonTagsManager commonTags;
 
     @Mock
-    ResolvedDataProperties propagation;
+    DataProperties propagation;
 
     Map<String, String> getCurrentTagsAsMap() {
         HashMap<String, String> result = new HashMap<>();
