@@ -9,6 +9,7 @@ import org.springframework.boot.convert.ApplicationConversionService;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.oce.core.config.model.instrumentation.dataproviders.DataProviderCallSettings;
+import rocks.inspectit.oce.core.config.model.instrumentation.dataproviders.GenericDataProviderSettings;
 import rocks.inspectit.oce.core.instrumentation.config.model.DataProviderCallConfig;
 import rocks.inspectit.oce.core.instrumentation.config.model.GenericDataProviderConfig;
 import rocks.inspectit.oce.core.instrumentation.config.model.MethodHookConfiguration;
@@ -18,14 +19,12 @@ import rocks.inspectit.oce.core.instrumentation.dataprovider.generic.DataProvide
 import rocks.inspectit.oce.core.metrics.MeasuresAndViewsManager;
 import rocks.inspectit.oce.core.utils.CommonUtils;
 
-import java.lang.ref.WeakReference;
-import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 /**
  * This class is responsible for translating {@link rocks.inspectit.oce.core.instrumentation.config.model.MethodHookConfiguration}s
@@ -58,17 +57,16 @@ public class MethodHookGenerator {
      * @return the generated method hook
      */
     public MethodHook buildHook(Class<?> declaringClass, MethodDescription method, MethodHookConfiguration config) {
-        String signature = CommonUtils.getSignature(method);
         val builder = MethodHook.builder()
                 .inspectitContextManager(contextManager)
-                .methodName(CommonUtils.getSignature(method))
                 .sourceConfiguration(config);
 
-        addReflectionInformationToHook(declaringClass, method, builder);
+        val methodInfo = MethodReflectionInformation.createFor(declaringClass, method);
+        builder.methodInformation(methodInfo);
 
         val entryActions = new CopyOnWriteArrayList<IHookAction>();
         val exitActions = new CopyOnWriteArrayList<IHookAction>();
-        addDataProviderCalls(declaringClass, signature, config, entryActions, exitActions);
+        addDataProviderCalls(methodInfo, config, entryActions, exitActions);
 
         addMetricsRecorder(config, exitActions);
 
@@ -89,22 +87,21 @@ public class MethodHookGenerator {
     /**
      * Adds the entry and exit calls to data providers as hook actions to the hook.
      *
-     * @param hookedClass  the class of which the method is being hooked
-     * @param signature    the signature of the method being hooked, only used to print meaningful error messages
+     * @param method       the information about the method within which this data provider is called
      * @param config       the configuration of the method hook specifying the data providers to call
      * @param entryActions the list of entry hook actions to which the data providers will be appended
      * @param exitActions  the list of exit hook actions to which the data providers will be appended
      */
-    private void addDataProviderCalls(Class<?> hookedClass, String signature, MethodHookConfiguration config, List<IHookAction> entryActions, List<IHookAction> exitActions) {
+    private void addDataProviderCalls(MethodReflectionInformation method, MethodHookConfiguration config, List<IHookAction> entryActions, List<IHookAction> exitActions) {
         config.getEntryProviders().forEach(pair -> {
             String dataKey = pair.getLeft();
             val providerCallConfig = pair.getRight();
             try {
-                BoundDataProvider call = generateAndBindDataProvider(hookedClass, dataKey, providerCallConfig);
+                BoundDataProvider call = generateAndBindDataProvider(method, dataKey, providerCallConfig);
                 entryActions.add(call);
             } catch (Exception e) {
-                log.error("Failed to build entry data provider {} for data {} on method {} of {}, no value will be assigned",
-                        providerCallConfig.getProvider().getName(), dataKey, signature, hookedClass.getName(), e);
+                log.error("Failed to build entry data provider {} for data {} on method {}.{}, no value will be assigned",
+                        providerCallConfig.getProvider().getName(), dataKey, method.getDeclaringClass().getName(), method.getName(), e);
             }
         });
 
@@ -112,11 +109,11 @@ public class MethodHookGenerator {
             String dataKey = pair.getLeft();
             val providerCallConfig = pair.getRight();
             try {
-                BoundDataProvider call = generateAndBindDataProvider(hookedClass, dataKey, providerCallConfig);
+                BoundDataProvider call = generateAndBindDataProvider(method, dataKey, providerCallConfig);
                 exitActions.add(call);
             } catch (Exception e) {
-                log.error("Failed to build exit data provider {} for data {} on method {} of {}, no value will be assigned",
-                        providerCallConfig.getProvider().getName(), dataKey, signature, hookedClass.getName(), e);
+                log.error("Failed to build exit data provider {} for data {} on method {}.{}, no value will be assigned",
+                        providerCallConfig.getProvider().getName(), dataKey, method.getDeclaringClass().getName(), method.getName(), e);
             }
         });
     }
@@ -124,17 +121,17 @@ public class MethodHookGenerator {
     /**
      * Generates a data provider and binds its arguments.
      *
-     * @param contextClass       the class in which this data provider will be used.
+     * @param method             the method in which this data provider will be used.
      * @param dataKey            the name of the data whose value is defined by executing the given data provider
      * @param providerCallConfig the specification of the call to the data provider
      * @return the executable data provider
      */
-    private BoundDataProvider generateAndBindDataProvider(Class<?> contextClass, String dataKey, DataProviderCallConfig providerCallConfig) {
+    private BoundDataProvider generateAndBindDataProvider(MethodReflectionInformation method, String dataKey, DataProviderCallConfig providerCallConfig) {
         GenericDataProviderConfig providerConfig = providerCallConfig.getProvider();
-        val injectedProviderClass = dataProviderGenerator.getOrGenerateDataProvider(providerConfig, contextClass);
+        val injectedProviderClass = dataProviderGenerator.getOrGenerateDataProvider(providerConfig, method.getDeclaringClass());
 
-        val dynamicAssignments = getDynamicInputAssignments(providerCallConfig);
-        val constantAssignments = getConstantInputAssignments(providerCallConfig, contextClass.getClassLoader());
+        val dynamicAssignments = getDynamicInputAssignments(method, providerCallConfig);
+        val constantAssignments = getConstantInputAssignments(method, providerCallConfig);
 
         return BoundDataProvider.bind(dataKey, providerConfig, injectedProviderClass, constantAssignments, dynamicAssignments);
     }
@@ -143,23 +140,27 @@ public class MethodHookGenerator {
      * Reads the constant assignments performed by the given provider call into a map.
      * The data is immediately converted to the expected input type using a conversion service.
      *
+     * @param method             the method within which the data provider is executed, used to find the correct types
      * @param providerCallConfig the call whose constant assignments should be queried
-     * @param context            the classloader within which the data provider is executed, used to find the correct types
      * @return a map mapping the name of the parameters to the constant value they are assigned
      */
-    private Map<String, Object> getConstantInputAssignments(DataProviderCallConfig providerCallConfig, ClassLoader context) {
+    private Map<String, Object> getConstantInputAssignments(MethodReflectionInformation method, DataProviderCallConfig providerCallConfig) {
         GenericDataProviderConfig providerConfig = providerCallConfig.getProvider();
         Map<String, Object> constantAssignments = new HashMap<>();
 
         DataProviderCallSettings callSettings = providerCallConfig.getCallSettings();
-        callSettings.getConstantInput()
+        SortedMap<String, String> providerArgumentTypes = providerConfig.getAdditionalArgumentTypes();
+        providerCallConfig.getCallSettings().getConstantInput()
                 .forEach((argName, value) -> {
-                    String expectedTypeName = providerConfig.getAdditionalArgumentTypes().get(argName);
-                    Class<?> expectedValueType = CommonUtils.locateTypeWithinImports(expectedTypeName, context, providerConfig.getImportedPackages());
-
+                    String expectedTypeName = providerArgumentTypes.get(argName);
+                    ClassLoader contextClassloader = method.getDeclaringClass().getClassLoader();
+                    Class<?> expectedValueType = CommonUtils.locateTypeWithinImports(expectedTypeName, contextClassloader, providerConfig.getImportedPackages());
                     Object convertedValue = callSettings.getConstantInputAsType(argName, expectedValueType);
                     constantAssignments.put(argName, convertedValue);
                 });
+        if (providerArgumentTypes.containsKey(GenericDataProviderSettings.METHOD_NAME_VARIABLE)) {
+            constantAssignments.put(GenericDataProviderSettings.METHOD_NAME_VARIABLE, method.getName());
+        }
         return constantAssignments;
     }
 
@@ -167,33 +168,26 @@ public class MethodHookGenerator {
      * Reads the dynamic assignments performed by the given provider call into a map.
      * Currently the only dynamic assignments are "data-inputs".
      *
+     * @param method             the method within which the data provider is executed, used to assign special variables
      * @param providerCallConfig the call whose dynamic assignments should be queried
      * @return a map mapping the parameter names to functions which are evaluated during
      * {@link IHookAction#execute(IHookAction.ExecutionContext)}  to find the concrete value for the parameter.
      */
-    private Map<String, Function<IHookAction.ExecutionContext, Object>> getDynamicInputAssignments(DataProviderCallConfig providerCallConfig) {
+    private Map<String, Function<IHookAction.ExecutionContext, Object>> getDynamicInputAssignments(MethodReflectionInformation method, DataProviderCallConfig providerCallConfig) {
         Map<String, Function<IHookAction.ExecutionContext, Object>> dynamicAssignments = new HashMap<>();
         providerCallConfig.getCallSettings().getDataInput()
                 .forEach((argName, dataName) ->
                         dynamicAssignments.put(argName, (ctx) -> ctx.getInspectitContext().getData(dataName))
                 );
+        val additionalProviderInputVars = providerCallConfig.getProvider().getAdditionalArgumentTypes().keySet();
+        if (additionalProviderInputVars.contains(GenericDataProviderSettings.METHOD_PARAMETER_TYPES_VARIABLE)) {
+            dynamicAssignments.put(GenericDataProviderSettings.METHOD_PARAMETER_TYPES_VARIABLE, (ex) -> method.getParameterTypes());
+        }
+        if (additionalProviderInputVars.contains(GenericDataProviderSettings.CLAZZ_VARIABLE)) {
+            dynamicAssignments.put(GenericDataProviderSettings.CLAZZ_VARIABLE, (ex) -> method.getDeclaringClass());
+        }
         return dynamicAssignments;
     }
 
-    private void addReflectionInformationToHook(Class<?> declaringClass, MethodDescription method, MethodHook.MethodHookBuilder builder) {
-        builder.hookedClass(new WeakReference<>(declaringClass));
-        builder.hookedConstructor(
-                Stream.of(declaringClass.getDeclaredConstructors())
-                        .filter(method::represents)
-                        .findFirst()
-                        .map(c -> new WeakReference<Constructor<?>>(c))
-                        .orElse(null));
 
-        builder.hookedMethod(
-                Stream.of(declaringClass.getDeclaredMethods())
-                        .filter(method::represents)
-                        .findFirst()
-                        .map(m -> new WeakReference<>(m))
-                        .orElse(null));
-    }
 }

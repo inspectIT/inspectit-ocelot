@@ -10,9 +10,6 @@ import rocks.inspectit.oce.core.instrumentation.config.model.MethodHookConfigura
 import rocks.inspectit.oce.core.instrumentation.context.ContextManager;
 import rocks.inspectit.oce.core.instrumentation.context.InspectitContext;
 
-import java.lang.ref.WeakReference;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -49,15 +46,9 @@ public class MethodHook implements IMethodHook {
     private CopyOnWriteArrayList<IHookAction> exitActions = new CopyOnWriteArrayList<>();
 
     /**
-     * A symbolic identifier to identify the instrumented method.
-     * Purely used to print meaningful log messages.
+     * Stores details regarding the hooked method
      */
-    private final String methodName;
-
-    private final WeakReference<Method> hookedMethod;
-    private final WeakReference<Constructor<?>> hookedConstructor;
-    private final WeakReference<Class<?>> hookedClass;
-
+    private MethodReflectionInformation methodInformation;
 
     @Override
     public IInspectitContext onEnter(Object[] args, Object thiz) {
@@ -68,7 +59,8 @@ public class MethodHook implements IMethodHook {
             try {
                 action.execute(executionContext);
             } catch (Throwable t) {
-                log.error("Entry action {} executed for method {} threw an exception and from now on is disabled!", action.getName(), methodName, t);
+                log.error("Entry action {} executed for method {} threw an exception and from now on is disabled!",
+                        action.getName(), methodInformation.getMethodFQN(), t);
                 entryActions.remove(action);
             }
         }
@@ -84,39 +76,12 @@ public class MethodHook implements IMethodHook {
             try {
                 action.execute(executionContext);
             } catch (Throwable t) {
-                log.error("Exit action {} executed for method {} threw an exception and from now on is disabled!", action.getName(), methodName, t);
+                log.error("Exit action {} executed for method {} threw an exception and from now on is disabled!",
+                        action.getName(), methodInformation.getMethodFQN(), t);
                 exitActions.remove(action);
             }
         }
         context.close();
-    }
-
-    /**
-     * If this hook is applied on a method, this getter returns the reflection access to it.
-     * Otherwise null.
-     *
-     * @return the instrumented method or null
-     */
-    public Method getHookedMethod() {
-        return hookedMethod == null ? null : hookedMethod.get();
-    }
-
-
-    /**
-     * If this hook is applied on a constructor, this getter returns the reflection access to it.
-     * Otherwise null.
-     *
-     * @return the instrumented constructor or null
-     */
-    public Constructor<?> getHookedConstructor() {
-        return hookedConstructor == null ? null : hookedConstructor.get();
-    }
-
-    /**
-     * @return The class on which this method hook is applied, never null as long as the class has not been garbage collected.
-     */
-    public Class<?> getHookedClass() {
-        return hookedClass == null ? null : hookedClass.get();
     }
 
 }

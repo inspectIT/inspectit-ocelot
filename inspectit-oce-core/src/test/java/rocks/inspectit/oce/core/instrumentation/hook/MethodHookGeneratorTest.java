@@ -12,8 +12,6 @@ import rocks.inspectit.oce.core.instrumentation.config.model.MethodHookConfigura
 import rocks.inspectit.oce.core.instrumentation.context.ContextManager;
 import rocks.inspectit.oce.core.testutils.Dummy;
 
-import java.lang.reflect.Constructor;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
@@ -43,7 +41,7 @@ public class MethodHookGeneratorTest {
         }
 
         @Test
-        void verifyConstructorSignatureCorrect() {
+        void verifyConstructorNameAndParameterTypesCorrect() {
             MethodDescription constructor = dummyType.getDeclaredMethods().stream()
                     .filter(MethodDescription::isConstructor)
                     .filter(md -> md.getParameters().size() == 2)
@@ -52,11 +50,12 @@ public class MethodHookGeneratorTest {
 
             MethodHook result = generator.buildHook(Dummy.class, constructor, config);
 
-            assertThat(result.getMethodName()).isEqualTo("<init>(java.lang.String,int)");
+            assertThat(result.getMethodInformation().getName()).isEqualTo("<init>");
+            assertThat(result.getMethodInformation().getParameterTypes()).containsExactly(String.class, int.class);
         }
 
         @Test
-        void verifyMethodSignatureCorrect() {
+        void verifyMethodNameAndParameterTypesCorrect() {
             MethodDescription method = dummyType.getDeclaredMethods().stream()
                     .filter(md -> md.getName().equals("doSomething"))
                     .findFirst().get();
@@ -64,27 +63,12 @@ public class MethodHookGeneratorTest {
 
             MethodHook result = generator.buildHook(Dummy.class, method, config);
 
-            assertThat(result.getMethodName()).isEqualTo("doSomething(long,java.lang.String)");
+            assertThat(result.getMethodInformation().getName()).isEqualTo("doSomething");
+            assertThat(result.getMethodInformation().getParameterTypes()).containsExactly(long.class, String.class);
         }
 
         @Test
-        void verifyReflectionConfigForConstructorCorrect() throws NoSuchMethodException {
-            MethodDescription constructor = dummyType.getDeclaredMethods().stream()
-                    .filter(MethodDescription::isConstructor)
-                    .filter(md -> md.getParameters().size() == 0)
-                    .findFirst().get();
-            MethodHookConfiguration config = MethodHookConfiguration.builder().build();
-
-            MethodHook result = generator.buildHook(Dummy.class, constructor, config);
-
-            assertThat(result.getHookedClass()).isSameAs(Dummy.class);
-            Constructor<Dummy> declaredConstructor = Dummy.class.getDeclaredConstructor();
-            assertThat(result.getHookedConstructor()).isEqualTo(declaredConstructor);
-            assertThat(result.getHookedMethod()).isNull();
-        }
-
-        @Test
-        void verifyReflectionConfigForMethodCorrect() throws Exception {
+        void verifyDeclaringClassCorrect() {
             MethodDescription method = dummyType.getDeclaredMethods().stream()
                     .filter(md -> md.getName().equals("doSomething"))
                     .findFirst().get();
@@ -92,9 +76,7 @@ public class MethodHookGeneratorTest {
 
             MethodHook result = generator.buildHook(Dummy.class, method, config);
 
-            assertThat(result.getHookedClass()).isSameAs(Dummy.class);
-            assertThat(result.getHookedConstructor()).isNull();
-            assertThat(result.getHookedMethod()).isEqualTo(Dummy.class.getDeclaredMethod("doSomething", long.class, String.class));
+            assertThat(result.getMethodInformation().getDeclaringClass()).isSameAs(Dummy.class);
         }
 
     }

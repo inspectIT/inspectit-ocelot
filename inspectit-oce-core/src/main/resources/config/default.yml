@@ -131,10 +131,17 @@ inspectit:
           sinceNanos: long
         value: "new Double( (System.nanoTime() - sinceNanos) * 1E-6)"
 
+      get_method_fqn:
+        input:
+          methodName: String
+          clazz: Class
+        value: new StringBuilder(clazz.getName()).append('.').append(methodName).toString()
+
     rules:
       record_method_duration:
         entry:
           method_entry_time: { provider: timestamp_nanos }
+          method_name: {provider: get_method_fqn }
         exit:
           method_duration:
             provider: elapsed_millis
