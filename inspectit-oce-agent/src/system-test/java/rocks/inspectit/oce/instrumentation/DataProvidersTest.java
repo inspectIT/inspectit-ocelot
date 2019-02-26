@@ -60,6 +60,9 @@ public class DataProvidersTest extends InstrumentationSysTestBase {
                 return name;
             }
         };
+        //call the anonymous classes to make sure they are loaded
+        n1.getName();
+        n2.getName();
         waitForInstrumentation(); //wait because until here the class has most likely not been loaded yet
         n1.doSomething(() -> {
             Map<String, String> tags = TestUtils.getCurrentTagsAsMap();
