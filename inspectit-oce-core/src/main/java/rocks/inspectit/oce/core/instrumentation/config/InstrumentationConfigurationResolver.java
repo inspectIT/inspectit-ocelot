@@ -23,8 +23,10 @@ import rocks.inspectit.oce.core.utils.CommonUtils;
 
 import javax.annotation.PostConstruct;
 import java.lang.instrument.Instrumentation;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * This class is responsible for deriving the {@link InstrumentationConfiguration} from
@@ -211,7 +213,12 @@ public class InstrumentationConfigurationResolver {
             return true;
         }
 
+        if (isLambdaWithDefaultMethod(clazz)) {
+            return true;
+        }
+
         String name = clazz.getName();
+
         boolean isIgnored = config.getSource().getIgnoredPackages().entrySet().stream()
                 .filter(Map.Entry::getValue)
                 .anyMatch(e -> name.startsWith(e.getKey()));
@@ -228,5 +235,9 @@ public class InstrumentationConfigurationResolver {
             }
         }
         return false;
+    }
+
+    private boolean isLambdaWithDefaultMethod(Class<?> clazz) {
+        return clazz.getName().contains("/") && Stream.of(clazz.getMethods()).anyMatch(Method::isDefault);
     }
 }

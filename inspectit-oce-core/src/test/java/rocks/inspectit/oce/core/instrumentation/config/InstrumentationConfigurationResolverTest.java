@@ -19,6 +19,7 @@ import rocks.inspectit.oce.core.config.model.instrumentation.InstrumentationSett
 import rocks.inspectit.oce.core.config.model.instrumentation.data.DataSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.data.PropagationMode;
 import rocks.inspectit.oce.core.instrumentation.FakeExecutor;
+import rocks.inspectit.oce.core.instrumentation.config.dummy.LambdaTestProvider;
 import rocks.inspectit.oce.core.instrumentation.config.model.*;
 import rocks.inspectit.oce.core.instrumentation.special.SpecialSensor;
 import rocks.inspectit.oce.core.testutils.DummyClassLoader;
@@ -279,6 +280,46 @@ class InstrumentationConfigurationResolverTest {
 
             assertThat(resolver.isIgnoredClass(ignored, config)).isTrue();
             assertThat(resolver.isIgnoredClass(notIgnored, config)).isFalse();
+        }
+
+        @Test
+        void ignoreLambdaWithDefaultMethod() throws Exception {
+            DummyClassLoader dcl = new DummyClassLoader(getClass().getClassLoader(), LambdaTestProvider.class);
+            Class<?> lambdasProvider = dcl.loadClass(LambdaTestProvider.class.getName());
+
+            Class<?> lambdaWithDefault = (Class<?>) lambdasProvider.getMethod("getLambdaWithDefaultMethod").invoke(null);
+
+            assertThat(resolver.isIgnoredClass(lambdaWithDefault, config)).isTrue();
+        }
+
+        @Test
+        void ignoreLambdaWithInheritedDefaultMethod() throws Exception {
+            DummyClassLoader dcl = new DummyClassLoader(getClass().getClassLoader(), LambdaTestProvider.class);
+            Class<?> lambdasProvider = dcl.loadClass(LambdaTestProvider.class.getName());
+
+            Class<?> lambdaWithInheritedDefault = (Class<?>) lambdasProvider.getMethod("getLambdaWithInheritedDefaultMethod").invoke(null);
+
+            assertThat(resolver.isIgnoredClass(lambdaWithInheritedDefault, config)).isTrue();
+        }
+
+        @Test
+        void notIgnoreClassWithDefaultMethod() throws Exception {
+            DummyClassLoader dcl = new DummyClassLoader(getClass().getClassLoader(), LambdaTestProvider.class, LambdaTestProvider.getAnonymousClassWithDefaultMethod());
+            Class<?> lambdasProvider = dcl.loadClass(LambdaTestProvider.class.getName());
+
+            Class<?> anonWithDefault = (Class<?>) lambdasProvider.getMethod("getAnonymousClassWithDefaultMethod").invoke(null);
+
+            assertThat(resolver.isIgnoredClass(anonWithDefault, config)).isFalse();
+        }
+
+        @Test
+        void notIgnoreClassWithInheritedDefaultMethod() throws Exception {
+            DummyClassLoader dcl = new DummyClassLoader(getClass().getClassLoader(), LambdaTestProvider.class, LambdaTestProvider.getAnonymousClassWithInheritedDefaultMethod());
+            Class<?> lambdasProvider = dcl.loadClass(LambdaTestProvider.class.getName());
+
+            Class<?> anonWithInheritedDefault = (Class<?>) lambdasProvider.getMethod("getAnonymousClassWithInheritedDefaultMethod").invoke(null);
+
+            assertThat(resolver.isIgnoredClass(anonWithInheritedDefault, config)).isFalse();
         }
 
     }

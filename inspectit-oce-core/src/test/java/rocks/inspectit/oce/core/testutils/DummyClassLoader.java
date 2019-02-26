@@ -27,7 +27,7 @@ public class DummyClassLoader extends ClassLoader {
 
     public static byte[] readByteCode(Class<?> clazz) {
         try {
-            String file = clazz.getSimpleName() + ".class";
+            String file = "/" + clazz.getName().replace('.', '/') + ".class";
             InputStream in = clazz.getResourceAsStream(file);
             ByteArrayOutputStream data = new ByteArrayOutputStream();
             while (in.available() > 0) {
