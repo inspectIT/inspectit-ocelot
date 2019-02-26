@@ -238,7 +238,6 @@ public class InstrumentationConfigurationResolver {
     }
 
     private boolean isLambdaWithDefaultMethod(Class<?> clazz) {
-        return clazz.getName().contains("/") && Stream.of(clazz.getMethods())
-                .anyMatch(Method::isDefault);
+        return clazz.getName().contains("/") && Stream.of(clazz.getMethods()).anyMatch(Method::isDefault);
     }
 }
