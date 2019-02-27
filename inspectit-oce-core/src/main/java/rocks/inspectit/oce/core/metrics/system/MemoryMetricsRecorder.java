@@ -79,23 +79,17 @@ public class MemoryMetricsRecorder extends AbstractPollingMetricsRecorder {
 
                 val mm = recorder.newMeasureMap();
                 if (usedEnabled) {
-                    measureManager.getMeasureLong(USED_METRIC_FULL_NAME)
-                            .ifPresent(measure -> mm.put(measure, memoryPoolBean.getUsage().getUsed()));
+                    measureManager.tryRecordingMeasurement(USED_METRIC_FULL_NAME, mm, memoryPoolBean.getUsage().getUsed());
                 }
                 if (committedEnabled) {
-                    measureManager.getMeasureLong(COMMITTED_METRIC_FULL_NAME)
-                            .ifPresent(measure -> mm.put(measure, memoryPoolBean.getUsage().getCommitted()));
+                    measureManager.tryRecordingMeasurement(COMMITTED_METRIC_FULL_NAME, mm, memoryPoolBean.getUsage().getCommitted());
                 }
                 if (maxEnabled) {
-                    measureManager.getMeasureLong(MAX_METRIC_FULL_NAME)
-                            .ifPresent(measure -> {
-                                long max = memoryPoolBean.getUsage().getMax();
-                                if (max == -1) { //max memory not set
-                                    mm.put(measure, 0L); //negative values are not supported by OpenCensus
-                                } else {
-                                    mm.put(measure, max);
-                                }
-                            });
+                    long max = memoryPoolBean.getUsage().getMax();
+                    if (max == -1) { //max memory not set
+                        max = 0L; //negative values are not supported by OpenCensus
+                    }
+                    measureManager.tryRecordingMeasurement(MAX_METRIC_FULL_NAME, mm, max);
 
                 }
                 mm.record(tags);
@@ -115,16 +109,13 @@ public class MemoryMetricsRecorder extends AbstractPollingMetricsRecorder {
 
                 val mm = recorder.newMeasureMap();
                 if (bufferCountEnabled) {
-                    measureManager.getMeasureLong(BUFFER_COUNT_METRIC_FULL_NAME)
-                            .ifPresent(measure -> mm.put(measure, bufferPoolBean.getCount()));
+                    measureManager.tryRecordingMeasurement(BUFFER_COUNT_METRIC_FULL_NAME, mm, bufferPoolBean.getCount());
                 }
                 if (bufferUsedEnabled) {
-                    measureManager.getMeasureLong(BUFFER_USED_METRIC_FULL_NAME)
-                            .ifPresent(measure -> mm.put(measure, bufferPoolBean.getMemoryUsed()));
+                    measureManager.tryRecordingMeasurement(BUFFER_USED_METRIC_FULL_NAME, mm, bufferPoolBean.getMemoryUsed());
                 }
                 if (bufferCapacityEnabled) {
-                    measureManager.getMeasureLong(BUFFER_CAPACITY_METRIC_FULL_NAME)
-                            .ifPresent(measure -> mm.put(measure, bufferPoolBean.getTotalCapacity()));
+                    measureManager.tryRecordingMeasurement(BUFFER_CAPACITY_METRIC_FULL_NAME, mm, bufferPoolBean.getTotalCapacity());
                 }
                 mm.record(tags);
             }

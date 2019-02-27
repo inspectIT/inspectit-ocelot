@@ -1,6 +1,8 @@
 package rocks.inspectit.oce.core.config.model.metrics.definition;
 
+import com.google.common.collect.Ordering;
 import lombok.*;
+import org.springframework.util.CollectionUtils;
 
 import javax.validation.constraints.AssertFalse;
 import javax.validation.constraints.AssertTrue;
@@ -30,14 +32,6 @@ public class ViewDefinitionSettings {
         @Getter
         private String readableName;
     }
-
-    /**
-     * The name of the view.
-     * If this is null, the name defaults the key in {@link MetricDefinitionSettings#getViews()}.
-     * map.
-     * This property can be used if the name contains ${} placeholders.
-     */
-    private String name;
 
     @Builder.Default
     private boolean enabled = true;
@@ -73,9 +67,8 @@ public class ViewDefinitionSettings {
     @Singular
     private Map<@NotBlank String, @NotNull Boolean> tags;
 
-    public ViewDefinitionSettings getCopyWithDefaultsPopulated(String defaultName, String measureDescription, String unit) {
-        val result = toBuilder()
-                .name(name == null ? defaultName : name);
+    public ViewDefinitionSettings getCopyWithDefaultsPopulated(String viewName, String measureDescription, String unit) {
+        val result = toBuilder();
         if (description == null) {
             result.description(aggregation.getReadableName() + " of " + measureDescription + " [" + unit + "]");
         }
@@ -84,20 +77,13 @@ public class ViewDefinitionSettings {
 
     @AssertFalse(message = "When using HISTOGRAM aggregation you must specify the bucket-boundaries!")
     boolean isBucketBoundariesNotSpecifiedForHistogram() {
-        return enabled && aggregation == Aggregation.HISTOGRAM && (bucketBoundaries == null || bucketBoundaries.isEmpty());
+        return enabled && aggregation == Aggregation.HISTOGRAM && CollectionUtils.isEmpty(bucketBoundaries);
     }
 
-    @AssertTrue(message = "When using HISTOGRAM  the specified bucket-boundaries must be sorted in ascending order and must contain each value at most once!")
+    @AssertTrue(message = "When using HISTOGRAM the specified bucket-boundaries must be sorted in ascending order and must contain each value at most once!")
     boolean isBucketBoundariesSorted() {
-        if (enabled && aggregation == Aggregation.HISTOGRAM && !(bucketBoundaries == null || bucketBoundaries.isEmpty())) {
-            double prev = bucketBoundaries.get(0);
-            for (int i = 1; i < bucketBoundaries.size(); i++) {
-                double next = bucketBoundaries.get(i);
-                if (prev >= next) {
-                    return false;
-                }
-                prev = next;
-            }
+        if (enabled && aggregation == Aggregation.HISTOGRAM && !CollectionUtils.isEmpty(bucketBoundaries)) {
+            return Ordering.natural().isStrictlyOrdered(bucketBoundaries);
         }
         return true;
     }

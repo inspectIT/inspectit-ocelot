@@ -3,6 +3,7 @@ package rocks.inspectit.oce.core.config.model.metrics;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.val;
+import org.springframework.util.CollectionUtils;
 import rocks.inspectit.oce.core.config.model.metrics.definition.MetricDefinitionSettings;
 import rocks.inspectit.oce.core.config.model.validation.AdditionalValidation;
 import rocks.inspectit.oce.core.config.model.validation.AdditionalValidations;
@@ -74,8 +75,8 @@ public class MetricsSettings {
     public void noDuplicateViewNames(ViolationBuilder vios) {
         Map<String, String> viewsToMeasuresMap = new HashMap<>();
         definitions.forEach((measure, def) -> {
-            val views = def.getViews();
-            if (views != null && def.isEnabled()) {
+            val views = def.getCopyWithDefaultsPopulated(measure).getViews();
+            if (!CollectionUtils.isEmpty(views)) {
                 views.forEach((view, viewDef) -> {
                     if (viewDef.isEnabled()) {
                         if (viewsToMeasuresMap.containsKey(view)) {

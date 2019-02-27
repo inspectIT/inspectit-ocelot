@@ -22,7 +22,7 @@ class EnvironmentTagsProviderIntTest {
         static final String SERVICE_NAME = "SERVICE_NAME";
 
         @Autowired
-        EnvironmentCommonTagsProvider provider;
+        EnvironmentTagsProvider provider;
 
         @Autowired
         InspectitEnvironment env;
@@ -50,7 +50,7 @@ class EnvironmentTagsProviderIntTest {
         InspectitEnvironment env;
 
         @Autowired
-        EnvironmentCommonTagsProvider provider;
+        EnvironmentTagsProvider provider;
 
         @Test
         public void happyPath() {
@@ -72,7 +72,7 @@ class EnvironmentTagsProviderIntTest {
         InspectitEnvironment env;
 
         @Autowired
-        EnvironmentCommonTagsProvider provider;
+        EnvironmentTagsProvider provider;
 
         @Test
         public void happyPath() {
@@ -89,7 +89,7 @@ class EnvironmentTagsProviderIntTest {
     class Update extends SpringTestBase {
 
         @Autowired
-        EnvironmentCommonTagsProvider provider;
+        EnvironmentTagsProvider provider;
 
         @Autowired
         InspectitEnvironment env;
@@ -111,7 +111,7 @@ class EnvironmentTagsProviderIntTest {
         InspectitEnvironment env;
 
         @Autowired
-        EnvironmentCommonTagsProvider provider;
+        EnvironmentTagsProvider provider;
 
         @Test
         public void happyPath() {

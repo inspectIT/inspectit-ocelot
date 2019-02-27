@@ -36,12 +36,12 @@ public class DiskMetricsRecorder extends AbstractPollingMetricsRecorder {
         val mm = recorder.newMeasureMap();
         val disk = config.getDisk();
         if (disk.getEnabled().getOrDefault(FREE_METRIC_NAME, false)) {
-            measureManager.getMeasureLong(METRIC_NAME_PREFIX + FREE_METRIC_NAME)
-                    .ifPresent(measure -> mm.put(measure, new File("/").getFreeSpace()));
+            measureManager.tryRecordingMeasurement(METRIC_NAME_PREFIX + FREE_METRIC_NAME, mm,
+                    new File("/").getFreeSpace());
         }
         if (disk.getEnabled().getOrDefault(TOTAL_METRIC_NAME, false)) {
-            measureManager.getMeasureLong(METRIC_NAME_PREFIX + TOTAL_METRIC_NAME)
-                    .ifPresent(measure -> mm.put(measure, new File("/").getTotalSpace()));
+            measureManager.tryRecordingMeasurement(METRIC_NAME_PREFIX + TOTAL_METRIC_NAME, mm,
+                    new File("/").getTotalSpace());
         }
         mm.record();
     }

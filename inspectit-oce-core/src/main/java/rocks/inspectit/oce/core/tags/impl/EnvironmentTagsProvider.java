@@ -18,7 +18,7 @@ import java.util.Map;
  */
 @Component
 @Slf4j
-public class EnvironmentCommonTagsProvider implements ICommonTagsProvider {
+public class EnvironmentTagsProvider implements ICommonTagsProvider {
 
     @Override
     public Map<String, String> getTags(InspectitConfig configuration) {

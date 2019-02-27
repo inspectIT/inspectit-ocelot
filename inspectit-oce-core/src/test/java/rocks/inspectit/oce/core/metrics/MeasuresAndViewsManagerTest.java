@@ -61,7 +61,7 @@ public class MeasuresAndViewsManagerTest {
                     .build()
                     .getCopyWithDefaultsPopulated(metricName);
 
-            manager.addOrUpdateAndCacheMeasureWithViews(metricDefinition, emptyMap(), emptyMap());
+            manager.addOrUpdateAndCacheMeasureWithViews(metricName, metricDefinition, emptyMap(), emptyMap());
 
             Measure resultMeasure = manager.getMeasure(metricName).get();
             assertThat(resultMeasure.getName()).isEqualTo(metricName);
@@ -97,7 +97,7 @@ public class MeasuresAndViewsManagerTest {
                     .build()
                     .getCopyWithDefaultsPopulated(metricName);
 
-            manager.addOrUpdateAndCacheMeasureWithViews(metricDefinition, emptyMap(), emptyMap());
+            manager.addOrUpdateAndCacheMeasureWithViews(metricName, metricDefinition, emptyMap(), emptyMap());
 
             Measure resultMeasure = manager.getMeasure(metricName).get();
             assertThat(resultMeasure.getName()).isEqualTo(metricName);
@@ -134,7 +134,7 @@ public class MeasuresAndViewsManagerTest {
                     .build()
                     .getCopyWithDefaultsPopulated(metricName);
 
-            manager.addOrUpdateAndCacheMeasureWithViews(metricDefinition, emptyMap(), emptyMap());
+            manager.addOrUpdateAndCacheMeasureWithViews(metricName, metricDefinition, emptyMap(), emptyMap());
 
             ArgumentCaptor<View> viewArg = ArgumentCaptor.forClass(View.class);
             verify(viewManager, times(1)).registerView(viewArg.capture());
@@ -156,7 +156,7 @@ public class MeasuresAndViewsManagerTest {
                     .build()
                     .getCopyWithDefaultsPopulated(metricName);
 
-            manager.addOrUpdateAndCacheMeasureWithViews(metricDefinition, emptyMap(), emptyMap());
+            manager.addOrUpdateAndCacheMeasureWithViews(metricName, metricDefinition, emptyMap(), emptyMap());
 
             ArgumentCaptor<View> viewArg = ArgumentCaptor.forClass(View.class);
             verify(viewManager, times(1)).registerView(viewArg.capture());
@@ -175,7 +175,7 @@ public class MeasuresAndViewsManagerTest {
                     .build()
                     .getCopyWithDefaultsPopulated(metricName);
 
-            manager.addOrUpdateAndCacheMeasureWithViews(metricDefinition, emptyMap(), emptyMap());
+            manager.addOrUpdateAndCacheMeasureWithViews(metricName, metricDefinition, emptyMap(), emptyMap());
 
             verify(viewManager, never()).registerView(any());
             assertThat(manager.getMeasure(metricName)).isNotEmpty();
@@ -188,7 +188,8 @@ public class MeasuresAndViewsManagerTest {
 
             String metricName = "my-metric";
             Measure existingMeasure = Measure.MeasureLong.create(metricName, "abc", "def");
-            View existingView = View.create(View.Name.create("existing"), "description", existingMeasure, Aggregation.LastValue.create(), Collections.emptyList());
+            View existingView = View.create(View.Name.create("existing"), "description",
+                    existingMeasure, Aggregation.LastValue.create(), Collections.emptyList());
 
             MetricDefinitionSettings metricDefinition = MetricDefinitionSettings.builder()
                     .unit("my-unit")
@@ -197,7 +198,8 @@ public class MeasuresAndViewsManagerTest {
                     .build()
                     .getCopyWithDefaultsPopulated(metricName);
 
-            manager.addOrUpdateAndCacheMeasureWithViews(metricDefinition, Maps.newHashMap(metricName, existingMeasure), Maps.newHashMap("existing", existingView));
+            manager.addOrUpdateAndCacheMeasureWithViews(metricName, metricDefinition,
+                    Maps.newHashMap(metricName, existingMeasure), Maps.newHashMap("existing", existingView));
 
             assertThat(manager.getMeasure(metricName)).contains(existingMeasure);
 
@@ -225,7 +227,7 @@ public class MeasuresAndViewsManagerTest {
                     .build()
                     .getCopyWithDefaultsPopulated(metricName);
 
-            manager.addOrUpdateAndCacheMeasureWithViews(metricDefinition, emptyMap(), emptyMap());
+            manager.addOrUpdateAndCacheMeasureWithViews(metricName, metricDefinition, emptyMap(), emptyMap());
 
             ArgumentCaptor<View> viewArg = ArgumentCaptor.forClass(View.class);
             verify(viewManager, times(3)).registerView(viewArg.capture());

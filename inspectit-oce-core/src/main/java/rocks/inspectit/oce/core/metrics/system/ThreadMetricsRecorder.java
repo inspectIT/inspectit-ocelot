@@ -10,9 +10,11 @@ import org.springframework.stereotype.Service;
 import rocks.inspectit.oce.core.config.model.metrics.MetricsSettings;
 
 import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.Objects;
 
 @Service
 public class ThreadMetricsRecorder extends AbstractPollingMetricsRecorder {
@@ -28,7 +30,6 @@ public class ThreadMetricsRecorder extends AbstractPollingMetricsRecorder {
     private static final String STATE_METRIC_NAME = "states";
 
     private static final String STATE_TAG_NAME = "state";
-    private static final String METRIC_THREAD_UNIT = "threads";
 
     private TagKey stateTag;
 
@@ -43,31 +44,21 @@ public class ThreadMetricsRecorder extends AbstractPollingMetricsRecorder {
         threadBean = ManagementFactory.getThreadMXBean();
     }
 
-    private void getPeakMeasure() {
-
-    }
-
     @Override
     protected void takeMeasurement(MetricsSettings config) {
         val measurement = recorder.newMeasureMap();
         val enabled = config.getThreads().getEnabled();
         if (enabled.getOrDefault(PEAK_METRIC_NAME, false)) {
-            measureManager.getMeasureLong(METRIC_NAME_PREFIX + PEAK_METRIC_NAME)
-                    .ifPresent(measure ->
-                            measurement.put(measure, threadBean.getPeakThreadCount())
-                    );
+            measureManager.tryRecordingMeasurement(METRIC_NAME_PREFIX + PEAK_METRIC_NAME, measurement,
+                    threadBean.getPeakThreadCount());
         }
         if (enabled.getOrDefault(DAEMON_METRIC_NAME, false)) {
-            measureManager.getMeasureLong(METRIC_NAME_PREFIX + DAEMON_METRIC_NAME)
-                    .ifPresent(measure ->
-                            measurement.put(measure, threadBean.getDaemonThreadCount())
-                    );
+            measureManager.tryRecordingMeasurement(METRIC_NAME_PREFIX + DAEMON_METRIC_NAME, measurement,
+                    threadBean.getDaemonThreadCount());
         }
         if (enabled.getOrDefault(LIVE_METRIC_NAME, false)) {
-            measureManager.getMeasureLong(METRIC_NAME_PREFIX + LIVE_METRIC_NAME)
-                    .ifPresent(measure ->
-                            measurement.put(measure, threadBean.getThreadCount())
-                    );
+            measureManager.tryRecordingMeasurement(METRIC_NAME_PREFIX + LIVE_METRIC_NAME, measurement,
+                    threadBean.getThreadCount());
         }
         if (enabled.getOrDefault(STATE_METRIC_NAME, false)) {
             recordStateMetric();
@@ -93,7 +84,9 @@ public class ThreadMetricsRecorder extends AbstractPollingMetricsRecorder {
                         try (val scope = contextBuilder.buildScoped()) {
                             val mm = recorder.newMeasureMap();
                             val count = Arrays.stream(threadBean.getThreadInfo(threadBean.getAllThreadIds()))
-                                    .filter(info -> info != null && info.getThreadState() == state)
+                                    .filter(Objects::nonNull)
+                                    .map(ThreadInfo::getThreadState)
+                                    .filter(s -> s == state)
                                     .count();
                             mm.put(measure, count);
                             mm.record();

@@ -432,33 +432,28 @@ inspectit:
             aggregation: LAST_VALUE
             tags: {state : true}
 
-      self_monitoring_duration:
-        name: "${inspectit.self-monitoring.measure-prefix}duration"
+      '[inspectit/self/duration]':
         enabled: ${inspectit.self-monitoring.enabled}
         unit: us
         description: "inspectIT OCE self-monitoring duration"
         views:
-          self_monitoring_duration_view:
-            name: "${inspectit.self-monitoring.measure-prefix}duration"
+          '[inspectit/self/duration]':
             aggregation: SUM
             tags: {"component-name" : true}
 
-      self_monitoring_analysis_queue_size:
-        name: "${inspectit.self-monitoring.measure-prefix}instrumentation-analysis-queue-size"
+      '[inspectit/self/instrumentation-analysis-queue-size]':
         enabled: ${inspectit.self-monitoring.enabled}
         type: LONG
         unit: classes
         description: "the number of pending classes inspectIT has to check if they require instrumentation updates"
 
-      self_monitoring_instrumented_classes:
-        name: "${inspectit.self-monitoring.measure-prefix}instrumented-classes"
+      '[inspectit/self/instrumented-classes]':
         enabled: ${inspectit.self-monitoring.enabled}
         type: LONG
         unit: classes
         description: "the number of classes currently instrumented by inspectIT"
 
-      self_monitoring_instrumented_hooking_queue_size:
-        name: "${inspectit.self-monitoring.measure-prefix}instrumentation-hooking-queue-size"
+      '[inspectit/self/instrumentation-hooking-queue-size]':
         enabled: ${inspectit.self-monitoring.enabled}
         type: LONG
         unit: classes
@@ -496,8 +491,6 @@ inspectit:
   self-monitoring:
     # if self monitoring is enabled
     enabled: false
-    # what should be the prefix for the self monitoring measures
-    measure-prefix: inspectit/self/
 
   # defines how many threads inspectIT may start for its internal tasks
   thread-pool-size: 2

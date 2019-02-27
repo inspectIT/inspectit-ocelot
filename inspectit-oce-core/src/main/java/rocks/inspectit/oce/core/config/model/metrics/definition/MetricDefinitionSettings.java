@@ -1,6 +1,7 @@
 package rocks.inspectit.oce.core.config.model.metrics.definition;
 
 import lombok.*;
+import org.springframework.util.CollectionUtils;
 import rocks.inspectit.oce.core.config.model.metrics.MetricsSettings;
 
 import javax.validation.Valid;
@@ -22,14 +23,6 @@ public class MetricDefinitionSettings {
     }
 
     /**
-     * The name of the measure.
-     * If this is null, the name defaults the key in {@link MetricsSettings#getDefinitions()}.
-     * map.
-     * This property can be used if the name contains ${}placeholders.
-     */
-    private String name;
-
-    /**
      * Defines if this metric is enabled.
      * If this metric is disabled:
      * - no views for it are created
@@ -38,7 +31,7 @@ public class MetricDefinitionSettings {
     @Builder.Default
     private boolean enabled = true;
 
-    @NotNull
+    @NotBlank
     private String unit;
 
     @NotNull
@@ -59,26 +52,24 @@ public class MetricDefinitionSettings {
     private Map<@NotBlank String, @Valid @NotNull ViewDefinitionSettings> views;
 
     /**
-     * copies tehse settings but applies the defaults, like vreating a view.
+     * Copies the settings of this object but applies the defaults, like creating a default view if no views were defined.
      *
-     * @param defaultName the default name of the measure, derived form the key in {@link MetricsSettings#getDefinitions()}
+     * @param metricName the name of the measure, derived form the key in {@link MetricsSettings#getDefinitions()}
      * @return a copy of this view definition with the default populated
      */
-    public MetricDefinitionSettings getCopyWithDefaultsPopulated(String defaultName) {
-        val resultName = name == null ? defaultName : name;
-        val resultDescription = description == null ? resultName : description;
+    public MetricDefinitionSettings getCopyWithDefaultsPopulated(String metricName) {
+        val resultDescription = description == null ? metricName : description;
         val result = toBuilder()
                 .description(resultDescription)
-                .name(resultName)
                 .clearViews();
-        if (views != null && !views.isEmpty()) {
+        if (!CollectionUtils.isEmpty(views)) {
             views.forEach((name, def) ->
                     result.view(name, def.getCopyWithDefaultsPopulated(name, resultDescription, unit)));
         } else {
-            result.view(resultName, ViewDefinitionSettings.builder()
+            result.view(metricName, ViewDefinitionSettings.builder()
                     .aggregation(ViewDefinitionSettings.Aggregation.LAST_VALUE)
                     .build()
-                    .getCopyWithDefaultsPopulated(resultName, resultDescription, unit));
+                    .getCopyWithDefaultsPopulated(metricName, resultDescription, unit));
         }
         return result.build();
     }

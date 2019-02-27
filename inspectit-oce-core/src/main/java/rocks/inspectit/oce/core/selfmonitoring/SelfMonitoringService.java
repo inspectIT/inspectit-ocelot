@@ -18,12 +18,13 @@ import rocks.inspectit.oce.core.config.model.selfmonitoring.SelfMonitoringSettin
 import rocks.inspectit.oce.core.metrics.MeasuresAndViewsManager;
 import rocks.inspectit.oce.core.tags.CommonTagsManager;
 
-import javax.validation.Valid;
 import java.util.concurrent.TimeUnit;
 
 @Component
 @Slf4j
 public class SelfMonitoringService {
+
+    private static final String METRICS_PREFIX = "inspectit/self/";
 
     private static final String DURATION_MEASURE_NAME = "duration";
 
@@ -90,13 +91,13 @@ public class SelfMonitoringService {
      * The measure has to be defined correctly in the {@link MetricsSettings#getDefinitions()}.
      * Only records a measurement if self monitoring is enabled.
      *
-     * @param measureName the name of the measure, excluding the {@link SelfMonitoringSettings#getMeasurePrefix()}
+     * @param measureName the name of the measure, excluding the {@link #METRICS_PREFIX}
      * @param value       the actual value
      */
     public void recordMeasurement(String measureName, double value) {
         SelfMonitoringSettings conf = env.getCurrentConfig().getSelfMonitoring();
         if (conf.isEnabled()) {
-            String fullMeasureName = conf.getMeasurePrefix() + measureName;
+            String fullMeasureName = METRICS_PREFIX + measureName;
             val measure = measureManager.getMeasureDouble(fullMeasureName);
             measure.ifPresent(m -> {
                 try (val ct = commonTags.withCommonTagScope()) {
@@ -113,13 +114,13 @@ public class SelfMonitoringService {
      * The measure has to be defined correctly in the {@link MetricsSettings#getDefinitions()}.
      * Only records a measurement if self monitoring is enabled.
      *
-     * @param measureName the name of the measure, excluding the {@link SelfMonitoringSettings#getMeasurePrefix()}
+     * @param measureName the name of the measure, excluding the {@link #METRICS_PREFIX}
      * @param value       the actual value
      */
     public void recordMeasurement(String measureName, long value) {
         SelfMonitoringSettings conf = env.getCurrentConfig().getSelfMonitoring();
         if (conf.isEnabled()) {
-            String fullMeasureName = conf.getMeasurePrefix() + measureName;
+            String fullMeasureName = METRICS_PREFIX + measureName;
             val measure = measureManager.getMeasureLong(fullMeasureName);
             measure.ifPresent(m -> {
                 try (val ct = commonTags.withCommonTagScope()) {
@@ -140,8 +141,7 @@ public class SelfMonitoringService {
         @Override
         public void close() {
             double durationInMicros = TimeUnit.NANOSECONDS.toMicros(System.nanoTime() - start);
-            @Valid SelfMonitoringSettings conf = env.getCurrentConfig().getSelfMonitoring();
-            val measure = measureManager.getMeasureDouble(conf.getMeasurePrefix() + DURATION_MEASURE_NAME);
+            val measure = measureManager.getMeasureDouble(METRICS_PREFIX + DURATION_MEASURE_NAME);
             measure.ifPresent(m ->
                     statsRecorder.newMeasureMap()
                             .put(m, durationInMicros)

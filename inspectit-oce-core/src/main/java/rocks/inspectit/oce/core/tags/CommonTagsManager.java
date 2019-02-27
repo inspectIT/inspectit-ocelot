@@ -25,7 +25,7 @@ public class CommonTagsManager {
      * Defines with which @{@link Order} the event listener for updating the common tags in reaction to an updated configuration is executed.
      * The Common tags manager defines highest precedence to ensure that all other registered listeners have access to the updated tags.
      */
-    public static final int CONFIG_EVENT_LISTENER_ORDER = Ordered.HIGHEST_PRECEDENCE;
+    public static final int CONFIG_EVENT_LISTENER_ORDER_PRIORITY = Ordered.HIGHEST_PRECEDENCE;
 
     @Autowired
     private InspectitEnvironment env;
@@ -81,7 +81,7 @@ public class CommonTagsManager {
      * Processes all {@link #providers} and creates common context based on the providers priority.
      */
     @EventListener(InspectitConfigChangedEvent.class)
-    @Order(CONFIG_EVENT_LISTENER_ORDER)
+    @Order(CONFIG_EVENT_LISTENER_ORDER_PRIORITY)
     @PostConstruct
     private void update() {
 

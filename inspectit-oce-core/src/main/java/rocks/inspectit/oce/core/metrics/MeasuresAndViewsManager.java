@@ -47,7 +47,7 @@ public class MeasuresAndViewsManager {
      * Caches the definition which was used to build the measures and views for a given metric.
      * This is used to quickly detect which metrics have changed on configuration updates.
      */
-    private final Map<String, MetricDefinitionSettings> definitionsUsedToDefineMetrics = new HashMap<>();
+    private final Map<String, MetricDefinitionSettings> currentMetricDefinitionSettings = new HashMap<>();
 
     /**
      * If a measure with the given name is defined via {@link MetricsSettings#getDefinitions()},
@@ -94,11 +94,47 @@ public class MeasuresAndViewsManager {
     }
 
     /**
+     * Calls {@link #getMeasureDouble(String)} and records a measurement if the measure was found.
+     *
+     * @param measureName the name of the measure
+     * @param resultMap   the map to store the measurement value in
+     * @param value       the measurement value for this measure
+     * @return true, if the measure exists, has type double and the measurement was recorded, false otherwise
+     */
+    public boolean tryRecordingMeasurement(String measureName, MeasureMap resultMap, double value) {
+        val measure = getMeasureDouble(measureName);
+        if (measure.isPresent()) {
+            resultMap.put(measure.get(), value);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Calls {@link #getMeasureLong(String)} and records a measurement if the measure was found.
+     *
+     * @param measureName the name of the measure
+     * @param resultMap   the map to store the measurement value in
+     * @param value       the measurement value for this measure
+     * @return true, if the measure exists, has type long and the measurement was recorded, false otherwise
+     */
+    public boolean tryRecordingMeasurement(String measureName, MeasureMap resultMap, long value) {
+        val measure = getMeasureLong(measureName);
+        if (measure.isPresent()) {
+            resultMap.put(measure.get(), value);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
      * Creates the measures and views defined via {@link MetricsSettings#getDefinitions()}.
      * OpenCensus does currently not allow the removal of views, therefore updating metrics is not possible.
      */
     @EventListener(InspectitConfigChangedEvent.class)
-    @Order(CommonTagsManager.CONFIG_EVENT_LISTENER_ORDER + 1) //to ensure common tags are updated first
+    @Order(CommonTagsManager.CONFIG_EVENT_LISTENER_ORDER_PRIORITY + 1) //to ensure common tags are updated first
     @PostConstruct
     public void updateMetricDefinitions() {
         MetricsSettings metricsSettings = env.getCurrentConfig().getMetrics();
@@ -115,9 +151,9 @@ public class MeasuresAndViewsManager {
 
             newMetricDefinitions.forEach((name, def) -> {
                 val defWithDefaults = def.getCopyWithDefaultsPopulated(name);
-                val oldDef = definitionsUsedToDefineMetrics.get(defWithDefaults.getName());
+                val oldDef = currentMetricDefinitionSettings.get(name);
                 if (defWithDefaults.isEnabled() && !defWithDefaults.equals(oldDef)) {
-                    addOrUpdateAndCacheMeasureWithViews(defWithDefaults, registeredMeasures, registeredViews);
+                    addOrUpdateAndCacheMeasureWithViews(name, defWithDefaults, registeredMeasures, registeredViews);
                 }
             });
         }
@@ -128,20 +164,20 @@ public class MeasuresAndViewsManager {
      * Tries to create a measure based on the given definition as well as its views.
      * If the measure or a view already exists, info messages are printed out
      *
+     * @param measureName        the name of the measure
      * @param definition         the definition of the measure and its views. The defaults
      *                           must be already populated using {@link MetricDefinitionSettings#getCopyWithDefaultsPopulated(String)}!
      * @param registeredMeasures a map of which measures are already registered at the OpenCensus API. Maps the names to the measures. Used to detect if the measure to create already exists.
      * @param registeredViews    same as registeredMeasures, but maps the view names to the corresponding registered views.
      */
     @VisibleForTesting
-    void addOrUpdateAndCacheMeasureWithViews(MetricDefinitionSettings definition, Map<String, Measure> registeredMeasures, Map<String, View> registeredViews) {
+    void addOrUpdateAndCacheMeasureWithViews(String measureName, MetricDefinitionSettings definition, Map<String, Measure> registeredMeasures, Map<String, View> registeredViews) {
         try {
-            String measureName = definition.getName();
             Measure measure = registeredMeasures.get(measureName);
             if (measure != null) {
-                updateMeasure(measure, definition);
+                updateMeasure(measureName, measure, definition);
             } else {
-                measure = createNewMeasure(definition);
+                measure = createNewMeasure(measureName, definition);
             }
             val resultMeasure = measure;
 
@@ -149,7 +185,7 @@ public class MeasuresAndViewsManager {
             metricViews.forEach((name, view) -> {
                 if (view.isEnabled()) {
                     try {
-                        addAndRegisterOrUpdateView(resultMeasure, view, registeredViews);
+                        addAndRegisterOrUpdateView(name, resultMeasure, view, registeredViews);
                     } catch (Exception e) {
                         log.error("Error creating view '{}'!", name, e);
                     }
@@ -157,7 +193,7 @@ public class MeasuresAndViewsManager {
             });
 
             //TODO: delete views which where created by this class but have been removed from the given metric as soon as OpenCensus supports it
-            definitionsUsedToDefineMetrics.put(measureName, definition);
+            currentMetricDefinitionSettings.put(measureName, definition);
             cachedMeasures.put(measureName, measure);
 
         } catch (Exception e) {
@@ -165,31 +201,31 @@ public class MeasuresAndViewsManager {
         }
     }
 
-    private Measure createNewMeasure(MetricDefinitionSettings fullDefinition) {
+    private Measure createNewMeasure(String measureName, MetricDefinitionSettings fullDefinition) {
         Measure measure;
         switch (fullDefinition.getType()) {
             case LONG:
-                measure = Measure.MeasureLong.create(fullDefinition.getName(), fullDefinition.getDescription(), fullDefinition.getUnit());
+                measure = Measure.MeasureLong.create(measureName, fullDefinition.getDescription(), fullDefinition.getUnit());
                 break;
             case DOUBLE:
-                measure = Measure.MeasureDouble.create(fullDefinition.getName(), fullDefinition.getDescription(), fullDefinition.getUnit());
+                measure = Measure.MeasureDouble.create(measureName, fullDefinition.getDescription(), fullDefinition.getUnit());
                 break;
             default:
-                throw new RuntimeException("Unhandled case!");
+                throw new RuntimeException("Unhandled measure type: " + fullDefinition.getType());
         }
         return measure;
     }
 
-    private void updateMeasure(Measure measure, MetricDefinitionSettings fullDefinition) {
+    private void updateMeasure(String measureName, Measure measure, MetricDefinitionSettings fullDefinition) {
         if (!fullDefinition.getDescription().equals(measure.getDescription())) {
-            log.info("Cannot update description of measure '{}' because it has been already registered in OpenCensus!", fullDefinition.getName());
+            log.info("Cannot update description of measure '{}' because it has been already registered in OpenCensus!", measureName);
         }
         if (!fullDefinition.getUnit().equals(measure.getUnit())) {
-            log.info("Cannot update unit of measure '{}' because it has been already registered in OpenCensus!", fullDefinition.getName());
+            log.info("Cannot update unit of measure '{}' because it has been already registered in OpenCensus!", measureName);
         }
         if ((measure instanceof Measure.MeasureLong && fullDefinition.getType() != MetricDefinitionSettings.MeasureType.LONG)
                 || (measure instanceof Measure.MeasureDouble && fullDefinition.getType() != MetricDefinitionSettings.MeasureType.DOUBLE)) {
-            log.info("Cannot update type of measure '{}' because it has been already registered in OpenCensus!", fullDefinition.getName());
+            log.info("Cannot update type of measure '{}' because it has been already registered in OpenCensus!", measureName);
         }
     }
 
@@ -197,48 +233,49 @@ public class MeasuresAndViewsManager {
      * Creates a view if does not exist yet.
      * Otherwise prints info messages indicating that updating the view is not possible.
      *
+     * @param viewName        the name of the view
      * @param measure         the measure which is used for the view
      * @param def             the definition of the view, on which
      *                        {@link ViewDefinitionSettings#getCopyWithDefaultsPopulated(String, String, String)} was already called.
      * @param registeredViews a map of which views are already registered at the OpenCensus API. Maps the view names to the views.
      */
-    private void addAndRegisterOrUpdateView(Measure measure, ViewDefinitionSettings def, Map<String, View> registeredViews) {
+    private void addAndRegisterOrUpdateView(String viewName, Measure measure, ViewDefinitionSettings def, Map<String, View> registeredViews) {
         Set<TagKey> viewTags = getTagKeysForView(def);
 
-        View view = registeredViews.get(def.getName());
+        View view = registeredViews.get(viewName);
         if (view != null) {
-            updateView(def, viewTags, view);
+            updateView(viewName, def, viewTags, view);
         } else {
-            registerNewView(measure, def, viewTags);
+            registerNewView(viewName, measure, def, viewTags);
         }
     }
 
-    private void registerNewView(Measure measure, ViewDefinitionSettings def, Set<TagKey> viewTags) {
+    private void registerNewView(String viewName, Measure measure, ViewDefinitionSettings def, Set<TagKey> viewTags) {
         View view;
         view = View.create(
-                View.Name.create(def.getName()),
+                View.Name.create(viewName),
                 def.getDescription(),
                 measure,
-                getAggregationOfType(def.getAggregation(), def.getBucketBoundaries()),
+                createAggregation(def),
                 new ArrayList<>(viewTags));
         viewManager.registerView(view);
     }
 
-    private void updateView(ViewDefinitionSettings def, Set<TagKey> viewTags, View view) {
+    private void updateView(String viewName, ViewDefinitionSettings def, Set<TagKey> viewTags, View view) {
         if (!def.getDescription().equals(view.getDescription())) {
-            log.info("Cannot update description of view '{}' because it has been already registered in OpenCensus!", def.getName());
+            log.info("Cannot update description of view '{}' because it has been already registered in OpenCensus!", viewName);
         }
-        if (!isAggregationOfType(def.getAggregation(), view.getAggregation())) {
-            log.info("Cannot update aggregation of view '{}' because it has been already registered in OpenCensus!", def.getName());
+        if (!isAggregationEqual(view.getAggregation(), def)) {
+            log.info("Cannot update aggregation of view '{}' because it has been already registered in OpenCensus!", viewName);
         }
         Set<TagKey> presentTagKeys = new HashSet<>(view.getColumns());
 
         presentTagKeys.stream()
                 .filter(t -> !viewTags.contains(t))
-                .forEach(tag -> log.info("Cannot remove tag '{}' from view '{}' because it has been already registered in OpenCensus!", tag.getName(), def.getName()));
+                .forEach(tag -> log.info("Cannot remove tag '{}' from view '{}' because it has been already registered in OpenCensus!", tag.getName(), viewName));
         viewTags.stream()
                 .filter(t -> !presentTagKeys.contains(t))
-                .forEach(tag -> log.info("Cannot add tag '{}' to view '{}' because it has been already registered in OpenCensus!", tag.getName(), def.getName()));
+                .forEach(tag -> log.info("Cannot add tag '{}' to view '{}' because it has been already registered in OpenCensus!", tag.getName(), viewName));
     }
 
     /**
@@ -265,34 +302,35 @@ public class MeasuresAndViewsManager {
         return viewTags;
     }
 
-    private boolean isAggregationOfType(ViewDefinitionSettings.Aggregation aggregationType, Aggregation instance) {
-        switch (aggregationType) {
+    private boolean isAggregationEqual(Aggregation instance, ViewDefinitionSettings view) {
+        switch (view.getAggregation()) {
             case COUNT:
                 return instance instanceof Aggregation.Count;
             case SUM:
                 return instance instanceof Aggregation.Sum;
             case HISTOGRAM:
-                return instance instanceof Aggregation.Distribution;
+                return instance instanceof Aggregation.Distribution &&
+                        ((Aggregation.Distribution) instance).getBucketBoundaries().equals(view.getBucketBoundaries());
             case LAST_VALUE:
                 return instance instanceof Aggregation.LastValue;
             default:
-                throw new RuntimeException("Unhandled case!");
+                throw new RuntimeException("Unhandled aggregation type: " + view.getAggregation());
         }
     }
 
 
-    private Aggregation getAggregationOfType(ViewDefinitionSettings.Aggregation aggregationType, List<Double> histogramBuckets) {
-        switch (aggregationType) {
+    private Aggregation createAggregation(ViewDefinitionSettings view) {
+        switch (view.getAggregation()) {
             case COUNT:
                 return Aggregation.Count.create();
             case SUM:
                 return Aggregation.Sum.create();
             case HISTOGRAM:
-                return Aggregation.Distribution.create(BucketBoundaries.create(histogramBuckets));
+                return Aggregation.Distribution.create(BucketBoundaries.create(view.getBucketBoundaries()));
             case LAST_VALUE:
                 return Aggregation.LastValue.create();
             default:
-                throw new RuntimeException("Unhandled case!");
+                throw new RuntimeException("Unhandled aggregation type: " + view.getAggregation());
         }
     }
 }

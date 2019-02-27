@@ -69,44 +69,30 @@ public class ProcessorMetricsRecorder extends AbstractPollingMetricsRecorder {
         val mm = recorder.newMeasureMap();
         Map<String, Boolean> enabled = config.getProcessor().getEnabled();
         if (enabled.getOrDefault(CPU_COUNT_METRIC_NAME, false)) {
-            measureManager.getMeasureLong(CPU_COUNT_METRIC_FULL_NAME)
-                    .ifPresent(measure ->
-                            mm.put(measure, runtime.availableProcessors())
-                    );
+            measureManager.tryRecordingMeasurement(CPU_COUNT_METRIC_FULL_NAME, mm, runtime.availableProcessors());
         }
         if (enabled.getOrDefault(AVERAGE_LOAD_METRIC_NAME, false) && averageLoadAvailable) {
-            measureManager.getMeasureDouble(AVERAGE_LOAD_METRIC_FULL_NAME)
-                    .ifPresent(measure ->
-                            mm.put(measure, operatingSystemBean.getSystemLoadAverage())
-                    );
+            measureManager.tryRecordingMeasurement(AVERAGE_LOAD_METRIC_FULL_NAME, mm, operatingSystemBean.getSystemLoadAverage());
         }
         if (enabled.getOrDefault(SYSTEM_USAGE_METRIC_NAME, false) && systemCpuUsage.isPresent()) {
-            measureManager.getMeasureDouble(SYSTEM_USAGE_METRIC_FULL_NAME)
-                    .ifPresent(measure -> {
-                        try {
-                            double value = (double) systemCpuUsage.get().invoke(operatingSystemBean);
-                            if (value >= 0D) {
-                                mm.put(measure, value);
-                            }
-                        } catch (Exception e) {
-                            log.error("Error reading system cpu usage", e);
-                        }
-                    });
+            try {
+                double value = (double) systemCpuUsage.get().invoke(operatingSystemBean);
+                if (value >= 0D) {
+                    measureManager.tryRecordingMeasurement(SYSTEM_USAGE_METRIC_FULL_NAME, mm, value);
+                }
+            } catch (Exception e) {
+                log.error("Error reading system cpu usage", e);
+            }
         }
         if (enabled.getOrDefault(PROCESS_USAGE_METRIC_NAME, false) && processCpuUsage.isPresent()) {
-            measureManager.getMeasureDouble(PROCESS_USAGE_METRIC_FULL_NAME)
-                    .ifPresent(measure -> {
-                                try {
-                                    double value = (double) processCpuUsage.get().invoke(operatingSystemBean);
-                                    if (value >= 0D) {
-                                        mm.put(measure, value);
-                                    }
-                                } catch (Exception e) {
-                                    log.error("Error reading system cpu usage", e);
-                                }
-                            }
-                    );
-
+            try {
+                double value = (double) processCpuUsage.get().invoke(operatingSystemBean);
+                if (value >= 0D) {
+                    measureManager.tryRecordingMeasurement(PROCESS_USAGE_METRIC_FULL_NAME, mm, value);
+                }
+            } catch (Exception e) {
+                log.error("Error reading system cpu usage", e);
+            }
         }
         mm.record();
     }
