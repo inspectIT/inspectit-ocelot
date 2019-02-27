@@ -73,7 +73,9 @@ public class InstrumentationScopeResolver {
         }
 
         //we ensure that we only match types which contain at least one matched method
-        return new InstrumentationScope(typeMatcher.and(declaresMethod(methodMatcher)), methodMatcher);
+        typeMatcher = typeMatcher.and(declaresMethod(methodMatcher));
+
+        return new InstrumentationScope(typeMatcher, methodMatcher);
     }
 
     /**
