@@ -12,6 +12,7 @@ import rocks.inspectit.oce.core.utils.AutoboxingHelper;
 import rocks.inspectit.oce.core.utils.CommonUtils;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -44,6 +45,43 @@ public class DataProviderCallSettings {
      * In this case the provider will not be executed anymore for the given method.
      */
     private Map<@NotBlank String, @NotBlank String> dataInput = Collections.emptyMap();
+
+    /**
+     * Normally, we assume references to data keys implictly define a dependency.
+     * For example, when defining data-input: { x: my_data} we assume that this provider uses the value of the data key
+     * my_data to populate the provider parameter "x".
+     * We then assume that if any provider on the same method within the same entry / exit section writes "my_data" it has to be executed before.
+     * This however is not always the case: in some cases we want to read a down-propagated value before it is overridden.
+     * <p>
+     * This map serves this purpose: it defines a set of data_keys.
+     * The data provider is now scheduled in a way that he is executed before any data-key mentioned in this set is written within
+     * the same method entry or exit phase
+     */
+    private Map<@NotBlank String, @NotNull Boolean> before = Collections.emptyMap();
+
+    /**
+     * If not null, this field specifies a data-key.
+     * In this case the data provider is only executed if the data assigned to this key is null.
+     */
+    private String onlyIfNull;
+
+    /**
+     * If not null, this field specifies a data-key.
+     * In this case the data provider is only executed if the data assigned to this key is not null.
+     */
+    private String onlyIfNotNull;
+
+    /**
+     * If not null, this field specifies a data-key.
+     * In this case the data provider is only executed if the data assigned to this key is a boolean with the value "true".
+     */
+    private String onlyIfTrue;
+
+    /**
+     * If not null, this field specifies a data-key.
+     * In this case the data provider is only executed if the data assigned to this key is a boolean with the value "false".
+     */
+    private String onlyIfFalse;
 
     public void performValidation(InstrumentationSettings container, ViolationBuilder vios) {
         val providerConf = container.getDataProviders().get(provider);

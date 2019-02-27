@@ -78,5 +78,27 @@ public class DataProvidersTest extends InstrumentationSysTestBase {
         });
     }
 
+
+    void conditionsTest(Runnable assertions) {
+        assertions.run();
+    }
+
+    @Test
+    void verifyConditionsBehaveAsExpected() {
+        conditionsTest(() -> {
+            Map<String, String> tags = TestUtils.getCurrentTagsAsMap();
+            assertThat(tags).containsKey("only_if_true_executed");
+            assertThat(tags).doesNotContainKey("only_if_true_skipped");
+            assertThat(tags).doesNotContainKey("only_if_true_also_skipped");
+            assertThat(tags).containsKey("only_if_false_executed");
+            assertThat(tags).doesNotContainKey("only_if_false_skipped");
+            assertThat(tags).doesNotContainKey("only_if_false_also_skipped");
+            assertThat(tags).containsKey("only_if_null_executed");
+            assertThat(tags).doesNotContainKey("only_if_null_skipped");
+            assertThat(tags).containsKey("only_if_not_null_executed");
+            assertThat(tags).doesNotContainKey("only_if_not_null_skipped");
+        });
+    }
+
 }
 

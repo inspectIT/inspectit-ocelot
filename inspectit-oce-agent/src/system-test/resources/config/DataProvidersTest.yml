@@ -57,6 +57,13 @@ inspectit:
         methods:
           - name: constantParsingTest
 
+      DataProvidersTest-conditionsTest:
+        type:
+          name: rocks.inspectit.oce.instrumentation.DataProvidersTest
+        methods:
+          - name: conditionsTest
+
+
 
     rules:
       DataProvidersTest-argumentAccessTest:
@@ -77,3 +84,24 @@ inspectit:
               argIndex: 0
               durationToAdd: "2s"
 
+      DataProvidersTest-conditionsTest:
+        scopes:
+          DataProvidersTest-conditionsTest : true
+        entry:
+          something: {provider: assign, constant-input: { val: "hello world"}}
+          true_bool: {provider: assign, constant-input: { val: true}}
+          false_bool: {provider: assign, constant-input: { val: false}}
+
+          only_if_true_executed: {only-if-true: true_bool, provider: assign, constant-input: { val: "yes"}}
+          only_if_true_skipped: {only-if-true: false_bool, provider: assign, constant-input: { val: "yes"}}
+          only_if_true_also_skipped: {only-if-true: not_existing, provider: assign, constant-input: { val: "yes"}}
+
+          only_if_false_executed: {only-if-false: false_bool, provider: assign, constant-input: { val: "yes"}}
+          only_if_false_skipped: {only-if-false: true_bool, provider: assign, constant-input: { val: "yes"}}
+          only_if_false_also_skipped: {only-if-false: not_existing, provider: assign, constant-input: { val: "yes"}}
+
+          only_if_null_executed: {only-if-null: not_existing, provider: assign, constant-input: { val: "yes"}}
+          only_if_null_skipped: {only-if-null: something, provider: assign, constant-input: { val: "yes"}}
+
+          only_if_not_null_executed: {only-if-not-null: something, provider: assign, constant-input: { val: "yes"}}
+          only_if_not_null_skipped: {only-if-not-null: not_existing, provider: assign, constant-input: { val: "yes"}}

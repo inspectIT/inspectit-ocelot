@@ -6,3 +6,8 @@ inspectit:
           val: Object
         value: val
 
+      get_method_name:
+        input:
+          _methodName: String
+        value: _methodName
+

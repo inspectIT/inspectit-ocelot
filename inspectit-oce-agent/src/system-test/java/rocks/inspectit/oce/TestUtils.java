@@ -58,7 +58,7 @@ public class TestUtils {
      *
      * @param viewName the name of the views
      * @param tags     the expected tag values
-     * @return the foudn aggregation data, null otherwise
+     * @return the found aggregation data, null otherwise
      */
     public static AggregationData getDataForView(String viewName, Map<String, String> tags) {
         ViewManager viewManager = Stats.getViewManager();
@@ -80,7 +80,7 @@ public class TestUtils {
                     return true;
                 })
                 .map(Map.Entry::getValue)
-                .findFirst().get();
+                .findFirst().orElse(null);
     }
 
     private static long getInstrumentationQueueLength() {

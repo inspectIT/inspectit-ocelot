@@ -1,0 +1,46 @@
+
+inspectit:
+  metrics:
+    definitions:
+      '[entrypoint/invocations]':
+        unit: invocations
+        views:
+          '[entrypoint/invocations]':
+            aggregation: COUNT
+            tags: {method_name : true}
+
+
+  instrumentation:
+    data:
+      entry_point_found:
+        is-tag: false
+      is_entry_point:
+        down-propagation: NONE
+        is-tag: false
+      method_name:
+        down-propagation: NONE
+
+    scopes:
+      EntryPointDetectionTest-methods:
+        type:
+          name: EntryPointDetectionTest
+          matcher-mode: ENDS_WITH
+        methods:
+          - name: methodA
+          - name: methodB
+
+    rules:
+      EntryPointDetectionTest-methods:
+        scopes:
+          EntryPointDetectionTest-methods: true
+        entry:
+          method_name: {provider: get_method_name}
+          entry_point_found: {provider: assign, constant-input: {val: true}}
+          is_entry_point:
+            only-if-null: entry_point_found
+            before:
+              entry_point_found : true
+            provider: assign
+            constant-input: {val: 1}
+        metrics:
+          '[entrypoint/invocations]': is_entry_point

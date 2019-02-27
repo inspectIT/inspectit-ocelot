@@ -27,6 +27,9 @@ public class MethodHookTest {
     @Mock
     private ContextManager contextManager;
 
+    @Mock
+    private MethodReflectionInformation methodInfo;
+
     @BeforeEach
     void setupContextManagerMock() {
         when(contextManager.enterNewContext()).thenReturn(context);
@@ -43,6 +46,7 @@ public class MethodHookTest {
             doThrow(Error.class).when(second).execute(any());
             MethodHook hook = MethodHook.builder()
                     .inspectitContextManager(contextManager)
+                    .methodInformation(methodInfo)
                     .entryActions(new CopyOnWriteArrayList<>(Arrays.asList(first, second, third)))
                     .methodInformation(Mockito.mock(MethodReflectionInformation.class))
                     .build();
@@ -64,6 +68,8 @@ public class MethodHookTest {
             verify(first, times(2)).execute(any());
             verify(second, times(1)).execute(any());
             verify(third, times(2)).execute(any());
+
+            hook.onExit(null, null, null, null, ctx);
         }
 
     }
@@ -79,6 +85,7 @@ public class MethodHookTest {
             doThrow(Error.class).when(second).execute(any());
             MethodHook hook = MethodHook.builder()
                     .inspectitContextManager(contextManager)
+                    .methodInformation(methodInfo)
                     .exitActions(new CopyOnWriteArrayList<>(Arrays.asList(first, second, third)))
                     .methodInformation(Mockito.mock(MethodReflectionInformation.class))
                     .build();
