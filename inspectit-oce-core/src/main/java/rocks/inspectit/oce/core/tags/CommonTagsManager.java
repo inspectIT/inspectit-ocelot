@@ -4,10 +4,16 @@ import io.opencensus.common.Scope;
 import io.opencensus.tags.*;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.EventListener;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+import rocks.inspectit.oce.core.config.InspectitConfigChangedEvent;
+import rocks.inspectit.oce.core.config.InspectitEnvironment;
+import rocks.inspectit.oce.core.config.model.InspectitConfig;
 
+import javax.annotation.PostConstruct;
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Component that provides tags that should be considered as common and used when ever a metric is recorded.
@@ -16,9 +22,19 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class CommonTagsManager {
 
     /**
-     * All {@link ITagsProvider}s registered in the manager.
+     * Defines with which @{@link Order} the event listener for updating the common tags in reaction to an updated configuration is executed.
+     * The Common tags manager defines highest precedence to ensure that all other registered listeners have access to the updated tags.
      */
-    private final List<ITagsProvider> providers = new CopyOnWriteArrayList<>();
+    public static final int CONFIG_EVENT_LISTENER_ORDER_PRIORITY = Ordered.HIGHEST_PRECEDENCE;
+
+    @Autowired
+    private InspectitEnvironment env;
+
+    /**
+     * All {@link ICommonTagsProvider}s registered in the manager.
+     */
+    @Autowired
+    private List<ICommonTagsProvider> providers;
 
     /**
      * All common tags a simple String map.
@@ -60,48 +76,21 @@ public class CommonTagsManager {
         return Tags.getTagger().withTagContext(commonTagContext);
     }
 
-    /**
-     * Registers a tag provider.
-     *
-     * @param tagsProvider ITagProvider
-     */
-    public void register(ITagsProvider tagsProvider) {
-        if (!providers.contains(tagsProvider)) {
-            providers.add(tagsProvider);
-            createCommonTagContext();
-        }
-    }
-
-    /**
-     * Unregisters a tag provider.
-     *
-     * @param tagsProvider ITagProvider
-     */
-    public void unregister(ITagsProvider tagsProvider) {
-        if (providers.contains(tagsProvider)) {
-            providers.remove(tagsProvider);
-            createCommonTagContext();
-        }
-    }
-
-    /**
-     * Utility to ensure that all ITagsProviders register themselves before the CommonTagsManager is used somewhere else.
-     *
-     * @param providers
-     */
-    @Autowired
-    void setAllTagsProviders(List<ITagsProvider> providers) {
-    }
 
     /**
      * Processes all {@link #providers} and creates common context based on the providers priority.
      */
-    private void createCommonTagContext() {
+    @EventListener(InspectitConfigChangedEvent.class)
+    @Order(CONFIG_EVENT_LISTENER_ORDER_PRIORITY)
+    @PostConstruct
+    private void update() {
+
+        InspectitConfig configuration = env.getCurrentConfig();
+
         // first create map of tags based on the providers priority
         Map<String, String> newCommonTagValueMap = new HashMap<>();
-        providers.stream()
-                .sorted(Comparator.comparingInt(ITagsProvider::getPriority).reversed())
-                .forEach(provider -> provider.getTags().forEach(newCommonTagValueMap::putIfAbsent));
+        providers
+                .forEach(provider -> provider.getTags(configuration).forEach(newCommonTagValueMap::putIfAbsent));
 
         // then create key/value tags pairs for resolved map
         List<TagKey> newCommonTagKeys = new ArrayList<>();

@@ -3,7 +3,6 @@ package rocks.inspectit.oce.core.instrumentation;
 import com.google.common.base.Stopwatch;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import io.opencensus.stats.Aggregation;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -228,14 +227,7 @@ public class InstrumentationManager implements IClassDiscoveryListener {
     @EventListener(classes = {InspectitConfigChangedEvent.class},
             condition = "!#root.event.oldConfig.selfMonitoring.enabled")
     private void selfMonitorQueueSize() {
-        if (selfMonitoring.isSelfMonitoringEnabled()) {
-            val measure = selfMonitoring.getSelfMonitoringMeasureLong(
-                    "instrumentation-analysis-queue-size",
-                    "The number of pending classes inspectIT has to check if they require instrumentation updates",
-                    "classes",
-                    Aggregation.LastValue::create);
-            selfMonitoring.recordMeasurement(measure, pendingClasses.size());
-        }
+        selfMonitoring.recordMeasurement("instrumentation-analysis-queue-size", pendingClasses.size());
     }
 
     /**

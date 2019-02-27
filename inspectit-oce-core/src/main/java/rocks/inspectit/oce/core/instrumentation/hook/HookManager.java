@@ -6,7 +6,6 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import io.opencensus.stats.Aggregation;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import net.bytebuddy.description.method.MethodDescription;
@@ -156,24 +155,26 @@ public class HookManager implements IClassDiscoveryListener {
      */
     private void checkClassesForConfigurationUpdates(int batchSize) {
 
-        Stopwatch watch = Stopwatch.createStarted();
+        try (val sm = selfMonitoring.withDurationSelfMonitoring("hook-configuration")) {
+            Stopwatch watch = Stopwatch.createStarted();
 
-        int checkedClassesCount = 0;
+            int checkedClassesCount = 0;
 
-        Iterator<Class<?>> queueIterator = pendingClasses.asMap().keySet().iterator();
-        while (queueIterator.hasNext() && checkedClassesCount < batchSize) {
-            Class<?> clazz = queueIterator.next();
-            queueIterator.remove();
-            try {
-                updateHooksForClass(clazz);
-            } catch (Throwable e) {
-                log.error("Error checking for hook configuration updates for {}", clazz.getName(), e);
+            Iterator<Class<?>> queueIterator = pendingClasses.asMap().keySet().iterator();
+            while (queueIterator.hasNext() && checkedClassesCount < batchSize) {
+                Class<?> clazz = queueIterator.next();
+                queueIterator.remove();
+                try {
+                    updateHooksForClass(clazz);
+                } catch (Throwable e) {
+                    log.error("Error checking for hook configuration updates for {}", clazz.getName(), e);
+                }
+                checkedClassesCount++;
             }
-            checkedClassesCount++;
-        }
-        if (checkedClassesCount > 0) {
-            log.debug("Checked hook configuration of {} classes in {} ms, {} classes left to check",
-                    checkedClassesCount, watch.elapsed(TimeUnit.MILLISECONDS), pendingClasses.size());
+            if (checkedClassesCount > 0) {
+                log.debug("Checked hook configuration of {} classes in {} ms, {} classes left to check",
+                        checkedClassesCount, watch.elapsed(TimeUnit.MILLISECONDS), pendingClasses.size());
+            }
         }
 
         selfMonitorQueueSize();
@@ -226,13 +227,6 @@ public class HookManager implements IClassDiscoveryListener {
     @EventListener(classes = {InspectitConfigChangedEvent.class},
             condition = "!#root.event.oldConfig.selfMonitoring.enabled")
     private void selfMonitorQueueSize() {
-        if (selfMonitoring.isSelfMonitoringEnabled()) {
-            val measure = selfMonitoring.getSelfMonitoringMeasureLong(
-                    "instrumentation-hooking-queue-size",
-                    "The number of pending classes inspectIT has to check if they require instrumentation updates",
-                    "classes",
-                    Aggregation.LastValue::create);
-            selfMonitoring.recordMeasurement(measure, pendingClasses.size());
-        }
+        selfMonitoring.recordMeasurement("instrumentation-hooking-queue-size", pendingClasses.size());
     }
 }

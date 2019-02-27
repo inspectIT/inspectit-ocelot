@@ -1,8 +1,6 @@
 package rocks.inspectit.oce.core.selfmonitoring;
 
 import io.opencensus.common.Scope;
-import io.opencensus.stats.Aggregation;
-import io.opencensus.stats.Measure;
 import io.opencensus.stats.StatsRecorder;
 import io.opencensus.tags.TagKey;
 import io.opencensus.tags.TagValue;
@@ -15,20 +13,20 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.oce.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.oce.core.config.InspectitEnvironment;
+import rocks.inspectit.oce.core.config.model.metrics.MetricsSettings;
 import rocks.inspectit.oce.core.config.model.selfmonitoring.SelfMonitoringSettings;
-import rocks.inspectit.oce.core.metrics.MeasuresAndViewsProvider;
+import rocks.inspectit.oce.core.metrics.MeasuresAndViewsManager;
 import rocks.inspectit.oce.core.tags.CommonTagsManager;
 
 import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
 
 @Component
 @Slf4j
 public class SelfMonitoringService {
 
+    private static final String METRICS_PREFIX = "inspectit/self/";
+
     private static final String DURATION_MEASURE_NAME = "duration";
-    private static final String DURATION_MEASURE_DESCRIPTION = "inspectIT OCE self-monitoring duration";
-    private static final String DURATION_MEASURE_UNIT = "us";
 
     private static final TagKey COMPONENT_TAG_KEY = TagKey.create("component-name");
 
@@ -40,7 +38,7 @@ public class SelfMonitoringService {
     private StatsRecorder statsRecorder;
 
     @Autowired
-    private MeasuresAndViewsProvider measureProvider;
+    private MeasuresAndViewsManager measureManager;
 
     @Autowired
     private CommonTagsManager commonTags;
@@ -52,8 +50,8 @@ public class SelfMonitoringService {
      * If self monitoring is enabled the {@link SelfMonitoringScope} instance is create that handles time measuring and measure recording.
      * If self monitoring is disabled, returns a no-ops closable.
      *
-     * @param componentName
-     * @return
+     * @param componentName the human readable name of the component of which the time is measured, is used as tag value
+     * @return the scope performing the measurement
      */
     public Scope withDurationSelfMonitoring(String componentName) {
         if (isSelfMonitoringEnabled()) {
@@ -89,70 +87,49 @@ public class SelfMonitoringService {
     }
 
     /**
-     * Utility function to record a measurement with the common tags.
+     * Records a self-monitoring measurement with the common tags.
+     * The measure has to be defined correctly in the {@link MetricsSettings#getDefinitions()}.
+     * Only records a measurement if self monitoring is enabled.
      *
-     * @param measure the measure, derived via {@link #getSelfMonitoringMeasureLong(String, String, String, Supplier, TagKey...)}
-     * @param value   the actual value
+     * @param measureName the name of the measure, excluding the {@link #METRICS_PREFIX}
+     * @param value       the actual value
      */
-    public void recordMeasurement(Measure.MeasureLong measure, long value) {
-        try (val ct = commonTags.withCommonTagScope()) {
-            statsRecorder.newMeasureMap()
-                    .put(measure, value)
-                    .record();
+    public void recordMeasurement(String measureName, double value) {
+        SelfMonitoringSettings conf = env.getCurrentConfig().getSelfMonitoring();
+        if (conf.isEnabled()) {
+            String fullMeasureName = METRICS_PREFIX + measureName;
+            val measure = measureManager.getMeasureDouble(fullMeasureName);
+            measure.ifPresent(m -> {
+                try (val ct = commonTags.withCommonTagScope()) {
+                    statsRecorder.newMeasureMap()
+                            .put(m, value)
+                            .record();
+                }
+            });
         }
     }
 
     /**
-     * Utility function to record a measurement with the common tags.
+     * Records a self-monitoring measurement with the common tags.
+     * The measure has to be defined correctly in the {@link MetricsSettings#getDefinitions()}.
+     * Only records a measurement if self monitoring is enabled.
      *
-     * @param measure the measure, derived via {@link #getSelfMonitoringMeasureDouble(String, String, String, Supplier, TagKey...)}
-     * @param value   the actual value
+     * @param measureName the name of the measure, excluding the {@link #METRICS_PREFIX}
+     * @param value       the actual value
      */
-    public void recordMeasurement(Measure.MeasureDouble measure, double value) {
-        try (val ct = commonTags.withCommonTagScope()) {
-            statsRecorder.newMeasureMap()
-                    .put(measure, value)
-                    .record();
+    public void recordMeasurement(String measureName, long value) {
+        SelfMonitoringSettings conf = env.getCurrentConfig().getSelfMonitoring();
+        if (conf.isEnabled()) {
+            String fullMeasureName = METRICS_PREFIX + measureName;
+            val measure = measureManager.getMeasureLong(fullMeasureName);
+            measure.ifPresent(m -> {
+                try (val ct = commonTags.withCommonTagScope()) {
+                    statsRecorder.newMeasureMap()
+                            .put(m, value)
+                            .record();
+                }
+            });
         }
-    }
-
-    /**
-     * Gets or creates a new self monitoring measure and view with the given name.
-     * The name is prefixed with the configured self monitoring prefix and all common tags are added to the view.
-     *
-     * @param measureName        the name of the measure, will be prefixed with {@link SelfMonitoringSettings#getMeasurePrefix()}
-     * @param description        the description of the measure and view
-     * @param unit               the unit of the measure
-     * @param aggregation        the aggregation to use for the view
-     * @param additionalViewTags additional tags to add to the view
-     * @return the created or existing measure
-     */
-    public Measure.MeasureLong getSelfMonitoringMeasureLong(String measureName, String description, String unit, Supplier<Aggregation> aggregation, TagKey... additionalViewTags) {
-        String fullName = env.getCurrentConfig().getSelfMonitoring().getMeasurePrefix() + measureName;
-        return measureProvider.getOrCreateMeasureLongWithViewAndCommonTags(
-                fullName, description, unit, aggregation, additionalViewTags);
-
-    }
-
-    /**
-     * Gets or creates a new self monitoring measure and view with the given name.
-     * The name is prefixed with the configured self monitoring prefix and all common tags are added to the view.
-     *
-     * @param measureName        the name of the measure, will be prefixed with {@link SelfMonitoringSettings#getMeasurePrefix()}
-     * @param description        the description of the measure and view
-     * @param unit               the unit of the measure
-     * @param aggregation        the aggregation to use for the view
-     * @param additionalViewTags additional tags to add to the view
-     * @return the created or existing measure
-     */
-    public Measure.MeasureDouble getSelfMonitoringMeasureDouble(String measureName, String description, String unit, Supplier<Aggregation> aggregation, TagKey... additionalViewTags) {
-        String fullName = env.getCurrentConfig().getSelfMonitoring().getMeasurePrefix() + measureName;
-        return measureProvider.getOrCreateMeasureDoubleWithViewAndCommonTags(
-                fullName, description, unit, aggregation, additionalViewTags);
-    }
-
-    private Measure.MeasureDouble getSelfMonitoringDurationMeasure() {
-        return getSelfMonitoringMeasureDouble(DURATION_MEASURE_NAME, DURATION_MEASURE_DESCRIPTION, DURATION_MEASURE_UNIT, Aggregation.Sum::create, COMPONENT_TAG_KEY);
     }
 
     @Data
@@ -164,11 +141,13 @@ public class SelfMonitoringService {
         @Override
         public void close() {
             double durationInMicros = TimeUnit.NANOSECONDS.toMicros(System.nanoTime() - start);
-            statsRecorder.newMeasureMap()
-                    .put(getSelfMonitoringDurationMeasure(), durationInMicros)
-                    .record(Tags.getTagger().toBuilder(commonTags.getCommonTagContext())
-                            .put(COMPONENT_TAG_KEY, TagValue.create(componentName)).build());
-
+            val measure = measureManager.getMeasureDouble(METRICS_PREFIX + DURATION_MEASURE_NAME);
+            measure.ifPresent(m ->
+                    statsRecorder.newMeasureMap()
+                            .put(m, durationInMicros)
+                            .record(Tags.getTagger().toBuilder(commonTags.getCommonTagContext())
+                                    .put(COMPONENT_TAG_KEY, TagValue.create(componentName)).build())
+            );
 
             if (log.isTraceEnabled()) {
                 log.trace(String.format("%s reported %.1fμs", componentName, durationInMicros));

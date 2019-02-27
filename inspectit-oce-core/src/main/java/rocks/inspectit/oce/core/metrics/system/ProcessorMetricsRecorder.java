@@ -1,6 +1,5 @@
-package rocks.inspectit.oce.core.metrics;
+package rocks.inspectit.oce.core.metrics.system;
 
-import io.opencensus.stats.Aggregation;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.stereotype.Service;
@@ -19,25 +18,15 @@ public class ProcessorMetricsRecorder extends AbstractPollingMetricsRecorder {
 
     private static final String CPU_COUNT_METRIC_NAME = "count";
     private static final String CPU_COUNT_METRIC_FULL_NAME = "system/cpu/count";
-    private static final String CPU_COUNT_METRIC_DESCRIPTION = "The number of processors available to the JVM";
-    private static final String CPU_COUNT_METRIC_UNIT = "cores";
 
     private static final String AVERAGE_LOAD_METRIC_NAME = "system.average";
     private static final String AVERAGE_LOAD_METRIC_FULL_NAME = "system/load/average/1m";
-    private static final String AVERAGE_LOAD_METRIC_DESCRIPTION =
-            "The sum of the number of runnable entities queued to available processors and the number" +
-                    "of runnable entities running on the available processors averaged over a period of time";
-    private static final String AVERAGE_LOAD_METRIC_UNIT = "percentage";
 
     private static final String SYSTEM_USAGE_METRIC_NAME = "system.usage";
     private static final String SYSTEM_USAGE_METRIC_FULL_NAME = "system/cpu/usage";
-    private static final String SYSTEM_USAGE_METRIC_DESCRIPTION = "The recent cpu usage for the whole system";
-    private static final String SYSTEM_USAGE_METRIC_UNIT = "percentage";
 
     private static final String PROCESS_USAGE_METRIC_NAME = "process.usage";
     private static final String PROCESS_USAGE_METRIC_FULL_NAME = "process/cpu/usage";
-    private static final String PROCESS_USAGE_METRIC_DESCRIPTION = "The recent cpu usage for the JVM's process";
-    private static final String PROCESS_USAGE_METRIC_UNIT = "percentage";
 
     private static final List<String> OPERATING_SYSTEM_BEAN_CLASS_NAMES = Arrays.asList(
             "com.sun.management.OperatingSystemMXBean", // HotSpot
@@ -48,7 +37,7 @@ public class ProcessorMetricsRecorder extends AbstractPollingMetricsRecorder {
     private OperatingSystemMXBean operatingSystemBean;
     private Optional<Method> systemCpuUsage;
     private Optional<Method> processCpuUsage;
-    boolean averageLoadAvailable;
+    private boolean averageLoadAvailable;
 
     public ProcessorMetricsRecorder() {
         super("metrics.processor");
@@ -80,34 +69,26 @@ public class ProcessorMetricsRecorder extends AbstractPollingMetricsRecorder {
         val mm = recorder.newMeasureMap();
         Map<String, Boolean> enabled = config.getProcessor().getEnabled();
         if (enabled.getOrDefault(CPU_COUNT_METRIC_NAME, false)) {
-            val measure = measureProvider.getOrCreateMeasureLongWithViewAndCommonTags(CPU_COUNT_METRIC_FULL_NAME, CPU_COUNT_METRIC_DESCRIPTION,
-                    CPU_COUNT_METRIC_UNIT, Aggregation.LastValue::create);
-            mm.put(measure, runtime.availableProcessors());
+            measureManager.tryRecordingMeasurement(CPU_COUNT_METRIC_FULL_NAME, mm, runtime.availableProcessors());
         }
         if (enabled.getOrDefault(AVERAGE_LOAD_METRIC_NAME, false) && averageLoadAvailable) {
-            val measure = measureProvider.getOrCreateMeasureDoubleWithViewAndCommonTags(AVERAGE_LOAD_METRIC_FULL_NAME, AVERAGE_LOAD_METRIC_DESCRIPTION,
-                    AVERAGE_LOAD_METRIC_UNIT, Aggregation.LastValue::create);
-            mm.put(measure, operatingSystemBean.getSystemLoadAverage());
+            measureManager.tryRecordingMeasurement(AVERAGE_LOAD_METRIC_FULL_NAME, mm, operatingSystemBean.getSystemLoadAverage());
         }
         if (enabled.getOrDefault(SYSTEM_USAGE_METRIC_NAME, false) && systemCpuUsage.isPresent()) {
-            val measure = measureProvider.getOrCreateMeasureDoubleWithViewAndCommonTags(SYSTEM_USAGE_METRIC_FULL_NAME, SYSTEM_USAGE_METRIC_DESCRIPTION,
-                    SYSTEM_USAGE_METRIC_UNIT, Aggregation.LastValue::create);
             try {
                 double value = (double) systemCpuUsage.get().invoke(operatingSystemBean);
                 if (value >= 0D) {
-                    mm.put(measure, value);
+                    measureManager.tryRecordingMeasurement(SYSTEM_USAGE_METRIC_FULL_NAME, mm, value);
                 }
             } catch (Exception e) {
                 log.error("Error reading system cpu usage", e);
             }
         }
         if (enabled.getOrDefault(PROCESS_USAGE_METRIC_NAME, false) && processCpuUsage.isPresent()) {
-            val measure = measureProvider.getOrCreateMeasureDoubleWithViewAndCommonTags(PROCESS_USAGE_METRIC_FULL_NAME, PROCESS_USAGE_METRIC_DESCRIPTION,
-                    PROCESS_USAGE_METRIC_UNIT, Aggregation.LastValue::create);
             try {
                 double value = (double) processCpuUsage.get().invoke(operatingSystemBean);
                 if (value >= 0D) {
-                    mm.put(measure, value);
+                    measureManager.tryRecordingMeasurement(PROCESS_USAGE_METRIC_FULL_NAME, mm, value);
                 }
             } catch (Exception e) {
                 log.error("Error reading system cpu usage", e);

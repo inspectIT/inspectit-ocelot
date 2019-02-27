@@ -2,11 +2,24 @@ package rocks.inspectit.oce.core.config.model.metrics;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.val;
+import org.springframework.util.CollectionUtils;
+import rocks.inspectit.oce.core.config.model.metrics.definition.MetricDefinitionSettings;
+import rocks.inspectit.oce.core.config.model.validation.AdditionalValidation;
+import rocks.inspectit.oce.core.config.model.validation.AdditionalValidations;
+import rocks.inspectit.oce.core.config.model.validation.ViolationBuilder;
+import rocks.inspectit.oce.core.metrics.system.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 @Data
 @NoArgsConstructor
+@AdditionalValidations
 public class MetricsSettings {
 
     /**
@@ -14,42 +27,70 @@ public class MetricsSettings {
      * If disabled the following happens:
      * - all metrics exporters are disabled
      * - all metrics recorders are disabled
+     * - no measurements are collected during instrumentation, the instrumentation however is still performed
+     * - no user metrics and views are created
      */
     private boolean enabled;
 
+    @NotNull
+    private Map<@NotBlank String, @NotNull @Valid MetricDefinitionSettings> definitions = Collections.emptyMap();
+
     /**
-     * Settings for {@link rocks.inspectit.oce.core.metrics.DiskMetricsRecorder}
+     * Settings for {@link DiskMetricsRecorder}
      */
     @Valid
     private StandardPollingMetricsRecorderSettings disk;
 
     /**
-     * Settings for {@link rocks.inspectit.oce.core.metrics.ClassLoaderMetricsRecorder}
+     * Settings for {@link ClassLoaderMetricsRecorder}
      */
     @Valid
     private StandardPollingMetricsRecorderSettings classloader;
 
     /**
-     * Settings for {@link rocks.inspectit.oce.core.metrics.ProcessorMetricsRecorder}
+     * Settings for {@link ProcessorMetricsRecorder}
      */
     @Valid
     private StandardPollingMetricsRecorderSettings processor;
 
     /**
-     * Settings for {@link rocks.inspectit.oce.core.metrics.ThreadMetricsRecorder}
+     * Settings for {@link ThreadMetricsRecorder}
      */
     @Valid
     private StandardPollingMetricsRecorderSettings threads;
 
     /**
-     * Settings for {@link rocks.inspectit.oce.core.metrics.GCMetricsRecorder}
+     * Settings for {@link GCMetricsRecorder}
      */
     @Valid
     private StandardMetricsSettings gc;
 
     /**
-     * Settings for {@link rocks.inspectit.oce.core.metrics.MemoryMetricsRecorder}
+     * Settings for {@link MemoryMetricsRecorder}
      */
     @Valid
     private StandardPollingMetricsRecorderSettings memory;
+
+    @AdditionalValidation
+    public void noDuplicateViewNames(ViolationBuilder vios) {
+        Map<String, String> viewsToMeasuresMap = new HashMap<>();
+        definitions.forEach((measure, def) -> {
+            val views = def.getCopyWithDefaultsPopulated(measure).getViews();
+            if (!CollectionUtils.isEmpty(views)) {
+                views.forEach((view, viewDef) -> {
+                    if (viewDef.isEnabled()) {
+                        if (viewsToMeasuresMap.containsKey(view)) {
+                            vios.message("View with name '{view}' is defined for both measures '{m1}' an '{m2}'")
+                                    .parameter("view", view)
+                                    .parameter("m1", viewsToMeasuresMap.get(view))
+                                    .parameter("m2", measure)
+                                    .buildAndPublish();
+                        } else {
+                            viewsToMeasuresMap.put(view, measure);
+                        }
+                    }
+                });
+            }
+        });
+    }
 }

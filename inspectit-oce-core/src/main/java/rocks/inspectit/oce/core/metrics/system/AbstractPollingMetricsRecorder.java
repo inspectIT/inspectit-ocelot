@@ -1,4 +1,4 @@
-package rocks.inspectit.oce.core.metrics;
+package rocks.inspectit.oce.core.metrics.system;
 
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;

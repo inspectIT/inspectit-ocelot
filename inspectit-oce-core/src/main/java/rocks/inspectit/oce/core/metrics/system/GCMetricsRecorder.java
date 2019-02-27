@@ -1,8 +1,7 @@
-package rocks.inspectit.oce.core.metrics;
+package rocks.inspectit.oce.core.metrics.system;
 
 import com.sun.management.GarbageCollectionNotificationInfo;
 import com.sun.management.GcInfo;
-import io.opencensus.stats.Aggregation;
 import io.opencensus.tags.TagContext;
 import io.opencensus.tags.TagKey;
 import io.opencensus.tags.TagValue;
@@ -36,33 +35,21 @@ public class GCMetricsRecorder extends AbstractMetricsRecorder {
 
     private static final String CONCURRENT_PHASE_TIME_METRIC_NAME = "concurrent.phase.time";
     private static final String CONCURRENT_PHASE_TIME_METRIC_FULL_NAME = METRIC_NAME_PREFIX + "concurrent/phase/time";
-    private static final String CONCURRENT_PHASE_TIME_METRIC_DESCRIPTION = "Time spent in concurrent phase";
-    private static final String CONCURRENT_PHASE_TIME_UNIT = "ms";
 
     private static final String PAUSE_METRIC_NAME = "pause";
     private static final String PAUSE_METRIC_FULL_NAME = METRIC_NAME_PREFIX + "pause";
-    private static final String PAUSE_METRIC_DESCRIPTION = "Time spent in GC pause";
-    private static final String PAUSE_UNIT = "ms";
 
     private static final String MEMORY_PROMOTED_METRIC_NAME = "memory.promoted";
     private static final String MEMORY_PROMOTED_METRIC_FULL_NAME = METRIC_NAME_PREFIX + "memory/promoted";
-    private static final String MEMORY_PROMOTED_METRIC_DESCRIPTION = "Count of positive increases in the size of the old generation memory pool before GC to after GC";
-    private static final String MEMORY_PROMOTED_UNIT = "bytes";
 
     private static final String MAX_DATA_SIZE_METRIC_NAME = "max.data.size";
     private static final String MAX_DATA_SIZE_METRIC_FULL_NAME = METRIC_NAME_PREFIX + "max/data/size";
-    private static final String MAX_DATA_SIZE_METRIC_DESCRIPTION = "Maximum size of old generation memory pool";
-    private static final String MAX_DATA_SIZE_UNIT = "bytes";
 
     private static final String LIVE_DATA_SIZE_METRIC_NAME = "live.data.size";
     private static final String LIVE_DATA_SIZE_METRIC_FULL_NAME = METRIC_NAME_PREFIX + "live/data/size";
-    private static final String LIVE_DATA_SIZE_METRIC_DESCRIPTION = "Size of old generation memory pool after a full GC";
-    private static final String LIVE_DATA_SIZE_UNIT = "bytes";
 
     private static final String MEMORY_ALLOCATED_METRIC_NAME = "memory.allocated";
     private static final String MEMORY_ALLOCATED_METRIC_FULL_NAME = METRIC_NAME_PREFIX + "memory/allocated";
-    private static final String MEMORY_ALLOCATED_METRIC_DESCRIPTION = "Increase in the size of the young generation memory pool after one GC to before the next";
-    private static final String MEMORY_ALLOCATED_UNIT = "bytes";
 
     private static final boolean MANAGEMENT_EXTENSIONS_PRESENT = isManagementExtensionsPresent();
 
@@ -80,7 +67,7 @@ public class GCMetricsRecorder extends AbstractMetricsRecorder {
     private Tagger tagger;
 
     @Autowired
-    protected SelfMonitoringService selfMonitoringService;
+    private SelfMonitoringService selfMonitoringService;
 
     public GCMetricsRecorder() {
         super("metrics.gc");
@@ -213,73 +200,68 @@ public class GCMetricsRecorder extends AbstractMetricsRecorder {
     }
 
     private void recordConcurrentPhaseTime(GarbageCollectionNotificationInfo notificationInfo) {
-        val measure = measureProvider.getOrCreateMeasureLongWithViewAndCommonTags(CONCURRENT_PHASE_TIME_METRIC_FULL_NAME,
-                CONCURRENT_PHASE_TIME_METRIC_DESCRIPTION, CONCURRENT_PHASE_TIME_UNIT,
-                Aggregation.Sum::create, actionTagKey, causeTagKey);
+        measureManager.getMeasureLong(CONCURRENT_PHASE_TIME_METRIC_FULL_NAME)
+                .ifPresent(measure -> {
+                    TagContext tags = tagger.toBuilder(commonTags.getCommonTagContext())
+                            .put(actionTagKey, TagValue.create(notificationInfo.getGcAction()))
+                            .put(causeTagKey, TagValue.create(notificationInfo.getGcCause()))
+                            .build();
 
-        TagContext tags = tagger.toBuilder(commonTags.getCommonTagContext())
-                .put(actionTagKey, TagValue.create(notificationInfo.getGcAction()))
-                .put(causeTagKey, TagValue.create(notificationInfo.getGcCause()))
-                .build();
-
-        recorder.newMeasureMap()
-                .put(measure, notificationInfo.getGcInfo().getDuration())
-                .record(tags);
+                    recorder.newMeasureMap()
+                            .put(measure, notificationInfo.getGcInfo().getDuration())
+                            .record(tags);
+                });
     }
 
     private void recordGCPause(GarbageCollectionNotificationInfo notificationInfo) {
-        val measure = measureProvider.getOrCreateMeasureLongWithViewAndCommonTags(PAUSE_METRIC_FULL_NAME,
-                PAUSE_METRIC_DESCRIPTION, PAUSE_UNIT,
-                Aggregation.Sum::create, actionTagKey, causeTagKey);
+        measureManager.getMeasureLong(PAUSE_METRIC_FULL_NAME)
+                .ifPresent(measure -> {
+                    TagContext tags = tagger.toBuilder(commonTags.getCommonTagContext())
+                            .put(actionTagKey, TagValue.create(notificationInfo.getGcAction()))
+                            .put(causeTagKey, TagValue.create(notificationInfo.getGcCause()))
+                            .build();
 
-        TagContext tags = tagger.toBuilder(commonTags.getCommonTagContext())
-                .put(actionTagKey, TagValue.create(notificationInfo.getGcAction()))
-                .put(causeTagKey, TagValue.create(notificationInfo.getGcCause()))
-                .build();
+                    recorder.newMeasureMap()
+                            .put(measure, notificationInfo.getGcInfo().getDuration())
+                            .record(tags);
 
-        recorder.newMeasureMap()
-                .put(measure, notificationInfo.getGcInfo().getDuration())
-                .record(tags);
+                });
     }
 
     private void recordPromotedBytes(long bytes) {
-        val measure = measureProvider.getOrCreateMeasureLongWithViewAndCommonTags(MEMORY_PROMOTED_METRIC_FULL_NAME,
-                MEMORY_PROMOTED_METRIC_DESCRIPTION, MEMORY_PROMOTED_UNIT,
-                Aggregation.Sum::create);
-
-        recorder.newMeasureMap()
-                .put(measure, bytes)
-                .record(commonTags.getCommonTagContext());
+        measureManager.getMeasureLong(MEMORY_PROMOTED_METRIC_FULL_NAME)
+                .ifPresent(measure ->
+                        recorder.newMeasureMap()
+                                .put(measure, bytes)
+                                .record(commonTags.getCommonTagContext())
+                );
     }
 
     private void recordAllocatedBytes(long bytes) {
-        val measure = measureProvider.getOrCreateMeasureLongWithViewAndCommonTags(MEMORY_ALLOCATED_METRIC_FULL_NAME,
-                MEMORY_ALLOCATED_METRIC_DESCRIPTION, MEMORY_ALLOCATED_UNIT,
-                Aggregation.Sum::create);
-
-        recorder.newMeasureMap()
-                .put(measure, bytes)
-                .record(commonTags.getCommonTagContext());
+        measureManager.getMeasureLong(MEMORY_ALLOCATED_METRIC_FULL_NAME)
+                .ifPresent(measure ->
+                        recorder.newMeasureMap()
+                                .put(measure, bytes)
+                                .record(commonTags.getCommonTagContext())
+                );
     }
 
     private void recordLiveDataSize(long bytes) {
-        val measure = measureProvider.getOrCreateMeasureLongWithViewAndCommonTags(LIVE_DATA_SIZE_METRIC_FULL_NAME,
-                LIVE_DATA_SIZE_METRIC_DESCRIPTION, LIVE_DATA_SIZE_UNIT,
-                Aggregation.LastValue::create);
-
-        recorder.newMeasureMap()
-                .put(measure, bytes)
-                .record(commonTags.getCommonTagContext());
+        measureManager.getMeasureLong(LIVE_DATA_SIZE_METRIC_FULL_NAME)
+                .ifPresent(measure ->
+                        recorder.newMeasureMap()
+                                .put(measure, bytes)
+                                .record(commonTags.getCommonTagContext())
+                );
     }
 
     private void recordMaxDataSize(long bytes) {
-        val measure = measureProvider.getOrCreateMeasureLongWithViewAndCommonTags(MAX_DATA_SIZE_METRIC_FULL_NAME,
-                MAX_DATA_SIZE_METRIC_DESCRIPTION, MAX_DATA_SIZE_UNIT,
-                Aggregation.LastValue::create);
-
-        recorder.newMeasureMap()
-                .put(measure, bytes)
-                .record(commonTags.getCommonTagContext());
+        measureManager.getMeasureLong(MAX_DATA_SIZE_METRIC_FULL_NAME)
+                .ifPresent(measure ->
+                        recorder.newMeasureMap()
+                                .put(measure, bytes)
+                                .record(commonTags.getCommonTagContext())
+                );
     }
 
     private static boolean isManagementExtensionsPresent() {
