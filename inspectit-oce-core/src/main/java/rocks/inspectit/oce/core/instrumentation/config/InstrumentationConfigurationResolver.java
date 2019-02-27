@@ -80,18 +80,26 @@ public class InstrumentationConfigurationResolver {
      */
     public ClassInstrumentationConfiguration getClassInstrumentationConfiguration(Class<?> clazz) {
         val config = currentConfig;
-        if (isIgnoredClass(clazz, config)) {
+        try {
+            if (isIgnoredClass(clazz, config)) {
+                return ClassInstrumentationConfiguration.NO_INSTRUMENTATION;
+
+            } else {
+                TypeDescription description = TypeDescription.ForLoadedType.of(clazz);
+                Set<SpecialSensor> activeSensors = specialSensors.stream()
+                        .filter(s -> s.shouldInstrument(description, config))
+                        .collect(Collectors.toSet());
+
+                Set<InstrumentationRule> narrowedRules = getNarrowedRulesFor(description, config);
+
+                return new ClassInstrumentationConfiguration(activeSensors, narrowedRules, config);
+
+            }
+        } catch (NoClassDefFoundError e) {
+            //the class contains a reference to an not loadable class
+            //this the case for example for very many spring boot classes
+            log.trace("Ignoring class {} for instrumentation as it is not initializable ", clazz.getName(), e);
             return ClassInstrumentationConfiguration.NO_INSTRUMENTATION;
-
-        } else {
-            TypeDescription description = TypeDescription.ForLoadedType.of(clazz);
-            Set<SpecialSensor> activeSensors = specialSensors.stream()
-                    .filter(s -> s.shouldInstrument(description, config))
-                    .collect(Collectors.toSet());
-
-            Set<InstrumentationRule> narrowedRules = getNarrowedRulesFor(description, config);
-
-            return new ClassInstrumentationConfiguration(activeSensors, narrowedRules, config);
         }
     }
 
@@ -103,36 +111,42 @@ public class InstrumentationConfigurationResolver {
      */
     public Map<MethodDescription, MethodHookConfiguration> getHookConfigurations(Class<?> clazz) {
         val config = currentConfig;
-        TypeDescription type = TypeDescription.ForLoadedType.of(clazz);
-        Set<InstrumentationRule> narrowedRules = getNarrowedRulesFor(type, config);
+        try {
+            TypeDescription type = TypeDescription.ForLoadedType.of(clazz);
+            Set<InstrumentationRule> narrowedRules = getNarrowedRulesFor(type, config);
 
-        Set<InstrumentationScope> involvedScopes = narrowedRules.stream()
-                .flatMap(r -> r.getScopes().stream())
-                .collect(Collectors.toSet());
+            Set<InstrumentationScope> involvedScopes = narrowedRules.stream()
+                    .flatMap(r -> r.getScopes().stream())
+                    .collect(Collectors.toSet());
 
-        if (!narrowedRules.isEmpty()) {
-            Map<MethodDescription, MethodHookConfiguration> result = new HashMap<>();
-            for (val method : type.getDeclaredMethods()) {
-                val rulesMatchingOnMethod = narrowedRules.stream()
-                        .filter(rule -> rule.getScopes().stream()
-                                .anyMatch(scope -> scope.getMethodMatcher().matches(method)))
-                        .collect(Collectors.toSet());
-                if (!rulesMatchingOnMethod.isEmpty()) {
-                    try {
-                        result.put(method, hookResolver.buildHookConfiguration(clazz, method, rulesMatchingOnMethod));
-                    } catch (MethodHookConfigurationResolver.CyclicDataDependencyException e) {
-                        log.error("Could not build hook for {} of class {} due to cyclic dependency between data assignments: {}",
-                                CommonUtils.getSignature(method), clazz.getName(), e.getDependencyCycle().toString());
-                    } catch (MethodHookConfigurationResolver.ConflictingDataDefinitionsException e) {
-                        log.error("Could not build hook for {} of class {} due to conflicting data assignments for data {} of rule {} and rule {}.",
-                                CommonUtils.getSignature(method), clazz.getName(), e.getDataKey(), e.getFirst().getName(), e.getSecond().getName());
+            if (!narrowedRules.isEmpty()) {
+                Map<MethodDescription, MethodHookConfiguration> result = new HashMap<>();
+                for (val method : type.getDeclaredMethods()) {
+                    val rulesMatchingOnMethod = narrowedRules.stream()
+                            .filter(rule -> rule.getScopes().stream()
+                                    .anyMatch(scope -> scope.getMethodMatcher().matches(method)))
+                            .collect(Collectors.toSet());
+                    if (!rulesMatchingOnMethod.isEmpty()) {
+                        try {
+                            result.put(method, hookResolver.buildHookConfiguration(clazz, method, rulesMatchingOnMethod));
+                        } catch (MethodHookConfigurationResolver.CyclicDataDependencyException e) {
+                            log.error("Could not build hook for {} of class {} due to cyclic dependency between data assignments: {}",
+                                    CommonUtils.getSignature(method), clazz.getName(), e.getDependencyCycle().toString());
+                        } catch (MethodHookConfigurationResolver.ConflictingDataDefinitionsException e) {
+                            log.error("Could not build hook for {} of class {} due to conflicting data assignments for data {} of rule {} and rule {}.",
+                                    CommonUtils.getSignature(method), clazz.getName(), e.getDataKey(), e.getFirst().getName(), e.getSecond().getName());
+                        }
                     }
                 }
+                return result;
             }
-            return result;
-        } else {
-            return Collections.emptyMap();
+        } catch (NoClassDefFoundError e) {
+            //the class contains a reference to an not loadable class
+            //this the case for example for very many spring boot classes
+            log.trace("Ignoring class {} for hooking as it is not initializable ", clazz.getName(), e);
         }
+        return Collections.emptyMap();
+
 
     }
 
