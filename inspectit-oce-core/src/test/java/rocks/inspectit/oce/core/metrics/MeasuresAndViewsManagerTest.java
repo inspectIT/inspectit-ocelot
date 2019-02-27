@@ -1,18 +1,18 @@
 package rocks.inspectit.oce.core.metrics;
 
-import io.opencensus.stats.Aggregation;
-import io.opencensus.stats.Measure;
-import io.opencensus.stats.View;
-import io.opencensus.stats.ViewManager;
+import io.opencensus.stats.*;
 import io.opencensus.tags.TagKey;
 import org.assertj.core.util.Maps;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import rocks.inspectit.oce.core.config.InspectitEnvironment;
 import rocks.inspectit.oce.core.config.model.metrics.definition.MetricDefinitionSettings;
 import rocks.inspectit.oce.core.config.model.metrics.definition.ViewDefinitionSettings;
 import rocks.inspectit.oce.core.tags.CommonTagsManager;
@@ -20,7 +20,6 @@ import rocks.inspectit.oce.core.tags.CommonTagsManager;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyMap;
@@ -33,20 +32,117 @@ public class MeasuresAndViewsManagerTest {
     @Mock
     ViewManager viewManager;
 
+
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    InspectitEnvironment environment;
+
     @Mock
     CommonTagsManager commonTagsManager;
 
-    @Mock
-    Aggregation aggregation;
-
-    private final Supplier<Aggregation> aggregationSupplier = () -> aggregation;
-
     private final TagKey[] commonTags = {TagKey.create("common-A"), TagKey.create("common-B")};
-
 
     @InjectMocks
     MeasuresAndViewsManager manager = new MeasuresAndViewsManager();
 
+    @Nested
+    class UpdateMetricDefinitions {
+
+        @Test
+        void verifyNoExceptionThrown() {
+            String metricName = "my-metric";
+            MetricDefinitionSettings metricDefinition = MetricDefinitionSettings.builder()
+                    .unit("my-unit")
+                    .build();
+            when(environment.getCurrentConfig().getMetrics().isEnabled()).thenReturn(true);
+            when(environment.getCurrentConfig().getMetrics().getDefinitions()).thenReturn(Maps.newHashMap(metricName, metricDefinition));
+            when(viewManager.getAllExportedViews()).thenReturn(Collections.emptySet());
+
+            manager.updateMetricDefinitions();
+
+            Measure resultMeasure = manager.getMeasure(metricName).get();
+            assertThat(resultMeasure.getName()).isEqualTo(metricName);
+            ArgumentCaptor<View> viewArg = ArgumentCaptor.forClass(View.class);
+            verify(viewManager, times(1)).registerView(viewArg.capture());
+            View view = viewArg.getValue();
+            assertThat(view.getName().asString()).isEqualTo(metricName);
+        }
+    }
+
+    @Nested
+    class TryRecordingMeasurement {
+
+        @Mock
+        MeasureMap measureMap;
+
+        private static final String DOUBLE_METRIC = "my-double";
+        private static final String LONG_METRIC = "my-long";
+
+        @BeforeEach
+        void defineMetrics() {
+            MetricDefinitionSettings doubleMetric = MetricDefinitionSettings.builder()
+                    .unit("my-unit")
+                    .build()
+                    .getCopyWithDefaultsPopulated(DOUBLE_METRIC);
+            manager.addOrUpdateAndCacheMeasureWithViews(DOUBLE_METRIC, doubleMetric, emptyMap(), emptyMap());
+
+            MetricDefinitionSettings longMetric = MetricDefinitionSettings.builder()
+                    .unit("my-unit")
+                    .type(MetricDefinitionSettings.MeasureType.LONG)
+                    .build()
+                    .getCopyWithDefaultsPopulated(LONG_METRIC);
+            manager.addOrUpdateAndCacheMeasureWithViews(LONG_METRIC, longMetric, emptyMap(), emptyMap());
+        }
+
+        @Test
+        void tryRecordingDoubleMetric() {
+            manager.tryRecordingMeasurement(DOUBLE_METRIC, measureMap, 42.0);
+
+            verify(measureMap, times(1)).put(any(Measure.MeasureDouble.class), eq(42.0));
+            verify(measureMap, never()).put(any(Measure.MeasureLong.class), any(long.class));
+        }
+
+        @Test
+        void tryRecordingLongMetric() {
+            manager.tryRecordingMeasurement(LONG_METRIC, measureMap, 42L);
+
+            verify(measureMap, never()).put(any(Measure.MeasureDouble.class), any(double.class));
+            verify(measureMap, times(1)).put(any(Measure.MeasureLong.class), eq(42L));
+        }
+
+        @Test
+        void tryRecordingNonExistingLongMetric() {
+            manager.tryRecordingMeasurement("nonexisting", measureMap, 42L);
+
+            verify(measureMap, never()).put(any(Measure.MeasureDouble.class), any(double.class));
+            verify(measureMap, never()).put(any(Measure.MeasureLong.class), any(long.class));
+        }
+
+        @Test
+        void tryRecordingNonExistingDoubleMetric() {
+            manager.tryRecordingMeasurement("nonexisting", measureMap, 42.0);
+
+            verify(measureMap, never()).put(any(Measure.MeasureDouble.class), any(double.class));
+            verify(measureMap, never()).put(any(Measure.MeasureLong.class), any(long.class));
+        }
+
+        @Test
+        void tryRecordingDoubleForLongMetric() {
+            manager.tryRecordingMeasurement(LONG_METRIC, measureMap, 42.0);
+
+            verify(measureMap, never()).put(any(Measure.MeasureDouble.class), any(double.class));
+            verify(measureMap, never()).put(any(Measure.MeasureLong.class), any(long.class));
+        }
+
+
+        @Test
+        void tryRecordingLongForDoubleMetric() {
+            manager.tryRecordingMeasurement(DOUBLE_METRIC, measureMap, 42L);
+
+            verify(measureMap, never()).put(any(Measure.MeasureDouble.class), any(double.class));
+            verify(measureMap, never()).put(any(Measure.MeasureLong.class), any(long.class));
+        }
+
+    }
 
     @Nested
     class AddOrUpdateAndCacheMeasureWithViews {
