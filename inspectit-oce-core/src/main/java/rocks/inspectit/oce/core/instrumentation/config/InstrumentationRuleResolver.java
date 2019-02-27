@@ -5,6 +5,7 @@ import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import rocks.inspectit.oce.core.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.dataproviders.DataProviderCallSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.rules.InstrumentationRuleSettings;
@@ -75,6 +76,10 @@ public class InstrumentationRuleResolver {
         settings.getExit().forEach((data, call) ->
                 result.exitProvider(data, resolveCall(call, dataProviders))
         );
+
+        settings.getMetrics().entrySet().stream()
+                .filter(e -> !StringUtils.isEmpty(e.getValue()))
+                .forEach(e -> result.metric(e.getKey(), e.getValue()));
 
         return result.build();
     }

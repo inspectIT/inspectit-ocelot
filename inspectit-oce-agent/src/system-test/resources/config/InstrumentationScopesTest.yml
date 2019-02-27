@@ -1,0 +1,20 @@
+# overwrite settings from default.yml for system tests
+inspectit:
+
+    scopes:
+      NamedElement-doSomething:
+        interfaces:
+          - name: rocks.inspectit.oce.instrumentation.NamedElement
+        methods:
+          - name: doSomething
+        advanced:
+          instrument-only-inherited-methods : true
+
+    rules:
+      InstrumentationScopesTest-read-name-of-NamedElement:
+        scopes:
+          NamedElement-doSomething: true
+        entry:
+          #defined in DataProvidersTest.yml
+          name: { provider: readNameViaThis }
+

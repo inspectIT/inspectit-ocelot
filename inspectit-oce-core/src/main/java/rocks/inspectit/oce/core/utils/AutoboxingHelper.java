@@ -117,4 +117,8 @@ public class AutoboxingHelper {
             return null;
         }
     }
+
+    public static Class<?> getPrimitiveClass(String typename) {
+        return primitivesToPrimitiveClassesMap.get(typename);
+    }
 }

@@ -129,12 +129,9 @@ public class InstrumentationConfigurationResolver {
                     if (!rulesMatchingOnMethod.isEmpty()) {
                         try {
                             result.put(method, hookResolver.buildHookConfiguration(clazz, method, rulesMatchingOnMethod));
-                        } catch (MethodHookConfigurationResolver.CyclicDataDependencyException e) {
-                            log.error("Could not build hook for {} of class {} due to cyclic dependency between data assignments: {}",
-                                    CommonUtils.getSignature(method), clazz.getName(), e.getDependencyCycle().toString());
-                        } catch (MethodHookConfigurationResolver.ConflictingDataDefinitionsException e) {
-                            log.error("Could not build hook for {} of class {} due to conflicting data assignments for data {} of rule {} and rule {}.",
-                                    CommonUtils.getSignature(method), clazz.getName(), e.getDataKey(), e.getFirst().getName(), e.getSecond().getName());
+                        } catch (Exception e) {
+                            log.error("Could not build hook for {} of class {}",
+                                    CommonUtils.getSignature(method), clazz.getName(), e);
                         }
                     }
                 }

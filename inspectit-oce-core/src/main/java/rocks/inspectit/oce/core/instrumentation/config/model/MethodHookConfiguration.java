@@ -6,6 +6,7 @@ import lombok.Value;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * The configuration used to build a {@link rocks.inspectit.oce.core.instrumentation.hook.MethodHook}
@@ -28,4 +29,17 @@ public class MethodHookConfiguration {
      */
     @Singular
     List<Pair<String, DataProviderCallConfig>> exitProviders;
+
+    /**
+     * Maps the metrics to capture to the data keys to use as value.
+     */
+    @Singular
+    Map<String, String> dataMetrics;
+
+    /**
+     * Maps the metrics to capture to the constants which should be used as value.
+     * This is for example useful for counter metrics where you don't actually are interested in the value.
+     */
+    @Singular
+    Map<String, Number> constantMetrics;
 }

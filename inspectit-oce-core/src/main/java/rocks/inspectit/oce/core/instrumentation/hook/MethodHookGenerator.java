@@ -1,5 +1,6 @@
 package rocks.inspectit.oce.core.instrumentation.hook;
 
+import io.opencensus.stats.StatsRecorder;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import net.bytebuddy.description.method.MethodDescription;
@@ -7,13 +8,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.convert.ApplicationConversionService;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
+import rocks.inspectit.oce.core.config.model.instrumentation.dataproviders.DataProviderCallSettings;
 import rocks.inspectit.oce.core.instrumentation.config.model.DataProviderCallConfig;
 import rocks.inspectit.oce.core.instrumentation.config.model.GenericDataProviderConfig;
 import rocks.inspectit.oce.core.instrumentation.config.model.MethodHookConfiguration;
 import rocks.inspectit.oce.core.instrumentation.context.ContextManager;
 import rocks.inspectit.oce.core.instrumentation.dataprovider.generic.BoundDataProvider;
 import rocks.inspectit.oce.core.instrumentation.dataprovider.generic.DataProviderGenerator;
-import rocks.inspectit.oce.core.utils.AutoboxingHelper;
+import rocks.inspectit.oce.core.metrics.MeasuresAndViewsManager;
 import rocks.inspectit.oce.core.utils.CommonUtils;
 
 import java.lang.ref.WeakReference;
@@ -35,6 +37,12 @@ public class MethodHookGenerator {
 
     @Autowired
     private ContextManager contextManager;
+
+    @Autowired
+    private MeasuresAndViewsManager metricsManager;
+
+    @Autowired
+    private StatsRecorder statsRecorder;
 
     @Autowired
     private DataProviderGenerator dataProviderGenerator;
@@ -62,41 +70,20 @@ public class MethodHookGenerator {
         val exitActions = new CopyOnWriteArrayList<IHookAction>();
         addDataProviderCalls(declaringClass, signature, config, entryActions, exitActions);
 
-
-        entryActions.add(new IHookAction() {
-            @Override
-            public void execute(IHookAction.ExecutionContext ctx) {
-                if (log.isTraceEnabled()) {
-                    log.trace("###Entering {}", ctx.getHook().getMethodName());
-                    ctx.getInspectitContext().getData().forEach(e -> log.trace("###   {}={}", e.getKey(), e.getValue()));
-                }
-            }
-
-            @Override
-            public String getName() {
-                return "Enter-print";
-            }
-        });
-
-        exitActions.add(new IHookAction() {
-            @Override
-            public void execute(IHookAction.ExecutionContext ctx) {
-                if (log.isTraceEnabled()) {
-                    log.trace("###exiting {}", ctx.getHook().getMethodName());
-                    ctx.getInspectitContext().getData().forEach(e -> log.trace("###   {}={}", e.getKey(), e.getValue()));
-                }
-            }
-
-            @Override
-            public String getName() {
-                return "Exit-print";
-            }
-        });
+        addMetricsRecorder(config, exitActions);
 
         builder.entryActions(entryActions);
         builder.exitActions(exitActions);
 
         return builder.build();
+    }
+
+    private void addMetricsRecorder(MethodHookConfiguration config, CopyOnWriteArrayList<IHookAction> exitActions) {
+        if (!config.getConstantMetrics().isEmpty() || !config.getDataMetrics().isEmpty()) {
+
+            val recorder = new MetricsRecorder(config.getConstantMetrics(), config.getDataMetrics(), metricsManager, statsRecorder);
+            exitActions.add(recorder);
+        }
     }
 
     /**
@@ -164,15 +151,13 @@ public class MethodHookGenerator {
         GenericDataProviderConfig providerConfig = providerCallConfig.getProvider();
         Map<String, Object> constantAssignments = new HashMap<>();
 
-        providerCallConfig.getCallSettings().getConstantInput()
+        DataProviderCallSettings callSettings = providerCallConfig.getCallSettings();
+        callSettings.getConstantInput()
                 .forEach((argName, value) -> {
                     String expectedTypeName = providerConfig.getAdditionalArgumentTypes().get(argName);
-                    //we don't want to give a primitive type to the conversion service
-                    if (AutoboxingHelper.isPrimitiveType(expectedTypeName)) {
-                        expectedTypeName = AutoboxingHelper.getWrapperForPrimitive(expectedTypeName);
-                    }
-                    Class<?> expectedTypeValue = CommonUtils.locateTypeWithinImports(expectedTypeName, context, providerConfig.getImportedPackages());
-                    Object convertedValue = conversionService.convert(value, expectedTypeValue);
+                    Class<?> expectedValueType = CommonUtils.locateTypeWithinImports(expectedTypeName, context, providerConfig.getImportedPackages());
+
+                    Object convertedValue = callSettings.getConstantInputAsType(argName, expectedValueType);
                     constantAssignments.put(argName, convertedValue);
                 });
         return constantAssignments;
