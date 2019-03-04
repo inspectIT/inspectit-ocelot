@@ -1,6 +1,6 @@
-# overwrite settings from default.yml for system tests
-inspectit:
 
+inspectit:
+  instrumentation:
     data-providers:
       #-----------------------DataProvidersTest.verifyArgumentsAccessible ------------------------
       readNameViaArg0:

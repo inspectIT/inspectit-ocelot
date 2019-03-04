@@ -1,5 +1,4 @@
 inspectit:
-
   metrics:
     definitions:
       '[my/invocation]':

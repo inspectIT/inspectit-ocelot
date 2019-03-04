@@ -1,6 +1,6 @@
 # overwrite settings from default.yml for system tests
 inspectit:
-
+  instrumentation:
     scopes:
       NamedElement-doSomething:
         interfaces:
