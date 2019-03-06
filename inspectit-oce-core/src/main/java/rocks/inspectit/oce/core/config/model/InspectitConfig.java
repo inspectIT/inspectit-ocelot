@@ -92,6 +92,11 @@ public class InspectitConfig {
      */
     private boolean publishOpencensusToBootstrap;
 
+    /**
+     * Allows all nested configs to evaluate context sensitive config properties regarding their correctness.
+     *
+     * @param vios the violation builder which is used to output violations
+     */
     @AdditionalValidation
     public void performValidation(ViolationBuilder vios) {
         instrumentation.performValidation(this, vios.atProperty("instrumentation"));

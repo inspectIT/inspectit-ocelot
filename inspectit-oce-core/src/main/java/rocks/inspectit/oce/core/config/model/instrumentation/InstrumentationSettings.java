@@ -78,6 +78,13 @@ public class InstrumentationSettings {
     @NotNull
     private Map<@NotBlank String, @Valid DataSettings> data = Collections.emptyMap();
 
+    /**
+     * Allows all nested configs to evaluate context sensitive config properties regarding their correctness.
+     * This is called by {@link InspectitConfig#performValidation(ViolationBuilder)}
+     *
+     * @param container the object containing this instance
+     * @param vios      the violation output
+     */
     public void performValidation(InspectitConfig container, ViolationBuilder vios) {
         Set<String> declaredMetrics = container.getMetrics().getDefinitions().keySet();
         rules.forEach((name, r) ->

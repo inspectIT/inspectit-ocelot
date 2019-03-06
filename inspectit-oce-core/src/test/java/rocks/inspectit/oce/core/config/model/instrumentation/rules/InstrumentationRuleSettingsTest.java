@@ -59,7 +59,7 @@ public class InstrumentationRuleSettingsTest {
         @Test
         void testNonExistingMetric() {
             Map<String, String> metricUsages = new HashMap<>();
-            metricUsages.put("m1", "42");
+            metricUsages.put("m123456", "42");
 
             rule.setMetrics(metricUsages);
 
@@ -68,6 +68,7 @@ public class InstrumentationRuleSettingsTest {
 
             assertThat(violations).hasSize(1);
             assertThat(violations.get(0).getMessage()).containsIgnoringCase("metric");
+            assertThat(violations.get(0).getParameters().values()).contains("m123456");
         }
 
         @Test

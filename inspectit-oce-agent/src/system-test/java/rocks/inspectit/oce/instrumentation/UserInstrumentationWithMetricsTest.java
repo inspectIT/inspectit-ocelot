@@ -1,5 +1,6 @@
 package rocks.inspectit.oce.instrumentation;
 
+import com.google.common.collect.ImmutableMap;
 import io.opencensus.common.Scope;
 import io.opencensus.stats.AggregationData;
 import io.opencensus.tags.TagContextBuilder;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import rocks.inspectit.oce.TestUtils;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -35,16 +37,13 @@ public class UserInstrumentationWithMetricsTest extends InstrumentationSysTestBa
         }
         TestUtils.waitForOpenCensusQueueToBeProcessed();
 
-        HashMap<String, String> countTags = new HashMap<>();
-        countTags.put("user_tag", "user_value");
-        countTags.put("method_name", "invocationCount");
-        assertThat(((AggregationData.CountData) TestUtils.getDataForView("my/invocation/count", countTags)).getCount())
-                .isEqualTo(7);
-        HashMap<String, String> sumTags = new HashMap<>();
-        sumTags.put("method_name", "invocationCount");
-        assertThat(((AggregationData.SumDataLong) TestUtils.getDataForView("my/invocation/sum", sumTags)).getSum())
-                .isEqualTo(7 * 42);
+        Map<String, String> countTags = ImmutableMap.of("user_tag", "user_value", "method_name", "invocationCount");
+        long invocationCount = ((AggregationData.CountData) TestUtils.getDataForView("my/invocation/count", countTags)).getCount();
+        assertThat(invocationCount).isEqualTo(7);
 
+        Map<String, String> sumTags = ImmutableMap.of("method_name", "invocationCount");
+        long invocationSum = ((AggregationData.SumDataLong) TestUtils.getDataForView("my/invocation/sum", sumTags)).getSum();
+        assertThat(invocationSum).isEqualTo(7 * 42);
     }
 
 
@@ -62,10 +61,9 @@ public class UserInstrumentationWithMetricsTest extends InstrumentationSysTestBa
         tags.put("service-name", ".*");
         tags.put("method_name", "responseTimeMeasuring");
 
-        assertThat(((AggregationData.CountData) TestUtils.getDataForView("method/duration/count", tags)).getCount())
-                .isEqualTo(3);
-        assertThat(((AggregationData.SumDataDouble) TestUtils.getDataForView("method/duration/sum", tags)).getSum())
-                .isBetween(3 * 90.0, 3 * 110.0);
-
+        long count = ((AggregationData.CountData) TestUtils.getDataForView("method/duration/count", tags)).getCount();
+        double sum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("method/duration/sum", tags)).getSum();
+        assertThat(count).isEqualTo(3);
+        assertThat(sum).isBetween(3 * 90.0, 3 * 150.0);
     }
 }

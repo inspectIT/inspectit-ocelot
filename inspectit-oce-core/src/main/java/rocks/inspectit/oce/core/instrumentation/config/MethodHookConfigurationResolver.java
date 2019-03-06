@@ -43,11 +43,18 @@ public class MethodHookConfigurationResolver {
         return result.build();
     }
 
+    /**
+     * Combines all metric definitions from the given rules
+     *
+     * @param result       the hook configuration to which the measurement definitions are added
+     * @param matchedRules the rules to combine
+     * @throws ConflictingMetricDefinitionsException of two rules define different values for the same metric
+     */
     private void resolveMetrics(MethodHookConfiguration.MethodHookConfigurationBuilder result, Set<InstrumentationRule> matchedRules) throws ConflictingMetricDefinitionsException {
 
         Map<String, InstrumentationRule> metricDefinitions = new HashMap<>();
         for (val rule : matchedRules) {
-            //check for conflcits first
+            //check for conflicts first
             for (val metricName : rule.getMetrics().keySet()) {
                 if (metricDefinitions.containsKey(metricName)) {
                     throw new ConflictingMetricDefinitionsException(metricName, metricDefinitions.get(metricName), rule);
@@ -59,7 +66,7 @@ public class MethodHookConfigurationResolver {
                     double constantValue = Double.parseDouble(value);
                     result.constantMetric(name, constantValue);
                 } catch (NumberFormatException e) {
-                    //the specified value is not a value, we therefore assume it is a data key
+                    //the specified value is not a double value, we therefore assume it is a data key
                     result.dataMetric(name, value);
                 }
             });

@@ -58,8 +58,8 @@ public class InstrumentationRuleSettings {
      * measurement value for every time a method matching this rule is executed.
      * <p>
      * If the provided value is not parseable as a double, it is assumed that is a data key.
-     * In this case the value i nthe context for the data key is used as value for the given measure.
-     * For this reason the value present in the inspectit context for the given data has to be an instance of {@link Number}.
+     * In this case the value in the context for the data key is used as value for the given measure.
+     * For this reason the value present in the inspectit context for the given data key has to be an instance of {@link Number}.
      * <p>
      * The value in this map can also be null or an empty string, in this case simply no measurement is recorded.
      * In addition the data-key can be null. This can be used to disable the recording of a metric for a rule.
