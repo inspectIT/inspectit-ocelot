@@ -1,5 +1,6 @@
 package rocks.inspectit.oce.core.instrumentation.special;
 
+import lombok.val;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
@@ -25,18 +26,19 @@ public class ExecutorContextPropagationSensor implements SpecialSensor {
             named("execute").and(takesArgument(0, Runnable.class));
 
     @Override
-    public boolean shouldInstrument(TypeDescription type, InstrumentationConfiguration settings) {
+    public boolean shouldInstrument(Class<?> clazz, InstrumentationConfiguration settings) {
+        val type = TypeDescription.ForLoadedType.of(clazz);
         return settings.getSource().getSpecial().isExecutorContextPropagation() &&
                 EXECUTER_CLASSES_MATCHER.matches(type);
     }
 
     @Override
-    public boolean requiresInstrumentationChange(TypeDescription type, InstrumentationConfiguration first, InstrumentationConfiguration second) {
+    public boolean requiresInstrumentationChange(Class<?> clazz, InstrumentationConfiguration first, InstrumentationConfiguration second) {
         return false; //if the sensor stays active it never requires changes
     }
 
     @Override
-    public DynamicType.Builder instrument(Class<?> clazz, TypeDescription type, InstrumentationConfiguration conf, DynamicType.Builder builder) {
+    public DynamicType.Builder instrument(Class<?> clazz, InstrumentationConfiguration conf, DynamicType.Builder builder) {
         return builder.visit(
                 Advice.to(ExecutorAdvice.class)
                         .on(EXECUTER_EXECUTE_METHOD_MATCHER));

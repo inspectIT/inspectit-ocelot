@@ -8,7 +8,7 @@ import io.opencensus.tags.TagKey;
 import io.opencensus.tags.TagValue;
 import io.opencensus.tags.Tags;
 import org.junit.jupiter.api.Test;
-import rocks.inspectit.oce.TestUtils;
+import rocks.inspectit.oce.utils.TestUtils;
 
 import java.util.HashMap;
 import java.util.Map;

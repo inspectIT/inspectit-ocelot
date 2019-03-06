@@ -1,7 +1,7 @@
 package rocks.inspectit.oce.instrumentation;
 
 import org.junit.jupiter.api.Test;
-import rocks.inspectit.oce.TestUtils;
+import rocks.inspectit.oce.utils.TestUtils;
 
 import java.time.Duration;
 import java.util.Map;

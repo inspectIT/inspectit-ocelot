@@ -1,7 +1,6 @@
 package rocks.inspectit.oce.core.instrumentation.config.model;
 
 import lombok.Getter;
-import net.bytebuddy.description.type.TypeDescription;
 import org.springframework.util.CollectionUtils;
 import rocks.inspectit.oce.core.instrumentation.special.SpecialSensor;
 import rocks.inspectit.oce.core.utils.CommonUtils;
@@ -47,11 +46,11 @@ public class ClassInstrumentationConfiguration {
      * To check if a given configuration represents "no instrumentation" you should rather use {@link #isNoInstrumentation()}
      * isntead of comparing against {@link #NO_INSTRUMENTATION}.
      *
-     * @param forType the type for which this configuration is meant.
-     * @param other   the other configuration to compare against
+     * @param clazz the type for which this configuration is meant.
+     * @param other the other configuration to compare against
      * @return true if both are the same, false otherwise
      */
-    public boolean isSameAs(TypeDescription forType, ClassInstrumentationConfiguration other) {
+    public boolean isSameAs(Class<?> clazz, ClassInstrumentationConfiguration other) {
         if (!CommonUtils.contentsEqual(activeSpecialSensors, other.activeSpecialSensors)) {
             return false;
         }
@@ -59,7 +58,7 @@ public class ClassInstrumentationConfiguration {
             return false;
         }
         for (SpecialSensor sensor : activeSpecialSensors) {
-            if (sensor.requiresInstrumentationChange(forType, activeConfiguration, other.activeConfiguration)) {
+            if (sensor.requiresInstrumentationChange(clazz, activeConfiguration, other.activeConfiguration)) {
                 return false;
             }
         }
@@ -68,7 +67,7 @@ public class ClassInstrumentationConfiguration {
 
     /**
      * Checks if this configuration induces no bytecode changes to the target class.
-     * This is the same as invoking {@link #isSameAs(TypeDescription, ClassInstrumentationConfiguration)}
+     * This is the same as invoking {@link #isSameAs(Class, ClassInstrumentationConfiguration)}
      * with {@link #NO_INSTRUMENTATION}, but faster.
      *
      * @return true iof this configuration represents "no instrumentation"

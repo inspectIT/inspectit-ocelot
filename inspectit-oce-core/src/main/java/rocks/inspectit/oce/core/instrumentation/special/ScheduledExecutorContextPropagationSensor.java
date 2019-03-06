@@ -1,5 +1,6 @@
 package rocks.inspectit.oce.core.instrumentation.special;
 
+import lombok.val;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.asm.AsmVisitorWrapper;
 import net.bytebuddy.description.type.TypeDescription;
@@ -34,17 +35,18 @@ public class ScheduledExecutorContextPropagationSensor implements SpecialSensor 
     private static final ElementMatcher<TypeDescription> CLASSES_MATCHER = isSubTypeOf(ScheduledExecutorService.class);
 
     @Override
-    public boolean shouldInstrument(TypeDescription type, InstrumentationConfiguration settings) {
+    public boolean shouldInstrument(Class<?> clazz, InstrumentationConfiguration settings) {
+        val type = TypeDescription.ForLoadedType.of(clazz);
         return settings.getSource().getSpecial().isScheduledExecutorContextPropagation() && CLASSES_MATCHER.matches(type);
     }
 
     @Override
-    public boolean requiresInstrumentationChange(TypeDescription type, InstrumentationConfiguration first, InstrumentationConfiguration second) {
+    public boolean requiresInstrumentationChange(Class<?> clazz, InstrumentationConfiguration first, InstrumentationConfiguration second) {
         return false; //if the sensor stays active it never requires changes
     }
 
     @Override
-    public DynamicType.Builder instrument(Class<?> clazz, TypeDescription type, InstrumentationConfiguration settings, DynamicType.Builder builder) {
+    public DynamicType.Builder instrument(Class<?> clazz, InstrumentationConfiguration settings, DynamicType.Builder builder) {
         return builder
                 .visit(ScheduledExecutorRunnableAdvice.TARGET)
                 .visit(ScheduledExecutorCallableAdvice.TARGET);

@@ -4,6 +4,7 @@ import org.openjdk.jmh.annotations.*;
 import rocks.inspectit.oce.bootstrap.Instances;
 import rocks.inspectit.oce.bootstrap.context.IInspectitContext;
 import rocks.inspectit.oce.target.MethodHookTarget;
+import rocks.inspectit.oce.utils.TestUtils;
 
 import java.util.concurrent.TimeUnit;
 

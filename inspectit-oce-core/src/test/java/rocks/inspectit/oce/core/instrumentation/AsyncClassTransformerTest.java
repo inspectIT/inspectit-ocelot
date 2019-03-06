@@ -6,9 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationContext;
 import rocks.inspectit.oce.core.config.InspectitEnvironment;
@@ -21,14 +19,17 @@ import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationRule
 import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationScope;
 import rocks.inspectit.oce.core.instrumentation.event.ClassInstrumentedEvent;
 import rocks.inspectit.oce.core.instrumentation.event.IClassDefinitionListener;
+import rocks.inspectit.oce.core.instrumentation.special.ClassLoaderDelegation;
 import rocks.inspectit.oce.core.instrumentation.special.SpecialSensor;
 import rocks.inspectit.oce.core.selfmonitoring.SelfMonitoringService;
 import rocks.inspectit.oce.core.testutils.DummyClassLoader;
 
 import java.lang.instrument.Instrumentation;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -50,6 +51,9 @@ public class AsyncClassTransformerTest {
 
     @Mock
     InstrumentationConfigurationResolver configResolver;
+
+    @Mock
+    ClassLoaderDelegation classLoaderDelegation;
 
     @InjectMocks
     AsyncClassTransformer transformer = new AsyncClassTransformer();
@@ -94,7 +98,7 @@ public class AsyncClassTransformerTest {
             SpecialSensor mockSensor = Mockito.mock(SpecialSensor.class);
             when(mockSensor.shouldInstrument(any(), any())).thenReturn(true);
             when(mockSensor.requiresInstrumentationChange(any(), any(), any())).thenReturn(true);
-            when(mockSensor.instrument(any(), any(), any(), any())).then(invocation -> invocation.getArgument(3));
+            when(mockSensor.instrument(any(), any(), any())).then(invocation -> invocation.getArgument(2));
 
             InstrumentationScope scope = new InstrumentationScope(ElementMatchers.any(), ElementMatchers.any());
             InstrumentationRule rule = InstrumentationRule.builder().scope(scope).build();
@@ -103,12 +107,13 @@ public class AsyncClassTransformerTest {
                     Collections.singleton(mockSensor), Collections.singleton(rule), null
             );
             when(configResolver.getClassInstrumentationConfiguration(any())).thenReturn(mockedConfig);
+            when(classLoaderDelegation.wasBootstrapMadeAvailableTo(any())).thenReturn(true);
 
             Class<AsyncClassTransformerTest> clazz = AsyncClassTransformerTest.class;
             String className = clazz.getName().replace('.', '/');
             transformer.transform(clazz.getClassLoader(), className, clazz, null, bytecodeOfTest);
 
-            verify(mockSensor).instrument(any(), any(), any(), any());
+            verify(mockSensor).instrument(any(), any(), any());
 
             Mockito.reset(mockSensor);
             doAnswer((inv) -> transformer.transform(clazz.getClassLoader(), className, clazz, null, bytecodeOfTest))
@@ -116,8 +121,65 @@ public class AsyncClassTransformerTest {
 
             transformer.destroy();
 
-            verify(mockSensor, never()).instrument(any(), any(), any(), any());
+            verify(mockSensor, never()).instrument(any(), any(), any());
             verify(instrumentation).retransformClasses(clazz);
+            verify(instrumentation).removeTransformer(transformer);
+        }
+
+
+        @Test
+        void verifyClassloaderDeinstrumentedLast() throws Exception {
+
+            InternalSettings internalSettings = new InternalSettings();
+            internalSettings.setClassRetransformBatchSize(1);
+            InstrumentationSettings settings = new InstrumentationSettings();
+            settings.setInternal(internalSettings);
+            InspectitConfig conf = new InspectitConfig();
+            conf.setInstrumentation(settings);
+            when(env.getCurrentConfig()).thenReturn(conf);
+
+            SpecialSensor mockSensor = Mockito.mock(SpecialSensor.class);
+            when(mockSensor.instrument(any(), any(), any())).then(invocation -> invocation.getArgument(2));
+
+            ClassInstrumentationConfiguration mockedConfig = new ClassInstrumentationConfiguration(
+                    Collections.singleton(mockSensor), Collections.emptySet(), null
+            );
+            when(configResolver.getClassInstrumentationConfiguration(any())).thenReturn(mockedConfig);
+            when(classLoaderDelegation.wasBootstrapMadeAvailableTo(any())).thenReturn(true);
+
+            List<Class<?>> classes = Arrays.asList(String.class, Integer.class, URLClassLoader.class, ClassLoader.class);
+            for (Class<?> clazz : classes) {
+                transformer.transform(getClass().getClassLoader(), "blub", clazz, null, bytecodeOfTest);
+            }
+
+            verify(mockSensor, times(4)).instrument(any(), any(), any());
+            reset(instrumentation);
+
+            doAnswer((inv) -> {
+                Object[] retransformClasses = inv.getArguments();
+                for (Object clazzObj : retransformClasses) {
+                    Class<?> clazz = (Class<?>) clazzObj;
+                    transformer.transform(clazz.getClassLoader(), "blub", clazz, null, bytecodeOfTest);
+                }
+                return null;
+            }).when(instrumentation).retransformClasses(any());
+
+            transformer.destroy();
+
+            //no new instrumentation
+            verify(mockSensor, times(4)).instrument(any(), any(), any());
+
+            //classloaders are deinstrumented last
+            ArgumentMatcher<Class> matcher = (x) -> x == ClassLoader.class || x == URLClassLoader.class;
+
+            InOrder ordered = Mockito.inOrder(instrumentation);
+            ordered.verify(instrumentation).retransformClasses(Integer.class);
+            ordered.verify(instrumentation).retransformClasses(argThat(matcher), argThat(matcher));
+
+            ordered = Mockito.inOrder(instrumentation);
+            ordered.verify(instrumentation).retransformClasses(String.class);
+            ordered.verify(instrumentation).retransformClasses(argThat(matcher), argThat(matcher));
+
             verify(instrumentation).removeTransformer(transformer);
         }
 
@@ -150,7 +212,6 @@ public class AsyncClassTransformerTest {
                 return null;
             }).when(instrumentation).retransformClasses(any());
 
-
             transformer.destroy();
 
             verify(instrumentation, times(1)).retransformClasses(any(), any());
@@ -164,12 +225,14 @@ public class AsyncClassTransformerTest {
 
         @Test
         void verifyClassInstrumentedEventPublished() throws Exception {
+            when(classLoaderDelegation.wasBootstrapMadeAvailableTo(any())).thenReturn(true);
+
             IClassDefinitionListener listener = Mockito.mock(IClassDefinitionListener.class);
 
             transformer.init();
 
             SpecialSensor mockSensor = Mockito.mock(SpecialSensor.class);
-            when(mockSensor.instrument(any(), any(), any(), any())).then(invocation -> invocation.getArgument(3));
+            when(mockSensor.instrument(any(), any(), any())).then(invocation -> invocation.getArgument(2));
             InstrumentationScope scope = new InstrumentationScope(ElementMatchers.any(), ElementMatchers.any());
             InstrumentationRule rule = InstrumentationRule.builder().scope(scope).build();
 
@@ -182,7 +245,7 @@ public class AsyncClassTransformerTest {
             String className = clazz.getName().replace('.', '/');
             transformer.transform(clazz.getClassLoader(), className, getClass(), null, bytecodeOfTest);
 
-            verify(mockSensor).instrument(any(), any(), any(), any());
+            verify(mockSensor).instrument(any(), any(), any());
             verify(ctx).publishEvent(isA(ClassInstrumentedEvent.class));
 
         }
@@ -206,6 +269,7 @@ public class AsyncClassTransformerTest {
 
         @Test
         void testDefinitionListenersNotInvokedForExistingClasses() throws Exception {
+            when(classLoaderDelegation.wasBootstrapMadeAvailableTo(any())).thenReturn(true);
             IClassDefinitionListener listener = Mockito.mock(IClassDefinitionListener.class);
             transformer.classDefinitionListeners = Arrays.asList(listener);
 

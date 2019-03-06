@@ -1,4 +1,4 @@
-package rocks.inspectit.oce;
+package rocks.inspectit.oce.utils;
 
 import io.opencensus.impl.internal.DisruptorEventQueue;
 import io.opencensus.stats.*;
@@ -37,11 +37,9 @@ public class TestUtils {
         await().atMost(30, TimeUnit.SECONDS).ignoreExceptions().untilAsserted(() -> {
             assertThat(getInstrumentationClassesCount()).isGreaterThan(0);
             assertThat(getInstrumentationQueueLength()).isZero();
-            assertThat(getHookingQueueLength()).isZero();
             Thread.sleep(200); //to ensure that new-class-discovery has been executed
             waitForOpenCensusQueueToBeProcessed();
             assertThat(getInstrumentationQueueLength()).isZero();
-            assertThat(getHookingQueueLength()).isZero();
         });
 
     }
@@ -87,18 +85,7 @@ public class TestUtils {
         ViewManager viewManager = Stats.getViewManager();
         AggregationData.LastValueDataLong queueSize =
                 (AggregationData.LastValueDataLong)
-                        viewManager.getView(View.Name.create("inspectit/self/instrumentation-analysis-queue-size"))
-                                .getAggregationMap().values().stream()
-                                .findFirst()
-                                .get();
-        return queueSize.getLastValue();
-    }
-
-    private static long getHookingQueueLength() {
-        ViewManager viewManager = Stats.getViewManager();
-        AggregationData.LastValueDataLong queueSize =
-                (AggregationData.LastValueDataLong)
-                        viewManager.getView(View.Name.create("inspectit/self/instrumentation-hooking-queue-size"))
+                        viewManager.getView(View.Name.create("inspectit/self/instrumentation-queue-size"))
                                 .getAggregationMap().values().stream()
                                 .findFirst()
                                 .get();

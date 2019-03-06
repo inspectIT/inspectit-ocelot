@@ -468,7 +468,7 @@ inspectit:
             aggregation: SUM
             tags: {"component-name" : true}
 
-      '[inspectit/self/instrumentation-analysis-queue-size]':
+      '[inspectit/self/instrumentation-queue-size]':
         enabled: ${inspectit.self-monitoring.enabled}
         type: LONG
         unit: classes
@@ -479,12 +479,6 @@ inspectit:
         type: LONG
         unit: classes
         description: "the number of classes currently instrumented by inspectIT"
-
-      '[inspectit/self/instrumentation-hooking-queue-size]':
-        enabled: ${inspectit.self-monitoring.enabled}
-        type: LONG
-        unit: classes
-        description: "the number of pending classes inspectIT has to check if they require updates of their method hooks"
 
   # logging settings
   logging:

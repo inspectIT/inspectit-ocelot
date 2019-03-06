@@ -85,7 +85,7 @@ public class InstrumentationConfigurationResolver {
             } else {
                 TypeDescription description = TypeDescription.ForLoadedType.of(clazz);
                 Set<SpecialSensor> activeSensors = specialSensors.stream()
-                        .filter(s -> s.shouldInstrument(description, config))
+                        .filter(s -> s.shouldInstrument(clazz, config))
                         .collect(Collectors.toSet());
 
                 Set<InstrumentationRule> narrowedRules = getNarrowedRulesFor(description, config);
