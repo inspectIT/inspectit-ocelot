@@ -8,6 +8,7 @@ import rocks.inspectit.oce.bootstrap.context.IInspectitContext;
 import rocks.inspectit.oce.bootstrap.instrumentation.IMethodHook;
 import rocks.inspectit.oce.core.instrumentation.config.model.MethodHookConfiguration;
 import rocks.inspectit.oce.core.instrumentation.context.ContextManager;
+import rocks.inspectit.oce.core.instrumentation.context.InspectitContext;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
@@ -78,7 +79,7 @@ public class MethodHook implements IMethodHook {
 
     @Override
     public void onExit(Object[] args, Object thiz, Object returnValue, Throwable thrown, IInspectitContext context) {
-        val executionContext = new IHookAction.ExecutionContext(args, thiz, returnValue, thrown, this, context);
+        val executionContext = new IHookAction.ExecutionContext(args, thiz, returnValue, thrown, this, (InspectitContext) context);
         for (val action : exitActions) {
             try {
                 action.execute(executionContext);

@@ -3,6 +3,7 @@ package rocks.inspectit.oce.core.config.model.instrumentation.rules;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import rocks.inspectit.oce.core.config.model.InspectitConfig;
 import rocks.inspectit.oce.core.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.dataproviders.DataProviderCallSettings;
 import rocks.inspectit.oce.core.config.model.validation.ViolationBuilder;
@@ -12,6 +13,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Data container for the configuration of a instrumentation rule. {@link rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationRule}
@@ -49,17 +51,45 @@ public class InstrumentationRuleSettings {
     private Map<@NotBlank String, @NotNull @Valid DataProviderCallSettings> exit = Collections.emptyMap();
 
     /**
-     * Validates this rule, invoked by {@link InstrumentationSettings#performValidation(ViolationBuilder)}
-     *
-     * @param container the settings containing this rule
-     * @param vios      the violation builder
+     * Defines which measurements should be taken at the instrumented method.
+     * This map maps the name of the metric (=the name of the open census measure) to a data key or a constant value.
+     * <p>
+     * If the specified value can be parsed using @{@link Double#parseDouble(String)}, the given value is used as constant
+     * measurement value for every time a method matching this rule is executed.
+     * <p>
+     * If the provided value is not parseable as a double, it is assumed that is a data key.
+     * In this case the value in the context for the data key is used as value for the given measure.
+     * For this reason the value present in the inspectit context for the given data key has to be an instance of {@link Number}.
+     * <p>
+     * The value in this map can also be null or an empty string, in this case simply no measurement is recorded.
+     * In addition the data-key can be null. This can be used to disable the recording of a metric for a rule.
      */
-    public void performValidation(InstrumentationSettings container, ViolationBuilder vios) {
+    @NotNull
+    private Map<@NotBlank String, String> metrics = Collections.emptyMap();
+
+    /**
+     * Validates this rule, invoked by {@link InstrumentationSettings#performValidation(InspectitConfig, ViolationBuilder)}
+     *
+     * @param container      the root config containing this rule
+     * @param definedMetrics all metrics which have been defined in the {@link rocks.inspectit.oce.core.config.model.metrics.MetricsSettings}
+     * @param vios           the violation builder
+     */
+    public void performValidation(InstrumentationSettings container, Set<String> definedMetrics, ViolationBuilder vios) {
         checkScopesExist(container, vios);
+        checkMetricsDefined(definedMetrics, vios);
         entry.forEach((data, call) -> call.performValidation(container,
                 vios.atProperty("entry").atProperty(data)));
         exit.forEach((data, call) -> call.performValidation(container,
                 vios.atProperty("exit").atProperty(data)));
+    }
+
+    private void checkMetricsDefined(Set<String> definedMetrics, ViolationBuilder vios) {
+        metrics.keySet().stream()
+                .filter(m -> !definedMetrics.contains(m))
+                .forEach(m -> vios.atProperty("metrics")
+                        .message("Metric '{metric}' is not defined in inspectit.metrics.definitions!")
+                        .parameter("metric", m)
+                        .buildAndPublish());
     }
 
     private void checkScopesExist(InstrumentationSettings container, ViolationBuilder vios) {

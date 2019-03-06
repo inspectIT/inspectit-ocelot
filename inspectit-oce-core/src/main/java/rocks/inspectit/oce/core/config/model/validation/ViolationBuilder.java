@@ -1,5 +1,7 @@
 package rocks.inspectit.oce.core.config.model.validation;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import java.util.Collection;
 import java.util.Objects;
 
@@ -13,7 +15,8 @@ public class ViolationBuilder {
 
     private Violation current;
 
-    ViolationBuilder(Collection<? super Violation> sink) {
+    @VisibleForTesting
+    public ViolationBuilder(Collection<? super Violation> sink) {
         this.sink = sink;
         current = new Violation.ViolationBuilder().build();
     }

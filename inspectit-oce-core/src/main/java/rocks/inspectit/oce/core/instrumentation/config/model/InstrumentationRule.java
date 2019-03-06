@@ -1,6 +1,7 @@
 package rocks.inspectit.oce.core.instrumentation.config.model;
 
 import lombok.*;
+import rocks.inspectit.oce.core.config.model.instrumentation.rules.InstrumentationRuleSettings;
 
 import java.util.Map;
 import java.util.Set;
@@ -39,4 +40,12 @@ public class InstrumentationRule {
      */
     @Singular
     private Map<String, DataProviderCallConfig> exitProviders;
+
+    /**
+     * Maps metrics to the data keys or constants used as sources, see {@link InstrumentationRuleSettings#getMetrics()}.
+     * However, this map is guaranteed to not contain null or blank values.
+     * This means that disabled metrics have been filtered out.
+     */
+    @Singular
+    private Map<String, String> metrics;
 }

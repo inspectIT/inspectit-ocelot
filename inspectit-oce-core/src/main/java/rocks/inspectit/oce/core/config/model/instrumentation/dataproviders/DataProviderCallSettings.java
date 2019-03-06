@@ -161,7 +161,7 @@ public class DataProviderCallSettings {
         if (value == null) {
             return null;
         } else {
-            ConversionService conversionService = new ApplicationConversionService();
+            ConversionService conversionService = ApplicationConversionService.getSharedInstance();
             if (!conversionService.canConvert(value.getClass(), targetType)) {
                 throw new IllegalArgumentException("Cannot parse '" + targetType.getName() + "' from a '" + value.getClass() + "'!");
             }

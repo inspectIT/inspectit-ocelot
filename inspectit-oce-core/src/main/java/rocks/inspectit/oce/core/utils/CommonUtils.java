@@ -48,19 +48,23 @@ public class CommonUtils {
      * @return the Class if it was found, null otherwise
      */
     public static Class<?> locateTypeWithinImports(String typename, ClassLoader context, Collection<String> packages) {
-        return Stream.concat(
-                Stream.concat(
-                        Stream.of(""),
-                        packages.stream().map(s -> s + ".")
-                ),
-                Stream.of("java.lang.")
-        ).flatMap(prefix -> {
-            try {
-                return Stream.of(Class.forName(prefix + typename, false, context));
-            } catch (Exception e) {
-                return Stream.empty();
-            }
-        }).findFirst().orElse(null);
+        if (AutoboxingHelper.isPrimitiveType(typename)) {
+            return AutoboxingHelper.getPrimitiveClass(typename);
+        } else {
+            return Stream.concat(
+                    Stream.concat(
+                            Stream.of(""),
+                            packages.stream().map(s -> s + ".")
+                    ),
+                    Stream.of("java.lang.")
+            ).flatMap(prefix -> {
+                try {
+                    return Stream.of(Class.forName(prefix + typename, false, context));
+                } catch (Exception e) {
+                    return Stream.empty();
+                }
+            }).findFirst().orElse(null);
+        }
     }
 
     /**

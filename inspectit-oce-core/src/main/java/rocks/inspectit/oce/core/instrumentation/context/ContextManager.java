@@ -5,7 +5,6 @@ import com.google.common.cache.CacheBuilder;
 import io.grpc.Context;
 import io.opencensus.tags.Tags;
 import rocks.inspectit.oce.bootstrap.context.IContextManager;
-import rocks.inspectit.oce.bootstrap.context.IInspectitContext;
 import rocks.inspectit.oce.core.config.spring.BootstrapInitializerConfiguration;
 import rocks.inspectit.oce.core.instrumentation.config.InstrumentationConfigurationResolver;
 import rocks.inspectit.oce.core.tags.CommonTagsManager;
@@ -65,7 +64,7 @@ public class ContextManager implements IContextManager {
     }
 
     @Override
-    public IInspectitContext enterNewContext() {
+    public InspectitContext enterNewContext() {
         return InspectitContext.createFromCurrent(commonTagsManager, configProvider.getCurrentConfig().getDataProperties(), IS_OPEN_CENSUS_ON_BOOTSTRAP);
     }
 

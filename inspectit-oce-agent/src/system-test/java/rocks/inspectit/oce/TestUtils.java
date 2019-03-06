@@ -1,17 +1,18 @@
 package rocks.inspectit.oce;
 
 import io.opencensus.impl.internal.DisruptorEventQueue;
-import io.opencensus.stats.AggregationData;
-import io.opencensus.stats.Stats;
-import io.opencensus.stats.View;
-import io.opencensus.stats.ViewManager;
+import io.opencensus.stats.*;
 import io.opencensus.tags.InternalUtils;
+import io.opencensus.tags.TagKey;
+import io.opencensus.tags.TagValue;
 import io.opencensus.tags.Tags;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -49,6 +50,28 @@ public class TestUtils {
         InternalUtils.getTags(Tags.getTagger().getCurrentTagContext())
                 .forEachRemaining(t -> result.put(t.getKey().getName(), t.getValue().asString()));
         return result;
+    }
+
+    public static AggregationData getDataForView(String viewName, Map<String, String> tags) {
+        ViewManager viewManager = Stats.getViewManager();
+        ViewData view = viewManager.getView(View.Name.create(viewName));
+        List<String> orderedTagKeys = view.getView().getColumns().stream().map(TagKey::getName).collect(Collectors.toList());
+        assertThat(orderedTagKeys).containsExactlyInAnyOrder(tags.keySet().toArray(new String[]{}));
+        List<String> expectedTagValues = orderedTagKeys.stream().map(tags::get).collect(Collectors.toList());
+
+        return view.getAggregationMap().entrySet()
+                .stream()
+                .filter(e -> {
+                    List<TagValue> tagValues = e.getKey();
+                    for (int i = 0; i < tagValues.size(); i++) {
+                        if (!tagValues.get(i).asString().matches(expectedTagValues.get(i))) {
+                            return false;
+                        }
+                    }
+                    return true;
+                })
+                .map(Map.Entry::getValue)
+                .findFirst().get();
     }
 
     private static long getInstrumentationQueueLength() {

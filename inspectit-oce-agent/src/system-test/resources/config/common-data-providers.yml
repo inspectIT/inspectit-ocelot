@@ -1,0 +1,8 @@
+inspectit:
+  instrumentation:
+    data-providers:
+      assign:
+        input:
+          val: Object
+        value: val
+

@@ -112,6 +112,31 @@ public class MeasuresAndViewsManager {
     }
 
     /**
+     * Records a measurement for the given measure, if it exists.
+     * Depending on the measure type either {@link Number#doubleValue()}
+     * or {@link Number#longValue()} is used.
+     *
+     * @param measureName the name of the measure
+     * @param resultMap   the map to store the measurement value in
+     * @param value       the measurement value for this measure
+     * @return true, if the measure exists, false otherwise
+     */
+    public boolean tryRecordingMeasurement(String measureName, MeasureMap resultMap, Number value) {
+        val measure = getMeasure(measureName);
+        if (measure.isPresent()) {
+            val m = measure.get();
+            if (m instanceof Measure.MeasureLong) {
+                resultMap.put((Measure.MeasureLong) m, value.longValue());
+            } else if (m instanceof Measure.MeasureDouble) {
+                resultMap.put((Measure.MeasureDouble) m, value.doubleValue());
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
      * Calls {@link #getMeasureLong(String)} and records a measurement if the measure was found.
      *
      * @param measureName the name of the measure

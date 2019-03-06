@@ -9,6 +9,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.oce.bootstrap.context.IInspectitContext;
 import rocks.inspectit.oce.core.instrumentation.context.ContextManager;
+import rocks.inspectit.oce.core.instrumentation.context.InspectitContext;
 
 import java.util.Arrays;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -21,7 +22,7 @@ import static org.mockito.Mockito.*;
 public class MethodHookTest {
 
     @Mock
-    private IInspectitContext context;
+    private InspectitContext context;
 
     @Mock
     private ContextManager contextManager;

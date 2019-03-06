@@ -2,12 +2,11 @@ package rocks.inspectit.oce.core.config.model.instrumentation;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import rocks.inspectit.oce.core.config.model.InspectitConfig;
 import rocks.inspectit.oce.core.config.model.instrumentation.data.DataSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.dataproviders.GenericDataProviderSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.rules.InstrumentationRuleSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.scope.InstrumentationScopeSettings;
-import rocks.inspectit.oce.core.config.model.validation.AdditionalValidation;
-import rocks.inspectit.oce.core.config.model.validation.AdditionalValidations;
 import rocks.inspectit.oce.core.config.model.validation.ViolationBuilder;
 
 import javax.validation.Valid;
@@ -15,13 +14,13 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Configuration object for all settings regarding the instrumentation.
  */
 @Data
 @NoArgsConstructor
-@AdditionalValidations
 public class InstrumentationSettings {
 
     /**
@@ -79,10 +78,17 @@ public class InstrumentationSettings {
     @NotNull
     private Map<@NotBlank String, @Valid DataSettings> data = Collections.emptyMap();
 
-    @AdditionalValidation
-    public void performValidation(ViolationBuilder vios) {
+    /**
+     * Allows all nested configs to evaluate context sensitive config properties regarding their correctness.
+     * This is called by {@link InspectitConfig#performValidation(ViolationBuilder)}
+     *
+     * @param container the object containing this instance
+     * @param vios      the violation output
+     */
+    public void performValidation(InspectitConfig container, ViolationBuilder vios) {
+        Set<String> declaredMetrics = container.getMetrics().getDefinitions().keySet();
         rules.forEach((name, r) ->
-                r.performValidation(this, vios.atProperty("rules").atProperty(name)));
+                r.performValidation(this, declaredMetrics, vios.atProperty("rules").atProperty(name)));
     }
 
 }

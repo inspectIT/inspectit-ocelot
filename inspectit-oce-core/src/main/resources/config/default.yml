@@ -121,26 +121,27 @@ inspectit:
     data-providers:
 
       #computes a nanosecond-timestamp as a long for the current point in time
-      timestamp-nanos:
+      timestamp_nanos:
         value: "new Long(System.nanoTime())"
 
       #computes the elapsed milliseconds as double since a given nanosecond-timestamp
-      elapsed-millis:
+      elapsed_millis:
         input:
           #the timestamp captured via System.nanoTime() to compare against
           sinceNanos: long
         value: "new Double( (System.nanoTime() - sinceNanos) * 1E-6)"
 
     rules:
-      method-response-time:
+      record_method_duration:
         entry:
-          method_entry_time: { provider: timestamp-nanos }
-
+          method_entry_time: { provider: timestamp_nanos }
         exit:
           method_duration:
-            provider: elapsed-millis
+            provider: elapsed_millis
             data-input:
               sinceNanos: method_entry_time
+        metrics:
+          '[method/duration]' : method_duration
 
 
     # defines all bootstrap packages whose classes and subpackages should be ignored
@@ -263,6 +264,19 @@ inspectit:
       frequency: ${inspectit.metrics.frequency}
 
     definitions:
+      '[method/duration]':
+        type: DOUBLE
+        unit: ms
+        description: "the duration from method entry to method exit"
+        views:
+          '[method/duration/sum]':
+            aggregation: SUM
+            tags:
+              method_name : true
+          '[method/duration/count]':
+            aggregation: COUNT
+            tags:
+              method_name: true
 
       '[disk/free]':
         enabled: '${inspectit.metrics.disk.enabled.free}'

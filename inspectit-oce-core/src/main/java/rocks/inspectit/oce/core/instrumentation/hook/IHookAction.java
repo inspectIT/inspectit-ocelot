@@ -1,7 +1,8 @@
 package rocks.inspectit.oce.core.instrumentation.hook;
 
 import lombok.Value;
-import rocks.inspectit.oce.bootstrap.context.IInspectitContext;
+import lombok.experimental.NonFinal;
+import rocks.inspectit.oce.core.instrumentation.context.InspectitContext;
 
 /**
  * Interface used to define any kind of action which is executed in a {@link MethodHook} on method enter or exit.
@@ -29,6 +30,7 @@ public interface IHookAction {
      * accessed by the hook action.
      */
     @Value
+    @NonFinal
     class ExecutionContext {
 
         /**
@@ -61,7 +63,7 @@ public interface IHookAction {
         /**
          * The context to store and read data.
          */
-        private IInspectitContext inspectitContext;
+        private InspectitContext inspectitContext;
 
     }
 }

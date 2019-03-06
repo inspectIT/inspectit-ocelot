@@ -32,13 +32,45 @@ public class MethodHookConfigurationResolver {
      * @return
      */
     public MethodHookConfiguration buildHookConfiguration(Class<?> clazzToInstrument, MethodDescription method, Set<InstrumentationRule> matchedRules)
-            throws CyclicDataDependencyException, ConflictingDataDefinitionsException {
+            throws Exception {
 
         val result = MethodHookConfiguration.builder();
         result.entryProviders(combineAndOrderProviderCalls(matchedRules, InstrumentationRule::getEntryProviders));
         result.exitProviders(combineAndOrderProviderCalls(matchedRules, InstrumentationRule::getExitProviders));
 
+        resolveMetrics(result, matchedRules);
+
         return result.build();
+    }
+
+    /**
+     * Combines all metric definitions from the given rules
+     *
+     * @param result       the hook configuration to which the measurement definitions are added
+     * @param matchedRules the rules to combine
+     * @throws ConflictingMetricDefinitionsException of two rules define different values for the same metric
+     */
+    private void resolveMetrics(MethodHookConfiguration.MethodHookConfigurationBuilder result, Set<InstrumentationRule> matchedRules) throws ConflictingMetricDefinitionsException {
+
+        Map<String, InstrumentationRule> metricDefinitions = new HashMap<>();
+        for (val rule : matchedRules) {
+            //check for conflicts first
+            for (val metricName : rule.getMetrics().keySet()) {
+                if (metricDefinitions.containsKey(metricName)) {
+                    throw new ConflictingMetricDefinitionsException(metricName, metricDefinitions.get(metricName), rule);
+                }
+                metricDefinitions.put(metricName, rule);
+            }
+            rule.getMetrics().forEach((name, value) -> {
+                try {
+                    double constantValue = Double.parseDouble(value);
+                    result.constantMetric(name, constantValue);
+                } catch (NumberFormatException e) {
+                    //the specified value is not a double value, we therefore assume it is a data key
+                    result.dataMetric(name, value);
+                }
+            });
+        }
     }
 
     /**
@@ -191,6 +223,11 @@ public class MethodHookConfigurationResolver {
          * The second rule assigning a value to dataKey
          */
         private InstrumentationRule second;
+
+        @Override
+        public String getMessage() {
+            return "The rules '" + first.getName() + "' and '" + second.getName() + "' contain conflicting definitions for the data '" + dataKey + "'";
+        }
     }
 
     @Value
@@ -200,5 +237,38 @@ public class MethodHookConfigurationResolver {
          * A list of data keys representing the dependency cycle.
          */
         private List<String> dependencyCycle;
+
+        @Override
+        public String getMessage() {
+            StringBuilder result = new StringBuilder("The matched rules lead to a cyclic data dependency: ");
+            boolean isFirst = true;
+            for (String data : dependencyCycle) {
+                if (!isFirst) {
+                    result.append(" -> ");
+                }
+                isFirst = false;
+                result.append(data);
+            }
+            return result.toString();
+        }
+    }
+
+    @Value
+    @EqualsAndHashCode(callSuper = true)
+    static class ConflictingMetricDefinitionsException extends Exception {
+        private String metricName;
+        /**
+         * The first rule assigning a value to dataKey
+         */
+        private InstrumentationRule first;
+        /**
+         * The second rule assigning a value to dataKey
+         */
+        private InstrumentationRule second;
+
+        @Override
+        public String getMessage() {
+            return "The rules '" + first.getName() + "' and '" + second.getName() + "' contain conflicting definitions for the metric '" + metricName + "'";
+        }
     }
 }

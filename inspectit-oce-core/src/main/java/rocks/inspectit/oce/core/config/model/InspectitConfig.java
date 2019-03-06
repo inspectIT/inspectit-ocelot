@@ -10,6 +10,9 @@ import rocks.inspectit.oce.core.config.model.logging.LoggingSettings;
 import rocks.inspectit.oce.core.config.model.metrics.MetricsSettings;
 import rocks.inspectit.oce.core.config.model.selfmonitoring.SelfMonitoringSettings;
 import rocks.inspectit.oce.core.config.model.tags.TagsSettings;
+import rocks.inspectit.oce.core.config.model.validation.AdditionalValidation;
+import rocks.inspectit.oce.core.config.model.validation.AdditionalValidations;
+import rocks.inspectit.oce.core.config.model.validation.ViolationBuilder;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
@@ -29,6 +32,7 @@ import javax.validation.constraints.NotBlank;
  */
 @Data
 @NoArgsConstructor
+@AdditionalValidations
 public class InspectitConfig {
 
     /**
@@ -87,5 +91,15 @@ public class InspectitConfig {
      * Otherwise they will be loaded by the private inspectIT classloader.
      */
     private boolean publishOpencensusToBootstrap;
+
+    /**
+     * Allows all nested configs to evaluate context sensitive config properties regarding their correctness.
+     *
+     * @param vios the violation builder which is used to output violations
+     */
+    @AdditionalValidation
+    public void performValidation(ViolationBuilder vios) {
+        instrumentation.performValidation(this, vios.atProperty("instrumentation"));
+    }
 
 }
