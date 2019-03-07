@@ -48,6 +48,13 @@ public class ThreadStartContextPropagationTest extends InstrumentationSysTestBas
         }
     }
 
+    static {
+        // Make sure the classes to instruemtn are loaded before the test starts
+        // so that they are instrumented
+        SubThread.class.getDeclaredMethods();
+        AbstractThread.class.getDeclaredMethods();
+    }
+
 
     @Test
     public void verifyContextProgapationViaAbstractThreads() throws InterruptedException {
