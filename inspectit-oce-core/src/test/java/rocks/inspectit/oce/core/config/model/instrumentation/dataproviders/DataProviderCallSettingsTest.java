@@ -103,7 +103,7 @@ public class DataProviderCallSettingsTest {
 
         @Test
         void testSpecialNotCountedAsAssignment() {
-            provider.getInput().put("returnValue", "String");
+            provider.getInput().put("_returnValue", "String");
 
             call.performValidation(instr, vios);
 
@@ -128,7 +128,7 @@ public class DataProviderCallSettingsTest {
 
         @Test
         void testSpecialNotCountedAsAssignment() {
-            provider.getInput().put("returnValue", "String");
+            provider.getInput().put("_returnValue", "String");
 
             call.performValidation(instr, vios);
 
@@ -142,11 +142,11 @@ public class DataProviderCallSettingsTest {
         @Test
         void testNonExistingProvider() {
             provider.getInput().put("my-prop", "String");
-            provider.getInput().put("thrown", "Throwable");
-            provider.getInput().put("arg3", "String");
+            provider.getInput().put("_thrown", "Throwable");
+            provider.getInput().put("_arg3", "String");
             call.getConstantInput().put("my-prop", "value");
-            call.getConstantInput().put("arg3", "value");
-            call.getDataInput().put("thrown", "my_data_key");
+            call.getConstantInput().put("_arg3", "value");
+            call.getDataInput().put("_thrown", "my_data_key");
 
             call.performValidation(instr, vios);
 

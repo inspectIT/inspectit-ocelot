@@ -1,0 +1,58 @@
+inspectit:
+  metrics:
+    definitions:
+      '[annotation/test]':
+        type: LONG
+        unit: black magic
+        views:
+          '[annotation/test]':
+            aggregation: LAST_VALUE
+            tags: {anno_value : true}
+  instrumentation:
+    data-providers:
+      #-----------------------DataProvidersTest.verifyArgumentsAccessible ------------------------
+      read_MyMethodAnnotation_value:
+        imports:
+          - rocks.inspectit.oce.instrumentation
+          - java.lang.reflect
+        input:
+          _methodName: String
+          _class: Class
+          _parameterTypes: Class[]
+        value-body: |
+          AnnotatedElement target;
+          if("<init>".equals(_methodName)) {
+              target = _class.getDeclaredConstructor(_parameterTypes);
+          } else {
+              target = _class.getDeclaredMethod(_methodName, _parameterTypes);
+          }
+          return ((MyMethodAnnotation)(target.getAnnotation(MyMethodAnnotation.class))).value();
+
+    scopes:
+      methods_with_MyMethodAnnotation:
+        methods:
+          - annotations:
+              - name: rocks.inspectit.oce.instrumentation.MyMethodAnnotation
+        advanced:
+          disable-safety-mechanisms: true
+      constructors_with_MyMethodAnnotation:
+        methods:
+            - annotations:
+              - name: rocks.inspectit.oce.instrumentation.MyMethodAnnotation
+              is-constructor: true
+        advanced:
+          disable-safety-mechanisms: true
+
+
+    rules:
+      extract_value_from_methods_with_MyMethodAnnotation:
+        scopes:
+          methods_with_MyMethodAnnotation: true
+          constructors_with_MyMethodAnnotation: true
+        entry:
+          anno_value: {provider: read_MyMethodAnnotation_value}
+        metrics:
+          '[annotation/test]' : 42
+
+
+

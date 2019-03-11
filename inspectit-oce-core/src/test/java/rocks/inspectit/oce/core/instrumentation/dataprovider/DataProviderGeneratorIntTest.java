@@ -114,7 +114,7 @@ public class DataProviderGeneratorIntTest extends SpringTestBase {
         GenericDataProviderConfig config = GenericDataProviderConfig.builder()
                 .name("my-provider")
                 .expectedArgumentTypes(argumentTypes)
-                .valueBody("return new Integer(arg0.length() + arg2);")
+                .valueBody("return new Integer(_arg0.length() + _arg2);")
                 .build();
 
         Object[] args = new Object[]{"1234", null, 6, null};
@@ -130,7 +130,7 @@ public class DataProviderGeneratorIntTest extends SpringTestBase {
         GenericDataProviderConfig config = GenericDataProviderConfig.builder()
                 .name("my-provider")
                 .usesArgsArray(true)
-                .valueBody("return new Integer(((String)args[0]).length() + ((Integer)args[2]).intValue());")
+                .valueBody("return new Integer(((String)_args[0]).length() + ((Integer)_args[2]).intValue());")
                 .build();
 
         Object[] args = new Object[]{"1234", null, 6, null};
@@ -145,7 +145,7 @@ public class DataProviderGeneratorIntTest extends SpringTestBase {
         GenericDataProviderConfig config = GenericDataProviderConfig.builder()
                 .name("my-provider")
                 .expectedReturnValueType("int[]")
-                .valueBody("return new Integer(returnValue[0] + returnValue[1] +returnValue[2]);")
+                .valueBody("return new Integer(_returnValue[0] + _returnValue[1] +_returnValue[2]);")
                 .build();
 
         InjectedClass<? extends IGenericDataProvider> provider = generator.getOrGenerateDataProvider(config, dummyClass);
@@ -159,7 +159,7 @@ public class DataProviderGeneratorIntTest extends SpringTestBase {
         GenericDataProviderConfig config = GenericDataProviderConfig.builder()
                 .name("my-provider")
                 .usesThrown(true)
-                .valueBody("return thrown.getMessage();")
+                .valueBody("return _thrown.getMessage();")
                 .build();
 
         InjectedClass<? extends IGenericDataProvider> provider = generator.getOrGenerateDataProvider(config, dummyClass);
@@ -210,7 +210,7 @@ public class DataProviderGeneratorIntTest extends SpringTestBase {
         GenericDataProviderConfig config = GenericDataProviderConfig.builder()
                 .name("my-provider")
                 .expectedThisType("String")
-                .valueBody("return thiz + \"!\";")
+                .valueBody("return _this + \"!\";")
                 .build();
 
         InjectedClass<? extends IGenericDataProvider> provider = generator.getOrGenerateDataProvider(config, dummyClass);
@@ -225,7 +225,7 @@ public class DataProviderGeneratorIntTest extends SpringTestBase {
         GenericDataProviderConfig config = GenericDataProviderConfig.builder()
                 .name("my-provider")
                 .expectedReturnValueType("String")
-                .valueBody("return returnValue + \"!\";")
+                .valueBody("return _returnValue + \"!\";")
                 .build();
 
         InjectedClass<? extends IGenericDataProvider> provider = generator.getOrGenerateDataProvider(config, dummyClass);

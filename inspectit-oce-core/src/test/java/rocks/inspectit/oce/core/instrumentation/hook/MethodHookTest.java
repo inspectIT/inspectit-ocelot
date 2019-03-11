@@ -44,6 +44,7 @@ public class MethodHookTest {
             MethodHook hook = MethodHook.builder()
                     .inspectitContextManager(contextManager)
                     .entryActions(new CopyOnWriteArrayList<>(Arrays.asList(first, second, third)))
+                    .methodInformation(Mockito.mock(MethodReflectionInformation.class))
                     .build();
 
             IInspectitContext ctx = hook.onEnter(null, null);
@@ -79,6 +80,7 @@ public class MethodHookTest {
             MethodHook hook = MethodHook.builder()
                     .inspectitContextManager(contextManager)
                     .exitActions(new CopyOnWriteArrayList<>(Arrays.asList(first, second, third)))
+                    .methodInformation(Mockito.mock(MethodReflectionInformation.class))
                     .build();
 
             IInspectitContext ctx = hook.onEnter(null, null);

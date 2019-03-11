@@ -36,15 +36,9 @@ inspectit:
         scopes:
           UserInstrumentationWithMetricsTest-invocationCount : true
         entry:
-          method_name:  {provider: assign, constant-input: {val: "invocationCount"}}
+          method_name:  {provider: get_method_fqn}
         metrics:
           '[my/invocation]': 42
-
-      UserInstrumentationWithMetricsTest-responseTimeMeasuring:
-        scopes:
-          UserInstrumentationWithMetricsTest-responseTimeMeasuring : true
-        entry:
-          method_name:  {provider: assign, constant-input: {val: "responseTimeMeasuring"}}
 
       record_method_duration:
         scopes:

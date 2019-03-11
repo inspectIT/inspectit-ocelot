@@ -39,6 +39,7 @@ public class TestUtils {
             assertThat(getInstrumentationQueueLength()).isZero();
             assertThat(getHookingQueueLength()).isZero();
             Thread.sleep(200); //to ensure that new-class-discovery has been executed
+            waitForOpenCensusQueueToBeProcessed();
             assertThat(getInstrumentationQueueLength()).isZero();
             assertThat(getHookingQueueLength()).isZero();
         });
@@ -52,11 +53,18 @@ public class TestUtils {
         return result;
     }
 
+    /**
+     * Returns the first found value for the view with the given tag values.
+     *
+     * @param viewName the name of the views
+     * @param tags     the expected tag values
+     * @return the foudn aggregation data, null otherwise
+     */
     public static AggregationData getDataForView(String viewName, Map<String, String> tags) {
         ViewManager viewManager = Stats.getViewManager();
         ViewData view = viewManager.getView(View.Name.create(viewName));
         List<String> orderedTagKeys = view.getView().getColumns().stream().map(TagKey::getName).collect(Collectors.toList());
-        assertThat(orderedTagKeys).containsExactlyInAnyOrder(tags.keySet().toArray(new String[]{}));
+        assertThat(orderedTagKeys).contains(tags.keySet().toArray(new String[]{}));
         List<String> expectedTagValues = orderedTagKeys.stream().map(tags::get).collect(Collectors.toList());
 
         return view.getAggregationMap().entrySet()
@@ -64,7 +72,8 @@ public class TestUtils {
                 .filter(e -> {
                     List<TagValue> tagValues = e.getKey();
                     for (int i = 0; i < tagValues.size(); i++) {
-                        if (!tagValues.get(i).asString().matches(expectedTagValues.get(i))) {
+                        String regex = expectedTagValues.get(i);
+                        if (regex != null && !tagValues.get(i).asString().matches(regex)) {
                             return false;
                         }
                     }
