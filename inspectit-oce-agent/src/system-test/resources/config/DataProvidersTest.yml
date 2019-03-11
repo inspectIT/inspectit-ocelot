@@ -7,14 +7,14 @@ inspectit:
         imports:
           - rocks.inspectit.oce.instrumentation
         input:
-          arg0: NamedElement
-        value: arg0.getName()
+          _arg0: NamedElement
+        value: _arg0.getName()
       readNameViaArgs:
         imports:
           - rocks.inspectit.oce.instrumentation
         input:
-          args: Object[]
-        value: ((NamedElement)args[0]).getName()
+          _args: Object[]
+        value: ((NamedElement)_args[0]).getName()
       reverse:
         input:
           str: String
@@ -31,18 +31,18 @@ inspectit:
         imports:
           - java.time
         input:
-          args: Object[]
+          _args: Object[]
           argIndex : int
           durationToAdd: Duration
-        value: new Long( ((Duration)(args[argIndex])).toMillis() + durationToAdd.toMillis() )
+        value: new Long( ((Duration)(_args[argIndex])).toMillis() + durationToAdd.toMillis() )
       #-----------------------DataProvidersTest.testDefaultMethodInstrumented ------------------------
       #---------------------- also used in InstrumentationScopesTest ---------------------------------
       readNameViaThis:
         imports:
           - rocks.inspectit.oce.instrumentation
         input:
-          thiz: NamedElement
-        value: thiz.getName()
+          _this: NamedElement
+        value: _this.getName()
 
     scopes:
       DataProvidersTest-argumentAccessTest:

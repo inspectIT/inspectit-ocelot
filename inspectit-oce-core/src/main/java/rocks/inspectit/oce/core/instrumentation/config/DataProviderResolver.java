@@ -53,7 +53,7 @@ public class DataProviderResolver {
         while (entryIterator.hasNext()) {
             val varEntry = entryIterator.next();
             String varName = varEntry.getKey();
-            if (GenericDataProviderSettings.ARG_VARIABLE_PATTERN.matcher(varName).matches()) {
+            if (GenericDataProviderSettings.ARG_VARIABLE_REGEX.matcher(varName).matches()) {
                 entryIterator.remove();
                 int index = Integer.parseInt(varName.substring(GenericDataProviderSettings.ARG_VARIABLE_PREFIX.length()));
                 result.expectedArgumentType(index, varEntry.getValue());
@@ -62,7 +62,7 @@ public class DataProviderResolver {
     }
 
     private void resolveSpecialVariables(HashMap<String, String> inputs, GenericDataProviderConfig.GenericDataProviderConfigBuilder result) {
-        result.expectedThisType(inputs.remove(GenericDataProviderSettings.THIZ_VARIABLE))
+        result.expectedThisType(inputs.remove(GenericDataProviderSettings.THIS_VARIABLE))
                 .expectedReturnValueType(inputs.remove(GenericDataProviderSettings.RETURN_VALUE_VARIABLE))
                 .usesThrown(inputs.remove(GenericDataProviderSettings.THROWN_VARIABLE) != null)
                 .usesArgsArray(inputs.remove(GenericDataProviderSettings.ARGS_VARIABLE) != null);

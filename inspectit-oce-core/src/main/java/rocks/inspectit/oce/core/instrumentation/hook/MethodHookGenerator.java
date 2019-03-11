@@ -5,8 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import net.bytebuddy.description.method.MethodDescription;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.convert.ApplicationConversionService;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.oce.core.config.model.instrumentation.dataproviders.DataProviderCallSettings;
 import rocks.inspectit.oce.core.config.model.instrumentation.dataproviders.GenericDataProviderSettings;
@@ -45,8 +43,6 @@ public class MethodHookGenerator {
 
     @Autowired
     private DataProviderGenerator dataProviderGenerator;
-
-    private ConversionService conversionService = ApplicationConversionService.getSharedInstance();
 
     /**
      * Builds a executable method hook based on the given configuration.
@@ -100,8 +96,8 @@ public class MethodHookGenerator {
                 BoundDataProvider call = generateAndBindDataProvider(method, dataKey, providerCallConfig);
                 entryActions.add(call);
             } catch (Exception e) {
-                log.error("Failed to build entry data provider {} for data {} on method {}.{}, no value will be assigned",
-                        providerCallConfig.getProvider().getName(), dataKey, method.getDeclaringClass().getName(), method.getName(), e);
+                log.error("Failed to build entry data provider {} for data {} on method {}, no value will be assigned",
+                        providerCallConfig.getProvider().getName(), dataKey, method.getMethodFQN(), e);
             }
         });
 
@@ -112,8 +108,8 @@ public class MethodHookGenerator {
                 BoundDataProvider call = generateAndBindDataProvider(method, dataKey, providerCallConfig);
                 exitActions.add(call);
             } catch (Exception e) {
-                log.error("Failed to build exit data provider {} for data {} on method {}.{}, no value will be assigned",
-                        providerCallConfig.getProvider().getName(), dataKey, method.getDeclaringClass().getName(), method.getName(), e);
+                log.error("Failed to build exit data provider {} for data {} on method {}, no value will be assigned",
+                        providerCallConfig.getProvider().getName(), dataKey, method.getMethodFQN(), e);
             }
         });
     }
@@ -121,17 +117,17 @@ public class MethodHookGenerator {
     /**
      * Generates a data provider and binds its arguments.
      *
-     * @param method             the method in which this data provider will be used.
+     * @param methodInfo         the method in which this data provider will be used.
      * @param dataKey            the name of the data whose value is defined by executing the given data provider
      * @param providerCallConfig the specification of the call to the data provider
      * @return the executable data provider
      */
-    private BoundDataProvider generateAndBindDataProvider(MethodReflectionInformation method, String dataKey, DataProviderCallConfig providerCallConfig) {
+    private BoundDataProvider generateAndBindDataProvider(MethodReflectionInformation methodInfo, String dataKey, DataProviderCallConfig providerCallConfig) {
         GenericDataProviderConfig providerConfig = providerCallConfig.getProvider();
-        val injectedProviderClass = dataProviderGenerator.getOrGenerateDataProvider(providerConfig, method.getDeclaringClass());
+        val injectedProviderClass = dataProviderGenerator.getOrGenerateDataProvider(providerConfig, methodInfo.getDeclaringClass());
 
-        val dynamicAssignments = getDynamicInputAssignments(method, providerCallConfig);
-        val constantAssignments = getConstantInputAssignments(method, providerCallConfig);
+        val dynamicAssignments = getDynamicInputAssignments(methodInfo, providerCallConfig);
+        val constantAssignments = getConstantInputAssignments(methodInfo, providerCallConfig);
 
         return BoundDataProvider.bind(dataKey, providerConfig, injectedProviderClass, constantAssignments, dynamicAssignments);
     }
@@ -140,11 +136,11 @@ public class MethodHookGenerator {
      * Reads the constant assignments performed by the given provider call into a map.
      * The data is immediately converted to the expected input type using a conversion service.
      *
-     * @param method             the method within which the data provider is executed, used to find the correct types
+     * @param methodInfo         the method within which the data provider is executed, used to find the correct types
      * @param providerCallConfig the call whose constant assignments should be queried
      * @return a map mapping the name of the parameters to the constant value they are assigned
      */
-    private Map<String, Object> getConstantInputAssignments(MethodReflectionInformation method, DataProviderCallConfig providerCallConfig) {
+    private Map<String, Object> getConstantInputAssignments(MethodReflectionInformation methodInfo, DataProviderCallConfig providerCallConfig) {
         GenericDataProviderConfig providerConfig = providerCallConfig.getProvider();
         Map<String, Object> constantAssignments = new HashMap<>();
 
@@ -153,13 +149,13 @@ public class MethodHookGenerator {
         providerCallConfig.getCallSettings().getConstantInput()
                 .forEach((argName, value) -> {
                     String expectedTypeName = providerArgumentTypes.get(argName);
-                    ClassLoader contextClassloader = method.getDeclaringClass().getClassLoader();
+                    ClassLoader contextClassloader = methodInfo.getDeclaringClass().getClassLoader();
                     Class<?> expectedValueType = CommonUtils.locateTypeWithinImports(expectedTypeName, contextClassloader, providerConfig.getImportedPackages());
                     Object convertedValue = callSettings.getConstantInputAsType(argName, expectedValueType);
                     constantAssignments.put(argName, convertedValue);
                 });
         if (providerArgumentTypes.containsKey(GenericDataProviderSettings.METHOD_NAME_VARIABLE)) {
-            constantAssignments.put(GenericDataProviderSettings.METHOD_NAME_VARIABLE, method.getName());
+            constantAssignments.put(GenericDataProviderSettings.METHOD_NAME_VARIABLE, methodInfo.getName());
         }
         return constantAssignments;
     }
@@ -168,12 +164,12 @@ public class MethodHookGenerator {
      * Reads the dynamic assignments performed by the given provider call into a map.
      * Currently the only dynamic assignments are "data-inputs".
      *
-     * @param method             the method within which the data provider is executed, used to assign special variables
+     * @param methodInfo         the method within which the data provider is executed, used to assign special variables
      * @param providerCallConfig the call whose dynamic assignments should be queried
      * @return a map mapping the parameter names to functions which are evaluated during
      * {@link IHookAction#execute(IHookAction.ExecutionContext)}  to find the concrete value for the parameter.
      */
-    private Map<String, Function<IHookAction.ExecutionContext, Object>> getDynamicInputAssignments(MethodReflectionInformation method, DataProviderCallConfig providerCallConfig) {
+    private Map<String, Function<IHookAction.ExecutionContext, Object>> getDynamicInputAssignments(MethodReflectionInformation methodInfo, DataProviderCallConfig providerCallConfig) {
         Map<String, Function<IHookAction.ExecutionContext, Object>> dynamicAssignments = new HashMap<>();
         providerCallConfig.getCallSettings().getDataInput()
                 .forEach((argName, dataName) ->
@@ -181,10 +177,10 @@ public class MethodHookGenerator {
                 );
         val additionalProviderInputVars = providerCallConfig.getProvider().getAdditionalArgumentTypes().keySet();
         if (additionalProviderInputVars.contains(GenericDataProviderSettings.METHOD_PARAMETER_TYPES_VARIABLE)) {
-            dynamicAssignments.put(GenericDataProviderSettings.METHOD_PARAMETER_TYPES_VARIABLE, (ex) -> method.getParameterTypes());
+            dynamicAssignments.put(GenericDataProviderSettings.METHOD_PARAMETER_TYPES_VARIABLE, (ex) -> methodInfo.getParameterTypes());
         }
-        if (additionalProviderInputVars.contains(GenericDataProviderSettings.CLAZZ_VARIABLE)) {
-            dynamicAssignments.put(GenericDataProviderSettings.CLAZZ_VARIABLE, (ex) -> method.getDeclaringClass());
+        if (additionalProviderInputVars.contains(GenericDataProviderSettings.CLASS_VARIABLE)) {
+            dynamicAssignments.put(GenericDataProviderSettings.CLASS_VARIABLE, (ex) -> methodInfo.getDeclaringClass());
         }
         return dynamicAssignments;
     }

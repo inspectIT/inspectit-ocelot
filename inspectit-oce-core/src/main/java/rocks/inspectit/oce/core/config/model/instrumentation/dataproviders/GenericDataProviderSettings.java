@@ -22,26 +22,26 @@ public class GenericDataProviderSettings {
 
     public static final String PACKAGE_REGEX = "[a-zA-Z]\\w*(\\.[a-zA-Z]\\w*)*";
 
-    public static final String THIZ_VARIABLE = "thiz";
-    public static final String ARGS_VARIABLE = "args";
-    public static final String THROWN_VARIABLE = "thrown";
-    public static final String RETURN_VALUE_VARIABLE = "returnValue";
-    public static final String ARG_VARIABLE_PREFIX = "arg";
-    public static final Pattern ARG_VARIABLE_PATTERN = Pattern.compile(ARG_VARIABLE_PREFIX + "(\\d+)");
+    public static final String THIS_VARIABLE = "_this";
+    public static final String ARGS_VARIABLE = "_args";
+    public static final String THROWN_VARIABLE = "_thrown";
+    public static final String RETURN_VALUE_VARIABLE = "_returnValue";
+    public static final String ARG_VARIABLE_PREFIX = "_arg";
+    public static final Pattern ARG_VARIABLE_REGEX = Pattern.compile(ARG_VARIABLE_PREFIX + "\\d+");
 
     //these special variables are passed in via the additionalArguments array
-    public static final String CLAZZ_VARIABLE = "clazz";
-    public static final String METHOD_NAME_VARIABLE = "methodName";
-    public static final String METHOD_PARAMETER_TYPES_VARIABLE = "parameterTypes";
+    public static final String CLASS_VARIABLE = "_class";
+    public static final String METHOD_NAME_VARIABLE = "_methodName";
+    public static final String METHOD_PARAMETER_TYPES_VARIABLE = "_parameterTypes";
 
 
     private static final List<Pattern> SPECIAL_VARIABLES_REGEXES = Arrays.asList(
-            Pattern.compile(THIZ_VARIABLE),
+            Pattern.compile(THIS_VARIABLE),
             Pattern.compile(ARGS_VARIABLE),
             Pattern.compile(THROWN_VARIABLE),
             Pattern.compile(RETURN_VALUE_VARIABLE),
-            ARG_VARIABLE_PATTERN,
-            Pattern.compile(CLAZZ_VARIABLE),
+            ARG_VARIABLE_REGEX,
+            Pattern.compile(CLASS_VARIABLE),
             Pattern.compile(METHOD_NAME_VARIABLE),
             Pattern.compile(METHOD_PARAMETER_TYPES_VARIABLE)
     );
@@ -100,41 +100,41 @@ public class GenericDataProviderSettings {
         return !StringUtils.isEmpty(value) && !StringUtils.isEmpty(valueBody);
     }
 
-    @AssertTrue(message = "The 'args' input must have the type 'Object[]'")
+    @AssertTrue(message = "The '_args' input must have the type 'Object[]'")
     private boolean isArgsArrayTypeCorrect() {
         String argsType = input.get(ARGS_VARIABLE);
-        return isJavaLangTypeOrNull(argsType, "Object[]");
+        return verifyType(argsType, "Object[]");
     }
 
-    @AssertTrue(message = "The 'thrown' input must have the type 'Throwable'")
+    @AssertTrue(message = "The '_thrown' input must have the type 'Throwable'")
     private boolean isThrownTypeCorrect() {
         String thrownType = input.get(THROWN_VARIABLE);
-        return isJavaLangTypeOrNull(thrownType, "Throwable");
+        return verifyType(thrownType, "Throwable");
     }
 
-    @AssertTrue(message = "The 'clazz' input must have the type 'Class'")
+    @AssertTrue(message = "The '_class' input must have the type 'Class'")
     private boolean isClazzTypeCorrect() {
-        String clazzType = input.get(CLAZZ_VARIABLE);
-        return isJavaLangTypeOrNull(clazzType, "Class");
+        String clazzType = input.get(CLASS_VARIABLE);
+        return verifyType(clazzType, "Class");
     }
 
-    @AssertTrue(message = "The 'methodName' input must have the type 'String'")
+    @AssertTrue(message = "The '_methodName' input must have the type 'String'")
     private boolean isMethodNameTypeCorrect() {
         String methodNameType = input.get(METHOD_NAME_VARIABLE);
-        return isJavaLangTypeOrNull(methodNameType, "String");
+        return verifyType(methodNameType, "String");
     }
 
-    @AssertTrue(message = "The 'parameterTypes' input must have the type 'Class[]'")
+    @AssertTrue(message = "The '_parameterTypes' input must have the type 'Class[]'")
     private boolean isParameterTypesTypeCorrect() {
         String parameterTypesType = input.get(METHOD_PARAMETER_TYPES_VARIABLE);
-        return isJavaLangTypeOrNull(parameterTypesType, "Class[]");
+        return verifyType(parameterTypesType, "Class[]");
     }
 
     public static boolean isSpecialVariable(String varName) {
         return SPECIAL_VARIABLES_REGEXES.stream().anyMatch(p -> p.matcher(varName).matches());
     }
 
-    private boolean isJavaLangTypeOrNull(String type, String expectedSimpleName) {
+    private boolean verifyType(String type, String expectedSimpleName) {
         return type == null || type.equals(expectedSimpleName) || type.equals("java.lang." + expectedSimpleName);
     }
 

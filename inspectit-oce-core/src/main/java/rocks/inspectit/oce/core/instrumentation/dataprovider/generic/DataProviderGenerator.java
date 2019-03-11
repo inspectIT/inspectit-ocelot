@@ -146,7 +146,7 @@ public class DataProviderGenerator {
     private String buildProviderMethod(GenericDataProviderConfig providerConfig) {
         StringBuilder methodBody = new StringBuilder("{");
         if (providerConfig.getExpectedThisType() != null) {
-            buildVariableDefinition(methodBody, providerConfig.getExpectedThisType(), GenericDataProviderSettings.THIZ_VARIABLE, THIZ);
+            buildVariableDefinition(methodBody, providerConfig.getExpectedThisType(), GenericDataProviderSettings.THIS_VARIABLE, THIZ);
         }
         if (providerConfig.getExpectedReturnValueType() != null) {
             buildVariableDefinition(methodBody, providerConfig.getExpectedReturnValueType(), GenericDataProviderSettings.RETURN_VALUE_VARIABLE, RETURN_VALUE);

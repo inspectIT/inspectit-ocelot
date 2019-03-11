@@ -133,9 +133,9 @@ inspectit:
 
       get_method_fqn:
         input:
-          methodName: String
-          clazz: Class
-        value: new StringBuilder(clazz.getName()).append('.').append(methodName).toString()
+          _methodName: String
+          _class: Class
+        value: new StringBuilder(_class.getName()).append('.').append(_methodName).toString()
 
     rules:
       record_method_duration:

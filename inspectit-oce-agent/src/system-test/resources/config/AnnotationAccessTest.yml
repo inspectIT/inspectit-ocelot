@@ -16,15 +16,15 @@ inspectit:
           - rocks.inspectit.oce.instrumentation
           - java.lang.reflect
         input:
-          methodName: String
-          clazz: Class
-          parameterTypes: Class[]
+          _methodName: String
+          _class: Class
+          _parameterTypes: Class[]
         value-body: |
           AnnotatedElement target;
-          if("<init>".equals(methodName)) {
-              target = clazz.getDeclaredConstructor(parameterTypes);
+          if("<init>".equals(_methodName)) {
+              target = _class.getDeclaredConstructor(_parameterTypes);
           } else {
-              target = clazz.getDeclaredMethod(methodName, parameterTypes);
+              target = _class.getDeclaredMethod(_methodName, _parameterTypes);
           }
           return ((MyMethodAnnotation)(target.getAnnotation(MyMethodAnnotation.class))).value();
 

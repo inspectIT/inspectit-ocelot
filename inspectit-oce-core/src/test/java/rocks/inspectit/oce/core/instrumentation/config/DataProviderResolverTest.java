@@ -45,8 +45,8 @@ public class DataProviderResolverTest {
         }
 
         @Test
-        void verifyThizTypeExtracted() {
-            inputProvider.getInput().put("thiz", "MyClass");
+        void verifyThisTypeExtracted() {
+            inputProvider.getInput().put(GenericDataProviderSettings.THIS_VARIABLE, "MyClass");
 
             Map<String, GenericDataProviderConfig> result = resolver.resolveProviders(config);
 
@@ -67,8 +67,8 @@ public class DataProviderResolverTest {
 
         @Test
         void verifyMethodArgumentsExtracted() {
-            inputProvider.getInput().put("arg1", "MyClass");
-            inputProvider.getInput().put("arg3", "MyOtherClass");
+            inputProvider.getInput().put(GenericDataProviderSettings.ARG_VARIABLE_PREFIX + 1, "MyClass");
+            inputProvider.getInput().put(GenericDataProviderSettings.ARG_VARIABLE_PREFIX + 3, "MyOtherClass");
 
             Map<String, GenericDataProviderConfig> result = resolver.resolveProviders(config);
 
@@ -114,7 +114,7 @@ public class DataProviderResolverTest {
 
         @Test
         void verifyReturnValueTypeExtracted() {
-            inputProvider.getInput().put("returnValue", "MyClass");
+            inputProvider.getInput().put(GenericDataProviderSettings.RETURN_VALUE_VARIABLE, "MyClass");
 
             Map<String, GenericDataProviderConfig> result = resolver.resolveProviders(config);
 
@@ -134,7 +134,7 @@ public class DataProviderResolverTest {
 
         @Test
         void verifyThrownExtracted() {
-            inputProvider.getInput().put("thrown", "java.lang.Throwable");
+            inputProvider.getInput().put(GenericDataProviderSettings.THROWN_VARIABLE, "java.lang.Throwable");
 
             Map<String, GenericDataProviderConfig> result = resolver.resolveProviders(config);
 

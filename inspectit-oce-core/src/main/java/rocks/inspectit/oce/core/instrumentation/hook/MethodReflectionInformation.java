@@ -9,6 +9,7 @@ import net.bytebuddy.description.method.MethodDescription;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -38,21 +39,19 @@ public class MethodReflectionInformation {
         builder.name(methodDescription.asSignatureToken().getName());
         builder.declaringClass(new WeakReference<>(declaringClass));
 
-        Stream.of(declaringClass.getDeclaredConstructors())
+        List<WeakReference<Class<?>>> parameterTypes = Stream.of(declaringClass.getDeclaredConstructors())
                 .filter(methodDescription::represents)
                 .findFirst()
-                .ifPresent(constructor ->
-                        builder.parameterTypes(Stream.of(constructor.getParameterTypes())
-                                .map(c -> new WeakReference<Class<?>>(c))
-                                .collect(Collectors.toList())));
+                .map(constructor -> Stream.of(constructor.getParameterTypes()))
+                .orElseGet(() -> Stream.of(declaringClass.getDeclaredMethods())
+                        .filter(methodDescription::represents)
+                        .findFirst()
+                        .map(method -> Stream.of(method.getParameterTypes()))
+                        .orElse(Stream.empty()))
+                .map(WeakReference<Class<?>>::new)
+                .collect(Collectors.toList());
 
-        Stream.of(declaringClass.getDeclaredMethods())
-                .filter(methodDescription::represents)
-                .findFirst()
-                .ifPresent(reflMethod ->
-                        builder.parameterTypes(Stream.of(reflMethod.getParameterTypes())
-                                .map(c -> new WeakReference<Class<?>>(c))
-                                .collect(Collectors.toList())));
+        builder.parameterTypes(parameterTypes);
         return builder.build();
     }
 
@@ -74,7 +73,8 @@ public class MethodReflectionInformation {
 
 
     public String getMethodFQN() {
-        return getDeclaringClass().getName() + "." + getName();
+        val declaringClass = Optional.ofNullable(getDeclaringClass());
+        return declaringClass.map(Class::getName).orElse("<garbage-collected>") + "." + getName();
     }
 
 }
