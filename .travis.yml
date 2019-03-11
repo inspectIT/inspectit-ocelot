@@ -18,7 +18,7 @@ cache:
     - $HOME/ibm-jdk-installer/
 
 install: true
-script: ./gradlew test systemTest
+script: ./gradlew jmhCompile test systemTest
 
 after_failure:
   - chmod +x ./resources/upload-test-reports.sh
