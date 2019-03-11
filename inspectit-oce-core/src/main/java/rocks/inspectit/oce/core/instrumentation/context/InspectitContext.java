@@ -6,7 +6,6 @@ import io.opencensus.tags.*;
 import lombok.val;
 import rocks.inspectit.oce.bootstrap.context.IInspectitContext;
 import rocks.inspectit.oce.core.instrumentation.config.model.DataProperties;
-import rocks.inspectit.oce.core.tags.CommonTagsManager;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -186,17 +185,17 @@ public class InspectitContext implements IInspectitContext {
      * Creates a new context which enters its "entry" lifecycle phase.
      * The created context will be a synchronous or asynchronous child of the currently active context.
      *
-     * @param commonTagsManager                  the provider for common tags used to populate the data if this is a root context
+     * @param commonTags                         the common tags used to populate the data if this is a root context
      * @param propagation                        the data propagation settings
      * @param interactWithApplicationTagContexts if true, data from the currently active {@link TagContext} will be inherited and makeActive will publish the data as a TagContext
      * @return the newly created context
      */
-    public static InspectitContext createFromCurrent(CommonTagsManager commonTagsManager, DataProperties propagation, boolean interactWithApplicationTagContexts) {
+    public static InspectitContext createFromCurrent(Map<String, String> commonTags, DataProperties propagation, boolean interactWithApplicationTagContexts) {
         InspectitContext parent = INSPECTIT_KEY.get();
         InspectitContext result = new InspectitContext(parent, propagation, interactWithApplicationTagContexts);
 
         if (parent == null) {
-            commonTagsManager.getCommonTagValueMap().forEach(result::setData);
+            commonTags.forEach(result::setData);
         }
 
         if (interactWithApplicationTagContexts) {
@@ -356,7 +355,7 @@ public class InspectitContext implements IInspectitContext {
     }
 
     /**
-     * Only invoked by {@link #createFromCurrent(CommonTagsManager, DataProperties, boolean)}
+     * Only invoked by {@link #createFromCurrent(Map, DataProperties, boolean)}
      * <p>
      * Reads the currently active tag context and makes this context inherit all values which
      * have changed in comparison to the values published by the parent context.

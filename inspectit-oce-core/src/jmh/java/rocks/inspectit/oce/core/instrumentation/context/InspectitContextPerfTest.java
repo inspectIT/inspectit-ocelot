@@ -2,9 +2,8 @@ package rocks.inspectit.oce.core.instrumentation.context;
 
 import org.openjdk.jmh.annotations.*;
 import rocks.inspectit.oce.core.instrumentation.config.model.DataProperties;
-import rocks.inspectit.oce.core.tags.CommonTagsManager;
-import rocks.inspectit.oce.core.tags.ITagsProvider;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -14,9 +13,7 @@ import java.util.concurrent.TimeUnit;
 @State(Scope.Benchmark)
 public class InspectitContextPerfTest {
 
-    private CommonTagsManager emptyCommonTagManager;
-
-    private CommonTagsManager commonTagsManager;
+    private Map<String, String> commonTags;
 
     private DataProperties dataProperties;
 
@@ -25,22 +22,9 @@ public class InspectitContextPerfTest {
 
     @Setup
     public void init() {
-        emptyCommonTagManager = new CommonTagsManager();
-        commonTagsManager = new CommonTagsManager();
-        commonTagsManager.register(new ITagsProvider() {
-            @Override
-            public int getPriority() {
-                return 0;
-            }
-
-            @Override
-            public Map<String, String> getTags() {
-                HashMap<String, String> map = new HashMap<>();
-                map.put("common-tag-1", "common-tag-1");
-                map.put("common-tag-2", "common-tag-2");
-                return map;
-            }
-        });
+        commonTags = new HashMap<>();
+        commonTags.put("common-tag-1", "common-tag-1");
+        commonTags.put("common-tag-2", "common-tag-2");
 
         dataProperties = DataProperties.builder()
                 .upPropagatedWithinJVM("propagate-1")
@@ -50,7 +34,7 @@ public class InspectitContextPerfTest {
 
     @Benchmark
     public void rootOnly() {
-        InspectitContext fromCurrent = InspectitContext.createFromCurrent(emptyCommonTagManager, dataProperties, interactWithAppTagContext);
+        InspectitContext fromCurrent = InspectitContext.createFromCurrent(Collections.emptyMap(), dataProperties, interactWithAppTagContext);
 
         fromCurrent.makeActive();
         fromCurrent.close();
@@ -58,7 +42,7 @@ public class InspectitContextPerfTest {
 
     @Benchmark
     public void rootOnly_with2CommonTags() {
-        InspectitContext fromCurrent = InspectitContext.createFromCurrent(emptyCommonTagManager, dataProperties, interactWithAppTagContext);
+        InspectitContext fromCurrent = InspectitContext.createFromCurrent(Collections.emptyMap(), dataProperties, interactWithAppTagContext);
 
         fromCurrent.makeActive();
         fromCurrent.close();
@@ -66,7 +50,7 @@ public class InspectitContextPerfTest {
 
     @Benchmark
     public void rootOnly_with2DataProviderTags() {
-        InspectitContext fromCurrent = InspectitContext.createFromCurrent(emptyCommonTagManager, dataProperties, interactWithAppTagContext);
+        InspectitContext fromCurrent = InspectitContext.createFromCurrent(Collections.emptyMap(), dataProperties, interactWithAppTagContext);
         fromCurrent.setData("data-1", "data-1");
         fromCurrent.setData("data-2", "data-2");
         fromCurrent.makeActive();
@@ -75,10 +59,10 @@ public class InspectitContextPerfTest {
 
     @Benchmark
     public void rootPlusOne() {
-        InspectitContext parent = InspectitContext.createFromCurrent(commonTagsManager, dataProperties, interactWithAppTagContext);
+        InspectitContext parent = InspectitContext.createFromCurrent(commonTags, dataProperties, interactWithAppTagContext);
         parent.makeActive();
 
-        InspectitContext fromCurrent = InspectitContext.createFromCurrent(commonTagsManager, dataProperties, interactWithAppTagContext);
+        InspectitContext fromCurrent = InspectitContext.createFromCurrent(commonTags, dataProperties, interactWithAppTagContext);
         fromCurrent.makeActive();
         fromCurrent.close();
 
@@ -87,10 +71,10 @@ public class InspectitContextPerfTest {
 
     @Benchmark
     public void rootPlusOne_with2UpPropagatedDataProviderTags() {
-        InspectitContext parent = InspectitContext.createFromCurrent(commonTagsManager, dataProperties, interactWithAppTagContext);
+        InspectitContext parent = InspectitContext.createFromCurrent(commonTags, dataProperties, interactWithAppTagContext);
         parent.makeActive();
 
-        InspectitContext fromCurrent = InspectitContext.createFromCurrent(commonTagsManager, dataProperties, interactWithAppTagContext);
+        InspectitContext fromCurrent = InspectitContext.createFromCurrent(commonTags, dataProperties, interactWithAppTagContext);
         fromCurrent.setData("propagate-3", "propagate-3");
         fromCurrent.setData("propagate-4", "propagate-4");
         fromCurrent.makeActive();
