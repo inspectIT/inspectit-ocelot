@@ -1,0 +1,13 @@
+
+#used by:
+# - HttpUrlConnectionContextPropagationTest
+inspectit:
+  instrumentation:
+    data:
+      up_propagated:
+        up-propagation: GLOBAL
+      up_propagated2:
+        up-propagation: GLOBAL
+      down_propagated:
+        up-propagation: NONE
+        down-propagation: GLOBAL

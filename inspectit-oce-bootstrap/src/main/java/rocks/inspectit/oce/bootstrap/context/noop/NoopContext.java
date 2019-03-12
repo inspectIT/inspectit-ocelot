@@ -4,6 +4,7 @@ import rocks.inspectit.oce.bootstrap.context.IInspectitContext;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 
 public class NoopContext implements IInspectitContext {
 
@@ -32,5 +33,25 @@ public class NoopContext implements IInspectitContext {
 
     @Override
     public void close() {
+    }
+
+    @Override
+    public Map<String, String> getDownPropagationHeaders() {
+        return Collections.emptyMap();
+    }
+
+    @Override
+    public Map<String, String> getUpPropagationHeaders() {
+        return Collections.emptyMap();
+    }
+
+    @Override
+    public void readPropagationHeaders(Map<String, String> headers) {
+
+    }
+
+    @Override
+    public Set<String> getPropagationHeaderFields() {
+        return Collections.emptySet();
     }
 }

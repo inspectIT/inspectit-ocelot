@@ -354,6 +354,32 @@ public class InspectitContext implements IInspectitContext {
         }
     }
 
+    @Override
+    public Map<String, String> getDownPropagationHeaders() {
+        return ContextPropagation.buildPropagationMap(
+                getDataAsStream()
+                        .filter(e -> propagation.isPropagatedDownGlobally(e.getKey()))
+        );
+    }
+
+    @Override
+    public Map<String, String> getUpPropagationHeaders() {
+        return ContextPropagation.buildPropagationMap(
+                getDataAsStream()
+                        .filter(e -> propagation.isPropagatedUpGlobally(e.getKey()))
+        );
+    }
+
+    @Override
+    public void readPropagationHeaders(Map<String, String> headers) {
+        ContextPropagation.readPropagationMap(headers, this);
+    }
+
+    @Override
+    public Set<String> getPropagationHeaderFields() {
+        return ContextPropagation.getPropagationFields();
+    }
+
     /**
      * Only invoked by {@link #createFromCurrent(Map, DataProperties, boolean)}
      * <p>

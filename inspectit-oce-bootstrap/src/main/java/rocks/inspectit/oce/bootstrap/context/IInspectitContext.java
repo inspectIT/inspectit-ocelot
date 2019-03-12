@@ -1,6 +1,7 @@
 package rocks.inspectit.oce.bootstrap.context;
 
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Interface abstraction for the InspectitContext.
@@ -48,4 +49,34 @@ public interface IInspectitContext extends AutoCloseable {
      */
     @Override
     void close();
+
+    /**
+     * Generates a map representing the globally down-propagated data stored in this context.
+     * The map is designed so that the keys can be used as HTTP header names and the values as corresponding header values.
+     * However, the contents of this map can be also used for any other protocol.
+     *
+     * @return the propagation map
+     */
+    Map<String, String> getDownPropagationHeaders();
+
+    /**
+     * Generates a map representing the globally up-propagated data stored in this context.
+     * The map is designed so that the keys can be used as HTTP header names and the values as corresponding header values.
+     * However, the contents of this map can be also used for any other protocol.
+     *
+     * @return the propagation map
+     */
+    Map<String, String> getUpPropagationHeaders();
+
+    /**
+     * Opposite method for {@link #getDownPropagationHeaders()} and {@link #getUpPropagationHeaders()}.
+     * This method takes a map from header names to header values and extracts the propagated data from them.
+     * The header names which are of interest for the propagation can be queried via {@link #getPropagationHeaderFields()}.
+     */
+    void readPropagationHeaders(Map<String, String> headers);
+
+    /**
+     * @return the names of Http headers which are relevant for the context propagation.
+     */
+    Set<String> getPropagationHeaderFields();
 }

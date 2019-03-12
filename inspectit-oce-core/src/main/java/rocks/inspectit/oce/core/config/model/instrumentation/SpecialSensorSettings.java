@@ -27,6 +27,22 @@ public class SpecialSensorSettings {
     private boolean scheduledExecutorContextPropagation;
 
     /**
+     * Enables or disables {@link rocks.inspectit.oce.core.instrumentation.special.HttpUrlConnectionContextPropagationSensor}.
+     */
+    private boolean httpUrlConnectionContextPropagation;
+
+    /**
+     * Enables or disable {@link rocks.inspectit.oce.core.instrumentation.special.ApacheHttpClientContextPropagationSensor}
+     */
+    private boolean apacheHttpClientContextPropagation;
+
+    /**
+     * Enables or disables {@link rocks.inspectit.oce.core.instrumentation.special.ServletApiContextUpPropagationSensor} and
+     * {@link rocks.inspectit.oce.core.instrumentation.special.ServletApiContextDownPropagationSensor}
+     */
+    private boolean servletApiContextPropagation;
+
+    /**
      * If true, we instrument all class loaders which contain instrumented classes to make sure our bootstrap classes are reachable.
      * This ensures that in custom module systems such as OSGi our instrumentation works without the need for configuration changes.
      */
