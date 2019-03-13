@@ -26,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 public class MethodHookConfigurationResolverTest {
 
     @Spy
-    DataProviderCallScheduler scheduler = new DataProviderCallScheduler();
+    DataProviderCallSorter scheduler = new DataProviderCallSorter();
 
     @InjectMocks
     MethodHookConfigurationResolver resolver;

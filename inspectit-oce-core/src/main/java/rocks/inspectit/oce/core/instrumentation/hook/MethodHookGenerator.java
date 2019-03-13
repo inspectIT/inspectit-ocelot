@@ -136,29 +136,37 @@ public class MethodHookGenerator {
         return addConditionsToProviderCall(callSettings, providerCall);
     }
 
+    /**
+     * If a data provider call contains values for the "only-if-..." settings the provider is meant to be only executed conditionally.
+     * Therefore in this method we wrap the call in {@link ConditionalHookAction} which check the corresponding preconditions.
+     *
+     * @param callSettings the data provider call definition
+     * @param providerCall the data provider call hook action which does not respect the conditions yet
+     * @return the wrapped providerCall in case conditions are defined
+     */
     private IHookAction addConditionsToProviderCall(DataProviderCallSettings callSettings, IHookAction providerCall) {
         if (!StringUtils.isEmpty(callSettings.getOnlyIfTrue())) {
             String conditionDataKey = callSettings.getOnlyIfTrue();
-            providerCall = new ConditionalHookAction((e) -> {
-                Object val = e.getInspectitContext().getData(conditionDataKey);
+            providerCall = new ConditionalHookAction((ctx) -> {
+                Object val = ctx.getInspectitContext().getData(conditionDataKey);
                 return val != null && (Boolean) val;
             }, providerCall);
         }
         if (!StringUtils.isEmpty(callSettings.getOnlyIfFalse())) {
             String conditionDataKey = callSettings.getOnlyIfFalse();
-            providerCall = new ConditionalHookAction((e) -> {
-                Object val = e.getInspectitContext().getData(conditionDataKey);
+            providerCall = new ConditionalHookAction((ctx) -> {
+                Object val = ctx.getInspectitContext().getData(conditionDataKey);
                 return val != null && !(Boolean) val;
             }, providerCall);
         }
 
         if (!StringUtils.isEmpty(callSettings.getOnlyIfNotNull())) {
             String conditionDataKey = callSettings.getOnlyIfNotNull();
-            providerCall = new ConditionalHookAction((e) -> e.getInspectitContext().getData(conditionDataKey) != null, providerCall);
+            providerCall = new ConditionalHookAction((ctx) -> ctx.getInspectitContext().getData(conditionDataKey) != null, providerCall);
         }
         if (!StringUtils.isEmpty(callSettings.getOnlyIfNull())) {
             String conditionDataKey = callSettings.getOnlyIfNull();
-            providerCall = new ConditionalHookAction((e) -> e.getInspectitContext().getData(conditionDataKey) == null, providerCall);
+            providerCall = new ConditionalHookAction((ctx) -> ctx.getInspectitContext().getData(conditionDataKey) == null, providerCall);
         }
 
         return providerCall;

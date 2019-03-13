@@ -35,12 +35,12 @@ inspectit:
           EntryPointDetectionTest-methods: true
         entry:
           method_name: {provider: get_method_name}
-          entry_point_found: {provider: assign, constant-input: {val: true}}
+          entry_point_found: {provider: set, constant-input: {value: true}}
           is_entry_point:
             only-if-null: entry_point_found
             before:
               entry_point_found : true
-            provider: assign
-            constant-input: {val: 1}
+            provider: set
+            constant-input: {value: 1}
         metrics:
           '[entrypoint/invocations]': is_entry_point

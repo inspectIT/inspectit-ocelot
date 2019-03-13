@@ -120,6 +120,12 @@ inspectit:
     #definitions of commonly used data providers
     data-providers:
 
+      # takes the input "value" and just returns it
+      set:
+        input:
+          value: Object
+        value: value
+
       #computes a nanosecond-timestamp as a long for the current point in time
       timestamp_nanos:
         value: "new Long(System.nanoTime())"

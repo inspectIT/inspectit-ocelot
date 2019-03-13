@@ -1,10 +1,6 @@
 inspectit:
   instrumentation:
     data-providers:
-      assign:
-        input:
-          val: Object
-        value: val
 
       get_method_name:
         input:

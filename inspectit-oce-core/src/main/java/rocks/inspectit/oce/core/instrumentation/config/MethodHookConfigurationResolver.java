@@ -25,7 +25,7 @@ public class MethodHookConfigurationResolver {
     DataProviderGenerator providerGenerator;
 
     @Autowired
-    DataProviderCallScheduler scheduler;
+    DataProviderCallSorter scheduler;
 
     /**
      * Derives the configuration of the hook for the given method.
@@ -82,11 +82,11 @@ public class MethodHookConfigurationResolver {
      * @param rules           the rules whose data-provider calls should be merged
      * @param providersGetter the getter to access the rules to process, e.g. {@link InstrumentationRule#getEntryProviders()}
      * @return a map mapping the data keys to the provider call which define the values
-     * @throws ConflictingDataDefinitionsException                     if the same data key is defined with different data-provider calls
-     * @throws DataProviderCallScheduler.CyclicDataDependencyException if the provider calls have cyclic dependencies preventing a scheduling
+     * @throws ConflictingDataDefinitionsException                  if the same data key is defined with different data-provider calls
+     * @throws DataProviderCallSorter.CyclicDataDependencyException if the provider calls have cyclic dependencies preventing a scheduling
      */
     private List<Pair<String, DataProviderCallConfig>> combineAndOrderProviderCalls(Set<InstrumentationRule> rules, Function<InstrumentationRule, Map<String, DataProviderCallConfig>> providersGetter)
-            throws ConflictingDataDefinitionsException, DataProviderCallScheduler.CyclicDataDependencyException {
+            throws ConflictingDataDefinitionsException, DataProviderCallSorter.CyclicDataDependencyException {
         Map<String, InstrumentationRule> dataOrigins = new HashMap<>();
         Map<String, DataProviderCallConfig> dataDefinitions = new HashMap<>();
         for (val rule : rules) {

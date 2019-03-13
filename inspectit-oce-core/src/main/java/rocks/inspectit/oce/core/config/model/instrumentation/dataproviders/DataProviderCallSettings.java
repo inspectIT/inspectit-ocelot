@@ -47,14 +47,14 @@ public class DataProviderCallSettings {
     private Map<@NotBlank String, @NotBlank String> dataInput = Collections.emptyMap();
 
     /**
-     * Normally, we assume references to data keys implictly define a dependency.
+     * Normally, we assume references to data keys implicitly define a dependency.
      * For example, when defining data-input: { x: my_data} we assume that this provider uses the value of the data key
      * my_data to populate the provider parameter "x".
      * We then assume that if any provider on the same method within the same entry / exit section writes "my_data" it has to be executed before.
      * This however is not always the case: in some cases we want to read a down-propagated value before it is overridden.
      * <p>
      * This map serves this purpose: it defines a set of data_keys.
-     * The data provider is now scheduled in a way that he is executed before any data-key mentioned in this set is written within
+     * The data provider is now scheduled in a way that it is executed before any data-key mentioned in this set is written within
      * the same method entry or exit phase
      */
     private Map<@NotBlank String, @NotNull Boolean> before = Collections.emptyMap();

@@ -5,7 +5,6 @@ import lombok.Value;
 @Value
 public class ConditionalHookAction implements IHookAction {
 
-
     @FunctionalInterface
     public interface Condition {
         boolean evaluate(IHookAction.ExecutionContext context);

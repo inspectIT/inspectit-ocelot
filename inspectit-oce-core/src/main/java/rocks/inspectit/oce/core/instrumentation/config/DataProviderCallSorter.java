@@ -19,12 +19,19 @@ import java.util.stream.Collectors;
  * The approach is that first a dependency graph is generated.
  * In this dependency graph the nodes are the data-keys and the data provider calls writing them,
  * the edges indicate a dependency between data keys and the corresponding data provider calls.
- * The edges are direct and and edge from data_A to data_B reads as
+ * The edges are direct and an edge from data_A to data_B reads as
  * "The provider writing data_B must be executed before the provider of data_A"
  */
 @Component
-public class DataProviderCallScheduler {
+public class DataProviderCallSorter {
 
+    /**
+     * Orders the given set of data-providers based on their inter-dependencies.
+     *
+     * @param calls the calls to sort
+     * @return the sorted calls, meaning that the providers should be executed in the order in which they appear in the list
+     * @throws CyclicDataDependencyException if the data provider calls have a cyclic dependency and therefore cannot be ordered
+     */
     public List<Pair<String, DataProviderCallConfig>> orderDataProviderCalls(Map<String, DataProviderCallConfig> calls) throws CyclicDataDependencyException {
         Set<String> dataKeys = calls.keySet();
         Map<String, Set<String>> dependencyGraph = new HashMap<>();
@@ -43,33 +50,33 @@ public class DataProviderCallScheduler {
     private void collectDependencies(String dataKey, DataProviderCallConfig providerCall, Map<String, Set<String>> dependencyGraph) {
         DataProviderCallSettings callSettings = providerCall.getCallSettings();
 
-        Set<String> afterDependencies = new HashSet<>();
+        Set<String> executeAfter = new HashSet<>();
         //this data provider uses the following data keys as input arguments, therefore depends on them
         val dataInputs = callSettings.getDataInput().values();
-        afterDependencies.addAll(dataInputs);
+        executeAfter.addAll(dataInputs);
 
         //the data referenced in conditions also counts as implicit dependencies
-        addIfNotBlank(callSettings.getOnlyIfFalse(), afterDependencies);
-        addIfNotBlank(callSettings.getOnlyIfTrue(), afterDependencies);
-        addIfNotBlank(callSettings.getOnlyIfNull(), afterDependencies);
-        addIfNotBlank(callSettings.getOnlyIfNotNull(), afterDependencies);
+        addIfNotBlank(callSettings.getOnlyIfFalse(), executeAfter);
+        addIfNotBlank(callSettings.getOnlyIfTrue(), executeAfter);
+        addIfNotBlank(callSettings.getOnlyIfNull(), executeAfter);
+        addIfNotBlank(callSettings.getOnlyIfNotNull(), executeAfter);
 
         //data provider calls can explicitly define that they want to be executed before other data is written
-        Set<String> beforeDependencies = callSettings.getBefore().entrySet().stream()
+        Set<String> executeBefore = callSettings.getBefore().entrySet().stream()
                 .filter(Map.Entry::getValue)
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toSet());
 
         //we want the data key in the graph even if it has no dependencies
         dependencyGraph.computeIfAbsent(dataKey, (x) -> new HashSet<>());
-        afterDependencies.stream()
+        executeAfter.stream()
                 //implicit after-dependencies are overridden by explicit before dependencies
                 //e.g. if a call uses data_xy as input and also defines before: {data_xy: true},
                 // the "after"-dependency to data_xy does not count
-                .filter(data -> !beforeDependencies.contains(data))
+                .filter(data -> !executeBefore.contains(data))
                 .forEach(afterData ->
                         dependencyGraph.get(dataKey).add(afterData));
-        beforeDependencies
+        executeBefore
                 .forEach(beforeData ->
                         dependencyGraph.computeIfAbsent(beforeData, (x) -> new HashSet<>())
                                 .add(dataKey));
