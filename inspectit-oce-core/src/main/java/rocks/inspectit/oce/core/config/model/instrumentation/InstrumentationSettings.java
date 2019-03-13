@@ -79,6 +79,11 @@ public class InstrumentationSettings {
     private Map<@NotBlank String, @Valid DataSettings> data = Collections.emptyMap();
 
     /**
+     * Defines whether lambda classes should be excluded from the declared scope.
+     */
+    private boolean excludeLambdas = true;
+
+    /**
      * Allows all nested configs to evaluate context sensitive config properties regarding their correctness.
      * This is called by {@link InspectitConfig#performValidation(ViolationBuilder)}
      *
