@@ -4,6 +4,7 @@ import io.opencensus.stats.StatsRecorder;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import net.bytebuddy.description.method.MethodDescription;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.oce.core.config.model.instrumentation.dataproviders.DataProviderCallSettings;
@@ -83,21 +84,21 @@ public class MethodHookGenerator {
     /**
      * Adds the entry and exit calls to data providers as hook actions to the hook.
      *
-     * @param method       the information about the method within which this data provider is called
+     * @param methodInfo   the information about the method within which this data provider is called
      * @param config       the configuration of the method hook specifying the data providers to call
      * @param entryActions the list of entry hook actions to which the data providers will be appended
      * @param exitActions  the list of exit hook actions to which the data providers will be appended
      */
-    private void addDataProviderCalls(MethodReflectionInformation method, MethodHookConfiguration config, List<IHookAction> entryActions, List<IHookAction> exitActions) {
+    private void addDataProviderCalls(MethodReflectionInformation methodInfo, MethodHookConfiguration config, List<IHookAction> entryActions, List<IHookAction> exitActions) {
         config.getEntryProviders().forEach(pair -> {
             String dataKey = pair.getLeft();
             val providerCallConfig = pair.getRight();
             try {
-                BoundDataProvider call = generateAndBindDataProvider(method, dataKey, providerCallConfig);
+                val call = generateAndBindDataProvider(methodInfo, dataKey, providerCallConfig);
                 entryActions.add(call);
             } catch (Exception e) {
-                log.error("Failed to build entry data provider {} for data {} on method {}, no value will be assigned",
-                        providerCallConfig.getProvider().getName(), dataKey, method.getMethodFQN(), e);
+                log.error("Failed to build entry data provider {} for data {} on method {}.{}, no value will be assigned",
+                        providerCallConfig.getProvider().getName(), dataKey, methodInfo.getDeclaringClass().getName(), methodInfo.getName(), e);
             }
         });
 
@@ -105,11 +106,11 @@ public class MethodHookGenerator {
             String dataKey = pair.getLeft();
             val providerCallConfig = pair.getRight();
             try {
-                BoundDataProvider call = generateAndBindDataProvider(method, dataKey, providerCallConfig);
+                val call = generateAndBindDataProvider(methodInfo, dataKey, providerCallConfig);
                 exitActions.add(call);
             } catch (Exception e) {
                 log.error("Failed to build exit data provider {} for data {} on method {}, no value will be assigned",
-                        providerCallConfig.getProvider().getName(), dataKey, method.getMethodFQN(), e);
+                        providerCallConfig.getProvider().getName(), dataKey, methodInfo.getMethodFQN(), e);
             }
         });
     }
@@ -122,14 +123,53 @@ public class MethodHookGenerator {
      * @param providerCallConfig the specification of the call to the data provider
      * @return the executable data provider
      */
-    private BoundDataProvider generateAndBindDataProvider(MethodReflectionInformation methodInfo, String dataKey, DataProviderCallConfig providerCallConfig) {
+    private IHookAction generateAndBindDataProvider(MethodReflectionInformation methodInfo, String dataKey, DataProviderCallConfig providerCallConfig) {
         GenericDataProviderConfig providerConfig = providerCallConfig.getProvider();
+        val callSettings = providerCallConfig.getCallSettings();
         val injectedProviderClass = dataProviderGenerator.getOrGenerateDataProvider(providerConfig, methodInfo.getDeclaringClass());
 
         val dynamicAssignments = getDynamicInputAssignments(methodInfo, providerCallConfig);
         val constantAssignments = getConstantInputAssignments(methodInfo, providerCallConfig);
 
-        return BoundDataProvider.bind(dataKey, providerConfig, injectedProviderClass, constantAssignments, dynamicAssignments);
+        IHookAction providerCall = BoundDataProvider.bind(dataKey, providerConfig, injectedProviderClass, constantAssignments, dynamicAssignments);
+
+        return addConditionsToProviderCall(callSettings, providerCall);
+    }
+
+    /**
+     * If a data provider call contains values for the "only-if-..." settings the provider is meant to be only executed conditionally.
+     * Therefore in this method we wrap the call in {@link ConditionalHookAction} which check the corresponding preconditions.
+     *
+     * @param callSettings the data provider call definition
+     * @param providerCall the data provider call hook action which does not respect the conditions yet
+     * @return the wrapped providerCall in case conditions are defined
+     */
+    private IHookAction addConditionsToProviderCall(DataProviderCallSettings callSettings, IHookAction providerCall) {
+        if (!StringUtils.isEmpty(callSettings.getOnlyIfTrue())) {
+            String conditionDataKey = callSettings.getOnlyIfTrue();
+            providerCall = new ConditionalHookAction((ctx) -> {
+                Object val = ctx.getInspectitContext().getData(conditionDataKey);
+                return val != null && (Boolean) val;
+            }, providerCall);
+        }
+        if (!StringUtils.isEmpty(callSettings.getOnlyIfFalse())) {
+            String conditionDataKey = callSettings.getOnlyIfFalse();
+            providerCall = new ConditionalHookAction((ctx) -> {
+                Object val = ctx.getInspectitContext().getData(conditionDataKey);
+                return val != null && !(Boolean) val;
+            }, providerCall);
+        }
+
+        if (!StringUtils.isEmpty(callSettings.getOnlyIfNotNull())) {
+            String conditionDataKey = callSettings.getOnlyIfNotNull();
+            providerCall = new ConditionalHookAction((ctx) -> ctx.getInspectitContext().getData(conditionDataKey) != null, providerCall);
+        }
+        if (!StringUtils.isEmpty(callSettings.getOnlyIfNull())) {
+            String conditionDataKey = callSettings.getOnlyIfNull();
+            providerCall = new ConditionalHookAction((ctx) -> ctx.getInspectitContext().getData(conditionDataKey) == null, providerCall);
+        }
+
+        return providerCall;
     }
 
     /**
@@ -184,6 +224,4 @@ public class MethodHookGenerator {
         }
         return dynamicAssignments;
     }
-
-
 }

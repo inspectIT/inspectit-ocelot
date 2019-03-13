@@ -1,8 +1,9 @@
 inspectit:
   instrumentation:
     data-providers:
-      assign:
+
+      get_method_name:
         input:
-          val: Object
-        value: val
+          _methodName: String
+        value: _methodName
 
