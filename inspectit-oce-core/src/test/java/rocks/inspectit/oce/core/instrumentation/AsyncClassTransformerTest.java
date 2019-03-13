@@ -26,10 +26,7 @@ import rocks.inspectit.oce.core.testutils.DummyClassLoader;
 
 import java.lang.instrument.Instrumentation;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -107,7 +104,8 @@ public class AsyncClassTransformerTest {
                     Collections.singleton(mockSensor), Collections.singleton(rule), null
             );
             when(configResolver.getClassInstrumentationConfiguration(any())).thenReturn(mockedConfig);
-            when(classLoaderDelegation.wasBootstrapMadeAvailableTo(any())).thenReturn(true);
+            when(classLoaderDelegation.getClassLoaderClassesRequiringRetransformation(any(), any()))
+                    .thenReturn(new LinkedHashSet<>());
 
             Class<AsyncClassTransformerTest> clazz = AsyncClassTransformerTest.class;
             String className = clazz.getName().replace('.', '/');
@@ -145,7 +143,8 @@ public class AsyncClassTransformerTest {
                     Collections.singleton(mockSensor), Collections.emptySet(), null
             );
             when(configResolver.getClassInstrumentationConfiguration(any())).thenReturn(mockedConfig);
-            when(classLoaderDelegation.wasBootstrapMadeAvailableTo(any())).thenReturn(true);
+            when(classLoaderDelegation.getClassLoaderClassesRequiringRetransformation(any(), any()))
+                    .thenReturn(new LinkedHashSet<>());
 
             List<Class<?>> classes = Arrays.asList(String.class, Integer.class, URLClassLoader.class, ClassLoader.class);
             for (Class<?> clazz : classes) {
@@ -225,7 +224,8 @@ public class AsyncClassTransformerTest {
 
         @Test
         void verifyClassInstrumentedEventPublished() throws Exception {
-            when(classLoaderDelegation.wasBootstrapMadeAvailableTo(any())).thenReturn(true);
+            when(classLoaderDelegation.getClassLoaderClassesRequiringRetransformation(any(), any()))
+                    .thenReturn(new LinkedHashSet<>());
 
             IClassDefinitionListener listener = Mockito.mock(IClassDefinitionListener.class);
 
@@ -269,7 +269,8 @@ public class AsyncClassTransformerTest {
 
         @Test
         void testDefinitionListenersNotInvokedForExistingClasses() throws Exception {
-            when(classLoaderDelegation.wasBootstrapMadeAvailableTo(any())).thenReturn(true);
+            when(classLoaderDelegation.getClassLoaderClassesRequiringRetransformation(any(), any()))
+                    .thenReturn(new LinkedHashSet<>());
             IClassDefinitionListener listener = Mockito.mock(IClassDefinitionListener.class);
             transformer.classDefinitionListeners = Arrays.asList(listener);
 

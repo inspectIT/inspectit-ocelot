@@ -109,6 +109,9 @@ public class InstrumentationConfigurationResolver {
      */
     public Map<MethodDescription, MethodHookConfiguration> getHookConfigurations(Class<?> clazz) {
         val config = currentConfig;
+        if (isIgnoredClass(clazz, config)) {
+            return Collections.emptyMap();
+        }
         try {
             TypeDescription type = TypeDescription.ForLoadedType.of(clazz);
             Set<InstrumentationRule> narrowedRules = getNarrowedRulesFor(type, config);

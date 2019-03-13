@@ -101,20 +101,20 @@ public class HookManagerIntTest extends SpringTestBase {
         assertThat(constructorHook).isNotSameAs(NoopMethodHook.INSTANCE);
     }
 
-
     @Test
     @DirtiesContext
-    void testNoInstrumentationAddedWithoutBootstrapAccess() {
+    void testIgnoresRespected() {
         waitForHookingToFinish();
 
-        updateProperties(ps ->
-                ps.setProperty("inspectit.instrumentation.rules.r2.scopes.scB", "true")
-        );
+        updateProperties(ps -> {
+            ps.setProperty("inspectit.instrumentation.rules.r2.scopes.scB", "true");
+            ps.setProperty("inspectit.instrumentation.ignored-packages.rocks", "true");
+        });
 
         waitForHookingToFinish();
 
-        IMethodHook hookB = Instances.hookManager.getHook(dummyClassWithoutBootstrapAccess, "methodB()");
-        IMethodHook constructorHook = Instances.hookManager.getHook(dummyClassWithoutBootstrapAccess, "<init>()");
+        IMethodHook hookB = Instances.hookManager.getHook(dummyClass, "methodB()");
+        IMethodHook constructorHook = Instances.hookManager.getHook(dummyClass, "<init>()");
         assertThat(hookB).isSameAs(NoopMethodHook.INSTANCE);
         assertThat(constructorHook).isSameAs(NoopMethodHook.INSTANCE);
     }

@@ -92,6 +92,10 @@ inspectit:
       # enables or disables the instrumentation to ensure context propagation across java.lang.Thread instances
       thread-start-context-propagation: true
 
+      # If true, we instrument all class loaders which contain instrumented classes to make sure our bootstrap classes are reachable.
+      # This ensures that in custom module systems such as OSGi our instrumentation works without the need for configuration changes.
+      class-loader-delegation: true
+
     # settings for fine-tuning the instrumentation process
     internal:
       # the time to pause between executing batches of class instrumentation updates

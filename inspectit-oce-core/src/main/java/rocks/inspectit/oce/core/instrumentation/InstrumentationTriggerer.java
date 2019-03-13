@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import rocks.inspectit.oce.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.oce.core.config.InspectitEnvironment;
 import rocks.inspectit.oce.core.config.model.instrumentation.InternalSettings;
+import rocks.inspectit.oce.core.instrumentation.config.InstrumentationConfigurationResolver;
 import rocks.inspectit.oce.core.instrumentation.config.event.InstrumentationConfigurationChangedEvent;
 import rocks.inspectit.oce.core.instrumentation.config.model.ClassInstrumentationConfiguration;
 import rocks.inspectit.oce.core.instrumentation.event.ClassInstrumentedEvent;
@@ -61,6 +62,9 @@ public class InstrumentationTriggerer implements IClassDiscoveryListener {
 
     @Autowired
     private HookManager hookManager;
+
+    @Autowired
+    InstrumentationConfigurationResolver configResolver;
 
     /**
      * The set of classes which might need instrumentation updates.
@@ -134,7 +138,7 @@ public class InstrumentationTriggerer implements IClassDiscoveryListener {
      * @param batchSize the number of classes to take from {@link #pendingClasses} and to retransform per batch
      */
     void checkClassesForConfigurationUpdates(BatchSize batchSize) {
-        List<Class<?>> classesToRetransform = getBatchOfClassesToRetransform(batchSize);
+        List<Class<?>> classesToRetransform = new ArrayList<>(getBatchOfClassesToRetransform(batchSize));
 
         try (val sm = selfMonitoring.withDurationSelfMonitoring("instrumentation-retransformation")) {
             val watch = Stopwatch.createStarted();
@@ -169,9 +173,9 @@ public class InstrumentationTriggerer implements IClassDiscoveryListener {
      * @param batchSize the configured batch sizes
      * @return the classes which need retransformation
      */
-    List<Class<?>> getBatchOfClassesToRetransform(BatchSize batchSize) {
+    Set<Class<?>> getBatchOfClassesToRetransform(BatchSize batchSize) {
         try (val sm = selfMonitoring.withDurationSelfMonitoring("instrumentation-analysis")) {
-            List<Class<?>> classesToRetransform = new ArrayList<>();
+            Set<Class<?>> classesToRetransform = new HashSet<>();
             val watch = Stopwatch.createStarted();
             try {
 
@@ -211,23 +215,34 @@ public class InstrumentationTriggerer implements IClassDiscoveryListener {
      * @param clazz                the class whose instrumentation should be checked
      * @param classesToRetransform if the class does require a change of the bytecode, it will be added to this set.
      */
-    private void updateClass(Class<?> clazz, Collection<Class<?>> classesToRetransform) {
-        ClassLoader targetClassLoader = clazz.getClassLoader();
+    private void updateClass(Class<?> clazz, Set<Class<?>> classesToRetransform) {
         if (instrumentationManager.doesClassRequireRetransformation(clazz)) {
-            if (classLoaderDelegation.makeBootstrapClassesAvailable(targetClassLoader)) {
-                classesToRetransform.add(clazz);
-            } else {
-                log.warn("Skipping instrumentation of {} as its classloader has no access to the bootstrap!",
-                        clazz.getName());
-            }
+            applyClassLoaderDelegation(clazz, classesToRetransform);
+            classesToRetransform.add(clazz);
         }
-        // we only do hook updates for classes which have access to our bootstrap
-        // the  reasons is that we for example inject DataProviders which depend on interfaces from our bootstrap
-        if (classLoaderDelegation.wasBootstrapMadeAvailableTo(targetClassLoader)) {
-            try {
-                hookManager.updateHooksForClass(clazz);
-            } catch (Throwable t) {
-                log.error("Error adding hooks to clazz {}", clazz.getName(), t);
+        try {
+            //this is guaranteed to be invoked after applyClassLoaderDelegation if any hooking occurs
+            //this is due to the fact doesClassRequireRetransformation return true when the first hook is added
+            hookManager.updateHooksForClass(clazz);
+        } catch (Throwable t) {
+            log.error("Error adding hooks to clazz {}", clazz.getName(), t);
+        }
+    }
+
+    private void applyClassLoaderDelegation(Class<?> clazz, Set<Class<?>> classesToRetransform) {
+        try (val sm = selfMonitoring.withDurationSelfMonitoring("classloader-delegation")) {
+            LinkedHashSet<Class<?>> classLoadersToRetransform = classLoaderDelegation.getClassLoaderClassesRequiringRetransformation(clazz.getClassLoader(), configResolver.getCurrentConfig());
+            //the order is important here!
+            for (Class<?> classLoaderToRetransform : classLoadersToRetransform) {
+                classesToRetransform.remove(classLoaderToRetransform);
+                if (instrumentationManager.doesClassRequireRetransformation(classLoaderToRetransform)) {
+                    try {
+                        log.debug("Retransforming {} due to classloader delegation", classLoaderToRetransform.getName());
+                        instrumentation.retransformClasses(classLoaderToRetransform);
+                    } catch (Throwable t) {
+                        log.error("Error retransforming {} due to classloader delegation", classLoaderToRetransform.getName(), t);
+                    }
+                }
             }
         }
     }

@@ -126,16 +126,14 @@ class InstrumentationConfigurationResolverTest {
         final Method testCase_methodA = TestCase.class.getDeclaredMethod("methodA");
         final Method testCase_methodB = TestCase.class.getDeclaredMethod("methodB");
 
+        Class<?> testCaseClass;
+
         GetHookConfigurations() throws NoSuchMethodException {
         }
 
-        class TestCase {
-
-            void methodA() {
-            }
-
-            void methodB() {
-            }
+        @BeforeEach
+        void setupTestCaseClass() throws ClassNotFoundException {
+            testCaseClass = Class.forName(TestCase.class.getName(), true, new DummyClassLoader((ClassLoader) null, TestCase.class));
         }
 
         @Test
@@ -147,7 +145,7 @@ class InstrumentationConfigurationResolverTest {
             config = InstrumentationConfiguration.builder().source(settings).rule(r1).build();
             FieldUtils.writeDeclaredField(resolver, "currentConfig", config, true);
 
-            Map<MethodDescription, MethodHookConfiguration> result = resolver.getHookConfigurations(TestCase.class);
+            Map<MethodDescription, MethodHookConfiguration> result = resolver.getHookConfigurations(testCaseClass);
 
             assertThat(result).isEmpty();
             verify(hookResolver, never()).buildHookConfiguration(any(), any(), any());
@@ -162,7 +160,7 @@ class InstrumentationConfigurationResolverTest {
             config = InstrumentationConfiguration.builder().source(settings).rule(r1).build();
             FieldUtils.writeDeclaredField(resolver, "currentConfig", config, true);
 
-            Map<MethodDescription, MethodHookConfiguration> result = resolver.getHookConfigurations(TestCase.class);
+            Map<MethodDescription, MethodHookConfiguration> result = resolver.getHookConfigurations(testCaseClass);
 
             assertThat(result).isEmpty();
             verify(hookResolver, never()).buildHookConfiguration(any(), any(), any());
@@ -181,12 +179,12 @@ class InstrumentationConfigurationResolverTest {
             config = InstrumentationConfiguration.builder().source(settings).rule(r1).rule(r2).build();
             FieldUtils.writeDeclaredField(resolver, "currentConfig", config, true);
 
-            Map<MethodDescription, MethodHookConfiguration> result = resolver.getHookConfigurations(TestCase.class);
+            Map<MethodDescription, MethodHookConfiguration> result = resolver.getHookConfigurations(testCaseClass);
 
             assertThat(result).hasSize(1);
             verify(hookResolver, times(1)).buildHookConfiguration(any(), any(), any());
             verify(hookResolver, times(1))
-                    .buildHookConfiguration(eq(testCase_methodA.getDeclaringClass()), argThat(method::matches), eq(Collections.singleton(r1)));
+                    .buildHookConfiguration(eq(testCaseClass), argThat(method::matches), eq(Collections.singleton(r1)));
         }
 
 
@@ -201,12 +199,12 @@ class InstrumentationConfigurationResolverTest {
             config = InstrumentationConfiguration.builder().source(settings).rule(r1).rule(r2).build();
             FieldUtils.writeDeclaredField(resolver, "currentConfig", config, true);
 
-            Map<MethodDescription, MethodHookConfiguration> result = resolver.getHookConfigurations(TestCase.class);
+            Map<MethodDescription, MethodHookConfiguration> result = resolver.getHookConfigurations(testCaseClass);
 
             assertThat(result).hasSize(1);
             verify(hookResolver, times(1)).buildHookConfiguration(any(), any(), any());
             verify(hookResolver, times(1))
-                    .buildHookConfiguration(eq(testCase_methodA.getDeclaringClass()), argThat(method::matches), eq(new HashSet<>(Arrays.asList(r1, r2))));
+                    .buildHookConfiguration(eq(testCaseClass), argThat(method::matches), eq(new HashSet<>(Arrays.asList(r1, r2))));
         }
 
 
@@ -223,14 +221,14 @@ class InstrumentationConfigurationResolverTest {
             config = InstrumentationConfiguration.builder().source(settings).rule(r1).rule(r2).build();
             FieldUtils.writeDeclaredField(resolver, "currentConfig", config, true);
 
-            Map<MethodDescription, MethodHookConfiguration> result = resolver.getHookConfigurations(TestCase.class);
+            Map<MethodDescription, MethodHookConfiguration> result = resolver.getHookConfigurations(testCaseClass);
 
             assertThat(result).hasSize(2);
             verify(hookResolver, times(2)).buildHookConfiguration(any(), any(), any());
             verify(hookResolver, times(1))
-                    .buildHookConfiguration(eq(testCase_methodA.getDeclaringClass()), argThat(methodA::matches), eq(new HashSet<>(Arrays.asList(r1, r2))));
+                    .buildHookConfiguration(eq(testCaseClass), argThat(methodA::matches), eq(new HashSet<>(Arrays.asList(r1, r2))));
             verify(hookResolver, times(1))
-                    .buildHookConfiguration(eq(testCase_methodB.getDeclaringClass()), argThat(methodB::matches), eq(new HashSet<>(Arrays.asList(r2))));
+                    .buildHookConfiguration(eq(testCaseClass), argThat(methodB::matches), eq(new HashSet<>(Arrays.asList(r2))));
         }
 
     }
@@ -396,6 +394,15 @@ class InstrumentationConfigurationResolverTest {
             assertThat(dataProps.isPropagatedUpGlobally("my_key")).isTrue();
         }
 
+    }
+}
+
+class TestCase {
+
+    void methodA() {
+    }
+
+    void methodB() {
     }
 }
 

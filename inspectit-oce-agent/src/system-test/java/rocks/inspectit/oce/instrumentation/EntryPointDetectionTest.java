@@ -3,7 +3,7 @@ package rocks.inspectit.oce.instrumentation;
 import io.opencensus.stats.AggregationData;
 import org.assertj.core.util.Maps;
 import org.junit.jupiter.api.Test;
-import rocks.inspectit.oce.TestUtils;
+import rocks.inspectit.oce.utils.TestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

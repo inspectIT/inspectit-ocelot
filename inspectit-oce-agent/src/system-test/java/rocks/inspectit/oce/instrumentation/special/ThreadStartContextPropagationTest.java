@@ -57,7 +57,7 @@ public class ThreadStartContextPropagationTest extends InstrumentationSysTestBas
 
 
     @Test
-    public void verifyContextProgapationViaAbstractThreads() throws InterruptedException {
+    public void verifyContextPropagationViaAbstractThreads() throws InterruptedException {
         long rand = System.nanoTime();
         TagKey tagKey = TagKey.create("test-tag-key-" + rand);
         TagValue tagValue = TagValue.create("test-tag-value-" + rand);

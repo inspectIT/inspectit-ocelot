@@ -94,8 +94,9 @@ public class AsyncClassTransformer implements ClassFileTransformer {
             classDefinitionListeners.forEach(lis -> lis.onNewClassDefined(className, loader));
             return bytecode; //leave the class unchanged for now
 
-            //retransforms can be triggered by other agents where the classloader delegation has not been applied yet
-        } else if (!classLoaderDelegation.wasBootstrapMadeAvailableTo(loader)) {
+        }
+        //retransforms can be triggered by other agents where the classloader delegation has not been applied yet
+        if (!classLoaderDelegation.getClassLoaderClassesRequiringRetransformation(loader, configResolver.getCurrentConfig()).isEmpty()) {
             log.debug("Skipping instrumentation of {} as bootstrap classes were not made available yet for the class", className);
             return bytecode; //leave the class unchanged for now
         } else {

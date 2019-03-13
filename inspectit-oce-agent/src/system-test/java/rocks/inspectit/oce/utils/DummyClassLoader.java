@@ -14,6 +14,11 @@ public class DummyClassLoader extends ClassLoader {
         this(null, classesToCopy);
     }
 
+    /**
+     * Takes the given class, locates its bytecode and loads the bytecode into this class loader
+     *
+     * @param classesToCopy the class to copy
+     */
     public void loadCopiesOfClasses(Class<?>... classesToCopy) {
         for (Class<?> clazz : classesToCopy) {
             byte[] code = readByteCode(clazz);
