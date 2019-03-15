@@ -92,6 +92,10 @@ inspectit:
       # enables or disables the instrumentation to ensure context propagation across java.lang.Thread instances
       thread-start-context-propagation: true
 
+      # If true, we instrument all class loaders which contain instrumented classes to make sure our bootstrap classes are reachable.
+      # This ensures that in custom module systems such as OSGi our instrumentation works without the need for configuration changes.
+      class-loader-delegation: true
+
     # settings for fine-tuning the instrumentation process
     internal:
       # the time to pause between executing batches of class instrumentation updates
@@ -468,7 +472,7 @@ inspectit:
             aggregation: SUM
             tags: {"component-name" : true}
 
-      '[inspectit/self/instrumentation-analysis-queue-size]':
+      '[inspectit/self/instrumentation-queue-size]':
         enabled: ${inspectit.self-monitoring.enabled}
         type: LONG
         unit: classes
@@ -479,12 +483,6 @@ inspectit:
         type: LONG
         unit: classes
         description: "the number of classes currently instrumented by inspectIT"
-
-      '[inspectit/self/instrumentation-hooking-queue-size]':
-        enabled: ${inspectit.self-monitoring.enabled}
-        type: LONG
-        unit: classes
-        description: "the number of pending classes inspectIT has to check if they require updates of their method hooks"
 
   # logging settings
   logging:

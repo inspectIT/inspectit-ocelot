@@ -2,7 +2,7 @@ package rocks.inspectit.oce.instrumentation;
 
 import org.junit.jupiter.api.BeforeAll;
 
-import static rocks.inspectit.oce.TestUtils.waitForInstrumentationToComplete;
+import static rocks.inspectit.oce.utils.TestUtils.waitForInstrumentationToComplete;
 
 public class InstrumentationSysTestBase {
 

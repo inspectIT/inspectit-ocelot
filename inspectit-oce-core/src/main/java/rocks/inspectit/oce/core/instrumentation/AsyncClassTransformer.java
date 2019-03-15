@@ -25,6 +25,7 @@ import rocks.inspectit.oce.core.instrumentation.event.ClassInstrumentedEvent;
 import rocks.inspectit.oce.core.instrumentation.event.IClassDefinitionListener;
 import rocks.inspectit.oce.core.instrumentation.event.TransformerShutdownEvent;
 import rocks.inspectit.oce.core.instrumentation.hook.DispatchHookAdvices;
+import rocks.inspectit.oce.core.instrumentation.special.ClassLoaderDelegation;
 import rocks.inspectit.oce.core.instrumentation.special.SpecialSensor;
 import rocks.inspectit.oce.core.selfmonitoring.SelfMonitoringService;
 import rocks.inspectit.oce.core.utils.CommonUtils;
@@ -35,9 +36,7 @@ import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.lang.instrument.Instrumentation;
 import java.security.ProtectionDomain;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * A class transformer applying all inspectIT instrumentations.
@@ -65,6 +64,9 @@ public class AsyncClassTransformer implements ClassFileTransformer {
     @Autowired
     List<IClassDefinitionListener> classDefinitionListeners;
 
+    @Autowired
+    ClassLoaderDelegation classLoaderDelegation;
+
     /**
      * Detects if the instrumenter is in the process of shutting down.
      * When it is shutting down, no new instrumentations are added anymore, instead all existing instrumentations are removed.
@@ -91,6 +93,12 @@ public class AsyncClassTransformer implements ClassFileTransformer {
         if (classBeingRedefined == null) { // class is not loaded yet! we only redefine only loaded classes to prevent blocking
             classDefinitionListeners.forEach(lis -> lis.onNewClassDefined(className, loader));
             return bytecode; //leave the class unchanged for now
+
+        }
+        //retransforms can be triggered by other agents where the classloader delegation has not been applied yet
+        if (!classLoaderDelegation.getClassLoaderClassesRequiringRetransformation(loader, configResolver.getCurrentConfig()).isEmpty()) {
+            log.debug("Skipping instrumentation of {} as bootstrap classes were not made available yet for the class", className);
+            return bytecode; //leave the class unchanged for now
         } else {
             return applyInstrumentation(classBeingRedefined, bytecode);
         }
@@ -106,7 +114,7 @@ public class AsyncClassTransformer implements ClassFileTransformer {
      */
     @PreDestroy
     void destroy() {
-        // this look guarantees through updateAndGetActiveConfiguration that no instrumentation is added after the lock is released
+        // this lock guarantees through updateAndGetActiveConfiguration that no instrumentation is added after the lock is released
         synchronized (shutDownLock) {
             shuttingDown = true;
         }
@@ -123,16 +131,27 @@ public class AsyncClassTransformer implements ClassFileTransformer {
      * When {@link #shuttingDown} is true, for every retransformed class any instrumentation is removed automatically.
      */
     private void deinstrumentAllClasses() {
+        //we deinstrument classloaders last to prevent classloading issues with the classloader delegation
+        Set<Class<?>> instrumentedClassLoaders = new HashSet<>();
+
         //elements are removed from instrumentedClasses by the updateAndGetActiveConfiguration method
-        while (instrumentedClasses.size() > 0) {
+        while (instrumentedClasses.size() > instrumentedClassLoaders.size()) {
             List<Class<?>> batchClasses = new ArrayList<>();
             int maxBatchSize = env.getCurrentConfig().getInstrumentation().getInternal().getClassRetransformBatchSize();
 
             Iterator<Class<?>> it = instrumentedClasses.asMap().keySet().iterator();
-            for (int i = 0; i < maxBatchSize && it.hasNext(); i++) {
-                batchClasses.add(it.next());
+            while (batchClasses.size() < maxBatchSize && it.hasNext()) {
+                Class<?> clazz = it.next();
+                if (ClassLoader.class.isAssignableFrom(clazz)) {
+                    instrumentedClassLoaders.add(clazz);
+                } else {
+                    batchClasses.add(clazz);
+                }
             }
             removeInstrumentationForBatch(batchClasses);
+        }
+        if (instrumentedClassLoaders.size() > 0) {
+            removeInstrumentationForBatch(new ArrayList<>(instrumentedClassLoaders));
         }
     }
 
@@ -181,7 +200,7 @@ public class AsyncClassTransformer implements ClassFileTransformer {
 
                 //Apply the actual instrumentation onto the builders
                 for (SpecialSensor specialSensor : classConf.getActiveSpecialSensors()) {
-                    builder = specialSensor.instrument(classBeingRedefined, type, classConf.getActiveConfiguration(), builder);
+                    builder = specialSensor.instrument(classBeingRedefined, classConf.getActiveConfiguration(), builder);
                 }
 
                 // Apply the instrumentation hook

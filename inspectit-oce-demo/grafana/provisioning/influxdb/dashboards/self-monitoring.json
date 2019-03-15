@@ -16,7 +16,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 2,
-  "iteration": 1551102345677,
+  "iteration": 1552297870742,
   "links": [],
   "panels": [
     {
@@ -271,42 +271,10 @@
         {
           "alias": "# classes pending for analysis",
           "groupBy": [],
-          "measurement": "inspectit_self_instrumentation_analysis_queue_size",
+          "measurement": "inspectit_self_instrumentation_queue_size",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "C",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "gauge"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "service_name",
-              "operator": "=~",
-              "value": "/^$service$/"
-            }
-          ]
-        },
-        {
-          "alias": "# classes pending for hook",
-          "groupBy": [],
-          "measurement": "inspectit_self_instrumentation_hooking_queue_size",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT last(\"gauge\") FROM \"inspectit_self_instrumentation_hooking_queue_size\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter",
-          "rawQuery": false,
-          "refId": "D",
           "resultFormat": "time_series",
           "select": [
             [
@@ -403,99 +371,13 @@
       "tableColumn": "Time",
       "targets": [
         {
-          "query": "perc = () => {\ninstrumented = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"inspectit_self_instrumentation_analysis_queue_size\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nloaded = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"jvm_classes_loaded\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nreturn join(tables:{instrumented:instrumented, loaded:loaded},on:[\"_time\"])\n|> map(fn:(r) => ({\n_time: r._time,\n_value: 1.0 - (r._value_instrumented / r._value_loaded),\n_measurement: \"progress\"}))\n}\n\nperc()",
+          "query": "perc = () => {\ninstrumented = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"inspectit_self_instrumentation_queue_size\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nloaded = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"jvm_classes_loaded\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nreturn join(tables:{instrumented:instrumented, loaded:loaded},on:[\"_time\"])\n|> map(fn:(r) => ({\n_time: r._time,\n_value: 1.0 - (r._value_instrumented / r._value_loaded),\n_measurement: \"progress\"}))\n}\n\nperc()",
           "refId": "A",
           "resultFormat": "time_series"
         }
       ],
       "thresholds": "0.33,0.66",
       "title": "Analysis Progress",
-      "type": "singlestat",
-      "valueFontSize": "80%",
-      "valueMaps": [
-        {
-          "op": "=",
-          "text": "N/A",
-          "value": "null"
-        }
-      ],
-      "valueName": "avg"
-    },
-    {
-      "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": true,
-      "colors": [
-        "#d44a3a",
-        "rgba(237, 129, 40, 0.89)",
-        "#299c46"
-      ],
-      "datasource": "Flux",
-      "format": "percentunit",
-      "gauge": {
-        "maxValue": 1,
-        "minValue": 0,
-        "show": true,
-        "thresholdLabels": false,
-        "thresholdMarkers": true
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 3,
-        "x": 12,
-        "y": 1
-      },
-      "id": 50,
-      "interval": null,
-      "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
-        {
-          "name": "value to text",
-          "value": 1
-        },
-        {
-          "name": "range to text",
-          "value": 2
-        }
-      ],
-      "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "postfix": "",
-      "postfixFontSize": "50%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "scopedVars": {
-        "service": {
-          "selected": false,
-          "text": "api-gateway",
-          "value": "api-gateway"
-        }
-      },
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": false,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": false
-      },
-      "tableColumn": "Time",
-      "targets": [
-        {
-          "query": "perc = () => {\nhooked = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"inspectit_self_instrumentation_hooking_queue_size\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nclassesLoaded = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"jvm_classes_loaded\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nreturn join(tables:{hooked:hooked, classesLoaded:classesLoaded},on:[\"_time\"])\n|> map(fn:(r) => ({\n_time: r._time,\n_value: 1.0 - (r._value_hooked / r._value_classesLoaded),\n_measurement: \"progress\"}))\n|> last()\n}\n\nperc()",
-          "refId": "A",
-          "resultFormat": "time_series"
-        }
-      ],
-      "thresholds": "0.33,0.66",
-      "title": "Hooking Progress",
       "type": "singlestat",
       "valueFontSize": "80%",
       "valueMaps": [
@@ -518,8 +400,8 @@
       "fill": 5,
       "gridPos": {
         "h": 6,
-        "w": 9,
-        "x": 15,
+        "w": 12,
+        "x": 12,
         "y": 1
       },
       "id": 49,
@@ -679,7 +561,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "inspectit_self_instrumentation_analysis_queue_size",
+          "measurement": "inspectit_self_instrumentation_queue_size",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "C",
@@ -738,49 +620,6 @@
               {
                 "params": [],
                 "type": "mean"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "service_name",
-              "operator": "=~",
-              "value": "/^$service$/"
-            }
-          ]
-        },
-        {
-          "alias": "classes pending for hook",
-          "groupBy": [
-            {
-              "params": [
-                "1m"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "measurement": "inspectit_self_instrumentation_hooking_queue_size",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "E",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "gauge"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
               }
             ]
           ],
@@ -842,10 +681,10 @@
         "x": 0,
         "y": 7
       },
-      "id": 51,
+      "id": 50,
       "panels": [],
       "repeat": null,
-      "repeatIteration": 1551102345677,
+      "repeatIteration": 1552297870742,
       "repeatPanelId": 2,
       "scopedVars": {
         "service": {
@@ -882,7 +721,7 @@
         "x": 0,
         "y": 8
       },
-      "id": 52,
+      "id": 51,
       "interval": null,
       "links": [],
       "mappingType": 1,
@@ -910,7 +749,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1551102345677,
+      "repeatIteration": 1552297870742,
       "repeatPanelId": 4,
       "repeatedByRow": true,
       "scopedVars": {
@@ -957,10 +796,10 @@
         "x": 3,
         "y": 8
       },
-      "id": 53,
+      "id": 52,
       "links": [],
       "pageSize": null,
-      "repeatIteration": 1551102345677,
+      "repeatIteration": 1552297870742,
       "repeatPanelId": 47,
       "repeatedByRow": true,
       "scopedVars": {
@@ -1094,42 +933,10 @@
         {
           "alias": "# classes pending for analysis",
           "groupBy": [],
-          "measurement": "inspectit_self_instrumentation_analysis_queue_size",
+          "measurement": "inspectit_self_instrumentation_queue_size",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "C",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "gauge"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "service_name",
-              "operator": "=~",
-              "value": "/^$service$/"
-            }
-          ]
-        },
-        {
-          "alias": "# classes pending for hook",
-          "groupBy": [],
-          "measurement": "inspectit_self_instrumentation_hooking_queue_size",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT last(\"gauge\") FROM \"inspectit_self_instrumentation_hooking_queue_size\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter",
-          "rawQuery": false,
-          "refId": "D",
           "resultFormat": "time_series",
           "select": [
             [
@@ -1182,7 +989,7 @@
         "x": 9,
         "y": 8
       },
-      "id": 54,
+      "id": 53,
       "interval": null,
       "links": [],
       "mappingType": 1,
@@ -1210,7 +1017,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1551102345677,
+      "repeatIteration": 1552297870742,
       "repeatPanelId": 23,
       "repeatedByRow": true,
       "scopedVars": {
@@ -1229,102 +1036,13 @@
       "tableColumn": "Time",
       "targets": [
         {
-          "query": "perc = () => {\ninstrumented = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"inspectit_self_instrumentation_analysis_queue_size\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nloaded = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"jvm_classes_loaded\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nreturn join(tables:{instrumented:instrumented, loaded:loaded},on:[\"_time\"])\n|> map(fn:(r) => ({\n_time: r._time,\n_value: 1.0 - (r._value_instrumented / r._value_loaded),\n_measurement: \"progress\"}))\n}\n\nperc()",
+          "query": "perc = () => {\ninstrumented = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"inspectit_self_instrumentation_queue_size\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nloaded = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"jvm_classes_loaded\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nreturn join(tables:{instrumented:instrumented, loaded:loaded},on:[\"_time\"])\n|> map(fn:(r) => ({\n_time: r._time,\n_value: 1.0 - (r._value_instrumented / r._value_loaded),\n_measurement: \"progress\"}))\n}\n\nperc()",
           "refId": "A",
           "resultFormat": "time_series"
         }
       ],
       "thresholds": "0.33,0.66",
       "title": "Analysis Progress",
-      "type": "singlestat",
-      "valueFontSize": "80%",
-      "valueMaps": [
-        {
-          "op": "=",
-          "text": "N/A",
-          "value": "null"
-        }
-      ],
-      "valueName": "avg"
-    },
-    {
-      "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": true,
-      "colors": [
-        "#d44a3a",
-        "rgba(237, 129, 40, 0.89)",
-        "#299c46"
-      ],
-      "datasource": "Flux",
-      "format": "percentunit",
-      "gauge": {
-        "maxValue": 1,
-        "minValue": 0,
-        "show": true,
-        "thresholdLabels": false,
-        "thresholdMarkers": true
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 3,
-        "x": 12,
-        "y": 8
-      },
-      "id": 55,
-      "interval": null,
-      "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
-        {
-          "name": "value to text",
-          "value": 1
-        },
-        {
-          "name": "range to text",
-          "value": 2
-        }
-      ],
-      "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "postfix": "",
-      "postfixFontSize": "50%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "repeatIteration": 1551102345677,
-      "repeatPanelId": 50,
-      "repeatedByRow": true,
-      "scopedVars": {
-        "service": {
-          "selected": false,
-          "text": "customers-service",
-          "value": "customers-service"
-        }
-      },
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": false,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": false
-      },
-      "tableColumn": "Time",
-      "targets": [
-        {
-          "query": "perc = () => {\nhooked = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"inspectit_self_instrumentation_hooking_queue_size\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nclassesLoaded = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"jvm_classes_loaded\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nreturn join(tables:{hooked:hooked, classesLoaded:classesLoaded},on:[\"_time\"])\n|> map(fn:(r) => ({\n_time: r._time,\n_value: 1.0 - (r._value_hooked / r._value_classesLoaded),\n_measurement: \"progress\"}))\n|> last()\n}\n\nperc()",
-          "refId": "A",
-          "resultFormat": "time_series"
-        }
-      ],
-      "thresholds": "0.33,0.66",
-      "title": "Hooking Progress",
       "type": "singlestat",
       "valueFontSize": "80%",
       "valueMaps": [
@@ -1347,11 +1065,11 @@
       "fill": 5,
       "gridPos": {
         "h": 6,
-        "w": 9,
-        "x": 15,
+        "w": 12,
+        "x": 12,
         "y": 8
       },
-      "id": 56,
+      "id": 54,
       "legend": {
         "avg": false,
         "current": false,
@@ -1369,7 +1087,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1551102345677,
+      "repeatIteration": 1552297870742,
       "repeatPanelId": 49,
       "repeatedByRow": true,
       "scopedVars": {
@@ -1511,7 +1229,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "inspectit_self_instrumentation_analysis_queue_size",
+          "measurement": "inspectit_self_instrumentation_queue_size",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "C",
@@ -1570,49 +1288,6 @@
               {
                 "params": [],
                 "type": "mean"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "service_name",
-              "operator": "=~",
-              "value": "/^$service$/"
-            }
-          ]
-        },
-        {
-          "alias": "classes pending for hook",
-          "groupBy": [
-            {
-              "params": [
-                "1m"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "measurement": "inspectit_self_instrumentation_hooking_queue_size",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "E",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "gauge"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
               }
             ]
           ],
@@ -1674,10 +1349,10 @@
         "x": 0,
         "y": 14
       },
-      "id": 57,
+      "id": 55,
       "panels": [],
       "repeat": null,
-      "repeatIteration": 1551102345677,
+      "repeatIteration": 1552297870742,
       "repeatPanelId": 2,
       "scopedVars": {
         "service": {
@@ -1714,7 +1389,7 @@
         "x": 0,
         "y": 15
       },
-      "id": 58,
+      "id": 56,
       "interval": null,
       "links": [],
       "mappingType": 1,
@@ -1742,7 +1417,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1551102345677,
+      "repeatIteration": 1552297870742,
       "repeatPanelId": 4,
       "repeatedByRow": true,
       "scopedVars": {
@@ -1789,10 +1464,10 @@
         "x": 3,
         "y": 15
       },
-      "id": 59,
+      "id": 57,
       "links": [],
       "pageSize": null,
-      "repeatIteration": 1551102345677,
+      "repeatIteration": 1552297870742,
       "repeatPanelId": 47,
       "repeatedByRow": true,
       "scopedVars": {
@@ -1926,42 +1601,10 @@
         {
           "alias": "# classes pending for analysis",
           "groupBy": [],
-          "measurement": "inspectit_self_instrumentation_analysis_queue_size",
+          "measurement": "inspectit_self_instrumentation_queue_size",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "C",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "gauge"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "service_name",
-              "operator": "=~",
-              "value": "/^$service$/"
-            }
-          ]
-        },
-        {
-          "alias": "# classes pending for hook",
-          "groupBy": [],
-          "measurement": "inspectit_self_instrumentation_hooking_queue_size",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT last(\"gauge\") FROM \"inspectit_self_instrumentation_hooking_queue_size\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter",
-          "rawQuery": false,
-          "refId": "D",
           "resultFormat": "time_series",
           "select": [
             [
@@ -2014,7 +1657,7 @@
         "x": 9,
         "y": 15
       },
-      "id": 60,
+      "id": 58,
       "interval": null,
       "links": [],
       "mappingType": 1,
@@ -2042,7 +1685,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1551102345677,
+      "repeatIteration": 1552297870742,
       "repeatPanelId": 23,
       "repeatedByRow": true,
       "scopedVars": {
@@ -2061,102 +1704,13 @@
       "tableColumn": "Time",
       "targets": [
         {
-          "query": "perc = () => {\ninstrumented = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"inspectit_self_instrumentation_analysis_queue_size\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nloaded = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"jvm_classes_loaded\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nreturn join(tables:{instrumented:instrumented, loaded:loaded},on:[\"_time\"])\n|> map(fn:(r) => ({\n_time: r._time,\n_value: 1.0 - (r._value_instrumented / r._value_loaded),\n_measurement: \"progress\"}))\n}\n\nperc()",
+          "query": "perc = () => {\ninstrumented = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"inspectit_self_instrumentation_queue_size\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nloaded = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"jvm_classes_loaded\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nreturn join(tables:{instrumented:instrumented, loaded:loaded},on:[\"_time\"])\n|> map(fn:(r) => ({\n_time: r._time,\n_value: 1.0 - (r._value_instrumented / r._value_loaded),\n_measurement: \"progress\"}))\n}\n\nperc()",
           "refId": "A",
           "resultFormat": "time_series"
         }
       ],
       "thresholds": "0.33,0.66",
       "title": "Analysis Progress",
-      "type": "singlestat",
-      "valueFontSize": "80%",
-      "valueMaps": [
-        {
-          "op": "=",
-          "text": "N/A",
-          "value": "null"
-        }
-      ],
-      "valueName": "avg"
-    },
-    {
-      "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": true,
-      "colors": [
-        "#d44a3a",
-        "rgba(237, 129, 40, 0.89)",
-        "#299c46"
-      ],
-      "datasource": "Flux",
-      "format": "percentunit",
-      "gauge": {
-        "maxValue": 1,
-        "minValue": 0,
-        "show": true,
-        "thresholdLabels": false,
-        "thresholdMarkers": true
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 3,
-        "x": 12,
-        "y": 15
-      },
-      "id": 61,
-      "interval": null,
-      "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
-        {
-          "name": "value to text",
-          "value": 1
-        },
-        {
-          "name": "range to text",
-          "value": 2
-        }
-      ],
-      "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "postfix": "",
-      "postfixFontSize": "50%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "repeatIteration": 1551102345677,
-      "repeatPanelId": 50,
-      "repeatedByRow": true,
-      "scopedVars": {
-        "service": {
-          "selected": false,
-          "text": "config-server",
-          "value": "config-server"
-        }
-      },
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": false,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": false
-      },
-      "tableColumn": "Time",
-      "targets": [
-        {
-          "query": "perc = () => {\nhooked = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"inspectit_self_instrumentation_hooking_queue_size\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nclassesLoaded = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"jvm_classes_loaded\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nreturn join(tables:{hooked:hooked, classesLoaded:classesLoaded},on:[\"_time\"])\n|> map(fn:(r) => ({\n_time: r._time,\n_value: 1.0 - (r._value_hooked / r._value_classesLoaded),\n_measurement: \"progress\"}))\n|> last()\n}\n\nperc()",
-          "refId": "A",
-          "resultFormat": "time_series"
-        }
-      ],
-      "thresholds": "0.33,0.66",
-      "title": "Hooking Progress",
       "type": "singlestat",
       "valueFontSize": "80%",
       "valueMaps": [
@@ -2179,11 +1733,11 @@
       "fill": 5,
       "gridPos": {
         "h": 6,
-        "w": 9,
-        "x": 15,
+        "w": 12,
+        "x": 12,
         "y": 15
       },
-      "id": 62,
+      "id": 59,
       "legend": {
         "avg": false,
         "current": false,
@@ -2201,7 +1755,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1551102345677,
+      "repeatIteration": 1552297870742,
       "repeatPanelId": 49,
       "repeatedByRow": true,
       "scopedVars": {
@@ -2343,7 +1897,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "inspectit_self_instrumentation_analysis_queue_size",
+          "measurement": "inspectit_self_instrumentation_queue_size",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "C",
@@ -2402,49 +1956,6 @@
               {
                 "params": [],
                 "type": "mean"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "service_name",
-              "operator": "=~",
-              "value": "/^$service$/"
-            }
-          ]
-        },
-        {
-          "alias": "classes pending for hook",
-          "groupBy": [
-            {
-              "params": [
-                "1m"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "measurement": "inspectit_self_instrumentation_hooking_queue_size",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "E",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "gauge"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
               }
             ]
           ],
@@ -2506,10 +2017,10 @@
         "x": 0,
         "y": 21
       },
-      "id": 63,
+      "id": 60,
       "panels": [],
       "repeat": null,
-      "repeatIteration": 1551102345677,
+      "repeatIteration": 1552297870742,
       "repeatPanelId": 2,
       "scopedVars": {
         "service": {
@@ -2546,7 +2057,7 @@
         "x": 0,
         "y": 22
       },
-      "id": 64,
+      "id": 61,
       "interval": null,
       "links": [],
       "mappingType": 1,
@@ -2574,7 +2085,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1551102345677,
+      "repeatIteration": 1552297870742,
       "repeatPanelId": 4,
       "repeatedByRow": true,
       "scopedVars": {
@@ -2621,10 +2132,10 @@
         "x": 3,
         "y": 22
       },
-      "id": 65,
+      "id": 62,
       "links": [],
       "pageSize": null,
-      "repeatIteration": 1551102345677,
+      "repeatIteration": 1552297870742,
       "repeatPanelId": 47,
       "repeatedByRow": true,
       "scopedVars": {
@@ -2758,42 +2269,10 @@
         {
           "alias": "# classes pending for analysis",
           "groupBy": [],
-          "measurement": "inspectit_self_instrumentation_analysis_queue_size",
+          "measurement": "inspectit_self_instrumentation_queue_size",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "C",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "gauge"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "service_name",
-              "operator": "=~",
-              "value": "/^$service$/"
-            }
-          ]
-        },
-        {
-          "alias": "# classes pending for hook",
-          "groupBy": [],
-          "measurement": "inspectit_self_instrumentation_hooking_queue_size",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT last(\"gauge\") FROM \"inspectit_self_instrumentation_hooking_queue_size\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter",
-          "rawQuery": false,
-          "refId": "D",
           "resultFormat": "time_series",
           "select": [
             [
@@ -2846,7 +2325,7 @@
         "x": 9,
         "y": 22
       },
-      "id": 66,
+      "id": 63,
       "interval": null,
       "links": [],
       "mappingType": 1,
@@ -2874,7 +2353,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1551102345677,
+      "repeatIteration": 1552297870742,
       "repeatPanelId": 23,
       "repeatedByRow": true,
       "scopedVars": {
@@ -2893,102 +2372,13 @@
       "tableColumn": "Time",
       "targets": [
         {
-          "query": "perc = () => {\ninstrumented = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"inspectit_self_instrumentation_analysis_queue_size\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nloaded = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"jvm_classes_loaded\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nreturn join(tables:{instrumented:instrumented, loaded:loaded},on:[\"_time\"])\n|> map(fn:(r) => ({\n_time: r._time,\n_value: 1.0 - (r._value_instrumented / r._value_loaded),\n_measurement: \"progress\"}))\n}\n\nperc()",
+          "query": "perc = () => {\ninstrumented = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"inspectit_self_instrumentation_queue_size\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nloaded = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"jvm_classes_loaded\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nreturn join(tables:{instrumented:instrumented, loaded:loaded},on:[\"_time\"])\n|> map(fn:(r) => ({\n_time: r._time,\n_value: 1.0 - (r._value_instrumented / r._value_loaded),\n_measurement: \"progress\"}))\n}\n\nperc()",
           "refId": "A",
           "resultFormat": "time_series"
         }
       ],
       "thresholds": "0.33,0.66",
       "title": "Analysis Progress",
-      "type": "singlestat",
-      "valueFontSize": "80%",
-      "valueMaps": [
-        {
-          "op": "=",
-          "text": "N/A",
-          "value": "null"
-        }
-      ],
-      "valueName": "avg"
-    },
-    {
-      "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": true,
-      "colors": [
-        "#d44a3a",
-        "rgba(237, 129, 40, 0.89)",
-        "#299c46"
-      ],
-      "datasource": "Flux",
-      "format": "percentunit",
-      "gauge": {
-        "maxValue": 1,
-        "minValue": 0,
-        "show": true,
-        "thresholdLabels": false,
-        "thresholdMarkers": true
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 3,
-        "x": 12,
-        "y": 22
-      },
-      "id": 67,
-      "interval": null,
-      "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
-        {
-          "name": "value to text",
-          "value": 1
-        },
-        {
-          "name": "range to text",
-          "value": 2
-        }
-      ],
-      "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "postfix": "",
-      "postfixFontSize": "50%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "repeatIteration": 1551102345677,
-      "repeatPanelId": 50,
-      "repeatedByRow": true,
-      "scopedVars": {
-        "service": {
-          "selected": false,
-          "text": "visits-service",
-          "value": "visits-service"
-        }
-      },
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": false,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": false
-      },
-      "tableColumn": "Time",
-      "targets": [
-        {
-          "query": "perc = () => {\nhooked = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"inspectit_self_instrumentation_hooking_queue_size\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nclassesLoaded = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"jvm_classes_loaded\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nreturn join(tables:{hooked:hooked, classesLoaded:classesLoaded},on:[\"_time\"])\n|> map(fn:(r) => ({\n_time: r._time,\n_value: 1.0 - (r._value_hooked / r._value_classesLoaded),\n_measurement: \"progress\"}))\n|> last()\n}\n\nperc()",
-          "refId": "A",
-          "resultFormat": "time_series"
-        }
-      ],
-      "thresholds": "0.33,0.66",
-      "title": "Hooking Progress",
       "type": "singlestat",
       "valueFontSize": "80%",
       "valueMaps": [
@@ -3011,11 +2401,11 @@
       "fill": 5,
       "gridPos": {
         "h": 6,
-        "w": 9,
-        "x": 15,
+        "w": 12,
+        "x": 12,
         "y": 22
       },
-      "id": 68,
+      "id": 64,
       "legend": {
         "avg": false,
         "current": false,
@@ -3033,7 +2423,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1551102345677,
+      "repeatIteration": 1552297870742,
       "repeatPanelId": 49,
       "repeatedByRow": true,
       "scopedVars": {
@@ -3175,7 +2565,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "inspectit_self_instrumentation_analysis_queue_size",
+          "measurement": "inspectit_self_instrumentation_queue_size",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "C",
@@ -3234,49 +2624,6 @@
               {
                 "params": [],
                 "type": "mean"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "service_name",
-              "operator": "=~",
-              "value": "/^$service$/"
-            }
-          ]
-        },
-        {
-          "alias": "classes pending for hook",
-          "groupBy": [
-            {
-              "params": [
-                "1m"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "measurement": "inspectit_self_instrumentation_hooking_queue_size",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "E",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "gauge"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
               }
             ]
           ],
@@ -3338,10 +2685,10 @@
         "x": 0,
         "y": 28
       },
-      "id": 69,
+      "id": 65,
       "panels": [],
       "repeat": null,
-      "repeatIteration": 1551102345677,
+      "repeatIteration": 1552297870742,
       "repeatPanelId": 2,
       "scopedVars": {
         "service": {
@@ -3378,7 +2725,7 @@
         "x": 0,
         "y": 29
       },
-      "id": 70,
+      "id": 66,
       "interval": null,
       "links": [],
       "mappingType": 1,
@@ -3406,7 +2753,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1551102345677,
+      "repeatIteration": 1552297870742,
       "repeatPanelId": 4,
       "repeatedByRow": true,
       "scopedVars": {
@@ -3453,10 +2800,10 @@
         "x": 3,
         "y": 29
       },
-      "id": 71,
+      "id": 67,
       "links": [],
       "pageSize": null,
-      "repeatIteration": 1551102345677,
+      "repeatIteration": 1552297870742,
       "repeatPanelId": 47,
       "repeatedByRow": true,
       "scopedVars": {
@@ -3590,42 +2937,10 @@
         {
           "alias": "# classes pending for analysis",
           "groupBy": [],
-          "measurement": "inspectit_self_instrumentation_analysis_queue_size",
+          "measurement": "inspectit_self_instrumentation_queue_size",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "C",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "gauge"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "service_name",
-              "operator": "=~",
-              "value": "/^$service$/"
-            }
-          ]
-        },
-        {
-          "alias": "# classes pending for hook",
-          "groupBy": [],
-          "measurement": "inspectit_self_instrumentation_hooking_queue_size",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT last(\"gauge\") FROM \"inspectit_self_instrumentation_hooking_queue_size\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter",
-          "rawQuery": false,
-          "refId": "D",
           "resultFormat": "time_series",
           "select": [
             [
@@ -3678,7 +2993,7 @@
         "x": 9,
         "y": 29
       },
-      "id": 72,
+      "id": 68,
       "interval": null,
       "links": [],
       "mappingType": 1,
@@ -3706,7 +3021,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1551102345677,
+      "repeatIteration": 1552297870742,
       "repeatPanelId": 23,
       "repeatedByRow": true,
       "scopedVars": {
@@ -3725,102 +3040,13 @@
       "tableColumn": "Time",
       "targets": [
         {
-          "query": "perc = () => {\ninstrumented = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"inspectit_self_instrumentation_analysis_queue_size\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nloaded = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"jvm_classes_loaded\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nreturn join(tables:{instrumented:instrumented, loaded:loaded},on:[\"_time\"])\n|> map(fn:(r) => ({\n_time: r._time,\n_value: 1.0 - (r._value_instrumented / r._value_loaded),\n_measurement: \"progress\"}))\n}\n\nperc()",
+          "query": "perc = () => {\ninstrumented = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"inspectit_self_instrumentation_queue_size\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nloaded = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"jvm_classes_loaded\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nreturn join(tables:{instrumented:instrumented, loaded:loaded},on:[\"_time\"])\n|> map(fn:(r) => ({\n_time: r._time,\n_value: 1.0 - (r._value_instrumented / r._value_loaded),\n_measurement: \"progress\"}))\n}\n\nperc()",
           "refId": "A",
           "resultFormat": "time_series"
         }
       ],
       "thresholds": "0.33,0.66",
       "title": "Analysis Progress",
-      "type": "singlestat",
-      "valueFontSize": "80%",
-      "valueMaps": [
-        {
-          "op": "=",
-          "text": "N/A",
-          "value": "null"
-        }
-      ],
-      "valueName": "avg"
-    },
-    {
-      "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": true,
-      "colors": [
-        "#d44a3a",
-        "rgba(237, 129, 40, 0.89)",
-        "#299c46"
-      ],
-      "datasource": "Flux",
-      "format": "percentunit",
-      "gauge": {
-        "maxValue": 1,
-        "minValue": 0,
-        "show": true,
-        "thresholdLabels": false,
-        "thresholdMarkers": true
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 3,
-        "x": 12,
-        "y": 29
-      },
-      "id": 73,
-      "interval": null,
-      "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
-        {
-          "name": "value to text",
-          "value": 1
-        },
-        {
-          "name": "range to text",
-          "value": 2
-        }
-      ],
-      "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "postfix": "",
-      "postfixFontSize": "50%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "repeatIteration": 1551102345677,
-      "repeatPanelId": 50,
-      "repeatedByRow": true,
-      "scopedVars": {
-        "service": {
-          "selected": false,
-          "text": "discovery-server",
-          "value": "discovery-server"
-        }
-      },
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": false,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": false
-      },
-      "tableColumn": "Time",
-      "targets": [
-        {
-          "query": "perc = () => {\nhooked = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"inspectit_self_instrumentation_hooking_queue_size\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nclassesLoaded = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"jvm_classes_loaded\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nreturn join(tables:{hooked:hooked, classesLoaded:classesLoaded},on:[\"_time\"])\n|> map(fn:(r) => ({\n_time: r._time,\n_value: 1.0 - (r._value_hooked / r._value_classesLoaded),\n_measurement: \"progress\"}))\n|> last()\n}\n\nperc()",
-          "refId": "A",
-          "resultFormat": "time_series"
-        }
-      ],
-      "thresholds": "0.33,0.66",
-      "title": "Hooking Progress",
       "type": "singlestat",
       "valueFontSize": "80%",
       "valueMaps": [
@@ -3843,11 +3069,11 @@
       "fill": 5,
       "gridPos": {
         "h": 6,
-        "w": 9,
-        "x": 15,
+        "w": 12,
+        "x": 12,
         "y": 29
       },
-      "id": 74,
+      "id": 69,
       "legend": {
         "avg": false,
         "current": false,
@@ -3865,7 +3091,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1551102345677,
+      "repeatIteration": 1552297870742,
       "repeatPanelId": 49,
       "repeatedByRow": true,
       "scopedVars": {
@@ -4007,7 +3233,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "inspectit_self_instrumentation_analysis_queue_size",
+          "measurement": "inspectit_self_instrumentation_queue_size",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "C",
@@ -4066,49 +3292,6 @@
               {
                 "params": [],
                 "type": "mean"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "service_name",
-              "operator": "=~",
-              "value": "/^$service$/"
-            }
-          ]
-        },
-        {
-          "alias": "classes pending for hook",
-          "groupBy": [
-            {
-              "params": [
-                "1m"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "measurement": "inspectit_self_instrumentation_hooking_queue_size",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "E",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "gauge"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
               }
             ]
           ],
@@ -4170,10 +3353,10 @@
         "x": 0,
         "y": 35
       },
-      "id": 75,
+      "id": 70,
       "panels": [],
       "repeat": null,
-      "repeatIteration": 1551102345677,
+      "repeatIteration": 1552297870742,
       "repeatPanelId": 2,
       "scopedVars": {
         "service": {
@@ -4210,7 +3393,7 @@
         "x": 0,
         "y": 36
       },
-      "id": 76,
+      "id": 71,
       "interval": null,
       "links": [],
       "mappingType": 1,
@@ -4238,7 +3421,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1551102345677,
+      "repeatIteration": 1552297870742,
       "repeatPanelId": 4,
       "repeatedByRow": true,
       "scopedVars": {
@@ -4285,10 +3468,10 @@
         "x": 3,
         "y": 36
       },
-      "id": 77,
+      "id": 72,
       "links": [],
       "pageSize": null,
-      "repeatIteration": 1551102345677,
+      "repeatIteration": 1552297870742,
       "repeatPanelId": 47,
       "repeatedByRow": true,
       "scopedVars": {
@@ -4422,42 +3605,10 @@
         {
           "alias": "# classes pending for analysis",
           "groupBy": [],
-          "measurement": "inspectit_self_instrumentation_analysis_queue_size",
+          "measurement": "inspectit_self_instrumentation_queue_size",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "C",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "gauge"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "service_name",
-              "operator": "=~",
-              "value": "/^$service$/"
-            }
-          ]
-        },
-        {
-          "alias": "# classes pending for hook",
-          "groupBy": [],
-          "measurement": "inspectit_self_instrumentation_hooking_queue_size",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT last(\"gauge\") FROM \"inspectit_self_instrumentation_hooking_queue_size\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter",
-          "rawQuery": false,
-          "refId": "D",
           "resultFormat": "time_series",
           "select": [
             [
@@ -4510,7 +3661,7 @@
         "x": 9,
         "y": 36
       },
-      "id": 78,
+      "id": 73,
       "interval": null,
       "links": [],
       "mappingType": 1,
@@ -4538,7 +3689,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1551102345677,
+      "repeatIteration": 1552297870742,
       "repeatPanelId": 23,
       "repeatedByRow": true,
       "scopedVars": {
@@ -4557,102 +3708,13 @@
       "tableColumn": "Time",
       "targets": [
         {
-          "query": "perc = () => {\ninstrumented = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"inspectit_self_instrumentation_analysis_queue_size\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nloaded = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"jvm_classes_loaded\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nreturn join(tables:{instrumented:instrumented, loaded:loaded},on:[\"_time\"])\n|> map(fn:(r) => ({\n_time: r._time,\n_value: 1.0 - (r._value_instrumented / r._value_loaded),\n_measurement: \"progress\"}))\n}\n\nperc()",
+          "query": "perc = () => {\ninstrumented = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"inspectit_self_instrumentation_queue_size\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nloaded = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"jvm_classes_loaded\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nreturn join(tables:{instrumented:instrumented, loaded:loaded},on:[\"_time\"])\n|> map(fn:(r) => ({\n_time: r._time,\n_value: 1.0 - (r._value_instrumented / r._value_loaded),\n_measurement: \"progress\"}))\n}\n\nperc()",
           "refId": "A",
           "resultFormat": "time_series"
         }
       ],
       "thresholds": "0.33,0.66",
       "title": "Analysis Progress",
-      "type": "singlestat",
-      "valueFontSize": "80%",
-      "valueMaps": [
-        {
-          "op": "=",
-          "text": "N/A",
-          "value": "null"
-        }
-      ],
-      "valueName": "avg"
-    },
-    {
-      "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": true,
-      "colors": [
-        "#d44a3a",
-        "rgba(237, 129, 40, 0.89)",
-        "#299c46"
-      ],
-      "datasource": "Flux",
-      "format": "percentunit",
-      "gauge": {
-        "maxValue": 1,
-        "minValue": 0,
-        "show": true,
-        "thresholdLabels": false,
-        "thresholdMarkers": true
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 3,
-        "x": 12,
-        "y": 36
-      },
-      "id": 79,
-      "interval": null,
-      "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
-        {
-          "name": "value to text",
-          "value": 1
-        },
-        {
-          "name": "range to text",
-          "value": 2
-        }
-      ],
-      "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "postfix": "",
-      "postfixFontSize": "50%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "repeatIteration": 1551102345677,
-      "repeatPanelId": 50,
-      "repeatedByRow": true,
-      "scopedVars": {
-        "service": {
-          "selected": false,
-          "text": "vets-service",
-          "value": "vets-service"
-        }
-      },
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": false,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": false
-      },
-      "tableColumn": "Time",
-      "targets": [
-        {
-          "query": "perc = () => {\nhooked = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"inspectit_self_instrumentation_hooking_queue_size\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nclassesLoaded = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"jvm_classes_loaded\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nreturn join(tables:{hooked:hooked, classesLoaded:classesLoaded},on:[\"_time\"])\n|> map(fn:(r) => ({\n_time: r._time,\n_value: 1.0 - (r._value_hooked / r._value_classesLoaded),\n_measurement: \"progress\"}))\n|> last()\n}\n\nperc()",
-          "refId": "A",
-          "resultFormat": "time_series"
-        }
-      ],
-      "thresholds": "0.33,0.66",
-      "title": "Hooking Progress",
       "type": "singlestat",
       "valueFontSize": "80%",
       "valueMaps": [
@@ -4675,11 +3737,11 @@
       "fill": 5,
       "gridPos": {
         "h": 6,
-        "w": 9,
-        "x": 15,
+        "w": 12,
+        "x": 12,
         "y": 36
       },
-      "id": 80,
+      "id": 74,
       "legend": {
         "avg": false,
         "current": false,
@@ -4697,7 +3759,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1551102345677,
+      "repeatIteration": 1552297870742,
       "repeatPanelId": 49,
       "repeatedByRow": true,
       "scopedVars": {
@@ -4839,7 +3901,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "inspectit_self_instrumentation_analysis_queue_size",
+          "measurement": "inspectit_self_instrumentation_queue_size",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "C",
@@ -4898,49 +3960,6 @@
               {
                 "params": [],
                 "type": "mean"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "service_name",
-              "operator": "=~",
-              "value": "/^$service$/"
-            }
-          ]
-        },
-        {
-          "alias": "classes pending for hook",
-          "groupBy": [
-            {
-              "params": [
-                "1m"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "measurement": "inspectit_self_instrumentation_hooking_queue_size",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "E",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "gauge"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
               }
             ]
           ],

@@ -1,7 +1,7 @@
 package rocks.inspectit.oce.metrics;
 
 import org.junit.jupiter.api.BeforeEach;
-import rocks.inspectit.oce.TestUtils;
+import rocks.inspectit.oce.utils.TestUtils;
 
 public class MetricsSysTestBase {
 

@@ -4,6 +4,7 @@ import io.opencensus.metrics.Metrics;
 import io.opencensus.metrics.export.MetricProducerManager;
 import io.opencensus.stats.*;
 import org.junit.jupiter.api.Test;
+import rocks.inspectit.oce.utils.TestUtils;
 
 import java.util.Collections;
 
