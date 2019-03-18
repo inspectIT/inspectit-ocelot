@@ -8,6 +8,7 @@ import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.matcher.ElementMatcher;
 import org.springframework.stereotype.Component;
+import rocks.inspectit.oce.bootstrap.instrumentation.ClassLoaderDelegationMarker;
 import rocks.inspectit.oce.core.config.model.instrumentation.SpecialSensorSettings;
 import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationConfiguration;
 
@@ -107,12 +108,22 @@ public class ClassLoaderDelegation implements SpecialSensor {
         public static Class<?> enter(@Advice.Argument(value = 0) String classname) {
             //we have to hardcode the classname as the bytecode gets inlined
             if (classname != null && classname.startsWith("rocks.inspectit.oce.bootstrap")) {
-                try {
-                    //delegate the loading to the bootstrap
-                    return Class.forName(classname, false, null);
-                } catch (ClassNotFoundException e) {
-                    //should never occur as we put our stuff on the bootstrap
-                    return null; //execute the classloader normally
+                //some JVMs, such as IBM implement the bootstrap classloader as a non-native class
+                //in this case we need to make sure that the classloader delegation is only performed once
+                //because otherwise we end up with a StackOverflowError (the instrument bootstrap loaded would call
+                //Class.forName in an infinite recursion)
+                boolean cldPerformed = ClassLoaderDelegationMarker.CLASS_LOADER_DELEGATION_PERFORMED.get() != null;
+                if (!cldPerformed) {
+                    ClassLoaderDelegationMarker.CLASS_LOADER_DELEGATION_PERFORMED.set(true);
+                    try {
+                        //delegate the loading to the bootstrap
+                        return Class.forName(classname, false, null);
+                    } catch (ClassNotFoundException e) {
+                        //should never occur as we put our stuff on the bootstrap
+                        return null; //execute the classloader normally
+                    } finally {
+                        ClassLoaderDelegationMarker.CLASS_LOADER_DELEGATION_PERFORMED.remove();
+                    }
                 }
             }
             return null; //execute the classloader normally
