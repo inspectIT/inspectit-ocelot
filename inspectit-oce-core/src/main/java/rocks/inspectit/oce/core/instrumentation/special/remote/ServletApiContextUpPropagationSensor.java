@@ -1,4 +1,4 @@
-package rocks.inspectit.oce.core.instrumentation.special;
+package rocks.inspectit.oce.core.instrumentation.special.remote;
 
 import lombok.val;
 import net.bytebuddy.asm.Advice;
@@ -13,6 +13,7 @@ import rocks.inspectit.oce.bootstrap.context.IInspectitContext;
 import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationConfiguration;
 import rocks.inspectit.oce.core.instrumentation.context.ContextManager;
 import rocks.inspectit.oce.core.instrumentation.context.ObjectAttachments;
+import rocks.inspectit.oce.core.instrumentation.special.SpecialSensor;
 
 import java.lang.reflect.Method;
 
@@ -96,7 +97,7 @@ public class ServletApiContextUpPropagationSensor implements SpecialSensor {
                         }
                     }
                 } catch (Throwable t) {
-                    t.printStackTrace();
+                    System.out.println("Error performing propagation, no data will be propagated: " + t.getMessage());
                 }
                 ctx.close();
             }
@@ -123,7 +124,7 @@ public class ServletApiContextUpPropagationSensor implements SpecialSensor {
                     }
                 }
             } catch (Throwable t) {
-                t.printStackTrace();
+                System.out.println("Error performing propagation, no data will be propagated: " + t.getMessage());
             }
         }
 

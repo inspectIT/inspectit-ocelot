@@ -1,4 +1,4 @@
-package rocks.inspectit.oce.core.instrumentation.special;
+package rocks.inspectit.oce.core.instrumentation.special.remote;
 
 import lombok.val;
 import net.bytebuddy.asm.Advice;
@@ -13,6 +13,7 @@ import rocks.inspectit.oce.bootstrap.context.IInspectitContext;
 import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationConfiguration;
 import rocks.inspectit.oce.core.instrumentation.context.ContextManager;
 import rocks.inspectit.oce.core.instrumentation.context.ObjectAttachments;
+import rocks.inspectit.oce.core.instrumentation.special.SpecialSensor;
 
 import java.lang.reflect.Method;
 import java.util.Collections;
@@ -70,7 +71,7 @@ public class ServletApiContextDownPropagationSensor implements SpecialSensor {
                         Method getHeadersMethod = httpRequestClazz.getMethod("getHeaders", String.class);
 
                         Map<String, String> headersOfInterest = new HashMap<>();
-                        for (String header : ctx.getPropagationHeaderFields()) {
+                        for (String header : ctx.getPropagationHeaderNames()) {
                             val values = (java.util.Enumeration<java.lang.String>) getHeadersMethod.invoke(request, header);
                             if (values != null && values.hasMoreElements()) {
                                 headersOfInterest.put(header, String.join(",", Collections.list(values)));
@@ -84,7 +85,7 @@ public class ServletApiContextDownPropagationSensor implements SpecialSensor {
                     }
                 }
             } catch (Throwable t) {
-                t.printStackTrace();
+                System.out.println("Error reading propagation data, no data will be propagated: " + t.getMessage());
             }
             return null;
         }

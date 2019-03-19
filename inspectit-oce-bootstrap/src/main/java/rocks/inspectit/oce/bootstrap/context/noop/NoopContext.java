@@ -47,11 +47,10 @@ public class NoopContext implements IInspectitContext {
 
     @Override
     public void readPropagationHeaders(Map<String, String> headers) {
-
     }
 
     @Override
-    public Set<String> getPropagationHeaderFields() {
+    public Set<String> getPropagationHeaderNames() {
         return Collections.emptySet();
     }
 }

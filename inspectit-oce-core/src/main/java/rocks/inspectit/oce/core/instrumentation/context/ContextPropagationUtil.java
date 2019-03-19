@@ -10,10 +10,13 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 /**
- * Implements the logic for generating and reading the Correlation-Context http headers.
+ * Implements the logic for generating and reading the http headers related to context propagation.
+ * Currently the propagation happens only via the Correlation-Context headers:
+ * https://github.com/w3c/correlation-context/blob/master/correlation_context/HTTP_HEADER_FORMAT.md
+ * When tracing is added, additional header formats, such as B3 will be used.
  */
 @Slf4j
-public class ContextPropagation {
+public class ContextPropagationUtil {
 
     /**
      * Maps each serializable type to its identifier.
@@ -59,7 +62,7 @@ public class ContextPropagation {
      * @param dataToPropagate the key-value pairs to propagate.
      * @return the result propagation map
      */
-    public static Map<String, String> buildPropagationMap(Stream<Map.Entry<String, Object>> dataToPropagate) {
+    public static Map<String, String> buildPropagationHeaderMap(Stream<Map.Entry<String, Object>> dataToPropagate) {
         StringBuilder contextCorrelationData = new StringBuilder();
         dataToPropagate.forEach(e -> {
             try {
@@ -82,20 +85,18 @@ public class ContextPropagation {
             }
         });
         if (contextCorrelationData.length() > 0) {
-            HashMap<String, String> result = new HashMap<>();
-            result.put(CORRELATION_CONTEXT_HEADER, contextCorrelationData.toString());
-            return result;
+            return Collections.singletonMap(CORRELATION_CONTEXT_HEADER, contextCorrelationData.toString());
         } else {
             return Collections.emptyMap();
         }
     }
 
     /**
-     * Returns all header names which can potentially be output by {@link #buildPropagationMap(Stream)}.
+     * Returns all header names which can potentially be output by {@link #buildPropagationHeaderMap(Stream)}.
      *
      * @return the set of header names
      */
-    public static Set<String> getPropagationFields() {
+    public static Set<String> getPropagationHeaderNames() {
         return PROPAGATION_FIELDS;
     }
 
@@ -105,12 +106,18 @@ public class ContextPropagation {
      * @param propagationMap the headers to decode
      * @param target         the context in which the decoded data key-value pairs will be stored.
      */
-    public static void readPropagationMap(Map<String, String> propagationMap, InspectitContext target) {
+    public static void readPropagationHeaderMap(Map<String, String> propagationMap, InspectitContext target) {
         if (propagationMap.containsKey(CORRELATION_CONTEXT_HEADER)) {
             readCorrelationContext(propagationMap.get(CORRELATION_CONTEXT_HEADER), target);
         }
     }
 
+    /**
+     * Parses the value of the Correlation-Context header, storing the propagated data values into the target context.
+     *
+     * @param correlationContext the value of the Correlation-Context header
+     * @param target             the target context in which the data will be stored
+     */
     private static void readCorrelationContext(String correlationContext, InspectitContext target) {
         correlationContext = correlationContext.trim();
         for (String keyValuePair : COMMA_WITH_WHITESPACES.split(correlationContext)) {
@@ -123,25 +130,39 @@ public class ContextPropagation {
                 }
                 String key = URLDecoder.decode(keyAndValue[0], ENCODING_CHARSET);
                 String stringValue = URLDecoder.decode(keyAndValue[1], ENCODING_CHARSET);
-                Object resultValue = stringValue;
-                for (int i = 1; i < pairAndProperties.length; i++) {
-                    String[] propertyAndValue = EQUALS_WITH_WHITESPACES.split(pairAndProperties[i]);
-                    if (propertyAndValue.length == 2) {
-                        String propertyName = propertyAndValue[0];
-                        String propertyValue = propertyAndValue[1];
-                        if (propertyName.equals("type") && propertyValue.length() == 1) {
-                            Function<String, Object> parser = TYPE_ID_TO_PARSER_MAP.get(propertyValue.charAt(0));
-                            if (parser != null) {
-                                resultValue = parser.apply(stringValue);
-                            }
-                        }
-                    }
-                }
+                List<String> properties = Arrays.asList(pairAndProperties).subList(1, pairAndProperties.length);
+                Object resultValue = parseTyped(stringValue, properties);
                 target.setData(key, resultValue);
             } catch (Throwable t) {
                 log.error("Error decoding Correlation-Context header", t);
             }
         }
+    }
+
+    /**
+     * Scans the given properties for a type=... definition.
+     * If a correct definition is found, the given string value is parsed ot the given type and returned.
+     * Otherwise the string value is returned unchanged.
+     *
+     * @param stringValue the value to parse
+     * @param properties  the collection of proeprty definition in the format "propertyname=value"
+     * @return the parsed value
+     */
+    private static Object parseTyped(String stringValue, Collection<String> properties) {
+        for (String property : properties) {
+            String[] propertyNameAndValue = EQUALS_WITH_WHITESPACES.split(property);
+            if (propertyNameAndValue.length == 2) {
+                String propertyName = propertyNameAndValue[0];
+                String propertyValue = propertyNameAndValue[1];
+                if (propertyName.equals("type") && propertyValue.length() == 1) {
+                    Function<String, Object> parser = TYPE_ID_TO_PARSER_MAP.get(propertyValue.charAt(0));
+                    if (parser != null) {
+                        return parser.apply(stringValue);
+                    }
+                }
+            }
+        }
+        return stringValue;
     }
 
 

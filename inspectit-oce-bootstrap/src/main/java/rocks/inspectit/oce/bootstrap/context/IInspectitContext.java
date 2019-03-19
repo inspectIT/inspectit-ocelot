@@ -71,12 +71,12 @@ public interface IInspectitContext extends AutoCloseable {
     /**
      * Opposite method for {@link #getDownPropagationHeaders()} and {@link #getUpPropagationHeaders()}.
      * This method takes a map from header names to header values and extracts the propagated data from them.
-     * The header names which are of interest for the propagation can be queried via {@link #getPropagationHeaderFields()}.
+     * The header names which are of interest for the propagation can be queried via {@link #getPropagationHeaderNames()}.
      */
     void readPropagationHeaders(Map<String, String> headers);
 
     /**
      * @return the names of Http headers which are relevant for the context propagation.
      */
-    Set<String> getPropagationHeaderFields();
+    Set<String> getPropagationHeaderNames();
 }

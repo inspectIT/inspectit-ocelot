@@ -3,6 +3,10 @@ package rocks.inspectit.oce.core.config.model.instrumentation;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import rocks.inspectit.oce.core.instrumentation.special.ExecutorContextPropagationSensor;
+import rocks.inspectit.oce.core.instrumentation.special.remote.ApacheHttpClientContextPropagationSensor;
+import rocks.inspectit.oce.core.instrumentation.special.remote.HttpUrlConnectionContextPropagationSensor;
+import rocks.inspectit.oce.core.instrumentation.special.remote.ServletApiContextDownPropagationSensor;
+import rocks.inspectit.oce.core.instrumentation.special.remote.ServletApiContextUpPropagationSensor;
 
 /**
  * Settings for the {@link rocks.inspectit.oce.core.instrumentation.special.SpecialSensor}s.
@@ -27,18 +31,18 @@ public class SpecialSensorSettings {
     private boolean scheduledExecutorContextPropagation;
 
     /**
-     * Enables or disables {@link rocks.inspectit.oce.core.instrumentation.special.HttpUrlConnectionContextPropagationSensor}.
+     * Enables or disables {@link HttpUrlConnectionContextPropagationSensor}.
      */
     private boolean httpUrlConnectionContextPropagation;
 
     /**
-     * Enables or disable {@link rocks.inspectit.oce.core.instrumentation.special.ApacheHttpClientContextPropagationSensor}
+     * Enables or disable {@link ApacheHttpClientContextPropagationSensor}
      */
     private boolean apacheHttpClientContextPropagation;
 
     /**
-     * Enables or disables {@link rocks.inspectit.oce.core.instrumentation.special.ServletApiContextUpPropagationSensor} and
-     * {@link rocks.inspectit.oce.core.instrumentation.special.ServletApiContextDownPropagationSensor}
+     * Enables or disables {@link ServletApiContextUpPropagationSensor} and
+     * {@link ServletApiContextDownPropagationSensor}
      */
     private boolean servletApiContextPropagation;
 

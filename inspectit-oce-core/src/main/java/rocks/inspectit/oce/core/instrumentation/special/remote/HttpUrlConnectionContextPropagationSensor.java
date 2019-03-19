@@ -1,4 +1,4 @@
-package rocks.inspectit.oce.core.instrumentation.special;
+package rocks.inspectit.oce.core.instrumentation.special.remote;
 
 import lombok.val;
 import net.bytebuddy.asm.Advice;
@@ -12,6 +12,7 @@ import rocks.inspectit.oce.bootstrap.Instances;
 import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationConfiguration;
 import rocks.inspectit.oce.core.instrumentation.context.ContextManager;
 import rocks.inspectit.oce.core.instrumentation.context.ObjectAttachments;
+import rocks.inspectit.oce.core.instrumentation.special.SpecialSensor;
 
 import java.net.HttpURLConnection;
 import java.util.HashMap;
@@ -33,9 +34,9 @@ public class HttpUrlConnectionContextPropagationSensor implements SpecialSensor 
      * We down propagate when the first of these three methods is executed
      */
     private static final ElementMatcher<MethodDescription> DOWN_PROPAGATION_TRIGGERING_METHODS =
-            named("getInputStream").and(takesArguments(0)).or(
-                    named("getOutputStream").and(takesArguments(0))).or(
-                    named("connect").and(takesArguments(0)));
+            named("getInputStream").and(takesArguments(0))
+                    .or(named("getOutputStream").and(takesArguments(0)))
+                    .or(named("connect").and(takesArguments(0)));
 
     /**
      * This method triggers the up-propagation.
@@ -72,7 +73,7 @@ public class HttpUrlConnectionContextPropagationSensor implements SpecialSensor 
 
         @Advice.OnMethodEnter
         public static void enter(@Advice.This HttpURLConnection thiz) {
-            boolean downPropagationPerformed = null != Instances.attachments.getAttachment(thiz, "down_propagation_performed");
+            boolean downPropagationPerformed = Instances.attachments.getAttachment(thiz, "down_propagation_performed") != null;
             if (!downPropagationPerformed) {
                 Instances.attachments.attach(thiz, "down_propagation_performed", true);
                 val ctx = Instances.contextManager.enterNewContext();
@@ -81,9 +82,7 @@ public class HttpUrlConnectionContextPropagationSensor implements SpecialSensor 
                 ctx.close();
             }
         }
-
     }
-
 
     private static class UpPropagationAdvice {
 
@@ -95,7 +94,7 @@ public class HttpUrlConnectionContextPropagationSensor implements SpecialSensor 
                 val ctx = Instances.contextManager.enterNewContext();
                 ctx.makeActive();
                 Map<String, String> headersOfInterest = new HashMap<>();
-                for (String headerName : ctx.getPropagationHeaderFields()) {
+                for (String headerName : ctx.getPropagationHeaderNames()) {
                     List<String> values = thiz.getHeaderFields().get(headerName);
                     if (values != null) {
                         headersOfInterest.put(headerName, String.join(",", values));

@@ -1,4 +1,4 @@
-package rocks.inspectit.oce.core.instrumentation.special;
+package rocks.inspectit.oce.core.instrumentation.special.remote;
 
 import lombok.val;
 import net.bytebuddy.asm.Advice;
@@ -12,8 +12,8 @@ import rocks.inspectit.oce.bootstrap.Instances;
 import rocks.inspectit.oce.core.instrumentation.config.model.InstrumentationConfiguration;
 import rocks.inspectit.oce.core.instrumentation.context.ContextManager;
 import rocks.inspectit.oce.core.instrumentation.context.ObjectAttachments;
+import rocks.inspectit.oce.core.instrumentation.special.SpecialSensor;
 
-import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,7 +21,7 @@ import java.util.Map;
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
 /**
- * Performs up-and down propagation via the protected doExecute method of the apache CLoseableHttpClient.
+ * Performs up- and down propagation via the protected doExecute method of the apache CloseableHttpClient.
  */
 @Component
 @DependsOn({ContextManager.BEAN_NAME, ObjectAttachments.BEAN_NAME})
@@ -73,7 +73,7 @@ public class ApacheHttpClientContextPropagationSensor implements SpecialSensor {
                 return downPropagationHeaders;
 
             } catch (Throwable t) {
-                t.printStackTrace();
+                System.out.println("Error performing propagation, no data will be propagated: " + t.getMessage());
             }
             return null;
         }
@@ -93,24 +93,24 @@ public class ApacheHttpClientContextPropagationSensor implements SpecialSensor {
                 val ctx = Instances.contextManager.enterNewContext();
 
                 Method getHeaders = httpMessage.getMethod("getHeaders", String.class);
-                Method headerGetValue = null;
+                Class<?> headerClass = Class.forName("org.apache.http.Header", true, httpMessage.getClassLoader());
+                Method mHeaderGetValue = headerClass.getMethod("getValue");
                 Map<String, String> upPropagationHeaders = new HashMap<>();
-                for (String headerName : ctx.getPropagationHeaderFields()) {
-                    Object headersArray = getHeaders.invoke(response, headerName);
-                    int numHeaders = Array.getLength(headersArray);
-                    StringBuilder result = new StringBuilder();
-                    for (int i = 0; i < numHeaders; i++) {
-                        Object header = Array.get(headersArray, i);
-                        if (headerGetValue == null) {
-                            Class<?> headerClass = Class.forName("org.apache.http.Header", true, header.getClass().getClassLoader());
-                            headerGetValue = headerClass.getMethod("getValue");
-                        }
-                        if (result.length() > 0) {
-                            result.append(',');
-                        }
-                        result.append(headerGetValue.invoke(header));
-                    }
+                for (String headerName : ctx.getPropagationHeaderNames()) {
+                    Object[] headersArray = (Object[]) getHeaders.invoke(response, headerName);
 
+                    StringBuilder result = new StringBuilder();
+                    if (headersArray != null) {
+                        for (Object header : headersArray) {
+                            String value = (String) mHeaderGetValue.invoke(header);
+                            if (value != null) {
+                                if (result.length() > 0) {
+                                    result.append(',');
+                                }
+                                result.append(value);
+                            }
+                        }
+                    }
                     if (result.length() > 0) {
                         upPropagationHeaders.put(headerName, result.toString());
                     }
@@ -121,8 +121,9 @@ public class ApacheHttpClientContextPropagationSensor implements SpecialSensor {
                     ctx.close();
                 }
 
-            } catch (Throwable t) {
-                t.printStackTrace();
+            } catch (
+                    Throwable t) {
+                System.out.println("Error reading propagation data, no data will be propagated: " + t.getMessage());
             }
         }
 

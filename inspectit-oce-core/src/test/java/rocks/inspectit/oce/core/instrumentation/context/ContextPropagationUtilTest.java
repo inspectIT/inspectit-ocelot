@@ -18,10 +18,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static rocks.inspectit.oce.core.instrumentation.context.ContextPropagation.CORRELATION_CONTEXT_HEADER;
+import static rocks.inspectit.oce.core.instrumentation.context.ContextPropagationUtil.CORRELATION_CONTEXT_HEADER;
 
 @ExtendWith(MockitoExtension.class)
-public class ContextPropagationTest {
+public class ContextPropagationUtilTest {
 
     @Mock
     InspectitContext inspectitContext;
@@ -42,7 +42,7 @@ public class ContextPropagationTest {
             Map<String, String> headers = ImmutableMap.of(CORRELATION_CONTEXT_HEADER,
                     enc("my_valü") + " =  " + enc("straße=15") + ";someprop=42");
 
-            ContextPropagation.readPropagationMap(headers, inspectitContext);
+            ContextPropagationUtil.readPropagationHeaderMap(headers, inspectitContext);
 
             verify(inspectitContext, times(1)).setData(any(), any());
             verify(inspectitContext, times(1)).setData(eq("my_valü"), eq("straße=15"));
@@ -53,7 +53,7 @@ public class ContextPropagationTest {
             Map<String, String> headers = ImmutableMap.of(CORRELATION_CONTEXT_HEADER,
                     enc("x") + " =  " + enc("42") + "; type = l");
 
-            ContextPropagation.readPropagationMap(headers, inspectitContext);
+            ContextPropagationUtil.readPropagationHeaderMap(headers, inspectitContext);
 
             verify(inspectitContext, times(1)).setData(any(), any());
             verify(inspectitContext, times(1)).setData(eq("x"), eq(42L));
@@ -64,7 +64,7 @@ public class ContextPropagationTest {
             Map<String, String> headers = ImmutableMap.of(CORRELATION_CONTEXT_HEADER,
                     enc("pi") + " =  " + enc(String.valueOf(Math.PI)) + "; blub=halloooo; type = d");
 
-            ContextPropagation.readPropagationMap(headers, inspectitContext);
+            ContextPropagationUtil.readPropagationHeaderMap(headers, inspectitContext);
 
             verify(inspectitContext, times(1)).setData(any(), any());
             verify(inspectitContext, times(1)).setData(eq("pi"), eq(Math.PI));
@@ -75,7 +75,7 @@ public class ContextPropagationTest {
             Map<String, String> headers = ImmutableMap.of(CORRELATION_CONTEXT_HEADER,
                     "is_something=true;type=b,hello=world");
 
-            ContextPropagation.readPropagationMap(headers, inspectitContext);
+            ContextPropagationUtil.readPropagationHeaderMap(headers, inspectitContext);
 
             verify(inspectitContext, times(2)).setData(any(), any());
             verify(inspectitContext, times(1)).setData(eq("is_something"), eq(true));
@@ -88,7 +88,7 @@ public class ContextPropagationTest {
             Map<String, String> headers = ImmutableMap.of(CORRELATION_CONTEXT_HEADER,
                     "is_something=true;type=blub;type=x");
 
-            ContextPropagation.readPropagationMap(headers, inspectitContext);
+            ContextPropagationUtil.readPropagationHeaderMap(headers, inspectitContext);
 
             verify(inspectitContext, times(1)).setData(any(), any());
             verify(inspectitContext, times(1)).setData(eq("is_something"), eq("true"));
@@ -105,7 +105,7 @@ public class ContextPropagationTest {
 
             Map<String, Object> data = ImmutableMap.of("my_valü", "straße=15");
 
-            Map<String, String> result = ContextPropagation.buildPropagationMap(data.entrySet().stream());
+            Map<String, String> result = ContextPropagationUtil.buildPropagationHeaderMap(data.entrySet().stream());
 
             assertThat(result).hasSize(1);
             assertThat(result).containsEntry(CORRELATION_CONTEXT_HEADER, enc("my_valü") + "=" + enc("straße=15"));
@@ -115,7 +115,7 @@ public class ContextPropagationTest {
         public void testSingleLong() {
             Map<String, Object> data = ImmutableMap.of("x", 42L);
 
-            Map<String, String> result = ContextPropagation.buildPropagationMap(data.entrySet().stream());
+            Map<String, String> result = ContextPropagationUtil.buildPropagationHeaderMap(data.entrySet().stream());
 
             assertThat(result).hasSize(1);
             assertThat(result).containsEntry(CORRELATION_CONTEXT_HEADER, "x=42;type=l");
@@ -125,7 +125,7 @@ public class ContextPropagationTest {
         public void testSingleDouble() {
             Map<String, Object> data = ImmutableMap.of("Pi", Math.PI);
 
-            Map<String, String> result = ContextPropagation.buildPropagationMap(data.entrySet().stream());
+            Map<String, String> result = ContextPropagationUtil.buildPropagationHeaderMap(data.entrySet().stream());
 
             assertThat(result).hasSize(1);
             assertThat(result).containsEntry(CORRELATION_CONTEXT_HEADER, "Pi=" + Math.PI + ";type=d");
@@ -135,7 +135,7 @@ public class ContextPropagationTest {
         public void testInvalidTypeIgnored() {
             Map<String, Object> data = ImmutableMap.of("Pi", new ArrayList<>());
 
-            Map<String, String> result = ContextPropagation.buildPropagationMap(data.entrySet().stream());
+            Map<String, String> result = ContextPropagationUtil.buildPropagationHeaderMap(data.entrySet().stream());
 
             assertThat(result).hasSize(0);
         }
@@ -144,7 +144,7 @@ public class ContextPropagationTest {
         public void testBooleanAndString() {
             Map<String, Object> data = ImmutableMap.of("hello", "world", "is_something", true);
 
-            Map<String, String> result = ContextPropagation.buildPropagationMap(data.entrySet().stream());
+            Map<String, String> result = ContextPropagationUtil.buildPropagationHeaderMap(data.entrySet().stream());
 
             assertThat(result).hasSize(1);
             assertThat(result).containsEntry(CORRELATION_CONTEXT_HEADER, "hello=world,is_something=true;type=b");

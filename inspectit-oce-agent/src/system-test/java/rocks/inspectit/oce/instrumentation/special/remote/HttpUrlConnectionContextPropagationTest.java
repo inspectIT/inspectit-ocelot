@@ -1,4 +1,4 @@
-package rocks.inspectit.oce.instrumentation.special;
+package rocks.inspectit.oce.instrumentation.special.remote;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import io.opencensus.common.Scope;

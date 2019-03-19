@@ -1,4 +1,4 @@
-package rocks.inspectit.oce.instrumentation.special;
+package rocks.inspectit.oce.instrumentation.special.remote;
 
 import com.google.common.collect.ImmutableMap;
 import org.eclipse.jetty.server.Server;
