@@ -112,7 +112,7 @@ public class ClassLoaderDelegation implements SpecialSensor {
                 //in this case we need to make sure that the classloader delegation is only performed once
                 //because otherwise we end up with a StackOverflowError (the instrument bootstrap loaded would call
                 //Class.forName in an infinite recursion)
-                boolean cldPerformed = ClassLoaderDelegationMarker.CLASS_LOADER_DELEGATION_PERFORMED.get() != null;
+                boolean cldPerformed = ClassLoaderDelegationMarker.CLASS_LOADER_DELEGATION_PERFORMED.get();
                 if (!cldPerformed) {
                     ClassLoaderDelegationMarker.CLASS_LOADER_DELEGATION_PERFORMED.set(true);
                     try {
@@ -122,7 +122,7 @@ public class ClassLoaderDelegation implements SpecialSensor {
                         //should never occur as we put our stuff on the bootstrap
                         return null; //execute the classloader normally
                     } finally {
-                        ClassLoaderDelegationMarker.CLASS_LOADER_DELEGATION_PERFORMED.remove();
+                        ClassLoaderDelegationMarker.CLASS_LOADER_DELEGATION_PERFORMED.set(false);
                     }
                 }
             }
