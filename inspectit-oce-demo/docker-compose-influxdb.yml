@@ -147,6 +147,12 @@ services:
       - 8080:8080
       - 9094:9094
 
+  load:
+    image: openapm/spring-petclinic-load:inspectit-oce-demo
+    container_name: load-generator
+    volumes:
+      - ./load/load-script.yml:/artillery/load-script.yml
+
   influxdb:
     image: influxdb:1.7.1
     container_name: influxdb
