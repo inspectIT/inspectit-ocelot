@@ -64,6 +64,10 @@ public class ClassLoaderDelegation implements SpecialSensor {
 
     @Override
     public DynamicType.Builder instrument(Class<?> clazz, InstrumentationConfiguration settings, DynamicType.Builder builder) {
+
+        //ensure that this bootstrap class is loaded BEFORE any classloader is instrumented
+        ClassLoaderDelegationMarker.CLASS_LOADER_DELEGATION_PERFORMED.get();
+
         //remember that this classloader was instrumented
         instrumentedClassloaderClasses.add(clazz);
         return builder.visit(Advice.to(ClassloaderDelegationAdvice.class).on(LOAD_CLASS_MATCHER));
