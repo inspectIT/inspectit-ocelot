@@ -30,6 +30,10 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
 @Slf4j
 public class ClassLoaderDelegation implements SpecialSensor {
 
+    static {
+        //ensure that this bootstrap class is loaded BEFORE any classloader is instrumented
+        ClassLoaderDelegationMarker.CLASS_LOADER_DELEGATION_PERFORMED.get();
+    }
 
     /**
      * Stores which classloaders have already been instrumented.
