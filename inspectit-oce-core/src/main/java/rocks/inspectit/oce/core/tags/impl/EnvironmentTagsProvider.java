@@ -25,7 +25,7 @@ public class EnvironmentTagsProvider implements ICommonTagsProvider {
         @Valid EnvironmentTagsProviderSettings conf = configuration.getTags().getProviders().getEnvironment();
         if (conf.isEnabled()) {
             Map<String, String> envTags = new HashMap<>();
-            envTags.put("service-name", configuration.getServiceName());
+            envTags.put("service", configuration.getServiceName());
 
             if (conf.isResolveHostName()) {
                 try {
@@ -39,7 +39,7 @@ public class EnvironmentTagsProvider implements ICommonTagsProvider {
 
             if (conf.isResolveHostAddress()) {
                 try {
-                    envTags.put("host-address", resolveHostAddress());
+                    envTags.put("host_address", resolveHostAddress());
                 } catch (UnknownHostException e) {
                     if (log.isDebugEnabled()) {
                         log.debug("Failed to resolve host address.", e);
