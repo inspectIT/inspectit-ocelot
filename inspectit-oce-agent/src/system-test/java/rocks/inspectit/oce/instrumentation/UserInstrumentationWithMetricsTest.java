@@ -58,8 +58,8 @@ public class UserInstrumentationWithMetricsTest extends InstrumentationSysTestBa
 
         HashMap<String, String> tags = new HashMap<>();
         tags.put("host", ".*");
-        tags.put("host-address", ".*");
-        tags.put("service-name", ".*");
+        tags.put("host_address", ".*");
+        tags.put("service", ".*");
         String methodName = UserInstrumentationWithMetricsTest.class.getName() + ".responseTimeMeasuring";
         tags.put("method_name", methodName);
 

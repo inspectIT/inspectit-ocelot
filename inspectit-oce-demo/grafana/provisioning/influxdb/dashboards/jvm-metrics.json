@@ -86,12 +86,12 @@
       "steppedLine": false,
       "targets": [
         {
-          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"process_cpu_usage\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])",
+          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"process_cpu_usage\" AND\n  r.service == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])",
           "refId": "A",
           "resultFormat": "time_series"
         },
         {
-          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_usage\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n",
+          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_usage\" AND\n  r.service == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n",
           "refId": "B",
           "resultFormat": "time_series"
         }
@@ -215,7 +215,7 @@
           "measurement": "jvm_memory_max",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
+          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
@@ -235,7 +235,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             },
@@ -266,7 +266,7 @@
           "measurement": "jvm_memory_committed",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
+          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
           "rawQuery": false,
           "refId": "B",
           "resultFormat": "time_series",
@@ -286,7 +286,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             },
@@ -317,7 +317,7 @@
           "measurement": "jvm_memory_used",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
+          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
           "rawQuery": false,
           "refId": "C",
           "resultFormat": "time_series",
@@ -337,7 +337,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             },
@@ -440,7 +440,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_daemon\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> map(fn:(r) => ({\n        _time: r._time,\n        _value: r._value,\n        _measurement: \"daemon\"\n    }))\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])",
+          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_daemon\" AND\n  r.service == \"$service\" AND\n  r._field == \"gauge\")\n|> map(fn:(r) => ({\n        _time: r._time,\n        _value: r._value,\n        _measurement: \"daemon\"\n    }))\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])",
           "refId": "B"
         },
         {
@@ -468,7 +468,7 @@
           "measurement": "jvm_threads_states",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "lnd = () => {\nlive = from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_live\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \ndaemon = from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_daemon\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \nreturn join(tables:{live:live, daemon:daemon},on:[\"_time\",\"_stop\",\"_start\", \"host\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_live - r._value_daemon),\n        _measurement: \"non-daemon\"\n    }))\n}\n\nlnd()",
+          "query": "lnd = () => {\nlive = from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_live\" AND\n  r.service == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \ndaemon = from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_daemon\" AND\n  r.service == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \nreturn join(tables:{live:live, daemon:daemon},on:[\"_time\",\"_stop\",\"_start\", \"host\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_live - r._value_daemon),\n        _measurement: \"non-daemon\"\n    }))\n}\n\nlnd()",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
@@ -488,14 +488,14 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
           ]
         },
         {
-          "query": "stackedPeak = () => {\npeak = from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_peak\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n\nlive = from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_live\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \n\n  \nreturn join(tables:{live:live, peak:peak},on:[\"_time\",\"_stop\",\"_start\", \"host\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_peak - r._value_live),\n        _measurement: \"peak\"\n    }))\n}\n\nstackedPeak()",
+          "query": "stackedPeak = () => {\npeak = from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_peak\" AND\n  r.service == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n\nlive = from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_live\" AND\n  r.service == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \n\n  \nreturn join(tables:{live:live, peak:peak},on:[\"_time\",\"_stop\",\"_start\", \"host\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_peak - r._value_live),\n        _measurement: \"peak\"\n    }))\n}\n\nstackedPeak()",
           "refId": "C"
         }
       ],
@@ -624,7 +624,7 @@
           "measurement": "jvm_gc_live_data_size",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT \"gauge\" FROM \"jvm_gc_live_data_size\" WHERE (\"service_name\" =~ /^$service$/) ",
+          "query": "SELECT \"gauge\" FROM \"jvm_gc_live_data_size\" WHERE (\"service\" =~ /^$service$/) ",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
@@ -644,7 +644,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -670,7 +670,7 @@
           "measurement": "jvm_gc_max_data_size",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT \"gauge\" FROM \"jvm_gc_live_data_size\" WHERE (\"service_name\" =~ /^$service$/) ",
+          "query": "SELECT \"gauge\" FROM \"jvm_gc_live_data_size\" WHERE (\"service\" =~ /^$service$/) ",
           "rawQuery": false,
           "refId": "B",
           "resultFormat": "time_series",
@@ -690,7 +690,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -709,7 +709,7 @@
           "measurement": "jvm_gc_memory_allocated",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT difference(sum(\"counter\")) FROM \"jvm_gc_memory_allocated\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(15s)",
+          "query": "SELECT difference(sum(\"counter\")) FROM \"jvm_gc_memory_allocated\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(15s)",
           "rawQuery": false,
           "refId": "D",
           "resultFormat": "time_series",
@@ -733,7 +733,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -752,7 +752,7 @@
           "measurement": "jvm_gc_memory_promoted",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT difference(sum(\"counter\")) FROM \"jvm_gc_memory_allocated\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(15s)",
+          "query": "SELECT difference(sum(\"counter\")) FROM \"jvm_gc_memory_allocated\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(15s)",
           "rawQuery": false,
           "refId": "F",
           "resultFormat": "time_series",
@@ -776,7 +776,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -914,7 +914,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -1020,7 +1020,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "from(bucket: \"telegraf\")\n  |> range(start: -1m)\n  |> filter(fn: (r) =>\n    r._measurement == \"jvm_classes_loaded\" AND\n    r.service_name == \"$service\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service_name\"])\n  |> last()\n",
+          "query": "from(bucket: \"telegraf\")\n  |> range(start: -1m)\n  |> filter(fn: (r) =>\n    r._measurement == \"jvm_classes_loaded\" AND\n    r.service == \"$service\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service\"])\n  |> last()\n",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -1130,7 +1130,7 @@
           "measurement": "jvm_memory_max",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
+          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1150,7 +1150,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             },
@@ -1181,7 +1181,7 @@
           "measurement": "jvm_memory_committed",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
+          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
           "rawQuery": false,
           "refId": "B",
           "resultFormat": "time_series",
@@ -1201,7 +1201,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             },
@@ -1232,7 +1232,7 @@
           "measurement": "jvm_memory_used",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
+          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
           "rawQuery": false,
           "refId": "C",
           "resultFormat": "time_series",
@@ -1252,7 +1252,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             },
@@ -1374,7 +1374,7 @@
           "measurement": "jvm_threads_states",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
+          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1394,7 +1394,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -1527,7 +1527,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             },
@@ -1574,7 +1574,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             },
@@ -1713,7 +1713,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "from(bucket: \"telegraf\")\n  |> range(start: -1m)\n  |> filter(fn: (r) =>\n    r._measurement == \"jvm_classes_unloaded\" AND\n    r.service_name == \"$service\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service_name\"])\n  |> last()\n",
+          "query": "from(bucket: \"telegraf\")\n  |> range(start: -1m)\n  |> filter(fn: (r) =>\n    r._measurement == \"jvm_classes_unloaded\" AND\n    r.service == \"$service\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service\"])\n  |> last()\n",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -1841,12 +1841,12 @@
       "steppedLine": false,
       "targets": [
         {
-          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"process_cpu_usage\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])",
+          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"process_cpu_usage\" AND\n  r.service == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])",
           "refId": "A",
           "resultFormat": "time_series"
         },
         {
-          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_usage\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n",
+          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_usage\" AND\n  r.service == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n",
           "refId": "B",
           "resultFormat": "time_series"
         }
@@ -1973,7 +1973,7 @@
           "measurement": "jvm_memory_max",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
+          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1993,7 +1993,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             },
@@ -2024,7 +2024,7 @@
           "measurement": "jvm_memory_committed",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
+          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
           "rawQuery": false,
           "refId": "B",
           "resultFormat": "time_series",
@@ -2044,7 +2044,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             },
@@ -2075,7 +2075,7 @@
           "measurement": "jvm_memory_used",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
+          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
           "rawQuery": false,
           "refId": "C",
           "resultFormat": "time_series",
@@ -2095,7 +2095,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             },
@@ -2201,7 +2201,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_daemon\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> map(fn:(r) => ({\n        _time: r._time,\n        _value: r._value,\n        _measurement: \"daemon\"\n    }))\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])",
+          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_daemon\" AND\n  r.service == \"$service\" AND\n  r._field == \"gauge\")\n|> map(fn:(r) => ({\n        _time: r._time,\n        _value: r._value,\n        _measurement: \"daemon\"\n    }))\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])",
           "refId": "B"
         },
         {
@@ -2229,7 +2229,7 @@
           "measurement": "jvm_threads_states",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "lnd = () => {\nlive = from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_live\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \ndaemon = from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_daemon\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \nreturn join(tables:{live:live, daemon:daemon},on:[\"_time\",\"_stop\",\"_start\", \"host\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_live - r._value_daemon),\n        _measurement: \"non-daemon\"\n    }))\n}\n\nlnd()",
+          "query": "lnd = () => {\nlive = from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_live\" AND\n  r.service == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \ndaemon = from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_daemon\" AND\n  r.service == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \nreturn join(tables:{live:live, daemon:daemon},on:[\"_time\",\"_stop\",\"_start\", \"host\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_live - r._value_daemon),\n        _measurement: \"non-daemon\"\n    }))\n}\n\nlnd()",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
@@ -2249,14 +2249,14 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
           ]
         },
         {
-          "query": "stackedPeak = () => {\npeak = from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_peak\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n\nlive = from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_live\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \n\n  \nreturn join(tables:{live:live, peak:peak},on:[\"_time\",\"_stop\",\"_start\", \"host\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_peak - r._value_live),\n        _measurement: \"peak\"\n    }))\n}\n\nstackedPeak()",
+          "query": "stackedPeak = () => {\npeak = from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_peak\" AND\n  r.service == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n\nlive = from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_live\" AND\n  r.service == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \n\n  \nreturn join(tables:{live:live, peak:peak},on:[\"_time\",\"_stop\",\"_start\", \"host\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_peak - r._value_live),\n        _measurement: \"peak\"\n    }))\n}\n\nstackedPeak()",
           "refId": "C"
         }
       ],
@@ -2388,7 +2388,7 @@
           "measurement": "jvm_gc_live_data_size",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT \"gauge\" FROM \"jvm_gc_live_data_size\" WHERE (\"service_name\" =~ /^$service$/) ",
+          "query": "SELECT \"gauge\" FROM \"jvm_gc_live_data_size\" WHERE (\"service\" =~ /^$service$/) ",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
@@ -2408,7 +2408,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -2434,7 +2434,7 @@
           "measurement": "jvm_gc_max_data_size",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT \"gauge\" FROM \"jvm_gc_live_data_size\" WHERE (\"service_name\" =~ /^$service$/) ",
+          "query": "SELECT \"gauge\" FROM \"jvm_gc_live_data_size\" WHERE (\"service\" =~ /^$service$/) ",
           "rawQuery": false,
           "refId": "B",
           "resultFormat": "time_series",
@@ -2454,7 +2454,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -2473,7 +2473,7 @@
           "measurement": "jvm_gc_memory_allocated",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT difference(sum(\"counter\")) FROM \"jvm_gc_memory_allocated\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(15s)",
+          "query": "SELECT difference(sum(\"counter\")) FROM \"jvm_gc_memory_allocated\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(15s)",
           "rawQuery": false,
           "refId": "D",
           "resultFormat": "time_series",
@@ -2497,7 +2497,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -2516,7 +2516,7 @@
           "measurement": "jvm_gc_memory_promoted",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT difference(sum(\"counter\")) FROM \"jvm_gc_memory_allocated\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(15s)",
+          "query": "SELECT difference(sum(\"counter\")) FROM \"jvm_gc_memory_allocated\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(15s)",
           "rawQuery": false,
           "refId": "F",
           "resultFormat": "time_series",
@@ -2540,7 +2540,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -2681,7 +2681,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -2790,7 +2790,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "from(bucket: \"telegraf\")\n  |> range(start: -1m)\n  |> filter(fn: (r) =>\n    r._measurement == \"jvm_classes_loaded\" AND\n    r.service_name == \"$service\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service_name\"])\n  |> last()\n",
+          "query": "from(bucket: \"telegraf\")\n  |> range(start: -1m)\n  |> filter(fn: (r) =>\n    r._measurement == \"jvm_classes_loaded\" AND\n    r.service == \"$service\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service\"])\n  |> last()\n",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -2903,7 +2903,7 @@
           "measurement": "jvm_memory_max",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
+          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
@@ -2923,7 +2923,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             },
@@ -2954,7 +2954,7 @@
           "measurement": "jvm_memory_committed",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
+          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
           "rawQuery": false,
           "refId": "B",
           "resultFormat": "time_series",
@@ -2974,7 +2974,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             },
@@ -3005,7 +3005,7 @@
           "measurement": "jvm_memory_used",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
+          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
           "rawQuery": false,
           "refId": "C",
           "resultFormat": "time_series",
@@ -3025,7 +3025,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             },
@@ -3150,7 +3150,7 @@
           "measurement": "jvm_threads_states",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
+          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
@@ -3170,7 +3170,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -3306,7 +3306,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             },
@@ -3353,7 +3353,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             },
@@ -3495,7 +3495,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "from(bucket: \"telegraf\")\n  |> range(start: -1m)\n  |> filter(fn: (r) =>\n    r._measurement == \"jvm_classes_unloaded\" AND\n    r.service_name == \"$service\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service_name\"])\n  |> last()\n",
+          "query": "from(bucket: \"telegraf\")\n  |> range(start: -1m)\n  |> filter(fn: (r) =>\n    r._measurement == \"jvm_classes_unloaded\" AND\n    r.service == \"$service\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service\"])\n  |> last()\n",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -3626,12 +3626,12 @@
       "steppedLine": false,
       "targets": [
         {
-          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"process_cpu_usage\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])",
+          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"process_cpu_usage\" AND\n  r.service == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])",
           "refId": "A",
           "resultFormat": "time_series"
         },
         {
-          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_usage\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n",
+          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_usage\" AND\n  r.service == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n",
           "refId": "B",
           "resultFormat": "time_series"
         }
@@ -3758,7 +3758,7 @@
           "measurement": "jvm_memory_max",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
+          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
@@ -3778,7 +3778,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             },
@@ -3809,7 +3809,7 @@
           "measurement": "jvm_memory_committed",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
+          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
           "rawQuery": false,
           "refId": "B",
           "resultFormat": "time_series",
@@ -3829,7 +3829,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             },
@@ -3860,7 +3860,7 @@
           "measurement": "jvm_memory_used",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
+          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
           "rawQuery": false,
           "refId": "C",
           "resultFormat": "time_series",
@@ -3880,7 +3880,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             },
@@ -3986,7 +3986,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_daemon\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> map(fn:(r) => ({\n        _time: r._time,\n        _value: r._value,\n        _measurement: \"daemon\"\n    }))\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])",
+          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_daemon\" AND\n  r.service == \"$service\" AND\n  r._field == \"gauge\")\n|> map(fn:(r) => ({\n        _time: r._time,\n        _value: r._value,\n        _measurement: \"daemon\"\n    }))\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])",
           "refId": "B"
         },
         {
@@ -4014,7 +4014,7 @@
           "measurement": "jvm_threads_states",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "lnd = () => {\nlive = from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_live\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \ndaemon = from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_daemon\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \nreturn join(tables:{live:live, daemon:daemon},on:[\"_time\",\"_stop\",\"_start\", \"host\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_live - r._value_daemon),\n        _measurement: \"non-daemon\"\n    }))\n}\n\nlnd()",
+          "query": "lnd = () => {\nlive = from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_live\" AND\n  r.service == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \ndaemon = from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_daemon\" AND\n  r.service == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \nreturn join(tables:{live:live, daemon:daemon},on:[\"_time\",\"_stop\",\"_start\", \"host\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_live - r._value_daemon),\n        _measurement: \"non-daemon\"\n    }))\n}\n\nlnd()",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
@@ -4034,14 +4034,14 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
           ]
         },
         {
-          "query": "stackedPeak = () => {\npeak = from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_peak\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n\nlive = from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_live\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \n\n  \nreturn join(tables:{live:live, peak:peak},on:[\"_time\",\"_stop\",\"_start\", \"host\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_peak - r._value_live),\n        _measurement: \"peak\"\n    }))\n}\n\nstackedPeak()",
+          "query": "stackedPeak = () => {\npeak = from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_peak\" AND\n  r.service == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n\nlive = from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_live\" AND\n  r.service == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \n\n  \nreturn join(tables:{live:live, peak:peak},on:[\"_time\",\"_stop\",\"_start\", \"host\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_peak - r._value_live),\n        _measurement: \"peak\"\n    }))\n}\n\nstackedPeak()",
           "refId": "C"
         }
       ],
@@ -4173,7 +4173,7 @@
           "measurement": "jvm_gc_live_data_size",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT \"gauge\" FROM \"jvm_gc_live_data_size\" WHERE (\"service_name\" =~ /^$service$/) ",
+          "query": "SELECT \"gauge\" FROM \"jvm_gc_live_data_size\" WHERE (\"service\" =~ /^$service$/) ",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
@@ -4193,7 +4193,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -4219,7 +4219,7 @@
           "measurement": "jvm_gc_max_data_size",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT \"gauge\" FROM \"jvm_gc_live_data_size\" WHERE (\"service_name\" =~ /^$service$/) ",
+          "query": "SELECT \"gauge\" FROM \"jvm_gc_live_data_size\" WHERE (\"service\" =~ /^$service$/) ",
           "rawQuery": false,
           "refId": "B",
           "resultFormat": "time_series",
@@ -4239,7 +4239,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -4258,7 +4258,7 @@
           "measurement": "jvm_gc_memory_allocated",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT difference(sum(\"counter\")) FROM \"jvm_gc_memory_allocated\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(15s)",
+          "query": "SELECT difference(sum(\"counter\")) FROM \"jvm_gc_memory_allocated\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(15s)",
           "rawQuery": false,
           "refId": "D",
           "resultFormat": "time_series",
@@ -4282,7 +4282,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -4301,7 +4301,7 @@
           "measurement": "jvm_gc_memory_promoted",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT difference(sum(\"counter\")) FROM \"jvm_gc_memory_allocated\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(15s)",
+          "query": "SELECT difference(sum(\"counter\")) FROM \"jvm_gc_memory_allocated\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(15s)",
           "rawQuery": false,
           "refId": "F",
           "resultFormat": "time_series",
@@ -4325,7 +4325,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -4466,7 +4466,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -4575,7 +4575,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "from(bucket: \"telegraf\")\n  |> range(start: -1m)\n  |> filter(fn: (r) =>\n    r._measurement == \"jvm_classes_loaded\" AND\n    r.service_name == \"$service\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service_name\"])\n  |> last()\n",
+          "query": "from(bucket: \"telegraf\")\n  |> range(start: -1m)\n  |> filter(fn: (r) =>\n    r._measurement == \"jvm_classes_loaded\" AND\n    r.service == \"$service\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service\"])\n  |> last()\n",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -4688,7 +4688,7 @@
           "measurement": "jvm_memory_max",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
+          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
@@ -4708,7 +4708,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             },
@@ -4739,7 +4739,7 @@
           "measurement": "jvm_memory_committed",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
+          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
           "rawQuery": false,
           "refId": "B",
           "resultFormat": "time_series",
@@ -4759,7 +4759,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             },
@@ -4790,7 +4790,7 @@
           "measurement": "jvm_memory_used",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
+          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
           "rawQuery": false,
           "refId": "C",
           "resultFormat": "time_series",
@@ -4810,7 +4810,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             },
@@ -4935,7 +4935,7 @@
           "measurement": "jvm_threads_states",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
+          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
@@ -4955,7 +4955,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -5091,7 +5091,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             },
@@ -5138,7 +5138,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             },
@@ -5280,7 +5280,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "from(bucket: \"telegraf\")\n  |> range(start: -1m)\n  |> filter(fn: (r) =>\n    r._measurement == \"jvm_classes_unloaded\" AND\n    r.service_name == \"$service\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service_name\"])\n  |> last()\n",
+          "query": "from(bucket: \"telegraf\")\n  |> range(start: -1m)\n  |> filter(fn: (r) =>\n    r._measurement == \"jvm_classes_unloaded\" AND\n    r.service == \"$service\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service\"])\n  |> last()\n",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -5411,12 +5411,12 @@
       "steppedLine": false,
       "targets": [
         {
-          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"process_cpu_usage\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])",
+          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"process_cpu_usage\" AND\n  r.service == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])",
           "refId": "A",
           "resultFormat": "time_series"
         },
         {
-          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_usage\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n",
+          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_usage\" AND\n  r.service == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n",
           "refId": "B",
           "resultFormat": "time_series"
         }
@@ -5543,7 +5543,7 @@
           "measurement": "jvm_memory_max",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
+          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
@@ -5563,7 +5563,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             },
@@ -5594,7 +5594,7 @@
           "measurement": "jvm_memory_committed",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
+          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
           "rawQuery": false,
           "refId": "B",
           "resultFormat": "time_series",
@@ -5614,7 +5614,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             },
@@ -5645,7 +5645,7 @@
           "measurement": "jvm_memory_used",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
+          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
           "rawQuery": false,
           "refId": "C",
           "resultFormat": "time_series",
@@ -5665,7 +5665,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             },
@@ -5771,7 +5771,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_daemon\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> map(fn:(r) => ({\n        _time: r._time,\n        _value: r._value,\n        _measurement: \"daemon\"\n    }))\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])",
+          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_daemon\" AND\n  r.service == \"$service\" AND\n  r._field == \"gauge\")\n|> map(fn:(r) => ({\n        _time: r._time,\n        _value: r._value,\n        _measurement: \"daemon\"\n    }))\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])",
           "refId": "B"
         },
         {
@@ -5799,7 +5799,7 @@
           "measurement": "jvm_threads_states",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "lnd = () => {\nlive = from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_live\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \ndaemon = from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_daemon\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \nreturn join(tables:{live:live, daemon:daemon},on:[\"_time\",\"_stop\",\"_start\", \"host\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_live - r._value_daemon),\n        _measurement: \"non-daemon\"\n    }))\n}\n\nlnd()",
+          "query": "lnd = () => {\nlive = from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_live\" AND\n  r.service == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \ndaemon = from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_daemon\" AND\n  r.service == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \nreturn join(tables:{live:live, daemon:daemon},on:[\"_time\",\"_stop\",\"_start\", \"host\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_live - r._value_daemon),\n        _measurement: \"non-daemon\"\n    }))\n}\n\nlnd()",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
@@ -5819,14 +5819,14 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
           ]
         },
         {
-          "query": "stackedPeak = () => {\npeak = from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_peak\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n\nlive = from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_live\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \n\n  \nreturn join(tables:{live:live, peak:peak},on:[\"_time\",\"_stop\",\"_start\", \"host\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_peak - r._value_live),\n        _measurement: \"peak\"\n    }))\n}\n\nstackedPeak()",
+          "query": "stackedPeak = () => {\npeak = from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_peak\" AND\n  r.service == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n\nlive = from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_live\" AND\n  r.service == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \n\n  \nreturn join(tables:{live:live, peak:peak},on:[\"_time\",\"_stop\",\"_start\", \"host\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_peak - r._value_live),\n        _measurement: \"peak\"\n    }))\n}\n\nstackedPeak()",
           "refId": "C"
         }
       ],
@@ -5958,7 +5958,7 @@
           "measurement": "jvm_gc_live_data_size",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT \"gauge\" FROM \"jvm_gc_live_data_size\" WHERE (\"service_name\" =~ /^$service$/) ",
+          "query": "SELECT \"gauge\" FROM \"jvm_gc_live_data_size\" WHERE (\"service\" =~ /^$service$/) ",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
@@ -5978,7 +5978,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -6004,7 +6004,7 @@
           "measurement": "jvm_gc_max_data_size",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT \"gauge\" FROM \"jvm_gc_live_data_size\" WHERE (\"service_name\" =~ /^$service$/) ",
+          "query": "SELECT \"gauge\" FROM \"jvm_gc_live_data_size\" WHERE (\"service\" =~ /^$service$/) ",
           "rawQuery": false,
           "refId": "B",
           "resultFormat": "time_series",
@@ -6024,7 +6024,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -6043,7 +6043,7 @@
           "measurement": "jvm_gc_memory_allocated",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT difference(sum(\"counter\")) FROM \"jvm_gc_memory_allocated\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(15s)",
+          "query": "SELECT difference(sum(\"counter\")) FROM \"jvm_gc_memory_allocated\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(15s)",
           "rawQuery": false,
           "refId": "D",
           "resultFormat": "time_series",
@@ -6067,7 +6067,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -6086,7 +6086,7 @@
           "measurement": "jvm_gc_memory_promoted",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT difference(sum(\"counter\")) FROM \"jvm_gc_memory_allocated\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(15s)",
+          "query": "SELECT difference(sum(\"counter\")) FROM \"jvm_gc_memory_allocated\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(15s)",
           "rawQuery": false,
           "refId": "F",
           "resultFormat": "time_series",
@@ -6110,7 +6110,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -6251,7 +6251,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -6360,7 +6360,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "from(bucket: \"telegraf\")\n  |> range(start: -1m)\n  |> filter(fn: (r) =>\n    r._measurement == \"jvm_classes_loaded\" AND\n    r.service_name == \"$service\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service_name\"])\n  |> last()\n",
+          "query": "from(bucket: \"telegraf\")\n  |> range(start: -1m)\n  |> filter(fn: (r) =>\n    r._measurement == \"jvm_classes_loaded\" AND\n    r.service == \"$service\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service\"])\n  |> last()\n",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -6473,7 +6473,7 @@
           "measurement": "jvm_memory_max",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
+          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
@@ -6493,7 +6493,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             },
@@ -6524,7 +6524,7 @@
           "measurement": "jvm_memory_committed",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
+          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
           "rawQuery": false,
           "refId": "B",
           "resultFormat": "time_series",
@@ -6544,7 +6544,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             },
@@ -6575,7 +6575,7 @@
           "measurement": "jvm_memory_used",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
+          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
           "rawQuery": false,
           "refId": "C",
           "resultFormat": "time_series",
@@ -6595,7 +6595,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             },
@@ -6720,7 +6720,7 @@
           "measurement": "jvm_threads_states",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
+          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
@@ -6740,7 +6740,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -6876,7 +6876,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             },
@@ -6923,7 +6923,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             },
@@ -7065,7 +7065,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "from(bucket: \"telegraf\")\n  |> range(start: -1m)\n  |> filter(fn: (r) =>\n    r._measurement == \"jvm_classes_unloaded\" AND\n    r.service_name == \"$service\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service_name\"])\n  |> last()\n",
+          "query": "from(bucket: \"telegraf\")\n  |> range(start: -1m)\n  |> filter(fn: (r) =>\n    r._measurement == \"jvm_classes_unloaded\" AND\n    r.service == \"$service\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service\"])\n  |> last()\n",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -7196,12 +7196,12 @@
       "steppedLine": false,
       "targets": [
         {
-          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"process_cpu_usage\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])",
+          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"process_cpu_usage\" AND\n  r.service == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])",
           "refId": "A",
           "resultFormat": "time_series"
         },
         {
-          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_usage\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n",
+          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_usage\" AND\n  r.service == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n",
           "refId": "B",
           "resultFormat": "time_series"
         }
@@ -7328,7 +7328,7 @@
           "measurement": "jvm_memory_max",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
+          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
@@ -7348,7 +7348,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             },
@@ -7379,7 +7379,7 @@
           "measurement": "jvm_memory_committed",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
+          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
           "rawQuery": false,
           "refId": "B",
           "resultFormat": "time_series",
@@ -7399,7 +7399,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             },
@@ -7430,7 +7430,7 @@
           "measurement": "jvm_memory_used",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
+          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
           "rawQuery": false,
           "refId": "C",
           "resultFormat": "time_series",
@@ -7450,7 +7450,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             },
@@ -7556,7 +7556,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_daemon\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> map(fn:(r) => ({\n        _time: r._time,\n        _value: r._value,\n        _measurement: \"daemon\"\n    }))\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])",
+          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_daemon\" AND\n  r.service == \"$service\" AND\n  r._field == \"gauge\")\n|> map(fn:(r) => ({\n        _time: r._time,\n        _value: r._value,\n        _measurement: \"daemon\"\n    }))\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])",
           "refId": "B"
         },
         {
@@ -7584,7 +7584,7 @@
           "measurement": "jvm_threads_states",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "lnd = () => {\nlive = from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_live\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \ndaemon = from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_daemon\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \nreturn join(tables:{live:live, daemon:daemon},on:[\"_time\",\"_stop\",\"_start\", \"host\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_live - r._value_daemon),\n        _measurement: \"non-daemon\"\n    }))\n}\n\nlnd()",
+          "query": "lnd = () => {\nlive = from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_live\" AND\n  r.service == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \ndaemon = from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_daemon\" AND\n  r.service == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \nreturn join(tables:{live:live, daemon:daemon},on:[\"_time\",\"_stop\",\"_start\", \"host\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_live - r._value_daemon),\n        _measurement: \"non-daemon\"\n    }))\n}\n\nlnd()",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
@@ -7604,14 +7604,14 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
           ]
         },
         {
-          "query": "stackedPeak = () => {\npeak = from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_peak\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n\nlive = from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_live\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \n\n  \nreturn join(tables:{live:live, peak:peak},on:[\"_time\",\"_stop\",\"_start\", \"host\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_peak - r._value_live),\n        _measurement: \"peak\"\n    }))\n}\n\nstackedPeak()",
+          "query": "stackedPeak = () => {\npeak = from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_peak\" AND\n  r.service == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n\nlive = from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_live\" AND\n  r.service == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \n\n  \nreturn join(tables:{live:live, peak:peak},on:[\"_time\",\"_stop\",\"_start\", \"host\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_peak - r._value_live),\n        _measurement: \"peak\"\n    }))\n}\n\nstackedPeak()",
           "refId": "C"
         }
       ],
@@ -7743,7 +7743,7 @@
           "measurement": "jvm_gc_live_data_size",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT \"gauge\" FROM \"jvm_gc_live_data_size\" WHERE (\"service_name\" =~ /^$service$/) ",
+          "query": "SELECT \"gauge\" FROM \"jvm_gc_live_data_size\" WHERE (\"service\" =~ /^$service$/) ",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
@@ -7763,7 +7763,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -7789,7 +7789,7 @@
           "measurement": "jvm_gc_max_data_size",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT \"gauge\" FROM \"jvm_gc_live_data_size\" WHERE (\"service_name\" =~ /^$service$/) ",
+          "query": "SELECT \"gauge\" FROM \"jvm_gc_live_data_size\" WHERE (\"service\" =~ /^$service$/) ",
           "rawQuery": false,
           "refId": "B",
           "resultFormat": "time_series",
@@ -7809,7 +7809,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -7828,7 +7828,7 @@
           "measurement": "jvm_gc_memory_allocated",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT difference(sum(\"counter\")) FROM \"jvm_gc_memory_allocated\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(15s)",
+          "query": "SELECT difference(sum(\"counter\")) FROM \"jvm_gc_memory_allocated\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(15s)",
           "rawQuery": false,
           "refId": "D",
           "resultFormat": "time_series",
@@ -7852,7 +7852,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -7871,7 +7871,7 @@
           "measurement": "jvm_gc_memory_promoted",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT difference(sum(\"counter\")) FROM \"jvm_gc_memory_allocated\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(15s)",
+          "query": "SELECT difference(sum(\"counter\")) FROM \"jvm_gc_memory_allocated\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(15s)",
           "rawQuery": false,
           "refId": "F",
           "resultFormat": "time_series",
@@ -7895,7 +7895,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -8036,7 +8036,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -8145,7 +8145,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "from(bucket: \"telegraf\")\n  |> range(start: -1m)\n  |> filter(fn: (r) =>\n    r._measurement == \"jvm_classes_loaded\" AND\n    r.service_name == \"$service\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service_name\"])\n  |> last()\n",
+          "query": "from(bucket: \"telegraf\")\n  |> range(start: -1m)\n  |> filter(fn: (r) =>\n    r._measurement == \"jvm_classes_loaded\" AND\n    r.service == \"$service\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service\"])\n  |> last()\n",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -8258,7 +8258,7 @@
           "measurement": "jvm_memory_max",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
+          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
@@ -8278,7 +8278,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             },
@@ -8309,7 +8309,7 @@
           "measurement": "jvm_memory_committed",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
+          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
           "rawQuery": false,
           "refId": "B",
           "resultFormat": "time_series",
@@ -8329,7 +8329,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             },
@@ -8360,7 +8360,7 @@
           "measurement": "jvm_memory_used",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
+          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
           "rawQuery": false,
           "refId": "C",
           "resultFormat": "time_series",
@@ -8380,7 +8380,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             },
@@ -8505,7 +8505,7 @@
           "measurement": "jvm_threads_states",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
+          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
@@ -8525,7 +8525,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -8661,7 +8661,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             },
@@ -8708,7 +8708,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             },
@@ -8850,7 +8850,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "from(bucket: \"telegraf\")\n  |> range(start: -1m)\n  |> filter(fn: (r) =>\n    r._measurement == \"jvm_classes_unloaded\" AND\n    r.service_name == \"$service\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service_name\"])\n  |> last()\n",
+          "query": "from(bucket: \"telegraf\")\n  |> range(start: -1m)\n  |> filter(fn: (r) =>\n    r._measurement == \"jvm_classes_unloaded\" AND\n    r.service == \"$service\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service\"])\n  |> last()\n",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -8981,12 +8981,12 @@
       "steppedLine": false,
       "targets": [
         {
-          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"process_cpu_usage\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])",
+          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"process_cpu_usage\" AND\n  r.service == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])",
           "refId": "A",
           "resultFormat": "time_series"
         },
         {
-          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_usage\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n",
+          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_usage\" AND\n  r.service == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n",
           "refId": "B",
           "resultFormat": "time_series"
         }
@@ -9113,7 +9113,7 @@
           "measurement": "jvm_memory_max",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
+          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
@@ -9133,7 +9133,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             },
@@ -9164,7 +9164,7 @@
           "measurement": "jvm_memory_committed",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
+          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
           "rawQuery": false,
           "refId": "B",
           "resultFormat": "time_series",
@@ -9184,7 +9184,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             },
@@ -9215,7 +9215,7 @@
           "measurement": "jvm_memory_used",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
+          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
           "rawQuery": false,
           "refId": "C",
           "resultFormat": "time_series",
@@ -9235,7 +9235,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             },
@@ -9341,7 +9341,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_daemon\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> map(fn:(r) => ({\n        _time: r._time,\n        _value: r._value,\n        _measurement: \"daemon\"\n    }))\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])",
+          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_daemon\" AND\n  r.service == \"$service\" AND\n  r._field == \"gauge\")\n|> map(fn:(r) => ({\n        _time: r._time,\n        _value: r._value,\n        _measurement: \"daemon\"\n    }))\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])",
           "refId": "B"
         },
         {
@@ -9369,7 +9369,7 @@
           "measurement": "jvm_threads_states",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "lnd = () => {\nlive = from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_live\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \ndaemon = from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_daemon\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \nreturn join(tables:{live:live, daemon:daemon},on:[\"_time\",\"_stop\",\"_start\", \"host\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_live - r._value_daemon),\n        _measurement: \"non-daemon\"\n    }))\n}\n\nlnd()",
+          "query": "lnd = () => {\nlive = from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_live\" AND\n  r.service == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \ndaemon = from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_daemon\" AND\n  r.service == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \nreturn join(tables:{live:live, daemon:daemon},on:[\"_time\",\"_stop\",\"_start\", \"host\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_live - r._value_daemon),\n        _measurement: \"non-daemon\"\n    }))\n}\n\nlnd()",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
@@ -9389,14 +9389,14 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
           ]
         },
         {
-          "query": "stackedPeak = () => {\npeak = from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_peak\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n\nlive = from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_live\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \n\n  \nreturn join(tables:{live:live, peak:peak},on:[\"_time\",\"_stop\",\"_start\", \"host\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_peak - r._value_live),\n        _measurement: \"peak\"\n    }))\n}\n\nstackedPeak()",
+          "query": "stackedPeak = () => {\npeak = from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_peak\" AND\n  r.service == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n\nlive = from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"jvm_threads_live\" AND\n  r.service == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \n\n  \nreturn join(tables:{live:live, peak:peak},on:[\"_time\",\"_stop\",\"_start\", \"host\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_peak - r._value_live),\n        _measurement: \"peak\"\n    }))\n}\n\nstackedPeak()",
           "refId": "C"
         }
       ],
@@ -9528,7 +9528,7 @@
           "measurement": "jvm_gc_live_data_size",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT \"gauge\" FROM \"jvm_gc_live_data_size\" WHERE (\"service_name\" =~ /^$service$/) ",
+          "query": "SELECT \"gauge\" FROM \"jvm_gc_live_data_size\" WHERE (\"service\" =~ /^$service$/) ",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
@@ -9548,7 +9548,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -9574,7 +9574,7 @@
           "measurement": "jvm_gc_max_data_size",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT \"gauge\" FROM \"jvm_gc_live_data_size\" WHERE (\"service_name\" =~ /^$service$/) ",
+          "query": "SELECT \"gauge\" FROM \"jvm_gc_live_data_size\" WHERE (\"service\" =~ /^$service$/) ",
           "rawQuery": false,
           "refId": "B",
           "resultFormat": "time_series",
@@ -9594,7 +9594,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -9613,7 +9613,7 @@
           "measurement": "jvm_gc_memory_allocated",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT difference(sum(\"counter\")) FROM \"jvm_gc_memory_allocated\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(15s)",
+          "query": "SELECT difference(sum(\"counter\")) FROM \"jvm_gc_memory_allocated\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(15s)",
           "rawQuery": false,
           "refId": "D",
           "resultFormat": "time_series",
@@ -9637,7 +9637,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -9656,7 +9656,7 @@
           "measurement": "jvm_gc_memory_promoted",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT difference(sum(\"counter\")) FROM \"jvm_gc_memory_allocated\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(15s)",
+          "query": "SELECT difference(sum(\"counter\")) FROM \"jvm_gc_memory_allocated\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(15s)",
           "rawQuery": false,
           "refId": "F",
           "resultFormat": "time_series",
@@ -9680,7 +9680,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -9821,7 +9821,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -9930,7 +9930,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "from(bucket: \"telegraf\")\n  |> range(start: -1m)\n  |> filter(fn: (r) =>\n    r._measurement == \"jvm_classes_loaded\" AND\n    r.service_name == \"$service\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service_name\"])\n  |> last()\n",
+          "query": "from(bucket: \"telegraf\")\n  |> range(start: -1m)\n  |> filter(fn: (r) =>\n    r._measurement == \"jvm_classes_loaded\" AND\n    r.service == \"$service\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service\"])\n  |> last()\n",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -10043,7 +10043,7 @@
           "measurement": "jvm_memory_max",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
+          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
@@ -10063,7 +10063,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             },
@@ -10094,7 +10094,7 @@
           "measurement": "jvm_memory_committed",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
+          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
           "rawQuery": false,
           "refId": "B",
           "resultFormat": "time_series",
@@ -10114,7 +10114,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             },
@@ -10145,7 +10145,7 @@
           "measurement": "jvm_memory_used",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
+          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
           "rawQuery": false,
           "refId": "C",
           "resultFormat": "time_series",
@@ -10165,7 +10165,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             },
@@ -10290,7 +10290,7 @@
           "measurement": "jvm_threads_states",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service_name\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
+          "query": "SELECT mean(\"gauge\") FROM \"jvm_memory_max\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(1m) fill(null)",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
@@ -10310,7 +10310,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -10446,7 +10446,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             },
@@ -10493,7 +10493,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             },
@@ -10635,7 +10635,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "from(bucket: \"telegraf\")\n  |> range(start: -1m)\n  |> filter(fn: (r) =>\n    r._measurement == \"jvm_classes_unloaded\" AND\n    r.service_name == \"$service\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service_name\"])\n  |> last()\n",
+          "query": "from(bucket: \"telegraf\")\n  |> range(start: -1m)\n  |> filter(fn: (r) =>\n    r._measurement == \"jvm_classes_unloaded\" AND\n    r.service == \"$service\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service\"])\n  |> last()\n",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -10717,7 +10717,7 @@
         "multi": true,
         "name": "service",
         "options": [],
-        "query": "from(bucket:\"telegraf\")     |> range(start: -1d)     |> filter(fn:(r) => r._measurement == \"disk_total\")     |> group(by:[\"service_name\"])     |> distinct(column:\"service_name\")     |> group(none:true)",
+        "query": "from(bucket:\"telegraf\")     |> range(start: -1d)     |> filter(fn:(r) => r._measurement == \"disk_total\")     |> group(by:[\"service\"])     |> distinct(column:\"service\")     |> group(none:true)",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,

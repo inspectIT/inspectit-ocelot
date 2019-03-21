@@ -233,7 +233,7 @@
           "measurement": "system_cpu_usage",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_usage\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\"])",
+          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_usage\" AND\n  r.service == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\"])",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -414,7 +414,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "query": "usedPerc = () => {\ntotal = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_total\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service_name\"])\n  \nfree = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service_name\"])\n  \nreturn join(tables:{total:total, free:free},on:[\"_time\",\"_stop\",\"_start\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_total - r._value_free)/r._value_total\n        \n    }))\n}\n\nusedPerc()",
+          "query": "usedPerc = () => {\ntotal = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_total\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service\"])\n  \nfree = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service\"])\n  \nreturn join(tables:{total:total, free:free},on:[\"_time\",\"_stop\",\"_start\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_total - r._value_free)/r._value_total\n        \n    }))\n}\n\nusedPerc()",
           "refId": "A"
         }
       ],
@@ -632,7 +632,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -758,7 +758,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -1001,7 +1001,7 @@
           "measurement": "system_cpu_usage",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_usage\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\"])",
+          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_usage\" AND\n  r.service == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\"])",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -1185,7 +1185,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "query": "usedPerc = () => {\ntotal = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_total\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service_name\"])\n  \nfree = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service_name\"])\n  \nreturn join(tables:{total:total, free:free},on:[\"_time\",\"_stop\",\"_start\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_total - r._value_free)/r._value_total\n        \n    }))\n}\n\nusedPerc()",
+          "query": "usedPerc = () => {\ntotal = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_total\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service\"])\n  \nfree = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service\"])\n  \nreturn join(tables:{total:total, free:free},on:[\"_time\",\"_stop\",\"_start\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_total - r._value_free)/r._value_total\n        \n    }))\n}\n\nusedPerc()",
           "refId": "A"
         }
       ],
@@ -1409,7 +1409,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -1538,7 +1538,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -1781,7 +1781,7 @@
           "measurement": "system_cpu_usage",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_usage\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\"])",
+          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_usage\" AND\n  r.service == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\"])",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -1965,7 +1965,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "query": "usedPerc = () => {\ntotal = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_total\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service_name\"])\n  \nfree = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service_name\"])\n  \nreturn join(tables:{total:total, free:free},on:[\"_time\",\"_stop\",\"_start\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_total - r._value_free)/r._value_total\n        \n    }))\n}\n\nusedPerc()",
+          "query": "usedPerc = () => {\ntotal = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_total\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service\"])\n  \nfree = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service\"])\n  \nreturn join(tables:{total:total, free:free},on:[\"_time\",\"_stop\",\"_start\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_total - r._value_free)/r._value_total\n        \n    }))\n}\n\nusedPerc()",
           "refId": "A"
         }
       ],
@@ -2189,7 +2189,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -2318,7 +2318,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -2561,7 +2561,7 @@
           "measurement": "system_cpu_usage",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_usage\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\"])",
+          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_usage\" AND\n  r.service == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\"])",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -2745,7 +2745,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "query": "usedPerc = () => {\ntotal = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_total\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service_name\"])\n  \nfree = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service_name\"])\n  \nreturn join(tables:{total:total, free:free},on:[\"_time\",\"_stop\",\"_start\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_total - r._value_free)/r._value_total\n        \n    }))\n}\n\nusedPerc()",
+          "query": "usedPerc = () => {\ntotal = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_total\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service\"])\n  \nfree = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service\"])\n  \nreturn join(tables:{total:total, free:free},on:[\"_time\",\"_stop\",\"_start\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_total - r._value_free)/r._value_total\n        \n    }))\n}\n\nusedPerc()",
           "refId": "A"
         }
       ],
@@ -2969,7 +2969,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -3098,7 +3098,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -3341,7 +3341,7 @@
           "measurement": "system_cpu_usage",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_usage\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\"])",
+          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_usage\" AND\n  r.service == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\"])",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -3525,7 +3525,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "query": "usedPerc = () => {\ntotal = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_total\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service_name\"])\n  \nfree = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service_name\"])\n  \nreturn join(tables:{total:total, free:free},on:[\"_time\",\"_stop\",\"_start\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_total - r._value_free)/r._value_total\n        \n    }))\n}\n\nusedPerc()",
+          "query": "usedPerc = () => {\ntotal = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_total\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service\"])\n  \nfree = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service\"])\n  \nreturn join(tables:{total:total, free:free},on:[\"_time\",\"_stop\",\"_start\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_total - r._value_free)/r._value_total\n        \n    }))\n}\n\nusedPerc()",
           "refId": "A"
         }
       ],
@@ -3749,7 +3749,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -3878,7 +3878,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -4121,7 +4121,7 @@
           "measurement": "system_cpu_usage",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_usage\" AND\n  r.service_name == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\"])",
+          "query": "from(bucket: \"telegraf\")\n|> range($range)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_usage\" AND\n  r.service == \"$service\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\"])",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -4305,7 +4305,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "query": "usedPerc = () => {\ntotal = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_total\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service_name\"])\n  \nfree = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service_name\"])\n  \nreturn join(tables:{total:total, free:free},on:[\"_time\",\"_stop\",\"_start\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_total - r._value_free)/r._value_total\n        \n    }))\n}\n\nusedPerc()",
+          "query": "usedPerc = () => {\ntotal = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_total\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service\"])\n  \nfree = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service\"])\n  \nreturn join(tables:{total:total, free:free},on:[\"_time\",\"_stop\",\"_start\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_total - r._value_free)/r._value_total\n        \n    }))\n}\n\nusedPerc()",
           "refId": "A"
         }
       ],
@@ -4529,7 +4529,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -4658,7 +4658,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }

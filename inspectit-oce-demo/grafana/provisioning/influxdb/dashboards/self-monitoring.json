@@ -109,7 +109,7 @@
       "tableColumn": "Time",
       "targets": [
         {
-          "query": "perc = () => {\ninstrumented = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"inspectit_self_instrumented_classes\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n\n\nloaded = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"jvm_classes_loaded\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n\n\nreturn join(tables:{instrumented:instrumented, loaded:loaded},on:[\"_time\"])\n|> map(fn:(r) => ({\n_time: r._time,\n_value: (r._value_instrumented / r._value_loaded),\n_measurement: \"perc-instrumented\"    }))\n|> last()\n}\n\nperc()",
+          "query": "perc = () => {\ninstrumented = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"inspectit_self_instrumented_classes\" AND  \nr.service == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n\n\nloaded = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"jvm_classes_loaded\" AND  \nr.service == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n\n\nreturn join(tables:{instrumented:instrumented, loaded:loaded},on:[\"_time\"])\n|> map(fn:(r) => ({\n_time: r._time,\n_value: (r._value_instrumented / r._value_loaded),\n_measurement: \"perc-instrumented\"    }))\n|> last()\n}\n\nperc()",
           "refId": "A",
           "resultFormat": "time_series"
         }
@@ -232,7 +232,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -262,7 +262,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -292,7 +292,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -371,7 +371,7 @@
       "tableColumn": "Time",
       "targets": [
         {
-          "query": "perc = () => {\ninstrumented = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"inspectit_self_instrumentation_queue_size\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nloaded = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"jvm_classes_loaded\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nreturn join(tables:{instrumented:instrumented, loaded:loaded},on:[\"_time\"])\n|> map(fn:(r) => ({\n_time: r._time,\n_value: 1.0 - (r._value_instrumented / r._value_loaded),\n_measurement: \"progress\"}))\n}\n\nperc()",
+          "query": "perc = () => {\ninstrumented = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"inspectit_self_instrumentation_queue_size\" AND  \nr.service == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nloaded = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"jvm_classes_loaded\" AND  \nr.service == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nreturn join(tables:{instrumented:instrumented, loaded:loaded},on:[\"_time\"])\n|> map(fn:(r) => ({\n_time: r._time,\n_value: 1.0 - (r._value_instrumented / r._value_loaded),\n_measurement: \"progress\"}))\n}\n\nperc()",
           "refId": "A",
           "resultFormat": "time_series"
         }
@@ -496,7 +496,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -539,7 +539,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -582,7 +582,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -625,7 +625,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -768,7 +768,7 @@
       "tableColumn": "Time",
       "targets": [
         {
-          "query": "perc = () => {\ninstrumented = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"inspectit_self_instrumented_classes\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n\n\nloaded = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"jvm_classes_loaded\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n\n\nreturn join(tables:{instrumented:instrumented, loaded:loaded},on:[\"_time\"])\n|> map(fn:(r) => ({\n_time: r._time,\n_value: (r._value_instrumented / r._value_loaded),\n_measurement: \"perc-instrumented\"    }))\n|> last()\n}\n\nperc()",
+          "query": "perc = () => {\ninstrumented = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"inspectit_self_instrumented_classes\" AND  \nr.service == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n\n\nloaded = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"jvm_classes_loaded\" AND  \nr.service == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n\n\nreturn join(tables:{instrumented:instrumented, loaded:loaded},on:[\"_time\"])\n|> map(fn:(r) => ({\n_time: r._time,\n_value: (r._value_instrumented / r._value_loaded),\n_measurement: \"perc-instrumented\"    }))\n|> last()\n}\n\nperc()",
           "refId": "A",
           "resultFormat": "time_series"
         }
@@ -894,7 +894,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -924,7 +924,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -954,7 +954,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -1036,7 +1036,7 @@
       "tableColumn": "Time",
       "targets": [
         {
-          "query": "perc = () => {\ninstrumented = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"inspectit_self_instrumentation_queue_size\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nloaded = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"jvm_classes_loaded\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nreturn join(tables:{instrumented:instrumented, loaded:loaded},on:[\"_time\"])\n|> map(fn:(r) => ({\n_time: r._time,\n_value: 1.0 - (r._value_instrumented / r._value_loaded),\n_measurement: \"progress\"}))\n}\n\nperc()",
+          "query": "perc = () => {\ninstrumented = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"inspectit_self_instrumentation_queue_size\" AND  \nr.service == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nloaded = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"jvm_classes_loaded\" AND  \nr.service == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nreturn join(tables:{instrumented:instrumented, loaded:loaded},on:[\"_time\"])\n|> map(fn:(r) => ({\n_time: r._time,\n_value: 1.0 - (r._value_instrumented / r._value_loaded),\n_measurement: \"progress\"}))\n}\n\nperc()",
           "refId": "A",
           "resultFormat": "time_series"
         }
@@ -1164,7 +1164,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -1207,7 +1207,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -1250,7 +1250,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -1293,7 +1293,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -1436,7 +1436,7 @@
       "tableColumn": "Time",
       "targets": [
         {
-          "query": "perc = () => {\ninstrumented = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"inspectit_self_instrumented_classes\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n\n\nloaded = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"jvm_classes_loaded\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n\n\nreturn join(tables:{instrumented:instrumented, loaded:loaded},on:[\"_time\"])\n|> map(fn:(r) => ({\n_time: r._time,\n_value: (r._value_instrumented / r._value_loaded),\n_measurement: \"perc-instrumented\"    }))\n|> last()\n}\n\nperc()",
+          "query": "perc = () => {\ninstrumented = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"inspectit_self_instrumented_classes\" AND  \nr.service == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n\n\nloaded = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"jvm_classes_loaded\" AND  \nr.service == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n\n\nreturn join(tables:{instrumented:instrumented, loaded:loaded},on:[\"_time\"])\n|> map(fn:(r) => ({\n_time: r._time,\n_value: (r._value_instrumented / r._value_loaded),\n_measurement: \"perc-instrumented\"    }))\n|> last()\n}\n\nperc()",
           "refId": "A",
           "resultFormat": "time_series"
         }
@@ -1562,7 +1562,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -1592,7 +1592,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -1622,7 +1622,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -1704,7 +1704,7 @@
       "tableColumn": "Time",
       "targets": [
         {
-          "query": "perc = () => {\ninstrumented = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"inspectit_self_instrumentation_queue_size\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nloaded = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"jvm_classes_loaded\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nreturn join(tables:{instrumented:instrumented, loaded:loaded},on:[\"_time\"])\n|> map(fn:(r) => ({\n_time: r._time,\n_value: 1.0 - (r._value_instrumented / r._value_loaded),\n_measurement: \"progress\"}))\n}\n\nperc()",
+          "query": "perc = () => {\ninstrumented = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"inspectit_self_instrumentation_queue_size\" AND  \nr.service == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nloaded = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"jvm_classes_loaded\" AND  \nr.service == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nreturn join(tables:{instrumented:instrumented, loaded:loaded},on:[\"_time\"])\n|> map(fn:(r) => ({\n_time: r._time,\n_value: 1.0 - (r._value_instrumented / r._value_loaded),\n_measurement: \"progress\"}))\n}\n\nperc()",
           "refId": "A",
           "resultFormat": "time_series"
         }
@@ -1832,7 +1832,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -1875,7 +1875,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -1918,7 +1918,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -1961,7 +1961,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -2104,7 +2104,7 @@
       "tableColumn": "Time",
       "targets": [
         {
-          "query": "perc = () => {\ninstrumented = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"inspectit_self_instrumented_classes\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n\n\nloaded = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"jvm_classes_loaded\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n\n\nreturn join(tables:{instrumented:instrumented, loaded:loaded},on:[\"_time\"])\n|> map(fn:(r) => ({\n_time: r._time,\n_value: (r._value_instrumented / r._value_loaded),\n_measurement: \"perc-instrumented\"    }))\n|> last()\n}\n\nperc()",
+          "query": "perc = () => {\ninstrumented = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"inspectit_self_instrumented_classes\" AND  \nr.service == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n\n\nloaded = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"jvm_classes_loaded\" AND  \nr.service == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n\n\nreturn join(tables:{instrumented:instrumented, loaded:loaded},on:[\"_time\"])\n|> map(fn:(r) => ({\n_time: r._time,\n_value: (r._value_instrumented / r._value_loaded),\n_measurement: \"perc-instrumented\"    }))\n|> last()\n}\n\nperc()",
           "refId": "A",
           "resultFormat": "time_series"
         }
@@ -2230,7 +2230,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -2260,7 +2260,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -2290,7 +2290,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -2372,7 +2372,7 @@
       "tableColumn": "Time",
       "targets": [
         {
-          "query": "perc = () => {\ninstrumented = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"inspectit_self_instrumentation_queue_size\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nloaded = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"jvm_classes_loaded\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nreturn join(tables:{instrumented:instrumented, loaded:loaded},on:[\"_time\"])\n|> map(fn:(r) => ({\n_time: r._time,\n_value: 1.0 - (r._value_instrumented / r._value_loaded),\n_measurement: \"progress\"}))\n}\n\nperc()",
+          "query": "perc = () => {\ninstrumented = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"inspectit_self_instrumentation_queue_size\" AND  \nr.service == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nloaded = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"jvm_classes_loaded\" AND  \nr.service == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nreturn join(tables:{instrumented:instrumented, loaded:loaded},on:[\"_time\"])\n|> map(fn:(r) => ({\n_time: r._time,\n_value: 1.0 - (r._value_instrumented / r._value_loaded),\n_measurement: \"progress\"}))\n}\n\nperc()",
           "refId": "A",
           "resultFormat": "time_series"
         }
@@ -2500,7 +2500,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -2543,7 +2543,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -2586,7 +2586,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -2629,7 +2629,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -2772,7 +2772,7 @@
       "tableColumn": "Time",
       "targets": [
         {
-          "query": "perc = () => {\ninstrumented = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"inspectit_self_instrumented_classes\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n\n\nloaded = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"jvm_classes_loaded\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n\n\nreturn join(tables:{instrumented:instrumented, loaded:loaded},on:[\"_time\"])\n|> map(fn:(r) => ({\n_time: r._time,\n_value: (r._value_instrumented / r._value_loaded),\n_measurement: \"perc-instrumented\"    }))\n|> last()\n}\n\nperc()",
+          "query": "perc = () => {\ninstrumented = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"inspectit_self_instrumented_classes\" AND  \nr.service == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n\n\nloaded = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"jvm_classes_loaded\" AND  \nr.service == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n\n\nreturn join(tables:{instrumented:instrumented, loaded:loaded},on:[\"_time\"])\n|> map(fn:(r) => ({\n_time: r._time,\n_value: (r._value_instrumented / r._value_loaded),\n_measurement: \"perc-instrumented\"    }))\n|> last()\n}\n\nperc()",
           "refId": "A",
           "resultFormat": "time_series"
         }
@@ -2898,7 +2898,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -2928,7 +2928,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -2958,7 +2958,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -3040,7 +3040,7 @@
       "tableColumn": "Time",
       "targets": [
         {
-          "query": "perc = () => {\ninstrumented = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"inspectit_self_instrumentation_queue_size\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nloaded = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"jvm_classes_loaded\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nreturn join(tables:{instrumented:instrumented, loaded:loaded},on:[\"_time\"])\n|> map(fn:(r) => ({\n_time: r._time,\n_value: 1.0 - (r._value_instrumented / r._value_loaded),\n_measurement: \"progress\"}))\n}\n\nperc()",
+          "query": "perc = () => {\ninstrumented = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"inspectit_self_instrumentation_queue_size\" AND  \nr.service == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nloaded = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"jvm_classes_loaded\" AND  \nr.service == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nreturn join(tables:{instrumented:instrumented, loaded:loaded},on:[\"_time\"])\n|> map(fn:(r) => ({\n_time: r._time,\n_value: 1.0 - (r._value_instrumented / r._value_loaded),\n_measurement: \"progress\"}))\n}\n\nperc()",
           "refId": "A",
           "resultFormat": "time_series"
         }
@@ -3168,7 +3168,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -3211,7 +3211,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -3254,7 +3254,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -3297,7 +3297,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -3440,7 +3440,7 @@
       "tableColumn": "Time",
       "targets": [
         {
-          "query": "perc = () => {\ninstrumented = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"inspectit_self_instrumented_classes\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n\n\nloaded = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"jvm_classes_loaded\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n\n\nreturn join(tables:{instrumented:instrumented, loaded:loaded},on:[\"_time\"])\n|> map(fn:(r) => ({\n_time: r._time,\n_value: (r._value_instrumented / r._value_loaded),\n_measurement: \"perc-instrumented\"    }))\n|> last()\n}\n\nperc()",
+          "query": "perc = () => {\ninstrumented = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"inspectit_self_instrumented_classes\" AND  \nr.service == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n\n\nloaded = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"jvm_classes_loaded\" AND  \nr.service == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n\n\nreturn join(tables:{instrumented:instrumented, loaded:loaded},on:[\"_time\"])\n|> map(fn:(r) => ({\n_time: r._time,\n_value: (r._value_instrumented / r._value_loaded),\n_measurement: \"perc-instrumented\"    }))\n|> last()\n}\n\nperc()",
           "refId": "A",
           "resultFormat": "time_series"
         }
@@ -3566,7 +3566,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -3596,7 +3596,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -3626,7 +3626,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -3708,7 +3708,7 @@
       "tableColumn": "Time",
       "targets": [
         {
-          "query": "perc = () => {\ninstrumented = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"inspectit_self_instrumentation_queue_size\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nloaded = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"jvm_classes_loaded\" AND  \nr.service_name == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nreturn join(tables:{instrumented:instrumented, loaded:loaded},on:[\"_time\"])\n|> map(fn:(r) => ({\n_time: r._time,\n_value: 1.0 - (r._value_instrumented / r._value_loaded),\n_measurement: \"progress\"}))\n}\n\nperc()",
+          "query": "perc = () => {\ninstrumented = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"inspectit_self_instrumentation_queue_size\" AND  \nr.service == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nloaded = from(bucket: \"telegraf\")\n|> range(start:-1h)\n|> filter(fn: (r) =>  \nr._measurement == \"jvm_classes_loaded\" AND  \nr.service == \"$service\" AND  \nr._field == \"gauge\")\n|> keep(columns: [\"_time\",\"_value\"])\n|> last()\n\nreturn join(tables:{instrumented:instrumented, loaded:loaded},on:[\"_time\"])\n|> map(fn:(r) => ({\n_time: r._time,\n_value: 1.0 - (r._value_instrumented / r._value_loaded),\n_measurement: \"progress\"}))\n}\n\nperc()",
           "refId": "A",
           "resultFormat": "time_series"
         }
@@ -3836,7 +3836,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -3879,7 +3879,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -3922,7 +3922,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -3965,7 +3965,7 @@
           ],
           "tags": [
             {
-              "key": "service_name",
+              "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
             }
@@ -4030,7 +4030,7 @@
           ]
         },
         "datasource": "Flux",
-        "definition": "from(bucket:\"telegraf\")     |> range(start: -1d)     |> filter(fn:(r) => r._measurement == \"inspectit_self_instrumented_classes\")     |> group(by:[\"host\"])     |> distinct(column:\"service_name\")     |> group(none:true)",
+        "definition": "from(bucket:\"telegraf\")     |> range(start: -1d)     |> filter(fn:(r) => r._measurement == \"inspectit_self_instrumented_classes\")     |> group(by:[\"host\"])     |> distinct(column:\"service\")     |> group(none:true)",
         "hide": 0,
         "includeAll": true,
         "label": null,
@@ -4073,7 +4073,7 @@
             "value": "vets-service"
           }
         ],
-        "query": "from(bucket:\"telegraf\")     |> range(start: -1d)     |> filter(fn:(r) => r._measurement == \"inspectit_self_instrumented_classes\")     |> group(by:[\"host\"])     |> distinct(column:\"service_name\")     |> group(none:true)",
+        "query": "from(bucket:\"telegraf\")     |> range(start: -1d)     |> filter(fn:(r) => r._measurement == \"inspectit_self_instrumented_classes\")     |> group(by:[\"host\"])     |> distinct(column:\"service\")     |> group(none:true)",
         "refresh": 0,
         "regex": "",
         "skipUrlSync": false,
