@@ -17,11 +17,16 @@ public class ThreadMetricsSysTest extends MetricsSysTestBase {
 
     @Test
     public void testThreadMetricsCapturing() {
-        await().atMost(20, TimeUnit.SECONDS).untilAsserted(() -> {
+        await().atMost(60, TimeUnit.SECONDS).untilAsserted(() -> {
             ViewData liveData = viewManager.getView(View.Name.create("jvm/threads/live"));
             ViewData peakData = viewManager.getView(View.Name.create("jvm/threads/peak"));
             ViewData daemonData = viewManager.getView(View.Name.create("jvm/threads/daemon"));
             ViewData stateData = viewManager.getView(View.Name.create("jvm/threads/states"));
+
+            assertThat(liveData).isNotNull();
+            assertThat(peakData).isNotNull();
+            assertThat(daemonData).isNotNull();
+            assertThat(stateData).isNotNull();
 
             assertThat(liveData.getAggregationMap()).isNotEmpty();
             assertThat(peakData.getAggregationMap()).isNotEmpty();

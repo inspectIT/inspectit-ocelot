@@ -20,13 +20,20 @@ public class MemoryMetricsSysTest extends MetricsSysTestBase {
      */
     @Test
     public void testMemoryCapturing() {
-        await().atMost(20, TimeUnit.SECONDS).untilAsserted(() -> {
+        await().atMost(60, TimeUnit.SECONDS).untilAsserted(() -> {
             ViewData usedData = viewManager.getView(View.Name.create("jvm/memory/used"));
             ViewData committedData = viewManager.getView(View.Name.create("jvm/memory/committed"));
             ViewData maxData = viewManager.getView(View.Name.create("jvm/memory/max"));
             ViewData bufCountData = viewManager.getView(View.Name.create("jvm/buffer/count"));
             ViewData bufUsedData = viewManager.getView(View.Name.create("jvm/buffer/memory/used"));
             ViewData bufCapData = viewManager.getView(View.Name.create("jvm/buffer/total/capacity"));
+
+            assertThat(usedData).isNotNull();
+            assertThat(committedData).isNotNull();
+            assertThat(maxData).isNotNull();
+            assertThat(bufCountData).isNotNull();
+            assertThat(bufUsedData).isNotNull();
+            assertThat(bufCapData).isNotNull();
 
             assertThat(usedData.getAggregationMap()).isNotEmpty();
             assertThat(committedData.getAggregationMap()).isNotEmpty();
