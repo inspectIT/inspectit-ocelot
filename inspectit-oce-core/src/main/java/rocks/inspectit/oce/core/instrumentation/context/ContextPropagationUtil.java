@@ -145,7 +145,7 @@ public class ContextPropagationUtil {
      * Otherwise the string value is returned unchanged.
      *
      * @param stringValue the value to parse
-     * @param properties  the collection of proeprty definition in the format "propertyname=value"
+     * @param properties  the collection of property definition in the format "propertyname=value"
      * @return the parsed value
      */
     private static Object parseTyped(String stringValue, Collection<String> properties) {

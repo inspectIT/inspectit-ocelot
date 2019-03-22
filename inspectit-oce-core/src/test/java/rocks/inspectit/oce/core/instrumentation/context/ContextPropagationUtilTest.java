@@ -14,10 +14,9 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static rocks.inspectit.oce.core.instrumentation.context.ContextPropagationUtil.CORRELATION_CONTEXT_HEADER;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,8 +43,8 @@ public class ContextPropagationUtilTest {
 
             ContextPropagationUtil.readPropagationHeaderMap(headers, inspectitContext);
 
-            verify(inspectitContext, times(1)).setData(any(), any());
-            verify(inspectitContext, times(1)).setData(eq("my_valü"), eq("straße=15"));
+            verify(inspectitContext).setData(eq("my_valü"), eq("straße=15"));
+            verifyNoMoreInteractions(inspectitContext);
         }
 
         @Test
@@ -55,8 +54,8 @@ public class ContextPropagationUtilTest {
 
             ContextPropagationUtil.readPropagationHeaderMap(headers, inspectitContext);
 
-            verify(inspectitContext, times(1)).setData(any(), any());
-            verify(inspectitContext, times(1)).setData(eq("x"), eq(42L));
+            verify(inspectitContext).setData(eq("x"), eq(42L));
+            verifyNoMoreInteractions(inspectitContext);
         }
 
         @Test
@@ -66,8 +65,8 @@ public class ContextPropagationUtilTest {
 
             ContextPropagationUtil.readPropagationHeaderMap(headers, inspectitContext);
 
-            verify(inspectitContext, times(1)).setData(any(), any());
-            verify(inspectitContext, times(1)).setData(eq("pi"), eq(Math.PI));
+            verify(inspectitContext).setData(eq("pi"), eq(Math.PI));
+            verifyNoMoreInteractions(inspectitContext);
         }
 
         @Test
@@ -77,9 +76,9 @@ public class ContextPropagationUtilTest {
 
             ContextPropagationUtil.readPropagationHeaderMap(headers, inspectitContext);
 
-            verify(inspectitContext, times(2)).setData(any(), any());
-            verify(inspectitContext, times(1)).setData(eq("is_something"), eq(true));
-            verify(inspectitContext, times(1)).setData(eq("hello"), eq("world"));
+            verify(inspectitContext).setData(eq("is_something"), eq(true));
+            verify(inspectitContext).setData(eq("hello"), eq("world"));
+            verifyNoMoreInteractions(inspectitContext);
         }
 
 
@@ -90,8 +89,8 @@ public class ContextPropagationUtilTest {
 
             ContextPropagationUtil.readPropagationHeaderMap(headers, inspectitContext);
 
-            verify(inspectitContext, times(1)).setData(any(), any());
-            verify(inspectitContext, times(1)).setData(eq("is_something"), eq("true"));
+            verify(inspectitContext).setData(eq("is_something"), eq("true"));
+            verifyNoMoreInteractions(inspectitContext);
         }
 
     }
@@ -107,8 +106,9 @@ public class ContextPropagationUtilTest {
 
             Map<String, String> result = ContextPropagationUtil.buildPropagationHeaderMap(data.entrySet().stream());
 
-            assertThat(result).hasSize(1);
-            assertThat(result).containsEntry(CORRELATION_CONTEXT_HEADER, enc("my_valü") + "=" + enc("straße=15"));
+            assertThat(result)
+                    .hasSize(1)
+                    .containsEntry(CORRELATION_CONTEXT_HEADER, enc("my_valü") + "=" + enc("straße=15"));
         }
 
         @Test
@@ -117,8 +117,9 @@ public class ContextPropagationUtilTest {
 
             Map<String, String> result = ContextPropagationUtil.buildPropagationHeaderMap(data.entrySet().stream());
 
-            assertThat(result).hasSize(1);
-            assertThat(result).containsEntry(CORRELATION_CONTEXT_HEADER, "x=42;type=l");
+            assertThat(result)
+                    .hasSize(1)
+                    .containsEntry(CORRELATION_CONTEXT_HEADER, "x=42;type=l");
         }
 
         @Test
@@ -127,8 +128,9 @@ public class ContextPropagationUtilTest {
 
             Map<String, String> result = ContextPropagationUtil.buildPropagationHeaderMap(data.entrySet().stream());
 
-            assertThat(result).hasSize(1);
-            assertThat(result).containsEntry(CORRELATION_CONTEXT_HEADER, "Pi=" + Math.PI + ";type=d");
+            assertThat(result)
+                    .hasSize(1)
+                    .containsEntry(CORRELATION_CONTEXT_HEADER, "Pi=" + Math.PI + ";type=d");
         }
 
         @Test
@@ -146,8 +148,9 @@ public class ContextPropagationUtilTest {
 
             Map<String, String> result = ContextPropagationUtil.buildPropagationHeaderMap(data.entrySet().stream());
 
-            assertThat(result).hasSize(1);
-            assertThat(result).containsEntry(CORRELATION_CONTEXT_HEADER, "hello=world,is_something=true;type=b");
+            assertThat(result)
+                    .hasSize(1)
+                    .containsEntry(CORRELATION_CONTEXT_HEADER, "hello=world,is_something=true;type=b");
         }
 
     }

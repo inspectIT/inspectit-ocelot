@@ -9,5 +9,4 @@ inspectit:
       up_propagated2:
         up-propagation: GLOBAL
       down_propagated:
-        up-propagation: NONE
         down-propagation: GLOBAL
