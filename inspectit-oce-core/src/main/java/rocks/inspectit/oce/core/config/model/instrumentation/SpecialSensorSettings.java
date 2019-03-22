@@ -3,6 +3,10 @@ package rocks.inspectit.oce.core.config.model.instrumentation;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import rocks.inspectit.oce.core.instrumentation.special.ExecutorContextPropagationSensor;
+import rocks.inspectit.oce.core.instrumentation.special.remote.ApacheHttpClientContextPropagationSensor;
+import rocks.inspectit.oce.core.instrumentation.special.remote.HttpUrlConnectionContextPropagationSensor;
+import rocks.inspectit.oce.core.instrumentation.special.remote.ServletApiContextDownPropagationSensor;
+import rocks.inspectit.oce.core.instrumentation.special.remote.ServletApiContextUpPropagationSensor;
 
 /**
  * Settings for the {@link rocks.inspectit.oce.core.instrumentation.special.SpecialSensor}s.
@@ -25,6 +29,22 @@ public class SpecialSensorSettings {
      * Enables or disables the @{@link rocks.inspectit.oce.core.instrumentation.special.ScheduledExecutorContextPropagationSensor}.
      */
     private boolean scheduledExecutorContextPropagation;
+
+    /**
+     * Enables or disables {@link HttpUrlConnectionContextPropagationSensor}.
+     */
+    private boolean httpUrlConnectionContextPropagation;
+
+    /**
+     * Enables or disable {@link ApacheHttpClientContextPropagationSensor}
+     */
+    private boolean apacheHttpClientContextPropagation;
+
+    /**
+     * Enables or disables {@link ServletApiContextUpPropagationSensor} and
+     * {@link ServletApiContextDownPropagationSensor}
+     */
+    private boolean servletApiContextPropagation;
 
     /**
      * If true, we instrument all class loaders which contain instrumented classes to make sure our bootstrap classes are reachable.

@@ -92,6 +92,15 @@ inspectit:
       # enables or disables the instrumentation to ensure context propagation across java.lang.Thread instances
       thread-start-context-propagation: true
 
+      # enables the global propagation via HttpUrlConnection objects
+      http-url-connection-context-propagation: true
+
+      # enables the global propagation via apache CloseableHttpClient
+      apache-http-client-context-propagation: true
+
+      # enables the global propagation via the servlet api
+      servlet-api-context-propagation: true
+
       # If true, we instrument all class loaders which contain instrumented classes to make sure our bootstrap classes are reachable.
       # This ensures that in custom module systems such as OSGi our instrumentation works without the need for configuration changes.
       class-loader-delegation: true
@@ -116,10 +125,14 @@ inspectit:
         down-propagation: NONE
       method_entry_time:
         down-propagation: NONE
-        isTag: false
+        is-tag: false
       method_duration:
         down-propagation: NONE
-        isTag: false
+        is-tag: false
+
+      # used for the servlet-api context propagation
+      servlet_api_down_propagation_performed:
+        is-tag: false
 
     #definitions of commonly used data providers
     data-providers:

@@ -76,6 +76,9 @@ public class InspectitContext implements IInspectitContext {
      */
     private InspectitContext parent;
 
+    /**
+     * Defines for each data key its propagation behaviour as well as if it is a tag.
+     */
     private final DataProperties propagation;
 
     /**
@@ -352,6 +355,32 @@ public class InspectitContext implements IInspectitContext {
                 }
             }
         }
+    }
+
+    @Override
+    public Map<String, String> getDownPropagationHeaders() {
+        return ContextPropagationUtil.buildPropagationHeaderMap(
+                getDataAsStream()
+                        .filter(e -> propagation.isPropagatedDownGlobally(e.getKey()))
+        );
+    }
+
+    @Override
+    public Map<String, String> getUpPropagationHeaders() {
+        return ContextPropagationUtil.buildPropagationHeaderMap(
+                getDataAsStream()
+                        .filter(e -> propagation.isPropagatedUpGlobally(e.getKey()))
+        );
+    }
+
+    @Override
+    public void readPropagationHeaders(Map<String, String> headers) {
+        ContextPropagationUtil.readPropagationHeaderMap(headers, this);
+    }
+
+    @Override
+    public Set<String> getPropagationHeaderNames() {
+        return ContextPropagationUtil.getPropagationHeaderNames();
     }
 
     /**
