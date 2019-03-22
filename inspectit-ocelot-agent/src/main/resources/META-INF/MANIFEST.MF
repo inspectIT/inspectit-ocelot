@@ -1,0 +1,4 @@
+Agent-Class: rocks.inspectit.ocelot.agent.AgentMain
+Premain-Class: rocks.inspectit.ocelot.agent.AgentMain
+Can-Redefine-Classes: true
+Can-Retransform-Classes: true

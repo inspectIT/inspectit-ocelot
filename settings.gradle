@@ -1,6 +1,6 @@
-include "inspectit-oce-agent"
-include 'inspectit-oce-bootstrap'
-include 'inspectit-oce-core'
-include 'inspectit-oce-documentation'
-include 'inspectit-oce-demo'
+include "inspectit-ocelot-agent"
+include 'inspectit-ocelot-bootstrap'
+include 'inspectit-ocelot-core'
+include 'inspectit-ocelot-documentation'
+include 'inspectit-ocelot-demo'
 

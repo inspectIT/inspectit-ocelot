@@ -1,0 +1,15 @@
+== Appendix
+
+=== All Configuration Options
+
+[source,yaml]
+----
+include::{gradle-rootdir-absolute}/inspectit-ocelot-core/src/main/resources/config/default.yml[]
+----
+
+=== Default Logback Configuration
+
+[source,xml]
+----
+include::{gradle-rootdir-absolute}/inspectit-ocelot-core/src/main/resources/inspectit-logback.xml[]
+----

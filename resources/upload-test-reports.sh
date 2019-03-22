@@ -4,10 +4,10 @@
 
 echo "Packing and uploading test-reports"
 
-ARCHIVE_FILE_NAME="inspectit-oce-test-reports-$TRAVIS_JOB_NUMBER.zip"
+ARCHIVE_FILE_NAME="inspectit-ocelot-test-reports-$TRAVIS_JOB_NUMBER.zip"
 ARCHIVE_FILE="$TRAVIS_BUILD_DIR/$ARCHIVE_FILE_NAME"
 
-DIRECTORY="$TRAVIS_BUILD_DIR/inspectit-oce-agent/build/reports/tests/"
+DIRECTORY="$TRAVIS_BUILD_DIR/inspectit-ocelot-agent/build/reports/tests/"
 if [ -d "$DIRECTORY" ]; then
     echo "Packing test-reports of agent project.."
     cd "$DIRECTORY"
@@ -15,7 +15,7 @@ if [ -d "$DIRECTORY" ]; then
     zip -q -r "$ARCHIVE_FILE" .
 fi
 
-DIRECTORY="$TRAVIS_BUILD_DIR/inspectit-oce-core/build/reports/tests/"
+DIRECTORY="$TRAVIS_BUILD_DIR/inspectit-ocelot-core/build/reports/tests/"
 if [ -d "$DIRECTORY" ]; then
     echo "Packing test-reports of core project.."
     cd "$DIRECTORY"
