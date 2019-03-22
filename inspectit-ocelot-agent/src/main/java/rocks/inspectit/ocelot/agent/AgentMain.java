@@ -24,16 +24,35 @@ public class AgentMain {
 
     private static final String INSPECTIT_BOOTSTRAP_JAR_PATH = "/inspectit-ocelot-bootstrap.jar";
     private static final String INSPECTIT_CORE_JAR_PATH = "/inspectit-ocelot-core.jar";
+    private static final String OPENCENSUS_FAT_JAR_PATH = "/opencensus-fat.jar";
+    private static final String PUBLISH_OPEN_CENSUS_TO_BOOTSTRAP_PROPERTY = "inspectit.publishOpenCensusToBootstrap";
 
     public static void agentmain(String agentArgs, Instrumentation inst) {
         //TODO: currently replacing the agent does not really work as all Agent versions share the same namespace in the same classpath
-        premain(agentArgs, inst);
+        try {
+            InspectITClassLoader icl = initializeInspectitLoader(inst, true);
+            AgentManager.startOrReplaceInspectitCore(icl, agentArgs, inst);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static void premain(String agentArgs, Instrumentation inst) {
+        boolean loadOpenCensusToBootstrap = "true".equalsIgnoreCase(System.getProperty(PUBLISH_OPEN_CENSUS_TO_BOOTSTRAP_PROPERTY));
         try {
-            ClassLoader icl = initializeClasspath(inst);
-            AgentManager.startOrReplaceInspectitCore(icl, agentArgs, inst);
+            if (loadOpenCensusToBootstrap) {
+                Path ocJarFile = copyResourceToTempJarFile(OPENCENSUS_FAT_JAR_PATH);
+                inst.appendToBootstrapClassLoaderSearch(new JarFile(ocJarFile.toFile()));
+            }
+            //we make sure that the startup of inspectIT is asynchronous
+            new Thread(() -> {
+                try {
+                    InspectITClassLoader icl = initializeInspectitLoader(inst, !loadOpenCensusToBootstrap);
+                    AgentManager.startOrReplaceInspectitCore(icl, agentArgs, inst);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }).start();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -45,12 +64,17 @@ public class AgentMain {
      * @return the created inspectIT classloader
      * @throws IOException
      */
-    private static InspectITClassLoader initializeClasspath(Instrumentation inst) throws IOException {
+    private static InspectITClassLoader initializeInspectitLoader(Instrumentation inst, boolean includeOpenCensus) throws IOException {
         Path bootstrapJar = copyResourceToTempJarFile(INSPECTIT_BOOTSTRAP_JAR_PATH);
         inst.appendToBootstrapClassLoaderSearch(new JarFile(bootstrapJar.toFile()));
 
         Path coreJar = copyResourceToTempJarFile(INSPECTIT_CORE_JAR_PATH);
         InspectITClassLoader icl = new InspectITClassLoader(new URL[]{coreJar.toUri().toURL()});
+
+        if (includeOpenCensus) {
+            Path ocJarFile = copyResourceToTempJarFile(OPENCENSUS_FAT_JAR_PATH);
+            icl.addURL(ocJarFile.toUri().toURL());
+        }
 
         return icl;
     }

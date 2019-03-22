@@ -13,10 +13,6 @@ dependencies {
             "io.opencensus:opencensus-api:${openCensusVersion}"
     )
 
-    opencensus(
-            "io.opencensus:opencensus-impl:${openCensusVersion}"
-    )
-
     implementation(
             // spring releated
             'org.springframework.boot:spring-boot:2.1.1.RELEASE',
@@ -61,20 +57,8 @@ dependencies {
 
 }
 
-task buildOpencensusFatJar(type: Jar) {
-    archiveName = "opencensus-fat.jar"
-    destinationDir = file("$buildDir/jarGen")
-    from {
-        configurations.opencensus.collect { it.isDirectory() ? it : zipTree(it) }
-    }
-}
-
 jar {
     archiveName = "${project.name}.jar"
-
-    //include the open-census dependencies as a fat jar
-    dependsOn buildOpencensusFatJar
-    from "$buildDir/jarGen"
 
     //include all "implementation" dependencies in fat jar
     from {

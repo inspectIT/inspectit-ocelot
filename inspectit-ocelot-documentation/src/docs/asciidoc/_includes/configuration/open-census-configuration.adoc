@@ -13,17 +13,22 @@ Please adapt any OpenCensus dependency in your application to this version to av
 <dependency>
     <groupId>io.opencensus</groupId>
     <artifactId>opencensus-api</artifactId>
-    <version>0.18.0</version>
+    <version>{opencensus-version}</version>
 </dependency>
 ```
-. Set the `inspectit.publish-opencensus-to-bootstrap` property to `true`
+. Set the JVM property `inspectit.publishOpenCensusToBootstrap` to `true`.
 +
+```
+-Dinspectit.publishOpenCensusToBootstrap=true
+```
 Setting the above property to `true` tells inspectIT Ocelot that you plan to use the OpenCensus library in combination with the agent.
+Note that this property must be specified as a JVM property with this exact name. The flexibility offered for all other config options do not apply here.
 The inspectIT Ocelot agent will make sure that all OpenCensus classes are then loaded by the bootstrap class loader.
 This ensures that OpenCensus implementation is shared between your manual instrumentation and the agent instrumentation, making the combing of data possible.
+
 . Add the agent to the start of a JVM
 +
 You should install the agent at the <<Adding the Agent to the JVM,start of the JVM>>.
-You should avoid attaching the agent during the run-time, as at this point it's already too late for the inspectIT Ocelot agent to perform needed setup described in the previous point.
+On success, the agent will print in its logs that it used the bootstrap loader for loading OpenCensus.
+When attaching the agent during the run-time, OpenCensus will *not* be published to the bootstrap even if you configured `-Dinspectit.publishOpenCensusToBootstrap=true`.
 If you anyhow do attach the agent, metrics and traces collected by inspectIT Ocelot will not be combined with the manual instrumentation.
-In such case you can also omit setting the `inspectit.publish-opencensus-to-bootstrap` property to `true`.

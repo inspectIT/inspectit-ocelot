@@ -87,12 +87,6 @@ public class InspectitConfig {
     private int threadPoolSize;
 
     /**
-     * If true, the OpenCensus API and Implementation will be loaded by the bootstrap classloader.
-     * Otherwise they will be loaded by the private inspectIT classloader.
-     */
-    private boolean publishOpencensusToBootstrap;
-
-    /**
      * Allows all nested configs to evaluate context sensitive config properties regarding their correctness.
      *
      * @param vios the violation builder which is used to output violations

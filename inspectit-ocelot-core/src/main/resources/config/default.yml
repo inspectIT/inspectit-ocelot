@@ -532,7 +532,3 @@ inspectit:
 
   # defines how many threads inspectIT may start for its internal tasks
   thread-pool-size: 2
-
-  # If true, the OpenCensus API and Implementation will be loaded by the bootstrap classloader.
-  # Otherwise they will be loaded by the private inspectIT classloader.
-  publish-opencensus-to-bootstrap: false
