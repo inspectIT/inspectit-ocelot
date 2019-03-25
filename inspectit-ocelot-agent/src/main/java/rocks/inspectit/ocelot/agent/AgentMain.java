@@ -29,12 +29,7 @@ public class AgentMain {
 
     public static void agentmain(String agentArgs, Instrumentation inst) {
         //TODO: currently replacing the agent does not really work as all Agent versions share the same namespace in the same classpath
-        try {
-            InspectITClassLoader icl = initializeInspectitLoader(inst, true);
-            AgentManager.startOrReplaceInspectitCore(icl, agentArgs, inst);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        startAgent(agentArgs, inst, true);
     }
 
     public static void premain(String agentArgs, Instrumentation inst) {
@@ -45,15 +40,21 @@ public class AgentMain {
                 inst.appendToBootstrapClassLoaderSearch(new JarFile(ocJarFile.toFile()));
             }
             //we make sure that the startup of inspectIT is asynchronous
-            new Thread(() -> {
-                try {
-                    InspectITClassLoader icl = initializeInspectitLoader(inst, !loadOpenCensusToBootstrap);
-                    AgentManager.startOrReplaceInspectitCore(icl, agentArgs, inst);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }).start();
+            new Thread(() ->
+                    startAgent(agentArgs, inst, !loadOpenCensusToBootstrap)
+            ).start();
         } catch (Exception e) {
+            System.err.println("Error starting inspectIT Agent!");
+            e.printStackTrace();
+        }
+    }
+
+    private static void startAgent(String agentArgs, Instrumentation inst, boolean includeOpencensusInInspectitLoader) {
+        try {
+            InspectITClassLoader icl = initializeInspectitLoader(inst, includeOpencensusInInspectitLoader);
+            AgentManager.startOrReplaceInspectitCore(icl, agentArgs, inst);
+        } catch (Exception e) {
+            System.err.println("Error starting inspectIT Agent!");
             e.printStackTrace();
         }
     }

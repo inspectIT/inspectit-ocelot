@@ -9,12 +9,7 @@ import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.config.spring.SpringConfiguration;
 import rocks.inspectit.ocelot.core.logging.logback.LogbackInitializer;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.instrument.Instrumentation;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.Optional;
 
 /**
@@ -46,7 +41,7 @@ public class AgentImpl implements IAgent {
         ClassLoader classloader = AgentImpl.class.getClassLoader();
 
         LOGGER.info("Starting inspectIT Ocelot Agent...");
-        verifyOpenCensusLib();
+        logOpenCensusClassLoader();
 
         ctx = new AnnotationConfigApplicationContext();
         ctx.setClassLoader(classloader);
@@ -64,7 +59,7 @@ public class AgentImpl implements IAgent {
         ctx.refresh();
     }
 
-    private void verifyOpenCensusLib() {
+    private void logOpenCensusClassLoader() {
         if (Tags.class.getClassLoader() == AgentImpl.class.getClassLoader()) {
             LOGGER.info("OpenCensus was loaded in inspectIT classloader");
         } else {
@@ -77,21 +72,5 @@ public class AgentImpl implements IAgent {
     public void destroy() {
         LOGGER.info("Shutting down inspectIT Ocelot Agent");
         ctx.close();
-    }
-
-    /**
-     * Copies the given resource to a new temporary file with the ending ".jar"
-     *
-     * @param resourcePath the path to the resource
-     * @return the path to the generated jar file
-     * @throws IOException
-     */
-    private static Path copyResourceToTempJarFile(String resourcePath) throws IOException {
-        try (InputStream is = AgentImpl.class.getResourceAsStream(resourcePath)) {
-            Path targetFile = Files.createTempFile("", ".jar");
-            Files.copy(is, targetFile, StandardCopyOption.REPLACE_EXISTING);
-            targetFile.toFile().deleteOnExit();
-            return targetFile;
-        }
     }
 }

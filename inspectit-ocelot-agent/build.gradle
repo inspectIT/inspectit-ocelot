@@ -2,7 +2,7 @@ plugins {
     id "me.champeau.gradle.jmh" version "0.4.8"
 }
 
-configurations{
+configurations {
     opencensus
 }
 
@@ -16,15 +16,15 @@ dependencies {
 }
 
 task buildOpencensusFatJar(type: Jar) {
-    archiveName = "opencensus-fat.jar"
-    destinationDir = file("$buildDir/jarGen")
+    archiveFileName = "opencensus-fat.jar"
+    destinationDirectory = file("$buildDir/jarGen")
     from {
         configurations.opencensus.collect { it.isDirectory() ? it : zipTree(it) }
     }
 }
 
 jar {
-    destinationDir = buildDir
+    destinationDirectory = buildDir
     archivesBaseName = "${project.name}"
 
     manifest {
