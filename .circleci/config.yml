@@ -1,0 +1,83 @@
+# Java Gradle CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-java/ for more details
+#
+version: 2.1
+
+#executors:
+# executor-openjdk8:
+#    docker:
+#      - image: circleci/openjdk:8-jdk
+#    working_directory: ~/inspectit
+
+default_working_directory: &default_working_directory
+  working_directory: ~/inspectit
+
+#default_test_steps: &default_test_steps
+#  steps:
+#    - attach_workspace:
+#        at: ~/inspectit/repo
+#    - pwd
+#    - ls repo
+#    - cd repo
+#    - run: ./gradlew test systemTest
+
+jobs:
+  build:
+    docker:
+      - image: circleci/openjdk:8-jdk
+    working_directory: ~/inspectit
+    steps:
+      - checkout:
+          path: ~/inspectit/repo
+      - run: cd repo && ./gradlew assemble
+      - persist_to_workspace:
+          root: ~/inspectit
+          paths:
+            - repo
+
+  openjdk8-test: &base_test_job
+    docker:
+      - image: circleci/openjdk:8-jdk
+    working_directory: ~/inspectit
+    steps:
+      - attach_workspace:
+          at: ~/inspectit
+      - run: cd repo && ./gradlew test systemTest
+
+  openjdk9-test:
+    <<: *base_test_job
+    docker:
+      - image: circleci/openjdk:9-jdk
+
+  openjdk11-test:
+    <<: *base_test_job
+    docker:
+      - image: circleci/openjdk:11-jdk
+
+  ibmjava8-test:
+    <<: *base_test_job
+    docker:
+      - image: ibmcom/ibmjava:8-sdk
+
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build
+      - openjdk8-test:
+          requires:
+            - build
+      - openjdk9-test:
+          requires:
+            - build
+      - openjdk11-test:
+          requires:
+            - build
+      - ibmjava8-test:
+          requires:
+            - build
+#      - systemtests:
+#          requires:
+#            - build
