@@ -1,9 +1,9 @@
-![inspectIT Ocelot ](https://inspectit.github.io/inspectit-oce/images/inspectit-oce.png)
+![inspectIT Ocelot ](https://inspectit.github.io/inspectit-ocelot/images/inspectit-oce.png)
 
 # inspectIT Ocelot 
 
-[![Build Status](https://travis-ci.com/inspectIT/inspectit-oce.svg?branch=master)](https://travis-ci.com/inspectIT/inspectit-oce)
-[![Code Coverage](https://codecov.io/gh/inspectit/inspectit-oce/branch/master/graph/badge.svg)](https://codecov.io/gh/inspectIT/inspectit-oce)
+[![Build Status](https://travis-ci.com/inspectIT/inspectit-ocelot.svg?branch=master)](https://travis-ci.com/inspectIT/inspectit-ocelot)
+[![Code Coverage](https://codecov.io/gh/inspectit/inspectit-ocelot/branch/master/graph/badge.svg)](https://codecov.io/gh/inspectIT/inspectit-ocelot)
 
 inspectIT Ocelot is a zero-configuration Java agent for dynamically collecting application performance, tracing and behavior data based on the [OpenCensus library](https://opencensus.io/).
 Despite the zero-configuration capability, it provides a powerful configuration feature which enables a full and in-depth customization of it.
@@ -51,7 +51,7 @@ Check out the [documentation's demo section](http://docs.inspectit.rocks/release
 Getting started with the inspectIT Ocelot Java agent is very easy!
 
 First of all, you have to download the Java agent.
-You will find all released versions in the release section of this repository: https://github.com/inspectIT/inspectit-oce/releases
+You will find all released versions in the release section of this repository: https://github.com/inspectIT/inspectit-ocelot/releases
 
 The best way to use the inspectIT Ocelot Java agent is to attach it to your Java application during startup.
 This can be achieved using the `-javaagent` command-line option of your JVM and referencing the agent Jar:
