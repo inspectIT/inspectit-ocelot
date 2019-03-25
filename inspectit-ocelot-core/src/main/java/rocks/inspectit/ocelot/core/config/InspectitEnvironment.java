@@ -20,6 +20,11 @@ import rocks.inspectit.ocelot.core.config.util.PropertyUtils;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -44,10 +49,10 @@ public class InspectitEnvironment extends StandardEnvironment {
     private static final String INSPECTIT_ROOT_PREFIX = "inspectit";
     private static final String INSPECTIT_CONFIG_SETTINGS_PREFIX = "inspectit.config";
 
-    private static final String DEFAULT_CONFIG_PATH = "/config/default.yml";
+    private static final String DEFAULT_CONFIG_PATH = "default";
     private static final String DEFAULT_CONFIG_PROPERTYSOURCE_NAME = "inspectitDefaults";
 
-    private static final String FALLBACK_CONFIG_PATH = "/config/fallback.yml";
+    private static final String FALLBACK_CONFIG_PATH = "fallback";
     private static final String FALLBACK_CONFIG_PROPERTYSOURCE_NAME = "inspectitFallbackOverwrites";
 
     private static final String CMD_ARGS_PROPERTYSOURCE_NAME = "javaagentArguments";
@@ -237,9 +242,19 @@ public class InspectitEnvironment extends StandardEnvironment {
     }
 
     private static PropertiesPropertySource loadAgentResourceYaml(String resourcePath, String propertySourceName) {
-        ClassPathResource defaultYamlResource = new ClassPathResource(resourcePath, InspectitEnvironment.class.getClassLoader());
-        Properties defaultProps = PropertyUtils.readYamlFiles(defaultYamlResource);
-        return new PropertiesPropertySource(propertySourceName, defaultProps);
+        Properties result = new Properties();
+        try (InputStream resource = InspectitEnvironment.class.getResourceAsStream("yamls.txt")) {
+            new BufferedReader(new InputStreamReader(resource, StandardCharsets.UTF_8)).lines()
+                    .filter(path -> path.startsWith(resourcePath + "/"))
+                    .forEach(path -> {
+                        ClassPathResource yamlResource = new ClassPathResource(path, InspectitEnvironment.class);
+                        Properties properties = PropertyUtils.readYamlFiles(yamlResource);
+                        result.putAll(properties);
+                    });
+        } catch (IOException e) {
+            log.error("ERROR reading config", e);
+        }
+        return new PropertiesPropertySource(propertySourceName, result);
     }
 
     /**

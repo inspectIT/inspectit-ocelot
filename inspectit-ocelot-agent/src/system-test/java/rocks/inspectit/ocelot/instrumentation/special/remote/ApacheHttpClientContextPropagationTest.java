@@ -19,6 +19,8 @@ import rocks.inspectit.ocelot.bootstrap.context.IInspectitContext;
 import rocks.inspectit.ocelot.utils.TestUtils;
 
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
@@ -32,6 +34,8 @@ public class ApacheHttpClientContextPropagationTest {
     public static final int PORT = 9999;
     public static final String TEST_URL = "http://localhost:" + PORT + "/test";
     private WireMockServer wireMockServer;
+
+    private final Map<String, Object> dataToPropagate = new HashMap<>();
 
     private CloseableHttpClient client;
 
@@ -50,13 +54,21 @@ public class ApacheHttpClientContextPropagationTest {
 
     @BeforeEach
     void setupWiremock() throws Exception {
+
         wireMockServer = new WireMockServer(options().port(PORT));
+        wireMockServer.addMockServiceRequestListener((req, resp) -> {
+            IInspectitContext ctx = Instances.contextManager.enterNewContext();
+            dataToPropagate.forEach(ctx::setData);
+            ctx.makeActive();
+            ctx.close();
+        });
         wireMockServer.start();
         configureFor(wireMockServer.port());
     }
 
     @AfterEach
     void cleanup() throws Exception {
+        dataToPropagate.clear();
         wireMockServer.stop();
         client.close();
     }
@@ -81,7 +93,7 @@ public class ApacheHttpClientContextPropagationTest {
             }
 
             verify(getRequestedFor(urlEqualTo("/test"))
-                    .withHeader("Correlation-Context", equalTo("down_propagated=myvalue")));
+                    .withHeader("Correlation-Context", containing("down_propagated=myvalue")));
         }
 
     }
@@ -92,13 +104,12 @@ public class ApacheHttpClientContextPropagationTest {
 
         @BeforeEach
         void setupResponse() {
-
             stubFor(get(urlEqualTo("/test"))
                     .willReturn(aResponse()
-                            .withHeader("Correlation-Context", "up_propagated=" + Math.PI + ";type=d")
-                            .withHeader("Correlation-Context", "up_propagated2 = Hello World ")
                             .withBody("body")
                             .withStatus(200)));
+            dataToPropagate.put("up_propagated", Math.PI);
+            dataToPropagate.put("up_propagated2", "Hello World");
         }
 
         @Test

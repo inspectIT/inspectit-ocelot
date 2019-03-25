@@ -218,7 +218,7 @@ public class ServletApiContextPropagationTest {
             urlConnection.setRequestMethod("GET");
             String correlHeader = urlConnection.getHeaderField("Correlation-Context");
 
-            assertThat(correlHeader).isEqualTo("up_propagated=" + Math.PI + ";type=d");
+            assertThat(correlHeader).contains("up_propagated=" + Math.PI + ";type=d");
         }
 
 
@@ -236,7 +236,7 @@ public class ServletApiContextPropagationTest {
             String correlHeader = urlConnection.getHeaderField("Correlation-Context");
 
 
-            assertThat(correlHeader).isEqualTo("up_propagated=" + Math.PI + ";type=d");
+            assertThat(correlHeader).contains("up_propagated=" + Math.PI + ";type=d");
             assertThat(IOUtil.readLines(urlConnection.getInputStream())).containsExactly("Hallo Welt!");
         }
 
@@ -256,7 +256,7 @@ public class ServletApiContextPropagationTest {
             String correlHeader = urlConnection.getHeaderField("Correlation-Context");
 
 
-            assertThat(correlHeader).isEqualTo("up_propagated=" + Math.PI + ";type=d");
+            assertThat(correlHeader).contains("up_propagated=" + Math.PI + ";type=d");
             assertThat(IOUtil.readLines(urlConnection.getInputStream())).containsExactly("Hallo Welt!");
         }
     }

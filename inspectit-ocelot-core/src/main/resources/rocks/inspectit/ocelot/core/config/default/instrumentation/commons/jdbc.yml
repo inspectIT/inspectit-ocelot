@@ -1,0 +1,20 @@
+inspectit:
+  instrumentation:
+
+    data-providers:
+      get_jdbc_statement_connection_name:
+        imports:
+          - java.sql
+        input:
+          _this: Statement
+        value-body: |
+          Connection con = _this.getConnection();
+          return con.getMetaData().getURL();
+
+    scopes:
+      jdbc_statement_execute:
+        interfaces:
+          - name: java.sql.Statement
+        methods:
+          - name: execute
+            matcher-mode: STARTS_WITH

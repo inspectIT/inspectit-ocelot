@@ -12,6 +12,8 @@ import rocks.inspectit.ocelot.utils.TestUtils;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
@@ -26,6 +28,7 @@ public class HttpUrlConnectionContextPropagationTest {
     public static final String TEST_URL = "http://localhost:" + PORT + "/test";
     private WireMockServer wireMockServer;
 
+    private final Map<String, Object> dataToPropagate = new HashMap<>();
 
     @BeforeAll
     static void waitForInstrumentation() throws Exception {
@@ -39,12 +42,19 @@ public class HttpUrlConnectionContextPropagationTest {
     @BeforeEach
     void setupWiremock() throws Exception {
         wireMockServer = new WireMockServer(options().port(PORT));
+        wireMockServer.addMockServiceRequestListener((req, resp) -> {
+            IInspectitContext ctx = Instances.contextManager.enterNewContext();
+            dataToPropagate.forEach(ctx::setData);
+            ctx.makeActive();
+            ctx.close();
+        });
         wireMockServer.start();
         configureFor(wireMockServer.port());
     }
 
     @AfterEach
     void cleanup() throws Exception {
+        dataToPropagate.clear();
         wireMockServer.stop();
     }
 
@@ -128,10 +138,10 @@ public class HttpUrlConnectionContextPropagationTest {
 
             stubFor(get(urlEqualTo("/test"))
                     .willReturn(aResponse()
-                            .withHeader("Correlation-Context", "up_propagated=" + Math.PI + ";type=d")
-                            .withHeader("Correlation-Context", "up_propagated2 = Hello World ")
                             .withBody("body")
                             .withStatus(200)));
+            dataToPropagate.put("up_propagated", Math.PI);
+            dataToPropagate.put("up_propagated2", "Hello World");
         }
 
         @Test

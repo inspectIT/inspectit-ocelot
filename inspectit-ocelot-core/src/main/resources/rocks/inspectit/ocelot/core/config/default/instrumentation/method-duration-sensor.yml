@@ -1,0 +1,87 @@
+inspectit:
+
+  # settings regarding the instrumentation performed on the target application
+  instrumentation:
+
+    #    # specifying instrumentation scopes which are used by rules for targeting classes and methods
+    #    # please see the documentation for detailed information about this configuration item
+    #    scopes:
+    #      # the id of the following defined scope element - this example scope targets the ArrayList's contains method
+    #      example-list-scope:
+    #        # interfaces which have to be implemented
+    #        interfaces:
+    #          - name: "java.util.List"
+    #            matcher-mode: "EQUALS_FULLY"
+    #        # the superclass which has to be extended
+    #        superclass:
+    #          name: "java.util.AbstractList"
+    #          matcher-mode: "EQUALS_FULLY"
+    #        # matcher describing the class' name (full qualified)
+    #        type:
+    #          name: "ArrayList"
+    #          matcher-mode: "ENDS_WITH"
+    #        # the targeted method - each method which matches at least one of the defined matchers will be instrumented
+    #        methods:
+    #          - name: "contains"
+    #            matcher-mode: "EQUALS_FULLY"
+    #            visibility: [PUBLIC]
+    #            arguments: ["java.lang.Object"]
+    #            is-synchronized: false
+    #          - is-constructor: true
+    #            arguments: []
+    #        # advances settings which can be used to specify and narrow the instrumentation
+    #        advanced:
+    #          instrument-only-inherited-methods: false
+    #          disable-safety-mechanisms: false
+
+    #    # definitions of the instrumentation rules
+    #    # please see the documentation for detailed information about this configuration item
+    #    rules:
+    #      # the id of the following defined rule element - this is an example rule
+    #      example-rule:
+    #        # specifies whether the rule is enabled or not
+    #        enabled: true
+    #        # the scopes used by this rule
+    #        scopes:
+    #          example-list-scope: true
+
+
+
+    data:
+      method_name:
+        down-propagation: NONE
+      method_entry_time:
+        down-propagation: NONE
+        is-tag: false
+      method_duration:
+        down-propagation: NONE
+        is-tag: false
+
+    rules:
+      record_method_duration:
+        entry:
+          method_entry_time: { provider: timestamp_nanos }
+          method_name: {provider: get_method_fqn }
+        exit:
+          method_duration:
+            provider: elapsed_millis
+            data-input:
+              sinceNanos: method_entry_time
+        metrics:
+          '[method/duration]' : method_duration
+
+  metrics:
+    definitions:
+      '[method/duration]':
+        type: DOUBLE
+        unit: ms
+        description: "the duration from method entry to method exit"
+        views:
+          '[method/duration/sum]':
+            aggregation: SUM
+            tags:
+              method_name : true
+          '[method/duration/count]':
+            aggregation: COUNT
+            tags:
+              method_name: true

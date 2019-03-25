@@ -1,0 +1,33 @@
+inspectit:
+  instrumentation:
+          
+    rules:
+    
+      http_server_servlet_api:
+        scopes:
+          servletapi_servlet_service: true
+          servletapi_filter_doFilter: true
+        entry:
+          http_is_entry:
+            provider: set
+            constant-input: { value: true}
+            only-if-null: http_server_servlet_entry_found
+            before: { http_server_servlet_entry_found: true }
+          http_server_servlet_entry_found:
+            provider : set
+            constant-input: {value: true}
+          
+          http_entry_time: { provider: timestamp_nanos, only-if-not-null: http_is_entry}
+          http_raw_path: { provider: get_servlet_request_path, only-if-not-null: http_is_entry}
+          http_method: {provider: get_servlet_request_method}
+          
+        exit:
+          http_path: { provider: getOrElse, data-input: {value: parametrized_http_path, elseValue: http_raw_path} }
+          http_status: {provider: get_servlet_response_status}
+          http_duration:
+            provider: elapsed_millis
+            data-input: {sinceNanos: http_entry_time }
+            only-if-not-null: http_is_entry
+          
+        metrics:
+          '[http/in/responsetime]': http_duration
