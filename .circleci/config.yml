@@ -4,33 +4,14 @@
 #
 version: 2.1
 
-#executors:
-# executor-openjdk8:
-#    docker:
-#      - image: circleci/openjdk:8-jdk
-#    working_directory: ~/inspectit
-
-default_working_directory: &default_working_directory
-  working_directory: ~/inspectit
-
-#default_test_steps: &default_test_steps
-#  steps:
-#    - attach_workspace:
-#        at: ~/inspectit/repo
-#    - pwd
-#    - ls repo
-#    - cd repo
-#    - run: ./gradlew test systemTest
-
 jobs:
-  build:
+  checkout:
     docker:
       - image: circleci/openjdk:8-jdk
     working_directory: ~/inspectit
     steps:
       - checkout:
           path: ~/inspectit/repo
-      - run: cd repo && ./gradlew assemble
       - persist_to_workspace:
           root: ~/inspectit
           paths:
@@ -43,7 +24,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/inspectit
-      - run: cd repo && ./gradlew test systemTest
+      - run: cd repo && ./gradlew assemble test systemTest
 
   openjdk9-test:
     <<: *base_test_job
@@ -60,24 +41,48 @@ jobs:
     docker:
       - image: ibmcom/ibmjava:8-sdk
 
+  oracle8-test:
+    <<: *base_test_job
+    steps:
+      - attach_workspace:
+          at: ~/inspectit
+      - run: sudo apt-get install -y software-properties-common
+      - run: sudo add-apt-repository -y ppa:webupd8team/java
+      - run: sudo apt-get --allow-unauthenticated update
+      - run: echo "oracle-java8-installer shared/accepted-oracle-license-v1-1 select true" | sudo debconf-set-selections
+      - run: sudo apt-get --allow-unauthenticated install -y oracle-java8-installer
+      - run: java -version
+      - run: cd repo && ./gradlew assemble test systemTest
+
+  oracle11-test:
+    <<: *base_test_job
+    steps:
+      - attach_workspace:
+          at: ~/inspectit
+      - run: sudo apt-get install -y software-properties-common
+      - run: sudo add-apt-repository -y ppa:linuxuprising/java
+      - run: sudo apt-get --allow-unauthenticated update
+      - run: echo oracle-java11-installer shared/accepted-oracle-license-v1-2 select true | sudo /usr/bin/debconf-set-selections
+      - run: sudo apt-get --allow-unauthenticated install -y oracle-java11-installer
+      - run: java -version
+      - run: cd repo && ./gradlew assemble test systemTest
+
 
 workflows:
   version: 2
   build_and_test:
     jobs:
-      - build
+      - checkout
+      - oracle8-test: &requires_checkout
+          requires:
+            - checkout
+      - oracle11-test:
+          <<: *requires_checkout
       - openjdk8-test:
-          requires:
-            - build
+          <<: *requires_checkout
       - openjdk9-test:
-          requires:
-            - build
+          <<: *requires_checkout
       - openjdk11-test:
-          requires:
-            - build
+          <<: *requires_checkout
       - ibmjava8-test:
-          requires:
-            - build
-#      - systemtests:
-#          requires:
-#            - build
+          <<: *requires_checkout
