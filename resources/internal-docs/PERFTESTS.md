@@ -1,19 +1,19 @@
 # Performance (JMH) Tests
 
-The inspectIT OCE team tries its best to provide performance tests that can be used to benchmark the inspectIT OCE agent.
+The inspectIT Ocelot team tries its best to provide performance tests that can be used to benchmark the inspectIT Ocelot agent.
 These tests are based on the Java Microbenchmark Harness (JVM) library.
 
 The performance tests are are available for the following projects:
 
-* `inspectit-oce-core`
-* `inspectit-oce-agent`
+* `inspectit-ocelot-core`
+* `inspectit-ocelot-agent`
 
 ## Running the tests
 
 The test can be run using the Gradle task `jmh`:
 
 ```bash
-$ ./gradlew :inspectit-oce-core:jmh :inspectit-oce-agent:jmh
+$ ./gradlew :inspectit-ocelot-core:jmh :inspectit-ocelot-agent:jmh
 ```
 > In case you experience the errors when starting the `jmh` task, consider restarting the Gradle wrapper by running `./gradlew --stop`.
 

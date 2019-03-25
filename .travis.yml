@@ -89,7 +89,7 @@ jobs:
           bucket: "docs.inspectit.rocks"
           region: eu-west-1
           skip_cleanup: true
-          local_dir: inspectit-oce-documentation/build/asciidoc/html5
+          local_dir: inspectit-ocelot-documentation/build/asciidoc/html5
           upload-dir: master
           on:
             tags: false
@@ -104,7 +104,7 @@ jobs:
           bucket: "docs.inspectit.rocks"
           region: eu-west-1
           skip_cleanup: true
-          local_dir: inspectit-oce-documentation/build/asciidoc/html5
+          local_dir: inspectit-ocelot-documentation/build/asciidoc/html5
           upload-dir: releases/latest
           on:
             tags: true
@@ -115,7 +115,7 @@ jobs:
           bucket: "docs.inspectit.rocks"
           region: eu-west-1
           skip_cleanup: true
-          local_dir: inspectit-oce-documentation/build/asciidoc/html5
+          local_dir: inspectit-ocelot-documentation/build/asciidoc/html5
           upload-dir: releases/$TRAVIS_TAG
           on:
             tags: true
@@ -135,9 +135,9 @@ jobs:
           api_key: "${GITHUB_TOKEN}"
           name: "Version $RELEASE_VERSION"
           file:
-           - "inspectit-oce-agent/build/inspectit-oce-agent-$RELEASE_VERSION.jar"
-           - "inspectit-oce-documentation/build/distributions/inspectit-oce-documentation-$RELEASE_VERSION.zip"
-           - "inspectit-oce-demo/build/inspectit-oce-demo-$RELEASE_VERSION.zip"
+           - "inspectit-ocelot-agent/build/inspectit-ocelot-agent-$RELEASE_VERSION.jar"
+           - "inspectit-ocelot-documentation/build/distributions/inspectit-ocelot-documentation-$RELEASE_VERSION.zip"
+           - "inspectit-ocelot-demo/build/inspectit-ocelot-demo-$RELEASE_VERSION.zip"
           skip_cleanup: true
           on:
             tags: true
@@ -147,4 +147,4 @@ jobs:
 stages:
   - test
   - name: deploy
-    if: repo = inspectIT/inspectit-oce
+    if: repo = inspectIT/inspectit-ocelot

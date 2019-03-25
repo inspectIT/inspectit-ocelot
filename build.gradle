@@ -101,5 +101,5 @@ task codeCoverageReport(type: JacocoReport) {
 }
 codeCoverageReport.dependsOn {
     subprojects*.test
-    project(':inspectit-oce-agent').systemTest
+    project(':inspectit-ocelot-agent').systemTest
 }

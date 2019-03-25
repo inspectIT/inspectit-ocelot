@@ -1,0 +1,7 @@
+== Instrumentation
+
+This section describes how the inspectIT Ocelot Java agent is using instrumentation in order to inject sensors and custom code into an application's Java classes and methods.
+
+When we refer to a sensor, this can be seen as a kind of predefined Java code or method that is injected into the target application to execute a certain functionality, such as measuring execution times.
+
+include::special-sensors.adoc[]

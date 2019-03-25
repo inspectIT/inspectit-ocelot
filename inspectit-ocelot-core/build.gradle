@@ -1,0 +1,133 @@
+plugins {
+    id "me.champeau.gradle.jmh" version "0.4.8"
+}
+
+configurations{
+    opencensus
+    testImplementation.extendsFrom opencensus
+}
+
+dependencies {
+    compileOnly(
+            project(':inspectit-ocelot-bootstrap'),
+            "io.opencensus:opencensus-api:${openCensusVersion}"
+    )
+
+    opencensus(
+            "io.opencensus:opencensus-impl:${openCensusVersion}"
+    )
+
+    implementation(
+            // spring releated
+            'org.springframework.boot:spring-boot:2.1.1.RELEASE',
+            'org.yaml:snakeyaml:1.23',
+            'javax.annotation:javax.annotation-api:1.3.2', //Required for @PostConstruct and @PreDestroy to work in Java9+
+
+            // data validation
+            'org.hibernate.validator:hibernate-validator:6.0.13.Final',
+            'org.apache.tomcat.embed:tomcat-embed-el:9.0.13',
+
+            // logging
+            'ch.qos.logback:logback-classic:1.2.3',
+
+            // utils
+            "org.apache.commons:commons-lang3:3.+",
+            'commons-io:commons-io:2.6',
+            'piccolo:piccolo:1.0.3',
+            'com.fasterxml.jackson.core:jackson-databind:2.9.7',
+
+            'org.javassist:javassist:3.24.1-GA',
+
+            // OpenCensus exporters
+            "io.opencensus:opencensus-exporter-stats-prometheus:${openCensusVersion}",
+            "io.prometheus:simpleclient_httpserver:${prometheusClientVersion}",
+
+            //bytecode manipulation
+            "net.bytebuddy:byte-buddy:1.9.2"
+    )
+
+    testImplementation(
+            project(':inspectit-ocelot-bootstrap'),
+            'org.springframework:spring-test:5.1.3.RELEASE',
+            'org.apache.httpcomponents:httpclient:4.5.6',
+            'org.mockito:mockito-core:2.23.4',
+            'org.assertj:assertj-core:3.11.1',
+            'org.awaitility:awaitility:3.1.5'
+    )
+
+    jmh (
+            project(':inspectit-ocelot-bootstrap')
+    )
+
+}
+
+task buildOpencensusFatJar(type: Jar) {
+    archiveName = "opencensus-fat.jar"
+    destinationDir = file("$buildDir/jarGen")
+    from {
+        configurations.opencensus.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+jar {
+    archiveName = "${project.name}.jar"
+
+    //include the open-census dependencies as a fat jar
+    dependsOn buildOpencensusFatJar
+    from "$buildDir/jarGen"
+
+    //include all "implementation" dependencies in fat jar
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+/**
+ * JMH-Perf tests.
+ */
+jmhJar {
+    doFirst {
+        duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+    }
+}
+jmh {
+
+    /**
+     * Use -PjmhInclude='regular expression' to specify what tests to run with JMH.
+     */
+    if (project.hasProperty('jmhInclude')) {
+        String regex = project.getProperty('jmhInclude')
+        println "Filtering for JMH-Tests matching to regex: " + regex
+        include = [regex]
+    }
+
+    /**
+     * Use -jmhProfiler='profiler name and settings' to specify what profiler to run with JMH.
+     */
+    if (project.hasProperty('jmhProfiler')) {
+        String profiler = project.getProperty('jmhProfiler')
+        println "Using profiler for JMH tests: " + profiler
+        profilers = [profiler]
+    }
+
+    /**
+     * Use -jmhFlightRecorder=true to add Flight recorder options to the JVM args. You'll need openJDK 11 or OracleJDK 8.
+     */
+    if (project.hasProperty('jmhFlightRecorder')) {
+        def recordingFile = "rec-jmh-${project.name}-${System.currentTimeMillis()}.jfr"
+        def frProperties = "-XX:StartFlightRecording=duration=10s,delay=3s,filename=${recordingFile}".toString()
+        jvmArgs = ['-XX:+UnlockCommercialFeatures', '-XX:+FlightRecorder', '-XX:+UnlockDiagnosticVMOptions', '-XX:+DebugNonSafepoints', frProperties, '-Djavax.xml.parsers.SAXParserFactory=com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl']
+    }
+
+    // output of results and duplicateClassesStrategy
+    humanOutputFile = file("$buildDir/jmh/human.txt")
+    resultsFile = file("$buildDir/jmh/results.txt")
+    duplicateClassesStrategy = DuplicatesStrategy.EXCLUDE
+
+    // shared settings if not defined on the class level
+    warmupIterations = 3
+    warmup = '1s'
+    iterations = 10
+    timeOnIteration = '1s'
+    fork = 1
+}
