@@ -11,7 +11,7 @@ inspectit:
           _arg0: ServletRequest
         value-body: |
           if(_arg0 instanceof HttpServletRequest) {
-            return ((HttpServletRequest)_arg0).getServletPath();
+            return java.net.URI.create(((HttpServletRequest)_arg0).getRequestURI()).getPath();
           }
           return null;
 

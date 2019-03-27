@@ -8,20 +8,20 @@ inspectit:
           servletapi_servlet_service: true
           servletapi_filter_doFilter: true
         entry:
-          http_raw_path: { provider: get_servlet_request_path}
+          http_method: {provider: get_servlet_request_method}
 
           http_is_entry:
             provider: set
             constant-input: { value: true}
             only-if-null: http_server_servlet_entry_found
-            only-if-not-null: http_raw_path # we use this check so that we exclude non-http requests
+            only-if-not-null: http_method # we use this check so that we exclude non-http requests
             before: { http_server_servlet_entry_found: true }
           http_server_servlet_entry_found:
             provider : set
             constant-input: {value: true}
-          
+
+          http_raw_path: { provider: get_servlet_request_path}
           http_entry_time: { provider: timestamp_nanos, only-if-not-null: http_is_entry}
-          http_method: {provider: get_servlet_request_method}
           
         exit:
           http_path: { provider: getOrElse, data-input: {value: parametrized_http_path, elseValue: http_raw_path} }

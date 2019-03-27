@@ -58,7 +58,7 @@ public class HttpInMetricTest {
             server = new Server(PORT);
             ServletHandler servletHandler = new ServletHandler();
             server.setHandler(servletHandler);
-            servletHandler.addServletWithMapping(TestServlet.class, "/servletapi");
+            servletHandler.addServletWithMapping(TestServlet.class, "/*");
             server.start();
             HttpURLConnection.class.getDeclaredMethods();
             TestUtils.waitForInstrumentationToComplete();
