@@ -15,6 +15,7 @@ inspectit:
       setNull:
         value: 'null'
 
+      #returns the "value" input if it is not null, otherwise returns "elseValue"
       getOrElse:
         input:
           value: Object

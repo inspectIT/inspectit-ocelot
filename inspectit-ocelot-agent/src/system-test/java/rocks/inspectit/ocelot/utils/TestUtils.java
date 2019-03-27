@@ -71,7 +71,8 @@ public class TestUtils {
                     List<TagValue> tagValues = e.getKey();
                     for (int i = 0; i < tagValues.size(); i++) {
                         String regex = expectedTagValues.get(i);
-                        if (regex != null && !tagValues.get(i).asString().matches(regex)) {
+                        TagValue tagValue = tagValues.get(i);
+                        if (regex != null && (tagValue == null || !tagValue.asString().matches(regex))) {
                             return false;
                         }
                     }

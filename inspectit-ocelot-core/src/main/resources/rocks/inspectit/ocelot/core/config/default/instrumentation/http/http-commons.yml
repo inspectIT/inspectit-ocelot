@@ -26,7 +26,7 @@ inspectit:
       http_is_entry: {down-propagation: NONE, is-tag: false}
       
       http_raw_path: {down-propagation: NONE, is-tag: false}
-      #can be written by user isntrumentation and will then be used instead of the raw path for http_path
+      #can be written by user instrumentation and will then be used instead of the raw path for http_path
       parametrized_http_path: {down-propagation: NONE, is-tag: false}
       
       http_entry_time: {down-propagation: NONE}
