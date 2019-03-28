@@ -1,1 +1,252 @@
 === Rules
+
+Rules define (a) how data should be extracted when the instrumented
+method is executed and (b) which metrics shall be recorded.
+The selection on which methods these actions are applied is done through <<Scopes, scopes>>.
+
+A highlight of inspectIT is the fact that you are completely free in defining how the data is
+extracted. In addition, the extracted data can be made visible outside of the instrumented method
+in which it was collected: Data can be configured to be propagated up or down with the call stack,
+which is explained in the section <<Data Propagation>>.
+
+The overall concept of rules is best explained with a simple example which is part of the inspectIT Ocelot default configuration:
+
+[source,yaml]
+----
+inspectit:
+  instrumentation:
+    rules:
+
+      record_method_duration:
+
+        entry:
+          method_entry_time:
+            provider: timestamp_nanos
+          method_name:
+            provider: get_method_fqn
+
+        exit:
+          method_duration:
+            provider: elapsed_millis
+            data-input:
+              sinceNanos: method_entry_time
+
+        metrics:
+          '[method/duration]' : method_duration
+----
+
+This example rule named `record_method_duration` measures the duration of the instrumented method and outputs the value using the `method/duration` metric.
+
+As the name states, we define under the `entry` property of the rule which actions are performed on method entry. Similarly, the `exit` property defines what is done when the instrumented method returns. In both sections we collect data.
+
+On entry, we collect the current timestamp in a variable named `method_entry_time` and the name of the currently executed method in `method_name`.
+These variables are _data_, their names are referred to as _data keys_. Note that we also define how the data is collected: For `method_entry_time` we invoke the <<Data Provider, data provider>> named `timestamp_nanos` and for `method_name` the one named `get_method_fqn`.
+
+This data is then used on method exit: using the provider `elapsed_millis` we compute the time which has passed since `method_entry_time`. Finally, the duration computed this way is used as value for the `method/duration` metric. As shown in the <<Defining Custom Metrics, definition>> of this metric, the collected `method_name` is used as tag for all of its views.
+
+==== Data Propagation
+
+As illustrated by the previous example, we can collect any amount of data in both the entry and the exit section of an instrumented method. Each data is hereby identified by its name, the _data key_.
+Internally, inspectIT creates a dictionary like Object each time an instrumented method is executed. This object is basically a local variable for the method. Whenever data is written, inspectIT stores the value under the given data key in this dictionary. Similarly, whenever data is read, inspectIT looks it up based on the data key in the dictionary. This dictionary is called _inspectIT context_.
+
+If the inspectIT context was truly implemented as explained above, all data would be only visible in the method where it was collected. This however often is not the desired behaviour.
+Consider the following example: you instrument the entry method of your HTTP server and collect the request URL as data there. You now of course want this data to be visible as tag for metrics collected in methods called by your entry point. With the implementation above, the request URL would only be visible within the HTTP entry method.
+
+For this reason the inspectIT context implements _data propagation_. The propagation can happen in two directions:
+
+* *Down Propagation:* Data collected in your instrumented method will also be visible to all methods directly or indirectly called by your method. This behaviour already comes https://opencensus.io/tag/#propagation[with the OpenCensus Library for tags].
+* *Up Propagation:* Data collected in your instrumented method will be visible to the methods which caused the invocation of your method. This means that all methods which lie on the call stack will have access to the data written by your method
+
+Up- and down propagation can also be combined: in this case then the data is attached to the control flow, meaning that it will appear as if its value will be passed around with every method call and return.
+
+The second aspect of propagation to consider is the _level_. Does the propagation happen within each Thread separately or is it propagated across threads? Also, what about propagation across JVM boarders, e.g. one micro service calling another one via HTTP? In inspectIT Ocelot we provide the following two settings for the propagation level.
+
+* *JVM local:* The data is propagated within the JVM, even across thread boarders. The behaviour when data moves from one thread to another is defined through <<Special Sensors>>.
+* *Global:* Data is propagated within the JVM and even across JVM boarders. For example, when an application issues an HTTP request, the globally down propagated data is added to the headers of the request. When the response arrives, up propagated data is collected from the response headers. Again, this protocol specific behaviour is realized through <<Special Sensors>>.
+
+===== Defining the Behaviour
+
+The propagation behaviour is not defined on rule level but instead globally based on the data keys under the configuration
+property `inspectit.instrumentation.data`. Here are some examples extracted from the default configurations of inspectIT:
+
+[source,yaml]
+----
+inspectit:
+  instrumentation:
+    data:
+      # for correlating calls across JVM boarders
+      prop_origin_service: {down-propagation: GLOBAL, is-tag: false}
+      prop_target_service: {up-propagation: GLOBAL, down-propagation: JVM_LOCAL, is-tag: false}
+
+      #we allow the application to be defined at the beginning and to be down propagated from there
+      application: {down-propagation: GLOBAL, is-tag: true}
+
+      #this data will only be visible locally in the method where it is collected
+      http_method: {down-propagation: NONE}
+      http_status: {down-propagation: NONE}
+----
+
+Under `inspectit.instrumentation.data`, the data keys are mapped to their desired behaviour.
+The configuration options are the following:
+[cols="2,2,5",options="header"]
+.Configuration otpions for data behaviour
+|===
+|Config Property|Default| Description
+|`down-propagation`
+|`JVM_LOCAL`
+| Configures if values for this data key propagate down and the level of propagation.
+Possible values are `NONE`, `JVM_LOCAL` and `GLOBAL`. If `NONE` is configured, no down propagation will take place.
+
+|`up-propagation`
+|`NONE`
+| Configures if values for this data key propagate up and the level of propagation.
+Possible values are `NONE`, `JVM_LOCAL` and `GLOBAL`. If `NONE` is configured, no up propagation will take place.
+
+|`is-tag`
+|`true`
+|If true, this data will act as a tag when metrics are recorded. This does not influence propagation, e.g. typically you want tags to be down propagated JVM locally.
+|===
+
+Note that you are free to use data keys without explicitly defining them in the `inspectit.instrumentation.data` section. In this case simply all settings are assumed to be default, which corresponds to the behaviour of OpenCensus tags.
+
+===== Interaction with OpenCensus Tags
+
+As explained previously, our inspectIT context can be seen as a more flexible variation of OpenCensus tags. In fact, we designed the inspectIT context so that it acts as a superset of the OpenCensus TagContext.
+
+Firstly, when an instrumented method is entered, a new inspectIT context is created. At this point, it imports any tag values published by OpenCensus directly as data. This also includes the <<Common Tags, common tags>> created by inspectIT. This means, that you can simply read (and overwrite) values for common tags such as `service` or `host_address` at any rule.
+
+The integration is even deeper if you <<Using OpenCensus Library with inspectIT Ocelot,configured the agent to also extract the metrics from manual instrumentation in your application>>.
+Firstly, if a method instrumented by inspectIT Ocelot is executed within a TagContext opened by your application,
+these application tags will also be visible in the inspectIT context. Secondly, after the execution of the entry section of each rule, a new TagContext is opened making the tags written there accessible to metrics collected by your application. Hereby, only data for which down propagation was configured to be `JVM_LOCAL` or greater and for which `is-tag` is true will be visible as tags.
+
+==== Data Providers
+
+Data providers are the tool for extracting arbitrary data from your application or the context.
+They are effectively Lambda-like functions you can invoke from the entry and the exit section of rules. They are defined by (a) specifying their input parameters and (b) giving a Java code snippet which defines how the result value is computed from these.
+
+Again, this is best explained by giving some simple examples extracted from inspectIT Ocelot default configuration:
+
+[source,yaml]
+----
+inspectit:
+  instrumentation:
+    data-providers:
+
+      #computes a nanosecond-timestamp as a long for the current point in time
+      timestamp_nanos:
+        value: "new Long(System.nanoTime())"
+
+      #computes the elapsed milliseconds as double since a given nanosecond-timestamp
+      elapsed_millis:
+        input:
+          #the timestamp captured via System.nanoTime() to compare against
+          sinceNanos: long
+        value: "new Double( (System.nanoTime() - sinceNanos) * 1E-6)"
+
+      string_replace_all:
+        input:
+          regex: String
+          replacement: String
+          string: String
+        value: string.replaceAll(regex,replacement)
+
+      get_method_fqn:
+        input:
+          _methodName: String
+          _class: Class
+        value: new StringBuilder(_class.getName()).append('.').append(_methodName).toString()
+----
+
+The names of the first two data providers, `timestamp_nanos` and `elapsed_millis` should be familiar for you from the initial example in the <<Rules, rules section>>.
+
+The code executed when a data provider is invoked is defined through the `value` configuration property. In YAML, this is simply a string. InspectIT however will interpret this string as a Java expression to evaluate. The result value of this expression will be used as result for the data provider invocation.
+
+Note that the code will not be interpreted at runtime, but instead inspectIT Ocelot will compile the expression to bytecode to ensure maximum efficiency. As indicated by the manual primitive boxing performed for `timestamp_nanos` the compiler has some restrictions. For example Autoboxing is not supported. However, data providers are expected to return Objects, therefore manual boxing has to be performed. Under the hood, inspectIT uses the http://www.javassist.org/[javassist] library, where all imposed restrictions can be found.
+The most important ones are that neither Autoboxing, Generics, Anonymous Classes or Lambda Expressions are supported.
+
+NOTE: Even if your data provider terminates with an exception or error, inspectIT will make sure that this does not affect your application. InspectIT will print information about the error and the faulting data provider. The execution of the data provider in the rule where the failure occured will be disabled until you update your configuration.
+
+===== Input Parameters
+
+As previously mentioned data providers are also free to define any kind of _input parameters_ they need. This is done using the `input` configuration property.
+This property maps the names of the input parameters to their expected Java type.
+For example, the `elapsed_millis` data provider declares a single input variable named `sinceNanos` which has the type `long`. Note that for input parameters automatic primitive unboxing is supported.
+
+Another example where the data provider even defines multiple inputs is `string_replace_all`. Guess what this data provider does? https://docs.oracle.com/javase/8/docs/api/java/lang/String.html#replaceAll-java.lang.String-java.lang.String-[Hint]
+
+The fourth example shown above is `get_method_fqn`, which uses the _special_ input parameters `_methodName` and `_class`. The fact that these variables are special is indicated by the leading underscore. When normally invoking data providers from rules, the user has to take care that all input parameters are assigned a value. For special input parameters inspectIT automatically assigned the desired value. This means that for example `get_method_fqn` can be called without manually assigning any parameter, like it was done in the initial example in the <<Rules>> section. An overview of all available special input parameters is given below:
+
+[cols="2,2,5",options="header"]
+.Special Input Parameters for Data Providers
+|===
+|Parameter Name|Type| Description
+
+|`_methodName`
+| https://docs.oracle.com/javase/8/docs/api/java/lang/String.html[String]
+| The name of the instrumented method within which this data provider is getting executed.
+
+|`_class`
+| https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html[Class]
+| The class declaring the instrumented method within which this data provider is getting executed.
+
+|`_this`
+| (depends on context)
+| The this-instance in the context of the instrumented method within which this data provider is getting executed.
+
+|`_args`
+| https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html[Object][]
+| The arguments with which the instrumented method was called within which this data provider is getting executed.
+ The arguments are boxed if necessary and packed into an array.
+
+|`_arg0,_arg1,...,_argN`
+| (depends on context)
+| The N-th argument with which the instrumented method was called within which this data provider is getting executed.
+
+|`_returnValue`
+| (depends on context)
+| The value returned by the instrumented method within which this data provider is getting executed.
+If the method terminated with an exception or the data provider is executed in the entry section this is `null`.
+
+|`_thrown`
+| https://docs.oracle.com/javase/8/docs/api/java/lang/Throwable.html[Throwable]
+| The exception thrown by the instrumented method within which this data provider is getting executed.
+If the method returned normally or the data provider is executed in the entry section this is `null`.
+
+|===
+
+===== Multiple statements and Imports
+
+Data providers can easily become more complex, so that a single expression is not sufficient for expressing the functionality.
+For this purpose we introduced the `value-body` configuration property for data providers as an alternative to `value`.
+`value-body` allows you to specify a Java method body which returns the result of the data provider. The body is given without surrounding curly braces. One example data provider from teh default configuration making use of this is given below:
+
+[source,YAML]
+----
+inspectit:
+  instrumentation:
+    data-providers:
+      get_servlet_request_path:
+        imports:
+          - javax.servlet
+          - javax.servlet.http
+        input:
+          _arg0: ServletRequest
+        value-body: |
+          if(_arg0 instanceof HttpServletRequest) {
+            return java.net.URI.create(((HttpServletRequest)_arg0).getRequestURI()).getPath();
+          }
+          return null;
+----
+
+This data provider is designed to be applied on the Servlet API https://javaee.github.io/javaee-spec/javadocs/javax/servlet/Filter.html#doFilter-javax.servlet.ServletRequest-javax.servlet.ServletResponse-javax.servlet.FilterChain-[doFilter] and
+https://javaee.github.io/javaee-spec/javadocs/javax/servlet/Servlet.html#service-javax.servlet.ServletRequest-javax.servlet.ServletResponse-[service] methods.
+ It's purpose is to extract HTTP path, however in the servlet API it is not guaranteed that the `ServletRequest` is a `HttpServletRequest`.
+ For this reason the data provider performs an instanceof check only returning the the HTTP path if it is available, otherwise `null`.
+
+Normally, all non `java.lang.*` types have to be referred to using their fully
+qualified name, as done for `java.net.URI` in the example above. However, as in
+java you can import packages using the `import` config option. In this example this
+allows us to refer to `ServletRequest` and `HttpServletRequest` without using the fully qualified name.
+
+
+==== Defining Rules
