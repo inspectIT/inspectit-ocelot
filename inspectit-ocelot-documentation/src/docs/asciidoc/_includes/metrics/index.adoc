@@ -12,8 +12,11 @@ If used, the switch makes sure that the inspectIT Ocelot agent:
 
 . disables all metrics recorders
 . does not set up any metrics exporter
+. disables the registration of <<Defining Custom Metrics, custom OpenCensus metric and view definitions>>
 ====
 
 include::metrics-recorders.adoc[]
 
 include::metrics-exporters.adoc[]
+
+include::metrics-custom.adoc[]

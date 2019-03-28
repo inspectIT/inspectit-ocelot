@@ -7,23 +7,24 @@ For example, the `inspectit/self/duration` metric gives the total execution time
 All metrics include the configured <<Common Tags, common tags>>.
 The metric is split by the tag containing the component name and also includes all common tags.
 
-.Exposed self-monitoring metric using the Prometheus exporter
-```
-# HELP inspectit_self_duration inspectIT Ocelot self-monitoring duration [us]
-# TYPE inspectit_self_duration counter
-inspectit_self_duration{component_name="instrumentation-retransformation",host="myhostname",host_address="10.0.75.1",service_name="my-service",} 224652.0
-inspectit_self_duration{component_name="class-discovery",host="myhostname",host_address="10.0.75.1",service_name="my-service",} 17145.0
-inspectit_self_duration{component_name="instrumentation-analysis",host="myhostname",host_address="10.0.75.1",service_name="my-service",} 64426.0
+[cols="2,1,5",options="header"]
+.Exposed Self monitoring metrics
+|===
+|Metric Name |Unit| Description
+|```inspectit/self/duration```
+|us
+|The total time spent by inspectIT doing internal tasks, such as configuration loading, instrumenting, etc.
+The metric contains the tag ```component_name```, specifying in which component the time was spent
 
-# HELP inspectit_self_instrumentation_analysis_queue_size The number of pending classes inspectIT has to check if they require instrumentation updates [classes]
-# TYPE inspectit_self_instrumentation_analysis_queue_size gauge
-inspectit_self_instrumentation_analysis_queue_size{host="myhostname",host_address="10.0.75.1",service_name="my-service",} 3746.0
+|```inspectit/self/instrumentation-queue-size```
+|`classes`
+|InspectIT applies the configured instrumentation by working through a queue of classes it has to analyze and potentially instrument. This metric exposes the current size of this queue. By comparing it against the <<Class Loading Metrics,total number of loaded classes>>, the instrumentation progress can be estimated.
 
-# HELP inspectit_self_instrumented_classes The number of currently by inspectIT instrumented classes [classes]
-# TYPE inspectit_self_instrumented_classes gauge
-inspectit_self_instrumented_classes{host="myhostname",host_address="10.0.75.1",service_name="my-service",} 2.0
-```
+|```inspectit/self/instrumented-classes```
+|`classes`
+|Exposes the total number of classes which are currently instrumented by inspectIT.
+|===
 
-Self monitoring is disabled by default and can be enabled by setting the `inspectit.self-monitoring.enabled` property to `true`.
+Self monitoring is enabled by default and can be disabled by setting the `inspectit.self-monitoring.enabled` property to `false`.
 
-WARNING: Components responsible for internal management of inspectIT Ocelot are at the moment not reporting the time used for internal tasks. Please take the provided numbers only for a basic reference on overhead and don't assume they are 100% correct.
+WARNING: Not all components responsible for internal management of inspectIT Ocelot are at the moment reporting the time used for internal tasks. Please take the provided numbers only for a basic reference on overhead and don't assume they are 100% correct. In addition the overhead introduced in application classes through instrumentation is currently also not captured.

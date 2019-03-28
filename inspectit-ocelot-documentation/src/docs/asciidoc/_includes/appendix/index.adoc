@@ -1,11 +1,8 @@
 == Appendix
 
-=== All Configuration Options
+=== Default Configuration
 
-[source,yaml]
-----
-include::{gradle-rootdir-absolute}/inspectit-ocelot-core/src/main/resources/config/default.yml[]
-----
+The default configuration of inspectIT Ocelot is a set of yaml files which is included within the agent jar. For the current master branch you can find them online in our https://github.com/inspectIT/inspectit-ocelot/tree/master/inspectit-ocelot-core/src/main/resources/rocks/inspectit/ocelot/core/config/default[github]. For this version you can download the release sources also on github and look on the same path as in the linked github repository.
 
 === Default Logback Configuration
 

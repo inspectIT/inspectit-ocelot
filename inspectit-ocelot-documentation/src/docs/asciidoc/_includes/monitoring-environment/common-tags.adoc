@@ -7,7 +7,7 @@ The map can be <<User Defined Tags,extended or overwritten by the user>> when th
 Tag provider is responsible for extracting information from a specific source and provides a map of key value pairs that are then combined into the common tag context.
 Each provider specifies a priority and if the same tag keys are supplied by two providers, then the tag value from the provider with higher priority will be used.
 
-inspectIT Ocelot current supports the following tag providers:
+inspectIT Ocelot currently supports the following tag providers:
 
 [cols="2,2,1,1,1",options="header"]
 |===
@@ -18,7 +18,7 @@ inspectIT Ocelot current supports the following tag providers:
 |No
 |HIGH
 |<<Environment Tags>>
-|`service-name`, `host`, `host-address`
+|`service`, `host`, `host_address`
 |Yes
 |Yes
 |LOW
@@ -48,8 +48,8 @@ inspectit:
 ----
 
 ==== Environment Tags
-The environment tag provider extends the common tag context by supplying information about the service name and the network host.
-The service name is resolved from the `inspectit.service-name` property, while the host information is extracted using `InetAddress.getLocalHost()`.
+The environment tag provider extends the common tag context by supplying information about the service and the network host.
+The service is resolved from the `inspectit.service-name` property, while the host information is extracted using `InetAddress.getLocalHost()`.
 
 NOTE: On machines that have multiple network interfaces the `InetAddress.getLocalHost()` method might not provide desired values for host related tags.
 
@@ -65,5 +65,5 @@ NOTE: On machines that have multiple network interfaces the `InetAddress.getLoca
 |If `false`, the tag `host` containing the resolved host name will not be provided.
 |```inspectit.tags.providers.environment.resolve-host-address```
 |`true`
-|If `false`, the tag `host-address` containing the resolved host IP address will not be provided.
+|If `false`, the tag `host_address` containing the resolved host IP address will not be provided.
 |===

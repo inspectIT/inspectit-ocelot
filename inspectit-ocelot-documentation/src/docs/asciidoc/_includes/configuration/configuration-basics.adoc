@@ -9,14 +9,14 @@ Configuration properties are considered in inspectIT Ocelot in the following ord
 . <<OS Environment Variables,OS environment variables>>
 . Supported <<Externalized Configuration Methods,externalized configuration methods>>
 .. <<File-based Configuration,File-based configuration>>
-. <<All Configuration Options,inspectIT Ocelot defaults>>
+. <<Default Configuration,inspectIT Ocelot defaults>>
 
 When an invalid configuration is given to inspectIT on startup, the agent will use a fallback configuration.
 In this fallback configuration, the agent is inactive with the exception of listening for configuration updates.
 
 When giving an invalid configuration through a runtime update to the agent, the agent will simply retain the previous configuration.
 
-The overview of all available inspectIT Ocelot configuration properties is given in the <<All Configuration Options>> section.
+The details on the inspectIT Ocelot default configuration is given in the <<Default Configuration>> section.
 
 ==== Java Agent Arguments
 
