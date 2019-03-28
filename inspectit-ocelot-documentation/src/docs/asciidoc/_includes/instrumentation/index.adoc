@@ -1,7 +1,21 @@
 == Instrumentation
 
-This section describes how the inspectIT Ocelot Java agent is using instrumentation in order to inject sensors and custom code into an application's Java classes and methods.
+This section describes how the inspectIT Ocelot Java agent can be used to inject predefined or custom monitoring code into the target application.
 
-When we refer to a sensor, this can be seen as a kind of predefined Java code or method that is injected into the target application to execute a certain functionality, such as measuring execution times.
+InspectIT Ocelot gives you a very large degree of freedom when it comes to defining instrumentation.
+The first step is usually defining your <<Scopes,scopes>>. A scope acts as a selector for finding the methods you want to instrument.
+
+Scopes are then used by <<Rules,rules>>. While scopes define which methods you instrument, rules define the actual monitoring actions which will be performed. Examples for such actions would be recording the response time or extracting the HTTP url for further processing.
+
+For the definition of rules, <<Data Providers, data providers>> are a key concept.
+Long story short: data providers allow you to specify _Java snippets in you configuration_
+which will be executed to extract any data you want. This can be performance data
+such as the response time or any kind of business data, e.g. the shopping cart size.
+
+include::scopes.adoc[]
+
+include::rules.adoc[]
 
 include::special-sensors.adoc[]
+
+include::default-instrumentation.adoc[]
