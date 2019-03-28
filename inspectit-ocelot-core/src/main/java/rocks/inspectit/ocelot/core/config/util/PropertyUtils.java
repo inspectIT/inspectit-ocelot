@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
-import org.springframework.core.io.AbstractResource;
+import org.springframework.core.io.Resource;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -27,7 +27,7 @@ public class PropertyUtils {
      * @param resources the resources to load
      * @return the generated Properties object
      */
-    public static Properties readYamlFiles(AbstractResource... resources) {
+    public static Properties readYamlFiles(Resource... resources) {
         YamlPropertiesFactoryBean properties = new YamlPropertiesFactoryBean();
         properties.setSingleton(false);
         properties.setResources(resources);
@@ -40,14 +40,14 @@ public class PropertyUtils {
      * @param resources the resources to load
      * @return the generated Properties object
      */
-    public static Properties readPropertyFiles(AbstractResource... resources) throws IOException {
+    public static Properties readPropertyFiles(Resource... resources) throws IOException {
         PropertiesFactoryBean properties = new PropertiesFactoryBean();
         properties.setSingleton(false);
         properties.setLocations(resources);
         return properties.getObject();
     }
 
-    public static Properties readJsonFile(AbstractResource jsonFile) throws JsonParseException, IOException {
+    public static Properties readJsonFile(Resource jsonFile) throws JsonParseException, IOException {
         try (InputStream is = jsonFile.getInputStream()) {
             return readJsonFromStream(is);
         }

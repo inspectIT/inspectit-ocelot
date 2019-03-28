@@ -53,34 +53,6 @@ dependencies {
 
 }
 
-
-task generateConfigFilesList {
-
-    def resDir = "src/main/resources/rocks/inspectit/ocelot/core/config"
-    def destinationFile = file("$buildDir/resourceGen/rocks/inspectit/ocelot/core/config/yamls.txt")
-
-    outputs.file destinationFile
-    inputs.dir file(resDir)
-
-    doLast {
-
-        def resDirAbsolute = file(resDir).path
-
-        destinationFile.getParentFile().mkdirs()
-        destinationFile.createNewFile()
-
-        fileTree(dir: resDir, include: '**/*.yml').forEach({ file ->
-            def path = file.path.substring(resDirAbsolute.length() + 1)
-            path = path.replace('\\', '/')
-            destinationFile.append(path +"\n")
-        })
-    }
-
-
-}
-
-sourceSets.main.output.dir "$buildDir/resourceGen", builtBy: generateConfigFilesList
-
 jar {
     archiveName = "${project.name}.jar"
 

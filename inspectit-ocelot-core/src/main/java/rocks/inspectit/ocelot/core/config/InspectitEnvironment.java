@@ -9,7 +9,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.expression.StandardBeanExpressionResolver;
 import org.springframework.core.env.*;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import rocks.inspectit.ocelot.core.config.filebased.DirectoryPropertySource;
 import rocks.inspectit.ocelot.core.config.model.InspectitConfig;
@@ -20,11 +21,7 @@ import rocks.inspectit.ocelot.core.config.util.PropertyUtils;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -243,14 +240,14 @@ public class InspectitEnvironment extends StandardEnvironment {
 
     private static PropertiesPropertySource loadAgentResourceYaml(String resourcePath, String propertySourceName) {
         Properties result = new Properties();
-        try (InputStream resource = InspectitEnvironment.class.getResourceAsStream("yamls.txt")) {
-            new BufferedReader(new InputStreamReader(resource, StandardCharsets.UTF_8)).lines()
-                    .filter(path -> path.startsWith(resourcePath + "/"))
-                    .forEach(path -> {
-                        ClassPathResource yamlResource = new ClassPathResource(path, InspectitEnvironment.class);
-                        Properties properties = PropertyUtils.readYamlFiles(yamlResource);
-                        result.putAll(properties);
-                    });
+
+        try {
+            Resource[] resources = new PathMatchingResourcePatternResolver(InspectitEnvironment.class.getClassLoader())
+                    .getResources("classpath:rocks/inspectit/ocelot/core/config/" + resourcePath + "/**/*.yml");
+            for (val res : resources) {
+                Properties properties = PropertyUtils.readYamlFiles(res);
+                result.putAll(properties);
+            }
         } catch (IOException e) {
             log.error("ERROR reading config", e);
         }

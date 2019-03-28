@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.instrumentation.http;
 
+import com.github.tomakehurst.wiremock.WireMockServer;
 import io.opencensus.stats.AggregationData;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
@@ -16,6 +17,8 @@ import rocks.inspectit.ocelot.utils.TestUtils;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -23,13 +26,42 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class HttpOutMetricTest {
 
-    public static final String GOOGLE_HOST = "www.google.com";
 
-    public static final String GOOGLE_SEARCH_URL = "https://www.google.com/search?q=hello";
-    public static final String GOOGLE_SEARCH_PATH = "/search";
+    public static final int PORT = 9999;
+    public static final String PATH_200 = "/test";
+    public static final String PATH_404 = "/error";
+    public static final String HOST = "localhost:" + PORT; //configured in agent-overwrites.yml
+    public static final String URL_START = "http://" + HOST; //configured in agent-overwrites.yml
 
-    public static final String GOOGLE_404_URL = "https://www.google.com/blub";
-    public static final String GOOGLE_404_PATH = "/blub";
+    private WireMockServer wireMockServer;
+
+    public static String targetName;
+
+    @BeforeEach
+    void setupWiremock() throws Exception {
+        wireMockServer = new WireMockServer(options().port(PORT));
+        wireMockServer.addMockServiceRequestListener((req, resp) -> {
+            IInspectitContext ctx = Instances.contextManager.enterNewContext();
+            ctx.setData("prop_target_service", targetName);
+            ctx.makeActive();
+            ctx.close();
+        });
+        wireMockServer.start();
+        configureFor(wireMockServer.port());
+
+        stubFor(get(urlPathEqualTo(PATH_404))
+                .willReturn(aResponse()
+                        .withStatus(404)));
+        stubFor(get(urlPathEqualTo(PATH_200))
+                .willReturn(aResponse()
+                        .withStatus(200)));
+
+    }
+
+    @AfterEach
+    void cleanup() {
+        wireMockServer.stop();
+    }
 
     @Nested
     class ApacheClient {
@@ -52,19 +84,19 @@ public class HttpOutMetricTest {
         }
 
         @Test
-        void testGoogleSearch() throws Exception {
+        void testSuccessStatus() throws Exception {
             IInspectitContext ctx = Instances.contextManager.enterNewContext();
             ctx.setData("service", "apache_client_test");
             ctx.makeActive();
-            client.execute(new HttpGet(GOOGLE_SEARCH_URL));
+            client.execute(new HttpGet(URL_START + PATH_200 + "?x=32423"));
             ctx.close();
 
             TestUtils.waitForOpenCensusQueueToBeProcessed();
 
             Map<String, String> tags = new HashMap<>();
             tags.put("service", "apache_client_test");
-            tags.put("http_host", GOOGLE_HOST);
-            tags.put("http_path", GOOGLE_SEARCH_PATH);
+            tags.put("http_host", HOST);
+            tags.put("http_path", PATH_200);
             tags.put("http_status", "200");
 
             long cnt = ((AggregationData.CountData) TestUtils.getDataForView("http/out/count", tags)).getCount();
@@ -75,19 +107,19 @@ public class HttpOutMetricTest {
         }
 
         @Test
-        void testGoogle404() throws Exception {
+        void testErrorStatus() throws Exception {
             IInspectitContext ctx = Instances.contextManager.enterNewContext();
             ctx.setData("service", "apache_client_test");
             ctx.makeActive();
-            client.execute(new HttpGet(GOOGLE_404_URL));
+            client.execute(new HttpGet(URL_START + PATH_404 + "?x=32423"));
             ctx.close();
 
             TestUtils.waitForOpenCensusQueueToBeProcessed();
 
             Map<String, String> tags = new HashMap<>();
             tags.put("service", "apache_client_test");
-            tags.put("http_host", GOOGLE_HOST);
-            tags.put("http_path", GOOGLE_404_PATH);
+            tags.put("http_host", HOST);
+            tags.put("http_path", PATH_404);
             tags.put("http_status", "404");
 
             long cnt = ((AggregationData.CountData) TestUtils.getDataForView("http/out/count", tags)).getCount();
