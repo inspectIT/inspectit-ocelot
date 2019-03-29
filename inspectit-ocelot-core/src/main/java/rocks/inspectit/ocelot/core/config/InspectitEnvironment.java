@@ -9,7 +9,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.expression.StandardBeanExpressionResolver;
 import org.springframework.core.env.*;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import rocks.inspectit.ocelot.core.config.filebased.DirectoryPropertySource;
 import rocks.inspectit.ocelot.core.config.model.InspectitConfig;
@@ -20,6 +21,7 @@ import rocks.inspectit.ocelot.core.config.util.PropertyUtils;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -44,10 +46,10 @@ public class InspectitEnvironment extends StandardEnvironment {
     private static final String INSPECTIT_ROOT_PREFIX = "inspectit";
     private static final String INSPECTIT_CONFIG_SETTINGS_PREFIX = "inspectit.config";
 
-    private static final String DEFAULT_CONFIG_PATH = "/config/default.yml";
+    private static final String DEFAULT_CONFIG_PATH = "default";
     private static final String DEFAULT_CONFIG_PROPERTYSOURCE_NAME = "inspectitDefaults";
 
-    private static final String FALLBACK_CONFIG_PATH = "/config/fallback.yml";
+    private static final String FALLBACK_CONFIG_PATH = "fallback";
     private static final String FALLBACK_CONFIG_PROPERTYSOURCE_NAME = "inspectitFallbackOverwrites";
 
     private static final String CMD_ARGS_PROPERTYSOURCE_NAME = "javaagentArguments";
@@ -237,9 +239,19 @@ public class InspectitEnvironment extends StandardEnvironment {
     }
 
     private static PropertiesPropertySource loadAgentResourceYaml(String resourcePath, String propertySourceName) {
-        ClassPathResource defaultYamlResource = new ClassPathResource(resourcePath, InspectitEnvironment.class.getClassLoader());
-        Properties defaultProps = PropertyUtils.readYamlFiles(defaultYamlResource);
-        return new PropertiesPropertySource(propertySourceName, defaultProps);
+        Properties result = new Properties();
+
+        try {
+            Resource[] resources = new PathMatchingResourcePatternResolver(InspectitEnvironment.class.getClassLoader())
+                    .getResources("classpath:rocks/inspectit/ocelot/core/config/" + resourcePath + "/**/*.yml");
+            for (val res : resources) {
+                Properties properties = PropertyUtils.readYamlFiles(res);
+                result.putAll(properties);
+            }
+        } catch (IOException e) {
+            log.error("ERROR reading config", e);
+        }
+        return new PropertiesPropertySource(propertySourceName, result);
     }
 
     /**

@@ -1,0 +1,41 @@
+inspectit:
+
+  instrumentation:  
+
+    data:
+      servicegraph_jdbc_entry_found: {down-propagation: JVM_LOCAL, is-tag: false}
+
+    rules:
+      servicegraph_record_jdbc_calls:
+        scopes:
+          jdbc_statement_execute: true
+        entry:
+          servicegraph_is_entry:
+            provider: set
+            constant-input: { value: 1}
+            only-if-null: servicegraph_jdbc_entry_found
+            before: { servicegraph_jdbc_entry_found: true }
+          servicegraph_jdbc_entry_found:
+            provider : set
+            constant-input: {value: true}
+          
+          servicegraph_call_entry: { provider: timestamp_nanos }
+          
+          target_external:
+            provider: get_jdbc_statement_connection_name
+            only-if-not-null: servicegraph_is_entry
+          origin_service: 
+            provider: set
+            data-input: {value: service}
+          protocol:
+            provider: set
+            constant-input: { value: "jdbc"}
+            
+        exit:
+          servicegraph_call_duration:
+            provider: elapsed_millis
+            data-input: {sinceNanos: servicegraph_call_entry }
+            only-if-not-null: servicegraph_is_entry
+          
+        metrics:
+          '[service/out/responsetime]': servicegraph_call_duration

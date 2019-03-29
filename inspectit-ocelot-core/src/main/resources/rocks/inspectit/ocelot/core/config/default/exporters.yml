@@ -1,0 +1,13 @@
+inspectit:
+  # settings for configuring OpenCensus stats and trace exporters
+  exporters:
+    # settings for metrics exporters
+    metrics:
+      # settings for the prometheus exporter (https://github.com/census-instrumentation/opencensus-java/tree/master/exporters/stats/prometheus)
+      prometheus:
+        # if true, the agent will try to start the Prometheus stats exporter
+        enabled: true
+        # the hostname or IP-address on which the /metrics endpoint of prometheus will be started.
+        host: 0.0.0.0
+        # the port on which the /metrics endpoint of prometheus will be started
+        port: 8888

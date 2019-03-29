@@ -1,5 +1,6 @@
 # overwrite settings from default.yml for system tests
 inspectit:
+  service-name: systemtest
   self-monitoring:
     enabled: true
   logging:

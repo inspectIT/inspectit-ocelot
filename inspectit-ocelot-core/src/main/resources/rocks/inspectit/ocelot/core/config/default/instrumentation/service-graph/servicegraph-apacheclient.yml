@@ -1,0 +1,62 @@
+inspectit:
+
+  instrumentation:  
+
+    data:
+      servicegraph_apache_client_entry_found: {down-propagation: JVM_LOCAL, is-tag: false}
+
+    rules:
+    
+      servicegraph_record_apache_client:
+      
+        scopes:
+          apache_http_client_execute: true
+          
+        entry:
+          servicegraph_is_entry:
+            provider: set
+            constant-input: { value: 1}
+            only-if-null: servicegraph_apache_cient_entry_found
+            before: { servicegraph_apache_client_entry_found: true }
+          servicegraph_apache_client_entry_found:
+            provider : set
+            constant-input: {value: true}
+          
+          servicegraph_call_entry: { provider: timestamp_nanos }
+          
+          prop_target_service: {provider: setNull}
+          prop_origin_service: 
+            provider: set
+            data-input: {value: service}
+          
+        exit:
+          origin_service: 
+            provider: set
+            data-input: {value: service}
+          target_service: 
+            provider: set
+            data-input: {value: prop_target_service}
+            before: {prop_target_service: true}
+          
+          #store the target host in case this is an external call (=the target_service is unknown)
+          target_external:
+            provider: get_apache_execute_request_host
+            only-if-not-null: servicegraph_is_entry
+            only-if-null: target_service
+          protocol:
+            provider: set
+            constant-input: { value: "http"}
+            
+          servicegraph_call_duration:
+            provider: elapsed_millis
+            data-input: {sinceNanos: servicegraph_call_entry }
+            only-if-not-null: servicegraph_is_entry
+          
+          #restore the target to our service in case an up-propagation for this server will happen
+          prop_target_service:
+            provider: set
+            data-input: {value: service}
+            only-if-not-null: servicegraph_is_entry
+          
+        metrics:
+          '[service/out/responsetime]': servicegraph_call_duration
