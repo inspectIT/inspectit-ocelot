@@ -117,12 +117,12 @@ Firstly, when an instrumented method is entered, a new inspectIT context is crea
 
 The integration is even deeper if you <<Using OpenCensus Library with inspectIT Ocelot,configured the agent to also extract the metrics from manual instrumentation in your application>>.
 Firstly, if a method instrumented by inspectIT Ocelot is executed within a TagContext opened by your application,
-these application tags will also be visible in the inspectIT context. Secondly, after the execution of the entry section of each rule, a new TagContext is opened making the tags written there accessible to metrics collected by your application. Hereby, only data for which down propagation was configured to be `JVM_LOCAL` or greater and for which `is-tag` is true will be visible as tags.
+these application tags will also be visible in the inspectIT context. Secondly, after the execution of the entry phase of each rule, a new TagContext is opened making the tags written there accessible to metrics collected by your application. Hereby, only data for which down propagation was configured to be `JVM_LOCAL` or greater and for which `is-tag` is true will be visible as tags.
 
 ==== Data Providers
 
 Data providers are the tool for extracting arbitrary data from your application or the context.
-They are effectively Lambda-like functions you can invoke from the entry and the exit section of rules. They are defined by (a) specifying their input parameters and (b) giving a Java code snippet which defines how the result value is computed from these.
+They are effectively Lambda-like functions you can invoke from the entry and the exit phase of rules. They are defined by (a) specifying their input parameters and (b) giving a Java code snippet which defines how the result value is computed from these.
 
 Again, this is best explained by giving some simple examples extracted from inspectIT Ocelot default configuration:
 
@@ -164,6 +164,8 @@ The code executed when a data provider is invoked is defined through the `value`
 Note that the code will not be interpreted at runtime, but instead inspectIT Ocelot will compile the expression to bytecode to ensure maximum efficiency. As indicated by the manual primitive boxing performed for `timestamp_nanos` the compiler has some restrictions. For example Autoboxing is not supported. However, data providers are expected to return Objects, therefore manual boxing has to be performed. Under the hood, inspectIT uses the http://www.javassist.org/[javassist] library, where all imposed restrictions can be found.
 The most important ones are that neither Autoboxing, Generics, Anonymous Classes or Lambda Expressions are supported.
 
+After data providers have been compiled, they are placed in the same class loader as the class you instrument with them. This means that they can access any class that your application class could also access.
+
 NOTE: Even if your data provider terminates with an exception or error, inspectIT will make sure that this does not affect your application. InspectIT will print information about the error and the faulting data provider. The execution of the data provider in the rule where the failure occured will be disabled until you update your configuration.
 
 ===== Input Parameters
@@ -189,6 +191,10 @@ The fourth example shown above is `get_method_fqn`, which uses the _special_ inp
 | https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html[Class]
 | The class declaring the instrumented method within which this data provider is getting executed.
 
+|`_parameterTypes`
+| https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html[Class][]
+| The types of the parameters which the instrumented method declares for which the data provider is executed.
+
 |`_this`
 | (depends on context)
 | The this-instance in the context of the instrumented method within which this data provider is getting executed.
@@ -205,12 +211,12 @@ The fourth example shown above is `get_method_fqn`, which uses the _special_ inp
 |`_returnValue`
 | (depends on context)
 | The value returned by the instrumented method within which this data provider is getting executed.
-If the method terminated with an exception or the data provider is executed in the entry section this is `null`.
+If the method terminated with an exception or the data provider is executed in the entry phase this is `null`.
 
 |`_thrown`
 | https://docs.oracle.com/javase/8/docs/api/java/lang/Throwable.html[Throwable]
 | The exception thrown by the instrumented method within which this data provider is getting executed.
-If the method returned normally or the data provider is executed in the entry section this is `null`.
+If the method returned normally or the data provider is executed in the entry phase this is `null`.
 
 |===
 
@@ -241,12 +247,219 @@ inspectit:
 This data provider is designed to be applied on the Servlet API https://javaee.github.io/javaee-spec/javadocs/javax/servlet/Filter.html#doFilter-javax.servlet.ServletRequest-javax.servlet.ServletResponse-javax.servlet.FilterChain-[doFilter] and
 https://javaee.github.io/javaee-spec/javadocs/javax/servlet/Servlet.html#service-javax.servlet.ServletRequest-javax.servlet.ServletResponse-[service] methods.
  It's purpose is to extract HTTP path, however in the servlet API it is not guaranteed that the `ServletRequest` is a `HttpServletRequest`.
- For this reason the data provider performs an instanceof check only returning the the HTTP path if it is available, otherwise `null`.
+ For this reason the data provider performs an instance-of check only returning the the HTTP path if it is available, otherwise `null`.
 
 Normally, all non `java.lang.*` types have to be referred to using their fully
-qualified name, as done for `java.net.URI` in the example above. However, as in
-java you can import packages using the `import` config option. In this example this
+qualified name, as done for `java.net.URI` in the example above. However, just like in
+Java you can import packages using the `import` config option. In this example this
 allows us to refer to `ServletRequest` and `HttpServletRequest` without using the fully qualified name.
 
-
 ==== Defining Rules
+
+Rules glue together <<Scopes,scopes>> and <<Data Providers, data providers>> to define which actions you want to perform on which application methods.
+
+As you might have noticed, the initial example rule shown in the <<Rules, Rules section>> did not define any reference to a scope. This is because this rule originates form the default configuration of inspectIT Ocelot,
+where we don't know yet of which methods you want to collect the response time. Therefore this rule is defined without scopes, but you can easily add some in your own configuration files:
+
+[source,yaml]
+----
+inspectit:
+  instrumentation:
+    rules:
+
+      record_method_duration:
+        scopes:
+          my_first_scope: true
+          my_second_scope: true
+----
+
+With this snippet we defined that the existing rule `record_method_duration` gets applied on the two scopes named `my_first_scope` and `my_second_scope`. The `scopes` configuration option maps scope names to `true` or `false`. The rule will be applied on all methods matching any scope where the value is `true`.
+
+Rules define their action within three _phases_:
+
+* *Entry Phase:* The actions defined in this phase get invoked directly before the body of the instrumented method. You can imagine that these actions are "inlined" at the very top of every method instrumented by the given rule.
+
+* *Exit Phase:* The actions defined in this phase get invoked after the body of the instrumented method has terminated. This can be the method either returning normally or throwing an exception. You can imagine that these actions are placed in a `finally` block of a `try` block surrounding the body of the instrumented method.
+
+* *Metrics Phase:* These actions are executed directly after the _exit phase_.
+Here, only values for metrics are recorded. No data providers will be executed here.
+
+The actions performed in this phases are defined in rules under the `entry`, `exit` and `metrics` configuration options. In the entry and in the exit phase the actions you perform are invocations of <<Data Providers, data providers>>. Please see the <<Invoking Data Providers>> section for information on how this is done.
+
+In the _metrics phase_ you only can collect metrics, this is explained in the <<Collecting Metrics>> section.
+
+===== Invoking Data Providers
+
+In this section you will find out how to collect data in the entry and exit phase of rules by invoking <<Data Providers, data providers>> and storing the results in the <<Data Propagation, inspectIT context>>.
+
+Let's take a look again at the entry phase definitions of the ``record_method_duration`` rule:
+
+[source,yaml]
+----
+#inspectit.instrumentation.rules is omitted here
+record_method_duration:
+  entry:
+    method_entry_time:
+      provider: timestamp_nanos
+    method_name:
+      provider: get_method_fqn
+----
+
+The `entry` and `exit` configuration options are YAML dictionaries mapping data keys to _data provider invocations_.
+This means the keys used in the dictionaries define the data key for which a value is being defined. Correspondingly, the assigned value defines which data provider is invoked to define the value of the data key.
+
+In the example above `method_entry_time` is a data key. The data provider which is invoked is defined through the `provider` configuration option. In this case, it is the data provider named `timestamp_nanos`.
+
+====== Assigning Input Parameter Values
+
+Data providers <<Input Parameters, can require input parameters>> which need to be assigned when invoking them.
+There are currently two possible ways of doing this:
+
+* *Assigning Data Values:* In this case, the value for a given data key is extracted from the <<Data Propagation, inspectIT context>> and passed to the data provider
+* *Assigning Constant Values:* In this case a literal specified in the configuration will directly be passed to the data provider.
+
+We have already seen how the assignment of data values to parameters is done in the exit phase of the `record_method_duration` rule:
+
+[source,yaml]
+----
+#inspectit.instrumentation.rules is omitted here
+record_method_duration:
+  exit:
+    method_duration:
+      provider: elapsed_millis
+      data-input:
+        sinceNanos: method_entry_time
+----
+
+The `elapsed_millis` data provider requires a value for the input parameter `sinceNanos`.
+In this example we defined that the value for the data key `method_entry_time` is used for `sinceNanos`.
+
+The assignment of constant values works very similar:
+
+[source,yaml]
+----
+#inspectit.instrumentation.rules is omitted here
+example_rule:
+  entry:
+    hello_world_text:
+      provider: set
+      constant-input:
+        value: "Hello World!"
+----
+
+Note that when assigning a constant value, inspectIT Ocelot automatically converts the given value to the type expected by the data provider. This is done using the https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/core/convert/ConversionService.html[Spring Conversion Service]. For example, if your data provider expects a parameter of type `java.time.Duration`, you can simply pass in `"42s"` as constant.
+
+As you might have noticed, `data-input` and `constant-input` are again YAML dictionaries.
+This allows you to assign values for data providers which expect multiple input parameters.
+You can also mix which parameters you assign from data and which from constants:
+
+
+[source,yaml]
+----
+#inspectit.instrumentation.rules is omitted here
+example_rule:
+  entry:
+    bye_world_text:
+      provider: string_replace_all
+      data-input:
+        string: hello_world_text
+      constant-input:
+        regex: "Hello"
+        replacement: "Bye"
+----
+
+As expected given the <<Data Providers, definition>> of the `string_replace_all` data provider, the value of `bye_world_text` will be `"Bye World!"`
+
+====== Adding Conditions
+
+It is possible to add conditions to data provider invocations. The invocation will only occur if the specified condition is met. Currently, the following configuration options can be used:
+
+[cols="1,3",options="header"]
+.Configuration Options for Conditions for Data Provider Invocations
+|===
+|Config Option| Description
+
+|`only-if-null`
+| Only executes the invocation if the value assigned with the given data key is null.
+
+|`only-if-not-null`
+| Only executes the invocation if the value assigned with the given data key is not null.
+
+|`only-if-true`
+| Only executes the invocation if the value assigned with the given data key is the boolean value `true`.
+
+|`only-if-false`
+| Only executes the invocation if the value assigned with the given data key is the boolean value `false`.
+
+|===
+
+An example for the usage of a condition is given below:
+[source,yaml]
+----
+#inspectit.instrumentation.rules is omitted here
+example_rule:
+  entry:
+    application_name:
+      provider: set
+      constant-input:
+        value: "My-Application"
+    only-if-null: application_name
+----
+
+In this example we define an invocation to set the value of the data key `application_name`
+to `"My-Application"`. However, this assignment is only performed if `application_name` previously was null, meaning that no value has been assigned yet. This mechanism is in particular useful when `application_name` is <<Data Propagation, down propagated>>.
+
+If multiple conditions are given for the same data provider invocation, the invocation is only executed if *all* conditions are met.
+
+====== Execution Order
+
+As we can use data values for input parameters and for conditions, data provider invocations can depend on another. This means that a defined order on data-provider executions within each phase is required for rules to work as expected.
+
+As all invocations are specified under the `entry` or the `exit` config options which are YAML dictionaries, the order they are given in the config file does not matter. YAML dictionaries do not maintain or define an order of their entries.
+
+However, inspectIT Ocelot _automatically_ orders the invocations for you correctly.
+For each instrumented method the agent first finds all rules which have scopes matching the given method. Afterwards, these rules get combined into one "super"-rule by simply merging the `entry`, `exit` and `metrics` phases.
+
+Within the `entry` and the `exit` phase, data providers are now automatically ordered based on their dependencies. E.g. if the invocation writing `data_b` uses `data_a` as input, the invocation writing `data_a` is guaranteed to be executed first! Whenever you use a data value as value for a parameter or in a condition, this will be counted as a dependency.
+
+In some rare cases you might want to change this behaviour. E.g. in tracing context you want to store the <<Data Propagation, down propagated>> `span_id` in `parent_span`, before the current method assigns a new `span_id`. This can easily be realized using the `before` config option for data provider invocations:
+
+[source,yaml]
+----
+#inspectit.instrumentation.rules is omitted here
+example_rule:
+  entry:
+    parent_span:
+      provider: set
+      data-input:
+        value: span_id
+    before:
+      span_id: true
+----
+
+===== Collecting Metrics
+
+Metrics collection is done in the metrics phase of a rule, which can be configured using the `metrics` option:
+
+[source,yaml]
+----
+#inspectit.instrumentation.rules is omitted here
+example_rule:
+  #...
+  exit:
+    method_duration:
+      #data provider invocation here....
+
+  metrics:
+    '[method/duration]' : method_duration
+    '[some/other/metric]' : 42
+----
+
+The metrics phase is executed after the exit phase of the rule. As shown above, you can simply assign values to metrics based on their name. You must however have <<Defining Custom Metrics, defined the metric>> to use them.
+
+The measurement value written to the metric can be specified by giving a data key. This was done in the example above for `method/duration`: Here, the value for the data key `method_duration` is taken, which we previously wrote in the exit phase.
+Alternatively you can just specify a constant which will be used, like it was done for `some/other/metric`.
+
+If the value assigned with the data key you specified is `null` (e.g. no data was collected), no value for the metric will be written out.
+
+In addition, all configured tags for the metrics will also be taken from the inspectIT context, if they have been <<Defining the Behaviour, configured to be used as tags>>.
