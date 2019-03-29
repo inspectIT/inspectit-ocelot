@@ -25,6 +25,16 @@ jobs:
       - attach_workspace:
           at: ~/inspectit
       - run: cd repo && ./gradlew assemble test systemTest
+      - store_test_results:
+          path: ~/inspectit/repo/inspectit-ocelot-agent/build/test-results
+      - run:
+          command: |
+            zip -q -r /tmp/artifacts/reports.zip ~/inspectit/repo/inspectit-ocelot-agent/build/reports/tests ~/inspectit/repo/inspectit-ocelot-core/build/reports/tests
+          when: on_fail
+      - store_artifacts:
+          path: /tmp/artifacts/
+          destination: test-reports
+          when: on_fail
 
   openjdk9-test:
     <<: *base_test_job
@@ -53,6 +63,13 @@ jobs:
       - run: sudo apt-get --allow-unauthenticated install -y oracle-java8-installer
       - run: java -version
       - run: cd repo && ./gradlew assemble test systemTest
+      - run:
+          command: |
+            zip -q -r /tmp/artifacts/reports.zip ~/inspectit/repo/inspectit-ocelot-agent/build/reports/tests ~/inspectit/repo/inspectit-ocelot-core/build/reports/tests
+          when: on_fail
+      - store_artifacts:
+          path: /tmp/artifacts/
+          destination: test-reports
 
   oracle11-test:
     <<: *base_test_job
@@ -66,7 +83,24 @@ jobs:
       - run: sudo apt-get --allow-unauthenticated install -y oracle-java11-installer
       - run: java -version
       - run: cd repo && ./gradlew assemble test systemTest
+      - run:
+          command: |
+            mkdir /tmp/artifacts
+            zip -q -r /tmp/artifacts/reports.zip ~/inspectit/repo/inspectit-ocelot-agent/build/reports/tests ~/inspectit/repo/inspectit-ocelot-core/build/reports/tests
+          when: on_fail
+      - store_artifacts:
+          path: /tmp/artifacts/
+          destination: test-reports
+          when: on_fail
 
+  compile-jmh:
+    docker:
+      - image: circleci/openjdk:8-jdk
+    working_directory: ~/inspectit
+    steps:
+      - attach_workspace:
+          at: ~/inspectit
+      - run: cd repo && ./gradlew jmhCompile
 
 workflows:
   version: 2
@@ -86,3 +120,11 @@ workflows:
           <<: *requires_checkout
       - ibmjava8-test:
           <<: *requires_checkout
+      - compile-jmh:
+          requires:
+            - oracle8-test
+            - oracle11-test
+            - openjdk8-test
+            - openjdk9-test
+            - openjdk11-test
+            - ibmjava8-test
