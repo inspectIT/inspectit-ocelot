@@ -4,6 +4,30 @@
 #
 version: 2.1
 
+# ###############################################################
+# Orbs
+orbs:
+  aws-s3: circleci/aws-s3@1.0.0
+
+# ###############################################################
+# Commands
+commands:
+  attach_repo:
+    steps:
+      - attach_workspace:
+          at: ~/inspectit
+  build_and_test_agent:
+    steps:
+      - run: cd repo && ./gradlew assemble
+      - run: cd repo && ./gradlew test
+      - run: cd repo && ./gradlew systemTest
+      - store_test_results:
+          path: ~/inspectit/repo/inspectit-ocelot-agent/build/test-results
+      - store_test_results:
+          path: ~/inspectit/repo/inspectit-ocelot-core/build/test-results
+
+# ###############################################################
+# Jobs
 jobs:
   # Job for checking out the source code to build and test
   checkout:
@@ -24,15 +48,8 @@ jobs:
       - image: circleci/openjdk:8-jdk
     working_directory: ~/inspectit
     steps:
-      - attach_workspace:
-          at: ~/inspectit
-      - run: cd repo && ./gradlew assemble
-      - run: cd repo && ./gradlew test
-      - run: cd repo && ./gradlew systemTest
-      - store_test_results:
-          path: ~/inspectit/repo/inspectit-ocelot-agent/build/test-results
-      - store_test_results:
-          path: ~/inspectit/repo/inspectit-ocelot-core/build/test-results
+      - attach_repo
+      - build_and_test_agent
 
   # Testing on OpenJDK 9
   sys-openjdk9:
@@ -56,21 +73,14 @@ jobs:
   sys-oracle8-codecov:
     <<: *base_test_job
     steps:
-      - attach_workspace:
-          at: ~/inspectit
+      - attach_repo
       - run: sudo apt-get install -y software-properties-common
       - run: sudo add-apt-repository -y ppa:webupd8team/java
       - run: sudo apt-get --allow-unauthenticated update
       - run: echo "oracle-java8-installer shared/accepted-oracle-license-v1-1 select true" | sudo debconf-set-selections
       - run: sudo apt-get --allow-unauthenticated install -y oracle-java8-installer
       - run: java -version
-      - run: cd repo && ./gradlew assemble
-      - run: cd repo && ./gradlew test
-      - run: cd repo && ./gradlew systemTest
-      - store_test_results:
-          path: ~/inspectit/repo/inspectit-ocelot-agent/build/test-results
-      - store_test_results:
-          path: ~/inspectit/repo/inspectit-ocelot-core/build/test-results
+      - build_and_test_agent
       - run: cd repo && ./gradlew codeCoverageReport
       - run: cd repo && bash <(curl -s https://codecov.io/bash)
 
@@ -78,21 +88,14 @@ jobs:
   sys-oracle11:
     <<: *base_test_job
     steps:
-      - attach_workspace:
-          at: ~/inspectit
+      - attach_repo
       - run: sudo apt-get install -y software-properties-common
       - run: sudo add-apt-repository -y ppa:linuxuprising/java
       - run: sudo apt-get --allow-unauthenticated update
       - run: echo oracle-java11-installer shared/accepted-oracle-license-v1-2 select true | sudo /usr/bin/debconf-set-selections
       - run: sudo apt-get --allow-unauthenticated install -y oracle-java11-installer
       - run: java -version
-      - run: cd repo && ./gradlew assemble
-      - run: cd repo && ./gradlew test
-      - run: cd repo && ./gradlew systemTest
-      - store_test_results:
-          path: ~/inspectit/repo/inspectit-ocelot-agent/build/test-results
-      - store_test_results:
-          path: ~/inspectit/repo/inspectit-ocelot-core/build/test-results
+      - build_and_test_agent
 
   # Testing the compilation of JMH tests
   compile-jmh:
@@ -104,7 +107,21 @@ jobs:
           at: ~/inspectit
       - run: cd repo && ./gradlew jmhCompile
 
-  deploy-documentation
+  deploy-documentation:
+    docker:
+      - image: circleci/openjdk:8-jdk
+    working_directory: ~/inspectit
+    steps:
+      - attach_workspace:
+          at: ~/inspectit
+      - run: cd repo && ./gradlew -PbuildVersion=$RELEASE_VERSION packageDocumentation
+      - aws-s3/sync:
+          from: bucket
+          to: 's3://my-s3-bucket-name/prefix'
+          arguments: |
+            --acl public-read \
+            --cache-control "max-age=86400"
+          overwrite: true
 
 # ###############################################
 # The defined workflows
