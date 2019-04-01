@@ -5,11 +5,6 @@
 version: 2.1
 
 # ###############################################################
-# Orbs
-orbs:
-  aws-s3: circleci/aws-s3@1.0.0
-
-# ###############################################################
 # Commands
 commands:
   attach_repo:
@@ -98,7 +93,7 @@ jobs:
       - build_and_test_agent
 
   # Testing the compilation of JMH tests
-  compile-jmh:
+  jmh-compile:
     docker:
       - image: circleci/openjdk:8-jdk
     working_directory: ~/inspectit
@@ -107,41 +102,105 @@ jobs:
           at: ~/inspectit
       - run: cd repo && ./gradlew jmhCompile
 
-  deploy-documentation:
+  # Deploy pre-release documentation
+  deploy-master-documentation:
     docker:
       - image: circleci/openjdk:8-jdk
     working_directory: ~/inspectit
     steps:
       - attach_workspace:
           at: ~/inspectit
-      - run: cd repo && ./gradlew -PbuildVersion=$RELEASE_VERSION packageDocumentation
-      - aws-s3/sync:
-          from: bucket
-          to: 's3://my-s3-bucket-name/prefix'
-          arguments: |
-            --acl public-read \
-            --cache-control "max-age=86400"
-          overwrite: true
+      - run: sudo apt-get install -y awscli
+      - run:
+          command: |
+            RELEASE_VERSION="SNAPSHOT-${CIRCLE_BUILD_NUM}"
+            echo "Release Version: $RELEASE_VERSION"
+            cd repo
+            ./gradlew -PbuildVersion=$RELEASE_VERSION packageDocumentation
+      - run: aws s3 sync ~/inspectit/repo/inspectit-ocelot-documentation/build/asciidoc/html5 s3://docs.inspectit.rocks/master
+
+  # Deploy release documentations
+  deploy-release-documentation:
+    docker:
+      - image: circleci/openjdk:8-jdk
+    working_directory: ~/inspectit
+    steps:
+      - attach_workspace:
+          at: ~/inspectit
+      - run: sudo apt-get install -y awscli
+      - run:
+          command: |
+            RELEASE_VERSION="${CIRCLE_TAG}"
+            echo "Release Version: $RELEASE_VERSION"
+            cd repo
+            ./gradlew -PbuildVersion=$RELEASE_VERSION packageDocumentation
+      - run: cd repo && chmod +x ./resources/generate-documentation-sitemap.sh
+      - run: cd repo && ./resources/generate-documentation-sitemap.sh
+      - run: aws s3 sync ~/inspectit/repo/inspectit-ocelot-documentation/build/asciidoc/html5 s3://docs.inspectit.rocks/releases/latest
+      - run: aws s3 sync ~/inspectit/repo/inspectit-ocelot-documentation/build/asciidoc/html5 s3://docs.inspectit.rocks/releases/$TRAVIS_TAG
+      - run: aws s3 sync ~/inspectit/repo/sitemap s3://docs.inspectit.rocks
 
 # ###############################################
 # The defined workflows
 workflows:
   version: 2
+
+  # Workflow for testing and deploying master documentation
   build_and_test:
     jobs:
       - checkout
+
       - sys-oracle8-codecov: &requires_checkout
           requires:
             - checkout
-#      - sys-oracle11:
-#          <<: *requires_checkout
-#      - sys-openjdk8:
-#          <<: *requires_checkout
-#      - sys-openjdk9:
-#          <<: *requires_checkout
-#      - sys-openjdk11:
-#          <<: *requires_checkout
-#      - sys-ibmjava8:
-#          <<: *requires_checkout
-#      - jmh-compile:
-#          <<: *requires_checkout
+      - sys-oracle11:
+          <<: *requires_checkout
+      - sys-openjdk8:
+          <<: *requires_checkout
+      - sys-openjdk9:
+          <<: *requires_checkout
+      - sys-openjdk11:
+          <<: *requires_checkout
+      - sys-ibmjava8:
+          <<: *requires_checkout
+      - jmh-compile:
+          <<: *requires_checkout
+
+      - deploy-master-documentation:
+          requires:
+            - sys-oracle8-codecov
+            - sys-oracle11
+            - sys-openjdk8
+            - sys-openjdk9
+            - sys-openjdk11
+            - sys-ibmjava8
+            - jmh-compile
+          filters:
+            branches:
+              only: master
+
+  # Workflow for building and deploying releases based on tagged commits
+  release:
+    jobs:
+      - requesting-release-build:
+          type: approval
+          filters: &filter_release
+            branches:
+              ignore: /.*/
+            tags:
+              only: /\d+\.\d+(\..+)?/
+      - checkout:
+          filters:
+            <<: *filter_release
+          requires:
+            - requesting-release-build
+      - sys-openjdk8:
+          filters:
+            <<: *filter_release
+          requires:
+            - checkout
+      - deploy-release-documentation:
+          filters:
+            <<: *filter_release
+          requires:
+            - sys-openjdk8
