@@ -7,6 +7,7 @@ public class MetricsSysTestBase {
 
     @BeforeEach
     void flushMetrics() {
+        TestUtils.waitForAgentInitialization();
         TestUtils.waitForOpenCensusQueueToBeProcessed();
     }
 
