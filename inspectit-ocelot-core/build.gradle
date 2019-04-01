@@ -32,6 +32,8 @@ dependencies {
             // OpenCensus exporters
             "io.opencensus:opencensus-exporter-stats-prometheus:${openCensusVersion}",
             "io.prometheus:simpleclient_httpserver:${prometheusClientVersion}",
+            "io.opencensus:opencensus-exporter-trace-zipkin:${openCensusVersion}",
+            "io.opencensus:opencensus-exporter-trace-jaeger:${openCensusVersion}",
 
             //bytecode manipulation
             "net.bytebuddy:byte-buddy:1.9.2"
@@ -44,7 +46,8 @@ dependencies {
             'org.apache.httpcomponents:httpclient:4.5.6',
             'org.mockito:mockito-core:2.23.4',
             'org.assertj:assertj-core:3.11.1',
-            'org.awaitility:awaitility:3.1.5'
+            'org.awaitility:awaitility:3.1.5',
+            "com.github.tomakehurst:wiremock-jre8:2.21.0",
     )
 
     jmh (

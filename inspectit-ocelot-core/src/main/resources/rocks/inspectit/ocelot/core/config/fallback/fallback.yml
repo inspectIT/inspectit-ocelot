@@ -16,6 +16,8 @@ inspectit:
       class-loader-delegation: false
   metrics:
     enabled: false
+  tracing:
+    enabled: false
 
   self-monitoring:
     enabled: false

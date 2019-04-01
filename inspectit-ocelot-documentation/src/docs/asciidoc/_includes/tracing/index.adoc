@@ -1,0 +1,17 @@
+== Tracing
+
+This section provides all the information on trace collection with inspectIT Ocelot.
+
+[IMPORTANT]
+.Master switch for tracing
+====
+The inspectIT Ocelot configuration has a master switch for tracing, which can be used to completly disable anything that has to do with trace collection and exporting.
+Disabling of trace completly in the agent can be done by setting the `inspectit.tracing.enabled` property to `false`.
+This way any default inspectIT setting or anything else defined for trace collection will be overruled.
+If used, the switch makes sure that the inspectIT Ocelot agent:
+
+. disables al ltrace exporters
+. removes tracing from all <<Rules,instrumentation rules>>
+====
+
+include::tracing-exporters.adoc[]
