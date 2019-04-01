@@ -6,6 +6,7 @@ import io.opencensus.tags.InternalUtils;
 import io.opencensus.tags.TagKey;
 import io.opencensus.tags.TagValue;
 import io.opencensus.tags.Tags;
+import rocks.inspectit.ocelot.bootstrap.AgentManager;
 
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +29,16 @@ public class TestUtils {
         DisruptorEventQueue.getInstance().enqueue(latch::countDown);
         try {
             latch.await(10, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void waitForAgentInitialization() {
+        try {
+            while (!AgentManager.isInitialized()) {
+                Thread.sleep(500);
+            }
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
