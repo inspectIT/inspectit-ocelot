@@ -72,7 +72,8 @@ public class ServiceInMetricTest {
             server.setHandler(servletHandler);
             servletHandler.addServletWithMapping(TestServlet.class, "/*");
             server.start();
-            HttpURLConnection.class.getDeclaredMethods();
+            // ensure HttpURLConnection is instrumented
+            Class.forName(HttpURLConnection.class.getName(), true, getClass().getClassLoader());
             TestUtils.waitForInstrumentationToComplete();
 
             fireRequest("servlet_origin");
