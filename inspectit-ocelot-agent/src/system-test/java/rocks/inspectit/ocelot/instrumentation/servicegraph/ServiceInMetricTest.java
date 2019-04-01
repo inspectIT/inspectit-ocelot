@@ -18,8 +18,10 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 /**
  * uses global-propagation-tests.yml
@@ -33,6 +35,8 @@ public class ServiceInMetricTest {
     public static final String SERVICE_NAME = "systemtest";
 
     private Server server;
+
+    public static Class sink;
 
     void fireRequest(String originService) {
 
@@ -66,30 +70,36 @@ public class ServiceInMetricTest {
 
         @Test
         void testInternalCallRecording() throws Exception {
-
             server = new Server(PORT);
             ServletHandler servletHandler = new ServletHandler();
             server.setHandler(servletHandler);
             servletHandler.addServletWithMapping(TestServlet.class, "/*");
             server.start();
             // ensure HttpURLConnection is instrumented
-            Class.forName(HttpURLConnection.class.getName(), true, getClass().getClassLoader());
+            sink = Class.forName(HttpURLConnection.class.getName(), true, getClass().getClassLoader());
+
             TestUtils.waitForInstrumentationToComplete();
 
             fireRequest("servlet_origin");
             server.stop();
 
+            TestUtils.waitForOpenCensusQueueToBeProcessed();
 
             Map<String, String> tags = new HashMap<>();
             tags.put("protocol", "http");
             tags.put("service", SERVICE_NAME);
             tags.put("origin_service", "servlet_origin");
 
-            long cnt = ((AggregationData.CountData) TestUtils.getDataForView("service/in/count", tags)).getCount();
-            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("service/in/responsetime/sum", tags)).getSum();
+            await().atMost(15, TimeUnit.SECONDS).untilAsserted(() -> {
+                AggregationData.CountData inCount = (AggregationData.CountData) TestUtils.getDataForView("service/in/count", tags);
+                AggregationData.SumDataDouble rtSum = (AggregationData.SumDataDouble) TestUtils.getDataForView("service/in/responsetime/sum", tags);
 
-            assertThat(cnt).isEqualTo(1);
-            assertThat(respSum).isGreaterThan(0);
+                assertThat(inCount).isNotNull();
+                assertThat(rtSum).isNotNull();
+
+                assertThat(inCount.getCount()).isEqualTo(1);
+                assertThat(rtSum.getSum()).isGreaterThan(0);
+            });
         }
 
     }
