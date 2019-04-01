@@ -24,7 +24,9 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/inspectit
-      - run: cd repo && ./gradlew assemble test systemTest
+      - run: cd repo && ./gradlew assemble
+      - run: cd repo && ./gradlew test
+      - run: cd repo && ./gradlew systemTest
       - store_test_results:
           path: ~/inspectit/repo/inspectit-ocelot-agent/build/test-results
       - store_test_results:
@@ -56,7 +58,9 @@ jobs:
       - run: echo "oracle-java8-installer shared/accepted-oracle-license-v1-1 select true" | sudo debconf-set-selections
       - run: sudo apt-get --allow-unauthenticated install -y oracle-java8-installer
       - run: java -version
-      - run: cd repo && ./gradlew assemble test systemTest
+      - run: cd repo && ./gradlew assemble
+      - run: cd repo && ./gradlew test
+      - run: cd repo && ./gradlew systemTest
       - store_test_results:
           path: ~/inspectit/repo/inspectit-ocelot-agent/build/test-results
       - store_test_results:
@@ -73,7 +77,9 @@ jobs:
       - run: echo oracle-java11-installer shared/accepted-oracle-license-v1-2 select true | sudo /usr/bin/debconf-set-selections
       - run: sudo apt-get --allow-unauthenticated install -y oracle-java11-installer
       - run: java -version
-      - run: cd repo && ./gradlew assemble test systemTest
+      - run: cd repo && ./gradlew assemble
+      - run: cd repo && ./gradlew test
+      - run: cd repo && ./gradlew systemTest
       - store_test_results:
           path: ~/inspectit/repo/inspectit-ocelot-agent/build/test-results
       - store_test_results:
