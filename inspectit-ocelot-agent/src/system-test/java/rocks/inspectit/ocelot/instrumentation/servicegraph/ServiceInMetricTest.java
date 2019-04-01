@@ -16,7 +16,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -34,9 +36,9 @@ public class ServiceInMetricTest {
 
     public static final String SERVICE_NAME = "systemtest";
 
-    private Server server;
+    public static Object sink;
 
-    public static Class sink;
+    private Server server;
 
     void fireRequest(String originService) {
 
@@ -75,8 +77,10 @@ public class ServiceInMetricTest {
             server.setHandler(servletHandler);
             servletHandler.addServletWithMapping(TestServlet.class, "/*");
             server.start();
+
             // ensure HttpURLConnection is instrumented
             sink = Class.forName(HttpURLConnection.class.getName(), true, getClass().getClassLoader());
+            TestUtils.waitForClassInstrumentations(Arrays.asList(HttpURLConnection.class, HttpServlet.class), 10, TimeUnit.SECONDS);
 
             TestUtils.waitForInstrumentationToComplete();
 
