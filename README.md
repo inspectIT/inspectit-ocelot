@@ -2,7 +2,7 @@
 
 # inspectIT Ocelot 
 
-[![Build Status](https://travis-ci.com/inspectIT/inspectit-ocelot.svg?branch=master)](https://travis-ci.com/inspectIT/inspectit-ocelot)
+[![Build Status](https://circleci.com/gh/inspectIT/inspectit-ocelot.svg?style=svg)](https://circleci.com/gh/inspectIT/inspectit-ocelot)
 [![Code Coverage](https://codecov.io/gh/inspectit/inspectit-ocelot/branch/master/graph/badge.svg)](https://codecov.io/gh/inspectIT/inspectit-ocelot)
 
 inspectIT Ocelot is a zero-configuration Java agent for dynamically collecting application performance, tracing and behavior data based on the [OpenCensus library](https://opencensus.io/).

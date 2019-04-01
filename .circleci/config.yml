@@ -1,0 +1,206 @@
+# Java Gradle CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-java/ for more details
+#
+version: 2.1
+
+# ###############################################################
+# Commands
+commands:
+  attach_repo:
+    steps:
+      - attach_workspace:
+          at: ~/inspectit
+  build_and_test_agent:
+    steps:
+      - run: cd repo && ./gradlew assemble
+      - run: cd repo && ./gradlew test
+      - run: cd repo && ./gradlew systemTest
+      - store_test_results:
+          path: ~/inspectit/repo/inspectit-ocelot-agent/build/test-results
+      - store_test_results:
+          path: ~/inspectit/repo/inspectit-ocelot-core/build/test-results
+
+# ###############################################################
+# Jobs
+jobs:
+  # Job for checking out the source code to build and test
+  checkout:
+    docker:
+      - image: circleci/openjdk:8-jdk
+    working_directory: ~/inspectit
+    steps:
+      - checkout:
+          path: ~/inspectit/repo
+      - persist_to_workspace:
+          root: ~/inspectit
+          paths:
+            - repo
+
+  # Testing on OpenJDK 8
+  sys-openjdk8: &base_test_job
+    docker:
+      - image: circleci/openjdk:8-jdk
+    working_directory: ~/inspectit
+    steps:
+      - attach_repo
+      - build_and_test_agent
+
+  # Testing on OpenJDK 9
+  sys-openjdk9:
+    <<: *base_test_job
+    docker:
+      - image: circleci/openjdk:9-jdk
+
+  # Testing on OpenJDK 11
+  sys-openjdk11:
+    <<: *base_test_job
+    docker:
+      - image: circleci/openjdk:11-jdk
+
+  # Testing on IBM JDK 8
+  sys-ibmjava8:
+    <<: *base_test_job
+    docker:
+      - image: ibmcom/ibmjava:8-sdk
+
+  # Testing on Oracle JDK 8 - this test will also generate the code coverage report
+  sys-oracle8-codecov:
+    <<: *base_test_job
+    steps:
+      - attach_repo
+      - run: sudo apt-get install -y software-properties-common
+      - run: sudo add-apt-repository -y ppa:webupd8team/java
+      - run: sudo apt-get --allow-unauthenticated update
+      - run: echo "oracle-java8-installer shared/accepted-oracle-license-v1-1 select true" | sudo debconf-set-selections
+      - run: sudo apt-get --allow-unauthenticated install -y oracle-java8-installer
+      - run: java -version
+      - build_and_test_agent
+      - run: cd repo && ./gradlew codeCoverageReport
+      - run: cd repo && bash <(curl -s https://codecov.io/bash)
+
+  # Testing on Oracle JDK 11
+  sys-oracle11:
+    <<: *base_test_job
+    steps:
+      - attach_repo
+      - run: sudo apt-get install -y software-properties-common
+      - run: sudo add-apt-repository -y ppa:linuxuprising/java
+      - run: sudo apt-get --allow-unauthenticated update
+      - run: echo oracle-java11-installer shared/accepted-oracle-license-v1-2 select true | sudo /usr/bin/debconf-set-selections
+      - run: sudo apt-get --allow-unauthenticated install -y oracle-java11-installer
+      - run: java -version
+      - build_and_test_agent
+
+  # Testing the compilation of JMH tests
+  jmh-compile:
+    docker:
+      - image: circleci/openjdk:8-jdk
+    working_directory: ~/inspectit
+    steps:
+      - attach_workspace:
+          at: ~/inspectit
+      - run: cd repo && ./gradlew jmhCompile
+
+  # Deploy pre-release documentation
+  deploy-master-documentation:
+    docker:
+      - image: circleci/openjdk:8-jdk
+    working_directory: ~/inspectit
+    steps:
+      - attach_workspace:
+          at: ~/inspectit
+      - run: sudo apt-get install -y awscli
+      - run:
+          command: |
+            RELEASE_VERSION="SNAPSHOT-${CIRCLE_BUILD_NUM}"
+            echo "Release Version: $RELEASE_VERSION"
+            cd repo
+            ./gradlew -PbuildVersion=$RELEASE_VERSION packageDocumentation
+      - run: aws s3 sync ~/inspectit/repo/inspectit-ocelot-documentation/build/asciidoc/html5 s3://docs.inspectit.rocks/master
+
+  # Deploy release documentations
+  deploy-release-documentation:
+    docker:
+      - image: circleci/openjdk:8-jdk
+    working_directory: ~/inspectit
+    steps:
+      - attach_workspace:
+          at: ~/inspectit
+      - run: sudo apt-get install -y awscli
+      - run:
+          command: |
+            RELEASE_VERSION="${CIRCLE_TAG}"
+            echo "Release Version: $RELEASE_VERSION"
+            cd repo
+            ./gradlew -PbuildVersion=$RELEASE_VERSION packageDocumentation
+      - run: cd repo && chmod +x ./resources/generate-documentation-sitemap.sh
+      - run: cd repo && ./resources/generate-documentation-sitemap.sh
+      - run: aws s3 sync ~/inspectit/repo/inspectit-ocelot-documentation/build/asciidoc/html5 s3://docs.inspectit.rocks/releases/latest
+      - run: aws s3 sync ~/inspectit/repo/inspectit-ocelot-documentation/build/asciidoc/html5 s3://docs.inspectit.rocks/releases/$TRAVIS_TAG
+      - run: aws s3 sync ~/inspectit/repo/sitemap s3://docs.inspectit.rocks
+
+# ###############################################
+# The defined workflows
+workflows:
+  version: 2
+
+  # Workflow for testing and deploying master documentation
+  build_and_test:
+    jobs:
+      - checkout
+
+      - sys-oracle8-codecov: &requires_checkout
+          requires:
+            - checkout
+      - sys-oracle11:
+          <<: *requires_checkout
+      - sys-openjdk8:
+          <<: *requires_checkout
+      - sys-openjdk9:
+          <<: *requires_checkout
+      - sys-openjdk11:
+          <<: *requires_checkout
+      - sys-ibmjava8:
+          <<: *requires_checkout
+      - jmh-compile:
+          <<: *requires_checkout
+
+      - deploy-master-documentation:
+          requires:
+            - sys-oracle8-codecov
+            - sys-oracle11
+            - sys-openjdk8
+            - sys-openjdk9
+            - sys-openjdk11
+            - sys-ibmjava8
+            - jmh-compile
+          filters:
+            branches:
+              only: master
+
+  # Workflow for building and deploying releases based on tagged commits
+  release:
+    jobs:
+      - requesting-release-build:
+          type: approval
+          filters: &filter_release
+            branches:
+              ignore: /.*/
+            tags:
+              only: /\d+\.\d+(\..+)?/
+      - checkout:
+          filters:
+            <<: *filter_release
+          requires:
+            - requesting-release-build
+      - sys-openjdk8:
+          filters:
+            <<: *filter_release
+          requires:
+            - checkout
+      - deploy-release-documentation:
+          filters:
+            <<: *filter_release
+          requires:
+            - sys-openjdk8
