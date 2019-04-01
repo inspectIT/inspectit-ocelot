@@ -27,14 +27,8 @@ jobs:
       - run: cd repo && ./gradlew assemble test systemTest
       - store_test_results:
           path: ~/inspectit/repo/inspectit-ocelot-agent/build/test-results
-      - run:
-          command: |
-            zip -q -r /tmp/artifacts/reports.zip ~/inspectit/repo/inspectit-ocelot-agent/build/reports/tests ~/inspectit/repo/inspectit-ocelot-core/build/reports/tests
-          when: on_fail
-      - store_artifacts:
-          path: /tmp/artifacts/
-          destination: test-reports
-          when: on_fail
+      - store_test_results:
+          path: ~/inspectit/repo/inspectit-ocelot-core/build/test-results
 
   openjdk9-test:
     <<: *base_test_job
@@ -63,13 +57,10 @@ jobs:
       - run: sudo apt-get --allow-unauthenticated install -y oracle-java8-installer
       - run: java -version
       - run: cd repo && ./gradlew assemble test systemTest
-      - run:
-          command: |
-            zip -q -r /tmp/artifacts/reports.zip ~/inspectit/repo/inspectit-ocelot-agent/build/reports/tests ~/inspectit/repo/inspectit-ocelot-core/build/reports/tests
-          when: on_fail
-      - store_artifacts:
-          path: /tmp/artifacts/
-          destination: test-reports
+      - store_test_results:
+          path: ~/inspectit/repo/inspectit-ocelot-agent/build/test-results
+      - store_test_results:
+          path: ~/inspectit/repo/inspectit-ocelot-core/build/test-results
 
   oracle11-test:
     <<: *base_test_job
@@ -83,15 +74,10 @@ jobs:
       - run: sudo apt-get --allow-unauthenticated install -y oracle-java11-installer
       - run: java -version
       - run: cd repo && ./gradlew assemble test systemTest
-      - run:
-          command: |
-            mkdir /tmp/artifacts
-            zip -q -r /tmp/artifacts/reports.zip ~/inspectit/repo/inspectit-ocelot-agent/build/reports/tests ~/inspectit/repo/inspectit-ocelot-core/build/reports/tests
-          when: on_fail
-      - store_artifacts:
-          path: /tmp/artifacts/
-          destination: test-reports
-          when: on_fail
+      - store_test_results:
+          path: ~/inspectit/repo/inspectit-ocelot-agent/build/test-results
+      - store_test_results:
+          path: ~/inspectit/repo/inspectit-ocelot-core/build/test-results
 
   compile-jmh:
     docker:
