@@ -5,6 +5,7 @@
 version: 2.1
 
 jobs:
+  # Job for checking out the source code to build and test
   checkout:
     docker:
       - image: circleci/openjdk:8-jdk
@@ -17,6 +18,7 @@ jobs:
           paths:
             - repo
 
+  # Testing on OpenJDK 8
   sys-openjdk8: &base_test_job
     docker:
       - image: circleci/openjdk:8-jdk
@@ -32,21 +34,25 @@ jobs:
       - store_test_results:
           path: ~/inspectit/repo/inspectit-ocelot-core/build/test-results
 
+  # Testing on OpenJDK 9
   sys-openjdk9:
     <<: *base_test_job
     docker:
       - image: circleci/openjdk:9-jdk
 
+  # Testing on OpenJDK 11
   sys-openjdk11:
     <<: *base_test_job
     docker:
       - image: circleci/openjdk:11-jdk
 
+  # Testing on IBM JDK 8
   sys-ibmjava8:
     <<: *base_test_job
     docker:
       - image: ibmcom/ibmjava:8-sdk
 
+  # Testing on Oracle JDK 8 - this test will also generate the code coverage report
   sys-oracle8-codecov:
     <<: *base_test_job
     steps:
@@ -68,6 +74,7 @@ jobs:
       - run: cd repo && ./gradlew codeCoverageReport
       - run: cd repo && bash <(curl -s https://codecov.io/bash)
 
+  # Testing on Oracle JDK 11
   sys-oracle11:
     <<: *base_test_job
     steps:
@@ -87,6 +94,7 @@ jobs:
       - store_test_results:
           path: ~/inspectit/repo/inspectit-ocelot-core/build/test-results
 
+  # Testing the compilation of JMH tests
   compile-jmh:
     docker:
       - image: circleci/openjdk:8-jdk
@@ -96,6 +104,10 @@ jobs:
           at: ~/inspectit
       - run: cd repo && ./gradlew jmhCompile
 
+  deploy-documentation
+
+# ###############################################
+# The defined workflows
 workflows:
   version: 2
   build_and_test:
