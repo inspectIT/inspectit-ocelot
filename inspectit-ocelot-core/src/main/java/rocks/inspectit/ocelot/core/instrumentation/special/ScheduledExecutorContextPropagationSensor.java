@@ -6,11 +6,9 @@ import net.bytebuddy.asm.AsmVisitorWrapper;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.matcher.ElementMatcher;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.InstrumentationConfiguration;
-import rocks.inspectit.ocelot.core.instrumentation.context.ContextManager;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ScheduledExecutorService;
@@ -29,7 +27,6 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
  * </ul><p>
  */
 @Component
-@DependsOn(ContextManager.BEAN_NAME)
 public class ScheduledExecutorContextPropagationSensor implements SpecialSensor {
 
     private static final ElementMatcher<TypeDescription> CLASSES_MATCHER = isSubTypeOf(ScheduledExecutorService.class);

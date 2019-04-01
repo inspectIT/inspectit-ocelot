@@ -6,7 +6,6 @@ import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.matcher.ElementMatcher;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.InstrumentationConfiguration;
@@ -17,7 +16,6 @@ import java.util.concurrent.Executor;
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
 @Component
-@DependsOn(ContextManager.BEAN_NAME)
 public class ExecutorContextPropagationSensor implements SpecialSensor {
 
     private static final ElementMatcher<TypeDescription> EXECUTER_CLASSES_MATCHER = isSubTypeOf(Executor.class);

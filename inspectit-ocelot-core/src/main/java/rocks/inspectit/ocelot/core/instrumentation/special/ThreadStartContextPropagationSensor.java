@@ -6,11 +6,9 @@ import net.bytebuddy.asm.AsmVisitorWrapper;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.matcher.ElementMatcher;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.InstrumentationConfiguration;
-import rocks.inspectit.ocelot.core.instrumentation.context.ContextManager;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
@@ -18,7 +16,6 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
  * Special sensor for passing the sensor to new threads. This sensor will pass the context when directly using the {@link Thread} class or classes extending it.
  */
 @Component
-@DependsOn(ContextManager.BEAN_NAME)
 public class ThreadStartContextPropagationSensor implements SpecialSensor {
 
     private static final ElementMatcher<TypeDescription> CLASSES_MATCHER = is(Thread.class).or(isSubTypeOf(Thread.class));

@@ -6,12 +6,9 @@ import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.matcher.ElementMatcher;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.InstrumentationConfiguration;
-import rocks.inspectit.ocelot.core.instrumentation.context.ContextManager;
-import rocks.inspectit.ocelot.core.instrumentation.context.ObjectAttachments;
 import rocks.inspectit.ocelot.core.instrumentation.special.SpecialSensor;
 
 import java.net.HttpURLConnection;
@@ -25,7 +22,6 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
  * Performs up and down propagation for {@link HttpURLConnection} client.
  */
 @Component
-@DependsOn({ContextManager.BEAN_NAME, ObjectAttachments.BEAN_NAME})
 public class HttpUrlConnectionContextPropagationSensor implements SpecialSensor {
 
     private static final ElementMatcher<TypeDescription> HTTP_URL_CONNECTION_CLASSES_MATCHER = isSubTypeOf(HttpURLConnection.class);

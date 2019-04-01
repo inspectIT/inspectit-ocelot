@@ -6,13 +6,10 @@ import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.matcher.ElementMatcher;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.bootstrap.context.IInspectitContext;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.InstrumentationConfiguration;
-import rocks.inspectit.ocelot.core.instrumentation.context.ContextManager;
-import rocks.inspectit.ocelot.core.instrumentation.context.ObjectAttachments;
 import rocks.inspectit.ocelot.core.instrumentation.special.SpecialSensor;
 
 import java.lang.reflect.Method;
@@ -26,7 +23,6 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
  * Sensor for reading down-propagated data when receiving a request via the Servlet API.
  */
 @Component
-@DependsOn({ContextManager.BEAN_NAME, ObjectAttachments.BEAN_NAME})
 public class ServletApiContextDownPropagationSensor implements SpecialSensor {
 
 
