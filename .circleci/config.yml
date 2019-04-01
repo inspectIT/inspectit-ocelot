@@ -17,7 +17,7 @@ jobs:
           paths:
             - repo
 
-  openjdk8-test: &base_test_job
+  sys-openjdk8: &base_test_job
     docker:
       - image: circleci/openjdk:8-jdk
     working_directory: ~/inspectit
@@ -32,22 +32,22 @@ jobs:
       - store_test_results:
           path: ~/inspectit/repo/inspectit-ocelot-core/build/test-results
 
-  openjdk9-test:
+  sys-openjdk9:
     <<: *base_test_job
     docker:
       - image: circleci/openjdk:9-jdk
 
-  openjdk11-test:
+  sys-openjdk11:
     <<: *base_test_job
     docker:
       - image: circleci/openjdk:11-jdk
 
-  ibmjava8-test:
+  sys-ibmjava8:
     <<: *base_test_job
     docker:
       - image: ibmcom/ibmjava:8-sdk
 
-  oracle8-test:
+  sys-oracle8-codecov:
     <<: *base_test_job
     steps:
       - attach_workspace:
@@ -65,8 +65,10 @@ jobs:
           path: ~/inspectit/repo/inspectit-ocelot-agent/build/test-results
       - store_test_results:
           path: ~/inspectit/repo/inspectit-ocelot-core/build/test-results
+      - run: cd repo && ./gradlew codeCoverageReport
+      - run: cd repo && bash <(curl -s https://codecov.io/bash)
 
-  oracle11-test:
+  sys-oracle11:
     <<: *base_test_job
     steps:
       - attach_workspace:
@@ -99,24 +101,18 @@ workflows:
   build_and_test:
     jobs:
       - checkout
-      - oracle8-test: &requires_checkout
+      - sys-oracle8-codecov: &requires_checkout
           requires:
             - checkout
-      - oracle11-test:
-          <<: *requires_checkout
-      - openjdk8-test:
-          <<: *requires_checkout
-      - openjdk9-test:
-          <<: *requires_checkout
-      - openjdk11-test:
-          <<: *requires_checkout
-      - ibmjava8-test:
-          <<: *requires_checkout
-      - compile-jmh:
-          requires:
-            - oracle8-test
-            - oracle11-test
-            - openjdk8-test
-            - openjdk9-test
-            - openjdk11-test
-            - ibmjava8-test
+#      - sys-oracle11:
+#          <<: *requires_checkout
+#      - sys-openjdk8:
+#          <<: *requires_checkout
+#      - sys-openjdk9:
+#          <<: *requires_checkout
+#      - sys-openjdk11:
+#          <<: *requires_checkout
+#      - sys-ibmjava8:
+#          <<: *requires_checkout
+#      - jmh-compile:
+#          <<: *requires_checkout
