@@ -21,6 +21,7 @@ import rocks.inspectit.ocelot.utils.TestUtils;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
@@ -49,7 +50,7 @@ public class ApacheHttpClientContextPropagationTest {
 
         client = builder.build();
 
-        TestUtils.waitForInstrumentationToComplete();
+        TestUtils.waitForClassInstrumentation(CloseableHttpClient.class, 10, TimeUnit.SECONDS);
     }
 
     @BeforeEach

@@ -16,6 +16,7 @@ import rocks.inspectit.ocelot.utils.TestUtils;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
@@ -75,7 +76,7 @@ public class HttpOutMetricTest {
             builder.setDefaultRequestConfig(requestBuilder.build());
             client = builder.build();
 
-            TestUtils.waitForInstrumentationToComplete();
+            TestUtils.waitForClassInstrumentation(CloseableHttpClient.class, 10, TimeUnit.SECONDS);
         }
 
         @AfterEach
@@ -92,6 +93,7 @@ public class HttpOutMetricTest {
             ctx.close();
 
             TestUtils.waitForOpenCensusQueueToBeProcessed();
+            TestUtils.waitForInstrumentationToComplete();
 
             Map<String, String> tags = new HashMap<>();
             tags.put("service", "apache_client_test");
@@ -115,6 +117,7 @@ public class HttpOutMetricTest {
             ctx.close();
 
             TestUtils.waitForOpenCensusQueueToBeProcessed();
+            TestUtils.waitForInstrumentationToComplete();
 
             Map<String, String> tags = new HashMap<>();
             tags.put("service", "apache_client_test");

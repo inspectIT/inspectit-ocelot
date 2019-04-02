@@ -36,8 +36,6 @@ public class ServiceInMetricTest {
 
     public static final String SERVICE_NAME = "systemtest";
 
-    public static Object sink;
-
     private Server server;
 
     void fireRequest(String originService) {
@@ -78,10 +76,7 @@ public class ServiceInMetricTest {
             servletHandler.addServletWithMapping(TestServlet.class, "/*");
             server.start();
 
-            // ensure HttpURLConnection is instrumented
-            sink = Class.forName(HttpURLConnection.class.getName(), true, getClass().getClassLoader());
             TestUtils.waitForClassInstrumentations(Arrays.asList(HttpURLConnection.class, HttpServlet.class), 10, TimeUnit.SECONDS);
-
             TestUtils.waitForInstrumentationToComplete();
 
             fireRequest("servlet_origin");

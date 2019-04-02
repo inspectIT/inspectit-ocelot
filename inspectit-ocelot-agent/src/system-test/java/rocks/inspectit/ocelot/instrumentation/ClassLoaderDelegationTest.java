@@ -4,21 +4,24 @@ import io.opencensus.common.Scope;
 import io.opencensus.tags.TagKey;
 import io.opencensus.tags.TagValue;
 import io.opencensus.tags.Tags;
+import org.junit.AfterClass;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import rocks.inspectit.ocelot.utils.DummyClassLoader;
 import rocks.inspectit.ocelot.utils.TestUtils;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ClassLoaderDelegationTest {
-
 
     static class BadClassLoader extends DummyClassLoader {
 
@@ -129,7 +132,7 @@ public class ClassLoaderDelegationTest {
         constr.setAccessible(true);
         Executor exec = (Executor) constr.newInstance();
 
-        TestUtils.waitForInstrumentationToComplete();
+        TestUtils.waitForClassInstrumentation(execClass, 15, TimeUnit.SECONDS);
 
         try (Scope tcb = Tags.getTagger().emptyBuilder()
                 .put(TagKey.create("test_key"), TagValue.create("test_value"))
@@ -154,7 +157,7 @@ public class ClassLoaderDelegationTest {
         constr.setAccessible(true);
         Executor exec = (Executor) constr.newInstance();
 
-        TestUtils.waitForInstrumentationToComplete();
+        TestUtils.waitForClassInstrumentation(execClass, 15, TimeUnit.SECONDS);
 
         try (Scope tcb = Tags.getTagger().emptyBuilder()
                 .put(TagKey.create("test_key"), TagValue.create("test_value"))
@@ -179,7 +182,7 @@ public class ClassLoaderDelegationTest {
         constr.setAccessible(true);
         Executor exec = (Executor) constr.newInstance();
 
-        TestUtils.waitForInstrumentationToComplete();
+        TestUtils.waitForClassInstrumentation(execClass, 15, TimeUnit.SECONDS);
 
         try (Scope tcb = Tags.getTagger().emptyBuilder()
                 .put(TagKey.create("test_key"), TagValue.create("test_value"))

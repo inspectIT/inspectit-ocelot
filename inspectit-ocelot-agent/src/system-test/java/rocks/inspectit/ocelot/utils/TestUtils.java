@@ -7,6 +7,7 @@ import io.opencensus.tags.InternalUtils;
 import io.opencensus.tags.TagKey;
 import io.opencensus.tags.TagValue;
 import io.opencensus.tags.Tags;
+import org.awaitility.core.ConditionTimeoutException;
 import rocks.inspectit.ocelot.bootstrap.AgentManager;
 
 import java.lang.reflect.Field;
@@ -23,6 +24,8 @@ public class TestUtils {
 
     private static Cache<Class<?>, Object> activeInstrumentations = null;
 
+    public static Object sink;
+
     private static Field getField(Class clazz, String fieldName) {
         try {
             Field field = clazz.getDeclaredField(fieldName);
@@ -36,6 +39,8 @@ public class TestUtils {
 
     private static synchronized Cache<Class<?>, Object> getInstrumentationCache() {
         if (activeInstrumentations == null) {
+            // to prevent race conditions
+            waitForAgentInitialization();
             try {
                 Object agentInstance = getField(AgentManager.class, "agentInstance").get(null);
                 Object ctx = getField(agentInstance.getClass(), "ctx").get(agentInstance);
@@ -64,12 +69,24 @@ public class TestUtils {
      * After the specified time, the method will cause the current test to fail.
      */
     public static void waitForClassInstrumentations(List<Class> clazzes, int duration, TimeUnit timeUnit) {
-        await().atMost(duration, timeUnit).ignoreExceptions().untilAsserted(() -> {
+        try {
+            await().atMost(duration, timeUnit).ignoreExceptions().untilAsserted(() -> {
+                for (Class clazz : clazzes) {
+                    sink = clazz.getMethods();
+                    Object clazzInstrumentation = getInstrumentationCache().getIfPresent(clazz);
+                    assertThat(clazzInstrumentation).isNotNull();
+                }
+            });
+        } catch(ConditionTimeoutException ex) {
             for (Class clazz : clazzes) {
                 Object clazzInstrumentation = getInstrumentationCache().getIfPresent(clazz);
-                assertThat(clazzInstrumentation).isNotNull();
+                if (clazzInstrumentation == null) {
+                    System.out.println(clazz.getName() + " was not instrumented!");
+                }
             }
-        });
+
+            throw ex;
+        }
     }
 
     /**
@@ -96,6 +113,7 @@ public class TestUtils {
         }
     }
 
+    @Deprecated
     public static void waitForInstrumentationToComplete() {
         await().atMost(30, TimeUnit.SECONDS).ignoreExceptions().untilAsserted(() -> {
             assertThat(getInstrumentationClassesCount()).isGreaterThan(0);
@@ -104,7 +122,6 @@ public class TestUtils {
             waitForOpenCensusQueueToBeProcessed();
             assertThat(getInstrumentationQueueLength()).isZero();
         });
-
     }
 
     public static Map<String, String> getCurrentTagsAsMap() {
