@@ -167,6 +167,7 @@ services:
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=demo
       - GF_PATHS_PROVISIONING=/usr/share/grafana/custom/
+      - GF_INSTALL_PLUGINS=https://github.com/NovatecConsulting/novatec-service-dependency-graph-panel/releases/download/v0.2/novatec-service-dependency-graph-panel.zip;novatec-servicegraph-panel
     volumes:
       - ./grafana/provisioning/prometheus:/usr/share/grafana/custom/
     ports:
