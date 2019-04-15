@@ -12,8 +12,10 @@ import rocks.inspectit.ocelot.utils.TestUtils;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
@@ -36,6 +38,7 @@ public class HttpUrlConnectionContextPropagationTest {
         HttpURLConnection urlConnection = (HttpURLConnection) new URL("http://google.com").openConnection();
         urlConnection.getResponseCode();
 
+        TestUtils.waitForClassInstrumentation(HttpURLConnection.class, 10, TimeUnit.SECONDS);
         TestUtils.waitForInstrumentationToComplete();
     }
 

@@ -14,8 +14,10 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -61,7 +63,8 @@ public class HttpInMetricTest {
             servletHandler.addServletWithMapping(TestServlet.class, "/*");
             server.start();
             HttpURLConnection.class.getDeclaredMethods();
-            TestUtils.waitForInstrumentationToComplete();
+
+            TestUtils.waitForClassInstrumentations(Arrays.asList(HttpURLConnection.class, HttpServlet.class), 10, TimeUnit.SECONDS);
 
             fireRequest("http://localhost:" + PORT + "/servletapi");
             server.stop();

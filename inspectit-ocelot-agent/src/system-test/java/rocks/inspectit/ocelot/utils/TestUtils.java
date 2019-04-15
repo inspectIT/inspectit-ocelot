@@ -1,16 +1,18 @@
 package rocks.inspectit.ocelot.utils;
 
+import com.google.common.cache.Cache;
 import io.opencensus.impl.internal.DisruptorEventQueue;
 import io.opencensus.stats.*;
 import io.opencensus.tags.InternalUtils;
 import io.opencensus.tags.TagKey;
 import io.opencensus.tags.TagValue;
 import io.opencensus.tags.Tags;
+import org.awaitility.core.ConditionTimeoutException;
 import rocks.inspectit.ocelot.bootstrap.AgentManager;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -19,6 +21,73 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
 public class TestUtils {
+
+    private static Cache<Class<?>, Object> activeInstrumentations = null;
+
+    public static Object sink;
+
+    private static Field getField(Class clazz, String fieldName) {
+        try {
+            Field field = clazz.getDeclaredField(fieldName);
+            field.setAccessible(true);
+            return field;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
+        }
+    }
+
+    private static synchronized Cache<Class<?>, Object> getInstrumentationCache() {
+        if (activeInstrumentations == null) {
+            // to prevent race conditions
+            waitForAgentInitialization();
+            try {
+                Object agentInstance = getField(AgentManager.class, "agentInstance").get(null);
+                Object ctx = getField(agentInstance.getClass(), "ctx").get(agentInstance);
+
+                Method getBean = ctx.getClass().getMethod("getBean", String.class);
+                getBean.setAccessible(true);
+                Object instrumentationManager = getBean.invoke(ctx, "instrumentationManager");
+
+                activeInstrumentations = (Cache<Class<?>, Object>) getField(instrumentationManager.getClass(), "activeInstrumentations").get(instrumentationManager);
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+        return activeInstrumentations;
+    }
+
+    /**
+     * See {@link #waitForClassInstrumentations(List, int, TimeUnit)}
+     */
+    public static void waitForClassInstrumentation(Class clazz, int duration, TimeUnit timeUnit) {
+        waitForClassInstrumentations(Collections.singletonList(clazz), duration, timeUnit);
+    }
+
+    /**
+     * This methods will wait until all specified classes are present in the inspectIT agents activeInstrumentation cache.
+     * After the specified time, the method will cause the current test to fail.
+     */
+    public static void waitForClassInstrumentations(List<Class> clazzes, int duration, TimeUnit timeUnit) {
+        try {
+            await().atMost(duration, timeUnit).ignoreExceptions().untilAsserted(() -> {
+                for (Class clazz : clazzes) {
+                    sink = clazz.getMethods();
+                    Object clazzInstrumentation = getInstrumentationCache().getIfPresent(clazz);
+                    assertThat(clazzInstrumentation).isNotNull();
+                }
+            });
+        } catch(ConditionTimeoutException ex) {
+            for (Class clazz : clazzes) {
+                Object clazzInstrumentation = getInstrumentationCache().getIfPresent(clazz);
+                if (clazzInstrumentation == null) {
+                    System.out.println(clazz.getName() + " was not instrumented!");
+                }
+            }
+
+            throw ex;
+        }
+    }
 
     /**
      * OpenCensus internally manages a queue of events.
@@ -44,6 +113,7 @@ public class TestUtils {
         }
     }
 
+    @Deprecated
     public static void waitForInstrumentationToComplete() {
         await().atMost(30, TimeUnit.SECONDS).ignoreExceptions().untilAsserted(() -> {
             assertThat(getInstrumentationClassesCount()).isGreaterThan(0);
@@ -52,7 +122,6 @@ public class TestUtils {
             waitForOpenCensusQueueToBeProcessed();
             assertThat(getInstrumentationQueueLength()).isZero();
         });
-
     }
 
     public static Map<String, String> getCurrentTagsAsMap() {

@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import rocks.inspectit.ocelot.utils.TestUtils;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -18,7 +19,9 @@ public class InstrumentationScopesTest extends InstrumentationSysTestBase {
                 return "blablub";
             }
         };
-        waitForInstrumentation(); //wait because until here the class has most likely not been loaded yet
+
+        TestUtils.waitForInstrumentationToComplete(); //wait because until here the class has most likely not been loaded yet
+
         n1.doSomething(() -> {
             Map<String, String> tags = TestUtils.getCurrentTagsAsMap();
             assertThat(tags).containsEntry("name", "blablub");
@@ -28,7 +31,9 @@ public class InstrumentationScopesTest extends InstrumentationSysTestBase {
     @Test
     void testNonOverriddenDefaultMethodInstrumentedForLambda() {
         NamedElement n1 = () -> "i'm a lambda";
-        waitForInstrumentation(); //wait because until here the class has most likely not been loaded yet
+
+        TestUtils.waitForInstrumentationToComplete(); //wait because until here the class has most likely not been loaded yet
+
         n1.doSomething(() -> {
             Map<String, String> tags = TestUtils.getCurrentTagsAsMap();
             assertThat(tags).containsEntry("name", "i'm a lambda");
@@ -51,7 +56,9 @@ public class InstrumentationScopesTest extends InstrumentationSysTestBase {
                 return name;
             }
         };
-        waitForInstrumentation();
+
+        TestUtils.waitForInstrumentationToComplete();
+
         n1.doSomething(() -> {
             Map<String, String> tags = TestUtils.getCurrentTagsAsMap();
             assertThat(tags).containsEntry("name", "something");
@@ -72,17 +79,5 @@ public class InstrumentationScopesTest extends InstrumentationSysTestBase {
 
         @Override
         void doSomething(Runnable r);
-    }
-
-
-    //instrumenting lambdas containing default methods is not supported yet
-    //@Test
-    void testOverriddenDefaultMethodInstrumentedForLambda() {
-        AdaptedNamedElement n1 = (r) -> r.run();
-        waitForInstrumentation(); //wait because until here the class has most likely not been loaded yet
-        n1.doSomething(() -> {
-            Map<String, String> tags = TestUtils.getCurrentTagsAsMap();
-            assertThat(tags).containsEntry("name", "AdaptedNamedElement");
-        });
     }
 }

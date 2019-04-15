@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.instrumentation.special.remote;
 
+import com.github.tomakehurst.wiremock.servlet.TrailingSlashFilter;
 import com.google.common.collect.ImmutableMap;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.FilterMapping;
@@ -20,7 +21,9 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
@@ -36,16 +39,17 @@ public class ServletApiContextPropagationTest {
 
     private Server server;
 
+    public static Object sink;
 
     @BeforeAll
-    static void waitForInstrumentation() throws Exception {
-        TestFilter.class.getDeclaredMethods();
-        TestServlet.class.getDeclaredMethods();
+    static void waitForInstrumentation() throws ClassNotFoundException {
+        sink = TestFilter.class.getDeclaredMethods();
+        sink = TestServlet.class.getDeclaredMethods();
         TestUtils.waitForInstrumentationToComplete();
     }
 
     @BeforeEach
-    void setupJetty() throws Exception {
+    void setupJetty() {
         server = new Server(PORT);
     }
 
@@ -54,10 +58,10 @@ public class ServletApiContextPropagationTest {
         server.stop();
     }
 
-    void startServer(Consumer<ServletHandler> shIntiializer) {
+    void startServer(Consumer<ServletHandler> shInitializer) {
         ServletHandler servletHandler = new ServletHandler();
         server.setHandler(servletHandler);
-        shIntiializer.accept(servletHandler);
+        shInitializer.accept(servletHandler);
         try {
             server.start();
         } catch (Exception e) {
@@ -82,7 +86,7 @@ public class ServletApiContextPropagationTest {
         }
 
         @Override
-        protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
             lastTags = TestUtils.getCurrentTagsAsMap();
 
             IInspectitContext ctx = null;
@@ -129,7 +133,7 @@ public class ServletApiContextPropagationTest {
         }
 
         @Override
-        public void init(FilterConfig filterConfig) throws ServletException {
+        public void init(FilterConfig filterConfig) {
 
         }
 
