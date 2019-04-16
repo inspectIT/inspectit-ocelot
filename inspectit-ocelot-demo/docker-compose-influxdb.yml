@@ -161,6 +161,8 @@ services:
       - INFLUXDB_HTTP_LOG_ENABLED=false
       - INFLUXDB_DATA_QUERY_LOG_ENABLED=false
     mem_limit: 512M
+    volumes:
+      - ./influx:/docker-entrypoint-initdb.d
     ports:
       - 8086:8086
 
