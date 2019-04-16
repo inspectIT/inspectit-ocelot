@@ -1,0 +1,7 @@
+CREATE DATABASE "telegraf";
+CREATE CONTINUOUS QUERY http_in_count_join ON telegraf BEGIN SELECT max(counter) AS counter INTO telegraf.autogen.http_in_joined FROM telegraf.autogen.http_in_count GROUP BY time(5s), * fill(previous) END;
+CREATE CONTINUOUS QUERY http_in_responsetime_join ON telegraf BEGIN SELECT max(counter) AS timesum INTO telegraf.autogen.http_in_joined FROM telegraf.autogen.http_in_responsetime_sum GROUP BY time(5s), * fill(previous) END;
+CREATE CONTINUOUS QUERY http_in_error_count_join ON telegraf BEGIN SELECT max(counter) AS errorcounter INTO telegraf.autogen.http_in_joined FROM telegraf.autogen.http_in_count WHERE http_status !~ /(1|2|3)\d\d/ GROUP BY time(5s), * fill(0) END;
+CREATE CONTINUOUS QUERY http_out_count_join ON telegraf BEGIN SELECT max(counter) AS counter INTO telegraf.autogen.http_out_joined FROM telegraf.autogen.http_out_count GROUP BY time(5s), * fill(previous) END;
+CREATE CONTINUOUS QUERY http_out_responsetime_join ON telegraf BEGIN SELECT max(counter) AS timesum INTO telegraf.autogen.http_out_joined FROM telegraf.autogen.http_out_responsetime_sum GROUP BY time(5s), * fill(previous) END;
+CREATE CONTINUOUS QUERY http_out_error_count_join ON telegraf BEGIN SELECT max(counter) AS errorcounter INTO telegraf.autogen.http_out_joined FROM telegraf.autogen.http_out_count WHERE http_status !~ /(1|2|3)\d\d/ GROUP BY time(5s), * fill(0) END;
