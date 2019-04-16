@@ -16,7 +16,13 @@ asciidoctor {
             'opencensus-version': "${openCensusVersion}",
             'gradle-rootdir-absolute': rootDir.absolutePath,
             revnumber: project.version,
-            toc: 'left'
+            toc: 'left',
+            docinfo: 'shared'
+}
+
+task copyAssets(type: Copy) {
+    from("src/assets")
+    into(asciidoctor.outputDir.toString() + "/html5/assets/")
 }
 
 task packageDocumentation(type: Zip) {
@@ -25,5 +31,7 @@ task packageDocumentation(type: Zip) {
     }
 
 }
+
 packageDocumentation.dependsOn asciidoctor
+packageDocumentation.dependsOn copyAssets
 build.dependsOn packageDocumentation
