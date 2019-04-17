@@ -8,7 +8,7 @@ The first step is usually defining your <<Scopes,scopes>>. A scope acts as a sel
 Scopes are then used by <<Rules,rules>>. While scopes define which methods you instrument, rules define the actual monitoring actions which will be performed. Examples for such actions would be recording the response time or extracting the HTTP url for further processing.
 
 For the definition of rules, <<Data Providers, data providers>> are a key concept.
-Long story short: data providers allow you to specify _Java snippets in you configuration_
+Long story short: data providers allow you to specify _Java snippets in your configuration_
 which will be executed to extract any data you want. This can be performance data
 such as the response time or any kind of business data, e.g. the shopping cart size.
 

@@ -19,7 +19,7 @@ inspectit:
 
       # defines how often the agent should check if new classes have been defined.
       new-class-discovery-interval: 10s
-      # defines how often after a new class has been loaded
+      # defines how often the new class discovery is performed after a new class has been loaded
       num-class-discovery-trials: 2
 ----
 

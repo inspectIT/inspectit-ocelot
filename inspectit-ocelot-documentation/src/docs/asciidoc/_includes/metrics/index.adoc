@@ -19,4 +19,8 @@ include::metrics-recorders.adoc[]
 
 include::metrics-exporters.adoc[]
 
+include::common-tags.adoc[]
+
 include::metrics-custom.adoc[]
+
+include::self-monitoring.adoc[]

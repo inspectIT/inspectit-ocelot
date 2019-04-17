@@ -1,4 +1,4 @@
-== Self Monitoring
+=== Self Monitoring
 
 inspectIT Ocelot is able to monitor itself and report the time spent in components responsible for recording metrics and creating traces.
 This way a user can have a clear view on what is the overhead introduced by running the inspectIT Ocelot agent.

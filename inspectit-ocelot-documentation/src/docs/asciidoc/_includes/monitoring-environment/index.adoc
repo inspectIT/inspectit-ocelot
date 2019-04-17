@@ -1,3 +1,0 @@
-== Monitoring Environment
-
-include::common-tags.adoc[]
