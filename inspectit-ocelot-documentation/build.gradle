@@ -33,5 +33,5 @@ task packageDocumentation(type: Zip) {
 }
 
 packageDocumentation.dependsOn asciidoctor
-packageDocumentation.dependsOn copyAssets
+asciidoctor.dependsOn copyAssets
 build.dependsOn packageDocumentation
