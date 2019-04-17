@@ -224,7 +224,7 @@ If the method returned normally or the data provider is executed in the entry ph
 
 Data providers can easily become more complex, so that a single expression is not sufficient for expressing the functionality.
 For this purpose we introduced the `value-body` configuration property for data providers as an alternative to `value`.
-`value-body` allows you to specify a Java method body which returns the result of the data provider. The body is given without surrounding curly braces. One example data provider from teh default configuration making use of this is given below:
+`value-body` allows you to specify a Java method body which returns the result of the data provider. The body is given without surrounding curly braces. One example data provider from the default configuration making use of this is given below:
 
 [source,YAML]
 ----
@@ -247,7 +247,7 @@ inspectit:
 This data provider is designed to be applied on the Servlet API https://javaee.github.io/javaee-spec/javadocs/javax/servlet/Filter.html#doFilter-javax.servlet.ServletRequest-javax.servlet.ServletResponse-javax.servlet.FilterChain-[doFilter] and
 https://javaee.github.io/javaee-spec/javadocs/javax/servlet/Servlet.html#service-javax.servlet.ServletRequest-javax.servlet.ServletResponse-[service] methods.
  It's purpose is to extract HTTP path, however in the servlet API it is not guaranteed that the `ServletRequest` is a `HttpServletRequest`.
- For this reason the data provider performs an instance-of check only returning the the HTTP path if it is available, otherwise `null`.
+ For this reason the data provider performs an instance-of check only returning the HTTP path if it is available, otherwise `null`.
 
 Normally, all non `java.lang.*` types have to be referred to using their fully
 qualified name, as done for `java.net.URI` in the example above. However, just like in

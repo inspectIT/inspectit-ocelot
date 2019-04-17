@@ -87,11 +87,29 @@ The demo scenarios come with the following predefined Grafana Dashboards:
 |===
 | Name / Grafana Marketplace Links | Description | Screenshot
 
+
+| *Service Graph*
+
+https://grafana.com/dashboards/10057[InfluxDB Version]
+
+https://grafana.com/dashboards/10059[Prometheus Version]
+
+| Shows a graph of all instrumented and external services and their interaction.
+All flows are derived based on live metrics.
+a| image::demo-dashboard-servicegraph.png[link=images/demo-dashboard-servicegraph.png]
+
+| *HTTP Metrics*
+
+https://grafana.com/dashboards/10052[InfluxDB Version]
+
+https://grafana.com/dashboards/10060[Prometheus Version]
+
+| Shows statistics of incoming and outgoing HTTP requests for each instrumented service.
+a| image::demo-dashboard-http.png[link=images/demo-dashboard-http.png]
+
 | *System Metrics*
 
 https://grafana.com/dashboards/9601[InfluxDB Version]
-
-https://grafana.com/dashboards/9602[Elastic Version]
 
 https://grafana.com/dashboards/9599[Prometheus Version]
 
@@ -102,12 +120,20 @@ a| image::demo-dashboard-system.png[link=images/demo-dashboard-system.png]
 
 https://grafana.com/dashboards/9600[InfluxDB Version]
 
-https://grafana.com/dashboards/9603[Elastic Version]
-
 https://grafana.com/dashboards/9598[Prometheus Version]
 
 | Shows JVM metrics related to JVM CPU usage, Memory (Heap and Non-Heap) and Garbage Collection.
 a| image::demo-dashboard-jvm.png[link=images/demo-dashboard-jvm.png]
+
+| *Self Monitoring*
+
+https://grafana.com/dashboards/10058[InfluxDB Version]
+
+https://grafana.com/dashboards/10061[Prometheus Version]
+
+| Shows the instrumentation state and progress based on <<Self Monitoring, self monitoring metrics>>
+a| image::demo-dashboard-selfmonitoring.png[link=images/demo-dashboard-selfmonitoring.png]
+
 
 |===
 

@@ -19,7 +19,7 @@ inspectit:
 ----
 ====
 
-=== JVM Local Context Propagation Sensors
+==== JVM Local Context Propagation Sensors
 
 The context propagation sensors are necessary to enable tracing and <<Data Propagation, data propagation>> between multiple threads by passing the current context.
 By doing this, tags and scopes can be correlated to another in case of switching threads.
@@ -42,7 +42,7 @@ This sensor enables passing the current context via implementations of the ``jav
 The context is attached to the ``java.lang.Runnable`` or ``java.util.concurrent.Callable`` used to invoke the Executor's ``schedule``, ``scheduleAtFixedRate`` and ``scheduleWithFixedDelay`` method.
 
 
-=== Cross-JVM Context Propagation Sensors
+==== Cross-JVM Context Propagation Sensors
 
 In addition to <<JVM local context propagation, JVM Local Context Propagation Sensors>>, inspectIT Ocelot also supports the propagation of data and the correlation of traces across JVM borders. In this case, the correlation data is attached as a header or an equivalent of the used protocol. Currently, the following sensors are available to enable propagation via HTTP:
 
@@ -59,7 +59,7 @@ Servlet API Context Propagation Sensor::
 Can be enabled or disabled via `inspectit.instrumentation.special.servlet-api-client-context-propagation`.
 This sensor enables the context across HTTP servers which use the https://javaee.github.io/javaee-spec/javadocs/javax/servlet/http/package-summary.html[Servlet API].
 
-=== Class Loader Delegation
+==== Class Loader Delegation
 
 For performing the instrumentation, inspectIT Ocelot requires that some classes it provides are accessible from the instrumented class. To ensure this, inspectIT pushes these classes to the bootstrap classloader.
 

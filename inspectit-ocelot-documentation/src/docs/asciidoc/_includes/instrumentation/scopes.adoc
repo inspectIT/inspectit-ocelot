@@ -1,7 +1,7 @@
 === Scopes
 
 
-A Scopes is one of the basic instrumentation configuration components.
+A Scope is one of the basic instrumentation configuration components.
 It is important to get familiar with it in order to understand which methods are targeted by which instrumentation rule.
 A single scope can be considered as a set of methods and is used by rules to determine which instrumentation should apply to which method.
 
@@ -141,7 +141,7 @@ Besides `name`, `matcher-mode` and `annotations`, the method matcher contains th
 
 |===
 
-The following example will match against all methods which are exactly named `contains`, uses the `PUBLIC` visibility modifier, have exactly one argument which is a `java.lang.Object`, is not synchronized and  is annotated by the annotation `any.Annotation`.
+The following example will match against all methods which are exactly named `contains`, use the `PUBLIC` visibility modifier, have exactly one argument which is a `java.lang.Object`, are not synchronized and are annotated by the annotation `any.Annotation`.
 
 [source,yaml]
 ----

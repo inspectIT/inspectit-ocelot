@@ -6,9 +6,9 @@ You can easily define custom performance and business metrics depending on your 
 
 In this section we explain how you can define custom OpenCensus https://opencensus.io/stats/[metrics]
 and https://opencensus.io/stats/view/[views]. We only show how to define the structure of both,
-not how the data is collected. For details on the data collection please see the <<Instrumentation,instrumentation section>>.
+not how the data is collected. For details on the data collection please see the <<Collecting Metrics,instrumentation section>>.
 
-All metrics are defined under the the `inspectit.metrics.definitions` property.
+All metrics are defined under the `inspectit.metrics.definitions` property.
 This is best explained by giving a simple example which comes from the default
 configuration of inspectIT Ocelot:
 
