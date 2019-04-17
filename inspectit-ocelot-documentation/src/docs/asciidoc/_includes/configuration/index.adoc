@@ -1,8 +1,8 @@
-== Configuration
+== Configuration Basics
 
 This section describes the configuration of the inspectIT Ocelot agent.
 
-include::configuration-basics.adoc[]
+include::configuration-sources.adoc[]
 
 include::externalized-configuration-methods.adoc[]
 

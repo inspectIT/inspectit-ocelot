@@ -17,4 +17,4 @@ $ java -javaagent:"/path/to/inspectit-ocelot-agent-{inspectit-ocelot-version}.ja
 ```
 
 The <<Installation>> section further describes what options are available for installing the agent, as well as how you can attach the agent to an already started JVM.
-In the <<Configuration>> part you can find more details on how to configure the inspectIT Ocelot agent.
+In the <<Configuration Basics>> section you can find more details on how to configure the inspectIT Ocelot agent.

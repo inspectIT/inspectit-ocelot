@@ -5,7 +5,7 @@ Jonas Kunz; Marius Oehler; Ivan Senić; Alexander Wert
 :icons: font
 :source-highlighter: coderay
 :toc: preamble
-:toclevels: 3
+:toclevels: 4
 :source-indent: 0
 :tabsize: 4
 :sectanchors:
@@ -25,9 +25,3 @@ include::{include-dir}/configuration/index.adoc[]
 include::{include-dir}/metrics/index.adoc[]
 
 include::{include-dir}/instrumentation/index.adoc[]
-
-include::{include-dir}/monitoring-environment/index.adoc[]
-
-include::{include-dir}/self-monitoring/index.adoc[]
-
-include::{include-dir}/appendix/index.adoc[]

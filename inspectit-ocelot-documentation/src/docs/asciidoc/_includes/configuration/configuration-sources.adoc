@@ -1,4 +1,4 @@
-=== Configuration Basics
+=== Configuration Sources
 
 inspectIT Ocelot tries to implement the zero-configuration approach but lets you externalize the configuration and influence every bit of its configuration if this is required.
 Internally it uses the Spring-based `PropertySource` order to allow overriding of configuration values.
@@ -9,14 +9,12 @@ Configuration properties are considered in inspectIT Ocelot in the following ord
 . <<OS Environment Variables,OS environment variables>>
 . Supported <<Externalized Configuration Methods,externalized configuration methods>>
 .. <<File-based Configuration,File-based configuration>>
-. <<All Configuration Options,inspectIT Ocelot defaults>>
+. inspectIT Ocelot defaults
 
 When an invalid configuration is given to inspectIT on startup, the agent will use a fallback configuration.
 In this fallback configuration, the agent is inactive with the exception of listening for configuration updates.
 
 When giving an invalid configuration through a runtime update to the agent, the agent will simply retain the previous configuration.
-
-The overview of all available inspectIT Ocelot configuration properties is given in the <<All Configuration Options>> section.
 
 ==== Java Agent Arguments
 

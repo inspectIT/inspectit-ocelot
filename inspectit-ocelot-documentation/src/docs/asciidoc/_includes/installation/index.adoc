@@ -29,8 +29,9 @@ The attaching can easily be done with utilities like https://github.com/apangin/
 
 [subs=attributes+]
 ```bash
-$ ./jattach.sh <pid> load instrument false /path/to/inspectit-ocelot-agent-{inspectit-ocelot-version}.jar
+$ ./jattach.sh <pid> load instrument false /path/to/inspectit-ocelot-agent-{inspectit-ocelot-version}.jar='{"inspectit.service-name" : "MyService"}'
 ```
+In this example we also passed <<Java Agent Arguments, JSON arguments>> to the agent to configure it's service name.
 
 In order to find the process ID of a running JVM, you can use the `jcmd` to list all the running Java processes on your machine:
 
