@@ -67,14 +67,11 @@ jobs:
   # Testing on Oracle JDK 8 - this test will also generate the code coverage report
   sys-oracle8-codecov:
     <<: *base_test_job
+    docker:
+      - image: sgrio/java:jdk_8_alpine
+    working_directory: ~/inspectit
     steps:
       - attach_repo
-      - run: sudo apt-get install -y software-properties-common
-      - run: sudo add-apt-repository -y ppa:webupd8team/java
-      - run: sudo apt-get --allow-unauthenticated update
-      - run: echo "oracle-java8-installer shared/accepted-oracle-license-v1-1 select true" | sudo debconf-set-selections
-      - run: sudo apt-get --allow-unauthenticated install -y oracle-java8-installer
-      - run: java -version
       - build_and_test_agent
       - run: cd repo && ./gradlew codeCoverageReport
       - run: cd repo && bash <(curl -s https://codecov.io/bash)
@@ -82,15 +79,14 @@ jobs:
   # Testing on Oracle JDK 11
   sys-oracle11:
     <<: *base_test_job
-    steps:
-      - attach_repo
-      - run: sudo apt-get install -y software-properties-common
-      - run: sudo add-apt-repository -y ppa:linuxuprising/java
-      - run: sudo apt-get --allow-unauthenticated update
-      - run: echo oracle-java11-installer shared/accepted-oracle-license-v1-2 select true | sudo /usr/bin/debconf-set-selections
-      - run: sudo apt-get --allow-unauthenticated install -y oracle-java11-installer
-      - run: java -version
-      - build_and_test_agent
+    docker:
+      - image: sgrio/java:jdk_11_alpine
+
+  # Testing on AdoptOpenJDK
+  sys-adoptjdk8:
+    <<: *base_test_job
+    docker:
+      - image: adoptopenjdk/openjdk8:latest
 
   # Testing the compilation of JMH tests
   jmh-compile:
@@ -163,6 +159,8 @@ workflows:
           <<: *requires_checkout
       - sys-ibmjava8:
           <<: *requires_checkout
+      - sys-adoptjdk8:
+          <<: *requires_checkout
       - jmh-compile:
           <<: *requires_checkout
 
@@ -174,6 +172,7 @@ workflows:
             - sys-openjdk9
             - sys-openjdk11
             - sys-ibmjava8
+            - sys-adoptjdk8
             - jmh-compile
           filters:
             branches:
