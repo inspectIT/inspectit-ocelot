@@ -46,7 +46,11 @@ public class NoopContext implements IInspectitContext {
     }
 
     @Override
-    public void readPropagationHeaders(Map<String, String> headers) {
+    public void readDownPropagationHeaders(Map<String, String> headers) {
+    }
+
+    @Override
+    public void readUpPropagationHeaders(Map<String, String> headers) {
     }
 
     @Override

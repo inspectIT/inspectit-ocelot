@@ -2,7 +2,9 @@ package rocks.inspectit.ocelot.core.instrumentation.config.model;
 
 import lombok.*;
 import rocks.inspectit.ocelot.core.config.model.instrumentation.rules.InstrumentationRuleSettings;
+import rocks.inspectit.ocelot.core.config.model.instrumentation.rules.RuleTracingSettings;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -28,18 +30,20 @@ public class InstrumentationRule {
     private Set<InstrumentationScope> scopes;
 
     /**
-     * Maps data keys to the data provider call defining the value.
-     * These assignments are performed in the method-entry part.
+     * The actions executed on the method entry.
+     * The order of the actions in the list does not matter, they are ordered automatically by the
+     * {@link rocks.inspectit.ocelot.core.instrumentation.hook.MethodHookGenerator}.
      */
     @Singular
-    private Map<String, DataProviderCallConfig> entryProviders;
+    private List<DataProviderCallConfig> entryProviders;
 
     /**
-     * Maps data keys to the data provider call defining the value.
-     * These assignments are performed in the method-exit part.
+     * The actions executed on the method exit.
+     * The order of the actions in the list does not matter, they are ordered automatically by the
+     * {@link rocks.inspectit.ocelot.core.instrumentation.hook.MethodHookGenerator}.
      */
     @Singular
-    private Map<String, DataProviderCallConfig> exitProviders;
+    private List<DataProviderCallConfig> exitProviders;
 
     /**
      * Maps metrics to the data keys or constants used as sources, see {@link InstrumentationRuleSettings#getMetrics()}.
@@ -48,4 +52,10 @@ public class InstrumentationRule {
      */
     @Singular
     private Map<String, String> metrics;
+
+    /**
+     * The tracing related settings.
+     */
+    @Builder.Default
+    private RuleTracingSettings tracing = new RuleTracingSettings();
 }

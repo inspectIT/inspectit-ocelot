@@ -463,3 +463,63 @@ Alternatively you can just specify a constant which will be used, like it was do
 If the value assigned with the data key you specified is `null` (e.g. no data was collected), no value for the metric will be written out.
 
 In addition, all configured tags for the metrics will also be taken from the inspectIT context, if they have been <<Defining the Behaviour, configured to be used as tags>>.
+
+
+===== Collecting Traces
+
+The inspectIT Ocelot Agent allows you to record method invocations as https://opencensus.io/tracing/span/[OpenCensus spans].
+For your collected spans to be visible you first need to setup a <<Trace Exporters, trace exporter>>.
+
+Afterwards you can define that all methods matching a certain rule will be traced:
+
+[source,yaml]
+----
+inspectit:
+  instrumentation:
+    rules:
+      example_rule:
+        tracing:
+          start-span: true
+----
+
+With this snippet each method matching the scopes attached to `example_rule` will appear as spans within traces when they are executed.
+You can customize the tracing using the following properties, which can all be configured under the `tracing` section of your rules.
+
+
+[cols="2,1,4",options="header"]
+.Tracing configuration options for rules
+|===
+|Property |Default| Description
+|```start-span```
+|`false`
+|If true, all method invocations of methods matching any scope of this rule will be collected as spans.
+|```name```
+|`null`
+|Defines a data key whose value will be used as name for the span. If it is `null` or the value for the data key is `null`, the full qualified name of the method will be used. Note that the value for the data key must be written in the entry section of the rule at latest!
+|```kind```
+|`null`
+|Can be `null`, `CLIENT` or `SERVER` corresponding to the https://opencensus.io/tracing/span/kind/[OpenCensus values].
+|```attributes```
+|`{}` (empty dictionary)
+|Maps names of attributes to data keys whose values will be used on exit to populate the given attributes.
+|===
+
+Commonly, you do not want to have the full qualified name of the instrumented method as span name. For example, for Http requests you typically want the http path as span name. This behaviour can be customized using the `name` property:
+
+[source,yaml]
+----
+inspectit:
+  instrumentation:
+    rules:
+      servlet_api_service:
+        tracing:
+          start-span: true
+          name: http_path
+        entry:
+          http_path:
+           #... provider call to fetch the http path here
+----
+
+Note that the name must be known at the end of the entry section!
+
+Another useful property of spans is that you can attach any additional information in form of _attributes_.

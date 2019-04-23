@@ -1,12 +1,14 @@
-package rocks.inspectit.ocelot.core.config.model.instrumentation.dataproviders;
+package rocks.inspectit.ocelot.core.config.model.instrumentation.actions;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.val;
 import org.springframework.boot.convert.ApplicationConversionService;
 import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConversionService;
 import rocks.inspectit.ocelot.core.config.model.instrumentation.InstrumentationSettings;
+import rocks.inspectit.ocelot.core.config.model.instrumentation.dataproviders.GenericDataProviderSettings;
 import rocks.inspectit.ocelot.core.config.model.validation.ViolationBuilder;
 import rocks.inspectit.ocelot.core.utils.AutoboxingHelper;
 import rocks.inspectit.ocelot.core.utils.CommonUtils;
@@ -19,7 +21,8 @@ import java.util.stream.Stream;
 
 @Data
 @NoArgsConstructor
-public class DataProviderCallSettings {
+@EqualsAndHashCode(callSuper = true)
+public class DataProviderCallSettings extends ConditionalActionSettings {
 
 
     /**
@@ -58,30 +61,6 @@ public class DataProviderCallSettings {
      * the same method entry or exit phase
      */
     private Map<@NotBlank String, @NotNull Boolean> before = Collections.emptyMap();
-
-    /**
-     * If not null, this field specifies a data-key.
-     * In this case the data provider is only executed if the data assigned to this key is null.
-     */
-    private String onlyIfNull;
-
-    /**
-     * If not null, this field specifies a data-key.
-     * In this case the data provider is only executed if the data assigned to this key is not null.
-     */
-    private String onlyIfNotNull;
-
-    /**
-     * If not null, this field specifies a data-key.
-     * In this case the data provider is only executed if the data assigned to this key is a boolean with the value "true".
-     */
-    private String onlyIfTrue;
-
-    /**
-     * If not null, this field specifies a data-key.
-     * In this case the data provider is only executed if the data assigned to this key is a boolean with the value "false".
-     */
-    private String onlyIfFalse;
 
     public void performValidation(InstrumentationSettings container, ViolationBuilder vios) {
         val providerConf = container.getDataProviders().get(provider);

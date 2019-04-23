@@ -10,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.bootstrap.context.IInspectitContext;
 import rocks.inspectit.ocelot.core.instrumentation.context.ContextManager;
 import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContext;
+import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
 
 import java.util.Arrays;
 import java.util.concurrent.CopyOnWriteArrayList;

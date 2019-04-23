@@ -14,7 +14,10 @@ import org.springframework.stereotype.Service;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.DoNotInstrumentMarker;
 import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
+import rocks.inspectit.ocelot.core.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.core.config.model.instrumentation.InstrumentationSettings;
+import rocks.inspectit.ocelot.core.config.model.metrics.MetricsSettings;
+import rocks.inspectit.ocelot.core.config.model.tracing.TracingSettings;
 import rocks.inspectit.ocelot.core.instrumentation.AsyncClassTransformer;
 import rocks.inspectit.ocelot.core.instrumentation.config.event.InstrumentationConfigurationChangedEvent;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.*;
@@ -66,7 +69,8 @@ public class InstrumentationConfigurationResolver {
 
     @PostConstruct
     private void init() {
-        currentConfig = resolveConfiguration(env.getCurrentConfig().getInstrumentation());
+        InspectitConfig conf = env.getCurrentConfig();
+        currentConfig = resolveConfiguration(conf.getInstrumentation(), conf.getMetrics(), conf.getTracing());
     }
 
     /**
@@ -129,7 +133,7 @@ public class InstrumentationConfigurationResolver {
                             .collect(Collectors.toSet());
                     if (!rulesMatchingOnMethod.isEmpty()) {
                         try {
-                            result.put(method, hookResolver.buildHookConfiguration(clazz, method, rulesMatchingOnMethod));
+                            result.put(method, hookResolver.buildHookConfiguration(clazz, method, config, rulesMatchingOnMethod));
                         } catch (Exception e) {
                             log.error("Could not build hook for {} of class {}",
                                     CommonUtils.getSignature(method), clazz.getName(), e);
@@ -172,12 +176,20 @@ public class InstrumentationConfigurationResolver {
     @EventListener
     private void inspectitConfigChanged(InspectitConfigChangedEvent ev) {
 
-        InstrumentationSettings oldSettings = ev.getOldConfig().getInstrumentation();
-        InstrumentationSettings newSettings = ev.getNewConfig().getInstrumentation();
+        val oldSettings = ev.getOldConfig().getInstrumentation();
+        val newSettings = ev.getNewConfig().getInstrumentation();
 
-        if (!Objects.equals(oldSettings, newSettings)) {
+        val oldMetricsSettings = ev.getOldConfig().getMetrics();
+        val newMetricsSettings = ev.getNewConfig().getMetrics();
+
+        val oldTracingSettings = ev.getOldConfig().getTracing();
+        val newTracingSettings = ev.getNewConfig().getTracing();
+
+        if (!Objects.equals(oldSettings, newSettings) ||
+                !Objects.equals(oldMetricsSettings, newMetricsSettings) ||
+                !Objects.equals(oldTracingSettings, newTracingSettings)) {
             val oldConfig = currentConfig;
-            val newConfig = resolveConfiguration(ev.getNewConfig().getInstrumentation());
+            val newConfig = resolveConfiguration(newSettings, newMetricsSettings, newTracingSettings);
             if (!Objects.equals(oldConfig, newConfig)) {
                 currentConfig = newConfig;
                 val event = new InstrumentationConfigurationChangedEvent(this, oldConfig, currentConfig);
@@ -186,9 +198,11 @@ public class InstrumentationConfigurationResolver {
         }
     }
 
-    private InstrumentationConfiguration resolveConfiguration(InstrumentationSettings source) {
+    private InstrumentationConfiguration resolveConfiguration(InstrumentationSettings source, MetricsSettings metrics, TracingSettings tracing) {
         val dataProviders = dataProviderResolver.resolveProviders(source);
         return InstrumentationConfiguration.builder()
+                .metricsEnabled(metrics.isEnabled())
+                .tracingEnabled(tracing.isEnabled())
                 .source(source)
                 .rules(ruleResolver.resolve(source, dataProviders))
                 .dataProperties(resolveDataProperties(source))

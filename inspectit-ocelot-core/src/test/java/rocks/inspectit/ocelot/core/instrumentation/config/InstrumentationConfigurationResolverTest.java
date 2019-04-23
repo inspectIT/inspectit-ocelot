@@ -148,7 +148,7 @@ class InstrumentationConfigurationResolverTest {
             Map<MethodDescription, MethodHookConfiguration> result = resolver.getHookConfigurations(testCaseClass);
 
             assertThat(result).isEmpty();
-            verify(hookResolver, never()).buildHookConfiguration(any(), any(), any());
+            verify(hookResolver, never()).buildHookConfiguration(any(), any(), any(), any());
         }
 
         @Test
@@ -163,7 +163,7 @@ class InstrumentationConfigurationResolverTest {
             Map<MethodDescription, MethodHookConfiguration> result = resolver.getHookConfigurations(testCaseClass);
 
             assertThat(result).isEmpty();
-            verify(hookResolver, never()).buildHookConfiguration(any(), any(), any());
+            verify(hookResolver, never()).buildHookConfiguration(any(), any(), any(), any());
         }
 
 
@@ -182,9 +182,8 @@ class InstrumentationConfigurationResolverTest {
             Map<MethodDescription, MethodHookConfiguration> result = resolver.getHookConfigurations(testCaseClass);
 
             assertThat(result).hasSize(1);
-            verify(hookResolver, times(1)).buildHookConfiguration(any(), any(), any());
-            verify(hookResolver, times(1))
-                    .buildHookConfiguration(eq(testCaseClass), argThat(method::matches), eq(Collections.singleton(r1)));
+            verify(hookResolver).buildHookConfiguration(eq(testCaseClass), argThat(method::matches), same(config), eq(Collections.singleton(r1)));
+            verifyNoMoreInteractions(hookResolver);
         }
 
 
@@ -202,9 +201,8 @@ class InstrumentationConfigurationResolverTest {
             Map<MethodDescription, MethodHookConfiguration> result = resolver.getHookConfigurations(testCaseClass);
 
             assertThat(result).hasSize(1);
-            verify(hookResolver, times(1)).buildHookConfiguration(any(), any(), any());
-            verify(hookResolver, times(1))
-                    .buildHookConfiguration(eq(testCaseClass), argThat(method::matches), eq(new HashSet<>(Arrays.asList(r1, r2))));
+            verify(hookResolver).buildHookConfiguration(eq(testCaseClass), argThat(method::matches), same(config), eq(new HashSet<>(Arrays.asList(r1, r2))));
+            verifyNoMoreInteractions(hookResolver);
         }
 
 
@@ -224,11 +222,11 @@ class InstrumentationConfigurationResolverTest {
             Map<MethodDescription, MethodHookConfiguration> result = resolver.getHookConfigurations(testCaseClass);
 
             assertThat(result).hasSize(2);
-            verify(hookResolver, times(2)).buildHookConfiguration(any(), any(), any());
             verify(hookResolver, times(1))
-                    .buildHookConfiguration(eq(testCaseClass), argThat(methodA::matches), eq(new HashSet<>(Arrays.asList(r1, r2))));
+                    .buildHookConfiguration(eq(testCaseClass), argThat(methodA::matches), same(config), eq(new HashSet<>(Arrays.asList(r1, r2))));
             verify(hookResolver, times(1))
-                    .buildHookConfiguration(eq(testCaseClass), argThat(methodB::matches), eq(new HashSet<>(Arrays.asList(r2))));
+                    .buildHookConfiguration(eq(testCaseClass), argThat(methodB::matches), same(config), eq(new HashSet<>(Arrays.asList(r2))));
+            verifyNoMoreInteractions(hookResolver);
         }
 
     }

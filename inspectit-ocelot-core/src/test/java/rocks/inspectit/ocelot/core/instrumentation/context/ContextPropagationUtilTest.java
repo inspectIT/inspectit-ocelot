@@ -34,7 +34,7 @@ public class ContextPropagationUtilTest {
     }
 
     @Nested
-    class ReadPropagationMap {
+    class ReadPropagationHeaderMap {
 
         @Test
         public void testSingleString() {
@@ -97,14 +97,14 @@ public class ContextPropagationUtilTest {
 
 
     @Nested
-    class BuildPropagationMap {
+    class BuildPropagationHeaderMap {
 
         @Test
         public void testSingleString() {
 
             Map<String, Object> data = ImmutableMap.of("my_valü", "straße=15");
 
-            Map<String, String> result = ContextPropagationUtil.buildPropagationHeaderMap(data.entrySet().stream());
+            Map<String, String> result = ContextPropagationUtil.buildPropagationHeaderMap(data.entrySet().stream(), null);
 
             assertThat(result)
                     .hasSize(1)
@@ -115,7 +115,7 @@ public class ContextPropagationUtilTest {
         public void testSingleLong() {
             Map<String, Object> data = ImmutableMap.of("x", 42L);
 
-            Map<String, String> result = ContextPropagationUtil.buildPropagationHeaderMap(data.entrySet().stream());
+            Map<String, String> result = ContextPropagationUtil.buildPropagationHeaderMap(data.entrySet().stream(), null);
 
             assertThat(result)
                     .hasSize(1)
@@ -126,7 +126,7 @@ public class ContextPropagationUtilTest {
         public void testSingleDouble() {
             Map<String, Object> data = ImmutableMap.of("Pi", Math.PI);
 
-            Map<String, String> result = ContextPropagationUtil.buildPropagationHeaderMap(data.entrySet().stream());
+            Map<String, String> result = ContextPropagationUtil.buildPropagationHeaderMap(data.entrySet().stream(), null);
 
             assertThat(result)
                     .hasSize(1)
@@ -137,7 +137,7 @@ public class ContextPropagationUtilTest {
         public void testInvalidTypeIgnored() {
             Map<String, Object> data = ImmutableMap.of("Pi", new ArrayList<>());
 
-            Map<String, String> result = ContextPropagationUtil.buildPropagationHeaderMap(data.entrySet().stream());
+            Map<String, String> result = ContextPropagationUtil.buildPropagationHeaderMap(data.entrySet().stream(), null);
 
             assertThat(result).hasSize(0);
         }
@@ -146,7 +146,7 @@ public class ContextPropagationUtilTest {
         public void testBooleanAndString() {
             Map<String, Object> data = ImmutableMap.of("hello", "world", "is_something", true);
 
-            Map<String, String> result = ContextPropagationUtil.buildPropagationHeaderMap(data.entrySet().stream());
+            Map<String, String> result = ContextPropagationUtil.buildPropagationHeaderMap(data.entrySet().stream(), null);
 
             assertThat(result)
                     .hasSize(1)

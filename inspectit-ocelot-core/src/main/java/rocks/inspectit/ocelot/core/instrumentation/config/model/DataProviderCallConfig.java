@@ -2,7 +2,7 @@ package rocks.inspectit.ocelot.core.instrumentation.config.model;
 
 import lombok.Builder;
 import lombok.Value;
-import rocks.inspectit.ocelot.core.config.model.instrumentation.dataproviders.DataProviderCallSettings;
+import rocks.inspectit.ocelot.core.config.model.instrumentation.actions.DataProviderCallSettings;
 
 /**
  * Combines a resolved data provider with a call to it.
@@ -14,6 +14,12 @@ import rocks.inspectit.ocelot.core.config.model.instrumentation.dataproviders.Da
 @Value
 @Builder
 public class DataProviderCallConfig {
+
+    /**
+     * The name used for this data provider call.
+     * This corresponds to the data key written by the provider.
+     */
+    String name;
 
     /**
      * The input assignments to use for calling the data provider.

@@ -5,7 +5,7 @@ import lombok.val;
 import org.apache.commons.lang3.tuple.Pair;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.IGenericDataProvider;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.GenericDataProviderConfig;
-import rocks.inspectit.ocelot.core.instrumentation.hook.IHookAction;
+import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
 import rocks.inspectit.ocelot.core.instrumentation.injection.ClassInjector;
 import rocks.inspectit.ocelot.core.instrumentation.injection.InjectedClass;
 

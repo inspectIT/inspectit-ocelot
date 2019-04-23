@@ -6,9 +6,8 @@ import lombok.Getter;
 import lombok.Value;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
-import rocks.inspectit.ocelot.core.config.model.instrumentation.dataproviders.DataProviderCallSettings;
+import rocks.inspectit.ocelot.core.config.model.instrumentation.actions.DataProviderCallSettings;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.DataProviderCallConfig;
 
 import java.util.*;
@@ -28,11 +27,15 @@ public class DataProviderCallSorter {
     /**
      * Orders the given set of data-providers based on their inter-dependencies.
      *
-     * @param calls the calls to sort
+     * @param callList the calls to sort
      * @return the sorted calls, meaning that the providers should be executed in the order in which they appear in the list
      * @throws CyclicDataDependencyException if the data provider calls have a cyclic dependency and therefore cannot be ordered
      */
-    public List<Pair<String, DataProviderCallConfig>> orderDataProviderCalls(Map<String, DataProviderCallConfig> calls) throws CyclicDataDependencyException {
+    public List<DataProviderCallConfig> orderDataProviderCalls(Collection<DataProviderCallConfig> callList) throws CyclicDataDependencyException {
+
+        Map<String, DataProviderCallConfig> calls =
+                callList.stream().collect(Collectors.toMap(DataProviderCallConfig::getName, c -> c));
+
         Set<String> dataKeys = calls.keySet();
         Map<String, Set<String>> dependencyGraph = new HashMap<>();
         calls.forEach((dataKey, providerCall) -> collectDependencies(dataKey, providerCall, dependencyGraph));
@@ -43,7 +46,7 @@ public class DataProviderCallSorter {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         return getInTopologicalOrder(filteredDependencyGraph).stream()
-                .map(data -> Pair.of(data, calls.get(data)))
+                .map(data -> calls.get(data))
                 .collect(Collectors.toList());
     }
 

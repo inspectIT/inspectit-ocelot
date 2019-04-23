@@ -74,7 +74,7 @@ public class ServletApiContextDownPropagationSensor implements SpecialSensor {
                             }
                         }
 
-                        ctx.readPropagationHeaders(headersOfInterest);
+                        ctx.readDownPropagationHeaders(headersOfInterest);
                         ctx.makeActive();
 
                         return ctx;

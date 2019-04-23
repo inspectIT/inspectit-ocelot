@@ -1,0 +1,35 @@
+inspectit:
+
+  instrumentation:
+    scopes:
+
+      HttpRemoteTracingTest-serverSpan:
+        type:
+          name: HttpRemoteTracingTest$TracingServlet
+          matcher-mode: ENDS_WITH
+        methods:
+          - name: serverSpan
+
+      HttpRemoteTracingTest-clientSpan:
+        type:
+          name: HttpRemoteTracingTest
+          matcher-mode: CONTAINS
+        methods:
+          - name: clientSpan
+            matcher-mode: STARTS_WITH
+
+
+    rules:
+      HttpRemoteTracingTest-serverSpan:
+        scopes:
+          HttpRemoteTracingTest-serverSpan: true
+        tracing:
+          start-span: true
+          kind: SERVER
+
+      HttpRemoteTracingTest-clientSpan:
+        scopes:
+          HttpRemoteTracingTest-clientSpan: true
+        tracing:
+          start-span: true
+          kind: CLIENT

@@ -8,6 +8,12 @@ import java.util.Set;
  */
 public interface IInspectitContext extends AutoCloseable {
 
+    /**
+     * Special data key which stores the remote parent SpanContext if any is present.
+     * As soon as a new span is opened, this parent is used and the data is cleared from the context.
+     */
+    String REMOTE_PARENT_SPAN_CONTEXT_KEY = "remote_parent_span_context";
+
 
     /**
      * Assigns the given value to the given data key.
@@ -69,11 +75,19 @@ public interface IInspectitContext extends AutoCloseable {
     Map<String, String> getUpPropagationHeaders();
 
     /**
-     * Opposite method for {@link #getDownPropagationHeaders()} and {@link #getUpPropagationHeaders()}.
+     * Opposite method for {@link #getDownPropagationHeaders()}.
+     * This method takes a map from header names to header values and extracts the propagated data from them.
+     * The header names which are of interest for the propagation can be queried via {@link #getPropagationHeaderNames()}.
+     * The difference to {@link #readUpPropagationHeaders(Map)} is that this method also extracts trace correlation information
+     */
+    void readDownPropagationHeaders(Map<String, String> headers);
+
+    /**
+     * Opposite method for {@link #getUpPropagationHeaders()}.
      * This method takes a map from header names to header values and extracts the propagated data from them.
      * The header names which are of interest for the propagation can be queried via {@link #getPropagationHeaderNames()}.
      */
-    void readPropagationHeaders(Map<String, String> headers);
+    void readUpPropagationHeaders(Map<String, String> headers);
 
     /**
      * @return the names of Http headers which are relevant for the context propagation.

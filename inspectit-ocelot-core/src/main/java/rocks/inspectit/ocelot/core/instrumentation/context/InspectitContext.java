@@ -3,6 +3,12 @@ package rocks.inspectit.ocelot.core.instrumentation.context;
 import io.grpc.Context;
 import io.opencensus.common.Scope;
 import io.opencensus.tags.*;
+import io.opencensus.trace.Span;
+import io.opencensus.trace.SpanBuilder;
+import io.opencensus.trace.SpanContext;
+import io.opencensus.trace.Tracing;
+import io.opencensus.trace.samplers.Samplers;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import rocks.inspectit.ocelot.bootstrap.context.IInspectitContext;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.DataProperties;
@@ -57,7 +63,12 @@ import java.util.stream.Stream;
  * If the context is synchronous, it will perform its up-propagation.
  * In addition ,the tag-context opened by the call to makeActive will be closed and the
  * previous parent will be registered back in GRPC as active context.
+ * <p>
+ * In addition, an {@link InspectitContext} instance can be used for tracing. Hereby, one instance can record exactly one span.
+ * To do this {@link #beginSpan(String, Span.Kind)} must be called BEFORE {@link #makeActive()}.
+ * The span is automatically finished when {@link #close()} is called.
  */
+@Slf4j
 public class InspectitContext implements IInspectitContext {
 
     /**
@@ -99,6 +110,11 @@ public class InspectitContext implements IInspectitContext {
      * Holds the previous GRPC context which was overridden when attaching this context as active in GRPC.
      */
     private Context overriddenGrpcContext;
+
+    /**
+     * The span which was (potentially) opened by invoking {@link #beginSpan(String, Span.Kind)}
+     */
+    private Scope openedSpanScope;
 
     /**
      * Holds the tag context which was opened by this context with the call to {@link #makeActive()}.
@@ -206,6 +222,35 @@ public class InspectitContext implements IInspectitContext {
         }
 
         return result;
+    }
+
+
+    /**
+     * If called, a new span is created which will be automatically closed when {@link #close()} is invoked.
+     * MUST BE CALLED BEFORE {@link #makeActive()}!
+     * Must only be called at most once per {@link InspectitContext} instance!
+     *
+     * @param name the name of the span to open
+     * @param kind the span kind, can be null
+     */
+    public void beginSpan(String name, Span.Kind kind) {
+        try {
+
+            Object parent = getData(REMOTE_PARENT_SPAN_CONTEXT_KEY);
+
+            SpanBuilder builder;
+            if (parent instanceof SpanContext) {
+                setData(REMOTE_PARENT_SPAN_CONTEXT_KEY, null);
+                builder = Tracing.getTracer().spanBuilderWithRemoteParent(name, (SpanContext) parent);
+            } else {
+                builder = Tracing.getTracer().spanBuilder(name);
+            }
+
+            builder.setSpanKind(kind);
+            openedSpanScope = builder.setSampler(Samplers.alwaysSample()).startScopedSpan();
+        } catch (Throwable t) {
+            log.error("Error performing tracing", t);
+        }
     }
 
     /**
@@ -331,6 +376,10 @@ public class InspectitContext implements IInspectitContext {
         }
         Context.current().detach(overriddenGrpcContext);
 
+        if (openedSpanScope != null) {
+            openedSpanScope.close();
+        }
+
         if (parent != null && !isInDifferentThreadThanParentOrIsParentClosed()) {
             parent.performUpPropagation(dataOverwrites);
         }
@@ -359,9 +408,19 @@ public class InspectitContext implements IInspectitContext {
 
     @Override
     public Map<String, String> getDownPropagationHeaders() {
+        SpanContext spanContext = Tracing.getTracer().getCurrentSpan().getContext();
+        if (!spanContext.isValid()) {
+            Object remoteParent = getData(REMOTE_PARENT_SPAN_CONTEXT_KEY);
+            if (remoteParent instanceof SpanContext) {
+                spanContext = (SpanContext) remoteParent;
+            } else {
+                spanContext = null;
+            }
+        }
         return ContextPropagationUtil.buildPropagationHeaderMap(
                 getDataAsStream()
-                        .filter(e -> propagation.isPropagatedDownGlobally(e.getKey()))
+                        .filter(e -> propagation.isPropagatedDownGlobally(e.getKey())),
+                spanContext
         );
     }
 
@@ -369,13 +428,20 @@ public class InspectitContext implements IInspectitContext {
     public Map<String, String> getUpPropagationHeaders() {
         return ContextPropagationUtil.buildPropagationHeaderMap(
                 getDataAsStream()
-                        .filter(e -> propagation.isPropagatedUpGlobally(e.getKey()))
+                        .filter(e -> propagation.isPropagatedUpGlobally(e.getKey())),
+                null
         );
     }
 
     @Override
-    public void readPropagationHeaders(Map<String, String> headers) {
+    public void readUpPropagationHeaders(Map<String, String> headers) {
         ContextPropagationUtil.readPropagationHeaderMap(headers, this);
+    }
+
+    @Override
+    public void readDownPropagationHeaders(Map<String, String> headers) {
+        SpanContext remote_span = ContextPropagationUtil.readPropagationHeaderMap(headers, this);
+        setData(REMOTE_PARENT_SPAN_CONTEXT_KEY, remote_span);
     }
 
     @Override

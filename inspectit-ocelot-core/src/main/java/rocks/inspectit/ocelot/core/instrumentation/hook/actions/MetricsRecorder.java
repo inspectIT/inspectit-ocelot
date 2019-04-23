@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.core.instrumentation.hook;
+package rocks.inspectit.ocelot.core.instrumentation.hook.actions;
 
 import io.opencensus.stats.StatsRecorder;
 import lombok.Value;

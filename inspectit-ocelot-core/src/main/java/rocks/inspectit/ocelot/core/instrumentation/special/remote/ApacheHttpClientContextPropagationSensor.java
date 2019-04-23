@@ -113,7 +113,7 @@ public class ApacheHttpClientContextPropagationSensor implements SpecialSensor {
                 }
                 if (!upPropagationHeaders.isEmpty()) {
                     ctx.makeActive();
-                    ctx.readPropagationHeaders(upPropagationHeaders);
+                    ctx.readUpPropagationHeaders(upPropagationHeaders);
                     ctx.close();
                 }
 

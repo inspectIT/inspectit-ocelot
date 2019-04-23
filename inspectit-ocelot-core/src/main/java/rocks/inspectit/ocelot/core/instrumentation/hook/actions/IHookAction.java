@@ -1,8 +1,9 @@
-package rocks.inspectit.ocelot.core.instrumentation.hook;
+package rocks.inspectit.ocelot.core.instrumentation.hook.actions;
 
 import lombok.Value;
 import lombok.experimental.NonFinal;
 import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContext;
+import rocks.inspectit.ocelot.core.instrumentation.hook.MethodHook;
 
 /**
  * Interface used to define any kind of action which is executed in a {@link MethodHook} on method enter or exit.

@@ -2,6 +2,17 @@ inspectit:
   instrumentation:
     data-providers:
 
+      get_arg0:
+        input:
+          _arg0: Object
+        value: _arg0
+
+
+      get_return_value:
+        input:
+          _returnValue: Object
+        value: _returnValue
+
       get_method_name:
         input:
           _methodName: String

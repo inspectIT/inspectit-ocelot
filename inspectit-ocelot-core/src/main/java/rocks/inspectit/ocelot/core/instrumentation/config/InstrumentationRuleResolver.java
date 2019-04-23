@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import rocks.inspectit.ocelot.core.config.model.instrumentation.InstrumentationSettings;
-import rocks.inspectit.ocelot.core.config.model.instrumentation.dataproviders.DataProviderCallSettings;
+import rocks.inspectit.ocelot.core.config.model.instrumentation.actions.DataProviderCallSettings;
 import rocks.inspectit.ocelot.core.config.model.instrumentation.rules.InstrumentationRuleSettings;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.DataProviderCallConfig;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.GenericDataProviderConfig;
@@ -70,16 +70,18 @@ public class InstrumentationRuleResolver {
                 .forEach(result::scope);
 
         settings.getEntry().forEach((data, call) ->
-                result.entryProvider(data, resolveCall(call, dataProviders))
+                result.entryProvider(resolveCall(data, call, dataProviders))
         );
 
         settings.getExit().forEach((data, call) ->
-                result.exitProvider(data, resolveCall(call, dataProviders))
+                result.exitProvider(resolveCall(data, call, dataProviders))
         );
 
         settings.getMetrics().entrySet().stream()
                 .filter(e -> !StringUtils.isEmpty(e.getValue()))
                 .forEach(e -> result.metric(e.getKey(), e.getValue()));
+
+        result.tracing(settings.getTracing());
 
         return result.build();
     }
@@ -89,12 +91,14 @@ public class InstrumentationRuleResolver {
      * As this involves linking the {@link GenericDataProviderConfig} of the provider which is used,
      * the map of known providers is required as input.
      *
+     * @param name          the name used for the call, corresponds to the written data key for data provider calls
      * @param dataProviders a map mapping the names of data providers to their resolved configuration.
      * @param call
      * @return
      */
-    private DataProviderCallConfig resolveCall(DataProviderCallSettings call, Map<String, GenericDataProviderConfig> dataProviders) {
+    private DataProviderCallConfig resolveCall(String name, DataProviderCallSettings call, Map<String, GenericDataProviderConfig> dataProviders) {
         return DataProviderCallConfig.builder()
+                .name(name)
                 .provider(dataProviders.get(call.getProvider()))
                 .callSettings(call)
                 .build();
