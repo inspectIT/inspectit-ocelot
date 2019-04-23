@@ -68,7 +68,7 @@ jobs:
   sys-oracle8-codecov:
     <<: *base_test_job
     docker:
-      - image: sgrio/java:jdk_8_alpine
+      - image: sgrio/java:jdk_8_ubuntu
     working_directory: ~/inspectit
     steps:
       - attach_repo
@@ -80,7 +80,7 @@ jobs:
   sys-oracle11:
     <<: *base_test_job
     docker:
-      - image: sgrio/java:jdk_11_alpine
+      - image: sgrio/java:jdk_11_ubuntu
 
   # Testing on AdoptOpenJDK
   sys-adoptjdk8:
