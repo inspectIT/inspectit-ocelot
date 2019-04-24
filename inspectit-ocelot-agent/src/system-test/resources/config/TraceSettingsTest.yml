@@ -76,7 +76,8 @@ inspectit:
           attributes:
             entry: entry_val
             exit: exit_val
-          only-if-true: should_capture_attribs
+          attribute-conditions:
+            only-if-true: should_capture_attribs
         entry:
           should_capture_attribs:
             action: get_arg0
@@ -92,7 +93,8 @@ inspectit:
           TraceSettingsTest-conditionalRoot: true
         tracing:
           start-span: true
-          only-if-true: should_capture
+          start-span-conditions:
+            only-if-true: should_capture
         entry:
           should_capture:
             action: get_arg0

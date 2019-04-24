@@ -4,16 +4,17 @@ import io.opencensus.trace.Span;
 import lombok.*;
 import rocks.inspectit.ocelot.config.model.instrumentation.actions.ConditionalActionSettings;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.Collections;
 import java.util.Map;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = true)
 @Builder
-public class RuleTracingSettings extends ConditionalActionSettings {
+public class RuleTracingSettings {
 
     public static final RuleTracingSettings NO_TRACING_AND_ATTRIBUTES = new RuleTracingSettings();
 
@@ -46,4 +47,20 @@ public class RuleTracingSettings extends ConditionalActionSettings {
      */
     @Builder.Default
     private Map<@NotBlank String, String> attributes = Collections.emptyMap();
+
+    /**
+     * Defines conditions which make the start-span flag conditional.
+     */
+    @Builder.Default
+    @Valid
+    @NotNull
+    ConditionalActionSettings startSpanConditions = new ConditionalActionSettings();
+
+    /**
+     * Defines conditions which make the attribute definitions conditional.
+     */
+    @Builder.Default
+    @Valid
+    @NotNull
+    ConditionalActionSettings attributeConditions = new ConditionalActionSettings();
 }

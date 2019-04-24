@@ -6,7 +6,6 @@ import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import rocks.inspectit.ocelot.config.model.instrumentation.actions.ConditionalActionSettings;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.*;
 
 import java.util.*;
@@ -58,31 +57,24 @@ public class MethodHookConfigurationResolver {
                             n -> !StringUtils.isEmpty(n),
                             "the span name"));
             builder.spanKind(getAndDetectConflicts(spanStartingRules, r -> r.getTracing().getKind(), Objects::nonNull, "the span kind"));
+            builder.startSpanConditions(getAndDetectConflicts(spanStartingRules, r -> r.getTracing().getStartSpanConditions(), x -> true, "start span conditions"));
         }
 
-        Set<String> writtenAttributes = matchedRules.stream()
-                .flatMap(r -> r.getTracing().getAttributes().entrySet().stream())
-                .filter(e -> !StringUtils.isEmpty(e.getValue()))
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toSet());
+        Collection<InstrumentationRule> attributeWritingRules = matchedRules.stream().filter(r -> !r.getTracing().getAttributes().isEmpty()).collect(Collectors.toSet());
+        if (!attributeWritingRules.isEmpty()) {
+            Set<String> writtenAttributes = attributeWritingRules.stream()
+                    .flatMap(r -> r.getTracing().getAttributes().entrySet().stream())
+                    .filter(e -> !StringUtils.isEmpty(e.getValue()))
+                    .map(Map.Entry::getKey)
+                    .collect(Collectors.toSet());
 
-        for (String attributeKey : writtenAttributes) {
-            String dataKey = getAndDetectConflicts(matchedRules, r -> r.getTracing().getAttributes().get(attributeKey),
-                    x -> !StringUtils.isEmpty(x), "the span attribute'" + attributeKey + "'");
-            builder.attribute(attributeKey, dataKey);
+            for (String attributeKey : writtenAttributes) {
+                String dataKey = getAndDetectConflicts(attributeWritingRules, r -> r.getTracing().getAttributes().get(attributeKey),
+                        x -> !StringUtils.isEmpty(x), "the span attribute'" + attributeKey + "'");
+                builder.attribute(attributeKey, dataKey);
+            }
+            builder.attributeConditions(getAndDetectConflicts(attributeWritingRules, r -> r.getTracing().getAttributeConditions(), x -> true, "span attribute writing conditions"));
         }
-
-
-        ConditionalActionSettings conditions = new ConditionalActionSettings();
-        conditions.setOnlyIfFalse(getAndDetectConflicts(matchedRules, r -> r.getTracing().getOnlyIfFalse(), Objects::nonNull,
-                "the only-if-false tracing condition"));
-        conditions.setOnlyIfTrue(getAndDetectConflicts(matchedRules, r -> r.getTracing().getOnlyIfTrue(), Objects::nonNull,
-                "the only-if-true tracing condition"));
-        conditions.setOnlyIfNull(getAndDetectConflicts(matchedRules, r -> r.getTracing().getOnlyIfNull(), Objects::nonNull,
-                "the only-if-null tracing condition"));
-        conditions.setOnlyIfNotNull(getAndDetectConflicts(matchedRules, r -> r.getTracing().getOnlyIfNotNull(), Objects::nonNull,
-                "the only-if-not-null tracing condition"));
-        builder.conditions(conditions);
         result.tracing(builder.build());
     }
 

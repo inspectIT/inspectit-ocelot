@@ -81,7 +81,7 @@ public class MethodHookGenerator {
         val attributes = tracing.getAttributes();
         if (!attributes.isEmpty()) {
             IHookAction endTraceAction = new WriteSpanAttributesAction(attributes);
-            val actionWithConditions = ConditionalHookAction.wrapWithConditionChecks(tracing.getConditions(), endTraceAction);
+            val actionWithConditions = ConditionalHookAction.wrapWithConditionChecks(tracing.getAttributeConditions(), endTraceAction);
             return Optional.of(actionWithConditions);
         } else {
             return Optional.empty();
@@ -91,7 +91,7 @@ public class MethodHookGenerator {
     private Optional<IHookAction> buildTracingEntryAction(MethodTracingConfiguration tracing) {
         if (tracing.isStartSpan()) {
             IHookAction beginTraceAction = new StartSpanAction(tracing.getSpanNameDataKey(), tracing.getSpanKind());
-            val actionWithConditions = ConditionalHookAction.wrapWithConditionChecks(tracing.getConditions(), beginTraceAction);
+            val actionWithConditions = ConditionalHookAction.wrapWithConditionChecks(tracing.getStartSpanConditions(), beginTraceAction);
             return Optional.of(actionWithConditions);
         } else {
             return Optional.empty();
