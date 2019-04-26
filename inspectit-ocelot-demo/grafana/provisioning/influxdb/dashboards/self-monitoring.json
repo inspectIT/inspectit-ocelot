@@ -15,8 +15,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 5,
-  "iteration": 1556109037022,
+  "id": 3,
+  "iteration": 1556280616734,
   "links": [],
   "panels": [
     {
@@ -749,7 +749,7 @@
       "id": 50,
       "panels": [],
       "repeat": null,
-      "repeatIteration": 1556109037022,
+      "repeatIteration": 1556280616734,
       "repeatPanelId": 2,
       "scopedVars": {
         "service": {
@@ -814,7 +814,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1556109037022,
+      "repeatIteration": 1556280616734,
       "repeatPanelId": 4,
       "repeatedByRow": true,
       "scopedVars": {
@@ -896,7 +896,7 @@
       "id": 52,
       "links": [],
       "pageSize": null,
-      "repeatIteration": 1556109037022,
+      "repeatIteration": 1556280616734,
       "repeatPanelId": 47,
       "repeatedByRow": true,
       "scopedVars": {
@@ -1114,7 +1114,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1556109037022,
+      "repeatIteration": 1556280616734,
       "repeatPanelId": 23,
       "repeatedByRow": true,
       "scopedVars": {
@@ -1217,7 +1217,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1556109037022,
+      "repeatIteration": 1556280616734,
       "repeatPanelId": 49,
       "repeatedByRow": true,
       "scopedVars": {
@@ -1482,7 +1482,7 @@
       "id": 55,
       "panels": [],
       "repeat": null,
-      "repeatIteration": 1556109037022,
+      "repeatIteration": 1556280616734,
       "repeatPanelId": 2,
       "scopedVars": {
         "service": {
@@ -1547,7 +1547,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1556109037022,
+      "repeatIteration": 1556280616734,
       "repeatPanelId": 4,
       "repeatedByRow": true,
       "scopedVars": {
@@ -1629,7 +1629,7 @@
       "id": 57,
       "links": [],
       "pageSize": null,
-      "repeatIteration": 1556109037022,
+      "repeatIteration": 1556280616734,
       "repeatPanelId": 47,
       "repeatedByRow": true,
       "scopedVars": {
@@ -1847,7 +1847,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1556109037022,
+      "repeatIteration": 1556280616734,
       "repeatPanelId": 23,
       "repeatedByRow": true,
       "scopedVars": {
@@ -1950,7 +1950,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1556109037022,
+      "repeatIteration": 1556280616734,
       "repeatPanelId": 49,
       "repeatedByRow": true,
       "scopedVars": {
@@ -2215,7 +2215,7 @@
       "id": 60,
       "panels": [],
       "repeat": null,
-      "repeatIteration": 1556109037022,
+      "repeatIteration": 1556280616734,
       "repeatPanelId": 2,
       "scopedVars": {
         "service": {
@@ -2280,7 +2280,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1556109037022,
+      "repeatIteration": 1556280616734,
       "repeatPanelId": 4,
       "repeatedByRow": true,
       "scopedVars": {
@@ -2362,7 +2362,7 @@
       "id": 62,
       "links": [],
       "pageSize": null,
-      "repeatIteration": 1556109037022,
+      "repeatIteration": 1556280616734,
       "repeatPanelId": 47,
       "repeatedByRow": true,
       "scopedVars": {
@@ -2580,7 +2580,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1556109037022,
+      "repeatIteration": 1556280616734,
       "repeatPanelId": 23,
       "repeatedByRow": true,
       "scopedVars": {
@@ -2683,7 +2683,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1556109037022,
+      "repeatIteration": 1556280616734,
       "repeatPanelId": 49,
       "repeatedByRow": true,
       "scopedVars": {
@@ -2948,7 +2948,7 @@
       "id": 65,
       "panels": [],
       "repeat": null,
-      "repeatIteration": 1556109037022,
+      "repeatIteration": 1556280616734,
       "repeatPanelId": 2,
       "scopedVars": {
         "service": {
@@ -3013,7 +3013,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1556109037022,
+      "repeatIteration": 1556280616734,
       "repeatPanelId": 4,
       "repeatedByRow": true,
       "scopedVars": {
@@ -3095,7 +3095,7 @@
       "id": 67,
       "links": [],
       "pageSize": null,
-      "repeatIteration": 1556109037022,
+      "repeatIteration": 1556280616734,
       "repeatPanelId": 47,
       "repeatedByRow": true,
       "scopedVars": {
@@ -3313,7 +3313,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1556109037022,
+      "repeatIteration": 1556280616734,
       "repeatPanelId": 23,
       "repeatedByRow": true,
       "scopedVars": {
@@ -3416,7 +3416,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1556109037022,
+      "repeatIteration": 1556280616734,
       "repeatPanelId": 49,
       "repeatedByRow": true,
       "scopedVars": {
@@ -3681,7 +3681,7 @@
       "id": 70,
       "panels": [],
       "repeat": null,
-      "repeatIteration": 1556109037022,
+      "repeatIteration": 1556280616734,
       "repeatPanelId": 2,
       "scopedVars": {
         "service": {
@@ -3746,7 +3746,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1556109037022,
+      "repeatIteration": 1556280616734,
       "repeatPanelId": 4,
       "repeatedByRow": true,
       "scopedVars": {
@@ -3828,7 +3828,7 @@
       "id": 72,
       "links": [],
       "pageSize": null,
-      "repeatIteration": 1556109037022,
+      "repeatIteration": 1556280616734,
       "repeatPanelId": 47,
       "repeatedByRow": true,
       "scopedVars": {
@@ -4046,7 +4046,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1556109037022,
+      "repeatIteration": 1556280616734,
       "repeatPanelId": 23,
       "repeatedByRow": true,
       "scopedVars": {
@@ -4149,7 +4149,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1556109037022,
+      "repeatIteration": 1556280616734,
       "repeatPanelId": 49,
       "repeatedByRow": true,
       "scopedVars": {
@@ -4413,58 +4413,21 @@
       {
         "allValue": null,
         "current": {
-          "tags": [],
           "text": "All",
           "value": [
             "$__all"
           ]
         },
-        "datasource": "Flux",
-        "definition": "from(bucket:\"telegraf\")     |> range(start: -1d)     |> filter(fn:(r) => r._measurement == \"inspectit_self_instrumented_classes\")     |> group(by:[\"host\"])     |> distinct(column:\"service\")     |> group(none:true)",
+        "datasource": "LocalInflux",
+        "definition": "SHOW TAG VALUES WITH KEY = \"service\"",
         "hide": 0,
         "includeAll": true,
         "label": null,
         "multi": true,
         "name": "service",
-        "options": [
-          {
-            "selected": true,
-            "text": "All",
-            "value": "$__all"
-          },
-          {
-            "selected": false,
-            "text": "api-gateway",
-            "value": "api-gateway"
-          },
-          {
-            "selected": false,
-            "text": "customers-service",
-            "value": "customers-service"
-          },
-          {
-            "selected": false,
-            "text": "config-server",
-            "value": "config-server"
-          },
-          {
-            "selected": false,
-            "text": "visits-service",
-            "value": "visits-service"
-          },
-          {
-            "selected": false,
-            "text": "discovery-server",
-            "value": "discovery-server"
-          },
-          {
-            "selected": false,
-            "text": "vets-service",
-            "value": "vets-service"
-          }
-        ],
-        "query": "from(bucket:\"telegraf\")     |> range(start: -1d)     |> filter(fn:(r) => r._measurement == \"inspectit_self_instrumented_classes\")     |> group(by:[\"host\"])     |> distinct(column:\"service\")     |> group(none:true)",
-        "refresh": 0,
+        "options": [],
+        "query": "SHOW TAG VALUES WITH KEY = \"service\"",
+        "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
