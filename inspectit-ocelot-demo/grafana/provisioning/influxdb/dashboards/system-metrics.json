@@ -15,8 +15,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 2,
-  "iteration": 1550817819867,
+  "id": 3,
+  "iteration": 1556110499281,
   "links": [],
   "panels": [
     {
@@ -33,8 +33,8 @@
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "0c20975f0231",
-          "value": "0c20975f0231"
+          "text": "4044e3e7fca5",
+          "value": "4044e3e7fca5"
         }
       },
       "title": "$host",
@@ -49,7 +49,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#bf1b00"
       ],
-      "datasource": "Flux",
+      "datasource": "LocalInflux",
       "format": "percentunit",
       "gauge": {
         "maxValue": 1,
@@ -96,8 +96,8 @@
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "0c20975f0231",
-          "value": "0c20975f0231"
+          "text": "4044e3e7fca5",
+          "value": "4044e3e7fca5"
         }
       },
       "sparkline": {
@@ -106,28 +106,15 @@
         "lineColor": "rgb(31, 120, 193)",
         "show": false
       },
-      "tableColumn": "",
+      "tableColumn": "last",
       "targets": [
         {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
+          "groupBy": [],
           "measurement": "system_cpu_usage",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "from(bucket: \"telegraf\")\n|> range(start: -1m)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_usage\" AND\n  r.host == \"$host\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\"])",
-          "rawQuery": true,
+          "query": "",
+          "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -140,11 +127,17 @@
               },
               {
                 "params": [],
-                "type": "mean"
+                "type": "last"
               }
             ]
           ],
-          "tags": []
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
         }
       ],
       "thresholds": "0.9,0.95",
@@ -198,8 +191,8 @@
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "0c20975f0231",
-          "value": "0c20975f0231"
+          "text": "4044e3e7fca5",
+          "value": "4044e3e7fca5"
         }
       },
       "seriesOverrides": [
@@ -353,7 +346,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "Flux",
+      "datasource": "LocalInflux",
       "format": "percentunit",
       "gauge": {
         "maxValue": 1,
@@ -401,8 +394,8 @@
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "0c20975f0231",
-          "value": "0c20975f0231"
+          "text": "4044e3e7fca5",
+          "value": "4044e3e7fca5"
         }
       },
       "sparkline": {
@@ -414,8 +407,48 @@
       "tableColumn": "",
       "targets": [
         {
-          "query": "usedPerc = () => {\ntotal = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_total\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service\"])\n  \nfree = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service\"])\n  \nreturn join(tables:{total:total, free:free},on:[\"_time\",\"_stop\",\"_start\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_total - r._value_free)/r._value_total\n        \n    }))\n}\n\nusedPerc()",
-          "refId": "A"
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "disk_usage",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT 1 - last(\"free\") /  last(\"total\") FROM \"disk_usage\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
         }
       ],
       "thresholds": "0.9,0.95",
@@ -439,7 +472,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "Flux",
+      "datasource": "LocalInflux",
       "fill": 7,
       "gridPos": {
         "h": 6,
@@ -468,22 +501,103 @@
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "0c20975f0231",
-          "value": "0c20975f0231"
+          "text": "4044e3e7fca5",
+          "value": "4044e3e7fca5"
         }
       },
       "seriesOverrides": [],
       "spaceLength": 10,
-      "stack": true,
+      "stack": false,
       "steppedLine": false,
       "targets": [
         {
+          "alias": "total capacity",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "disk_total",
+          "orderByTime": "ASC",
+          "policy": "default",
           "query": "usedPerc = () => {\ntotal = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_total\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \nfree = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \nreturn join(tables:{total:total, free:free},on:[\"_time\",\"_stop\",\"_start\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_total - r._value_free),\n        _measurement: \"disk_used\"\n    }))\n}\n\nusedPerc()",
-          "refId": "A"
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "gauge"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
         },
         {
-          "query": "from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n",
-          "refId": "B"
+          "alias": "used",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "disk_usage",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT mean(\"total\")- mean(free) FROM \"disk_usage\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter GROUP BY time($__interval) fill(null)",
+          "rawQuery": true,
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "total"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
         }
       ],
       "thresholds": [],
@@ -511,7 +625,7 @@
           "label": null,
           "logBase": 1,
           "max": null,
-          "min": null,
+          "min": "0",
           "show": true
         },
         {
@@ -519,7 +633,7 @@
           "label": null,
           "logBase": 1,
           "max": null,
-          "min": null,
+          "min": "0",
           "show": true
         }
       ],
@@ -537,7 +651,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "Flux",
+      "datasource": "LocalInflux",
       "format": "none",
       "gauge": {
         "maxValue": 100,
@@ -583,8 +697,8 @@
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "0c20975f0231",
-          "value": "0c20975f0231"
+          "text": "4044e3e7fca5",
+          "value": "4044e3e7fca5"
         }
       },
       "sparkline": {
@@ -596,23 +710,10 @@
       "tableColumn": "",
       "targets": [
         {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
+          "groupBy": [],
           "measurement": "system_cpu_count",
           "orderByTime": "ASC",
-          "policy": "default",
+          "policy": "autogen",
           "query": "from(bucket: \"telegraf\")\n|> range(start: -1m)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_count\" AND\n  r.host == \"$host\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\"])\n|> last()",
           "refId": "A",
           "resultFormat": "time_series",
@@ -632,9 +733,9 @@
           ],
           "tags": [
             {
-              "key": "service",
+              "key": "host",
               "operator": "=~",
-              "value": "/^$service$/"
+              "value": "/^$host$/"
             }
           ]
         }
@@ -662,7 +763,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#299c46"
       ],
-      "datasource": "Flux",
+      "datasource": "LocalInflux",
       "decimals": null,
       "format": "decbytes",
       "gauge": {
@@ -709,8 +810,8 @@
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "0c20975f0231",
-          "value": "0c20975f0231"
+          "text": "4044e3e7fca5",
+          "value": "4044e3e7fca5"
         }
       },
       "sparkline": {
@@ -722,21 +823,8 @@
       "tableColumn": "",
       "targets": [
         {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "measurement": "system_cpu_count",
+          "groupBy": [],
+          "measurement": "disk_free",
           "orderByTime": "ASC",
           "policy": "default",
           "query": "from(bucket: \"telegraf\")\n  |> range(start: -1m)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\"])\n  |> last()",
@@ -758,9 +846,9 @@
           ],
           "tags": [
             {
-              "key": "service",
+              "key": "host",
               "operator": "=~",
-              "value": "/^$service$/"
+              "value": "/^$host$/"
             }
           ]
         }
@@ -790,13 +878,13 @@
       "id": 14,
       "panels": [],
       "repeat": null,
-      "repeatIteration": 1550817819867,
+      "repeatIteration": 1556110499281,
       "repeatPanelId": 7,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "0c3ef30136a2",
-          "value": "0c3ef30136a2"
+          "text": "78addbc0261f",
+          "value": "78addbc0261f"
         }
       },
       "title": "$host",
@@ -811,7 +899,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#bf1b00"
       ],
-      "datasource": "Flux",
+      "datasource": "LocalInflux",
       "format": "percentunit",
       "gauge": {
         "maxValue": 1,
@@ -855,14 +943,14 @@
         }
       ],
       "repeatDirection": "h",
-      "repeatIteration": 1550817819867,
+      "repeatIteration": 1556110499281,
       "repeatPanelId": 5,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "0c3ef30136a2",
-          "value": "0c3ef30136a2"
+          "text": "78addbc0261f",
+          "value": "78addbc0261f"
         }
       },
       "sparkline": {
@@ -871,28 +959,15 @@
         "lineColor": "rgb(31, 120, 193)",
         "show": false
       },
-      "tableColumn": "",
+      "tableColumn": "last",
       "targets": [
         {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
+          "groupBy": [],
           "measurement": "system_cpu_usage",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "from(bucket: \"telegraf\")\n|> range(start: -1m)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_usage\" AND\n  r.host == \"$host\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\"])",
-          "rawQuery": true,
+          "query": "",
+          "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -905,11 +980,17 @@
               },
               {
                 "params": [],
-                "type": "mean"
+                "type": "last"
               }
             ]
           ],
-          "tags": []
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
         }
       ],
       "thresholds": "0.9,0.95",
@@ -960,14 +1041,14 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1550817819867,
+      "repeatIteration": 1556110499281,
       "repeatPanelId": 11,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "0c3ef30136a2",
-          "value": "0c3ef30136a2"
+          "text": "78addbc0261f",
+          "value": "78addbc0261f"
         }
       },
       "seriesOverrides": [
@@ -1121,7 +1202,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "Flux",
+      "datasource": "LocalInflux",
       "format": "percentunit",
       "gauge": {
         "maxValue": 1,
@@ -1166,14 +1247,14 @@
       ],
       "repeat": null,
       "repeatDirection": "h",
-      "repeatIteration": 1550817819867,
+      "repeatIteration": 1556110499281,
       "repeatPanelId": 4,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "0c3ef30136a2",
-          "value": "0c3ef30136a2"
+          "text": "78addbc0261f",
+          "value": "78addbc0261f"
         }
       },
       "sparkline": {
@@ -1185,8 +1266,48 @@
       "tableColumn": "",
       "targets": [
         {
-          "query": "usedPerc = () => {\ntotal = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_total\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service\"])\n  \nfree = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service\"])\n  \nreturn join(tables:{total:total, free:free},on:[\"_time\",\"_stop\",\"_start\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_total - r._value_free)/r._value_total\n        \n    }))\n}\n\nusedPerc()",
-          "refId": "A"
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "disk_usage",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT 1 - last(\"free\") /  last(\"total\") FROM \"disk_usage\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
         }
       ],
       "thresholds": "0.9,0.95",
@@ -1210,7 +1331,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "Flux",
+      "datasource": "LocalInflux",
       "fill": 7,
       "gridPos": {
         "h": 6,
@@ -1236,28 +1357,109 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1550817819867,
+      "repeatIteration": 1556110499281,
       "repeatPanelId": 13,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "0c3ef30136a2",
-          "value": "0c3ef30136a2"
+          "text": "78addbc0261f",
+          "value": "78addbc0261f"
         }
       },
       "seriesOverrides": [],
       "spaceLength": 10,
-      "stack": true,
+      "stack": false,
       "steppedLine": false,
       "targets": [
         {
+          "alias": "total capacity",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "disk_total",
+          "orderByTime": "ASC",
+          "policy": "default",
           "query": "usedPerc = () => {\ntotal = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_total\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \nfree = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \nreturn join(tables:{total:total, free:free},on:[\"_time\",\"_stop\",\"_start\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_total - r._value_free),\n        _measurement: \"disk_used\"\n    }))\n}\n\nusedPerc()",
-          "refId": "A"
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "gauge"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
         },
         {
-          "query": "from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n",
-          "refId": "B"
+          "alias": "used",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "disk_usage",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT mean(\"total\")- mean(free) FROM \"disk_usage\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter GROUP BY time($__interval) fill(null)",
+          "rawQuery": true,
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "total"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
         }
       ],
       "thresholds": [],
@@ -1285,7 +1487,7 @@
           "label": null,
           "logBase": 1,
           "max": null,
-          "min": null,
+          "min": "0",
           "show": true
         },
         {
@@ -1293,7 +1495,7 @@
           "label": null,
           "logBase": 1,
           "max": null,
-          "min": null,
+          "min": "0",
           "show": true
         }
       ],
@@ -1311,7 +1513,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "Flux",
+      "datasource": "LocalInflux",
       "format": "none",
       "gauge": {
         "maxValue": 100,
@@ -1354,14 +1556,14 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1550817819867,
+      "repeatIteration": 1556110499281,
       "repeatPanelId": 9,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "0c3ef30136a2",
-          "value": "0c3ef30136a2"
+          "text": "78addbc0261f",
+          "value": "78addbc0261f"
         }
       },
       "sparkline": {
@@ -1373,23 +1575,10 @@
       "tableColumn": "",
       "targets": [
         {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
+          "groupBy": [],
           "measurement": "system_cpu_count",
           "orderByTime": "ASC",
-          "policy": "default",
+          "policy": "autogen",
           "query": "from(bucket: \"telegraf\")\n|> range(start: -1m)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_count\" AND\n  r.host == \"$host\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\"])\n|> last()",
           "refId": "A",
           "resultFormat": "time_series",
@@ -1409,9 +1598,9 @@
           ],
           "tags": [
             {
-              "key": "service",
+              "key": "host",
               "operator": "=~",
-              "value": "/^$service$/"
+              "value": "/^$host$/"
             }
           ]
         }
@@ -1439,7 +1628,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#299c46"
       ],
-      "datasource": "Flux",
+      "datasource": "LocalInflux",
       "decimals": null,
       "format": "decbytes",
       "gauge": {
@@ -1483,14 +1672,14 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1550817819867,
+      "repeatIteration": 1556110499281,
       "repeatPanelId": 12,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "0c3ef30136a2",
-          "value": "0c3ef30136a2"
+          "text": "78addbc0261f",
+          "value": "78addbc0261f"
         }
       },
       "sparkline": {
@@ -1502,21 +1691,8 @@
       "tableColumn": "",
       "targets": [
         {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "measurement": "system_cpu_count",
+          "groupBy": [],
+          "measurement": "disk_free",
           "orderByTime": "ASC",
           "policy": "default",
           "query": "from(bucket: \"telegraf\")\n  |> range(start: -1m)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\"])\n  |> last()",
@@ -1538,9 +1714,9 @@
           ],
           "tags": [
             {
-              "key": "service",
+              "key": "host",
               "operator": "=~",
-              "value": "/^$service$/"
+              "value": "/^$host$/"
             }
           ]
         }
@@ -1570,13 +1746,13 @@
       "id": 21,
       "panels": [],
       "repeat": null,
-      "repeatIteration": 1550817819867,
+      "repeatIteration": 1556110499281,
       "repeatPanelId": 7,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "4facbde295c2",
-          "value": "4facbde295c2"
+          "text": "8c7d80fbc14a",
+          "value": "8c7d80fbc14a"
         }
       },
       "title": "$host",
@@ -1591,7 +1767,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#bf1b00"
       ],
-      "datasource": "Flux",
+      "datasource": "LocalInflux",
       "format": "percentunit",
       "gauge": {
         "maxValue": 1,
@@ -1635,14 +1811,14 @@
         }
       ],
       "repeatDirection": "h",
-      "repeatIteration": 1550817819867,
+      "repeatIteration": 1556110499281,
       "repeatPanelId": 5,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "4facbde295c2",
-          "value": "4facbde295c2"
+          "text": "8c7d80fbc14a",
+          "value": "8c7d80fbc14a"
         }
       },
       "sparkline": {
@@ -1651,28 +1827,15 @@
         "lineColor": "rgb(31, 120, 193)",
         "show": false
       },
-      "tableColumn": "",
+      "tableColumn": "last",
       "targets": [
         {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
+          "groupBy": [],
           "measurement": "system_cpu_usage",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "from(bucket: \"telegraf\")\n|> range(start: -1m)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_usage\" AND\n  r.host == \"$host\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\"])",
-          "rawQuery": true,
+          "query": "",
+          "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -1685,11 +1848,17 @@
               },
               {
                 "params": [],
-                "type": "mean"
+                "type": "last"
               }
             ]
           ],
-          "tags": []
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
         }
       ],
       "thresholds": "0.9,0.95",
@@ -1740,14 +1909,14 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1550817819867,
+      "repeatIteration": 1556110499281,
       "repeatPanelId": 11,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "4facbde295c2",
-          "value": "4facbde295c2"
+          "text": "8c7d80fbc14a",
+          "value": "8c7d80fbc14a"
         }
       },
       "seriesOverrides": [
@@ -1901,7 +2070,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "Flux",
+      "datasource": "LocalInflux",
       "format": "percentunit",
       "gauge": {
         "maxValue": 1,
@@ -1946,14 +2115,14 @@
       ],
       "repeat": null,
       "repeatDirection": "h",
-      "repeatIteration": 1550817819867,
+      "repeatIteration": 1556110499281,
       "repeatPanelId": 4,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "4facbde295c2",
-          "value": "4facbde295c2"
+          "text": "8c7d80fbc14a",
+          "value": "8c7d80fbc14a"
         }
       },
       "sparkline": {
@@ -1965,8 +2134,48 @@
       "tableColumn": "",
       "targets": [
         {
-          "query": "usedPerc = () => {\ntotal = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_total\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service\"])\n  \nfree = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service\"])\n  \nreturn join(tables:{total:total, free:free},on:[\"_time\",\"_stop\",\"_start\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_total - r._value_free)/r._value_total\n        \n    }))\n}\n\nusedPerc()",
-          "refId": "A"
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "disk_usage",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT 1 - last(\"free\") /  last(\"total\") FROM \"disk_usage\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
         }
       ],
       "thresholds": "0.9,0.95",
@@ -1990,7 +2199,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "Flux",
+      "datasource": "LocalInflux",
       "fill": 7,
       "gridPos": {
         "h": 6,
@@ -2016,28 +2225,109 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1550817819867,
+      "repeatIteration": 1556110499281,
       "repeatPanelId": 13,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "4facbde295c2",
-          "value": "4facbde295c2"
+          "text": "8c7d80fbc14a",
+          "value": "8c7d80fbc14a"
         }
       },
       "seriesOverrides": [],
       "spaceLength": 10,
-      "stack": true,
+      "stack": false,
       "steppedLine": false,
       "targets": [
         {
+          "alias": "total capacity",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "disk_total",
+          "orderByTime": "ASC",
+          "policy": "default",
           "query": "usedPerc = () => {\ntotal = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_total\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \nfree = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \nreturn join(tables:{total:total, free:free},on:[\"_time\",\"_stop\",\"_start\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_total - r._value_free),\n        _measurement: \"disk_used\"\n    }))\n}\n\nusedPerc()",
-          "refId": "A"
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "gauge"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
         },
         {
-          "query": "from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n",
-          "refId": "B"
+          "alias": "used",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "disk_usage",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT mean(\"total\")- mean(free) FROM \"disk_usage\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter GROUP BY time($__interval) fill(null)",
+          "rawQuery": true,
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "total"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
         }
       ],
       "thresholds": [],
@@ -2065,7 +2355,7 @@
           "label": null,
           "logBase": 1,
           "max": null,
-          "min": null,
+          "min": "0",
           "show": true
         },
         {
@@ -2073,7 +2363,7 @@
           "label": null,
           "logBase": 1,
           "max": null,
-          "min": null,
+          "min": "0",
           "show": true
         }
       ],
@@ -2091,7 +2381,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "Flux",
+      "datasource": "LocalInflux",
       "format": "none",
       "gauge": {
         "maxValue": 100,
@@ -2134,14 +2424,14 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1550817819867,
+      "repeatIteration": 1556110499281,
       "repeatPanelId": 9,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "4facbde295c2",
-          "value": "4facbde295c2"
+          "text": "8c7d80fbc14a",
+          "value": "8c7d80fbc14a"
         }
       },
       "sparkline": {
@@ -2153,23 +2443,10 @@
       "tableColumn": "",
       "targets": [
         {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
+          "groupBy": [],
           "measurement": "system_cpu_count",
           "orderByTime": "ASC",
-          "policy": "default",
+          "policy": "autogen",
           "query": "from(bucket: \"telegraf\")\n|> range(start: -1m)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_count\" AND\n  r.host == \"$host\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\"])\n|> last()",
           "refId": "A",
           "resultFormat": "time_series",
@@ -2189,9 +2466,9 @@
           ],
           "tags": [
             {
-              "key": "service",
+              "key": "host",
               "operator": "=~",
-              "value": "/^$service$/"
+              "value": "/^$host$/"
             }
           ]
         }
@@ -2219,7 +2496,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#299c46"
       ],
-      "datasource": "Flux",
+      "datasource": "LocalInflux",
       "decimals": null,
       "format": "decbytes",
       "gauge": {
@@ -2263,14 +2540,14 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1550817819867,
+      "repeatIteration": 1556110499281,
       "repeatPanelId": 12,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "4facbde295c2",
-          "value": "4facbde295c2"
+          "text": "8c7d80fbc14a",
+          "value": "8c7d80fbc14a"
         }
       },
       "sparkline": {
@@ -2282,21 +2559,8 @@
       "tableColumn": "",
       "targets": [
         {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "measurement": "system_cpu_count",
+          "groupBy": [],
+          "measurement": "disk_free",
           "orderByTime": "ASC",
           "policy": "default",
           "query": "from(bucket: \"telegraf\")\n  |> range(start: -1m)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\"])\n  |> last()",
@@ -2318,9 +2582,9 @@
           ],
           "tags": [
             {
-              "key": "service",
+              "key": "host",
               "operator": "=~",
-              "value": "/^$service$/"
+              "value": "/^$host$/"
             }
           ]
         }
@@ -2350,13 +2614,13 @@
       "id": 28,
       "panels": [],
       "repeat": null,
-      "repeatIteration": 1550817819867,
+      "repeatIteration": 1556110499281,
       "repeatPanelId": 7,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "68e45ec619b3",
-          "value": "68e45ec619b3"
+          "text": "ae3d6ae24353",
+          "value": "ae3d6ae24353"
         }
       },
       "title": "$host",
@@ -2371,7 +2635,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#bf1b00"
       ],
-      "datasource": "Flux",
+      "datasource": "LocalInflux",
       "format": "percentunit",
       "gauge": {
         "maxValue": 1,
@@ -2415,14 +2679,14 @@
         }
       ],
       "repeatDirection": "h",
-      "repeatIteration": 1550817819867,
+      "repeatIteration": 1556110499281,
       "repeatPanelId": 5,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "68e45ec619b3",
-          "value": "68e45ec619b3"
+          "text": "ae3d6ae24353",
+          "value": "ae3d6ae24353"
         }
       },
       "sparkline": {
@@ -2431,28 +2695,15 @@
         "lineColor": "rgb(31, 120, 193)",
         "show": false
       },
-      "tableColumn": "",
+      "tableColumn": "last",
       "targets": [
         {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
+          "groupBy": [],
           "measurement": "system_cpu_usage",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "from(bucket: \"telegraf\")\n|> range(start: -1m)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_usage\" AND\n  r.host == \"$host\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\"])",
-          "rawQuery": true,
+          "query": "",
+          "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -2465,11 +2716,17 @@
               },
               {
                 "params": [],
-                "type": "mean"
+                "type": "last"
               }
             ]
           ],
-          "tags": []
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
         }
       ],
       "thresholds": "0.9,0.95",
@@ -2520,14 +2777,14 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1550817819867,
+      "repeatIteration": 1556110499281,
       "repeatPanelId": 11,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "68e45ec619b3",
-          "value": "68e45ec619b3"
+          "text": "ae3d6ae24353",
+          "value": "ae3d6ae24353"
         }
       },
       "seriesOverrides": [
@@ -2681,7 +2938,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "Flux",
+      "datasource": "LocalInflux",
       "format": "percentunit",
       "gauge": {
         "maxValue": 1,
@@ -2726,14 +2983,14 @@
       ],
       "repeat": null,
       "repeatDirection": "h",
-      "repeatIteration": 1550817819867,
+      "repeatIteration": 1556110499281,
       "repeatPanelId": 4,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "68e45ec619b3",
-          "value": "68e45ec619b3"
+          "text": "ae3d6ae24353",
+          "value": "ae3d6ae24353"
         }
       },
       "sparkline": {
@@ -2745,8 +3002,48 @@
       "tableColumn": "",
       "targets": [
         {
-          "query": "usedPerc = () => {\ntotal = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_total\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service\"])\n  \nfree = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service\"])\n  \nreturn join(tables:{total:total, free:free},on:[\"_time\",\"_stop\",\"_start\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_total - r._value_free)/r._value_total\n        \n    }))\n}\n\nusedPerc()",
-          "refId": "A"
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "disk_usage",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT 1 - last(\"free\") /  last(\"total\") FROM \"disk_usage\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
         }
       ],
       "thresholds": "0.9,0.95",
@@ -2770,7 +3067,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "Flux",
+      "datasource": "LocalInflux",
       "fill": 7,
       "gridPos": {
         "h": 6,
@@ -2796,28 +3093,109 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1550817819867,
+      "repeatIteration": 1556110499281,
       "repeatPanelId": 13,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "68e45ec619b3",
-          "value": "68e45ec619b3"
+          "text": "ae3d6ae24353",
+          "value": "ae3d6ae24353"
         }
       },
       "seriesOverrides": [],
       "spaceLength": 10,
-      "stack": true,
+      "stack": false,
       "steppedLine": false,
       "targets": [
         {
+          "alias": "total capacity",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "disk_total",
+          "orderByTime": "ASC",
+          "policy": "default",
           "query": "usedPerc = () => {\ntotal = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_total\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \nfree = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \nreturn join(tables:{total:total, free:free},on:[\"_time\",\"_stop\",\"_start\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_total - r._value_free),\n        _measurement: \"disk_used\"\n    }))\n}\n\nusedPerc()",
-          "refId": "A"
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "gauge"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
         },
         {
-          "query": "from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n",
-          "refId": "B"
+          "alias": "used",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "disk_usage",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT mean(\"total\")- mean(free) FROM \"disk_usage\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter GROUP BY time($__interval) fill(null)",
+          "rawQuery": true,
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "total"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
         }
       ],
       "thresholds": [],
@@ -2845,7 +3223,7 @@
           "label": null,
           "logBase": 1,
           "max": null,
-          "min": null,
+          "min": "0",
           "show": true
         },
         {
@@ -2853,7 +3231,7 @@
           "label": null,
           "logBase": 1,
           "max": null,
-          "min": null,
+          "min": "0",
           "show": true
         }
       ],
@@ -2871,7 +3249,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "Flux",
+      "datasource": "LocalInflux",
       "format": "none",
       "gauge": {
         "maxValue": 100,
@@ -2914,14 +3292,14 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1550817819867,
+      "repeatIteration": 1556110499281,
       "repeatPanelId": 9,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "68e45ec619b3",
-          "value": "68e45ec619b3"
+          "text": "ae3d6ae24353",
+          "value": "ae3d6ae24353"
         }
       },
       "sparkline": {
@@ -2933,23 +3311,10 @@
       "tableColumn": "",
       "targets": [
         {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
+          "groupBy": [],
           "measurement": "system_cpu_count",
           "orderByTime": "ASC",
-          "policy": "default",
+          "policy": "autogen",
           "query": "from(bucket: \"telegraf\")\n|> range(start: -1m)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_count\" AND\n  r.host == \"$host\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\"])\n|> last()",
           "refId": "A",
           "resultFormat": "time_series",
@@ -2969,9 +3334,9 @@
           ],
           "tags": [
             {
-              "key": "service",
+              "key": "host",
               "operator": "=~",
-              "value": "/^$service$/"
+              "value": "/^$host$/"
             }
           ]
         }
@@ -2999,7 +3364,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#299c46"
       ],
-      "datasource": "Flux",
+      "datasource": "LocalInflux",
       "decimals": null,
       "format": "decbytes",
       "gauge": {
@@ -3043,14 +3408,14 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1550817819867,
+      "repeatIteration": 1556110499281,
       "repeatPanelId": 12,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "68e45ec619b3",
-          "value": "68e45ec619b3"
+          "text": "ae3d6ae24353",
+          "value": "ae3d6ae24353"
         }
       },
       "sparkline": {
@@ -3062,21 +3427,8 @@
       "tableColumn": "",
       "targets": [
         {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "measurement": "system_cpu_count",
+          "groupBy": [],
+          "measurement": "disk_free",
           "orderByTime": "ASC",
           "policy": "default",
           "query": "from(bucket: \"telegraf\")\n  |> range(start: -1m)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\"])\n  |> last()",
@@ -3098,9 +3450,9 @@
           ],
           "tags": [
             {
-              "key": "service",
+              "key": "host",
               "operator": "=~",
-              "value": "/^$service$/"
+              "value": "/^$host$/"
             }
           ]
         }
@@ -3130,13 +3482,13 @@
       "id": 35,
       "panels": [],
       "repeat": null,
-      "repeatIteration": 1550817819867,
+      "repeatIteration": 1556110499281,
       "repeatPanelId": 7,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "8543d3197916",
-          "value": "8543d3197916"
+          "text": "ce9859de83e8",
+          "value": "ce9859de83e8"
         }
       },
       "title": "$host",
@@ -3151,7 +3503,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#bf1b00"
       ],
-      "datasource": "Flux",
+      "datasource": "LocalInflux",
       "format": "percentunit",
       "gauge": {
         "maxValue": 1,
@@ -3195,14 +3547,14 @@
         }
       ],
       "repeatDirection": "h",
-      "repeatIteration": 1550817819867,
+      "repeatIteration": 1556110499281,
       "repeatPanelId": 5,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "8543d3197916",
-          "value": "8543d3197916"
+          "text": "ce9859de83e8",
+          "value": "ce9859de83e8"
         }
       },
       "sparkline": {
@@ -3211,28 +3563,15 @@
         "lineColor": "rgb(31, 120, 193)",
         "show": false
       },
-      "tableColumn": "",
+      "tableColumn": "last",
       "targets": [
         {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
+          "groupBy": [],
           "measurement": "system_cpu_usage",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "from(bucket: \"telegraf\")\n|> range(start: -1m)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_usage\" AND\n  r.host == \"$host\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\"])",
-          "rawQuery": true,
+          "query": "",
+          "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -3245,11 +3584,17 @@
               },
               {
                 "params": [],
-                "type": "mean"
+                "type": "last"
               }
             ]
           ],
-          "tags": []
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
         }
       ],
       "thresholds": "0.9,0.95",
@@ -3300,14 +3645,14 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1550817819867,
+      "repeatIteration": 1556110499281,
       "repeatPanelId": 11,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "8543d3197916",
-          "value": "8543d3197916"
+          "text": "ce9859de83e8",
+          "value": "ce9859de83e8"
         }
       },
       "seriesOverrides": [
@@ -3461,7 +3806,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "Flux",
+      "datasource": "LocalInflux",
       "format": "percentunit",
       "gauge": {
         "maxValue": 1,
@@ -3506,14 +3851,14 @@
       ],
       "repeat": null,
       "repeatDirection": "h",
-      "repeatIteration": 1550817819867,
+      "repeatIteration": 1556110499281,
       "repeatPanelId": 4,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "8543d3197916",
-          "value": "8543d3197916"
+          "text": "ce9859de83e8",
+          "value": "ce9859de83e8"
         }
       },
       "sparkline": {
@@ -3525,8 +3870,48 @@
       "tableColumn": "",
       "targets": [
         {
-          "query": "usedPerc = () => {\ntotal = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_total\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service\"])\n  \nfree = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service\"])\n  \nreturn join(tables:{total:total, free:free},on:[\"_time\",\"_stop\",\"_start\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_total - r._value_free)/r._value_total\n        \n    }))\n}\n\nusedPerc()",
-          "refId": "A"
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "disk_usage",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT 1 - last(\"free\") /  last(\"total\") FROM \"disk_usage\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
         }
       ],
       "thresholds": "0.9,0.95",
@@ -3550,7 +3935,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "Flux",
+      "datasource": "LocalInflux",
       "fill": 7,
       "gridPos": {
         "h": 6,
@@ -3576,28 +3961,109 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1550817819867,
+      "repeatIteration": 1556110499281,
       "repeatPanelId": 13,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "8543d3197916",
-          "value": "8543d3197916"
+          "text": "ce9859de83e8",
+          "value": "ce9859de83e8"
         }
       },
       "seriesOverrides": [],
       "spaceLength": 10,
-      "stack": true,
+      "stack": false,
       "steppedLine": false,
       "targets": [
         {
+          "alias": "total capacity",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "disk_total",
+          "orderByTime": "ASC",
+          "policy": "default",
           "query": "usedPerc = () => {\ntotal = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_total\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \nfree = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \nreturn join(tables:{total:total, free:free},on:[\"_time\",\"_stop\",\"_start\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_total - r._value_free),\n        _measurement: \"disk_used\"\n    }))\n}\n\nusedPerc()",
-          "refId": "A"
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "gauge"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
         },
         {
-          "query": "from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n",
-          "refId": "B"
+          "alias": "used",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "disk_usage",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT mean(\"total\")- mean(free) FROM \"disk_usage\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter GROUP BY time($__interval) fill(null)",
+          "rawQuery": true,
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "total"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
         }
       ],
       "thresholds": [],
@@ -3625,7 +4091,7 @@
           "label": null,
           "logBase": 1,
           "max": null,
-          "min": null,
+          "min": "0",
           "show": true
         },
         {
@@ -3633,7 +4099,7 @@
           "label": null,
           "logBase": 1,
           "max": null,
-          "min": null,
+          "min": "0",
           "show": true
         }
       ],
@@ -3651,7 +4117,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "Flux",
+      "datasource": "LocalInflux",
       "format": "none",
       "gauge": {
         "maxValue": 100,
@@ -3694,14 +4160,14 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1550817819867,
+      "repeatIteration": 1556110499281,
       "repeatPanelId": 9,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "8543d3197916",
-          "value": "8543d3197916"
+          "text": "ce9859de83e8",
+          "value": "ce9859de83e8"
         }
       },
       "sparkline": {
@@ -3713,23 +4179,10 @@
       "tableColumn": "",
       "targets": [
         {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
+          "groupBy": [],
           "measurement": "system_cpu_count",
           "orderByTime": "ASC",
-          "policy": "default",
+          "policy": "autogen",
           "query": "from(bucket: \"telegraf\")\n|> range(start: -1m)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_count\" AND\n  r.host == \"$host\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\"])\n|> last()",
           "refId": "A",
           "resultFormat": "time_series",
@@ -3749,9 +4202,9 @@
           ],
           "tags": [
             {
-              "key": "service",
+              "key": "host",
               "operator": "=~",
-              "value": "/^$service$/"
+              "value": "/^$host$/"
             }
           ]
         }
@@ -3779,7 +4232,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#299c46"
       ],
-      "datasource": "Flux",
+      "datasource": "LocalInflux",
       "decimals": null,
       "format": "decbytes",
       "gauge": {
@@ -3823,14 +4276,14 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1550817819867,
+      "repeatIteration": 1556110499281,
       "repeatPanelId": 12,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "8543d3197916",
-          "value": "8543d3197916"
+          "text": "ce9859de83e8",
+          "value": "ce9859de83e8"
         }
       },
       "sparkline": {
@@ -3842,21 +4295,8 @@
       "tableColumn": "",
       "targets": [
         {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "measurement": "system_cpu_count",
+          "groupBy": [],
+          "measurement": "disk_free",
           "orderByTime": "ASC",
           "policy": "default",
           "query": "from(bucket: \"telegraf\")\n  |> range(start: -1m)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\"])\n  |> last()",
@@ -3878,9 +4318,9 @@
           ],
           "tags": [
             {
-              "key": "service",
+              "key": "host",
               "operator": "=~",
-              "value": "/^$service$/"
+              "value": "/^$host$/"
             }
           ]
         }
@@ -3910,13 +4350,13 @@
       "id": 42,
       "panels": [],
       "repeat": null,
-      "repeatIteration": 1550817819867,
+      "repeatIteration": 1556110499281,
       "repeatPanelId": 7,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "8b0320ce0a5a",
-          "value": "8b0320ce0a5a"
+          "text": "d2816ef65636",
+          "value": "d2816ef65636"
         }
       },
       "title": "$host",
@@ -3931,7 +4371,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#bf1b00"
       ],
-      "datasource": "Flux",
+      "datasource": "LocalInflux",
       "format": "percentunit",
       "gauge": {
         "maxValue": 1,
@@ -3975,14 +4415,14 @@
         }
       ],
       "repeatDirection": "h",
-      "repeatIteration": 1550817819867,
+      "repeatIteration": 1556110499281,
       "repeatPanelId": 5,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "8b0320ce0a5a",
-          "value": "8b0320ce0a5a"
+          "text": "d2816ef65636",
+          "value": "d2816ef65636"
         }
       },
       "sparkline": {
@@ -3991,28 +4431,15 @@
         "lineColor": "rgb(31, 120, 193)",
         "show": false
       },
-      "tableColumn": "",
+      "tableColumn": "last",
       "targets": [
         {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
+          "groupBy": [],
           "measurement": "system_cpu_usage",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "from(bucket: \"telegraf\")\n|> range(start: -1m)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_usage\" AND\n  r.host == \"$host\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\"])",
-          "rawQuery": true,
+          "query": "",
+          "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -4025,11 +4452,17 @@
               },
               {
                 "params": [],
-                "type": "mean"
+                "type": "last"
               }
             ]
           ],
-          "tags": []
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
         }
       ],
       "thresholds": "0.9,0.95",
@@ -4080,14 +4513,14 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1550817819867,
+      "repeatIteration": 1556110499281,
       "repeatPanelId": 11,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "8b0320ce0a5a",
-          "value": "8b0320ce0a5a"
+          "text": "d2816ef65636",
+          "value": "d2816ef65636"
         }
       },
       "seriesOverrides": [
@@ -4241,7 +4674,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "Flux",
+      "datasource": "LocalInflux",
       "format": "percentunit",
       "gauge": {
         "maxValue": 1,
@@ -4286,14 +4719,14 @@
       ],
       "repeat": null,
       "repeatDirection": "h",
-      "repeatIteration": 1550817819867,
+      "repeatIteration": 1556110499281,
       "repeatPanelId": 4,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "8b0320ce0a5a",
-          "value": "8b0320ce0a5a"
+          "text": "d2816ef65636",
+          "value": "d2816ef65636"
         }
       },
       "sparkline": {
@@ -4305,8 +4738,48 @@
       "tableColumn": "",
       "targets": [
         {
-          "query": "usedPerc = () => {\ntotal = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_total\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service\"])\n  \nfree = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"service\"])\n  \nreturn join(tables:{total:total, free:free},on:[\"_time\",\"_stop\",\"_start\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_total - r._value_free)/r._value_total\n        \n    }))\n}\n\nusedPerc()",
-          "refId": "A"
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "disk_usage",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT 1 - last(\"free\") /  last(\"total\") FROM \"disk_usage\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
         }
       ],
       "thresholds": "0.9,0.95",
@@ -4330,7 +4803,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "Flux",
+      "datasource": "LocalInflux",
       "fill": 7,
       "gridPos": {
         "h": 6,
@@ -4356,28 +4829,109 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1550817819867,
+      "repeatIteration": 1556110499281,
       "repeatPanelId": 13,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "8b0320ce0a5a",
-          "value": "8b0320ce0a5a"
+          "text": "d2816ef65636",
+          "value": "d2816ef65636"
         }
       },
       "seriesOverrides": [],
       "spaceLength": 10,
-      "stack": true,
+      "stack": false,
       "steppedLine": false,
       "targets": [
         {
+          "alias": "total capacity",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "disk_total",
+          "orderByTime": "ASC",
+          "policy": "default",
           "query": "usedPerc = () => {\ntotal = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_total\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \nfree = from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n  \nreturn join(tables:{total:total, free:free},on:[\"_time\",\"_stop\",\"_start\"])\n    |> map(fn:(r) => ({\n        _time: r._time,\n        _value: (r._value_total - r._value_free),\n        _measurement: \"disk_used\"\n    }))\n}\n\nusedPerc()",
-          "refId": "A"
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "gauge"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
         },
         {
-          "query": "from(bucket: \"telegraf\")\n  |> range($range)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\", \"_measurement\"])\n",
-          "refId": "B"
+          "alias": "used",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "disk_usage",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT mean(\"total\")- mean(free) FROM \"disk_usage\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter GROUP BY time($__interval) fill(null)",
+          "rawQuery": true,
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "total"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
         }
       ],
       "thresholds": [],
@@ -4405,7 +4959,7 @@
           "label": null,
           "logBase": 1,
           "max": null,
-          "min": null,
+          "min": "0",
           "show": true
         },
         {
@@ -4413,7 +4967,7 @@
           "label": null,
           "logBase": 1,
           "max": null,
-          "min": null,
+          "min": "0",
           "show": true
         }
       ],
@@ -4431,7 +4985,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "Flux",
+      "datasource": "LocalInflux",
       "format": "none",
       "gauge": {
         "maxValue": 100,
@@ -4474,14 +5028,14 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1550817819867,
+      "repeatIteration": 1556110499281,
       "repeatPanelId": 9,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "8b0320ce0a5a",
-          "value": "8b0320ce0a5a"
+          "text": "d2816ef65636",
+          "value": "d2816ef65636"
         }
       },
       "sparkline": {
@@ -4493,23 +5047,10 @@
       "tableColumn": "",
       "targets": [
         {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
+          "groupBy": [],
           "measurement": "system_cpu_count",
           "orderByTime": "ASC",
-          "policy": "default",
+          "policy": "autogen",
           "query": "from(bucket: \"telegraf\")\n|> range(start: -1m)\n|> filter(fn: (r) =>\n  r._measurement == \"system_cpu_count\" AND\n  r.host == \"$host\" AND\n  r._field == \"gauge\")\n|> keep(columns: [\"_value\", \"_time\"])\n|> last()",
           "refId": "A",
           "resultFormat": "time_series",
@@ -4529,9 +5070,9 @@
           ],
           "tags": [
             {
-              "key": "service",
+              "key": "host",
               "operator": "=~",
-              "value": "/^$service$/"
+              "value": "/^$host$/"
             }
           ]
         }
@@ -4559,7 +5100,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#299c46"
       ],
-      "datasource": "Flux",
+      "datasource": "LocalInflux",
       "decimals": null,
       "format": "decbytes",
       "gauge": {
@@ -4603,14 +5144,14 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1550817819867,
+      "repeatIteration": 1556110499281,
       "repeatPanelId": 12,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "8b0320ce0a5a",
-          "value": "8b0320ce0a5a"
+          "text": "d2816ef65636",
+          "value": "d2816ef65636"
         }
       },
       "sparkline": {
@@ -4622,21 +5163,8 @@
       "tableColumn": "",
       "targets": [
         {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "measurement": "system_cpu_count",
+          "groupBy": [],
+          "measurement": "disk_free",
           "orderByTime": "ASC",
           "policy": "default",
           "query": "from(bucket: \"telegraf\")\n  |> range(start: -1m)\n  |> filter(fn: (r) =>\n    r._measurement == \"disk_free\" AND\n    r.host == \"$host\" AND\n    r._field == \"gauge\")\n  |> keep(columns: [\"_value\", \"_time\"])\n  |> last()",
@@ -4658,9 +5186,9 @@
           ],
           "tags": [
             {
-              "key": "service",
+              "key": "host",
               "operator": "=~",
-              "value": "/^$service$/"
+              "value": "/^$host$/"
             }
           ]
         }
@@ -4689,20 +5217,21 @@
       {
         "allValue": null,
         "current": {
-          "tags": [],
           "text": "All",
-          "value": "$__all"
+          "value": [
+            "$__all"
+          ]
         },
-        "datasource": "Flux",
-        "definition": "from(bucket:\"telegraf\")     |> range(start: -1h)     |> filter(fn:(r) => r._measurement == \"disk_total\")     |> group(by:[\"host\"])     |> distinct(column:\"host\")     |> group(none:true)",
+        "datasource": "LocalInflux",
+        "definition": "SHOW TAG VALUES WITH KEY = \"host\"",
         "hide": 0,
         "includeAll": true,
         "label": null,
-        "multi": false,
+        "multi": true,
         "name": "host",
         "options": [],
-        "query": "from(bucket:\"telegraf\")     |> range(start: -1h)     |> filter(fn:(r) => r._measurement == \"disk_total\")     |> group(by:[\"host\"])     |> distinct(column:\"host\")     |> group(none:true)",
-        "refresh": 1,
+        "query": "SHOW TAG VALUES WITH KEY = \"host\"",
+        "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
