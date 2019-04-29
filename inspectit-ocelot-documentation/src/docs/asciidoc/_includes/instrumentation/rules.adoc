@@ -522,4 +522,51 @@ inspectit:
 
 Note that the name must be known at the end of the entry section!
 
-Another useful property of spans is that you can attach any additional information in form of _attributes_.
+Another useful property of spans is that you can attach any additional information in form of attributes.
+In most trace storage such as ZipKin and Jaeger, you can search your traces based on attributes.
+The example below shows how you can define attributes:
+
+[source,yaml]
+----
+inspectit:
+  instrumentation:
+    rules:
+      servlet_api_service:
+        tracing:
+          attributes:
+            http_host: host_name
+        entry:
+          host_name:
+           #... provider call to fetch the http host here
+----
+
+The attributes property maps the names of attributes to data keys.
+After the exit phase of the rule is executed, the corresponding data keys are read and attached as attributes to the current span.
+
+Note that it is not required for a rule to also start a span when writing attributes!
+If a rule does not start a span, the attributes will be written to the first span opened by any method on the current call stack.
+
+It also is possible to conditionalize the span starting as well as the attribute writing:
+
+[source,yaml]
+----
+inspectit:
+  instrumentation:
+    rules:
+      span_starting_rule:
+        tracing:
+          start-span: true
+          start-span-conditions:
+            only-if-true: my_condition_data
+#....
+      attribute_writing_rule:
+        tracing:
+          attributes:
+            attrA: data_a
+            attrB: data_b
+          attribute-conditions:
+            only-if-true: my_condition_data
+----
+
+When any conditions under start-span-conditions are defined, a span is only created if all conditions are met.
+Similarly to attach attributes all conditions under attribute-conditions have to be fulfilled. The conditions that can be used are exactly the same as the ones available for <<Adding Conditions, data providers>>.
