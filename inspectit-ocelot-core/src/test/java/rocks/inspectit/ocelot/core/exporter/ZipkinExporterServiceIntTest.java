@@ -20,7 +20,7 @@ import static org.awaitility.Awaitility.await;
         "inspectit.exporters.tracing.zipkin.url=http://127.0.0.1:9411/api/v2/spans"
 })
 @DirtiesContext
-public class ZipKinExporterServiceIntTest extends SpringTestBase {
+public class ZipkinExporterServiceIntTest extends SpringTestBase {
 
     public static final int ZIPKIN_PORT = 9411;
     public static final String ZIPKIN_PATH = "/api/v2/spans";

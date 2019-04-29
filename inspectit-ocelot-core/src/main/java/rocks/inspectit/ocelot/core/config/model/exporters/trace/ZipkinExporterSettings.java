@@ -5,12 +5,12 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class ZipKinExporterSettings {
+public class ZipkinExporterSettings {
 
     private boolean enabled;
 
     /**
-     * The URL of the ZipKin server.
+     * The URL of the Zipkin server.
      */
     private String url;
 

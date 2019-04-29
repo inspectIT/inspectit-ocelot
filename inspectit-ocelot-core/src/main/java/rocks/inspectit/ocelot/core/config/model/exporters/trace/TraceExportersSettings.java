@@ -13,5 +13,5 @@ public class TraceExportersSettings {
     private JaegerExporterSettings jaeger;
 
     @Valid
-    private ZipKinExporterSettings zipkin;
+    private ZipkinExporterSettings zipkin;
 }

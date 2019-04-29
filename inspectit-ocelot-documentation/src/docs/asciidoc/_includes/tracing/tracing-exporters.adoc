@@ -22,18 +22,18 @@ When sending spans, ZipKin expects you to give a name of the service where the s
 
 ==== Jaeger Exporter
 
-The Jeager exports works exactly the same way as the <<ZipKin Exporter>>.
+The Jaeger exports works exactly the same way as the <<ZipKin Exporter>>.
 The corresponding properties are the following:
 
-* `inspectit.exporters.tracing.jaeger.enabled`: enables / disables teh Jaeger exporter
+* `inspectit.exporters.tracing.jaeger.enabled`: enables / disables the Jaeger exporter
 * `inspectit.exporters.tracing.jaeger.url`: defines the URL where the spans will be pushed
 * `inspectit.exporters.tracing.jaeger.service-name`: defines the service name under which the spans will be published
 
 By default, the Jaeger exporter is enabled but has no URL configured.
 The service name defaults to `inspectit.service-name`.
 
-To make inspectIT Ocelot pus hthe spans to a Jaeger server running on the same machine as the agent, the following JVM property can be used:
+To make inspectIT Ocelot push the spans to a Jaeger server running on the same machine as the agent, the following JVM property can be used:
 
 ```
--Dinspectit.exporters.tracing.jeager.url=http://127.0.0.1:14268/api/traces
+-Dinspectit.exporters.tracing.jaeger.url=http://127.0.0.1:14268/api/traces
 ```
