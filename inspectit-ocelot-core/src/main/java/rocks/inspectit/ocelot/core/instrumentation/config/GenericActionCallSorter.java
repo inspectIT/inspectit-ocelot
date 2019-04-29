@@ -7,38 +7,38 @@ import lombok.Value;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
-import rocks.inspectit.ocelot.core.config.model.instrumentation.actions.DataProviderCallSettings;
-import rocks.inspectit.ocelot.core.instrumentation.config.model.DataProviderCallConfig;
+import rocks.inspectit.ocelot.core.config.model.instrumentation.actions.ActionCallSettings;
+import rocks.inspectit.ocelot.core.instrumentation.config.model.ActionCallConfig;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * This class encapsulates the logic how data providers are ordered.
+ * This class encapsulates the logic how action calls are ordered.
  * The approach is that first a dependency graph is generated.
- * In this dependency graph the nodes are the data-keys and the data provider calls writing them,
- * the edges indicate a dependency between data keys and the corresponding data provider calls.
+ * In this dependency graph the nodes are the data-keys and the action calls writing them,
+ * the edges indicate a dependency between data keys and the corresponding action calls.
  * The edges are direct and an edge from data_A to data_B reads as
- * "The provider writing data_B must be executed before the provider of data_A"
+ * "The action writing data_B must be executed before the action of data_A"
  */
 @Component
-public class DataProviderCallSorter {
+public class GenericActionCallSorter {
 
     /**
-     * Orders the given set of data-providers based on their inter-dependencies.
+     * Orders the given set of action calls based on their inter-dependencies.
      *
      * @param callCollection the calls to sort
-     * @return the sorted calls, meaning that the providers should be executed in the order in which they appear in the list
-     * @throws CyclicDataDependencyException if the data provider calls have a cyclic dependency and therefore cannot be ordered
+     * @return the sorted calls, meaning that the actions should be executed in the order in which they appear in the list
+     * @throws CyclicDataDependencyException if the action calls have a cyclic dependency and therefore cannot be ordered
      */
-    public List<DataProviderCallConfig> orderDataProviderCalls(Collection<DataProviderCallConfig> callCollection) throws CyclicDataDependencyException {
+    public List<ActionCallConfig> orderActionCalls(Collection<ActionCallConfig> callCollection) throws CyclicDataDependencyException {
 
-        Map<String, DataProviderCallConfig> calls =
-                callCollection.stream().collect(Collectors.toMap(DataProviderCallConfig::getName, c -> c));
+        Map<String, ActionCallConfig> calls =
+                callCollection.stream().collect(Collectors.toMap(ActionCallConfig::getName, c -> c));
 
         Set<String> dataKeys = calls.keySet();
         Map<String, Set<String>> dependencyGraph = new HashMap<>();
-        calls.forEach((dataKey, providerCall) -> collectDependencies(dataKey, providerCall, dependencyGraph));
+        calls.forEach((dataKey, actionCall) -> collectDependencies(dataKey, actionCall, dependencyGraph));
 
         //filter out data keys which are not written
         val filteredDependencyGraph = dependencyGraph.entrySet().stream()
@@ -46,17 +46,16 @@ public class DataProviderCallSorter {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         return getInTopologicalOrder(filteredDependencyGraph).stream()
-                .map(data -> calls.get(data))
+                .map(calls::get)
                 .collect(Collectors.toList());
     }
 
-    private void collectDependencies(String dataKey, DataProviderCallConfig providerCall, Map<String, Set<String>> dependencyGraph) {
-        DataProviderCallSettings callSettings = providerCall.getCallSettings();
+    private void collectDependencies(String dataKey, ActionCallConfig actionCall, Map<String, Set<String>> dependencyGraph) {
+        ActionCallSettings callSettings = actionCall.getCallSettings();
 
-        Set<String> executeAfter = new HashSet<>();
-        //this data provider uses the following data keys as input arguments, therefore depends on them
+        //this data action uses the following data keys as input arguments, therefore depends on them
         val dataInputs = callSettings.getDataInput().values();
-        executeAfter.addAll(dataInputs);
+        Set<String> executeAfter = new HashSet<>(dataInputs);
 
         //the data referenced in conditions also counts as implicit dependencies
         addIfNotBlank(callSettings.getOnlyIfFalse(), executeAfter);
@@ -64,7 +63,7 @@ public class DataProviderCallSorter {
         addIfNotBlank(callSettings.getOnlyIfNull(), executeAfter);
         addIfNotBlank(callSettings.getOnlyIfNotNull(), executeAfter);
 
-        //data provider calls can explicitly define that they want to be executed before other data is written
+        //data action calls can explicitly define that they want to be executed before other data is written
         Set<String> executeBefore = callSettings.getBefore().entrySet().stream()
                 .filter(Map.Entry::getValue)
                 .map(Map.Entry::getKey)

@@ -1,14 +1,14 @@
-package rocks.inspectit.ocelot.core.instrumentation.dataprovider.generic;
+package rocks.inspectit.ocelot.core.instrumentation.genericactions;
 
 import rocks.inspectit.ocelot.bootstrap.instrumentation.DoNotInstrumentMarker;
-import rocks.inspectit.ocelot.bootstrap.instrumentation.IGenericDataProvider;
+import rocks.inspectit.ocelot.bootstrap.instrumentation.IGenericAction;
 
-public class GenericDataProviderTemplate implements IGenericDataProvider, DoNotInstrumentMarker {
+public class GenericActionTemplate implements IGenericAction, DoNotInstrumentMarker {
 
-    public static final IGenericDataProvider INSTANCE = new GenericDataProviderTemplate();
+    public static final IGenericAction INSTANCE = new GenericActionTemplate();
 
     /**
-     * This methods body will be replaced via javassist to the actual data provider code.
+     * This methods body will be replaced via javassist to the actual generic action code.
      */
     public static Object executeImpl(Object[] instrumentedMethodArgs, Object thiz, Object returnValue, Throwable thrown, Object[] additionalArgs) {
         return null;

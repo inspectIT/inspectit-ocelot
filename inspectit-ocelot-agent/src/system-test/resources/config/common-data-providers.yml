@@ -1,6 +1,6 @@
 inspectit:
   instrumentation:
-    data-providers:
+    actions:
 
       get_arg0:
         input:

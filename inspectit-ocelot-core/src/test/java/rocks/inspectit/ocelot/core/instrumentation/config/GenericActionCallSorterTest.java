@@ -12,9 +12,9 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-public class DataProviderCallSorterTest {
+public class GenericActionCallSorterTest {
 
-    private DataProviderCallSorter scheduler = new DataProviderCallSorter();
+    private GenericActionCallSorter scheduler = new GenericActionCallSorter();
 
     @Nested
     class GetInTopologicalOrder {
@@ -67,7 +67,7 @@ public class DataProviderCallSorterTest {
             dependencies.put("B", Sets.newHashSet("A"));
             dependencies.put("C", Sets.newHashSet("A"));
             assertThatThrownBy(() -> scheduler.getInTopologicalOrder(dependencies))
-                    .isInstanceOf(DataProviderCallSorter.CyclicDataDependencyException.class);
+                    .isInstanceOf(GenericActionCallSorter.CyclicDataDependencyException.class);
         }
 
         @Test
@@ -77,7 +77,7 @@ public class DataProviderCallSorterTest {
             dependencies.put("B", Sets.newHashSet("C"));
             dependencies.put("C", Sets.newHashSet("A"));
             assertThatThrownBy(() -> scheduler.getInTopologicalOrder(dependencies))
-                    .isInstanceOf(DataProviderCallSorter.CyclicDataDependencyException.class);
+                    .isInstanceOf(GenericActionCallSorter.CyclicDataDependencyException.class);
         }
 
     }

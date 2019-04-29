@@ -49,7 +49,7 @@ public class InspectitContextPerfTest {
     }
 
     @Benchmark
-    public void rootOnly_with2DataProviderTags() {
+    public void rootOnly_with2Tags() {
         InspectitContext fromCurrent = InspectitContext.createFromCurrent(Collections.emptyMap(), dataProperties, interactWithAppTagContext);
         fromCurrent.setData("data-1", "data-1");
         fromCurrent.setData("data-2", "data-2");
@@ -70,7 +70,7 @@ public class InspectitContextPerfTest {
     }
 
     @Benchmark
-    public void rootPlusOne_with2UpPropagatedDataProviderTags() {
+    public void rootPlusOne_with2UpPropagatedTags() {
         InspectitContext parent = InspectitContext.createFromCurrent(commonTags, dataProperties, interactWithAppTagContext);
         parent.makeActive();
 

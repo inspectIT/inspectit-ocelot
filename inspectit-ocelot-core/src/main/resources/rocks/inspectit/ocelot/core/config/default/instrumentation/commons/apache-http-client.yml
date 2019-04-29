@@ -2,7 +2,7 @@ inspectit:
 
   instrumentation:
 
-    data-providers:
+    actions:
       #designed to be applied on execute(HttpHost,...) or execute(HttpUriRequest,...) of the apache CloseableHttpClient
       get_apache_execute_request_host:
         imports:
@@ -25,7 +25,7 @@ inspectit:
           }
           return null;
 
-      #all other data providers are designed to applied on CloseableHttpClient.doExecute(HttpHost, HttpRequest, HttpContext)
+      #all other actions are designed to applied on CloseableHttpClient.doExecute(HttpHost, HttpRequest, HttpContext)
       get_apache_request_host:
         imports:
           - java.net

@@ -5,7 +5,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import rocks.inspectit.ocelot.core.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.core.config.model.instrumentation.InstrumentationSettings;
-import rocks.inspectit.ocelot.core.config.model.instrumentation.actions.DataProviderCallSettings;
+import rocks.inspectit.ocelot.core.config.model.instrumentation.actions.ActionCallSettings;
 import rocks.inspectit.ocelot.core.config.model.metrics.MetricsSettings;
 import rocks.inspectit.ocelot.core.config.model.validation.ViolationBuilder;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.InstrumentationRule;
@@ -43,14 +43,14 @@ public class InstrumentationRuleSettings {
      * The key defines the name of the data which is collected, the value defines how it is collected.
      */
     @NotNull
-    private Map<@NotBlank String, @NotNull @Valid DataProviderCallSettings> entry = Collections.emptyMap();
+    private Map<@NotBlank String, @NotNull @Valid ActionCallSettings> entry = Collections.emptyMap();
 
     /**
      * Defines which data is collected at the exit of the methods instrumented with this rule.
      * The key defines the name of the data which is collected, the value defines how it is collected.
      */
     @NotNull
-    private Map<@NotBlank String, @NotNull @Valid DataProviderCallSettings> exit = Collections.emptyMap();
+    private Map<@NotBlank String, @NotNull @Valid ActionCallSettings> exit = Collections.emptyMap();
 
     /**
      * Defines which measurements should be taken at the instrumented method.

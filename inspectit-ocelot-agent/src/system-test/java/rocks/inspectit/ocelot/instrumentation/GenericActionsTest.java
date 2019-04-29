@@ -8,7 +8,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class DataProvidersTest extends InstrumentationSysTestBase {
+public class GenericActionsTest extends InstrumentationSysTestBase {
 
 
     void argumentAccessTest(NamedElement elem, Runnable assertions) {

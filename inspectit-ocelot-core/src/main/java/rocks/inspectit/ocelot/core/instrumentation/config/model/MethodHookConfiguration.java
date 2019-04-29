@@ -21,17 +21,15 @@ public class MethodHookConfiguration {
 
     /**
      * The ordered list of data assignments performed on method entry.
-     * The first argument of the pair is the key of the data, the second is the data provider.
      */
     @Singular
-    private List<DataProviderCallConfig> entryProviders;
+    private List<ActionCallConfig> entryActions;
 
     /**
      * The ordered list of data assignments performed on method exit.
-     * The first argument of the pair is the key of the data, the second is the data provider.
      */
     @Singular
-    private List<DataProviderCallConfig> exitProviders;
+    private List<ActionCallConfig> exitActions;
 
     /**
      * Maps the metrics to capture to the data keys to use as value.

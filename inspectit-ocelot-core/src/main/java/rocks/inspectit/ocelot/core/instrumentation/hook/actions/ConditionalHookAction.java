@@ -29,12 +29,12 @@ public class ConditionalHookAction implements IHookAction {
     }
 
     /**
-     * If a data provider call contains values for the "only-if-..." settings the provider is meant to be only executed conditionally.
+     * If a action contains values for the "only-if-..." settings the provider is meant to be only executed conditionally.
      * Therefore in this method we wrap the call in {@link ConditionalHookAction} which check the corresponding preconditions.
      *
-     * @param conditions  the condition definition
-     * @param inputAction the hook action which does not respect the conditions yet
-     * @return the wrapped providerCall in case conditions are defined
+     * @param conditions the definitions of the conditions to check
+     * @param inputAction     the action to execute only conditionally
+     * @return the wrapped action in case conditions are defined
      */
     public static IHookAction wrapWithConditionChecks(ConditionalActionSettings conditions, IHookAction inputAction) {
         IHookAction resultAction = inputAction;

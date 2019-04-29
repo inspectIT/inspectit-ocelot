@@ -14,37 +14,37 @@ inspectit:
           apache_http_client_doExecute: true
         entry:
           
-          apache_http_host: { provider: get_apache_request_host}
-          apache_http_raw_path: { provider: get_apache_request_path}
-          apache_http_method: {provider: get_apache_request_method}
+          apache_http_host: { action: get_apache_request_host}
+          apache_http_raw_path: { action: get_apache_request_path}
+          apache_http_method: {action: get_apache_request_method}
           
         exit:
-          apache_http_status: {provider: get_apache_response_status}
+          apache_http_status: {action: get_apache_response_status}
           
       http_client_apache_execute:
         scopes:
           apache_http_client_execute: true
         entry:
           http_is_entry:
-            provider: set
+            action: set
             constant-input: { value: true}
             only-if-null: http_apache_client_entry_found
             before: { http_apache_client_entry_found: true }
           http_apache_client_entry_found:
-            provider : set
+            action: set
             constant-input: {value: true}
           
-          http_entry_time: { provider: timestamp_nanos, only-if-not-null: http_is_entry}
+          http_entry_time: { action: timestamp_nanos, only-if-not-null: http_is_entry}
           
         exit:
-          http_host: { provider: set, data-input: { value: apache_http_host} }
-          http_method: { provider: set, data-input: { value: apache_http_method} }
-          http_raw_path: { provider: set, data-input: { value: apache_http_raw_path} }
-          http_path: { provider: getOrElse, data-input: {value: parametrized_http_path, elseValue: http_raw_path} }
-          http_status: { provider: set, data-input: { value: apache_http_status} }
+          http_host: { action: set, data-input: { value: apache_http_host} }
+          http_method: { action: set, data-input: { value: apache_http_method} }
+          http_raw_path: { action: set, data-input: { value: apache_http_raw_path} }
+          http_path: { action: getOrElse, data-input: {value: parametrized_http_path, elseValue: http_raw_path} }
+          http_status: { action: set, data-input: { value: apache_http_status} }
           
           http_duration:
-            provider: elapsed_millis
+            action: elapsed_millis
             data-input: {sinceNanos: http_entry_time }
             only-if-not-null: http_is_entry
           

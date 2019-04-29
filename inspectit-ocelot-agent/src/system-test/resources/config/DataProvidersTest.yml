@@ -1,8 +1,8 @@
 
 inspectit:
   instrumentation:
-    data-providers:
-      #-----------------------DataProvidersTest.verifyArgumentsAccessible ------------------------
+    actions:
+      #-----------------------GenericActionsTest.verifyArgumentsAccessible ------------------------
       readNameViaArg0:
         imports:
           - rocks.inspectit.ocelot.instrumentation
@@ -26,7 +26,7 @@ inspectit:
         input:
           str: String
         value: str.toUpperCase()
-      #-----------------------DataProvidersTest.verifyArgumentsAccessible ------------------------
+      #-----------------------GenericActionsTest.verifyArgumentsAccessible ------------------------
       addDurationToArg:
         imports:
           - java.time
@@ -35,7 +35,7 @@ inspectit:
           argIndex : int
           durationToAdd: Duration
         value: new Long( ((Duration)(_args[argIndex])).toMillis() + durationToAdd.toMillis() )
-      #-----------------------DataProvidersTest.testDefaultMethodInstrumented ------------------------
+      #-----------------------GenericActionsTest.testDefaultMethodInstrumented ------------------------
       #---------------------- also used in InstrumentationScopesTest ---------------------------------
       readNameViaThis:
         imports:
@@ -45,63 +45,63 @@ inspectit:
         value: _this.getName()
 
     scopes:
-      DataProvidersTest-argumentAccessTest:
+      GenericActionsTest-argumentAccessTest:
         type:
-          name: DataProvidersTest
+          name: GenericActionsTest
           matcher-mode: ENDS_WITH
         methods:
           - name: argumentAccessTest
-      DataProvidersTest-constantParsingTest:
+      GenericActionsTest-constantParsingTest:
         type:
-          name: rocks.inspectit.ocelot.instrumentation.DataProvidersTest
+          name: rocks.inspectit.ocelot.instrumentation.GenericActionsTest
         methods:
           - name: constantParsingTest
 
-      DataProvidersTest-conditionsTest:
+      GenericActionsTest-conditionsTest:
         type:
-          name: rocks.inspectit.ocelot.instrumentation.DataProvidersTest
+          name: rocks.inspectit.ocelot.instrumentation.GenericActionsTest
         methods:
           - name: conditionsTest
 
 
 
     rules:
-      DataProvidersTest-argumentAccessTest:
+      GenericActionsTest-argumentAccessTest:
         scopes:
-          DataProvidersTest-argumentAccessTest: true
+          GenericActionsTest-argumentAccessTest: true
         entry:
-          name_via_arg0: {provider: readNameViaArg0}
-          name_via_args: {provider: readNameViaArgs}
-          name_reversed: {provider: reverse, data-input: {str : name_via_arg0}}
-          name_reversed_upper: {provider: toUpperCase, data-input: {str : name_reversed}}
-      DataProvidersTest-constantParsingTest:
+          name_via_arg0: {action: readNameViaArg0}
+          name_via_args: {action: readNameViaArgs}
+          name_reversed: {action: reverse, data-input: {str : name_via_arg0}}
+          name_reversed_upper: {action: toUpperCase, data-input: {str : name_reversed}}
+      GenericActionsTest-constantParsingTest:
         scopes:
-          DataProvidersTest-constantParsingTest: true
+          GenericActionsTest-constantParsingTest: true
         entry:
           result:
-            provider: addDurationToArg
+            action: addDurationToArg
             constant-input:
               argIndex: 0
               durationToAdd: "2s"
 
-      DataProvidersTest-conditionsTest:
+      GenericActionsTest-conditionsTest:
         scopes:
-          DataProvidersTest-conditionsTest : true
+          GenericActionsTest-conditionsTest : true
         entry:
-          something: {provider: set, constant-input: { value: "hello world"}}
-          true_bool: {provider: set, constant-input: { value: true}}
-          false_bool: {provider: set, constant-input: { value: false}}
+          something: {action: set, constant-input: { value: "hello world"}}
+          true_bool: {action: set, constant-input: { value: true}}
+          false_bool: {action: set, constant-input: { value: false}}
 
-          only_if_true_executed: {only-if-true: true_bool, provider: set, constant-input: { value: "yes"}}
-          only_if_true_skipped: {only-if-true: false_bool, provider: set, constant-input: { value: "yes"}}
-          only_if_true_also_skipped: {only-if-true: not_existing, provider: set, constant-input: { value: "yes"}}
+          only_if_true_executed: {only-if-true: true_bool, action: set, constant-input: { value: "yes"}}
+          only_if_true_skipped: {only-if-true: false_bool, action: set, constant-input: { value: "yes"}}
+          only_if_true_also_skipped: {only-if-true: not_existing, action: set, constant-input: { value: "yes"}}
 
-          only_if_false_executed: {only-if-false: false_bool, provider: set, constant-input: { value: "yes"}}
-          only_if_false_skipped: {only-if-false: true_bool, provider: set, constant-input: { value: "yes"}}
-          only_if_false_also_skipped: {only-if-false: not_existing, provider: set, constant-input: { value: "yes"}}
+          only_if_false_executed: {only-if-false: false_bool, action: set, constant-input: { value: "yes"}}
+          only_if_false_skipped: {only-if-false: true_bool, action: set, constant-input: { value: "yes"}}
+          only_if_false_also_skipped: {only-if-false: not_existing, action: set, constant-input: { value: "yes"}}
 
-          only_if_null_executed: {only-if-null: not_existing, provider: set, constant-input: { value: "yes"}}
-          only_if_null_skipped: {only-if-null: something, provider: set, constant-input: { value: "yes"}}
+          only_if_null_executed: {only-if-null: not_existing, action: set, constant-input: { value: "yes"}}
+          only_if_null_skipped: {only-if-null: something, action: set, constant-input: { value: "yes"}}
 
-          only_if_not_null_executed: {only-if-not-null: something, provider: set, constant-input: { value: "yes"}}
-          only_if_not_null_skipped: {only-if-not-null: not_existing, provider: set, constant-input: { value: "yes"}}
+          only_if_not_null_executed: {only-if-not-null: something, action: set, constant-input: { value: "yes"}}
+          only_if_not_null_skipped: {only-if-not-null: not_existing, action: set, constant-input: { value: "yes"}}

@@ -6,78 +6,78 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import rocks.inspectit.ocelot.core.config.model.instrumentation.InstrumentationSettings;
-import rocks.inspectit.ocelot.core.config.model.instrumentation.dataproviders.GenericDataProviderSettings;
-import rocks.inspectit.ocelot.core.instrumentation.config.model.GenericDataProviderConfig;
+import rocks.inspectit.ocelot.core.config.model.instrumentation.actions.GenericActionSettings;
+import rocks.inspectit.ocelot.core.instrumentation.config.model.GenericActionConfig;
 
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class DataProviderResolverTest {
+public class GenericActionConfigurationResolverTest {
 
     @InjectMocks
-    private DataProviderResolver resolver = new DataProviderResolver();
+    private GenericActionConfigurationResolver resolver = new GenericActionConfigurationResolver();
 
     @Nested
-    public class ResolveProviders {
+    public class ResolveActions {
 
-        private static final String PROVIDER_NAME = "My-Provider1";
-        private static final String PROVIDER_VALUE_BODY = "return new Integer(42);";
+        private static final String ACTION_NAME = "My-Action1";
+        private static final String ACTION_VALUE_BODY = "return new Integer(42);";
 
         InstrumentationSettings config;
-        GenericDataProviderSettings inputProvider;
+        GenericActionSettings inputAction;
 
         @BeforeEach
         void setup() {
             config = new InstrumentationSettings();
-            inputProvider = new GenericDataProviderSettings();
-            inputProvider.setValueBody(PROVIDER_VALUE_BODY);
-            config.setDataProviders(Maps.newHashMap(PROVIDER_NAME, inputProvider));
+            inputAction = new GenericActionSettings();
+            inputAction.setValueBody(ACTION_VALUE_BODY);
+            config.setActions(Maps.newHashMap(ACTION_NAME, inputAction));
         }
 
         @Test
         void verifyNamePreserved() {
-            Map<String, GenericDataProviderConfig> result = resolver.resolveProviders(config);
+            Map<String, GenericActionConfig> result = resolver.resolveActions(config);
 
             assertThat(result).hasSize(1);
-            assertThat(result).containsKey(PROVIDER_NAME);
-            assertThat(result.get(PROVIDER_NAME).getName()).isEqualTo(PROVIDER_NAME);
+            assertThat(result).containsKey(ACTION_NAME);
+            assertThat(result.get(ACTION_NAME).getName()).isEqualTo(ACTION_NAME);
         }
 
         @Test
         void verifyThisTypeExtracted() {
-            inputProvider.getInput().put(GenericDataProviderSettings.THIS_VARIABLE, "MyClass");
+            inputAction.getInput().put(GenericActionSettings.THIS_VARIABLE, "MyClass");
 
-            Map<String, GenericDataProviderConfig> result = resolver.resolveProviders(config);
+            Map<String, GenericActionConfig> result = resolver.resolveActions(config);
 
             assertThat(result).hasSize(1);
-            assertThat(result).containsKey(PROVIDER_NAME);
+            assertThat(result).containsKey(ACTION_NAME);
 
-            GenericDataProviderConfig rc = result.get(PROVIDER_NAME);
+            GenericActionConfig rc = result.get(ACTION_NAME);
             assertThat(rc.getExpectedThisType()).isEqualTo("MyClass");
-            assertThat(rc.getName()).isEqualTo(PROVIDER_NAME);
+            assertThat(rc.getName()).isEqualTo(ACTION_NAME);
             assertThat(rc.getAdditionalArgumentTypes()).isEmpty();
             assertThat(rc.getExpectedArgumentTypes()).isEmpty();
             assertThat(rc.getExpectedReturnValueType()).isNull();
             assertThat(rc.isUsesThrown()).isFalse();
             assertThat(rc.getImportedPackages()).isEmpty();
-            assertThat(rc.getValueBody()).isEqualTo(PROVIDER_VALUE_BODY);
+            assertThat(rc.getValueBody()).isEqualTo(ACTION_VALUE_BODY);
         }
 
 
         @Test
         void verifyMethodArgumentsExtracted() {
-            inputProvider.getInput().put(GenericDataProviderSettings.ARG_VARIABLE_PREFIX + 1, "MyClass");
-            inputProvider.getInput().put(GenericDataProviderSettings.ARG_VARIABLE_PREFIX + 3, "MyOtherClass");
+            inputAction.getInput().put(GenericActionSettings.ARG_VARIABLE_PREFIX + 1, "MyClass");
+            inputAction.getInput().put(GenericActionSettings.ARG_VARIABLE_PREFIX + 3, "MyOtherClass");
 
-            Map<String, GenericDataProviderConfig> result = resolver.resolveProviders(config);
+            Map<String, GenericActionConfig> result = resolver.resolveActions(config);
 
             assertThat(result).hasSize(1);
-            assertThat(result).containsKey(PROVIDER_NAME);
+            assertThat(result).containsKey(ACTION_NAME);
 
-            GenericDataProviderConfig rc = result.get(PROVIDER_NAME);
+            GenericActionConfig rc = result.get(ACTION_NAME);
             assertThat(rc.getExpectedThisType()).isNull();
-            assertThat(rc.getName()).isEqualTo(PROVIDER_NAME);
+            assertThat(rc.getName()).isEqualTo(ACTION_NAME);
             assertThat(rc.getAdditionalArgumentTypes()).isEmpty();
             assertThat(rc.getExpectedArgumentTypes()).hasSize(2);
             assertThat(rc.getExpectedArgumentTypes()).containsEntry(1, "MyClass");
@@ -85,23 +85,23 @@ public class DataProviderResolverTest {
             assertThat(rc.getExpectedReturnValueType()).isNull();
             assertThat(rc.isUsesThrown()).isFalse();
             assertThat(rc.getImportedPackages()).isEmpty();
-            assertThat(rc.getValueBody()).isEqualTo(PROVIDER_VALUE_BODY);
+            assertThat(rc.getValueBody()).isEqualTo(ACTION_VALUE_BODY);
         }
 
 
         @Test
         void verifyAdditionalArgumentsExtracted() {
-            inputProvider.getInput().put("argument", "MyClass");
-            inputProvider.getInput().put("x", "MyOtherClass");
+            inputAction.getInput().put("argument", "MyClass");
+            inputAction.getInput().put("x", "MyOtherClass");
 
-            Map<String, GenericDataProviderConfig> result = resolver.resolveProviders(config);
+            Map<String, GenericActionConfig> result = resolver.resolveActions(config);
 
             assertThat(result).hasSize(1);
-            assertThat(result).containsKey(PROVIDER_NAME);
+            assertThat(result).containsKey(ACTION_NAME);
 
-            GenericDataProviderConfig rc = result.get(PROVIDER_NAME);
+            GenericActionConfig rc = result.get(ACTION_NAME);
             assertThat(rc.getExpectedThisType()).isNull();
-            assertThat(rc.getName()).isEqualTo(PROVIDER_NAME);
+            assertThat(rc.getName()).isEqualTo(ACTION_NAME);
             assertThat(rc.getExpectedArgumentTypes()).isEmpty();
             assertThat(rc.getAdditionalArgumentTypes()).hasSize(2);
             assertThat(rc.getAdditionalArgumentTypes()).containsEntry("argument", "MyClass");
@@ -109,83 +109,83 @@ public class DataProviderResolverTest {
             assertThat(rc.getExpectedReturnValueType()).isNull();
             assertThat(rc.isUsesThrown()).isFalse();
             assertThat(rc.getImportedPackages()).isEmpty();
-            assertThat(rc.getValueBody()).isEqualTo(PROVIDER_VALUE_BODY);
+            assertThat(rc.getValueBody()).isEqualTo(ACTION_VALUE_BODY);
         }
 
         @Test
         void verifyReturnValueTypeExtracted() {
-            inputProvider.getInput().put(GenericDataProviderSettings.RETURN_VALUE_VARIABLE, "MyClass");
+            inputAction.getInput().put(GenericActionSettings.RETURN_VALUE_VARIABLE, "MyClass");
 
-            Map<String, GenericDataProviderConfig> result = resolver.resolveProviders(config);
+            Map<String, GenericActionConfig> result = resolver.resolveActions(config);
 
             assertThat(result).hasSize(1);
-            assertThat(result).containsKey(PROVIDER_NAME);
+            assertThat(result).containsKey(ACTION_NAME);
 
-            GenericDataProviderConfig rc = result.get(PROVIDER_NAME);
+            GenericActionConfig rc = result.get(ACTION_NAME);
             assertThat(rc.getExpectedThisType()).isNull();
-            assertThat(rc.getName()).isEqualTo(PROVIDER_NAME);
+            assertThat(rc.getName()).isEqualTo(ACTION_NAME);
             assertThat(rc.getAdditionalArgumentTypes()).isEmpty();
             assertThat(rc.getExpectedArgumentTypes()).isEmpty();
             assertThat(rc.getExpectedReturnValueType()).isEqualTo("MyClass");
             assertThat(rc.isUsesThrown()).isFalse();
             assertThat(rc.getImportedPackages()).isEmpty();
-            assertThat(rc.getValueBody()).isEqualTo(PROVIDER_VALUE_BODY);
+            assertThat(rc.getValueBody()).isEqualTo(ACTION_VALUE_BODY);
         }
 
         @Test
         void verifyThrownExtracted() {
-            inputProvider.getInput().put(GenericDataProviderSettings.THROWN_VARIABLE, "java.lang.Throwable");
+            inputAction.getInput().put(GenericActionSettings.THROWN_VARIABLE, "java.lang.Throwable");
 
-            Map<String, GenericDataProviderConfig> result = resolver.resolveProviders(config);
+            Map<String, GenericActionConfig> result = resolver.resolveActions(config);
 
             assertThat(result).hasSize(1);
-            assertThat(result).containsKey(PROVIDER_NAME);
+            assertThat(result).containsKey(ACTION_NAME);
 
-            GenericDataProviderConfig rc = result.get(PROVIDER_NAME);
+            GenericActionConfig rc = result.get(ACTION_NAME);
             assertThat(rc.getExpectedThisType()).isNull();
-            assertThat(rc.getName()).isEqualTo(PROVIDER_NAME);
+            assertThat(rc.getName()).isEqualTo(ACTION_NAME);
             assertThat(rc.getAdditionalArgumentTypes()).isEmpty();
             assertThat(rc.getExpectedArgumentTypes()).isEmpty();
             assertThat(rc.getExpectedReturnValueType()).isNull();
             assertThat(rc.isUsesThrown()).isTrue();
             assertThat(rc.getImportedPackages()).isEmpty();
-            assertThat(rc.getValueBody()).isEqualTo(PROVIDER_VALUE_BODY);
+            assertThat(rc.getValueBody()).isEqualTo(ACTION_VALUE_BODY);
         }
 
         @Test
         void verifyImportedPackagedExtracted() {
-            inputProvider.getImports().add("my.package");
-            inputProvider.getImports().add("my.other.package");
+            inputAction.getImports().add("my.package");
+            inputAction.getImports().add("my.other.package");
 
-            Map<String, GenericDataProviderConfig> result = resolver.resolveProviders(config);
+            Map<String, GenericActionConfig> result = resolver.resolveActions(config);
 
             assertThat(result).hasSize(1);
-            assertThat(result).containsKey(PROVIDER_NAME);
+            assertThat(result).containsKey(ACTION_NAME);
 
-            GenericDataProviderConfig rc = result.get(PROVIDER_NAME);
+            GenericActionConfig rc = result.get(ACTION_NAME);
             assertThat(rc.getExpectedThisType()).isNull();
-            assertThat(rc.getName()).isEqualTo(PROVIDER_NAME);
+            assertThat(rc.getName()).isEqualTo(ACTION_NAME);
             assertThat(rc.getAdditionalArgumentTypes()).isEmpty();
             assertThat(rc.getExpectedArgumentTypes()).isEmpty();
             assertThat(rc.getExpectedReturnValueType()).isNull();
             assertThat(rc.isUsesThrown()).isFalse();
             assertThat(rc.getImportedPackages()).containsExactly("my.package", "my.other.package");
-            assertThat(rc.getValueBody()).isEqualTo(PROVIDER_VALUE_BODY);
+            assertThat(rc.getValueBody()).isEqualTo(ACTION_VALUE_BODY);
         }
 
         @Test
         void verifyValueUsedIfPresent() {
-            inputProvider.setValueBody(null);
-            inputProvider.setValue("\"Test\"");
+            inputAction.setValueBody(null);
+            inputAction.setValue("\"Test\"");
 
-            Map<String, GenericDataProviderConfig> result = resolver.resolveProviders(config);
+            Map<String, GenericActionConfig> result = resolver.resolveActions(config);
 
             assertThat(result).hasSize(1);
-            assertThat(result).containsKey(PROVIDER_NAME);
+            assertThat(result).containsKey(ACTION_NAME);
 
-            GenericDataProviderConfig rc = result.get(PROVIDER_NAME);
+            GenericActionConfig rc = result.get(ACTION_NAME);
             assertThat(rc.getExpectedThisType()).isNull();
-            assertThat(rc.getName()).isEqualTo(PROVIDER_NAME);
+            assertThat(rc.getName()).isEqualTo(ACTION_NAME);
             assertThat(rc.getAdditionalArgumentTypes()).isEmpty();
             assertThat(rc.getExpectedArgumentTypes()).isEmpty();
             assertThat(rc.getExpectedReturnValueType()).isNull();

@@ -15,6 +15,6 @@ inspectit:
         scopes:
           NamedElement-doSomething: true
         entry:
-          #defined in DataProvidersTest.yml
-          name: { provider: readNameViaThis }
+          #defined in GenericActionsTest.yml
+          name: { action: readNameViaThis }
 

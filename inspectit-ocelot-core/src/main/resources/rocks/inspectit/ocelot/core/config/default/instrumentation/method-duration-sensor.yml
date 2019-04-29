@@ -15,11 +15,11 @@ inspectit:
     rules:
       record_method_duration:
         entry:
-          method_entry_time: { provider: timestamp_nanos }
-          method_name: {provider: get_method_fqn }
+          method_entry_time: { action: timestamp_nanos }
+          method_name: {action: get_method_fqn }
         exit:
           method_duration:
-            provider: elapsed_millis
+            action: elapsed_millis
             data-input:
               sinceNanos: method_entry_time
         metrics:

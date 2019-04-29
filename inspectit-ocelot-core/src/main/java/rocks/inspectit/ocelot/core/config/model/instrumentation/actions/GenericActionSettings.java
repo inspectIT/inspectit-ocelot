@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.core.config.model.instrumentation.dataproviders;
+package rocks.inspectit.ocelot.core.config.model.instrumentation.actions;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,13 +12,13 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 /**
- * Settings defining a generic data provider.
+ * Settings defining a generic action.
  * The name is defined by the key within the map
- * {@link InstrumentationSettings#getDataProviders()}
+ * {@link InstrumentationSettings#getActions()}
  */
 @Data
 @NoArgsConstructor
-public class GenericDataProviderSettings {
+public class GenericActionSettings {
 
     public static final String PACKAGE_REGEX = "[a-zA-Z]\\w*(\\.[a-zA-Z]\\w*)*";
 
@@ -47,7 +47,7 @@ public class GenericDataProviderSettings {
     );
 
     /**
-     * Defines the input variables used by this data provider.
+     * Defines the input variables used by this action.
      * The key is the name of the variable, the value is the type of the corresponding variable.
      * The following "special" variables are available:
      * - thiz: the this-instance on which the instrumented method is executed.
@@ -58,7 +58,7 @@ public class GenericDataProviderSettings {
      * - methodName: the name of the method being instrumented, e.g. "hashcode", "doXYZ" or "<init>" for a constructor
      * - parameterTypes: the types of the arguments with which the method is declared in form of a Class[] array
      * <p>
-     * null if void, the method threw an exception or the provider is not executed at the method exit
+     * null if void, the method threw an exception or the action is not executed at the method exit
      * - thrown: the {@link Throwable}-Object raised by the the executed method, the type must be java.lang.Throwable
      * null if no throwable was raised
      * <p>
@@ -75,15 +75,15 @@ public class GenericDataProviderSettings {
             String> imports = new ArrayList<>();
 
     /**
-     * A single Java-statement (without return) defining the value of this data provider.
+     * A single Java-statement (without return) defining the value of this action.
      * The statement must be of type Object, primitive results have to wrapped manually!
      * If this field is present, {@link #valueBody} must be null!
      */
     private String value;
 
     /**
-     * A string defining the Java method body of the data-provider without surrounding braces {}.
-     * This method body must have a return statement to return the value provided by the provider!
+     * A string defining the Java method body of the generic action without surrounding braces {}.
+     * This method body must have a return statement to return the value provided by the action!
      * The statement must be of type Object, primitive results have to wrapped manually!
      * If this field is present, {@link #value} must be null!
      */
