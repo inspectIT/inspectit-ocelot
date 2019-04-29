@@ -11,3 +11,21 @@ inspectit:
         host: 0.0.0.0
         # the port on which the /metrics endpoint of prometheus will be started
         port: 8888
+    # settings for metrics exporters
+    tracing:
+      # settings for the zipkin exporter (https://github.com/census-instrumentation/opencensus-java/tree/master/exporters/trace/zipkin)
+      zipkin:
+        # if true, the agent will try to start the ZipKin trace exporter
+        enabled: true
+        # the v2 Url under which the ZipKin server can be accessed, e.g. http://127.0.0.1:9411/api/v2/spans
+        url: null
+        # the service-name which will be used to publish the spans
+        service-name: ${inspectit.service-name}
+      # settings for the jaeger exporter (https://github.com/census-instrumentation/opencensus-java/tree/master/exporters/trace/jaeger)
+      jaeger:
+        # if true, the agent will try to start the Jaeger trace exporter
+        enabled: true
+        # the URL under which the jaeger thrift server can be accessed, e.g. http://127.0.0.1:14268/api/traces
+        url: null
+        # the service-name which will be used to publish the spans
+        service-name: ${inspectit.service-name}

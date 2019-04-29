@@ -10,6 +10,7 @@ import rocks.inspectit.ocelot.core.config.model.logging.LoggingSettings;
 import rocks.inspectit.ocelot.core.config.model.metrics.MetricsSettings;
 import rocks.inspectit.ocelot.core.config.model.selfmonitoring.SelfMonitoringSettings;
 import rocks.inspectit.ocelot.core.config.model.tags.TagsSettings;
+import rocks.inspectit.ocelot.core.config.model.tracing.TracingSettings;
 import rocks.inspectit.ocelot.core.config.model.validation.AdditionalValidation;
 import rocks.inspectit.ocelot.core.config.model.validation.AdditionalValidations;
 import rocks.inspectit.ocelot.core.config.model.validation.ViolationBuilder;
@@ -64,6 +65,12 @@ public class InspectitConfig {
      */
     @Valid
     private MetricsSettings metrics = new MetricsSettings();
+
+    /**
+     * General tracing settings.
+     */
+    @Valid
+    private TracingSettings tracing = new TracingSettings();
 
     /**
      * General logging settings.

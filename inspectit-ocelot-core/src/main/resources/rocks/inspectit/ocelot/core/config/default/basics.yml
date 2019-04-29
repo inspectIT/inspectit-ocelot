@@ -20,6 +20,13 @@ inspectit:
     # these tag values would overwrite any value added by the providers, thus you can easily overwrite tags values by your own
     extra: {}
 
+  # general settings regarding trace capturing
+  tracing:
+    # master switch for trace capturing. When set to false the following happens:
+    #  - all trace exporters are disabled
+    #  - tracing is disabled for all instrumentation rules
+    enabled: true
+
   # general settings regarding metrics capturing
   metrics:
     # master switch for metrics capturing. When set to false the following happens:
