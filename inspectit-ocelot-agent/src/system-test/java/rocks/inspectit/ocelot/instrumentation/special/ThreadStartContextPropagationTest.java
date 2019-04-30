@@ -2,8 +2,10 @@ package rocks.inspectit.ocelot.instrumentation.special;
 
 import io.opencensus.common.Scope;
 import io.opencensus.tags.*;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import rocks.inspectit.ocelot.instrumentation.InstrumentationSysTestBase;
+import rocks.inspectit.ocelot.utils.TestUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -48,11 +50,10 @@ public class ThreadStartContextPropagationTest extends InstrumentationSysTestBas
         }
     }
 
-    static {
-        // Make sure the classes to instruemtn are loaded before the test starts
-        // so that they are instrumented
-        SubThread.class.getDeclaredMethods();
-        AbstractThread.class.getDeclaredMethods();
+
+    @BeforeAll
+    static void waitForInstrumentation() {
+        TestUtils.waitForClassInstrumentation(Thread.class, 15, TimeUnit.SECONDS);
     }
 
 

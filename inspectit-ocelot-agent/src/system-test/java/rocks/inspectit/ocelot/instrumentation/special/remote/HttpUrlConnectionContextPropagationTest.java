@@ -12,7 +12,6 @@ import rocks.inspectit.ocelot.utils.TestUtils;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -39,7 +38,11 @@ public class HttpUrlConnectionContextPropagationTest {
         urlConnection.getResponseCode();
 
         TestUtils.waitForClassInstrumentation(HttpURLConnection.class, 10, TimeUnit.SECONDS);
-        TestUtils.waitForInstrumentationToComplete();
+        try {
+            TestUtils.waitForClassInstrumentation(Class.forName("sun.net.www.protocol.http.HttpURLConnection"), 10, TimeUnit.SECONDS);
+        } catch (Exception e) {
+        }
+
     }
 
     @BeforeEach

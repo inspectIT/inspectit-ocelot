@@ -76,7 +76,10 @@ public class ServiceInMetricTest {
             server.start();
 
             TestUtils.waitForClassInstrumentations(Arrays.asList(HttpURLConnection.class, HttpServlet.class), 10, TimeUnit.SECONDS);
-            TestUtils.waitForInstrumentationToComplete();
+            try {
+                TestUtils.waitForClassInstrumentation(Class.forName("sun.net.www.protocol.http.HttpURLConnection"), 10, TimeUnit.SECONDS);
+            } catch (Exception e) {
+            }
 
             Map<String, String> tags = new HashMap<>();
             tags.put("protocol", "http");

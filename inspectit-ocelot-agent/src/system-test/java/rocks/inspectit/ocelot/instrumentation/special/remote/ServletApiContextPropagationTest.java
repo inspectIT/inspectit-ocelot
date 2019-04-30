@@ -1,7 +1,7 @@
 package rocks.inspectit.ocelot.instrumentation.special.remote;
 
-import com.github.tomakehurst.wiremock.servlet.TrailingSlashFilter;
 import com.google.common.collect.ImmutableMap;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.FilterMapping;
 import org.eclipse.jetty.servlet.ServletHandler;
@@ -39,13 +39,14 @@ public class ServletApiContextPropagationTest {
 
     private Server server;
 
-    public static Object sink;
 
     @BeforeAll
     static void waitForInstrumentation() throws ClassNotFoundException {
-        sink = TestFilter.class.getDeclaredMethods();
-        sink = TestServlet.class.getDeclaredMethods();
-        TestUtils.waitForInstrumentationToComplete();
+        TestUtils.waitForClassInstrumentations(Arrays.asList(TestFilter.class, HttpServlet.class, CloseableHttpClient.class, HttpURLConnection.class), 10, TimeUnit.SECONDS);
+        try {
+            TestUtils.waitForClassInstrumentation(Class.forName("sun.net.www.protocol.http.HttpURLConnection"), 10, TimeUnit.SECONDS);
+        } catch (Exception e) {
+        }
     }
 
     @BeforeEach

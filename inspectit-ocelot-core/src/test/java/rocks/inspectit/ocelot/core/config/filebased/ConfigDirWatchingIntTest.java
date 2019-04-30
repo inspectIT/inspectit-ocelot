@@ -48,7 +48,7 @@ public class ConfigDirWatchingIntTest {
         @Test
         public void testNewFilesDetected() throws Exception {
             FileUtils.write(new File(tmpDir + "/A.properties"), "inspectit.service-name=FromAproperties", Charset.defaultCharset());
-            await().atMost(5, TimeUnit.SECONDS).untilAsserted(() ->
+            await().atMost(15, TimeUnit.SECONDS).untilAsserted(() ->
                     assertThat(env.getCurrentConfig().getServiceName()).isEqualTo("FromAproperties")
             );
         }
@@ -57,11 +57,11 @@ public class ConfigDirWatchingIntTest {
         @Test
         public void testFileChangesDetected() throws Exception {
             FileUtils.write(new File(tmpDir + "/A.yml"), "inspectit.service-name: FromAproperties", Charset.defaultCharset());
-            await().atMost(5, TimeUnit.SECONDS).untilAsserted(() ->
+            await().atMost(15, TimeUnit.SECONDS).untilAsserted(() ->
                     assertThat(env.getCurrentConfig().getServiceName()).isEqualTo("FromAproperties")
             );
             FileUtils.write(new File(tmpDir + "/A.yml"), "inspectit.service-name: newname", Charset.defaultCharset());
-            await().atMost(5, TimeUnit.SECONDS).untilAsserted(() ->
+            await().atMost(15, TimeUnit.SECONDS).untilAsserted(() ->
                     assertThat(env.getCurrentConfig().getServiceName()).isEqualTo("newname")
             );
         }
@@ -69,12 +69,12 @@ public class ConfigDirWatchingIntTest {
         @Test
         public void testFileDeleted() throws Exception {
             FileUtils.write(new File(tmpDir + "/A.yml"), "inspectit.service-name: FromAproperties", Charset.defaultCharset());
-            await().atMost(5, TimeUnit.SECONDS).untilAsserted(() ->
+            await().atMost(15, TimeUnit.SECONDS).untilAsserted(() ->
                     assertThat(env.getCurrentConfig().getServiceName()).isEqualTo("FromAproperties")
             );
-            await().atMost(5, TimeUnit.SECONDS).until(() ->
+            await().atMost(15, TimeUnit.SECONDS).until(() ->
                     FileUtils.deleteQuietly(new File(tmpDir + "/A.yml")));
-            await().atMost(5, TimeUnit.SECONDS).untilAsserted(() ->
+            await().atMost(15, TimeUnit.SECONDS).untilAsserted(() ->
                     assertThat(env.getCurrentConfig().getServiceName()).isEqualTo("InspectIT Agent")
             );
         }
@@ -95,7 +95,7 @@ public class ConfigDirWatchingIntTest {
         @Test
         public void testNewFilesDetected() throws Exception {
             FileUtils.write(new File(tmpDir + "/A.properties"), "inspectit.service-name=FromAproperties", Charset.defaultCharset());
-            await().atMost(5, TimeUnit.SECONDS).untilAsserted(() ->
+            await().atMost(15, TimeUnit.SECONDS).untilAsserted(() ->
                     assertThat(env.getCurrentConfig().getServiceName()).isEqualTo("FromAproperties")
             );
         }
@@ -104,11 +104,11 @@ public class ConfigDirWatchingIntTest {
         @Test
         public void testFileChangesDetected() throws Exception {
             FileUtils.write(new File(tmpDir + "/A.yml"), "inspectit.service-name: FromAproperties", Charset.defaultCharset());
-            await().atMost(5, TimeUnit.SECONDS).untilAsserted(() ->
+            await().atMost(15, TimeUnit.SECONDS).untilAsserted(() ->
                     assertThat(env.getCurrentConfig().getServiceName()).isEqualTo("FromAproperties")
             );
             FileUtils.write(new File(tmpDir + "/A.yml"), "inspectit.service-name: newname", Charset.defaultCharset());
-            await().atMost(5, TimeUnit.SECONDS).untilAsserted(() ->
+            await().atMost(15, TimeUnit.SECONDS).untilAsserted(() ->
                     assertThat(env.getCurrentConfig().getServiceName()).isEqualTo("newname")
             );
         }
@@ -116,12 +116,12 @@ public class ConfigDirWatchingIntTest {
         @Test
         public void testFileDeleted() throws Exception {
             FileUtils.write(new File(tmpDir + "/A.yml"), "inspectit.service-name: FromAproperties", Charset.defaultCharset());
-            await().atMost(5, TimeUnit.SECONDS).untilAsserted(() ->
+            await().atMost(15, TimeUnit.SECONDS).untilAsserted(() ->
                     assertThat(env.getCurrentConfig().getServiceName()).isEqualTo("FromAproperties")
             );
-            await().atMost(5, TimeUnit.SECONDS).until(() ->
+            await().atMost(15, TimeUnit.SECONDS).until(() ->
                     FileUtils.deleteQuietly(new File(tmpDir + "/A.yml")));
-            await().atMost(5, TimeUnit.SECONDS).untilAsserted(() ->
+            await().atMost(15, TimeUnit.SECONDS).untilAsserted(() ->
                     assertThat(env.getCurrentConfig().getServiceName()).isEqualTo("InspectIT Agent")
             );
         }
