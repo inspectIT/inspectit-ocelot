@@ -1,6 +1,7 @@
 package rocks.inspectit.ocelot.agent;
 
 import rocks.inspectit.ocelot.bootstrap.AgentManager;
+import rocks.inspectit.ocelot.bootstrap.Instances;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -68,6 +69,8 @@ public class AgentMain {
     private static InspectITClassLoader initializeInspectitLoader(Instrumentation inst, boolean includeOpenCensus) throws IOException {
         Path bootstrapJar = copyResourceToTempJarFile(INSPECTIT_BOOTSTRAP_JAR_PATH);
         inst.appendToBootstrapClassLoaderSearch(new JarFile(bootstrapJar.toFile()));
+
+        Instances.BOOTSTRAP_JAR_URL = bootstrapJar.toUri().toURL().toString();
 
         Path coreJar = copyResourceToTempJarFile(INSPECTIT_CORE_JAR_PATH);
         InspectITClassLoader icl = new InspectITClassLoader(new URL[]{coreJar.toUri().toURL()});

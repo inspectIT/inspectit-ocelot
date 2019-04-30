@@ -1,13 +1,14 @@
 package rocks.inspectit.ocelot.bootstrap.instrumentation.noop;
 
-import rocks.inspectit.ocelot.bootstrap.instrumentation.IObjectAttachments;
+import rocks.inspectit.ocelot.bootstrap.accessible.ObjectAttachments;
 
-public class NoopObjectAttachments implements IObjectAttachments {
+public class NoopObjectAttachments implements ObjectAttachments {
 
     public static final NoopObjectAttachments INSTANCE = new NoopObjectAttachments();
 
     @Override
-    public void attach(Object target, String key, Object value) {
+    public Object attach(Object target, String key, Object value) {
+        return null;
     }
 
     @Override

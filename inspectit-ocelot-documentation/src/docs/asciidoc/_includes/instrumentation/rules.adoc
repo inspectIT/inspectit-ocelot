@@ -218,6 +218,16 @@ If the method terminated with an exception or the action is executed in the entr
 | The exception thrown by the instrumented method within which this action is getting executed.
 If the method returned normally or the action is executed in the entry phase this is `null`.
 
+
+|`_context`
+| https://github.com/inspectIT/inspectit-ocelot/blob/master/inspectit-ocelot-bootstrap/src/main/java/rocks/inspectit/ocelot/bootstrap/accessible/InspectitContext.java[InspectitContext]
+| Gives direct read and write access to the current <<Data Propagation, context>>. Can be used to implement custom data propagation.
+
+
+|`_attachments`
+| https://github.com/inspectIT/inspectit-ocelot/blob/master/inspectit-ocelot-bootstrap/src/main/java/rocks/inspectit/ocelot/bootstrap/accessible/ObjectAttachments.java[ObjectAttachments]
+| Allows you to attach values to objects instead of to the control flow, as done via `_context`.
+
 |===
 
 ===== Multiple statements and Imports

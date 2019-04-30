@@ -3,7 +3,7 @@ inspectit:
   instrumentation:  
 
     data:
-      servicegraph_jdbc_entry_found: {down-propagation: JVM_LOCAL, is-tag: false}
+      servicegraph_jdbc_entry_found: {is-tag: false}
 
     rules:
       servicegraph_record_jdbc_calls:
@@ -11,19 +11,14 @@ inspectit:
           jdbc_statement_execute: true
         entry:
           servicegraph_is_entry:
-            action: set
-            constant-input: { value: 1}
-            only-if-null: servicegraph_jdbc_entry_found
-            before: { servicegraph_jdbc_entry_found: true }
-          servicegraph_jdbc_entry_found:
-            action: set
-            constant-input: {value: true}
+            action: test_and_set_marker
+            constant-input: { marker: servicegraph_jdbc_entry_found}
           
           servicegraph_call_entry: { action: timestamp_nanos }
           
           target_external:
             action: get_jdbc_statement_connection_name
-            only-if-not-null: servicegraph_is_entry
+            only-if-true: servicegraph_is_entry
           origin_service: 
             action: set
             data-input: {value: service}
@@ -35,7 +30,7 @@ inspectit:
           servicegraph_call_duration:
             action: elapsed_millis
             data-input: {sinceNanos: servicegraph_call_entry }
-            only-if-not-null: servicegraph_is_entry
+            only-if-true: servicegraph_is_entry
           
         metrics:
           '[service/out/responsetime]': servicegraph_call_duration

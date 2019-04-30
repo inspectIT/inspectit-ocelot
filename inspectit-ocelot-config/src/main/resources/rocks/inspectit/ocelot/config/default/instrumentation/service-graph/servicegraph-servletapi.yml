@@ -14,13 +14,8 @@ inspectit:
           
           #entry point detection
           servicegraph_is_entry:
-            action: set
-            constant-input: { value: 1}
-            only-if-null: servicegraph_servlet_entry_found
-            before: { servicegraph_servlet_entry_found: true }
-          servicegraph_servlet_entry_found:
-            action: set
-            constant-input: {value: true}
+            action: test_and_set_marker
+            constant-input: { marker: servicegraph_servlet_entry_found}
           
           servicegraph_call_entry: { action: timestamp_nanos }
           
@@ -36,7 +31,7 @@ inspectit:
           prop_target_service: 
             action: set
             data-input: {value: service}
-            only-if-not-null: servicegraph_is_entry
+            only-if-true: servicegraph_is_entry
           
         exit:
           target_service:
@@ -48,7 +43,7 @@ inspectit:
           servicegraph_call_duration:
             action: elapsed_millis
             data-input: {sinceNanos: servicegraph_call_entry }
-            only-if-not-null: servicegraph_is_entry
+            only-if-true: servicegraph_is_entry
         metrics:
           '[service/in/responsetime]': servicegraph_call_duration
           

@@ -1,0 +1,65 @@
+
+inspectit:
+  metrics:
+    definitions:
+      writeAttachment:
+        unit: invocations
+        views:
+          writeAttachment:
+            aggregation: COUNT
+            tags: {target: true, firstVal: true, secondVal: true}
+      readAttachment:
+        unit: invocations
+        views:
+          readAttachment:
+            aggregation: COUNT
+            tags: {target: true, firstVal: true, secondVal: true}
+
+  instrumentation:
+    scopes:
+      ObjectAttachmentsTest-writeAttachments:
+        type: { name: ObjectAttachmentsTest, matcher-mode: ENDS_WITH}
+        methods: [{name: writeAttachments}]
+      ObjectAttachmentsTest-readAttachments:
+        type: { name: ObjectAttachmentsTest, matcher-mode: ENDS_WITH}
+        methods: [{name: readAttachments}]
+
+
+
+    rules:
+      ObjectAttachmentsTest-writeAttachments:
+        scopes: { ObjectAttachmentsTest-writeAttachments: true }
+        entry:
+          target: {action: get_arg0}
+          new_firstVal: {action: get_arg1}
+          new_secondVal: {action: get_arg2}
+
+          firstVal:
+            action: replace_attachment
+            constant-input: {key: "first"}
+            data-input: {target: target, value: new_firstVal}
+
+          secondVal:
+            action: replace_attachment
+            constant-input: {key: "second"}
+            data-input: {target: target, value: new_secondVal}
+        metrics:
+          writeAttachment: 1
+
+
+      ObjectAttachmentsTest-readAttachments:
+        scopes: { ObjectAttachmentsTest-readAttachments: true }
+        entry:
+          target: {action: get_arg0}
+
+          firstVal:
+            action: read_attachment
+            constant-input: {key: "first"}
+            data-input: {target: target}
+
+          secondVal:
+            action: read_attachment
+            constant-input: {key: "second"}
+            data-input: {target: target}
+        metrics:
+          readAttachment: 1

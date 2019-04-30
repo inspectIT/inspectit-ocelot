@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.bootstrap.instrumentation;
+package rocks.inspectit.ocelot.bootstrap.accessible;
 
 /**
  * Abstraction for a simple map which allows to attach arbitrary objects to other objects based on a string key.
@@ -6,7 +6,7 @@ package rocks.inspectit.ocelot.bootstrap.instrumentation;
  * <p>
  * In addition this data structure is thread safe.
  */
-public interface IObjectAttachments {
+public interface ObjectAttachments {
 
     /**
      * Attaches the given value to the given target object under the given key name.
@@ -15,8 +15,9 @@ public interface IObjectAttachments {
      * @param target the object to which this value shall be attached
      * @param key    the name under which the value shall be attached
      * @param value  the value to attach or null to remove the value.
+     * @return the value previously attached to this Object with the given key
      */
-    void attach(Object target, String key, Object value);
+    Object attach(Object target, String key, Object value);
 
     /**
      * Reads an attachment given the target object and the key under which the value was attached.
