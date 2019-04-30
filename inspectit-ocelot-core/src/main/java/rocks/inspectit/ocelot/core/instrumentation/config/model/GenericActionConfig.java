@@ -21,6 +21,11 @@ import java.util.SortedMap;
 public class GenericActionConfig {
 
     /**
+     * See {@link GenericActionSettings#isVoid}
+     */
+    private boolean isVoid;
+
+    /**
      * The name uniquely identifying this generic action.
      */
     private String name;

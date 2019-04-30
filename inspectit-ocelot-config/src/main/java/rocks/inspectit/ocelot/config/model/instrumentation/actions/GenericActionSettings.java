@@ -1,7 +1,6 @@
 package rocks.inspectit.ocelot.config.model.instrumentation.actions;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.util.StringUtils;
 import rocks.inspectit.ocelot.config.model.instrumentation.InstrumentationSettings;
 
@@ -52,6 +51,15 @@ public class GenericActionSettings {
     );
 
     /**
+     * If true, the action does not return a value.
+     * This means when it is called, no data is explicitly written unless done through
+     * the _context special variable.
+     */
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
+    private boolean isVoid = false;
+
+    /**
      * Defines the input variables used by this action.
      * The key is the name of the variable, the value is the type of the corresponding variable.
      * The following "special" variables are available:
@@ -94,6 +102,13 @@ public class GenericActionSettings {
      */
     private String valueBody;
 
+    public boolean getIsVoid() {
+        return isVoid;
+    }
+
+    public void setIsVoid(boolean isVoid) {
+        this.isVoid = isVoid;
+    }
 
     @AssertFalse(message = "Either 'value' or 'valueBody' must be present")
     private boolean isEitherValueOrValueBodyPresent() {

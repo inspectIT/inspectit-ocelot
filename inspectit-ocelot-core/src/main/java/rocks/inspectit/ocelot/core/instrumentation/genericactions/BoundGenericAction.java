@@ -24,14 +24,14 @@ import java.util.function.Function;
 public abstract class BoundGenericAction implements IHookAction {
 
     /**
-     * The data to which the value is assigned
+     * The name of the call, usually equal to the data key.
      */
-    protected final String dataKey;
+    private final String callName;
 
     /**
      * The name of the action, only used to provide a meaningful name via getName()
      */
-    private final String actionName;
+    protected final String actionName;
 
     /**
      * Reference to the class of the generic action.
@@ -46,9 +46,9 @@ public abstract class BoundGenericAction implements IHookAction {
     protected final WeakReference<IGenericAction> action;
 
 
-    protected BoundGenericAction(String dataKey, GenericActionConfig actionConfig, InjectedClass<?> actionClass) {
-        this.dataKey = dataKey;
+    protected BoundGenericAction(String callName, GenericActionConfig actionConfig, InjectedClass<?> actionClass) {
         actionName = actionConfig.getName();
+        this.callName = callName;
         this.actionClass = actionClass;
         try {
             action = new WeakReference<>((IGenericAction) actionClass.getInjectedClassObject().get().getField("INSTANCE").get(null));
@@ -59,7 +59,7 @@ public abstract class BoundGenericAction implements IHookAction {
 
     @Override
     public String getName() {
-        return "Action '" + actionName + "' for '" + dataKey + "'";
+        return "Action '" + actionName + "' for call '" + callName + "'";
     }
 
     /**
@@ -80,20 +80,28 @@ public abstract class BoundGenericAction implements IHookAction {
                                           Map<String, Function<ExecutionContext, Object>> dynamicAssignments) {
 
         if (dynamicAssignments.isEmpty()) {
-            return new ConstantOnlyBoundGenericAction(dataKey, actionConfig, action, constantAssignments);
+            if (actionConfig.isVoid()) {
+                return new VoidConstantOnlyBoundGenericAction(dataKey, actionConfig, action, constantAssignments);
+            } else {
+                return new NonVoidConstantOnlyBoundGenericAction(dataKey, dataKey, actionConfig, action, constantAssignments);
+            }
         } else {
-            return new DynamicBoundGenericAction(dataKey, actionConfig, action, constantAssignments, dynamicAssignments);
+            if (actionConfig.isVoid()) {
+                return new VoidDynamicBoundGenericAction(dataKey, actionConfig, action, constantAssignments, dynamicAssignments);
+            } else {
+                return new NonVoidDynamicBoundGenericAction(dataKey, dataKey, actionConfig, action, constantAssignments, dynamicAssignments);
+            }
         }
     }
 }
 
-class ConstantOnlyBoundGenericAction extends BoundGenericAction {
+abstract class AbstractConstantOnlyBoundGenericAction extends BoundGenericAction {
 
-    private final Object[] arguments;
+    protected final Object[] arguments;
 
-    public ConstantOnlyBoundGenericAction(String dataKey, GenericActionConfig actionConfig,
-                                          InjectedClass<?> action, Map<String, Object> constantAssignments) {
-        super(dataKey, actionConfig, action);
+    public AbstractConstantOnlyBoundGenericAction(String callName, GenericActionConfig actionConfig,
+                                                  InjectedClass<?> action, Map<String, Object> constantAssignments) {
+        super(callName, actionConfig, action);
 
         // the additionalArgumentTypes is a sorted map
         // the order in which the arguments appear in this map correspond to the order in which their values
@@ -104,6 +112,17 @@ class ConstantOnlyBoundGenericAction extends BoundGenericAction {
                         constantAssignments::get
                 ).toArray();
     }
+}
+
+class NonVoidConstantOnlyBoundGenericAction extends AbstractConstantOnlyBoundGenericAction {
+
+    private final String dataKey;
+
+    NonVoidConstantOnlyBoundGenericAction(String dataKey, String callName, GenericActionConfig actionConfig,
+                                          InjectedClass<?> action, Map<String, Object> constantAssignments) {
+        super(callName, actionConfig, action, constantAssignments);
+        this.dataKey = dataKey;
+    }
 
     @Override
     public void execute(ExecutionContext context) {
@@ -113,11 +132,26 @@ class ConstantOnlyBoundGenericAction extends BoundGenericAction {
     }
 }
 
-class DynamicBoundGenericAction extends BoundGenericAction {
+
+class VoidConstantOnlyBoundGenericAction extends AbstractConstantOnlyBoundGenericAction {
+
+    VoidConstantOnlyBoundGenericAction(String callName, GenericActionConfig actionConfig,
+                                       InjectedClass<?> action, Map<String, Object> constantAssignments) {
+        super(callName, actionConfig, action, constantAssignments);
+    }
+
+    @Override
+    public void execute(ExecutionContext context) {
+        action.get().execute(context.getMethodArguments(), context.getThiz(),
+                context.getReturnValue(), context.getThrown(), arguments);
+    }
+}
+
+abstract class AbstractDynamicBoundGenericAction extends BoundGenericAction {
 
     /**
      * A template containing the already assigned constant arguments for this generic action.
-     * As the same {@link DynamicBoundGenericAction} instance could potentially be used by multiple threads,
+     * As the same {@link AbstractDynamicBoundGenericAction} instance could potentially be used by multiple threads,
      * this array needs to be copied before the dynamicAssignments can be performed.
      */
     private final Object[] argumentsTemplate;
@@ -130,10 +164,10 @@ class DynamicBoundGenericAction extends BoundGenericAction {
      */
     private Pair<Integer, Function<ExecutionContext, Object>>[] dynamicAssignments;
 
-    public DynamicBoundGenericAction(String dataKey, GenericActionConfig actionConfig,
-                                     InjectedClass<?> action, Map<String, Object> constantAssignments,
-                                     Map<String, Function<ExecutionContext, Object>> dynamicAssignments) {
-        super(dataKey, actionConfig, action);
+    AbstractDynamicBoundGenericAction(String callName, GenericActionConfig actionConfig,
+                                      InjectedClass<?> action, Map<String, Object> constantAssignments,
+                                      Map<String, Function<ExecutionContext, Object>> dynamicAssignments) {
+        super(callName, actionConfig, action);
 
         // the sorted additionalArgumentTypes map defines the number and the order of the additional input
         // parameters the generic action expects
@@ -164,16 +198,51 @@ class DynamicBoundGenericAction extends BoundGenericAction {
         this.dynamicAssignments = dynamicAssignmentsWithIndices.toArray(new Pair[0]);
     }
 
-    @Override
-    public void execute(ExecutionContext context) {
+    Object[] buildAdditionalArguments(ExecutionContext context) {
         Object[] args = Arrays.copyOf(argumentsTemplate, argumentsTemplate.length);
 
         for (val assignment : dynamicAssignments) {
             args[assignment.getLeft()] = assignment.getRight().apply(context);
         }
+        return args;
+    }
+}
 
+
+class NonVoidDynamicBoundGenericAction extends AbstractDynamicBoundGenericAction {
+
+    private final String dataKey;
+
+    NonVoidDynamicBoundGenericAction(String callName, String dataKey, GenericActionConfig actionConfig,
+                                     InjectedClass<?> action, Map<String, Object> constantAssignments,
+                                     Map<String, Function<IHookAction.ExecutionContext, Object>> dynamicAssignments) {
+        super(callName, actionConfig, action, constantAssignments, dynamicAssignments);
+        this.dataKey = dataKey;
+    }
+
+    @Override
+    public void execute(ExecutionContext context) {
+        Object[] args = buildAdditionalArguments(context);
         Object result = action.get().execute(context.getMethodArguments(), context.getThiz(),
                 context.getReturnValue(), context.getThrown(), args);
         context.getInspectitContext().setData(dataKey, result);
+    }
+}
+
+
+class VoidDynamicBoundGenericAction extends AbstractDynamicBoundGenericAction {
+
+
+    VoidDynamicBoundGenericAction(String callName, GenericActionConfig actionConfig,
+                                  InjectedClass<?> action, Map<String, Object> constantAssignments,
+                                  Map<String, Function<IHookAction.ExecutionContext, Object>> dynamicAssignments) {
+        super(callName, actionConfig, action, constantAssignments, dynamicAssignments);
+    }
+
+    @Override
+    public void execute(ExecutionContext context) {
+        Object[] args = buildAdditionalArguments(context);
+        action.get().execute(context.getMethodArguments(), context.getThiz(),
+                context.getReturnValue(), context.getThrown(), args);
     }
 }
