@@ -86,6 +86,8 @@ public class HttpRemoteTracingTest extends TraceTestBase {
             TestUtils.waitForClassInstrumentation(HttpURLConnection.class, 15, TimeUnit.SECONDS);
             TestUtils.waitForClassInstrumentation(HttpUrlConnectionTest.class, 15, TimeUnit.SECONDS);
             TestUtils.waitForClassInstrumentation(TracingServlet.class, 15, TimeUnit.SECONDS);
+            TestUtils.waitForClassInstrumentation(Class.forName("sun.net.www.protocol.http.HttpURLConnection"), 10, TimeUnit.SECONDS);
+
             clientSpan();
 
             assertTraceExported((spans) ->
