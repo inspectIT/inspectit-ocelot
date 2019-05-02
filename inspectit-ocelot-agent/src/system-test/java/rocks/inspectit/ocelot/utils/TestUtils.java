@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -26,6 +27,29 @@ import static org.awaitility.Awaitility.await;
 public class TestUtils {
 
     private static Cache<Class<?>, Object> activeInstrumentations = null;
+
+    public static ConcurrentHashMap<Class<?>, Long> instrumentationTimeStamp = new ConcurrentHashMap<>();
+
+    static {
+        Thread poller = new Thread(() -> {
+
+            while (true) {
+                for (Class<?> cl : getInstrumentationCache().asMap().keySet()) {
+                    if (!instrumentationTimeStamp.contains(cl)) {
+                        //we remember when a class first appeared in the cache
+                        instrumentationTimeStamp.put(cl, System.currentTimeMillis());
+                    }
+                }
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    return;
+                }
+            }
+        });
+        poller.setDaemon(true);
+        poller.start();
+    }
 
     public static Object sink;
 
@@ -76,19 +100,30 @@ public class TestUtils {
             await().atMost(duration, timeUnit).ignoreExceptions().untilAsserted(() -> {
                 for (Class clazz : clazzes) {
                     sink = Class.forName(clazz.getName(), true, clazz.getClassLoader());
-                    Object clazzInstrumentation = getInstrumentationCache().getIfPresent(clazz);
-                    assertThat(clazzInstrumentation).isNotNull();
+                    Long timeStamp = instrumentationTimeStamp.get(clazz);
+                    assertThat(timeStamp).isNotNull();
                 }
             });
         } catch (ConditionTimeoutException ex) {
             for (Class clazz : clazzes) {
-                Object clazzInstrumentation = getInstrumentationCache().getIfPresent(clazz);
-                if (clazzInstrumentation == null) {
+                Long timeStamp = instrumentationTimeStamp.get(clazz);
+                if (timeStamp == null) {
                     System.out.println(clazz.getName() + " was not instrumented!");
                 }
             }
 
             throw ex;
+        }
+        for (Class clazz : clazzes) {
+            Long timeStamp = instrumentationTimeStamp.get(clazz);
+            long delta = System.currentTimeMillis() - timeStamp;
+            if (delta < 5000) {
+                try {
+                    //make sure that the instrumentation was performed at least 5 seconds ago.
+                    Thread.sleep(5000 - delta);
+                } catch (Exception e) {
+                }
+            }
         }
     }
 
