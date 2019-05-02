@@ -16,7 +16,6 @@ import rocks.inspectit.ocelot.bootstrap.context.IInspectitContext;
 import rocks.inspectit.ocelot.utils.TestUtils;
 
 import java.net.URI;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -61,7 +60,6 @@ public class ServiceOutMetricTest {
         wireMockServer.stop();
     }
 
-
     @Nested
     class ApacheClient {
 
@@ -75,7 +73,6 @@ public class ServiceOutMetricTest {
             CloseableHttpClient client = builder.build();
 
             TestUtils.waitForClassInstrumentation(CloseableHttpClient.class, 10, TimeUnit.SECONDS);
-            TestUtils.waitForInstrumentationToComplete();
 
             client.execute(URIUtils.extractHost(URI.create(TEST_URL)), new HttpGet(TEST_URL));
             client.close();
@@ -93,8 +90,6 @@ public class ServiceOutMetricTest {
             assertThat(cnt).isEqualTo(1);
             assertThat(respSum).isGreaterThan(0);
         }
-
-
     }
 
 

@@ -38,8 +38,9 @@ public class HttpUrlConnectionContextPropagationTest {
         HttpURLConnection urlConnection = (HttpURLConnection) new URL("http://google.com").openConnection();
         urlConnection.getResponseCode();
 
-        TestUtils.waitForClassInstrumentation(HttpURLConnection.class, 10, TimeUnit.SECONDS);
-        TestUtils.waitForInstrumentationToComplete();
+        TestUtils.waitForClassInstrumentations(Arrays.asList(HttpURLConnection.class, Class.forName("sun.net.www.protocol.http.HttpURLConnection")),
+                10, TimeUnit.SECONDS);
+
     }
 
     @BeforeEach

@@ -93,7 +93,6 @@ public class HttpOutMetricTest {
             ctx.close();
 
             TestUtils.waitForOpenCensusQueueToBeProcessed();
-            TestUtils.waitForInstrumentationToComplete();
 
             Map<String, String> tags = new HashMap<>();
             tags.put("service", "apache_client_test");
@@ -117,7 +116,6 @@ public class HttpOutMetricTest {
             ctx.close();
 
             TestUtils.waitForOpenCensusQueueToBeProcessed();
-            TestUtils.waitForInstrumentationToComplete();
 
             Map<String, String> tags = new HashMap<>();
             tags.put("service", "apache_client_test");
