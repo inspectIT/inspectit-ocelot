@@ -9,6 +9,7 @@ import rocks.inspectit.ocelot.utils.TestUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -53,7 +54,7 @@ public class ThreadStartContextPropagationTest extends InstrumentationSysTestBas
 
     @BeforeAll
     static void waitForInstrumentation() {
-        TestUtils.waitForClassInstrumentation(Thread.class, 15, TimeUnit.SECONDS);
+        TestUtils.waitForClassInstrumentations(Arrays.asList(AbstractThread.class, Thread.class), 15, TimeUnit.SECONDS);
     }
 
 
