@@ -15,6 +15,7 @@ import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.bootstrap.context.IInspectitContext;
 import rocks.inspectit.ocelot.utils.TestUtils;
 
+import javax.servlet.http.HttpServlet;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
@@ -53,6 +54,8 @@ public class ServiceOutMetricTest {
                 .willReturn(aResponse()
                         .withBody("body")
                         .withStatus(200)));
+
+        TestUtils.waitForClassInstrumentation(HttpServlet.class, 10, TimeUnit.SECONDS);
     }
 
     @AfterEach
