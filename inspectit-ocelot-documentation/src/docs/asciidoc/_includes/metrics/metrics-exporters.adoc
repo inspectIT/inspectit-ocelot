@@ -41,3 +41,33 @@ The server is by default started on the port `8888` and metrics can then be acce
 
 
 TIP: Don't forget to check https://opencensus.io/exporters/supported-exporters/java/prometheus/[the official OpenCensus Prometheus exporter documentation].
+
+==== OpenCensus Agent Metrics Exporter
+Metrics can be additionally exported to the https://opencensus.io/service/components/agent/[OpenCensus Agent].
+When enabled, all metrics are send via gRCP to the OpenCensus Agent. By default, the exporter is enabled, but the agent address is set to ```null```.
+
+[cols="3,1,3",options="header"]
+.Properties related to the OpenCensus Agent Metrics exporter
+|===
+|Property |Default| Description
+|```inspectit.exporters.metrics.open-census-agent.enabled```
+|`true`
+|If true, the agent will try to start the OpenCensus Agent Metrics exporter.
+|```inspectit.exporters.metrics.open-census-agent.address```
+|`null`
+|Address of the open-census agent (e.g. localhost:1234).
+|```inspectit.exporters.metrics.open-census-agent.use-insecure```
+|`false`
+|If true, SSL is disabled.
+|```inspectit.exporters.metrics.open-census-agent.service-name```
+|refers to `inspectit.service-name`
+|The service-name which will be used to publish the metrics.
+|```inspectit.exporters.metrics.open-census-agent.reconnection-period```
+|`5`
+|The time at which the exporter tries to reconnect to the OpenCensus agent.
+|```inspectit.exporters.metrics.open-census-agent.export-interval```
+|refers to `inspectit.metrics.frequency`
+|The export interval of the metrics.
+|===
+
+TIP: Don't forget to check https://opencensus.io/exporters/supported-exporters/java/ocagent/[the official OpenCensus Agent exporter documentation].

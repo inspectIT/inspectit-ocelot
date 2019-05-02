@@ -11,7 +11,21 @@ inspectit:
         host: 0.0.0.0
         # the port on which the /metrics endpoint of prometheus will be started
         port: 8888
-    # settings for metrics exporters
+      # settings for the OpenCensus Agent Metrics exporter (https://opencensus.io/exporters/supported-exporters/java/ocagent/)
+      open-census-agent:
+        # if true, the agent will try to start the OpenCensus agent metrics exporter
+        enabled: true
+        # address of the open-census agent (e.g. localhost:1234)
+        address: null
+        # if true, SSL is disabled
+        use-insecure: false
+        # the service-name which will be used to publish the metrics
+        service-name: ${inspectit.service-name}
+        # the time at which the exporter tries to reconnect to the OpenCensus agent
+        reconnection-period: 5s
+        # the export interval of the metrics
+        export-interval: ${inspectit.metrics.frequency}
+    # settings for trace exporters
     tracing:
       # settings for the zipkin exporter (https://github.com/census-instrumentation/opencensus-java/tree/master/exporters/trace/zipkin)
       zipkin:
@@ -29,3 +43,15 @@ inspectit:
         url: null
         # the service-name which will be used to publish the spans
         service-name: ${inspectit.service-name}
+      # settings for the OpenCensus Agent Trace exporter (https://opencensus.io/exporters/supported-exporters/java/ocagent/)
+      open-census-agent:
+        # if true, the agent will try to start the OpenCensus agent trace exporter
+        enabled: true
+        # Address of the open-census agent (e.g. localhost:1234)
+        address: null
+        # if true, SSL is disabled
+        use-insecure: false
+        # the service-name which will be used to publish the spans
+        service-name: ${inspectit.service-name}
+        # the time at which the exporter tries to reconnect to the OpenCensus agent
+        reconnection-period: 5s

@@ -14,4 +14,7 @@ public class MetricsExportersSettings {
 
     @Valid
     private PrometheusExporterSettings prometheus;
+
+    @Valid
+    private OpenCensusAgentMetricsExporterSettings openCensusAgent;
 }
