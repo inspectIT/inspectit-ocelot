@@ -41,12 +41,9 @@ public class ServletApiContextPropagationTest {
 
 
     @BeforeAll
-    static void waitForInstrumentation() throws ClassNotFoundException {
-        TestUtils.waitForClassInstrumentations(Arrays.asList(TestFilter.class, HttpServlet.class, CloseableHttpClient.class, HttpURLConnection.class), 10, TimeUnit.SECONDS);
-        try {
-            TestUtils.waitForClassInstrumentation(Class.forName("sun.net.www.protocol.http.HttpURLConnection"), 10, TimeUnit.SECONDS);
-        } catch (Exception e) {
-        }
+    static void waitForInstrumentation() throws Exception {
+        TestUtils.waitForClassInstrumentations(Arrays.asList(TestFilter.class, HttpServlet.class, CloseableHttpClient.class,
+                HttpURLConnection.class, Class.forName("sun.net.www.protocol.http.HttpURLConnection")), 10, TimeUnit.SECONDS);
     }
 
     @BeforeEach
