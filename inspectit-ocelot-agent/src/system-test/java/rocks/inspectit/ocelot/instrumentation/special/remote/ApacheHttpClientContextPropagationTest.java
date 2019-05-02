@@ -18,7 +18,9 @@ import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.bootstrap.context.IInspectitContext;
 import rocks.inspectit.ocelot.utils.TestUtils;
 
+import javax.servlet.http.HttpServlet;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -50,7 +52,7 @@ public class ApacheHttpClientContextPropagationTest {
 
         client = builder.build();
 
-        TestUtils.waitForClassInstrumentation(CloseableHttpClient.class, 10, TimeUnit.SECONDS);
+        TestUtils.waitForClassInstrumentations(Arrays.asList(CloseableHttpClient.class, HttpServlet.class), 10, TimeUnit.SECONDS);
     }
 
     @BeforeEach
