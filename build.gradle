@@ -1,3 +1,17 @@
+import com.github.jk1.license.render.TextReportRenderer
+
+plugins {
+    id 'com.github.jk1.dependency-license-report' version '1.6'
+}
+
+licenseReport {
+    outputDir = "$projectDir/build/licenses"
+
+    renderers = [new TextReportRenderer()]
+
+}
+
+
 allprojects {
 
     repositories {
