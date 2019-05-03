@@ -32,7 +32,6 @@ public class TestUtils {
 
     static {
         Thread poller = new Thread(() -> {
-
             while (true) {
                 for (Class<?> cl : getInstrumentationCache().asMap().keySet()) {
                     if (!instrumentationTimeStamp.contains(cl)) {
