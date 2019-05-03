@@ -76,7 +76,7 @@ public class HttpOutMetricTest {
             builder.setDefaultRequestConfig(requestBuilder.build());
             client = builder.build();
 
-            TestUtils.waitForClassInstrumentation(CloseableHttpClient.class, 10, TimeUnit.SECONDS);
+            TestUtils.waitForClassInstrumentation(CloseableHttpClient.class, 15, TimeUnit.SECONDS);
         }
 
         @AfterEach
