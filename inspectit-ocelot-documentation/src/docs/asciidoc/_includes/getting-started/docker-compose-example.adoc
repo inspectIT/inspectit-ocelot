@@ -90,9 +90,9 @@ The demo scenarios come with the following predefined Grafana Dashboards:
 
 | *Service Graph*
 
-https://grafana.com/dashboards/10057[InfluxDB Version]
+https://grafana.com/dashboards/10142[InfluxDB Version]
 
-https://grafana.com/dashboards/10059[Prometheus Version]
+https://grafana.com/dashboards/10139[Prometheus Version]
 
 | Shows a graph of all instrumented and external services and their interaction.
 All flows are derived based on live metrics.
@@ -100,9 +100,9 @@ a| image::demo-dashboard-servicegraph.png[link=images/demo-dashboard-servicegrap
 
 | *HTTP Metrics*
 
-https://grafana.com/dashboards/10052[InfluxDB Version]
+https://grafana.com/dashboards/10141[InfluxDB Version]
 
-https://grafana.com/dashboards/10060[Prometheus Version]
+https://grafana.com/dashboards/10138[Prometheus Version]
 
 | Shows statistics of incoming and outgoing HTTP requests for each instrumented service.
 a| image::demo-dashboard-http.png[link=images/demo-dashboard-http.png]
@@ -127,9 +127,9 @@ a| image::demo-dashboard-jvm.png[link=images/demo-dashboard-jvm.png]
 
 | *Self Monitoring*
 
-https://grafana.com/dashboards/10058[InfluxDB Version]
+https://grafana.com/dashboards/10143[InfluxDB Version]
 
-https://grafana.com/dashboards/10061[Prometheus Version]
+https://grafana.com/dashboards/10140[Prometheus Version]
 
 | Shows the instrumentation state and progress based on <<Self Monitoring, self monitoring metrics>>
 a| image::demo-dashboard-selfmonitoring.png[link=images/demo-dashboard-selfmonitoring.png]
