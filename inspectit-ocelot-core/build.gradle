@@ -34,6 +34,8 @@ dependencies {
             "io.prometheus:simpleclient_httpserver:${prometheusClientVersion}",
             "io.opencensus:opencensus-exporter-trace-zipkin:${openCensusVersion}",
             "io.opencensus:opencensus-exporter-trace-jaeger:${openCensusVersion}",
+            "io.opencensus:opencensus-exporter-metrics-ocagent:${openCensusVersion}",
+            "io.opencensus:opencensus-exporter-trace-ocagent:${openCensusVersion}",
 
             //bytecode manipulation
             "net.bytebuddy:byte-buddy:1.9.2"
@@ -48,6 +50,8 @@ dependencies {
             'org.assertj:assertj-core:3.11.1',
             'org.awaitility:awaitility:3.1.5',
             "com.github.tomakehurst:wiremock-jre8:2.21.0",
+            "io.grpc:grpc-netty-shaded:1.20.0",
+            "io.grpc:grpc-stub:1.20.0",
     )
 
     jmh (

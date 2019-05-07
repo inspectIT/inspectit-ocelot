@@ -37,3 +37,30 @@ To make inspectIT Ocelot push the spans to a Jaeger server running on the same m
 ```
 -Dinspectit.exporters.tracing.jaeger.url=http://127.0.0.1:14268/api/traces
 ```
+
+==== OpenCensus Agent Trace Exporter
+Spans can be additionally exported to the https://opencensus.io/service/components/agent/[OpenCensus Agent].
+When enabled, all Spans are send via gRCP to the OpenCensus Agent. By default, the exporter is enabled, but the agent address is set to ```null```.
+
+[cols="3,1,3",options="header"]
+.Properties related to the OpenCensus Agent Trace exporter
+|===
+|Property |Default| Description
+|```inspectit.exporters.tracing.open-census-agent.enabled```
+|`true`
+|If true, the agent will try to start the OpenCensus Agent Trace exporter.
+|```inspectit.exporters.tracing.open-census-agent.address```
+|`null`
+|Address of the open-census agent (e.g. localhost:1234).
+|```inspectit.exporters.tracing.open-census-agent.use-insecure```
+|`false`
+|If true, SSL is disabled.
+|```inspectit.exporters.tracing.open-census-agent.service-name```
+|refers to `inspectit.service-name`
+|The service-name which will be used to publish the spans.
+|```inspectit.exporters.tracing.open-census-agent.reconnection-period```
+|`5`
+|The time at which the exporter tries to reconnect to the OpenCensus agent.
+|===
+
+TIP: Don't forget to check https://opencensus.io/exporters/supported-exporters/java/ocagent/[the official OpenCensus Agent exporter documentation].
