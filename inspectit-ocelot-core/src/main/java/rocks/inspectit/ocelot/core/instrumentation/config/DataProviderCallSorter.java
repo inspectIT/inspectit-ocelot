@@ -27,14 +27,14 @@ public class DataProviderCallSorter {
     /**
      * Orders the given set of data-providers based on their inter-dependencies.
      *
-     * @param callList the calls to sort
+     * @param callCollection the calls to sort
      * @return the sorted calls, meaning that the providers should be executed in the order in which they appear in the list
      * @throws CyclicDataDependencyException if the data provider calls have a cyclic dependency and therefore cannot be ordered
      */
-    public List<DataProviderCallConfig> orderDataProviderCalls(Collection<DataProviderCallConfig> callList) throws CyclicDataDependencyException {
+    public List<DataProviderCallConfig> orderDataProviderCalls(Collection<DataProviderCallConfig> callCollection) throws CyclicDataDependencyException {
 
         Map<String, DataProviderCallConfig> calls =
-                callList.stream().collect(Collectors.toMap(DataProviderCallConfig::getName, c -> c));
+                callCollection.stream().collect(Collectors.toMap(DataProviderCallConfig::getName, c -> c));
 
         Set<String> dataKeys = calls.keySet();
         Map<String, Set<String>> dependencyGraph = new HashMap<>();

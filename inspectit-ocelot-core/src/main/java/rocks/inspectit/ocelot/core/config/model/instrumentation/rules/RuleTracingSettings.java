@@ -15,6 +15,8 @@ import java.util.Map;
 @Builder
 public class RuleTracingSettings extends ConditionalActionSettings {
 
+    public static final RuleTracingSettings NO_TRACING_AND_ATTRIBUTES = new RuleTracingSettings();
+
     /**
      * If true, the methods which are matched by the rule containing this settings will appear in traces.
      */
@@ -29,7 +31,7 @@ public class RuleTracingSettings extends ConditionalActionSettings {
 
     /**
      * The kind of the span, e.g. SERVER or CLIENT.
-     * Can be null, in which case it is just a "normal" span.
+     * Can be null, in which case it is a span of unspecified kind.
      */
     private Span.Kind kind;
 

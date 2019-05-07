@@ -17,7 +17,7 @@ import java.util.Map;
 public class MethodHookConfiguration {
 
     @Builder.Default
-    private MethodTracingConfiguration tracing = MethodTracingConfiguration.builder().startSpan(false).build();
+    private MethodTracingConfiguration tracing = MethodTracingConfiguration.NO_TRACING_AND_ATTRIBUTES;
 
     /**
      * The ordered list of data assignments performed on method entry.

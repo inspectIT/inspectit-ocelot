@@ -114,7 +114,7 @@ public class InspectitContext implements IInspectitContext {
     /**
      * The span which was (potentially) opened by invoking {@link #beginSpan(String, Span.Kind)}
      */
-    private Scope openedSpanScope;
+    private Scope currentSpanScope;
 
     /**
      * Holds the tag context which was opened by this context with the call to {@link #makeActive()}.
@@ -234,22 +234,24 @@ public class InspectitContext implements IInspectitContext {
      * @param kind the span kind, can be null
      */
     public void beginSpan(String name, Span.Kind kind) {
-        try {
+        if (currentSpanScope == null) {
+            try {
 
-            Object parent = getData(REMOTE_PARENT_SPAN_CONTEXT_KEY);
+                Object parent = getData(REMOTE_PARENT_SPAN_CONTEXT_KEY);
 
-            SpanBuilder builder;
-            if (parent instanceof SpanContext) {
-                setData(REMOTE_PARENT_SPAN_CONTEXT_KEY, null);
-                builder = Tracing.getTracer().spanBuilderWithRemoteParent(name, (SpanContext) parent);
-            } else {
-                builder = Tracing.getTracer().spanBuilder(name);
+                SpanBuilder builder;
+                if (parent instanceof SpanContext) {
+                    setData(REMOTE_PARENT_SPAN_CONTEXT_KEY, null);
+                    builder = Tracing.getTracer().spanBuilderWithRemoteParent(name, (SpanContext) parent);
+                } else {
+                    builder = Tracing.getTracer().spanBuilder(name);
+                }
+
+                builder.setSpanKind(kind);
+                currentSpanScope = builder.setSampler(Samplers.alwaysSample()).startScopedSpan();
+            } catch (Throwable t) {
+                log.error("Error performing tracing", t);
             }
-
-            builder.setSpanKind(kind);
-            openedSpanScope = builder.setSampler(Samplers.alwaysSample()).startScopedSpan();
-        } catch (Throwable t) {
-            log.error("Error performing tracing", t);
         }
     }
 
@@ -376,8 +378,8 @@ public class InspectitContext implements IInspectitContext {
         }
         Context.current().detach(overriddenGrpcContext);
 
-        if (openedSpanScope != null) {
-            openedSpanScope.close();
+        if (currentSpanScope != null) {
+            currentSpanScope.close();
         }
 
         if (parent != null && !isInDifferentThreadThanParentOrIsParentClosed()) {
@@ -428,19 +430,18 @@ public class InspectitContext implements IInspectitContext {
     public Map<String, String> getUpPropagationHeaders() {
         return ContextPropagationUtil.buildPropagationHeaderMap(
                 getDataAsStream()
-                        .filter(e -> propagation.isPropagatedUpGlobally(e.getKey())),
-                null
-        );
+                        .filter(e -> propagation.isPropagatedUpGlobally(e.getKey())));
     }
 
     @Override
     public void readUpPropagationHeaders(Map<String, String> headers) {
-        ContextPropagationUtil.readPropagationHeaderMap(headers, this);
+        ContextPropagationUtil.readPropagatedDataFromHeaderMap(headers, this);
     }
 
     @Override
     public void readDownPropagationHeaders(Map<String, String> headers) {
-        SpanContext remote_span = ContextPropagationUtil.readPropagationHeaderMap(headers, this);
+        ContextPropagationUtil.readPropagatedDataFromHeaderMap(headers, this);
+        SpanContext remote_span = ContextPropagationUtil.readPropagatedSpanContextFromHeaderMap(headers);
         setData(REMOTE_PARENT_SPAN_CONTEXT_KEY, remote_span);
     }
 

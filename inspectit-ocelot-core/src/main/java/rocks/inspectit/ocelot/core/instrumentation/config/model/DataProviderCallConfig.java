@@ -19,7 +19,7 @@ public class DataProviderCallConfig {
      * The name used for this data provider call.
      * This corresponds to the data key written by the provider.
      */
-    String name;
+    private String name;
 
     /**
      * The input assignments to use for calling the data provider.

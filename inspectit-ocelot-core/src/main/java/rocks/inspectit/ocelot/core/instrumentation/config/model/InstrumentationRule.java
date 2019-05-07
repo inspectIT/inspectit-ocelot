@@ -4,7 +4,7 @@ import lombok.*;
 import rocks.inspectit.ocelot.core.config.model.instrumentation.rules.InstrumentationRuleSettings;
 import rocks.inspectit.ocelot.core.config.model.instrumentation.rules.RuleTracingSettings;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
@@ -35,7 +35,7 @@ public class InstrumentationRule {
      * {@link rocks.inspectit.ocelot.core.instrumentation.hook.MethodHookGenerator}.
      */
     @Singular
-    private List<DataProviderCallConfig> entryProviders;
+    private Collection<DataProviderCallConfig> entryProviders;
 
     /**
      * The actions executed on the method exit.
@@ -43,7 +43,7 @@ public class InstrumentationRule {
      * {@link rocks.inspectit.ocelot.core.instrumentation.hook.MethodHookGenerator}.
      */
     @Singular
-    private List<DataProviderCallConfig> exitProviders;
+    private Collection<DataProviderCallConfig> exitProviders;
 
     /**
      * Maps metrics to the data keys or constants used as sources, see {@link InstrumentationRuleSettings#getMetrics()}.
@@ -57,5 +57,5 @@ public class InstrumentationRule {
      * The tracing related settings.
      */
     @Builder.Default
-    private RuleTracingSettings tracing = new RuleTracingSettings();
+    private RuleTracingSettings tracing = RuleTracingSettings.NO_TRACING_AND_ATTRIBUTES;
 }

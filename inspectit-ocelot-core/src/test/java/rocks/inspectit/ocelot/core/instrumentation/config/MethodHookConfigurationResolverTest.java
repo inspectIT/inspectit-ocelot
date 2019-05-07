@@ -2,8 +2,6 @@ package rocks.inspectit.ocelot.core.instrumentation.config;
 
 import com.google.common.collect.Sets;
 import io.opencensus.trace.Span;
-import net.bytebuddy.description.method.MethodDescription;
-import net.bytebuddy.description.type.TypeDescription;
 import org.assertj.core.util.Maps;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -15,7 +13,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.core.config.model.instrumentation.actions.DataProviderCallSettings;
 import rocks.inspectit.ocelot.core.config.model.instrumentation.rules.RuleTracingSettings;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.*;
-import rocks.inspectit.ocelot.core.testutils.Dummy;
 
 import java.util.Map;
 
@@ -30,11 +27,6 @@ public class MethodHookConfigurationResolverTest {
 
     @InjectMocks
     MethodHookConfigurationResolver resolver;
-
-    private final Class<?> DUMMY_CLASS = Dummy.class;
-    private final TypeDescription DUMMY_TYPE = TypeDescription.ForLoadedType.of(Dummy.class);
-    private final MethodDescription DUMMY_METHOD = DUMMY_TYPE.getDeclaredMethods().stream()
-            .filter(m -> m.getName().equals("methodA")).findFirst().get();
 
 
     @Nested
@@ -88,7 +80,7 @@ public class MethodHookConfigurationResolverTest {
             InstrumentationRule r1 = InstrumentationRule.builder().entryProvider(callToA1).build();
             InstrumentationRule r2 = InstrumentationRule.builder().entryProvider(callToB).build();
 
-            assertThatThrownBy(() -> resolver.buildHookConfiguration(DUMMY_CLASS, DUMMY_METHOD, config, Sets.newHashSet(r1, r2)))
+            assertThatThrownBy(() -> resolver.buildHookConfiguration(config, Sets.newHashSet(r1, r2)))
                     .isInstanceOf(MethodHookConfigurationResolver.ConflictingDefinitionsException.class);
         }
 
@@ -97,7 +89,7 @@ public class MethodHookConfigurationResolverTest {
             InstrumentationRule r1 = InstrumentationRule.builder().entryProvider(callToA1).build();
             InstrumentationRule r2 = InstrumentationRule.builder().entryProvider(callToA2).build();
 
-            MethodHookConfiguration conf = resolver.buildHookConfiguration(DUMMY_CLASS, DUMMY_METHOD, config, Sets.newHashSet(r1, r2));
+            MethodHookConfiguration conf = resolver.buildHookConfiguration(config, Sets.newHashSet(r1, r2));
             assertThat(conf.getEntryProviders()).containsExactly(callToA1);
         }
 
@@ -107,7 +99,7 @@ public class MethodHookConfigurationResolverTest {
             InstrumentationRule r1 = InstrumentationRule.builder().metric("my_metric", "dataA").build();
             InstrumentationRule r2 = InstrumentationRule.builder().metric("my_metric", "dataB").build();
 
-            assertThatThrownBy(() -> resolver.buildHookConfiguration(DUMMY_CLASS, DUMMY_METHOD, config, Sets.newHashSet(r1, r2)))
+            assertThatThrownBy(() -> resolver.buildHookConfiguration(config, Sets.newHashSet(r1, r2)))
                     .isInstanceOf(MethodHookConfigurationResolver.ConflictingDefinitionsException.class);
         }
 
@@ -115,7 +107,7 @@ public class MethodHookConfigurationResolverTest {
         void verifyMetricsMasterSwitchRespected() throws Exception {
             InstrumentationRule r1 = InstrumentationRule.builder().metric("my_metric", "dataA").build();
 
-            Map<String, String> result = resolver.buildHookConfiguration(DUMMY_CLASS, DUMMY_METHOD,
+            Map<String, String> result = resolver.buildHookConfiguration(
                     config.toBuilder().metricsEnabled(false).build(), Sets.newHashSet(r1)).getDataMetrics();
             assertThat(result).isEmpty();
         }
@@ -126,7 +118,7 @@ public class MethodHookConfigurationResolverTest {
             InstrumentationRule r2 = InstrumentationRule.builder().metric("my_other_metric", "dataB").build();
 
 
-            Map<String, String> result = resolver.buildHookConfiguration(DUMMY_CLASS, DUMMY_METHOD,
+            Map<String, String> result = resolver.buildHookConfiguration(
                     config, Sets.newHashSet(r1, r2)).getDataMetrics();
             assertThat(result)
                     .hasSize(2)
@@ -143,7 +135,7 @@ public class MethodHookConfigurationResolverTest {
                             .build())
                     .build();
 
-            MethodHookConfiguration result = resolver.buildHookConfiguration(DUMMY_CLASS, DUMMY_METHOD,
+            MethodHookConfiguration result = resolver.buildHookConfiguration(
                     config.toBuilder().tracingEnabled(false).build(), Sets.newHashSet(r1));
 
             assertThat(result.getTracing().isStartSpan()).isFalse();
@@ -168,7 +160,7 @@ public class MethodHookConfigurationResolverTest {
                             .build())
                     .build();
 
-            MethodTracingConfiguration result = resolver.buildHookConfiguration(DUMMY_CLASS, DUMMY_METHOD,
+            MethodTracingConfiguration result = resolver.buildHookConfiguration(
                     config, Sets.newHashSet(r1, r2)).getTracing();
 
             assertThat(result.isStartSpan()).isTrue();
@@ -205,7 +197,7 @@ public class MethodHookConfigurationResolverTest {
             InstrumentationRule r2 = InstrumentationRule.builder()
                     .entryProvider(depFirst).build();
 
-            MethodHookConfiguration conf = resolver.buildHookConfiguration(DUMMY_CLASS, DUMMY_METHOD, config, Sets.newHashSet(r1, r2));
+            MethodHookConfiguration conf = resolver.buildHookConfiguration(config, Sets.newHashSet(r1, r2));
             assertThat(conf.getEntryProviders()).containsExactly(
                     callToA1,
                     depFirst,

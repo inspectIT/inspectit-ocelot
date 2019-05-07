@@ -13,6 +13,9 @@ import java.util.Map;
 @Builder
 public class MethodTracingConfiguration {
 
+    public static MethodTracingConfiguration NO_TRACING_AND_ATTRIBUTES =
+            MethodTracingConfiguration.builder().startSpan(false).build();
+
     /**
      * See {@link RuleTracingSettings#isStartSpan()}.
      */

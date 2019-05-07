@@ -32,35 +32,36 @@ public class ConditionalHookAction implements IHookAction {
      * If a data provider call contains values for the "only-if-..." settings the provider is meant to be only executed conditionally.
      * Therefore in this method we wrap the call in {@link ConditionalHookAction} which check the corresponding preconditions.
      *
-     * @param conditions   the data provider call definition
-     * @param providerCall the data provider call hook action which does not respect the conditions yet
+     * @param conditions  the condition definition
+     * @param inputAction the hook action which does not respect the conditions yet
      * @return the wrapped providerCall in case conditions are defined
      */
-    public static IHookAction wrapWithConditionChecks(ConditionalActionSettings conditions, IHookAction action) {
+    public static IHookAction wrapWithConditionChecks(ConditionalActionSettings conditions, IHookAction inputAction) {
+        IHookAction resultAction = inputAction;
         if (!StringUtils.isEmpty(conditions.getOnlyIfTrue())) {
             String conditionDataKey = conditions.getOnlyIfTrue();
-            action = new ConditionalHookAction((ctx) -> {
+            resultAction = new ConditionalHookAction((ctx) -> {
                 Object val = ctx.getInspectitContext().getData(conditionDataKey);
                 return val != null && (Boolean) val;
-            }, action);
+            }, resultAction);
         }
         if (!StringUtils.isEmpty(conditions.getOnlyIfFalse())) {
             String conditionDataKey = conditions.getOnlyIfFalse();
-            action = new ConditionalHookAction((ctx) -> {
+            resultAction = new ConditionalHookAction((ctx) -> {
                 Object val = ctx.getInspectitContext().getData(conditionDataKey);
                 return val != null && !(Boolean) val;
-            }, action);
+            }, resultAction);
         }
 
         if (!StringUtils.isEmpty(conditions.getOnlyIfNotNull())) {
             String conditionDataKey = conditions.getOnlyIfNotNull();
-            action = new ConditionalHookAction((ctx) -> ctx.getInspectitContext().getData(conditionDataKey) != null, action);
+            resultAction = new ConditionalHookAction((ctx) -> ctx.getInspectitContext().getData(conditionDataKey) != null, resultAction);
         }
         if (!StringUtils.isEmpty(conditions.getOnlyIfNull())) {
             String conditionDataKey = conditions.getOnlyIfNull();
-            action = new ConditionalHookAction((ctx) -> ctx.getInspectitContext().getData(conditionDataKey) == null, action);
+            resultAction = new ConditionalHookAction((ctx) -> ctx.getInspectitContext().getData(conditionDataKey) == null, resultAction);
         }
 
-        return action;
+        return resultAction;
     }
 }

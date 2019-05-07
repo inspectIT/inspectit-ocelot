@@ -34,14 +34,14 @@ public class ContextPropagationUtilTest {
     }
 
     @Nested
-    class ReadPropagationHeaderMap {
+    class ReadPropagatedDataFromHeaderMap {
 
         @Test
         public void testSingleString() {
             Map<String, String> headers = ImmutableMap.of(CORRELATION_CONTEXT_HEADER,
                     enc("my_valü") + " =  " + enc("straße=15") + ";someprop=42");
 
-            ContextPropagationUtil.readPropagationHeaderMap(headers, inspectitContext);
+            ContextPropagationUtil.readPropagatedDataFromHeaderMap(headers, inspectitContext);
 
             verify(inspectitContext).setData(eq("my_valü"), eq("straße=15"));
             verifyNoMoreInteractions(inspectitContext);
@@ -52,7 +52,7 @@ public class ContextPropagationUtilTest {
             Map<String, String> headers = ImmutableMap.of(CORRELATION_CONTEXT_HEADER,
                     enc("x") + " =  " + enc("42") + "; type = l");
 
-            ContextPropagationUtil.readPropagationHeaderMap(headers, inspectitContext);
+            ContextPropagationUtil.readPropagatedDataFromHeaderMap(headers, inspectitContext);
 
             verify(inspectitContext).setData(eq("x"), eq(42L));
             verifyNoMoreInteractions(inspectitContext);
@@ -63,7 +63,7 @@ public class ContextPropagationUtilTest {
             Map<String, String> headers = ImmutableMap.of(CORRELATION_CONTEXT_HEADER,
                     enc("pi") + " =  " + enc(String.valueOf(Math.PI)) + "; blub=halloooo; type = d");
 
-            ContextPropagationUtil.readPropagationHeaderMap(headers, inspectitContext);
+            ContextPropagationUtil.readPropagatedDataFromHeaderMap(headers, inspectitContext);
 
             verify(inspectitContext).setData(eq("pi"), eq(Math.PI));
             verifyNoMoreInteractions(inspectitContext);
@@ -74,7 +74,7 @@ public class ContextPropagationUtilTest {
             Map<String, String> headers = ImmutableMap.of(CORRELATION_CONTEXT_HEADER,
                     "is_something=true;type=b,hello=world");
 
-            ContextPropagationUtil.readPropagationHeaderMap(headers, inspectitContext);
+            ContextPropagationUtil.readPropagatedDataFromHeaderMap(headers, inspectitContext);
 
             verify(inspectitContext).setData(eq("is_something"), eq(true));
             verify(inspectitContext).setData(eq("hello"), eq("world"));
@@ -87,7 +87,7 @@ public class ContextPropagationUtilTest {
             Map<String, String> headers = ImmutableMap.of(CORRELATION_CONTEXT_HEADER,
                     "is_something=true;type=blub;type=x");
 
-            ContextPropagationUtil.readPropagationHeaderMap(headers, inspectitContext);
+            ContextPropagationUtil.readPropagatedDataFromHeaderMap(headers, inspectitContext);
 
             verify(inspectitContext).setData(eq("is_something"), eq("true"));
             verifyNoMoreInteractions(inspectitContext);

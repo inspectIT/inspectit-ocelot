@@ -3,7 +3,6 @@ package rocks.inspectit.ocelot.core.instrumentation.config;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import lombok.val;
-import net.bytebuddy.description.method.MethodDescription;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -24,11 +23,11 @@ public class MethodHookConfigurationResolver {
     /**
      * Derives the configuration of the hook for the given method.
      *
-     * @param method       The method to derive the hook for
+     * @param allSettings  The global instrumentation configuration, used for the global master switches
      * @param matchedRules All enabled rules which have a scope which matches to this method, must contain at least one value
      * @return
      */
-    public MethodHookConfiguration buildHookConfiguration(Class<?> clazzToInstrument, MethodDescription method, InstrumentationConfiguration allSettings, Set<InstrumentationRule> matchedRules)
+    public MethodHookConfiguration buildHookConfiguration(InstrumentationConfiguration allSettings, Set<InstrumentationRule> matchedRules)
             throws Exception {
 
         val result = MethodHookConfiguration.builder();
@@ -111,6 +110,7 @@ public class MethodHookConfigurationResolver {
             Optional<InstrumentationRule> secondMatch = rules.stream()
                     .filter(r -> r != firstMatch.get())
                     .filter(r -> filter.test(getter.apply(r)))
+                    .filter(r -> !Objects.equals(getter.apply(r), getter.apply(firstMatch.get())))
                     .findFirst();
             if (secondMatch.isPresent()) {
                 throw new ConflictingDefinitionsException(firstMatch.get(), secondMatch.get(), exceptionMessage);

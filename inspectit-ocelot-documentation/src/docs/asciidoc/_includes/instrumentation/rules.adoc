@@ -467,8 +467,8 @@ In addition, all configured tags for the metrics will also be taken from the ins
 
 ===== Collecting Traces
 
-The inspectIT Ocelot Agent allows you to record method invocations as https://opencensus.io/tracing/span/[OpenCensus spans].
-For your collected spans to be visible you first need to setup a <<Trace Exporters, trace exporter>>.
+The inspectIT Ocelot agent allows you to record method invocations as https://opencensus.io/tracing/span/[OpenCensus spans].
+In order to make your collected spans visible, you must first set up a <<Trace Exporters, trace exporter>>.
 
 Afterwards you can define that all methods matching a certain rule will be traced:
 
@@ -482,8 +482,7 @@ inspectit:
           start-span: true
 ----
 
-With this snippet each method matching the scopes attached to `example_rule` will appear as spans within traces when they are executed.
-You can customize the tracing using the following properties, which can all be configured under the `tracing` section of your rules.
+For example, using the previous configuration snippet, each method that matches the scope definition of the `example_rule` rule will appear within a trace. Its appearance can be customized using the following properties which can be set in the rule's `tracing` section.
 
 
 [cols="2,1,4",options="header"]
@@ -504,7 +503,7 @@ You can customize the tracing using the following properties, which can all be c
 |Maps names of attributes to data keys whose values will be used on exit to populate the given attributes.
 |===
 
-Commonly, you do not want to have the full qualified name of the instrumented method as span name. For example, for Http requests you typically want the http path as span name. This behaviour can be customized using the `name` property:
+Commonly, you do not want to have the full qualified name of the instrumented method as span name. For example, for HTTP requests you typically want the HTTP path as span name. This behaviour can be customized using the `name` property:
 
 [source,yaml]
 ----
@@ -520,10 +519,10 @@ inspectit:
            #... provider call to fetch the http path here
 ----
 
-Note that the name must be known at the end of the entry section!
+IMPORTANT: The name must exist at the end of the entry section and cannot be set in the exit section.
 
 Another useful property of spans is that you can attach any additional information in form of attributes.
-In most trace storage such as ZipKin and Jaeger, you can search your traces based on attributes.
+In most tracing backends such as ZipKin and Jaeger, you can search your traces based on attributes.
 The example below shows how you can define attributes:
 
 [source,yaml]
@@ -541,12 +540,12 @@ inspectit:
 ----
 
 The attributes property maps the names of attributes to data keys.
-After the exit phase of the rule is executed, the corresponding data keys are read and attached as attributes to the current span.
+After the rule's exit phase, the corresponding data keys are read and attached as attributes to the current span.
 
-Note that it is not required for a rule to also start a span when writing attributes!
+Note that a rule does not have to start a span for attatching attributes.
 If a rule does not start a span, the attributes will be written to the first span opened by any method on the current call stack.
 
-It also is possible to conditionalize the span starting as well as the attribute writing:
+It is also possible to conditionalize the span starting as well as the attribute writing:
 
 [source,yaml]
 ----
@@ -568,5 +567,9 @@ inspectit:
             only-if-true: my_condition_data
 ----
 
+If any start-span-condition is defined, a span will only be created when all conditions are met.
+Analogous to this, attributes will only be written if each condition defined in attribute-conditions is fulfilled.
+The conditions that can be defined are equal to the ones of data providers, thus, please see the <<Adding Conditions, data provider conditions description>> for detailed information.
+
 When any conditions under start-span-conditions are defined, a span is only created if all conditions are met.
-Similarly to attach attributes all conditions under attribute-conditions have to be fulfilled. The conditions that can be used are exactly the same as the ones available for <<Adding Conditions, data providers>>.
+Similarly to attach attributes all conditions under attribute-conditions have to be fulfilled. The conditions that can be used are exactly the same as the ones available for .

@@ -8,7 +8,7 @@ import lombok.val;
 import java.util.Map;
 
 /**
- * Reads specified data keys fro mthe current context and attaches them to the current span as attributes.
+ * Reads specified data keys from the current context and attaches them to the current span as attributes.
  */
 @AllArgsConstructor
 public class WriteSpanAttributesAction implements IHookAction {

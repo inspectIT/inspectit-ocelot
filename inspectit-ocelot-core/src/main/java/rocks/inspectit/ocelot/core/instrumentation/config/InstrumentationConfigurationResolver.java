@@ -133,7 +133,7 @@ public class InstrumentationConfigurationResolver {
                             .collect(Collectors.toSet());
                     if (!rulesMatchingOnMethod.isEmpty()) {
                         try {
-                            result.put(method, hookResolver.buildHookConfiguration(clazz, method, config, rulesMatchingOnMethod));
+                            result.put(method, hookResolver.buildHookConfiguration(config, rulesMatchingOnMethod));
                         } catch (Exception e) {
                             log.error("Could not build hook for {} of class {}",
                                     CommonUtils.getSignature(method), clazz.getName(), e);
