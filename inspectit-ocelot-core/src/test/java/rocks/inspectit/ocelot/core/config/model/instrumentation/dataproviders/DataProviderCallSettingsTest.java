@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import rocks.inspectit.ocelot.core.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.ocelot.core.config.model.instrumentation.InternalSettings;
 import rocks.inspectit.ocelot.core.config.model.instrumentation.SpecialSensorSettings;
+import rocks.inspectit.ocelot.core.config.model.instrumentation.actions.DataProviderCallSettings;
 import rocks.inspectit.ocelot.core.config.model.instrumentation.rules.InstrumentationRuleSettings;
 import rocks.inspectit.ocelot.core.config.model.validation.Violation;
 import rocks.inspectit.ocelot.core.config.model.validation.ViolationBuilder;

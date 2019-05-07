@@ -1,0 +1,108 @@
+inspectit:
+
+  instrumentation:
+    scopes:
+      TraceSettingsTest-root:
+        type:
+          name: TraceSettingsTest
+          matcher-mode: ENDS_WITH
+        methods:
+          - name: root
+            matcher-mode: STARTS_WITH
+      TraceSettingsTest-nested:
+        type:
+          name: TraceSettingsTest
+          matcher-mode: ENDS_WITH
+        methods:
+          - name: nested
+            matcher-mode: STARTS_WITH
+
+      TraceSettingsTest-attributesSetterWithoutSpan:
+        type:
+          name: TraceSettingsTest
+          matcher-mode: ENDS_WITH
+        methods:
+          - name: attributesSetterWithoutSpan
+      TraceSettingsTest-attributesSetterWithoutSpanWithConditions:
+        type:
+          name: TraceSettingsTest
+          matcher-mode: ENDS_WITH
+        methods:
+          - name: attributesSetterWithoutSpanWithConditions
+
+      TraceSettingsTest-conditionalRoot:
+        type:
+          name: TraceSettingsTest
+          matcher-mode: ENDS_WITH
+        methods:
+          - name: conditionalRoot
+
+      TraceSettingsTest-named:
+        type:
+          name: TraceSettingsTest
+          matcher-mode: ENDS_WITH
+        methods:
+          - name: named
+            matcher-mode: STARTS_WITH
+
+    rules:
+      TraceSettingsTest-startspan:
+        scopes:
+          TraceSettingsTest-root: true
+          TraceSettingsTest-nested: true
+        tracing:
+          start-span: true
+
+      TraceSettingsTest-attributesSetterWithoutSpan:
+        scopes:
+          TraceSettingsTest-attributesSetterWithoutSpan: true
+        tracing:
+          attributes:
+            entry: entry_val
+            exit: exit_val
+        entry:
+          entry_val:
+            provider: set
+            constant-input: {value: "const"}
+        exit:
+          exit_val:
+            provider: get_return_value
+
+
+      TraceSettingsTest-attributesSetterWithoutSpanWithConditions:
+        scopes:
+          TraceSettingsTest-attributesSetterWithoutSpanWithConditions: true
+        tracing:
+          attributes:
+            entry: entry_val
+            exit: exit_val
+          only-if-true: should_capture_attribs
+        entry:
+          should_capture_attribs:
+            provider: get_arg0
+          entry_val:
+            provider: set
+            constant-input: {value: "const"}
+        exit:
+          exit_val:
+            provider: get_return_value
+
+      TraceSettingsTest-conditionalRoot:
+        scopes:
+          TraceSettingsTest-conditionalRoot: true
+        tracing:
+          start-span: true
+          only-if-true: should_capture
+        entry:
+          should_capture:
+            provider: get_arg0
+
+      TraceSettingsTest-named:
+        scopes:
+          TraceSettingsTest-named: true
+        tracing:
+          start-span: true
+          name: name_val
+        entry:
+          name_val:
+            provider: get_arg0

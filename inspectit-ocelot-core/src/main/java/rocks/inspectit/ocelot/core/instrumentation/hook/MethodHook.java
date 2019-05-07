@@ -9,6 +9,7 @@ import rocks.inspectit.ocelot.bootstrap.instrumentation.IMethodHook;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.MethodHookConfiguration;
 import rocks.inspectit.ocelot.core.instrumentation.context.ContextManager;
 import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContext;
+import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 

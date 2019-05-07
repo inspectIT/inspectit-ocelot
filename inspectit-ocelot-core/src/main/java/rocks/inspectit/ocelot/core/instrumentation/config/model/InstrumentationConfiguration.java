@@ -5,6 +5,7 @@ import lombok.Singular;
 import lombok.Value;
 import lombok.experimental.NonFinal;
 import rocks.inspectit.ocelot.core.config.model.instrumentation.InstrumentationSettings;
+import rocks.inspectit.ocelot.core.config.model.tracing.TracingSettings;
 import rocks.inspectit.ocelot.core.instrumentation.config.InstrumentationConfigurationResolver;
 
 import java.util.Set;
@@ -16,9 +17,21 @@ import java.util.Set;
  * For example, in the resolved InstrumentationConfiguration profiles have been unrolled, so that a complete set of rules is available.
  */
 @Value
-@Builder
+@Builder(toBuilder = true)
 @NonFinal //for testing
 public class InstrumentationConfiguration {
+
+    /**
+     * Corresponds to {@link rocks.inspectit.ocelot.core.config.model.metrics.MetricsSettings#isEnabled()}
+     */
+    @Builder.Default
+    private boolean metricsEnabled = true;
+
+    /**
+     * Corresponds to {@link TracingSettings#isEnabled()}
+     */
+    @Builder.Default
+    private boolean tracingEnabled = true;
 
     /**
      * The instrumentation settings which have been used to derive this configuration.

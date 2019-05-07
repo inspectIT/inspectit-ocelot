@@ -1,5 +1,8 @@
 package rocks.inspectit.ocelot.core.instrumentation.context;
 
+import io.opencensus.trace.SpanContext;
+import io.opencensus.trace.Tracing;
+import io.opencensus.trace.propagation.TextFormat;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.URLDecoder;
@@ -31,11 +34,30 @@ public class ContextPropagationUtil {
 
     public static final String CORRELATION_CONTEXT_HEADER = "Correlation-Context";
 
-    private static final Set<String> PROPAGATION_FIELDS = new HashSet<>(Collections.singletonList(CORRELATION_CONTEXT_HEADER));
 
     private static final Pattern COMMA_WITH_WHITESPACES = Pattern.compile(" *, *");
     private static final Pattern SEMICOLON_WITH_WHITESPACES = Pattern.compile(" *; *");
     private static final Pattern EQUALS_WITH_WHITESPACES = Pattern.compile(" *= *");
+
+    private static final Set<String> PROPAGATION_FIELDS = new HashSet<>();
+
+    public static final TextFormat.Setter<Map<String, String>> MAP_INJECTOR = new TextFormat.Setter<Map<String, String>>() {
+        @Override
+        public void put(Map<String, String> carrier, String key, String value) {
+            carrier.put(key, value);
+        }
+    };
+    public static final TextFormat.Getter<Map<String, String>> MAP_EXTRACTOR = new TextFormat.Getter<Map<String, String>>() {
+        @Override
+        public String get(Map<String, String> carrier, String key) {
+            return carrier.get(key);
+        }
+    };
+
+    static {
+        PROPAGATION_FIELDS.add(CORRELATION_CONTEXT_HEADER);
+        PROPAGATION_FIELDS.addAll(Tracing.getPropagationComponent().getB3Format().fields());
+    }
 
     static {
         TYPE_TO_ID_MAP.put(Byte.class, 'a'); //use a because b is already taken for boolean
@@ -63,6 +85,30 @@ public class ContextPropagationUtil {
      * @return the result propagation map
      */
     public static Map<String, String> buildPropagationHeaderMap(Stream<Map.Entry<String, Object>> dataToPropagate) {
+        return buildPropagationHeaderMap(dataToPropagate, null);
+    }
+
+    /**
+     * Takes the given key-value pairs and the span context and encodes them into the Correlation-Context header.
+     *
+     * @param dataToPropagate the key-value pairs to propagate.
+     * @param spanToPropagate the span context to propagate, null if none shall be propagated
+     * @return the result propagation map
+     */
+    public static Map<String, String> buildPropagationHeaderMap(Stream<Map.Entry<String, Object>> dataToPropagate, SpanContext spanToPropagate) {
+        String contextCorrelationData = buildCorrelationContextHeader(dataToPropagate);
+        HashMap<String, String> result = new HashMap<>();
+        if (contextCorrelationData.length() > 0) {
+            result.put(CORRELATION_CONTEXT_HEADER, contextCorrelationData);
+        }
+        if (spanToPropagate != null) {
+            TextFormat b3Format = Tracing.getPropagationComponent().getB3Format();
+            b3Format.inject(spanToPropagate, result, MAP_INJECTOR);
+        }
+        return result;
+    }
+
+    private static String buildCorrelationContextHeader(Stream<Map.Entry<String, Object>> dataToPropagate) {
         StringBuilder contextCorrelationData = new StringBuilder();
         dataToPropagate.forEach(e -> {
             try {
@@ -84,15 +130,11 @@ public class ContextPropagationUtil {
                 log.error("Error encoding correlation context header", e);
             }
         });
-        if (contextCorrelationData.length() > 0) {
-            return Collections.singletonMap(CORRELATION_CONTEXT_HEADER, contextCorrelationData.toString());
-        } else {
-            return Collections.emptyMap();
-        }
+        return contextCorrelationData.toString();
     }
 
     /**
-     * Returns all header names which can potentially be output by {@link #buildPropagationHeaderMap(Stream)}.
+     * Returns all header names which can potentially be output by {@link #buildPropagationHeaderMap(Stream, SpanContext)}.
      *
      * @return the set of header names
      */
@@ -101,15 +143,33 @@ public class ContextPropagationUtil {
     }
 
     /**
-     * Decodes te given header to value map into the given target context.
+     * Decodes the given header to value map into the given target context.
      *
      * @param propagationMap the headers to decode
      * @param target         the context in which the decoded data key-value pairs will be stored.
      */
-    public static void readPropagationHeaderMap(Map<String, String> propagationMap, InspectitContext target) {
+    public static void readPropagatedDataFromHeaderMap(Map<String, String> propagationMap, InspectitContext target) {
         if (propagationMap.containsKey(CORRELATION_CONTEXT_HEADER)) {
             readCorrelationContext(propagationMap.get(CORRELATION_CONTEXT_HEADER), target);
         }
+    }
+
+    /**
+     * Decodes a span context from the given header to value map into the given target context.
+     *
+     * @param propagationMap the headers to decode
+     * @return if the data contained any trace correlation, the SpanContext is returned. Otherwise returns null
+     */
+    public static SpanContext readPropagatedSpanContextFromHeaderMap(Map<String, String> propagationMap) {
+        boolean anyB3Header = Tracing.getPropagationComponent().getB3Format().fields().stream().anyMatch(propagationMap::containsKey);
+        if (anyB3Header) {
+            try {
+                return Tracing.getPropagationComponent().getB3Format().extract(propagationMap, MAP_EXTRACTOR);
+            } catch (Throwable t) {
+                log.error("Error reading trace correlation data", t);
+            }
+        }
+        return null;
     }
 
     /**

@@ -10,7 +10,7 @@ import rocks.inspectit.ocelot.core.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.core.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.ocelot.core.config.model.instrumentation.InternalSettings;
 import rocks.inspectit.ocelot.core.config.model.instrumentation.SpecialSensorSettings;
-import rocks.inspectit.ocelot.core.config.model.instrumentation.dataproviders.DataProviderCallSettings;
+import rocks.inspectit.ocelot.core.config.model.instrumentation.actions.DataProviderCallSettings;
 import rocks.inspectit.ocelot.core.config.model.metrics.MetricsSettings;
 import rocks.inspectit.ocelot.core.config.model.validation.Violation;
 import rocks.inspectit.ocelot.core.config.model.validation.ViolationBuilder;

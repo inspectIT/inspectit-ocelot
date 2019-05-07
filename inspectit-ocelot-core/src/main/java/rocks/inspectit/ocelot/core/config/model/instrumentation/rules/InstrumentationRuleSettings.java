@@ -5,7 +5,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import rocks.inspectit.ocelot.core.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.core.config.model.instrumentation.InstrumentationSettings;
-import rocks.inspectit.ocelot.core.config.model.instrumentation.dataproviders.DataProviderCallSettings;
+import rocks.inspectit.ocelot.core.config.model.instrumentation.actions.DataProviderCallSettings;
 import rocks.inspectit.ocelot.core.config.model.metrics.MetricsSettings;
 import rocks.inspectit.ocelot.core.config.model.validation.ViolationBuilder;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.InstrumentationRule;
@@ -68,6 +68,13 @@ public class InstrumentationRuleSettings {
      */
     @NotNull
     private Map<@NotBlank String, String> metrics = Collections.emptyMap();
+
+    /**
+     * Stores all configuration options related to tracing.
+     */
+    @NotNull
+    @Valid
+    private RuleTracingSettings tracing = new RuleTracingSettings();
 
     /**
      * Validates this rule, invoked by {@link InstrumentationSettings#performValidation(InspectitConfig, ViolationBuilder)}

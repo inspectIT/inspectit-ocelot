@@ -96,7 +96,7 @@ public class HttpUrlConnectionContextPropagationSensor implements SpecialSensor 
                         headersOfInterest.put(headerName, String.join(",", values));
                     }
                 }
-                ctx.readPropagationHeaders(headersOfInterest);
+                ctx.readUpPropagationHeaders(headersOfInterest);
                 ctx.close();
             }
         }

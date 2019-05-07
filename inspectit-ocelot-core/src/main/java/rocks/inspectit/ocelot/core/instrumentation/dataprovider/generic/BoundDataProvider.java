@@ -5,7 +5,7 @@ import lombok.val;
 import org.apache.commons.lang3.tuple.Pair;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.IGenericDataProvider;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.GenericDataProviderConfig;
-import rocks.inspectit.ocelot.core.instrumentation.hook.IHookAction;
+import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
 import rocks.inspectit.ocelot.core.instrumentation.injection.ClassInjector;
 import rocks.inspectit.ocelot.core.instrumentation.injection.InjectedClass;
 
@@ -64,7 +64,7 @@ public abstract class BoundDataProvider implements IHookAction {
     /**
      * Binds a data provider to the given input argument values.
      *
-     * @param dataKey             the data key udner which the result of this provider will be stored
+     * @param dataKey             the data key under which the result of this provider will be stored
      * @param providerConfig      the configuration of the used data provider
      * @param provider            the generated provider class
      * @param constantAssignments a map mapping input variable names to their constant values
