@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -127,9 +128,11 @@ public class HttpRemoteTracingTest extends TraceTestBase {
         @Test
         void testPropagationViaServlet() throws Exception {
 
-            TestUtils.waitForClassInstrumentation(CloseableHttpClient.class, 15, TimeUnit.SECONDS);
-            TestUtils.waitForClassInstrumentation(ApacheClientConnectionTest.class, 15, TimeUnit.SECONDS);
-            TestUtils.waitForClassInstrumentation(TracingServlet.class, 15, TimeUnit.SECONDS);
+            TestUtils.waitForClassInstrumentations(Arrays.asList(
+                    CloseableHttpClient.class,
+                    Class.forName("org.apache.http.impl.client.InternalHttpClient"),
+                    ApacheClientConnectionTest.class,
+                    TracingServlet.class), 15, TimeUnit.SECONDS);
             clientSpan();
 
             assertTraceExported((spans) ->

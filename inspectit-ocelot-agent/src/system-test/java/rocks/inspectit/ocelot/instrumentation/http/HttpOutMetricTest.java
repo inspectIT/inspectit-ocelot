@@ -14,6 +14,7 @@ import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.bootstrap.context.IInspectitContext;
 import rocks.inspectit.ocelot.utils.TestUtils;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -70,13 +71,16 @@ public class HttpOutMetricTest {
         CloseableHttpClient client;
 
         @BeforeEach
-        void setupClient() {
+        void setupClient() throws Exception {
             RequestConfig.Builder requestBuilder = RequestConfig.custom();
             HttpClientBuilder builder = HttpClientBuilder.create();
             builder.setDefaultRequestConfig(requestBuilder.build());
             client = builder.build();
 
-            TestUtils.waitForClassInstrumentation(CloseableHttpClient.class, 15, TimeUnit.SECONDS);
+            TestUtils.waitForClassInstrumentations(Arrays.asList(
+                    CloseableHttpClient.class,
+                    Class.forName("org.apache.http.impl.client.InternalHttpClient")),
+                    15, TimeUnit.SECONDS);
         }
 
         @AfterEach

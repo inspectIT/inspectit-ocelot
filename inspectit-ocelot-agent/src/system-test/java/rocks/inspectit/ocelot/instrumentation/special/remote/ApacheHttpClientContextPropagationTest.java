@@ -52,7 +52,10 @@ public class ApacheHttpClientContextPropagationTest {
 
         client = builder.build();
 
-        TestUtils.waitForClassInstrumentations(Arrays.asList(CloseableHttpClient.class, HttpServlet.class), 10, TimeUnit.SECONDS);
+        TestUtils.waitForClassInstrumentations(Arrays.asList(
+                Class.forName("org.apache.http.impl.client.InternalHttpClient"),
+                CloseableHttpClient.class,
+                HttpServlet.class), 10, TimeUnit.SECONDS);
     }
 
     @BeforeEach
