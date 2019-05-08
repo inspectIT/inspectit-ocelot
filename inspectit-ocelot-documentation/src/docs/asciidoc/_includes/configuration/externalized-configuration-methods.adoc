@@ -52,4 +52,4 @@ This is done by specifying the duration `inspectit.config.file-based.frequency`.
 filesystem events published by the operating system to detect changes.
 |===
 
-IMPORTANT: You must make sure that the access to your configuration directory is restricted in the same way you would restrict access to your application code or startup script. Otherwise the concept of <<Data Providers, data providers>> of inspectIT Ocelot could make your application prone to code injection!
+IMPORTANT: You must make sure that the access to your configuration directory is restricted in the same way you would restrict access to your application code or startup script. Otherwise the concept of <<Actions, actions>> of inspectIT Ocelot could make your application prone to code injection!

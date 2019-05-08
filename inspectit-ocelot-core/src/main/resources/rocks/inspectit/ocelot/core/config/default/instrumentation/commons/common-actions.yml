@@ -2,8 +2,8 @@ inspectit:
 
   # settings regarding the instrumentation performed on the target application
   instrumentation:
-    #definitions of commonly used data providers
-    data-providers:
+    #definitions of commonly used actions
+    actions:
 
       # takes the input "value" and just returns it
       set:

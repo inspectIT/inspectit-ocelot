@@ -2,7 +2,7 @@ inspectit:
 
   instrumentation:
 
-    data-providers:
+    actions:
       get_servlet_request_path:
         imports:
           - javax.servlet

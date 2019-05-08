@@ -1,14 +1,15 @@
-package rocks.inspectit.ocelot.core.instrumentation.dataprovider.generic;
+package rocks.inspectit.ocelot.core.instrumentation.genericactions;
 
 import lombok.experimental.NonFinal;
 import lombok.val;
 import org.apache.commons.lang3.tuple.Pair;
-import rocks.inspectit.ocelot.bootstrap.instrumentation.IGenericDataProvider;
-import rocks.inspectit.ocelot.core.instrumentation.config.model.GenericDataProviderConfig;
+import rocks.inspectit.ocelot.bootstrap.instrumentation.IGenericAction;
+import rocks.inspectit.ocelot.core.instrumentation.config.model.GenericActionConfig;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
 import rocks.inspectit.ocelot.core.instrumentation.injection.ClassInjector;
 import rocks.inspectit.ocelot.core.instrumentation.injection.InjectedClass;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -16,11 +17,11 @@ import java.util.Map;
 import java.util.function.Function;
 
 /**
- * Represents a {@link IGenericDataProvider} which has values bound to its input arguments.
+ * Represents a {@link IGenericAction} which has values bound to its input arguments.
  * The bound values can be either constants or dynamically computed based on the {@link IHookAction.ExecutionContext}.
  */
 @NonFinal
-public abstract class BoundDataProvider implements IHookAction {
+public abstract class BoundGenericAction implements IHookAction {
 
     /**
      * The data to which the value is assigned
@@ -28,76 +29,76 @@ public abstract class BoundDataProvider implements IHookAction {
     protected final String dataKey;
 
     /**
-     * The name of the data provider, only used to provide a meaningful name via getName()
+     * The name of the action, only used to provide a meaningful name via getName()
      */
-    private final String providerName;
+    private final String actionName;
 
     /**
-     * Reference to the class of teh data provider.
-     * This reference is held to prevent the {@link ClassInjector} from reusing this provider.
+     * Reference to the class of the generic action.
+     * This reference is held to prevent the {@link ClassInjector} from reusing this action.
      */
-    private final InjectedClass<?> providerClass;
+    private final InjectedClass<?> actionClass;
 
     /**
-     * Reference to the actual provider instance.
-     * This corresponds to the value of {@link #providerClass} for {@link GenericDataProviderTemplate#INSTANCE}.
+     * Reference to the actual action instance.
+     * This corresponds to the value of {@link #actionClass} for {@link GenericActionTemplate#INSTANCE}.
      */
-    protected final IGenericDataProvider provider;
+    protected final WeakReference<IGenericAction> action;
 
 
-    protected BoundDataProvider(String dataKey, GenericDataProviderConfig providerConfig, InjectedClass<?> providerClass) {
+    protected BoundGenericAction(String dataKey, GenericActionConfig actionConfig, InjectedClass<?> actionClass) {
         this.dataKey = dataKey;
-        providerName = providerConfig.getName();
-        this.providerClass = providerClass;
+        actionName = actionConfig.getName();
+        this.actionClass = actionClass;
         try {
-            provider = (IGenericDataProvider) providerClass.getInjectedClassObject().get().getField("INSTANCE").get(null);
+            action = new WeakReference<>((IGenericAction) actionClass.getInjectedClassObject().get().getField("INSTANCE").get(null));
         } catch (Exception e) {
-            throw new IllegalArgumentException("The given provider is not based on the GenericDatProviderTemplate");
+            throw new IllegalArgumentException("The given action is not based on the GenericActionTemplate");
         }
     }
 
     @Override
     public String getName() {
-        return "DataProvider '" + providerName + "' for '" + dataKey + "'";
+        return "Action '" + actionName + "' for '" + dataKey + "'";
     }
 
     /**
-     * Binds a data provider to the given input argument values.
+     * Binds a generic action to the given input argument values.
      *
-     * @param dataKey             the data key under which the result of this provider will be stored
-     * @param providerConfig      the configuration of the used data provider
-     * @param provider            the generated provider class
+     * @param dataKey             the data key under which the result of this action will be stored
+     * @param actionConfig        the configuration of the used data action
+     * @param action              the generated action class
      * @param constantAssignments a map mapping input variable names to their constant values
      * @param dynamicAssignments  a map mapping input variables to a function which is used to derive
-     *                            the parameter value when the provider is invoked
+     *                            the parameter value when the action is invoked
      * @return
      */
-    public static BoundDataProvider bind(String dataKey,
-                                         GenericDataProviderConfig providerConfig,
-                                         InjectedClass<?> provider,
-                                         Map<String, Object> constantAssignments,
-                                         Map<String, Function<ExecutionContext, Object>> dynamicAssignments) {
+    public static BoundGenericAction bind(String dataKey,
+                                          GenericActionConfig actionConfig,
+                                          InjectedClass<?> action,
+                                          Map<String, Object> constantAssignments,
+                                          Map<String, Function<ExecutionContext, Object>> dynamicAssignments) {
 
         if (dynamicAssignments.isEmpty()) {
-            return new ConstantOnlyBoundDataProvider(dataKey, providerConfig, provider, constantAssignments);
+            return new ConstantOnlyBoundGenericAction(dataKey, actionConfig, action, constantAssignments);
         } else {
-            return new DynamicBoundDataProvider(dataKey, providerConfig, provider, constantAssignments, dynamicAssignments);
+            return new DynamicBoundGenericAction(dataKey, actionConfig, action, constantAssignments, dynamicAssignments);
         }
     }
 }
 
-class ConstantOnlyBoundDataProvider extends BoundDataProvider {
+class ConstantOnlyBoundGenericAction extends BoundGenericAction {
 
     private final Object[] arguments;
 
-    public ConstantOnlyBoundDataProvider(String dataKey, GenericDataProviderConfig providerConfig,
-                                         InjectedClass<?> provider, Map<String, Object> constantAssignments) {
-        super(dataKey, providerConfig, provider);
+    public ConstantOnlyBoundGenericAction(String dataKey, GenericActionConfig actionConfig,
+                                          InjectedClass<?> action, Map<String, Object> constantAssignments) {
+        super(dataKey, actionConfig, action);
 
         // the additionalArgumentTypes is a sorted map
         // the order in which the arguments appear in this map correspond to the order in which their values
         // have to be placed in the arguments array
-        arguments = providerConfig.getAdditionalArgumentTypes()
+        arguments = actionConfig.getAdditionalArgumentTypes()
                 .keySet().stream()
                 .map(
                         constantAssignments::get
@@ -106,38 +107,38 @@ class ConstantOnlyBoundDataProvider extends BoundDataProvider {
 
     @Override
     public void execute(ExecutionContext context) {
-        Object result = provider.execute(context.getMethodArguments(), context.getThiz(),
+        Object result = action.get().execute(context.getMethodArguments(), context.getThiz(),
                 context.getReturnValue(), context.getThrown(), arguments);
         context.getInspectitContext().setData(dataKey, result);
     }
 }
 
-class DynamicBoundDataProvider extends BoundDataProvider {
+class DynamicBoundGenericAction extends BoundGenericAction {
 
     /**
-     * A template containing the already assigned constant arguments for this data provider.
-     * As the same {@link DynamicBoundDataProvider} instance could potentially be used by multiple threads,
+     * A template containing the already assigned constant arguments for this generic action.
+     * As the same {@link DynamicBoundGenericAction} instance could potentially be used by multiple threads,
      * this array needs to be copied before the dynamicAssignments can be performed.
      */
     private final Object[] argumentsTemplate;
 
     /**
      * An array containing (a) the index of the addition input to assign and (b) a function for defining the value.
-     * The index corresponds to the index of the parameter in {@link GenericDataProviderConfig#getAdditionalArgumentTypes()}.
+     * The index corresponds to the index of the parameter in {@link GenericActionConfig#getAdditionalArgumentTypes()}.
      * Therefore the index corresponds to the position in the additionalArgumetns array with which the
-     * {@link IGenericDataProvider#execute(Object[], Object, Object, Throwable, Object[])} function is called.
+     * {@link IGenericAction#execute(Object[], Object, Object, Throwable, Object[])} function is called.
      */
     private Pair<Integer, Function<ExecutionContext, Object>>[] dynamicAssignments;
 
-    public DynamicBoundDataProvider(String dataKey, GenericDataProviderConfig providerConfig,
-                                    InjectedClass<?> provider, Map<String, Object> constantAssignments,
-                                    Map<String, Function<ExecutionContext, Object>> dynamicAssignments) {
-        super(dataKey, providerConfig, provider);
+    public DynamicBoundGenericAction(String dataKey, GenericActionConfig actionConfig,
+                                     InjectedClass<?> action, Map<String, Object> constantAssignments,
+                                     Map<String, Function<ExecutionContext, Object>> dynamicAssignments) {
+        super(dataKey, actionConfig, action);
 
         // the sorted additionalArgumentTypes map defines the number and the order of the additional input
-        // parameters the data provider expects
+        // parameters the generic action expects
         // therefore we can already reserve the exact amount of space needed for the argumentsTemplate
-        int numArgs = providerConfig.getAdditionalArgumentTypes().size();
+        int numArgs = actionConfig.getAdditionalArgumentTypes().size();
         argumentsTemplate = new Object[numArgs];
 
         List<Pair<Integer, Function<ExecutionContext, Object>>> dynamicAssignmentsWithIndices = new ArrayList<>();
@@ -149,7 +150,7 @@ class DynamicBoundDataProvider extends BoundDataProvider {
         //Instead we remember the index and the function used to perform the assignment in dynamicAssignments.
 
         int idx = 0;
-        for (String argName : providerConfig.getAdditionalArgumentTypes().keySet()) {
+        for (String argName : actionConfig.getAdditionalArgumentTypes().keySet()) {
             if (constantAssignments.containsKey(argName)) {
                 argumentsTemplate[idx] = constantAssignments.get(argName);
             } else if (dynamicAssignments.containsKey(argName)) {
@@ -171,7 +172,7 @@ class DynamicBoundDataProvider extends BoundDataProvider {
             args[assignment.getLeft()] = assignment.getRight().apply(context);
         }
 
-        Object result = provider.execute(context.getMethodArguments(), context.getThiz(),
+        Object result = action.get().execute(context.getMethodArguments(), context.getThiz(),
                 context.getReturnValue(), context.getThrown(), args);
         context.getInspectitContext().setData(dataKey, result);
     }

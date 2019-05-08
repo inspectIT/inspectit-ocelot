@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 public class MethodHookConfigurationResolver {
 
     @Autowired
-    DataProviderCallSorter scheduler;
+    GenericActionCallSorter scheduler;
 
     /**
      * Derives the configuration of the hook for the given method.
@@ -31,8 +31,8 @@ public class MethodHookConfigurationResolver {
             throws Exception {
 
         val result = MethodHookConfiguration.builder();
-        result.entryProviders(combineAndOrderProviderCalls(matchedRules, InstrumentationRule::getEntryProviders));
-        result.exitProviders(combineAndOrderProviderCalls(matchedRules, InstrumentationRule::getExitProviders));
+        result.entryActions(combineAndOrderActionCalls(matchedRules, InstrumentationRule::getEntryActions));
+        result.exitActions(combineAndOrderActionCalls(matchedRules, InstrumentationRule::getExitActions));
 
         if (allSettings.isMetricsEnabled()) {
             resolveMetrics(result, matchedRules);
@@ -153,21 +153,21 @@ public class MethodHookConfigurationResolver {
     }
 
     /**
-     * Combines and correctly orders all data provider calls from the given rules to a single map
+     * Combines and correctly orders all action calls from the given rules to a single map
      *
-     * @param rules           the rules whose data-provider calls should be merged
-     * @param providersGetter the getter to access the rules to process, e.g. {@link InstrumentationRule#getEntryProviders()}
-     * @return a map mapping the data keys to the provider call which define the values
-     * @throws ConflictingDefinitionsException                      if the same data key is defined with different data-provider calls
-     * @throws DataProviderCallSorter.CyclicDataDependencyException if the provider calls have cyclic dependencies preventing a scheduling
+     * @param rules         the rules whose generic action calls should be merged
+     * @param actionsGetter the getter to access the rules to process, e.g. {@link InstrumentationRule#getEntryActions()}
+     * @return a map mapping the data keys to the action call which define the values
+     * @throws ConflictingDefinitionsException                       if the same data key is defined with different generic action calls
+     * @throws GenericActionCallSorter.CyclicDataDependencyException if the action calls have cyclic dependencies preventing a scheduling
      */
-    private List<DataProviderCallConfig> combineAndOrderProviderCalls(Set<InstrumentationRule> rules, Function<InstrumentationRule, Collection<DataProviderCallConfig>> providersGetter)
-            throws ConflictingDefinitionsException, DataProviderCallSorter.CyclicDataDependencyException {
+    private List<ActionCallConfig> combineAndOrderActionCalls(Set<InstrumentationRule> rules, Function<InstrumentationRule, Collection<ActionCallConfig>> actionsGetter)
+            throws ConflictingDefinitionsException, GenericActionCallSorter.CyclicDataDependencyException {
         Map<String, InstrumentationRule> dataOrigins = new HashMap<>();
-        Map<String, DataProviderCallConfig> dataDefinitions = new HashMap<>();
+        Map<String, ActionCallConfig> dataDefinitions = new HashMap<>();
         for (val rule : rules) {
-            Collection<DataProviderCallConfig> providers = providersGetter.apply(rule);
-            for (val dataDefinition : providers) {
+            Collection<ActionCallConfig> actions = actionsGetter.apply(rule);
+            for (val dataDefinition : actions) {
                 String dataKey = dataDefinition.getName();
 
                 //check if we have previously already encountered a differing definition for the key
@@ -180,7 +180,7 @@ public class MethodHookConfigurationResolver {
             }
         }
 
-        return scheduler.orderDataProviderCalls(dataDefinitions.values());
+        return scheduler.orderActionCalls(dataDefinitions.values());
     }
 
     @Value

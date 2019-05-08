@@ -15,7 +15,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Each {@link MethodHook} instances defines for a single method which actions are performed.
- * This defines for example which data providers are executed or which emtrics are collected.
+ * This defines for example which generic actions are executed or which metrics are collected.
  * {@link MethodHook}s are created, destroyed and mapped to methods via the {@link HookManager}.
  */
 @Slf4j
@@ -24,7 +24,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class MethodHook implements IMethodHook {
 
     /**
-     * The configuraiton on which this hook is based.
+     * The configuration on which this hook is based.
      * This object can be compared against newly derived configurations to see if the hook requires an update.
      */
     private final MethodHookConfiguration sourceConfiguration;

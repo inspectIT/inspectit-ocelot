@@ -14,39 +14,39 @@ inspectit:
           
           #entry point detection
           servicegraph_is_entry:
-            provider: set
+            action: set
             constant-input: { value: 1}
             only-if-null: servicegraph_servlet_entry_found
             before: { servicegraph_servlet_entry_found: true }
           servicegraph_servlet_entry_found:
-            provider : set
+            action: set
             constant-input: {value: true}
           
-          servicegraph_call_entry: { provider: timestamp_nanos }
+          servicegraph_call_entry: { action: timestamp_nanos }
           
           origin_service: 
-            provider: set
+            action: set
             data-input: {value: prop_origin_service}
             before: {prop_origin_service: true}
           protocol:
-            provider: set
+            action: set
             constant-input: { value: "http"}
           
           #set the target to our service in case an up-propagation for this servlet will happen at some point in the future
           prop_target_service: 
-            provider: set
+            action: set
             data-input: {value: service}
             only-if-not-null: servicegraph_is_entry
           
         exit:
           target_service:
-            provider: set
+            action: set
             data-input: {value: service}
             
           # we don't save anything in target_external even if target_service is null because we don't want ip's
           # or something related there due to the potential high cardinality
           servicegraph_call_duration:
-            provider: elapsed_millis
+            action: elapsed_millis
             data-input: {sinceNanos: servicegraph_call_entry }
             only-if-not-null: servicegraph_is_entry
         metrics:

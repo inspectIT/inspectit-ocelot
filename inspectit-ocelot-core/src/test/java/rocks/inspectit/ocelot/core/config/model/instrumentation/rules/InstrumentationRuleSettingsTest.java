@@ -10,7 +10,7 @@ import rocks.inspectit.ocelot.core.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.core.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.ocelot.core.config.model.instrumentation.InternalSettings;
 import rocks.inspectit.ocelot.core.config.model.instrumentation.SpecialSensorSettings;
-import rocks.inspectit.ocelot.core.config.model.instrumentation.actions.DataProviderCallSettings;
+import rocks.inspectit.ocelot.core.config.model.instrumentation.actions.ActionCallSettings;
 import rocks.inspectit.ocelot.core.config.model.metrics.MetricsSettings;
 import rocks.inspectit.ocelot.core.config.model.validation.Violation;
 import rocks.inspectit.ocelot.core.config.model.validation.ViolationBuilder;
@@ -85,11 +85,11 @@ public class InstrumentationRuleSettingsTest {
 
         @Test
         void ensureAllCallsValidated() {
-            DataProviderCallSettings entryCall = Mockito.spy(DataProviderCallSettings.class);
-            entryCall.setProvider("someProvider");
+            ActionCallSettings entryCall = Mockito.spy(ActionCallSettings.class);
+            entryCall.setAction("someAction");
             doNothing().when(entryCall).performValidation(any(), any());
-            DataProviderCallSettings exitCall = Mockito.spy(DataProviderCallSettings.class);
-            exitCall.setProvider("someProvider");
+            ActionCallSettings exitCall = Mockito.spy(ActionCallSettings.class);
+            exitCall.setAction("someAction");
             doNothing().when(exitCall).performValidation(any(), any());
 
             rule.setEntry(Collections.singletonMap("entry_data", entryCall));

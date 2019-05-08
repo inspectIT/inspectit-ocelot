@@ -9,8 +9,8 @@ inspectit:
             aggregation: LAST_VALUE
             tags: {anno_value : true}
   instrumentation:
-    data-providers:
-      #-----------------------DataProvidersTest.verifyArgumentsAccessible ------------------------
+    actions:
+      #-----------------------GenericActionsTest.verifyArgumentsAccessible ------------------------
       read_MyMethodAnnotation_value:
         imports:
           - rocks.inspectit.ocelot.instrumentation
@@ -50,7 +50,7 @@ inspectit:
           methods_with_MyMethodAnnotation: true
           constructors_with_MyMethodAnnotation: true
         entry:
-          anno_value: {provider: read_MyMethodAnnotation_value}
+          anno_value: {action: read_MyMethodAnnotation_value}
         metrics:
           '[annotation/test]' : 42
 

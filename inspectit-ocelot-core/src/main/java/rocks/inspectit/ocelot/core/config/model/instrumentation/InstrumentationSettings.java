@@ -3,8 +3,8 @@ package rocks.inspectit.ocelot.core.config.model.instrumentation;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import rocks.inspectit.ocelot.core.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.core.config.model.instrumentation.actions.GenericActionSettings;
 import rocks.inspectit.ocelot.core.config.model.instrumentation.data.DataSettings;
-import rocks.inspectit.ocelot.core.config.model.instrumentation.dataproviders.GenericDataProviderSettings;
 import rocks.inspectit.ocelot.core.config.model.instrumentation.rules.InstrumentationRuleSettings;
 import rocks.inspectit.ocelot.core.config.model.instrumentation.scope.InstrumentationScopeSettings;
 import rocks.inspectit.ocelot.core.config.model.validation.ViolationBuilder;
@@ -52,11 +52,11 @@ public class InstrumentationSettings {
     private Map<@NotBlank String, Boolean> ignoredPackages = Collections.emptyMap();
 
     /**
-     * All defined custom data providers, the key defines their name.
+     * All defined custom generic actions, the key defines their name.
      * The name is case sensitive!
      */
     @NotNull
-    private Map<@NotBlank String, @Valid GenericDataProviderSettings> dataProviders = Collections.emptyMap();
+    private Map<@NotBlank String, @Valid GenericActionSettings> actions = Collections.emptyMap();
 
 
     /**

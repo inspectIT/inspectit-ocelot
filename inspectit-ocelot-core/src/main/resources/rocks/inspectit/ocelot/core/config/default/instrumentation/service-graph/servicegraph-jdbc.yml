@@ -11,29 +11,29 @@ inspectit:
           jdbc_statement_execute: true
         entry:
           servicegraph_is_entry:
-            provider: set
+            action: set
             constant-input: { value: 1}
             only-if-null: servicegraph_jdbc_entry_found
             before: { servicegraph_jdbc_entry_found: true }
           servicegraph_jdbc_entry_found:
-            provider : set
+            action: set
             constant-input: {value: true}
           
-          servicegraph_call_entry: { provider: timestamp_nanos }
+          servicegraph_call_entry: { action: timestamp_nanos }
           
           target_external:
-            provider: get_jdbc_statement_connection_name
+            action: get_jdbc_statement_connection_name
             only-if-not-null: servicegraph_is_entry
           origin_service: 
-            provider: set
+            action: set
             data-input: {value: service}
           protocol:
-            provider: set
+            action: set
             constant-input: { value: "jdbc"}
             
         exit:
           servicegraph_call_duration:
-            provider: elapsed_millis
+            action: elapsed_millis
             data-input: {sinceNanos: servicegraph_call_entry }
             only-if-not-null: servicegraph_is_entry
           

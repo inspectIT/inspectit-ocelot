@@ -35,7 +35,7 @@ public class InstrumentationRule {
      * {@link rocks.inspectit.ocelot.core.instrumentation.hook.MethodHookGenerator}.
      */
     @Singular
-    private Collection<DataProviderCallConfig> entryProviders;
+    private Collection<ActionCallConfig> entryActions;
 
     /**
      * The actions executed on the method exit.
@@ -43,7 +43,7 @@ public class InstrumentationRule {
      * {@link rocks.inspectit.ocelot.core.instrumentation.hook.MethodHookGenerator}.
      */
     @Singular
-    private Collection<DataProviderCallConfig> exitProviders;
+    private Collection<ActionCallConfig> exitActions;
 
     /**
      * Maps metrics to the data keys or constants used as sources, see {@link InstrumentationRuleSettings#getMetrics()}.

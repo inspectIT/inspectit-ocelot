@@ -10,7 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import rocks.inspectit.ocelot.core.config.model.instrumentation.actions.DataProviderCallSettings;
+import rocks.inspectit.ocelot.core.config.model.instrumentation.actions.ActionCallSettings;
 import rocks.inspectit.ocelot.core.config.model.instrumentation.rules.RuleTracingSettings;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.*;
 
@@ -23,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 public class MethodHookConfigurationResolverTest {
 
     @Spy
-    DataProviderCallSorter scheduler = new DataProviderCallSorter();
+    GenericActionCallSorter scheduler = new GenericActionCallSorter();
 
     @InjectMocks
     MethodHookConfigurationResolver resolver;
@@ -34,51 +34,51 @@ public class MethodHookConfigurationResolverTest {
 
         InstrumentationConfiguration config;
 
-        GenericDataProviderConfig providerA;
-        DataProviderCallConfig callToA1;
-        DataProviderCallConfig callToA2;
-        GenericDataProviderConfig providerB;
-        DataProviderCallConfig callToB;
+        GenericActionConfig providerA;
+        ActionCallConfig callToA1;
+        ActionCallConfig callToA2;
+        GenericActionConfig providerB;
+        ActionCallConfig callToB;
 
         @BeforeEach
         void initTestData() {
 
             config = InstrumentationConfiguration.builder().build();
 
-            providerA = GenericDataProviderConfig.builder()
+            providerA = GenericActionConfig.builder()
                     .name("providerA")
                     .build();
 
-            DataProviderCallSettings seta1 = new DataProviderCallSettings();
-            seta1.setProvider("providerA");
-            callToA1 = DataProviderCallConfig.builder()
+            ActionCallSettings seta1 = new ActionCallSettings();
+            seta1.setAction("providerA");
+            callToA1 = ActionCallConfig.builder()
                     .name("my_key")
                     .callSettings(seta1)
-                    .provider(providerA).build();
+                    .action(providerA).build();
 
-            DataProviderCallSettings seta2 = new DataProviderCallSettings();
-            seta2.setProvider("providerA");
-            callToA2 = DataProviderCallConfig.builder()
+            ActionCallSettings seta2 = new ActionCallSettings();
+            seta2.setAction("providerA");
+            callToA2 = ActionCallConfig.builder()
                     .name("my_key")
                     .callSettings(seta2)
-                    .provider(providerA).build();
+                    .action(providerA).build();
 
-            providerB = GenericDataProviderConfig.builder()
+            providerB = GenericActionConfig.builder()
                     .name("providerB")
                     .build();
 
-            DataProviderCallSettings setb1 = new DataProviderCallSettings();
-            setb1.setProvider("providerB");
-            callToB = DataProviderCallConfig.builder()
+            ActionCallSettings setb1 = new ActionCallSettings();
+            setb1.setAction("providerB");
+            callToB = ActionCallConfig.builder()
                     .name("my_key")
                     .callSettings(setb1)
-                    .provider(providerB).build();
+                    .action(providerB).build();
         }
 
         @Test
         void verifyProviderConflictsDetected() {
-            InstrumentationRule r1 = InstrumentationRule.builder().entryProvider(callToA1).build();
-            InstrumentationRule r2 = InstrumentationRule.builder().entryProvider(callToB).build();
+            InstrumentationRule r1 = InstrumentationRule.builder().entryAction(callToA1).build();
+            InstrumentationRule r2 = InstrumentationRule.builder().entryAction(callToB).build();
 
             assertThatThrownBy(() -> resolver.buildHookConfiguration(config, Sets.newHashSet(r1, r2)))
                     .isInstanceOf(MethodHookConfigurationResolver.ConflictingDefinitionsException.class);
@@ -86,11 +86,11 @@ public class MethodHookConfigurationResolverTest {
 
         @Test
         void verifyNoProviderConflictsForSameCall() throws Exception {
-            InstrumentationRule r1 = InstrumentationRule.builder().entryProvider(callToA1).build();
-            InstrumentationRule r2 = InstrumentationRule.builder().entryProvider(callToA2).build();
+            InstrumentationRule r1 = InstrumentationRule.builder().entryAction(callToA1).build();
+            InstrumentationRule r2 = InstrumentationRule.builder().entryAction(callToA2).build();
 
             MethodHookConfiguration conf = resolver.buildHookConfiguration(config, Sets.newHashSet(r1, r2));
-            assertThat(conf.getEntryProviders()).containsExactly(callToA1);
+            assertThat(conf.getEntryActions()).containsExactly(callToA1);
         }
 
 
@@ -175,30 +175,30 @@ public class MethodHookConfigurationResolverTest {
 
         @Test
         void verifyProvidersOrderedByDependencies() throws Exception {
-            DataProviderCallSettings dependingOnFirst = new DataProviderCallSettings();
-            dependingOnFirst.setProvider("providerA");
+            ActionCallSettings dependingOnFirst = new ActionCallSettings();
+            dependingOnFirst.setAction("providerA");
             dependingOnFirst.setDataInput(Maps.newHashMap("someArgument", "my_key"));
-            DataProviderCallConfig depFirst = DataProviderCallConfig.builder()
+            ActionCallConfig depFirst = ActionCallConfig.builder()
                     .name("third_key")
                     .callSettings(dependingOnFirst)
-                    .provider(providerA).build();
+                    .action(providerA).build();
 
-            DataProviderCallSettings dependingOnSecond = new DataProviderCallSettings();
-            dependingOnSecond.setProvider("providerA");
+            ActionCallSettings dependingOnSecond = new ActionCallSettings();
+            dependingOnSecond.setAction("providerA");
             dependingOnSecond.setDataInput(Maps.newHashMap("someArgument", "second_key"));
-            DataProviderCallConfig depSecond = DataProviderCallConfig.builder()
+            ActionCallConfig depSecond = ActionCallConfig.builder()
                     .name("second_key")
                     .callSettings(dependingOnSecond)
-                    .provider(providerA).build();
+                    .action(providerA).build();
 
             InstrumentationRule r1 = InstrumentationRule.builder()
-                    .entryProvider(callToA1)
-                    .entryProvider(depSecond).build();
+                    .entryAction(callToA1)
+                    .entryAction(depSecond).build();
             InstrumentationRule r2 = InstrumentationRule.builder()
-                    .entryProvider(depFirst).build();
+                    .entryAction(depFirst).build();
 
             MethodHookConfiguration conf = resolver.buildHookConfiguration(config, Sets.newHashSet(r1, r2));
-            assertThat(conf.getEntryProviders()).containsExactly(
+            assertThat(conf.getEntryActions()).containsExactly(
                     callToA1,
                     depFirst,
                     depSecond

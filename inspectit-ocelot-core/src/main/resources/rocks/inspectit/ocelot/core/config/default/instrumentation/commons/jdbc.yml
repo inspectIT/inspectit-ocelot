@@ -1,7 +1,7 @@
 inspectit:
   instrumentation:
 
-    data-providers:
+    actions:
       get_jdbc_statement_connection_name:
         imports:
           - java.sql

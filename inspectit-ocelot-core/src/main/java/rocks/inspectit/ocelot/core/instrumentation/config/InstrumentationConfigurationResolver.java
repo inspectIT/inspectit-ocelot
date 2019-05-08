@@ -55,7 +55,7 @@ public class InstrumentationConfigurationResolver {
     private InstrumentationRuleResolver ruleResolver;
 
     @Autowired
-    private DataProviderResolver dataProviderResolver;
+    private GenericActionConfigurationResolver genericActionConfigurationResolver;
 
     @Autowired
     private MethodHookConfigurationResolver hookResolver;
@@ -199,12 +199,12 @@ public class InstrumentationConfigurationResolver {
     }
 
     private InstrumentationConfiguration resolveConfiguration(InstrumentationSettings source, MetricsSettings metrics, TracingSettings tracing) {
-        val dataProviders = dataProviderResolver.resolveProviders(source);
+        val genericActions = genericActionConfigurationResolver.resolveActions(source);
         return InstrumentationConfiguration.builder()
                 .metricsEnabled(metrics.isEnabled())
                 .tracingEnabled(tracing.isEnabled())
                 .source(source)
-                .rules(ruleResolver.resolve(source, dataProviders))
+                .rules(ruleResolver.resolve(source, genericActions))
                 .dataProperties(resolveDataProperties(source))
                 .build();
     }

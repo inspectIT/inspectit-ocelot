@@ -61,7 +61,7 @@ public class MetricsRecorder implements IHookAction {
             for (val measureAndDataKey : dataMetrics) {
                 Object value = context.getInspectitContext().getData(measureAndDataKey.getValue());
                 //only record metrics where a value is present
-                //this allows to disable the recording of a metric depending on the execution results of data providers
+                //this allows to disable the recording of a metric depending on the results of action executions
                 if (value != null) {
                     if (value instanceof Number) {
                         metricsManager.tryRecordingMeasurement(measureAndDataKey.getKey(), measureMap, (Number) value);

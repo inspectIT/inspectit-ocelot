@@ -34,13 +34,13 @@ inspectit:
         scopes:
           EntryPointDetectionTest-methods: true
         entry:
-          method_name: {provider: get_method_name}
-          entry_point_found: {provider: set, constant-input: {value: true}}
+          method_name: {action: get_method_name}
+          entry_point_found: {action: set, constant-input: {value: true}}
           is_entry_point:
             only-if-null: entry_point_found
             before:
               entry_point_found : true
-            provider: set
+            action: set
             constant-input: {value: 1}
         metrics:
           '[entrypoint/invocations]': is_entry_point

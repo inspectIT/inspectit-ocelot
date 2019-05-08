@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.core.config.model.instrumentation.dataproviders;
+package rocks.inspectit.ocelot.core.config.model.instrumentation.actions;
 
 import org.assertj.core.util.Maps;
 import org.junit.jupiter.api.BeforeEach;
@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import rocks.inspectit.ocelot.core.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.ocelot.core.config.model.instrumentation.InternalSettings;
 import rocks.inspectit.ocelot.core.config.model.instrumentation.SpecialSensorSettings;
-import rocks.inspectit.ocelot.core.config.model.instrumentation.actions.DataProviderCallSettings;
 import rocks.inspectit.ocelot.core.config.model.instrumentation.rules.InstrumentationRuleSettings;
 import rocks.inspectit.ocelot.core.config.model.validation.Violation;
 import rocks.inspectit.ocelot.core.config.model.validation.ViolationBuilder;
@@ -20,13 +19,13 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-public class DataProviderCallSettingsTest {
+public class ActionCallSettingsTest {
 
     InstrumentationSettings instr;
 
-    DataProviderCallSettings call;
+    ActionCallSettings call;
 
-    GenericDataProviderSettings provider;
+    GenericActionSettings action;
 
     ViolationBuilder vios;
     List<Violation> violations;
@@ -40,13 +39,13 @@ public class DataProviderCallSettingsTest {
         instr.setSpecial(new SpecialSensorSettings());
         instr.setInternal(new InternalSettings());
 
-        provider = new GenericDataProviderSettings();
-        provider.setValue("null");
-        provider.setInput(new HashMap<>());
-        instr.setDataProviders(Maps.newHashMap("my-provider", provider));
+        action = new GenericActionSettings();
+        action.setValue("null");
+        action.setInput(new HashMap<>());
+        instr.setActions(Maps.newHashMap("my-action", action));
 
-        call = new DataProviderCallSettings();
-        call.setProvider("my-provider");
+        call = new ActionCallSettings();
+        call.setAction("my-action");
         call.setDataInput(new HashMap<>());
         call.setConstantInput(new HashMap<>());
 
@@ -57,16 +56,16 @@ public class DataProviderCallSettingsTest {
 
 
     @Nested
-    class CheckDataProviderExistsDecoded {
+    class CheckActionExistsDecoded {
         @Test
-        void testNonExistingProvider() {
-            call.setProvider("blabla");
+        void testNonExistingAction() {
+            call.setAction("blabla");
 
             call.performValidation(instr, vios);
 
             assertThat(violations).hasSize(1);
             assertThat(violations.get(0).getParameters().values()).contains("blabla");
-            assertThat(violations.get(0).getMessage()).containsIgnoringCase("provider");
+            assertThat(violations.get(0).getMessage()).containsIgnoringCase("action");
             assertThat(violations.get(0).getMessage()).containsIgnoringCase("exist");
         }
     }
@@ -76,7 +75,7 @@ public class DataProviderCallSettingsTest {
 
         @Test
         void testDuplicateAssignment() {
-            provider.getInput().put("my-prop", "String");
+            action.getInput().put("my-prop", "String");
             call.getConstantInput().put("my-prop", "value");
             call.getDataInput().put("my-prop", "my_data_key");
 
@@ -92,8 +91,8 @@ public class DataProviderCallSettingsTest {
 
         @Test
         void testMissingAssignment() {
-            provider.getInput().put("my-prop", "String");
-            provider.getInput().put("other-prop", "String");
+            action.getInput().put("my-prop", "String");
+            action.getInput().put("other-prop", "String");
             call.getConstantInput().put("my-prop", "value");
 
             call.performValidation(instr, vios);
@@ -104,7 +103,7 @@ public class DataProviderCallSettingsTest {
 
         @Test
         void testSpecialNotCountedAsAssignment() {
-            provider.getInput().put("_returnValue", "String");
+            action.getInput().put("_returnValue", "String");
 
             call.performValidation(instr, vios);
 
@@ -117,7 +116,7 @@ public class DataProviderCallSettingsTest {
 
         @Test
         void testMissingAssignment() {
-            provider.getInput().put("p1", "String");
+            action.getInput().put("p1", "String");
             call.getConstantInput().put("p1", "value");
             call.getConstantInput().put("P1", "other-value");
 
@@ -129,7 +128,7 @@ public class DataProviderCallSettingsTest {
 
         @Test
         void testSpecialNotCountedAsAssignment() {
-            provider.getInput().put("_returnValue", "String");
+            action.getInput().put("_returnValue", "String");
 
             call.performValidation(instr, vios);
 
@@ -141,10 +140,10 @@ public class DataProviderCallSettingsTest {
     class CheckNoSpecialVariablesAssigned {
 
         @Test
-        void testNonExistingProvider() {
-            provider.getInput().put("my-prop", "String");
-            provider.getInput().put("_thrown", "Throwable");
-            provider.getInput().put("_arg3", "String");
+        void testNonExistingAction() {
+            action.getInput().put("my-prop", "String");
+            action.getInput().put("_thrown", "Throwable");
+            action.getInput().put("_arg3", "String");
             call.getConstantInput().put("my-prop", "value");
             call.getConstantInput().put("_arg3", "value");
             call.getDataInput().put("_thrown", "my_data_key");
@@ -162,7 +161,7 @@ public class DataProviderCallSettingsTest {
 
         @Test
         void testConstantStringAssignment() {
-            provider.getInput().put("my-prop", "String");
+            action.getInput().put("my-prop", "String");
             call.getConstantInput().put("my-prop", "myValue");
 
             call.performValidation(instr, vios);
@@ -172,7 +171,7 @@ public class DataProviderCallSettingsTest {
 
         @Test
         void testNullStringAssignment() {
-            provider.getInput().put("my-prop", "String");
+            action.getInput().put("my-prop", "String");
             call.getConstantInput().put("my-prop", null);
 
             call.performValidation(instr, vios);
@@ -183,7 +182,7 @@ public class DataProviderCallSettingsTest {
 
         @Test
         void testFloatToDoubleWrapperAssignment() {
-            provider.getInput().put("p1", "Double");
+            action.getInput().put("p1", "Double");
             call.getConstantInput().put("p1", "2.05E-5f");
 
             call.performValidation(instr, vios);
@@ -194,7 +193,7 @@ public class DataProviderCallSettingsTest {
 
         @Test
         void testFloatToDoublePrimitiveAssignment() {
-            provider.getInput().put("p1", "double");
+            action.getInput().put("p1", "double");
             call.getConstantInput().put("p1", "2.05E-5f");
 
             call.performValidation(instr, vios);
@@ -205,7 +204,7 @@ public class DataProviderCallSettingsTest {
 
         @Test
         void testDoubleToFloatPrimitiveAssignment() {
-            provider.getInput().put("p1", "double");
+            action.getInput().put("p1", "double");
             call.getConstantInput().put("p1", " -2.05E5 ");
 
             call.performValidation(instr, vios);
@@ -215,7 +214,7 @@ public class DataProviderCallSettingsTest {
 
         @Test
         void testNullToPrimitiveAssignment() {
-            provider.getInput().put("p1", "byte");
+            action.getInput().put("p1", "byte");
             call.getConstantInput().put("p1", null);
 
             call.performValidation(instr, vios);
@@ -227,7 +226,7 @@ public class DataProviderCallSettingsTest {
 
         @Test
         void testNullToWrapperAssignment() {
-            provider.getInput().put("p1", "java.lang.Byte");
+            action.getInput().put("p1", "java.lang.Byte");
             call.getConstantInput().put("p1", null);
 
             call.performValidation(instr, vios);
@@ -237,7 +236,7 @@ public class DataProviderCallSettingsTest {
 
         @Test
         void testEmptyIntegerAssignment() {
-            provider.getInput().put("p1", "Integer");
+            action.getInput().put("p1", "Integer");
             call.getConstantInput().put("p1", "");
 
             call.performValidation(instr, vios);
@@ -247,7 +246,7 @@ public class DataProviderCallSettingsTest {
 
         @Test
         void testInvalidIntegerAssignment() {
-            provider.getInput().put("p1", "Integer");
+            action.getInput().put("p1", "Integer");
             call.getConstantInput().put("p1", "14notanumber5");
 
             call.performValidation(instr, vios);
@@ -258,7 +257,7 @@ public class DataProviderCallSettingsTest {
 
         @Test
         void testCorrectCharacterAssignment() {
-            provider.getInput().put("p1", "char");
+            action.getInput().put("p1", "char");
             call.getConstantInput().put("p1", "X");
 
             call.performValidation(instr, vios);
@@ -268,7 +267,7 @@ public class DataProviderCallSettingsTest {
 
         @Test
         void testEmptyCharacterAssignment() {
-            provider.getInput().put("p1", "char");
+            action.getInput().put("p1", "char");
             call.getConstantInput().put("p1", "");
 
             call.performValidation(instr, vios);
@@ -278,7 +277,7 @@ public class DataProviderCallSettingsTest {
 
         @Test
         void testTooLongCharacterAssignment() {
-            provider.getInput().put("p1", "char");
+            action.getInput().put("p1", "char");
             call.getConstantInput().put("p1", "AB");
 
             call.performValidation(instr, vios);
@@ -288,7 +287,7 @@ public class DataProviderCallSettingsTest {
 
         @Test
         void testUnknownTypeNonNullAssignment() {
-            provider.getInput().put("p1", "my.package.DomainObject");
+            action.getInput().put("p1", "my.package.DomainObject");
             call.getConstantInput().put("p1", "blabla");
 
             call.performValidation(instr, vios);
@@ -298,7 +297,7 @@ public class DataProviderCallSettingsTest {
 
         @Test
         void testUnknownTypeNullAssignment() {
-            provider.getInput().put("p1", "my.package.DomainObject");
+            action.getInput().put("p1", "my.package.DomainObject");
             call.getConstantInput().put("p1", null);
 
             call.performValidation(instr, vios);
@@ -308,8 +307,8 @@ public class DataProviderCallSettingsTest {
 
         @Test
         void testNonParsableAssignment() {
-            provider.setImports(Arrays.asList("java.util"));
-            provider.getInput().put("p1", "Map");
+            action.setImports(Arrays.asList("java.util"));
+            action.getInput().put("p1", "Map");
             call.getConstantInput().put("p1", "I'm a map");
 
             call.performValidation(instr, vios);
@@ -319,8 +318,8 @@ public class DataProviderCallSettingsTest {
 
         @Test
         void testDateAssignment() {
-            provider.setImports(Arrays.asList("java.util"));
-            provider.getInput().put("p1", "Date");
+            action.setImports(Arrays.asList("java.util"));
+            action.getInput().put("p1", "Date");
             call.getConstantInput().put("p1", "22/05/1950 10:00:42");
 
             call.performValidation(instr, vios);
@@ -330,8 +329,8 @@ public class DataProviderCallSettingsTest {
 
         @Test
         void testDurationAssignment() {
-            provider.setImports(Arrays.asList("java.time"));
-            provider.getInput().put("p1", "Duration");
+            action.setImports(Arrays.asList("java.time"));
+            action.getInput().put("p1", "Duration");
             call.getConstantInput().put("p1", "15s");
 
             call.performValidation(instr, vios);
@@ -341,11 +340,11 @@ public class DataProviderCallSettingsTest {
 
         @Test
         void testMapToListAssignment() {
-            provider.setImports(Arrays.asList("java.time"));
+            action.setImports(Arrays.asList("java.time"));
             HashMap<String, String> nested = new HashMap<>();
             nested.put("0", "firstEntry");
             nested.put("1", "secondEntry");
-            provider.getInput().put("p1", "java.util.List");
+            action.getInput().put("p1", "java.util.List");
             call.getConstantInput().put("p1", nested);
 
             call.performValidation(instr, vios);
@@ -355,11 +354,11 @@ public class DataProviderCallSettingsTest {
 
         @Test
         void testMapToMapAssignment() {
-            provider.setImports(Arrays.asList("java.time"));
+            action.setImports(Arrays.asList("java.time"));
             HashMap<String, String> nested = new HashMap<>();
             nested.put("firstKey", "firstEntry");
             nested.put("secondKey", "secondEntry");
-            provider.getInput().put("p1", "java.util.Map");
+            action.getInput().put("p1", "java.util.Map");
             call.getConstantInput().put("p1", nested);
 
             call.performValidation(instr, vios);

@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.core.instrumentation.dataprovider.generic;
+package rocks.inspectit.ocelot.core.instrumentation.genericactions;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -10,9 +10,9 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import rocks.inspectit.ocelot.bootstrap.instrumentation.IGenericDataProvider;
-import rocks.inspectit.ocelot.core.config.model.instrumentation.dataproviders.GenericDataProviderSettings;
-import rocks.inspectit.ocelot.core.instrumentation.config.model.GenericDataProviderConfig;
+import rocks.inspectit.ocelot.bootstrap.instrumentation.IGenericAction;
+import rocks.inspectit.ocelot.core.config.model.instrumentation.actions.GenericActionSettings;
+import rocks.inspectit.ocelot.core.instrumentation.config.model.GenericActionConfig;
 import rocks.inspectit.ocelot.core.instrumentation.injection.ClassInjector;
 import rocks.inspectit.ocelot.core.instrumentation.injection.InjectedClass;
 import rocks.inspectit.ocelot.core.utils.AutoboxingHelper;
@@ -25,7 +25,7 @@ import java.util.concurrent.ExecutionException;
 
 @Component
 @Slf4j
-public class DataProviderGenerator {
+public class GenericActionGenerator {
 
     /**
      * Guava seems to not allow null keys.
@@ -33,7 +33,7 @@ public class DataProviderGenerator {
      */
     private static final ClassLoader BOOTSTRAP_LOADER_MARKER = new URLClassLoader(new URL[]{});
 
-    private static final String GENERIC_PROVIDER_STRUCTURAL_ID = "genericDataProvider";
+    private static final String GENERIC_ACTION_STRUCTURAL_ID = "genericAction";
 
     private static final String METHOD_ARGS = "$1";
     private static final String THIZ = "$2";
@@ -44,41 +44,41 @@ public class DataProviderGenerator {
     @Autowired
     private ClassInjector classInjector;
 
-    private LoadingCache<ClassLoader, Cache<GenericDataProviderConfig, InjectedClass<? extends IGenericDataProvider>>> providersCache
+    private LoadingCache<ClassLoader, Cache<GenericActionConfig, InjectedClass<? extends IGenericAction>>> actionsCache
             = CacheBuilder.newBuilder().weakKeys().build(
-            new CacheLoader<ClassLoader, Cache<GenericDataProviderConfig, InjectedClass<? extends IGenericDataProvider>>>() {
+            new CacheLoader<ClassLoader, Cache<GenericActionConfig, InjectedClass<? extends IGenericAction>>>() {
                 @Override
-                public Cache<GenericDataProviderConfig, InjectedClass<? extends IGenericDataProvider>> load(ClassLoader key) {
+                public Cache<GenericActionConfig, InjectedClass<? extends IGenericAction>> load(ClassLoader key) {
                     return CacheBuilder.newBuilder().weakValues().build();
                 }
             });
 
     /**
-     * Provides an executable {@link IGenericDataProvider} based on the given configuration.
-     * The provider is either dynamically compiled and injected or a cached provider is used.
+     * Provides an executable {@link IGenericAction} based on the given configuration.
+     * The action is either dynamically compiled and injected or a cached action is used.
      *
-     * @param providerConfig       the configuration of the generic data provider to use
-     * @param classToUseProviderOn the context in which the provider will be actively. The provider will be injected into the classloader of this class.
-     * @return the generated provider
-     * @throws ExecutionException
+     * @param actionConfig       the configuration of the generic action to use
+     * @param classToUseActionOn the context in which the action will be active. The action will be injected into the classloader of this class.
+     * @return the generated action
      */
-    public InjectedClass<? extends IGenericDataProvider> getOrGenerateDataProvider(GenericDataProviderConfig providerConfig, Class<?> classToUseProviderOn) {
-        ClassLoader loader = Optional.ofNullable(classToUseProviderOn.getClassLoader()).orElse(BOOTSTRAP_LOADER_MARKER);
-        providersCache.cleanUp();
-        Cache<GenericDataProviderConfig, InjectedClass<? extends IGenericDataProvider>> clCache;
+    @SuppressWarnings("unchecked")
+    public InjectedClass<? extends IGenericAction> getOrGenerateGenericAction(GenericActionConfig actionConfig, Class<?> classToUseActionOn) {
+        ClassLoader loader = Optional.ofNullable(classToUseActionOn.getClassLoader()).orElse(BOOTSTRAP_LOADER_MARKER);
+        actionsCache.cleanUp();
+        Cache<GenericActionConfig, InjectedClass<? extends IGenericAction>> clCache;
         try {
-            clCache = providersCache.get(loader);
+            clCache = actionsCache.get(loader);
             clCache.cleanUp(); //cleanup to make sure unused InjectedClasses are released
             try {
-                return clCache.get(providerConfig, () ->
-                        (InjectedClass<? extends IGenericDataProvider>)
-                                classInjector.inject(GENERIC_PROVIDER_STRUCTURAL_ID, classToUseProviderOn, (className) ->
-                                        buildGenericDataProviderByteCode(providerConfig, loader, className)
+                return clCache.get(actionConfig, () ->
+                        (InjectedClass<? extends IGenericAction>)
+                                classInjector.inject(GENERIC_ACTION_STRUCTURAL_ID, classToUseActionOn, (className) ->
+                                        buildGenericActionByteCode(actionConfig, loader, className)
                                 ));
             } catch (ExecutionException | ExecutionError e) {
-                log.error("Error creating data provider '{}' in context of class {}! Using a No-Operation data provider instead!",
-                        providerConfig.getName(), classToUseProviderOn.getName(), e);
-                return clCache.get(providerConfig, () -> new InjectedClass<IGenericDataProvider>(GenericDataProviderTemplate.class));
+                log.error("Error creating generic action '{}' in context of class {}! Using a No-Operation action instead!",
+                        actionConfig.getName(), classToUseActionOn.getName(), e);
+                return clCache.get(actionConfig, () -> new InjectedClass<IGenericAction>(GenericActionTemplate.class));
             }
         } catch (ExecutionException e) {
             //never happens
@@ -86,33 +86,33 @@ public class DataProviderGenerator {
         }
     }
 
-    private byte[] buildGenericDataProviderByteCode(GenericDataProviderConfig providerConfig, ClassLoader loader, String className) throws NotFoundException, CannotCompileException, IOException {
+    private byte[] buildGenericActionByteCode(GenericActionConfig actionConfig, ClassLoader loader, String className) throws NotFoundException, CannotCompileException, IOException {
         ClassPool cp = new ClassPool();
-        cp.insertClassPath(new ClassClassPath(GenericDataProviderTemplate.class));
+        cp.insertClassPath(new ClassClassPath(GenericActionTemplate.class));
         if (loader != BOOTSTRAP_LOADER_MARKER) {
             cp.insertClassPath(new LoaderClassPath(loader));
         }
 
-        CtClass provider = cp.get(GenericDataProviderTemplate.class.getName());
-        provider.setName(className);
+        CtClass action = cp.get(GenericActionTemplate.class.getName());
+        action.setName(className);
 
-        for (String packageName : providerConfig.getImportedPackages()) {
+        for (String packageName : actionConfig.getImportedPackages()) {
             cp.importPackage(packageName);
         }
 
-        CtMethod method = provider.getDeclaredMethod("executeImpl");
-        method.setBody(buildProviderMethod(providerConfig));
+        CtMethod method = action.getDeclaredMethod("executeImpl");
+        method.setBody(buildActionMethod(actionConfig));
 
-        return provider.toBytecode();
+        return action.toBytecode();
     }
 
     /**
-     * Builds the Java source code used to replace {@link GenericDataProviderTemplate#executeImpl(Object[], Object, Object, Throwable, Object[])}.
+     * Builds the Java source code used to replace {@link GenericActionTemplate#executeImpl(Object[], Object, Object, Throwable, Object[])}.
      * <p>
      * Example configuration:
      * <pre>
      * {@code
-     * my-provider:
+     * my-action:
      *   input:
      *     x: boolean
      *     y: java.lang.Object
@@ -139,29 +139,29 @@ public class DataProviderGenerator {
      * }
      * </pre>
      *
-     * @param providerConfig
-     * @return
+     * @param actionConfig the config of the action to build
+     * @return the generated method body as string
      */
-    private String buildProviderMethod(GenericDataProviderConfig providerConfig) {
+    private String buildActionMethod(GenericActionConfig actionConfig) {
         StringBuilder methodBody = new StringBuilder("{");
-        if (providerConfig.getExpectedThisType() != null) {
-            buildVariableDefinition(methodBody, providerConfig.getExpectedThisType(), GenericDataProviderSettings.THIS_VARIABLE, THIZ);
+        if (actionConfig.getExpectedThisType() != null) {
+            buildVariableDefinition(methodBody, actionConfig.getExpectedThisType(), GenericActionSettings.THIS_VARIABLE, THIZ);
         }
-        if (providerConfig.getExpectedReturnValueType() != null) {
-            buildVariableDefinition(methodBody, providerConfig.getExpectedReturnValueType(), GenericDataProviderSettings.RETURN_VALUE_VARIABLE, RETURN_VALUE);
+        if (actionConfig.getExpectedReturnValueType() != null) {
+            buildVariableDefinition(methodBody, actionConfig.getExpectedReturnValueType(), GenericActionSettings.RETURN_VALUE_VARIABLE, RETURN_VALUE);
         }
-        if (providerConfig.isUsesThrown()) {
-            buildVariableDefinition(methodBody, "java.lang.Throwable", GenericDataProviderSettings.THROWN_VARIABLE, THROWN);
+        if (actionConfig.isUsesThrown()) {
+            buildVariableDefinition(methodBody, "java.lang.Throwable", GenericActionSettings.THROWN_VARIABLE, THROWN);
         }
-        if (providerConfig.isUsesArgsArray()) {
-            buildVariableDefinition(methodBody, "Object[]", GenericDataProviderSettings.ARGS_VARIABLE, METHOD_ARGS);
+        if (actionConfig.isUsesArgsArray()) {
+            buildVariableDefinition(methodBody, "Object[]", GenericActionSettings.ARGS_VARIABLE, METHOD_ARGS);
         }
-        providerConfig.getExpectedArgumentTypes().forEach((id, type) -> {
+        actionConfig.getExpectedArgumentTypes().forEach((id, type) -> {
             String value = METHOD_ARGS + "[" + id + "]";
-            String varName = GenericDataProviderSettings.ARG_VARIABLE_PREFIX + id;
+            String varName = GenericActionSettings.ARG_VARIABLE_PREFIX + id;
             buildVariableDefinition(methodBody, type, varName, value);
         });
-        val additionalArgs = providerConfig.getAdditionalArgumentTypes();
+        val additionalArgs = actionConfig.getAdditionalArgumentTypes();
         val iterator = additionalArgs.entrySet().iterator();
         int id = 0;
         while (iterator.hasNext()) {
@@ -172,7 +172,7 @@ public class DataProviderGenerator {
             buildVariableDefinition(methodBody, varType, varName, value);
             id++;
         }
-        methodBody.append(providerConfig.getValueBody());
+        methodBody.append(actionConfig.getValueBody());
 
         return methodBody.append("}").toString();
     }

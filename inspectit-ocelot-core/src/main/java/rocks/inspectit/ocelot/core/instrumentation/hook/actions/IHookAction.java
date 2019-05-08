@@ -7,7 +7,7 @@ import rocks.inspectit.ocelot.core.instrumentation.hook.MethodHook;
 
 /**
  * Interface used to define any kind of action which is executed in a {@link MethodHook} on method enter or exit.
- * Possible actions are for example data provider executions or the metrics collection.
+ * Possible actions are for example generic action executions or the metrics collection.
  */
 public interface IHookAction {
 

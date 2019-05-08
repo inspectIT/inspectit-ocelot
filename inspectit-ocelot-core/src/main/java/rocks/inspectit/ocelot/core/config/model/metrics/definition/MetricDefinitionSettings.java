@@ -26,7 +26,7 @@ public class MetricDefinitionSettings {
      * Defines if this metric is enabled.
      * If this metric is disabled:
      * - no views for it are created
-     * - no measurements for it are collected in the instrumentation. However the data providers are still executed!
+     * - no measurements for it are collected in the instrumentation. However the actions are still executed!
      */
     @Builder.Default
     private boolean enabled = true;

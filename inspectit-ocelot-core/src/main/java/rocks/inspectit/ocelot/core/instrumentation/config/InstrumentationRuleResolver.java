@@ -7,10 +7,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import rocks.inspectit.ocelot.core.config.model.instrumentation.InstrumentationSettings;
-import rocks.inspectit.ocelot.core.config.model.instrumentation.actions.DataProviderCallSettings;
+import rocks.inspectit.ocelot.core.config.model.instrumentation.actions.ActionCallSettings;
 import rocks.inspectit.ocelot.core.config.model.instrumentation.rules.InstrumentationRuleSettings;
-import rocks.inspectit.ocelot.core.instrumentation.config.model.DataProviderCallConfig;
-import rocks.inspectit.ocelot.core.instrumentation.config.model.GenericDataProviderConfig;
+import rocks.inspectit.ocelot.core.instrumentation.config.model.ActionCallConfig;
+import rocks.inspectit.ocelot.core.instrumentation.config.model.GenericActionConfig;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.InstrumentationRule;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.InstrumentationScope;
 
@@ -38,7 +38,7 @@ public class InstrumentationRuleResolver {
      * @param source the configuration which is used as basis for the rules
      * @return A set containing the resolved rules.
      */
-    public Set<InstrumentationRule> resolve(InstrumentationSettings source, Map<String, GenericDataProviderConfig> dataProviders) {
+    public Set<InstrumentationRule> resolve(InstrumentationSettings source, Map<String, GenericActionConfig> actions) {
         if (CollectionUtils.isEmpty(source.getRules())) {
             return Collections.emptySet();
         }
@@ -49,16 +49,16 @@ public class InstrumentationRuleResolver {
                 .entrySet()
                 .stream()
                 .filter(e -> e.getValue().isEnabled())
-                .map(e -> resolveRule(e.getKey(), e.getValue(), scopeMap, dataProviders))
+                .map(e -> resolveRule(e.getKey(), e.getValue(), scopeMap, actions))
                 .collect(Collectors.toSet());
 
         return rules;
     }
 
     /**
-     * Creating the {@link InstrumentationRule} instance and linking the scopes as well as the data providers to it.
+     * Creating the {@link InstrumentationRule} instance and linking the scopes as well as the generic actions to it.
      */
-    private InstrumentationRule resolveRule(String name, InstrumentationRuleSettings settings, Map<String, InstrumentationScope> scopeMap, Map<String, GenericDataProviderConfig> dataProviders) {
+    private InstrumentationRule resolveRule(String name, InstrumentationRuleSettings settings, Map<String, InstrumentationScope> scopeMap, Map<String, GenericActionConfig> actions) {
         val result = InstrumentationRule.builder();
         result.name(name);
         settings.getScopes().entrySet()
@@ -70,11 +70,11 @@ public class InstrumentationRuleResolver {
                 .forEach(result::scope);
 
         settings.getEntry().forEach((data, call) ->
-                result.entryProvider(resolveCall(data, call, dataProviders))
+                result.entryAction(resolveCall(data, call, actions))
         );
 
         settings.getExit().forEach((data, call) ->
-                result.exitProvider(resolveCall(data, call, dataProviders))
+                result.exitAction(resolveCall(data, call, actions))
         );
 
         settings.getMetrics().entrySet().stream()
@@ -87,19 +87,19 @@ public class InstrumentationRuleResolver {
     }
 
     /**
-     * Resolves a {@link DataProviderCallSettings} instance into a {@link DataProviderCallConfig}.
-     * As this involves linking the {@link GenericDataProviderConfig} of the provider which is used,
-     * the map of known providers is required as input.
+     * Resolves a {@link ActionCallSettings} instance into a {@link ActionCallConfig}.
+     * As this involves linking the {@link GenericActionConfig} of the action which is used,
+     * the map of known generic actions is required as input.
      *
-     * @param name          the name used for the call, corresponds to the written data key for data provider calls
-     * @param dataProviders a map mapping the names of data providers to their resolved configuration.
+     * @param name    the name used for the call, corresponds to the written data key for action calls
+     * @param actions a map mapping the names of data actions to their resolved configuration.
      * @param call
      * @return
      */
-    private DataProviderCallConfig resolveCall(String name, DataProviderCallSettings call, Map<String, GenericDataProviderConfig> dataProviders) {
-        return DataProviderCallConfig.builder()
+    private ActionCallConfig resolveCall(String name, ActionCallSettings call, Map<String, GenericActionConfig> actions) {
+        return ActionCallConfig.builder()
                 .name(name)
-                .provider(dataProviders.get(call.getProvider()))
+                .action(actions.get(call.getAction()))
                 .callSettings(call)
                 .build();
     }

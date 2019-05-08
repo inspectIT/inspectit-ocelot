@@ -1,7 +1,7 @@
 inspectit:
   
   instrumentation:  
-    dataproviders:
+    actions:
       
       get_servlet_application:
         imports:
@@ -27,7 +27,7 @@ inspectit:
           servletapi_filter_doFilter: true
         entry:
           application: 
-            provider: get_servlet_application
+            action: get_servlet_application
             only-if-null: application
           
           

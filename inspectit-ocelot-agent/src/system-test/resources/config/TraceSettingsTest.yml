@@ -62,11 +62,11 @@ inspectit:
             exit: exit_val
         entry:
           entry_val:
-            provider: set
+            action: set
             constant-input: {value: "const"}
         exit:
           exit_val:
-            provider: get_return_value
+            action: get_return_value
 
 
       TraceSettingsTest-attributesSetterWithoutSpanWithConditions:
@@ -79,13 +79,13 @@ inspectit:
           only-if-true: should_capture_attribs
         entry:
           should_capture_attribs:
-            provider: get_arg0
+            action: get_arg0
           entry_val:
-            provider: set
+            action: set
             constant-input: {value: "const"}
         exit:
           exit_val:
-            provider: get_return_value
+            action: get_return_value
 
       TraceSettingsTest-conditionalRoot:
         scopes:
@@ -95,7 +95,7 @@ inspectit:
           only-if-true: should_capture
         entry:
           should_capture:
-            provider: get_arg0
+            action: get_arg0
 
       TraceSettingsTest-named:
         scopes:
@@ -105,4 +105,4 @@ inspectit:
           name: name_val
         entry:
           name_val:
-            provider: get_arg0
+            action: get_arg0
