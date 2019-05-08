@@ -1,6 +1,7 @@
 include "inspectit-ocelot-agent"
 include 'inspectit-ocelot-bootstrap'
 include 'inspectit-ocelot-core'
+include 'inspectit-ocelot-config'
 include 'inspectit-ocelot-documentation'
 include 'inspectit-ocelot-demo'
 

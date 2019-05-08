@@ -28,7 +28,7 @@ import rocks.inspectit.ocelot.core.instrumentation.hook.DispatchHookAdvices;
 import rocks.inspectit.ocelot.core.instrumentation.special.ClassLoaderDelegation;
 import rocks.inspectit.ocelot.core.instrumentation.special.SpecialSensor;
 import rocks.inspectit.ocelot.core.selfmonitoring.SelfMonitoringService;
-import rocks.inspectit.ocelot.core.utils.CommonUtils;
+import rocks.inspectit.ocelot.core.utils.CoreUtils;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -119,7 +119,7 @@ public class AsyncClassTransformer implements ClassFileTransformer {
             shuttingDown = true;
         }
         ctx.publishEvent(new TransformerShutdownEvent(this));
-        if (!CommonUtils.isJVMShuttingDown()) {
+        if (!CoreUtils.isJVMShuttingDown()) {
             deinstrumentAllClasses();
         }
         instrumentation.removeTransformer(this);

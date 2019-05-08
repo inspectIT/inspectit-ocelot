@@ -3,16 +3,15 @@ package rocks.inspectit.ocelot.core.instrumentation.config;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
-import net.bytebuddy.matcher.StringMatcher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
-import rocks.inspectit.ocelot.core.config.model.instrumentation.InstrumentationSettings;
-import rocks.inspectit.ocelot.core.config.model.instrumentation.rules.InstrumentationRuleSettings;
-import rocks.inspectit.ocelot.core.config.model.instrumentation.scope.*;
+import rocks.inspectit.ocelot.config.model.instrumentation.InstrumentationSettings;
+import rocks.inspectit.ocelot.config.model.instrumentation.rules.InstrumentationRuleSettings;
+import rocks.inspectit.ocelot.config.model.instrumentation.scope.*;
 import rocks.inspectit.ocelot.core.instrumentation.config.matcher.IsAnnotatedMatcher;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.InstrumentationScope;
 
@@ -23,7 +22,7 @@ import java.util.Map;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static rocks.inspectit.ocelot.core.config.model.instrumentation.scope.MethodMatcherSettings.AccessModifier;
+import static rocks.inspectit.ocelot.config.model.instrumentation.scope.MethodMatcherSettings.AccessModifier;
 
 @ExtendWith(MockitoExtension.class)
 class InstrumentationScopeResolverTest {
@@ -198,7 +197,7 @@ class InstrumentationScopeResolverTest {
             MethodMatcherSettings methodSettings = new MethodMatcherSettings();
             methodSettings.setVisibility(Collections.singletonList(AccessModifier.PUBLIC));
             methodSettings.setArguments(Collections.emptyList());
-            methodSettings.setMatcherMode(StringMatcher.Mode.MATCHES);
+            methodSettings.setMatcherMode(MatcherMode.MATCHES);
             methodSettings.setName("method");
             methodSettings.setIsSynchronized(true);
             setScopeSettings(scopeKey, null, null, null, Collections.singletonList(methodSettings), null);
@@ -225,7 +224,7 @@ class InstrumentationScopeResolverTest {
             methodSettings.setIsConstructor(true);
             methodSettings.setVisibility(Collections.singletonList(AccessModifier.PUBLIC));
             methodSettings.setArguments(Collections.singletonList("any.Class"));
-            methodSettings.setMatcherMode(StringMatcher.Mode.MATCHES);
+            methodSettings.setMatcherMode(MatcherMode.MATCHES);
             methodSettings.setName("method");
             methodSettings.setIsSynchronized(true);
             setScopeSettings(scopeKey, null, null, null, Collections.singletonList(methodSettings), null);

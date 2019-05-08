@@ -7,7 +7,7 @@ import lombok.Value;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
-import rocks.inspectit.ocelot.core.config.model.instrumentation.actions.ActionCallSettings;
+import rocks.inspectit.ocelot.config.model.instrumentation.actions.ActionCallSettings;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.ActionCallConfig;
 
 import java.util.*;

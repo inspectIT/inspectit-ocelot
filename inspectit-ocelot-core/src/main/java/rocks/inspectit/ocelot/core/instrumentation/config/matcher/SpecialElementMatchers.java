@@ -10,14 +10,14 @@ import net.bytebuddy.matcher.NameMatcher;
 import net.bytebuddy.matcher.StringMatcher;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
-import rocks.inspectit.ocelot.core.config.model.instrumentation.scope.ElementDescriptionMatcherSettings;
-import rocks.inspectit.ocelot.core.config.model.instrumentation.scope.InstrumentationScopeSettings;
-import rocks.inspectit.ocelot.core.config.model.instrumentation.scope.NameMatcherSettings;
+import rocks.inspectit.ocelot.config.model.instrumentation.scope.ElementDescriptionMatcherSettings;
+import rocks.inspectit.ocelot.config.model.instrumentation.scope.InstrumentationScopeSettings;
+import rocks.inspectit.ocelot.config.model.instrumentation.scope.NameMatcherSettings;
 
 import java.util.List;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
-import static rocks.inspectit.ocelot.core.config.model.instrumentation.scope.MethodMatcherSettings.AccessModifier;
+import static rocks.inspectit.ocelot.config.model.instrumentation.scope.MethodMatcherSettings.AccessModifier;
 
 /**
  * This class provides advanced and custom ElementMatchers.
@@ -38,8 +38,28 @@ public class SpecialElementMatchers {
         String namePattern = settings.getName();
 
         if (StringUtils.isNotEmpty(namePattern)) {
-            StringMatcher.Mode matcherMode = settings.getMatcherMode();
-            return new NameMatcher<>(new StringMatcher(namePattern, matcherMode));
+            switch (settings.getMatcherMode()) {
+                case EQUALS_FULLY:
+                    return new NameMatcher<>(new StringMatcher(namePattern, StringMatcher.Mode.EQUALS_FULLY));
+                case EQUALS_FULLY_IGNORE_CASE:
+                    return new NameMatcher<>(new StringMatcher(namePattern, StringMatcher.Mode.EQUALS_FULLY_IGNORE_CASE));
+                case STARTS_WITH:
+                    return new NameMatcher<>(new StringMatcher(namePattern, StringMatcher.Mode.STARTS_WITH));
+                case STARTS_WITH_IGNORE_CASE:
+                    return new NameMatcher<>(new StringMatcher(namePattern, StringMatcher.Mode.STARTS_WITH_IGNORE_CASE));
+                case ENDS_WITH:
+                    return new NameMatcher<>(new StringMatcher(namePattern, StringMatcher.Mode.ENDS_WITH));
+                case ENDS_WITH_IGNORE_CASE:
+                    return new NameMatcher<>(new StringMatcher(namePattern, StringMatcher.Mode.ENDS_WITH_IGNORE_CASE));
+                case CONTAINS:
+                    return new NameMatcher<>(new StringMatcher(namePattern, StringMatcher.Mode.CONTAINS));
+                case CONTAINS_IGNORE_CASE:
+                    return new NameMatcher<>(new StringMatcher(namePattern, StringMatcher.Mode.CONTAINS_IGNORE_CASE));
+                case MATCHES:
+                    return new NameMatcher<>(new StringMatcher(namePattern, StringMatcher.Mode.MATCHES));
+                default:
+                    throw new RuntimeException("Unhandled matcher mode!");
+            }
         } else {
             return null;
         }

@@ -2,8 +2,8 @@ package rocks.inspectit.ocelot.core.instrumentation.config.model;
 
 import lombok.Getter;
 import org.springframework.util.CollectionUtils;
+import rocks.inspectit.ocelot.config.utils.ConfigUtils;
 import rocks.inspectit.ocelot.core.instrumentation.special.SpecialSensor;
-import rocks.inspectit.ocelot.core.utils.CommonUtils;
 
 import java.util.Collections;
 import java.util.Set;
@@ -51,10 +51,10 @@ public class ClassInstrumentationConfiguration {
      * @return true if both are the same, false otherwise
      */
     public boolean isSameAs(Class<?> clazz, ClassInstrumentationConfiguration other) {
-        if (!CommonUtils.contentsEqual(activeSpecialSensors, other.activeSpecialSensors)) {
+        if (!ConfigUtils.contentsEqual(activeSpecialSensors, other.activeSpecialSensors)) {
             return false;
         }
-        if (!CommonUtils.contentsEqual(getActiveRules(), other.getActiveRules())) {
+        if (!ConfigUtils.contentsEqual(getActiveRules(), other.getActiveRules())) {
             return false;
         }
         for (SpecialSensor sensor : activeSpecialSensors) {

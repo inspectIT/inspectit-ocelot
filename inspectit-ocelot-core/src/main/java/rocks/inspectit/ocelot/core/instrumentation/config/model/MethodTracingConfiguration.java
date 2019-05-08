@@ -4,8 +4,8 @@ import io.opencensus.trace.Span;
 import lombok.Builder;
 import lombok.Singular;
 import lombok.Value;
-import rocks.inspectit.ocelot.core.config.model.instrumentation.actions.ConditionalActionSettings;
-import rocks.inspectit.ocelot.core.config.model.instrumentation.rules.RuleTracingSettings;
+import rocks.inspectit.ocelot.config.model.instrumentation.actions.ConditionalActionSettings;
+import rocks.inspectit.ocelot.config.model.instrumentation.rules.RuleTracingSettings;
 
 import java.util.Map;
 

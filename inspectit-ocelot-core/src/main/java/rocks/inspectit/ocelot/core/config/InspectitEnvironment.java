@@ -13,8 +13,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import rocks.inspectit.ocelot.core.config.filebased.DirectoryPropertySource;
-import rocks.inspectit.ocelot.core.config.model.InspectitConfig;
-import rocks.inspectit.ocelot.core.config.model.config.ConfigSettings;
+import rocks.inspectit.ocelot.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.config.model.config.ConfigSettings;
 import rocks.inspectit.ocelot.core.config.util.CaseUtils;
 import rocks.inspectit.ocelot.core.config.util.PropertyUtils;
 

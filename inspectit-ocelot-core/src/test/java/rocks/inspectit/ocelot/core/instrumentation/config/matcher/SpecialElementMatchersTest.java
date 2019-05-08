@@ -4,13 +4,13 @@ import net.bytebuddy.description.NamedElement;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
-import net.bytebuddy.matcher.StringMatcher;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import rocks.inspectit.ocelot.core.config.model.instrumentation.scope.ElementDescriptionMatcherSettings;
-import rocks.inspectit.ocelot.core.config.model.instrumentation.scope.InstrumentationScopeSettings;
-import rocks.inspectit.ocelot.core.config.model.instrumentation.scope.MethodMatcherSettings.AccessModifier;
-import rocks.inspectit.ocelot.core.config.model.instrumentation.scope.NameMatcherSettings;
+import rocks.inspectit.ocelot.config.model.instrumentation.scope.ElementDescriptionMatcherSettings;
+import rocks.inspectit.ocelot.config.model.instrumentation.scope.InstrumentationScopeSettings;
+import rocks.inspectit.ocelot.config.model.instrumentation.scope.MatcherMode;
+import rocks.inspectit.ocelot.config.model.instrumentation.scope.MethodMatcherSettings.AccessModifier;
+import rocks.inspectit.ocelot.config.model.instrumentation.scope.NameMatcherSettings;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -35,7 +35,7 @@ class SpecialElementMatchersTest {
         public void validSettings() {
             NameMatcherSettings settings = new NameMatcherSettings();
             settings.setName("name");
-            settings.setMatcherMode(StringMatcher.Mode.MATCHES);
+            settings.setMatcherMode(MatcherMode.MATCHES);
 
             ElementMatcher.Junction<NamedElement> result = SpecialElementMatchers.nameIs(settings);
 
@@ -45,11 +45,21 @@ class SpecialElementMatchersTest {
         @Test
         public void emptyName() {
             NameMatcherSettings settings = new NameMatcherSettings();
-            settings.setMatcherMode(StringMatcher.Mode.MATCHES);
+            settings.setMatcherMode(MatcherMode.MATCHES);
 
             ElementMatcher.Junction<NamedElement> result = SpecialElementMatchers.nameIs(settings);
 
             assertThat(result).isNull();
+        }
+
+        @Test
+        public void verifyAllMatcherModesHandled() {
+            for (MatcherMode mode : MatcherMode.values()) {
+                NameMatcherSettings settings = new NameMatcherSettings();
+                settings.setName("something");
+                ElementMatcher.Junction<NamedElement> result = SpecialElementMatchers.nameIs(settings);
+                assertThat(result).isNotNull();
+            }
         }
     }
 

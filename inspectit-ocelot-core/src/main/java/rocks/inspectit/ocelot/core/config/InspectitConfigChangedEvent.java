@@ -2,7 +2,7 @@ package rocks.inspectit.ocelot.core.config;
 
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
-import rocks.inspectit.ocelot.core.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.config.model.InspectitConfig;
 
 public class InspectitConfigChangedEvent extends ApplicationEvent {
 

@@ -4,7 +4,7 @@ import lombok.Builder;
 import lombok.Singular;
 import lombok.Value;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.IGenericAction;
-import rocks.inspectit.ocelot.core.config.model.instrumentation.actions.GenericActionSettings;
+import rocks.inspectit.ocelot.config.model.instrumentation.actions.GenericActionSettings;
 import rocks.inspectit.ocelot.core.instrumentation.config.InstrumentationConfigurationResolver;
 
 import java.util.ArrayList;

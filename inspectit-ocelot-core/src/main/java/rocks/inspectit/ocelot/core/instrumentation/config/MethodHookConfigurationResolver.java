@@ -6,7 +6,7 @@ import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import rocks.inspectit.ocelot.core.config.model.instrumentation.actions.ConditionalActionSettings;
+import rocks.inspectit.ocelot.config.model.instrumentation.actions.ConditionalActionSettings;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.*;
 
 import java.util.*;

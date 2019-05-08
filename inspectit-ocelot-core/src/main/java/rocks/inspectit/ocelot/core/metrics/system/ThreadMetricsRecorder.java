@@ -7,7 +7,7 @@ import io.opencensus.tags.Tagger;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import rocks.inspectit.ocelot.core.config.model.metrics.MetricsSettings;
+import rocks.inspectit.ocelot.config.model.metrics.MetricsSettings;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;

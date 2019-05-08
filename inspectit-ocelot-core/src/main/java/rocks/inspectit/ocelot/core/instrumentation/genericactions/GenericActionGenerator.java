@@ -11,11 +11,11 @@ import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.IGenericAction;
-import rocks.inspectit.ocelot.core.config.model.instrumentation.actions.GenericActionSettings;
+import rocks.inspectit.ocelot.config.model.instrumentation.actions.GenericActionSettings;
+import rocks.inspectit.ocelot.config.utils.AutoboxingHelper;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.GenericActionConfig;
 import rocks.inspectit.ocelot.core.instrumentation.injection.ClassInjector;
 import rocks.inspectit.ocelot.core.instrumentation.injection.InjectedClass;
-import rocks.inspectit.ocelot.core.utils.AutoboxingHelper;
 
 import java.io.IOException;
 import java.net.URL;

@@ -2,7 +2,7 @@ package rocks.inspectit.ocelot.core.instrumentation.hook.actions;
 
 import io.opencensus.trace.Span;
 import lombok.AllArgsConstructor;
-import rocks.inspectit.ocelot.core.config.model.instrumentation.rules.RuleTracingSettings;
+import rocks.inspectit.ocelot.config.model.instrumentation.rules.RuleTracingSettings;
 import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContext;
 import rocks.inspectit.ocelot.core.instrumentation.hook.MethodReflectionInformation;
 

@@ -10,7 +10,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
-import rocks.inspectit.ocelot.core.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.config.model.InspectitConfig;
 
 import javax.annotation.PostConstruct;
 import java.util.*;

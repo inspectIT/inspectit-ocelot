@@ -6,8 +6,9 @@ import lombok.val;
 import net.bytebuddy.description.method.MethodDescription;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import rocks.inspectit.ocelot.core.config.model.instrumentation.actions.ActionCallSettings;
-import rocks.inspectit.ocelot.core.config.model.instrumentation.actions.GenericActionSettings;
+import rocks.inspectit.ocelot.config.model.instrumentation.actions.ActionCallSettings;
+import rocks.inspectit.ocelot.config.model.instrumentation.actions.GenericActionSettings;
+import rocks.inspectit.ocelot.config.utils.ConfigUtils;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.ActionCallConfig;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.GenericActionConfig;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.MethodHookConfiguration;
@@ -17,7 +18,6 @@ import rocks.inspectit.ocelot.core.instrumentation.genericactions.BoundGenericAc
 import rocks.inspectit.ocelot.core.instrumentation.genericactions.GenericActionGenerator;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.*;
 import rocks.inspectit.ocelot.core.metrics.MeasuresAndViewsManager;
-import rocks.inspectit.ocelot.core.utils.CommonUtils;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -159,7 +159,7 @@ public class MethodHookGenerator {
                 .forEach((argName, value) -> {
                     String expectedTypeName = actionArgumentTypes.get(argName);
                     ClassLoader contextClassloader = methodInfo.getDeclaringClass().getClassLoader();
-                    Class<?> expectedValueType = CommonUtils.locateTypeWithinImports(expectedTypeName, contextClassloader, actionConfig.getImportedPackages());
+                    Class<?> expectedValueType = ConfigUtils.locateTypeWithinImports(expectedTypeName, contextClassloader, actionConfig.getImportedPackages());
                     Object convertedValue = callSettings.getConstantInputAsType(argName, expectedValueType);
                     constantAssignments.put(argName, convertedValue);
                 });

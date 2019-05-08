@@ -11,9 +11,9 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
-import rocks.inspectit.ocelot.core.config.model.metrics.MetricsSettings;
-import rocks.inspectit.ocelot.core.config.model.metrics.definition.MetricDefinitionSettings;
-import rocks.inspectit.ocelot.core.config.model.metrics.definition.ViewDefinitionSettings;
+import rocks.inspectit.ocelot.config.model.metrics.MetricsSettings;
+import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings;
+import rocks.inspectit.ocelot.config.model.metrics.definition.ViewDefinitionSettings;
 import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
 
 import javax.annotation.PostConstruct;
