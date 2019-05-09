@@ -9,8 +9,8 @@ import ch.qos.logback.core.util.StatusPrinter;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
-import rocks.inspectit.ocelot.core.config.model.InspectitConfig;
-import rocks.inspectit.ocelot.core.config.model.logging.LoggingSettings;
+import rocks.inspectit.ocelot.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.config.model.logging.LoggingSettings;
 
 import java.io.IOException;
 import java.io.InputStream;

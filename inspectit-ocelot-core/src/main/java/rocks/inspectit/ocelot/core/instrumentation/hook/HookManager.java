@@ -16,7 +16,7 @@ import rocks.inspectit.ocelot.bootstrap.instrumentation.noop.NoopMethodHook;
 import rocks.inspectit.ocelot.core.instrumentation.config.InstrumentationConfigurationResolver;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.MethodHookConfiguration;
 import rocks.inspectit.ocelot.core.selfmonitoring.SelfMonitoringService;
-import rocks.inspectit.ocelot.core.utils.CommonUtils;
+import rocks.inspectit.ocelot.core.utils.CoreUtils;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -89,7 +89,7 @@ public class HookManager {
 
     private void addOrReplaceHooks(Class<?> clazz, Map<MethodDescription, MethodHookConfiguration> hookConfigs, ConcurrentHashMap<String, MethodHook> activeClassHooks) {
         hookConfigs.forEach((method, config) -> {
-            String signature = CommonUtils.getSignature(method);
+            String signature = CoreUtils.getSignature(method);
             MethodHookConfiguration previous = Optional.ofNullable(activeClassHooks.get(signature))
                     .map(MethodHook::getSourceConfiguration)
                     .orElse(null);
@@ -109,7 +109,7 @@ public class HookManager {
 
     private void deactivateRemovedHooks(Class<?> clazz, Map<MethodDescription, MethodHookConfiguration> hookConfigs, ConcurrentHashMap<String, MethodHook> activeClassHooks) {
         Set<String> hookedMethodSignatures = hookConfigs.keySet().stream()
-                .map(CommonUtils::getSignature)
+                .map(CoreUtils::getSignature)
                 .collect(Collectors.toSet());
         if (log.isDebugEnabled()) {
             activeClassHooks.keySet().stream()

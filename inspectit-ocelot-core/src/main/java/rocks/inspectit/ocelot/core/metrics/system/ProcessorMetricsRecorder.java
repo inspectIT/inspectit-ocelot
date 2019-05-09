@@ -3,7 +3,7 @@ package rocks.inspectit.ocelot.core.metrics.system;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.stereotype.Service;
-import rocks.inspectit.ocelot.core.config.model.metrics.MetricsSettings;
+import rocks.inspectit.ocelot.config.model.metrics.MetricsSettings;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;

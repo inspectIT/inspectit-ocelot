@@ -10,9 +10,9 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import rocks.inspectit.ocelot.core.config.model.InspectitConfig;
-import rocks.inspectit.ocelot.core.config.model.metrics.MetricsSettings;
-import rocks.inspectit.ocelot.core.config.model.metrics.StandardMetricsSettings;
+import rocks.inspectit.ocelot.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.config.model.metrics.MetricsSettings;
+import rocks.inspectit.ocelot.config.model.metrics.StandardMetricsSettings;
 import rocks.inspectit.ocelot.core.selfmonitoring.SelfMonitoringService;
 
 import javax.management.ListenerNotFoundException;

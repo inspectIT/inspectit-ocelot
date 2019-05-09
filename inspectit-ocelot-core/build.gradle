@@ -9,14 +9,16 @@ dependencies {
     )
 
     implementation(
+            project(':inspectit-ocelot-config'),
+
             // spring releated
-            'org.springframework.boot:spring-boot:2.1.1.RELEASE',
+            "org.springframework.boot:spring-boot:${springVersion}",
             'org.yaml:snakeyaml:1.23',
             'javax.annotation:javax.annotation-api:1.3.2', //Required for @PostConstruct and @PreDestroy to work in Java9+
 
             // data validation
-            'org.hibernate.validator:hibernate-validator:6.0.13.Final',
             'org.apache.tomcat.embed:tomcat-embed-el:9.0.13',
+            'org.hibernate.validator:hibernate-validator:6.0.13.Final',
 
             // logging
             'ch.qos.logback:logback-classic:1.2.3',

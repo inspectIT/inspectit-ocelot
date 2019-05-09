@@ -8,8 +8,8 @@ import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
-import rocks.inspectit.ocelot.core.config.model.InspectitConfig;
-import rocks.inspectit.ocelot.core.config.model.exporters.metrics.PrometheusExporterSettings;
+import rocks.inspectit.ocelot.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.config.model.exporters.metrics.PrometheusExporterSettings;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;

@@ -6,7 +6,7 @@ import io.prometheus.client.exporter.HTTPServer;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.stereotype.Component;
-import rocks.inspectit.ocelot.core.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 
 import static io.prometheus.client.CollectorRegistry.defaultRegistry;

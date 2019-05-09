@@ -12,17 +12,17 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.DoNotInstrumentMarker;
+import rocks.inspectit.ocelot.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.config.model.instrumentation.InstrumentationSettings;
+import rocks.inspectit.ocelot.config.model.metrics.MetricsSettings;
+import rocks.inspectit.ocelot.config.model.tracing.TracingSettings;
 import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
-import rocks.inspectit.ocelot.core.config.model.InspectitConfig;
-import rocks.inspectit.ocelot.core.config.model.instrumentation.InstrumentationSettings;
-import rocks.inspectit.ocelot.core.config.model.metrics.MetricsSettings;
-import rocks.inspectit.ocelot.core.config.model.tracing.TracingSettings;
 import rocks.inspectit.ocelot.core.instrumentation.AsyncClassTransformer;
 import rocks.inspectit.ocelot.core.instrumentation.config.event.InstrumentationConfigurationChangedEvent;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.*;
 import rocks.inspectit.ocelot.core.instrumentation.special.SpecialSensor;
-import rocks.inspectit.ocelot.core.utils.CommonUtils;
+import rocks.inspectit.ocelot.core.utils.CoreUtils;
 
 import javax.annotation.PostConstruct;
 import java.lang.instrument.Instrumentation;
@@ -136,7 +136,7 @@ public class InstrumentationConfigurationResolver {
                             result.put(method, hookResolver.buildHookConfiguration(config, rulesMatchingOnMethod));
                         } catch (Exception e) {
                             log.error("Could not build hook for {} of class {}",
-                                    CommonUtils.getSignature(method), clazz.getName(), e);
+                                    CoreUtils.getSignature(method), clazz.getName(), e);
                         }
                     }
                 }

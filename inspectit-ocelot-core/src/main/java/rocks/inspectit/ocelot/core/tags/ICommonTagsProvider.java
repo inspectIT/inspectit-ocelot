@@ -1,6 +1,6 @@
 package rocks.inspectit.ocelot.core.tags;
 
-import rocks.inspectit.ocelot.core.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.config.model.InspectitConfig;
 
 import java.util.Map;
 

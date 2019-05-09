@@ -13,8 +13,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
-import rocks.inspectit.ocelot.core.config.model.metrics.definition.MetricDefinitionSettings;
-import rocks.inspectit.ocelot.core.config.model.metrics.definition.ViewDefinitionSettings;
+import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings;
+import rocks.inspectit.ocelot.config.model.metrics.definition.ViewDefinitionSettings;
 import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
 
 import java.util.Arrays;

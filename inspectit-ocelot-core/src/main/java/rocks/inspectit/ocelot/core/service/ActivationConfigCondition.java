@@ -1,9 +1,9 @@
 package rocks.inspectit.ocelot.core.service;
 
 import org.springframework.context.annotation.Conditional;
-import rocks.inspectit.ocelot.core.config.model.InspectitConfig;
-import rocks.inspectit.ocelot.core.config.model.config.ConfigSettings;
-import rocks.inspectit.ocelot.core.config.model.config.FileBasedConfigSettings;
+import rocks.inspectit.ocelot.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.config.model.config.ConfigSettings;
+import rocks.inspectit.ocelot.config.model.config.FileBasedConfigSettings;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

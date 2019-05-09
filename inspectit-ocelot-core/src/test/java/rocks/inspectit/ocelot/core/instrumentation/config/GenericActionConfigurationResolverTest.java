@@ -5,8 +5,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
-import rocks.inspectit.ocelot.core.config.model.instrumentation.InstrumentationSettings;
-import rocks.inspectit.ocelot.core.config.model.instrumentation.actions.GenericActionSettings;
+import rocks.inspectit.ocelot.config.model.instrumentation.InstrumentationSettings;
+import rocks.inspectit.ocelot.config.model.instrumentation.actions.GenericActionSettings;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.GenericActionConfig;
 
 import java.util.Map;

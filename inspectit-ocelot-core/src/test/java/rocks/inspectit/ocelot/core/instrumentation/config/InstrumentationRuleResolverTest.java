@@ -6,8 +6,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import rocks.inspectit.ocelot.core.config.model.instrumentation.InstrumentationSettings;
-import rocks.inspectit.ocelot.core.config.model.instrumentation.rules.InstrumentationRuleSettings;
+import rocks.inspectit.ocelot.config.model.instrumentation.InstrumentationSettings;
+import rocks.inspectit.ocelot.config.model.instrumentation.rules.InstrumentationRuleSettings;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.InstrumentationRule;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.InstrumentationScope;
 

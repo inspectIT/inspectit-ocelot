@@ -53,7 +53,6 @@ subprojects {
 
     // use jarCheck to make sure all classes in our dependencies are at maximum in version 1.8
     task checkDependencyJavaVersions {
-
         def excludes = ["byte-buddy"]
 
         def jarCheckPath = "$buildDir/jarCheck"
@@ -67,7 +66,7 @@ subprojects {
                 def isExcluded = excludes.stream().anyMatch({ excl ->
                     name.contains(excl)
                 })
-                if (!isExcluded) {
+                if (!isExcluded && file.exists()) {
                     javaexec {
                         classpath configurations.buildTools
                         main = 'com.mindprod.jarcheck.JarCheck'

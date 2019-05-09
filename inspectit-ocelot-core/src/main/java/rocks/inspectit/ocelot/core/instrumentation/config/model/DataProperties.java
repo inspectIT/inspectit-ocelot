@@ -2,7 +2,7 @@ package rocks.inspectit.ocelot.core.instrumentation.config.model;
 
 import lombok.*;
 import lombok.experimental.NonFinal;
-import rocks.inspectit.ocelot.core.config.model.instrumentation.data.DataSettings;
+import rocks.inspectit.ocelot.config.model.instrumentation.data.DataSettings;
 
 import java.util.Set;
 

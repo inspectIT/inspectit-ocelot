@@ -2,8 +2,8 @@ package rocks.inspectit.ocelot.core.tags.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import rocks.inspectit.ocelot.core.config.model.InspectitConfig;
-import rocks.inspectit.ocelot.core.config.model.tags.providers.EnvironmentTagsProviderSettings;
+import rocks.inspectit.ocelot.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.config.model.tags.providers.EnvironmentTagsProviderSettings;
 import rocks.inspectit.ocelot.core.tags.ICommonTagsProvider;
 
 import javax.validation.Valid;

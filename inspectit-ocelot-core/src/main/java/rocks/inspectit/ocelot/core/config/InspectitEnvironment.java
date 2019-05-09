@@ -12,9 +12,9 @@ import org.springframework.core.env.*;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
+import rocks.inspectit.ocelot.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.config.model.config.ConfigSettings;
 import rocks.inspectit.ocelot.core.config.filebased.DirectoryPropertySource;
-import rocks.inspectit.ocelot.core.config.model.InspectitConfig;
-import rocks.inspectit.ocelot.core.config.model.config.ConfigSettings;
 import rocks.inspectit.ocelot.core.config.util.CaseUtils;
 import rocks.inspectit.ocelot.core.config.util.PropertyUtils;
 
@@ -243,7 +243,7 @@ public class InspectitEnvironment extends StandardEnvironment {
 
         try {
             Resource[] resources = new PathMatchingResourcePatternResolver(InspectitEnvironment.class.getClassLoader())
-                    .getResources("classpath:rocks/inspectit/ocelot/core/config/" + resourcePath + "/**/*.yml");
+                    .getResources("classpath:rocks/inspectit/ocelot/config/" + resourcePath + "/**/*.yml");
             for (val res : resources) {
                 Properties properties = PropertyUtils.readYamlFiles(res);
                 result.putAll(properties);

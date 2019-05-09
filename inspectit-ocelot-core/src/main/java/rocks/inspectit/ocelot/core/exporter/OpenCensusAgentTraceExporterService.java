@@ -6,8 +6,8 @@ import io.opencensus.exporter.trace.ocagent.OcAgentTraceExporterConfiguration;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
-import rocks.inspectit.ocelot.core.config.model.InspectitConfig;
-import rocks.inspectit.ocelot.core.config.model.exporters.trace.OpenCensusAgentTraceExporterSettings;
+import rocks.inspectit.ocelot.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.config.model.exporters.trace.OpenCensusAgentTraceExporterSettings;
 import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 
 @Component

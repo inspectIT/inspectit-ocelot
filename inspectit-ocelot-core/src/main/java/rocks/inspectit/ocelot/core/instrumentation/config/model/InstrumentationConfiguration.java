@@ -4,8 +4,9 @@ import lombok.Builder;
 import lombok.Singular;
 import lombok.Value;
 import lombok.experimental.NonFinal;
-import rocks.inspectit.ocelot.core.config.model.instrumentation.InstrumentationSettings;
-import rocks.inspectit.ocelot.core.config.model.tracing.TracingSettings;
+import rocks.inspectit.ocelot.config.model.instrumentation.InstrumentationSettings;
+import rocks.inspectit.ocelot.config.model.metrics.MetricsSettings;
+import rocks.inspectit.ocelot.config.model.tracing.TracingSettings;
 import rocks.inspectit.ocelot.core.instrumentation.config.InstrumentationConfigurationResolver;
 
 import java.util.Set;
@@ -22,7 +23,7 @@ import java.util.Set;
 public class InstrumentationConfiguration {
 
     /**
-     * Corresponds to {@link rocks.inspectit.ocelot.core.config.model.metrics.MetricsSettings#isEnabled()}
+     * Corresponds to {@link MetricsSettings#isEnabled()}
      */
     @Builder.Default
     private boolean metricsEnabled = true;

@@ -1,8 +1,8 @@
 package rocks.inspectit.ocelot.core.instrumentation.config.model;
 
 import lombok.*;
-import rocks.inspectit.ocelot.core.config.model.instrumentation.rules.InstrumentationRuleSettings;
-import rocks.inspectit.ocelot.core.config.model.instrumentation.rules.RuleTracingSettings;
+import rocks.inspectit.ocelot.config.model.instrumentation.rules.InstrumentationRuleSettings;
+import rocks.inspectit.ocelot.config.model.instrumentation.rules.RuleTracingSettings;
 
 import java.util.Collection;
 import java.util.Map;

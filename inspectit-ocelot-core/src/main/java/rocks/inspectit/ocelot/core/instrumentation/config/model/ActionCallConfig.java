@@ -2,7 +2,7 @@ package rocks.inspectit.ocelot.core.instrumentation.config.model;
 
 import lombok.Builder;
 import lombok.Value;
-import rocks.inspectit.ocelot.core.config.model.instrumentation.actions.ActionCallSettings;
+import rocks.inspectit.ocelot.config.model.instrumentation.actions.ActionCallSettings;
 
 /**
  * Combines a resolved action with a call to it.

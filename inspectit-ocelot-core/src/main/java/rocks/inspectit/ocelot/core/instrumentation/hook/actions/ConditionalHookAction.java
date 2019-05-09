@@ -2,7 +2,7 @@ package rocks.inspectit.ocelot.core.instrumentation.hook.actions;
 
 import lombok.Value;
 import org.apache.commons.lang3.StringUtils;
-import rocks.inspectit.ocelot.core.config.model.instrumentation.actions.ConditionalActionSettings;
+import rocks.inspectit.ocelot.config.model.instrumentation.actions.ConditionalActionSettings;
 
 @Value
 public class ConditionalHookAction implements IHookAction {
