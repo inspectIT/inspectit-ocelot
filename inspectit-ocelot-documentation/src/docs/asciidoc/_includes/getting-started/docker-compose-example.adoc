@@ -10,13 +10,13 @@ To demonstrate the flexibility of the OpenCensus bases inspectIT agent, we provi
 |===
 |Docker-compose file | Landscape | Description
 
-| docker-compose-influxdb.yml
-a| image::demo-landscape-influxdb.png[link=https://openapm.io/landscape?agent=inspectit-ocelot-agent&instrumentation-lib=opencensus&collector=influx-telegraf&storage=influx-db&dashboarding=grafana]
-| Uses InfluxData Telegraf for metrics gathering, InfluxDB for metrics storage and Grafana for Dashboards.
+| docker-compose-influxdb-zipkin.yml
+a| image::demo-landscape-influxdb-zipkin.png[link=https://openapm.io/landscape?agent=inspectit-ocelot-agent&instrumentation-lib=opencensus&collector=influx-telegraf,zipkin-server&storage=influx-db&dashboarding=grafana]
+| Uses InfluxData Telegraf for metrics gathering, InfluxDB for metrics storage and Grafana for Dashboards. Traces are exported to Zipkin.
 
-| docker-compose-prometheus.yml
-a| image::demo-landscape-prometheus.png[link=https://openapm.io/landscape?instrumentation-lib=opencensus&agent=inspectit-ocelot-agent&dashboarding=grafana&collector=prometheus-server]
-| Uses Prometheus Server for metrics gathering and storage, Grafana for Dashboards.
+| docker-compose-prometheus-jaeger.yml
+a| image::demo-landscape-prometheus-jaeger.png[link=https://openapm.io/landscape?agent=inspectit-ocelot-agent&instrumentation-lib=opencensus&collector=prometheus-server,jaeger-collector&dashboarding=grafana&visualization=jaeger-query]
+| Uses Prometheus Server for metrics gathering and storage, Grafana for Dashboards. Traces are exported to Jaeger.
 
 |===
 
@@ -27,7 +27,7 @@ All of the demo scenarios are fully configured with predefined dashboards, *so y
 *Pre-requisites:* To launch the demo, https://www.docker.com/[Docker] needs to be installed on your system.
 If you are using Docker for Windows or running Docker in a virtual machine, ensure that Docker has at least 4GB main memory assigned.
 
-Either https://github.com/inspectIT/inspectit-oce/archive/master.zip[download] or https://github.com/inspectIT/inspectit-oce[clone the inspectit-Ocelot GitHub repository].
+Either https://github.com/inspectIT/inspectit-ocelot/archive/master.zip[download] or https://github.com/inspectIT/inspectit-ocelot[clone the inspectit-Ocelot GitHub repository].
 
 Change into the ```inspectit-ocelot-demo/``` directory and execute the following command to launch the desired demo scenario (replace [SCENARIO_POSTFIX] with the postfix of the scenario you would like to launch):
 
@@ -55,28 +55,32 @@ For more information, check out the following blog post: https://nickjanetakis.c
 
 ==== Demo Scenarios
 
-===== InfluxDB Scenario
+===== InfluxDB and Zipkin Scenario
 In this scenario the following components are preconfigured and used for monitoring:
 
-image::demo-landscape-influxdb.png[link=https://openapm.io/landscape?agent=inspectit-ocelot-agent&instrumentation-lib=opencensus&collector=influx-telegraf&storage=influx-db&dashboarding=grafana]
+image::demo-landscape-influxdb-zipkin.png[link=https://openapm.io/landscape?agent=inspectit-ocelot-agent&instrumentation-lib=opencensus&collector=influx-telegraf,zipkin-server&storage=influx-db&dashboarding=grafana]
 
 - *inspectIT Ocelot agent:* Instruments all the target demo application components.
 - *InfluxData Telegraf:* Gathers metrics exposed by the agent.
 - *InfluxDB:* Stores metric data collected by Telegraf as time series.
 - *Grafana:* Provides predefined example Dashboards visualizing the metrics collected by the inspectIT Ocelot agent. The query language https://docs.influxdata.com/flux[Flux] is used to query the data from InfluxDB.
+- *Zipkin:* Zipkin is used to store and query all recorded traces.
 
 You can access Grafana through http://localhost:3001 using `admin` as username and `demo` as password.
+The traces can be viewed in Zipkin on http://localhost:9411.
 
-===== Prometheus Scenario
+===== Prometheus and Jaeger Scenario
 In this scenario the following components are preconfigured and used for monitoring:
 
-image::demo-landscape-prometheus.png[link=https://openapm.io/landscape?instrumentation-lib=opencensus&agent=inspectit-ocelot-agent&dashboarding=grafana&collector=prometheus-server]
+image::demo-landscape-prometheus-jaeger.png[link=https://openapm.io/landscape?agent=inspectit-ocelot-agent&instrumentation-lib=opencensus&collector=prometheus-server,jaeger-collector&dashboarding=grafana&visualization=jaeger-query]
 
 - *inspectIT Ocelot agent:* Instruments all the target demo application components.
 - *Prometheus Server:* Gathers metrics exposed by the agent.
 - *Grafana:* Provides predefined example Dashboards visualizing the metrics collected by the inspectIT Ocelot agent.
+- *Jaeger:* Jaeger is used to store and query all recorded traces.
 
 You can access Grafana through http://localhost:3001 using `admin` as username and `demo` as password.
+The traces can be viewed in Jaeger on http://localhost:16686.
 
 Prometheus can be accessed through http://localhost:9090.
 
