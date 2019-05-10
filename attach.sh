@@ -1,6 +1,7 @@
 #!/bin/bash
 
-AGENT_VERSION=0.1.M3
+AGENT_VERSION=$(curl -s --head https://github.com/inspectit/inspectit-ocelot/releases/latest \
+   | grep -P '(?<=https:\/\/github\.com\/inspectit\/inspectit-ocelot\/releases\/tag\/)(\w|\.)+' -o)
 
 display_usage() {
   echo "This script requires a single attribute specifying the process ID of the JVM the agent should be attached to."
