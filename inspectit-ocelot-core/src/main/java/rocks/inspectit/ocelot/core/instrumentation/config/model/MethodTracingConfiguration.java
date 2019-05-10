@@ -38,8 +38,12 @@ public class MethodTracingConfiguration {
     private Map<String, String> attributes;
 
     /**
-     * Defines a dynamic condition which can be used to decide at runtime if a given trace should be recorded or not.
-     * In addition the conditions define if attributes will be written or not.
+     * Defines the dynamic conditions which are evaluated prior to starting a span.
      */
-    private ConditionalActionSettings conditions;
+    private ConditionalActionSettings startSpanConditions;
+
+    /**
+     * Defines the dynamic conditions which are evaluated prior to writing span attributes.
+     */
+    private ConditionalActionSettings attributeConditions;
 }

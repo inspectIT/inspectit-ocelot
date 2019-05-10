@@ -46,7 +46,7 @@ public class StartSpanAction implements IHookAction {
             }
         }
         if (name == null) {
-            name = methodInfo.getMethodFQN();
+            name = methodInfo.getDeclaringClass().getSimpleName() + "." + methodInfo.getName();
         }
         return name;
     }

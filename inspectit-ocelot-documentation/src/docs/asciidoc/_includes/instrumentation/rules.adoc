@@ -567,6 +567,6 @@ inspectit:
             only-if-true: my_condition_data
 ----
 
-If any start-span-condition is defined, a span will only be created when all conditions are met.
-Analogous to this, attributes will only be written if each condition defined in attribute-conditions is fulfilled.
-The conditions that can be defined are equal to the ones of data providers, thus, please see the <<Adding Conditions, action conditions description>> for detailed information.
+If any `start-span-conditions` are defined, a span will only be created when all conditions are met.
+Analogous to this, attributes will only be written if each condition defined in `attribute-conditions` is fulfilled.
+The conditions that can be defined are equal to the ones of actions, thus, please see the <<Adding Conditions, action conditions description>> for detailed information.

@@ -34,7 +34,7 @@ public class TestUtils {
         Thread poller = new Thread(() -> {
             while (true) {
                 for (Class<?> cl : getInstrumentationCache().asMap().keySet()) {
-                    if (!instrumentationTimeStamp.contains(cl)) {
+                    if (!instrumentationTimeStamp.containsKey(cl)) {
                         //we remember when a class first appeared in the cache
                         instrumentationTimeStamp.put(cl, System.currentTimeMillis());
                     }
