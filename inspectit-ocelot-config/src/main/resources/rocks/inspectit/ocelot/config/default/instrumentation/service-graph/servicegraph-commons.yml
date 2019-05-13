@@ -31,8 +31,8 @@ inspectit:
       
       #we allow the application to be defined at the beginning and to be down propagated from there
       application: {down-propagation: GLOBAL, is-tag: true}
-      
-      protocal: {down-propagation: NONE}
+
+      protocol: {down-propagation: NONE}
       target_external: {down-propagation: NONE}
       target_service: {down-propagation: NONE}
       origin_external: {down-propagation: NONE}

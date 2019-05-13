@@ -41,7 +41,7 @@ public class ServiceInMetricTest {
 
         try {
             InternalInspectitContext context = Instances.contextManager.enterNewContext();
-            context.setData("prop_origin_service", originService);
+            context.setData("service", originService);
             context.makeActive();
 
             HttpURLConnection urlConnection = (HttpURLConnection) new URL(TEST_URL).openConnection();

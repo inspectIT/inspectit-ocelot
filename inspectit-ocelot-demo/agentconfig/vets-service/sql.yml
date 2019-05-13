@@ -1,10 +1,10 @@
 #extract the prepared statement SQL string from the HSQLDB jdbc driver
 inspectit:
-  data:
-    sql:
-      is-tag: false
       
   instrumentation:  
+    data:
+      sql:
+        is-tag: false
   
     actions:
       hsqldb_prepared_statement_get_sql:

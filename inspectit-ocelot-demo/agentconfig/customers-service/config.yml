@@ -1,6 +1,8 @@
 # See https://github.com/inspectIT/inspectit-oce/blob/0.1.M1/inspectit-oce-core/src/main/resources/config/default.yml
 # for all the configuration options.
 inspectit:
+  logging:
+    debug: true
   metrics:
     # root setting for the polling frequency of all metrics
     # when a metrics has no frequency defined separately, this frequency will be used
