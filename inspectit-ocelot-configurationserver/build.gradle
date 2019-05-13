@@ -39,4 +39,8 @@ dependencies {
             project(':inspectit-ocelot-config')
     )
     testCompile("junit:junit")
+    testImplementation(
+            'org.mockito:mockito-core:2.23.4',
+            'org.assertj:assertj-core:3.11.1',
+    )
 }
