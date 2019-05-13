@@ -62,7 +62,6 @@ public class HttpInMetricTest {
             server.setHandler(servletHandler);
             servletHandler.addServletWithMapping(TestServlet.class, "/*");
             server.start();
-            HttpURLConnection.class.getDeclaredMethods();
 
             TestUtils.waitForClassInstrumentations(Arrays.asList(HttpURLConnection.class, HttpServlet.class,
                     Class.forName("sun.net.www.protocol.http.HttpURLConnection")), 10, TimeUnit.SECONDS);
@@ -73,7 +72,7 @@ public class HttpInMetricTest {
 
             Map<String, String> tags = new HashMap<>();
             tags.put("http_path", "/servletapi");
-            //tags.put("http_status", "123");
+            tags.put("http_status", "123");
 
             long cnt = ((AggregationData.CountData) TestUtils.getDataForView("http/in/count", tags)).getCount();
             double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/in/responsetime/sum", tags)).getSum();

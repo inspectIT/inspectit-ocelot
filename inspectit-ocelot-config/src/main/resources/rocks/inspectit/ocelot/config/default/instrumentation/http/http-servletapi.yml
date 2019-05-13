@@ -28,7 +28,7 @@ inspectit:
           http_duration:
             action: elapsed_millis
             data-input: {sinceNanos: http_entry_time }
-            only-if-not-null: http_is_entry
+            only-if-true: http_is_entry
           
         metrics:
           '[http/in/responsetime]': http_duration
