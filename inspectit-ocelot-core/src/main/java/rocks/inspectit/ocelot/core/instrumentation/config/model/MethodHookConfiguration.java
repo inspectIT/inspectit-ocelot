@@ -23,17 +23,29 @@ public class MethodHookConfiguration {
     @Builder.Default
     private RuleTracingSettings tracing = RuleTracingSettings.NO_TRACING_AND_ATTRIBUTES;
 
+    @Singular
+    private List<ActionCallConfig> preEntryActions;
+
     /**
      * The ordered list of data assignments performed on method entry.
      */
     @Singular
     private List<ActionCallConfig> entryActions;
 
+    @Singular
+    private List<ActionCallConfig> postEntryActions;
+
+    @Singular
+    private List<ActionCallConfig> preExitActions;
+
     /**
      * The ordered list of data assignments performed on method exit.
      */
     @Singular
     private List<ActionCallConfig> exitActions;
+
+    @Singular
+    private List<ActionCallConfig> postExitActions;
 
     /**
      * Maps the metrics to capture to the data keys to use as value.

@@ -37,8 +37,13 @@ public class MethodHookConfigurationResolver {
             throws Exception {
 
         val result = MethodHookConfiguration.builder();
+
+        result.preEntryActions(combineAndOrderActionCalls(matchedRules, InstrumentationRule::getPreEntryActions));
         result.entryActions(combineAndOrderActionCalls(matchedRules, InstrumentationRule::getEntryActions));
+        result.postEntryActions(combineAndOrderActionCalls(matchedRules, InstrumentationRule::getPostEntryActions));
+        result.preExitActions(combineAndOrderActionCalls(matchedRules, InstrumentationRule::getPreExitActions));
         result.exitActions(combineAndOrderActionCalls(matchedRules, InstrumentationRule::getExitActions));
+        result.postExitActions(combineAndOrderActionCalls(matchedRules, InstrumentationRule::getPostExitActions));
 
         if (allSettings.isMetricsEnabled()) {
             resolveMetrics(result, matchedRules);

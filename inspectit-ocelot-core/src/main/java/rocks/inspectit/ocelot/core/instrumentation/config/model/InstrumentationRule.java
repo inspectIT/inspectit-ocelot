@@ -29,6 +29,9 @@ public class InstrumentationRule {
     @Singular
     private Set<InstrumentationScope> scopes;
 
+    @Singular
+    private Collection<ActionCallConfig> preEntryActions;
+
     /**
      * The actions executed on the method entry.
      * The order of the actions in the list does not matter, they are ordered automatically by the
@@ -37,6 +40,12 @@ public class InstrumentationRule {
     @Singular
     private Collection<ActionCallConfig> entryActions;
 
+    @Singular
+    private Collection<ActionCallConfig> postEntryActions;
+
+    @Singular
+    private Collection<ActionCallConfig> preExitActions;
+
     /**
      * The actions executed on the method exit.
      * The order of the actions in the list does not matter, they are ordered automatically by the
@@ -44,6 +53,9 @@ public class InstrumentationRule {
      */
     @Singular
     private Collection<ActionCallConfig> exitActions;
+
+    @Singular
+    private Collection<ActionCallConfig> postExitActions;
 
     /**
      * Maps metrics to the data keys or constants used as sources, see {@link InstrumentationRuleSettings#getMetrics()}.

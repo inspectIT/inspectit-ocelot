@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.core.instrumentation.config;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import io.opencensus.trace.Span;
 import org.assertj.core.util.Maps;
@@ -208,6 +209,183 @@ public class MethodHookConfigurationResolverTest {
                     callToA1,
                     depFirst,
                     depSecond
+            );
+        }
+
+
+        @Test
+        void verifyPreEntryProvidersPreserved() throws Exception {
+            ActionCallSettings firstSettings = new ActionCallSettings();
+            firstSettings.setAction("providerA");
+            ActionCallConfig first = ActionCallConfig.builder()
+                    .name("first")
+                    .callSettings(firstSettings)
+                    .action(providerA).build();
+
+            ActionCallSettings secondSettings = new ActionCallSettings();
+            secondSettings.setAction("providerB");
+            secondSettings.setDataInput(ImmutableMap.of("somearg", "first"));
+            ActionCallConfig second = ActionCallConfig.builder()
+                    .name("second")
+                    .callSettings(secondSettings)
+                    .action(providerB).build();
+
+            InstrumentationRule r1 = InstrumentationRule.builder()
+                    .preEntryAction(first)
+                    .preEntryAction(second)
+                    .build();
+
+            MethodHookConfiguration conf = resolver.buildHookConfiguration(config, Sets.newHashSet(r1));
+            assertThat(conf.getPreEntryActions()).containsExactly(
+                    first,
+                    second
+            );
+        }
+
+        @Test
+        void verifyEntryProvidersPreserved() throws Exception {
+            ActionCallSettings firstSettings = new ActionCallSettings();
+            firstSettings.setAction("providerA");
+            ActionCallConfig first = ActionCallConfig.builder()
+                    .name("first")
+                    .callSettings(firstSettings)
+                    .action(providerA).build();
+
+            ActionCallSettings secondSettings = new ActionCallSettings();
+            secondSettings.setAction("providerB");
+            secondSettings.setDataInput(ImmutableMap.of("somearg", "first"));
+            ActionCallConfig second = ActionCallConfig.builder()
+                    .name("second")
+                    .callSettings(secondSettings)
+                    .action(providerB).build();
+
+            InstrumentationRule r1 = InstrumentationRule.builder()
+                    .entryAction(first)
+                    .entryAction(second)
+                    .build();
+
+            MethodHookConfiguration conf = resolver.buildHookConfiguration(config, Sets.newHashSet(r1));
+            assertThat(conf.getEntryActions()).containsExactly(
+                    first,
+                    second
+            );
+        }
+
+
+        @Test
+        void verifyPostEntryProvidersPreserved() throws Exception {
+            ActionCallSettings firstSettings = new ActionCallSettings();
+            firstSettings.setAction("providerA");
+            ActionCallConfig first = ActionCallConfig.builder()
+                    .name("first")
+                    .callSettings(firstSettings)
+                    .action(providerA).build();
+
+            ActionCallSettings secondSettings = new ActionCallSettings();
+            secondSettings.setAction("providerB");
+            secondSettings.setDataInput(ImmutableMap.of("somearg", "first"));
+            ActionCallConfig second = ActionCallConfig.builder()
+                    .name("second")
+                    .callSettings(secondSettings)
+                    .action(providerB).build();
+
+            InstrumentationRule r1 = InstrumentationRule.builder()
+                    .postEntryAction(first)
+                    .postEntryAction(second)
+                    .build();
+
+            MethodHookConfiguration conf = resolver.buildHookConfiguration(config, Sets.newHashSet(r1));
+            assertThat(conf.getPostEntryActions()).containsExactly(
+                    first,
+                    second
+            );
+        }
+
+        @Test
+        void verifyPreExitProvidersPreserved() throws Exception {
+            ActionCallSettings firstSettings = new ActionCallSettings();
+            firstSettings.setAction("providerA");
+            ActionCallConfig first = ActionCallConfig.builder()
+                    .name("first")
+                    .callSettings(firstSettings)
+                    .action(providerA).build();
+
+            ActionCallSettings secondSettings = new ActionCallSettings();
+            secondSettings.setAction("providerB");
+            secondSettings.setDataInput(ImmutableMap.of("somearg", "first"));
+            ActionCallConfig second = ActionCallConfig.builder()
+                    .name("second")
+                    .callSettings(secondSettings)
+                    .action(providerB).build();
+
+            InstrumentationRule r1 = InstrumentationRule.builder()
+                    .preExitAction(first)
+                    .preExitAction(second)
+                    .build();
+
+            MethodHookConfiguration conf = resolver.buildHookConfiguration(config, Sets.newHashSet(r1));
+            assertThat(conf.getPreExitActions()).containsExactly(
+                    first,
+                    second
+            );
+        }
+
+        @Test
+        void verifyExitProvidersPreserved() throws Exception {
+            ActionCallSettings firstSettings = new ActionCallSettings();
+            firstSettings.setAction("providerA");
+            ActionCallConfig first = ActionCallConfig.builder()
+                    .name("first")
+                    .callSettings(firstSettings)
+                    .action(providerA).build();
+
+            ActionCallSettings secondSettings = new ActionCallSettings();
+            secondSettings.setAction("providerB");
+            secondSettings.setDataInput(ImmutableMap.of("somearg", "first"));
+            ActionCallConfig second = ActionCallConfig.builder()
+                    .name("second")
+                    .callSettings(secondSettings)
+                    .action(providerB).build();
+
+            InstrumentationRule r1 = InstrumentationRule.builder()
+                    .exitAction(first)
+                    .exitAction(second)
+                    .build();
+
+            MethodHookConfiguration conf = resolver.buildHookConfiguration(config, Sets.newHashSet(r1));
+            assertThat(conf.getExitActions()).containsExactly(
+                    first,
+                    second
+            );
+        }
+
+
+        @Test
+        void verifyPostExitProvidersPreserved() throws Exception {
+            ActionCallSettings firstSettings = new ActionCallSettings();
+            firstSettings.setAction("providerA");
+            ActionCallConfig first = ActionCallConfig.builder()
+                    .name("first")
+                    .callSettings(firstSettings)
+                    .action(providerA).build();
+
+            ActionCallSettings secondSettings = new ActionCallSettings();
+            secondSettings.setAction("providerB");
+            secondSettings.setDataInput(ImmutableMap.of("somearg", "first"));
+            ActionCallConfig second = ActionCallConfig.builder()
+                    .name("second")
+                    .callSettings(secondSettings)
+                    .action(providerB).build();
+
+            InstrumentationRule r1 = InstrumentationRule.builder()
+                    .postExitAction(first)
+                    .postExitAction(second)
+                    .build();
+
+            MethodHookConfiguration conf = resolver.buildHookConfiguration(config, Sets.newHashSet(r1));
+            assertThat(conf.getPostExitActions()).containsExactly(
+                    first,
+                    second
             );
         }
 

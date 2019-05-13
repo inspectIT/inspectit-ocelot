@@ -1,12 +1,15 @@
 package rocks.inspectit.ocelot.core.instrumentation.config;
 
+import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.config.model.instrumentation.InstrumentationSettings;
+import rocks.inspectit.ocelot.config.model.instrumentation.actions.ActionCallSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.InstrumentationRuleSettings;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.InstrumentationRule;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.InstrumentationScope;
@@ -97,6 +100,161 @@ class InstrumentationRuleResolverTest {
             assertThat(result).flatExtracting(InstrumentationRule::getScopes).isEmpty();
             verify(scopeResolver).resolve(settings);
             verifyNoMoreInteractions(scopeResolver);
+        }
+
+
+        @Test
+        public void verifyPreEntryActionsPreserved() {
+            ActionCallSettings first = Mockito.mock(ActionCallSettings.class);
+            ActionCallSettings second = Mockito.mock(ActionCallSettings.class);
+            InstrumentationRuleSettings ruleSettings = new InstrumentationRuleSettings();
+            ruleSettings.setEnabled(true);
+            ruleSettings.setPreEntry(ImmutableMap.of("first", first, "second", second));
+            InstrumentationSettings settings = new InstrumentationSettings();
+            settings.setRules(Collections.singletonMap("rule-key", ruleSettings));
+
+            Set<InstrumentationRule> result = ruleResolver.resolve(settings, Collections.emptyMap());
+
+            assertThat(result).hasSize(1);
+            assertThat(result).flatExtracting(InstrumentationRule::getPreEntryActions)
+                    .hasSize(2)
+                    .anySatisfy((ac) -> {
+                        assertThat(ac.getName()).isEqualTo("first");
+                        assertThat(ac.getCallSettings()).isSameAs(first);
+                    })
+                    .anySatisfy((ac) -> {
+                        assertThat(ac.getName()).isEqualTo("second");
+                        assertThat(ac.getCallSettings()).isSameAs(second);
+                    });
+        }
+
+
+        @Test
+        public void verifyEntryActionsPreserved() {
+            ActionCallSettings first = Mockito.mock(ActionCallSettings.class);
+            ActionCallSettings second = Mockito.mock(ActionCallSettings.class);
+            InstrumentationRuleSettings ruleSettings = new InstrumentationRuleSettings();
+            ruleSettings.setEnabled(true);
+            ruleSettings.setEntry(ImmutableMap.of("first", first, "second", second));
+            InstrumentationSettings settings = new InstrumentationSettings();
+            settings.setRules(Collections.singletonMap("rule-key", ruleSettings));
+
+            Set<InstrumentationRule> result = ruleResolver.resolve(settings, Collections.emptyMap());
+
+            assertThat(result).hasSize(1);
+            assertThat(result).flatExtracting(InstrumentationRule::getEntryActions)
+                    .hasSize(2)
+                    .anySatisfy((ac) -> {
+                        assertThat(ac.getName()).isEqualTo("first");
+                        assertThat(ac.getCallSettings()).isSameAs(first);
+                    })
+                    .anySatisfy((ac) -> {
+                        assertThat(ac.getName()).isEqualTo("second");
+                        assertThat(ac.getCallSettings()).isSameAs(second);
+                    });
+        }
+
+
+        @Test
+        public void verifyPostEntryActionsPreserved() {
+            ActionCallSettings first = Mockito.mock(ActionCallSettings.class);
+            ActionCallSettings second = Mockito.mock(ActionCallSettings.class);
+            InstrumentationRuleSettings ruleSettings = new InstrumentationRuleSettings();
+            ruleSettings.setEnabled(true);
+            ruleSettings.setPostEntry(ImmutableMap.of("first", first, "second", second));
+            InstrumentationSettings settings = new InstrumentationSettings();
+            settings.setRules(Collections.singletonMap("rule-key", ruleSettings));
+
+            Set<InstrumentationRule> result = ruleResolver.resolve(settings, Collections.emptyMap());
+
+            assertThat(result).hasSize(1);
+            assertThat(result).flatExtracting(InstrumentationRule::getPostEntryActions)
+                    .hasSize(2)
+                    .anySatisfy((ac) -> {
+                        assertThat(ac.getName()).isEqualTo("first");
+                        assertThat(ac.getCallSettings()).isSameAs(first);
+                    })
+                    .anySatisfy((ac) -> {
+                        assertThat(ac.getName()).isEqualTo("second");
+                        assertThat(ac.getCallSettings()).isSameAs(second);
+                    });
+        }
+
+        @Test
+        public void verifyPreExitActionsPreserved() {
+            ActionCallSettings first = Mockito.mock(ActionCallSettings.class);
+            ActionCallSettings second = Mockito.mock(ActionCallSettings.class);
+            InstrumentationRuleSettings ruleSettings = new InstrumentationRuleSettings();
+            ruleSettings.setEnabled(true);
+            ruleSettings.setPreExit(ImmutableMap.of("first", first, "second", second));
+            InstrumentationSettings settings = new InstrumentationSettings();
+            settings.setRules(Collections.singletonMap("rule-key", ruleSettings));
+
+            Set<InstrumentationRule> result = ruleResolver.resolve(settings, Collections.emptyMap());
+
+            assertThat(result).hasSize(1);
+            assertThat(result).flatExtracting(InstrumentationRule::getPreExitActions)
+                    .hasSize(2)
+                    .anySatisfy((ac) -> {
+                        assertThat(ac.getName()).isEqualTo("first");
+                        assertThat(ac.getCallSettings()).isSameAs(first);
+                    })
+                    .anySatisfy((ac) -> {
+                        assertThat(ac.getName()).isEqualTo("second");
+                        assertThat(ac.getCallSettings()).isSameAs(second);
+                    });
+        }
+
+
+        @Test
+        public void verifyExitActionsPreserved() {
+            ActionCallSettings first = Mockito.mock(ActionCallSettings.class);
+            ActionCallSettings second = Mockito.mock(ActionCallSettings.class);
+            InstrumentationRuleSettings ruleSettings = new InstrumentationRuleSettings();
+            ruleSettings.setEnabled(true);
+            ruleSettings.setExit(ImmutableMap.of("first", first, "second", second));
+            InstrumentationSettings settings = new InstrumentationSettings();
+            settings.setRules(Collections.singletonMap("rule-key", ruleSettings));
+
+            Set<InstrumentationRule> result = ruleResolver.resolve(settings, Collections.emptyMap());
+
+            assertThat(result).hasSize(1);
+            assertThat(result).flatExtracting(InstrumentationRule::getExitActions)
+                    .hasSize(2)
+                    .anySatisfy((ac) -> {
+                        assertThat(ac.getName()).isEqualTo("first");
+                        assertThat(ac.getCallSettings()).isSameAs(first);
+                    })
+                    .anySatisfy((ac) -> {
+                        assertThat(ac.getName()).isEqualTo("second");
+                        assertThat(ac.getCallSettings()).isSameAs(second);
+                    });
+        }
+
+
+        @Test
+        public void verifyPostExitActionsPreserved() {
+            ActionCallSettings first = Mockito.mock(ActionCallSettings.class);
+            ActionCallSettings second = Mockito.mock(ActionCallSettings.class);
+            InstrumentationRuleSettings ruleSettings = new InstrumentationRuleSettings();
+            ruleSettings.setEnabled(true);
+            ruleSettings.setPostExit(ImmutableMap.of("first", first, "second", second));
+            InstrumentationSettings settings = new InstrumentationSettings();
+            settings.setRules(Collections.singletonMap("rule-key", ruleSettings));
+
+            Set<InstrumentationRule> result = ruleResolver.resolve(settings, Collections.emptyMap());
+
+            assertThat(result).hasSize(1);
+            assertThat(result).flatExtracting(InstrumentationRule::getPostExitActions)
+                    .hasSize(2)
+                    .anySatisfy((ac) -> {
+                        assertThat(ac.getName()).isEqualTo("first");
+                        assertThat(ac.getCallSettings()).isSameAs(first);
+                    })
+                    .anySatisfy((ac) -> {
+                        assertThat(ac.getName()).isEqualTo("second");
+                        assertThat(ac.getCallSettings()).isSameAs(second);
+                    });
         }
 
     }
