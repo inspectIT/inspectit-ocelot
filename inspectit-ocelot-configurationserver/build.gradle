@@ -1,0 +1,42 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.1.4.RELEASE")
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+
+bootJar {
+    archivesBaseName = 'inspectit-ocelot-configurationserver'
+    version = '0.1.0'
+
+    manifest {
+        attributes 'Start-Class': 'rocks.inspectit.ocelot.ConfigurationServer'
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+dependencies {
+    compile(
+            "org.springframework.boot:spring-boot-starter-web",
+            "org.yaml:snakeyaml:1.24",
+            "io.springfox:springfox-swagger2:2.9.2",
+            "io.springfox:springfox-swagger-ui:2.9.2"
+    )
+    implementation(
+            project(':inspectit-ocelot-config')
+    )
+    testCompile("junit:junit")
+}

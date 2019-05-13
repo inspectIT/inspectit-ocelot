@@ -65,33 +65,35 @@ subprojects {
         targetCompatibility = 1.8
     }
 
-    // use jarCheck to make sure all classes in our dependencies are at maximum in version 1.8
-    task checkDependencyJavaVersions {
-        def excludes = ["byte-buddy"]
+    if (it.name != 'inspectit-ocelot-configurationserver') {
+        // use jarCheck to make sure all classes in our dependencies are at maximum in version 1.8
+        task checkDependencyJavaVersions {
+            def excludes = ["byte-buddy"]
 
-        def jarCheckPath = "$buildDir/jarCheck"
-        outputs.dir jarCheckPath
+            def jarCheckPath = "$buildDir/jarCheck"
+            outputs.dir jarCheckPath
 
-        doFirst {
-            def jarCheckOutput = new File(jarCheckPath)
-            jarCheckOutput.mkdirs()
-            configurations.runtimeClasspath.each { file ->
-                def name = file.name
-                def isExcluded = excludes.stream().anyMatch({ excl ->
-                    name.contains(excl)
-                })
-                if (!isExcluded && file.exists()) {
-                    javaexec {
-                        classpath configurations.buildTools
-                        main = 'com.mindprod.jarcheck.JarCheck'
-                        args = ["$file", "1.0", "1.8"]
-                        standardOutput = new File(jarCheckOutput, "$name-check.log").newOutputStream()
+            doFirst {
+                def jarCheckOutput = new File(jarCheckPath)
+                jarCheckOutput.mkdirs()
+                configurations.runtimeClasspath.each { file ->
+                    def name = file.name
+                    def isExcluded = excludes.stream().anyMatch({ excl ->
+                        name.contains(excl)
+                    })
+                    if (!isExcluded && file.exists()) {
+                        javaexec {
+                            classpath configurations.buildTools
+                            main = 'com.mindprod.jarcheck.JarCheck'
+                            args = ["$file", "1.0", "1.8"]
+                            standardOutput = new File(jarCheckOutput, "$name-check.log").newOutputStream()
+                        }
                     }
                 }
             }
         }
+        jar.dependsOn checkDependencyJavaVersions
     }
-    jar.dependsOn checkDependencyJavaVersions
 }
 
 task codeCoverageReport(type: JacocoReport) {
