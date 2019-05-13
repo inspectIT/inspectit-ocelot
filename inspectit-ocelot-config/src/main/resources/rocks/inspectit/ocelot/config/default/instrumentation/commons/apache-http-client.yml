@@ -71,13 +71,3 @@ inspectit:
           - name: doExecute
         advanced:
           instrument-only-inherited-methods: true
-
-      apache_http_client_execute:
-        interfaces:
-          - name: org.apache.http.client.HttpClient
-        superclass:
-          name: org.apache.http.impl.client.CloseableHttpClient
-        methods:
-          - name: execute
-        advanced:
-          instrument-only-inherited-methods: true

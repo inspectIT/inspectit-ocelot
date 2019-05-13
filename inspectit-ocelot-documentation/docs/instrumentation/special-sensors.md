@@ -22,6 +22,10 @@ By default, all special sensors are enabled.
 
 The context propagation sensors are necessary to enable tracing and [data propagation](instrumentation/rules.md#data-propagation) between multiple threads by passing the current context.
 By doing this, tags and scopes can be correlated to another in case of switching threads.
+Propagation across JVM borders is realized purely through the default configuration of the agent.
+Hereby, propagation is supported for [HttpUrlConnection](https://docs.oracle.com/javase/8/docs/api/java/net/HttpURLConnection.html),
+[Apache CloseableHttpClient](https://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/org/apache/http/impl/client/CloseableHttpClient.html)
+and the [Servlet API](https://javaee.github.io/javaee-spec/javadocs/javax/servlet/http/package-summary.html).
 
 The following context propagation sensors are provided out-of-the-box:
 
@@ -39,22 +43,6 @@ The following context propagation sensors are provided out-of-the-box:
    Can be enabled or disabled via `inspectit.instrumentation.special.scheduled-executor-context-propagation`.
    This sensor enables passing the current context via implementations of the `java.util.concurrent.ScheduledExecutorService` interface.
    The context is attached to the `java.lang.Runnable` or `java.util.concurrent.Callable` used to invoke the Executor's `schedule`, `scheduleAtFixedRate` and `scheduleWithFixedDelay` method.
-
-## Cross-JVM Context Propagation Sensors
-
-In addition to [JVM Local Context Propagation Sensors](instrumentation/special-sensors.md#jvm-local-context-propagation-sensors), inspectIT Ocelot also supports the propagation of data and the correlation of traces across JVM borders. In this case, the correlation data is attached as a header or an equivalent of the used protocol. Currently, the following sensors are available to enable propagation via HTTP:
-
-* **HTTPUrlConnection Context Propagation Sensor:**
-   Can be enabled or disabled via `inspectit.instrumentation.special.http-url-connection-context-propagation`.
-   This sensor enables the context propagation across HTTP clients which use [HttpUrlConnection](https://docs.oracle.com/javase/8/docs/api/java/net/HttpURLConnection.html).
-
-* **Apache HTTP Client Context Propagation Sensor:**
-   Can be enabled or disabled via `inspectit.instrumentation.special.apache-http-client-context-propagation`.
-   This sensor enables the context across HTTP clients which use the [Apache CloseableHttpClient](https://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/org/apache/http/impl/client/CloseableHttpClient.html).
-
-* **Servlet API Context Propagation Sensor:**
-   Can be enabled or disabled via `inspectit.instrumentation.special.servlet-api-client-context-propagation`.
-   This sensor enables the context across HTTP servers which use the [Servlet API](https://javaee.github.io/javaee-spec/javadocs/javax/servlet/http/package-summary.html).
 
 ## Class Loader Delegation
 

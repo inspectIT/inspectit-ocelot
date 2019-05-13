@@ -10,7 +10,7 @@ inspectit:
       servicegraph_record_apache_client:
       
         scopes:
-          apache_http_client_execute: true
+          apache_http_client_doExecute: true
           
         entry:
           servicegraph_is_entry:

@@ -6,6 +6,16 @@ inspectit:
       servicegraph_record_apache_client: {enabled: false }
       servicegraph_record_jdbc_calls: {enabled: false }
       servicegraph_record_servletapi_entry: {enabled: false }
+
       http_client_apache_doExecute: {enabled: false }
       http_client_apache_execute: {enabled: false }
       http_server_servlet_api: {enabled: false }
+
+      http_propagation_apache_doExecute: {enabled: false}
+      httpurlconnection_down_propagation: {enabled: false}
+      httpurlconnection_up_propagation: {enabled: false}
+
+      servlet_api_down_propagation: {enabled: false}
+      servlet_api_up_propagation_on_servlet_and_filter: {enabled: false}
+      servlet_api_up_propagation_on_servletresponse: {enabled: false}
+

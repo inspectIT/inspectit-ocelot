@@ -31,19 +31,4 @@ public class SpecialSensorSettings {
      */
     private boolean classLoaderDelegation;
 
-    /**
-     * Enables or disables {@link rocks.inspectit.ocelot.core.instrumentation.special.remote.HttpUrlConnectionContextPropagationSensor}.
-     */
-    private boolean httpUrlConnectionContextPropagation;
-
-    /**
-     * Enables or disable {@link rocks.inspectit.ocelot.core.instrumentation.special.remote.ApacheHttpClientContextPropagationSensor}
-     */
-    private boolean apacheHttpClientContextPropagation;
-
-    /**
-     * Enables or disables {@link rocks.inspectit.ocelot.core.instrumentation.special.remote.ServletApiContextUpPropagationSensor} and
-     * {@link rocks.inspectit.ocelot.core.instrumentation.special.remote.ServletApiContextDownPropagationSensor}
-     */
-    private boolean servletApiContextPropagation;
 }

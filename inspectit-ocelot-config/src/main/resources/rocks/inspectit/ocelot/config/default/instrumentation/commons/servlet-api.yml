@@ -55,3 +55,17 @@ inspectit:
           - name: doFilter
         advanced:
           instrument-only-inherited-methods: true
+      servletapi_servletresponse_getOutputStream:
+        interfaces:
+            - name: javax.servlet.ServletResponse
+        methods:
+          - name: getOutputStream
+        advanced:
+          instrument-only-inherited-methods: true
+      servletapi_servletresponse_getWriter:
+        interfaces:
+          - name: javax.servlet.ServletResponse
+        methods:
+          - name: getWriter
+        advanced:
+          instrument-only-inherited-methods: true

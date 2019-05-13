@@ -1,0 +1,26 @@
+inspectit:
+
+  instrumentation:
+
+    scopes:
+      httpurlconnection_getOutputStream:
+        superclass:
+          name: java.net.HttpURLConnection
+        methods:
+          - name: getOutputStream
+            arguments: []
+
+
+      httpurlconnection_getInputStream:
+        superclass:
+          name: java.net.HttpURLConnection
+        methods:
+          - name: getInputStream
+            arguments: []
+
+      httpurlconnection_connect:
+        superclass:
+          name: java.net.HttpURLConnection
+        methods:
+          - name: connect
+            arguments: []

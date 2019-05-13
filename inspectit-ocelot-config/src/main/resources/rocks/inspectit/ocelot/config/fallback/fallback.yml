@@ -10,9 +10,6 @@ inspectit:
       executor-context-propagation: false
       scheduled-executor-context-propagation: false
       thread-start-context-propagation: false
-      http-url-connection-context-propagation: false
-      apache-http-client-context-propagation: false
-      servlet-api-context-propagation: false
       class-loader-delegation: false
   metrics:
     enabled: false
