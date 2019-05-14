@@ -1,7 +1,9 @@
 package rocks.inspectit.ocelot.config.model.instrumentation.data;
 
+import lombok.AccessLevel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import rocks.inspectit.ocelot.config.model.instrumentation.InstrumentationSettings;
 
 import javax.validation.constraints.NotNull;
@@ -29,6 +31,11 @@ public class DataSettings {
     /**
      * Defines whether this data is visible as an OpenCensus Tag.
      */
+    @Setter(AccessLevel.NONE)
     private boolean isTag = true;
+
+    public void setIsTag(boolean isTag) {
+        this.isTag = isTag;
+    }
 
 }
