@@ -19,14 +19,26 @@ import java.util.Map;
 import java.util.Set;
 
 
+/**
+ * The rest controller providing the interface used by the agent for configuration fetching.
+ */
 @RestController
 @RequestMapping("/agent")
 public class AgentController {
 
+    /**
+     * Returns the {@link InspectitConfig} for the agent with the given name.
+     *
+     * @param serviceName the agents service name
+     * @return The configuration mapped on the given agent name
+     */
     @GetMapping("/configuration")
     @ApiImplicitParam(name = "Authorization", value = "Bearer token for authorization", required = true, dataType = "string", paramType = "header")
     @ApiOperation(value = "Fetch configuration", notes = "This is used by agents to fetch their current configuration.")
     public String fetchConfiguration(@ApiParam(value = "The agent's service name", required = true) @RequestParam String serviceName) {
+        // ###########################################
+        // THIS IS JUST A DUMMY IMPLEMENTATION
+        // ###########################################
         InspectitConfig config = new InspectitConfig();
         Map<String, InspectitConfig> configMap = Collections.singletonMap("inspectit", config);
 

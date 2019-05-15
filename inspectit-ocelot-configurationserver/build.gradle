@@ -29,14 +29,12 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 dependencies {
-    compile(
+    implementation(
+            project(':inspectit-ocelot-config'),
             "org.springframework.boot:spring-boot-starter-web",
             "org.yaml:snakeyaml:1.24",
             "io.springfox:springfox-swagger2:2.9.2",
             "io.springfox:springfox-swagger-ui:2.9.2"
-    )
-    implementation(
-            project(':inspectit-ocelot-config')
     )
     testCompile("junit:junit")
     testImplementation(

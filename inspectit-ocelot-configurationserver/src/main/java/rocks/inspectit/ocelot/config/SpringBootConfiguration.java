@@ -5,9 +5,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import rocks.inspectit.ocelot.rest.agent.AgentBearerFilter;
 
+/**
+ * The spring configuration.
+ */
 @Configuration
 public class SpringBootConfiguration {
 
+    /**
+     * The servlet filter used for authorization of requests against the /agent/* REST interfaces.
+     */
     @Bean
     public FilterRegistrationBean agentBearerFilter() {
 
