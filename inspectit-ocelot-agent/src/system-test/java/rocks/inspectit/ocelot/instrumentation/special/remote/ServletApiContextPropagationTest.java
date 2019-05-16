@@ -8,7 +8,7 @@ import org.eclipse.jetty.servlet.ServletHandler;
 import org.junit.jupiter.api.*;
 import org.mockito.internal.util.io.IOUtil;
 import rocks.inspectit.ocelot.bootstrap.Instances;
-import rocks.inspectit.ocelot.bootstrap.context.IInspectitContext;
+import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 import rocks.inspectit.ocelot.utils.TestUtils;
 
 import javax.servlet.*;
@@ -87,7 +87,7 @@ public class ServletApiContextPropagationTest {
         protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
             lastTags = TestUtils.getCurrentTagsAsMap();
 
-            IInspectitContext ctx = null;
+            InternalInspectitContext ctx = null;
             try {
                 if (upPropagationValue != null) {
                     ctx = Instances.contextManager.enterNewContext();
@@ -139,7 +139,7 @@ public class ServletApiContextPropagationTest {
         public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
             lastTags = TestUtils.getCurrentTagsAsMap();
             if (overrideTags != null) {
-                IInspectitContext ctx = Instances.contextManager.enterNewContext();
+                InternalInspectitContext ctx = Instances.contextManager.enterNewContext();
                 overrideTags.forEach(ctx::setData);
                 try {
                     ctx.makeActive();

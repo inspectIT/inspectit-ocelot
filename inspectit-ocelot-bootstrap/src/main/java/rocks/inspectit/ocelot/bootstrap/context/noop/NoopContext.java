@@ -1,12 +1,12 @@
 package rocks.inspectit.ocelot.bootstrap.context.noop;
 
-import rocks.inspectit.ocelot.bootstrap.context.IInspectitContext;
+import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
-public class NoopContext implements IInspectitContext {
+public class NoopContext implements InternalInspectitContext {
 
     public static final NoopContext INSTANCE = new NoopContext();
 

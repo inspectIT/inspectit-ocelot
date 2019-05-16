@@ -1,25 +1,20 @@
-package rocks.inspectit.ocelot.bootstrap.context;
+package rocks.inspectit.ocelot.bootstrap.exposed;
+
+import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 
 import java.util.Map;
 import java.util.Set;
 
 /**
- * Interface abstraction for the InspectitContext.
+ * The view on the inspectIT context which is accessible from within actions.
  */
-public interface IInspectitContext extends AutoCloseable {
-
-    /**
-     * Special data key which stores the remote parent SpanContext if any is present.
-     * As soon as a new span is opened, this parent is used and the data is cleared from the context.
-     */
-    String REMOTE_PARENT_SPAN_CONTEXT_KEY = "remote_parent_span_context";
-
+public interface InspectitContext {
 
     /**
      * Assigns the given value to the given data key.
      * Depending on how the propagation is configured for the given key, the value will be propagated up or down.
-     * All changes made through this method before {@link #makeActive()} is called will be visible for
-     * all child contexts. If this method is called after {@link #makeActive()}, the changes will only be visible
+     * All changes made through this method before {@link InternalInspectitContext#makeActive()} is called will be visible for
+     * all child contexts. If this method is called after {@link InternalInspectitContext#makeActive()}, the changes will only be visible
      * for synchronous child contexts.
      *
      * @param key   the name of the data to assign the value to
@@ -37,24 +32,12 @@ public interface IInspectitContext extends AutoCloseable {
     Object getData(String key);
 
     /**
-     * Returns all current data as an iteratable.
+     * Returns all current data as an iterable.
      *
-     * @return the data iteratable
+     * @return the data iterable
      */
     Iterable<Map.Entry<String, Object>> getData();
 
-    /**
-     * Makes this context the active one.
-     * This means all new contexts created from this point will use this context as a parent.
-     * Async context will see down-propagated data in the state it was when this method was calle.
-     */
-    void makeActive();
-
-    /**
-     * Closes this context, performing up-propagation if required.
-     */
-    @Override
-    void close();
 
     /**
      * Generates a map representing the globally down-propagated data stored in this context.

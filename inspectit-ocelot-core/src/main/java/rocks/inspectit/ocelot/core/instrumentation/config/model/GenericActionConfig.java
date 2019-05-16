@@ -7,7 +7,6 @@ import rocks.inspectit.ocelot.bootstrap.instrumentation.IGenericAction;
 import rocks.inspectit.ocelot.config.model.instrumentation.actions.GenericActionSettings;
 import rocks.inspectit.ocelot.core.instrumentation.config.InstrumentationConfigurationResolver;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
@@ -71,8 +70,8 @@ public class GenericActionConfig {
      * Allows to import packages, so that it is not required to use the Full-Qualified name when referencing types.
      * All packages in this list will be imported.
      */
-    @Builder.Default
-    private List<String> importedPackages = new ArrayList<>();
+    @Singular
+    private List<String> importedPackages;
 
     /**
      * A java method body using the specified variables, containing a return statement returning the value provided by this action

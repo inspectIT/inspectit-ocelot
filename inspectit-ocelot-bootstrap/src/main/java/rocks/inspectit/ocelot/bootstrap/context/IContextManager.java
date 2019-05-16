@@ -43,10 +43,10 @@ public interface IContextManager {
 
     /**
      * Creates a new context which is not yet active.
-     * After the initial data collection has been performed {@link IInspectitContext#makeActive()} neeeds to be called
+     * After the initial data collection has been performed {@link InternalInspectitContext#makeActive()} neeeds to be called
      *
      * @return the newly created context
      */
-    IInspectitContext enterNewContext();
+    InternalInspectitContext enterNewContext();
 
 }

@@ -11,7 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import rocks.inspectit.ocelot.bootstrap.Instances;
-import rocks.inspectit.ocelot.bootstrap.context.IInspectitContext;
+import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 import rocks.inspectit.ocelot.utils.TestUtils;
 
 import java.util.Arrays;
@@ -43,7 +43,7 @@ public class HttpOutMetricTest {
     void setupWiremock() throws Exception {
         wireMockServer = new WireMockServer(options().port(PORT));
         wireMockServer.addMockServiceRequestListener((req, resp) -> {
-            IInspectitContext ctx = Instances.contextManager.enterNewContext();
+            InternalInspectitContext ctx = Instances.contextManager.enterNewContext();
             ctx.setData("prop_target_service", targetName);
             ctx.makeActive();
             ctx.close();
@@ -90,7 +90,7 @@ public class HttpOutMetricTest {
 
         @Test
         void testSuccessStatus() throws Exception {
-            IInspectitContext ctx = Instances.contextManager.enterNewContext();
+            InternalInspectitContext ctx = Instances.contextManager.enterNewContext();
             ctx.setData("service", "apache_client_test");
             ctx.makeActive();
             client.execute(new HttpGet(URL_START + PATH_200 + "?x=32423"));
@@ -113,7 +113,7 @@ public class HttpOutMetricTest {
 
         @Test
         void testErrorStatus() throws Exception {
-            IInspectitContext ctx = Instances.contextManager.enterNewContext();
+            InternalInspectitContext ctx = Instances.contextManager.enterNewContext();
             ctx.setData("service", "apache_client_test");
             ctx.makeActive();
             client.execute(new HttpGet(URL_START + PATH_404 + "?x=32423"));

@@ -34,6 +34,9 @@ public class GenericActionSettings {
     public static final String METHOD_NAME_VARIABLE = "_methodName";
     public static final String METHOD_PARAMETER_TYPES_VARIABLE = "_parameterTypes";
 
+    public static final String CONTEXT_VARIABLE = "_context";
+    public static final String OBJECT_ATTACHMENTS_VARIABLE = "_attachments";
+
 
     private static final List<Pattern> SPECIAL_VARIABLES_REGEXES = Arrays.asList(
             Pattern.compile(THIS_VARIABLE),
@@ -43,7 +46,9 @@ public class GenericActionSettings {
             ARG_VARIABLE_REGEX,
             Pattern.compile(CLASS_VARIABLE),
             Pattern.compile(METHOD_NAME_VARIABLE),
-            Pattern.compile(METHOD_PARAMETER_TYPES_VARIABLE)
+            Pattern.compile(METHOD_PARAMETER_TYPES_VARIABLE),
+            Pattern.compile(CONTEXT_VARIABLE),
+            Pattern.compile(OBJECT_ATTACHMENTS_VARIABLE)
     );
 
     /**
@@ -58,7 +63,7 @@ public class GenericActionSettings {
      * - methodName: the name of the method being instrumented, e.g. "hashcode", "doXYZ" or "<init>" for a constructor
      * - parameterTypes: the types of the arguments with which the method is declared in form of a Class[] array
      * <p>
-     * null if void, the method threw an exception or the action is not executed at the method exit
+     * null if void, the method threw an exception or the provider is not executed at the method exit
      * - thrown: the {@link Throwable}-Object raised by the the executed method, the type must be java.lang.Throwable
      * null if no throwable was raised
      * <p>
@@ -83,7 +88,7 @@ public class GenericActionSettings {
 
     /**
      * A string defining the Java method body of the generic action without surrounding braces {}.
-     * This method body must have a return statement to return the value provided by the action!
+     * This method body must have a return statement to return the value provided by the provider!
      * The statement must be of type Object, primitive results have to wrapped manually!
      * If this field is present, {@link #value} must be null!
      */
@@ -128,6 +133,18 @@ public class GenericActionSettings {
     private boolean isParameterTypesTypeCorrect() {
         String parameterTypesType = input.get(METHOD_PARAMETER_TYPES_VARIABLE);
         return verifyType(parameterTypesType, "Class[]");
+    }
+
+    @AssertTrue(message = "The '_context' input must have the type 'InspectitContext'")
+    private boolean isContextTypeCorrect() {
+        String type = input.get(CONTEXT_VARIABLE);
+        return type == null || "InspectitContext".equals(type);
+    }
+
+    @AssertTrue(message = "The '_attachments' input must have the type 'ObjectAttachments'")
+    private boolean isAttachmentsTypeCorrect() {
+        String type = input.get(OBJECT_ATTACHMENTS_VARIABLE);
+        return type == null || "ObjectAttachments".equals(type);
     }
 
     public static boolean isSpecialVariable(String varName) {

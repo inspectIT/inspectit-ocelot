@@ -1,6 +1,6 @@
 package rocks.inspectit.ocelot.bootstrap.instrumentation;
 
-import rocks.inspectit.ocelot.bootstrap.context.IInspectitContext;
+import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 
 public interface IMethodHook {
 
@@ -11,7 +11,7 @@ public interface IMethodHook {
      * @param thiz                   the "this" instance of the invoked method, null if the invoked method is static
      * @return the opened context, will be passed to onExit
      */
-    IInspectitContext onEnter(Object[] instrumentedMethodArgs, Object thiz);
+    InternalInspectitContext onEnter(Object[] instrumentedMethodArgs, Object thiz);
 
     /**
      * Called when the hooked method exits.
@@ -22,5 +22,5 @@ public interface IMethodHook {
      * @param thrown                 the exception thrown by the instrumented method, null otherwise
      * @param context                the context returned by the onEnter call
      */
-    void onExit(Object[] instrumentedMethodArgs, Object thiz, Object returnValue, Throwable thrown, IInspectitContext context);
+    void onExit(Object[] instrumentedMethodArgs, Object thiz, Object returnValue, Throwable thrown, InternalInspectitContext context);
 }

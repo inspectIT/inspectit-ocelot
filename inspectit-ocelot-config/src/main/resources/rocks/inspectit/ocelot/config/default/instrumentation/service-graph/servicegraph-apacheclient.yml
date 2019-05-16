@@ -3,7 +3,7 @@ inspectit:
   instrumentation:  
 
     data:
-      servicegraph_apache_client_entry_found: {down-propagation: JVM_LOCAL, is-tag: false}
+      servicegraph_apache_client_entry_found: {is-tag: false}
 
     rules:
     
@@ -14,13 +14,8 @@ inspectit:
           
         entry:
           servicegraph_is_entry:
-            action: set
-            constant-input: { value: 1}
-            only-if-null: servicegraph_apache_cient_entry_found
-            before: { servicegraph_apache_client_entry_found: true }
-          servicegraph_apache_client_entry_found:
-            action: set
-            constant-input: {value: true}
+            action: test_and_set_marker
+            constant-input: { marker: servicegraph_apache_client_entry_found}
           
           servicegraph_call_entry: { action: timestamp_nanos }
           
@@ -41,7 +36,7 @@ inspectit:
           #store the target host in case this is an external call (=the target_service is unknown)
           target_external:
             action: get_apache_execute_request_host
-            only-if-not-null: servicegraph_is_entry
+            only-if-true: servicegraph_is_entry
             only-if-null: target_service
           protocol:
             action: set
@@ -50,13 +45,13 @@ inspectit:
           servicegraph_call_duration:
             action: elapsed_millis
             data-input: {sinceNanos: servicegraph_call_entry }
-            only-if-not-null: servicegraph_is_entry
+            only-if-true: servicegraph_is_entry
           
           #restore the target to our service in case an up-propagation for this server will happen
           prop_target_service:
             action: set
             data-input: {value: service}
-            only-if-not-null: servicegraph_is_entry
+            only-if-true: servicegraph_is_entry
           
         metrics:
           '[service/out/responsetime]': servicegraph_call_duration

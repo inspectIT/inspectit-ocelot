@@ -4,15 +4,15 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import rocks.inspectit.ocelot.bootstrap.instrumentation.IObjectAttachments;
+import rocks.inspectit.ocelot.bootstrap.exposed.ObjectAttachments;
 
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Implementation for the bootstrap interface {@link IObjectAttachments}
+ * Implementation for the bootstrap interface {@link ObjectAttachments}
  */
 @Slf4j
-public class ObjectAttachments implements IObjectAttachments {
+public class ObjectAttachmentsImpl implements ObjectAttachments {
 
     /**
      * The name of this bean, initialized via the {@link rocks.inspectit.ocelot.core.config.spring.BootstrapInitializerConfiguration}
@@ -24,19 +24,21 @@ public class ObjectAttachments implements IObjectAttachments {
             .build();
 
     @Override
-    public void attach(Object target, String key, Object value) {
+    public Object attach(Object target, String key, Object value) {
+        Object previous = null;
         if (target != null) {
             try {
                 ConcurrentHashMap<String, Object> map = attachments.get(target, ConcurrentHashMap::new);
                 if (value != null) {
-                    map.put(key, value);
+                    previous = map.put(key, value);
                 } else {
-                    map.remove(key);
+                    previous = map.remove(key);
                 }
             } catch (Exception e) {
                 log.error("Error storing value", e);
             }
         }
+        return previous;
     }
 
     @Override

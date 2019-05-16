@@ -7,7 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import rocks.inspectit.ocelot.bootstrap.context.IInspectitContext;
+import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 import rocks.inspectit.ocelot.core.instrumentation.context.ContextManager;
 import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContext;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
@@ -52,7 +52,7 @@ public class MethodHookTest {
                     .methodInformation(Mockito.mock(MethodReflectionInformation.class))
                     .build();
 
-            IInspectitContext ctx = hook.onEnter(null, null);
+            InternalInspectitContext ctx = hook.onEnter(null, null);
             assertThat(ctx).isSameAs(context);
             verify(context, times(1)).makeActive();
             verify(context, times(0)).close();
@@ -91,7 +91,7 @@ public class MethodHookTest {
                     .methodInformation(Mockito.mock(MethodReflectionInformation.class))
                     .build();
 
-            IInspectitContext ctx = hook.onEnter(null, null);
+            InternalInspectitContext ctx = hook.onEnter(null, null);
             hook.onExit(null, null, null, null, ctx);
 
             verify(first, times(1)).execute(any());

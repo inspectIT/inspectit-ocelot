@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import rocks.inspectit.ocelot.bootstrap.context.IInspectitContext;
+import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.DataProperties;
 import rocks.inspectit.ocelot.core.testutils.GcUtils;
 
@@ -29,7 +29,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class InspectitContextTest {
+public class InternalInspectitContextTest {
 
     @Mock
     DataProperties propagation;
@@ -810,10 +810,10 @@ public class InspectitContextTest {
             }
 
             InspectitContext ctx = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, true);
-            ctx.setData(IInspectitContext.REMOTE_PARENT_SPAN_CONTEXT_KEY, parentContext);
+            ctx.setData(InternalInspectitContext.REMOTE_PARENT_SPAN_CONTEXT_KEY, parentContext);
 
             ctx.beginSpan("my-span", Span.Kind.SERVER);
-            Object storedParent = ctx.getData(IInspectitContext.REMOTE_PARENT_SPAN_CONTEXT_KEY);
+            Object storedParent = ctx.getData(InternalInspectitContext.REMOTE_PARENT_SPAN_CONTEXT_KEY);
             ctx.makeActive();
 
             child = Tracing.getTracer().getCurrentSpan().getContext().getTraceId();

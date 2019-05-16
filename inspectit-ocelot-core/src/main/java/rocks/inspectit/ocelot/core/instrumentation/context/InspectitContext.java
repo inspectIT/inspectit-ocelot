@@ -10,7 +10,7 @@ import io.opencensus.trace.Tracing;
 import io.opencensus.trace.samplers.Samplers;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import rocks.inspectit.ocelot.bootstrap.context.IInspectitContext;
+import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.DataProperties;
 
 import java.util.*;
@@ -69,7 +69,7 @@ import java.util.stream.Stream;
  * The span is automatically finished when {@link #close()} is called.
  */
 @Slf4j
-public class InspectitContext implements IInspectitContext {
+public class InspectitContext implements InternalInspectitContext {
 
     /**
      * We only allow "data" of the following types to be used as tags

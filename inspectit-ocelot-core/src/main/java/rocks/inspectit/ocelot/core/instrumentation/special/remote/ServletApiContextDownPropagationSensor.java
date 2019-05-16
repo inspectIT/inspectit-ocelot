@@ -8,7 +8,7 @@ import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.matcher.ElementMatcher;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.bootstrap.Instances;
-import rocks.inspectit.ocelot.bootstrap.context.IInspectitContext;
+import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.InstrumentationConfiguration;
 import rocks.inspectit.ocelot.core.instrumentation.special.SpecialSensor;
 
@@ -56,7 +56,7 @@ public class ServletApiContextDownPropagationSensor implements SpecialSensor {
 
         @Advice.OnMethodEnter
         @SuppressWarnings("unchecked")
-        public static IInspectitContext enter(@Advice.Argument(0) Object request) {
+        public static InternalInspectitContext enter(@Advice.Argument(0) Object request) {
             try {
                 Class<?> httpRequestClazz = Class.forName("javax.servlet.http.HttpServletRequest", true, request.getClass().getClassLoader());
                 if (httpRequestClazz.isInstance(request)) {
@@ -87,7 +87,7 @@ public class ServletApiContextDownPropagationSensor implements SpecialSensor {
         }
 
         @Advice.OnMethodExit
-        public static void exit(@Advice.Enter IInspectitContext ctx) {
+        public static void exit(@Advice.Enter InternalInspectitContext ctx) {
             if (ctx != null) {
                 ctx.close();
             }

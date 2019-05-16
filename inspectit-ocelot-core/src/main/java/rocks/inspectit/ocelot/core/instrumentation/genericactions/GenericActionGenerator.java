@@ -10,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import rocks.inspectit.ocelot.bootstrap.Instances;
+import rocks.inspectit.ocelot.bootstrap.exposed.ObjectAttachments;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.IGenericAction;
 import rocks.inspectit.ocelot.config.model.instrumentation.actions.GenericActionSettings;
 import rocks.inspectit.ocelot.config.utils.AutoboxingHelper;
@@ -28,18 +30,43 @@ import java.util.concurrent.ExecutionException;
 public class GenericActionGenerator {
 
     /**
+     * Classes in this package are accessible by generic actions.
+     * They are implicitly imported.
+     */
+    private static final String INSPECTIT_ACCESSIBLE_BOOTSTRAP_PACKAGE = ObjectAttachments.class.getPackage().getName();
+
+    /**
+     * Javassist needs to access the .class files of all classes that are referenced in the code to compile.
+     * However, for bootstrap classes those are not available.
+     * Therefore we provide Javassists with a classloader which is actually never used,
+     * but which points to the jar containing our bootstrap classes.
+     */
+    private static ClassLoader INSPECTIT_BOOTSTRAP_JAR_LOADER;
+
+    static {
+        if (Instances.BOOTSTRAP_JAR_URL != null) {
+            //normal case, the AgentMain made Instances.BOOTSTRAP_JAR_URL point to the actual jar location
+            INSPECTIT_BOOTSTRAP_JAR_LOADER = new URLClassLoader(new URL[]{Instances.BOOTSTRAP_JAR_URL});
+        } else {
+            //This is the unit test and integration test branch
+            //there the bootstrap classes are included in the normal inspectit classloader
+            INSPECTIT_BOOTSTRAP_JAR_LOADER = GenericActionGenerator.class.getClassLoader();
+        }
+    }
+
+    /**
      * Guava seems to not allow null keys.
      * Therefore we just use this object as replacement for the bootstrap loader.
      */
-    private static final ClassLoader BOOTSTRAP_LOADER_MARKER = new URLClassLoader(new URL[]{});
+    private static ClassLoader BOOTSTRAP_LOADER_MARKER = new URLClassLoader(new URL[]{});
 
-    private static final String GENERIC_ACTION_STRUCTURAL_ID = "genericAction";
+    private static String GENERIC_ACTION_STRUCTURAL_ID = "genericAction";
 
-    private static final String METHOD_ARGS = "$1";
-    private static final String THIZ = "$2";
-    private static final String RETURN_VALUE = "$3";
-    private static final String THROWN = "$4";
-    private static final String ADDITIONAL_ARGS = "$5";
+    private static String METHOD_ARGS = "$1";
+    private static String THIZ = "$2";
+    private static String RETURN_VALUE = "$3";
+    private static String THROWN = "$4";
+    private static String ADDITIONAL_ARGS = "$5";
 
     @Autowired
     private ClassInjector classInjector;
@@ -62,7 +89,8 @@ public class GenericActionGenerator {
      * @return the generated action
      */
     @SuppressWarnings("unchecked")
-    public InjectedClass<? extends IGenericAction> getOrGenerateGenericAction(GenericActionConfig actionConfig, Class<?> classToUseActionOn) {
+    public InjectedClass<? extends IGenericAction> getOrGenerateGenericAction(GenericActionConfig
+                                                                                      actionConfig, Class<?> classToUseActionOn) {
         ClassLoader loader = Optional.ofNullable(classToUseActionOn.getClassLoader()).orElse(BOOTSTRAP_LOADER_MARKER);
         actionsCache.cleanUp();
         Cache<GenericActionConfig, InjectedClass<? extends IGenericAction>> clCache;
@@ -86,9 +114,14 @@ public class GenericActionGenerator {
         }
     }
 
-    private byte[] buildGenericActionByteCode(GenericActionConfig actionConfig, ClassLoader loader, String className) throws NotFoundException, CannotCompileException, IOException {
+    private byte[] buildGenericActionByteCode(GenericActionConfig actionConfig, ClassLoader loader, String
+            className) throws NotFoundException, CannotCompileException, IOException {
+
+
         ClassPool cp = new ClassPool();
         cp.insertClassPath(new ClassClassPath(GenericActionTemplate.class));
+        //include the dummy bootstrap loader to make interfaces such as InspectitContext or ObjectAttachments accessible
+        cp.insertClassPath(new LoaderClassPath(INSPECTIT_BOOTSTRAP_JAR_LOADER));
         if (loader != BOOTSTRAP_LOADER_MARKER) {
             cp.insertClassPath(new LoaderClassPath(loader));
         }
@@ -96,6 +129,7 @@ public class GenericActionGenerator {
         CtClass action = cp.get(GenericActionTemplate.class.getName());
         action.setName(className);
 
+        cp.importPackage(INSPECTIT_ACCESSIBLE_BOOTSTRAP_PACKAGE);
         for (String packageName : actionConfig.getImportedPackages()) {
             cp.importPackage(packageName);
         }

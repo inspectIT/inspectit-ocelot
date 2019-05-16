@@ -1,9 +1,9 @@
 package rocks.inspectit.ocelot;
 
 import org.openjdk.jmh.annotations.*;
-import rocks.inspectit.ocelot.target.MethodHookTarget;
 import rocks.inspectit.ocelot.bootstrap.Instances;
-import rocks.inspectit.ocelot.bootstrap.context.IInspectitContext;
+import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
+import rocks.inspectit.ocelot.target.MethodHookTarget;
 import rocks.inspectit.ocelot.utils.TestUtils;
 
 import java.util.concurrent.TimeUnit;
@@ -20,7 +20,7 @@ public class MethodHookPerfTest {
 
     private MethodHookTarget target = new MethodHookTarget();
 
-    private IInspectitContext root;
+    private InternalInspectitContext root;
 
     @Setup
     public void waitForInstrumentation() {

@@ -1,7 +1,7 @@
 package rocks.inspectit.ocelot.bootstrap.context.noop;
 
 import rocks.inspectit.ocelot.bootstrap.context.IContextManager;
-import rocks.inspectit.ocelot.bootstrap.context.IInspectitContext;
+import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 
 import java.util.concurrent.Callable;
 
@@ -34,7 +34,7 @@ public class NoopContextManager implements IContextManager {
     }
 
     @Override
-    public IInspectitContext enterNewContext() {
+    public InternalInspectitContext enterNewContext() {
         return NoopContext.INSTANCE;
     }
 

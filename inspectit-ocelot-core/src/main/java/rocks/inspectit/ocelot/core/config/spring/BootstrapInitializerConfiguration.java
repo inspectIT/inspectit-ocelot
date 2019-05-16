@@ -7,7 +7,7 @@ import rocks.inspectit.ocelot.bootstrap.context.noop.NoopContextManager;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.noop.NoopObjectAttachments;
 import rocks.inspectit.ocelot.core.instrumentation.config.InstrumentationConfigurationResolver;
 import rocks.inspectit.ocelot.core.instrumentation.context.ContextManager;
-import rocks.inspectit.ocelot.core.instrumentation.context.ObjectAttachments;
+import rocks.inspectit.ocelot.core.instrumentation.context.ObjectAttachmentsImpl;
 import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
 
 import javax.annotation.PreDestroy;
@@ -30,9 +30,9 @@ public class BootstrapInitializerConfiguration {
         return contextManager;
     }
 
-    @Bean(ObjectAttachments.BEAN_NAME)
-    public ObjectAttachments getObjectAttachments() {
-        ObjectAttachments attachments = new ObjectAttachments();
+    @Bean(ObjectAttachmentsImpl.BEAN_NAME)
+    public ObjectAttachmentsImpl getObjectAttachments() {
+        ObjectAttachmentsImpl attachments = new ObjectAttachmentsImpl();
         Instances.attachments = attachments;
         return attachments;
     }

@@ -8,7 +8,7 @@ import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.matcher.ElementMatcher;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.bootstrap.Instances;
-import rocks.inspectit.ocelot.bootstrap.context.IInspectitContext;
+import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.InstrumentationConfiguration;
 import rocks.inspectit.ocelot.core.instrumentation.special.SpecialSensor;
 
@@ -64,8 +64,8 @@ public class ServletApiContextUpPropagationSensor implements SpecialSensor {
     private static class ServletOrFilterUpPropagationAdvice {
 
         @Advice.OnMethodEnter
-        public static IInspectitContext enter() {
-            IInspectitContext ctx = null;
+        public static InternalInspectitContext enter() {
+            InternalInspectitContext ctx = null;
             try {
                 ctx = Instances.contextManager.enterNewContext();
                 ctx.makeActive();
@@ -76,7 +76,7 @@ public class ServletApiContextUpPropagationSensor implements SpecialSensor {
         }
 
         @Advice.OnMethodExit
-        public static void exit(@Advice.Enter IInspectitContext ctx, @Advice.Argument(1) Object response) {
+        public static void exit(@Advice.Enter InternalInspectitContext ctx, @Advice.Argument(1) Object response) {
             if (ctx != null) {
                 try {
                     Class<?> httpResponseClass = Class.forName("javax.servlet.http.HttpServletResponse", true, response.getClass().getClassLoader());
@@ -109,7 +109,7 @@ public class ServletApiContextUpPropagationSensor implements SpecialSensor {
                 if (httpResponseClass.isInstance(response)) {
                     Method isCommitted = httpResponseClass.getMethod("isCommitted");
                     if (!(Boolean) isCommitted.invoke(response)) {
-                        IInspectitContext ctx = Instances.contextManager.enterNewContext();
+                        InternalInspectitContext ctx = Instances.contextManager.enterNewContext();
                         Method setHeader = null;
                         for (val entry : ctx.getUpPropagationHeaders().entrySet()) {
                             if (setHeader == null) {

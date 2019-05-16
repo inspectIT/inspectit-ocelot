@@ -7,6 +7,15 @@ inspectit:
           _arg0: Object
         value: _arg0
 
+      get_arg1:
+        input:
+          _arg1: Object
+        value: _arg1
+
+      get_arg2:
+        input:
+          _arg2: Object
+        value: _arg2
 
       get_return_value:
         input:
