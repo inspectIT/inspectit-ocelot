@@ -149,6 +149,8 @@ public class MethodHookConfigurationResolverTest {
                     .tracing(RuleTracingSettings.builder()
                             .startSpan(true)
                             .kind(Span.Kind.SERVER)
+                            .storeSpan("store_span")
+                            .endSpan(false)
                             .attributes(Maps.newHashMap("attr", "dataX"))
                             .build())
                     .build();
@@ -156,16 +158,21 @@ public class MethodHookConfigurationResolverTest {
                     .tracing(RuleTracingSettings.builder()
                             .startSpan(true)
                             .name("data_name")
+                            .continueSpan("my_span")
+                            .endSpan(true)
                             .attributes(Maps.newHashMap("attr2", "dataY"))
                             .build())
                     .build();
 
-            MethodTracingConfiguration result = resolver.buildHookConfiguration(
+            RuleTracingSettings result = resolver.buildHookConfiguration(
                     config, Sets.newHashSet(r1, r2)).getTracing();
 
             assertThat(result.isStartSpan()).isTrue();
-            assertThat(result.getSpanKind()).isEqualTo(Span.Kind.SERVER);
-            assertThat(result.getSpanNameDataKey()).isEqualTo("data_name");
+            assertThat(result.getStoreSpan()).isEqualTo("store_span");
+            assertThat(result.getContinueSpan()).isEqualTo("my_span");
+            assertThat(result.isEndSpan()).isTrue();
+            assertThat(result.getKind()).isEqualTo(Span.Kind.SERVER);
+            assertThat(result.getName()).isEqualTo("data_name");
             assertThat(result.getAttributes())
                     .hasSize(2)
                     .containsEntry("attr", "dataX")

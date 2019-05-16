@@ -580,3 +580,48 @@ inspectit:
 If any `start-span-conditions` are defined, a span will only be created when all conditions are met.
 Analogous to this, attributes will only be written if each condition defined in `attribute-conditions` is fulfilled.
 The conditions that can be defined are equal to the ones of actions, thus, please see the <<Adding Conditions, action conditions description>> for detailed information.
+
+With the previous shown settings, it is possible to add an instrumentation which creates exactly one span per invocation of an instrumented method. Especially in asynchronous scenarios, this might not be the desired behaviour:
+For these cases inspectIT Ocelot offers the possibility to record multiple method invocations into a single span.
+The resulting span then has the following properties:
+
+* the span starts with the first invoked method and ends as soon as the last one returns
+* all attributes written by each method are combined into the single span
+* all invocations made from the methods which compose the single span will appear as children of this span
+
+This can be configured by defining for rules that they (a) can continue existing spans and (b) can optionally end the span they started or continued.
+
+Firstly, it is possible to "remember" the span created or continued using the `store-span` option:
+
+[source,yaml]
+----
+    rules:
+      span_starting_rule:
+        tracing:
+          start-span: true
+          store-span: my_span_data
+          end-span: false
+----
+
+With this option, the span created at the end of the entry phase will be stored in the context with the data key `my_span_data`. Usually this span reference is then extracted from the context and attached ot an object via the <<Input Parameters,_attachments>>.
+
+Without the `end-span: false` definition above, the span would be ended as soon as the instrumented method returns.
+By setting `end-span` to false, the span is kept open instead. It can then be continued when another method is executed as follows:
+
+[source,yaml]
+----
+    rules:
+      span_finishing_rule:
+        tracing:
+          continue-span: my_span_data
+          end-span: true # actually not necessary as it is the default value
+----
+
+Methods instrumented with this rule will not create a new span. Instead at the end of the entry phase the data for the key `my_span_data` is read from the context. If it contains a valid span written via `store-span`, this span is continued in this method. This implies that all spans started by callees of this method will appear as children of the span stored in `my_span_data`. In addition, this rule also then causes the continued span to end with the execution of the method due to the `end-span` option. This is not required to happen: a span can be continued by any number of rules before it is finally ended.
+
+It also is possible to define rules for which both `start-span` and `continue-span` is configured.
+In this case, the rule will first attempt to continue the existing span. Only if this fails (e.g. because the specified span does not exist yet or the conditions are not met) a new span is started.
+
+Again, conditions for the span continuing and span ending can be specified just like for the span starting.
+The properties `continue-span-conditions` and `end-span-conditions` work just like `start-span-conditions`.
+

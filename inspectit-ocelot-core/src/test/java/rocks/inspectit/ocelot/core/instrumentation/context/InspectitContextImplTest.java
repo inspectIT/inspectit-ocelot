@@ -4,16 +4,12 @@ import io.grpc.Context;
 import io.opencensus.common.Scope;
 import io.opencensus.tags.*;
 import io.opencensus.trace.Span;
-import io.opencensus.trace.SpanContext;
-import io.opencensus.trace.TraceId;
 import io.opencensus.trace.Tracing;
-import io.opencensus.trace.samplers.Samplers;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.DataProperties;
 import rocks.inspectit.ocelot.core.testutils.GcUtils;
 
@@ -29,7 +25,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class InternalInspectitContextTest {
+public class InspectitContextImplTest {
 
     @Mock
     DataProperties propagation;
@@ -763,66 +759,24 @@ public class InternalInspectitContextTest {
 
 
     @Nested
-    public class SpanCreation {
+    public class SpanActivation {
 
         @Test
-        void verifySpanOpenedAndClosed() {
+        void verifySpanAttachedAndDetached() {
             InspectitContext ctx = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, true);
-            ctx.beginSpan("my-span", Span.Kind.SERVER);
+            Span sp = Tracing.getTracer().spanBuilder("blub").startSpan();
+            ctx.enterSpan(sp);
             ctx.makeActive();
 
             Span span = Tracing.getTracer().getCurrentSpan();
 
             ctx.close();
+            Span endSpan = Tracing.getTracer().getCurrentSpan();
 
-            assertThat(span).isNotNull();
+            assertThat(span).isSameAs(sp);
+            assertThat(endSpan).isNotSameAs(sp);
         }
 
-        @Test
-        void verifyLocalParentRespected() {
-            TraceId parent;
-            TraceId child;
-            try (Scope spanScope = Tracing.getTracer().spanBuilder("parent").setSampler(Samplers.alwaysSample()).startScopedSpan()) {
-                parent = Tracing.getTracer().getCurrentSpan().getContext().getTraceId();
-
-                InspectitContext ctx = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, true);
-                ctx.beginSpan("my-span", Span.Kind.SERVER);
-                ctx.makeActive();
-
-                child = Tracing.getTracer().getCurrentSpan().getContext().getTraceId();
-
-                ctx.close();
-            }
-            assertThat(child).isEqualTo(parent);
-        }
-
-
-        @Test
-        void verifyRemoteParentRespected() {
-
-            SpanContext parentContext;
-            TraceId parent;
-            TraceId child;
-
-            try (Scope spanScope = Tracing.getTracer().spanBuilder("parent").setSampler(Samplers.alwaysSample()).startScopedSpan()) {
-                parentContext = Tracing.getTracer().getCurrentSpan().getContext();
-                parent = parentContext.getTraceId();
-            }
-
-            InspectitContext ctx = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, true);
-            ctx.setData(InternalInspectitContext.REMOTE_PARENT_SPAN_CONTEXT_KEY, parentContext);
-
-            ctx.beginSpan("my-span", Span.Kind.SERVER);
-            Object storedParent = ctx.getData(InternalInspectitContext.REMOTE_PARENT_SPAN_CONTEXT_KEY);
-            ctx.makeActive();
-
-            child = Tracing.getTracer().getCurrentSpan().getContext().getTraceId();
-
-            ctx.close();
-
-            assertThat(child).isEqualTo(parent);
-            assertThat(storedParent).isNull();
-        }
     }
 
 

@@ -6,20 +6,25 @@ import lombok.val;
 import net.bytebuddy.description.method.MethodDescription;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import rocks.inspectit.ocelot.config.model.instrumentation.actions.ActionCallSettings;
-import rocks.inspectit.ocelot.config.model.instrumentation.actions.GenericActionSettings;
-import rocks.inspectit.ocelot.config.utils.ConfigUtils;
+import rocks.inspectit.ocelot.config.model.instrumentation.rules.RuleTracingSettings;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.ActionCallConfig;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.MethodHookConfiguration;
-import rocks.inspectit.ocelot.core.instrumentation.config.model.MethodTracingConfiguration;
 import rocks.inspectit.ocelot.core.instrumentation.context.ContextManager;
-import rocks.inspectit.ocelot.core.instrumentation.hook.actions.*;
+import rocks.inspectit.ocelot.core.instrumentation.hook.actions.ConditionalHookAction;
+import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
+import rocks.inspectit.ocelot.core.instrumentation.hook.actions.MetricsRecorder;
+import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.ContinueOrStartSpanAction;
+import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.EndSpanAction;
+import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.StoreSpanAction;
+import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.WriteSpanAttributesAction;
 import rocks.inspectit.ocelot.core.metrics.MeasuresAndViewsManager;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Predicate;
 
 /**
  * This class is responsible for translating {@link MethodHookConfiguration}s
@@ -59,14 +64,12 @@ public class MethodHookGenerator {
 
         val entryActions = new CopyOnWriteArrayList<IHookAction>();
         entryActions.addAll(buildActionCalls(config.getEntryActions(), methodInfo));
-        buildTracingEntryAction(config.getTracing())
-                .ifPresent(entryActions::add);
+        entryActions.addAll(buildTracingEntryActions(config.getTracing()));
         builder.entryActions(entryActions);
 
         val exitActions = new CopyOnWriteArrayList<IHookAction>();
         exitActions.addAll(buildActionCalls(config.getExitActions(), methodInfo));
-        buildTracingExitAction(config.getTracing())
-                .ifPresent(exitActions::add);
+        exitActions.addAll(buildTracingExitActions(config.getTracing()));
         buildMetricsRecorder(config)
                 .ifPresent(exitActions::add);
         builder.exitActions(exitActions);
@@ -75,25 +78,49 @@ public class MethodHookGenerator {
     }
 
 
-    private Optional<IHookAction> buildTracingExitAction(MethodTracingConfiguration tracing) {
-        val attributes = tracing.getAttributes();
-        if (!attributes.isEmpty()) {
-            IHookAction endTraceAction = new WriteSpanAttributesAction(attributes);
-            val actionWithConditions = ConditionalHookAction.wrapWithConditionChecks(tracing.getAttributeConditions(), endTraceAction);
-            return Optional.of(actionWithConditions);
+    private List<IHookAction> buildTracingEntryActions(RuleTracingSettings tracing) {
+        if (tracing.isStartSpan() || tracing.getContinueSpan() != null) {
+
+            Predicate<IHookAction.ExecutionContext> startCondition = (ctx) -> false;
+            if (tracing.isStartSpan()) {
+                startCondition = ConditionalHookAction.getAsPredicate(tracing.getStartSpanConditions());
+            }
+
+            Predicate<IHookAction.ExecutionContext> continueCondition = (ctx) -> false;
+            if (tracing.getContinueSpan() != null) {
+                continueCondition = ConditionalHookAction.getAsPredicate(tracing.getContinueSpanConditions());
+            }
+
+            IHookAction beginTraceAction = new ContinueOrStartSpanAction(tracing.getName(), tracing.getKind(),
+                    tracing.getContinueSpan(), continueCondition, startCondition);
+
+            val result = new ArrayList<IHookAction>();
+            result.add(beginTraceAction);
+
+            if (tracing.getStoreSpan() != null) {
+                result.add(new StoreSpanAction(tracing.getStoreSpan()));
+            }
+            return result;
         } else {
-            return Optional.empty();
+            return Collections.emptyList();
         }
     }
 
-    private Optional<IHookAction> buildTracingEntryAction(MethodTracingConfiguration tracing) {
-        if (tracing.isStartSpan()) {
-            IHookAction beginTraceAction = new StartSpanAction(tracing.getSpanNameDataKey(), tracing.getSpanKind());
-            val actionWithConditions = ConditionalHookAction.wrapWithConditionChecks(tracing.getStartSpanConditions(), beginTraceAction);
-            return Optional.of(actionWithConditions);
-        } else {
-            return Optional.empty();
+    private List<IHookAction> buildTracingExitActions(RuleTracingSettings tracing) {
+        val result = new ArrayList<IHookAction>();
+
+        val attributes = tracing.getAttributes();
+        if (!attributes.isEmpty()) {
+            IHookAction endTraceAction = new WriteSpanAttributesAction(attributes);
+            IHookAction actionWithConditions = ConditionalHookAction.wrapWithConditionChecks(tracing.getAttributeConditions(), endTraceAction);
+            result.add(actionWithConditions);
         }
+
+        if (tracing.isEndSpan() && (tracing.isStartSpan() || tracing.getContinueSpan() != null)) {
+            val endSpanAction = new EndSpanAction(ConditionalHookAction.getAsPredicate(tracing.getEndSpanConditions()));
+            result.add(endSpanAction);
+        }
+        return result;
     }
 
     private Optional<IHookAction> buildMetricsRecorder(MethodHookConfiguration config) {

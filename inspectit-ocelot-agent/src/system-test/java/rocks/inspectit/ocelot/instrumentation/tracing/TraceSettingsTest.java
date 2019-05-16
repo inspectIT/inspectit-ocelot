@@ -1,10 +1,13 @@
 package rocks.inspectit.ocelot.instrumentation.tracing;
 
 import io.opencensus.trace.AttributeValue;
+import io.opencensus.trace.export.SpanData;
 import org.junit.jupiter.api.Test;
 import rocks.inspectit.ocelot.utils.TestUtils;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -151,6 +154,65 @@ public class TraceSettingsTest extends TraceTestBase {
                         })
 
         );
+
+    }
+
+    static class AsyncTask {
+        void doAsync(String att1, String att2, String att3, boolean isFinished) {
+        }
+    }
+
+    @Test
+    void testInterleavedAsyncSpans() throws Exception {
+
+        TestUtils.waitForClassInstrumentation(AsyncTask.class, 15, TimeUnit.SECONDS);
+
+        //all method calls of each task will result in a single span
+        AsyncTask first = new AsyncTask();
+        AsyncTask second = new AsyncTask();
+
+        //interleave the asynchronous tasks and check that the
+        first.doAsync("a1", null, null, false);
+        Thread.sleep(10);
+        second.doAsync("b1", null, null, false);
+        second.doAsync(null, "b2", null, false);
+        Thread.sleep(10);
+        first.doAsync(null, "a2", null, true);
+        Thread.sleep(10);
+        second.doAsync(null, null, "b3", true);
+
+        assertSpansExported(spans -> {
+            List<SpanData> asyncSpans = spans.stream()
+                    .filter(s -> s.getName().equals("AsyncTask.doAsync"))
+                    .collect(Collectors.toList());
+            assertThat(asyncSpans).hasSize(2);
+
+            SpanData firstSpan = asyncSpans.get(0);
+            SpanData secondSpan = asyncSpans.get(1);
+
+            //order the spans by time
+            if (secondSpan.getStartTimestamp().compareTo(secondSpan.getStartTimestamp()) < 0) {
+                SpanData temp = firstSpan;
+                firstSpan = secondSpan;
+                secondSpan = temp;
+            }
+
+            //ensure that all method invocations have been combined to single spans
+            assertThat(firstSpan.getAttributes().getAttributeMap())
+                    .hasSize(2)
+                    .containsEntry("1", AttributeValue.stringAttributeValue("a1"))
+                    .containsEntry("2", AttributeValue.stringAttributeValue("a2"));
+            assertThat(secondSpan.getAttributes().getAttributeMap())
+                    .hasSize(3)
+                    .containsEntry("1", AttributeValue.stringAttributeValue("b1"))
+                    .containsEntry("2", AttributeValue.stringAttributeValue("b2"))
+                    .containsEntry("3", AttributeValue.stringAttributeValue("b3"));
+
+            //ensure that the timings are valid
+            assertThat(firstSpan.getEndTimestamp()).isLessThan(secondSpan.getEndTimestamp());
+            assertThat(secondSpan.getStartTimestamp()).isLessThan(firstSpan.getEndTimestamp());
+        });
+
 
     }
 }

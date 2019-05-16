@@ -1,9 +1,10 @@
-package rocks.inspectit.ocelot.core.instrumentation.hook.actions;
+package rocks.inspectit.ocelot.core.instrumentation.hook.actions.span;
 
 import io.opencensus.trace.AttributeValue;
 import io.opencensus.trace.Tracing;
 import lombok.AllArgsConstructor;
 import lombok.val;
+import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
 
 import java.util.Map;
 

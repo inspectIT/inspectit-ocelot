@@ -92,7 +92,6 @@ inspectit:
           value: Object
         value: _attachments.attach(target, key, value)
 
-
       # removes a given attachment from a target object, returning the previously attached value
       remove_attachment:
         input:
@@ -100,3 +99,30 @@ inspectit:
           target: Object
           key: String
         value: _attachments.attach(target, key, null)
+
+
+      # removes a given attachment from the "this" object, returning the previously attached value
+      remove_attachment_on_this:
+        input:
+          _attachments: ObjectAttachments
+          _this: Object
+          key: String
+        value: _attachments.attach(_this, key, null)
+
+
+      # reads a given attachment from the "this" Object
+      read_attachment_on_this:
+        input:
+          _attachments: ObjectAttachments
+          _this: Object
+          key: String
+        value: _attachments.getAttachment(_this, key)
+
+      # replaces a given attachment of the "this" Object with a new one, returns the previous value
+      replace_attachment_on_this:
+        input:
+          _attachments: ObjectAttachments
+          _this: Object
+          key: String
+          value: Object
+        value: _attachments.attach(_this, key, value)

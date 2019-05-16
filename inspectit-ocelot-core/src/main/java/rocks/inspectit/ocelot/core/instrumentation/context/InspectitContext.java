@@ -4,10 +4,8 @@ import io.grpc.Context;
 import io.opencensus.common.Scope;
 import io.opencensus.tags.*;
 import io.opencensus.trace.Span;
-import io.opencensus.trace.SpanBuilder;
 import io.opencensus.trace.SpanContext;
 import io.opencensus.trace.Tracing;
-import io.opencensus.trace.samplers.Samplers;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
@@ -65,7 +63,7 @@ import java.util.stream.Stream;
  * previous parent will be registered back in GRPC as active context.
  * <p>
  * In addition, an {@link InspectitContext} instance can be used for tracing. Hereby, one instance can record exactly one span.
- * To do this {@link #beginSpan(String, Span.Kind)} must be called BEFORE {@link #makeActive()}.
+ * To do this {@link #enterSpan(String, Span.Kind)} must be called BEFORE {@link #makeActive()}.
  * The span is automatically finished when {@link #close()} is called.
  */
 @Slf4j
@@ -112,7 +110,7 @@ public class InspectitContext implements InternalInspectitContext {
     private Context overriddenGrpcContext;
 
     /**
-     * The span which was (potentially) opened by invoking {@link #beginSpan(String, Span.Kind)}
+     * The span which was (potentially) opened by invoking {@link #enterSpan(Span)}
      */
     private Scope currentSpanScope;
 
@@ -226,32 +224,43 @@ public class InspectitContext implements InternalInspectitContext {
 
 
     /**
-     * If called, a new span is created which will be automatically closed when {@link #close()} is invoked.
+     * If called, the given span is marked as active on the GRPC context until {@link #close()} is called.
+     * Note that the span will not be ended when {@link #close()} is called, it still has to be ended manually.
      * MUST BE CALLED BEFORE {@link #makeActive()}!
      * Must only be called at most once per {@link InspectitContext} instance!
      *
-     * @param name the name of the span to open
-     * @param kind the span kind, can be null
+     * @param span the span to enter
      */
-    public void beginSpan(String name, Span.Kind kind) {
+    public void enterSpan(Span span) {
         if (currentSpanScope == null) {
             try {
-
-                Object parent = getData(REMOTE_PARENT_SPAN_CONTEXT_KEY);
-
-                SpanBuilder builder;
-                if (parent instanceof SpanContext) {
-                    setData(REMOTE_PARENT_SPAN_CONTEXT_KEY, null);
-                    builder = Tracing.getTracer().spanBuilderWithRemoteParent(name, (SpanContext) parent);
-                } else {
-                    builder = Tracing.getTracer().spanBuilder(name);
-                }
-
-                builder.setSpanKind(kind);
-                currentSpanScope = builder.setSampler(Samplers.alwaysSample()).startScopedSpan();
+                currentSpanScope = Tracing.getTracer().withSpan(span);
             } catch (Throwable t) {
-                log.error("Error performing tracing", t);
+                log.error("Error activating span", t);
             }
+        }
+    }
+
+    /**
+     * @return true, if {@link #enterSpan(Span)} was called
+     */
+    public boolean wasSpanEntered() {
+        return currentSpanScope != null;
+    }
+
+    /**
+     * Checks if previously a down propagation happened where a remote parent span was received.
+     * If this is the case, the corresponding SpanContext is returned and removed from the context.
+     *
+     * @return the remote parent SpanContext received via down-propagation, null if none was received.
+     */
+    public SpanContext getAndClearCurrentRemoteSpanContext() {
+        Object parent = getData(REMOTE_PARENT_SPAN_CONTEXT_KEY);
+        if (parent instanceof SpanContext) {
+            setData(REMOTE_PARENT_SPAN_CONTEXT_KEY, null);
+            return (SpanContext) parent;
+        } else {
+            return null;
         }
     }
 
