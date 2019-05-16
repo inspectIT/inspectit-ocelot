@@ -1,4 +1,4 @@
-![inspectIT Ocelot ](https://inspectit.github.io/inspectit-ocelot/images/inspectit-oce.png)
+![inspectIT Ocelot ](https://inspectit.github.io/inspectit-ocelot/images/inspectit-ocelot.png)
 
 # inspectIT Ocelot 
 
