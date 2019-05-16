@@ -3,12 +3,12 @@ package rocks.inspectit.ocelot.core.instrumentation.hook;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import rocks.inspectit.ocelot.bootstrap.exposed.ObjectAttachments;
 import rocks.inspectit.ocelot.config.model.instrumentation.actions.ActionCallSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.actions.GenericActionSettings;
 import rocks.inspectit.ocelot.config.utils.ConfigUtils;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.ActionCallConfig;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.GenericActionConfig;
-import rocks.inspectit.ocelot.core.instrumentation.context.ObjectAttachmentsImpl;
 import rocks.inspectit.ocelot.core.instrumentation.genericactions.BoundGenericAction;
 import rocks.inspectit.ocelot.core.instrumentation.genericactions.GenericActionGenerator;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.ConditionalHookAction;
@@ -26,7 +26,7 @@ public class ActionCallGenerator {
     private GenericActionGenerator genericActionGenerator;
 
     @Autowired
-    private ObjectAttachmentsImpl objectAttachments;
+    private ObjectAttachments objectAttachments;
 
     /**
      * Generates a action and binds its arguments.
