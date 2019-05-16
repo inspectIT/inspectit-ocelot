@@ -7,7 +7,6 @@ buildscript {
     }
 }
 
-apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
@@ -36,7 +35,6 @@ dependencies {
             "io.springfox:springfox-swagger2:2.9.2",
             "io.springfox:springfox-swagger-ui:2.9.2"
     )
-    testCompile("junit:junit")
     testImplementation(
             'org.mockito:mockito-core:2.23.4',
             'org.assertj:assertj-core:3.11.1',

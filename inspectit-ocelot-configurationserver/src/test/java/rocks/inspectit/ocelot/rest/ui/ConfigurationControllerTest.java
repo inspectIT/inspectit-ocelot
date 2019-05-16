@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.rest.agent;
+package rocks.inspectit.ocelot.rest.ui;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -6,26 +6,24 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collection;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
-class AgentControllerTest {
+class ConfigurationControllerTest {
 
     @InjectMocks
-    AgentController controller;
+    ConfigurationController controller;
 
     @Nested
-    public class FetchConfiguration {
+    public class FetchConfigurations {
 
         @Test
         public void valid() {
-
-            String result = controller.fetchConfiguration("my-agent");
+            Collection<String> result = controller.fetchConfigurations();
 
             assertThat(result).isNotEmpty();
-            assertThat(result).contains("my-agent");
         }
-
     }
-
 }
