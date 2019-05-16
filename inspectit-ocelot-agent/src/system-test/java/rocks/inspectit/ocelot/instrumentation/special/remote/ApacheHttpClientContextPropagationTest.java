@@ -15,7 +15,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import rocks.inspectit.ocelot.bootstrap.Instances;
-import rocks.inspectit.ocelot.bootstrap.context.IInspectitContext;
+import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 import rocks.inspectit.ocelot.utils.TestUtils;
 
 import javax.servlet.http.HttpServlet;
@@ -63,7 +63,7 @@ public class ApacheHttpClientContextPropagationTest {
 
         wireMockServer = new WireMockServer(options().port(PORT));
         wireMockServer.addMockServiceRequestListener((req, resp) -> {
-            IInspectitContext ctx = Instances.contextManager.enterNewContext();
+            InternalInspectitContext ctx = Instances.contextManager.enterNewContext();
             dataToPropagate.forEach(ctx::setData);
             ctx.makeActive();
             ctx.close();
@@ -120,7 +120,7 @@ public class ApacheHttpClientContextPropagationTest {
 
         @Test
         void testUpPropagation() throws Exception {
-            IInspectitContext myCtx = Instances.contextManager.enterNewContext();
+            InternalInspectitContext myCtx = Instances.contextManager.enterNewContext();
             myCtx.makeActive();
 
             client.execute(URIUtils.extractHost(URI.create(TEST_URL)), new HttpGet(TEST_URL));

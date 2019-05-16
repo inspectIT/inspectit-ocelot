@@ -46,7 +46,7 @@ inspectit:
           _class: Class
         value: new StringBuilder(_class.getName()).append('.').append(_methodName).toString()
 
-      # adds a marker datum to the current context, if it has not already been set
+      # adds a marker flag to the current context, if it has not already been set
       # the corresponding marker should be configured for down propagation
       # returns true if the marker was not set previously, false otherwise
       test_and_set_marker:
@@ -60,7 +60,7 @@ inspectit:
           } else {
             return Boolean.FALSE;
           }
-      # adds a marker datum to a given target object
+      # adds a marker flag to a given target object
       # returns true if the marker was not set previously, false otherwise
       test_and_set_object_marker:
         input:

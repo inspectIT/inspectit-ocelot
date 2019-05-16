@@ -4,7 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import rocks.inspectit.ocelot.bootstrap.context.IInspectitContext;
+import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.IMethodHook;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.MethodHookConfiguration;
 import rocks.inspectit.ocelot.core.instrumentation.context.ContextManager;
@@ -52,7 +52,7 @@ public class MethodHook implements IMethodHook {
     private MethodReflectionInformation methodInformation;
 
     @Override
-    public IInspectitContext onEnter(Object[] args, Object thiz) {
+    public InternalInspectitContext onEnter(Object[] args, Object thiz) {
         val inspectitContext = inspectitContextManager.enterNewContext();
         val executionContext = new IHookAction.ExecutionContext(args, thiz, null, null, this, inspectitContext);
 
@@ -71,7 +71,7 @@ public class MethodHook implements IMethodHook {
     }
 
     @Override
-    public void onExit(Object[] args, Object thiz, Object returnValue, Throwable thrown, IInspectitContext context) {
+    public void onExit(Object[] args, Object thiz, Object returnValue, Throwable thrown, InternalInspectitContext context) {
         val executionContext = new IHookAction.ExecutionContext(args, thiz, returnValue, thrown, this, (InspectitContext) context);
         for (val action : exitActions) {
             try {

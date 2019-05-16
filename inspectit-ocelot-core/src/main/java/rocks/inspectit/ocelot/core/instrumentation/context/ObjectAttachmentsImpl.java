@@ -4,14 +4,15 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import rocks.inspectit.ocelot.bootstrap.exposed.ObjectAttachments;
 
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Implementation for the bootstrap interface {@link rocks.inspectit.ocelot.bootstrap.accessible.ObjectAttachments}
+ * Implementation for the bootstrap interface {@link ObjectAttachments}
  */
 @Slf4j
-public class ObjectAttachments implements rocks.inspectit.ocelot.bootstrap.accessible.ObjectAttachments {
+public class ObjectAttachmentsImpl implements ObjectAttachments {
 
     /**
      * The name of this bean, initialized via the {@link rocks.inspectit.ocelot.core.config.spring.BootstrapInitializerConfiguration}

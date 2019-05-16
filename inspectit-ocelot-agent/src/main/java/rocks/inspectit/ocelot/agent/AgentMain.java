@@ -70,7 +70,7 @@ public class AgentMain {
         Path bootstrapJar = copyResourceToTempJarFile(INSPECTIT_BOOTSTRAP_JAR_PATH);
         inst.appendToBootstrapClassLoaderSearch(new JarFile(bootstrapJar.toFile()));
 
-        Instances.BOOTSTRAP_JAR_URL = bootstrapJar.toUri().toURL().toString();
+        Instances.BOOTSTRAP_JAR_URL = bootstrapJar.toUri().toURL();
 
         Path coreJar = copyResourceToTempJarFile(INSPECTIT_CORE_JAR_PATH);
         InspectITClassLoader icl = new InspectITClassLoader(new URL[]{coreJar.toUri().toURL()});

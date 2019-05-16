@@ -1,6 +1,6 @@
 package rocks.inspectit.ocelot.bootstrap.instrumentation.noop;
 
-import rocks.inspectit.ocelot.bootstrap.accessible.ObjectAttachments;
+import rocks.inspectit.ocelot.bootstrap.exposed.ObjectAttachments;
 
 public class NoopObjectAttachments implements ObjectAttachments {
 

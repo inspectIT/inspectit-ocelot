@@ -12,7 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import rocks.inspectit.ocelot.bootstrap.Instances;
-import rocks.inspectit.ocelot.bootstrap.context.IInspectitContext;
+import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 import rocks.inspectit.ocelot.utils.TestUtils;
 
 import javax.servlet.http.HttpServlet;
@@ -42,7 +42,7 @@ public class ServiceOutMetricTest {
     void setupWiremock() throws Exception {
         wireMockServer = new WireMockServer(options().port(PORT));
         wireMockServer.addMockServiceRequestListener((req, resp) -> {
-            IInspectitContext ctx = Instances.contextManager.enterNewContext();
+            InternalInspectitContext ctx = Instances.contextManager.enterNewContext();
             ctx.setData("prop_target_service", targetName);
             ctx.makeActive();
             ctx.close();

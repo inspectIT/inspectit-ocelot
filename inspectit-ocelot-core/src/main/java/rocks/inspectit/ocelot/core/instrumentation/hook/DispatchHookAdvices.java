@@ -6,7 +6,7 @@ import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.implementation.bytecode.assign.Assigner;
 import net.bytebuddy.matcher.ElementMatcher;
 import rocks.inspectit.ocelot.bootstrap.Instances;
-import rocks.inspectit.ocelot.bootstrap.context.IInspectitContext;
+import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.IMethodHook;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
@@ -51,7 +51,7 @@ public class DispatchHookAdvices {
                                    @Advice.AllArguments Object[] args,
                                    @Advice.This Object thiz,
                                    @Advice.Local("hook") IMethodHook hook,
-                                   @Advice.Local("context") IInspectitContext context) {
+                                   @Advice.Local("context") InternalInspectitContext context) {
             hook = Instances.hookManager.getHook(declaringClass, signature);
             context = hook.onEnter(args, thiz);
         }
@@ -62,7 +62,7 @@ public class DispatchHookAdvices {
                                   @Advice.Return(typing = Assigner.Typing.DYNAMIC) Object returnValue,
                                   @Advice.Thrown Throwable thrown,
                                   @Advice.Local("hook") IMethodHook hook,
-                                  @Advice.Local("context") IInspectitContext context) {
+                                  @Advice.Local("context") InternalInspectitContext context) {
             hook.onExit(args, thiz, returnValue, thrown, context);
         }
     }
@@ -75,7 +75,7 @@ public class DispatchHookAdvices {
                                    @Advice.Origin("#m#s") String signature,
                                    @Advice.AllArguments Object[] args,
                                    @Advice.Local("hook") IMethodHook hook,
-                                   @Advice.Local("context") IInspectitContext context) {
+                                   @Advice.Local("context") InternalInspectitContext context) {
             hook = Instances.hookManager.getHook(declaringClass, signature);
             context = hook.onEnter(args, null);
         }
@@ -84,7 +84,7 @@ public class DispatchHookAdvices {
         public static void onExit(@Advice.AllArguments Object[] args,
                                   @Advice.This Object thiz,
                                   @Advice.Local("hook") IMethodHook hook,
-                                  @Advice.Local("context") IInspectitContext context) {
+                                  @Advice.Local("context") InternalInspectitContext context) {
             hook.onExit(args, thiz, null, null, context);
         }
     }
@@ -96,7 +96,7 @@ public class DispatchHookAdvices {
                                    @Advice.Origin("#m#s") String signature,
                                    @Advice.AllArguments Object[] args,
                                    @Advice.Local("hook") IMethodHook hook,
-                                   @Advice.Local("context") IInspectitContext context) {
+                                   @Advice.Local("context") InternalInspectitContext context) {
             hook = Instances.hookManager.getHook(declaringClass, signature);
             context = hook.onEnter(args, null);
         }
@@ -106,7 +106,7 @@ public class DispatchHookAdvices {
                                   @Advice.Return(typing = Assigner.Typing.DYNAMIC) Object returnValue,
                                   @Advice.Thrown Throwable thrown,
                                   @Advice.Local("hook") IMethodHook hook,
-                                  @Advice.Local("context") IInspectitContext context) {
+                                  @Advice.Local("context") InternalInspectitContext context) {
             hook.onExit(args, null, returnValue, thrown, context);
         }
     }

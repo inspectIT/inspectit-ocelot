@@ -6,7 +6,7 @@ import org.eclipse.jetty.servlet.ServletHandler;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import rocks.inspectit.ocelot.bootstrap.Instances;
-import rocks.inspectit.ocelot.bootstrap.context.IInspectitContext;
+import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 import rocks.inspectit.ocelot.utils.TestUtils;
 
 import javax.servlet.ServletException;
@@ -40,7 +40,7 @@ public class ServiceInMetricTest {
     void fireRequest(String originService) {
 
         try {
-            IInspectitContext context = Instances.contextManager.enterNewContext();
+            InternalInspectitContext context = Instances.contextManager.enterNewContext();
             context.setData("prop_origin_service", originService);
             context.makeActive();
 

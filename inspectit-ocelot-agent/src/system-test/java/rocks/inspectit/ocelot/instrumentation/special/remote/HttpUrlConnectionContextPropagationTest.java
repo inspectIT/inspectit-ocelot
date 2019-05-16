@@ -7,7 +7,7 @@ import io.opencensus.tags.TagValue;
 import io.opencensus.tags.Tags;
 import org.junit.jupiter.api.*;
 import rocks.inspectit.ocelot.bootstrap.Instances;
-import rocks.inspectit.ocelot.bootstrap.context.IInspectitContext;
+import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 import rocks.inspectit.ocelot.utils.TestUtils;
 
 import java.net.HttpURLConnection;
@@ -47,7 +47,7 @@ public class HttpUrlConnectionContextPropagationTest {
     void setupWiremock() throws Exception {
         wireMockServer = new WireMockServer(options().port(PORT));
         wireMockServer.addMockServiceRequestListener((req, resp) -> {
-            IInspectitContext ctx = Instances.contextManager.enterNewContext();
+            InternalInspectitContext ctx = Instances.contextManager.enterNewContext();
             dataToPropagate.forEach(ctx::setData);
             ctx.makeActive();
             ctx.close();
@@ -152,7 +152,7 @@ public class HttpUrlConnectionContextPropagationTest {
         void propagationViaGetResponseCode() throws Exception {
             HttpURLConnection urlConnection = (HttpURLConnection) new URL(TEST_URL).openConnection();
 
-            IInspectitContext myCtx = Instances.contextManager.enterNewContext();
+            InternalInspectitContext myCtx = Instances.contextManager.enterNewContext();
             myCtx.makeActive();
 
             urlConnection.getResponseCode();
@@ -167,7 +167,7 @@ public class HttpUrlConnectionContextPropagationTest {
         void propagationViaGetHeaderField() throws Exception {
             HttpURLConnection urlConnection = (HttpURLConnection) new URL(TEST_URL).openConnection();
 
-            IInspectitContext myCtx = Instances.contextManager.enterNewContext();
+            InternalInspectitContext myCtx = Instances.contextManager.enterNewContext();
             myCtx.makeActive();
 
             urlConnection.getHeaderField("some-header");
@@ -182,7 +182,7 @@ public class HttpUrlConnectionContextPropagationTest {
         void propagationViaGetHeaderFields() throws Exception {
             HttpURLConnection urlConnection = (HttpURLConnection) new URL(TEST_URL).openConnection();
 
-            IInspectitContext myCtx = Instances.contextManager.enterNewContext();
+            InternalInspectitContext myCtx = Instances.contextManager.enterNewContext();
             myCtx.makeActive();
 
             urlConnection.getHeaderFields();
@@ -197,7 +197,7 @@ public class HttpUrlConnectionContextPropagationTest {
         void propagationViaGetResponseMessage() throws Exception {
             HttpURLConnection urlConnection = (HttpURLConnection) new URL(TEST_URL).openConnection();
 
-            IInspectitContext myCtx = Instances.contextManager.enterNewContext();
+            InternalInspectitContext myCtx = Instances.contextManager.enterNewContext();
             myCtx.makeActive();
 
             urlConnection.getResponseMessage();
@@ -212,7 +212,7 @@ public class HttpUrlConnectionContextPropagationTest {
         void propagationViaGetInputStream() throws Exception {
             HttpURLConnection urlConnection = (HttpURLConnection) new URL(TEST_URL).openConnection();
 
-            IInspectitContext myCtx = Instances.contextManager.enterNewContext();
+            InternalInspectitContext myCtx = Instances.contextManager.enterNewContext();
             myCtx.makeActive();
 
             urlConnection.getInputStream();

@@ -11,7 +11,7 @@ import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.bootstrap.Instances;
-import rocks.inspectit.ocelot.bootstrap.accessible.ObjectAttachments;
+import rocks.inspectit.ocelot.bootstrap.exposed.ObjectAttachments;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.IGenericAction;
 import rocks.inspectit.ocelot.config.model.instrumentation.actions.GenericActionSettings;
 import rocks.inspectit.ocelot.config.utils.AutoboxingHelper;
@@ -20,7 +20,6 @@ import rocks.inspectit.ocelot.core.instrumentation.injection.ClassInjector;
 import rocks.inspectit.ocelot.core.instrumentation.injection.InjectedClass;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Optional;
@@ -45,18 +44,13 @@ public class GenericActionGenerator {
     private static ClassLoader INSPECTIT_BOOTSTRAP_JAR_LOADER;
 
     static {
-        try {
-            if (Instances.BOOTSTRAP_JAR_URL != null) {
-                //normal case, the AgentMain made Instances.BOOTSTRAP_JAR_URL point to the actual jar location
-                INSPECTIT_BOOTSTRAP_JAR_LOADER = new URLClassLoader(new URL[]{new URL(Instances.BOOTSTRAP_JAR_URL)});
-            } else {
-                //This is the unit test and integration test branch
-                //there the bootstrap classes are included in the normal inspectit classloader
-                INSPECTIT_BOOTSTRAP_JAR_LOADER = GenericActionGenerator.class.getClassLoader();
-            }
-        } catch (MalformedURLException e) {
-            //never occurs
-            log.error("Error creating dummy bootstrap loader", e);
+        if (Instances.BOOTSTRAP_JAR_URL != null) {
+            //normal case, the AgentMain made Instances.BOOTSTRAP_JAR_URL point to the actual jar location
+            INSPECTIT_BOOTSTRAP_JAR_LOADER = new URLClassLoader(new URL[]{Instances.BOOTSTRAP_JAR_URL});
+        } else {
+            //This is the unit test and integration test branch
+            //there the bootstrap classes are included in the normal inspectit classloader
+            INSPECTIT_BOOTSTRAP_JAR_LOADER = GenericActionGenerator.class.getClassLoader();
         }
     }
 
@@ -126,7 +120,7 @@ public class GenericActionGenerator {
 
         ClassPool cp = new ClassPool();
         cp.insertClassPath(new ClassClassPath(GenericActionTemplate.class));
-        //include the dummy bootstrap loader to make interfaces such as InspectitContet or ObjectAttachments accessible
+        //include the dummy bootstrap loader to make interfaces such as InspectitContext or ObjectAttachments accessible
         cp.insertClassPath(new LoaderClassPath(INSPECTIT_BOOTSTRAP_JAR_LOADER));
         if (loader != BOOTSTRAP_LOADER_MARKER) {
             cp.insertClassPath(new LoaderClassPath(loader));

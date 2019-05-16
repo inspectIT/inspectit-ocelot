@@ -1,4 +1,6 @@
-package rocks.inspectit.ocelot.bootstrap.accessible;
+package rocks.inspectit.ocelot.bootstrap.exposed;
+
+import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 
 import java.util.Map;
 import java.util.Set;
@@ -11,8 +13,8 @@ public interface InspectitContext {
     /**
      * Assigns the given value to the given data key.
      * Depending on how the propagation is configured for the given key, the value will be propagated up or down.
-     * All changes made through this method before {@link rocks.inspectit.ocelot.bootstrap.context.IInspectitContext#makeActive()} is called will be visible for
-     * all child contexts. If this method is called after {@link rocks.inspectit.ocelot.bootstrap.context.IInspectitContext#makeActive()}, the changes will only be visible
+     * All changes made through this method before {@link InternalInspectitContext#makeActive()} is called will be visible for
+     * all child contexts. If this method is called after {@link InternalInspectitContext#makeActive()}, the changes will only be visible
      * for synchronous child contexts.
      *
      * @param key   the name of the data to assign the value to

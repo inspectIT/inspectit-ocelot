@@ -1,11 +1,13 @@
 package rocks.inspectit.ocelot.bootstrap;
 
-import rocks.inspectit.ocelot.bootstrap.accessible.ObjectAttachments;
 import rocks.inspectit.ocelot.bootstrap.context.IContextManager;
 import rocks.inspectit.ocelot.bootstrap.context.noop.NoopContextManager;
+import rocks.inspectit.ocelot.bootstrap.exposed.ObjectAttachments;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.IHookManager;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.noop.NoopHookManager;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.noop.NoopObjectAttachments;
+
+import java.net.URL;
 
 /**
  * Accessor for implementations of the interfaces.
@@ -18,7 +20,7 @@ public class Instances {
      * The AgentMain class is responsible for setting the value correctly.
      * This is required as Javassist needs access to the bytecode of the bootstrap classes for compiling actions.
      */
-    public static String BOOTSTRAP_JAR_URL;
+    public static URL BOOTSTRAP_JAR_URL;
 
     public static IContextManager contextManager = NoopContextManager.INSTANCE;
 

@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.bootstrap.accessible;
+package rocks.inspectit.ocelot.bootstrap.exposed;
 
 /**
  * Abstraction for a simple map which allows to attach arbitrary objects to other objects based on a string key.

@@ -8,7 +8,7 @@ import rocks.inspectit.ocelot.config.model.instrumentation.actions.GenericAction
 import rocks.inspectit.ocelot.config.utils.ConfigUtils;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.ActionCallConfig;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.GenericActionConfig;
-import rocks.inspectit.ocelot.core.instrumentation.context.ObjectAttachments;
+import rocks.inspectit.ocelot.core.instrumentation.context.ObjectAttachmentsImpl;
 import rocks.inspectit.ocelot.core.instrumentation.genericactions.BoundGenericAction;
 import rocks.inspectit.ocelot.core.instrumentation.genericactions.GenericActionGenerator;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.ConditionalHookAction;
@@ -26,7 +26,7 @@ public class ActionCallGenerator {
     private GenericActionGenerator genericActionGenerator;
 
     @Autowired
-    private ObjectAttachments objectAttachments;
+    private ObjectAttachmentsImpl objectAttachments;
 
     /**
      * Generates a action and binds its arguments.

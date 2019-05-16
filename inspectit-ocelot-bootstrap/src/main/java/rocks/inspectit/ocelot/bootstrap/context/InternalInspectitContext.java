@@ -1,11 +1,11 @@
 package rocks.inspectit.ocelot.bootstrap.context;
 
-import rocks.inspectit.ocelot.bootstrap.accessible.InspectitContext;
+import rocks.inspectit.ocelot.bootstrap.exposed.InspectitContext;
 
 /**
  * Interface abstraction for the InspectitContext.
  */
-public interface IInspectitContext extends AutoCloseable, InspectitContext {
+public interface InternalInspectitContext extends AutoCloseable, InspectitContext {
 
     /**
      * Special data key which stores the remote parent SpanContext if any is present.
