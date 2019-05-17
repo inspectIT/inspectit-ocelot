@@ -395,6 +395,8 @@ public class InspectitContextImpl implements InternalInspectitContext {
             parent.performUpPropagation(dataOverwrites);
         }
         //clear the references to prevent memory leaks
+        openedDownPropagationScope = null;
+        currentSpanScope = null;
         parent = null;
         overriddenGrpcContext = null;
     }
