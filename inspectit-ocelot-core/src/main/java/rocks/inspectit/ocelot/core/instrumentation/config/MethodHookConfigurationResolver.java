@@ -52,13 +52,21 @@ public class MethodHookConfigurationResolver {
 
         val builder = RuleTracingSettings.builder();
 
-        resolveStartSpan(matchedRules, builder);
-        resolveEndSpan(matchedRules, builder);
-        resolveContinueSpan(matchedRules, builder);
-        builder.storeSpan(getAndDetectConflicts(matchedRules, r -> r.getTracing().getStoreSpan(), s -> !StringUtils.isEmpty(s), "store span data key"));
-        resolveSpanAttributeWriting(matchedRules, builder);
+        Set<InstrumentationRule> tracingRules = matchedRules.stream()
+                .filter(r -> r.getTracing() != null)
+                .collect(Collectors.toSet());
 
-        result.tracing(builder.build());
+        if (!tracingRules.isEmpty()) {
+
+            resolveStartSpan(tracingRules, builder);
+            resolveEndSpan(tracingRules, builder);
+            resolveContinueSpan(tracingRules, builder);
+            builder.storeSpan(getAndDetectConflicts(tracingRules, r -> r.getTracing().getStoreSpan(), s -> !StringUtils.isEmpty(s), "store span data key"));
+            resolveSpanAttributeWriting(tracingRules, builder);
+
+            result.tracing(builder.build());
+        }
+
     }
 
     private void resolveSpanAttributeWriting(Set<InstrumentationRule> matchedRules, RuleTracingSettings.RuleTracingSettingsBuilder builder) throws ConflictingDefinitionsException {
@@ -84,39 +92,28 @@ public class MethodHookConfigurationResolver {
     }
 
     private void resolveContinueSpan(Set<InstrumentationRule> matchedRules, RuleTracingSettings.RuleTracingSettingsBuilder builder) throws ConflictingDefinitionsException {
-        Collection<InstrumentationRule> spanContinuingRules = matchedRules.stream()
-                .filter(r -> !StringUtils.isEmpty(r.getTracing().getContinueSpan()))
-                .collect(Collectors.toSet());
-        if (!spanContinuingRules.isEmpty()) {
-            builder.continueSpan(getAndDetectConflicts(spanContinuingRules, r -> r.getTracing().getContinueSpan(), x -> true, "continue span data key"));
-            builder.continueSpanConditions(getAndDetectConflicts(spanContinuingRules, r -> r.getTracing().getContinueSpanConditions(), x -> true, "continue span conditions"));
+        String continueSpan = getAndDetectConflicts(matchedRules, r -> r.getTracing().getContinueSpan(), x -> true, "continue-span");
+        builder.continueSpan(continueSpan);
+        if (continueSpan != null) {
+            builder.continueSpanConditions(getAndDetectConflicts(matchedRules, r -> r.getTracing().getContinueSpanConditions(), x -> true, "continue span conditions"));
         }
     }
 
     private void resolveEndSpan(Set<InstrumentationRule> matchedRules, RuleTracingSettings.RuleTracingSettingsBuilder builder) throws ConflictingDefinitionsException {
-        Collection<InstrumentationRule> spanEndingRules = matchedRules.stream()
-                .filter(r -> r.getTracing().isEndSpan())
-                .collect(Collectors.toSet());
-        boolean endSpan = !spanEndingRules.isEmpty();
+        boolean endSpan = getAndDetectConflicts(matchedRules, r -> r.getTracing().isEndSpan(), x -> true, "end-span");
         builder.endSpan(endSpan);
         if (endSpan) {
-            builder.endSpanConditions(getAndDetectConflicts(spanEndingRules, r -> r.getTracing().getEndSpanConditions(), x -> true, "end span conditions"));
+            builder.endSpanConditions(getAndDetectConflicts(matchedRules, r -> r.getTracing().getEndSpanConditions(), x -> true, "end span conditions"));
         }
     }
 
     private void resolveStartSpan(Set<InstrumentationRule> matchedRules, RuleTracingSettings.RuleTracingSettingsBuilder builder) throws ConflictingDefinitionsException {
-        Collection<InstrumentationRule> spanStartingRules = matchedRules.stream().filter(r -> r.getTracing().isStartSpan()).collect(Collectors.toSet());
-        boolean startSpan = !spanStartingRules.isEmpty();
+        boolean startSpan = getAndDetectConflicts(matchedRules, r -> r.getTracing().isStartSpan(), x -> true, "start-span");
         builder.startSpan(startSpan);
         if (startSpan) {
-            builder.name(
-                    getAndDetectConflicts(
-                            spanStartingRules,
-                            r -> r.getTracing().getName(),
-                            n -> !StringUtils.isEmpty(n),
-                            "the span name"));
-            builder.kind(getAndDetectConflicts(spanStartingRules, r -> r.getTracing().getKind(), Objects::nonNull, "the span kind"));
-            builder.startSpanConditions(getAndDetectConflicts(spanStartingRules, r -> r.getTracing().getStartSpanConditions(), x -> true, "start span conditions"));
+            builder.name(getAndDetectConflicts(matchedRules, r -> r.getTracing().getName(), n -> !StringUtils.isEmpty(n), "the span name"));
+            builder.kind(getAndDetectConflicts(matchedRules, r -> r.getTracing().getKind(), Objects::nonNull, "the span kind"));
+            builder.startSpanConditions(getAndDetectConflicts(matchedRules, r -> r.getTracing().getStartSpanConditions(), x -> true, "start span conditions"));
         }
     }
 

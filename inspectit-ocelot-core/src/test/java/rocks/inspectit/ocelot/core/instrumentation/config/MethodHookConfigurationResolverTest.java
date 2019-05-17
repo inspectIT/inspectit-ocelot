@@ -150,6 +150,7 @@ public class MethodHookConfigurationResolverTest {
                             .startSpan(true)
                             .kind(Span.Kind.SERVER)
                             .storeSpan("store_span")
+                            .continueSpan("my_span")
                             .endSpan(false)
                             .attributes(Maps.newHashMap("attr", "dataX"))
                             .build())
@@ -159,7 +160,7 @@ public class MethodHookConfigurationResolverTest {
                             .startSpan(true)
                             .name("data_name")
                             .continueSpan("my_span")
-                            .endSpan(true)
+                            .endSpan(false)
                             .attributes(Maps.newHashMap("attr2", "dataY"))
                             .build())
                     .build();
@@ -170,7 +171,7 @@ public class MethodHookConfigurationResolverTest {
             assertThat(result.isStartSpan()).isTrue();
             assertThat(result.getStoreSpan()).isEqualTo("store_span");
             assertThat(result.getContinueSpan()).isEqualTo("my_span");
-            assertThat(result.isEndSpan()).isTrue();
+            assertThat(result.isEndSpan()).isFalse();
             assertThat(result.getKind()).isEqualTo(Span.Kind.SERVER);
             assertThat(result.getName()).isEqualTo("data_name");
             assertThat(result.getAttributes())
