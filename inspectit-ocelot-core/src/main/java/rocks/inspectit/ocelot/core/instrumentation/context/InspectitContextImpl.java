@@ -22,7 +22,7 @@ import java.util.stream.Stream;
  * Context Lifecycle: | <- Entry Phase-> | <- Active Phase -> | <- Exit Phase-> |  (Closed)
  * <p>
  * When a method is entered, the entry hook is executed.
- * In this phase a new InspectitContext is created but not yet made active.
+ * In this phase a new InspectitContextImpl is created but not yet made active.
  * This context inherits all down-propagated data from the currently active context as well as all tags from the active TagContext.
  * In the entry phase, the contexts data can be altered via {@link #setData(String, Object)}, even though the context is not yet active.
  * <p>
@@ -62,12 +62,12 @@ import java.util.stream.Stream;
  * In addition ,the tag-context opened by the call to makeActive will be closed and the
  * previous parent will be registered back in GRPC as active context.
  * <p>
- * In addition, an {@link InspectitContext} instance can be used for tracing. Hereby, one instance can record exactly one span.
+ * In addition, an {@link InspectitContextImpl} instance can be used for tracing. Hereby, one instance can record exactly one span.
  * To do this {@link #enterSpan(String, Span.Kind)} must be called BEFORE {@link #makeActive()}.
  * The span is automatically finished when {@link #close()} is called.
  */
 @Slf4j
-public class InspectitContext implements InternalInspectitContext {
+public class InspectitContextImpl implements InternalInspectitContext {
 
     /**
      * We only allow "data" of the following types to be used as tags
@@ -77,13 +77,13 @@ public class InspectitContext implements InternalInspectitContext {
             Double.class, Float.class, Boolean.class
     ));
 
-    static final Context.Key<InspectitContext> INSPECTIT_KEY = Context.key("inspectit-context");
+    static final Context.Key<InspectitContextImpl> INSPECTIT_KEY = Context.key("inspectit-context");
 
     /**
      * Points to the parent from which this context inherits its data and to which potential up-propagation is performed.
      * Is effectively final and never changes, except that it is set to null in {@link #close()} to prevent memory leaks.
      */
-    private InspectitContext parent;
+    private InspectitContextImpl parent;
 
     /**
      * Defines for each data key its propagation behaviour as well as if it is a tag.
@@ -117,7 +117,7 @@ public class InspectitContext implements InternalInspectitContext {
     /**
      * Holds the tag context which was opened by this context with the call to {@link #makeActive()}.
      * If none was opened, this variable is null.
-     * Note that this tag context is not necessarily owned by this {@link InspectitContext}.
+     * Note that this tag context is not necessarily owned by this {@link InspectitContextImpl}.
      * If it did not change any value, the context can simply keep the current context and reference it using this variable.
      * <p>
      * The tag context is guaranteed to contain the same tags as returned by {@link #getPostEntryPhaseTags()}
@@ -179,7 +179,7 @@ public class InspectitContext implements InternalInspectitContext {
      */
     private Map<String, Object> cachedActivePhaseDownPropagatedData = null;
 
-    private InspectitContext(InspectitContext parent, DataProperties propagation, boolean interactWithApplicationTagContexts) {
+    private InspectitContextImpl(InspectitContextImpl parent, DataProperties propagation, boolean interactWithApplicationTagContexts) {
         this.parent = parent;
         this.propagation = propagation;
         this.interactWithApplicationTagContexts = interactWithApplicationTagContexts;
@@ -207,9 +207,9 @@ public class InspectitContext implements InternalInspectitContext {
      * @param interactWithApplicationTagContexts if true, data from the currently active {@link TagContext} will be inherited and makeActive will publish the data as a TagContext
      * @return the newly created context
      */
-    public static InspectitContext createFromCurrent(Map<String, String> commonTags, DataProperties propagation, boolean interactWithApplicationTagContexts) {
-        InspectitContext parent = INSPECTIT_KEY.get();
-        InspectitContext result = new InspectitContext(parent, propagation, interactWithApplicationTagContexts);
+    public static InspectitContextImpl createFromCurrent(Map<String, String> commonTags, DataProperties propagation, boolean interactWithApplicationTagContexts) {
+        InspectitContextImpl parent = INSPECTIT_KEY.get();
+        InspectitContextImpl result = new InspectitContextImpl(parent, propagation, interactWithApplicationTagContexts);
 
         if (parent == null) {
             commonTags.forEach(result::setData);
@@ -227,7 +227,7 @@ public class InspectitContext implements InternalInspectitContext {
      * If called, the given span is marked as active on the GRPC context until {@link #close()} is called.
      * Note that the span will not be ended when {@link #close()} is called, it still has to be ended manually.
      * MUST BE CALLED BEFORE {@link #makeActive()}!
-     * Must only be called at most once per {@link InspectitContext} instance!
+     * Must only be called at most once per {@link InspectitContextImpl} instance!
      *
      * @param span the span to enter
      */

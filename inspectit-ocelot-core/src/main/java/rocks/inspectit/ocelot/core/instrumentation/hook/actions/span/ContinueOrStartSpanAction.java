@@ -7,14 +7,14 @@ import io.opencensus.trace.Tracing;
 import io.opencensus.trace.samplers.Samplers;
 import lombok.AllArgsConstructor;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.RuleTracingSettings;
-import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContext;
+import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
 import rocks.inspectit.ocelot.core.instrumentation.hook.MethodReflectionInformation;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
 
 import java.util.function.Predicate;
 
 /**
- * Invokes {@link InspectitContext#enterSpan(Span)} on the currently active context.
+ * Invokes {@link InspectitContextImpl#enterSpan(Span)} on the currently active context.
  */
 @AllArgsConstructor
 public class ContinueOrStartSpanAction implements IHookAction {
@@ -51,7 +51,7 @@ public class ContinueOrStartSpanAction implements IHookAction {
 
     @Override
     public void execute(ExecutionContext context) {
-        InspectitContext ctx = context.getInspectitContext();
+        InspectitContextImpl ctx = context.getInspectitContext();
         if (continueSpanDataKey != null && continueSpanCondition.test(context)) {
             Object spanObj = ctx.getData(continueSpanDataKey);
             if (spanObj instanceof Span) {
@@ -81,7 +81,7 @@ public class ContinueOrStartSpanAction implements IHookAction {
         return "Span continuing / creation";
     }
 
-    private String getSpanName(InspectitContext inspectitContext, MethodReflectionInformation methodInfo) {
+    private String getSpanName(InspectitContextImpl inspectitContext, MethodReflectionInformation methodInfo) {
         String name = null;
         if (nameDataKey != null) {
             Object data = inspectitContext.getData(nameDataKey);

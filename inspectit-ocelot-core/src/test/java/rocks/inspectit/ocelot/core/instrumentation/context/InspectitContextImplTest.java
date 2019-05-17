@@ -46,14 +46,14 @@ public class InspectitContextImplTest {
             tags.put("tagA", "valueA");
             tags.put("tagB", "valueB");
 
-            InspectitContext ctx = InspectitContext.createFromCurrent(tags, propagation, false);
+            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(tags, propagation, false);
             ctx.makeActive();
 
             assertThat(ctx.getData("tagA")).isEqualTo("valueA");
             assertThat(ctx.getData("tagB")).isEqualTo("valueB");
 
             ctx.close();
-            assertThat(InspectitContext.INSPECTIT_KEY.get()).isNull();
+            assertThat(InspectitContextImpl.INSPECTIT_KEY.get()).isNull();
         }
 
 
@@ -64,11 +64,11 @@ public class InspectitContextImplTest {
             tags.put("tagB", "valueB");
             when(propagation.isPropagatedDownWithinJVM(any())).thenReturn(true);
 
-            InspectitContext ctxA = InspectitContext.createFromCurrent(tags, propagation, false);
+            InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(tags, propagation, false);
             ctxA.setData("tagB", "overwritten");
             ctxA.makeActive();
 
-            InspectitContext ctxB = InspectitContext.createFromCurrent(tags, propagation, false);
+            InspectitContextImpl ctxB = InspectitContextImpl.createFromCurrent(tags, propagation, false);
             ctxB.makeActive();
 
             assertThat(ctxB.getData("tagA")).isEqualTo("valueA");
@@ -77,7 +77,7 @@ public class InspectitContextImplTest {
             ctxB.close();
             ctxA.close();
 
-            assertThat(InspectitContext.INSPECTIT_KEY.get()).isNull();
+            assertThat(InspectitContextImpl.INSPECTIT_KEY.get()).isNull();
         }
 
 
@@ -85,16 +85,16 @@ public class InspectitContextImplTest {
         void verifyOverwritesAreLocal() {
             when(propagation.isPropagatedDownWithinJVM(any())).thenReturn(true);
 
-            InspectitContext ctxA = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
             ctxA.setData("keyA", "ctxA_valueA");
             ctxA.setData("keyB", "ctxA_valueB");
             ctxA.makeActive();
 
-            InspectitContext ctxB = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl ctxB = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
             ctxB.setData("keyB", "ctxB_valueB");
             ctxB.makeActive();
 
-            InspectitContext ctxC = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl ctxC = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
             ctxC.makeActive();
 
             assertThat(ctxA.getData("keyA")).isEqualTo("ctxA_valueA");
@@ -114,7 +114,7 @@ public class InspectitContextImplTest {
             assertThat(ctxA.getData("keyB")).isEqualTo("ctxA_valueB");
             ctxA.close();
 
-            assertThat(InspectitContext.INSPECTIT_KEY.get()).isNull();
+            assertThat(InspectitContextImpl.INSPECTIT_KEY.get()).isNull();
         }
 
 
@@ -123,16 +123,16 @@ public class InspectitContextImplTest {
             doReturn(true).when(propagation).isPropagatedDownWithinJVM(eq("keyA"));
             doReturn(false).when(propagation).isPropagatedDownWithinJVM(eq("keyB"));
 
-            InspectitContext ctxA = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
             ctxA.setData("keyA", "ctxA_valueA");
             ctxA.setData("keyB", "ctxA_valueB");
             ctxA.makeActive();
 
-            InspectitContext ctxB = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl ctxB = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
             ctxB.setData("keyB", "ctxB_valueB");
             ctxB.makeActive();
 
-            InspectitContext ctxC = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl ctxC = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
             ctxC.makeActive();
 
             assertThat(ctxA.getData("keyA")).isEqualTo("ctxA_valueA");
@@ -152,21 +152,21 @@ public class InspectitContextImplTest {
             assertThat(ctxA.getData("keyB")).isEqualTo("ctxA_valueB");
             ctxA.close();
 
-            assertThat(InspectitContext.INSPECTIT_KEY.get()).isNull();
+            assertThat(InspectitContextImpl.INSPECTIT_KEY.get()).isNull();
         }
 
 
         @Test
         void verifyContextReleasedWhenAllChildrenAreClosed() {
 
-            InspectitContext firstContext = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl firstContext = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
             firstContext.makeActive();
 
-            InspectitContext secondContext = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl secondContext = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
             secondContext.makeActive();
-            WeakReference<InspectitContext> firstContextWeak = new WeakReference<>(firstContext);
+            WeakReference<InspectitContextImpl> firstContextWeak = new WeakReference<>(firstContext);
 
-            InspectitContext openRemainingContext = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl openRemainingContext = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
 
             secondContext.close();
             firstContext.close();
@@ -184,14 +184,14 @@ public class InspectitContextImplTest {
         void verifyDownPropagationForChildrenOnDifferentThreadWithRootNotClosed() throws Exception {
             doReturn(true).when(propagation).isPropagatedDownWithinJVM(any());
 
-            InspectitContext root = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
             root.setData("tag", "rootValue");
             root.makeActive();
             root.setData("tag", "invisibleValue");
 
             AtomicReference<Object> tagValue = new AtomicReference<>();
             Thread asyncTask = new Thread(Context.current().wrap(() -> {
-                InspectitContext asyncChild = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, false);
+                InspectitContextImpl asyncChild = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
                 tagValue.set(asyncChild.getData("tag"));
                 asyncChild.makeActive();
                 asyncChild.close();
@@ -210,14 +210,14 @@ public class InspectitContextImplTest {
         void verifyDownPropagationForChildrenOnDifferentThreadWithRootClosed() throws Exception {
             lenient().doReturn(true).when(propagation).isPropagatedDownWithinJVM(any());
 
-            InspectitContext root = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
             root.setData("tag", "rootValue");
             root.makeActive();
             root.setData("tag", "invisibleValue");
 
             AtomicReference<Object> tagValue = new AtomicReference<>();
             Thread asyncTask = new Thread(Context.current().wrap(() -> {
-                InspectitContext asyncChild = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, false);
+                InspectitContextImpl asyncChild = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
                 tagValue.set(asyncChild.getData("tag"));
                 asyncChild.makeActive();
                 asyncChild.close();
@@ -236,14 +236,14 @@ public class InspectitContextImplTest {
         void verifyDownPropagationForChildrenOnSameThreadWithRootClosed() throws Exception {
             lenient().doReturn(true).when(propagation).isPropagatedDownWithinJVM(any());
 
-            InspectitContext root = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
             root.setData("tag", "rootValue");
             root.makeActive();
             root.setData("tag", "invisibleValue");
 
             AtomicReference<Object> tagValue = new AtomicReference<>();
             Runnable delayedTask = Context.current().wrap(() -> {
-                InspectitContext delayedChild = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, false);
+                InspectitContextImpl delayedChild = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
                 tagValue.set(delayedChild.getData("tag"));
                 delayedChild.makeActive();
                 delayedChild.close();
@@ -267,11 +267,11 @@ public class InspectitContextImplTest {
             doReturn(true).when(propagation).isPropagatedUpWithinJVM(eq("tag1"));
             doReturn(false).when(propagation).isPropagatedUpWithinJVM(eq("tag2"));
 
-            InspectitContext ctxA = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
             ctxA.makeActive();
-            InspectitContext ctxB = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl ctxB = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
             ctxB.makeActive();
-            InspectitContext ctxC = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl ctxC = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
             ctxC.makeActive();
 
             ctxC.setData("tag1", "ctxC_value1");
@@ -301,7 +301,7 @@ public class InspectitContextImplTest {
 
             ctxA.close();
 
-            assertThat(InspectitContext.INSPECTIT_KEY.get()).isNull();
+            assertThat(InspectitContextImpl.INSPECTIT_KEY.get()).isNull();
         }
 
 
@@ -309,12 +309,12 @@ public class InspectitContextImplTest {
         void verifyNoUpPropagationForChildrenOnDifferentThreadWithRootNotClosed() throws Exception {
             lenient().doReturn(true).when(propagation).isPropagatedUpWithinJVM(any());
 
-            InspectitContext root = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
             root.setData("tag", "rootValue");
             root.makeActive();
 
             Thread asyncTask = new Thread(Context.current().wrap(() -> {
-                InspectitContext asyncChild = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, false);
+                InspectitContextImpl asyncChild = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
                 asyncChild.setData("tag", "asyncChildValue");
                 asyncChild.makeActive();
                 asyncChild.close();
@@ -333,12 +333,12 @@ public class InspectitContextImplTest {
         void verifyNoUpPropagationForChildrenOnDifferentThreadWithRootClosed() throws Exception {
             lenient().doReturn(true).when(propagation).isPropagatedUpWithinJVM(any());
 
-            InspectitContext root = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
             root.setData("tag", "rootValue");
             root.makeActive();
 
             Thread asyncTask = new Thread(Context.current().wrap(() -> {
-                InspectitContext asyncChild = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, false);
+                InspectitContextImpl asyncChild = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
                 asyncChild.setData("tag", "asyncChildValue");
                 asyncChild.makeActive();
                 asyncChild.close();
@@ -357,12 +357,12 @@ public class InspectitContextImplTest {
         void verifyNoUpPropagationForChildrenOnSameThreadWithRootClosed() throws Exception {
             lenient().doReturn(true).when(propagation).isPropagatedUpWithinJVM(any());
 
-            InspectitContext root = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
             root.setData("tag", "rootValue");
             root.makeActive();
 
             Runnable delayedTask = Context.current().wrap(() -> {
-                InspectitContext delayedChild = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, false);
+                InspectitContextImpl delayedChild = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
                 delayedChild.setData("tag", "asyncChildValue");
                 delayedChild.makeActive();
                 delayedChild.close();
@@ -387,13 +387,13 @@ public class InspectitContextImplTest {
             doReturn(true).when(propagation).isPropagatedDownWithinJVM(eq("tag1"));
             doReturn(false).when(propagation).isPropagatedDownWithinJVM(eq("tag2"));
 
-            InspectitContext ctxA = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
             ctxA.setData("tag2", "ctxA_value2");
             ctxA.makeActive();
-            InspectitContext ctxB = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl ctxB = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
             ctxB.setData("tag2", "ctxB_value2");
             ctxB.makeActive();
-            InspectitContext ctxC = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl ctxC = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
             ctxC.setData("tag2", "ctxC_value2");
             ctxC.setData("tag1", "ctxC_value1");
             ctxC.makeActive();
@@ -415,7 +415,7 @@ public class InspectitContextImplTest {
             assertThat(ctxB.getData("tag1")).isEqualTo("ctxC_value1");
             assertThat(ctxB.getData("tag2")).isEqualTo("ctxB_value2");
 
-            InspectitContext ctxC2 = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl ctxC2 = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
             ctxC2.makeActive();
 
             assertThat(ctxB.getData("tag1")).isEqualTo("ctxC_value1");
@@ -436,7 +436,7 @@ public class InspectitContextImplTest {
 
             ctxA.close();
 
-            assertThat(InspectitContext.INSPECTIT_KEY.get()).isNull();
+            assertThat(InspectitContextImpl.INSPECTIT_KEY.get()).isNull();
         }
 
         @Test
@@ -444,18 +444,18 @@ public class InspectitContextImplTest {
             doReturn(true).when(propagation).isPropagatedUpWithinJVM(any());
             doReturn(true).when(propagation).isPropagatedDownWithinJVM(any());
 
-            InspectitContext root = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
             root.setData("tag", "rootValue");
             root.makeActive();
 
-            InspectitContext syncChild = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl syncChild = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
             syncChild.setData("tag", "syncChildValue");
             syncChild.makeActive();
             syncChild.close();
 
             AtomicReference<Object> asyncTaskTagValue = new AtomicReference<>();
             Thread asyncTask = new Thread(Context.current().wrap(() -> {
-                InspectitContext asyncChild = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, false);
+                InspectitContextImpl asyncChild = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
                 asyncTaskTagValue.set(asyncChild.getData("tag"));
                 asyncChild.makeActive();
                 asyncChild.close();
@@ -476,18 +476,18 @@ public class InspectitContextImplTest {
             doReturn(true).when(propagation).isPropagatedUpWithinJVM(any());
             doReturn(true).when(propagation).isPropagatedDownWithinJVM(any());
 
-            InspectitContext root = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
             root.setData("tag", "rootValue");
             root.makeActive();
 
-            InspectitContext syncChild = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl syncChild = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
             syncChild.setData("tag", "syncChildValue");
             syncChild.makeActive();
             syncChild.close();
 
             AtomicReference<Object> asyncTaskTagValue = new AtomicReference<>();
             Thread asyncTask = new Thread(Context.current().wrap(() -> {
-                InspectitContext asyncChild = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, false);
+                InspectitContextImpl asyncChild = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
                 asyncTaskTagValue.set(asyncChild.getData("tag"));
                 asyncChild.makeActive();
                 asyncChild.close();
@@ -509,18 +509,18 @@ public class InspectitContextImplTest {
             doReturn(true).when(propagation).isPropagatedUpWithinJVM(any());
             doReturn(true).when(propagation).isPropagatedDownWithinJVM(any());
 
-            InspectitContext root = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
             root.setData("tag", "rootValue");
             root.makeActive();
 
-            InspectitContext syncChild = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl syncChild = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
             syncChild.setData("tag", "syncChildValue");
             syncChild.makeActive();
             syncChild.close();
 
             AtomicReference<Object> asyncTaskTagValue = new AtomicReference<>();
             Runnable asyncTask = Context.current().wrap(() -> {
-                InspectitContext asyncChild = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, false);
+                InspectitContextImpl asyncChild = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
                 asyncTaskTagValue.set(asyncChild.getData("tag"));
                 asyncChild.makeActive();
                 asyncChild.close();
@@ -546,7 +546,7 @@ public class InspectitContextImplTest {
             TagContextBuilder tcb = Tags.getTagger().emptyBuilder()
                     .put(TagKey.create("myTag"), TagValue.create("myValue"));
             try (Scope tc = tcb.buildScoped()) {
-                InspectitContext ctxA = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, true);
+                InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
                 assertThat(ctxA.getData("myTag")).isEqualTo("myValue");
 
                 ctxA.makeActive();
@@ -557,7 +557,7 @@ public class InspectitContextImplTest {
                 ctxA.close();
             }
 
-            assertThat(InspectitContext.INSPECTIT_KEY.get()).isNull();
+            assertThat(InspectitContextImpl.INSPECTIT_KEY.get()).isNull();
         }
 
         @Test
@@ -565,7 +565,7 @@ public class InspectitContextImplTest {
             doReturn(true).when(propagation).isPropagatedDownWithinJVM(any());
             doReturn(true).when(propagation).isTag(any());
 
-            InspectitContext root = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, true);
+            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
             root.setData("rootKey", "rootValue");
 
             root.makeActive();
@@ -573,7 +573,7 @@ public class InspectitContextImplTest {
             TagContextBuilder tcb = Tags.getTagger().emptyBuilder()
                     .put(TagKey.create("myTag"), TagValue.create("myValue"));
             try (Scope tc = tcb.buildScoped()) {
-                InspectitContext ctxA = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, true);
+                InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
                 assertThat(ctxA.getData("myTag")).isEqualTo("myValue");
 
                 ctxA.makeActive();
@@ -585,7 +585,7 @@ public class InspectitContextImplTest {
             }
 
             root.close();
-            assertThat(InspectitContext.INSPECTIT_KEY.get()).isNull();
+            assertThat(InspectitContextImpl.INSPECTIT_KEY.get()).isNull();
         }
 
 
@@ -594,7 +594,7 @@ public class InspectitContextImplTest {
             doReturn(true).when(propagation).isPropagatedDownWithinJVM(any());
             doReturn(true).when(propagation).isTag(eq("my_tag"));
 
-            InspectitContext root = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, true);
+            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
             root.setData("my_tag", "tagValue");
             root.setData("my_hidden", "hiddenValue");
 
@@ -604,7 +604,7 @@ public class InspectitContextImplTest {
             assertThat(getCurrentTagsAsMap()).containsEntry("my_tag", "tagValue");
 
             root.close();
-            assertThat(InspectitContext.INSPECTIT_KEY.get()).isNull();
+            assertThat(InspectitContextImpl.INSPECTIT_KEY.get()).isNull();
         }
 
 
@@ -613,7 +613,7 @@ public class InspectitContextImplTest {
             doReturn(true).when(propagation).isPropagatedDownWithinJVM(any());
             doReturn(true).when(propagation).isTag(any());
 
-            InspectitContext root = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, true);
+            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
             root.setData("rootKey", "rootValue");
             root.setData("myTag", "rootValue");
             root.setData("longKey", 42L);
@@ -627,7 +627,7 @@ public class InspectitContextImplTest {
                 Map<String, String> currentTagsAsMap = getCurrentTagsAsMap();
                 assertThat(currentTagsAsMap).containsEntry("longKey", "42");
 
-                InspectitContext ctxA = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, true);
+                InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
                 ctxA.makeActive();
                 assertThat(ctxA.getData("myTag")).isEqualTo("myValue");
                 assertThat(ctxA.getData("rootKey")).isEqualTo("rootValue");
@@ -637,7 +637,7 @@ public class InspectitContextImplTest {
             }
 
             root.close();
-            assertThat(InspectitContext.INSPECTIT_KEY.get()).isNull();
+            assertThat(InspectitContextImpl.INSPECTIT_KEY.get()).isNull();
         }
 
 
@@ -649,7 +649,7 @@ public class InspectitContextImplTest {
             doReturn(true).when(propagation).isPropagatedDownWithinJVM(any());
             doReturn(true).when(propagation).isTag(any());
 
-            InspectitContext ctx = InspectitContext.createFromCurrent(tags, propagation, true);
+            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(tags, propagation, true);
             ctx.makeActive();
 
             assertThat(getCurrentTagsAsMap()).hasSize(2);
@@ -657,7 +657,7 @@ public class InspectitContextImplTest {
             assertThat(getCurrentTagsAsMap()).containsEntry("tagB", "valueB");
 
             ctx.close();
-            assertThat(InspectitContext.INSPECTIT_KEY.get()).isNull();
+            assertThat(InspectitContextImpl.INSPECTIT_KEY.get()).isNull();
         }
 
 
@@ -667,7 +667,7 @@ public class InspectitContextImplTest {
             doReturn(true).when(propagation).isPropagatedDownWithinJVM(eq("global"));
             doReturn(true).when(propagation).isTag(any());
 
-            InspectitContext ctx = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, true);
+            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
             ctx.setData("local", "localValue");
             ctx.setData("global", "globalValue");
 
@@ -683,7 +683,7 @@ public class InspectitContextImplTest {
             }
 
             ctx.close();
-            assertThat(InspectitContext.INSPECTIT_KEY.get()).isNull();
+            assertThat(InspectitContextImpl.INSPECTIT_KEY.get()).isNull();
         }
 
 
@@ -693,7 +693,7 @@ public class InspectitContextImplTest {
             doReturn(true).when(propagation).isPropagatedUpWithinJVM(any());
             doReturn(true).when(propagation).isTag(any());
 
-            InspectitContext ctx = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, true);
+            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
             ctx.setData("rootKey1", "rootValue1");
             ctx.setData("rootKey2", "rootValue2");
 
@@ -703,7 +703,7 @@ public class InspectitContextImplTest {
             assertThat(getCurrentTagsAsMap()).containsEntry("rootKey1", "rootValue1");
             assertThat(getCurrentTagsAsMap()).containsEntry("rootKey2", "rootValue2");
 
-            InspectitContext nested = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, true);
+            InspectitContextImpl nested = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
             nested.makeActive();
             nested.setData("rootKey1", "nestedValue1");
             nested.setData("nestedKey2", "nestedValue2");
@@ -722,7 +722,7 @@ public class InspectitContextImplTest {
             }
 
             ctx.close();
-            assertThat(InspectitContext.INSPECTIT_KEY.get()).isNull();
+            assertThat(InspectitContextImpl.INSPECTIT_KEY.get()).isNull();
         }
 
         @Test
@@ -730,7 +730,7 @@ public class InspectitContextImplTest {
             doReturn(true).when(propagation).isPropagatedDownWithinJVM(any());
             doReturn(true).when(propagation).isTag(any());
 
-            InspectitContext ctx = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, true);
+            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
             ctx.setData("d1", "string");
             ctx.setData("d2", 1);
             ctx.setData("d3", 2L);
@@ -763,7 +763,7 @@ public class InspectitContextImplTest {
 
         @Test
         void verifySpanAttachedAndDetached() {
-            InspectitContext ctx = InspectitContext.createFromCurrent(Collections.emptyMap(), propagation, true);
+            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
             Span sp = Tracing.getTracer().spanBuilder("blub").startSpan();
             ctx.enterSpan(sp);
             ctx.makeActive();

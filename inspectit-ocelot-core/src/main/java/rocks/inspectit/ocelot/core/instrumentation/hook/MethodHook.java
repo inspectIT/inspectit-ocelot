@@ -8,7 +8,7 @@ import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.IMethodHook;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.MethodHookConfiguration;
 import rocks.inspectit.ocelot.core.instrumentation.context.ContextManager;
-import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContext;
+import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
 
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -72,7 +72,7 @@ public class MethodHook implements IMethodHook {
 
     @Override
     public void onExit(Object[] args, Object thiz, Object returnValue, Throwable thrown, InternalInspectitContext context) {
-        val executionContext = new IHookAction.ExecutionContext(args, thiz, returnValue, thrown, this, (InspectitContext) context);
+        val executionContext = new IHookAction.ExecutionContext(args, thiz, returnValue, thrown, this, (InspectitContextImpl) context);
         for (val action : exitActions) {
             try {
                 action.execute(executionContext);
