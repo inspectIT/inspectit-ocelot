@@ -1,0 +1,7 @@
+{
+  "roles": [
+    {"name" : "Admin", "code": 1},
+    {"name" : "User", "code": 2}
+  ],
+  "minPwLength" : 5
+}

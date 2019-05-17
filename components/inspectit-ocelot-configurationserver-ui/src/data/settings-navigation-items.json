@@ -1,0 +1,12 @@
+[
+  {
+    "name": "User",
+    "icon": "pi-users",
+    "href": "/settings/user"
+  },
+  {
+    "name": "Account",
+    "icon": "pi-user",
+    "href": "/settings/account"
+  }
+]

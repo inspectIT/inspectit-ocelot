@@ -56,10 +56,18 @@ const agentStatus = {
     pendingClearRequests: 0,
 }
 
+const settings = {
+    /** Specifying whether a password change request is currently be executed */
+    loading: false,
+    /** Contains all users */
+    users: []
+}
+
 export {
     authentication,
     configuration,
     notification,
     mappings,
-    agentStatus
+    agentStatus,
+    settings
 }

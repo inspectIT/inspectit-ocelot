@@ -23,10 +23,29 @@ const SideNavigation = () => {
                 align-items: center;
                 border-right: 1px solid #ddd;
             }
+            .bottom {
+                width: inherit;
+                display: flex;
+                flex-direction: column;
+                position: fixed;
+                bottom: 0;
+            }
+            .top{
+              width: inherit;
+              display: flex;
+              flex-direction: column;
+            }
             `}</style>
+            <div className='top'>
+              {itemData.map(item => (
+                item.align === 'top' ? <NavigationItem key={item.name} href={item.href} hrefBase={item.hrefBase} name={item.name} icon={item.icon} /> : ''
+              ))}
+            </div>
+            <div className='bottom'>
             {itemData.map(item => (
-                <NavigationItem key={item.name} href={item.href} name={item.name} icon={item.icon} />
+                item.align === 'bottom' ? <NavigationItem key={item.name} href={item.href} hrefBase={item.hrefBase} name={item.name} icon={item.icon} /> : ''
             ))}
+            </div>
         </div>
     )
 }

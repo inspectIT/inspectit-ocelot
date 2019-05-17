@@ -4,8 +4,9 @@ import Link from '../basics/Link'
 /**
  * Component used by the side navigation as items.
  */
-const SideNavigationItem = ({ href, icon, name, router }) => {
-    const isActive = router.pathname.endsWith(href);
+const SideNavigationItem = ({ href, icon, name, router, hrefBase }) => {
+    const regEx = new RegExp(`${hrefBase}(?!\\w)`)
+    const isActive = router.pathname.search(regEx) !== -1 ? true : false
 
     return (
         <Link className="this" href={href}>
