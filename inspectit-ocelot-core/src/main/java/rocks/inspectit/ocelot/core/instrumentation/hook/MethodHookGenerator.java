@@ -85,10 +85,10 @@ public class MethodHookGenerator {
 
 
     private List<IHookAction> buildTracingEntryActions(RuleTracingSettings tracing) {
-        if (tracing.isStartSpan() || tracing.getContinueSpan() != null) {
+        if (tracing.getStartSpan() || tracing.getContinueSpan() != null) {
 
             Predicate<IHookAction.ExecutionContext> startCondition = (ctx) -> false;
-            if (tracing.isStartSpan()) {
+            if (tracing.getStartSpan()) {
                 startCondition = ConditionalHookAction.getAsPredicate(tracing.getStartSpanConditions());
             }
 
@@ -122,7 +122,7 @@ public class MethodHookGenerator {
             result.add(actionWithConditions);
         }
 
-        if (tracing.isEndSpan() && (tracing.isStartSpan() || tracing.getContinueSpan() != null)) {
+        if (tracing.getEndSpan() && (tracing.getStartSpan() || tracing.getContinueSpan() != null)) {
             val endSpanAction = new EndSpanAction(ConditionalHookAction.getAsPredicate(tracing.getEndSpanConditions()));
             result.add(endSpanAction);
         }

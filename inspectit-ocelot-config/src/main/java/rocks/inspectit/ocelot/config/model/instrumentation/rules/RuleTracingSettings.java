@@ -19,24 +19,30 @@ import java.util.Map;
 @Builder
 public class RuleTracingSettings {
 
-    public static final RuleTracingSettings NO_TRACING_AND_ATTRIBUTES = new RuleTracingSettings();
+    public static final RuleTracingSettings NO_TRACING_AND_ATTRIBUTES = RuleTracingSettings.builder()
+            .startSpan(false)
+            .endSpan(false)
+            .build();
 
     /**
      * If true, the methods which are matched by the rule containing this settings will appear in traces.
      * Only happens, if no span is continued as configured by {@link #continueSpan}
+     * If this is null, this means that the containing rule does not care whether a span is started or not.
      */
-    @Builder.Default
-    private boolean startSpan = false;
+    private Boolean startSpan;
 
     /**
      * If true, the span either started or continued will be ended as soon as the instrumented method returns.
+     * If this is null, this means that the containing rule does not care whether a span is ended or not.
+     * If any rule for a method specified that a span is started or continued but none specified a value for
+     * "endSpan", the span is automatically ended.
      */
-    @Builder.Default
-    private boolean endSpan = true;
+    private Boolean endSpan;
 
     /**
      * If not null, this rule will attempt to continue the span stored under the given data key.
      * This only happens if the {@link #continueSpanConditions} are met and the the value for the given data key is a valid Span.
+     * If this is null, this means that the containing rule does not care whether a span is started or not.
      */
     private String continueSpan;
 

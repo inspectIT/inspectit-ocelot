@@ -6,6 +6,7 @@ import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import rocks.inspectit.ocelot.config.model.instrumentation.actions.ConditionalActionSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.RuleTracingSettings;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.ActionCallConfig;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.InstrumentationConfiguration;
@@ -92,28 +93,42 @@ public class MethodHookConfigurationResolver {
     }
 
     private void resolveContinueSpan(Set<InstrumentationRule> matchedRules, RuleTracingSettings.RuleTracingSettingsBuilder builder) throws ConflictingDefinitionsException {
-        String continueSpan = getAndDetectConflicts(matchedRules, r -> r.getTracing().getContinueSpan(), x -> true, "continue-span");
+        Set<InstrumentationRule> rulesContinuingSpan = matchedRules.stream()
+                .filter(r -> r.getTracing().getContinueSpan() != null)
+                .collect(Collectors.toSet());
+        String continueSpan = getAndDetectConflicts(rulesContinuingSpan, r -> r.getTracing().getContinueSpan(), x -> true, "continue-span");
         builder.continueSpan(continueSpan);
         if (continueSpan != null) {
-            builder.continueSpanConditions(getAndDetectConflicts(matchedRules, r -> r.getTracing().getContinueSpanConditions(), x -> true, "continue span conditions"));
+            builder.continueSpanConditions(getAndDetectConflicts(rulesContinuingSpan, r -> r.getTracing().getContinueSpanConditions(), x -> true, "continue span conditions"));
         }
     }
 
     private void resolveEndSpan(Set<InstrumentationRule> matchedRules, RuleTracingSettings.RuleTracingSettingsBuilder builder) throws ConflictingDefinitionsException {
-        boolean endSpan = getAndDetectConflicts(matchedRules, r -> r.getTracing().isEndSpan(), x -> true, "end-span");
-        builder.endSpan(endSpan);
-        if (endSpan) {
-            builder.endSpanConditions(getAndDetectConflicts(matchedRules, r -> r.getTracing().getEndSpanConditions(), x -> true, "end span conditions"));
+        Set<InstrumentationRule> rulesDefiningEndSpan = matchedRules.stream()
+                .filter(r -> r.getTracing().getEndSpan() != null)
+                .collect(Collectors.toSet());
+        Boolean endSpan = getAndDetectConflicts(rulesDefiningEndSpan, r -> r.getTracing().getEndSpan(), Objects::nonNull, "end-span");
+        Boolean spanActuallyEnding = Optional.ofNullable(endSpan).orElse(true);
+        builder.endSpan(spanActuallyEnding);
+        if (spanActuallyEnding) {
+            builder.endSpanConditions(
+                    Optional.ofNullable(
+                            getAndDetectConflicts(rulesDefiningEndSpan, r -> r.getTracing().getEndSpanConditions(), x -> true, "end span conditions")
+                    ).orElse(new ConditionalActionSettings()));
         }
     }
 
     private void resolveStartSpan(Set<InstrumentationRule> matchedRules, RuleTracingSettings.RuleTracingSettingsBuilder builder) throws ConflictingDefinitionsException {
-        boolean startSpan = getAndDetectConflicts(matchedRules, r -> r.getTracing().isStartSpan(), x -> true, "start-span");
-        builder.startSpan(startSpan);
-        if (startSpan) {
-            builder.name(getAndDetectConflicts(matchedRules, r -> r.getTracing().getName(), n -> !StringUtils.isEmpty(n), "the span name"));
-            builder.kind(getAndDetectConflicts(matchedRules, r -> r.getTracing().getKind(), Objects::nonNull, "the span kind"));
-            builder.startSpanConditions(getAndDetectConflicts(matchedRules, r -> r.getTracing().getStartSpanConditions(), x -> true, "start span conditions"));
+        Set<InstrumentationRule> rulesDefiningStartSpan = matchedRules.stream()
+                .filter(r -> r.getTracing().getStartSpan() != null)
+                .collect(Collectors.toSet());
+        Boolean startSpan = getAndDetectConflicts(rulesDefiningStartSpan, r -> r.getTracing().getStartSpan(), x -> true, "start-span");
+        Boolean spanActuallyStarted = Optional.ofNullable(startSpan).orElse(false);
+        builder.startSpan(spanActuallyStarted);
+        if (spanActuallyStarted) {
+            builder.name(getAndDetectConflicts(rulesDefiningStartSpan, r -> r.getTracing().getName(), n -> !StringUtils.isEmpty(n), "the span name"));
+            builder.kind(getAndDetectConflicts(rulesDefiningStartSpan, r -> r.getTracing().getKind(), Objects::nonNull, "the span kind"));
+            builder.startSpanConditions(getAndDetectConflicts(rulesDefiningStartSpan, r -> r.getTracing().getStartSpanConditions(), x -> true, "start span conditions"));
         }
     }
 

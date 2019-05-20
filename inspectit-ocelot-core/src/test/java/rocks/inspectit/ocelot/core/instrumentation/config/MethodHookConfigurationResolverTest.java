@@ -138,7 +138,7 @@ public class MethodHookConfigurationResolverTest {
             MethodHookConfiguration result = resolver.buildHookConfiguration(
                     config.toBuilder().tracingEnabled(false).build(), Sets.newHashSet(r1));
 
-            assertThat(result.getTracing().isStartSpan()).isFalse();
+            assertThat(result.getTracing().getStartSpan()).isFalse();
             assertThat(result.getTracing().getAttributes()).isEmpty();
         }
 
@@ -151,7 +151,6 @@ public class MethodHookConfigurationResolverTest {
                             .kind(Span.Kind.SERVER)
                             .storeSpan("store_span")
                             .continueSpan("my_span")
-                            .endSpan(false)
                             .attributes(Maps.newHashMap("attr", "dataX"))
                             .build())
                     .build();
@@ -159,7 +158,6 @@ public class MethodHookConfigurationResolverTest {
                     .tracing(RuleTracingSettings.builder()
                             .startSpan(true)
                             .name("data_name")
-                            .continueSpan("my_span")
                             .endSpan(false)
                             .attributes(Maps.newHashMap("attr2", "dataY"))
                             .build())
@@ -168,10 +166,10 @@ public class MethodHookConfigurationResolverTest {
             RuleTracingSettings result = resolver.buildHookConfiguration(
                     config, Sets.newHashSet(r1, r2)).getTracing();
 
-            assertThat(result.isStartSpan()).isTrue();
+            assertThat(result.getStartSpan()).isTrue();
             assertThat(result.getStoreSpan()).isEqualTo("store_span");
             assertThat(result.getContinueSpan()).isEqualTo("my_span");
-            assertThat(result.isEndSpan()).isFalse();
+            assertThat(result.getEndSpan()).isFalse();
             assertThat(result.getKind()).isEqualTo(Span.Kind.SERVER);
             assertThat(result.getName()).isEqualTo("data_name");
             assertThat(result.getAttributes())
