@@ -1,0 +1,3 @@
+[submodule "inspectit-ocelot-configuration"]
+	path = inspectit-ocelot-configuration
+	url = https://github.com/inspectIT/inspectit-ocelot-configuration.git

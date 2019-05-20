@@ -32,6 +32,12 @@ jobs:
     steps:
       - checkout:
           path: ~/inspectit/repo
+      - run:
+          command: git submodule sync
+          working_directory: ~/inspectit/repo
+      - run:
+          command: git submodule update --init
+          working_directory: ~/inspectit/repo
       - persist_to_workspace:
           root: ~/inspectit
           paths:

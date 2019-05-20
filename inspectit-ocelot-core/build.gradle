@@ -9,7 +9,7 @@ dependencies {
     )
 
     implementation(
-            project(':inspectit-ocelot-config'),
+            project(':inspectit-ocelot-configuration'),
 
             // spring releated
             "org.springframework.boot:spring-boot:${springVersion}",
