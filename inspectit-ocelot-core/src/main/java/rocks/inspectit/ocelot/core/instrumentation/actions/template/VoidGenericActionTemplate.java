@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.core.instrumentation.genericactions;
+package rocks.inspectit.ocelot.core.instrumentation.actions.template;
 
 import rocks.inspectit.ocelot.bootstrap.instrumentation.DoNotInstrumentMarker;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.IGenericAction;

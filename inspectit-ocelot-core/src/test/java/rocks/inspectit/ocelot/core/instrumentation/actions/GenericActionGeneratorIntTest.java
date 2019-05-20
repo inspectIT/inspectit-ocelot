@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.core.instrumentation.genericactions;
+package rocks.inspectit.ocelot.core.instrumentation.actions;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeAll;
@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.IGenericAction;
 import rocks.inspectit.ocelot.core.SpringTestBase;
+import rocks.inspectit.ocelot.core.instrumentation.actions.template.GenericActionTemplate;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.GenericActionConfig;
 import rocks.inspectit.ocelot.core.instrumentation.injection.InjectedClass;
 import rocks.inspectit.ocelot.core.testutils.DummyClassLoader;

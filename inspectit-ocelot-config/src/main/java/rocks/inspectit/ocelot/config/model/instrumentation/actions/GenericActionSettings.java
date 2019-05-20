@@ -63,16 +63,17 @@ public class GenericActionSettings {
      * Defines the input variables used by this action.
      * The key is the name of the variable, the value is the type of the corresponding variable.
      * The following "special" variables are available:
-     * - thiz: the this-instance on which the instrumented method is executed.
-     * - argN: the N-th argument with which the instrumented method was invoked.
-     * - args: an array of all arguments with which the instrumented method was invoked, the type must be Object[]
-     * - returnValue: the value returned by the instrumented method,
-     * - clazz: the java.lang.{@link Class} defining the method being instrumented
-     * - methodName: the name of the method being instrumented, e.g. "hashcode", "doXYZ" or "<init>" for a constructor
-     * - parameterTypes: the types of the arguments with which the method is declared in form of a Class[] array
-     * <p>
+     * - _this: the this-instance on which the instrumented method is executed.
+     * - _argN: the N-th argument with which the instrumented method was invoked.
+     * - _args: an array of all arguments with which the instrumented method was invoked, the type must be Object[]
+     * - _returnValue: the value returned by the instrumented method, <p>
      * null if void, the method threw an exception or the provider is not executed at the method exit
-     * - thrown: the {@link Throwable}-Object raised by the the executed method, the type must be java.lang.Throwable
+     * - _class: the java.lang.{@link Class} defining the method being instrumented
+     * - _methodName: the name of the method being instrumented, e.g. "hashcode", "doXYZ" or "<init>" for a constructor
+     * - _parameterTypes: the types of the arguments with which the method is declared in form of a Class[] array
+     * - _attachments: an {@link ObjectAttachments} instance which allows you to "attach" values to a given object
+     * - _context: gives read and write access to the current {@link InspectitContext}, allowing you to attach values to the control flow
+     * - _thrown: the {@link Throwable}-Object raised by the the executed method, the type must be java.lang.Throwable
      * null if no throwable was raised
      * <p>
      * In addition arbitrary custom input variables may be defined.
@@ -102,6 +103,12 @@ public class GenericActionSettings {
      */
     private String valueBody;
 
+    /*
+    Why don't we use Lombok generated getters / setters here?
+    Lombok would generate methods named isVoid() and setVoid(),
+    which imply that the property is named "void" and not "is-void".
+    This would confuse the spring configuration binding.
+     */
     public boolean getIsVoid() {
         return isVoid;
     }
