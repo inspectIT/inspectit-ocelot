@@ -5,6 +5,10 @@ import rocks.inspectit.ocelot.core.instrumentation.injection.InjectedClass;
 
 import java.util.Map;
 
+/**
+ * Variant of a {@link AbstractConstantOnlyBoundGenericAction} which returns
+ * the value computed by the invoked action.
+ */
 class NonVoidConstantOnlyBoundGenericAction extends AbstractConstantOnlyBoundGenericAction {
 
     private final String dataKey;

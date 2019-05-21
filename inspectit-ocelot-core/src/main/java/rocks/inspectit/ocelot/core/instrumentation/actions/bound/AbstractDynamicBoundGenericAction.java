@@ -12,6 +12,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+
+/**
+ * Base class for {@link BoundGenericAction}s which have
+ * constant values and values depending on the execution context
+ * for their input parameters assigned.
+ */
 abstract class AbstractDynamicBoundGenericAction extends BoundGenericAction {
 
     /**

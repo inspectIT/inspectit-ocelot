@@ -5,6 +5,11 @@ import rocks.inspectit.ocelot.core.instrumentation.injection.InjectedClass;
 
 import java.util.Map;
 
+/**
+ * Variant of a {@link AbstractConstantOnlyBoundGenericAction} which does
+ * not write the value returned by the invoked action to the context,
+ * as it is a void action.
+ */
 class VoidConstantOnlyBoundGenericAction extends AbstractConstantOnlyBoundGenericAction {
 
     VoidConstantOnlyBoundGenericAction(String callName, GenericActionConfig actionConfig,

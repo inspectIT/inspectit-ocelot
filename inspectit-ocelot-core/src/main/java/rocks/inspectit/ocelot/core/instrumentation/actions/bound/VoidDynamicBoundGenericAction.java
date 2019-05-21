@@ -6,6 +6,12 @@ import rocks.inspectit.ocelot.core.instrumentation.injection.InjectedClass;
 import java.util.Map;
 import java.util.function.Function;
 
+
+/**
+ * Variant of a {@link AbstractDynamicBoundGenericAction} which does
+ * not write the value returned by the invoked action to the context,
+ * as it is a void action.
+ */
 class VoidDynamicBoundGenericAction extends AbstractDynamicBoundGenericAction {
 
 

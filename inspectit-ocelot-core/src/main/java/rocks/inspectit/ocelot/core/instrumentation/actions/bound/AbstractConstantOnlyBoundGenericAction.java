@@ -5,6 +5,10 @@ import rocks.inspectit.ocelot.core.instrumentation.injection.InjectedClass;
 
 import java.util.Map;
 
+/**
+ * Base class for {@link BoundGenericAction}s which only have
+ * constant values for their input parameters assigned.
+ */
 abstract class AbstractConstantOnlyBoundGenericAction extends BoundGenericAction {
 
     protected final Object[] arguments;

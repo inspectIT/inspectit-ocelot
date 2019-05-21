@@ -6,6 +6,11 @@ import rocks.inspectit.ocelot.core.instrumentation.injection.InjectedClass;
 import java.util.Map;
 import java.util.function.Function;
 
+
+/**
+ * Variant of a {@link AbstractDynamicBoundGenericAction} which returns
+ * the value computed by the invoked action.
+ */
 class NonVoidDynamicBoundGenericAction extends AbstractDynamicBoundGenericAction {
 
     private final String dataKey;
