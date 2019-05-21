@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.core.instrumentation.genericactions;
+package rocks.inspectit.ocelot.core.instrumentation.actions;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -15,6 +15,8 @@ import rocks.inspectit.ocelot.bootstrap.exposed.ObjectAttachments;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.IGenericAction;
 import rocks.inspectit.ocelot.config.model.instrumentation.actions.GenericActionSettings;
 import rocks.inspectit.ocelot.config.utils.AutoboxingHelper;
+import rocks.inspectit.ocelot.core.instrumentation.actions.template.GenericActionTemplate;
+import rocks.inspectit.ocelot.core.instrumentation.actions.template.VoidGenericActionTemplate;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.GenericActionConfig;
 import rocks.inspectit.ocelot.core.instrumentation.injection.ClassInjector;
 import rocks.inspectit.ocelot.core.instrumentation.injection.InjectedClass;
@@ -60,7 +62,8 @@ public class GenericActionGenerator {
      */
     private static ClassLoader BOOTSTRAP_LOADER_MARKER = new URLClassLoader(new URL[]{});
 
-    private static String GENERIC_ACTION_STRUCTURAL_ID = "genericAction";
+    private static String NON_VOID_GENERIC_ACTION_STRUCTURAL_ID = "genericAction";
+    private static String VOID_GENERIC_ACTION_STRUCTURAL_ID = "voidGenericAction";
 
     private static String METHOD_ARGS = "$1";
     private static String THIZ = "$2";
@@ -98,9 +101,10 @@ public class GenericActionGenerator {
             clCache = actionsCache.get(loader);
             clCache.cleanUp(); //cleanup to make sure unused InjectedClasses are released
             try {
+                String templateType = actionConfig.isVoid() ? VOID_GENERIC_ACTION_STRUCTURAL_ID : NON_VOID_GENERIC_ACTION_STRUCTURAL_ID;
                 return clCache.get(actionConfig, () ->
                         (InjectedClass<? extends IGenericAction>)
-                                classInjector.inject(GENERIC_ACTION_STRUCTURAL_ID, classToUseActionOn, (className) ->
+                                classInjector.inject(templateType, classToUseActionOn, (className) ->
                                         buildGenericActionByteCode(actionConfig, loader, className)
                                 ));
             } catch (ExecutionException | ExecutionError e) {
@@ -126,7 +130,12 @@ public class GenericActionGenerator {
             cp.insertClassPath(new LoaderClassPath(loader));
         }
 
-        CtClass action = cp.get(GenericActionTemplate.class.getName());
+        CtClass action;
+        if (actionConfig.isVoid()) {
+            action = cp.get(VoidGenericActionTemplate.class.getName());
+        } else {
+            action = cp.get(GenericActionTemplate.class.getName());
+        }
         action.setName(className);
 
         cp.importPackage(INSPECTIT_ACCESSIBLE_BOOTSTRAP_PACKAGE);

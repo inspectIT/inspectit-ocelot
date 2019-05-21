@@ -54,6 +54,7 @@ public class GenericActionConfigurationResolverTest {
             assertThat(result).containsKey(ACTION_NAME);
 
             GenericActionConfig rc = result.get(ACTION_NAME);
+            assertThat(rc.isVoid()).isFalse();
             assertThat(rc.getExpectedThisType()).isEqualTo("MyClass");
             assertThat(rc.getName()).isEqualTo(ACTION_NAME);
             assertThat(rc.getAdditionalArgumentTypes()).isEmpty();
@@ -76,6 +77,7 @@ public class GenericActionConfigurationResolverTest {
             assertThat(result).containsKey(ACTION_NAME);
 
             GenericActionConfig rc = result.get(ACTION_NAME);
+            assertThat(rc.isVoid()).isFalse();
             assertThat(rc.getExpectedThisType()).isNull();
             assertThat(rc.getName()).isEqualTo(ACTION_NAME);
             assertThat(rc.getAdditionalArgumentTypes()).isEmpty();
@@ -100,6 +102,7 @@ public class GenericActionConfigurationResolverTest {
             assertThat(result).containsKey(ACTION_NAME);
 
             GenericActionConfig rc = result.get(ACTION_NAME);
+            assertThat(rc.isVoid()).isFalse();
             assertThat(rc.getExpectedThisType()).isNull();
             assertThat(rc.getName()).isEqualTo(ACTION_NAME);
             assertThat(rc.getExpectedArgumentTypes()).isEmpty();
@@ -122,6 +125,7 @@ public class GenericActionConfigurationResolverTest {
             assertThat(result).containsKey(ACTION_NAME);
 
             GenericActionConfig rc = result.get(ACTION_NAME);
+            assertThat(rc.isVoid()).isFalse();
             assertThat(rc.getExpectedThisType()).isNull();
             assertThat(rc.getName()).isEqualTo(ACTION_NAME);
             assertThat(rc.getAdditionalArgumentTypes()).isEmpty();
@@ -142,6 +146,7 @@ public class GenericActionConfigurationResolverTest {
             assertThat(result).containsKey(ACTION_NAME);
 
             GenericActionConfig rc = result.get(ACTION_NAME);
+            assertThat(rc.isVoid()).isFalse();
             assertThat(rc.getExpectedThisType()).isNull();
             assertThat(rc.getName()).isEqualTo(ACTION_NAME);
             assertThat(rc.getAdditionalArgumentTypes()).isEmpty();
@@ -163,6 +168,7 @@ public class GenericActionConfigurationResolverTest {
             assertThat(result).containsKey(ACTION_NAME);
 
             GenericActionConfig rc = result.get(ACTION_NAME);
+            assertThat(rc.isVoid()).isFalse();
             assertThat(rc.getExpectedThisType()).isNull();
             assertThat(rc.getName()).isEqualTo(ACTION_NAME);
             assertThat(rc.getAdditionalArgumentTypes()).isEmpty();
@@ -174,7 +180,7 @@ public class GenericActionConfigurationResolverTest {
         }
 
         @Test
-        void verifyValueUsedIfPresent() {
+        void verifyValueUsedIfPresentForNonVoid() {
             inputAction.setValueBody(null);
             inputAction.setValue("\"Test\"");
 
@@ -184,6 +190,7 @@ public class GenericActionConfigurationResolverTest {
             assertThat(result).containsKey(ACTION_NAME);
 
             GenericActionConfig rc = result.get(ACTION_NAME);
+            assertThat(rc.isVoid()).isFalse();
             assertThat(rc.getExpectedThisType()).isNull();
             assertThat(rc.getName()).isEqualTo(ACTION_NAME);
             assertThat(rc.getAdditionalArgumentTypes()).isEmpty();
@@ -192,6 +199,30 @@ public class GenericActionConfigurationResolverTest {
             assertThat(rc.isUsesThrown()).isFalse();
             assertThat(rc.getImportedPackages()).isEmpty();
             assertThat(rc.getValueBody()).isEqualTo("return \"Test\";");
+        }
+
+
+        @Test
+        void verifyValueUsedIfPresentForVoid() {
+            inputAction.setValueBody(null);
+            inputAction.setIsVoid(true);
+            inputAction.setValue("\"Test\"");
+
+            Map<String, GenericActionConfig> result = resolver.resolveActions(config);
+
+            assertThat(result).hasSize(1);
+            assertThat(result).containsKey(ACTION_NAME);
+
+            GenericActionConfig rc = result.get(ACTION_NAME);
+            assertThat(rc.isVoid()).isTrue();
+            assertThat(rc.getExpectedThisType()).isNull();
+            assertThat(rc.getName()).isEqualTo(ACTION_NAME);
+            assertThat(rc.getAdditionalArgumentTypes()).isEmpty();
+            assertThat(rc.getExpectedArgumentTypes()).isEmpty();
+            assertThat(rc.getExpectedReturnValueType()).isNull();
+            assertThat(rc.isUsesThrown()).isFalse();
+            assertThat(rc.getImportedPackages()).isEmpty();
+            assertThat(rc.getValueBody()).isEqualTo("\"Test\";");
         }
     }
 }

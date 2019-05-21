@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.core.instrumentation.genericaction;
+package rocks.inspectit.ocelot.core.instrumentation.actions;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeAll;
@@ -7,9 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.IGenericAction;
 import rocks.inspectit.ocelot.core.SpringTestBase;
+import rocks.inspectit.ocelot.core.instrumentation.actions.template.GenericActionTemplate;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.GenericActionConfig;
-import rocks.inspectit.ocelot.core.instrumentation.genericactions.GenericActionGenerator;
-import rocks.inspectit.ocelot.core.instrumentation.genericactions.GenericActionTemplate;
 import rocks.inspectit.ocelot.core.instrumentation.injection.InjectedClass;
 import rocks.inspectit.ocelot.core.testutils.DummyClassLoader;
 import rocks.inspectit.ocelot.core.testutils.GcUtils;
@@ -19,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -123,6 +123,23 @@ public class GenericActionGeneratorIntTest extends SpringTestBase {
 
     }
 
+
+    @Test
+    @DirtiesContext
+    void testVoidActionReturnsNull() {
+        GenericActionConfig config = GenericActionConfig.builder()
+                .name("my-action")
+                .isVoid(true)
+                .usesArgsArray(true)
+                .valueBody("((java.util.concurrent.atomic.AtomicLong)_args[0]).incrementAndGet();")
+                .build();
+
+        AtomicLong myLong = new AtomicLong(42);
+        Object[] args = new Object[]{myLong};
+        InjectedClass<? extends IGenericAction> action = generator.getOrGenerateGenericAction(config, dummyClass);
+        assertThat(getInstance(action).execute(args, null, null, null, null)).isNull();
+        assertThat(myLong.get()).isEqualTo(43);
+    }
 
     @Test
     @DirtiesContext

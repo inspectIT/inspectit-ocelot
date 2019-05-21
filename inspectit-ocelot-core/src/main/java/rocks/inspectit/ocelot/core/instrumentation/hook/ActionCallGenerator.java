@@ -7,10 +7,10 @@ import rocks.inspectit.ocelot.bootstrap.exposed.ObjectAttachments;
 import rocks.inspectit.ocelot.config.model.instrumentation.actions.ActionCallSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.actions.GenericActionSettings;
 import rocks.inspectit.ocelot.config.utils.ConfigUtils;
+import rocks.inspectit.ocelot.core.instrumentation.actions.GenericActionGenerator;
+import rocks.inspectit.ocelot.core.instrumentation.actions.bound.BoundGenericAction;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.ActionCallConfig;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.GenericActionConfig;
-import rocks.inspectit.ocelot.core.instrumentation.genericactions.BoundGenericAction;
-import rocks.inspectit.ocelot.core.instrumentation.genericactions.GenericActionGenerator;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.ConditionalHookAction;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
 

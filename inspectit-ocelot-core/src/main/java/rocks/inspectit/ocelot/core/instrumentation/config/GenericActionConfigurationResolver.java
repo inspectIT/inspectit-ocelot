@@ -26,6 +26,7 @@ public class GenericActionConfigurationResolver {
 
             val result = GenericActionConfig.builder()
                     .name(name)
+                    .isVoid(conf.getIsVoid())
                     .importedPackages(conf.getImports());
 
             resolveSpecialVariables(additionalInputs, result);
@@ -41,7 +42,11 @@ public class GenericActionConfigurationResolver {
 
     private void resolveBody(GenericActionSettings conf, GenericActionConfig.GenericActionConfigBuilder result) {
         if (conf.getValue() != null) {
-            result.valueBody("return " + conf.getValue() + ";");
+            if (conf.getIsVoid()) {
+                result.valueBody(conf.getValue() + ";");
+            } else {
+                result.valueBody("return " + conf.getValue() + ";");
+            }
         } else {
             result.valueBody(conf.getValueBody());
         }
