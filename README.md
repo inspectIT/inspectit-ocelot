@@ -125,4 +125,4 @@ It's like executing just `java`.
 
 ## Behind the Scenes
 
-inspectIT Ocelot is mainly driven by [NovaTec Consulting GmbH](https://www.novatec-gmbh.de/), a German consultancy firm that specializes in software performance.
+inspectIT Ocelot is mainly driven by [Novatec Consulting GmbH](https://www.novatec-gmbh.de/), a German consultancy firm that specializes in software performance.
