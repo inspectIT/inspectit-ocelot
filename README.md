@@ -5,22 +5,27 @@
 [![Build Status](https://circleci.com/gh/inspectIT/inspectit-ocelot.svg?style=svg)](https://circleci.com/gh/inspectIT/inspectit-ocelot)
 [![Code Coverage](https://codecov.io/gh/inspectit/inspectit-ocelot/branch/master/graph/badge.svg)](https://codecov.io/gh/inspectIT/inspectit-ocelot)
 
-inspectIT Ocelot is a zero-configuration Java agent for dynamically collecting application performance, tracing and behavior data based on the [OpenCensus library](https://opencensus.io/).
-Despite the zero-configuration capability, it provides a powerful configuration feature which enables a full and in-depth customization of it.
-In order to use inspectIT Ocelot, the source code of the target application does **not** have to be touched, changed or modified - even access to the actual source code is not required.
+[inspectIT Ocelot](https://inspectit.rocks/) is a zero-configuration Java agent for dynamically collecting application performance,
+ tracing and behavior data based on the [OpenCensus library](https://opencensus.io/).
+Despite the zero-configuration capability, it provides a powerful configuration feature
+ which enables a full and in-depth customization of all features.
+In order to use inspectIT Ocelot, the source code of the target application does
+**not** have to be touched, changed or modified - even access to the actual source code is not required.
 It automatically injects all required components and executes the necessary actions by itself.
 
-But wait - isn't there already an inspecIT existing?
-Yes, it is! Please [read this](http://www.inspectit.rocks/public-announcement-inspectit-future-plans-and-road-map/) in order to understand why we are developing a new and improved version of it!
-Compared to the former [inspectIT](https://inspectit.rocks/), the OC edition follows the approach of focusing on compatibility and interaction with other awesome open source tools.
-For this purpose we provide interfaces and data exporters for tools and frameworks like [Prometheus](https://prometheus.io/), [Zipkin](https://zipkin.io/) or [Jaeger](https://www.jaegertracing.io/).
-This allows us to use and interact with well-known and established tools like [Elasticsearch](https://www.elastic.co/products/elasticsearch), [InfluxDB](https://www.influxdata.com/) or [Grafana](https://grafana.com/), reducing the amount of components which have to be introduced into an existing infrastructure or which needs to be familiarized with.
+Compared to the former [inspectIT](https://github.com/inspectIT/inspectIT),
+Ocelot follows the approach of focusing on compatibility and interaction with other awesome open source tools.
+For this purpose the agent includes data exporters for tools and frameworks like [Prometheus](https://prometheus.io/), [Zipkin](https://zipkin.io/) or [Jaeger](https://www.jaegertracing.io/).
+This allows us to use and interact with well-known and established tools like [Elasticsearch](https://www.elastic.co/products/elasticsearch), [InfluxDB](https://www.influxdata.com/) or [Grafana](https://grafana.com/),
+reducing the amount of components which have to be introduced into an existing infrastructure or which need to be familiarized with.
 
 ## Collected Data
 
-The inspectIT Ocelot Java agent collects a lot of different data. Currently among others the following data is collected:
+The inspectIT Ocelot Java agent collects a lot of different data, namely metrics and traces.
+You can fully customize the metrics and traces you want to collect via the [configuration](http://docs.inspectit.rocks/releases/latest/#_instrumentation).
+With respect to our zero-configuration goal, the agent already ships with a default configuration capturing useful data for you.
 
-* Metrics
+For example, the following system and JVM metrics are captured by default:
   * CPU (usage and number of cores)
   * Disk Space (used, free and total)
   * Memory (used and available for various regions like heap or non-heap)
@@ -28,21 +33,34 @@ The inspectIT Ocelot Java agent collects a lot of different data. Currently amon
   * Garbage Collection (pause times and collection statistics)
   * Class Loading (loaded and unloaded counts)
   
- A full list of gathered data and metrics can be found in the [documentation](http://docs.inspectit.rocks/releases/latest/#_metrics).
+In addition, the response times for sent and received HTTP requests are collected
+and tagged with relevant information such as the response code or the HTTP method.
+
+Ocelot also collects response times and invocation counts for remote calls between your services.
+Hereby, it is automatically detected whether the call was made to an internal or external service.
+The resulting metric can then then be visualized for example
+using the [Grafana Service Graph Panel](https://github.com/NovatecConsulting/novatec-service-dependency-graph-panel):
+
+![Service Graph](https://inspectit.github.io/inspectit-ocelot/images/service-graph.PNG)
+
+In addition, the agent provides out-of-the-box support for tracing, even across JVM borders.
+You can easily record your traces and enrich them with metadata extracted from your application at runtime:
+
+![Distributed Tracing](https://inspectit.github.io/inspectit-ocelot/images/distributed-tracing.PNG)
+
+Checkout the [documentation](http://docs.inspectit.rocks/releases/latest/) to find out how you can extract custom metrics and traces.
 
 ## Demo
 
 You want to see the inspectIT Ocelot Java agent in action?
 No problem!
 We've prepared a nice containerized demo to show what the agent is capable of.
-The demo consists of three different scenarios, whereby we would like to emphasize the flexibility of the agent and therefore each scenario uses a different set of tools.
-For example, Elasticsearch is used as data storage in one scenario and InfluxDB or Prometheus in the other.
+The demo consists of two different scenarios, whereby we would like to emphasize the flexibility of the agent and therefore each scenario uses a different set of tools.
 
-All you have to be done is to checkout this repository, install Docker on your machine and spin one of the prepared scenarios up:
+All you have to do is to download the [demo archive](https://github.com/inspectIT/inspectit-ocelot/releases/latest) and start it with docker-compose:
 
-* `$ docker-compose -f inspectit-ocelot-demo/docker-compose-elastic.yml up`
-* `$ docker-compose -f inspectit-ocelot-demo/docker-compose-influxdb.yml up`     
-* `$ docker-compose -f inspectit-ocelot-demo/docker-compose-prometheus.yml up`
+* `$ docker-compose -f docker-compose-influxdb-zipkin.yml up`
+* `$ docker-compose -f docker-compose-prometheus-jaeger.yml up`
 
 Check out the [documentation's demo section](http://docs.inspectit.rocks/releases/latest/#_demo_scenarios) for detailed information on each scenario.
 
@@ -51,9 +69,9 @@ Check out the [documentation's demo section](http://docs.inspectit.rocks/release
 Getting started with the inspectIT Ocelot Java agent is very easy!
 
 First of all, you have to download the Java agent.
-You will find all released versions in the release section of this repository: https://github.com/inspectIT/inspectit-ocelot/releases
+You can find all released versions in the release section of this repository: https://github.com/inspectIT/inspectit-ocelot/releases
 
-The best way to use the inspectIT Ocelot Java agent is to attach it to your Java application during startup.
+The easiest way to use the inspectIT Ocelot Java agent is to attach it to your Java application during startup.
 This can be achieved using the `-javaagent` command-line option of your JVM and referencing the agent Jar:
 
     $ java -javaagent:"/path/to/inspectit-ocelot-agent.jar" -jar my-java-program.jar
@@ -66,7 +84,7 @@ Please read the [documentation](http://docs.inspectit.rocks/releases/latest/#_at
 
 ## Configuration
 
-The inspectIT Ocelot Java agent offers a comprehensive configuration capability which allows you to customize practically all properties to your own needs.
+The inspectIT Ocelot Java agent offers a comprehensive configuration capability which allows you to customize all properties to your own needs.
 In addition, the agent also supports **hot reloading** for its configuration which makes it possible to modify individual configuration settings during runtime without having to restart the application, which is usually the case.
 
 The configuration hot reloading feature also allows you to start the agent in a kind of "standby state" with deactivated features and activate these at a later point in time.
@@ -74,7 +92,7 @@ The configuration hot reloading feature also allows you to start the agent in a 
 Currently, the configuration values can be set using [environment variables, system properties](http://docs.inspectit.rocks/releases/latest/#_java_system_properties) or [configuration files](http://docs.inspectit.rocks/releases/latest/#_file_based_configuration).
 This allows you to pass configuration values to the agents by, for example, using Puppet to set specific properties or using Ansible to roll out updated configuration files which then will be hot reloaded.
  
-For detailed information about the configuration see the [related section of the documentation](http://docs.inspectit.rocks/releases/latest/#_configuration).
+For detailed information about the configuration see the [related section of the documentation](http://docs.inspectit.rocks/releases/latest/#_configuration_basics).
 
 ## Documentation
 
@@ -86,7 +104,7 @@ If you cannot wait for the next stable release and want to use an agent based on
 
 ## Contribution and Development
 
-If you want to contribute anything to this awesome project, feel free to open a pull request or reach out to us!
+If you want to contribute anything to this project, feel free to open a pull request or reach out to us!
 A good starting point is the [CONRIBUTION.md](CONTRIBUTION.md).
 
 If you need additional or in-depth information on the actual implementation of inspectIT Ocelot, check out the README files in the child projects of this repository. 
@@ -109,7 +127,7 @@ No. The agent is compatible to and can be used with any kind of JVM (Oracle JVM,
 
 Yes, you can use the inspectIT Ocelot Java agent if you already use the OpenCensus library.
 However, there are a few points that need to be considered to ensure a smooth operation.
-Please read the [corresponding section in the documentation](http://docs.inspectit.rocks/master/#_using_opencensus_library_with_inspectit_oce).
+Please read the [corresponding section in the documentation](http://docs.inspectit.rocks/releases/latest/#_using_opencensus_library_with_inspectit_ocelot).
 
 #### How can I start my application with the inspectIT Ocelot Java agent?
 
