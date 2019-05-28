@@ -21,6 +21,8 @@ import java.util.stream.Collectors;
 @Component
 public class MethodHookConfigurationResolver {
 
+    private static final Predicate<Object> ALWAYS_TRUE = x -> true;
+
     @Autowired
     GenericActionCallSorter scheduler;
 
@@ -88,7 +90,7 @@ public class MethodHookConfigurationResolver {
                 resultAttributes.put(attributeKey, dataKey);
             }
             builder.attributes(resultAttributes);
-            builder.attributeConditions(getAndDetectConflicts(attributeWritingRules, r -> r.getTracing().getAttributeConditions(), x -> true, "span attribute writing conditions"));
+            builder.attributeConditions(getAndDetectConflicts(attributeWritingRules, r -> r.getTracing().getAttributeConditions(), ALWAYS_TRUE, "span attribute writing conditions"));
         }
     }
 
@@ -96,10 +98,10 @@ public class MethodHookConfigurationResolver {
         Set<InstrumentationRule> rulesContinuingSpan = matchedRules.stream()
                 .filter(r -> r.getTracing().getContinueSpan() != null)
                 .collect(Collectors.toSet());
-        String continueSpan = getAndDetectConflicts(rulesContinuingSpan, r -> r.getTracing().getContinueSpan(), x -> true, "continue-span");
+        String continueSpan = getAndDetectConflicts(rulesContinuingSpan, r -> r.getTracing().getContinueSpan(), ALWAYS_TRUE, "continue-span");
         builder.continueSpan(continueSpan);
         if (continueSpan != null) {
-            builder.continueSpanConditions(getAndDetectConflicts(rulesContinuingSpan, r -> r.getTracing().getContinueSpanConditions(), x -> true, "continue span conditions"));
+            builder.continueSpanConditions(getAndDetectConflicts(rulesContinuingSpan, r -> r.getTracing().getContinueSpanConditions(), ALWAYS_TRUE, "continue span conditions"));
         }
     }
 
@@ -107,13 +109,13 @@ public class MethodHookConfigurationResolver {
         Set<InstrumentationRule> rulesDefiningEndSpan = matchedRules.stream()
                 .filter(r -> r.getTracing().getEndSpan() != null)
                 .collect(Collectors.toSet());
-        Boolean endSpan = getAndDetectConflicts(rulesDefiningEndSpan, r -> r.getTracing().getEndSpan(), Objects::nonNull, "end-span");
-        Boolean spanActuallyEnding = Optional.ofNullable(endSpan).orElse(true);
-        builder.endSpan(spanActuallyEnding);
-        if (spanActuallyEnding) {
+        Boolean endSpanSetting = getAndDetectConflicts(rulesDefiningEndSpan, r -> r.getTracing().getEndSpan(), Objects::nonNull, "end-span");
+        boolean endSpan = Optional.ofNullable(endSpanSetting).orElse(true);
+        builder.endSpan(endSpan);
+        if (endSpan) {
             builder.endSpanConditions(
                     Optional.ofNullable(
-                            getAndDetectConflicts(rulesDefiningEndSpan, r -> r.getTracing().getEndSpanConditions(), x -> true, "end span conditions")
+                            getAndDetectConflicts(rulesDefiningEndSpan, r -> r.getTracing().getEndSpanConditions(), ALWAYS_TRUE, "end span conditions")
                     ).orElse(new ConditionalActionSettings()));
         }
     }
@@ -122,13 +124,13 @@ public class MethodHookConfigurationResolver {
         Set<InstrumentationRule> rulesDefiningStartSpan = matchedRules.stream()
                 .filter(r -> r.getTracing().getStartSpan() != null)
                 .collect(Collectors.toSet());
-        Boolean startSpan = getAndDetectConflicts(rulesDefiningStartSpan, r -> r.getTracing().getStartSpan(), x -> true, "start-span");
-        Boolean spanActuallyStarted = Optional.ofNullable(startSpan).orElse(false);
-        builder.startSpan(spanActuallyStarted);
-        if (spanActuallyStarted) {
+        Boolean startSpanSetting = getAndDetectConflicts(rulesDefiningStartSpan, r -> r.getTracing().getStartSpan(), ALWAYS_TRUE, "start-span");
+        boolean startSpan = Optional.ofNullable(startSpanSetting).orElse(false);
+        builder.startSpan(startSpan);
+        if (startSpan) {
             builder.name(getAndDetectConflicts(rulesDefiningStartSpan, r -> r.getTracing().getName(), n -> !StringUtils.isEmpty(n), "the span name"));
             builder.kind(getAndDetectConflicts(rulesDefiningStartSpan, r -> r.getTracing().getKind(), Objects::nonNull, "the span kind"));
-            builder.startSpanConditions(getAndDetectConflicts(rulesDefiningStartSpan, r -> r.getTracing().getStartSpanConditions(), x -> true, "start span conditions"));
+            builder.startSpanConditions(getAndDetectConflicts(rulesDefiningStartSpan, r -> r.getTracing().getStartSpanConditions(), ALWAYS_TRUE, "start span conditions"));
         }
     }
 
@@ -147,7 +149,7 @@ public class MethodHookConfigurationResolver {
      * @return null if none of the rules have a setting matching the given filter. Otherwise returns the setting found.
      * @throws ConflictingDefinitionsException thrown if a conflicting setting is detected
      */
-    private <T> T getAndDetectConflicts(Collection<InstrumentationRule> rules, Function<InstrumentationRule, T> getter, Predicate<T> filter, String exceptionMessage)
+    private <T> T getAndDetectConflicts(Collection<InstrumentationRule> rules, Function<InstrumentationRule, T> getter, Predicate<? super T> filter, String exceptionMessage)
             throws ConflictingDefinitionsException {
 
         Optional<InstrumentationRule> firstMatch = rules.stream().filter(r -> filter.test(getter.apply(r))).findFirst();
@@ -156,7 +158,7 @@ public class MethodHookConfigurationResolver {
             Optional<InstrumentationRule> secondMatch = rules.stream()
                     .filter(r -> r != firstMatch.get())
                     .filter(r -> filter.test(getter.apply(r)))
-                    .filter(r -> !Objects.equals(getter.apply(r), getter.apply(firstMatch.get())))
+                    .filter(r -> !Objects.equals(getter.apply(r), value))
                     .findFirst();
             if (secondMatch.isPresent()) {
                 throw new ConflictingDefinitionsException(firstMatch.get(), secondMatch.get(), exceptionMessage);

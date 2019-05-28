@@ -4,12 +4,14 @@ import io.grpc.Context;
 import io.opencensus.common.Scope;
 import io.opencensus.tags.*;
 import io.opencensus.trace.Span;
+import io.opencensus.trace.SpanContext;
 import io.opencensus.trace.Tracing;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.DataProperties;
 import rocks.inspectit.ocelot.core.testutils.GcUtils;
 
@@ -36,6 +38,55 @@ public class InspectitContextImplTest {
                 .forEachRemaining(t -> result.put(t.getKey().getName(), t.getValue().asString()));
         return result;
     }
+
+    @Nested
+    public class GetAndClearCurrentRemoteSpanContext {
+
+        @Test
+        void verifyNullIfNoSpanSet() {
+            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(new HashMap<>(), propagation, false);
+
+            assertThat(ctx.getAndClearCurrentRemoteSpanContext()).isNull();
+        }
+
+        @Test
+        void verifyCleared() {
+            SpanContext span = Tracing.getTracer().spanBuilder("blub").startSpan().getContext();
+            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(new HashMap<>(), propagation, false);
+            ctx.setData(InternalInspectitContext.REMOTE_PARENT_SPAN_CONTEXT_KEY, span);
+
+            SpanContext result = ctx.getAndClearCurrentRemoteSpanContext();
+
+            assertThat(ctx.getAndClearCurrentRemoteSpanContext()).isNull();
+            assertThat(result).isSameAs(span);
+        }
+
+    }
+
+
+    @Nested
+    public class EnterSpan {
+
+        @Test
+        void spanEntered() {
+            Span mySpan = Tracing.getTracer().spanBuilder("blub").startSpan();
+
+            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(new HashMap<>(), propagation, false);
+            assertThat(ctx.enteredSpan()).isFalse();
+
+            ctx.enterSpan(mySpan);
+            ctx.makeActive();
+
+            assertThat(ctx.enteredSpan()).isTrue();
+            assertThat(Tracing.getTracer().getCurrentSpan()).isSameAs(mySpan);
+
+            ctx.close();
+
+            assertThat(Tracing.getTracer().getCurrentSpan()).isNotSameAs(mySpan);
+        }
+
+    }
+
 
     @Nested
     public class DownPropagation {

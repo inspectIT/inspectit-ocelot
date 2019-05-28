@@ -48,19 +48,34 @@ public class ContinueOrStartSpanAction implements IHookAction {
      */
     private Predicate<ExecutionContext> startSpanCondition;
 
+    @Override
+    public String getName() {
+        return "Span continuing / creation";
+    }
 
     @Override
     public void execute(ExecutionContext context) {
-        InspectitContextImpl ctx = context.getInspectitContext();
+        if (!continueSpan(context)) {
+            startSpan(context);
+        }
+    }
+
+
+    private boolean continueSpan(ExecutionContext context) {
         if (continueSpanDataKey != null && continueSpanCondition.test(context)) {
+            InspectitContextImpl ctx = context.getInspectitContext();
             Object spanObj = ctx.getData(continueSpanDataKey);
             if (spanObj instanceof Span) {
                 ctx.enterSpan((Span) spanObj);
-                return;
+                return true;
             }
         }
-        //no span was continued, attempt to create a new (if configured..)
+        return false;
+    }
+
+    private void startSpan(ExecutionContext context) {
         if (startSpanCondition.test(context)) {
+            InspectitContextImpl ctx = context.getInspectitContext();
             String spanName = getSpanName(ctx, context.getHook().getMethodInformation());
             SpanContext remoteParent = ctx.getAndClearCurrentRemoteSpanContext();
             SpanBuilder builder;
@@ -74,11 +89,6 @@ public class ContinueOrStartSpanAction implements IHookAction {
 
             ctx.enterSpan(builder.startSpan());
         }
-    }
-
-    @Override
-    public String getName() {
-        return "Span continuing / creation";
     }
 
     private String getSpanName(InspectitContextImpl inspectitContext, MethodReflectionInformation methodInfo) {

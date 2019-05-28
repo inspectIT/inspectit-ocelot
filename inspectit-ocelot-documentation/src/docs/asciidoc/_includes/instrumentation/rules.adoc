@@ -583,7 +583,7 @@ The conditions that can be defined are equal to the ones of actions, thus, pleas
 
 With the previous shown settings, it is possible to add an instrumentation which creates exactly one span per invocation of an instrumented method. Especially in asynchronous scenarios, this might not be the desired behaviour:
 For these cases inspectIT Ocelot offers the possibility to record multiple method invocations into a single span.
-The resulting span then has the following properties:
+The resulting span will have the following properties:
 
 * the span starts with the first invoked method and ends as soon as the last one returns
 * all attributes written by each method are combined into the single span

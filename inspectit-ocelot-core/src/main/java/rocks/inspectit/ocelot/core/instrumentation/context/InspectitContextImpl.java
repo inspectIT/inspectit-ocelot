@@ -244,7 +244,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
     /**
      * @return true, if {@link #enterSpan(Span)} was called
      */
-    public boolean wasSpanEntered() {
+    public boolean enteredSpan() {
         return currentSpanScope != null;
     }
 

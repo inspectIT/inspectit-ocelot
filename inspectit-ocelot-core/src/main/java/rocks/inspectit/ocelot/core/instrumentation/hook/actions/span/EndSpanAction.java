@@ -19,7 +19,7 @@ public class EndSpanAction implements IHookAction {
     @Override
     public void execute(ExecutionContext context) {
         InspectitContextImpl ctx = context.getInspectitContext();
-        if (ctx.wasSpanEntered() && condition.test(context)) {
+        if (ctx.enteredSpan() && condition.test(context)) {
             Span current = Tracing.getTracer().getCurrentSpan();
             current.end();
         }

@@ -97,11 +97,11 @@ public class MethodHookGenerator {
                 continueCondition = ConditionalHookAction.getAsPredicate(tracing.getContinueSpanConditions());
             }
 
-            IHookAction beginTraceAction = new ContinueOrStartSpanAction(tracing.getName(), tracing.getKind(),
+            IHookAction startSpanAction = new ContinueOrStartSpanAction(tracing.getName(), tracing.getKind(),
                     tracing.getContinueSpan(), continueCondition, startCondition);
 
             val result = new ArrayList<IHookAction>();
-            result.add(beginTraceAction);
+            result.add(startSpanAction);
 
             if (tracing.getStoreSpan() != null) {
                 result.add(new StoreSpanAction(tracing.getStoreSpan()));
