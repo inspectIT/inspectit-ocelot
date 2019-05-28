@@ -2,7 +2,7 @@ package rocks.inspectit.ocelot.core.instrumentation.hook.actions;
 
 import lombok.Value;
 import lombok.experimental.NonFinal;
-import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContext;
+import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
 import rocks.inspectit.ocelot.core.instrumentation.hook.MethodHook;
 
 /**
@@ -64,7 +64,7 @@ public interface IHookAction {
         /**
          * The context to store and read data.
          */
-        private InspectitContext inspectitContext;
+        private InspectitContextImpl inspectitContext;
 
     }
 }

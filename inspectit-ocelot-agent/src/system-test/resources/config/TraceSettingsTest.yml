@@ -45,6 +45,13 @@ inspectit:
           - name: named
             matcher-mode: STARTS_WITH
 
+      TraceSettingsTest-asyncInterleaved:
+        type:
+          name: TraceSettingsTest$AsyncTask
+          matcher-mode: ENDS_WITH
+        methods:
+          - name: doAsync
+
     rules:
       TraceSettingsTest-startspan:
         scopes:
@@ -108,3 +115,31 @@ inspectit:
         entry:
           name_val:
             action: get_arg0
+
+      TraceSettingsTest-asyncInterleaved:
+        scopes:
+          TraceSettingsTest-asyncInterleaved: true
+        tracing:
+          start-span: true
+          continue-span: span_id
+          end-span: true
+          end-span-conditions: {only-if-true: end_span_arg}
+          store-span: span_id
+          attributes:
+            "1": att_1
+            "2": att_2
+            "3": att_3
+
+        entry:
+          span_id:
+            action: read_attachment_on_this
+            constant-input: {key: "span_obj"}
+        exit:
+          do_write_span_obj:
+            action: replace_attachment_on_this
+            constant-input: {key: "span_obj"}
+            data-input: {value: span_id}
+          att_1: { action: get_arg0 }
+          att_2: { action: get_arg1 }
+          att_3: { action: get_arg2 }
+          end_span_arg: { action: get_arg3 }

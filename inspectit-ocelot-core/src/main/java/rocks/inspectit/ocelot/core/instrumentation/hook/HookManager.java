@@ -100,7 +100,7 @@ public class HookManager {
                 try {
                     activeClassHooks.put(signature, hookGenerator.buildHook(clazz, method, config));
                 } catch (Throwable t) {
-                    log.error("Error generating hook for {} of {}. Method will not be hooked.", signature, clazz.getName());
+                    log.error("Error generating hook for {} of {}. Method will not be hooked.", signature, clazz.getName(), t);
                     activeClassHooks.remove(signature);
                 }
             }
