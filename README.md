@@ -13,17 +13,16 @@ In order to use inspectIT Ocelot, the source code of the target application does
 **not** have to be touched, changed or modified - even access to the actual source code is not required.
 It automatically injects all required components and executes the necessary actions by itself.
 
-But wait - isn't there already an inspectIT?
 Compared to the former [inspectIT](https://github.com/inspectIT/inspectIT),
 Ocelot follows the approach of focusing on compatibility and interaction with other awesome open source tools.
-For this purpose we ship the agent with data exporters for tools and frameworks like [Prometheus](https://prometheus.io/), [Zipkin](https://zipkin.io/) or [Jaeger](https://www.jaegertracing.io/).
+For this purpose the agent includes data exporters for tools and frameworks like [Prometheus](https://prometheus.io/), [Zipkin](https://zipkin.io/) or [Jaeger](https://www.jaegertracing.io/).
 This allows us to use and interact with well-known and established tools like [Elasticsearch](https://www.elastic.co/products/elasticsearch), [InfluxDB](https://www.influxdata.com/) or [Grafana](https://grafana.com/),
 reducing the amount of components which have to be introduced into an existing infrastructure or which need to be familiarized with.
 
 ## Collected Data
 
 The inspectIT Ocelot Java agent collects a lot of different data, namely metrics and traces.
-You can customize the metrics and traces you want to see fully through the [configuration](http://docs.inspectit.rocks/releases/latest/#_instrumentation).
+You can fully customize the metrics and traces you want to collect via the [configuration](http://docs.inspectit.rocks/releases/latest/#_instrumentation).
 With respect to our zero-configuration goal, the agent already ships with a default configuration capturing useful data for you.
 
 For example, the following system and JVM metrics are captured by default:
@@ -35,21 +34,21 @@ For example, the following system and JVM metrics are captured by default:
   * Class Loading (loaded and unloaded counts)
   
 In addition, the response times for sent and received HTTP requests are collected
-and tagged with relevant information such as the response code or the http method.
+and tagged with relevant information such as the response code or the HTTP method.
 
-Ocelot also collects the response times and invocation counts for remote calls between your services.
-Hereby, it is automatically detected, if the call was made to an internal service also instrumented
-with Ocelot or to an external service. The resulting metric can then then be visualized for example
+Ocelot also collects response times and invocation counts for remote calls between your services.
+Hereby, it is automatically detected whether the call was made to an internal or external service.
+The resulting metric can then then be visualized for example
 using the [Grafana Service Graph Panel](https://github.com/NovatecConsulting/novatec-service-dependency-graph-panel):
 
 ![Service Graph](https://inspectit.github.io/inspectit-ocelot/images/service-graph.PNG)
 
-In addition, the agent comes with out of the box support for tracing, even across JVM borders.
+In addition, the agent provides out-of-the-box support for tracing, even across JVM borders.
 You can easily record your traces and enrich them with metadata extracted from your application at runtime:
 
 ![Distributed Tracing](https://inspectit.github.io/inspectit-ocelot/images/distributed-tracing.PNG)
 
-Checkout the [documentation](http://docs.inspectit.rocks/releases/latest/) to find out on how you can extract custom metrics and traces.
+Checkout the [documentation](http://docs.inspectit.rocks/releases/latest/) to find out how you can extract custom metrics and traces.
 
 ## Demo
 
@@ -58,7 +57,7 @@ No problem!
 We've prepared a nice containerized demo to show what the agent is capable of.
 The demo consists of two different scenarios, whereby we would like to emphasize the flexibility of the agent and therefore each scenario uses a different set of tools.
 
-All you have to do is to download the [demo archive](https://github.com/inspectIT/inspectit-ocelot/releases/latest) and start it up with docker-compose:
+All you have to do is to download the [demo archive](https://github.com/inspectIT/inspectit-ocelot/releases/latest) and start it with docker-compose:
 
 * `$ docker-compose -f docker-compose-influxdb-zipkin.yml up`
 * `$ docker-compose -f docker-compose-prometheus-jaeger.yml up`
