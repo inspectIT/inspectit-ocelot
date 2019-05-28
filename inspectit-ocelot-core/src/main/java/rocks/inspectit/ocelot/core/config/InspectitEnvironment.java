@@ -22,6 +22,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -47,10 +48,12 @@ public class InspectitEnvironment extends StandardEnvironment {
     private static final String INSPECTIT_CONFIG_SETTINGS_PREFIX = "inspectit.config";
 
     private static final String DEFAULT_CONFIG_PATH = "default";
-    private static final String DEFAULT_CONFIG_PROPERTYSOURCE_NAME = "inspectitDefaults";
+    public static final String DEFAULT_CONFIG_PROPERTYSOURCE_NAME = "inspectitDefaults";
 
     private static final String FALLBACK_CONFIG_PATH = "fallback";
     private static final String FALLBACK_CONFIG_PROPERTYSOURCE_NAME = "inspectitFallbackOverwrites";
+
+    public static final String HTTP_BASED_CONFIGURATION = "httpBasedConfig";
 
     private static final String CMD_ARGS_PROPERTYSOURCE_NAME = "javaagentArguments";
 
@@ -67,7 +70,8 @@ public class InspectitEnvironment extends StandardEnvironment {
      * In contrast items appearing first in the list can provide information for loading items appearing later in the list.
      */
     private static final List<BiConsumer<MutablePropertySources, ConfigSettings>> CONFIGURATION_INIT_STEPS = Arrays.asList(
-            InspectitEnvironment::addFileBasedConfiguration
+            InspectitEnvironment::addFileBasedConfiguration,
+            InspectitEnvironment::addHttpBasedConfiguration
     );
 
     /**
@@ -277,11 +281,29 @@ public class InspectitEnvironment extends StandardEnvironment {
             if (Files.exists(dirPath) && Files.isDirectory(dirPath)) {
                 log.info("initializing file based configuration from dir: {}", path);
                 val dps = new DirectoryPropertySource("fileBasedConfig", Paths.get(path));
-                propsList.addBefore(DEFAULT_CONFIG_PROPERTYSOURCE_NAME, dps);
+
+                // ensure that file-based has a higher priority than http-based
+                boolean containsHttpSource = propsList.contains(HTTP_BASED_CONFIGURATION);
+                if (containsHttpSource) {
+                    propsList.addBefore(HTTP_BASED_CONFIGURATION, dps);
+                } else {
+                    propsList.addBefore(DEFAULT_CONFIG_PROPERTYSOURCE_NAME, dps);
+                }
+
                 dps.reload(propsList);
             } else {
                 log.error("The given configuration file directory does not exist: {}", path);
             }
+        }
+    }
+
+    private static void addHttpBasedConfiguration(MutablePropertySources propsList, ConfigSettings currentConfig) {
+        URL url = currentConfig.getHttp().getUrl();
+        boolean httpEnabled = currentConfig.getHttp().isEnabled() && url != null;
+
+        if (httpEnabled) {
+            PropertySource emptyHttpProperties = new PropertiesPropertySource(HTTP_BASED_CONFIGURATION, new Properties());
+            propsList.addBefore(InspectitEnvironment.DEFAULT_CONFIG_PROPERTYSOURCE_NAME, emptyHttpProperties);
         }
     }
 }

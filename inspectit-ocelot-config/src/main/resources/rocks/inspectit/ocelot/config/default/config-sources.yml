@@ -16,3 +16,11 @@ inspectit:
       # If the frequency is set to zero, a OS notification based approach is used instead of polling.
       # However, depending on the filesystem OS notification might not work, e.g. for network filesystems.
       frequency: 5s
+    # http property source configuration - has a lower priority than file-based configuration
+    http:
+      # the url of the http endpoint to query the configuration
+      url:
+      # whether the http property source should be used
+      enabled: true
+      # the frequency of polling the http endpoint to check for configuration changes
+      frequency: 5s

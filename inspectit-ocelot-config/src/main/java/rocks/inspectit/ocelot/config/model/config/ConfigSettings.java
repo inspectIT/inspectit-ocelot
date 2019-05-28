@@ -3,6 +3,8 @@ package rocks.inspectit.ocelot.config.model.config;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.Valid;
+
 /**
  * Defines the settings for all configuration sources
  */
@@ -15,4 +17,9 @@ public class ConfigSettings {
      */
     private FileBasedConfigSettings fileBased;
 
+    /**
+     * Settings for http property source.
+     */
+    @Valid
+    private HttpConfigSettings http;
 }
