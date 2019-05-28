@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.core.config.filebased;
+package rocks.inspectit.ocelot.core.config.propertysources.file;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.*;

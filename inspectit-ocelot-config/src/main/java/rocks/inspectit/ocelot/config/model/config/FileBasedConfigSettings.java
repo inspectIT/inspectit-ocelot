@@ -26,7 +26,7 @@ public class FileBasedConfigSettings {
     private boolean enabled;
 
     /**
-     * If true, a {@link rocks.inspectit.ocelot.core.config.filebased.ConfigurationDirectoriesWatcher} will be started to reload the configuration from the directory on changes.
+     * If true, a {@link rocks.inspectit.ocelot.core.config.propertysources.file.ConfigurationDirectoriesWatcher} will be started to reload the configuration from the directory on changes.
      */
     private boolean watch;
 
