@@ -13,13 +13,16 @@ commands:
           at: ~/inspectit
   build_and_test_agent:
     steps:
-      - run: cd repo && ./gradlew assemble
-      - run: cd repo && ./gradlew test
-      - run: cd repo && ./gradlew systemTest
+      - run: cd repo && ./gradlew assemble test systemTest
       - store_test_results:
           path: ~/inspectit/repo/inspectit-ocelot-agent/build/test-results
       - store_test_results:
           path: ~/inspectit/repo/inspectit-ocelot-core/build/test-results
+  build_and_test_configuration_server:
+    steps:
+      - run: cd repo/components/inspectit-ocelot-configurationserver && ./gradlew assemble test
+      - store_test_results:
+          path: ~/inspectit/repo/components/inspectit-ocelot-configurationserver/build/test-results
 
 # ###############################################################
 # Jobs
@@ -98,6 +101,14 @@ jobs:
           at: ~/inspectit
       - run: cd repo && ./gradlew jmhCompile
 
+  configuration-server-openjdk8:
+    docker:
+      - image: circleci/openjdk:8-jdk
+    working_directory: ~/inspectit
+    steps:
+      - attach_repo
+      - build_and_test_configuration_server
+
   # Deploy pre-release documentation
   deploy-master-documentation:
     docker:
@@ -163,6 +174,8 @@ workflows:
           <<: *requires_checkout
       - jmh-compile:
           <<: *requires_checkout
+      - configuration-server-openjdk8:
+          <<: *requires_checkout
 
       - deploy-master-documentation:
           requires:
@@ -174,6 +187,7 @@ workflows:
             - sys-ibmjava8
             - sys-adoptjdk8
             - jmh-compile
+            - configuration-server-openjdk8
           filters:
             branches:
               only: master
@@ -194,6 +208,11 @@ workflows:
           requires:
             - requesting-release-build
       - sys-openjdk8:
+          filters:
+            <<: *filter_release
+          requires:
+            - checkout
+      - configuration-server-openjdk8:
           filters:
             <<: *filter_release
           requires:

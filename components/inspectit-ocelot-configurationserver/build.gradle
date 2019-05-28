@@ -1,0 +1,86 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.1.4.RELEASE")
+    }
+}
+
+apply plugin: 'idea'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+apply plugin: 'java'
+
+bootJar {
+    archivesBaseName = 'inspectit-ocelot-configurationserver'
+    version = '0.1.0'
+
+    manifest {
+        attributes 'Start-Class': 'rocks.inspectit.ocelot.ConfigurationServer'
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+subprojects {
+
+    repositories {
+        mavenCentral()
+    }
+
+    apply plugin: 'java'
+
+    configurations {
+        buildTools
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+
+    dependencies {
+        buildTools(
+                'jarcheck:jarcheck:1.5'
+        )
+        compileOnly 'org.projectlombok:lombok:1.18.4'
+        annotationProcessor 'org.projectlombok:lombok:1.18.4'
+        testImplementation (
+                'org.junit.jupiter:junit-jupiter-api:5.3.1',
+                'org.mockito:mockito-junit-jupiter:2.23.0'
+        )
+        testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
+    }
+
+    compileJava {
+        sourceCompatibility = 1.8
+        targetCompatibility = 1.8
+    }
+    compileTestJava {
+        sourceCompatibility = 1.8
+        targetCompatibility = 1.8
+    }
+}
+
+dependencies {
+    implementation(
+            project(':inspectit-ocelot-config'),
+            "org.springframework.boot:spring-boot-starter-web",
+            "org.yaml:snakeyaml:1.24",
+            "io.springfox:springfox-swagger2:2.9.2",
+            "io.springfox:springfox-swagger-ui:2.9.2"
+    )
+    testImplementation(
+            'org.mockito:mockito-core:2.23.4',
+            'org.assertj:assertj-core:3.11.1',
+            'org.junit.jupiter:junit-jupiter-api:5.3.1',
+            'org.mockito:mockito-junit-jupiter:2.23.0'
+
+    )
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
+}
