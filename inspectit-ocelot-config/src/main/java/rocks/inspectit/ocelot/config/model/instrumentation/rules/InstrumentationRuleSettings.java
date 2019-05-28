@@ -71,9 +71,8 @@ public class InstrumentationRuleSettings {
     /**
      * Stores all configuration options related to tracing.
      */
-    @NotNull
     @Valid
-    private RuleTracingSettings tracing = new RuleTracingSettings();
+    private RuleTracingSettings tracing = null;
 
     /**
      * Validates this rule, invoked by {@link InstrumentationSettings#performValidation(InspectitConfig, ViolationBuilder)}

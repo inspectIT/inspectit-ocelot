@@ -17,6 +17,11 @@ inspectit:
           _arg2: Object
         value: _arg2
 
+      get_arg3:
+        input:
+          _arg3: Object
+        value: _arg3
+
       get_return_value:
         input:
           _returnValue: Object

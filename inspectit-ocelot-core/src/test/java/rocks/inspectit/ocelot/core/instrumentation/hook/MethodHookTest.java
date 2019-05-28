@@ -9,7 +9,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 import rocks.inspectit.ocelot.core.instrumentation.context.ContextManager;
-import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContext;
+import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
 
 import java.util.Arrays;
@@ -23,7 +23,7 @@ import static org.mockito.Mockito.*;
 public class MethodHookTest {
 
     @Mock
-    private InspectitContext context;
+    private InspectitContextImpl context;
 
     @Mock
     private ContextManager contextManager;

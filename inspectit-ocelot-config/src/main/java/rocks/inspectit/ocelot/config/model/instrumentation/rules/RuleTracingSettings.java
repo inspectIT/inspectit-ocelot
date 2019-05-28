@@ -1,7 +1,10 @@
 package rocks.inspectit.ocelot.config.model.instrumentation.rules;
 
 import io.opencensus.trace.Span;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import rocks.inspectit.ocelot.config.model.instrumentation.actions.ConditionalActionSettings;
 
 import javax.validation.Valid;
@@ -16,13 +19,37 @@ import java.util.Map;
 @Builder
 public class RuleTracingSettings {
 
-    public static final RuleTracingSettings NO_TRACING_AND_ATTRIBUTES = new RuleTracingSettings();
+    public static final RuleTracingSettings NO_TRACING_AND_ATTRIBUTES = RuleTracingSettings.builder()
+            .startSpan(false)
+            .endSpan(false)
+            .build();
 
     /**
      * If true, the methods which are matched by the rule containing this settings will appear in traces.
+     * Only happens, if no span is continued as configured by {@link #continueSpan}
+     * If this is null, this means that the containing rule does not care whether a span is started or not.
      */
-    @Builder.Default
-    private boolean startSpan = false;
+    private Boolean startSpan;
+
+    /**
+     * If true, the span either started or continued will be ended as soon as the instrumented method returns.
+     * If this is null, this means that the containing rule does not care whether a span is ended or not.
+     * If any rule for a method specified that a span is started or continued but none specified a value for
+     * "endSpan", the span is automatically ended.
+     */
+    private Boolean endSpan;
+
+    /**
+     * If not null, this rule will attempt to continue the span stored under the given data key.
+     * This only happens if the {@link #continueSpanConditions} are met and the the value for the given data key is a valid Span.
+     * If this is null, this means that the containing rule does not care whether a span is started or not.
+     */
+    private String continueSpan;
+
+    /**
+     * If not null, the span started or continued by this rule will be stored under the given data key.
+     */
+    private String storeSpan;
 
     /**
      * Specifies a data key to use as span name from the {@link rocks.inspectit.ocelot.core.instrumentation.context.InspectitContext}.
@@ -55,6 +82,22 @@ public class RuleTracingSettings {
     @Valid
     @NotNull
     ConditionalActionSettings startSpanConditions = new ConditionalActionSettings();
+
+    /**
+     * Defines conditions which make the end-span flag conditional.
+     */
+    @Builder.Default
+    @Valid
+    @NotNull
+    ConditionalActionSettings endSpanConditions = new ConditionalActionSettings();
+
+    /**
+     * Defines conditions which make the continue-span flag conditional.
+     */
+    @Builder.Default
+    @Valid
+    @NotNull
+    ConditionalActionSettings continueSpanConditions = new ConditionalActionSettings();
 
     /**
      * Defines conditions which make the attribute definitions conditional.

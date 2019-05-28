@@ -148,7 +148,7 @@ public class ContextPropagationUtil {
      * @param propagationMap the headers to decode
      * @param target         the context in which the decoded data key-value pairs will be stored.
      */
-    public static void readPropagatedDataFromHeaderMap(Map<String, String> propagationMap, InspectitContext target) {
+    public static void readPropagatedDataFromHeaderMap(Map<String, String> propagationMap, InspectitContextImpl target) {
         if (propagationMap.containsKey(CORRELATION_CONTEXT_HEADER)) {
             readCorrelationContext(propagationMap.get(CORRELATION_CONTEXT_HEADER), target);
         }
@@ -178,7 +178,7 @@ public class ContextPropagationUtil {
      * @param correlationContext the value of the Correlation-Context header
      * @param target             the target context in which the data will be stored
      */
-    private static void readCorrelationContext(String correlationContext, InspectitContext target) {
+    private static void readCorrelationContext(String correlationContext, InspectitContextImpl target) {
         correlationContext = correlationContext.trim();
         for (String keyValuePair : COMMA_WITH_WHITESPACES.split(correlationContext)) {
             try {

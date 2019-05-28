@@ -3,6 +3,7 @@ package rocks.inspectit.ocelot.core.instrumentation.config.model;
 import lombok.Builder;
 import lombok.Singular;
 import lombok.Value;
+import rocks.inspectit.ocelot.config.model.instrumentation.rules.RuleTracingSettings;
 import rocks.inspectit.ocelot.core.instrumentation.hook.MethodHook;
 
 import java.util.List;
@@ -16,8 +17,11 @@ import java.util.Map;
 @Value
 public class MethodHookConfiguration {
 
+    /**
+     * The combined tracing settings from all rules matching this method.
+     */
     @Builder.Default
-    private MethodTracingConfiguration tracing = MethodTracingConfiguration.NO_TRACING_AND_ATTRIBUTES;
+    private RuleTracingSettings tracing = RuleTracingSettings.NO_TRACING_AND_ATTRIBUTES;
 
     /**
      * The ordered list of data assignments performed on method entry.
