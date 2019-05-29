@@ -1,6 +1,7 @@
 package rocks.inspectit.ocelot.core.instrumentation.hook;
 
 import io.opencensus.stats.StatsRecorder;
+import io.opencensus.trace.samplers.Samplers;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import net.bytebuddy.description.method.MethodDescription;
@@ -24,7 +25,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.function.Predicate;
 
 /**
  * This class is responsible for translating {@link MethodHookConfiguration}s
@@ -87,21 +87,29 @@ public class MethodHookGenerator {
     private List<IHookAction> buildTracingEntryActions(RuleTracingSettings tracing) {
         if (tracing.getStartSpan() || tracing.getContinueSpan() != null) {
 
-            Predicate<IHookAction.ExecutionContext> startCondition = (ctx) -> false;
+            val actionBuilder = ContinueOrStartSpanAction.builder();
+
+
             if (tracing.getStartSpan()) {
-                startCondition = ConditionalHookAction.getAsPredicate(tracing.getStartSpanConditions());
+                actionBuilder
+                        .startSpanCondition(ConditionalHookAction.getAsPredicate(tracing.getStartSpanConditions()))
+                        .nameDataKey(tracing.getName())
+                        .spanKind(tracing.getKind());
+                configureSampling(tracing, actionBuilder);
+            } else {
+                actionBuilder.startSpanCondition(ctx -> false);
             }
 
-            Predicate<IHookAction.ExecutionContext> continueCondition = (ctx) -> false;
             if (tracing.getContinueSpan() != null) {
-                continueCondition = ConditionalHookAction.getAsPredicate(tracing.getContinueSpanConditions());
+                actionBuilder
+                        .continueSpanCondition(ConditionalHookAction.getAsPredicate(tracing.getContinueSpanConditions()))
+                        .continueSpanDataKey(tracing.getContinueSpan());
+            } else {
+                actionBuilder.continueSpanCondition(ctx -> false);
             }
-
-            IHookAction startSpanAction = new ContinueOrStartSpanAction(tracing.getName(), tracing.getKind(),
-                    tracing.getContinueSpan(), continueCondition, startCondition);
 
             val result = new ArrayList<IHookAction>();
-            result.add(startSpanAction);
+            result.add(actionBuilder.build());
 
             if (tracing.getStoreSpan() != null) {
                 result.add(new StoreSpanAction(tracing.getStoreSpan()));
@@ -109,6 +117,21 @@ public class MethodHookGenerator {
             return result;
         } else {
             return Collections.emptyList();
+        }
+    }
+
+    private void configureSampling(RuleTracingSettings tracing, ContinueOrStartSpanAction.ContinueOrStartSpanActionBuilder actionBuilder) {
+        try {
+            double fixedProbability = Double.parseDouble(tracing.getSampleProbability());
+            if (fixedProbability <= 0) {
+                actionBuilder.staticSampler(Samplers.neverSample());
+            } else if (fixedProbability >= 1) {
+                actionBuilder.staticSampler(Samplers.alwaysSample());
+            } else {
+                actionBuilder.staticSampler(Samplers.probabilitySampler(fixedProbability));
+            }
+        } catch (NumberFormatException e) {
+            actionBuilder.dynamicSampleProbabilityKey(tracing.getSampleProbability());
         }
     }
 

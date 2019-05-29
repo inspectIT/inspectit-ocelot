@@ -212,8 +212,70 @@ public class TraceSettingsTest extends TraceTestBase {
             assertThat(firstSpan.getEndTimestamp()).isLessThan(secondSpan.getEndTimestamp());
             assertThat(secondSpan.getStartTimestamp()).isLessThan(firstSpan.getEndTimestamp());
         });
-
-
     }
+
+    void samplingTestEndMarker(String id) {
+    }
+
+    void fixedSamplingRateTest(String id) {
+    }
+
+    void dynamicSamplingRateTest(String id, Object rate) {
+    }
+
+
+    @Test
+    void testFixedSpanSamplingRate() {
+        TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, 15, TimeUnit.SECONDS);
+        for (int i = 0; i < 10000; i++) {
+            fixedSamplingRateTest("fixed");
+        }
+        samplingTestEndMarker("fixed_end");
+
+        //wait for the end marker, this ensures that all sampled spans are also exported
+        assertTraceExported((spans) ->
+                assertThat(spans)
+                        .anySatisfy((sp) -> {
+                            assertThat(sp.getName()).isEqualTo("fixed_end");
+                        })
+        );
+
+        long numSpans = exportedSpans.stream().filter(sp -> sp.getName().equals("fixed")).count();
+        //the number of spans lies with a probability greater than 99.999% +-300 around the mean of 0.5 * 10000
+        assertThat(numSpans).isGreaterThan(4700).isLessThan(5300);
+    }
+
+
+    @Test
+    void testDynamicSpanSamplingRate() {
+        TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, 15, TimeUnit.SECONDS);
+        for (int i = 0; i < 10000; i++) {
+            dynamicSamplingRateTest("dynamic_0.2", 0.2);
+            dynamicSamplingRateTest("dynamic_0.7", 0.7);
+            dynamicSamplingRateTest("invalid", "not a number! haha!");
+        }
+        samplingTestEndMarker("dynamic_end");
+
+        //wait for the end marker, this ensures that all sampled spans are also exported
+        assertTraceExported((spans) ->
+                assertThat(spans)
+                        .anySatisfy((sp) -> {
+                            assertThat(sp.getName()).isEqualTo("dynamic_end");
+                        })
+        );
+
+        //the number of spans lies with a probability greater than 99.999% +-300 around the mean of 0.2 * 10000 and 0.7 * 1000
+        long numSpans02 = exportedSpans.stream().filter(sp -> sp.getName().equals("dynamic_0.2")).count();
+        assertThat(numSpans02).isGreaterThan(1700).isLessThan(2300);
+
+        long numSpans07 = exportedSpans.stream().filter(sp -> sp.getName().equals("dynamic_0.7")).count();
+        assertThat(numSpans07).isGreaterThan(6700).isLessThan(7300);
+
+        //ensure that an invalid probability is equal to "never sample"
+        long numSpansInvalid = exportedSpans.stream().filter(sp -> sp.getName().equals("invalid")).count();
+        assertThat(numSpansInvalid).isZero();
+    }
+
+
 }
 

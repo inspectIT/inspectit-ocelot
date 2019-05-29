@@ -1,6 +1,7 @@
 inspectit:
 
   instrumentation:
+
     scopes:
       TraceSettingsTest-root:
         type:
@@ -51,6 +52,28 @@ inspectit:
           matcher-mode: ENDS_WITH
         methods:
           - name: doAsync
+
+      TraceSettingsTest-samplingTestEndMarker:
+        type:
+          name: TraceSettingsTest
+          matcher-mode: ENDS_WITH
+        methods:
+          - name: samplingTestEndMarker
+
+
+      TraceSettingsTest-fixedSamplingRateTest:
+        type:
+          name: TraceSettingsTest
+          matcher-mode: ENDS_WITH
+        methods:
+          - name: fixedSamplingRateTest
+
+      TraceSettingsTest-dynamicSamplingRateTest:
+        type:
+          name: TraceSettingsTest
+          matcher-mode: ENDS_WITH
+        methods:
+          - name: dynamicSamplingRateTest
 
     rules:
       TraceSettingsTest-startspan:
@@ -143,3 +166,40 @@ inspectit:
           att_2: { action: get_arg1 }
           att_3: { action: get_arg2 }
           end_span_arg: { action: get_arg3 }
+
+
+      TraceSettingsTest-samplingTestEndMarker:
+        scopes:
+          TraceSettingsTest-samplingTestEndMarker: true
+        tracing:
+          start-span: true
+          name: name_val
+        entry:
+          name_val:
+            action: get_arg0
+
+
+      TraceSettingsTest-fixedSamplingRateTest:
+        scopes:
+          TraceSettingsTest-fixedSamplingRateTest: true
+        tracing:
+          start-span: true
+          name: name_val
+          sample-probability: 0.5
+        entry:
+          name_val:
+            action: get_arg0
+
+
+      TraceSettingsTest-dynamicSamplingRateTest:
+        scopes:
+          TraceSettingsTest-dynamicSamplingRateTest: true
+        tracing:
+          start-span: true
+          name: name_val
+          sample-probability: sample_prob
+        entry:
+          name_val:
+            action: get_arg0
+          sample_prob:
+            action: get_arg1

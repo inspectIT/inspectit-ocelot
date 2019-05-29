@@ -180,6 +180,39 @@ public class MethodHookConfigurationResolverTest {
 
 
         @Test
+        void verifyTracingCustomSamplingProbabilityRespected() throws Exception {
+            InstrumentationRule r1 = InstrumentationRule.builder()
+                    .tracing(RuleTracingSettings.builder()
+                            .startSpan(true)
+                            .sampleProbability("blub")
+                            .build())
+                    .build();
+
+            RuleTracingSettings result = resolver.buildHookConfiguration(
+                    config, Sets.newHashSet(r1)).getTracing();
+
+            assertThat(result.getSampleProbability()).isEqualTo("blub");
+        }
+
+        @Test
+        void verifyTracingDefaultSamplingProbabilityAvailable() throws Exception {
+            config = InstrumentationConfiguration.builder().defaultTraceSampleProbability(0.5).build();
+
+            InstrumentationRule r1 = InstrumentationRule.builder()
+                    .tracing(RuleTracingSettings.builder()
+                            .startSpan(true)
+                            .sampleProbability(null)
+                            .build())
+                    .build();
+
+            RuleTracingSettings result = resolver.buildHookConfiguration(
+                    config, Sets.newHashSet(r1)).getTracing();
+
+            assertThat(result.getSampleProbability()).isEqualTo("0.5");
+        }
+
+
+        @Test
         void verifyProvidersOrderedByDependencies() throws Exception {
             ActionCallSettings dependingOnFirst = new ActionCallSettings();
             dependingOnFirst.setAction("providerA");

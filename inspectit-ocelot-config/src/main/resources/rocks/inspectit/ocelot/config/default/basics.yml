@@ -27,6 +27,10 @@ inspectit:
     #  - tracing is disabled for all instrumentation rules
     enabled: true
 
+    #global sample probability used to decide if a trace shall be sampled or not
+    # this value can be overridden by the tracing settings of individual instrumentation rules.
+    sample-probability: 1.0
+
   # general settings regarding metrics capturing
   metrics:
     # master switch for metrics capturing. When set to false the following happens:

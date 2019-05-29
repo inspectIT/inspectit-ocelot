@@ -531,6 +531,27 @@ inspectit:
 
 IMPORTANT: The name must exist at the end of the entry section and cannot be set in the exit section.
 
+It is often desirable to not capture every trace, but instead so https://opencensus.io/tracing/sampling/[sample] only a subset.
+This can be configured using the `sample-probability` setting under the `tracing` section:
+
+[source,yaml]
+----
+inspectit:
+  instrumentation:
+    rules:
+      servlet_api_service:
+        tracing:
+          start-span: true
+          sample-probability: 0.2
+----
+
+The example shown above will ensure that only 20% of all traces starting at the given rule will actually be exported.
+Instead of specifying a fixed value, you can also specify a data key here, just like for `name`.
+In this case, the value from the given data key is read and used as sampling probability.
+This allows you for example to vary the sample probability based on the HTTP url.
+
+If no sample probability is defined for a rule, the <<Tracing, default probability>> is used.
+
 Another useful property of spans is that you can attach any additional information in form of attributes.
 In most tracing backends such as ZipKin and Jaeger, you can search your traces based on attributes.
 The example below shows how you can define attributes:
