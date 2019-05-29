@@ -23,4 +23,4 @@ inspectit:
       # whether the http property source should be used
       enabled: true
       # the frequency of polling the http endpoint to check for configuration changes
-      frequency: 5s
+      frequency: 30s

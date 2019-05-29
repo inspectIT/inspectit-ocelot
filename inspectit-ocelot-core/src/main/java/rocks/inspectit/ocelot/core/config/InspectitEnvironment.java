@@ -15,6 +15,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.config.ConfigSettings;
 import rocks.inspectit.ocelot.core.config.propertysources.file.DirectoryPropertySource;
+import rocks.inspectit.ocelot.core.config.propertysources.http.HttpPropertySourceState;
 import rocks.inspectit.ocelot.core.config.util.CaseUtils;
 import rocks.inspectit.ocelot.core.config.util.PropertyUtils;
 
@@ -279,7 +280,7 @@ public class InspectitEnvironment extends StandardEnvironment {
         boolean fileBasedConfigEnabled = enabled && path != null && !path.isEmpty();
         if (fileBasedConfigEnabled) {
             if (Files.exists(dirPath) && Files.isDirectory(dirPath)) {
-                log.info("initializing file based configuration from dir: {}", path);
+                log.info("Initializing file based configuration from dir: {}", path);
                 val dps = new DirectoryPropertySource("fileBasedConfig", Paths.get(path));
 
                 // ensure that file-based has a higher priority than http-based
@@ -302,8 +303,14 @@ public class InspectitEnvironment extends StandardEnvironment {
         boolean httpEnabled = currentConfig.getHttp().isEnabled() && url != null;
 
         if (httpEnabled) {
-            PropertySource emptyHttpProperties = new PropertiesPropertySource(HTTP_BASED_CONFIGURATION, new Properties());
-            propsList.addBefore(InspectitEnvironment.DEFAULT_CONFIG_PROPERTYSOURCE_NAME, emptyHttpProperties);
+            log.info("Initializing HTTP based configuration from URL: {}", url);
+
+            HttpPropertySourceState httpSourceState = new HttpPropertySourceState(HTTP_BASED_CONFIGURATION, currentConfig.getHttp());
+            boolean updateSuccessful = httpSourceState.update();
+
+            if (updateSuccessful) {
+                propsList.addBefore(InspectitEnvironment.DEFAULT_CONFIG_PROPERTYSOURCE_NAME, httpSourceState.getCurrentPropertySource());
+            }
         }
     }
 }
