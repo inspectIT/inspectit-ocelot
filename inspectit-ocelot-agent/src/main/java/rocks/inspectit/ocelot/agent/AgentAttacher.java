@@ -15,14 +15,15 @@ public class AgentAttacher {
     /**
      * Agent jar path.
      */
-    private static final String AGENT_PATH = AgentAttacher.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+    private static final String AGENT_PATH = new File(AgentAttacher.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getAbsolutePath();
 
     /**
      * Attaches the agent to the JVM with the given PID.
      *
-     * @param pid the PID of the JVM to attach the agent
+     * @param pid             the PID of the JVM to attach the agent
+     * @param agentProperties properties passed to the agent represented as a JSON string
      */
-    public static void attach(int pid) {
+    public static void attach(int pid, String agentProperties) {
         System.out.println("Attaching inspectIT Ocelot agent to process " + pid);
 
         File jattachFile = null;
@@ -30,7 +31,7 @@ public class AgentAttacher {
             jattachFile = exportJattach();
             System.out.println("Exported jattach to: " + jattachFile);
 
-            attachAgent(jattachFile, pid);
+            attachAgent(jattachFile, pid, agentProperties);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -44,11 +45,15 @@ public class AgentAttacher {
     /**
      * Attaches the agent to the JVM with the given PID using jattach.
      *
-     * @param jattachFile the jattach binary
-     * @param pid         the PID of the JVM to attach the agent
+     * @param jattachFile     the jattach binary
+     * @param pid             the PID of the JVM to attach the agent
+     * @param agentProperties properties passed to the agent represented as a JSON string
      */
-    private static void attachAgent(File jattachFile, int pid) throws InterruptedException, IOException {
+    private static void attachAgent(File jattachFile, int pid, String agentProperties) throws InterruptedException, IOException {
         String command = String.format("%s %d load instrument false %s", jattachFile.toString(), pid, AGENT_PATH);
+        if (agentProperties != null) {
+            command += "=" + agentProperties;
+        }
         System.out.println("Executing command: " + command);
 
         Process attachProcess = Runtime.getRuntime().exec(command, null, jattachFile.getParentFile());

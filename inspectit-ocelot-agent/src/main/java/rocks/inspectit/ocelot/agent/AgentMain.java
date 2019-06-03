@@ -35,18 +35,19 @@ public class AgentMain {
      */
     public static void main(String[] args) {
         boolean error = false;
-        if (args.length != 1) {
+        if (args.length != 1 && args.length != 2) {
             error = true;
         } else if (!args[0].matches("\\d+")) {
             error = true;
         }
 
         if (error) {
-            System.err.println("Please specify the PID of the JVM you want the agent attach to.\n\nUsage: <PID>");
+            System.err.println("Please specify the PID of the JVM you want the agent attach to.\nNote: you can pass properties to the agent represented as a JSON string!\n\nUsage: <PID> [AGENT_PROPERTIES]");
             System.exit(1);
         }
 
-        AgentAttacher.attach(Integer.parseInt(args[0]));
+        String agentProperties = args.length == 2 ? args[1] : null;
+        AgentAttacher.attach(Integer.parseInt(args[0]), agentProperties);
     }
 
     public static void agentmain(String agentArgs, Instrumentation inst) {
