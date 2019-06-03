@@ -55,7 +55,8 @@ public class HttpPropertySourceState {
 
     /**
      * Constructor.
-     * @param name the name used for the property source
+     *
+     * @param name            the name used for the property source
      * @param currentSettings the settings used to fetch the configuration
      */
     public HttpPropertySourceState(String name, HttpConfigSettings currentSettings) {
@@ -172,11 +173,15 @@ public class HttpPropertySourceState {
             Header[] headersLastModified = response.getHeaders("Last-Modified");
             if (headersLastModified.length > 0) {
                 latestLastModified = headersLastModified[0].getValue();
+            } else {
+                latestLastModified = null;
             }
 
             Header[] headersETag = response.getHeaders("ETag");
             if (headersETag.length > 0) {
                 latestETag = headersETag[0].getValue();
+            } else {
+                latestETag = null;
             }
 
             log.debug("Configuration has successfully been fetched.");

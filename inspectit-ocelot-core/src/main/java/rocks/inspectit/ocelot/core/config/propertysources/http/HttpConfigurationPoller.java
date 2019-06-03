@@ -94,8 +94,6 @@ public class HttpConfigurationPoller extends DynamicallyActivatableService imple
             env.updatePropertySources(propertySources -> {
                 if (propertySources.contains(InspectitEnvironment.HTTP_BASED_CONFIGURATION)) {
                     propertySources.replace(InspectitEnvironment.HTTP_BASED_CONFIGURATION, currentState.getCurrentPropertySource());
-                } else {
-                    propertySources.addBefore(InspectitEnvironment.DEFAULT_CONFIG_PROPERTYSOURCE_NAME, currentState.getCurrentPropertySource());
                 }
             });
         }

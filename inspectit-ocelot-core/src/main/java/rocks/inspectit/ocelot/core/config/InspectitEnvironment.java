@@ -280,17 +280,9 @@ public class InspectitEnvironment extends StandardEnvironment {
         boolean fileBasedConfigEnabled = enabled && path != null && !path.isEmpty();
         if (fileBasedConfigEnabled) {
             if (Files.exists(dirPath) && Files.isDirectory(dirPath)) {
-                log.info("Initializing file based configuration from dir: {}", path);
+                log.info("initializing file based configuration from dir: {}", path);
                 val dps = new DirectoryPropertySource("fileBasedConfig", Paths.get(path));
-
-                // ensure that file-based has a higher priority than http-based
-                boolean containsHttpSource = propsList.contains(HTTP_BASED_CONFIGURATION);
-                if (containsHttpSource) {
-                    propsList.addBefore(HTTP_BASED_CONFIGURATION, dps);
-                } else {
-                    propsList.addBefore(DEFAULT_CONFIG_PROPERTYSOURCE_NAME, dps);
-                }
-
+                propsList.addBefore(DEFAULT_CONFIG_PROPERTYSOURCE_NAME, dps);
                 dps.reload(propsList);
             } else {
                 log.error("The given configuration file directory does not exist: {}", path);
@@ -306,11 +298,8 @@ public class InspectitEnvironment extends StandardEnvironment {
             log.info("Initializing HTTP based configuration from URL: {}", url);
 
             HttpPropertySourceState httpSourceState = new HttpPropertySourceState(HTTP_BASED_CONFIGURATION, currentConfig.getHttp());
-            boolean updateSuccessful = httpSourceState.update();
-
-            if (updateSuccessful) {
-                propsList.addBefore(InspectitEnvironment.DEFAULT_CONFIG_PROPERTYSOURCE_NAME, httpSourceState.getCurrentPropertySource());
-            }
+            httpSourceState.update();
+            propsList.addBefore(InspectitEnvironment.DEFAULT_CONFIG_PROPERTYSOURCE_NAME, httpSourceState.getCurrentPropertySource());
         }
     }
 }

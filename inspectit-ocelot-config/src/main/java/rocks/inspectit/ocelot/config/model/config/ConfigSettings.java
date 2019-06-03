@@ -15,6 +15,7 @@ public class ConfigSettings {
     /**
      * Settings for file-based configuration input.
      */
+    @Valid
     private FileBasedConfigSettings fileBased;
 
     /**
