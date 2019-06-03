@@ -17,7 +17,7 @@ The best option for using the inspectIT Ocelot is to include it to the start of 
 This way the agent will be initialized before your application starts.
 
 ```bash
-$ java -javaagent:"/path/to/inspectit-ocelot-agent-{inspectit-ocelot-version}.jar" -jar my-java-program.jar
+$ java -javaagent:"/path/to/inspectit-ocelot-agent-0.2.jar" -jar my-java-program.jar
 ```
 
 > Some application servers have dedicated scripts that are used to launch the actual JVM that runs the application. In such cases, you must alter the start-up scripts in order to instrument the correct JVM.
@@ -30,7 +30,7 @@ In such a scenario the collection of metrics and traces will start from the poin
 The attaching can easily be done with utilities like [jattach](https://github.com/apangin/jattach):
 
 ```bash
-$ ./jattach.sh <pid> load instrument false /path/to/inspectit-ocelot-agent-{inspectit-ocelot-version}.jar='{"inspectit.service-name" : "MyService"}'
+$ ./jattach.sh <pid> load instrument false /path/to/inspectit-ocelot-agent-0.2.jar='{"inspectit.service-name" : "MyService"}'
 ```
 In this example we're also passing [JSON arguments](configuration/configuration-sources.md#java-agent-arguments) to the agent in order to configure its service name.
 

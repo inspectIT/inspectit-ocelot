@@ -29,13 +29,13 @@ For example, to override the service name used to identify your application repo
 you can change the `inspectit.service-name` property as follows:
 
 ```bash
-$ java -javaagent:/path/to/inspectit-ocelot-agent-{inspectit-ocelot-version}.jar="{ \"inspectit\": { \"service-name\": \"My Custom Service\" }}" -jar my-java-program.jar
+$ java -javaagent:/path/to/inspectit-ocelot-agent-0.2.jar="{ \"inspectit\": { \"service-name\": \"My Custom Service\" }}" -jar my-java-program.jar
 ```
 
 Note that you have to escape the quotes within your JSON string. On linux you can just use the more readable single quotes notation:
 
 ```bash
-$ java -javaagent:/path/to/inspectit-ocelot-agent-{inspectit-ocelot-version}.jar='{ "inspectit": { "service-name": "My Custom Service" }}' -jar my-java-program.jar
+$ java -javaagent:/path/to/inspectit-ocelot-agent-0.2.jar='{ "inspectit": { "service-name": "My Custom Service" }}' -jar my-java-program.jar
 ```
 
 ### Java System Properties
@@ -44,7 +44,7 @@ You can pass any configuration property as the Java System property to the Java 
 Using this approach you can change the `inspectit.service-name` property as follows:
 
 ```bash
-$ java -Dinspectit.service-name="My Custom Service" -javaagent:/path/to/inspectit-ocelot-agent-{inspectit-ocelot-version}.jar -jar my-java-program.jar
+$ java -Dinspectit.service-name="My Custom Service" -javaagent:/path/to/inspectit-ocelot-agent-0.2.jar -jar my-java-program.jar
 ```
 
 ### OS Environment Variables
@@ -53,7 +53,7 @@ Similar to the Java System properties, inspectIT Ocelot will also consider all t
 Due to the relaxed bindings, you can use upper case format, which is recommended when using system environment variables.
 
 ```bash
-$ INSPECTIT_SERVICE_NAME="My Custom Service" java -javaagent:/path/to/inspectit-ocelot-agent-{inspectit-ocelot-version}.jar -jar my-java-program.jar
+$ INSPECTIT_SERVICE_NAME="My Custom Service" java -javaagent:/path/to/inspectit-ocelot-agent-0.2.jar -jar my-java-program.jar
 ```
 
 ## Relaxed Bindings

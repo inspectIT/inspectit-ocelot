@@ -11,12 +11,12 @@ Furthermore, a correct configuration will make it possible to combine metrics an
 
 1. Make sure you are using the same version of OpenCensus as inspectIT Ocelot.
    
-   The inspectIT Ocelot agent in version {inspectit-ocelot-version} internally uses OpenCensus in version {opencensus-version}. Please adapt any OpenCensus dependency in your application to this version to avoid run-time conflicts.
+   The inspectIT Ocelot agent in version 0.2 internally uses OpenCensus in version 0.20.0. Please adapt any OpenCensus dependency in your application to this version to avoid run-time conflicts.
    ```XML
    <dependency>
        <groupId>io.opencensus</groupId>
        <artifactId>opencensus-api</artifactId>
-       <version>{opencensus-version}</version>
+       <version>0.20.0</version>
    </dependency>
    ```
 
