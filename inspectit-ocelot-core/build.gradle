@@ -2,11 +2,41 @@ plugins {
     id "me.champeau.gradle.jmh" version "0.4.8"
 }
 
+
+apply plugin: 'java'
+
+configurations {
+    buildTools
+}
+
+test {
+    useJUnitPlatform()
+}
+
+compileJava {
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+}
+compileTestJava {
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+}
+
 dependencies {
     compileOnly(
             project(':inspectit-ocelot-bootstrap'),
-            "io.opencensus:opencensus-api:${openCensusVersion}"
+            "io.opencensus:opencensus-api:${openCensusVersion}",
+            'org.projectlombok:lombok:1.18.4'
     )
+    buildTools(
+            'jarcheck:jarcheck:1.5'
+    )
+    annotationProcessor 'org.projectlombok:lombok:1.18.4'
+    testImplementation (
+            'org.junit.jupiter:junit-jupiter-api:5.3.1',
+            'org.mockito:mockito-junit-jupiter:2.23.0'
+    )
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
 
     implementation(
             project(':inspectit-ocelot-config'),
@@ -61,6 +91,35 @@ dependencies {
     )
 
 }
+
+
+// use jarCheck to make sure all classes in our dependencies are at maximum in version 1.8
+task checkDependencyJavaVersions {
+    def excludes = ["byte-buddy"]
+
+    def jarCheckPath = "$buildDir/jarCheck"
+    outputs.dir jarCheckPath
+
+    doFirst {
+        def jarCheckOutput = new File(jarCheckPath)
+        jarCheckOutput.mkdirs()
+        configurations.runtimeClasspath.each { file ->
+            def name = file.name
+            def isExcluded = excludes.stream().anyMatch({ excl ->
+                name.contains(excl)
+            })
+            if (!isExcluded && file.exists()) {
+                javaexec {
+                    classpath configurations.buildTools
+                    main = 'com.mindprod.jarcheck.JarCheck'
+                    args = ["$file", "1.0", "1.8"]
+                    standardOutput = new File(jarCheckOutput, "$name-check.log").newOutputStream()
+                }
+            }
+        }
+    }
+}
+jar.dependsOn checkDependencyJavaVersions
 
 jar {
     archiveName = "${project.name}.jar"

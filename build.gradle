@@ -11,7 +11,6 @@ licenseReport {
 
 }
 
-
 allprojects {
 
     repositories {
@@ -30,41 +29,6 @@ allprojects {
     version = "$buildVersion"
 }
 
-subprojects {
-
-
-    apply plugin: 'java'
-
-    configurations {
-        buildTools
-    }
-
-    test {
-        useJUnitPlatform()
-    }
-
-    dependencies {
-        buildTools(
-                'jarcheck:jarcheck:1.5'
-        )
-        compileOnly 'org.projectlombok:lombok:1.18.4'
-        annotationProcessor 'org.projectlombok:lombok:1.18.4'
-        testImplementation (
-                'org.junit.jupiter:junit-jupiter-api:5.3.1',
-                'org.mockito:mockito-junit-jupiter:2.23.0'
-        )
-        testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
-    }
-
-    compileJava {
-        sourceCompatibility = 1.8
-        targetCompatibility = 1.8
-    }
-    compileTestJava {
-        sourceCompatibility = 1.8
-        targetCompatibility = 1.8
-    }
-}
 
 task codeCoverageReport(type: JacocoReport) {
     group = 'Verification'
@@ -73,7 +37,9 @@ task codeCoverageReport(type: JacocoReport) {
     executionData fileTree(project.rootDir.absolutePath).include("**/build/jacoco/*.exec")
 
     subprojects.each {
-        sourceSets it.sourceSets.main
+        if(it.plugins.hasPlugin('java')) {
+            sourceSets it.sourceSets.main
+        }
     }
 
     reports {

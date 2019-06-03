@@ -1,5 +1,29 @@
+
+plugins {
+    id 'java'
+}
+
 dependencies {
-   //No bootstrap dependencies so far...
+    compileOnly 'org.projectlombok:lombok:1.18.4'
+    annotationProcessor 'org.projectlombok:lombok:1.18.4'
+    testImplementation (
+            'org.junit.jupiter:junit-jupiter-api:5.3.1',
+            'org.mockito:mockito-junit-jupiter:2.23.0'
+    )
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+compileJava {
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+}
+compileTestJava {
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
 }
 
 jar {

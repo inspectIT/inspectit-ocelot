@@ -1,3 +1,0 @@
-include 'inspectit-ocelot-config'
-project(':inspectit-ocelot-config').projectDir = new File('../../inspectit-ocelot-config')
-

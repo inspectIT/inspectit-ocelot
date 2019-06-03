@@ -1,6 +1,8 @@
-include "inspectit-ocelot-agent"
+include 'inspectit-ocelot-config'
 include 'inspectit-ocelot-bootstrap'
 include 'inspectit-ocelot-core'
-include 'inspectit-ocelot-config'
+include "inspectit-ocelot-agent"
 include 'inspectit-ocelot-documentation'
 include 'inspectit-ocelot-demo'
+include 'inspectit-ocelot-configurationserver'
+project(':inspectit-ocelot-configurationserver').projectDir = new File('./components/inspectit-ocelot-configurationserver')
