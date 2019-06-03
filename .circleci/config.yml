@@ -101,40 +101,19 @@ jobs:
   # Deploy pre-release documentation
   deploy-master-documentation:
     docker:
-      - image: circleci/openjdk:8-jdk
+      - image: circleci/node:8.11.1
     working_directory: ~/inspectit
     steps:
       - attach_workspace:
           at: ~/inspectit
-      - run: sudo apt-get install -y awscli
       - run:
+          name: Deploying to GitHub Pages
+          working_directory: ~/inspectit/inspectit-ocelot-documentation/website
           command: |
-            RELEASE_VERSION="SNAPSHOT-${CIRCLE_BUILD_NUM}"
-            echo "Release Version: $RELEASE_VERSION"
-            cd repo
-            ./gradlew -PbuildVersion=$RELEASE_VERSION packageDocumentation
-      - run: aws s3 sync ~/inspectit/repo/inspectit-ocelot-documentation/build/asciidoc/html5 s3://docs.inspectit.rocks/master
-
-  # Deploy release documentations
-  deploy-release-documentation:
-    docker:
-      - image: circleci/openjdk:8-jdk
-    working_directory: ~/inspectit
-    steps:
-      - attach_workspace:
-          at: ~/inspectit
-      - run: sudo apt-get install -y awscli
-      - run:
-          command: |
-            RELEASE_VERSION="${CIRCLE_TAG}"
-            echo "Release Version: $RELEASE_VERSION"
-            cd repo
-            ./gradlew -PbuildVersion=$RELEASE_VERSION packageDocumentation
-      - run: cd repo && chmod +x ./resources/generate-documentation-sitemap.sh
-      - run: cd repo && ./resources/generate-documentation-sitemap.sh
-      - run: aws s3 sync ~/inspectit/repo/inspectit-ocelot-documentation/build/asciidoc/html5 s3://docs.inspectit.rocks/releases/latest
-      - run: aws s3 sync ~/inspectit/repo/inspectit-ocelot-documentation/build/asciidoc/html5 s3://docs.inspectit.rocks/releases/$TRAVIS_TAG
-      - run: aws s3 sync ~/inspectit/repo/sitemap s3://docs.inspectit.rocks
+            git config --global user.email "mariusoe@users.noreply.github.com"
+            git config --global user.name "Marius Oehler"
+            echo "machine github.com login mariusoe password $GITHUB_TOKEN" > ~/.netrc
+            cd website && yarn install && GIT_USER=mariusoe yarn run publish-gh-pages
 
 # ###############################################
 # The defined workflows
@@ -198,7 +177,7 @@ workflows:
             <<: *filter_release
           requires:
             - checkout
-      - deploy-release-documentation:
+      - deploy-master-documentation:
           filters:
             <<: *filter_release
           requires:
