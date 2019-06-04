@@ -39,6 +39,7 @@ task codeCoverageReport(type: JacocoReport) {
     subprojects.each {
         if(it.plugins.hasPlugin('java')) {
             sourceSets it.sourceSets.main
+            dependsOn it.test
         }
     }
 
@@ -51,6 +52,5 @@ task codeCoverageReport(type: JacocoReport) {
     }
 }
 codeCoverageReport.dependsOn {
-    subprojects*.test
     project(':inspectit-ocelot-agent').systemTest
 }
