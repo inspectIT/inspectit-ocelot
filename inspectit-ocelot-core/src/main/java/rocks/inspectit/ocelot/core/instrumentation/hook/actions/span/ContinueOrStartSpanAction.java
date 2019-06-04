@@ -1,11 +1,9 @@
 package rocks.inspectit.ocelot.core.instrumentation.hook.actions.span;
 
-import io.opencensus.trace.Span;
-import io.opencensus.trace.SpanBuilder;
-import io.opencensus.trace.SpanContext;
-import io.opencensus.trace.Tracing;
+import io.opencensus.trace.*;
 import io.opencensus.trace.samplers.Samplers;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.RuleTracingSettings;
 import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
 import rocks.inspectit.ocelot.core.instrumentation.hook.MethodReflectionInformation;
@@ -17,6 +15,7 @@ import java.util.function.Predicate;
  * Invokes {@link InspectitContextImpl#enterSpan(Span)} on the currently active context.
  */
 @AllArgsConstructor
+@Builder
 public class ContinueOrStartSpanAction implements IHookAction {
 
     /**
@@ -35,6 +34,18 @@ public class ContinueOrStartSpanAction implements IHookAction {
      * The data key to read for continuing a span.
      */
     private final String continueSpanDataKey;
+
+    /**
+     * If the sample probability is fixed, this attribute holds the corresponding sampler.
+     * If a dynamic sample probability is used, this value is null and {@link #dynamicSampleProbabilityKey} is not null.
+     */
+    private final Sampler staticSampler;
+
+    /**
+     * If the sample probability is dynamic, this attribute holds the datakey under which the sample probability is looked up from the context.
+     * If no dynamic sample probability is used, {@link #staticSampler} has to be not null.
+     */
+    private final String dynamicSampleProbabilityKey;
 
     /**
      * The condition which defines if this actions attempts to continue the span defined by {@link #continueSpanDataKey}.
@@ -76,6 +87,17 @@ public class ContinueOrStartSpanAction implements IHookAction {
     private void startSpan(ExecutionContext context) {
         if (startSpanCondition.test(context)) {
             InspectitContextImpl ctx = context.getInspectitContext();
+
+            Sampler sampler = staticSampler;
+            if (sampler == null) {
+                Object probability = ctx.getData(dynamicSampleProbabilityKey);
+                if (probability instanceof Number) {
+                    sampler = Samplers.probabilitySampler(Math.min(1, Math.max(0, ((Number) probability).doubleValue())));
+                } else {
+                    sampler = Samplers.neverSample();
+                }
+            }
+
             String spanName = getSpanName(ctx, context.getHook().getMethodInformation());
             SpanContext remoteParent = ctx.getAndClearCurrentRemoteSpanContext();
             SpanBuilder builder;
@@ -85,7 +107,7 @@ public class ContinueOrStartSpanAction implements IHookAction {
                 builder = Tracing.getTracer().spanBuilder(spanName);
             }
             builder.setSpanKind(spanKind);
-            builder.setSampler(Samplers.alwaysSample());
+            builder.setSampler(sampler);
 
             ctx.enterSpan(builder.startSpan());
         }
