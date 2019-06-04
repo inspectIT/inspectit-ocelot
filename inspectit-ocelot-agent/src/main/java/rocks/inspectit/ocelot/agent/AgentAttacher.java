@@ -5,6 +5,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -50,23 +53,32 @@ public class AgentAttacher {
      * @param agentProperties properties passed to the agent represented as a JSON string
      */
     private static void attachAgent(File jattachFile, int pid, String agentProperties) throws InterruptedException, IOException {
-        String command = String.format("%s %d load instrument false %s", jattachFile.toString(), pid, AGENT_PATH);
+        List<String> commandList = new ArrayList<>(Arrays.asList(jattachFile.toString(), String.valueOf(pid), "load", "instrument", "false"));
+
         if (agentProperties != null) {
-            command += "=" + agentProperties;
+            commandList.add(AGENT_PATH + "=" + agentProperties);
+        } else {
+            commandList.add(AGENT_PATH);
         }
-        System.out.println("Executing command: " + command);
 
-        Process attachProcess = Runtime.getRuntime().exec(command, null, jattachFile.getParentFile());
+        ProcessBuilder processBuilder = new ProcessBuilder(commandList)
+                .directory(jattachFile.getParentFile())
+                .redirectErrorStream(true)
+                .inheritIO();
 
-        StreamCopy outStream = new StreamCopy(attachProcess.getInputStream(), System.out);
-        StreamCopy errStream = new StreamCopy(attachProcess.getErrorStream(), System.err);
-        outStream.start();
-        errStream.start();
+        System.out.println("Executing command: " + processBuilder.command());
 
-        outStream.join();
-        errStream.join();
+        System.out.println("###################################");
+        System.out.println("## JATTACH START ##################");
+        System.out.println("# # # # # # # # # # # # # # # # # #");
 
+        Process attachProcess = processBuilder.start();
         int exitVal = attachProcess.waitFor();
+
+        System.out.println("# # # # # # # # # # # # # # # # # #");
+        System.out.println("## JATTACH END ####################");
+        System.out.println("###################################");
+
         if (exitVal == 0) {
             System.out.println("Agent successfully attached!");
         } else {
@@ -114,32 +126,5 @@ public class AgentAttacher {
         }
 
         return jattachFile;
-    }
-
-    /**
-     * Helper class for copying an input stream to a print stream.
-     */
-    private static class StreamCopy extends Thread {
-
-        private InputStream inputStream;
-        private PrintStream printStream;
-
-        public StreamCopy(InputStream inputStream, PrintStream printStream) {
-            this.inputStream = inputStream;
-            this.printStream = printStream;
-        }
-
-        @Override
-        public void run() {
-            try {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    printStream.println("[JATTACH] " + line);
-                }
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
     }
 }
