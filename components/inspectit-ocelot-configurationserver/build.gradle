@@ -26,7 +26,6 @@ repositories {
 }
 
 sourceCompatibility = 1.8
-targetCompatibility = 1.8
 
 test {
     useJUnitPlatform()
@@ -35,15 +34,6 @@ test {
 dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.4'
     annotationProcessor 'org.projectlombok:lombok:1.18.4'
-}
-
-compileJava {
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
-}
-compileTestJava {
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
 }
 
 dependencies {

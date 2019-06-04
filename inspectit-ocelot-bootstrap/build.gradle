@@ -17,14 +17,7 @@ test {
     useJUnitPlatform()
 }
 
-compileJava {
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
-}
-compileTestJava {
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
-}
+sourceCompatibility = 1.8
 
 jar {
     archiveName = "${project.name}.jar"

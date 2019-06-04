@@ -10,17 +10,9 @@ test {
     useJUnitPlatform()
 }
 
-compileJava {
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
-}
-compileTestJava {
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
-}
+sourceCompatibility = 1.8
 
 configurations {
-    buildTools
     opencensus
 }
 
@@ -31,9 +23,6 @@ dependencies {
     )
     opencensus(
             "io.opencensus:opencensus-impl:${openCensusVersion}"
-    )
-    buildTools(
-            'jarcheck:jarcheck:1.5'
     )
     annotationProcessor 'org.projectlombok:lombok:1.18.4'
     testImplementation (

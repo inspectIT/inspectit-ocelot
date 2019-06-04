@@ -1,27 +1,14 @@
 
 apply plugin: 'java'
 
-configurations {
-    buildTools
-}
-
 test {
     useJUnitPlatform()
 }
 
-compileJava {
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
-}
-compileTestJava {
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
-}
+
+sourceCompatibility = 1.8
 
 dependencies {
-    buildTools(
-            'jarcheck:jarcheck:1.5'
-    )
     compileOnly 'org.projectlombok:lombok:1.18.4'
     annotationProcessor 'org.projectlombok:lombok:1.18.4'
     testImplementation (
