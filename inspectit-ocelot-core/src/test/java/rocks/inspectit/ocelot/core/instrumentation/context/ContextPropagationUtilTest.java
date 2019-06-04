@@ -23,7 +23,7 @@ import static rocks.inspectit.ocelot.core.instrumentation.context.ContextPropaga
 public class ContextPropagationUtilTest {
 
     @Mock
-    InspectitContext inspectitContext;
+    InspectitContextImpl inspectitContext;
 
     private String enc(String str) {
         try {

@@ -138,7 +138,7 @@ public class MethodHookConfigurationResolverTest {
             MethodHookConfiguration result = resolver.buildHookConfiguration(
                     config.toBuilder().tracingEnabled(false).build(), Sets.newHashSet(r1));
 
-            assertThat(result.getTracing().isStartSpan()).isFalse();
+            assertThat(result.getTracing().getStartSpan()).isFalse();
             assertThat(result.getTracing().getAttributes()).isEmpty();
         }
 
@@ -149,6 +149,8 @@ public class MethodHookConfigurationResolverTest {
                     .tracing(RuleTracingSettings.builder()
                             .startSpan(true)
                             .kind(Span.Kind.SERVER)
+                            .storeSpan("store_span")
+                            .continueSpan("my_span")
                             .attributes(Maps.newHashMap("attr", "dataX"))
                             .build())
                     .build();
@@ -156,16 +158,20 @@ public class MethodHookConfigurationResolverTest {
                     .tracing(RuleTracingSettings.builder()
                             .startSpan(true)
                             .name("data_name")
+                            .endSpan(false)
                             .attributes(Maps.newHashMap("attr2", "dataY"))
                             .build())
                     .build();
 
-            MethodTracingConfiguration result = resolver.buildHookConfiguration(
+            RuleTracingSettings result = resolver.buildHookConfiguration(
                     config, Sets.newHashSet(r1, r2)).getTracing();
 
-            assertThat(result.isStartSpan()).isTrue();
-            assertThat(result.getSpanKind()).isEqualTo(Span.Kind.SERVER);
-            assertThat(result.getSpanNameDataKey()).isEqualTo("data_name");
+            assertThat(result.getStartSpan()).isTrue();
+            assertThat(result.getStoreSpan()).isEqualTo("store_span");
+            assertThat(result.getContinueSpan()).isEqualTo("my_span");
+            assertThat(result.getEndSpan()).isFalse();
+            assertThat(result.getKind()).isEqualTo(Span.Kind.SERVER);
+            assertThat(result.getName()).isEqualTo("data_name");
             assertThat(result.getAttributes())
                     .hasSize(2)
                     .containsEntry("attr", "dataX")

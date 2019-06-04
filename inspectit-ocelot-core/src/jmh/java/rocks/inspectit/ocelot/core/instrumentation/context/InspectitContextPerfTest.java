@@ -34,7 +34,7 @@ public class InspectitContextPerfTest {
 
     @Benchmark
     public void rootOnly() {
-        InspectitContext fromCurrent = InspectitContext.createFromCurrent(Collections.emptyMap(), dataProperties, interactWithAppTagContext);
+        InspectitContextImpl fromCurrent = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), dataProperties, interactWithAppTagContext);
 
         fromCurrent.makeActive();
         fromCurrent.close();
@@ -42,7 +42,7 @@ public class InspectitContextPerfTest {
 
     @Benchmark
     public void rootOnly_with2CommonTags() {
-        InspectitContext fromCurrent = InspectitContext.createFromCurrent(Collections.emptyMap(), dataProperties, interactWithAppTagContext);
+        InspectitContextImpl fromCurrent = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), dataProperties, interactWithAppTagContext);
 
         fromCurrent.makeActive();
         fromCurrent.close();
@@ -50,7 +50,7 @@ public class InspectitContextPerfTest {
 
     @Benchmark
     public void rootOnly_with2Tags() {
-        InspectitContext fromCurrent = InspectitContext.createFromCurrent(Collections.emptyMap(), dataProperties, interactWithAppTagContext);
+        InspectitContextImpl fromCurrent = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), dataProperties, interactWithAppTagContext);
         fromCurrent.setData("data-1", "data-1");
         fromCurrent.setData("data-2", "data-2");
         fromCurrent.makeActive();
@@ -59,10 +59,10 @@ public class InspectitContextPerfTest {
 
     @Benchmark
     public void rootPlusOne() {
-        InspectitContext parent = InspectitContext.createFromCurrent(commonTags, dataProperties, interactWithAppTagContext);
+        InspectitContextImpl parent = InspectitContextImpl.createFromCurrent(commonTags, dataProperties, interactWithAppTagContext);
         parent.makeActive();
 
-        InspectitContext fromCurrent = InspectitContext.createFromCurrent(commonTags, dataProperties, interactWithAppTagContext);
+        InspectitContextImpl fromCurrent = InspectitContextImpl.createFromCurrent(commonTags, dataProperties, interactWithAppTagContext);
         fromCurrent.makeActive();
         fromCurrent.close();
 
@@ -71,10 +71,10 @@ public class InspectitContextPerfTest {
 
     @Benchmark
     public void rootPlusOne_with2UpPropagatedTags() {
-        InspectitContext parent = InspectitContext.createFromCurrent(commonTags, dataProperties, interactWithAppTagContext);
+        InspectitContextImpl parent = InspectitContextImpl.createFromCurrent(commonTags, dataProperties, interactWithAppTagContext);
         parent.makeActive();
 
-        InspectitContext fromCurrent = InspectitContext.createFromCurrent(commonTags, dataProperties, interactWithAppTagContext);
+        InspectitContextImpl fromCurrent = InspectitContextImpl.createFromCurrent(commonTags, dataProperties, interactWithAppTagContext);
         fromCurrent.setData("propagate-3", "propagate-3");
         fromCurrent.setData("propagate-4", "propagate-4");
         fromCurrent.makeActive();

@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 
 import java.io.ByteArrayInputStream;
@@ -57,6 +58,11 @@ public class PropertyUtils {
         try (ByteArrayInputStream is = new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8))) {
             return readJsonFromStream(is);
         }
+    }
+
+    public static Properties readYaml(String yaml) {
+        ByteArrayResource resource = new ByteArrayResource(yaml.getBytes(StandardCharsets.UTF_8));
+        return readYamlFiles(resource);
     }
 
     private static Properties readJsonFromStream(InputStream is) throws IOException {

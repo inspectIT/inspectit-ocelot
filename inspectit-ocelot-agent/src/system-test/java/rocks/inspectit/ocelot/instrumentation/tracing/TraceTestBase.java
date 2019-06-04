@@ -49,4 +49,11 @@ public class TraceTestBase extends InstrumentationSysTestBase {
             assertThat(traces.values()).filteredOnAssertions(assertions).hasSize(1);
         });
     }
+
+    void assertSpansExported(Consumer<? super Collection<? extends SpanData>> assertions) {
+
+        await().atMost(15, TimeUnit.SECONDS).untilAsserted(() -> {
+            assertions.accept(exportedSpans);
+        });
+    }
 }
