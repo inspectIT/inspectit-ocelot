@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.core.config.filebased;
+package rocks.inspectit.ocelot.core.config.propertysources.file;
 
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
