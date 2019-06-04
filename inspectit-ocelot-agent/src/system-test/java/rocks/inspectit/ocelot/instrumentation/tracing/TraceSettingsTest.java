@@ -264,7 +264,7 @@ public class TraceSettingsTest extends TraceTestBase {
                         })
         );
 
-        //the number of spans lies with a probability greater than 99.999% +-300 around the mean of 0.2 * 10000 and 0.7 * 1000
+        //the number of spans lies with a probability greater than 99.999% +-300 around the mean of 0.2 * 10000 and 0.7 * 10000
         long numSpans02 = exportedSpans.stream().filter(sp -> sp.getName().equals("dynamic_0.2")).count();
         assertThat(numSpans02).isGreaterThan(1700).isLessThan(2300);
 

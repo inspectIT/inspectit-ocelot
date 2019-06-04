@@ -121,6 +121,8 @@ public class MethodHookGenerator {
     }
 
     private void configureSampling(RuleTracingSettings tracing, ContinueOrStartSpanAction.ContinueOrStartSpanActionBuilder actionBuilder) {
+        // tracing.getSampleProbability() never returns null here because the
+        // InstrumentationRuleResolver resolves null to the default sample probability
         try {
             double fixedProbability = Double.parseDouble(tracing.getSampleProbability());
             if (fixedProbability <= 0) {

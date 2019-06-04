@@ -181,17 +181,18 @@ public class MethodHookConfigurationResolverTest {
 
         @Test
         void verifyTracingCustomSamplingProbabilityRespected() throws Exception {
+            config = InstrumentationConfiguration.builder().defaultTraceSampleProbability(0.5).build();
             InstrumentationRule r1 = InstrumentationRule.builder()
                     .tracing(RuleTracingSettings.builder()
                             .startSpan(true)
-                            .sampleProbability("blub")
+                            .sampleProbability("foo")
                             .build())
                     .build();
 
             RuleTracingSettings result = resolver.buildHookConfiguration(
                     config, Sets.newHashSet(r1)).getTracing();
 
-            assertThat(result.getSampleProbability()).isEqualTo("blub");
+            assertThat(result.getSampleProbability()).isEqualTo("foo");
         }
 
         @Test
