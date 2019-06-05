@@ -10,6 +10,7 @@ buildscript {
 apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
+apply plugin: 'java'
 
 bootJar {
     archivesBaseName = 'inspectit-ocelot-configurationserver'
@@ -25,7 +26,15 @@ repositories {
 }
 
 sourceCompatibility = 1.8
-targetCompatibility = 1.8
+
+test {
+    useJUnitPlatform()
+}
+
+dependencies {
+    compileOnly 'org.projectlombok:lombok:1.18.4'
+    annotationProcessor 'org.projectlombok:lombok:1.18.4'
+}
 
 dependencies {
     implementation(
@@ -38,5 +47,9 @@ dependencies {
     testImplementation(
             'org.mockito:mockito-core:2.23.4',
             'org.assertj:assertj-core:3.11.1',
+            'org.junit.jupiter:junit-jupiter-api:5.3.1',
+            'org.mockito:mockito-junit-jupiter:2.23.0'
+
     )
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
 }

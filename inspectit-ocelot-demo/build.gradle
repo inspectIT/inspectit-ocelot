@@ -1,5 +1,6 @@
 plugins {
     id 'com.palantir.docker' version "0.21.0"
+    id "java"
 }
 
 task copyAgent(type: Copy) {

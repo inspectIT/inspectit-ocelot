@@ -14,7 +14,8 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.config.ConfigSettings;
-import rocks.inspectit.ocelot.core.config.filebased.DirectoryPropertySource;
+import rocks.inspectit.ocelot.core.config.propertysources.file.DirectoryPropertySource;
+import rocks.inspectit.ocelot.core.config.propertysources.http.HttpPropertySourceState;
 import rocks.inspectit.ocelot.core.config.util.CaseUtils;
 import rocks.inspectit.ocelot.core.config.util.PropertyUtils;
 
@@ -22,6 +23,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -47,10 +49,12 @@ public class InspectitEnvironment extends StandardEnvironment {
     private static final String INSPECTIT_CONFIG_SETTINGS_PREFIX = "inspectit.config";
 
     private static final String DEFAULT_CONFIG_PATH = "default";
-    private static final String DEFAULT_CONFIG_PROPERTYSOURCE_NAME = "inspectitDefaults";
+    public static final String DEFAULT_CONFIG_PROPERTYSOURCE_NAME = "inspectitDefaults";
 
     private static final String FALLBACK_CONFIG_PATH = "fallback";
     private static final String FALLBACK_CONFIG_PROPERTYSOURCE_NAME = "inspectitFallbackOverwrites";
+
+    public static final String HTTP_BASED_CONFIGURATION = "httpBasedConfig";
 
     private static final String CMD_ARGS_PROPERTYSOURCE_NAME = "javaagentArguments";
 
@@ -67,7 +71,8 @@ public class InspectitEnvironment extends StandardEnvironment {
      * In contrast items appearing first in the list can provide information for loading items appearing later in the list.
      */
     private static final List<BiConsumer<MutablePropertySources, ConfigSettings>> CONFIGURATION_INIT_STEPS = Arrays.asList(
-            InspectitEnvironment::addFileBasedConfiguration
+            InspectitEnvironment::addFileBasedConfiguration,
+            InspectitEnvironment::addHttpBasedConfiguration
     );
 
     /**
@@ -282,6 +287,19 @@ public class InspectitEnvironment extends StandardEnvironment {
             } else {
                 log.error("The given configuration file directory does not exist: {}", path);
             }
+        }
+    }
+
+    private static void addHttpBasedConfiguration(MutablePropertySources propsList, ConfigSettings currentConfig) {
+        URL url = currentConfig.getHttp().getUrl();
+        boolean httpEnabled = currentConfig.getHttp().isEnabled() && url != null;
+
+        if (httpEnabled) {
+            log.info("Initializing HTTP based configuration from URL: {}", url);
+
+            HttpPropertySourceState httpSourceState = new HttpPropertySourceState(HTTP_BASED_CONFIGURATION, currentConfig.getHttp());
+            httpSourceState.update();
+            propsList.addBefore(InspectitEnvironment.DEFAULT_CONFIG_PROPERTYSOURCE_NAME, httpSourceState.getCurrentPropertySource());
         }
     }
 }

@@ -203,6 +203,7 @@ public class InstrumentationConfigurationResolver {
         return InstrumentationConfiguration.builder()
                 .metricsEnabled(metrics.isEnabled())
                 .tracingEnabled(tracing.isEnabled())
+                .defaultTraceSampleProbability(tracing.getSampleProbability())
                 .source(source)
                 .rules(ruleResolver.resolve(source, genericActions))
                 .dataProperties(resolveDataProperties(source))

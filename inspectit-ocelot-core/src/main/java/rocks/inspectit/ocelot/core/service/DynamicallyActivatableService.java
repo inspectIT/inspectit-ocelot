@@ -122,10 +122,10 @@ public abstract class DynamicallyActivatableService {
      * The implementation of this method checks if the service should be enabled given a certain configuration.
      * When changes to the configuration occur, this method will be used to correctly invoke {@link #doDisable()} and {@link #doEnable()}.
      *
-     * @param conf the configuration to check
-     * @return
+     * @param configuration the configuration to check
+     * @return true if the service should be enabled otherwise false
      */
-    protected abstract boolean checkEnabledForConfig(InspectitConfig conf);
+    protected abstract boolean checkEnabledForConfig(InspectitConfig configuration);
 
     /**
      * Called when the service should start.

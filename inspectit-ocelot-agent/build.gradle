@@ -2,6 +2,16 @@ plugins {
     id "me.champeau.gradle.jmh" version "0.4.8"
 }
 
+apply plugin: 'java'
+evaluationDependsOn(':inspectit-ocelot-bootstrap')
+evaluationDependsOn(':inspectit-ocelot-core')
+
+test {
+    useJUnitPlatform()
+}
+
+sourceCompatibility = 1.8
+
 configurations {
     opencensus
 }
@@ -9,10 +19,17 @@ configurations {
 dependencies {
     compileOnly(
             project(':inspectit-ocelot-bootstrap'),
+            'org.projectlombok:lombok:1.18.4'
     )
     opencensus(
             "io.opencensus:opencensus-impl:${openCensusVersion}"
     )
+    annotationProcessor 'org.projectlombok:lombok:1.18.4'
+    testImplementation (
+            'org.junit.jupiter:junit-jupiter-api:5.3.1',
+            'org.mockito:mockito-junit-jupiter:2.23.0'
+    )
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
 }
 
 task buildOpencensusFatJar(type: Jar) {
@@ -22,6 +39,7 @@ task buildOpencensusFatJar(type: Jar) {
         configurations.opencensus.collect { it.isDirectory() ? it : zipTree(it) }
     }
 }
+
 
 jar {
     destinationDirectory = buildDir

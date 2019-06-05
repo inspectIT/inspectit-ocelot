@@ -35,6 +35,12 @@ public class InstrumentationConfiguration {
     private boolean tracingEnabled = true;
 
     /**
+     * Corresponds to {@link TracingSettings#getSampleProbability()}
+     */
+    @Builder.Default
+    private double defaultTraceSampleProbability = 1.0;
+
+    /**
      * The instrumentation settings which have been used to derive this configuration.
      */
     private InstrumentationSettings source;
