@@ -38,11 +38,30 @@ public class InstrumentationRuleSettings {
     private Map<@NotBlank String, Boolean> scopes = Collections.emptyMap();
 
     /**
+     * Defines the action to execute before {@link #entry}.
+     */
+    @NotNull
+    private Map<@NotBlank String, @NotNull @Valid ActionCallSettings> preEntry = Collections.emptyMap();
+
+    /**
      * Defines which data is collected at the entry of the methods instrumented with this rule.
      * The key defines the name of the data which is collected, the value defines how it is collected.
      */
     @NotNull
     private Map<@NotBlank String, @NotNull @Valid ActionCallSettings> entry = Collections.emptyMap();
+
+
+    /**
+     * Defines the action to execute after {@link #entry}.
+     */
+    @NotNull
+    private Map<@NotBlank String, @NotNull @Valid ActionCallSettings> postEntry = Collections.emptyMap();
+
+    /**
+     * Defines the action to execute before {@link #exit}.
+     */
+    @NotNull
+    private Map<@NotBlank String, @NotNull @Valid ActionCallSettings> preExit = Collections.emptyMap();
 
     /**
      * Defines which data is collected at the exit of the methods instrumented with this rule.
@@ -50,6 +69,12 @@ public class InstrumentationRuleSettings {
      */
     @NotNull
     private Map<@NotBlank String, @NotNull @Valid ActionCallSettings> exit = Collections.emptyMap();
+
+    /**
+     * Defines the action to execute after {@link #exit}.
+     */
+    @NotNull
+    private Map<@NotBlank String, @NotNull @Valid ActionCallSettings> postExit = Collections.emptyMap();
 
     /**
      * Defines which measurements should be taken at the instrumented method.
@@ -84,10 +109,18 @@ public class InstrumentationRuleSettings {
     public void performValidation(InstrumentationSettings container, Set<String> definedMetrics, ViolationBuilder vios) {
         checkScopesExist(container, vios);
         checkMetricsDefined(definedMetrics, vios);
+        preEntry.forEach((data, call) -> call.performValidation(container,
+                vios.atProperty("preEntry").atProperty(data)));
         entry.forEach((data, call) -> call.performValidation(container,
                 vios.atProperty("entry").atProperty(data)));
+        postEntry.forEach((data, call) -> call.performValidation(container,
+                vios.atProperty("postEntry").atProperty(data)));
+        preExit.forEach((data, call) -> call.performValidation(container,
+                vios.atProperty("preExit").atProperty(data)));
         exit.forEach((data, call) -> call.performValidation(container,
                 vios.atProperty("exit").atProperty(data)));
+        postExit.forEach((data, call) -> call.performValidation(container,
+                vios.atProperty("postExit").atProperty(data)));
     }
 
     private void checkMetricsDefined(Set<String> definedMetrics, ViolationBuilder vios) {

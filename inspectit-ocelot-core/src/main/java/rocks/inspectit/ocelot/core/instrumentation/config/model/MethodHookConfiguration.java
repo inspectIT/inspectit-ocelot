@@ -24,16 +24,42 @@ public class MethodHookConfiguration {
     private RuleTracingSettings tracing = RuleTracingSettings.NO_TRACING_AND_ATTRIBUTES;
 
     /**
+     * Holds all actions executed in the specified order directly before the ones in {@link #entryActions}.
+     */
+    @Singular
+    private List<ActionCallConfig> preEntryActions;
+
+    /**
      * The ordered list of data assignments performed on method entry.
      */
     @Singular
     private List<ActionCallConfig> entryActions;
 
     /**
+     * Holds all actions executed in the specified order directly after the ones in {@link #entryActions}.
+     * These actions are executed after a span has been started or continued, if requested.
+     */
+    @Singular
+    private List<ActionCallConfig> postEntryActions;
+
+    /**
+     * Holds all actions executed in the specified order directly before the ones in {@link #exitActions}.
+     */
+    @Singular
+    private List<ActionCallConfig> preExitActions;
+
+    /**
      * The ordered list of data assignments performed on method exit.
      */
     @Singular
     private List<ActionCallConfig> exitActions;
+
+    /**
+     * Holds all actions executed in the specified order directly after the ones in {@link #entryActions}.
+     * These actions are executed after a span has been finished, if requested.
+     */
+    @Singular
+    private List<ActionCallConfig> postExitActions;
 
     /**
      * Maps the metrics to capture to the data keys to use as value.

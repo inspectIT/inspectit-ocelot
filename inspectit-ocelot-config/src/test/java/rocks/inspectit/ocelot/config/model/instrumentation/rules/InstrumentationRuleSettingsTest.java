@@ -20,7 +20,8 @@ import java.util.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.same;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
 
 
 public class InstrumentationRuleSettingsTest {
@@ -85,22 +86,45 @@ public class InstrumentationRuleSettingsTest {
 
         @Test
         void ensureAllCallsValidated() {
+            ActionCallSettings preEntryCall = Mockito.spy(ActionCallSettings.class);
+            preEntryCall.setAction("someAction");
+            doNothing().when(preEntryCall).performValidation(any(), any());
             ActionCallSettings entryCall = Mockito.spy(ActionCallSettings.class);
             entryCall.setAction("someAction");
             doNothing().when(entryCall).performValidation(any(), any());
+            ActionCallSettings postEntryCall = Mockito.spy(ActionCallSettings.class);
+            postEntryCall.setAction("someAction");
+            doNothing().when(postEntryCall).performValidation(any(), any());
+
+
+            ActionCallSettings preExitCall = Mockito.spy(ActionCallSettings.class);
+            preExitCall.setAction("someAction");
+            doNothing().when(preExitCall).performValidation(any(), any());
             ActionCallSettings exitCall = Mockito.spy(ActionCallSettings.class);
             exitCall.setAction("someAction");
             doNothing().when(exitCall).performValidation(any(), any());
+            ActionCallSettings postExitCall = Mockito.spy(ActionCallSettings.class);
+            postExitCall.setAction("someAction");
+            doNothing().when(postExitCall).performValidation(any(), any());
 
+            rule.setPreEntry(Collections.singletonMap("pre_entry_data", preEntryCall));
             rule.setEntry(Collections.singletonMap("entry_data", entryCall));
+            rule.setPostEntry(Collections.singletonMap("post_entry_data", postEntryCall));
+
+            rule.setPreExit(Collections.singletonMap("pre_exit_data", preExitCall));
             rule.setExit(Collections.singletonMap("exit_data", exitCall));
+            rule.setPostExit(Collections.singletonMap("exit_data", postExitCall));
 
             List<Violation> violations = new ArrayList<>();
             instr.performValidation(root, new ViolationBuilder(violations));
 
             assertThat(violations).hasSize(0);
-            verify(entryCall, times(1)).performValidation(same(instr), any());
-            verify(exitCall, times(1)).performValidation(same(instr), any());
+            verify(preEntryCall).performValidation(same(instr), any());
+            verify(entryCall).performValidation(same(instr), any());
+            verify(postEntryCall).performValidation(same(instr), any());
+            verify(preExitCall).performValidation(same(instr), any());
+            verify(exitCall).performValidation(same(instr), any());
+            verify(postExitCall).performValidation(same(instr), any());
         }
     }
 

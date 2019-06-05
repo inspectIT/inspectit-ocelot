@@ -30,6 +30,12 @@ public class InstrumentationRule {
     private Set<InstrumentationScope> scopes;
 
     /**
+     * Holds all actions executed directly before the ones in {@link #entryActions}.
+     */
+    @Singular
+    private Collection<ActionCallConfig> preEntryActions;
+
+    /**
      * The actions executed on the method entry.
      * The order of the actions in the list does not matter, they are ordered automatically by the
      * {@link rocks.inspectit.ocelot.core.instrumentation.hook.MethodHookGenerator}.
@@ -38,12 +44,30 @@ public class InstrumentationRule {
     private Collection<ActionCallConfig> entryActions;
 
     /**
+     * Holds all actions executed directly after the ones in {@link #entryActions}.
+     */
+    @Singular
+    private Collection<ActionCallConfig> postEntryActions;
+
+    /**
+     * Holds all actions executed directly before the ones in {@link #exitActions}.
+     */
+    @Singular
+    private Collection<ActionCallConfig> preExitActions;
+
+    /**
      * The actions executed on the method exit.
      * The order of the actions in the list does not matter, they are ordered automatically by the
      * {@link rocks.inspectit.ocelot.core.instrumentation.hook.MethodHookGenerator}.
      */
     @Singular
     private Collection<ActionCallConfig> exitActions;
+
+    /**
+     * Holds all actions executed directly after the ones in {@link #exitActions}.
+     */
+    @Singular
+    private Collection<ActionCallConfig> postExitActions;
 
     /**
      * Maps metrics to the data keys or constants used as sources, see {@link InstrumentationRuleSettings#getMetrics()}.

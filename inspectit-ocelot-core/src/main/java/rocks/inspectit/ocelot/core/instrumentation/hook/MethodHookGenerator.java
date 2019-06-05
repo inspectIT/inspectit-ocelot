@@ -65,19 +65,23 @@ public class MethodHookGenerator {
         RuleTracingSettings tracingSettings = config.getTracing();
 
         val entryActions = new CopyOnWriteArrayList<IHookAction>();
+        entryActions.addAll(buildActionCalls(config.getPreEntryActions(), methodInfo));
         entryActions.addAll(buildActionCalls(config.getEntryActions(), methodInfo));
         if (tracingSettings != null) {
             entryActions.addAll(buildTracingEntryActions(tracingSettings));
         }
+        entryActions.addAll(buildActionCalls(config.getPostEntryActions(), methodInfo));
         builder.entryActions(entryActions);
 
         val exitActions = new CopyOnWriteArrayList<IHookAction>();
+        exitActions.addAll(buildActionCalls(config.getPreExitActions(), methodInfo));
         exitActions.addAll(buildActionCalls(config.getExitActions(), methodInfo));
         if (tracingSettings != null) {
             exitActions.addAll(buildTracingExitActions(tracingSettings));
         }
         buildMetricsRecorder(config)
                 .ifPresent(exitActions::add);
+        exitActions.addAll(buildActionCalls(config.getPostExitActions(), methodInfo));
         builder.exitActions(exitActions);
 
         return builder.build();

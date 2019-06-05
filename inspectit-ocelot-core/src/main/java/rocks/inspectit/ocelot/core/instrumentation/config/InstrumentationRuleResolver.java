@@ -69,12 +69,28 @@ public class InstrumentationRuleResolver {
                 .filter(Objects::nonNull)
                 .forEach(result::scope);
 
+        settings.getPreEntry().forEach((data, call) ->
+                result.preEntryAction(resolveCall(data, call, actions))
+        );
+
         settings.getEntry().forEach((data, call) ->
                 result.entryAction(resolveCall(data, call, actions))
         );
 
+        settings.getPostEntry().forEach((data, call) ->
+                result.postEntryAction(resolveCall(data, call, actions))
+        );
+
+        settings.getPreExit().forEach((data, call) ->
+                result.preExitAction(resolveCall(data, call, actions))
+        );
+
         settings.getExit().forEach((data, call) ->
                 result.exitAction(resolveCall(data, call, actions))
+        );
+
+        settings.getPostExit().forEach((data, call) ->
+                result.postExitAction(resolveCall(data, call, actions))
         );
 
         settings.getMetrics().entrySet().stream()
