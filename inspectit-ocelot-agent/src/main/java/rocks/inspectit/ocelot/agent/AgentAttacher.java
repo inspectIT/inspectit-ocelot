@@ -21,6 +21,11 @@ public class AgentAttacher {
     private static final String AGENT_PATH = new File(AgentAttacher.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getAbsolutePath();
 
     /**
+     * The OS name.
+     */
+    private static final String OS = System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH);
+
+    /**
      * Attaches the agent to the JVM with the given PID.
      *
      * @param pid             the PID of the JVM to attach the agent
@@ -56,6 +61,10 @@ public class AgentAttacher {
         List<String> commandList = new ArrayList<>(Arrays.asList(jattachFile.toString(), String.valueOf(pid), "load", "instrument", "false"));
 
         if (agentProperties != null) {
+            // preventing excessive escaping on windows
+            if (isWindows()) {
+                agentProperties = agentProperties.replace("\"", "\\\"");
+            }
             commandList.add(AGENT_PATH + "=" + agentProperties);
         } else {
             commandList.add(AGENT_PATH);
@@ -92,16 +101,36 @@ public class AgentAttacher {
      * @return the file name of the jattach binary
      */
     private static String getJattachFileName() {
-        String os = System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH);
-        if (os.contains("win")) {
+        if (isWindows()) {
             return "jattach.exe";
-        } else if (os.contains("mac") || os.contains("darwin")) {
+        } else if (isMacOS()) {
             return "jattach-macos";
-        } else if (os.contains("nux")) {
+        } else if (isLinux()) {
             return "jattach";
         } else {
             throw new RuntimeException("Operating system could not be recognized.");
         }
+    }
+
+    /**
+     * Returns whether the underlying operating system is Windows.
+     */
+    private static boolean isWindows() {
+        return OS.contains("win");
+    }
+
+    /**
+     * Returns whether the underlying operating system is MacOS.
+     */
+    private static boolean isMacOS() {
+        return OS.contains("mac") || OS.contains("darwin");
+    }
+
+    /**
+     * Returns whether the underlying operating system is Linux.
+     */
+    private static boolean isLinux() {
+        return OS.contains("nux");
     }
 
     /**
