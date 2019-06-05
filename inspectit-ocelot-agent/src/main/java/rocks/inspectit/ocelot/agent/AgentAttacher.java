@@ -105,7 +105,7 @@ public class AgentAttacher {
             return "jattach.exe";
         } else if (isMacOS()) {
             return "jattach-macos";
-        } else if (isLinux()) {
+        } else if (isUnix()) {
             return "jattach";
         } else {
             throw new RuntimeException("Operating system could not be recognized.");
@@ -123,14 +123,14 @@ public class AgentAttacher {
      * Returns whether the underlying operating system is MacOS.
      */
     private static boolean isMacOS() {
-        return OS.contains("mac") || OS.contains("darwin");
+        return OS.contains("mac");
     }
 
     /**
      * Returns whether the underlying operating system is Linux.
      */
-    private static boolean isLinux() {
-        return OS.contains("nux");
+    private static boolean isUnix() {
+        return OS.contains("nix") || OS.contains("nux") || OS.indexOf("aix") > 0;
     }
 
     /**
