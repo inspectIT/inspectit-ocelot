@@ -1,7 +1,0 @@
-== Getting Started
-
-This section describes how to start using the inspectIT Ocelot agent.
-
-include::quick-start.adoc[]
-
-include::docker-compose-example.adoc[]

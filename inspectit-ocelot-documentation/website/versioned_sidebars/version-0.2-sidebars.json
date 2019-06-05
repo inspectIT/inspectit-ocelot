@@ -1,0 +1,35 @@
+{
+  "version-0.2-docs": {
+    "Getting Started": [
+      "version-0.2-doc1",
+      "version-0.2-getting-started/quick-start",
+      "version-0.2-getting-started/docker-examples",
+      "version-0.2-getting-started/installation"
+    ],
+    "Configuration": [
+      "version-0.2-configuration/configuration-sources",
+      "version-0.2-configuration/external-configuration-sources",
+      "version-0.2-configuration/logging-configuration",
+      "version-0.2-configuration/open-census-configuration"
+    ],
+    "Metrics": [
+      "version-0.2-metrics/metrics",
+      "version-0.2-metrics/metric-recorders",
+      "version-0.2-metrics/metric-exporters",
+      "version-0.2-metrics/common-tags",
+      "version-0.2-metrics/custom-metrics",
+      "version-0.2-metrics/self-monitoring"
+    ],
+    "Tracing": [
+      "version-0.2-tracing/tracing",
+      "version-0.2-tracing/trace-exporters"
+    ],
+    "Instrumentation": [
+      "version-0.2-instrumentation/instrumentation",
+      "version-0.2-instrumentation/scopes",
+      "version-0.2-instrumentation/rules",
+      "version-0.2-instrumentation/special-sensors",
+      "version-0.2-instrumentation/process"
+    ]
+  }
+}
