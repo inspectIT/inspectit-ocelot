@@ -1,0 +1,35 @@
+{
+  "docs": {
+    "Getting Started": [
+      "doc1",
+      "getting-started/quick-start",
+      "getting-started/docker-examples",
+      "getting-started/installation"
+    ],
+    "Configuration": [
+      "configuration/configuration-sources",
+      "configuration/external-configuration-sources",
+      "configuration/logging-configuration",
+      "configuration/open-census-configuration"
+    ],
+    "Metrics": [
+      "metrics/metrics",
+      "metrics/metric-recorders",
+      "metrics/metric-exporters",
+      "metrics/common-tags",
+      "metrics/custom-metrics",
+      "metrics/self-monitoring"
+    ],
+    "Tracing": [
+      "tracing/tracing",
+      "tracing/trace-exporters"
+    ],
+    "Instrumentation": [
+      "instrumentation/instrumentation",
+      "instrumentation/scopes",
+      "instrumentation/rules",
+      "instrumentation/special-sensors",
+      "instrumentation/process"
+    ]
+  }
+}
