@@ -29,6 +29,9 @@ public class InstrumentationRule {
     @Singular
     private Set<InstrumentationScope> scopes;
 
+    /**
+     * Holds all actions executed directly before the ones in {@link #entryActions}.
+     */
     @Singular
     private Collection<ActionCallConfig> preEntryActions;
 
@@ -40,9 +43,15 @@ public class InstrumentationRule {
     @Singular
     private Collection<ActionCallConfig> entryActions;
 
+    /**
+     * Holds all actions executed directly after the ones in {@link #entryActions}.
+     */
     @Singular
     private Collection<ActionCallConfig> postEntryActions;
 
+    /**
+     * Holds all actions executed directly before the ones in {@link #exitActions}.
+     */
     @Singular
     private Collection<ActionCallConfig> preExitActions;
 
@@ -54,6 +63,9 @@ public class InstrumentationRule {
     @Singular
     private Collection<ActionCallConfig> exitActions;
 
+    /**
+     * Holds all actions executed directly after the ones in {@link #exitActions}.
+     */
     @Singular
     private Collection<ActionCallConfig> postExitActions;
 

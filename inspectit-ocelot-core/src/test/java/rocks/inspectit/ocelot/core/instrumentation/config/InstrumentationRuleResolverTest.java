@@ -11,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.actions.ActionCallSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.InstrumentationRuleSettings;
+import rocks.inspectit.ocelot.core.instrumentation.config.model.ActionCallConfig;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.InstrumentationRule;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.InstrumentationScope;
 
@@ -118,14 +119,8 @@ class InstrumentationRuleResolverTest {
             assertThat(result).hasSize(1);
             assertThat(result).flatExtracting(InstrumentationRule::getPreEntryActions)
                     .hasSize(2)
-                    .anySatisfy((ac) -> {
-                        assertThat(ac.getName()).isEqualTo("first");
-                        assertThat(ac.getCallSettings()).isSameAs(first);
-                    })
-                    .anySatisfy((ac) -> {
-                        assertThat(ac.getName()).isEqualTo("second");
-                        assertThat(ac.getCallSettings()).isSameAs(second);
-                    });
+                    .anySatisfy((ac) -> verifyActionCall(ac, "first", first))
+                    .anySatisfy((ac) -> verifyActionCall(ac, "second", second));
         }
 
 
@@ -144,14 +139,8 @@ class InstrumentationRuleResolverTest {
             assertThat(result).hasSize(1);
             assertThat(result).flatExtracting(InstrumentationRule::getEntryActions)
                     .hasSize(2)
-                    .anySatisfy((ac) -> {
-                        assertThat(ac.getName()).isEqualTo("first");
-                        assertThat(ac.getCallSettings()).isSameAs(first);
-                    })
-                    .anySatisfy((ac) -> {
-                        assertThat(ac.getName()).isEqualTo("second");
-                        assertThat(ac.getCallSettings()).isSameAs(second);
-                    });
+                    .anySatisfy((ac) -> verifyActionCall(ac, "first", first))
+                    .anySatisfy((ac) -> verifyActionCall(ac, "second", second));
         }
 
 
@@ -170,14 +159,8 @@ class InstrumentationRuleResolverTest {
             assertThat(result).hasSize(1);
             assertThat(result).flatExtracting(InstrumentationRule::getPostEntryActions)
                     .hasSize(2)
-                    .anySatisfy((ac) -> {
-                        assertThat(ac.getName()).isEqualTo("first");
-                        assertThat(ac.getCallSettings()).isSameAs(first);
-                    })
-                    .anySatisfy((ac) -> {
-                        assertThat(ac.getName()).isEqualTo("second");
-                        assertThat(ac.getCallSettings()).isSameAs(second);
-                    });
+                    .anySatisfy((ac) -> verifyActionCall(ac, "first", first))
+                    .anySatisfy((ac) -> verifyActionCall(ac, "second", second));
         }
 
         @Test
@@ -195,14 +178,8 @@ class InstrumentationRuleResolverTest {
             assertThat(result).hasSize(1);
             assertThat(result).flatExtracting(InstrumentationRule::getPreExitActions)
                     .hasSize(2)
-                    .anySatisfy((ac) -> {
-                        assertThat(ac.getName()).isEqualTo("first");
-                        assertThat(ac.getCallSettings()).isSameAs(first);
-                    })
-                    .anySatisfy((ac) -> {
-                        assertThat(ac.getName()).isEqualTo("second");
-                        assertThat(ac.getCallSettings()).isSameAs(second);
-                    });
+                    .anySatisfy((ac) -> verifyActionCall(ac, "first", first))
+                    .anySatisfy((ac) -> verifyActionCall(ac, "second", second));
         }
 
 
@@ -221,14 +198,8 @@ class InstrumentationRuleResolverTest {
             assertThat(result).hasSize(1);
             assertThat(result).flatExtracting(InstrumentationRule::getExitActions)
                     .hasSize(2)
-                    .anySatisfy((ac) -> {
-                        assertThat(ac.getName()).isEqualTo("first");
-                        assertThat(ac.getCallSettings()).isSameAs(first);
-                    })
-                    .anySatisfy((ac) -> {
-                        assertThat(ac.getName()).isEqualTo("second");
-                        assertThat(ac.getCallSettings()).isSameAs(second);
-                    });
+                    .anySatisfy((ac) -> verifyActionCall(ac, "first", first))
+                    .anySatisfy((ac) -> verifyActionCall(ac, "second", second));
         }
 
 
@@ -247,14 +218,13 @@ class InstrumentationRuleResolverTest {
             assertThat(result).hasSize(1);
             assertThat(result).flatExtracting(InstrumentationRule::getPostExitActions)
                     .hasSize(2)
-                    .anySatisfy((ac) -> {
-                        assertThat(ac.getName()).isEqualTo("first");
-                        assertThat(ac.getCallSettings()).isSameAs(first);
-                    })
-                    .anySatisfy((ac) -> {
-                        assertThat(ac.getName()).isEqualTo("second");
-                        assertThat(ac.getCallSettings()).isSameAs(second);
-                    });
+                    .anySatisfy((ac) -> verifyActionCall(ac, "first", first))
+                    .anySatisfy((ac) -> verifyActionCall(ac, "second", second));
+        }
+
+        private void verifyActionCall(ActionCallConfig ac, String name, ActionCallSettings callSettings) {
+            assertThat(ac.getName()).isEqualTo(name);
+            assertThat(ac.getCallSettings()).isSameAs(callSettings);
         }
 
     }
