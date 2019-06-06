@@ -22,7 +22,7 @@ reducing the amount of components which have to be introduced into an existing i
 ## Collected Data
 
 The inspectIT Ocelot Java agent collects a lot of different data, namely metrics and traces.
-You can fully customize the metrics and traces you want to collect via the [configuration](http://docs.inspectit.rocks/releases/latest/#_instrumentation).
+You can fully customize the metrics and traces you want to collect via the [configuration](https://inspectit.github.io/inspectit-ocelot/docs/next/instrumentation/instrumentation).
 With respect to our zero-configuration goal, the agent already ships with a default configuration capturing useful data for you.
 
 For example, the following system and JVM metrics are captured by default:
@@ -48,7 +48,7 @@ You can easily record your traces and enrich them with metadata extracted from y
 
 ![Distributed Tracing](https://inspectit.github.io/inspectit-ocelot/images/distributed-tracing.PNG)
 
-Checkout the [documentation](http://docs.inspectit.rocks/releases/latest/) to find out how you can extract custom metrics and traces.
+Checkout the [documentation](https://inspectit.github.io/inspectit-ocelot/) to find out how you can extract custom metrics and traces.
 
 ## Demo
 
@@ -62,7 +62,7 @@ All you have to do is to download the [demo archive](https://github.com/inspectI
 * `$ docker-compose -f docker-compose-influxdb-zipkin.yml up`
 * `$ docker-compose -f docker-compose-prometheus-jaeger.yml up`
 
-Check out the [documentation's demo section](http://docs.inspectit.rocks/releases/latest/#_demo_scenarios) for detailed information on each scenario.
+Check out the [documentation's demo section](https://inspectit.github.io/inspectit-ocelot/docs/getting-started/docker-examples) for detailed information on each scenario.
 
 ## Installation
 
@@ -80,7 +80,7 @@ This can be achieved using the `-javaagent` command-line option of your JVM and 
 
 We also support attaching the inspectIT Ocelot Java agent to an already running JVM.
 In such a scenario the collection of metrics and traces will start from the point of the attachment.
-Please read the [documentation](http://docs.inspectit.rocks/releases/latest/#_attaching_the_agent_to_an_already_started_jvm) how this can be achieved.
+Please read the [documentation](https://inspectit.github.io/inspectit-ocelot/docs/getting-started/installation#attaching-the-agent-to-a-running-jvm) how this can be achieved.
 
 ## Configuration
 
@@ -89,18 +89,18 @@ In addition, the agent also supports **hot reloading** for its configuration whi
 
 The configuration hot reloading feature also allows you to start the agent in a kind of "standby state" with deactivated features and activate these at a later point in time.
 
-Currently, the configuration values can be set using [environment variables, system properties](http://docs.inspectit.rocks/releases/latest/#_java_system_properties) or [configuration files](http://docs.inspectit.rocks/releases/latest/#_file_based_configuration).
+Currently, the configuration values can be set using [environment variables, system properties](https://inspectit.github.io/inspectit-ocelot/docs/configuration/configuration-sources#java-system-properties) or [configuration files](https://inspectit.github.io/inspectit-ocelot/docs/configuration/external-configuration-sources#file-based-configuration).
 This allows you to pass configuration values to the agents by, for example, using Puppet to set specific properties or using Ansible to roll out updated configuration files which then will be hot reloaded.
  
-For detailed information about the configuration see the [related section of the documentation](http://docs.inspectit.rocks/releases/latest/#_configuration_basics).
+For detailed information about the configuration see the [related section of the documentation](https://inspectit.github.io/inspectit-ocelot/docs/configuration/configuration-sources).
 
 ## Documentation
 
 A detailed user documentation can be found at: http://docs.inspectit.rocks/
 
-You need a documentation of an earlier version? No problem! All the released documentation can be found here: http://docs.inspectit.rocks/releases/
+You need a documentation of an earlier version? No problem! All the released documentation can be found [here](https://inspectit.github.io/inspectit-ocelot/versions).
 
-If you cannot wait for the next stable release and want to use an agent based on the current master branch, the corresponding documentation can be found here: http://docs.inspectit.rocks/master/  
+If you cannot wait for the next stable release and want to use an agent based on the current master branch, the corresponding documentation can be found [here](https://inspectit.github.io/inspectit-ocelot/docs/next/doc1).  
 
 ## Contribution and Development
 
@@ -127,11 +127,11 @@ No. The agent is compatible to and can be used with any kind of JVM (Oracle JVM,
 
 Yes, you can use the inspectIT Ocelot Java agent if you already use the OpenCensus library.
 However, there are a few points that need to be considered to ensure a smooth operation.
-Please read the [corresponding section in the documentation](http://docs.inspectit.rocks/releases/latest/#_using_opencensus_library_with_inspectit_ocelot).
+Please read the [corresponding section in the documentation](https://inspectit.github.io/inspectit-ocelot/docs/next/configuration/open-census-configuration).
 
 #### How can I start my application with the inspectIT Ocelot Java agent?
 
-We have a [detailed section in the documentation](http://docs.inspectit.rocks/releases/latest/#_installation) about this topic.
+We have a [detailed section in the documentation](https://inspectit.github.io/inspectit-ocelot/docs/next/getting-started/installation) about this topic.
 The easiest way is to add the `javaagent` argument to your Java command like [described above](#installation).
 
 #### My Java application does not start or it exits immediately when I use the agent.

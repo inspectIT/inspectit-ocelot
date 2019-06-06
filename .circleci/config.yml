@@ -165,7 +165,7 @@ jobs:
             git config --global user.email "NTTechnicalUser@users.noreply.github.com"
             git config --global user.name "NTTechnicalUser"
             echo "machine github.com login NTTechnicalUser password $GITHUB_TOKEN" > ~/.netrc
-            npm install && GIT_USER=NTTechnicalUser npm run publish-gh-pages
+            npm install && GIT_USER=NTTechnicalUser CUSTOM_COMMIT_MESSAGE="[skip ci] Updated master documentation." npm run publish-gh-pages
 
   # Deploy pre-release documentation
   deploy-release-documentation:

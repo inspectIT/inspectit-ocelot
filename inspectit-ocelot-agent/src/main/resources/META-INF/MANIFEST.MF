@@ -1,3 +1,4 @@
+Main-Class: rocks.inspectit.ocelot.agent.AgentMain
 Agent-Class: rocks.inspectit.ocelot.agent.AgentMain
 Premain-Class: rocks.inspectit.ocelot.agent.AgentMain
 Can-Redefine-Classes: true
