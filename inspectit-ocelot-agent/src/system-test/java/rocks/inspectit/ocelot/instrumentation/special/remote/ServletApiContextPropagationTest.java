@@ -43,7 +43,7 @@ public class ServletApiContextPropagationTest {
     @BeforeAll
     static void waitForInstrumentation() throws Exception {
         TestUtils.waitForClassInstrumentations(Arrays.asList(TestFilter.class, HttpServlet.class, CloseableHttpClient.class,
-                HttpURLConnection.class, Class.forName("sun.net.www.protocol.http.HttpURLConnection")), 10, TimeUnit.SECONDS);
+                Class.forName("sun.net.www.protocol.http.HttpURLConnection")), 10, TimeUnit.SECONDS);
     }
 
     @BeforeEach

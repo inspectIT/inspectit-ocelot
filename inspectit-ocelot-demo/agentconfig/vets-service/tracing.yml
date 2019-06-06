@@ -14,7 +14,7 @@ inspectit:
           start-span-conditions:
             only-if-not-null: http_is_entry
        
-      http_client_apache_execute:
+      http_client_apache_client:
         tracing:
           start-span: true
           kind: CLIENT

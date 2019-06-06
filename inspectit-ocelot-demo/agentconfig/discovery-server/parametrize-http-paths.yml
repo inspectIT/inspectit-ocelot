@@ -2,7 +2,7 @@ inspectit:
   
   instrumentation:  
     rules:    
-      http_client_apache_execute:
+      http_client_apache_client:
         exit:
           parametrized_http_path:
             action: string_replace_all
