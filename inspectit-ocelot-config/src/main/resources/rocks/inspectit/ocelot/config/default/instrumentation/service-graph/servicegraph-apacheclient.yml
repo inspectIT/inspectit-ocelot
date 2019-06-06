@@ -35,7 +35,7 @@ inspectit:
           
           #store the target host in case this is an external call (=the target_service is unknown)
           target_external:
-            action: get_apache_execute_request_host
+            action: get_apache_request_host
             only-if-true: servicegraph_is_entry
             only-if-null: target_service
           protocol:

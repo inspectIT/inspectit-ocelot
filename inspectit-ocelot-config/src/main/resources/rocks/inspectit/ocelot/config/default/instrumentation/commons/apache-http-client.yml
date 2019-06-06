@@ -3,27 +3,6 @@ inspectit:
   instrumentation:
 
     actions:
-      #designed to be applied on execute(HttpHost,...) or execute(HttpUriRequest,...) of the apache CloseableHttpClient
-      get_apache_execute_request_host:
-        imports:
-          - java.net
-          - org.apache.http
-          - org.apache.http.client.methods
-        input:
-          _arg0: Object
-        value-body: |
-          if( _arg0 instanceof HttpHost) {
-            return ((HttpHost)_arg0).toHostString();
-          } else if (_arg0 instanceof HttpUriRequest) {
-            URI uri =((HttpUriRequest)_arg0).getURI();
-            int port = uri.getPort();
-            if(port == -1) {
-              return uri.getHost();
-            } else {
-              return uri.getHost() + ":" + port;
-            }
-          }
-          return null;
 
       #all other actions are designed to applied on CloseableHttpClient.doExecute(HttpHost, HttpRequest, HttpContext)
       get_apache_request_host:
@@ -62,6 +41,7 @@ inspectit:
           } else {
             return Integer.toString(_returnValue.getStatusLine().getStatusCode());
           }
+
     scopes:
 
       apache_http_client_doExecute:

@@ -7,8 +7,7 @@ inspectit:
       servicegraph_record_jdbc_calls: {enabled: false }
       servicegraph_record_servletapi_entry: {enabled: false }
 
-      http_client_apache_doExecute: {enabled: false }
-      http_client_apache_execute: {enabled: false }
+      http_client_apache_client: {enabled: false }
       http_server_servlet_api: {enabled: false }
 
       http_propagation_apache_doExecute: {enabled: false}
