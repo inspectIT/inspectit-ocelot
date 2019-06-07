@@ -14,6 +14,8 @@ import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 import rocks.inspectit.ocelot.utils.TestUtils;
 
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -103,6 +105,7 @@ public class HttpOutMetricTest {
             tags.put("http_host", HOST);
             tags.put("http_path", PATH_200);
             tags.put("http_status", "200");
+            tags.put("http_method", "GET");
 
             long cnt = ((AggregationData.CountData) TestUtils.getDataForView("http/out/count", tags)).getCount();
             double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/out/responsetime/sum", tags)).getSum();
@@ -126,6 +129,73 @@ public class HttpOutMetricTest {
             tags.put("http_host", HOST);
             tags.put("http_path", PATH_404);
             tags.put("http_status", "404");
+            tags.put("http_method", "GET");
+
+            long cnt = ((AggregationData.CountData) TestUtils.getDataForView("http/out/count", tags)).getCount();
+            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/out/responsetime/sum", tags)).getSum();
+
+            assertThat(cnt).isEqualTo(1);
+            assertThat(respSum).isGreaterThan(0);
+        }
+
+    }
+
+
+    @Nested
+    class HttpUrlConnection {
+
+
+        @BeforeEach
+        void setupClient() throws Exception {
+            TestUtils.waitForClassInstrumentation(Class.forName("sun.net.www.protocol.http.HttpURLConnection"), 10, TimeUnit.SECONDS);
+        }
+
+        @Test
+        void testSuccessStatus() throws Exception {
+            InternalInspectitContext ctx = Instances.contextManager.enterNewContext();
+            ctx.setData("service", "urlconn_client_test");
+            ctx.makeActive();
+
+            HttpURLConnection urlConnection = (HttpURLConnection) new URL(URL_START + PATH_200 + "?x=32423").openConnection();
+            urlConnection.getResponseCode();
+
+            ctx.close();
+
+            TestUtils.waitForOpenCensusQueueToBeProcessed();
+
+            Map<String, String> tags = new HashMap<>();
+            tags.put("service", "urlconn_client_test");
+            tags.put("http_host", HOST);
+            tags.put("http_path", PATH_200);
+            tags.put("http_status", "200");
+            tags.put("http_method", "GET");
+
+            long cnt = ((AggregationData.CountData) TestUtils.getDataForView("http/out/count", tags)).getCount();
+            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/out/responsetime/sum", tags)).getSum();
+
+            assertThat(cnt).isEqualTo(1);
+            assertThat(respSum).isGreaterThan(0);
+        }
+
+        @Test
+        void testErrorStatus() throws Exception {
+            InternalInspectitContext ctx = Instances.contextManager.enterNewContext();
+            ctx.setData("service", "urlconn_client_test");
+            ctx.makeActive();
+
+            HttpURLConnection urlConnection = (HttpURLConnection) new URL(URL_START + PATH_404 + "?x=32423").openConnection();
+            urlConnection.getResponseCode();
+
+            ctx.close();
+
+            TestUtils.waitForOpenCensusQueueToBeProcessed();
+
+            Map<String, String> tags = new HashMap<>();
+            tags.put("service", "urlconn_client_test");
+            tags.put("http_host", HOST);
+            tags.put("http_path", PATH_404);
+            tags.put("http_status", "404");
+            tags.put("http_method", "GET");
 
             long cnt = ((AggregationData.CountData) TestUtils.getDataForView("http/out/count", tags)).getCount();
             double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/out/responsetime/sum", tags)).getSum();

@@ -19,9 +19,7 @@ inspectit:
           target_external:
             action: get_jdbc_statement_connection_name
             only-if-true: servicegraph_is_entry
-          origin_service: 
-            action: set
-            data-input: {value: service}
+
           protocol:
             action: set
             constant-input: { value: "jdbc"}

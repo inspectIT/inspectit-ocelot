@@ -16,7 +16,10 @@ import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 import rocks.inspectit.ocelot.utils.TestUtils;
 
 import javax.servlet.http.HttpServlet;
+import java.net.HttpURLConnection;
 import java.net.URI;
+import java.net.URL;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -75,10 +78,40 @@ public class ServiceOutMetricTest {
             builder.setDefaultRequestConfig(requestBuilder.build());
             CloseableHttpClient client = builder.build();
 
-            TestUtils.waitForClassInstrumentation(CloseableHttpClient.class, 10, TimeUnit.SECONDS);
+            TestUtils.waitForClassInstrumentations(Arrays.asList(
+                    CloseableHttpClient.class,
+                    Class.forName("org.apache.http.impl.client.InternalHttpClient")), 10, TimeUnit.SECONDS);
 
             client.execute(URIUtils.extractHost(URI.create(TEST_URL)), new HttpGet(TEST_URL));
             client.close();
+
+            TestUtils.waitForOpenCensusQueueToBeProcessed();
+
+            Map<String, String> tags = new HashMap<>();
+            tags.put("protocol", "http");
+            tags.put("service", SERVICE_NAME);
+            tags.put("target_service", targetName);
+
+            long cnt = ((AggregationData.CountData) TestUtils.getDataForView("service/out/count", tags)).getCount();
+            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("service/out/responsetime/sum", tags)).getSum();
+
+            assertThat(cnt).isEqualTo(1);
+            assertThat(respSum).isGreaterThan(0);
+        }
+    }
+
+
+    @Nested
+    class HttpUrlConnection {
+
+        @Test
+        void testInternalCallRecording() throws Exception {
+            targetName = "urlconn_test";
+
+            TestUtils.waitForClassInstrumentation(Class.forName("sun.net.www.protocol.http.HttpURLConnection"), 10, TimeUnit.SECONDS);
+
+            HttpURLConnection urlConnection = (HttpURLConnection) new URL(TEST_URL).openConnection();
+            urlConnection.getResponseCode();
 
             TestUtils.waitForOpenCensusQueueToBeProcessed();
 

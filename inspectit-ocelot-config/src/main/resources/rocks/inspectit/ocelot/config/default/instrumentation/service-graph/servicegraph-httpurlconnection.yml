@@ -2,30 +2,37 @@ inspectit:
 
   instrumentation:  
 
-    data:
-      servicegraph_apache_client_entry_found: {is-tag: false}
-
     rules:
+
+      servicegraph_httpurlconnection_setup_propagation:
+
+        scopes:
+          httpurlconnection_connect: true
+          httpurlconnection_getOutputStream: true
+          httpurlconnection_getInputStream: true
+
+        entry:
+          prop_origin_service:
+            action: set
+            data-input: {value: service}
     
-      servicegraph_record_apache_client:
+      servicegraph_httpurlconnection_record:
       
         scopes:
-          apache_http_client_doExecute: true
+          httpurlconnection_getInputStream: true
           
         entry:
           servicegraph_is_entry:
-            action: test_and_set_marker
-            constant-input: { marker: servicegraph_apache_client_entry_found}
+            action: test_and_set_this_marker
+            constant-input: { marker: servicegraph_httpurlconnection_entry_found}
           
           servicegraph_call_entry: { action: timestamp_nanos }
-          
-          prop_target_service: {action: setNull}
-          prop_origin_service: 
-            action: set
-            data-input: {value: service}
+
+          prop_target_service:
+            action: setNull
+            only-if-true: servicegraph_is_entry
           
         exit:
-
           target_service: 
             action: set
             data-input: {value: prop_target_service}
@@ -33,7 +40,7 @@ inspectit:
           
           #store the target host in case this is an external call (=the target_service is unknown)
           target_external:
-            action: get_apache_request_host
+            action: httpurlconnection_get_host
             only-if-true: servicegraph_is_entry
             only-if-null: target_service
           protocol:

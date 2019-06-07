@@ -1,6 +1,36 @@
 inspectit:
 
   instrumentation:
+    actions:
+
+      httpurlconnection_get_host:
+        imports:
+          - java.net
+        input:
+          _this: HttpURLConnection
+        value-body: |
+          URL url = _this.getURL();
+          int port = url.getPort();
+          if(port == -1) {
+            return url.getHost();
+          } else {
+            return url.getHost() + ":" + port;
+          }
+
+      httpurlconnection_get_path:
+        input:
+          _this: java.net.HttpURLConnection
+        value: _this.getURL().getPath()
+
+      httpurlconnection_get_method:
+        input:
+          _this: java.net.HttpURLConnection
+        value: _this.getRequestMethod()
+
+      httpurlconnection_get_response_status:
+        input:
+          _this: java.net.HttpURLConnection
+        value: String.valueOf(_this.getResponseCode())
 
     scopes:
       httpurlconnection_getOutputStream:
