@@ -230,7 +230,7 @@ public class FileManagerTest {
             setupTestFiles("topA=content");
 
             assertThatThrownBy(() -> fm.createNewDirectory("topA"))
-                    .isInstanceOf(FileAlreadyExistsException.class);
+                    .isInstanceOf(AccessDeniedException.class);
         }
 
 
@@ -239,7 +239,7 @@ public class FileManagerTest {
             setupTestFiles("topA=content");
 
             assertThatThrownBy(() -> fm.createNewDirectory("topA/subDir"))
-                    .isInstanceOf(FileAlreadyExistsException.class);
+                    .isInstanceOf(AccessDeniedException.class);
         }
 
         @Test
@@ -281,7 +281,7 @@ public class FileManagerTest {
 
 
         @Test
-        void createDirInRootIndirect() throws Exception {
+        void deleteDirInRootIndirect() throws Exception {
             setupTestFiles("topA", "topB");
 
             fm.deleteDirectory("topB/../topA");

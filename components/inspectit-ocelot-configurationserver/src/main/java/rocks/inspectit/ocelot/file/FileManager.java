@@ -77,6 +77,15 @@ public class FileManager {
         assertPathNotEmpty(path);
         assertPathWithinWorkDir(path);
         Path dir = root.resolve(path);
+
+        Path curr = dir;
+        while (curr != null) {
+            if (Files.exists(curr) && !Files.isDirectory(curr)) {
+                throw new AccessDeniedException(curr + " is a file!");
+            }
+            curr = curr.getParent();
+        }
+
         Files.createDirectories(dir.getParent());
         Files.createDirectory(dir);
     }
@@ -112,6 +121,9 @@ public class FileManager {
         assertPathNotEmpty(path);
         assertPathWithinWorkDir(path);
         Path file = root.resolve(path);
+        if (Files.exists(file) && !Files.isRegularFile(file)) {
+            throw new AccessDeniedException(path + " is a directory!");
+        }
         return new String(Files.readAllBytes(file), ENCODING);
     }
 
@@ -127,6 +139,9 @@ public class FileManager {
         assertPathNotEmpty(path);
         assertPathWithinWorkDir(path);
         Path file = root.resolve(path);
+        if (Files.exists(file) && !Files.isRegularFile(file)) {
+            throw new AccessDeniedException(path + " is a directory!");
+        }
         Files.createDirectories(file.getParent());
         Files.write(file, content.getBytes(ENCODING));
     }
