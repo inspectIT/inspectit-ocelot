@@ -1,0 +1,50 @@
+inspectit-ocelot-eum-server:
+  definitions:
+    page_ready_time:
+      measure-type: LONG
+      beacon-field: t_page
+      unit: ms
+      views:
+        '[page_ready_time/SUM]': {aggregation: SUM}
+        '[page_ready_time/COUNT]': {aggregation: COUNT}
+    load_time:
+      measure-type: LONG
+      beacon-field: t_done
+      unit: ms
+      views:
+        '[load_time/SUM]': {aggregation: SUM}
+        '[load_time/COUNT]': {aggregation: COUNT}
+
+    start_timestamp:
+      measure-type: LONG
+      beacon-field: rt.tstart
+      unit: ms
+
+    navigation_start_timestamp:
+      measure-type: LONG
+      beacon-field: rt.nstart
+      unit: ms
+
+    end_timestamp:
+      measure-type: LONG
+      beacon-field: rt.end
+      unit: ms
+      views:
+        end_timestamp:
+          aggregation: LAST_VALUE
+          tags: {APPLICATION : true}
+  tags:
+    extra:
+      APPLICATION: my-application
+    beacon:
+      URL: u
+      OS: ua.plt
+    global:
+      - URL
+      - OS
+  exporters:
+    metrics:
+      prometheus:
+        enabled: true
+        host: localhost
+        port: 8888

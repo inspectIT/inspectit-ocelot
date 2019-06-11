@@ -1,0 +1,45 @@
+plugins {
+	id 'org.springframework.boot' version '2.1.4.RELEASE'
+	id 'java'
+}
+apply plugin: 'io.spring.dependency-management'
+
+group = 'rocks.inspectit.oce'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '1.8'
+
+bootJar {
+	archivesBaseName = 'inspectit-ocelot-configurationserver'
+	version = '0.1.0'
+
+	manifest {
+		attributes 'Start-Class': 'rocks.inspectit.ocelot.ConfigurationServer'
+	}
+}
+
+
+dependencies {
+	implementation(
+			project(':inspectit-ocelot-config'),
+			"org.springframework.boot:spring-boot-starter-web",
+			"io.opencensus:opencensus-api:${openCensusVersion}",
+			"io.opencensus:opencensus-impl:${openCensusVersion}",
+			"io.prometheus:simpleclient_httpserver:${prometheusClientVersion}",
+			"io.opencensus:opencensus-exporter-stats-prometheus:${openCensusVersion}"
+
+
+	)
+	compileOnly "org.projectlombok:lombok:1.18.4"
+	annotationProcessor "org.projectlombok:lombok:1.18.4"
+	testImplementation(
+			project(':inspectit-ocelot-config'),
+			"org.springframework.boot:spring-boot-starter-test",
+			"io.opencensus:opencensus-impl:${openCensusVersion}",
+			'org.springframework:spring-test:5.1.3.RELEASE',
+			'org.apache.httpcomponents:httpclient:4.5.6',
+			'org.mockito:mockito-core:2.23.4',
+			'org.junit.jupiter:junit-jupiter-api:5.3.1',
+			'org.mockito:mockito-junit-jupiter:2.23.0'
+	)
+	testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.3.1"
+}
