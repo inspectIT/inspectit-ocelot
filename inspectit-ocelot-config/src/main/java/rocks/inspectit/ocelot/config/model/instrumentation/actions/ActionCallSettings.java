@@ -49,17 +49,31 @@ public class ActionCallSettings extends ConditionalActionSettings {
     private Map<@NotBlank String, @NotBlank String> dataInput = Collections.emptyMap();
 
     /**
-     * Normally, we assume references to data keys implicitly define a dependency.
-     * For example, when defining data-input: { x: my_data} we assume that this action uses the value of the data key
-     * my_data to populate the action parameter "x".
-     * We then assume that if any action on the same method within the same entry / exit section writes "my_data" it has to be executed before.
-     * This however is not always the case: in some cases we want to read a down-propagated value before it is overridden.
-     * <p>
-     * This map serves this purpose: it defines a set of data_keys.
-     * The action is now scheduled in a way that it is executed before any data-key mentioned in this set is written within
-     * the same method entry or exit phase
+     * Allows to explicitly define which data keys this call reads before they are overridden by any other call.
+     * These dependencies influence the execution order of calls,
+     * e.g. calls specifying that they read data before it is overridden are executed
+     * before any calls writing the data.
+     * If a data key is present in both readsBeforeWritten and {@link #reads}, readsBeforeWritten takes precedence.
      */
-    private Map<@NotBlank String, @NotNull Boolean> before = Collections.emptyMap();
+    private Map<@NotBlank String, @NotNull Boolean> readsBeforeWritten = Collections.emptyMap();
+
+    /**
+     * Allows to explicitly define which data keys this call reads or does not read.
+     * Implicitly, all data keys used as {@link #dataInput} or in the conditions are marked as "read".
+     * These implicit dependencies can be removed by adding them with the value "false" to this map.
+     * Additional dependencies can be added with the value "true".
+     * These dependencies influence the execution order of calls, e.g. calls reading data are executed
+     * after the calls writing the data.
+     */
+    private Map<@NotBlank String, @NotNull Boolean> reads = Collections.emptyMap();
+
+    /**
+     * Allows to explicitly define which data keys this call writes (e.g. due to side effects of the action).
+     * These dependencies influence the execution order of calls,
+     * e.g. calls specifying that they read data are executed
+     * after any calls writing the data.
+     */
+    private Map<@NotBlank String, @NotNull Boolean> writes = Collections.emptyMap();
 
     public void performValidation(InstrumentationSettings container, ViolationBuilder vios) {
         val actionConf = container.getActions().get(action);

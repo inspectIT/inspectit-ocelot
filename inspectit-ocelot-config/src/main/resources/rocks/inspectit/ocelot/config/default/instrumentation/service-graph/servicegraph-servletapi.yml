@@ -22,7 +22,7 @@ inspectit:
           origin_service: 
             action: set
             data-input: {value: prop_origin_service}
-            before: {prop_origin_service: true}
+            reads-before-written: {prop_origin_service: true}
           protocol:
             action: set
             constant-input: { value: "http"}

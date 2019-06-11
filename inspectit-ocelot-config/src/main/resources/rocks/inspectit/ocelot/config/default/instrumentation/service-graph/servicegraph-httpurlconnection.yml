@@ -36,7 +36,7 @@ inspectit:
           target_service: 
             action: set
             data-input: {value: prop_target_service}
-            before: {prop_target_service: true}
+            reads-before-written: {prop_target_service: true}
           
           #store the target host in case this is an external call (=the target_service is unknown)
           target_external:

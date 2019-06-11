@@ -13,6 +13,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.config.model.instrumentation.actions.ActionCallSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.RuleTracingSettings;
+import rocks.inspectit.ocelot.core.instrumentation.config.callsorting.GenericActionCallSorter;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.*;
 
 import java.util.Map;
@@ -75,25 +76,6 @@ public class MethodHookConfigurationResolverTest {
                     .callSettings(setb1)
                     .action(providerB).build();
         }
-
-        @Test
-        void verifyProviderConflictsDetected() {
-            InstrumentationRule r1 = InstrumentationRule.builder().entryAction(callToA1).build();
-            InstrumentationRule r2 = InstrumentationRule.builder().entryAction(callToB).build();
-
-            assertThatThrownBy(() -> resolver.buildHookConfiguration(config, Sets.newHashSet(r1, r2)))
-                    .isInstanceOf(MethodHookConfigurationResolver.ConflictingDefinitionsException.class);
-        }
-
-        @Test
-        void verifyNoProviderConflictsForSameCall() throws Exception {
-            InstrumentationRule r1 = InstrumentationRule.builder().entryAction(callToA1).build();
-            InstrumentationRule r2 = InstrumentationRule.builder().entryAction(callToA2).build();
-
-            MethodHookConfiguration conf = resolver.buildHookConfiguration(config, Sets.newHashSet(r1, r2));
-            assertThat(conf.getEntryActions()).containsExactly(callToA1);
-        }
-
 
         @Test
         void verifyMetricConflictsDetected() {
@@ -220,7 +202,7 @@ public class MethodHookConfigurationResolverTest {
             dependingOnFirst.setAction("providerA");
             dependingOnFirst.setDataInput(Maps.newHashMap("someArgument", "my_key"));
             ActionCallConfig depFirst = ActionCallConfig.builder()
-                    .name("third_key")
+                    .name("second_key")
                     .callSettings(dependingOnFirst)
                     .action(providerA).build();
 
