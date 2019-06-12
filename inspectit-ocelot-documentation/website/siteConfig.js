@@ -97,7 +97,15 @@ const siteConfig = {
 
   docsSideNavCollapsible: true,
 
-  editUrl: "https://github.com/inspectit/inspectit-ocelot-documentation/edit/master/docs/"
+  editUrl: "https://github.com/inspectit/inspectit-ocelot-documentation/edit/master/docs/",
+
+  algolia: {
+    apiKey: 'ce332dcee733a92cefacc3195edd83dd',
+    indexName: 'inspectit-ocelot',
+    algoliaOptions: {
+      facetFilters: [ "version:VERSION" ]
+    }
+  }
 };
 
 module.exports = siteConfig;
