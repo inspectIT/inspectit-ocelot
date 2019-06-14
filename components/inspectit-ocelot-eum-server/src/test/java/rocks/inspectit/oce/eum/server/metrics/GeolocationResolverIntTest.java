@@ -1,4 +1,4 @@
-package rocks.inspectit.oce.eum.server.exporters;
+package rocks.inspectit.oce.eum.server.metrics;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -20,6 +20,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import rocks.inspectit.oce.eum.server.utils.DefaultTags;
 
 import java.util.HashMap;
 import java.util.List;
@@ -31,18 +32,16 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Integration test of PrometheusExporterService
+ * Integration test of {@link GeolocationResolver}
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-public class PrometheusExporterServiceIntTest {
+public class GeolocationResolverIntTest {
 
     private static String URL_KEY = "u";
     private static String SUT_URL = "http://test.com/login";
-    private static String  METRIC_NAME = "page_ready_time";
     private static String  BEACON_KEY_NAME = "t_page";
-    private static String  FAKE_BEACON_KEY_NAME = "does_not_exist";
 
     @Autowired
     protected MockMvc mockMvc;
@@ -60,9 +59,9 @@ public class PrometheusExporterServiceIntTest {
      * @param beacon
      * @throws Exception
      */
-    private void sendBeacon(Map<String, String> beacon) throws Exception {
+    private void sendBeacon(Map<String, String> beacon, String requesterIP) throws Exception {
         List<NameValuePair> params = beacon.entrySet().stream().map(entry -> new BasicNameValuePair(entry.getKey(), entry.getValue())).collect(Collectors.toList());
-        mockMvc.perform(post("/beacon").contentType(MediaType.APPLICATION_FORM_URLENCODED).content(EntityUtils.toString(new UrlEncodedFormEntity(params)))).andExpect(status().isAccepted());
+        mockMvc.perform(post("/beacon").header("X-Forwarded-For", requesterIP).contentType(MediaType.APPLICATION_FORM_URLENCODED).content(EntityUtils.toString(new UrlEncodedFormEntity(params)))).andExpect(status().isAccepted());
     }
 
     private Map<String, String> getBasicBeacon(){
@@ -71,51 +70,56 @@ public class PrometheusExporterServiceIntTest {
         return  beacon;
     }
 
-    void assertGet200(String url) throws Exception {
-        int statusCode = testClient.execute(new HttpGet(url)).getStatusLine().getStatusCode();
-
-        assertThat(statusCode).isEqualTo(200);
-    }
-
     @After
     public void closeClient() throws Exception {
         testClient.close();
     }
 
-    @Test
-    public void testDefaultSettings() throws Exception {
-        assertGet200("http://localhost:8888/metrics");
-    }
-
     /**
-     * The application should expose no view, since no beacon entry maps to the default implementation.
+     * The application should expose a view, where the tag COUNTRY_CODE is set to DE
      * @throws Exception
      */
     @Test
-    public void expectNoViews() throws Exception {
-        Map<String, String> beacon =getBasicBeacon();
-        beacon.put(FAKE_BEACON_KEY_NAME, "Fake Value");
-        sendBeacon(beacon);
-
-        HttpResponse response = testClient.execute(new HttpGet("http://localhost:8888/metrics)"));
-        ResponseHandler responseHandler = new BasicResponseHandler();
-        assertThat(responseHandler.handleResponse(response).toString()).doesNotContain("Fake Value");
-        assertGet200("http://localhost:8888/metrics");
-    }
-
-    /**
-     * The application should expose one view, since one beacon entry maps to the default implementation.
-     * @throws Exception
-     */
-    @Test
-    public void expectOneView() throws Exception {
+    public void expectCountryCodeToBeSet() throws Exception {
         Map<String, String> beacon = getBasicBeacon();
         beacon.put(BEACON_KEY_NAME, "12");
 
-        sendBeacon(beacon);
+        sendBeacon(beacon, "94.186.169.18");
 
         HttpResponse response = testClient.execute(new HttpGet("http://localhost:8888/metrics)"));
         ResponseHandler responseHandler = new BasicResponseHandler();
-        assertThat(responseHandler.handleResponse(response).toString()).contains(METRIC_NAME).contains(SUT_URL).contains("12");
+        assertThat(responseHandler.handleResponse(response).toString()).contains(DefaultTags.COUNTRY_CODE.name()+"="+"\"DE\"");
+    }
+
+    /**
+     * The application should expose a view, where the tag COUNTRY_CODE is not set
+     * @throws Exception
+     */
+    @Test
+    public void expectCountryCodeToBeNotSetNotResolvableIP() throws Exception {
+        Map<String, String> beacon = getBasicBeacon();
+        beacon.put(BEACON_KEY_NAME, "12");
+
+        sendBeacon(beacon, "127.0.0.1");
+
+        HttpResponse response = testClient.execute(new HttpGet("http://localhost:8888/metrics)"));
+        ResponseHandler responseHandler = new BasicResponseHandler();
+        assertThat(responseHandler.handleResponse(response).toString()).contains(DefaultTags.COUNTRY_CODE.name()+"="+"\"\"");
+    }
+
+    /**
+     * The application should expose a view, where the tag COUNTRY_CODE is not set
+     * @throws Exception
+     */
+    @Test
+    public void expectCountryCodeToBeNotSetWrongFormattedIP() throws Exception {
+        Map<String, String> beacon = getBasicBeacon();
+        beacon.put(BEACON_KEY_NAME, "12");
+
+        sendBeacon(beacon, "wrong-formatted-ip");
+
+        HttpResponse response = testClient.execute(new HttpGet("http://localhost:8888/metrics)"));
+        ResponseHandler responseHandler = new BasicResponseHandler();
+        assertThat(responseHandler.handleResponse(response).toString()).contains(DefaultTags.COUNTRY_CODE.name()+"="+"\"\"");
     }
 }

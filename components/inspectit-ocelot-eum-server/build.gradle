@@ -25,7 +25,8 @@ dependencies {
 			"io.opencensus:opencensus-api:${openCensusVersion}",
 			"io.opencensus:opencensus-impl:${openCensusVersion}",
 			"io.prometheus:simpleclient_httpserver:${prometheusClientVersion}",
-			"io.opencensus:opencensus-exporter-stats-prometheus:${openCensusVersion}"
+			"io.opencensus:opencensus-exporter-stats-prometheus:${openCensusVersion}",
+			'com.maxmind.geoip2:geoip2:2.12.0'
 
 
 	)

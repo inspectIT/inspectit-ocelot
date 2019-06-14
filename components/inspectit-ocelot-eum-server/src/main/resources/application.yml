@@ -42,6 +42,7 @@ inspectit-ocelot-eum-server:
     global:
       - URL
       - OS
+      - COUNTRY_CODE
   exporters:
     metrics:
       prometheus:

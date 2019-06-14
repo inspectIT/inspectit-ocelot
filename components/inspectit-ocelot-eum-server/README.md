@@ -90,6 +90,7 @@ inspectit-ocelot-eum-server:
     global:
       - URL
       - OS
+      - COUNTRY_CODE
   exporters:
     metrics:
       prometheus:
@@ -113,6 +114,9 @@ We distinguish between to different types of tags:
 * `extra`- tags: Extra tags define tags, which are manually set in the configuration. The field `extra` holds a list of key-value mappings.
 * `beacon`- tags: Beacon tags define tags, whose tag value is resolved by a beacon entry. The defined value of the `beacon` map will be resolved by using the provided beacon.
 In order to provide selected tags to each measurement by default, tags can be defined as global. `global` holds a list of already defined tags, which will be then exposed for each measurement.
+
+##### Automated Geolocation Detection
+By using the tag `COUNTRY_CODE`, the geolocation of the requester is resolved by using the requester IP and the [GeoLite2 database](https://www.maxmind.com). If the IP cannot be resolved, the tag value will be empty.
 
 ##### Exporters
 By now, the prometheus exporter is available. If `ènabled` is set to true, the exporter is exposes the metrics under 
