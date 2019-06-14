@@ -8,13 +8,33 @@ inspectit:
         input:
           _this: Statement
         value-body: |
-          Connection con = _this.getConnection();
-          return con.getMetaData().getURL();
+          if(!_this.isClosed()) {
+            Connection con = _this.getConnection();
+            String url = con.getMetaData().getURL();
+
+            int semiColonIndex = url.indexOf(';');
+            if(semiColonIndex != -1) {
+              url = url.substring(0,semiColonIndex);
+            }
+
+            int questionIndex = url.indexOf('?');
+            if(questionIndex != -1) {
+              url = url.substring(0,questionIndex);
+            }
+            return url;
+          } else {
+            return null;
+          }
 
     scopes:
       jdbc_statement_execute:
         interfaces:
-          - name: java.sql.Statement
+          - name: "\\Qjava.sql.Statement\\E|\\Qjava.sql.PreparedStatement\\E"
+            matcher-mode: MATCHES
         methods:
           - name: execute
-            matcher-mode: STARTS_WITH
+          - name: executeQuery
+          - name: executeUpdate
+          - name: executeBatch
+        advanced:
+          instrument-only-inherited-methods: true

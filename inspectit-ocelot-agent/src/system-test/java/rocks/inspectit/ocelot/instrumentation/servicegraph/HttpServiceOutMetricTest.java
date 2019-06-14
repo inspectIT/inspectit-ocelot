@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * uses global-propagation-tests.yml
  */
-public class ServiceOutMetricTest {
+public class HttpServiceOutMetricTest {
 
     public static final int PORT = 9999;
     public static final String TEST_PATH = "/test";
