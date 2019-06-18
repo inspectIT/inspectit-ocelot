@@ -2,11 +2,15 @@ package rocks.inspectit.oce.eum.server.metrics;
 
 import io.opencensus.common.Scope;
 import io.opencensus.stats.*;
-import io.opencensus.tags.*;
+import io.opencensus.tags.TagContextBuilder;
+import io.opencensus.tags.TagKey;
+import io.opencensus.tags.TagValue;
+import io.opencensus.tags.Tags;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.oce.eum.server.model.config.BeaconMetricDefinition;
 import rocks.inspectit.oce.eum.server.model.config.Configuration;
+import rocks.inspectit.oce.eum.server.utils.DefaultTags;
 import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings;
 import rocks.inspectit.ocelot.config.model.metrics.definition.ViewDefinitionSettings;
 
@@ -154,14 +158,21 @@ public class MeasuresAndViewsManager {
         TagContextBuilder tagContextBuilder = Tags.getTagger().currentBuilder();
 
         for(Map.Entry<String, String> extraTag : configuration.getTags().getExtra().entrySet()){
-            tagContextBuilder.put(TagKey.create(extraTag.getKey()), TagValue.create(extraTag.getValue()), TagMetadata.create(TagMetadata.TagTtl.NO_PROPAGATION));
+            tagContextBuilder.putLocal(TagKey.create(extraTag.getKey()), TagValue.create(extraTag.getValue()));
         }
 
         for(Map.Entry<String, String> beaconTag : configuration.getTags().getBeacon().entrySet()) {
             if (beacon.containsKey(beaconTag.getValue())) {
-                tagContextBuilder.put(TagKey.create(beaconTag.getKey()), TagValue.create(beacon.get(beaconTag.getValue())), TagMetadata.create(TagMetadata.TagTtl.NO_PROPAGATION));
+                tagContextBuilder.putLocal(TagKey.create(beaconTag.getKey()), TagValue.create(beacon.get(beaconTag.getValue())));
             }
         }
+
+        for(DefaultTags defaultTag : DefaultTags.values()){
+            if(beacon.containsKey(defaultTag.name())){
+                tagContextBuilder.putLocal(TagKey.create(defaultTag.name()), TagValue.create(beacon.get(defaultTag.name())));
+            }
+        }
+
         return tagContextBuilder;
     }
 

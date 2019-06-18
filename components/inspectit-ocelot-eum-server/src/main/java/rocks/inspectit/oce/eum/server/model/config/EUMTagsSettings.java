@@ -3,6 +3,7 @@ package rocks.inspectit.oce.eum.server.model.config;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import rocks.inspectit.oce.eum.server.utils.DefaultTags;
 import rocks.inspectit.ocelot.config.model.tags.TagsSettings;
 
 import javax.validation.constraints.AssertTrue;
@@ -29,7 +30,7 @@ public class EUMTagsSettings extends TagsSettings {
 
     @AssertTrue(message = "All defined global tags should exist either in extra tags or beacon tags")
     public boolean isGlobalTagsContainAlreadyDefinedTags() {
-        return global.stream().allMatch(globalTag -> getExtra().containsKey(globalTag) || getBeacon().containsKey(globalTag));
+        return global.stream().allMatch(globalTag -> getExtra().containsKey(globalTag) || getBeacon().containsKey(globalTag) || DefaultTags.isDefaultTag(globalTag));
     }
 
     @AssertTrue(message = "Each tag should only be defined once")
