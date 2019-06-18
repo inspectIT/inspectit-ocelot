@@ -78,15 +78,10 @@ public class FileManager {
         assertPathWithinWorkDir(path);
         Path dir = root.resolve(path);
 
-        Path curr = dir;
-        while (curr != null) {
-            if (Files.exists(curr) && !Files.isDirectory(curr)) {
-                throw new AccessDeniedException(curr + " is a file!");
-            }
-            curr = curr.getParent();
+        createDirectoriesIfNotExisting(dir.getParent());
+        if (Files.exists(dir) && !Files.isDirectory(dir)) {
+            throw new AccessDeniedException(dir + " is a file!");
         }
-
-        Files.createDirectories(dir.getParent());
         Files.createDirectory(dir);
     }
 
@@ -142,7 +137,7 @@ public class FileManager {
         if (Files.exists(file) && !Files.isRegularFile(file)) {
             throw new AccessDeniedException(path + " is a directory!");
         }
-        Files.createDirectories(file.getParent());
+        createDirectoriesIfNotExisting(file.getParent());
         Files.write(file, content.getBytes(ENCODING));
     }
 
@@ -178,8 +173,19 @@ public class FileManager {
         assertPathWithinWorkDir(destination);
         Path src = root.resolve(source);
         Path dest = root.resolve(destination);
-        Files.createDirectories(dest.getParent());
+        createDirectoriesIfNotExisting(dest.getParent());
         Files.move(src, dest);
+    }
+
+    private void createDirectoriesIfNotExisting(Path dir) throws IOException {
+        Path curr = dir;
+        while (curr != null) {
+            if (Files.exists(curr) && !Files.isDirectory(curr)) {
+                throw new AccessDeniedException(curr + " is a file!");
+            }
+            curr = curr.getParent();
+        }
+        Files.createDirectories(dir);
     }
 
     private List<Path> getContentsDepthFirst(Path dir) throws IOException {
