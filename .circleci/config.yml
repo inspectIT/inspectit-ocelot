@@ -74,7 +74,7 @@ jobs:
       - attach_repo
       - build_and_test_agent
       - run: cd repo && ./gradlew codeCoverageReport
-      - run: cd repo && bash <(curl -s https://codecov.io/bash)
+      - run: cd repo && bash <(curl -s https://codecov.io/bash) -y ./codecov.yml
 
   # Testing on Oracle JDK 11
   sys-oracle11:
