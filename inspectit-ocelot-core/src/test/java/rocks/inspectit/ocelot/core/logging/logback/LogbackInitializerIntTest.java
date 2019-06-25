@@ -1,9 +1,12 @@
 package rocks.inspectit.ocelot.core.logging.logback;
 
+import ch.qos.logback.classic.LoggerContext;
+import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,12 +15,10 @@ import org.springframework.test.context.TestPropertySource;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,14 +33,15 @@ class LogbackInitializerIntTest {
     @DirtiesContext
     class Defaults extends SpringTestBase {
 
-        private final String TMP_DIR = "tmp";
+        private Path tempDirectory;
 
         @Autowired
         InspectitEnvironment environment;
 
         @BeforeEach
-        void initTemp() {
-            System.setProperty("java.io.tmpdir", TMP_DIR);
+        void initTemp() throws IOException {
+            tempDirectory = Files.createTempDirectory("ocelot-logback");
+            System.setProperty("java.io.tmpdir", tempDirectory.toString());
         }
 
         @Test
@@ -64,7 +66,7 @@ class LogbackInitializerIntTest {
             Logger logger = LoggerFactory.getLogger(OverwrittenDefaults.class);
             logger.info(testMessage);
 
-            Path output = Paths.get(TMP_DIR, "inspectit-ocelot");
+            Path output = Paths.get(tempDirectory.toString(), "inspectit-ocelot");
             Optional<Path> agentLog = Files.walk(output)
                     .filter(p -> p.endsWith(AGENT_LOG_FILE))
                     .findFirst();
@@ -103,7 +105,7 @@ class LogbackInitializerIntTest {
             Logger logger = LoggerFactory.getLogger(OverwrittenDefaults.class);
             logger.warn(testMessage, exception);
 
-            Path output = Paths.get(TMP_DIR, "inspectit-ocelot");
+            Path output = Paths.get(tempDirectory.toString(), "inspectit-ocelot");
             Optional<Path> agentLog = Files.walk(output)
                     .filter(p -> p.endsWith(AGENT_LOG_FILE))
                     .findFirst();
@@ -144,7 +146,7 @@ class LogbackInitializerIntTest {
             Logger logger = LoggerFactory.getLogger(OverwrittenDefaults.class);
             logger.trace(testMessage);
 
-            Path output = Paths.get(TMP_DIR, "inspectit-ocelot");
+            Path output = Paths.get(tempDirectory.toString(), "inspectit-ocelot");
             Optional<Path> agentLog = Files.walk(output)
                     .filter(p -> p.endsWith(AGENT_LOG_FILE))
                     .findFirst();
@@ -174,16 +176,23 @@ class LogbackInitializerIntTest {
         }
 
         @AfterEach
-        void clean() throws Exception {
+        void clean() {
             System.clearProperty("java.io.tmpdir");
 
-            Path output = Paths.get(TMP_DIR);
-            Files.walk(output)
-                    .sorted(Comparator.reverseOrder())
-                    .map(Path::toFile)
-                    .forEach(File::delete);
+            try {
+                ILoggerFactory loggerFactory = LoggerFactory.getILoggerFactory();
 
-            Files.deleteIfExists(output);
+                // Check for logback implementation of slf4j
+                if (loggerFactory instanceof LoggerContext) {
+                    LoggerContext context = (LoggerContext) loggerFactory;
+                    context.reset();
+                    context.stop();
+                }
+
+                FileUtils.deleteDirectory(tempDirectory.toFile());
+            } catch (Exception e) {
+                // ignored - this may happen on Windows if the log files are still locked by the unit test
+            }
         }
 
     }
@@ -196,23 +205,28 @@ class LogbackInitializerIntTest {
             "inspectit.logging.console.pattern=my-console-pattern",
             "inspectit.logging.file.enabled=false",
             "inspectit.logging.file.pattern=my-file-pattern",
-            "inspectit.logging.file.path=" + OverwrittenDefaults.MY_CUSTOM_PATH,
             "inspectit.logging.file.include-service-name=false",
     })
     @DirtiesContext
     class OverwrittenDefaults extends SpringTestBase {
 
-        static final String MY_CUSTOM_PATH = "my/custom/path";
+        Path tempDirectory;
 
         @Autowired
         InspectitEnvironment environment;
+
+        @BeforeEach
+        void beforeTest() throws IOException {
+            tempDirectory = Files.createTempDirectory("ocelot-logback");
+            environment.getCurrentConfig().getLogging().getFile().setPath(tempDirectory);
+        }
 
         @Test
         void propertiesSet() {
             LogbackInitializer.initLogging(environment.getCurrentConfig());
 
             assertThat(System.getProperty(LogbackInitializer.INSPECTIT_LOG_LEVEL)).isEqualTo("TRACE");
-            assertThat(System.getProperty(LogbackInitializer.INSPECTIT_LOG_PATH)).isEqualTo(Paths.get(MY_CUSTOM_PATH).toAbsolutePath().toString());
+            assertThat(System.getProperty(LogbackInitializer.INSPECTIT_LOG_PATH)).isEqualTo(tempDirectory.toAbsolutePath().toString());
             assertThat(System.getProperty(LogbackInitializer.INSPECTIT_LOG_SERVICE_NAME)).isEmpty();
             assertThat(System.getProperty(LogbackInitializer.INSPECTIT_LOG_CONSOLE_PATTERN)).isEqualTo("my-console-pattern");
             assertThat(System.getProperty(LogbackInitializer.INSPECTIT_LOG_FILE_PATTERN)).isEqualTo("my-file-pattern");
@@ -229,8 +243,7 @@ class LogbackInitializerIntTest {
             Logger logger = LoggerFactory.getLogger(OverwrittenDefaults.class);
             logger.info(testMessage);
 
-            Path output = Paths.get(MY_CUSTOM_PATH);
-            Optional<Path> agentLog = Files.walk(output)
+            Optional<Path> agentLog = Files.walk(tempDirectory)
                     .filter(p -> p.endsWith(AGENT_LOG_FILE))
                     .findFirst();
 
@@ -248,15 +261,17 @@ class LogbackInitializerIntTest {
 
         @AfterEach
         void clean() throws Exception {
-            Path output = Paths.get("my");
-            Files.walk(output)
-                    .sorted(Comparator.reverseOrder())
-                    .map(Path::toFile)
-                    .forEach(File::delete);
+            ILoggerFactory loggerFactory = LoggerFactory.getILoggerFactory();
 
-            Files.deleteIfExists(output);
+            // Check for logback implementation of slf4j
+            if (loggerFactory instanceof LoggerContext) {
+                LoggerContext context = (LoggerContext) loggerFactory;
+                context.reset();
+                context.stop();
+            }
+
+            FileUtils.deleteDirectory(tempDirectory.toFile());
         }
-
     }
 
     @Nested
@@ -284,6 +299,15 @@ class LogbackInitializerIntTest {
 
         @AfterEach
         void clean() throws Exception {
+            ILoggerFactory loggerFactory = LoggerFactory.getILoggerFactory();
+
+            // Check for logback implementation of slf4j
+            if (loggerFactory instanceof LoggerContext) {
+                LoggerContext context = (LoggerContext) loggerFactory;
+                context.reset();
+                context.stop();
+            }
+
             Files.deleteIfExists(OUTPUT_FILE);
         }
 
