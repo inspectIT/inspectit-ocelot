@@ -29,17 +29,21 @@ allprojects {
     version = "$buildVersion"
 }
 
-
 task codeCoverageReport(type: JacocoReport) {
     group = 'Verification'
     description = 'Generates a combined report from all subprojects'
 
     executionData fileTree(project.rootDir.absolutePath).include("**/build/jacoco/*.exec")
 
-    subprojects.each {
-        if(it.plugins.hasPlugin('java')) {
+    dependsOn(':inspectit-ocelot-agent:systemTest')
+    dependsOn(':inspectit-ocelot-agent:test')
+    dependsOn(':inspectit-ocelot-bootstrap:test')
+    dependsOn(':inspectit-ocelot-config:test')
+    dependsOn(':inspectit-ocelot-core:test')
+
+    doFirst {
+        [project(':inspectit-ocelot-agent'), project(':inspectit-ocelot-bootstrap'), project(':inspectit-ocelot-config'), project(':inspectit-ocelot-core')].each {
             sourceSets it.sourceSets.main
-            dependsOn it.test
         }
     }
 
@@ -50,7 +54,4 @@ task codeCoverageReport(type: JacocoReport) {
         html.destination file("${buildDir}/reports/jacoco/html")
         csv.enabled false
     }
-}
-codeCoverageReport.dependsOn {
-    project(':inspectit-ocelot-agent').systemTest
 }
