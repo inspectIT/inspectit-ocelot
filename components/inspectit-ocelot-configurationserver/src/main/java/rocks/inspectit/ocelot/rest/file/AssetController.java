@@ -1,6 +1,9 @@
 package rocks.inspectit.ocelot.rest.file;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import rocks.inspectit.ocelot.file.FileData;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -11,16 +14,29 @@ import java.io.IOException;
 @RestController
 public class AssetController extends FileBaseController {
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @PutMapping(value = "assets/**")
-    public void writeAsset(HttpServletRequest request, @RequestBody(required = false) String content) throws IOException {
+    public void writeAsset(HttpServletRequest request, @RequestParam(defaultValue = "false") boolean raw, @RequestBody(required = false) String content) throws IOException {
         String path = getRequestSubPath(request);
-        files.createOrReplaceFile(path, content == null ? "" : content);
+        if (raw || content == null) {
+            files.createOrReplaceFile(path, content == null ? "" : content);
+        } else {
+            FileData data = objectMapper.readValue(content, FileData.class);
+            files.createOrReplaceFile(path, data.getContent());
+        }
     }
 
     @GetMapping(value = "assets/**")
-    public String readAsset(HttpServletRequest request) throws IOException {
+    public Object readAsset(HttpServletRequest request, @RequestParam(defaultValue = "false") boolean raw) throws IOException {
         String path = getRequestSubPath(request);
-        return files.readFile(path);
+        String content = files.readFile(path);
+        if (raw) {
+            return content;
+        } else {
+            return FileData.builder().content(content).build();
+        }
     }
 
     @DeleteMapping(value = "assets/**")
