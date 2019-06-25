@@ -154,10 +154,8 @@ services:
       - 9094:9094
 
   load:
-    image: openapm/spring-petclinic-load:inspectit-oce-demo
+    image: inspectit/spring-petclinic-load:1.0
     container_name: load-generator
-    volumes:
-      - ./load/load-script.yml:/artillery/load-script.yml
 
   jaeger:
     image: jaegertracing/all-in-one:1.6
