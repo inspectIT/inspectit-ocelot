@@ -41,6 +41,7 @@ dependencies {
             project(':inspectit-ocelot-config'),
             "org.springframework.boot:spring-boot-starter-web",
             "org.yaml:snakeyaml:1.24",
+            "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.9.9",
             "io.springfox:springfox-swagger2:2.9.2",
             "io.springfox:springfox-swagger-ui:2.9.2",
             "commons-io:commons-io:2.6"
