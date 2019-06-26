@@ -2,9 +2,9 @@ package rocks.inspectit.ocelot.file;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
-import lombok.Value;
+import lombok.Data;
 
-@Value
+@Data
 @Builder
 public class FileInfo {
 
@@ -16,5 +16,6 @@ public class FileInfo {
     }
 
     private Type type;
+
     private String path;
 }

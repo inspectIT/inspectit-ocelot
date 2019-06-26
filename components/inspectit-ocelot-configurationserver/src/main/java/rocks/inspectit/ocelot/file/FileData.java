@@ -1,6 +1,5 @@
 package rocks.inspectit.ocelot.file;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
@@ -13,10 +12,5 @@ import lombok.Data;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class FileData {
 
-    String content;
-
-    @JsonCreator
-    public FileData(String content) {
-        this.content = content;
-    }
+    private String content;
 }

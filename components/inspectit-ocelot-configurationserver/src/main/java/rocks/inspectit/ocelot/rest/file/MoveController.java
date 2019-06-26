@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.rest.file;
 
+import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,9 +14,10 @@ import java.io.IOException;
 @RestController
 public class MoveController extends FileBaseController {
 
+    @ApiOperation(value = "Move or rename a file or directory")
     @PutMapping(value = "move")
     public void moveAssetOrDirectory(@RequestBody FileMoveDescription moveDescription) throws IOException {
-        files.move(moveDescription.getSource(), moveDescription.getTarget());
+        fileManager.move(moveDescription.getSource(), moveDescription.getTarget());
     }
 
 }

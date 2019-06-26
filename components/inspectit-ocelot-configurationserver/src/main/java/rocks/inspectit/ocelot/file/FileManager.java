@@ -2,6 +2,7 @@ package rocks.inspectit.ocelot.file;
 
 import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -11,34 +12,41 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Encapsulates access to the file system storing the source config files managed by this server.
+ */
 @Component
 @Slf4j
 public class FileManager {
 
+    /**
+     * The subfolder within the working directory which acts as
+     * filesRoot for the files and directories managed by this class.
+     */
+    @VisibleForTesting
+    static final String FILES_SUBFOLDER = "files";
+
     @VisibleForTesting
     static final Charset ENCODING = StandardCharsets.UTF_8;
 
-    @Value("${inspectit.workingDirectory:workdir}")
+    @Value("${inspectit.workingDirectory}")
     @VisibleForTesting
-    String workingDir;
+    String workingDirectory;
 
     /**
      * The path under which the file system accessible by this component lies.
-     * This is the absolute, normalized path represented by {@link #workingDir}.
+     * This is the absolute, normalized path represented by {@link #workingDirectory} with {@link #FILES_SUBFOLDER} appended.
      */
-    private Path root;
+    private Path filesRoot;
 
     @PostConstruct
     @VisibleForTesting
     void init() throws IOException {
-        root = Paths.get(workingDir).toAbsolutePath().normalize();
-        Files.createDirectories(root);
+        filesRoot = Paths.get(workingDirectory).resolve(FILES_SUBFOLDER).toAbsolutePath().normalize();
+        Files.createDirectories(filesRoot);
     }
 
     /**
@@ -46,15 +54,15 @@ public class FileManager {
      *
      * @param path the path of the directory
      * @return the directory contents
-     * @throws IOException If the input was not valid or something in the fileystem went wrong
+     * @throws IOException If the input was not valid or something in the filesystem went wrong
      */
     public synchronized Collection<FileInfo> getFilesInDirectory(String path) throws IOException {
         Path dir;
         if (StringUtils.isEmpty(path)) {
-            dir = root;
+            dir = filesRoot;
         } else {
-            assertPathWithinWorkDir(path);
-            dir = root.resolve(path);
+            assertPathWithinFilesRoot(path);
+            dir = filesRoot.resolve(path);
         }
         return Files.walk(dir)
                 .filter(f -> f != dir)
@@ -73,16 +81,11 @@ public class FileManager {
      * @param path the path of the directory to create
      * @throws IOException if the directory already exists or could not be created for any reason
      */
-    public synchronized void createNewDirectory(String path) throws IOException {
-        assertPathNotEmpty(path);
-        assertPathWithinWorkDir(path);
-        Path dir = root.resolve(path);
+    public synchronized void createDirectory(String path) throws IOException {
+        assertValidSubPath(path);
+        Path dir = filesRoot.resolve(path);
 
-        createDirectoriesIfNotExisting(dir.getParent());
-        if (Files.exists(dir) && !Files.isDirectory(dir)) {
-            throw new AccessDeniedException(dir + " is a file!");
-        }
-        Files.createDirectory(dir);
+        FileUtils.forceMkdir(dir.toFile());
     }
 
     /**
@@ -92,17 +95,14 @@ public class FileManager {
      * @throws IOException if the directory could not be deleted
      */
     public synchronized void deleteDirectory(String path) throws IOException {
-        assertPathNotEmpty(path);
-        assertPathWithinWorkDir(path);
-        Path dir = root.resolve(path);
-        if (Files.isDirectory(dir)) {
-            List<Path> files = getContentsDepthFirst(dir);
-            for (Path f : files) {
-                Files.delete(f);
-            }
-        } else {
-            throw new NotDirectoryException(path);
+        assertValidSubPath(path);
+        Path dir = filesRoot.resolve(path);
+        // throw a more meaningful exception instead of the illegal argument exception thrown by
+        // FileUtils.deleteDirectory
+        if (!Files.exists(dir) || !Files.isDirectory(dir)) {
+            throw new NotDirectoryException(getRelativePath(dir));
         }
+        FileUtils.deleteDirectory(dir.toFile());
     }
 
     /**
@@ -113,9 +113,8 @@ public class FileManager {
      * @throws IOException if the file could not be read
      */
     public synchronized String readFile(String path) throws IOException {
-        assertPathNotEmpty(path);
-        assertPathWithinWorkDir(path);
-        Path file = root.resolve(path);
+        assertValidSubPath(path);
+        Path file = filesRoot.resolve(path);
         if (Files.exists(file) && !Files.isRegularFile(file)) {
             throw new AccessDeniedException(path + " is a directory!");
         }
@@ -131,13 +130,12 @@ public class FileManager {
      * @throws IOException if the file could not be written
      */
     public synchronized void createOrReplaceFile(String path, String content) throws IOException {
-        assertPathNotEmpty(path);
-        assertPathWithinWorkDir(path);
-        Path file = root.resolve(path);
+        assertValidSubPath(path);
+        Path file = filesRoot.resolve(path);
         if (Files.exists(file) && !Files.isRegularFile(file)) {
             throw new AccessDeniedException(path + " is a directory!");
         }
-        createDirectoriesIfNotExisting(file.getParent());
+        FileUtils.forceMkdir(file.getParent().toFile());
         Files.write(file, content.getBytes(ENCODING));
     }
 
@@ -148,9 +146,8 @@ public class FileManager {
      * @throws IOException if the file could not be deleted.
      */
     public synchronized void deleteFile(String path) throws IOException {
-        assertPathNotEmpty(path);
-        assertPathWithinWorkDir(path);
-        Path file = root.resolve(path);
+        assertValidSubPath(path);
+        Path file = filesRoot.resolve(path);
         if (Files.isRegularFile(file)) {
             Files.delete(file);
         } else {
@@ -167,63 +164,62 @@ public class FileManager {
      * @throws IOException if the given file or directory could not be renamed / moved
      */
     public synchronized void move(String source, String destination) throws IOException {
-        assertPathNotEmpty(source);
-        assertPathNotEmpty(destination);
-        assertPathWithinWorkDir(source);
-        assertPathWithinWorkDir(destination);
-        Path src = root.resolve(source);
-        Path dest = root.resolve(destination);
-        createDirectoriesIfNotExisting(dest.getParent());
-        Files.move(src, dest);
-    }
+        assertValidSubPath(source);
+        assertValidSubPath(destination);
+        Path src = filesRoot.resolve(source);
+        Path dest = filesRoot.resolve(destination);
 
-    private void createDirectoriesIfNotExisting(Path dir) throws IOException {
-        Path curr = dir;
-        while (curr != null) {
-            if (Files.exists(curr) && !Files.isDirectory(curr)) {
-                throw new AccessDeniedException(curr + " is a file!");
-            }
-            curr = curr.getParent();
+        FileUtils.forceMkdir(dest.getParent().toFile());
+
+        if (Files.isDirectory(src)) {
+            FileUtils.moveDirectory(src.toFile(), dest.toFile());
+        } else {
+            FileUtils.moveFile(src.toFile(), dest.toFile());
         }
-        Files.createDirectories(dir);
-    }
-
-    private List<Path> getContentsDepthFirst(Path dir) throws IOException {
-        List<Path> files = Files.walk(dir).collect(Collectors.toCollection(ArrayList::new));
-        Collections.reverse(files);
-        return files;
     }
 
     private String getRelativePath(Path f) {
-        return root.relativize(f.normalize())
+        return filesRoot.relativize(f.normalize())
                 .toString()
                 .replace(f.getFileSystem().getSeparator(), "/");
     }
 
     /**
-     * Ensures that the given path does not point to the root directory.
+     * Ensures that the given path is a subpath of {@link #filesRoot}
+     *
+     * @param path the pat hto check
+     * @throws AccessDeniedException if the file is not a subpath of the filesRoot
+     */
+    private void assertValidSubPath(String path) throws AccessDeniedException {
+        assertPathNotEmpty(path);
+        assertPathWithinFilesRoot(path);
+    }
+
+    /**
+     * Ensures that the given path does not point to the filesRoot directory.
      *
      * @param path the path to test
-     * @throws AccessDeniedException thrown if the path points to the root
+     * @throws AccessDeniedException thrown if the path points to the filesRoot
      */
     private void assertPathNotEmpty(String path) throws AccessDeniedException {
         if (StringUtils.isEmpty(path)) {
             throw new AccessDeniedException("/");
         }
-        if (root.resolve(path).toAbsolutePath().normalize().equals(root.toAbsolutePath())) {
+        if (filesRoot.resolve(path).toAbsolutePath().normalize().equals(filesRoot.toAbsolutePath())) {
             throw new AccessDeniedException("/");
         }
     }
 
     /**
-     * Ensures that the given path does not point to a file outside of the root directory.
+     * Ensures that the given path does not point to a file outside of the filesRoot directory.
+     * This method succeeds if the given path represents the filesRoot.
      *
      * @param path the path to test
-     * @throws AccessDeniedException thrown if the path points to a file outside of the root
+     * @throws AccessDeniedException thrown if the path points to a file outside of the filesRoot
      */
-    private void assertPathWithinWorkDir(String path) throws IOException {
-        String subPath = root.resolve(path).toAbsolutePath().normalize().toString();
-        String rootPath = root.toString();
+    private void assertPathWithinFilesRoot(String path) throws AccessDeniedException {
+        String subPath = filesRoot.resolve(path).toAbsolutePath().normalize().toString();
+        String rootPath = filesRoot.toString();
         if (!subPath.startsWith(rootPath)) {
             throw new AccessDeniedException(path);
         }

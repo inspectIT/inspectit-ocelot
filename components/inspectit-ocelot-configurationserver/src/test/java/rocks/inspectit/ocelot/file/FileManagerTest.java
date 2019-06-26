@@ -1,10 +1,12 @@
 package rocks.inspectit.ocelot.file;
 
 
+import org.apache.commons.io.FileExistsException;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.ArrayList;
@@ -36,7 +38,7 @@ public class FileManagerTest {
     @BeforeEach
     private void setupFileManager() throws Exception {
         fm = new FileManager();
-        fm.workingDir = fmRoot.toString();
+        fm.workingDirectory = fmRoot.toString();
         fm.init();
     }
 
@@ -50,10 +52,10 @@ public class FileManagerTest {
         try {
             for (String path : paths) {
                 if (!path.contains("=")) {
-                    Files.createDirectories(fmRoot.resolve(path));
+                    Files.createDirectories(fmRoot.resolve(FileManager.FILES_SUBFOLDER).resolve(path));
                 } else {
                     String[] splitted = path.split("=");
-                    Path file = fmRoot.resolve(splitted[0]);
+                    Path file = fmRoot.resolve(FileManager.FILES_SUBFOLDER).resolve(splitted[0]);
                     Files.createDirectories(file.getParent());
                     String content = splitted.length > 1 ? splitted[1] : "";
                     Files.write(file, content.getBytes(FileManager.ENCODING));
@@ -143,13 +145,13 @@ public class FileManagerTest {
     }
 
     @Nested
-    class CreateNewDirectory {
+    class CreateDirectory {
 
         @Test
         void createDirInRootDirect() throws Exception {
             setupTestFiles("topA", "topB");
 
-            fm.createNewDirectory("myDir");
+            fm.createDirectory("myDir");
 
             assertThat(fm.getFilesInDirectory(""))
                     .hasSize(3)
@@ -172,7 +174,7 @@ public class FileManagerTest {
         void createDirInRootIndirect() throws Exception {
             setupTestFiles("topA", "topB");
 
-            fm.createNewDirectory("topB/.././myDir");
+            fm.createDirectory("topB/.././myDir");
 
             assertThat(fm.getFilesInDirectory(""))
                     .hasSize(3)
@@ -195,7 +197,7 @@ public class FileManagerTest {
         void createDirInSubFolder() throws Exception {
             setupTestFiles("topA", "topB");
 
-            fm.createNewDirectory("topA/subA/subB");
+            fm.createDirectory("topA/subA/subB");
 
             assertThat(fm.getFilesInDirectory(""))
                     .hasSize(4)
@@ -218,19 +220,18 @@ public class FileManagerTest {
         }
 
         @Test
-        void createDirOnExistingDir() {
+        void createDirOnExistingDir() throws Exception {
             setupTestFiles("topA/subA", "topB");
 
-            assertThatThrownBy(() -> fm.createNewDirectory("topA/subA"))
-                    .isInstanceOf(FileAlreadyExistsException.class);
+            fm.createDirectory("topA/subA");
         }
 
         @Test
         void createDirOnExistingFile() {
             setupTestFiles("topA=content");
 
-            assertThatThrownBy(() -> fm.createNewDirectory("topA"))
-                    .isInstanceOf(AccessDeniedException.class);
+            assertThatThrownBy(() -> fm.createDirectory("topA"))
+                    .isInstanceOf(IOException.class);
         }
 
 
@@ -238,25 +239,25 @@ public class FileManagerTest {
         void createDirBeneathExistingFile() {
             setupTestFiles("topA=content");
 
-            assertThatThrownBy(() -> fm.createNewDirectory("topA/subDir"))
-                    .isInstanceOf(AccessDeniedException.class);
+            assertThatThrownBy(() -> fm.createDirectory("topA/subDir"))
+                    .isInstanceOf(IOException.class);
         }
 
         @Test
         void verifyDirOutsideWorkdirNotCreateable() {
             setupTestFiles("top");
 
-            assertThatThrownBy(() -> fm.createNewDirectory(null))
+            assertThatThrownBy(() -> fm.createDirectory(null))
                     .isInstanceOf(AccessDeniedException.class);
-            assertThatThrownBy(() -> fm.createNewDirectory(""))
+            assertThatThrownBy(() -> fm.createDirectory(""))
                     .isInstanceOf(AccessDeniedException.class);
-            assertThatThrownBy(() -> fm.createNewDirectory("./"))
+            assertThatThrownBy(() -> fm.createDirectory("./"))
                     .isInstanceOf(AccessDeniedException.class);
-            assertThatThrownBy(() -> fm.createNewDirectory("../mydir"))
+            assertThatThrownBy(() -> fm.createDirectory("../mydir"))
                     .isInstanceOf(AccessDeniedException.class);
-            assertThatThrownBy(() -> fm.createNewDirectory("top/../../mydir"))
+            assertThatThrownBy(() -> fm.createDirectory("top/../../mydir"))
                     .isInstanceOf(AccessDeniedException.class);
-            assertThatThrownBy(() -> fm.createNewDirectory("../../mydir"))
+            assertThatThrownBy(() -> fm.createDirectory("../../mydir"))
                     .isInstanceOf(AccessDeniedException.class);
         }
     }
@@ -661,7 +662,7 @@ public class FileManagerTest {
             setupTestFiles("file=");
 
             assertThatThrownBy(() -> fm.move("someFile", "anotherFile"))
-                    .isInstanceOf(NoSuchFileException.class);
+                    .isInstanceOf(FileNotFoundException.class);
         }
 
         @Test
@@ -669,7 +670,7 @@ public class FileManagerTest {
             setupTestFiles("file=", "someFile=");
 
             assertThatThrownBy(() -> fm.move("someFile", "file"))
-                    .isInstanceOf(FileAlreadyExistsException.class);
+                    .isInstanceOf(FileExistsException.class);
         }
 
         @Test
