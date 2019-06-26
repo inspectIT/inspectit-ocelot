@@ -23,6 +23,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -295,9 +296,13 @@ public class InspectitEnvironment extends StandardEnvironment {
         boolean httpEnabled = currentConfig.getHttp().isEnabled() && url != null;
 
         if (httpEnabled) {
-            log.info("Initializing HTTP based configuration from URL: {}", url);
 
             HttpPropertySourceState httpSourceState = new HttpPropertySourceState(HTTP_BASED_CONFIGURATION, currentConfig.getHttp());
+            try {
+                log.info("Initializing HTTP based configuration from URL: {}", httpSourceState.getEffectiveRequestUri());
+            } catch (URISyntaxException e) {
+                log.error("Configured Http URL is unparsable");
+            }
             httpSourceState.update();
             propsList.addBefore(InspectitEnvironment.DEFAULT_CONFIG_PROPERTYSOURCE_NAME, httpSourceState.getCurrentPropertySource());
         }

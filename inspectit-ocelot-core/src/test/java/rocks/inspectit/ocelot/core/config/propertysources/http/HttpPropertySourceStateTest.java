@@ -1,6 +1,7 @@
 package rocks.inspectit.ocelot.core.config.propertysources.http;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
+import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -12,6 +13,7 @@ import rocks.inspectit.ocelot.config.model.config.HttpConfigSettings;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
@@ -150,6 +152,37 @@ class HttpPropertySourceStateTest {
 
             assertFalse(updateResult);
             assertNull(result);
+        }
+    }
+
+    @Nested
+    public class GetEffectiveRequestUri {
+
+        @Test
+        void emptyParametersIgnored() throws Exception {
+            HttpConfigSettings httpSettings = new HttpConfigSettings();
+            httpSettings.setUrl(new URL("http://localhost:4242/endpoint"));
+
+            HashMap<String, String> attributes = new HashMap<>();
+            attributes.put("a", null);
+            attributes.put("b", "valb");
+            attributes.put("c", "");
+            httpSettings.setAttributes(attributes);
+
+            state = new HttpPropertySourceState("test-state", httpSettings);
+
+            assertThat(state.getEffectiveRequestUri().toString()).isEqualTo("http://localhost:4242/endpoint?b=valb");
+        }
+
+        @Test
+        void existingParametersPreserved() throws Exception {
+            HttpConfigSettings httpSettings = new HttpConfigSettings();
+            httpSettings.setUrl(new URL("http://localhost:4242/endpoint?fixed=something"));
+            httpSettings.setAttributes(ImmutableMap.of("service", "myservice"));
+
+            state = new HttpPropertySourceState("test-state", httpSettings);
+
+            assertThat(state.getEffectiveRequestUri().toString()).isEqualTo("http://localhost:4242/endpoint?fixed=something&service=myservice");
         }
     }
 }
