@@ -1,2 +1,4 @@
 server:
   port: 8090
+inspectit:
+  workingDirectory: working_directory
