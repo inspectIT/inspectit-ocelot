@@ -154,10 +154,8 @@ services:
       - 9094:9094
 
   load:
-    image: openapm/spring-petclinic-load:inspectit-oce-demo
+    image: inspectit/spring-petclinic-load:1.0
     container_name: load-generator
-    volumes:
-      - ./load/load-script.yml:/artillery/load-script.yml
 
   influxdb:
     image: influxdb:1.7.1
@@ -186,12 +184,11 @@ services:
       - 9411:9411
 
   grafana:
-    image: openapm/grafana:inspectit-oce-demo
+    image: inspectit/grafana:servicegraph-v0.2
     container_name: grafana
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=demo
       - GF_PATHS_PROVISIONING=/usr/share/grafana/custom/
-      - GF_INSTALL_PLUGINS=https://github.com/NovatecConsulting/novatec-service-dependency-graph-panel/releases/download/v0.2/novatec-service-dependency-graph-panel.zip;novatec-servicegraph-panel
     volumes:
       - ./grafana/provisioning/influxdb:/usr/share/grafana/custom/
     ports:

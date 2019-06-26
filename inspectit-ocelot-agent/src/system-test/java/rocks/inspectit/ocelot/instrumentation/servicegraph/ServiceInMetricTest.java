@@ -41,7 +41,7 @@ public class ServiceInMetricTest {
 
         try {
             InternalInspectitContext context = Instances.contextManager.enterNewContext();
-            context.setData("prop_origin_service", originService);
+            context.setData("service", originService);
             context.makeActive();
 
             HttpURLConnection urlConnection = (HttpURLConnection) new URL(TEST_URL).openConnection();
@@ -75,7 +75,7 @@ public class ServiceInMetricTest {
             servletHandler.addServletWithMapping(TestServlet.class, "/*");
             server.start();
 
-            TestUtils.waitForClassInstrumentations(Arrays.asList(HttpURLConnection.class, HttpServlet.class,
+            TestUtils.waitForClassInstrumentations(Arrays.asList(HttpServlet.class,
                     Class.forName("sun.net.www.protocol.http.HttpURLConnection")), 10, TimeUnit.SECONDS);
 
             Map<String, String> tags = new HashMap<>();

@@ -1,25 +1,127 @@
 inspectit:
-  data:
-    sql:
-      is-tag: false
   instrumentation:  
-    rules:    
+    data:
+      span_name:
+        down-propagation: NONE
+        is-tag: false
+      span_obj:
+        down-propagation: NONE
+        is-tag: false
+      httpurlconn_get_is_entry:
+        down-propagation: NONE
+        is-tag: false
     
+    actions:
+      string_concat_3:
+        input:
+          a: String
+          b: String
+          c: String
+        value: new StringBuilder(a).append(b).append(c).toString()
+            
+    rules:    
       #use the existing rules from the default configuration but enable tracing
       http_server_servlet_api:
         tracing:
           start-span: true
-          name: http_raw_path
+          name: span_name
           kind: SERVER
           start-span-conditions:
-            only-if-not-null: http_is_entry
+            only-if-true: http_is_entry
+        entry:
+          span_name:
+            action: string_concat_3
+            data-input:
+              a: http_method
+              c: http_raw_path
+            constant-input:
+              b: " "
        
-      http_client_apache_execute:
+      http_client_apache_client:
         tracing:
           start-span: true
+          name: span_name
           kind: CLIENT
           start-span-conditions:
-            only-if-not-null: http_is_entry   
+            only-if-true: http_is_entry   
+        entry:
+          span_name:
+            action: string_concat_3
+            data-input:
+              a: http_method
+              c: http_raw_path
+            constant-input:
+              b: " "
+      
+      httpurlconnection_tracing_start:
+        scopes:
+          httpurlconnection_connect: true
+          httpurlconnection_getOutputStream: true
+        tracing:
+          start-span: true
+          continue-span: span_obj
+          store-span: span_obj
+          end-span: false
+          name: span_name
+          kind: CLIENT
+        entry:            
+          span_obj:
+            action: read_attachment_on_this
+            constant-input: {key: "span"}
+          http_raw_path: 
+            action: httpurlconnection_get_path
+          http_method: 
+            action: httpurlconnection_get_method
+          span_name:
+            action: string_concat_3
+            data-input:
+              a: http_method
+              c: http_raw_path
+            constant-input:
+              b: " "
+        post-entry:
+          span_obj:
+            action: replace_attachment_on_this
+            constant-input: {key: "span"}
+            data-input: {value: span_obj}
+            
+      httpurlconnection_tracing_end:
+        scopes:
+          httpurlconnection_getInputStream: true
+        tracing:
+          start-span: true
+          continue-span: span_obj
+          store-span: span_obj
+          end-span: true
+          continue-span-conditions:
+            only-if-true: httpurlconn_get_is_entry
+          start-span-conditions:
+            only-if-true: httpurlconn_get_is_entry
+          name: span_name
+          kind: CLIENT
+        entry:
+          httpurlconn_get_is_entry:
+            action: test_and_set_this_marker
+            constant-input: {marker: "get_input_stream_invoked"}
+          span_obj:
+            action: read_attachment_on_this
+            constant-input: {key: "span"}
+          http_raw_path: 
+            action: httpurlconnection_get_path
+          http_method: 
+            action: httpurlconnection_get_method
+          span_name:
+            action: string_concat_3
+            data-input:
+              a: http_method
+              c: http_raw_path
+            constant-input:
+              b: " "
+        post-entry:
+          span_obj:
+            action: replace_attachment_on_this
+            constant-input: {key: "span"}
+            data-input: {value: span_obj}
           
       #we also record jdbc calls including their target database
       servicegraph_record_jdbc_calls:
@@ -28,7 +130,7 @@ inspectit:
           attributes:
             database: db_name
           start-span-conditions:
-            only-if-not-null: servicegraph_is_entry
+            only-if-true: servicegraph_is_entry
         entry:
           db_name:
             action: get_jdbc_statement_connection_name

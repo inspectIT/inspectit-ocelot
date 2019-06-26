@@ -22,6 +22,17 @@ inspectit:
           elseValue: Object
         value: "value == null ? elseValue : value"
 
+      get_argument:
+        input:
+          index: Number
+          _args: Object[]
+        value: _args[index.intValue()]
+
+      get_this:
+        input:
+          _this: Object
+        value: _this
+
       string_replace_all:
         input:
           regex: String
@@ -69,6 +80,19 @@ inspectit:
           marker: String
         value-body: |
           Object previous = _attachments.attach(target, marker, Boolean.TRUE);
+          if(previous == null) {
+            return Boolean.TRUE;
+          } else {
+            return Boolean.FALSE;
+          }
+
+      test_and_set_this_marker:
+        input:
+          _attachments: ObjectAttachments
+          _this: Object
+          marker: String
+        value-body: |
+          Object previous = _attachments.attach(_this, marker, Boolean.TRUE);
           if(previous == null) {
             return Boolean.TRUE;
           } else {

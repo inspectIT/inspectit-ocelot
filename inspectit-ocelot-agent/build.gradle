@@ -100,7 +100,9 @@ dependencies {
 
             'org.apache.httpcomponents:httpclient:4.5.6',
             'org.eclipse.jetty:jetty-server:9.4.3.v20170317',
-            'org.eclipse.jetty:jetty-servlet:9.4.3.v20170317'
+            'org.eclipse.jetty:jetty-servlet:9.4.3.v20170317',
+            
+            'com.h2database:h2:1.4.199'
     )
 
     jmh(

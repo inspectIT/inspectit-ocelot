@@ -2,7 +2,7 @@ inspectit:
   
   instrumentation:  
     rules:    
-      http_client_apache_execute:
+      http_client_apache_client:
         exit:
           parametrized_http_path:
             action: string_replace_all
@@ -17,5 +17,11 @@ inspectit:
             constant-input: { regex: "\\/\\d+(?=\\/|$)" , replacement: "/{id}"}
             data-input: { string: http_raw_path}
             only-if-not-null: http_raw_path
-          
-          
+      
+      http_client_httpurlconnection:
+        exit:
+          parametrized_http_path:
+            action: string_replace_all
+            constant-input: { regex: "\\/\\d+(?=\\/|$)" , replacement: "/{id}"}
+            data-input: { string: http_raw_path}
+            only-if-not-null: http_raw_path
