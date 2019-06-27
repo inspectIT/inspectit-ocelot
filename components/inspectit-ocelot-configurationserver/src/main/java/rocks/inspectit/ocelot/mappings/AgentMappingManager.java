@@ -1,20 +1,22 @@
 package rocks.inspectit.ocelot.mappings;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.CollectionType;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
+import rocks.inspectit.ocelot.utils.ObjectMapperUtils;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import static com.google.common.base.Preconditions.checkArgument;
 
 @Component
 @Slf4j
@@ -24,9 +26,8 @@ public class AgentMappingManager {
 
     private static final Object mappingLock = new Object();
 
-    private ObjectMapper ymlMapper;
-
-    private CollectionType agentMappingListType;
+    @Autowired
+    private ObjectMapperUtils objectMapperUtils;
 
     private File mappingsFile;
 
@@ -42,21 +43,13 @@ public class AgentMappingManager {
 
         mappingsFile = new File(workingDirectory, AGENT_MAPPINGS_FILE);
 
-        initObjectMapper();
         readAgentMappingsFromFile();
-    }
-
-    private void initObjectMapper() {
-        ymlMapper = new ObjectMapper(new YAMLFactory().disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER));
-        ymlMapper.findAndRegisterModules();
-
-        agentMappingListType = ymlMapper.getTypeFactory().constructCollectionType(List.class, AgentMapping.class);
     }
 
     private void readAgentMappingsFromFile() {
         if (mappingsFile.exists()) {
             try {
-                agentMappings = ymlMapper.readValue(mappingsFile, agentMappingListType);
+                agentMappings = objectMapperUtils.readAgentMappings(mappingsFile);
                 log.debug("Successfully loaded agent mappings.");
             } catch (IOException e) {
                 log.error("Could not load agent mappings from file.", e);
@@ -68,9 +61,9 @@ public class AgentMappingManager {
         }
     }
 
-    private void writeAgentMappingsToFile() throws IOException {
+    private void writeAgentMappingsToFile(List<AgentMapping> mappings) throws IOException {
         log.debug("Writing agent mappings to file: {}", mappingsFile);
-        ymlMapper.writeValue(mappingsFile, agentMappings);
+        objectMapperUtils.writeAgentMappings(mappings, mappingsFile);
     }
 
     public List<AgentMapping> getAgentMappings() {
@@ -78,37 +71,46 @@ public class AgentMappingManager {
     }
 
     public Optional<AgentMapping> getAgentMapping(String mappingName) {
+        checkArgument(!StringUtils.isEmpty(mappingName), "The mapping name should not be empty or null.");
+
         return agentMappings.stream()
                 .filter(mapping -> mapping.getName().equals(mappingName))
                 .findFirst();
     }
 
     public synchronized void setAgentMappings(List<AgentMapping> newAgentMappings) throws IOException {
-        log.info("Overriding current agent mappings with {} new mappings.", newAgentMappings.size());
+        checkArgument(newAgentMappings != null, "The agent mappings should not be null.");
+
+        List<AgentMapping> copiedMappings = newAgentMappings.stream()
+                .map(mapping -> mapping.toBuilder().build())
+                .collect(Collectors.toList());
+
+        log.info("Overriding current agent mappings with {} new mappings.", copiedMappings.size());
         synchronized (mappingLock) {
-            agentMappings = newAgentMappings;
-            writeAgentMappingsToFile();
+            writeAgentMappingsToFile(copiedMappings);
+            agentMappings = copiedMappings;
         }
     }
 
     public boolean deleteAgentMapping(String mappingName) throws IOException {
+        checkArgument(!StringUtils.isEmpty(mappingName), "The mapping name should not be empty or null.");
+
         log.info("Deleting agent mapping '{}'.", mappingName);
         synchronized (mappingLock) {
-            ArrayList<AgentMapping> currentMappings = new ArrayList<>(this.agentMappings);
-            boolean removed = agentMappings.removeIf(mapping -> mapping.getName().equals(mappingName));
+            ArrayList<AgentMapping> newAgentMappings = new ArrayList<>(agentMappings);
+            boolean removed = newAgentMappings.removeIf(mapping -> mapping.getName().equals(mappingName));
             if (removed) {
-                try {
-                    writeAgentMappingsToFile();
-                } catch (IOException ex) {
-                    agentMappings = currentMappings;
-                    throw ex;
-                }
+                writeAgentMappingsToFile(newAgentMappings);
+                agentMappings = newAgentMappings;
             }
             return removed;
         }
     }
 
     public void addAgentMapping(AgentMapping agentMapping) throws IOException {
+        checkArgument(agentMapping != null, "The agent mapping should not be null.");
+        checkArgument(!StringUtils.isEmpty(agentMapping.getName()), "The agent mapping's name should not be null or empty.");
+
         log.info("Adding new agent mapping '{}'.", agentMapping.getName());
         synchronized (mappingLock) {
             addAgentMapping(agentMapping, 0);
@@ -122,7 +124,7 @@ public class AgentMappingManager {
             if (indexOpt.isPresent()) {
                 addAgentMapping(agentMapping, indexOpt.getAsInt());
             } else {
-                throw new IllegalArgumentException("The agent mapping has not been added because the mapping '" + mappingName + "' does not exists, thus, cannot be added before it.");
+                throw new RuntimeException("The agent mapping has not been added because the mapping '" + mappingName + "' does not exists, thus, cannot be added before it.");
             }
         }
     }
@@ -134,7 +136,7 @@ public class AgentMappingManager {
             if (indexOpt.isPresent()) {
                 addAgentMapping(agentMapping, indexOpt.getAsInt() + 1);
             } else {
-                throw new IllegalArgumentException("The agent mapping has not been added because the mapping '" + mappingName + "' does not exists, thus, cannot be added after it.");
+                throw new RuntimeException("The agent mapping has not been added because the mapping '" + mappingName + "' does not exists, thus, cannot be added after it.");
             }
         }
     }
@@ -147,29 +149,28 @@ public class AgentMappingManager {
 
     private void addAgentMapping(AgentMapping agentMapping, int index) throws IOException {
         synchronized (mappingLock) {
-            ArrayList<AgentMapping> currentMappings = new ArrayList<>(this.agentMappings);
+            ArrayList<AgentMapping> newAgentMappings = new ArrayList<>(agentMappings);
 
-            OptionalInt currentIndexOpt = getMappingIndex(agentMapping.getName());
+            AgentMapping copiedAgentMapping = agentMapping.toBuilder().build();
+
+            OptionalInt currentIndexOpt = getMappingIndex(copiedAgentMapping.getName());
 
             if (currentIndexOpt.isPresent()) {
                 int currentIndex = currentIndexOpt.getAsInt();
                 if (index > currentIndex) {
                     index = index - 1;
                 }
-                agentMappings.remove(currentIndex);
+                newAgentMappings.remove(currentIndex);
             }
 
-            if (index > agentMappings.size()) {
-                agentMappings.add(agentMapping);
+            if (index > newAgentMappings.size()) {
+                newAgentMappings.add(copiedAgentMapping);
             } else {
-                agentMappings.add(index, agentMapping);
+                newAgentMappings.add(index, copiedAgentMapping);
             }
-            try {
-                writeAgentMappingsToFile();
-            } catch (IOException ex) {
-                agentMappings = currentMappings;
-                throw ex;
-            }
+
+            writeAgentMappingsToFile(newAgentMappings);
+            agentMappings = newAgentMappings;
         }
     }
 }

@@ -1,46 +1,55 @@
 package rocks.inspectit.ocelot.mappings;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FileUtils;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.platform.commons.util.ReflectionUtils;
 import org.mockito.InjectMocks;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.yaml.snakeyaml.Yaml;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
+import rocks.inspectit.ocelot.utils.ObjectMapperUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class AgentMappingManagerTest {
 
+    private static ObjectMapperUtils mapperUtils;
+
     @InjectMocks
     AgentMappingManager manager;
 
+    @Spy
+    ObjectMapperUtils objectMapperUtils = new ObjectMapperUtils();
+
     Path tempDirectory;
+
+    @BeforeAll
+    public static void beforeAll() {
+        mapperUtils = new ObjectMapperUtils();
+        mapperUtils.postConstruct();
+    }
 
     @BeforeEach
     public void beforeEach() throws IOException {
         tempDirectory = Files.createTempDirectory("agent-mappings");
         manager.workingDirectory = tempDirectory.toString();
+
+        objectMapperUtils.postConstruct();
+        verify(objectMapperUtils).postConstruct();
     }
 
     @AfterEach
@@ -72,8 +81,6 @@ public class AgentMappingManagerTest {
 
             assertThat((Object) getField("mappingsFile")).isEqualTo(new File(tempDirectory.toFile(), "agent_mappings.yaml"));
             assertThat((List) getField("agentMappings")).isEmpty();
-            assertThat((Object) getField("ymlMapper")).isNotNull();
-            assertThat((Object) getField("agentMappingListType")).isNotNull();
         }
 
         @Test
@@ -92,8 +99,6 @@ public class AgentMappingManagerTest {
             assertThat(agentMappings.get(0))
                     .extracting(AgentMapping::getName).isEqualTo("my-mapping");
             assertThat((Object) getField("mappingsFile")).isEqualTo(getMappingsFile());
-            assertThat((Object) getField("ymlMapper")).isNotNull();
-            assertThat((Object) getField("agentMappingListType")).isNotNull();
         }
 
         @Test
@@ -106,8 +111,6 @@ public class AgentMappingManagerTest {
 
             assertThat((Object) getField("mappingsFile")).isEqualTo(new File(tempDirectory.toFile(), "agent_mappings.yaml"));
             assertThat((List) getField("agentMappings")).isEmpty();
-            assertThat((Object) getField("ymlMapper")).isNotNull();
-            assertThat((Object) getField("agentMappingListType")).isNotNull();
         }
     }
 
@@ -126,12 +129,397 @@ public class AgentMappingManagerTest {
 
             assertThat(mappingsFile.exists()).isTrue();
             assertThat(manager.getAgentMappings()).containsExactly(mapping);
-            String mappingYaml = new String(Files.readAllBytes(mappingsFile.toPath()));
-            assertThat(mappingYaml).isEqualTo("- name: \"my-mapping\"\n" +
-                    "  sources:\n" +
-                    "  - \"sourceA\"\n" +
-                    "  attributes:\n" +
-                    "    attributeA: \"valueA\"\n");
+            List<AgentMapping> resultMappings = mapperUtils.readAgentMappings(mappingsFile);
+            assertThat(resultMappings).hasSize(1);
+            assertThat(resultMappings.get(0)).isEqualTo(mapping);
+            verify(objectMapperUtils).writeAgentMappings(any(), eq(mappingsFile));
+            verifyNoMoreInteractions(objectMapperUtils);
+        }
+
+        @Test
+        public void writingMappingsFileFails() throws IOException {
+            AgentMapping mapping = AgentMapping.builder().name("mapping").build();
+            doThrow(IOException.class).when(objectMapperUtils).writeAgentMappings(any(), any());
+
+            manager.postConstruct();
+
+            assertThatExceptionOfType(IOException.class)
+                    .isThrownBy(() -> manager.setAgentMappings(Collections.singletonList(mapping)));
+
+            assertThat(manager.getAgentMappings()).isEmpty();
+        }
+
+        @Test
+        public void writingMappingsFileFailsDoNothing() throws IOException {
+            AgentMapping mappingA = AgentMapping.builder().name("mappingA").build();
+            AgentMapping mappingB = AgentMapping.builder().name("mappingB").build();
+            AgentMapping mappingC = AgentMapping.builder().name("mappingC").build();
+            doNothing().doThrow(IOException.class).when(objectMapperUtils).writeAgentMappings(any(), any());
+
+            manager.postConstruct();
+            manager.setAgentMappings(Collections.singletonList(mappingA));
+
+            assertThatExceptionOfType(IOException.class)
+                    .isThrownBy(() -> manager.setAgentMappings(Arrays.asList(mappingB, mappingC)));
+
+            assertThat(manager.getAgentMappings()).hasSize(1);
+            assertThat(manager.getAgentMappings().get(0)).isEqualTo(mappingA);
+        }
+
+        @Test
+        public void setNull() {
+            assertThatExceptionOfType(IllegalArgumentException.class)
+                    .isThrownBy(() -> manager.setAgentMappings(null))
+                    .withMessage("The agent mappings should not be null.");
+
+            verifyZeroInteractions(objectMapperUtils);
+        }
+    }
+
+    @Nested
+    public class GetAgentMapping {
+
+        @Test
+        public void getAgentMapping() throws IOException {
+            AgentMapping mappingA = AgentMapping.builder().name("first").build();
+            AgentMapping mappingB = AgentMapping.builder().name("second").build();
+
+            manager.postConstruct();
+            manager.setAgentMappings(Arrays.asList(mappingA, mappingB));
+            verify(objectMapperUtils).writeAgentMappings(any(), any());
+
+            Optional<AgentMapping> result = manager.getAgentMapping("second");
+
+            assertThat(result).isNotEmpty();
+            assertThat(result).contains(mappingB);
+            verifyZeroInteractions(objectMapperUtils);
+        }
+
+        @Test
+        public void noMappingFound() throws IOException {
+            AgentMapping mapping = AgentMapping.builder().name("first").build();
+
+            manager.postConstruct();
+            manager.setAgentMappings(Collections.singletonList(mapping));
+            verify(objectMapperUtils).writeAgentMappings(any(), any());
+
+            Optional<AgentMapping> result = manager.getAgentMapping("not-existing");
+
+            assertThat(result).isEmpty();
+            verifyZeroInteractions(objectMapperUtils);
+        }
+
+        @Test
+        public void getNullName() {
+            assertThatExceptionOfType(IllegalArgumentException.class)
+                    .isThrownBy(() -> manager.getAgentMapping(null))
+                    .withMessage("The mapping name should not be empty or null.");
+
+            verifyZeroInteractions(objectMapperUtils);
+        }
+
+        @Test
+        public void getEmptyName() {
+            assertThatExceptionOfType(IllegalArgumentException.class)
+                    .isThrownBy(() -> manager.getAgentMapping(""))
+                    .withMessage("The mapping name should not be empty or null.");
+
+            verifyZeroInteractions(objectMapperUtils);
+        }
+    }
+
+    @Nested
+    public class DeleteAgentMapping {
+
+        @Test
+        public void successfullyDeleteMapping() throws IOException {
+            AgentMapping mappingA = AgentMapping.builder().name("first").build();
+            AgentMapping mappingB = AgentMapping.builder().name("second").build();
+
+            manager.postConstruct();
+            manager.setAgentMappings(Arrays.asList(mappingA, mappingB));
+
+            boolean result = manager.deleteAgentMapping("first");
+
+            assertThat(result).isTrue();
+            assertThat(manager.getAgentMappings()).containsExactly(mappingB);
+            verify(objectMapperUtils, times(2)).writeAgentMappings(any(), any());
+            verifyNoMoreInteractions(objectMapperUtils);
+        }
+
+        @Test
+        public void mappingDoesNotExist() throws IOException {
+            AgentMapping mappingA = AgentMapping.builder().name("first").build();
+
+            manager.postConstruct();
+            manager.setAgentMappings(Collections.singletonList(mappingA));
+            verify(objectMapperUtils).writeAgentMappings(any(), any());
+
+            boolean result = manager.deleteAgentMapping("not-existing");
+
+            assertThat(result).isFalse();
+            verifyZeroInteractions(objectMapperUtils);
+        }
+
+        @Test
+        public void writingFileFails() throws IOException {
+            doNothing().doThrow(IOException.class).when(objectMapperUtils).writeAgentMappings(any(), any());
+            AgentMapping mappingA = AgentMapping.builder().name("first").build();
+            AgentMapping mappingB = AgentMapping.builder().name("second").build();
+
+            manager.postConstruct();
+            manager.setAgentMappings(Arrays.asList(mappingA, mappingB));
+
+            assertThatExceptionOfType(IOException.class)
+                    .isThrownBy(() -> manager.deleteAgentMapping("first"));
+
+            verify(objectMapperUtils, times(2)).writeAgentMappings(any(), any());
+            verifyNoMoreInteractions(objectMapperUtils);
+        }
+
+        @Test
+        public void deleteNullMapping() {
+            manager.postConstruct();
+
+            assertThatExceptionOfType(IllegalArgumentException.class)
+                    .isThrownBy(() -> manager.deleteAgentMapping(null))
+                    .withMessage("The mapping name should not be empty or null.");
+
+            verifyZeroInteractions(objectMapperUtils);
+        }
+    }
+
+    @Nested
+    public class AddAgentMapping {
+
+        @Test
+        public void addingAgentMapping() throws IOException {
+            AgentMapping mappingA = AgentMapping.builder().name("first").build();
+
+            manager.postConstruct();
+
+            manager.addAgentMapping(mappingA);
+
+            assertThat(manager.getAgentMappings()).containsExactly(mappingA);
+            verify(objectMapperUtils).writeAgentMappings(any(), any());
+            verifyNoMoreInteractions(objectMapperUtils);
+        }
+
+        @Test
+        public void addingAgentMappingToExisting() throws IOException {
+            AgentMapping mappingA = AgentMapping.builder().name("first").build();
+            AgentMapping mappingB = AgentMapping.builder().name("second").build();
+
+            manager.postConstruct();
+
+            manager.addAgentMapping(mappingA);
+            manager.addAgentMapping(mappingB);
+
+            assertThat(manager.getAgentMappings()).containsExactly(mappingB, mappingA);
+            verify(objectMapperUtils, times(2)).writeAgentMappings(any(), any());
+            verifyNoMoreInteractions(objectMapperUtils);
+        }
+
+        @Test
+        public void addNullMapping() {
+            manager.postConstruct();
+
+            assertThatExceptionOfType(IllegalArgumentException.class)
+                    .isThrownBy(() -> manager.addAgentMapping(null))
+                    .withMessage("The agent mapping should not be null.");
+
+            verifyZeroInteractions(objectMapperUtils);
+        }
+
+        @Test
+        public void addingAgentMappingWithNullName() {
+            AgentMapping mappingA = AgentMapping.builder().name(null).build();
+
+            manager.postConstruct();
+
+            assertThatExceptionOfType(IllegalArgumentException.class)
+                    .isThrownBy(() -> manager.addAgentMapping(mappingA))
+                    .withMessage("The agent mapping's name should not be null or empty.");
+
+            verifyZeroInteractions(objectMapperUtils);
+        }
+
+        @Test
+        public void addingAgentMappingWithEmptyName() {
+            AgentMapping mappingA = AgentMapping.builder().name("").build();
+
+            manager.postConstruct();
+
+            assertThatExceptionOfType(IllegalArgumentException.class)
+                    .isThrownBy(() -> manager.addAgentMapping(mappingA))
+                    .withMessage("The agent mapping's name should not be null or empty.");
+
+            verifyZeroInteractions(objectMapperUtils);
+        }
+
+        @Test
+        public void updateMapping() throws IOException {
+            AgentMapping mappingA = AgentMapping.builder().name("mapping").build();
+
+            manager.postConstruct();
+            manager.addAgentMapping(mappingA);
+
+            assertThat(manager.getAgentMappings()).containsExactly(mappingA);
+
+            mappingA.setSources(Collections.singletonList("/newSource"));
+
+            AgentMapping storedMapping = manager.getAgentMapping("mapping").get();
+            assertThat(storedMapping.getSources()).isEmpty();
+
+            manager.addAgentMapping(mappingA);
+
+            assertThat(manager.getAgentMappings()).containsExactly(mappingA);
+            storedMapping = manager.getAgentMapping("mapping").get();
+            assertThat(storedMapping.getSources()).contains("/newSource");
+        }
+    }
+
+    @Nested
+    public class AddAgentMappingBefore {
+
+        @Test
+        public void successfullyAddMappingBefore() throws IOException {
+            AgentMapping mappingA = AgentMapping.builder().name("first").build();
+            AgentMapping mappingB = AgentMapping.builder().name("second").build();
+            AgentMapping mappingC = AgentMapping.builder().name("third").build();
+
+            manager.postConstruct();
+            manager.setAgentMappings(Arrays.asList(mappingA, mappingB));
+
+            manager.addAgentMappingBefore(mappingC, "second");
+
+            assertThat(manager.getAgentMappings()).containsExactly(mappingA, mappingC, mappingB);
+            verify(objectMapperUtils, times(2)).writeAgentMappings(any(), any());
+            verifyNoMoreInteractions(objectMapperUtils);
+        }
+
+        @Test
+        public void addBeforeFirst() throws IOException {
+            AgentMapping mappingA = AgentMapping.builder().name("first").build();
+            AgentMapping mappingB = AgentMapping.builder().name("second").build();
+            AgentMapping mappingC = AgentMapping.builder().name("third").build();
+
+            manager.postConstruct();
+            manager.setAgentMappings(Arrays.asList(mappingA, mappingB));
+
+            manager.addAgentMappingBefore(mappingC, "first");
+
+            assertThat(manager.getAgentMappings()).containsExactly(mappingC, mappingA, mappingB);
+        }
+
+
+        @Test
+        public void addBeforeItself() throws IOException {
+            AgentMapping mappingA = AgentMapping.builder().name("first").build();
+            AgentMapping mappingB = AgentMapping.builder().name("second").build();
+            AgentMapping mappingC = AgentMapping.builder().name("third").build();
+
+            manager.postConstruct();
+            manager.setAgentMappings(Arrays.asList(mappingA, mappingB, mappingC));
+
+            manager.addAgentMappingBefore(mappingB, "second");
+
+            assertThat(manager.getAgentMappings()).containsExactly(mappingA, mappingB, mappingC);
+        }
+
+        @Test
+        public void moveExistingMapping() throws IOException {
+            AgentMapping mappingA = AgentMapping.builder().name("first").build();
+            AgentMapping mappingB = AgentMapping.builder().name("second").build();
+            AgentMapping mappingC = AgentMapping.builder().name("third").build();
+
+            manager.postConstruct();
+            manager.setAgentMappings(Arrays.asList(mappingA, mappingB, mappingC));
+            assertThat(manager.getAgentMappings()).containsExactly(mappingA, mappingB, mappingC);
+
+            manager.addAgentMappingBefore(mappingC, "first");
+
+            assertThat(manager.getAgentMappings()).containsExactly(mappingC, mappingA, mappingB);
+        }
+
+        @Test
+        public void targetNotExists() throws IOException {
+            AgentMapping mappingA = AgentMapping.builder().name("first").build();
+            AgentMapping mappingB = AgentMapping.builder().name("second").build();
+
+            manager.postConstruct();
+            manager.setAgentMappings(Collections.singletonList(mappingA));
+
+            assertThatExceptionOfType(RuntimeException.class)
+                    .isThrownBy(() -> manager.addAgentMappingBefore(mappingB, "not-existing"))
+                    .withMessage("The agent mapping has not been added because the mapping 'not-existing' does not exists, thus, cannot be added before it.");
+
+            assertThat(manager.getAgentMappings()).containsExactly(mappingA);
+        }
+    }
+
+    @Nested
+    public class AddAgentMappingAfter {
+
+        @Test
+        public void successfullyAddMappingAfter() throws IOException {
+            AgentMapping mappingA = AgentMapping.builder().name("first").build();
+            AgentMapping mappingB = AgentMapping.builder().name("second").build();
+            AgentMapping mappingC = AgentMapping.builder().name("third").build();
+
+            manager.postConstruct();
+            manager.setAgentMappings(Arrays.asList(mappingA, mappingB));
+
+            manager.addAgentMappingAfter(mappingC, "second");
+
+            assertThat(manager.getAgentMappings()).containsExactly(mappingA, mappingB, mappingC);
+            verify(objectMapperUtils, times(2)).writeAgentMappings(any(), any());
+            verifyNoMoreInteractions(objectMapperUtils);
+        }
+
+        @Test
+        public void addAfterItself() throws IOException {
+            AgentMapping mappingA = AgentMapping.builder().name("first").build();
+            AgentMapping mappingB = AgentMapping.builder().name("second").build();
+            AgentMapping mappingC = AgentMapping.builder().name("third").build();
+
+            manager.postConstruct();
+            manager.setAgentMappings(Arrays.asList(mappingA, mappingB, mappingC));
+
+            manager.addAgentMappingAfter(mappingB, "second");
+
+            assertThat(manager.getAgentMappings()).containsExactly(mappingA, mappingB, mappingC);
+        }
+
+        @Test
+        public void moveExistingMapping() throws IOException {
+            AgentMapping mappingA = AgentMapping.builder().name("first").build();
+            AgentMapping mappingB = AgentMapping.builder().name("second").build();
+            AgentMapping mappingC = AgentMapping.builder().name("third").build();
+
+            manager.postConstruct();
+            manager.setAgentMappings(Arrays.asList(mappingA, mappingB, mappingC));
+            assertThat(manager.getAgentMappings()).containsExactly(mappingA, mappingB, mappingC);
+
+            manager.addAgentMappingAfter(mappingC, "first");
+
+            assertThat(manager.getAgentMappings()).containsExactly(mappingA, mappingC, mappingB);
+        }
+
+
+        @Test
+        public void targetNotExists() throws IOException {
+            AgentMapping mappingA = AgentMapping.builder().name("first").build();
+            AgentMapping mappingB = AgentMapping.builder().name("second").build();
+
+            manager.postConstruct();
+            manager.setAgentMappings(Collections.singletonList(mappingA));
+
+            assertThatExceptionOfType(RuntimeException.class)
+                    .isThrownBy(() -> manager.addAgentMappingAfter(mappingB, "not-existing"))
+                    .withMessage("The agent mapping has not been added because the mapping 'not-existing' does not exists, thus, cannot be added after it.");
+
+            assertThat(manager.getAgentMappings()).containsExactly(mappingA);
         }
     }
 }
