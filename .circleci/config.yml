@@ -20,6 +20,12 @@ commands:
           path: ~/inspectit/repo/inspectit-ocelot-agent/build/test-results
       - store_test_results:
           path: ~/inspectit/repo/inspectit-ocelot-core/build/test-results
+      - store_test_results:
+          path: ~/inspectit/repo/inspectit-ocelot-config/build/test-results
+      - store_test_results:
+          path: ~/inspectit/repo/components/inspectit-ocelot-configurationserver/build/test-results
+      - store_test_results:
+          path: ~/inspectit/repo/components/inspectit-ocelot-eum-server/build/test-results
 
 # ###############################################################
 # Jobs
