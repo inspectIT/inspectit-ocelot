@@ -14,6 +14,7 @@ import rocks.inspectit.ocelot.config.model.config.HttpConfigSettings;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.Properties;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
@@ -37,6 +38,7 @@ class HttpPropertySourceStateTest {
 
             HttpConfigSettings httpSettings = new HttpConfigSettings();
             httpSettings.setUrl(new URL("http://localhost:" + mockServer.port() + "/"));
+            httpSettings.setAttributes(new HashMap<>());
             state = new HttpPropertySourceState("test-state", httpSettings);
         }
 
@@ -151,7 +153,7 @@ class HttpPropertySourceStateTest {
             PropertySource result = state.getCurrentPropertySource();
 
             assertFalse(updateResult);
-            assertNull(result);
+            assertThat(((Properties) result.getSource())).isEmpty();
         }
     }
 
