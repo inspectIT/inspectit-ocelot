@@ -9,5 +9,4 @@ public class YamlJackson2HttpMessageConverter extends AbstractJackson2HttpMessag
     public YamlJackson2HttpMessageConverter() {
         super(new YAMLMapper(), MediaType.parseMediaType("application/x-yaml"));
     }
-
 }
