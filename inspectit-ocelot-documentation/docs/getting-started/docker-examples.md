@@ -32,12 +32,14 @@ Uses Prometheus Server for metrics gathering and storage, Grafana for Dashboards
 
 ### Demo #3 - Wavefront and Zipkin
 
-Sends Zipkin traces to Wavefront through a Wavefront proxy running as a Docker container.
-Note: Before running the demo, you must set the Wavefront host and API token as follows:
-```
-export WAVEFRONT_URL=https://<your cluster>.wavefront.com/api
-export WAVEFRONT_TOKEN=<API token obtained from Wavefront>
-```
+Sends Zipkin traces to Wavefront through a Wavefront proxy running as a Docker container. Collects metrics via Telegraf and sends them to Wavefront.
+
+Note: Before running the demo, you must add the Wavefront host and API token to the ```.env``` file in the ```inspectit-ocelot-demo```. Please add the following lines and change the cluster and token according to your Wavefront instance.
+
+>> ```
+>> export WAVEFRONT_URL=https://<your cluster>.wavefront.com/api
+>> export WAVEFRONT_TOKEN=<API token obtained from Wavefront>
+>> ```
 
 * File: `docker-compose-wavefront-zipkin.yml`
 
