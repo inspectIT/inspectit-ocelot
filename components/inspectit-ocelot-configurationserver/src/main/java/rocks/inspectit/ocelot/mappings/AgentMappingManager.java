@@ -18,25 +18,49 @@ import java.util.stream.IntStream;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+/**
+ * The manager class to handle and manage the agent mappings.
+ */
 @Component
 @Slf4j
 public class AgentMappingManager {
 
+    /**
+     * The name of the agent mappings Yaml file.
+     */
     private static final String AGENT_MAPPINGS_FILE = "agent_mappings.yaml";
 
+    /**
+     * Lock for manipulation of the agent mappings.
+     */
     private static final Object mappingLock = new Object();
 
+    /**
+     * Object mapper utils.
+     */
     @Autowired
     private ObjectMapperUtils objectMapperUtils;
 
+    /**
+     * The agent mappings Yaml file.
+     */
     private File mappingsFile;
 
+    /**
+     * The currently used agent mappings. This should be in sync with the content of the {@link #mappingsFile}.
+     */
     private List<AgentMapping> agentMappings;
 
+    /**
+     * The working directory which is used to store the {@link #AGENT_MAPPINGS_FILE}.
+     */
     @Value("${inspectit.workingDirectory}")
     @VisibleForTesting
     String workingDirectory;
 
+    /**
+     * Post construct. Initially reading the agent mappings if the mappings file exists.
+     */
     @PostConstruct
     public void postConstruct() {
         log.debug("Loading existing agent mappings.");
@@ -46,6 +70,9 @@ public class AgentMappingManager {
         readAgentMappingsFromFile();
     }
 
+    /**
+     * Reading existing agent mappings from the mappings file.
+     */
     private void readAgentMappingsFromFile() {
         if (mappingsFile.exists()) {
             try {
@@ -61,23 +88,49 @@ public class AgentMappingManager {
         }
     }
 
+    /**
+     * Writes the given list of {@link AgentMapping}s into the {@link #mappingsFile}.
+     *
+     * @param mappings the mappings to write
+     * @throws IOException In case of an error
+     */
     private void writeAgentMappingsToFile(List<AgentMapping> mappings) throws IOException {
         log.debug("Writing agent mappings to file: {}", mappingsFile);
         objectMapperUtils.writeAgentMappings(mappings, mappingsFile);
     }
 
+    /**
+     * Returns a copy of the current agent mappings list.
+     *
+     * @return A list of {@link AgentMapping}
+     */
     public List<AgentMapping> getAgentMappings() {
-        return agentMappings;
+        return agentMappings.stream()
+                .map(mapping -> mapping.toBuilder().build())
+                .collect(Collectors.toList());
     }
 
+    /**
+     * Returns the {@link AgentMapping} with the given name.
+     *
+     * @param mappingName the name of the mapping
+     * @return The mapping with the given name or an empty {@link Optional} in case no mapping exists with the given name
+     */
     public Optional<AgentMapping> getAgentMapping(String mappingName) {
         checkArgument(!StringUtils.isEmpty(mappingName), "The mapping name should not be empty or null.");
 
         return agentMappings.stream()
                 .filter(mapping -> mapping.getName().equals(mappingName))
+                .map(mapping -> mapping.toBuilder().build())
                 .findFirst();
     }
 
+    /**
+     * Sets the given list as new list of {@link AgentMapping}s and persists it into a file.
+     *
+     * @param newAgentMappings list of {@link AgentMapping}s
+     * @throws IOException In case of an error while persisting it into a file
+     */
     public synchronized void setAgentMappings(List<AgentMapping> newAgentMappings) throws IOException {
         checkArgument(newAgentMappings != null, "The agent mappings should not be null.");
 
@@ -92,6 +145,13 @@ public class AgentMappingManager {
         }
     }
 
+    /**
+     * Deletes the {@link AgentMapping} with the given name and persists the changed list into a file.
+     *
+     * @param mappingName the name of the {@link AgentMapping} to delete
+     * @return Returns true if a mapping has been removed, otherwise false.
+     * @throws IOException In case of an error while persisting it into a file
+     */
     public boolean deleteAgentMapping(String mappingName) throws IOException {
         checkArgument(!StringUtils.isEmpty(mappingName), "The mapping name should not be empty or null.");
 
@@ -107,6 +167,14 @@ public class AgentMappingManager {
         }
     }
 
+    /**
+     * Adds a {@link AgentMapping} to the head of the current list of mappings. If an agent mapping exists which has the
+     * same name as the given agent mapping, the existing one will be removed.
+     * The new list will be persisted into a file.
+     *
+     * @param agentMapping the {@link AgentMapping} to add
+     * @throws IOException In case of an error while persisting it into a file
+     */
     public void addAgentMapping(AgentMapping agentMapping) throws IOException {
         checkArgument(agentMapping != null, "The agent mapping should not be null.");
         checkArgument(!StringUtils.isEmpty(agentMapping.getName()), "The agent mapping's name should not be null or empty.");
@@ -117,6 +185,16 @@ public class AgentMappingManager {
         }
     }
 
+    /**
+     * Adds a {@link AgentMapping} before the agent mapping with the given name in the current list of mappings. If an agent mapping exists which has the
+     * same name as the given agent mapping, the existing one will be removed. The new list will be persisted into a file.
+     * Nothing happens if no agent mapping exists with the given name.
+     *
+     * @param agentMapping the {@link AgentMapping} to add
+     * @param mappingName  the name of the mapping where the new mapping is added before
+     * @throws IOException      In case of an error while persisting it into a file
+     * @throws RuntimeException If no mapping exists with the given name
+     */
     public void addAgentMappingBefore(AgentMapping agentMapping, String mappingName) throws IOException {
         log.info("Adding new agent mapping '{}' before existing mapping '{}'.", agentMapping.getName(), mappingName);
         synchronized (mappingLock) {
@@ -129,6 +207,16 @@ public class AgentMappingManager {
         }
     }
 
+    /**
+     * Adds a {@link AgentMapping} after the agent mapping with the given name in the current list of mappings. If an agent mapping exists which has the
+     * same name as the given agent mapping, the existing one will be removed. The new list will be persisted into a file.
+     * Nothing happens if no agent mapping exists with the given name.
+     *
+     * @param agentMapping the {@link AgentMapping} to add
+     * @param mappingName  the name of the mapping where the new mapping is added after
+     * @throws IOException      In case of an error while persisting it into a file
+     * @throws RuntimeException If no mapping exists with the given name
+     */
     public void addAgentMappingAfter(AgentMapping agentMapping, String mappingName) throws IOException {
         log.info("Adding new agent mapping '{}' after existing mapping '{}'.", agentMapping.getName(), mappingName);
         synchronized (mappingLock) {
@@ -141,12 +229,18 @@ public class AgentMappingManager {
         }
     }
 
+    /**
+     * Returns the index of the agent mapping with the given name.
+     */
     private OptionalInt getMappingIndex(String mappingName) {
         return IntStream.range(0, agentMappings.size())
                 .filter(i -> mappingName.equals(agentMappings.get(i).getName()))
                 .findFirst();
     }
 
+    /**
+     * Adds a agent mapping at the specified index. An existing mapping will be removed if it has the same name as the given one.
+     */
     private void addAgentMapping(AgentMapping agentMapping, int index) throws IOException {
         synchronized (mappingLock) {
             ArrayList<AgentMapping> newAgentMappings = new ArrayList<>(agentMappings);
