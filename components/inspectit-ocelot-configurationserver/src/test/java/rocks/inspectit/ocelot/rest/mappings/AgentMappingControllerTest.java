@@ -38,7 +38,7 @@ public class AgentMappingControllerTest {
             List<AgentMapping> dummyList = new ArrayList<>();
             when(mappingManager.getAgentMappings()).thenReturn(dummyList);
 
-            List<AgentMapping> result = controller.getMappings("json");
+            List<AgentMapping> result = controller.getMappings();
 
             verify(mappingManager).getAgentMappings();
             verifyNoMoreInteractions(mappingManager);
@@ -70,7 +70,7 @@ public class AgentMappingControllerTest {
             AgentMapping mappingMock = mock(AgentMapping.class);
             when(mappingManager.getAgentMapping("name")).thenReturn(Optional.of(mappingMock));
 
-            ResponseEntity<AgentMapping> result = controller.getMappingByName("name", null);
+            ResponseEntity<AgentMapping> result = controller.getMappingByName("name");
 
             verify(mappingManager).getAgentMapping(eq("name"));
             verifyNoMoreInteractions(mappingManager);
@@ -83,7 +83,7 @@ public class AgentMappingControllerTest {
         public void mappingNotFound() {
             when(mappingManager.getAgentMapping("name")).thenReturn(Optional.empty());
 
-            ResponseEntity<AgentMapping> result = controller.getMappingByName("name", null);
+            ResponseEntity<AgentMapping> result = controller.getMappingByName("name");
 
             verify(mappingManager).getAgentMapping(eq("name"));
             verifyNoMoreInteractions(mappingManager);
@@ -99,7 +99,7 @@ public class AgentMappingControllerTest {
         public void successfullyDeleteMappingByName() throws IOException {
             when(mappingManager.deleteAgentMapping("name")).thenReturn(true);
 
-            ResponseEntity result = controller.deleteMappingByName("name", null);
+            ResponseEntity result = controller.deleteMappingByName("name");
 
             verify(mappingManager).deleteAgentMapping(eq("name"));
             verifyNoMoreInteractions(mappingManager);
@@ -111,7 +111,7 @@ public class AgentMappingControllerTest {
         public void mappingNotFound() throws IOException {
             when(mappingManager.deleteAgentMapping("name")).thenReturn(false);
 
-            ResponseEntity result = controller.deleteMappingByName("name", null);
+            ResponseEntity result = controller.deleteMappingByName("name");
 
             verify(mappingManager).deleteAgentMapping(eq("name"));
             verifyNoMoreInteractions(mappingManager);
