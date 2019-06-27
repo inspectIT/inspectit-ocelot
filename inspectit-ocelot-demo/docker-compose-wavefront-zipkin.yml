@@ -174,5 +174,15 @@ services:
       - 2879:2878
       - 9411:9411
 
+  telegraf:
+    image: telegraf:1.9.4
+    container_name: telegraf
+    depends_on:
+      - wfproxy
+    volumes:
+      - ./telegraf/telegraf-wavefront.conf:/etc/telegraf/telegraf.conf:ro
+    mem_limit: 512M
+
+
 volumes:
   agent-vol:
