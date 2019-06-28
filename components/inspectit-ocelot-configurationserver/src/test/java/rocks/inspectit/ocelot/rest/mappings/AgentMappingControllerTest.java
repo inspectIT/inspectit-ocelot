@@ -67,7 +67,7 @@ public class AgentMappingControllerTest {
 
         @Test
         public void successfullyGetMappingByName() {
-            AgentMapping mappingMock = mock(AgentMapping.class);
+            AgentMapping mappingMock = AgentMapping.builder().name("mapping").build();
             when(mappingManager.getAgentMapping("name")).thenReturn(Optional.of(mappingMock));
 
             ResponseEntity<AgentMapping> result = controller.getMappingByName("name");
@@ -122,16 +122,14 @@ public class AgentMappingControllerTest {
     @Nested
     public class PutMapping {
 
-        @Mock
-        AgentMapping agentMapping;
+        AgentMapping agentMapping = AgentMapping.builder().name("mappingName").build();
 
         @Test
         public void successfullyPutMapping() throws IOException {
             ResponseEntity result = controller.putMapping("mappingName", agentMapping, null, null);
 
-            verify(agentMapping).setName("mappingName");
             verify(mappingManager).addAgentMapping(same(agentMapping));
-            verifyNoMoreInteractions(mappingManager, agentMapping);
+            verifyNoMoreInteractions(mappingManager);
             assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
         }
 

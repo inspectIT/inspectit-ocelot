@@ -7,7 +7,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
-import rocks.inspectit.ocelot.utils.ObjectMapperUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,19 +26,19 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class AgentMappingManagerTest {
 
-    private static ObjectMapperUtils mapperUtils;
+    private static AgentMappingSerializer mapperUtils;
 
     @InjectMocks
     AgentMappingManager manager;
 
     @Spy
-    ObjectMapperUtils objectMapperUtils = new ObjectMapperUtils();
+    AgentMappingSerializer objectMapperUtils = new AgentMappingSerializer();
 
     Path tempDirectory;
 
     @BeforeAll
     public static void beforeAll() {
-        mapperUtils = new ObjectMapperUtils();
+        mapperUtils = new AgentMappingSerializer();
         mapperUtils.postConstruct();
     }
 
@@ -365,12 +364,10 @@ public class AgentMappingManagerTest {
             manager.addAgentMapping(mappingA);
 
             assertThat(manager.getAgentMappings()).containsExactly(mappingA);
-
-            mappingA.setSources(Collections.singletonList("/newSource"));
-
             AgentMapping storedMapping = manager.getAgentMapping("mapping").get();
             assertThat(storedMapping.getSources()).isEmpty();
 
+            mappingA = AgentMapping.builder().name("mapping").source("/newSource").build();
             manager.addAgentMapping(mappingA);
 
             assertThat(manager.getAgentMappings()).containsExactly(mappingA);

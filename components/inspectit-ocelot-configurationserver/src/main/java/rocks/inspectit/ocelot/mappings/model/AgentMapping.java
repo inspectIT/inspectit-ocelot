@@ -1,18 +1,20 @@
 package rocks.inspectit.ocelot.mappings.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 /**
  * The model of the agent mappings.
  */
-@Data
+@Value
 @Builder(toBuilder = true)
-@NoArgsConstructor
-@AllArgsConstructor
 public class AgentMapping {
 
     /**
@@ -31,4 +33,11 @@ public class AgentMapping {
      */
     @Singular
     private Map<@NotBlank String, @NotBlank String> attributes;
+
+    @JsonCreator
+    public AgentMapping(@JsonProperty("name") String name, @JsonProperty("sources") List<@NotBlank String> sources, @JsonProperty("attributes") Map<@NotBlank String, @NotBlank String> attributes) {
+        this.name = name;
+        this.sources = Collections.unmodifiableList(sources);
+        this.attributes = Collections.unmodifiableMap(attributes);
+    }
 }

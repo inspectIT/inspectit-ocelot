@@ -3,6 +3,7 @@ package rocks.inspectit.ocelot.rest.mappings;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import rocks.inspectit.ocelot.mappings.AgentMappingManager;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
@@ -12,6 +13,8 @@ import javax.validation.Valid;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+
+import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * Controller for managing the agent mappings.
@@ -92,11 +95,12 @@ public class AgentMappingController extends AbstractBaseController {
      */
     @PutMapping(value = "mappings/{mappingName}")
     public ResponseEntity putMapping(@PathVariable("mappingName") String mappingName, @Valid @RequestBody AgentMapping agentMapping, @RequestParam(required = false) String before, @RequestParam(required = false) String after) throws IOException {
-        if (before != null && after != null) {
-            throw new IllegalArgumentException("The 'before' and 'after' parameters cannot be used together.");
-        }
+        checkArgument(!StringUtils.isEmpty(mappingName), "The mapping name should not be empty or null.");
+        checkArgument(before == null || after == null, "The 'before' and 'after' parameters cannot be used together.");
 
-        agentMapping.setName(mappingName);
+        if (!mappingName.equals(agentMapping.getName())) {
+            agentMapping = agentMapping.toBuilder().name(mappingName).build();
+        }
 
         if (before != null) {
             mappingManager.addAgentMappingBefore(agentMapping, before);

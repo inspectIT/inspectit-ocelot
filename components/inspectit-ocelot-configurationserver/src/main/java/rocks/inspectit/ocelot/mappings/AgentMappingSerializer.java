@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.utils;
+package rocks.inspectit.ocelot.mappings;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
@@ -16,7 +16,7 @@ import java.util.List;
  * Utility for reading and writing objects as a Yaml represented string into files.
  */
 @Component
-public class ObjectMapperUtils {
+public class AgentMappingSerializer {
 
     private ObjectMapper ymlMapper;
 

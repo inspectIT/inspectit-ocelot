@@ -1,29 +1,28 @@
-package rocks.inspectit.ocelot.utils;
+package rocks.inspectit.ocelot.mappings;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
+import rocks.inspectit.ocelot.mappings.AgentMappingSerializer;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
-public class ObjectMapperUtilsTest {
+public class AgentMappingSerializerTest {
 
     private static File tempDirectory;
 
     @InjectMocks
-    ObjectMapperUtils mapper;
+    AgentMappingSerializer serializer;
 
     @BeforeAll
     public static void beforeAll() throws IOException {
@@ -48,8 +47,8 @@ public class ObjectMapperUtilsTest {
             AgentMapping mapping = AgentMapping.builder().name("mapping").source("/any-source").attribute("key", "val").build();
             File testFile = new File(tempDirectory, "test.yml");
 
-            mapper.postConstruct();
-            mapper.writeAgentMappings(Collections.singletonList(mapping), testFile);
+            serializer.postConstruct();
+            serializer.writeAgentMappings(Collections.singletonList(mapping), testFile);
 
             String content = new String(Files.readAllBytes(testFile.toPath()));
             assertThat(content).isEqualTo("- name: \"mapping\"\n" +
@@ -73,8 +72,8 @@ public class ObjectMapperUtilsTest {
             File testFile = new File(tempDirectory, "test.yml");
             Files.write(testFile.toPath(), dummyYaml.getBytes());
 
-            mapper.postConstruct();
-            List<AgentMapping> result = mapper.readAgentMappings(testFile);
+            serializer.postConstruct();
+            List<AgentMapping> result = serializer.readAgentMappings(testFile);
 
             assertThat(result).hasSize(1);
             AgentMapping mapping = result.get(0);
