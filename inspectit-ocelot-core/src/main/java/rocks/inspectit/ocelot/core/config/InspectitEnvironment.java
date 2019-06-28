@@ -301,7 +301,7 @@ public class InspectitEnvironment extends StandardEnvironment {
             try {
                 log.info("Initializing HTTP based configuration from URL: {}", httpSourceState.getEffectiveRequestUri());
             } catch (URISyntaxException e) {
-                log.error("Configured Http URL is unparsable");
+                log.error("The syntax of the URL of the HTTP based configuration is not valid", e);
             }
             httpSourceState.update();
             propsList.addBefore(InspectitEnvironment.DEFAULT_CONFIG_PROPERTYSOURCE_NAME, httpSourceState.getCurrentPropertySource());

@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -144,7 +143,7 @@ public class HttpPropertySourceState {
             log.debug("Updating configuration via HTTP from URL: {}", uri.toString());
             httpGet = new HttpGet(uri);
         } catch (URISyntaxException e) {
-            log.error("Error building Http URI for fetching configuration!", e);
+            log.error("Error building HTTP URI for fetching configuration!", e);
             return null;
         }
 
@@ -178,11 +177,9 @@ public class HttpPropertySourceState {
      */
     public URI getEffectiveRequestUri() throws URISyntaxException {
         URIBuilder uriBuilder = new URIBuilder(currentSettings.getUrl().toURI());
-        for (Map.Entry<String, String> pair : currentSettings.getAttributes().entrySet()) {
-            if (!StringUtils.isEmpty(pair.getValue())) {
-                uriBuilder.setParameter(pair.getKey(), pair.getValue());
-            }
-        }
+        currentSettings.getAttributes().entrySet().stream()
+                .filter(pair -> !StringUtils.isEmpty(pair.getValue()))
+                .forEach(pair -> uriBuilder.setParameter(pair.getKey(), pair.getValue()));
         return uriBuilder.build();
     }
 
