@@ -1,4 +1,7 @@
-# inspectit-ocelot-eum-server
+---
+id: enduser-monitoring-server
+title: End User Monitoring Server
+---
 This server provides Enduser Monitoring data by using the [OpenCensus](https://github.com/census-instrumentation/opencensus-java) toolkit.
 
 ## Metrics
