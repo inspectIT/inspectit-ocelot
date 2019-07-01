@@ -70,15 +70,15 @@ public class AgentMappingManager {
     private void readAgentMappingsFromFile() {
         if (mappingsFile.exists()) {
             try {
-                agentMappings = new CopyOnWriteArrayList<>(serializer.readAgentMappings(mappingsFile));
+                agentMappings = new ArrayList<>(serializer.readAgentMappings(mappingsFile));
                 log.debug("Successfully loaded agent mappings.");
             } catch (IOException e) {
                 log.error("Could not load agent mappings from file.", e);
-                agentMappings = new CopyOnWriteArrayList<>();
+                agentMappings = new ArrayList<>();
             }
         } else {
             log.info("No agent mappings have been loaded - agent mappings file has not been found: {}", mappingsFile.getAbsolutePath());
-            agentMappings = new CopyOnWriteArrayList<>();
+            agentMappings = new ArrayList<>();
         }
     }
 
