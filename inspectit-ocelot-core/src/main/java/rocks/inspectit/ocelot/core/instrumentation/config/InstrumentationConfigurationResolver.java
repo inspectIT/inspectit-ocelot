@@ -228,6 +228,8 @@ public class InstrumentationConfigurationResolver {
     @VisibleForTesting
     boolean isIgnoredClass(Class<?> clazz, InstrumentationConfiguration config) {
 
+        ClassLoader loader = clazz.getClassLoader();
+
         if (!instrumentation.isModifiableClass(clazz)) {
             return true;
         }
@@ -236,7 +238,11 @@ public class InstrumentationConfigurationResolver {
             return true;
         }
 
-        if (clazz.getClassLoader() == INSPECTIT_CLASSLOADER) {
+        if (loader != null && DoNotInstrumentMarker.class.isAssignableFrom(loader.getClass())) {
+            return true;
+        }
+
+        if (loader == INSPECTIT_CLASSLOADER) {
             return true;
         }
 

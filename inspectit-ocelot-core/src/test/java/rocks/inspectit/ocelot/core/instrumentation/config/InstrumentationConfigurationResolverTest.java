@@ -14,10 +14,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.DoNotInstrumentMarker;
-import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.data.DataSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.data.PropagationMode;
+import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.instrumentation.FakeExecutor;
 import rocks.inspectit.ocelot.core.instrumentation.config.dummy.LambdaTestProvider;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.*;
@@ -300,6 +300,14 @@ class InstrumentationConfigurationResolverTest {
 
             assertThat(resolver.isIgnoredClass(lambdaWithDefault, config)).isFalse();
         }
+
+
+        @Test
+        void testIgnoredClassloader() throws Exception {
+            DummyClassLoader dcl = new IgnoredDummyClassLoader(FakeExecutor.class);
+            Class<?> copied = Class.forName(FakeExecutor.class.getName(), false, dcl);
+            assertThat(resolver.isIgnoredClass(copied, config)).isTrue();
+        }
     }
 
 
@@ -392,6 +400,12 @@ class InstrumentationConfigurationResolverTest {
             assertThat(dataProps.isPropagatedUpGlobally("my_key")).isTrue();
         }
 
+    }
+}
+
+class IgnoredDummyClassLoader extends DummyClassLoader implements DoNotInstrumentMarker {
+    public IgnoredDummyClassLoader(Class<?>... classesToCopy) {
+        super(classesToCopy);
     }
 }
 

@@ -6,5 +6,6 @@ include 'inspectit-ocelot-documentation'
 include 'inspectit-ocelot-demo'
 include 'inspectit-ocelot-configurationserver'
 include 'inspectit-ocelot-eum-server'
+include 'inspectit-ocelot-sdk'
 project(':inspectit-ocelot-configurationserver').projectDir = new File('./components/inspectit-ocelot-configurationserver')
 project(':inspectit-ocelot-eum-server').projectDir = new File('./components/inspectit-ocelot-eum-server')
