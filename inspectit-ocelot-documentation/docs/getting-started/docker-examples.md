@@ -34,14 +34,13 @@ Uses Prometheus Server for metrics gathering and storage, Grafana for Dashboards
 
 Sends Zipkin traces to Wavefront through a Wavefront proxy running as a Docker container. Collects metrics via Telegraf and sends them to Wavefront.
 
-Note: Before running the demo, you must add the Wavefront host and API token to the ```.env``` file in the ```inspectit-ocelot-demo```. Please add the following lines and change the cluster and token according to your Wavefront instance.
-
->> ```
->> WAVEFRONT_URL=https://<your cluster>.wavefront.com/api
->> WAVEFRONT_TOKEN=<API token obtained from Wavefront>
->> ```
-
 * File: `docker-compose-wavefront-zipkin.yml`
+
+>Note: Before running the demo, you must add the Wavefront host and API token to the ```.env``` file in the ```inspectit-ocelot-demo```. Please add the following lines and change the cluster and token according to your Wavefront instance.
+> ```
+> WAVEFRONT_URL=https://<your cluster>.wavefront.com/api
+> WAVEFRONT_TOKEN=<API token obtained from Wavefront>
+> ```
 
 ## Launching the Demo
 
@@ -118,7 +117,7 @@ The InfluxDB and Prometheus demo scenarios include the following predefined Graf
 | Self Monitoring [[InfluxDB]](https://grafana.com/dashboards/10143) [[Prometheus]](https://grafana.com/dashboards/10140) | Shows the instrumentation state and progress based on [self monitoring metrics](metrics/self-monitoring.md). | ![](assets/demo-dashboard-selfmonitoring_small.png) |
 
 ### Wavefront Demo Scenario
-Wavefront is a SaaS-based monitoring and tracing solution. In this demo, we are running a local proxy as a Docker container that is responsible for receiving Zipkin traces and sending them to Wavefront. We're also using Telegraf to poll the Prometheus enpoints on the monitoried services and send that data to Wavefront through the proxy. 
+Wavefront is a SaaS-based monitoring and tracing solution. In this demo, we are running a local proxy as a Docker container that is responsible for receiving Zipkin traces and sending them to Wavefront. We're also using Telegraf to poll the Prometheus endpoints on the monitored services and send that data to Wavefront through the proxy. 
 
 - *inspectIT Ocelot agent:* Instruments all the target demo application components.
 - *Telegraf:* Polls the Prometheus metric endpoints on the services.
