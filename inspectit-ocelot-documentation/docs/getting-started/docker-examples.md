@@ -21,7 +21,7 @@ Uses InfluxData Telegraf for metrics gathering, InfluxDB for metrics storage and
 
 ![Demo scenario using InfluxDB and Zipkin](assets/demo-landscape-influxdb-zipkin.png)
 
-### Demo #2 - Prometheus,Grafana and jaeger
+### Demo #2 - Prometheus, Grafana and Jaeger
 
 Uses Prometheus Server for metrics gathering and storage, Grafana for Dashboards. Traces are exported to Jaeger.
 
