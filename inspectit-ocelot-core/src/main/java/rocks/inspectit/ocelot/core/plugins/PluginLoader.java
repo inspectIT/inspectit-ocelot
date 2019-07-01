@@ -142,6 +142,7 @@ public class PluginLoader {
                             log.error("Error loading default config file {} of plugin {}", defaultConfigYml, pluginClass.getName(), e);
                         }
                     }
+                    log.info("Plugin '{}' loaded!", pluginInfo.value());
                 } catch (NoSuchMethodException e) {
                     log.error("The plugin {} does not have a public default constructor!", pluginClass.getName());
                 }

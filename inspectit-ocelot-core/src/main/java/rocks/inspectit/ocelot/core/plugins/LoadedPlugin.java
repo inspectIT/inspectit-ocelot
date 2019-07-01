@@ -71,7 +71,8 @@ class LoadedPlugin {
                 if (!Objects.equals(newInspectitConfig, lastInspectitConfig) || !Objects.equals(lastPluginConfig, newPluginConfig)) {
                     lastPluginConfig = newPluginConfig;
                     lastInspectitConfig = newInspectitConfig;
-                    plugin.update(newInspectitConfig, lastPluginConfig);
+                    withPluginClassloader(() ->
+                            plugin.update(newInspectitConfig, lastPluginConfig));
                 }
             }
         } else {
@@ -82,7 +83,18 @@ class LoadedPlugin {
         }
     }
 
+    public void withPluginClassloader(Runnable r) {
+        Thread thread = Thread.currentThread();
+        ClassLoader prevContextClassLoader = thread.getContextClassLoader();
+        thread.setContextClassLoader(plugin.getClass().getClassLoader());
+        try {
+            r.run();
+        } finally {
+            thread.setContextClassLoader(prevContextClassLoader);
+        }
+    }
+
     public void destroy() {
-        plugin.destroy();
+        withPluginClassloader(plugin::destroy);
     }
 }
