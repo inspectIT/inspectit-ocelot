@@ -5,8 +5,11 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
 import javax.validation.constraints.AssertFalse;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.net.URL;
 import java.time.Duration;
+import java.util.Map;
 
 /**
  * Defines the settings for using a HTTP property source.
@@ -24,6 +27,13 @@ public class HttpConfigSettings {
      * The URL for fetching the configuration.
      */
     private URL url;
+
+    /**
+     * Contains additional attributes which will be added as query parameters to the request URL.
+     * If the value for a given key is blank or null, the given attribute will not be sent.
+     */
+    @NotNull
+    private Map<@NotBlank String, String> attributes;
 
     /**
      * The frequency of polling the HTTP endpoint.
