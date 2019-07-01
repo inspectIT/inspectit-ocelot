@@ -127,8 +127,9 @@ public class AgentMappingManager {
 
         log.info("Overriding current agent mappings with {} new mappings.", newAgentMappings.size());
 
-        writeAgentMappingsToFile(newAgentMappings);
-        agentMappings = newAgentMappings;
+        List<AgentMapping> mappings =  new CopyOnWriteArrayList<>(newAgentMappings);
+        writeAgentMappingsToFile(mappings);
+        agentMappings = mappings;
     }
 
     /**
