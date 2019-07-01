@@ -3,16 +3,15 @@ package rocks.inspectit.ocelot.mappings;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import rocks.inspectit.ocelot.config.InspectitServerConfig;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.IntStream;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -46,11 +45,11 @@ public class AgentMappingManager {
     private List<AgentMapping> agentMappings;
 
     /**
-     * The working directory which is used to store the {@link #AGENT_MAPPINGS_FILE}.
+     * The configuration sued to resolve the working directory where the {@link #AGENT_MAPPINGS_FILE} is stored.
      */
-    @Value("${inspectit.workingDirectory}")
+    @Autowired
     @VisibleForTesting
-    String workingDirectory;
+    InspectitServerConfig config;
 
     /**
      * Post construct. Initially reading the agent mappings if the mappings file exists.
@@ -59,7 +58,7 @@ public class AgentMappingManager {
     public void postConstruct() {
         log.debug("Loading existing agent mappings.");
 
-        mappingsFile = new File(workingDirectory, AGENT_MAPPINGS_FILE);
+        mappingsFile = new File(config.getWorkingDirectory(), AGENT_MAPPINGS_FILE);
 
         readAgentMappingsFromFile();
     }
@@ -127,7 +126,7 @@ public class AgentMappingManager {
 
         log.info("Overriding current agent mappings with {} new mappings.", newAgentMappings.size());
 
-        List<AgentMapping> mappings =  new CopyOnWriteArrayList<>(newAgentMappings);
+        List<AgentMapping> mappings = new ArrayList<>(newAgentMappings);
         writeAgentMappingsToFile(mappings);
         agentMappings = mappings;
     }

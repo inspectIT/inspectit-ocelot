@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import rocks.inspectit.ocelot.config.InspectitServerConfig;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 
 import java.io.File;
@@ -19,7 +20,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -45,7 +47,10 @@ public class AgentMappingManagerTest {
     @BeforeEach
     public void beforeEach() throws IOException {
         tempDirectory = Files.createTempDirectory("agent-mappings");
-        manager.workingDirectory = tempDirectory.toString();
+
+        InspectitServerConfig conf = new InspectitServerConfig();
+        conf.setWorkingDirectory(tempDirectory.toString());
+        manager.config = conf;
 
         objectMapperUtils.postConstruct();
         verify(objectMapperUtils).postConstruct();
