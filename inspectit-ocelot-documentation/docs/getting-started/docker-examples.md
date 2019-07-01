@@ -30,6 +30,17 @@ Uses Prometheus Server for metrics gathering and storage, Grafana for Dashboards
 
 ![Demo scenario using Prometheus and Jaeger](assets/demo-landscape-prometheus-jaeger.png)
 
+### Demo #3 - Wavefront and Zipkin
+
+Sends Zipkin traces to Wavefront through a Wavefront proxy running as a Docker container. Collects metrics via Telegraf and sends them to Wavefront.
+
+* File: `docker-compose-wavefront-zipkin.yml`
+
+>Note: Before running the demo, you must add the Wavefront host and API token to the ```.env``` file in the ```inspectit-ocelot-demo```. Please add the following lines and change the cluster and token according to your Wavefront instance.
+> ```
+> WAVEFRONT_URL=https://<your cluster>.wavefront.com/api
+> WAVEFRONT_TOKEN=<API token obtained from Wavefront>
+> ```
 
 ## Launching the Demo
 
@@ -95,7 +106,7 @@ The traces can be viewed in Jaeger on http://localhost:16686.
 Prometheus can be accessed through http://localhost:9090.
 
 ### Demo Grafana Dashboards
-The demo scenarios include the following predefined Grafana Dashboards:
+The InfluxDB and Prometheus demo scenarios include the following predefined Grafana Dashboards:
 
 | Name + Grafana Marketplace | Description | Screenshot |
 | -------------- | ------- | -------- |
@@ -105,6 +116,14 @@ The demo scenarios include the following predefined Grafana Dashboards:
 | JVM Metrics [[InfluxDB]](https://grafana.com/dashboards/9600) [[Prometheus]](https://grafana.com/dashboards/9598) | Shows JVM metrics related to JVM CPU usage, Memory (Heap and Non-Heap) and Garbage Collection. | ![](assets/demo-dashboard-jvm_small.png) |
 | Self Monitoring [[InfluxDB]](https://grafana.com/dashboards/10143) [[Prometheus]](https://grafana.com/dashboards/10140) | Shows the instrumentation state and progress based on [self monitoring metrics](metrics/self-monitoring.md). | ![](assets/demo-dashboard-selfmonitoring_small.png) |
 
+### Wavefront Demo Scenario
+Wavefront is a SaaS-based monitoring and tracing solution. In this demo, we are running a local proxy as a Docker container that is responsible for receiving Zipkin traces and sending them to Wavefront. We're also using Telegraf to poll the Prometheus endpoints on the monitored services and send that data to Wavefront through the proxy. 
+
+- *inspectIT Ocelot agent:* Instruments all the target demo application components.
+- *Telegraf:* Polls the Prometheus metric endpoints on the services.
+- *Wavefront Proxy:* Receives Zipkin traces and metrics (via Telegraf), aggregates, secures and compresses them before sending them to Wavefront.
+
+A sandbox instance of Wavefront can be obtained here: https://www.wavefront.com/sign-up/ 
 
 ## Changing Agent Configurations
 
