@@ -83,6 +83,26 @@ public class FileManager {
     }
 
     /**
+     * @param path the path to check
+     * @return true if the given path denotes a directory
+     * @throws AccessDeniedException if access is forbidden
+     */
+    public boolean isDirectory(String path) throws AccessDeniedException {
+        assertPathWithinFilesRoot(path);
+        return Files.isDirectory(filesRoot.resolve(path));
+    }
+
+    /**
+     * @param path the path to check
+     * @return true if the given path denotes an existing file or directory
+     * @throws AccessDeniedException if access is forbidden
+     */
+    public boolean doesPathExist(String path) throws AccessDeniedException {
+        assertPathWithinFilesRoot(path);
+        return Files.exists(filesRoot.resolve(path));
+    }
+
+    /**
      * Creates a new directory with the given path
      *
      * @param path the path of the directory to create

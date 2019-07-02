@@ -1,58 +1,45 @@
 package rocks.inspectit.ocelot.rest.agent;
 
-import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.introspector.Property;
-import org.yaml.snakeyaml.nodes.MappingNode;
-import org.yaml.snakeyaml.nodes.Tag;
-import org.yaml.snakeyaml.representer.Representer;
+import rocks.inspectit.ocelot.agentconfig.AgentConfigurationManager;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.rest.AbstractBaseController;
 
-import java.util.Collections;
+import java.io.IOException;
 import java.util.Map;
-import java.util.Set;
 
 
 /**
  * The rest controller providing the interface used by the agent for configuration fetching.
  */
 @RestController
-@RequestMapping("/agent")
-public class AgentController {
+public class AgentController extends AbstractBaseController {
+
+    @Autowired
+    AgentConfigurationManager configManager;
 
     /**
      * Returns the {@link InspectitConfig} for the agent with the given name.
      *
-     * @param serviceName the agents service name
+     * @param attributes the attributes of the agents used to select the mapping
      * @return The configuration mapped on the given agent name
      */
-    @GetMapping("/configuration")
-    @ApiImplicitParam(name = "Authorization", value = "Bearer token for authorization", required = true, dataType = "string", paramType = "header")
-    @ApiOperation(value = "Fetch configuration", notes = "This is used by agents to fetch their current configuration.")
-    public String fetchConfiguration(@ApiParam(value = "The agent's service name", required = true) @RequestParam String serviceName) {
-        // ###########################################
-        // THIS IS JUST A DUMMY IMPLEMENTATION
-        // ###########################################
-        InspectitConfig config = new InspectitConfig();
-        Map<String, InspectitConfig> configMap = Collections.singletonMap("inspectit", config);
-
-        config.setServiceName(serviceName + System.currentTimeMillis());
-
-        Yaml yaml = new Yaml(new Representer() {
-            @Override
-            protected MappingNode representJavaBean(Set<Property> properties, Object javaBean) {
-                if (!classTags.containsKey(javaBean.getClass()))
-                    addClassTag(javaBean.getClass(), Tag.MAP);
-
-                return super.representJavaBean(properties, javaBean);
-            }
-        });
-        return yaml.dumpAs(configMap, Tag.MAP, null);
+    @ApiOperation(value = "Fetch the Agent Configuration", notes = "Reads the configuration for the given agent and returns it as a yaml string")
+    @GetMapping(value = "agent/configuration", produces = "text/plain")
+    //use text/plain to allow browser to display the resulting configuration
+    public ResponseEntity<String> fetchConfiguration(@ApiParam("The agent attributes used to select the correct mapping") @RequestParam Map<String, String> attributes) throws IOException {
+        String configuration = configManager.getConfiguration(attributes);
+        if (configuration == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } else {
+            return ResponseEntity.status(HttpStatus.OK).body(configuration);
+        }
     }
 }

@@ -89,9 +89,9 @@ dependencies {
 dependencies {
     implementation(
             project(':inspectit-ocelot-config'),
-            "org.springframework.boot:spring-boot-starter-web",
-            "org.springframework.security:spring-security-web",
-            "org.springframework.security:spring-security-config",
+            "org.springframework.boot:spring-boot-starter-web:2.1.4.RELEASE",
+            "org.springframework.security:spring-security-web:5.1.5.RELEASE",
+            "org.springframework.security:spring-security-config:5.1.5.RELEASE",
             'io.jsonwebtoken:jjwt-api:0.10.5',
             'io.jsonwebtoken:jjwt-impl:0.10.5',
             'io.jsonwebtoken:jjwt-jackson:0.10.5',
