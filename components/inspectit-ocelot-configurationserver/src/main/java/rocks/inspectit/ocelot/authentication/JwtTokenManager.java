@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.users;
+package rocks.inspectit.ocelot.authentication;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.jsonwebtoken.Claims;
@@ -12,7 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
-import rocks.inspectit.ocelot.config.InspectitServerConfig;
+import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 
 import java.security.Key;
 import java.util.Date;
@@ -27,7 +27,7 @@ public class JwtTokenManager {
 
     @VisibleForTesting
     @Autowired
-    InspectitServerConfig config;
+    InspectitServerSettings config;
 
     /**
      * We dynamically generate a secret to sign the tokens with at server start.
@@ -36,11 +36,11 @@ public class JwtTokenManager {
     private Key secret = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
     @Autowired
-    private InspectitUserDetailsService userDetailsService;
+    private LocalUserDetailsService userDetailsService;
 
     /**
      * Creates a token containing the specified username.
-     * The token expires after the specified Duration via {@link InspectitServerConfig#getTokenLifespan()} from now.
+     * The token expires after the specified Duration via {@link InspectitServerSettings#getTokenLifespan()} from now.
      *
      * @param username the username for which the token is generated
      * @return the generated token
@@ -73,13 +73,8 @@ public class JwtTokenManager {
                 .parseClaimsJws(token)
                 .getBody();
 
-        Date now = new Date();
-        Date expiration = parsedAndValidatedToken.getExpiration();
-        if (now.after(expiration)) {
-            throw new JwtException("Token has expired");
-        }
-
-        UserDetails userDetails = userDetailsService.loadUserByUsername(parsedAndValidatedToken.getSubject());
+        String username = parsedAndValidatedToken.getSubject();
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 

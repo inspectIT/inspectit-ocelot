@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.config;
+package rocks.inspectit.ocelot.config.model;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -12,7 +12,7 @@ import java.time.Duration;
 @Data
 @ConfigurationProperties("inspectit")
 @Configuration
-public class InspectitServerConfig {
+public class InspectitServerSettings {
 
     /**
      * The directory in which the server stores all its files.
@@ -28,5 +28,5 @@ public class InspectitServerConfig {
     /**
      * The default user to create if no user database is found.
      */
-    private DefaultUserConfig defaultUser;
+    private DefaultUserSettings defaultUser;
 }

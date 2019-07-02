@@ -5,7 +5,7 @@ import org.apache.commons.io.FileExistsException;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-import rocks.inspectit.ocelot.config.InspectitServerConfig;
+import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -39,7 +39,7 @@ public class FileManagerTest {
     @BeforeEach
     private void setupFileManager() throws Exception {
         fm = new FileManager();
-        InspectitServerConfig conf = new InspectitServerConfig();
+        InspectitServerSettings conf = new InspectitServerSettings();
         conf.setWorkingDirectory(fmRoot.toString());
         fm.config = conf;
         fm.init();

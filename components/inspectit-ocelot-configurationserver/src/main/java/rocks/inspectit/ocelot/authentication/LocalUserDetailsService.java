@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.users;
+package rocks.inspectit.ocelot.authentication;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -10,7 +10,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-import rocks.inspectit.ocelot.config.InspectitServerConfig;
+import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 
 import javax.annotation.PostConstruct;
 import java.util.HashMap;
@@ -21,10 +21,10 @@ import java.util.Map;
  */
 @Component
 @Slf4j
-public class InspectitUserDetailsService implements UserDetailsService {
+public class LocalUserDetailsService implements UserDetailsService {
 
     @Autowired
-    private InspectitServerConfig config;
+    private InspectitServerSettings config;
 
     @Getter
     private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();

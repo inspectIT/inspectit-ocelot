@@ -1,10 +1,11 @@
-package rocks.inspectit.ocelot.users;
+package rocks.inspectit.ocelot.authentication;
 
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.GenericFilterBean;
+import rocks.inspectit.ocelot.config.SecurityConfiguration;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -16,7 +17,7 @@ import java.io.IOException;
 /**
  * This filter performs token-based authentication.
  * Tokens are created via the {@link rocks.inspectit.ocelot.rest.users.AccountController}.
- * This Filter is registered by the {@link rocks.inspectit.ocelot.config.SecurityConfig}.
+ * This Filter is registered by the {@link SecurityConfiguration}.
  */
 @AllArgsConstructor
 public class JwtTokenFilter extends GenericFilterBean {
@@ -28,15 +29,21 @@ public class JwtTokenFilter extends GenericFilterBean {
 
         String token = extractBearerToken((HttpServletRequest) req);
 
+        boolean authenticationThroughFilter = false;
+
         if (token != null) {
             try {
                 Authentication authentication = tokenManager.authenticateWithToken(token);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+                authenticationThroughFilter = true;
             } catch (Exception e) {
                 logger.debug("Token-based authentication failed: {}", e);
             }
         }
         chain.doFilter(req, res);
+        if (authenticationThroughFilter) {
+            SecurityContextHolder.getContext().setAuthentication(null);
+        }
     }
 
     /**

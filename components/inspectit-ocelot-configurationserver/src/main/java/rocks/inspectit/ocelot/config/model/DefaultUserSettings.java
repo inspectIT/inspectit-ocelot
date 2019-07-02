@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.config;
+package rocks.inspectit.ocelot.config.model;
 
 import lombok.Data;
 
@@ -7,7 +7,10 @@ import lombok.Data;
  * created if no User-Database is found.
  */
 @Data
-public class DefaultUserConfig {
+public class DefaultUserSettings {
+
     private String name;
+
     private String password;
+    
 }

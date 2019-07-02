@@ -8,13 +8,16 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
-import rocks.inspectit.ocelot.users.InspectitUserDetailsService;
-import rocks.inspectit.ocelot.users.JwtTokenFilter;
-import rocks.inspectit.ocelot.users.JwtTokenManager;
+import rocks.inspectit.ocelot.authentication.JwtTokenFilter;
+import rocks.inspectit.ocelot.authentication.JwtTokenManager;
+import rocks.inspectit.ocelot.authentication.LocalUserDetailsService;
 
+/**
+ * Spring security configuration enabling authentication on all except excluded endpoints.
+ */
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(securedEnabled = true)
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
+public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Autowired
     JwtTokenManager tokenManager;
@@ -44,7 +47,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Autowired
-    public void configureAuth(AuthenticationManagerBuilder auth, InspectitUserDetailsService detailsService) throws Exception {
+    public void configureAuth(AuthenticationManagerBuilder auth, LocalUserDetailsService detailsService) throws Exception {
         auth
                 .userDetailsService(detailsService)
                 .passwordEncoder(detailsService.getPasswordEncoder());

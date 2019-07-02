@@ -14,7 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
         "inspectit.default-user.password=foo",
         "inspectit.token-lifespan=2s"
 })
-public class SecurityConfigIntTest extends IntegrationTestBase {
+public class SecurityConfigurationIntTest extends IntegrationTestBase {
 
     private static final String DIRECTORIES_URL = "/api/v1/directories";
     private static final String NEW_TOKEN_URL = "/api/v1/account/token";

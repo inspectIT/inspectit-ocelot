@@ -8,11 +8,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+import rocks.inspectit.ocelot.authentication.JwtTokenManager;
 import rocks.inspectit.ocelot.rest.AbstractBaseController;
-import rocks.inspectit.ocelot.users.JwtTokenManager;
 
 import java.io.IOException;
 
+/**
+ * Rest controller allowing users to manage their own account.
+ */
 @RestController
 public class AccountController extends AbstractBaseController {
 

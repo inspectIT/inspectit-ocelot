@@ -6,7 +6,7 @@ import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import rocks.inspectit.ocelot.config.InspectitServerConfig;
+import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
@@ -35,7 +35,7 @@ public class FileManager {
 
     @VisibleForTesting
     @Autowired
-    InspectitServerConfig config;
+    InspectitServerSettings config;
 
     /**
      * The path under which the file system accessible by this component lies.

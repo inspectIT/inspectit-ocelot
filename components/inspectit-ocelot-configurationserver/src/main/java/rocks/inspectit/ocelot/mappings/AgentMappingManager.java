@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import rocks.inspectit.ocelot.config.InspectitServerConfig;
+import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 
 import javax.annotation.PostConstruct;
@@ -49,7 +49,7 @@ public class AgentMappingManager {
      */
     @Autowired
     @VisibleForTesting
-    InspectitServerConfig config;
+    InspectitServerSettings config;
 
     /**
      * Post construct. Initially reading the agent mappings if the mappings file exists.
