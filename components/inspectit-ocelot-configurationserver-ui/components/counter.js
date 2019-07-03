@@ -1,38 +1,36 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { bindActionCreators } from 'redux'
-//import { incrementCount, decrementCount, resetCount } from '../store'
-import { clockOperations } from '../redux/ducks/clock'
+import { clockActions, clockSelectors } from '../redux/ducks/clock'
 
 class Counter extends Component {
   increment = () => {
-    // const { incrementCount } = this.props
-    // incrementCount()
     this.props.incrementCount();
   }
 
+  incrementFive = () => {
+    this.props.incrementCount(5);
+  }
+
   decrement = () => {
-    // const { decrementCount } = this.props
-    // decrementCount()
     this.props.decrementCount();
   }
 
   reset = () => {
-    // const { resetCount } = this.props
-    // resetCount()
     this.props.resetCount();
   }
 
   render() {
-    const { count } = this.props
+    const { count, isNegative } = this.props
     return (
       <div>
         <h1>
           Count: <span>{count}</span>
         </h1>
         <button onClick={this.increment}>+1</button>
+        <button onClick={this.incrementFive}>+5</button>
         <button onClick={this.decrement}>-1</button>
         <button onClick={this.reset}>Reset</button>
+        Is negative: {isNegative ? "true" : "false"}
       </div>
     )
   }
@@ -40,19 +38,16 @@ class Counter extends Component {
 
 function mapStateToProps(state) {
   const { count } = state.clock;  
-  return { count }
+  return {
+    count,
+    isNegative: clockSelectors.isNegativeCount(state)
+  }
 }
 
 const mapDispatchToProps = {
-  incrementCount: clockOperations.incrementCount,
-  decrementCount: clockOperations.decrementCount,
-  resetCount: clockOperations.resetCount
+  incrementCount: clockActions.incrementCount,
+  decrementCount: clockActions.decrementCount,
+  resetCount: clockActions.resetCount,
 }
 
-//const mapDispatchToProps = dispatch =>
-//  bindActionCreators({ incrementCount, decrementCount, resetCount }, dispatch)
-
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Counter)
+export default connect(mapStateToProps, mapDispatchToProps)(Counter)

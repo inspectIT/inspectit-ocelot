@@ -1,19 +1,25 @@
 import * as types from "./types";
 
-export const serverRenderClock = () => ({
+export const initClock = (isServer) => ({
     type: types.TICK,
-    light: false,
-    ts: Date.now()
+    payload: {
+        initial: true,
+        light: !isServer,
+        ts: Date.now()
+    }
 });
 
-export const startClock = () => ({
+export const tickClock = () => ({
     type: types.TICK,
-    light: true,
-    ts: Date.now()
+    payload: {
+        light: true,
+        ts: Date.now()
+    }
 });
 
-export const incrementCount = () => ({
-    type: types.INCREMENT
+export const incrementCount = (value = 1) => ({
+    type: types.INCREMENT,
+    payload: { value }
 });
 
 export const decrementCount = () => ({

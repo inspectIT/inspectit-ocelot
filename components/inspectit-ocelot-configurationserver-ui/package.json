@@ -15,7 +15,8 @@
     "react-dom": "^16.7.0",
     "react-redux": "^5.0.1",
     "redux": "^3.6.0",
-    "redux-devtools-extension": "^2.13.2"
+    "redux-devtools-extension": "^2.13.2",
+    "reselect": "^4.0.0"
   },
   "license": "ISC"
 }

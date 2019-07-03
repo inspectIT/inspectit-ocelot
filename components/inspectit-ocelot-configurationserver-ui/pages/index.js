@@ -1,39 +1,36 @@
 import React from 'react'
 import { connect } from 'react-redux'
 //import { startClock, serverRenderClock } from '../store'
-import { clockOperations } from "../redux/ducks/clock";
+import { clockActions } from "../redux/ducks/clock";
 import Examples from '../components/examples'
 
 class Index extends React.Component {
-  static getInitialProps ({ reduxStore, req }) {
+
+  static getInitialProps({ reduxStore, req }) {
     const isServer = !!req
     // DISPATCH ACTIONS HERE ONLY WITH `reduxStore.dispatch`
-    reduxStore.dispatch(clockOperations.serverRenderClock())
+    reduxStore.dispatch(clockActions.initClock(isServer))
 
     return {}
   }
 
-  componentDidMount () {
+  componentDidMount() {
     // DISPATCH ACTIONS HERE FROM `mapDispatchToProps`
     // TO TICK THE CLOCK
-    this.timer = setInterval(() => this.props.startClock(), 1000)
+    this.timer = setInterval(() => this.props.tickClock(), 1000)
   }
 
-  componentWillUnmount () {
+  componentWillUnmount() {
     clearInterval(this.timer)
   }
 
-  render () {
+  render() {
     return <Examples />
   }
 }
 
+const mapDispatchToProps = {
+  tickClock: clockActions.tickClock
+}
 
-const mapDispatchToProps = { 
-  startClock: clockOperations.startClock
- }
-
-export default connect(
-  null,
-  mapDispatchToProps
-)(Index)
+export default connect(null, mapDispatchToProps)(Index)

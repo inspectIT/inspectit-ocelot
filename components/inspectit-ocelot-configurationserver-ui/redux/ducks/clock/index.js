@@ -1,9 +1,11 @@
 import reducer from "./reducers";
 
-import * as clockOperations from "./operations";
+import * as clockActions from "./actions";
+import * as clockSelectors from "./selectors";
 
 export {
-    clockOperations
+    clockActions,
+    clockSelectors
 };
 
 export default reducer;

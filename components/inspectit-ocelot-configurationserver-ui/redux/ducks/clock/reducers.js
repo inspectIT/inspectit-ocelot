@@ -9,16 +9,18 @@ const initialState = {
 
 const clockReducer = createReducer(initialState)({
     [types.TICK]: (state, action) => {
+        const { ts, light } = action.payload;
         return {
             ...state,
-            lastUpdate: action.ts,
-            light: !!action.light
+            lastUpdate: ts,
+            light: !!light
         };
     },
     [types.INCREMENT]: (state, action) => {
+        const { value } = action.payload;
         return {
             ...state,
-            count: state.count + 1
+            count: state.count + value
         };
     },
     [types.DECREMENT]: (state, action) => {
