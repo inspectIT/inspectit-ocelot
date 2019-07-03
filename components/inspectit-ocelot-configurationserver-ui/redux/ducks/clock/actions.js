@@ -1,33 +1,25 @@
 import * as types from "./types";
 
 export const serverRenderClock = () => ({
-    type: actionTypes.TICK,
+    type: types.TICK,
     light: false,
     ts: Date.now()
 });
 
 export const startClock = () => ({
-    type: actionTypes.TICK,
+    type: types.TICK,
     light: true,
     ts: Date.now()
 });
 
 export const incrementCount = () => ({
-    type: actionTypes.INCREMENT
+    type: types.INCREMENT
 });
 
 export const decrementCount = () => ({
-    type: actionTypes.DECREMENT
+    type: types.DECREMENT
 });
 
 export const resetCount = () => ({
-    type: actionTypes.RESET
+    type: types.RESET
 });
-
-export function initializeStore(initialState = exampleInitialState) {
-    return createStore(
-        reducer,
-        initialState,
-        composeWithDevTools(applyMiddleware())
-    )
-}

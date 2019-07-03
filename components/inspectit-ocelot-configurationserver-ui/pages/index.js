@@ -1,13 +1,14 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { startClock, serverRenderClock } from '../store'
+//import { startClock, serverRenderClock } from '../store'
+import { clockOperations } from "../redux/ducks/clock";
 import Examples from '../components/examples'
 
 class Index extends React.Component {
   static getInitialProps ({ reduxStore, req }) {
     const isServer = !!req
     // DISPATCH ACTIONS HERE ONLY WITH `reduxStore.dispatch`
-    reduxStore.dispatch(serverRenderClock(isServer))
+    reduxStore.dispatch(clockOperations.serverRenderClock())
 
     return {}
   }
@@ -26,7 +27,12 @@ class Index extends React.Component {
     return <Examples />
   }
 }
-const mapDispatchToProps = { startClock }
+
+
+const mapDispatchToProps = { 
+  startClock: clockOperations.startClock
+ }
+
 export default connect(
   null,
   mapDispatchToProps

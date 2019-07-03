@@ -1,5 +1,5 @@
 import { connect } from 'react-redux'
-import Clock from './clock'
+import Clock from './clock/Clock'
 import Counter from './counter'
 import Link from '../components/basics/Link'
 
@@ -13,8 +13,8 @@ function Examples({ lastUpdate, light }) {
   )
 }
 
-function mapStateToProps(state) {
-  const { lastUpdate, light } = state
+function mapStateToProps(state) {  
+  const { lastUpdate, light } = state.clock;
   return { lastUpdate, light }
 }
 

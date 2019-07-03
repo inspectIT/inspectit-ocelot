@@ -1,25 +1,29 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
-import { incrementCount, decrementCount, resetCount } from '../store'
+//import { incrementCount, decrementCount, resetCount } from '../store'
+import { clockOperations } from '../redux/ducks/clock'
 
 class Counter extends Component {
   increment = () => {
-    const { incrementCount } = this.props
-    incrementCount()
+    // const { incrementCount } = this.props
+    // incrementCount()
+    this.props.incrementCount();
   }
 
   decrement = () => {
-    const { decrementCount } = this.props
-    decrementCount()
+    // const { decrementCount } = this.props
+    // decrementCount()
+    this.props.decrementCount();
   }
 
   reset = () => {
-    const { resetCount } = this.props
-    resetCount()
+    // const { resetCount } = this.props
+    // resetCount()
+    this.props.resetCount();
   }
 
-  render () {
+  render() {
     const { count } = this.props
     return (
       <div>
@@ -34,12 +38,19 @@ class Counter extends Component {
   }
 }
 
-function mapStateToProps (state) {
-  const { count } = state
+function mapStateToProps(state) {
+  const { count } = state.clock;  
   return { count }
 }
-const mapDispatchToProps = dispatch =>
-  bindActionCreators({ incrementCount, decrementCount, resetCount }, dispatch)
+
+const mapDispatchToProps = {
+  incrementCount: clockOperations.incrementCount,
+  decrementCount: clockOperations.decrementCount,
+  resetCount: clockOperations.resetCount
+}
+
+//const mapDispatchToProps = dispatch =>
+//  bindActionCreators({ incrementCount, decrementCount, resetCount }, dispatch)
 
 export default connect(
   mapStateToProps,

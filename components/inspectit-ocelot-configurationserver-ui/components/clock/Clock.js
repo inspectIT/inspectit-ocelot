@@ -1,8 +1,8 @@
 export default ({ lastUpdate, light }) => {
     return (
-      <div className={light ? 'light' : ''}>
-        {format(new Date(lastUpdate))}
-        <style jsx>{`
+        <div className={light ? 'light' : ''}>
+            {format(lastUpdate ? new Date(lastUpdate) : new Date())}
+            <style jsx>{`
           div {
             padding: 15px;
             display: inline-block;
@@ -10,14 +10,12 @@ export default ({ lastUpdate, light }) => {
             font: 50px menlo, monaco, monospace;
             background-color: #000;
           }
-  
           .light {
             background-color: #999;
           }
         `}</style>
-      </div>
+        </div>
     )
-  }
-  
-  const format = t => t.toJSON().slice(11, 19) // cut off except hh:mm:ss
-  
+}
+
+const format = t => t.toJSON().slice(11, 19) // cut off except hh:mm:ss
