@@ -3,9 +3,10 @@ package rocks.inspectit.ocelot.file;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
@@ -32,9 +33,9 @@ public class FileManager {
     @VisibleForTesting
     static final Charset ENCODING = StandardCharsets.UTF_8;
 
-    @Value("${inspectit.workingDirectory}")
     @VisibleForTesting
-    String workingDirectory;
+    @Autowired
+    InspectitServerSettings config;
 
     /**
      * The path under which the file system accessible by this component lies.
@@ -45,7 +46,7 @@ public class FileManager {
     @PostConstruct
     @VisibleForTesting
     void init() throws IOException {
-        filesRoot = Paths.get(workingDirectory).resolve(FILES_SUBFOLDER).toAbsolutePath().normalize();
+        filesRoot = Paths.get(config.getWorkingDirectory()).resolve(FILES_SUBFOLDER).toAbsolutePath().normalize();
         Files.createDirectories(filesRoot);
     }
 
