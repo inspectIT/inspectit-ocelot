@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { clockActions, clockSelectors } from '../redux/ducks/clock'
+import { clockActions, clockSelectors } from '../../redux/ducks/clock'
 
 class Counter extends Component {
   increment = () => {
@@ -20,7 +20,7 @@ class Counter extends Component {
   }
 
   render() {
-    const { count, isNegative } = this.props
+    const { count, isNegative, serverRendered } = this.props
     return (
       <div>
         <h1>
@@ -30,16 +30,17 @@ class Counter extends Component {
         <button onClick={this.incrementFive}>+5</button>
         <button onClick={this.decrement}>-1</button>
         <button onClick={this.reset}>Reset</button>
-        Is negative: {isNegative ? "true" : "false"}
+        Is negative: {isNegative ? "true" : "false"} // Rendered on Server: {serverRendered ?  "true" : "false"}
       </div>
     )
   }
 }
 
 function mapStateToProps(state) {
-  const { count } = state.clock;  
+  const { count, serverRendered } = state.clock;  
   return {
     count,
+    serverRendered,
     isNegative: clockSelectors.isNegativeCount(state)
   }
 }

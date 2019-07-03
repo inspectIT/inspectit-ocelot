@@ -8,6 +8,15 @@ const initialState = {
 };
 
 const clockReducer = createReducer(initialState)({
+    [types.INIT]: (state, action) => {
+        const { ts, isServer } = action.payload;
+        return {
+            ...state,
+            lastUpdate: ts,
+            light: !isServer,
+            serverRendered: isServer
+        };
+    },
     [types.TICK]: (state, action) => {
         const { ts, light } = action.payload;
         return {

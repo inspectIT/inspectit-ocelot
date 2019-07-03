@@ -1,10 +1,9 @@
 import * as types from "./types";
 
 export const initClock = (isServer) => ({
-    type: types.TICK,
+    type: types.INIT,
     payload: {
-        initial: true,
-        light: !isServer,
+        isServer,
         ts: Date.now()
     }
 });

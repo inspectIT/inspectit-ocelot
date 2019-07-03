@@ -1,14 +1,14 @@
 import { connect } from 'react-redux'
-import Clock from './clock/Clock'
+import Clock from './Clock'
 import Counter from './counter'
-import Link from '../components/basics/Link'
+import Link from '../basics/Link'
 
 function Examples({ lastUpdate, light }) {
   return (
     <div>
       <Clock lastUpdate={lastUpdate} light={light} />
       <Counter />
-      <Link href="/abc"><a>abc</a></Link>
+      <Link href="/"><a>Index</a></Link>
     </div>
   )
 }
