@@ -30,6 +30,9 @@
       "instrumentation/rules",
       "instrumentation/special-sensors",
       "instrumentation/process"
+    ],
+    "End User Monitoring": [
+      "enduser-monitoring/enduser-monitoring-server"
     ]
   }
 }
