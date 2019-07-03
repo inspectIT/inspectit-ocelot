@@ -2,6 +2,7 @@ package rocks.inspectit.ocelot.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.core.Authentication;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.spi.DocumentationType;
@@ -18,6 +19,7 @@ public class SwaggerConfiguration {
     @Bean
     public Docket swaggerApi() {
         return new Docket(DocumentationType.SWAGGER_2)
+                .ignoredParameterTypes(Authentication.class)
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("rocks.inspectit.ocelot.rest"))
                 .paths(PathSelectors.any())
