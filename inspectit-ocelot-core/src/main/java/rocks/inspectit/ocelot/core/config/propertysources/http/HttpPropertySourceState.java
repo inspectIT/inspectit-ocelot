@@ -2,6 +2,7 @@ package rocks.inspectit.ocelot.core.config.propertysources.http;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -9,6 +10,7 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.springframework.core.env.PropertiesPropertySource;
@@ -17,6 +19,8 @@ import rocks.inspectit.ocelot.config.model.config.HttpConfigSettings;
 import rocks.inspectit.ocelot.core.config.util.PropertyUtils;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
@@ -62,6 +66,8 @@ public class HttpPropertySourceState {
     public HttpPropertySourceState(String name, HttpConfigSettings currentSettings) {
         this.name = name;
         this.currentSettings = currentSettings;
+        //ensure that currentPropertySource is never null, even if the initial fetching fails
+        currentPropertySource = new PropertiesPropertySource(name, new Properties());
     }
 
     /**
@@ -72,8 +78,6 @@ public class HttpPropertySourceState {
      * @return returns true if a new property source has been created, otherwise false.
      */
     public boolean update() {
-        log.debug("Update configuration via HTTP from URL: " + currentSettings.getUrl().toString());
-
         String configuration = fetchConfiguration();
         if (configuration != null) {
             try {
@@ -133,7 +137,16 @@ public class HttpPropertySourceState {
      * server returns 304 (not modified).
      */
     private String fetchConfiguration() {
-        HttpGet httpGet = new HttpGet(currentSettings.getUrl().toString());
+        HttpGet httpGet;
+        try {
+            URI uri = getEffectiveRequestUri();
+            log.debug("Updating configuration via HTTP from URL: {}", uri.toString());
+            httpGet = new HttpGet(uri);
+        } catch (URISyntaxException e) {
+            log.error("Error building HTTP URI for fetching configuration!", e);
+            return null;
+        }
+
         if (latestLastModified != null) {
             httpGet.setHeader("If-Modified-Since", latestLastModified);
         }
@@ -154,6 +167,20 @@ public class HttpPropertySourceState {
             httpGet.releaseConnection();
         }
         return null;
+    }
+
+    /**
+     * Builds the request URI by combining the base URI with the configured attributes.
+     *
+     * @return the resulting URI
+     * @throws URISyntaxException if the base URI is malformed
+     */
+    public URI getEffectiveRequestUri() throws URISyntaxException {
+        URIBuilder uriBuilder = new URIBuilder(currentSettings.getUrl().toURI());
+        currentSettings.getAttributes().entrySet().stream()
+                .filter(pair -> !StringUtils.isEmpty(pair.getValue()))
+                .forEach(pair -> uriBuilder.setParameter(pair.getKey(), pair.getValue()));
+        return uriBuilder.build();
     }
 
     /**
