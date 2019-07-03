@@ -1,9 +1,9 @@
 inspectit:
 
-  data:
-    http_servlet_api_entry_found: {is-tag: false}
-
   instrumentation:
+
+    data:
+      http_servlet_api_entry_found: {is-tag: false}
           
     rules:
     
