@@ -29,6 +29,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
 
+                .cors().and()
+
                 .authorizeRequests()
                 .antMatchers("/v2/api-docs",
                         "/configuration/**",
