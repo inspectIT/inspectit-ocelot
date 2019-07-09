@@ -1,4 +1,8 @@
 server:
   port: 8090
 inspectit:
-  workingDirectory: working_directory
+  working-directory: working_directory
+  token-lifespan: 60m
+  default-user:
+    name: admin
+    password: admin
