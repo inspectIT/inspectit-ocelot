@@ -4,6 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
@@ -38,6 +39,9 @@ public class FileManager {
     @VisibleForTesting
     @Autowired
     InspectitServerSettings config;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     /**
      * The path under which the file system accessible by this component lies.
@@ -115,6 +119,7 @@ public class FileManager {
         Path dir = filesRoot.resolve(path);
 
         FileUtils.forceMkdir(dir.toFile());
+        fireFileChangeEvent();
     }
 
     /**
@@ -132,6 +137,7 @@ public class FileManager {
             throw new NotDirectoryException(getRelativePath(dir));
         }
         FileUtils.deleteDirectory(dir.toFile());
+        fireFileChangeEvent();
     }
 
     /**
@@ -166,6 +172,7 @@ public class FileManager {
         }
         FileUtils.forceMkdir(file.getParent().toFile());
         Files.write(file, content.getBytes(ENCODING));
+        fireFileChangeEvent();
     }
 
     /**
@@ -179,6 +186,7 @@ public class FileManager {
         Path file = filesRoot.resolve(path);
         if (Files.isRegularFile(file)) {
             Files.delete(file);
+            fireFileChangeEvent();
         } else {
             throw new AccessDeniedException(path);
         }
@@ -205,6 +213,11 @@ public class FileManager {
         } else {
             FileUtils.moveFile(src.toFile(), dest.toFile());
         }
+        fireFileChangeEvent();
+    }
+
+    private void fireFileChangeEvent() {
+        eventPublisher.publishEvent(new FileChangedEvent(this));
     }
 
     private String getRelativePath(Path f) {

@@ -1,124 +1,108 @@
 package rocks.inspectit.ocelot.agentconfiguration;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
-import org.yaml.snakeyaml.Yaml;
+import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
+import rocks.inspectit.ocelot.file.FileChangedEvent;
 import rocks.inspectit.ocelot.file.FileManager;
 import rocks.inspectit.ocelot.mappings.AgentMappingManager;
+import rocks.inspectit.ocelot.mappings.AgentMappingsChangedEvent;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 
-import java.io.IOException;
+import javax.annotation.PostConstruct;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Manager responsible for serving the agent configuration based on the set of {@link AgentMapping}s.
  */
 @Component
+@Slf4j
 public class AgentConfigurationManager {
 
     /**
-     * Predicate for detecting if a given file ends with .yml or .yaml.
-     * Not case sensitive.
+     * Used as maker in {@link #attributesToConfigurationCache} to mark attribute-maps for which no mapping matches.
      */
-    private static final Predicate<String> HAS_YAML_ENDING = filePath -> filePath.toLowerCase().endsWith(".yml") || filePath.toLowerCase().endsWith(".yaml");
+    private static final AgentConfiguration NO_MATCHING_MAPPING = new AgentConfiguration(null, "");
+
+    @Autowired
+    @VisibleForTesting
+    InspectitServerSettings config;
 
     @Autowired
     private AgentMappingManager mappingManager;
 
     @Autowired
+    private ExecutorService executorService;
+
+    @Autowired
     private FileManager fileManager;
 
+    /**
+     * Cache mapping attribute-maps to configurations.
+     * This is a loading cache which has all mappings with their configurations in-memory.
+     * If the mappings or any configuration file change, this cache is replaced with a new one.
+     */
+    private LoadingCache<Map<String, String>, AgentConfiguration> attributesToConfigurationCache;
+
+    /**
+     * Active task used for reloading the configuration asynchronously.
+     */
+    private AgentConfigurationReloadTask reloadTask;
+
+    @PostConstruct
+    @VisibleForTesting
+    void init() {
+        replaceConfigurations(Collections.emptyList());
+        triggerConfigurationReloading();
+    }
+
+    @EventListener({FileChangedEvent.class, AgentMappingsChangedEvent.class})
+    private synchronized void triggerConfigurationReloading() {
+        if (reloadTask != null) {
+            reloadTask.cancel();
+        }
+        reloadTask = new AgentConfigurationReloadTask(mappingManager.getAgentMappings(), fileManager, this::replaceConfigurations);
+        executorService.submit(reloadTask);
+    }
 
     /**
      * Fetches the configuration as yaml string given a set of attributes describing the target agent.
      *
      * @param agentAttributes the attributes of the agent for which the configuration shall be queried
-     * @return the YAML configuration as a string or null if the attributes match no mapping
+     * @return the configuration for this agent or null if the attributes match no mapping
      */
-    public String getConfiguration(Map<String, String> agentAttributes) throws IOException {
-        //TODO: add a (limited size) cache mapping the agentAttributes to the resulting configuration, as this avoids looping over all mappings
-        for (AgentMapping mapping : mappingManager.getAgentMappings()) {
-            if (mapping.matchesAttributes(agentAttributes)) {
-                return loadConfigForMapping(mapping);
-            }
-        }
-        return null;
+    public AgentConfiguration getConfiguration(Map<String, String> agentAttributes) {
+        AgentConfiguration config = attributesToConfigurationCache.getUnchecked(agentAttributes);
+        return config == NO_MATCHING_MAPPING ? null : config;
     }
 
     /**
-     * Loads the given mapping as yaml string.
+     * Replaces {@link #attributesToConfigurationCache} with a new cache which is backed by the given list of configurations.
+     * The order of the list is used as priority, e.g. configurations coming first have a higher priority.
      *
-     * @param mapping the mapping to load
-     * @return the merged yaml for the given mapping or an empty string if the mapping does not contain any existing files
-     * @throws IOException in case a file could not be loaded
+     * @param newConfigurations the new ordered list of configurations
      */
-    @VisibleForTesting
-    String loadConfigForMapping(AgentMapping mapping) throws IOException {
-        //TODO: instead of reloading the mapping when it is requested, reload it once the files or the mappings change and cache it
-        LinkedHashSet<String> allYamlFiles = new LinkedHashSet<>();
-        for (String path : mapping.getSources()) {
-            allYamlFiles.addAll(getAllYamlFiles(path));
-        }
-
-        Object result = null;
-        for (String path : allYamlFiles) {
-            result = loadAndMergeYaml(result, path);
-        }
-        return result == null ? "" : new Yaml().dump(result);
-    }
-
-    /**
-     * If the given path is a yaml file, a list containing only it is returned.
-     * If the path is a directory, the absolute path of all contained yaml files is returned in alphabetical order.
-     * If it is neither, an empty list is returned.
-     *
-     * @param path the path to check for yaml files, can start with a slash which will be ignored
-     * @return a list of absolute paths of contained YAML files
-     */
-    private List<String> getAllYamlFiles(String path) throws IOException {
-        String cleanedPath;
-        if (path.startsWith("/")) {
-            cleanedPath = path.substring(1);
-        } else {
-            cleanedPath = path;
-        }
-        if (fileManager.exists(cleanedPath)) {
-            if (fileManager.isDirectory(cleanedPath)) {
-                return fileManager.getFilesInDirectory(cleanedPath, true).stream()
-                        .flatMap(f -> f.getAbsoluteFilePaths(cleanedPath))
-                        .filter(HAS_YAML_ENDING)
-                        .sorted()
-                        .collect(Collectors.toList());
-            } else if (HAS_YAML_ENDING.test(cleanedPath)) {
-                return Collections.singletonList(cleanedPath);
-            }
-        }
-        return Collections.emptyList();
-    }
-
-    /**
-     * Loads a yaml file as a Map/List strucutre and merges it with an existing map/list structure
-     *
-     * @param toMerge the existing structure of nested maps / lists with which the loaded yaml will be merged.
-     * @param path    the path of the yaml file to load
-     * @return the merged structure
-     * @throws IOException in case an error occurs while loading the file
-     */
-    private Object loadAndMergeYaml(Object toMerge, String path) throws IOException {
-        Yaml yaml = new Yaml();
-        String src = fileManager.readFile(path);
-        Object loadedYaml = yaml.load(src);
-        if (toMerge == null) {
-            return loadedYaml;
-        } else {
-            return ObjectStructureMerger.merge(toMerge, loadedYaml);
-        }
+    private synchronized void replaceConfigurations(List<AgentConfiguration> newConfigurations) {
+        attributesToConfigurationCache = CacheBuilder.newBuilder()
+                .maximumSize(config.getMaxAgents())
+                .build(new CacheLoader<Map<String, String>, AgentConfiguration>() {
+                    @Override
+                    public AgentConfiguration load(Map<String, String> agentAttributes) {
+                        return newConfigurations.stream()
+                                .filter(config -> config.getMapping().matchesAttributes(agentAttributes))
+                                .findFirst()
+                                .orElse(NO_MATCHING_MAPPING);
+                    }
+                });
     }
 
 }

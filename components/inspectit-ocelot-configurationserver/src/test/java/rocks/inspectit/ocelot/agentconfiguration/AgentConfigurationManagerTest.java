@@ -7,13 +7,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import rocks.inspectit.ocelot.file.FileInfo;
+import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.file.FileManager;
 import rocks.inspectit.ocelot.mappings.AgentMappingManager;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.concurrent.ExecutorService;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -27,8 +28,21 @@ public class AgentConfigurationManagerTest {
     @Mock
     AgentMappingManager mappingManager;
 
+    @Mock
+    ExecutorService executor;
+
     @InjectMocks
     AgentConfigurationManager configManager;
+
+    void init() {
+        doAnswer(a -> {
+            ((Runnable) a.getArgument(0)).run();
+            return null;
+        }).when(executor).submit(any(Runnable.class));
+
+        configManager.config = InspectitServerSettings.builder().maxAgents(1000).build();
+        configManager.init();
+    }
 
 
     @Nested
@@ -42,8 +56,9 @@ public class AgentConfigurationManagerTest {
                             .build()))
                     .when(mappingManager).getAgentMappings();
 
+            init();
 
-            String result = configManager.getConfiguration(ImmutableMap.of("service", "somethingElse"));
+            AgentConfiguration result = configManager.getConfiguration(ImmutableMap.of("service", "somethingElse"));
 
             assertThat(result).isNull();
         }
@@ -66,11 +81,13 @@ public class AgentConfigurationManagerTest {
             doReturn("a: test").when(fileManager).readFile("test.yml");
             doReturn("a: default").when(fileManager).readFile("default.yml");
 
-            String resultA = configManager.getConfiguration(ImmutableMap.of("service", "test"));
-            String resultB = configManager.getConfiguration(ImmutableMap.of("service", "somethingElse"));
+            init();
 
-            assertThat(resultA).isEqualTo("{a: test}\n");
-            assertThat(resultB).isEqualTo("{a: default}\n");
+            AgentConfiguration resultA = configManager.getConfiguration(ImmutableMap.of("service", "test"));
+            AgentConfiguration resultB = configManager.getConfiguration(ImmutableMap.of("service", "somethingElse"));
+
+            assertThat(resultA.getConfigYaml()).isEqualTo("{a: test}\n");
+            assertThat(resultB.getConfigYaml()).isEqualTo("{a: default}\n");
         }
 
 
@@ -88,121 +105,16 @@ public class AgentConfigurationManagerTest {
             doReturn(false).when(fileManager).isDirectory(any());
             doReturn("a: test").when(fileManager).readFile("test.yml");
 
-            String resultA = configManager.getConfiguration(ImmutableMap.of("service", "test-17", "application", "myApp"));
-            String resultB = configManager.getConfiguration(ImmutableMap.of("service", "test-17"));
-            String resultC = configManager.getConfiguration(ImmutableMap.of("service", "test-17", "application", "foo"));
+            init();
+
+            AgentConfiguration resultA = configManager.getConfiguration(ImmutableMap.of("service", "test-17", "application", "myApp"));
+            AgentConfiguration resultB = configManager.getConfiguration(ImmutableMap.of("service", "test-17"));
+            AgentConfiguration resultC = configManager.getConfiguration(ImmutableMap.of("service", "test-17", "application", "foo"));
 
             assertThat(resultA).isNotNull();
             assertThat(resultB).isNull();
             assertThat(resultC).isNull();
         }
 
-    }
-
-    @Nested
-    class LoadConfigForMapping {
-
-        @Test
-        void noSourcesSpecified() throws IOException {
-            String result = configManager.loadConfigForMapping(
-                    AgentMapping.builder()
-                            .build());
-
-            assertThat(result).isEmpty();
-        }
-
-
-        @Test
-        void nonExistingSourcesSpecified() throws IOException {
-            doReturn(false).when(fileManager).exists("a.yml");
-            doReturn(false).when(fileManager).exists("some/folder");
-
-            String result = configManager.loadConfigForMapping(
-                    AgentMapping.builder()
-                            .source("a.yml")
-                            .source("/some/folder")
-                            .build());
-
-            assertThat(result).isEmpty();
-        }
-
-
-        @Test
-        void nonYamlIgnored() throws IOException {
-            doReturn(true).when(fileManager).exists(any());
-            doReturn(false).when(fileManager).isDirectory(any());
-            doReturn("").when(fileManager).readFile(any());
-
-            String result = configManager.loadConfigForMapping(
-                    AgentMapping.builder()
-                            .source("a.yml")
-                            .source("b.YmL")
-                            .source("c.yaml")
-                            .source("d.txt")
-                            .build());
-
-            assertThat(result).isEmpty();
-            verify(fileManager).readFile("a.yml");
-            verify(fileManager).readFile("b.YmL");
-            verify(fileManager).readFile("c.yaml");
-
-            verify(fileManager, never()).readFile("d.txt");
-        }
-
-
-        @Test
-        void leadingSlashesInSourcesRemoved() throws IOException {
-            doReturn(false).when(fileManager).exists("a.yml");
-
-            lenient().doThrow(new RuntimeException()).when(fileManager).exists(startsWith("/"));
-
-            configManager.loadConfigForMapping(
-                    AgentMapping.builder()
-                            .source("/a.yml")
-                            .build());
-
-            verify(fileManager).exists(eq("a.yml"));
-        }
-
-
-        @Test
-        void priorityRespected() throws IOException {
-
-            doReturn(true).when(fileManager).exists(any());
-
-            doReturn(true).when(fileManager).isDirectory("folder");
-            doReturn(false).when(fileManager).isDirectory("z.yml");
-
-            doReturn(Arrays.asList(
-                    FileInfo.builder()
-                            .type(FileInfo.Type.FILE)
-                            .name("b.yml")
-                            .build(),
-                    FileInfo.builder()
-                            .type(FileInfo.Type.FILE)
-                            .name("a.yml")
-                            .build(),
-                    FileInfo.builder()
-                            .type(FileInfo.Type.FILE)
-                            .name("somethingelse")
-                            .build()
-
-            )).when(fileManager).getFilesInDirectory("folder", true);
-
-            doReturn("{ val1: z}").when(fileManager).readFile("z.yml");
-            doReturn("{ val1: a, val2: a}").when(fileManager).readFile("folder/a.yml");
-            doReturn("{ val1: b, val2: b, val3: b}").when(fileManager).readFile("folder/b.yml");
-
-
-            String result = configManager.loadConfigForMapping(
-                    AgentMapping.builder()
-                            .source("/z.yml")
-                            .source("/folder")
-                            .build());
-
-
-            assertThat(result).isEqualTo("{val1: z, val2: a, val3: b}\n");
-            verify(fileManager, never()).readFile("folder/somethingelse");
-        }
     }
 }
