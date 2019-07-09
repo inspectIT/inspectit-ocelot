@@ -27,10 +27,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         http
                 .csrf().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+
                 .and()
+                .cors()
 
-                .cors().and()
-
+                .and()
                 .authorizeRequests()
                 .antMatchers("/v2/api-docs",
                         "/configuration/**",
@@ -42,8 +43,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
                 .and()
                 .authorizeRequests().anyRequest().authenticated()
+
                 .and()
                 .httpBasic()
+
                 .and()
                 .addFilterBefore(new JwtTokenFilter(tokenManager), BasicAuthenticationFilter.class);
     }
