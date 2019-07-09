@@ -11,7 +11,7 @@ module.exports = withCSS({
     // Will be available on both server and client
     publicRuntimeConfig: {
         // used in '/components/basics/Link.js', for more details go to the component itself
-        linkPrefix: isProduction ? '/next-hello-world' : ''
+        linkPrefix: isProduction ? '/ui' : ''
     },
 
     // Required for successfully importing CSS files (e.g. from PrimeReact)
