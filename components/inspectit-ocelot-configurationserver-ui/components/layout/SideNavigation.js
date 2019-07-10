@@ -16,8 +16,8 @@ const SideNavigation = () => {
                 top: 4rem;
                 left: 0;
                 bottom: 0;
-                width: 3rem;
-                background-color: #ddd;
+                width: 4rem;
+                background-color: #eee;
                 display: flex;
                 flex-direction: column;
                 align-items: center;

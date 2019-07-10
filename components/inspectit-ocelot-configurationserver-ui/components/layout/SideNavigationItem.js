@@ -12,16 +12,20 @@ const SideNavigationItem = ({ href, icon, name, router }) => {
             <a className={"anchor" + (isActive ? " active" : "")} title={name}>
                 <style jsx>{`
                 .pi {
-                    font-size: 2.5rem;
+                    font-size: 2rem;
+                    color: #bbb;
+                }
+                .anchor.active .pi, .anchor:hover .pi {
+                    color: #888;
                 }
                 .anchor {
                     width: 100%;
                     text-align: center;
-                    border-bottom: 1px solid #ccc;
-                    padding: 0.25rem 0;
+                    padding: 0.75rem 0.25rem;
                 }
-                .anchor.active, .anchor:hover {
-                    background-color: #00000022;
+                .anchor.active {
+                    padding-left: 0;
+                    border-left: 0.25rem solid #e8a034;
                 }
                 `}</style>
                 <i className={"pi " + icon} />
