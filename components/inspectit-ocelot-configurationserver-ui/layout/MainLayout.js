@@ -14,7 +14,6 @@ const MainLayout = (props) => {
             `}</style>
             <style jsx>{`
             .content {
-                background-color: green;
                 margin-left: 3rem;
             }
             `}</style>

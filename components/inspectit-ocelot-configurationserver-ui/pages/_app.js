@@ -10,6 +10,7 @@ import {BASE_PAGE_TITLE} from '../data/constants'
 import 'primereact/resources/themes/nova-dark/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
+import 'primeflex/primeflex.css';
 
 class OcelotConfigurationUI extends App {
   render() {

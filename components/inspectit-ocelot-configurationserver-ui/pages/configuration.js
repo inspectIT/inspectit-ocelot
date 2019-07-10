@@ -11,15 +11,13 @@ class ConfigurationPage extends React.Component {
 
   render() {
     return (
-      <div>
+      <MainLayout>
         <Head>
           <title>{BASE_PAGE_TITLE} | Configuration</title>
         </Head>
-        
-        <MainLayout>
-          <a>hey</a>
-        </MainLayout>
-      </div>
+
+        {/** content here */}
+      </MainLayout>
     )
   }
 }
