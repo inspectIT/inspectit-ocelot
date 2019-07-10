@@ -39,26 +39,16 @@ node {
  */
 task buildFrontend(type: YarnTask) {
     args = ['export']
-
-    doLast {
-        println("Cleaning existing configuration-ui directory")
-        project.delete(files("src/main/resources/static/ui") {})
-
-        println("Importing built configuration-ui")
-        copy {
-            from "${project.projectDir}/../inspectit-ocelot-configurationserver-ui/out"
-            into 'src/main/resources/static/ui'
-            include '**'
-        }
-    }
 }
+
+def serverMainClass = 'rocks.inspectit.ocelot.ConfigurationServer'
 
 bootJar {
     archivesBaseName = 'inspectit-ocelot-configurationserver'
     version = '0.1.0'
 
     manifest {
-        attributes 'Start-Class': 'rocks.inspectit.ocelot.ConfigurationServer'
+        attributes 'Start-Class': "${serverMainClass}"
     }
 }
 
@@ -69,8 +59,12 @@ task bootJarWithFrontend(type: org.springframework.boot.gradle.tasks.bundling.Bo
     archivesBaseName = 'inspectit-ocelot-configurationserver'
     version = '0.1.0'
 
+    from("${project.projectDir}/../inspectit-ocelot-configurationserver-ui/out") {
+        into('static/ui')
+    }
+
     manifest {
-        attributes 'Start-Class': 'rocks.inspectit.ocelot.ConfigurationServer'
+        attributes 'Start-Class': "${serverMainClass}"
     }
 
     with bootJar

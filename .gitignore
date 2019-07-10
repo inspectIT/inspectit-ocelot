@@ -27,6 +27,3 @@
 /dist/
 /nbdist/
 /.nb-gradle/
-
-### Ocelot Components ###
-/components/inspectit-ocelot-configurationserver/src/main/resources/static/ui
