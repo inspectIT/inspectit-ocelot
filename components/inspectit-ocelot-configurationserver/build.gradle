@@ -48,7 +48,7 @@ bootJar {
     version = '0.1.0'
 
     manifest {
-        attributes 'Start-Class': "${serverMainClass}"
+        attributes 'Start-Class': "${serverMainClass}".toString()
     }
 }
 
@@ -64,7 +64,7 @@ task bootJarWithFrontend(type: org.springframework.boot.gradle.tasks.bundling.Bo
     }
 
     manifest {
-        attributes 'Start-Class': "${serverMainClass}"
+        attributes 'Start-Class': "${serverMainClass}".toString()
     }
 
     with bootJar
