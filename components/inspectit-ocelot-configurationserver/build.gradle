@@ -89,9 +89,15 @@ dependencies {
 dependencies {
     implementation(
             project(':inspectit-ocelot-config'),
+
             "org.springframework.boot:spring-boot-starter-web:2.1.4.RELEASE",
             "org.springframework.security:spring-security-web:5.1.5.RELEASE",
             "org.springframework.security:spring-security-config:5.1.5.RELEASE",
+            "org.springframework.boot:spring-boot-starter-data-jpa:2.1.4.RELEASE",
+
+            "org.xerial:sqlite-jdbc:3.28.0",
+            "com.github.gwenn:sqlite-dialect:0.1.0",
+
             'io.jsonwebtoken:jjwt-api:0.10.5',
             'io.jsonwebtoken:jjwt-impl:0.10.5',
             'io.jsonwebtoken:jjwt-jackson:0.10.5',
