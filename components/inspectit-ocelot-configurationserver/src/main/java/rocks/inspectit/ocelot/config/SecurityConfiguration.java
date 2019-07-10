@@ -37,6 +37,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                         "/configuration/**",
                         "/csrf",
                         "/",
+                        "/ui/**",
                         "/swagger*/**",
                         "/webjars/**")
                 .permitAll()

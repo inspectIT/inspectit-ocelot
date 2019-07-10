@@ -1,0 +1,40 @@
+{
+  "name": "inspectit-ocelot-configuration-ui",
+  "description": "web-frontend for the inspectIT Ocelot's configuration server",
+  "homepage": "https://inspectit.rocks/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/inspectIT/inspectit-ocelot"
+  },
+  "author": {
+    "name": "Novatec Consulting GmbH",
+    "email": "digital-experience@novatec-gmbh.de",
+    "url": "https://www.novatec-gmbh.de/"
+  },
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "next",
+    "build": "next build",
+    "start": "next start",
+    "export": "next build && next export"
+  },
+  "dependencies": {
+    "@zeit/next-css": "^1.0.1",
+    "classnames": "^2.2.6",
+    "next": "latest",
+    "primeicons": "^1.0.0",
+    "primereact": "^3.1.7",
+    "react": "^16.7.0",
+    "react-dom": "^16.7.0",
+    "react-redux": "^5.0.1",
+    "react-transition-group": "^4.2.1",
+    "redux": "^3.6.0",
+    "redux-devtools-extension": "^2.13.2",
+    "reselect": "^4.0.0"
+  },
+  "license": "apache-2.0",
+  "devDependencies": {
+    "file-loader": "^4.0.0",
+    "url-loader": "^2.0.1"
+  }
+}

@@ -7,19 +7,69 @@ buildscript {
     }
 }
 
+plugins {
+    id "com.moowork.node" version "1.3.1"
+}
+
 apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 apply plugin: 'java'
+
+node {
+    // If true, it will download node using above parameters.
+    // If false, it will try to use globally installed node.
+    download = true
+
+    // Set the work directory for unpacking node
+    workDir = file("${project.buildDir}/nodejs")
+
+    // Set the work directory for NPM
+    npmWorkDir = file("${project.buildDir}/npm")
+
+    // Set the work directory for Yarn
+    yarnWorkDir = file("${project.buildDir}/yarn")
+
+    // Set the work directory where node_modules should be located
+    nodeModulesDir = file("${project.projectDir}/../inspectit-ocelot-configurationserver-ui")
+}
+
+/**
+ * Task for building the frontend and copying it to the configuration-server project.
+ */
+task buildFrontend(type: YarnTask) {
+    args = ['export']
+}
+
+def serverMainClass = 'rocks.inspectit.ocelot.ConfigurationServer'
 
 bootJar {
     archivesBaseName = 'inspectit-ocelot-configurationserver'
     version = '0.1.0'
 
     manifest {
-        attributes 'Start-Class': 'rocks.inspectit.ocelot.ConfigurationServer'
+        attributes 'Start-Class': "${serverMainClass}".toString()
     }
 }
+
+/**
+ * Builds the configuration server and the web frontend.
+ */
+task bootJarWithFrontend(type: org.springframework.boot.gradle.tasks.bundling.BootJar) {
+    archivesBaseName = 'inspectit-ocelot-configurationserver'
+    version = '0.1.0'
+
+    from("${project.projectDir}/../inspectit-ocelot-configurationserver-ui/out") {
+        into('static/ui')
+    }
+
+    manifest {
+        attributes 'Start-Class': "${serverMainClass}".toString()
+    }
+
+    with bootJar
+}
+bootJarWithFrontend.dependsOn buildFrontend
 
 repositories {
     mavenCentral()
