@@ -1,0 +1,12 @@
+[
+    {
+        "name": "Configuration",
+        "icon": "pi-cog",
+        "href": "/configuration"
+    },
+    {
+        "name": "Agent Mappings",
+        "icon": "pi-sitemap",
+        "href": "/mappings"
+    }
+]
