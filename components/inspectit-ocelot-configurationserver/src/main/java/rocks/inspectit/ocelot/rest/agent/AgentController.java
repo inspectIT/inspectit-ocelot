@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import rocks.inspectit.ocelot.agentconfig.AgentConfigurationManager;
+import rocks.inspectit.ocelot.agentconfiguration.AgentConfigurationManager;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.rest.AbstractBaseController;
 
@@ -27,13 +27,13 @@ public class AgentController extends AbstractBaseController {
 
     /**
      * Returns the {@link InspectitConfig} for the agent with the given name.
+     * Uses text/plain as mime type to ensure that the configuration is presented nicely when opened in a browser
      *
      * @param attributes the attributes of the agents used to select the mapping
      * @return The configuration mapped on the given agent name
      */
     @ApiOperation(value = "Fetch the Agent Configuration", notes = "Reads the configuration for the given agent and returns it as a yaml string")
     @GetMapping(value = "agent/configuration", produces = "text/plain")
-    //use text/plain to allow browser to display the resulting configuration
     public ResponseEntity<String> fetchConfiguration(@ApiParam("The agent attributes used to select the correct mapping") @RequestParam Map<String, String> attributes) throws IOException {
         String configuration = configManager.getConfiguration(attributes);
         if (configuration == null) {

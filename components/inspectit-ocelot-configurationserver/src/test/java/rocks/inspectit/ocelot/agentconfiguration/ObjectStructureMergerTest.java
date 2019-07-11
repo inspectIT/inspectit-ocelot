@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.agentconfig;
+package rocks.inspectit.ocelot.agentconfiguration;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

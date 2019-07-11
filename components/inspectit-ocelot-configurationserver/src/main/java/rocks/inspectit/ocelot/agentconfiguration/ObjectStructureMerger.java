@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.agentconfig;
+package rocks.inspectit.ocelot.agentconfiguration;
 
 
 import java.util.*;
@@ -10,6 +10,15 @@ import java.util.stream.Stream;
  */
 public class ObjectStructureMerger {
 
+    /**
+     * Tries to merge the given two Object structure, giving precedence to the first one.
+     * If both Objects are maps or bot hare lists, they will be deeply merged.
+     * Otherwise, simply "first" is returned.
+     *
+     * @param first  the object structure to take precedence
+     * @param second the second object structure
+     * @return
+     */
     public static Object merge(Object first, Object second) {
         if (first instanceof Map && second instanceof Map) {
             return mergeMaps((Map<?, ?>) first, (Map<?, ?>) second);
@@ -20,6 +29,14 @@ public class ObjectStructureMerger {
         }
     }
 
+    /**
+     * Merges two non-null maps deeply.
+     * This means if a given key exists in both maps, {@link #merge(Object, Object)} will be called for its value.
+     *
+     * @param first  the first map to merge
+     * @param second the second map to merge
+     * @return the merged map
+     */
     private static Map<?, ?> mergeMaps(Map<?, ?> first, Map<?, ?> second) {
         //use a linked hashmap to potentially preserve the order
         Map<Object, Object> result = new LinkedHashMap<>();
@@ -39,6 +56,14 @@ public class ObjectStructureMerger {
         return result;
     }
 
+    /**
+     * Merges two non-null lists deeply.
+     * This means if a element at a given index exists in both lists, {@link #merge(Object, Object)} will be called for its value.
+     *
+     * @param first  the first list to merge
+     * @param second the second list to merge
+     * @return the merged map
+     */
     private static List<?> mergeLists(List<?> first, List<?> second) {
         List<Object> result = new ArrayList<>();
 

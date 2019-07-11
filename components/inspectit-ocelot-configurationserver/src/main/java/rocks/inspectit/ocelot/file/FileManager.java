@@ -97,7 +97,7 @@ public class FileManager {
      * @return true if the given path denotes an existing file or directory
      * @throws AccessDeniedException if access is forbidden
      */
-    public boolean doesPathExist(String path) throws AccessDeniedException {
+    public boolean exists(String path) throws AccessDeniedException {
         assertPathWithinFilesRoot(path);
         return Files.exists(filesRoot.resolve(path));
     }

@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.agentconfig;
+package rocks.inspectit.ocelot.agentconfiguration;
 
 import com.google.common.annotations.VisibleForTesting;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +10,8 @@ import rocks.inspectit.ocelot.mappings.AgentMappingManager;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
@@ -21,6 +23,10 @@ import java.util.stream.Collectors;
 @Component
 public class AgentConfigurationManager {
 
+    /**
+     * Predicate for detecting if a given file ends with .yml or .yaml.
+     * Not case sensitive.
+     */
     private static final Predicate<String> HAS_YAML_ENDING = filePath -> filePath.toLowerCase().endsWith(".yml") || filePath.toLowerCase().endsWith(".yaml");
 
     @Autowired
@@ -39,7 +45,7 @@ public class AgentConfigurationManager {
     public String getConfiguration(Map<String, String> agentAttributes) throws IOException {
         //TODO: add a (limited size) cache mapping the agentAttributes to the resulting configuration, as this avoids looping over all mappings
         for (AgentMapping mapping : mappingManager.getAgentMappings()) {
-            if (doAttributesMatchMapping(agentAttributes, mapping)) {
+            if (mapping.matchesAttributes(agentAttributes)) {
                 return loadConfigForMapping(mapping);
             }
         }
@@ -56,32 +62,47 @@ public class AgentConfigurationManager {
     @VisibleForTesting
     String loadConfigForMapping(AgentMapping mapping) throws IOException {
         //TODO: instead of reloading the mapping when it is requested, reload it once the files or the mappings change and cache it
-        Object result = null;
+        LinkedHashSet<String> allYamlFiles = new LinkedHashSet<>();
         for (String path : mapping.getSources()) {
-            if (path.startsWith("/")) {
-                path = path.substring(1);
-            }
-            if (fileManager.doesPathExist(path)) {
-                if (fileManager.isDirectory(path)) {
-                    List<String> paths = fileManager.getFilesInDirectory(path).stream()
-                            .filter(f -> f.getType() == FileInfo.Type.FILE)
-                            .map(FileInfo::getPath)
-                            .filter(HAS_YAML_ENDING)
-                            .sorted()
-                            .collect(Collectors.toList());
-                    for (String file : paths) {
-                        result = loadAndMergeYaml(result, file);
-                    }
-                } else if (HAS_YAML_ENDING.test(path)) {
-                    result = loadAndMergeYaml(result, path);
-                }
-            }
+            allYamlFiles.addAll(getAllYamlFiles(path));
         }
-        if (result == null) {
+
+        if (allYamlFiles.isEmpty()) {
             return "";
         } else {
+            Object result = null;
+            for (String path : allYamlFiles) {
+                result = loadAndMergeYaml(result, path);
+            }
             return new Yaml().dump(result);
         }
+    }
+
+    /**
+     * If the given path is a yaml file, a list containing only it is returned.
+     * If the path is a directory, the absolute path of all contained yaml files is returned in alphabetical order.
+     * If it is neither, an empty list is returned.
+     *
+     * @param path the path to check for yaml files, can start with a slash which will be ignored
+     * @return a list of absolute paths of contained YAML files
+     */
+    private List<String> getAllYamlFiles(String path) throws IOException {
+        if (path.startsWith("/")) {
+            path = path.substring(1);
+        }
+        if (fileManager.exists(path)) {
+            if (fileManager.isDirectory(path)) {
+                return fileManager.getFilesInDirectory(path).stream()
+                        .filter(f -> f.getType() == FileInfo.Type.FILE)
+                        .map(FileInfo::getPath)
+                        .filter(HAS_YAML_ENDING)
+                        .sorted()
+                        .collect(Collectors.toList());
+            } else if (HAS_YAML_ENDING.test(path)) {
+                return Collections.singletonList(path);
+            }
+        }
+        return Collections.emptyList();
     }
 
     /**
@@ -95,28 +116,12 @@ public class AgentConfigurationManager {
     private Object loadAndMergeYaml(Object toMerge, String path) throws IOException {
         Yaml yaml = new Yaml();
         String src = fileManager.readFile(path);
-        Object loaded = yaml.load(src);
+        Object loadedYaml = yaml.load(src);
         if (toMerge == null) {
-            return loaded;
+            return loadedYaml;
         } else {
-            return ObjectStructureMerger.merge(toMerge, loaded);
+            return ObjectStructureMerger.merge(toMerge, loadedYaml);
         }
     }
 
-    /**
-     * Checks if an Agent with a given map of attributes and their values fulfills the requirements of a given mapping.
-     *
-     * @param agentAttributes the attributes to check
-     * @param mapping         the mapping to check against
-     * @return true, if the mapping matches
-     */
-    private boolean doAttributesMatchMapping(Map<String, String> agentAttributes, AgentMapping mapping) {
-        for (Map.Entry<String, String> pair : mapping.getAttributes().entrySet()) {
-            String value = agentAttributes.getOrDefault(pair.getKey(), "");
-            if (!value.matches(pair.getValue())) {
-                return false;
-            }
-        }
-        return true;
-    }
 }

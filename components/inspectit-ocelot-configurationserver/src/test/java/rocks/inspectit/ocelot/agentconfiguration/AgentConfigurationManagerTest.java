@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.agentconfig;
+package rocks.inspectit.ocelot.agentconfiguration;
 
 import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.Nested;
@@ -61,7 +61,7 @@ public class AgentConfigurationManagerTest {
                             .build()))
                     .when(mappingManager).getAgentMappings();
 
-            doReturn(true).when(fileManager).doesPathExist(any());
+            doReturn(true).when(fileManager).exists(any());
             doReturn(false).when(fileManager).isDirectory(any());
             doReturn("a: test").when(fileManager).readFile("test.yml");
             doReturn("a: default").when(fileManager).readFile("default.yml");
@@ -84,7 +84,7 @@ public class AgentConfigurationManagerTest {
                             .build()))
                     .when(mappingManager).getAgentMappings();
 
-            doReturn(true).when(fileManager).doesPathExist(any());
+            doReturn(true).when(fileManager).exists(any());
             doReturn(false).when(fileManager).isDirectory(any());
             doReturn("a: test").when(fileManager).readFile("test.yml");
 
@@ -114,8 +114,8 @@ public class AgentConfigurationManagerTest {
 
         @Test
         void nonExistingSourcesSpecified() throws IOException {
-            doReturn(false).when(fileManager).doesPathExist("a.yml");
-            doReturn(false).when(fileManager).doesPathExist("some/folder");
+            doReturn(false).when(fileManager).exists("a.yml");
+            doReturn(false).when(fileManager).exists("some/folder");
 
             String result = configManager.loadConfigForMapping(
                     AgentMapping.builder()
@@ -129,7 +129,7 @@ public class AgentConfigurationManagerTest {
 
         @Test
         void nonYamlIgnored() throws IOException {
-            doReturn(true).when(fileManager).doesPathExist(any());
+            doReturn(true).when(fileManager).exists(any());
             doReturn(false).when(fileManager).isDirectory(any());
             doReturn("").when(fileManager).readFile(any());
 
@@ -152,23 +152,23 @@ public class AgentConfigurationManagerTest {
 
         @Test
         void leadingSlashesInSourcesRemoved() throws IOException {
-            doReturn(false).when(fileManager).doesPathExist("a.yml");
+            doReturn(false).when(fileManager).exists("a.yml");
 
-            lenient().doThrow(new RuntimeException()).when(fileManager).doesPathExist(startsWith("/"));
+            lenient().doThrow(new RuntimeException()).when(fileManager).exists(startsWith("/"));
 
             configManager.loadConfigForMapping(
                     AgentMapping.builder()
                             .source("/a.yml")
                             .build());
 
-            verify(fileManager).doesPathExist(eq("a.yml"));
+            verify(fileManager).exists(eq("a.yml"));
         }
 
 
         @Test
         void priorityRespected() throws IOException {
 
-            doReturn(true).when(fileManager).doesPathExist(any());
+            doReturn(true).when(fileManager).exists(any());
 
             doReturn(true).when(fileManager).isDirectory("folder");
             doReturn(false).when(fileManager).isDirectory("z.yml");
