@@ -13,7 +13,8 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -39,7 +40,7 @@ public class FileManager {
 
     /**
      * The path under which the file system accessible by this component lies.
-     * This is the absolute, normalized path represented by {@link #workingDirectory} with {@link #FILES_SUBFOLDER} appended.
+     * This is the absolute, normalized path represented by {@link InspectitServerSettings#getWorkingDirectory()} with {@link #FILES_SUBFOLDER} appended.
      */
     private Path filesRoot;
 
@@ -53,11 +54,12 @@ public class FileManager {
     /**
      * Returns all files recursively contained under the given path.
      *
-     * @param path the path of the directory
+     * @param path      the path of the directory
+     * @param recursive if true, the entire file tree within this directory is returned. Otherwise only the direct children.
      * @return the directory contents
      * @throws IOException If the input was not valid or something in the filesystem went wrong
      */
-    public synchronized Collection<FileInfo> getFilesInDirectory(String path) throws IOException {
+    public synchronized List<FileInfo> getFilesInDirectory(String path, boolean recursive) throws IOException {
         Path dir;
         if (StringUtils.isEmpty(path)) {
             dir = filesRoot;
@@ -65,14 +67,18 @@ public class FileManager {
             assertPathWithinFilesRoot(path);
             dir = filesRoot.resolve(path);
         }
-        return Files.walk(dir)
-                .filter(f -> f != dir)
-                .map((f) ->
-                        FileInfo.builder()
-                                .path(getRelativePath(f))
-                                .type(Files.isDirectory(f) ? FileInfo.Type.DIRECTORY : FileInfo.Type.FILE)
-                                .build()
-                ).collect(Collectors.toSet());
+        List<FileInfo> result = new ArrayList<>();
+        for (Path child : Files.list(dir).collect(Collectors.toList())) {
+            boolean isDirectory = Files.isDirectory(child);
+            FileInfo.FileInfoBuilder builder = FileInfo.builder()
+                    .name(child.getFileName().toString())
+                    .type(isDirectory ? FileInfo.Type.DIRECTORY : FileInfo.Type.FILE);
+            if (isDirectory && recursive) {
+                builder.children(getFilesInDirectory(getRelativePath(child), true));
+            }
+            result.add(builder.build());
+        }
+        return result;
 
     }
 
