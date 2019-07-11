@@ -22,7 +22,7 @@ The development server can be reached at [http://localhost:3000](http://localhos
 
 ### Exporting
 
-The frontend can be build and exported using the following command - the `build` task is included in the `export` task.
+The frontend can be built and exported using the following command - the `build` task is included in the `export` task.
 
 ```bash
 yarn export
