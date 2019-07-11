@@ -17,6 +17,11 @@ class OcelotConfigurationUI extends App {
     const { Component, pageProps, reduxStore } = this.props
     return (
       <Container>
+        <style global jsx>{`
+        body {
+          margin: 0;
+        }
+        `}</style>
         <Head>
             <meta charSet="utf-8" />
             <title>{BASE_PAGE_TITLE}</title>
