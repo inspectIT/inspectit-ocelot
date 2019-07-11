@@ -2,10 +2,8 @@ package rocks.inspectit.ocelot.rest.file;
 
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RestController;
+import io.swagger.annotations.ApiParam;
+import org.springframework.web.bind.annotation.*;
 import rocks.inspectit.ocelot.file.FileInfo;
 import rocks.inspectit.ocelot.rest.util.RequestUtil;
 
@@ -20,12 +18,15 @@ import java.util.Collection;
 public class DirectoryController extends FileBaseController {
 
 
-    @ApiOperation(value = "List directory contents", notes = "Can be used to get a list of all (recursive) contents of a given directory.")
+    @ApiOperation(value = "List directory contents", notes = "Can be used to get a list of the contents of a given directory.")
     @ApiImplicitParam(name = "Path", value = "The part of the url after /directories/ define the path to the directory whose contents shall be read.")
     @GetMapping(value = "directories/**")
-    public Collection<FileInfo> listContents(HttpServletRequest request) throws IOException {
+    public Collection<FileInfo> listContents(HttpServletRequest request,
+
+                                             @ApiParam("If false, only direct children of this directory are returned. Otherwise the entire file tree is returned.")
+                                             @RequestParam(defaultValue = "true") boolean recursive) throws IOException {
         String path = RequestUtil.getRequestSubPath(request);
-        return fileManager.getFilesInDirectory(path);
+        return fileManager.getFilesInDirectory(path, recursive);
     }
 
 
