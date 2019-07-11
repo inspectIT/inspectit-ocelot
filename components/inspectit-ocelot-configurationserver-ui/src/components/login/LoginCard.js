@@ -1,3 +1,4 @@
+import React, { Component } from 'react'
 import { Card } from 'primereact/card';
 import { InputText } from "primereact/inputtext";
 import { Password } from 'primereact/password';
@@ -30,52 +31,72 @@ const LoginCardHeader = (
     </div>
 )
 
-const LoginCard = () => {
-    return (
-        <Card className="loggin-card" header={LoginCardHeader}>
-            <style global jsx>{`
-            .loggin-card.p-card {
-                width: 20rem;
-                position: relative;
-            }
-            .loggin-card .p-button, .loggin-card .p-inputtext, .loggin-card .p-message {
-                width: 100%;
-            }
-            `}</style>
-            <style jsx>{`
-            .input {
-                margin-top: 0.5rem;
-            }
-            .pi-spinner {
-                position: absolute;
-                top: 0.5rem;
-                right: 0.5rem;
-            }
-            `}</style>
-            <div className="p-inputgroup input">
-                <span className="p-inputgroup-addon">
-                    <i className="pi pi-user"></i>
-                </span>
-                <InputText placeholder="Username" />
-            </div>
-            <div className="p-inputgroup input">
-                <span className="p-inputgroup-addon">
-                    <i className="pi pi-lock"></i>
-                </span>
-                <Password placeholder="Password" feedback={false} />
-            </div>
+class LoginCard extends Component {
 
-            <div className="input">
-                <Message severity="error" text="Wrong password."></Message>
-            </div>
+    state = {
+        buttonDisabled: false,
+        showSpinner: false,
+        errorMessage: ""
+    }
 
-            <div className="input">
-                <Button label="Login" />
-            </div>
+    doLogin = () => {
+        this.setState({
+            buttonDisabled: true,
+            showSpinner: true
+        });
+    }
 
-            <i className="pi pi-spin pi-spinner"></i>
-        </Card>
-    )
+    render() {
+        return (
+            <Card className="loggin-card" header={LoginCardHeader}>
+                <style global jsx>{`
+                .loggin-card.p-card {
+                    width: 20rem;
+                    position: relative;
+                }
+                .loggin-card .p-button, .loggin-card .p-inputtext, .loggin-card .p-message {
+                    width: 100%;
+                }
+                `}</style>
+                <style jsx>{`
+                .input {
+                    margin-top: 0.5rem;
+                }
+                .pi-spinner {
+                    position: absolute;
+                    top: 0.5rem;
+                    right: 0.5rem;
+                }
+                `}</style>
+                <div className="p-inputgroup input">
+                    <span className="p-inputgroup-addon">
+                        <i className="pi pi-user"></i>
+                    </span>
+                    <InputText placeholder="Username" />
+                </div>
+                <div className="p-inputgroup input">
+                    <span className="p-inputgroup-addon">
+                        <i className="pi pi-lock"></i>
+                    </span>
+                    <Password placeholder="Password" feedback={false} />
+                </div>
+
+                {this.state.errorMessage === "" ?
+                    null
+                    :
+                    <div className="input">
+                        <Message severity="error" text={this.state.errorMessage}></Message>
+                    </div>
+                }
+
+                <div className="input">
+                    <Button onClick={this.doLogin} disabled={this.state.buttonDisabled} label="Login" />
+                </div>
+
+                {this.state.showSpinner ? <i className="pi pi-spin pi-spinner"></i> : null}
+            </Card>
+        )
+    }
 }
 
 export default LoginCard;
