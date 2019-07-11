@@ -87,26 +87,52 @@ public class FileManagerTest {
     class GetFilesInDirectory {
 
         @Test
-        void listRootFiles() throws Exception {
+        void listRootFilesRecursive() throws Exception {
             setupTestFiles("topA/fileA=", "topA/nested", "topB");
             Verfification<String> checkForCall = (path) ->
-                    assertThat(fm.getFilesInDirectory(path))
-                            .hasSize(4)
+                    assertThat(fm.getFilesInDirectory(path, true))
+                            .hasSize(2)
                             .anySatisfy((f) -> {
                                 assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                                assertThat(f.getPath()).isEqualTo("topA");
+                                assertThat(f.getName()).isEqualTo("topA");
+                                assertThat(f.getChildren())
+                                        .hasSize(2)
+                                        .anySatisfy((f2) -> {
+                                            assertThat(f2.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+                                            assertThat(f2.getName()).isEqualTo("nested");
+                                            assertThat(f2.getChildren()).isEmpty();
+                                        })
+                                        .anySatisfy((f2) -> {
+                                            assertThat(f2.getType()).isEqualTo(FileInfo.Type.FILE);
+                                            assertThat(f2.getName()).isEqualTo("fileA");
+                                        });
                             })
                             .anySatisfy((f) -> {
                                 assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                                assertThat(f.getPath()).isEqualTo("topB");
+                                assertThat(f.getName()).isEqualTo("topB");
+                                assertThat(f.getChildren()).isEmpty();
+                            });
+
+            checkForCall.verify(null);
+            checkForCall.verify("");
+            checkForCall.verify("./");
+        }
+
+        @Test
+        void listRootFilesNonRecursive() throws Exception {
+            setupTestFiles("topA/fileA=", "topA/nested", "topB");
+            Verfification<String> checkForCall = (path) ->
+                    assertThat(fm.getFilesInDirectory(path, false))
+                            .hasSize(2)
+                            .anySatisfy((f) -> {
+                                assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+                                assertThat(f.getName()).isEqualTo("topA");
+                                assertThat(f.getChildren()).isNull();
                             })
                             .anySatisfy((f) -> {
                                 assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                                assertThat(f.getPath()).isEqualTo("topA/nested");
-                            })
-                            .anySatisfy((f) -> {
-                                assertThat(f.getType()).isEqualTo(FileInfo.Type.FILE);
-                                assertThat(f.getPath()).isEqualTo("topA/fileA");
+                                assertThat(f.getName()).isEqualTo("topB");
+                                assertThat(f.getChildren()).isNull();
                             });
 
             checkForCall.verify(null);
@@ -117,19 +143,22 @@ public class FileManagerTest {
         @Test
         void listNonRootFiles() throws Exception {
             setupTestFiles("topA/fileA=", "topA/nested/sub", "topB");
-            assertThat(fm.getFilesInDirectory("topA"))
-                    .hasSize(3)
+            assertThat(fm.getFilesInDirectory("topA", true))
+                    .hasSize(2)
                     .anySatisfy((f) -> {
                         assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getPath()).isEqualTo("topA/nested");
-                    })
-                    .anySatisfy((f) -> {
-                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getPath()).isEqualTo("topA/nested/sub");
+                        assertThat(f.getName()).isEqualTo("nested");
+                        assertThat(f.getChildren())
+                                .hasSize(1)
+                                .anySatisfy((f2) -> {
+                                    assertThat(f2.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+                                    assertThat(f2.getName()).isEqualTo("sub");
+                                    assertThat(f2.getChildren()).isEmpty();
+                                });
                     })
                     .anySatisfy((f) -> {
                         assertThat(f.getType()).isEqualTo(FileInfo.Type.FILE);
-                        assertThat(f.getPath()).isEqualTo("topA/fileA");
+                        assertThat(f.getName()).isEqualTo("fileA");
                     });
         }
 
@@ -138,11 +167,11 @@ public class FileManagerTest {
         void verifyFilesOutsideWorkdirNotAccessible() {
             setupTestFiles("top");
 
-            assertThatThrownBy(() -> fm.getFilesInDirectory("../"))
+            assertThatThrownBy(() -> fm.getFilesInDirectory("../", true))
                     .isInstanceOf(AccessDeniedException.class);
-            assertThatThrownBy(() -> fm.getFilesInDirectory("top/../../"))
+            assertThatThrownBy(() -> fm.getFilesInDirectory("top/../../", true))
                     .isInstanceOf(AccessDeniedException.class);
-            assertThatThrownBy(() -> fm.getFilesInDirectory("../../"))
+            assertThatThrownBy(() -> fm.getFilesInDirectory("../../", true))
                     .isInstanceOf(AccessDeniedException.class);
         }
     }
@@ -156,19 +185,19 @@ public class FileManagerTest {
 
             fm.createDirectory("myDir");
 
-            assertThat(fm.getFilesInDirectory(""))
+            assertThat(fm.getFilesInDirectory("", true))
                     .hasSize(3)
                     .anySatisfy((f) -> {
                         assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getPath()).isEqualTo("topA");
+                        assertThat(f.getName()).isEqualTo("topA");
                     })
                     .anySatisfy((f) -> {
                         assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getPath()).isEqualTo("topB");
+                        assertThat(f.getName()).isEqualTo("topB");
                     })
                     .anySatisfy((f) -> {
                         assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getPath()).isEqualTo("myDir");
+                        assertThat(f.getName()).isEqualTo("myDir");
                     });
         }
 
@@ -179,19 +208,19 @@ public class FileManagerTest {
 
             fm.createDirectory("topB/.././myDir");
 
-            assertThat(fm.getFilesInDirectory(""))
+            assertThat(fm.getFilesInDirectory("", true))
                     .hasSize(3)
                     .anySatisfy((f) -> {
                         assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getPath()).isEqualTo("topA");
+                        assertThat(f.getName()).isEqualTo("topA");
                     })
                     .anySatisfy((f) -> {
                         assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getPath()).isEqualTo("topB");
+                        assertThat(f.getName()).isEqualTo("topB");
                     })
                     .anySatisfy((f) -> {
                         assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getPath()).isEqualTo("myDir");
+                        assertThat(f.getName()).isEqualTo("myDir");
                     });
         }
 
@@ -202,23 +231,28 @@ public class FileManagerTest {
 
             fm.createDirectory("topA/subA/subB");
 
-            assertThat(fm.getFilesInDirectory(""))
-                    .hasSize(4)
+            assertThat(fm.getFilesInDirectory("", true))
+                    .hasSize(2)
                     .anySatisfy((f) -> {
                         assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getPath()).isEqualTo("topA");
+                        assertThat(f.getName()).isEqualTo("topA");
+                        assertThat(f.getChildren())
+                                .hasSize(1)
+                                .anySatisfy((f2) -> {
+                                    assertThat(f2.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+                                    assertThat(f2.getName()).isEqualTo("subA");
+                                    assertThat(f2.getChildren())
+                                            .hasSize(1)
+                                            .anySatisfy((f3) -> {
+                                                assertThat(f3.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+                                                assertThat(f3.getName()).isEqualTo("subB");
+                                                assertThat(f3.getChildren()).isEmpty();
+                                            });
+                                });
                     })
                     .anySatisfy((f) -> {
                         assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getPath()).isEqualTo("topB");
-                    })
-                    .anySatisfy((f) -> {
-                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getPath()).isEqualTo("topA/subA");
-                    })
-                    .anySatisfy((f) -> {
-                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getPath()).isEqualTo("topA/subA/subB");
+                        assertThat(f.getName()).isEqualTo("topB");
                     });
         }
 
@@ -275,11 +309,11 @@ public class FileManagerTest {
 
             fm.deleteDirectory("topA");
 
-            assertThat(fm.getFilesInDirectory(""))
+            assertThat(fm.getFilesInDirectory("", true))
                     .hasSize(1)
                     .anySatisfy((f) -> {
                         assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getPath()).isEqualTo("topB");
+                        assertThat(f.getName()).isEqualTo("topB");
                     });
         }
 
@@ -290,11 +324,11 @@ public class FileManagerTest {
 
             fm.deleteDirectory("topB/../topA");
 
-            assertThat(fm.getFilesInDirectory(""))
+            assertThat(fm.getFilesInDirectory("", true))
                     .hasSize(1)
                     .anySatisfy((f) -> {
                         assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getPath()).isEqualTo("topB");
+                        assertThat(f.getName()).isEqualTo("topB");
                     });
         }
 
@@ -305,15 +339,15 @@ public class FileManagerTest {
 
             fm.deleteDirectory("topA/subA");
 
-            assertThat(fm.getFilesInDirectory(""))
+            assertThat(fm.getFilesInDirectory("", true))
                     .hasSize(2)
                     .anySatisfy((f) -> {
                         assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getPath()).isEqualTo("topA");
+                        assertThat(f.getName()).isEqualTo("topA");
                     })
                     .anySatisfy((f) -> {
                         assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getPath()).isEqualTo("topB");
+                        assertThat(f.getName()).isEqualTo("topB");
                     });
         }
 
@@ -472,9 +506,9 @@ public class FileManagerTest {
 
             fm.deleteFile("topA");
 
-            assertThat(fm.getFilesInDirectory(""))
+            assertThat(fm.getFilesInDirectory("", true))
                     .noneSatisfy((f) ->
-                            assertThat(f.getPath()).isEqualTo("topA")
+                            assertThat(f.getName()).isEqualTo("topA")
                     );
         }
 
@@ -485,9 +519,9 @@ public class FileManagerTest {
 
             fm.deleteFile("topB/.././topA");
 
-            assertThat(fm.getFilesInDirectory(""))
+            assertThat(fm.getFilesInDirectory("", true))
                     .noneSatisfy((f) ->
-                            assertThat(f.getPath()).isEqualTo("topA")
+                            assertThat(f.getName()).isEqualTo("topA")
                     );
         }
 
@@ -498,19 +532,23 @@ public class FileManagerTest {
 
             fm.deleteFile("topA/subA/myFile");
 
-            assertThat(fm.getFilesInDirectory(""))
-                    .hasSize(3)
+            assertThat(fm.getFilesInDirectory("", true))
+                    .hasSize(1)
                     .anySatisfy((f) -> {
                         assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getPath()).isEqualTo("topA");
-                    })
-                    .anySatisfy((f) -> {
-                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getPath()).isEqualTo("topA/subA");
-                    })
-                    .anySatisfy((f) -> {
-                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getPath()).isEqualTo("topA/subB");
+                        assertThat(f.getName()).isEqualTo("topA");
+                        assertThat(f.getChildren())
+                                .hasSize(2)
+                                .anySatisfy((f2) -> {
+                                    assertThat(f2.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+                                    assertThat(f2.getName()).isEqualTo("subA");
+                                    assertThat(f2.getChildren()).isEmpty();
+                                })
+                                .anySatisfy((f2) -> {
+                                    assertThat(f2.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+                                    assertThat(f2.getName()).isEqualTo("subB");
+                                    assertThat(f2.getChildren()).isEmpty();
+                                });
                     });
         }
 
@@ -559,15 +597,15 @@ public class FileManagerTest {
 
             fm.move("foo", "bar");
 
-            assertThat(fm.getFilesInDirectory(""))
+            assertThat(fm.getFilesInDirectory("", true))
                     .hasSize(2)
                     .anySatisfy((f) -> {
                         assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getPath()).isEqualTo("top");
+                        assertThat(f.getName()).isEqualTo("top");
                     })
                     .anySatisfy((f) -> {
                         assertThat(f.getType()).isEqualTo(FileInfo.Type.FILE);
-                        assertThat(f.getPath()).isEqualTo("bar");
+                        assertThat(f.getName()).isEqualTo("bar");
                     });
             assertThat(fm.readFile("bar")).isEqualTo("foo");
         }
@@ -579,23 +617,28 @@ public class FileManagerTest {
 
             fm.move("foo/sub", "foo/bar");
 
-            assertThat(fm.getFilesInDirectory(""))
-                    .hasSize(4)
+            assertThat(fm.getFilesInDirectory("", true))
+                    .hasSize(2)
                     .anySatisfy((f) -> {
                         assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getPath()).isEqualTo("top");
+                        assertThat(f.getName()).isEqualTo("top");
+                        assertThat(f.getChildren()).isEmpty();
                     })
                     .anySatisfy((f) -> {
                         assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getPath()).isEqualTo("foo");
-                    })
-                    .anySatisfy((f) -> {
-                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getPath()).isEqualTo("foo/bar");
-                    })
-                    .anySatisfy((f) -> {
-                        assertThat(f.getType()).isEqualTo(FileInfo.Type.FILE);
-                        assertThat(f.getPath()).isEqualTo("foo/bar/something");
+                        assertThat(f.getName()).isEqualTo("foo");
+                        assertThat(f.getChildren())
+                                .hasSize(1)
+                                .anySatisfy((f2) -> {
+                                    assertThat(f2.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+                                    assertThat(f2.getName()).isEqualTo("bar");
+                                    assertThat(f2.getChildren())
+                                            .hasSize(1)
+                                            .anySatisfy((f3) -> {
+                                                assertThat(f3.getType()).isEqualTo(FileInfo.Type.FILE);
+                                                assertThat(f3.getName()).isEqualTo("something");
+                                            });
+                                });
                     });
             assertThat(fm.readFile("foo/bar/something")).isEqualTo("text");
         }
@@ -606,31 +649,36 @@ public class FileManagerTest {
 
             fm.move("foo/sub", "sub");
 
-            assertThat(fm.getFilesInDirectory(""))
-                    .hasSize(6)
+            assertThat(fm.getFilesInDirectory("", true))
+                    .hasSize(3)
                     .anySatisfy((f) -> {
                         assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getPath()).isEqualTo("top");
+                        assertThat(f.getName()).isEqualTo("top");
                     })
                     .anySatisfy((f) -> {
                         assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getPath()).isEqualTo("foo");
+                        assertThat(f.getName()).isEqualTo("foo");
                     })
                     .anySatisfy((f) -> {
                         assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getPath()).isEqualTo("sub");
-                    })
-                    .anySatisfy((f) -> {
-                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getPath()).isEqualTo("sub/a");
-                    })
-                    .anySatisfy((f) -> {
-                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getPath()).isEqualTo("sub/a/b");
-                    })
-                    .anySatisfy((f) -> {
-                        assertThat(f.getType()).isEqualTo(FileInfo.Type.FILE);
-                        assertThat(f.getPath()).isEqualTo("sub/something");
+                        assertThat(f.getName()).isEqualTo("sub");
+                        assertThat(f.getChildren())
+                                .hasSize(2)
+                                .anySatisfy((f2) -> {
+                                    assertThat(f2.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+                                    assertThat(f2.getName()).isEqualTo("a");
+                                    assertThat(f2.getChildren())
+                                            .hasSize(1)
+                                            .anySatisfy((f3) -> {
+                                                assertThat(f3.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+                                                assertThat(f3.getName()).isEqualTo("b");
+                                                assertThat(f3.getChildren()).isEmpty();
+                                            });
+                                })
+                                .anySatisfy((f2) -> {
+                                    assertThat(f2.getType()).isEqualTo(FileInfo.Type.FILE);
+                                    assertThat(f2.getName()).isEqualTo("something");
+                                });
                     });
             assertThat(fm.readFile("sub/something")).isEqualTo("text");
         }
@@ -642,19 +690,23 @@ public class FileManagerTest {
 
             fm.move("file", "a/b/file");
 
-            assertThat(fm.getFilesInDirectory(""))
-                    .hasSize(3)
+            assertThat(fm.getFilesInDirectory("", true))
+                    .hasSize(1)
                     .anySatisfy((f) -> {
                         assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getPath()).isEqualTo("a");
-                    })
-                    .anySatisfy((f) -> {
-                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getPath()).isEqualTo("a/b");
-                    })
-                    .anySatisfy((f) -> {
-                        assertThat(f.getType()).isEqualTo(FileInfo.Type.FILE);
-                        assertThat(f.getPath()).isEqualTo("a/b/file");
+                        assertThat(f.getName()).isEqualTo("a");
+                        assertThat(f.getChildren())
+                                .hasSize(1)
+                                .anySatisfy((f2) -> {
+                                    assertThat(f2.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+                                    assertThat(f2.getName()).isEqualTo("b");
+                                    assertThat(f2.getChildren())
+                                            .hasSize(1)
+                                            .anySatisfy((f3) -> {
+                                                assertThat(f3.getType()).isEqualTo(FileInfo.Type.FILE);
+                                                assertThat(f3.getName()).isEqualTo("file");
+                                            });
+                                });
                     });
             assertThat(fm.readFile("a/b/file")).isEqualTo("");
         }
