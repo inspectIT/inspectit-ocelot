@@ -138,13 +138,13 @@ inspectit:
           regex: String
           replacement: String
           string: String
-        value: string.replaceAll(regex,replacement)
+        value: "string.replaceAll(regex,replacement)"
 
       get_method_fqn:
         input:
           _methodName: String
           _class: Class
-        value: new StringBuilder(_class.getName()).append('.').append(_methodName).toString()
+        value: "new StringBuilder(_class.getName()).append('.').append(_methodName).toString()"
 ```
 
 The names of the first two actions, `timestamp_nanos` and `elapsed_millis` should be familiar for you from the initial example in the [rules section](instrumentation/rules.md).
