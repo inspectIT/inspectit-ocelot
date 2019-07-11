@@ -176,18 +176,18 @@ public class AgentConfigurationManagerTest {
             doReturn(Arrays.asList(
                     FileInfo.builder()
                             .type(FileInfo.Type.FILE)
-                            .path("folder/b.yml")
+                            .name("b.yml")
                             .build(),
                     FileInfo.builder()
                             .type(FileInfo.Type.FILE)
-                            .path("folder/a.yml")
+                            .name("a.yml")
                             .build(),
                     FileInfo.builder()
                             .type(FileInfo.Type.FILE)
-                            .path("folder/somethingelse")
+                            .name("somethingelse")
                             .build()
 
-            )).when(fileManager).getFilesInDirectory("folder");
+            )).when(fileManager).getFilesInDirectory("folder", true);
 
             doReturn("{ val1: z}").when(fileManager).readFile("z.yml");
             doReturn("{ val1: a, val2: a}").when(fileManager).readFile("folder/a.yml");

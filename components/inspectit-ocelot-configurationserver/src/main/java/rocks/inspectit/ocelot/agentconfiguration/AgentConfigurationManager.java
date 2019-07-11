@@ -4,7 +4,6 @@ import com.google.common.annotations.VisibleForTesting;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.yaml.snakeyaml.Yaml;
-import rocks.inspectit.ocelot.file.FileInfo;
 import rocks.inspectit.ocelot.file.FileManager;
 import rocks.inspectit.ocelot.mappings.AgentMappingManager;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
@@ -67,15 +66,11 @@ public class AgentConfigurationManager {
             allYamlFiles.addAll(getAllYamlFiles(path));
         }
 
-        if (allYamlFiles.isEmpty()) {
-            return "";
-        } else {
-            Object result = null;
-            for (String path : allYamlFiles) {
-                result = loadAndMergeYaml(result, path);
-            }
-            return new Yaml().dump(result);
+        Object result = null;
+        for (String path : allYamlFiles) {
+            result = loadAndMergeYaml(result, path);
         }
+        return result == null ? "" : new Yaml().dump(result);
     }
 
     /**
@@ -87,19 +82,21 @@ public class AgentConfigurationManager {
      * @return a list of absolute paths of contained YAML files
      */
     private List<String> getAllYamlFiles(String path) throws IOException {
+        String cleanedPath;
         if (path.startsWith("/")) {
-            path = path.substring(1);
+            cleanedPath = path.substring(1);
+        } else {
+            cleanedPath = path;
         }
-        if (fileManager.exists(path)) {
-            if (fileManager.isDirectory(path)) {
-                return fileManager.getFilesInDirectory(path).stream()
-                        .filter(f -> f.getType() == FileInfo.Type.FILE)
-                        .map(FileInfo::getPath)
+        if (fileManager.exists(cleanedPath)) {
+            if (fileManager.isDirectory(cleanedPath)) {
+                return fileManager.getFilesInDirectory(cleanedPath, true).stream()
+                        .flatMap(f -> f.getAbsoluteFilePaths(cleanedPath))
                         .filter(HAS_YAML_ENDING)
                         .sorted()
                         .collect(Collectors.toList());
-            } else if (HAS_YAML_ENDING.test(path)) {
-                return Collections.singletonList(path);
+            } else if (HAS_YAML_ENDING.test(cleanedPath)) {
+                return Collections.singletonList(cleanedPath);
             }
         }
         return Collections.emptyList();
