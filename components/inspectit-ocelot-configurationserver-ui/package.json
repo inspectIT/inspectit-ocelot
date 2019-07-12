@@ -13,10 +13,10 @@
   },
   "version": "0.1.0",
   "scripts": {
-    "dev": "next",
-    "build": "next build",
-    "start": "next start",
-    "export": "next build && next export"
+    "dev": "next ./src",
+    "build": "next build ./src",
+    "start": "next start ./src",
+    "export": "next build ./src && next export ./src -o ./out"
   },
   "dependencies": {
     "@zeit/next-css": "^1.0.1",

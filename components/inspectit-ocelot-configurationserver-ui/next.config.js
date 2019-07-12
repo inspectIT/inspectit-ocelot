@@ -2,6 +2,8 @@ const withCSS = require('@zeit/next-css')
 const isProduction = process.env.NODE_ENV === 'production';
 
 module.exports = withCSS({
+    distDir: '../.next',
+
     assetPrefix: isProduction ? '/ui' : '',
 
     // Will only be available on the server side
