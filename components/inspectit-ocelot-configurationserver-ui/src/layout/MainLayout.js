@@ -7,11 +7,6 @@ import SideNavigation from '../components/layout/SideNavigation';
 const MainLayout = (props) => {
     return (
         <div>
-            <style global jsx>{`
-            body {
-              margin: 0;
-            }
-            `}</style>
             <style jsx>{`
             .content {
                 margin-left: 3rem;

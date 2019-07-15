@@ -13,10 +13,17 @@ import 'primeicons/primeicons.css';
 import 'primeflex/primeflex.css';
 
 class OcelotConfigurationUI extends App {
+
   render() {
     const { Component, pageProps, reduxStore } = this.props
     return (
       <Container>
+        <style global jsx>{`
+        body {
+          margin: 0;
+          font-family: "Open Sans", "Helvetica Neue", sans-serif;
+        }
+        `}</style>
         <Head>
             <meta charSet="utf-8" />
             <title>{BASE_PAGE_TITLE}</title>
