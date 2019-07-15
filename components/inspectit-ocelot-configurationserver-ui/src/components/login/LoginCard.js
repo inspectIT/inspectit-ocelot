@@ -13,7 +13,7 @@ const LoginCardHeader = (
             padding: 1rem 0rem;
         }
         .ocelot-head {
-            width: 50%;
+            height: 9rem;
         }
         .text-ocelot {
             font-size: 1rem;
@@ -46,13 +46,21 @@ class LoginCard extends Component {
         });
     }
 
+    onKeyPress = (e) => {
+        if (!this.state.buttonDisabled && e.key === 'Enter') {
+            this.doLogin();
+            e.target.blur();
+        }
+    }
+
     render() {
         return (
             <Card className="loggin-card" header={LoginCardHeader}>
                 <style global jsx>{`
                 .loggin-card.p-card {
-                    width: 20rem;
+                    width: 25rem;
                     position: relative;
+                    box-shadow: none;
                 }
                 .loggin-card .p-button, .loggin-card .p-inputtext, .loggin-card .p-message {
                     width: 100%;
@@ -60,7 +68,7 @@ class LoginCard extends Component {
                 `}</style>
                 <style jsx>{`
                 .input {
-                    margin-top: 0.5rem;
+                    margin-top: 1rem;
                 }
                 .pi-spinner {
                     position: absolute;
@@ -72,13 +80,13 @@ class LoginCard extends Component {
                     <span className="p-inputgroup-addon">
                         <i className="pi pi-user"></i>
                     </span>
-                    <InputText placeholder="Username" />
+                    <InputText placeholder="Username" onKeyPress={this.onKeyPress} />
                 </div>
                 <div className="p-inputgroup input">
                     <span className="p-inputgroup-addon">
                         <i className="pi pi-lock"></i>
                     </span>
-                    <Password placeholder="Password" feedback={false} />
+                    <Password placeholder="Password" feedback={false} onKeyPress={this.onKeyPress} />
                 </div>
 
                 {this.state.errorMessage === "" ?
