@@ -1,3 +1,5 @@
+import { linkPrefix } from '../../lib/configuration';
+
 /**
  * The used header in the login card.
  */
@@ -22,7 +24,7 @@ const LoginCardHeader = () => {
                 font-size: 1.5rem;
             }
             `}</style>
-            <img className="ocelot-head" src="/static/images/inspectit-ocelot.svg" />
+            <img className="ocelot-head" src={linkPrefix + "/static/images/inspectit-ocelot.svg"} />
             <div className="text-ocelot">inspectIT Ocelot</div>
             <div className="text-server">Configuration Server</div>
         </div>

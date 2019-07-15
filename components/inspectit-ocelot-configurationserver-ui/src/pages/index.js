@@ -10,7 +10,7 @@ const linkPrefix = publicRuntimeConfig.linkPrefix;
  */
 class IndexPage extends React.Component {
 
-  componentDidMount() {
+  componentDidMount() {    
     Router.push(linkPrefix + "/configuration")
   }
 

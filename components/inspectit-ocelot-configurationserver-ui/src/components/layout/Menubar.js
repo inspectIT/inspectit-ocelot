@@ -1,5 +1,6 @@
 import { Toolbar } from 'primereact/toolbar';
 import { Button } from 'primereact/button';
+import { linkPrefix } from '../../lib/configuration';
 
 /**
  * The application's menu bar.
@@ -33,7 +34,7 @@ const Menubar = () => {
             }
             `}</style>
             <div className="p-toolbar-group-left flex-v-center">
-                <img className="ocelot-head" src="/static/images/inspectit-ocelot-head.svg" />
+                <img className="ocelot-head" src={linkPrefix + "/static/images/inspectit-ocelot-head.svg"} />
                 <div className="ocelot-text">inspectIT Ocelot</div>
             </div>
             <div className="p-toolbar-group-right flex-v-center">
