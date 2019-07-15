@@ -13,6 +13,7 @@ import 'primeicons/primeicons.css';
 import 'primeflex/primeflex.css';
 
 class OcelotConfigurationUI extends App {
+
   render() {
     const { Component, pageProps, reduxStore } = this.props
     return (
@@ -20,6 +21,7 @@ class OcelotConfigurationUI extends App {
         <style global jsx>{`
         body {
           margin: 0;
+          font-family: "Open Sans", "Helvetica Neue", sans-serif;
         }
         `}</style>
         <Head>
