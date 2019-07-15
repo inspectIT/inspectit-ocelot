@@ -5,6 +5,9 @@ import { Password } from 'primereact/password';
 import { Button } from 'primereact/button';
 import { Message } from 'primereact/message';
 
+/**
+ * The used header in the login card.
+ */
 const LoginCardHeader = (
     <div className="this">
         <style jsx>{`
@@ -31,6 +34,9 @@ const LoginCardHeader = (
     </div>
 )
 
+/**
+ * The login card which wrapes and handles the interaction in order to log in into the application.
+ */
 class LoginCard extends Component {
 
     state = {
