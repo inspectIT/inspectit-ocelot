@@ -4,7 +4,7 @@ const isProduction = process.env.NODE_ENV === 'production';
 module.exports = withCSS({
     distDir: '../.next',
 
-    assetPrefix: isProduction ? '/ui' : '/',
+    assetPrefix: isProduction ? '/ui' : '',
 
     // Will only be available on the server side
     serverRuntimeConfig: {

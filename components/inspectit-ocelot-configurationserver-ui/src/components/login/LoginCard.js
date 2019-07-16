@@ -23,17 +23,29 @@ class LoginCard extends Component {
         this.props.fetchToken(this.state.username, this.state.password);
     }
 
-    componentDidUpdate(prevProps) {
+    componentWillMount = () => {
+        this.checkAuthenticated();
+    }
+
+    componentDidUpdate = (prevProps) => {
+        this.checkAuthenticated();
+    }
+
+    checkAuthenticated = () => {
         if (this.props.isAuthenticated) {
             Router.push(linkPrefix + "/")
         }
     }
 
     onKeyPress = (e) => {
-        if (!this.state.buttonDisabled && e.key === 'Enter') {
+        if (this.canLogin() && e.key === 'Enter') {
             this.doLogin();
             e.target.blur();
         }
+    }
+
+    canLogin = () => {
+        return !(this.state.username == "" || this.state.password == "" || this.props.loading);
     }
 
     render() {
@@ -79,7 +91,7 @@ class LoginCard extends Component {
                 }
 
                 <div className="input">
-                    <Button style={fullWidthStyle} onClick={this.doLogin} disabled={this.props.loading} label="Login" />
+                    <Button style={fullWidthStyle} onClick={this.doLogin} disabled={!this.canLogin()} label="Login" />
                 </div>
 
                 {this.props.loading && <i className="pi pi-spin pi-spinner"></i>}

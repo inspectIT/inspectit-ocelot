@@ -19,7 +19,8 @@ const authorizationReducer = createReducer(initialState)({
         return {
             ...state,
             loading: false,
-            error: error
+            error: error,
+            token: null
         };
     },
     [types.FETCH_TOKEN_SUCCESS]: (state, action) => {

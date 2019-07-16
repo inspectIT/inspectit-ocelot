@@ -1,12 +1,13 @@
 import * as types from "./types";
 import axios from '../../../lib/axios-api';
+import { BASE_APU_URL_V1 } from '../../../data/constants';
 
 export const fetchToken = (username, password) => {
     return dispatch => {
         dispatch(fetchTokenStarted());
 
         axios
-            .get("http://localhost:8090/api/v1/account/token", {
+            .get(BASE_APU_URL_V1 + "/account/token", {
                 auth: {
                     username: username,
                     password: password
@@ -18,7 +19,7 @@ export const fetchToken = (username, password) => {
             })
             .catch(err => {
                 let message;
-                const {response} = err;
+                const { response } = err;
                 if (response && response.status == 401) {
                     message = "The given credentials are not valid.";
                 } else {

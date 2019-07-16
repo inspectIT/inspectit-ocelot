@@ -2,6 +2,8 @@ import App, { Container } from 'next/app'
 import Head from 'next/head'
 import React from 'react'
 import withReduxStore from '../lib/with-redux-store'
+import { persistStore } from 'redux-persist'
+import { PersistGate } from 'redux-persist/integration/react'
 import { Provider } from 'react-redux'
 import { linkPrefix } from '../lib/configuration';
 
@@ -14,6 +16,11 @@ import 'primeicons/primeicons.css';
 import 'primeflex/primeflex.css';
 
 class OcelotConfigurationUI extends App {
+
+  constructor(props) {
+    super(props)
+    this.persistor = persistStore(props.reduxStore)
+  }
 
   render() {
     const { Component, pageProps, reduxStore } = this.props
@@ -31,9 +38,11 @@ class OcelotConfigurationUI extends App {
           <link rel="shortcut icon" type="image/x-icon" href={linkPrefix + "/static/favicon.ico"} />
         </Head>
         <Provider store={reduxStore}>
-          <Component {...pageProps} />
+          <PersistGate loading={<Component {...pageProps} />} persistor={this.persistor}>
+            <Component {...pageProps} />
+          </PersistGate>
         </Provider>
-      </Container>
+      </Container >
     )
   }
 }
