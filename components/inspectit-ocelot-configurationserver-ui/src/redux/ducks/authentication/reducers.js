@@ -4,7 +4,8 @@ import { createReducer } from "../../utils";
 const initialState = {
     token: null,
     loading: false,
-    error: null
+    error: null,
+    username: null
 };
 
 const authorizationReducer = createReducer(initialState)({
@@ -24,12 +25,13 @@ const authorizationReducer = createReducer(initialState)({
         };
     },
     [types.FETCH_TOKEN_SUCCESS]: (state, action) => {
-        const { token } = action.payload;
+        const { token, username } = action.payload;
         return {
             ...state,
             loading: false,
             error: null,
-            token
+            token,
+            username: username.toLowerCase()
         };
     },
     [types.LOGOUT]: (state, action) => {
@@ -37,7 +39,8 @@ const authorizationReducer = createReducer(initialState)({
             ...state,
             loading: false,
             error: null,
-            token: null
+            token: null,
+            username: null
         };
     },
     // SPECIAL REDUCER - dispatched by redux-persist to rehydrate store
@@ -46,12 +49,13 @@ const authorizationReducer = createReducer(initialState)({
             return { ...state };
         }
 
-        const { token } = action.payload.authentication;
+        const { token, username } = action.payload.authentication;
         return {
             ...state,
             loading: false,
             error: null,
-            token
+            token,
+            username
         };
     }
 });

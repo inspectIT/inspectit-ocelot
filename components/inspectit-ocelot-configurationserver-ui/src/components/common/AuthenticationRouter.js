@@ -22,12 +22,10 @@ class AuthenticationRouter extends React.Component {
 
         if (this.props.isAuthenticated) {
             if (pathname.endsWith("/login")) {
-                console.log("Forward to index.");
                 Router.push(linkPrefix + "/");
             }
         } else {
             if (!pathname.endsWith("/login")) {
-                console.log("Forward to login page.");
                 Router.push(linkPrefix + "/login");
             }
         }

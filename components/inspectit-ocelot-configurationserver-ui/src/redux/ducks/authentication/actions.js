@@ -21,7 +21,7 @@ export const fetchToken = (username, password) => {
             })
             .then(res => {
                 const token = res.data;
-                dispatch(fetchTokenSuccess(token));
+                dispatch(fetchTokenSuccess(token, username));
             })
             .catch(err => {
                 let message;
@@ -60,10 +60,11 @@ export const fetchTokenFailure = (error) => ({
  * 
  * @param {string} token 
  */
-export const fetchTokenSuccess = (token) => ({
+export const fetchTokenSuccess = (token, username) => ({
     type: types.FETCH_TOKEN_SUCCESS,
     payload: {
-        token
+        token,
+        username
     }
 });
 

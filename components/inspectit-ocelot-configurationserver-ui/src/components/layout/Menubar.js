@@ -65,8 +65,9 @@ class Menubar extends React.Component {
 }
 
 function mapStateToProps(state) {
+    const {username} = state.authentication;
     return {
-        username: authenticationSelectors.getUsername(state)
+        username
     }
 }
 

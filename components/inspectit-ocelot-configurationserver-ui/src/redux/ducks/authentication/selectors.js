@@ -14,13 +14,13 @@ export const isAuthenticated = createSelector(
 );
 
 /**
- * Returns the username of the current user.
+ * Returns the expiring date of the current access token.
  */
-export const getUsername = createSelector(
+export const getTokenExpirationDate = createSelector(
     authenticationSelector,
     authentication => {
         if (authentication.token) {
-            return jwtDecode(authentication.token).sub;
+            return jwtDecode(authentication.token).exp;
         } else {
             return null;
         }
