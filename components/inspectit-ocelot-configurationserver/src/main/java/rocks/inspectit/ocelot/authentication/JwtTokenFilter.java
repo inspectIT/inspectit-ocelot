@@ -3,6 +3,7 @@ package rocks.inspectit.ocelot.authentication;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.GenericFilterBean;
 import rocks.inspectit.ocelot.config.SecurityConfiguration;
@@ -13,6 +14,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * This filter performs token-based authentication.
@@ -24,8 +26,17 @@ public class JwtTokenFilter extends GenericFilterBean {
 
     private JwtTokenManager tokenManager;
 
+    List<String> excludePatterns;
+
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
+        String servletPath = ((HttpServletRequest) req).getServletPath();
+        for (String pattern : excludePatterns) {
+            if (new AntPathMatcher().match(pattern, servletPath)) {
+                chain.doFilter(req, res);
+                return;
+            }
+        }
 
         String token = extractBearerToken((HttpServletRequest) req);
 

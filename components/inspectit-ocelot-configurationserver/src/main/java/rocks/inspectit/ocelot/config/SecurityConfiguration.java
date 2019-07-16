@@ -12,6 +12,8 @@ import rocks.inspectit.ocelot.authentication.JwtTokenFilter;
 import rocks.inspectit.ocelot.authentication.JwtTokenManager;
 import rocks.inspectit.ocelot.user.LocalUserDetailsService;
 
+import java.util.Arrays;
+
 /**
  * Spring security configuration enabling authentication on all except excluded endpoints.
  */
@@ -50,7 +52,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .httpBasic()
 
                 .and()
-                .addFilterBefore(new JwtTokenFilter(tokenManager), BasicAuthenticationFilter.class);
+                .addFilterBefore(new JwtTokenFilter(tokenManager, Arrays.asList(
+                        "/api/v1/account/password"
+                )), BasicAuthenticationFilter.class);
     }
 
     @Autowired
