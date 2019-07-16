@@ -1,5 +1,5 @@
 import { connect } from 'react-redux'
-import { authenticationActions } from '../../redux/ducks/authentication'
+import { authenticationActions, authenticationSelectors } from '../../redux/ducks/authentication'
 import Router from 'next/router';
 
 import { Toolbar } from 'primereact/toolbar';
@@ -43,12 +43,20 @@ class Menubar extends React.Component {
                 font-weight: bold;
                 color: #eee;
             }
+            .user-description {
+                color: #ccc;
+                margin-right: 1rem;
+            }
+            .user-description b {
+                color:#fff;
+            }
             `}</style>
                 <div className="p-toolbar-group-left flex-v-center">
                     <img className="ocelot-head" src={linkPrefix + "/static/images/inspectit-ocelot-head.svg"} />
                     <div className="ocelot-text">inspectIT Ocelot</div>
                 </div>
                 <div className="p-toolbar-group-right flex-v-center">
+                    <div className="user-description">Logged in as <b>{this.props.username}</b></div>
                     <Button label="Logout" onClick={this.logout} icon="pi pi-power-off" style={{ marginLeft: 4 }} />
                 </div>
             </Toolbar>
@@ -56,8 +64,14 @@ class Menubar extends React.Component {
     }
 }
 
+function mapStateToProps(state) {
+    return {
+        username: authenticationSelectors.getUsername(state)
+    }
+}
+
 const mapDispatchToProps = {
     logout: authenticationActions.logout
 }
 
-export default connect(null, mapDispatchToProps)(Menubar);
+export default connect(mapStateToProps, mapDispatchToProps)(Menubar);

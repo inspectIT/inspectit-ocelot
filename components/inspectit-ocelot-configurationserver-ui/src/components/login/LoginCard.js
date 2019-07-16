@@ -1,6 +1,6 @@
 import { Component } from 'react'
 import { connect } from 'react-redux'
-import { authenticationActions, authenticationSelectors } from '../../redux/ducks/authentication'
+import { authenticationActions } from '../../redux/ducks/authentication'
 import { InputText } from "primereact/inputtext";
 import { Password } from 'primereact/password';
 import { Button } from 'primereact/button';
