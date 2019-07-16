@@ -1,3 +1,7 @@
+import { connect } from 'react-redux'
+import { authenticationActions } from '../../redux/ducks/authentication'
+import Router from 'next/router';
+
 import { Toolbar } from 'primereact/toolbar';
 import { Button } from 'primereact/button';
 import { linkPrefix } from '../../lib/configuration';
@@ -5,10 +9,17 @@ import { linkPrefix } from '../../lib/configuration';
 /**
  * The application's menu bar.
  */
-const Menubar = () => {
-    return (
-        <Toolbar id="toolbar">
-            <style global jsx>{`
+class Menubar extends React.Component {
+
+    logout = () => {
+        this.props.logout();
+        Router.push(linkPrefix + "/login")
+    }
+
+    render() {
+        return (
+            <Toolbar id="toolbar">
+                <style global jsx>{`
             #toolbar {
                 height: 4rem;
                 padding: 0.5rem;
@@ -17,7 +28,7 @@ const Menubar = () => {
                 border-bottom: 1px solid #ccc;
             }
             `}</style>
-            <style jsx>{`
+                <style jsx>{`
             .flex-v-center {
                 display: flex;
                 align-items: center;
@@ -33,15 +44,20 @@ const Menubar = () => {
                 color: #eee;
             }
             `}</style>
-            <div className="p-toolbar-group-left flex-v-center">
-                <img className="ocelot-head" src={linkPrefix + "/static/images/inspectit-ocelot-head.svg"} />
-                <div className="ocelot-text">inspectIT Ocelot</div>
-            </div>
-            <div className="p-toolbar-group-right flex-v-center">
-                <Button label="Logout" icon="pi pi-power-off" style={{ marginLeft: 4 }} />
-            </div>
-        </Toolbar>
-    )
+                <div className="p-toolbar-group-left flex-v-center">
+                    <img className="ocelot-head" src={linkPrefix + "/static/images/inspectit-ocelot-head.svg"} />
+                    <div className="ocelot-text">inspectIT Ocelot</div>
+                </div>
+                <div className="p-toolbar-group-right flex-v-center">
+                    <Button label="Logout" onClick={this.logout} icon="pi pi-power-off" style={{ marginLeft: 4 }} />
+                </div>
+            </Toolbar>
+        )
+    }
 }
 
-export default Menubar;
+const mapDispatchToProps = {
+    logout: authenticationActions.logout
+}
+
+export default connect(null, mapDispatchToProps)(Menubar);

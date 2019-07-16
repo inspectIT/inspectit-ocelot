@@ -6,8 +6,6 @@ import { Password } from 'primereact/password';
 import { Button } from 'primereact/button';
 import { Message } from 'primereact/message';
 import LoginCardHeader from './LoginCardHeader';
-import Router from 'next/router';
-import { linkPrefix } from '../../lib/configuration';
 
 /**
  * The login card which wrapes and handles the interaction in order to log in into the application.
@@ -21,20 +19,6 @@ class LoginCard extends Component {
 
     doLogin = () => {
         this.props.fetchToken(this.state.username, this.state.password);
-    }
-
-    componentWillMount = () => {
-        this.checkAuthenticated();
-    }
-
-    componentDidUpdate = (prevProps) => {
-        this.checkAuthenticated();
-    }
-
-    checkAuthenticated = () => {
-        if (this.props.isAuthenticated) {
-            Router.push(linkPrefix + "/")
-        }
     }
 
     onKeyPress = (e) => {
@@ -104,8 +88,7 @@ function mapStateToProps(state) {
     const { loading, error } = state.authentication;
     return {
         loading,
-        error,
-        isAuthenticated: authenticationSelectors.isAuthenticated(state)
+        error
     }
 }
 

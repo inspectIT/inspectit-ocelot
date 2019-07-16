@@ -5,9 +5,10 @@ import withReduxStore from '../lib/with-redux-store'
 import { persistStore } from 'redux-persist'
 import { PersistGate } from 'redux-persist/integration/react'
 import { Provider } from 'react-redux'
-import { linkPrefix } from '../lib/configuration';
+import AuthenticationRouter from '../components/common/AuthenticationRouter';
 
 import { BASE_PAGE_TITLE } from '../data/constants'
+import { linkPrefix } from '../lib/configuration';
 
 // importing required css files for primereact
 import 'primereact/resources/themes/nova-dark/theme.css';
@@ -38,8 +39,10 @@ class OcelotConfigurationUI extends App {
           <link rel="shortcut icon" type="image/x-icon" href={linkPrefix + "/static/favicon.ico"} />
         </Head>
         <Provider store={reduxStore}>
-          <PersistGate loading={<Component {...pageProps} />} persistor={this.persistor}>
-            <Component {...pageProps} />
+          <PersistGate loading={null} persistor={this.persistor}>
+            <AuthenticationRouter>
+              <Component {...pageProps} />
+            </AuthenticationRouter>
           </PersistGate>
         </Provider>
       </Container >

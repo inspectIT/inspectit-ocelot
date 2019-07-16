@@ -47,3 +47,7 @@ export const fetchTokenSuccess = (token) => ({
         token
     }
 });
+
+export const logout = () => ({
+    type: types.LOGOUT
+});
