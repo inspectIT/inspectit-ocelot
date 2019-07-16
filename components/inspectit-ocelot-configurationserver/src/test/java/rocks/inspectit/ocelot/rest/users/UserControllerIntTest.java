@@ -44,7 +44,7 @@ public class UserControllerIntTest extends IntegrationTestBase {
         void noUsernameFilter() {
             userDetailsService.addOrUpdateUser(User.builder()
                     .username("John")
-                    .password(userDetailsService.encodePassword("doe"))
+                    .password("doe")
                     .build());
 
             ResponseEntity<List<User>> result = authRest.exchange(
@@ -59,11 +59,13 @@ public class UserControllerIntTest extends IntegrationTestBase {
                     .anySatisfy((u) -> {
                         assertThat(u.getUsername()).isEqualTo(settings.getDefaultUser().getName());
                         assertThat(u.getPassword()).isNull();
+                        assertThat(u.getPasswordHash()).isNull();
                         assertThat(u.getId()).isNotNull();
                     })
                     .anySatisfy((u) -> {
                         assertThat(u.getUsername()).isEqualTo("john");
                         assertThat(u.getPassword()).isNull();
+                        assertThat(u.getPasswordHash()).isNull();
                         assertThat(u.getId()).isNotNull();
                     });
 
@@ -74,7 +76,7 @@ public class UserControllerIntTest extends IntegrationTestBase {
         void emptyUsernameFilter() {
             userDetailsService.addOrUpdateUser(User.builder()
                     .username("John")
-                    .password(userDetailsService.encodePassword("doe"))
+                    .password("doe")
                     .build());
 
             ResponseEntity<List<User>> result = authRest.exchange(
@@ -89,11 +91,13 @@ public class UserControllerIntTest extends IntegrationTestBase {
                     .anySatisfy((u) -> {
                         assertThat(u.getUsername()).isEqualTo(settings.getDefaultUser().getName());
                         assertThat(u.getPassword()).isNull();
+                        assertThat(u.getPasswordHash()).isNull();
                         assertThat(u.getId()).isNotNull();
                     })
                     .anySatisfy((u) -> {
                         assertThat(u.getUsername()).isEqualTo("john");
                         assertThat(u.getPassword()).isNull();
+                        assertThat(u.getPasswordHash()).isNull();
                         assertThat(u.getId()).isNotNull();
                     });
 
@@ -104,7 +108,7 @@ public class UserControllerIntTest extends IntegrationTestBase {
         void withUsernameFilter() {
             userDetailsService.addOrUpdateUser(User.builder()
                     .username("John")
-                    .password(userDetailsService.encodePassword("doe"))
+                    .password("doe")
                     .build());
 
             ResponseEntity<List<User>> result = authRest.exchange(
@@ -119,6 +123,7 @@ public class UserControllerIntTest extends IntegrationTestBase {
                     .anySatisfy((u) -> {
                         assertThat(u.getUsername()).isEqualTo("john");
                         assertThat(u.getPassword()).isNull();
+                        assertThat(u.getPasswordHash()).isNull();
                         assertThat(u.getId()).isNotNull();
                     });
 
@@ -134,7 +139,7 @@ public class UserControllerIntTest extends IntegrationTestBase {
         void existingUser() {
             Long id = userDetailsService.addOrUpdateUser(User.builder()
                     .username("John")
-                    .password(userDetailsService.encodePassword("doe"))
+                    .password("doe")
                     .build())
                     .getId();
 
@@ -148,6 +153,7 @@ public class UserControllerIntTest extends IntegrationTestBase {
             assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(user.getUsername()).isEqualTo("john");
             assertThat(user.getPassword()).isNull();
+            assertThat(user.getPasswordHash()).isNull();
             assertThat(user.getId()).isNotNull();
 
         }
@@ -264,6 +270,7 @@ public class UserControllerIntTest extends IntegrationTestBase {
             assertThat(result.getHeaders().getFirst("Location")).endsWith("users/" + user.getId());
             assertThat(user.getUsername()).isEqualTo("john");
             assertThat(user.getPassword()).isNull();
+            assertThat(user.getPasswordHash()).isNull();
             assertThat(user.getId()).isNotEqualTo(existingId);
 
             //do a get to check if the user is able to authenticate
@@ -292,7 +299,7 @@ public class UserControllerIntTest extends IntegrationTestBase {
                     HttpMethod.DELETE,
                     null,
                     String.class);
-            assertThat(result.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+            assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         }
 
 
@@ -300,7 +307,7 @@ public class UserControllerIntTest extends IntegrationTestBase {
         void userExisting() {
             Long id = userDetailsService.addOrUpdateUser(User.builder()
                     .username("John")
-                    .password(userDetailsService.encodePassword("doe"))
+                    .password("doe")
                     .build())
                     .getId();
 

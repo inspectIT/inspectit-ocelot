@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 
 import javax.annotation.PostConstruct;
@@ -22,24 +23,13 @@ import java.util.Optional;
 public class LocalUserDetailsService implements UserDetailsService {
 
     @Autowired
-    UserRepository users;
+    private UserRepository users;
 
     @Autowired
     private InspectitServerSettings config;
 
     @Getter
     private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-
-
-    /**
-     * Hashes the given raw password to store it in the DB.
-     *
-     * @param rawPassword the raw password
-     * @return the hashed password
-     */
-    public String encodePassword(String rawPassword) {
-        return passwordEncoder.encode(rawPassword);
-    }
 
 
     /**
@@ -55,13 +45,21 @@ public class LocalUserDetailsService implements UserDetailsService {
      * If the ID is not null, the given User will be updated.
      * <p>
      * This method enforces the username to be lowercase.
+     * <p>
+     * If the given user has teh "password" field set, the password will be hashen into "passwordHash"
+     * before storing the user.
      *
      * @param user the user to add or update
      * @return the updated user entity
      */
     public User addOrUpdateUser(User user) {
+        String pwHash = user.getPasswordHash();
+        if (!StringUtils.isEmpty(user.getPassword())) {
+            pwHash = passwordEncoder.encode(user.getPassword());
+        }
         User lowerCaseUser = user.toBuilder()
                 .username(user.getUsername().toLowerCase())
+                .passwordHash(pwHash)
                 .build();
         return users.save(lowerCaseUser);
     }
@@ -108,7 +106,7 @@ public class LocalUserDetailsService implements UserDetailsService {
     private UserDetails toUserDetails(User user) {
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getUsername())
-                .password(user.getPassword())
+                .password(user.getPasswordHash())
                 .authorities("USER") //at least one authority is required by spring, even if we don't use them yet
                 .build();
     }
@@ -125,7 +123,7 @@ public class LocalUserDetailsService implements UserDetailsService {
             addOrUpdateUser(
                     User.builder()
                             .username(name)
-                            .password(encodePassword(rawPassword))
+                            .password(rawPassword)
                             .build());
         }
     }

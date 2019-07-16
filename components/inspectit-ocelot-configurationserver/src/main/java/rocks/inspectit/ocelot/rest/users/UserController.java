@@ -11,6 +11,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 import rocks.inspectit.ocelot.rest.AbstractBaseController;
+import rocks.inspectit.ocelot.rest.ErrorInfo;
 import rocks.inspectit.ocelot.user.LocalUserDetailsService;
 import rocks.inspectit.ocelot.user.User;
 
@@ -26,8 +27,23 @@ import java.util.stream.StreamSupport;
 @Slf4j
 public class UserController extends AbstractBaseController {
 
+    private static final ErrorInfo NO_USERNAME_ERROR = ErrorInfo.builder()
+            .error("NoUsername")
+            .message("Username must not be empty")
+            .build();
+
+    private static final ErrorInfo NO_PASSWORD_ERROR = ErrorInfo.builder()
+            .error("NoPassword")
+            .message("Password must not be empty")
+            .build();
+
+    private static final ErrorInfo USERNAME_TAKEN_ERROR = ErrorInfo.builder()
+            .error("UsernameAlreadyTaken")
+            .message("A user with the given name already exists")
+            .build();
+
     @Autowired
-    LocalUserDetailsService userDetailsService;
+    private LocalUserDetailsService userDetailsService;
 
     @ApiOperation(value = "Select users", notes = "Fetches the list of registered users." +
             " If a username query parameter is given, the list is filtered to contain only the user matching the given username." +
@@ -37,11 +53,10 @@ public class UserController extends AbstractBaseController {
                                   @RequestParam(required = false) String username) {
         if (!StringUtils.isEmpty(username)) {
             return userDetailsService.getUserByName(username)
-                    .map(u -> Collections.singletonList(erasePassword(u)))
+                    .map(Collections::singletonList)
                     .orElse(Collections.emptyList());
         } else {
             return StreamSupport.stream(userDetailsService.getUsers().spliterator(), false)
-                    .map(this::erasePassword)
                     .collect(Collectors.toList());
         }
     }
@@ -51,7 +66,6 @@ public class UserController extends AbstractBaseController {
     public ResponseEntity<?> getUser(@ApiParam("The ID of the user")
                                      @PathVariable long id) {
         return userDetailsService.getUserById(id)
-                .map(this::erasePassword)
                 .map(ResponseEntity::<Object>ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -63,23 +77,25 @@ public class UserController extends AbstractBaseController {
             @ApiParam("The user to add, must only contain username and the password")
             @RequestBody User user, UriComponentsBuilder builder) {
         if (StringUtils.isEmpty(user.getUsername())) {
-            return ResponseEntity.badRequest().body("username must not be empty");
+            return ResponseEntity.badRequest().body(NO_USERNAME_ERROR);
         }
         if (StringUtils.isEmpty(user.getPassword())) {
-            return ResponseEntity.badRequest().body("password must not be empty");
+            return ResponseEntity.badRequest().body(NO_PASSWORD_ERROR);
         }
         try {
             User savedUser = userDetailsService.addOrUpdateUser(
                     user.toBuilder()
                             .id(null)
-                            .password(userDetailsService.encodePassword(user.getPassword()))
                             .build());
             return ResponseEntity.created(
                     builder.path("users/{id}").buildAndExpand(savedUser.getId()).toUri())
-                    .body(erasePassword(savedUser));
+                    .body(savedUser
+                            .toBuilder()
+                            .password(null)
+                            .build());
         } catch (JpaSystemException e) {
             log.error("Error adding new user", e);
-            return ResponseEntity.badRequest().body("Username already taken");
+            return ResponseEntity.badRequest().body(USERNAME_TAKEN_ERROR);
         }
     }
 
@@ -93,11 +109,7 @@ public class UserController extends AbstractBaseController {
             return ResponseEntity.ok("");
         } catch (EmptyResultDataAccessException e) {
             log.error("Error deleting user", e);
-            return ResponseEntity.badRequest().body("User does not exist");
+            return ResponseEntity.notFound().build();
         }
-    }
-
-    private User erasePassword(User user) {
-        return user.toBuilder().password(null).build();
     }
 }

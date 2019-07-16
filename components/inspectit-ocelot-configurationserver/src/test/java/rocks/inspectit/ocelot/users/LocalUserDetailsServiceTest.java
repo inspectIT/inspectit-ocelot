@@ -42,9 +42,7 @@ public class LocalUserDetailsServiceTest {
 
             ArgumentCaptor<User> argument = ArgumentCaptor.forClass(User.class);
             verify(repository).save(argument.capture());
-            assertThat(argument.getValue()).isEqualTo(
-                    input.toBuilder().username("camelcase").build()
-            );
+            assertThat(argument.getValue().getUsername()).isEqualTo("camelcase");
             assertThat(actualResult).isSameAs(result);
         }
     }
