@@ -1,13 +1,19 @@
 import * as types from "./types";
 import axios from '../../../lib/axios-api';
-import { BASE_APU_URL_V1 } from '../../../data/constants';
+import { BASE_API_URL_V1 } from '../../../data/constants';
 
+/**
+ * Fetches an access token for the given credentials.
+ * 
+ * @param {string} username 
+ * @param {string} password 
+ */
 export const fetchToken = (username, password) => {
     return dispatch => {
         dispatch(fetchTokenStarted());
 
         axios
-            .get(BASE_APU_URL_V1 + "/account/token", {
+            .get(BASE_API_URL_V1 + "/account/token", {
                 auth: {
                     username: username,
                     password: password
@@ -30,10 +36,18 @@ export const fetchToken = (username, password) => {
     };
 };
 
+/**
+ * Is dispatched when the fetching of the access token has been started.
+ */
 export const fetchTokenStarted = () => ({
     type: types.FETCH_TOKEN_STARTED
 });
 
+/**
+ * Is dispatched if the fetching of the access token was not successful.
+ * 
+ * @param {*} error 
+ */
 export const fetchTokenFailure = (error) => ({
     type: types.FETCH_TOKEN_FAILURE,
     payload: {
@@ -41,6 +55,11 @@ export const fetchTokenFailure = (error) => ({
     }
 });
 
+/**
+ * Is dispatched when the fetching of the access token was successful.
+ * 
+ * @param {string} token 
+ */
 export const fetchTokenSuccess = (token) => ({
     type: types.FETCH_TOKEN_SUCCESS,
     payload: {
@@ -48,6 +67,9 @@ export const fetchTokenSuccess = (token) => ({
     }
 });
 
+/**
+ * Logout of the current user - removes the access token.
+ */
 export const logout = () => ({
     type: types.LOGOUT
 });

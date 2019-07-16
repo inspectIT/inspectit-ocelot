@@ -4,7 +4,9 @@ import { authenticationSelectors } from '../../redux/ducks/authentication'
 import Router, { withRouter } from 'next/router';
 import { linkPrefix } from '../../lib/configuration';
 
-
+/**
+ * Handles the routing based on the current authentication (user is logged in/out) status.
+ */
 class AuthenticationRouter extends React.Component {
 
     componentDidMount = () => {
