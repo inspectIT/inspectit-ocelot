@@ -18,7 +18,7 @@ import java.nio.file.Paths;
 
 @ExtendWith(SpringExtension.class)
 @TestPropertySource(properties = "inspectit.working-directory=temp_work_dir")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class IntegrationTestBase {
 
     @Autowired
