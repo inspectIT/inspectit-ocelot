@@ -180,10 +180,7 @@ public class UserControllerIntTest extends IntegrationTestBase {
 
         @Test
         void usernameAlreadyExists() {
-            User userToAdd = User.builder()
-                    .username(settings.getDefaultUser().getName())
-                    .password("doe")
-                    .build();
+            InputUser userToAdd = new InputUser(settings.getDefaultUser().getName(), "doe", null);
 
             ResponseEntity<String> result = authRest.postForEntity(
                     "/api/v1/users",
@@ -195,10 +192,7 @@ public class UserControllerIntTest extends IntegrationTestBase {
 
         @Test
         void emptyUsername() {
-            User userToAdd = User.builder()
-                    .username("")
-                    .password("doe")
-                    .build();
+            InputUser userToAdd = new InputUser("", "doe", null);
 
             ResponseEntity<String> result = authRest.postForEntity(
                     "/api/v1/users",
@@ -209,10 +203,7 @@ public class UserControllerIntTest extends IntegrationTestBase {
 
         @Test
         void nullUsername() {
-            User userToAdd = User.builder()
-                    .username(null)
-                    .password("doe")
-                    .build();
+            InputUser userToAdd = new InputUser(null, "doe", null);
 
             ResponseEntity<String> result = authRest.postForEntity(
                     "/api/v1/users",
@@ -224,10 +215,7 @@ public class UserControllerIntTest extends IntegrationTestBase {
 
         @Test
         void emptyPassword() {
-            User userToAdd = User.builder()
-                    .username("John")
-                    .password("")
-                    .build();
+            InputUser userToAdd = new InputUser("John", "", null);
 
             ResponseEntity<String> result = authRest.postForEntity(
                     "/api/v1/users",
@@ -238,10 +226,7 @@ public class UserControllerIntTest extends IntegrationTestBase {
 
         @Test
         void nullPassword() {
-            User userToAdd = User.builder()
-                    .username("John")
-                    .password(null)
-                    .build();
+            InputUser userToAdd = new InputUser("John", null, null);
 
             ResponseEntity<String> result = authRest.postForEntity(
                     "/api/v1/users",
@@ -255,11 +240,7 @@ public class UserControllerIntTest extends IntegrationTestBase {
         void ensureIdIgnored() {
             Long existingId = userDetailsService.getUsers().iterator().next().getId();
 
-            User userToAdd = User.builder()
-                    .username("John")
-                    .password("DoE")
-                    .id(existingId)
-                    .build();
+            InputUser userToAdd = new InputUser("John", "DoE", existingId);
 
             ResponseEntity<User> result = authRest.postForEntity(
                     "/api/v1/users",
@@ -320,6 +301,30 @@ public class UserControllerIntTest extends IntegrationTestBase {
 
             assertThat(userDetailsService.getUserByName("John")).isEmpty();
             assertThat(userDetailsService.getUserById(id)).isEmpty();
+        }
+    }
+
+    private static class InputUser {
+        private final String username;
+        private final String password;
+        private final Long id;
+
+        public InputUser(String username, String password, Long id) {
+            this.username = username;
+            this.password = password;
+            this.id = id;
+        }
+
+        public String getUsername() {
+            return username;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+        public Long getId() {
+            return id;
         }
     }
 }
