@@ -10,7 +10,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import rocks.inspectit.ocelot.authentication.JwtTokenFilter;
 import rocks.inspectit.ocelot.authentication.JwtTokenManager;
-import rocks.inspectit.ocelot.authentication.LocalUserDetailsService;
+import rocks.inspectit.ocelot.user.LocalUserDetailsService;
 
 /**
  * Spring security configuration enabling authentication on all except excluded endpoints.

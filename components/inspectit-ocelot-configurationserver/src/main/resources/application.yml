@@ -1,5 +1,20 @@
+spring:
+  datasource:
+    url: jdbc:sqlite:${inspectit.working-directory}/users.db
+    driver-class-name: org.sqlite.JDBC
+    username: ""
+    password: ""
+
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.SQLiteDialect
+    hibernate:
+      ddl-auto: update
+
 server:
   port: 8090
+
 inspectit:
   working-directory: working_directory
   token-lifespan: 60m
