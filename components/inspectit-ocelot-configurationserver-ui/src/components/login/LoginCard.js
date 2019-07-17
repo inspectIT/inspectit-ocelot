@@ -1,9 +1,11 @@
-import React, { Component } from 'react';
-import LoginCardHeader from './LoginCardHeader';
+import { Component } from 'react'
+import { connect } from 'react-redux'
+import { authenticationActions } from '../../redux/ducks/authentication'
 import { InputText } from "primereact/inputtext";
 import { Password } from 'primereact/password';
 import { Button } from 'primereact/button';
 import { Message } from 'primereact/message';
+import LoginCardHeader from './LoginCardHeader';
 
 /**
  * The login card which wrapes and handles the interaction in order to log in into the application.
@@ -11,24 +13,23 @@ import { Message } from 'primereact/message';
 class LoginCard extends Component {
 
     state = {
-        buttonDisabled: false,
-        showSpinner: false,
-        errorMessage: ""
+        username: "",
+        password: ""
     }
 
     doLogin = () => {
-        this.setState({
-            buttonDisabled: true,
-            showSpinner: true,
-            errorMessage: "error-message"
-        });
+        this.props.fetchToken(this.state.username, this.state.password);
     }
 
     onKeyPress = (e) => {
-        if (!this.state.buttonDisabled && e.key === 'Enter') {
+        if (this.canLogin() && e.key === 'Enter') {
             this.doLogin();
             e.target.blur();
         }
+    }
+
+    canLogin = () => {
+        return !(this.state.username == "" || this.state.password == "" || this.props.loading);
     }
 
     render() {
@@ -56,29 +57,43 @@ class LoginCard extends Component {
                     <span className="p-inputgroup-addon">
                         <i className="pi pi-user"></i>
                     </span>
-                    <InputText style={fullWidthStyle} placeholder="Username" onKeyPress={this.onKeyPress} />
+                    <InputText placeholder="Username" style={fullWidthStyle} onKeyPress={this.onKeyPress} value={this.state.username} onChange={(e) => this.setState({ username: e.target.value })} />
                 </div>
                 <div className="p-inputgroup input">
                     <span className="p-inputgroup-addon">
                         <i className="pi pi-lock"></i>
                     </span>
-                    <Password style={fullWidthStyle} placeholder="Password" feedback={false} onKeyPress={this.onKeyPress} />
+                    <Password style={fullWidthStyle} placeholder="Password" feedback={false} onKeyPress={this.onKeyPress} value={this.state.password} onChange={(e) => this.setState({ password: e.target.value })} />
                 </div>
 
-                {this.state.errorMessage && 
+                {this.props.error ?
                     <div className="input">
-                        <Message style={fullWidthStyle} severity="error" text={this.state.errorMessage}></Message>
+                        <Message style={fullWidthStyle} severity="error" text={"Login failed: " + this.props.error}></Message>
                     </div>
+                    :
+                    null
                 }
 
                 <div className="input">
-                    <Button style={fullWidthStyle} onClick={this.doLogin} disabled={this.state.buttonDisabled} label="Login" />
+                    <Button style={fullWidthStyle} onClick={this.doLogin} disabled={!this.canLogin()} label="Login" />
                 </div>
 
-                {this.state.showSpinner && <i className="pi pi-spin pi-spinner"></i>}
+                {this.props.loading && <i className="pi pi-spin pi-spinner"></i>}
             </div>
         )
     }
 }
 
-export default LoginCard;
+function mapStateToProps(state) {
+    const { loading, error } = state.authentication;
+    return {
+        loading,
+        error
+    }
+}
+
+const mapDispatchToProps = {
+    fetchToken: authenticationActions.fetchToken
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(LoginCard);

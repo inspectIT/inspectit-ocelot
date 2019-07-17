@@ -2,9 +2,13 @@ import App, { Container } from 'next/app'
 import Head from 'next/head'
 import React from 'react'
 import withReduxStore from '../lib/with-redux-store'
+import { persistStore } from 'redux-persist'
+import { PersistGate } from 'redux-persist/integration/react'
 import { Provider } from 'react-redux'
+import AuthenticationRouter from '../components/common/AuthenticationRouter';
 
-import {BASE_PAGE_TITLE} from '../data/constants'
+import { BASE_PAGE_TITLE } from '../data/constants'
+import { linkPrefix } from '../lib/configuration';
 
 // importing required css files for primereact
 import 'primereact/resources/themes/nova-dark/theme.css';
@@ -13,6 +17,11 @@ import 'primeicons/primeicons.css';
 import 'primeflex/primeflex.css';
 
 class OcelotConfigurationUI extends App {
+
+  constructor(props) {
+    super(props)
+    this.persistor = persistStore(props.reduxStore)
+  }
 
   render() {
     const { Component, pageProps, reduxStore } = this.props
@@ -25,13 +34,18 @@ class OcelotConfigurationUI extends App {
         }
         `}</style>
         <Head>
-            <meta charSet="utf-8" />
-            <title>{BASE_PAGE_TITLE}</title>
+          <meta charSet="utf-8" />
+          <title>{BASE_PAGE_TITLE}</title>
+          <link rel="shortcut icon" type="image/x-icon" href={linkPrefix + "/static/favicon.ico"} />
         </Head>
         <Provider store={reduxStore}>
-          <Component {...pageProps} />
+          <PersistGate loading={null} persistor={this.persistor}>
+            <AuthenticationRouter>
+              <Component {...pageProps} />
+            </AuthenticationRouter>
+          </PersistGate>
         </Provider>
-      </Container>
+      </Container >
     )
   }
 }

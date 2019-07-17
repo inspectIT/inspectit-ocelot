@@ -1,13 +1,25 @@
+import { connect } from 'react-redux'
+import { authenticationActions, authenticationSelectors } from '../../redux/ducks/authentication'
+import Router from 'next/router';
+
 import { Toolbar } from 'primereact/toolbar';
 import { Button } from 'primereact/button';
+import { linkPrefix } from '../../lib/configuration';
 
 /**
  * The application's menu bar.
  */
-const Menubar = () => {
-    return (
-        <Toolbar id="toolbar">
-            <style global jsx>{`
+class Menubar extends React.Component {
+
+    logout = () => {
+        this.props.logout();
+        Router.push(linkPrefix + "/login")
+    }
+
+    render() {
+        return (
+            <Toolbar id="toolbar">
+                <style global jsx>{`
             #toolbar {
                 height: 4rem;
                 padding: 0.5rem;
@@ -16,7 +28,7 @@ const Menubar = () => {
                 border-bottom: 1px solid #ccc;
             }
             `}</style>
-            <style jsx>{`
+                <style jsx>{`
             .flex-v-center {
                 display: flex;
                 align-items: center;
@@ -31,16 +43,36 @@ const Menubar = () => {
                 font-weight: bold;
                 color: #eee;
             }
+            .user-description {
+                color: #ccc;
+                margin-right: 1rem;
+            }
+            .user-description b {
+                color:#fff;
+            }
             `}</style>
-            <div className="p-toolbar-group-left flex-v-center">
-                <img className="ocelot-head" src="/static/images/inspectit-ocelot-head.svg" />
-                <div className="ocelot-text">inspectIT Ocelot</div>
-            </div>
-            <div className="p-toolbar-group-right flex-v-center">
-                <Button label="Logout" icon="pi pi-power-off" style={{ marginLeft: 4 }} />
-            </div>
-        </Toolbar>
-    )
+                <div className="p-toolbar-group-left flex-v-center">
+                    <img className="ocelot-head" src={linkPrefix + "/static/images/inspectit-ocelot-head.svg"} />
+                    <div className="ocelot-text">inspectIT Ocelot</div>
+                </div>
+                <div className="p-toolbar-group-right flex-v-center">
+                    <div className="user-description">Logged in as <b>{this.props.username}</b></div>
+                    <Button label="Logout" onClick={this.logout} icon="pi pi-power-off" style={{ marginLeft: 4 }} />
+                </div>
+            </Toolbar>
+        )
+    }
 }
 
-export default Menubar;
+function mapStateToProps(state) {
+    const {username} = state.authentication;
+    return {
+        username
+    }
+}
+
+const mapDispatchToProps = {
+    logout: authenticationActions.logout
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Menubar);
