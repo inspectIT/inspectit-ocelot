@@ -28,17 +28,17 @@ import java.util.stream.StreamSupport;
 public class UserController extends AbstractBaseController {
 
     private static final ErrorInfo NO_USERNAME_ERROR = ErrorInfo.builder()
-            .error("NoUsername")
+            .error(ErrorInfo.Type.NO_USERNAME)
             .message("Username must not be empty")
             .build();
 
     private static final ErrorInfo NO_PASSWORD_ERROR = ErrorInfo.builder()
-            .error("NoPassword")
+            .error(ErrorInfo.Type.NO_PASSWORD)
             .message("Password must not be empty")
             .build();
 
     private static final ErrorInfo USERNAME_TAKEN_ERROR = ErrorInfo.builder()
-            .error("UsernameAlreadyTaken")
+            .error(ErrorInfo.Type.USERNAME_ALREADY_TAKEN)
             .message("A user with the given name already exists")
             .build();
 
@@ -89,10 +89,7 @@ public class UserController extends AbstractBaseController {
                             .build());
             return ResponseEntity.created(
                     builder.path("users/{id}").buildAndExpand(savedUser.getId()).toUri())
-                    .body(savedUser
-                            .toBuilder()
-                            .password(null)
-                            .build());
+                    .body(savedUser);
         } catch (JpaSystemException e) {
             log.error("Error adding new user", e);
             return ResponseEntity.badRequest().body(USERNAME_TAKEN_ERROR);

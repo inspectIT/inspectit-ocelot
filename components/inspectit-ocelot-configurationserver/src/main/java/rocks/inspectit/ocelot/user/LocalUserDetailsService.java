@@ -46,27 +46,28 @@ public class LocalUserDetailsService implements UserDetailsService {
      * <p>
      * This method enforces the username to be lowercase.
      * <p>
-     * If the given user has teh "password" field set, the password will be hashen into "passwordHash"
+     * If the given user has the "password" field set, the password will be hashed into "passwordHash"
      * before storing the user.
      *
      * @param user the user to add or update
      * @return the updated user entity
      */
     public User addOrUpdateUser(User user) {
-        String pwHash = user.getPasswordHash();
+        User.UserBuilder userBuilder = user
+                .toBuilder()
+                .username(user.getUsername().toLowerCase());
+
         if (!StringUtils.isEmpty(user.getPassword())) {
-            pwHash = passwordEncoder.encode(user.getPassword());
+            String passwordHash = passwordEncoder.encode(user.getPassword());
+            userBuilder.passwordHash(passwordHash);
         }
-        User lowerCaseUser = user.toBuilder()
-                .username(user.getUsername().toLowerCase())
-                .passwordHash(pwHash)
-                .build();
-        return users.save(lowerCaseUser);
+
+        return users.save(userBuilder.build());
     }
 
 
     /**
-     * Selects a gioven user based on his username.
+     * Selects a given user based on his username.
      *
      * @param name the username, will be turned to lower case before querying
      * @return the user, if present
