@@ -41,6 +41,11 @@ const configurationReducer = createReducer(initialState)({
             ...state,
             selection
         };
+    },
+    [types.RESET]: (state, action) => {
+        return {
+            ...initialState
+        };
     }
 });
 

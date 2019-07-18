@@ -10,11 +10,13 @@ class FileTree extends React.Component {
     }
 
     componentDidMount = () => {
-        this.props.fetchFiles();
+        const { loading, files } = this.props;
+        if (!loading && (files && files.length <= 0)) {
+            this.props.fetchFiles();
+        }
     }
 
     onSelectionChange = (event) => {
-        console.log(event, event.value);
         this.props.selectFile(event.value);
     }
 
@@ -33,8 +35,10 @@ class FileTree extends React.Component {
 }
 
 function mapStateToProps(state) {
+    const { loading } = state.configuration;
     return {
-        files: configurationSelectors.fileTree(state)
+        files: configurationSelectors.fileTree(state),
+        loading
     }
 }
 

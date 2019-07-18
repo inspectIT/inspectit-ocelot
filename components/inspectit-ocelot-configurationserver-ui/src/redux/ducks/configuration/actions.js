@@ -1,14 +1,15 @@
 import * as types from "./types";
 import axios from '../../../lib/axios-api';
 import { BASE_API_URL_V1 } from '../../../data/constants';
+import { authenticationActions } from '../authentication'
 
 export const fetchFiles = (fileRoot = "/") => {
     return (dispatch, state) => {
         dispatch(fetchFilesStarted());
 
-        const {token} = state().authentication;
+        const { token } = state().authentication;
         var config = {
-            headers: {'Authorization': "Bearer " + token}
+            headers: { 'Authorization': "Bearer " + token }
         };
 
         axios
@@ -18,13 +19,11 @@ export const fetchFiles = (fileRoot = "/") => {
                 dispatch(fetchFilesSuccess(fileRoot, files));
             })
             .catch(err => {
-                let message;
-                const { response } = err;
+                const { response, message } = err;
                 if (response && response.status == 401) {
-                    message = "The given credentials are not valid.";
-                } else {
-                    message = err.message;
+                    dispatch(authenticationActions.unauthorizedResponse());
                 }
+
                 dispatch(fetchFilesFailure(message));
             });
     };
@@ -63,12 +62,13 @@ export const fetchFilesSuccess = (fileRoot, files) => ({
     }
 });
 
-/**
- * Is dispatched when the fetching of the access token has been started.
- */
 export const selectFile = (selection) => ({
     type: types.SELECT_FILE,
     payload: {
         selection
     }
+});
+
+export const reset = () => ({
+    type: types.RESET
 });

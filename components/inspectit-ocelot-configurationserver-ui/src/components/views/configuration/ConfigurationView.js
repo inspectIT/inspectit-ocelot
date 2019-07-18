@@ -1,8 +1,12 @@
 import React from 'react';
-import FileTree from './FileTree';
 import { connect } from 'react-redux'
+import { configurationActions } from '../../../redux/ducks/configuration'
+
+import FileTree from './FileTree';
+import FileToolbar from './FileToolbar';
 
 class ConfigurationView extends React.Component {
+
     render() {
         return (
             <div className="this">
@@ -34,6 +38,7 @@ class ConfigurationView extends React.Component {
                 }
                 `}</style>
                 <div className="treeContainer">
+                    <FileToolbar />
                     <FileTree className="fileTree" />
                     <div className="details">Last update: {this.props.updateDate ? new Date(this.props.updateDate).toLocaleString() : "-"}</div>
                 </div>
@@ -51,4 +56,8 @@ function mapStateToProps(state) {
     }
 }
 
-export default connect(mapStateToProps, null)(ConfigurationView);
+const mapDispatchToProps = {
+    fetchFiles: configurationActions.fetchFiles
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(ConfigurationView);

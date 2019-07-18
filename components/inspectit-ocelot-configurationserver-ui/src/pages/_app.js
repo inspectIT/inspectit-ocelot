@@ -6,6 +6,7 @@ import { persistStore } from 'redux-persist'
 import { PersistGate } from 'redux-persist/integration/react'
 import { Provider } from 'react-redux'
 import AuthenticationRouter from '../components/common/AuthenticationRouter';
+import NotificationHandler from '../components/common/NotificationHandler';
 
 import { BASE_PAGE_TITLE } from '../data/constants'
 import { linkPrefix } from '../lib/configuration';
@@ -40,9 +41,11 @@ class OcelotConfigurationUI extends App {
         </Head>
         <Provider store={reduxStore}>
           <PersistGate loading={null} persistor={this.persistor}>
-            <AuthenticationRouter>
-              <Component {...pageProps} />
-            </AuthenticationRouter>
+            <NotificationHandler>
+              <AuthenticationRouter>
+                <Component {...pageProps} />
+              </AuthenticationRouter>
+            </NotificationHandler>
           </PersistGate>
         </Provider>
       </Container >

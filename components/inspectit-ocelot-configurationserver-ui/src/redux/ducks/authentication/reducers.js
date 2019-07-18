@@ -6,14 +6,16 @@ const initialState = {
     token: null,
     loading: false,
     error: null,
-    username: null
+    username: null,
+    unauthorized: false
 };
 
 const authorizationReducer = createReducer(initialState)({
     [types.FETCH_TOKEN_STARTED]: (state, action) => {
         return {
             ...state,
-            loading: true
+            loading: true,
+            unauthorized: false
         };
     },
     [types.FETCH_TOKEN_FAILURE]: (state, action) => {
@@ -44,6 +46,16 @@ const authorizationReducer = createReducer(initialState)({
             username: null
         };
     },
+    [types.UNAUTHORIZED_RESPONSE]: (state, action) => {
+        return {
+            ...state,
+            loading: false,
+            error: null,
+            token: null,
+            username: null,
+            unauthorized: true
+        };
+    },
     // SPECIAL REDUCER - dispatched by redux-persist to rehydrate store
     ["persist/REHYDRATE"]: (state, action) => {
         if (!action.payload || !action.payload.authentication) {
@@ -55,9 +67,7 @@ const authorizationReducer = createReducer(initialState)({
             const expired = isTokenExpired(token);
             if (!expired) {
                 return {
-                    ...state,
-                    loading: false,
-                    error: null,
+                    ...initialState,
                     token,
                     username
                 };

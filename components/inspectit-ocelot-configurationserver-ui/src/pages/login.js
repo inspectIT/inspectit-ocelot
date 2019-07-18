@@ -1,13 +1,19 @@
 import React from 'react'
 import Head from 'next/head'
+import { connect } from 'react-redux'
+import { notificationActions } from '../redux/ducks/notification'
+
 import LoginView from '../components/views/LoginView'
 
 import { BASE_PAGE_TITLE } from '../data/constants'
 
-/**
- * The configuration page. Users can manage their configurations files on this page.
- */
 class LoginPage extends React.Component {
+
+  componentDidMount = () => {
+    if (this.props.unauthorized) {
+      this.props.showWarningMessage("Unauthorized", "Your access token is no longer valid. Please login again.");
+    }
+  }
 
   render() {
     return (
@@ -20,4 +26,15 @@ class LoginPage extends React.Component {
   }
 }
 
-export default LoginPage;
+function mapStateToProps(state) {
+  const { unauthorized } = state.authentication;
+  return {
+    unauthorized
+  }
+}
+
+const mapDispatchToProps = {
+  showWarningMessage: notificationActions.showWarningMessage
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(LoginPage);
