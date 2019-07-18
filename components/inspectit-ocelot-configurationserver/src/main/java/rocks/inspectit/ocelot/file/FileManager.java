@@ -16,6 +16,7 @@ import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Encapsulates access to the file system storing the source config files managed by this server.
@@ -67,19 +68,20 @@ public class FileManager {
             assertPathWithinFilesRoot(path);
             dir = filesRoot.resolve(path);
         }
-        List<FileInfo> result = new ArrayList<>();
-        for (Path child : Files.list(dir).collect(Collectors.toList())) {
-            boolean isDirectory = Files.isDirectory(child);
-            FileInfo.FileInfoBuilder builder = FileInfo.builder()
-                    .name(child.getFileName().toString())
-                    .type(isDirectory ? FileInfo.Type.DIRECTORY : FileInfo.Type.FILE);
-            if (isDirectory && recursive) {
-                builder.children(getFilesInDirectory(getRelativePath(child), true));
+        try (Stream<Path> files = Files.list(dir)) {
+            List<FileInfo> result = new ArrayList<>();
+            for (Path child : files.collect(Collectors.toList())) {
+                boolean isDirectory = Files.isDirectory(child);
+                FileInfo.FileInfoBuilder builder = FileInfo.builder()
+                        .name(child.getFileName().toString())
+                        .type(isDirectory ? FileInfo.Type.DIRECTORY : FileInfo.Type.FILE);
+                if (isDirectory && recursive) {
+                    builder.children(getFilesInDirectory(getRelativePath(child), true));
+                }
+                result.add(builder.build());
             }
-            result.add(builder.build());
+            return result;
         }
-        return result;
-
     }
 
     /**
