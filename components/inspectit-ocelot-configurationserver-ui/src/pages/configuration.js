@@ -1,6 +1,7 @@
 import React from 'react'
 import MainLayout from '../layout/MainLayout'
 import Head from 'next/head'
+import ConfigurationView from '../components/views/configuration/ConfigurationView';
 
 import { BASE_PAGE_TITLE } from '../data/constants'
 
@@ -16,7 +17,7 @@ class ConfigurationPage extends React.Component {
           <title>{BASE_PAGE_TITLE} | Configuration</title>
         </Head>
 
-        {/** content here */}
+        <ConfigurationView />
       </MainLayout>
     )
   }
