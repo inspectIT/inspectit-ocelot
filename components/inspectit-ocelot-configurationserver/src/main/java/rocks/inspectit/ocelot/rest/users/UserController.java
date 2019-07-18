@@ -4,6 +4,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.orm.jpa.JpaSystemException;
@@ -90,7 +91,7 @@ public class UserController extends AbstractBaseController {
             return ResponseEntity.created(
                     builder.path("users/{id}").buildAndExpand(savedUser.getId()).toUri())
                     .body(savedUser);
-        } catch (JpaSystemException e) {
+        } catch (DataIntegrityViolationException | JpaSystemException e) {
             log.error("Error adding new user", e);
             return ResponseEntity.badRequest().body(USERNAME_TAKEN_ERROR);
         }
