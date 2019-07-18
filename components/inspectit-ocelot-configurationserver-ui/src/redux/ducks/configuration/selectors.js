@@ -3,6 +3,11 @@ import { map, find } from 'lodash';
 
 const configurationSelector = state => state.configuration;
 
+/**
+ * Recoursivly building a tree representation based on the given file objects.
+ * @param {*} parent 
+ * @param {*} node 
+ */
 const _asTreeNode = (parent, node) => {
     const { type, name } = node;
     const key = parent + name;
@@ -23,7 +28,10 @@ const _asTreeNode = (parent, node) => {
     }
 };
 
-export const fileTree = createSelector(
+/**
+ * Returns the loaded configuration files and directories in a tree structure used by the FileTree component.
+ */
+export const getFileTree = createSelector(
     configurationSelector,
     configuration => {
         const { files } = configuration;
@@ -33,6 +41,9 @@ export const fileTree = createSelector(
     }
 );
 
+/**
+ * Returns the selected file object.
+ */
 export const getSelectedFile = createSelector(
     configurationSelector,
     configuration => {
@@ -64,9 +75,12 @@ export const getSelectedFile = createSelector(
     }
 );
 
+/**
+ * Returns true if the selected file is a directory. The function returns false in case a file is selected or no selection exists.
+ */
 export const isSelectionDirectory = createSelector(
-    [getSelectedFile, configurationSelector],
-    (selectedFile, configuration) => {
+    [getSelectedFile],
+    (selectedFile) => {
         if (selectedFile) {
             return selectedFile.type === "directory";
         } else {

@@ -71,15 +71,18 @@ export const fetchTokenSuccess = (token, username) => ({
 });
 
 /**
- * Logout of the current user - removes the access token.
+ * Logout of the current user.
  */
 export const logout = () => {
     return dispatch => {
         dispatch({type: types.LOGOUT});
-        dispatch(configurationActions.reset());
+        dispatch(configurationActions.resetState());
     };
 };
 
+/**
+ * This has to be dispatched in case any request returned 401 (unauthorized).
+ */
 export const unauthorizedResponse = () => ({
     type: types.UNAUTHORIZED_RESPONSE
 });

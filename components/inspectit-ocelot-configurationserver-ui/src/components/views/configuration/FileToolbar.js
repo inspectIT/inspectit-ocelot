@@ -5,6 +5,9 @@ import { configurationActions, configurationSelectors } from '../../../redux/duc
 import { Toolbar } from 'primereact/toolbar';
 import { Button } from 'primereact/button';
 
+/**
+ * The toolbar used in the configuration view's file tree.
+ */
 class FileToolbar extends React.Component {
 
     fetchFiles = () => {

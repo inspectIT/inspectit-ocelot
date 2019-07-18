@@ -3,12 +3,14 @@ import { Tree } from 'primereact/tree';
 import { connect } from 'react-redux'
 import { configurationActions, configurationSelectors } from '../../../redux/ducks/configuration'
 
+/**
+ * The file tree used in the configuration view.
+ */
 class FileTree extends React.Component {
 
-    state = {
-        selectedNodeKey: ""
-    }
-
+    /**
+     * Fetch the files initially.
+     */
     componentDidMount = () => {
         const { loading, files } = this.props;
         if (!loading && (files && files.length <= 0)) {
@@ -16,6 +18,9 @@ class FileTree extends React.Component {
         }
     }
 
+    /**
+     * Handle tree selection changes.
+     */
     onSelectionChange = (event) => {
         this.props.selectFile(event.value);
     }
@@ -28,7 +33,6 @@ class FileTree extends React.Component {
                 filterBy="label"
                 value={this.props.files}
                 selectionMode="single"
-                selectionKeys={this.state.selectedNodeKey}
                 onSelectionChange={e => this.onSelectionChange(e)} />
         );
     }
@@ -37,7 +41,7 @@ class FileTree extends React.Component {
 function mapStateToProps(state) {
     const { loading } = state.configuration;
     return {
-        files: configurationSelectors.fileTree(state),
+        files: configurationSelectors.getFileTree(state),
         loading
     }
 }

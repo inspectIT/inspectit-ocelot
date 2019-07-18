@@ -7,8 +7,14 @@ import LoginView from '../components/views/LoginView'
 
 import { BASE_PAGE_TITLE } from '../data/constants'
 
+/**
+ * The login page.
+ */
 class LoginPage extends React.Component {
 
+  /**
+   * A warning notification will be shown in case an unauthorized request was made.
+   */
   componentDidMount = () => {
     if (this.props.unauthorized) {
       this.props.showWarningMessage("Unauthorized", "Your access token is no longer valid. Please login again.");

@@ -3,7 +3,10 @@ import axios from '../../../lib/axios-api';
 import { BASE_API_URL_V1 } from '../../../data/constants';
 import { authenticationActions } from '../authentication'
 
-export const fetchFiles = (fileRoot = "/") => {
+/**
+ * Fetches all existing configuration files and directories.
+ */
+export const fetchFiles = () => {
     return (dispatch, state) => {
         dispatch(fetchFilesStarted());
 
@@ -13,10 +16,10 @@ export const fetchFiles = (fileRoot = "/") => {
         };
 
         axios
-            .get(BASE_API_URL_V1 + "/directories" + fileRoot, config)
+            .get(BASE_API_URL_V1 + "/directories/", config)
             .then(res => {
                 const files = res.data;
-                dispatch(fetchFilesSuccess(fileRoot, files));
+                dispatch(fetchFilesSuccess(files));
             })
             .catch(err => {
                 const { response, message } = err;
@@ -31,14 +34,14 @@ export const fetchFiles = (fileRoot = "/") => {
 
 
 /**
- * Is dispatched when the fetching of the access token has been started.
+ * Is dispatched when the fetching of the configuration files has been started.
  */
 export const fetchFilesStarted = () => ({
     type: types.FETCH_FILES_STARTED
 });
 
 /**
- * Is dispatched if the fetching of the access token was not successful.
+ * Is dispatched if the fetching of the configuration files was not successful.
  * 
  * @param {*} error 
  */
@@ -50,18 +53,22 @@ export const fetchFilesFailure = (error) => ({
 });
 
 /**
- * Is dispatched when the fetching of the access token was successful.
+ * Is dispatched when the fetching of the configuration files was successful.
  * 
- * @param {string} token 
+ * @param {*} files - the fetched files
  */
-export const fetchFilesSuccess = (fileRoot, files) => ({
+export const fetchFilesSuccess = (files) => ({
     type: types.FETCH_FILES_SUCCESS,
     payload: {
-        fileRoot,
         files
     }
 });
 
+/**
+ * Sets the selection to the given file.
+ * 
+ * @param {string} selection - absolute path of the selected file (e.g. /configs/prod/interfaces.yml)
+ */
 export const selectFile = (selection) => ({
     type: types.SELECT_FILE,
     payload: {
@@ -69,6 +76,9 @@ export const selectFile = (selection) => ({
     }
 });
 
-export const reset = () => ({
+/**
+ * Resets the configuration state.
+ */
+export const resetState = () => ({
     type: types.RESET
 });

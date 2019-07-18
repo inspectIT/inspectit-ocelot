@@ -5,6 +5,9 @@ import { configurationActions } from '../../../redux/ducks/configuration'
 import FileTree from './FileTree';
 import FileToolbar from './FileToolbar';
 
+/**
+ * The configuration view component used for managing the agent configurations.
+ */
 class ConfigurationView extends React.Component {
 
     render() {
