@@ -4,22 +4,29 @@ import { connect } from 'react-redux'
 import { Growl } from 'primereact/growl';
 
 /** ID of the last show notification */
-let lastNotification = -1;
+let lastNotificationId = -1;
 
 /**
  * Handles showing of notification messages.
  */
 class NotificationHandler extends React.Component {
 
-    componentDidUpdate = () => {
-        const { notifications } = this.props;
+    growl = React.createRef();
 
-        if (notifications && notifications.length > 0) {
-            let notification = notifications[0];            
-            if (notification.id != lastNotification) {
-                lastNotification = notification.id;
-                this.growl.show(notifications);
-            }
+    componentDidMount = () => {
+        this.showNotifications();
+    }
+
+    componentDidUpdate = () => {
+        this.showNotifications();
+    }
+
+    showNotifications = () => {
+        const { notification } = this.props;
+
+        if (notification && notification.id != lastNotificationId) {
+            lastNotificationId = notification.id;
+            this.growl.show(notification);
         }
     }
 
@@ -34,9 +41,9 @@ class NotificationHandler extends React.Component {
 }
 
 function mapStateToProps(state) {
-    const { notifications } = state.notification;
+    const { lastNotification } = state.notification;
     return {
-        notifications
+        notification: lastNotification
     }
 }
 

@@ -1,13 +1,6 @@
 import * as types from "./types";
 import { createReducer } from "../../utils";
-
-const initialState = {
-    loading: false,
-    error: null,
-    files: [],
-    updateDate: null,
-    selection: null
-};
+import { configuration as initialState } from '../initial-states';
 
 const configurationReducer = createReducer(initialState)({
     [types.FETCH_FILES_STARTED]: (state, action) => {
@@ -17,11 +10,9 @@ const configurationReducer = createReducer(initialState)({
         };
     },
     [types.FETCH_FILES_FAILURE]: (state, action) => {
-        const { error } = action.payload;
         return {
             ...state,
             loading: false,
-            error: error,
             files: []
         };
     },
@@ -30,7 +21,6 @@ const configurationReducer = createReducer(initialState)({
         return {
             ...state,
             loading: false,
-            error: null,
             files,
             updateDate: Date.now()
         };

@@ -1,14 +1,7 @@
 import * as types from "./types";
 import { createReducer } from "../../utils";
 import { isTokenExpired } from '../../../lib/jwt-utils';
-
-const initialState = {
-    token: null,
-    loading: false,
-    error: null,
-    username: null,
-    unauthorized: false
-};
+import {authentication as initialState} from '../initial-states';
 
 const authorizationReducer = createReducer(initialState)({
     [types.FETCH_TOKEN_STARTED]: (state, action) => {
@@ -44,16 +37,6 @@ const authorizationReducer = createReducer(initialState)({
             error: null,
             token: null,
             username: null
-        };
-    },
-    [types.UNAUTHORIZED_RESPONSE]: (state, action) => {
-        return {
-            ...state,
-            loading: false,
-            error: null,
-            token: null,
-            username: null,
-            unauthorized: true
         };
     },
     // SPECIAL REDUCER - dispatched by redux-persist to rehydrate store

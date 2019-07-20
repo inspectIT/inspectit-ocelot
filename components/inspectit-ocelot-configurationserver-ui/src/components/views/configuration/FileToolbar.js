@@ -15,7 +15,7 @@ class FileToolbar extends React.Component {
     }
 
     render() {
-        const {loading, directorySelected} = this.props;
+        const { loading, selection } = this.props;
 
         const tooltipOptions = {
             showDelay: 500,
@@ -38,8 +38,8 @@ class FileToolbar extends React.Component {
                 `}</style>
                 <Toolbar>
                     <div className="p-toolbar-group-left">
-                        <Button disabled={loading || !directorySelected} tooltip="New File" icon="pi pi-file" tooltipOptions={tooltipOptions} />
-                        <Button disabled={loading || !directorySelected} tooltip="New Directory" icon="pi pi-folder-open" tooltipOptions={tooltipOptions} />
+                        <Button disabled={loading || !selection} tooltip="New File" icon="pi pi-file" tooltipOptions={tooltipOptions} />
+                        <Button disabled={loading || !selection} tooltip="New Directory" icon="pi pi-folder-open" tooltipOptions={tooltipOptions} />
                     </div>
                     <div className="p-toolbar-group-right">
                         <Button disabled={loading} onClick={this.fetchFiles} tooltip="Reload" icon="pi pi-refresh" tooltipOptions={tooltipOptions} />
@@ -51,10 +51,10 @@ class FileToolbar extends React.Component {
 }
 
 function mapStateToProps(state) {
-    const { loading } = state.configuration;
+    const { loading, selection } = state.configuration;
     return {
         loading,
-        directorySelected: configurationSelectors.isSelectionDirectory(state)
+        selection
     }
 }
 

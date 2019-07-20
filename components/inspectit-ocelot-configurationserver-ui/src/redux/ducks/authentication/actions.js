@@ -1,6 +1,5 @@
 import * as types from "./types";
-import axios from '../../../lib/axios-api';
-import { BASE_API_URL_V1 } from '../../../data/constants';
+import {axiosPlain} from '../../../lib/axios-api';
 
 import {configurationActions} from '../configuration';
 
@@ -14,8 +13,8 @@ export const fetchToken = (username, password) => {
     return dispatch => {
         dispatch(fetchTokenStarted());
 
-        axios
-            .get(BASE_API_URL_V1 + "/account/token", {
+        axiosPlain
+            .get("/account/token", {
                 auth: {
                     username: username,
                     password: password
@@ -79,10 +78,3 @@ export const logout = () => {
         dispatch(configurationActions.resetState());
     };
 };
-
-/**
- * This has to be dispatched in case any request returned 401 (unauthorized).
- */
-export const unauthorizedResponse = () => ({
-    type: types.UNAUTHORIZED_RESPONSE
-});

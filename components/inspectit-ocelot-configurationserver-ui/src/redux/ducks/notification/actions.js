@@ -1,5 +1,7 @@
 import * as types from "./types";
 
+let notificationCount = 0;
+
 /**
  * Shows a success notification message.
  * 
@@ -11,7 +13,8 @@ export const showSuccessMessage = (summary, detail) => ({
     payload: {
         severity: 'success',
         summary,
-        detail
+        detail,
+        id: notificationCount++
     }
 });
 
@@ -26,7 +29,8 @@ export const showInfoMessage = (summary, detail) => ({
     payload: {
         severity: 'info',
         summary,
-        detail
+        detail,
+        id: notificationCount++
     }
 });
 
@@ -41,7 +45,8 @@ export const showWarningMessage = (summary, detail) => ({
     payload: {
         severity: 'warn',
         summary,
-        detail
+        detail,
+        id: notificationCount++
     }
 });
 
@@ -56,6 +61,7 @@ export const showErrorMessage = (summary, detail) => ({
     payload: {
         severity: 'error',
         summary,
-        detail
+        detail,
+        id: notificationCount++
     }
 });

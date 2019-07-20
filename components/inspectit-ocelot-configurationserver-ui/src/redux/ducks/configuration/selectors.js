@@ -5,12 +5,13 @@ const configurationSelector = state => state.configuration;
 
 /**
  * Recoursivly building a tree representation based on the given file objects.
- * @param {*} parent 
- * @param {*} node 
+ * 
+ * @param {*} parentKey the key (absolute path) of the node's parent
+ * @param {*} node the current node (file)
  */
-const _asTreeNode = (parent, node) => {
+const _asTreeNode = (parentKey, node) => {
     const { type, name } = node;
-    const key = parent + name;
+    const key = parentKey + name;
 
     if (type === "directory") {
         return {

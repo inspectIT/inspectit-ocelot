@@ -59,8 +59,4 @@ function mapStateToProps(state) {
     }
 }
 
-const mapDispatchToProps = {
-    fetchFiles: configurationActions.fetchFiles
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(ConfigurationView);
+export default connect(mapStateToProps, null)(ConfigurationView);

@@ -12,8 +12,8 @@ class FileTree extends React.Component {
      * Fetch the files initially.
      */
     componentDidMount = () => {
-        const { loading, files } = this.props;
-        if (!loading && (files && files.length <= 0)) {
+        const { loading } = this.props;
+        if (!loading) {
             this.props.fetchFiles();
         }
     }
