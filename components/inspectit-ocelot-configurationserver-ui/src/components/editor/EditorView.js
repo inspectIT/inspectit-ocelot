@@ -92,7 +92,7 @@ class EditorView extends React.Component {
                         <div className="p-toolbar-group-left">
                             {selection &&
                                 <>
-                                    <i className={"pi pi-" + (isDirectory ? "inbox" : "file")}></i>
+                                    <i className={"pi pi-" + (isDirectory ? "folder" : "file")}></i>
                                     <div className="path">{path}</div>
                                     <div className="name">{name}</div>
                                 </>
