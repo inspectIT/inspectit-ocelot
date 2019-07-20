@@ -17,7 +17,7 @@ const _asTreeNode = (parentKey, node) => {
         return {
             key,
             label: name,
-            icon: "pi pi-fw pi-inbox",
+            icon: "pi pi-fw pi-folder",
             children: map(node.children, child => _asTreeNode(key + "/", child))
         };
     } else {
