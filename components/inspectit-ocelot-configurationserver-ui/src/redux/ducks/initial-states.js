@@ -21,7 +21,13 @@ const configuration = {
     selection: null
 };
 
+const notification = {
+    /** The latest notification object. */
+    lastNotification: null
+};
+
 export {
     authentication,
-    configuration
+    configuration,
+    notification
 }

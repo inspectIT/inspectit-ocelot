@@ -1,9 +1,6 @@
 import * as types from "./types";
 import { createReducer } from "../../utils";
-
-const initialState = {
-    lastNotification: null
-};
+import {notification as initialState} from '../initial-states';
 
 const notificationReducer = createReducer(initialState)({
     [types.SHOW]: (state, action) => {

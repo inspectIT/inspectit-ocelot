@@ -19,7 +19,7 @@ const FAILURE = [
 ].join(";");
 
 const createLogger = (active = true) => (store) => (next) => (action) => {
-    if (!active || !action.type ) {
+    if (!active || typeof action === "function" ) {
         return next(action);
     }
 
