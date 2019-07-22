@@ -9,7 +9,6 @@ const authentication = {
     username: null
 };
 
-
 const configuration = {
     /** Specifies whether the configuration files are currently being loaded. */
     loading: false,

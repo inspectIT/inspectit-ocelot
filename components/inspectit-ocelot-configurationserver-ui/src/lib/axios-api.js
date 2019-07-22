@@ -14,7 +14,12 @@ const commonConfiguration = {
 const axiosPlain = axios.create(commonConfiguration);
 const axiosBearer = axios.create(commonConfiguration);
 
+// ############################################################################
 // Request Interceptors
+
+/**
+ * Ensures requres are authenticated using the bearer token.
+ */
 axiosBearer.interceptors.request.use(function (config) {
     const state = getStore().getState();
     const { token } = state.authentication;
@@ -26,7 +31,13 @@ axiosBearer.interceptors.request.use(function (config) {
     return Promise.reject(error);
 });
 
+// ############################################################################
 // Response Interceptors
+
+/**
+ * Does error handling. Shows notifications in case an error occurs or triggers
+ * a logout if a request returns with a 401 status code (unauthorized).
+ */
 axiosBearer.interceptors.response.use(function (response) {
     return response;
 }, function (error) {
