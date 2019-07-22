@@ -9,7 +9,8 @@ const MainLayout = (props) => {
         <div>
             <style jsx>{`
             .content {
-                margin-left: 3rem;
+                margin-left: 4rem;
+                height: calc(100vh - 4rem)
             }
             `}</style>
             <Menubar />

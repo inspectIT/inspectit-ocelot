@@ -1,6 +1,7 @@
 import * as types from "./types";
-import axios from '../../../lib/axios-api';
-import { BASE_API_URL_V1 } from '../../../data/constants';
+import {axiosPlain} from '../../../lib/axios-api';
+
+import {configurationActions} from '../configuration';
 
 /**
  * Fetches an access token for the given credentials.
@@ -12,8 +13,8 @@ export const fetchToken = (username, password) => {
     return dispatch => {
         dispatch(fetchTokenStarted());
 
-        axios
-            .get(BASE_API_URL_V1 + "/account/token", {
+        axiosPlain
+            .get("/account/token", {
                 auth: {
                     username: username,
                     password: password
@@ -69,8 +70,11 @@ export const fetchTokenSuccess = (token, username) => ({
 });
 
 /**
- * Logout of the current user - removes the access token.
+ * Logout of the current user.
  */
-export const logout = () => ({
-    type: types.LOGOUT
-});
+export const logout = () => {
+    return dispatch => {
+        dispatch({type: types.LOGOUT});
+        dispatch(configurationActions.resetState());
+    };
+};

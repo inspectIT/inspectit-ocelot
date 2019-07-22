@@ -27,3 +27,5 @@
 /dist/
 /nbdist/
 /.nb-gradle/
+
+/working_directory

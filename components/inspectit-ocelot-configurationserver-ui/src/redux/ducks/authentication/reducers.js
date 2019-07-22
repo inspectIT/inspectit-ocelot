@@ -1,19 +1,14 @@
 import * as types from "./types";
 import { createReducer } from "../../utils";
 import { isTokenExpired } from '../../../lib/jwt-utils';
-
-const initialState = {
-    token: null,
-    loading: false,
-    error: null,
-    username: null
-};
+import {authentication as initialState} from '../initial-states';
 
 const authorizationReducer = createReducer(initialState)({
     [types.FETCH_TOKEN_STARTED]: (state, action) => {
         return {
             ...state,
-            loading: true
+            loading: true,
+            unauthorized: false
         };
     },
     [types.FETCH_TOKEN_FAILURE]: (state, action) => {
@@ -55,9 +50,7 @@ const authorizationReducer = createReducer(initialState)({
             const expired = isTokenExpired(token);
             if (!expired) {
                 return {
-                    ...state,
-                    loading: false,
-                    error: null,
+                    ...initialState,
                     token,
                     username
                 };

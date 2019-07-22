@@ -21,6 +21,7 @@ const SideNavigation = () => {
                 display: flex;
                 flex-direction: column;
                 align-items: center;
+                border-right: 1px solid #ddd;
             }
             `}</style>
             {itemData.map(item => (
