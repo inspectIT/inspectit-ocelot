@@ -26,15 +26,19 @@ public class JwtTokenFilter extends GenericFilterBean {
 
     private JwtTokenManager tokenManager;
 
-    List<String> excludePatterns;
+    private List<String> excludePatterns;
+
+    private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
-        String servletPath = ((HttpServletRequest) req).getServletPath();
-        for (String pattern : excludePatterns) {
-            if (new AntPathMatcher().match(pattern, servletPath)) {
-                chain.doFilter(req, res);
-                return;
+        if (excludePatterns != null) {
+            String servletPath = ((HttpServletRequest) req).getServletPath();
+            for (String pattern : excludePatterns) {
+                if (pathMatcher.match(pattern, servletPath)) {
+                    chain.doFilter(req, res);
+                    return;
+                }
             }
         }
 

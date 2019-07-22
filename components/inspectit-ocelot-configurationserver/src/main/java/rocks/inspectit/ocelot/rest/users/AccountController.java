@@ -1,6 +1,5 @@
 package rocks.inspectit.ocelot.rest.users;
 
-import com.google.common.annotations.VisibleForTesting;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.Example;
@@ -31,6 +30,9 @@ import java.io.IOException;
 @RestController
 public class AccountController extends AbstractBaseController {
 
+    /**
+     * Error object returned when the password field of a change request is blank.
+     */
     private static final ErrorInfo NO_PASSWORD_ERROR = ErrorInfo.builder()
             .error(ErrorInfo.Type.NO_PASSWORD)
             .message("Password must not be empty")
@@ -53,27 +55,31 @@ public class AccountController extends AbstractBaseController {
         return tokenManager.createToken(user.getName());
     }
 
+    @ApiOperation(value = "Change Password", notes = "Changes the password of the logged in user." +
+            " This endpoint does not work with token-based authentication, only HTTP basic auth is allowed.")
     @PutMapping("account/password")
     public ResponseEntity<?> changePassword(@RequestBody PasswordChangeRequest newPassword, Authentication user) {
         if (StringUtils.isEmpty(newPassword.getPassword())) {
             return ResponseEntity.badRequest().body(NO_PASSWORD_ERROR);
         }
-        User updated = userDetailsService.getUserByName(user.getName())
+        User updatedUser = userDetailsService.getUserByName(user.getName())
                 .get()
                 .toBuilder()
                 .password(newPassword.getPassword())
                 .build();
-        userDetailsService.addOrUpdateUser(updated);
+        userDetailsService.addOrUpdateUser(updatedUser);
 
         return ResponseEntity.ok().build();
     }
 
+    /**
+     * The payload for a password change, passed to {@link #changePassword(PasswordChangeRequest, Authentication)}.
+     */
     @Data
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    @VisibleForTesting
-    static class PasswordChangeRequest {
+    public static class PasswordChangeRequest {
         private String password;
     }
 }

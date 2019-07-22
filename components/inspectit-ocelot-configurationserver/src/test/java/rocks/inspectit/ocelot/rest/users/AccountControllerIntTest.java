@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import rocks.inspectit.ocelot.IntegrationTestBase;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
+import rocks.inspectit.ocelot.rest.ErrorInfo;
 import rocks.inspectit.ocelot.user.LocalUserDetailsService;
 import rocks.inspectit.ocelot.user.User;
 
@@ -55,8 +56,11 @@ public class AccountControllerIntTest extends IntegrationTestBase {
                             });
             assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-            assertThat(userDetailsService.getPasswordEncoder().matches("Foo",
-                    userDetailsService.getUserByName("John").get().getPasswordHash()))
+            String pwHash = userDetailsService
+                    .getUserByName("John").get()
+                    .getPasswordHash();
+            assertThat(userDetailsService.getPasswordEncoder()
+                    .matches("Foo", pwHash))
                     .isTrue();
         }
 
@@ -64,13 +68,14 @@ public class AccountControllerIntTest extends IntegrationTestBase {
         void emptyPassword() {
             PasswordChangeRequest req = new PasswordChangeRequest("");
 
-            ResponseEntity<String> result = authRest.exchange(
+            ResponseEntity<ErrorInfo> result = authRest.exchange(
                     "/api/v1/account/password",
                     HttpMethod.PUT,
                     new HttpEntity<>(req),
-                    new ParameterizedTypeReference<String>() {
+                    new ParameterizedTypeReference<ErrorInfo>() {
                     });
             assertThat(result.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+            assertThat(result.getBody().getError()).isEqualTo(ErrorInfo.Type.NO_PASSWORD);
 
         }
 
@@ -78,13 +83,14 @@ public class AccountControllerIntTest extends IntegrationTestBase {
         void nullPassword() {
             PasswordChangeRequest req = new PasswordChangeRequest(null);
 
-            ResponseEntity<String> result = authRest.exchange(
+            ResponseEntity<ErrorInfo> result = authRest.exchange(
                     "/api/v1/account/password",
                     HttpMethod.PUT,
                     new HttpEntity<>(req),
-                    new ParameterizedTypeReference<String>() {
+                    new ParameterizedTypeReference<ErrorInfo>() {
                     });
             assertThat(result.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+            assertThat(result.getBody().getError()).isEqualTo(ErrorInfo.Type.NO_PASSWORD);
 
         }
 
