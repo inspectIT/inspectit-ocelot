@@ -16,7 +16,6 @@ class FileToolbar extends React.Component {
 
     render() {
         const { loading } = this.props;
-        const spinClass = loading ? " pi-spin" : "";
 
         const tooltipOptions = {
             showDelay: 500,
@@ -43,7 +42,7 @@ class FileToolbar extends React.Component {
                         <Button disabled={loading} tooltip="New Directory" icon="pi pi-folder-open" tooltipOptions={tooltipOptions} />
                     </div>
                     <div className="p-toolbar-group-right">
-                        <Button disabled={loading} onClick={this.fetchFiles} tooltip="Reload" icon={"pi pi-refresh" + spinClass} tooltipOptions={tooltipOptions} />
+                        <Button disabled={loading} onClick={this.fetchFiles} tooltip="Reload" icon={"pi pi-refresh" + (loading ? " pi-spin" : "")} tooltipOptions={tooltipOptions} />
                     </div>
                 </Toolbar>
             </div>

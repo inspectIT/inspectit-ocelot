@@ -5,6 +5,7 @@ import React from 'react';
 import 'ace-builds/src-noconflict/ext-language_tools';
 import 'ace-builds/src-noconflict/ext-searchbox';
 import 'ace-builds/src-noconflict/ext-keybinding_menu';
+
 //include supported themes and modes here
 import 'ace-builds/src-noconflict/mode-yaml';
 import 'ace-builds/src-noconflict/theme-cobalt';
@@ -43,12 +44,19 @@ class AceEditor extends React.Component {
 
         this.configureEditor();
         this.props.initEditor(this.editor);
+        this.updateValue();
     }
     
     componentDidUpdate() {
         this.configureEditor();
+        this.updateValue();
     }
 
+    updateValue = () => {
+        if (this.props.value) {
+            this.editor.setValue(this.props.value);
+        }
+    }
 }
 
 export default AceEditor;

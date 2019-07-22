@@ -4,6 +4,7 @@ import { configurationActions } from '../../../redux/ducks/configuration'
 
 import FileTree from './FileTree';
 import FileToolbar from './FileToolbar';
+import EditorView from '../../editor/EditorView';
 
 /**
  * The configuration view component used for managing the agent configurations.
@@ -45,7 +46,7 @@ class ConfigurationView extends React.Component {
                     <FileTree className="fileTree" />
                     <div className="details">Last update: {this.props.updateDate ? new Date(this.props.updateDate).toLocaleString() : "-"}</div>
                 </div>
-                <div>{this.props.selection}</div>
+                <EditorView />
             </div>
         );
     }
