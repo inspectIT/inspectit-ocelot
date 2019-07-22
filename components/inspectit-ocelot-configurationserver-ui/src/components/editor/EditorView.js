@@ -1,33 +1,18 @@
 import React from 'react'
-import { Tree } from 'primereact/tree';
 import { connect } from 'react-redux'
-import { configurationActions, configurationSelectors } from '../../redux/ducks/configuration'
+import { configurationSelectors } from '../../redux/ducks/configuration'
 import { notificationActions } from '../../redux/ducks/notification'
 
 import dynamic from 'next/dynamic'
-import { Toolbar } from 'primereact/toolbar';
-import { Button } from 'primereact/button';
-import { SplitButton } from 'primereact/splitbutton';
-import { ScrollPanel } from 'primereact/scrollpanel';
+import EditorToolbar from './EditorToolbar';
 
 import yamlEditorConfig from '../../data/yaml-editor-config.json'
-
 
 const AceEditor = dynamic(() => import('./AceEditor'), {
     ssr: false
 });
 
 class EditorView extends React.Component {
-
-    items = [
-        {
-            label: 'Save as..',
-            icon: 'pi pi-save',
-            command: (e) => {
-                console.log("save as");
-            }
-        }
-    ];
 
     initEditor = (editor) => {
         this.editor = editor;
@@ -37,17 +22,23 @@ class EditorView extends React.Component {
         this.props.showInfo("File saved", null);
     }
 
+    parsePath = (fullPath) => {
+        if (fullPath) {
+            const lastIndex = fullPath.lastIndexOf("/") + 1;
+            return {
+                path: fullPath.slice(0, lastIndex),
+                name: fullPath.slice(lastIndex)
+            }
+        } else {
+            return {};
+        }
+    }
+
     render() {
         const { selection, isDirectory } = this.props;
-
-        let path = "";
-        let name = "";
-
-        if (selection) {
-            const lastIndex = selection.lastIndexOf("/") + 1;
-            path = selection.slice(0, lastIndex);
-            name = selection.slice(lastIndex);
-        }
+        const {path, name} = this.parsePath(selection);
+        const icon = "pi-" + (isDirectory ? "folder" : "file");
+        const enableButtons = !isDirectory && selection;
 
         return (
             <div className="this p-grid p-dir-col p-nogutter">
@@ -88,22 +79,14 @@ class EditorView extends React.Component {
                 }
                 `}</style>
                 <div className="p-col-fixed">
-                    <Toolbar>
-                        <div className="p-toolbar-group-left">
-                            {selection &&
-                                <>
-                                    <i className={"pi pi-" + (isDirectory ? "folder" : "file")}></i>
-                                    <div className="path">{path}</div>
-                                    <div className="name">{name}</div>
-                                </>
-                            }
-                        </div>
-                        <div className="p-toolbar-group-right">
-                            <Button disabled={!selection || isDirectory} icon="pi pi-question" onClick={() => this.editor.showKeyboardShortcuts()} />
-                            <Button disabled={!selection || isDirectory} icon="pi pi-search" onClick={() => this.editor.execCommand("find")} />
-                            <SplitButton disabled={!selection || isDirectory} onClick={this.save} label="Save" icon="pi pi-save" model={this.items} />
-                        </div>
-                    </Toolbar>
+                    <EditorToolbar
+                        path={path}
+                        filename={name}
+                        enableButtons={enableButtons}
+                        icon={icon}
+                        onSave={this.save}
+                        onSearch={() => this.editor.execCommand("find")}
+                        onHelp={() => this.editor.showKeyboardShortcuts()} />
                 </div>
                 <div className="p-col">
                     {!selection || isDirectory ?
