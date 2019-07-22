@@ -88,7 +88,7 @@ class AgentConfigurationReloadTask implements Runnable {
                 return;
             }
             onLoadCallback.accept(newConfigurations);
-            log.info("Active configurations reloaded");
+            log.info("Configurations successfully reloaded");
         }
     }
 

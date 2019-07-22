@@ -11,7 +11,7 @@ import java.util.concurrent.ScheduledExecutorService;
 public class BeanConfiguration {
 
     /**
-     * Executor service to sue for asynchronous tasks.
+     * Executor service to issue for asynchronous tasks.
      *
      * @param config the applications configuration, gets autowired
      * @return the executor service
