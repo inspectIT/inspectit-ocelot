@@ -46,36 +46,12 @@ class EditorView extends React.Component {
                 .this {
                     flex: 1;
                 }
-                .this :global(.p-toolbar) {
-                    background: 0;
-                    border: 0;
-                    border-radius: 0;
-                    background-color: #eee;
-                    border-bottom: 1px solid #ddd;
-                }
-                .this :global(.p-toolbar-group-right) > :global(*) {
-                    margin-left: .25rem;
-                }
                 .selection-information {
                     display: flex;
                     height: 100%;
                     align-items: center;
                     justify-content: center;
                     color: #bbb;
-                }
-                .this :global(.p-toolbar-group-left) {
-                    font-size: 1rem;
-                    display: flex;
-                    align-items: center;
-                    height: 2rem;
-                }
-                .this :global(.p-toolbar-group-left) :global(.pi) {
-                    font-size: 1.75rem;
-                    color: #aaa;
-                    margin-right: 1rem;
-                }
-                .path {
-                    color: #999;
                 }
                 `}</style>
                 <div className="p-col-fixed">
