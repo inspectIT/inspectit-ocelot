@@ -105,7 +105,8 @@ dependencies {
             "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.9.9",
             "io.springfox:springfox-swagger2:2.9.2",
             "io.springfox:springfox-swagger-ui:2.9.2",
-            "commons-io:commons-io:2.6"
+            "commons-io:commons-io:2.6",
+            "org.apache.commons:commons-lang3:3.+",
     )
     testImplementation(
             'org.springframework.boot:spring-boot-starter-test:2.1.6.RELEASE',

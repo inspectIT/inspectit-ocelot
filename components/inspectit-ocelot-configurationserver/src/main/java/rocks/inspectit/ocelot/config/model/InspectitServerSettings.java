@@ -1,6 +1,9 @@
 package rocks.inspectit.ocelot.config.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
@@ -12,6 +15,9 @@ import java.time.Duration;
 @Data
 @ConfigurationProperties("inspectit")
 @Configuration
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class InspectitServerSettings {
 
     /**
@@ -29,4 +35,15 @@ public class InspectitServerSettings {
      * The default user to create if no user database is found.
      */
     private DefaultUserSettings defaultUser;
+
+    /**
+     * The number of threads to use for asynchronous tasks.
+     */
+    private int threadPoolSize;
+
+    /**
+     * The estimated upper bound of agents who connect to this server.
+     * This is only used to limit internal caches of the server and not as hard limitation.
+     */
+    private int maxAgents;
 }

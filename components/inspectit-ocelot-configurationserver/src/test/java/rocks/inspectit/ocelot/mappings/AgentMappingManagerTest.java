@@ -4,8 +4,10 @@ import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 
@@ -32,6 +34,9 @@ public class AgentMappingManagerTest {
 
     @InjectMocks
     AgentMappingManager manager;
+
+    @Mock
+    ApplicationEventPublisher eventPublisher;
 
     @Spy
     AgentMappingSerializer objectMapperUtils = new AgentMappingSerializer();
@@ -138,6 +143,8 @@ public class AgentMappingManagerTest {
             assertThat(resultMappings.get(0)).isEqualTo(mapping);
             verify(objectMapperUtils).writeAgentMappings(any(), eq(mappingsFile));
             verifyNoMoreInteractions(objectMapperUtils);
+
+            verify(eventPublisher).publishEvent(any(AgentMappingsChangedEvent.class));
         }
 
         @Test
@@ -249,6 +256,8 @@ public class AgentMappingManagerTest {
             assertThat(manager.getAgentMappings()).containsExactly(mappingB);
             verify(objectMapperUtils, times(2)).writeAgentMappings(any(), any());
             verifyNoMoreInteractions(objectMapperUtils);
+
+            verify(eventPublisher, times(2)).publishEvent(any(AgentMappingsChangedEvent.class));
         }
 
         @Test
@@ -307,6 +316,8 @@ public class AgentMappingManagerTest {
             assertThat(manager.getAgentMappings()).containsExactly(mappingA);
             verify(objectMapperUtils).writeAgentMappings(any(), any());
             verifyNoMoreInteractions(objectMapperUtils);
+
+            verify(eventPublisher).publishEvent(any(AgentMappingsChangedEvent.class));
         }
 
         @Test
@@ -322,6 +333,8 @@ public class AgentMappingManagerTest {
             assertThat(manager.getAgentMappings()).containsExactly(mappingB, mappingA);
             verify(objectMapperUtils, times(2)).writeAgentMappings(any(), any());
             verifyNoMoreInteractions(objectMapperUtils);
+
+            verify(eventPublisher, times(2)).publishEvent(any(AgentMappingsChangedEvent.class));
         }
 
         @Test
@@ -378,6 +391,8 @@ public class AgentMappingManagerTest {
             assertThat(manager.getAgentMappings()).containsExactly(mappingA);
             storedMapping = manager.getAgentMapping("mapping").get();
             assertThat(storedMapping.getSources()).contains("/newSource");
+
+            verify(eventPublisher, times(2)).publishEvent(any(AgentMappingsChangedEvent.class));
         }
     }
 
@@ -398,6 +413,8 @@ public class AgentMappingManagerTest {
             assertThat(manager.getAgentMappings()).containsExactly(mappingA, mappingC, mappingB);
             verify(objectMapperUtils, times(2)).writeAgentMappings(any(), any());
             verifyNoMoreInteractions(objectMapperUtils);
+
+            verify(eventPublisher, times(2)).publishEvent(any(AgentMappingsChangedEvent.class));
         }
 
         @Test
@@ -412,6 +429,8 @@ public class AgentMappingManagerTest {
             manager.addAgentMappingBefore(mappingC, "first");
 
             assertThat(manager.getAgentMappings()).containsExactly(mappingC, mappingA, mappingB);
+
+            verify(eventPublisher, times(2)).publishEvent(any(AgentMappingsChangedEvent.class));
         }
 
 
@@ -427,6 +446,8 @@ public class AgentMappingManagerTest {
             manager.addAgentMappingBefore(mappingB, "second");
 
             assertThat(manager.getAgentMappings()).containsExactly(mappingA, mappingB, mappingC);
+
+            verify(eventPublisher, times(2)).publishEvent(any(AgentMappingsChangedEvent.class));
         }
 
         @Test
@@ -442,6 +463,8 @@ public class AgentMappingManagerTest {
             manager.addAgentMappingBefore(mappingC, "first");
 
             assertThat(manager.getAgentMappings()).containsExactly(mappingC, mappingA, mappingB);
+
+            verify(eventPublisher, times(2)).publishEvent(any(AgentMappingsChangedEvent.class));
         }
 
         @Test
@@ -477,6 +500,8 @@ public class AgentMappingManagerTest {
             assertThat(manager.getAgentMappings()).containsExactly(mappingA, mappingB, mappingC);
             verify(objectMapperUtils, times(2)).writeAgentMappings(any(), any());
             verifyNoMoreInteractions(objectMapperUtils);
+
+            verify(eventPublisher, times(2)).publishEvent(any(AgentMappingsChangedEvent.class));
         }
 
         @Test
@@ -491,6 +516,8 @@ public class AgentMappingManagerTest {
             manager.addAgentMappingAfter(mappingB, "second");
 
             assertThat(manager.getAgentMappings()).containsExactly(mappingA, mappingB, mappingC);
+
+            verify(eventPublisher, times(2)).publishEvent(any(AgentMappingsChangedEvent.class));
         }
 
         @Test
@@ -506,6 +533,8 @@ public class AgentMappingManagerTest {
             manager.addAgentMappingAfter(mappingC, "first");
 
             assertThat(manager.getAgentMappings()).containsExactly(mappingA, mappingC, mappingB);
+
+            verify(eventPublisher, times(2)).publishEvent(any(AgentMappingsChangedEvent.class));
         }
 
 
