@@ -17,7 +17,13 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 @ExtendWith(SpringExtension.class)
-@TestPropertySource(properties = "inspectit.working-directory=temp_work_dir")
+@TestPropertySource(properties = {
+        "inspectit.working-directory=temp_work_dir",
+        "spring.datasource.url=jdbc:h2:mem:userdb;DB_CLOSE_DELAY=-1",
+        "spring.datasource.driver-class-name=org.h2.Driver",
+        "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect",
+        "spring.jpa.hibernate.ddl-auto=create",
+})
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class IntegrationTestBase {
 

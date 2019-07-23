@@ -4,7 +4,10 @@ package rocks.inspectit.ocelot.file;
 import org.apache.commons.io.FileExistsException;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 
 import java.io.FileNotFoundException;
@@ -17,6 +20,8 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 public class FileManagerTest {
@@ -24,7 +29,11 @@ public class FileManagerTest {
     private static final Path rootWorkDir = Paths.get("temp_test_workdir");
     private static final Path fmRoot = rootWorkDir.resolve("root");
 
+    @InjectMocks
     private FileManager fm;
+
+    @Mock
+    ApplicationEventPublisher eventPublisher;
 
     @BeforeAll
     private static void setup() throws Exception {
@@ -38,7 +47,6 @@ public class FileManagerTest {
 
     @BeforeEach
     private void setupFileManager() throws Exception {
-        fm = new FileManager();
         InspectitServerSettings conf = new InspectitServerSettings();
         conf.setWorkingDirectory(fmRoot.toString());
         fm.config = conf;
@@ -199,6 +207,8 @@ public class FileManagerTest {
                         assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
                         assertThat(f.getName()).isEqualTo("myDir");
                     });
+
+            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
         }
 
 
@@ -222,6 +232,8 @@ public class FileManagerTest {
                         assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
                         assertThat(f.getName()).isEqualTo("myDir");
                     });
+
+            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
         }
 
 
@@ -254,6 +266,8 @@ public class FileManagerTest {
                         assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
                         assertThat(f.getName()).isEqualTo("topB");
                     });
+
+            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
         }
 
         @Test
@@ -261,6 +275,8 @@ public class FileManagerTest {
             setupTestFiles("topA/subA", "topB");
 
             fm.createDirectory("topA/subA");
+
+            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
         }
 
         @Test
@@ -315,6 +331,8 @@ public class FileManagerTest {
                         assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
                         assertThat(f.getName()).isEqualTo("topB");
                     });
+
+            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
         }
 
 
@@ -330,6 +348,8 @@ public class FileManagerTest {
                         assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
                         assertThat(f.getName()).isEqualTo("topB");
                     });
+
+            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
         }
 
 
@@ -349,6 +369,8 @@ public class FileManagerTest {
                         assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
                         assertThat(f.getName()).isEqualTo("topB");
                     });
+
+            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
         }
 
         @Test
@@ -439,6 +461,7 @@ public class FileManagerTest {
             fm.createOrReplaceFile("myFile", "content");
 
             assertThat(fm.readFile("myFile")).isEqualTo("content");
+            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
         }
 
         @Test
@@ -448,6 +471,7 @@ public class FileManagerTest {
             fm.createOrReplaceFile("topB/../topB/./sub/myFile", "content");
 
             assertThat(fm.readFile("topB/sub/myFile")).isEqualTo("content");
+            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
         }
 
 
@@ -458,6 +482,7 @@ public class FileManagerTest {
             fm.createOrReplaceFile("fileA", "");
 
             assertThat(fm.readFile("fileA")).isEqualTo("");
+            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
         }
 
         @Test
@@ -467,6 +492,7 @@ public class FileManagerTest {
             fm.createOrReplaceFile("topA/fileA", "bar");
 
             assertThat(fm.readFile("topA/fileA")).isEqualTo("bar");
+            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
         }
 
         @Test
@@ -510,6 +536,7 @@ public class FileManagerTest {
                     .noneSatisfy((f) ->
                             assertThat(f.getName()).isEqualTo("topA")
                     );
+            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
         }
 
 
@@ -523,6 +550,7 @@ public class FileManagerTest {
                     .noneSatisfy((f) ->
                             assertThat(f.getName()).isEqualTo("topA")
                     );
+            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
         }
 
 
@@ -550,6 +578,7 @@ public class FileManagerTest {
                                     assertThat(f2.getChildren()).isEmpty();
                                 });
                     });
+            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
         }
 
         @Test
@@ -608,6 +637,7 @@ public class FileManagerTest {
                         assertThat(f.getName()).isEqualTo("bar");
                     });
             assertThat(fm.readFile("bar")).isEqualTo("foo");
+            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
         }
 
 
@@ -641,6 +671,7 @@ public class FileManagerTest {
                                 });
                     });
             assertThat(fm.readFile("foo/bar/something")).isEqualTo("text");
+            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
         }
 
         @Test
@@ -681,6 +712,7 @@ public class FileManagerTest {
                                 });
                     });
             assertThat(fm.readFile("sub/something")).isEqualTo("text");
+            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
         }
 
 
@@ -709,6 +741,7 @@ public class FileManagerTest {
                                 });
                     });
             assertThat(fm.readFile("a/b/file")).isEqualTo("");
+            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
         }
 
 

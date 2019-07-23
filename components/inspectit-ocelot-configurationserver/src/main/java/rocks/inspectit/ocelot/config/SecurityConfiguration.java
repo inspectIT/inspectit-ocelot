@@ -12,6 +12,8 @@ import rocks.inspectit.ocelot.authentication.JwtTokenFilter;
 import rocks.inspectit.ocelot.authentication.JwtTokenManager;
 import rocks.inspectit.ocelot.user.LocalUserDetailsService;
 
+import java.util.Arrays;
+
 /**
  * Spring security configuration enabling authentication on all except excluded endpoints.
  */
@@ -50,7 +52,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .httpBasic()
 
                 .and()
-                .addFilterBefore(new JwtTokenFilter(tokenManager), BasicAuthenticationFilter.class);
+                //TODO: The "correct" way of selectively enabling token based would be to have multiple spring security configs.
+                //However, previous attempts of doing so were unsuccessful, therefore we simply exclude them manually in the filter
+                .addFilterBefore(new JwtTokenFilter(tokenManager, Arrays.asList(
+                        "/api/v1/account/password"
+                )), BasicAuthenticationFilter.class);
     }
 
     @Autowired

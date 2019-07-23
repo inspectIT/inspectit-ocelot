@@ -3,6 +3,7 @@ package rocks.inspectit.ocelot.mappings;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
@@ -50,6 +51,9 @@ public class AgentMappingManager {
     @Autowired
     @VisibleForTesting
     InspectitServerSettings config;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     /**
      * Post construct. Initially reading the agent mappings if the mappings file exists.
@@ -129,6 +133,7 @@ public class AgentMappingManager {
         List<AgentMapping> mappings = new ArrayList<>(newAgentMappings);
         writeAgentMappingsToFile(mappings);
         agentMappings = mappings;
+        fireMappingsChangeEvent();
     }
 
     /**
@@ -148,6 +153,7 @@ public class AgentMappingManager {
         if (removed) {
             writeAgentMappingsToFile(newAgentMappings);
             agentMappings = newAgentMappings;
+            fireMappingsChangeEvent();
         }
         return removed;
     }
@@ -211,6 +217,11 @@ public class AgentMappingManager {
         }
     }
 
+
+    private void fireMappingsChangeEvent() {
+        eventPublisher.publishEvent(new AgentMappingsChangedEvent(this));
+    }
+
     /**
      * Returns the index of the agent mapping with the given name.
      */
@@ -244,5 +255,6 @@ public class AgentMappingManager {
 
         writeAgentMappingsToFile(newAgentMappings);
         agentMappings = newAgentMappings;
+        fireMappingsChangeEvent();
     }
 }

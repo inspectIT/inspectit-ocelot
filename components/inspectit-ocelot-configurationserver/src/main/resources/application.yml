@@ -21,3 +21,9 @@ inspectit:
   default-user:
     name: admin
     password: admin
+
+  thread-pool-size: 4
+
+  # the maximum number of active agents connected to this server
+  # only used to limit the sizes of internal caches
+  max-agents: 10000
