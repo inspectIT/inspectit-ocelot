@@ -33,16 +33,19 @@ class FileTree extends React.Component {
                 filterBy="label"
                 value={this.props.files}
                 selectionMode="single"
-                onSelectionChange={e => this.onSelectionChange(e)} />
+                selectionKeys={this.props.selection}
+                onSelectionChange={this.onSelectionChange}
+            />
         );
     }
 }
 
 function mapStateToProps(state) {
-    const { loading } = state.configuration;
+    const { loading, selection } = state.configuration;
     return {
         files: configurationSelectors.getFileTree(state),
-        loading
+        loading,
+        selection
     }
 }
 

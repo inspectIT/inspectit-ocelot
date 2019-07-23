@@ -10,8 +10,8 @@ const authentication = {
 };
 
 const configuration = {
-    /** Specifies whether the configuration files are currently being loaded. */
-    loading: false,
+    /** Specifies how many requests are currently loading in the background */
+    loading: 0,
     /** The existing configuration files. */
     files: [],
     /** The date when the configuration files have been fetched. */
