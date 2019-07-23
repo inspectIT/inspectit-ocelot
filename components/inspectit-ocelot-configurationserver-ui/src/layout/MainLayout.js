@@ -10,7 +10,6 @@ const MainLayout = (props) => {
             <style jsx>{`
             .content {
                 margin-left: 4rem;
-                widht: 100%;
                 height: calc(100vh - 4rem);
                 overflow: auto auto;
             }

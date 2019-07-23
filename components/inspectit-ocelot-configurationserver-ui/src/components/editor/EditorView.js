@@ -19,7 +19,7 @@ class EditorView extends React.Component {
     }
 
     save = () => {
-        this.props.showInfo("File saved", null);
+        // save file
     }
 
     parsePath = (fullPath) => {
