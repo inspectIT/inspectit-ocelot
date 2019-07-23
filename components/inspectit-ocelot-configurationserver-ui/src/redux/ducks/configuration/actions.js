@@ -150,3 +150,32 @@ export const createDirectory = (path,fetchFilesOnSuccess) => {
             });
     };
 };
+
+
+/**
+ * Attempts to move the given directory or file.
+ */
+export const move = (path,targetPath,fetchFilesOnSuccess) => {
+    return (dispatch) => {
+
+        dispatch({type : types.MOVE_STARTED});
+        let req = {
+            source: path,
+            target : targetPath
+        };
+        axios
+            .put("/move" , req)
+            .then(res => {
+                dispatch({
+                    type : types.MOVE_SUCCESS,
+                    payload : req
+                });
+                if (fetchFilesOnSuccess) {
+                    dispatch(fetchFiles());
+                }
+            })
+            .catch((error) => {
+                dispatch({type : types.MOVE_FAILURE});
+            });
+    };
+};

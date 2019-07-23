@@ -31,6 +31,17 @@ export function getFile(rootFiles,path) {
 }
 
 /**
+ * Reutrns the path of the parent folder of the given file.
+ * If the given file is on root level, an empty string is returned.
+ * 
+ * @param {*} path the path of the file
+ */
+export function getParentDirectoryPath(path) {
+    const lastSlash = path.lastIndexOf("/");
+    return lastSlash == -1 ? "" : path.substring(0,lastSlash);
+}
+
+/**
  * true if the given file object is a directory.
  */
 export function isDirectory(file) {

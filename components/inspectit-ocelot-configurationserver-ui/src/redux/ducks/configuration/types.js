@@ -15,3 +15,7 @@ export const WRITE_FILE_SUCCESS = 'configuration/WRITE_FILE_SUCCESS';
 export const CREATE_DIRECTORY_STARTED = 'configuration/CREATE_DIRECTORY_STARTED';
 export const CREATE_DIRECTORY_FAILURE = 'configuration/CREATE_DIRECTORY_FAILURE';
 export const CREATE_DIRECTORY_SUCCESS = 'configuration/CREATE_DIRECTORY_SUCCESS';
+
+export const MOVE_STARTED = 'configuration/MOVE_STARTED';
+export const MOVE_FAILURE = 'configuration/MOVE_FAILURE';
+export const MOVE_SUCCESS = 'configuration/MOVE_SUCCESS';
