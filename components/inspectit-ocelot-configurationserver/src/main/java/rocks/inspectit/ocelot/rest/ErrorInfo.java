@@ -1,13 +1,17 @@
 package rocks.inspectit.ocelot.rest;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Value;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * Value class for representing error messages which are sent as response to REST requests in the body.
  */
-@Value
+@Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ErrorInfo {
 
     public enum Type {

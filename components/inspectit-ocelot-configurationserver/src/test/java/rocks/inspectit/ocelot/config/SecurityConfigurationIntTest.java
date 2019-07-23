@@ -127,6 +127,21 @@ public class SecurityConfigurationIntTest extends IntegrationTestBase {
 
             assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
         }
+
+        @Test
+        void ensureTokenCannotChangePassword() throws InterruptedException {
+            String token = rest
+                    .withBasicAuth("master", "foo")
+                    .getForObject(NEW_TOKEN_URL, String.class);
+
+            assertThat(token).isNotEmpty();
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(token);
+            ResponseEntity<?> resp = rest.exchange("/api/v1/account/password", HttpMethod.GET, new HttpEntity<>(headers), String.class);
+
+            assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        }
     }
 
 }
