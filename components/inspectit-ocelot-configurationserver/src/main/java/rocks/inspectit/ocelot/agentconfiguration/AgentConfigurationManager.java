@@ -62,11 +62,11 @@ public class AgentConfigurationManager {
     @VisibleForTesting
     void init() {
         replaceConfigurations(Collections.emptyList());
-        triggerConfigurationReloading();
+        reloadConfigurationAsync();
     }
 
     @EventListener({FileChangedEvent.class, AgentMappingsChangedEvent.class})
-    private synchronized void triggerConfigurationReloading() {
+    private synchronized void reloadConfigurationAsync() {
         if (reloadTask != null) {
             reloadTask.cancel();
         }
