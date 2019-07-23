@@ -10,7 +10,8 @@ const MainLayout = (props) => {
             <style jsx>{`
             .content {
                 margin-left: 4rem;
-                height: calc(100vh - 4rem)
+                height: calc(100vh - 4rem);
+                overflow: auto auto;
             }
             `}</style>
             <Menubar />

@@ -952,6 +952,11 @@ abbrev@1:
   resolved "https://registry.yarnpkg.com/abbrev/-/abbrev-1.1.1.tgz#f8f2c887ad10bf67f634f005b6987fed3179aac8"
   integrity sha512-nne9/IiQ/hzIhY6pdDnbBtz7DjPTKrY00P/zvPSm5pOFkl6xuGrGnXn/VtTNNfNtAfZ9/1RtehkszU9qcTii0Q==
 
+ace-builds@^1.4.5:
+  version "1.4.5"
+  resolved "https://registry.yarnpkg.com/ace-builds/-/ace-builds-1.4.5.tgz#f442b2e0b2fc3f83739617f184805fb0677cfda7"
+  integrity sha512-wotVzxv5YClvwOjiuXNyGm4j/CnKoFIoTnnXNmi1nTHjr7hXMMjQeytcnbFua4thaJ5vvpVEDv0utmjqsrp3Jw==
+
 acorn@^6.2.0:
   version "6.2.0"
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-6.2.0.tgz#67f0da2fc339d6cfb5d6fb244fd449f33cd8bbe3"
