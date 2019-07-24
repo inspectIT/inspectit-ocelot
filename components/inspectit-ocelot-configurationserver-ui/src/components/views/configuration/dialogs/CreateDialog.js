@@ -46,7 +46,7 @@ class CreateDialog extends React.Component {
                 )}
             >
                 <div style={{ width: '100%', paddingBottom: "0.5em" }}>
-                    Create a {type.toLowerCase()} in <b>{this.props.parentDirName}</b> :
+                    Create a {type.toLowerCase()} in <b>{this.props.parentDirName}</b>:
                 </div>
                 <div className="p-inputgroup" style={{ width: '100%' }}>
                     <InputText

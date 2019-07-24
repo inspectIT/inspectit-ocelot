@@ -29,7 +29,7 @@ class DeleteDialog extends React.Component {
                     </div>
                 )}
             >
-                Are you sure you want to delete <b>"{selectionName}"</b> ? This cannot be undone!"
+                Are you sure you want to delete <b>"{selectionName}"</b> ? This cannot be undone!
             </Dialog>
         )
     }
