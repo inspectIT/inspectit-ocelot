@@ -14,8 +14,7 @@ class DeleteDialog extends React.Component {
     deleteButton = React.createRef();
 
     render() {
-        const { selection } = this.props;
-        const selectedName = selection ? selection.split("/").slice(-1)[0] : ""
+        const { selectionName } = this.props;
 
         return (
             <Dialog
@@ -30,7 +29,7 @@ class DeleteDialog extends React.Component {
                     </div>
                 )}
             >
-                Are you sure you want to delete <b>"{selectedName}"</b> ? This cannot be undone!"
+                Are you sure you want to delete <b>"{selectionName}"</b> ? This cannot be undone!"
             </Dialog>
         )
     }
@@ -52,7 +51,7 @@ function mapStateToProps(state) {
     const { selection } = state.configuration;
     return {
         type: configurationSelectors.isSelectionDirectory(state) ? "Directory" : "File",
-        selection
+        selectionName: selection ? selection.split("/").slice(-1)[0] : ""
     }
 }
 
