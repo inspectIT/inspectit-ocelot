@@ -1,7 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { configurationActions, configurationSelectors } from '../../../../redux/ducks/configuration'
-import {uniqueId} from 'lodash'
 
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
@@ -12,29 +11,27 @@ import { Dialog } from 'primereact/dialog';
  */
 class DeleteDialog extends React.Component {
 
-    state = {
-        deleteButtonId: uniqueId("deletebtn")
-    }
+    deleteButton = React.createRef();
 
-    render () {
-        const {selection } = this.props;
+    render() {
+        const { selection } = this.props;
         const selectedName = selection ? selection.split("/").slice(-1)[0] : ""
 
         return (
             <Dialog
-                    header={"Delete "+ this.props.type}
-                    modal={true}
-                    visible={this.props.visible}
-                    onHide={this.props.onHide}
-                    footer={(
-                        <div>
-                            <Button label="Delete" id={this.state.deleteButtonId} className="p-button-danger" onClick={this.deleteSelectedFile}/>
-                            <Button label="Cancel" className="p-button-secondary" onClick={this.props.onHide}/>
-                        </div>
-                    )}
-                >
-                    {"Are you sure you want to delete "}<b>{"\"" + selectedName + "\""}</b>{" ? This cannot be undone!"}
-                </Dialog>
+                header={"Delete " + this.props.type}
+                modal={true}
+                visible={this.props.visible}
+                onHide={this.props.onHide}
+                footer={(
+                    <div>
+                        <Button label="Delete" ref={this.deleteButton} className="p-button-danger" onClick={this.deleteSelectedFile} />
+                        <Button label="Cancel" className="p-button-secondary" onClick={this.props.onHide} />
+                    </div>
+                )}
+            >
+                Are you sure you want to delete <b>"{selectedName}"</b> ? This cannot be undone!"
+            </Dialog>
         )
     }
 
@@ -44,11 +41,11 @@ class DeleteDialog extends React.Component {
     }
 
     componentDidUpdate(prevProps) {
-        if(!prevProps.visible && this.props.visible) {
-            document.getElementById(this.state.deleteButtonId).focus();
+        if (!prevProps.visible && this.props.visible) {
+            this.deleteButton.current.element.focus();
         }
     }
-    
+
 }
 
 function mapStateToProps(state) {

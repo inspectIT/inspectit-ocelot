@@ -1,7 +1,6 @@
 import { createSelector } from 'reselect'
 import { map, find } from 'lodash';
-import "./queries";
-import { getFile, isDirectory } from './queries';
+import { getFile, isDirectory } from './utils';
 
 const configurationSelector = state => state.configuration;
 

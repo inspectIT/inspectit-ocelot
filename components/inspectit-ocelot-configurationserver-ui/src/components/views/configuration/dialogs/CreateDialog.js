@@ -1,12 +1,11 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { uniqueId } from 'lodash';
 
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { Message } from 'primereact/message';
 import { InputText } from 'primereact/inputtext';
-import { configurationQueries, configurationActions, configurationSelectors } from '../../../../redux/ducks/configuration';
+import { configurationUtils, configurationActions, configurationSelectors } from '../../../../redux/ducks/configuration';
 
 
 /**
@@ -21,59 +20,59 @@ class CreateDialog extends React.Component {
     constructor(props) {
         super(props)
         this.state = {
-            /**
-             * In case the input name is invalid, a meaningful error message is placed here
-             */
+            /** In case the input name is invalid, a meaningful error message is placed here */
             error: null,
-            filename: props.directoryMode ? "" : ".yml",
-            inputId: uniqueId("create-dialog-input")
+            filename: "",
         }
+        this.input = React.createRef();
     }
 
     render() {
-        const type = this.props.directoryMode ? "Directory" : "File";
+        const type = this.props.directoryMode ? "Folder" : "File";
 
         return (
             <Dialog
-                style={{width: '400px'}}
+                style={{ width: '400px' }}
                 header={"Create " + type}
                 modal={true}
                 visible={this.props.visible}
-                onHide={this.onHide}
+                onHide={this.props.onHide}
+                onShow={() => this.filenameChanged("")}
                 footer={(
                     <div>
-                        <Button label="Create" disabled={!this.canCreateFileOrFolder()}onClick={this.createFileOrFolder} />
-                        <Button label="Cancel" className="p-button-secondary" onClick={this.onHide} />
+                        <Button label="Create" disabled={!this.canCreateFileOrFolder()} onClick={this.createFileOrFolder} />
+                        <Button label="Cancel" className="p-button-secondary" onClick={this.props.onHide} />
                     </div>
                 )}
             >
-                <span className="p-float-label" style={{marginTop : "0.5em", marginBottom : "0.5em"}}>
-                    <InputText 
-                        id={this.state.inputId} 
-                        style={{width: '100%'}}
-                        onKeyPress={this.onKeyPress} 
-                        value={this.state.filename} 
-                        onChange={(e) => this.filenameChanged(e.target.value)} 
+                <div style={{ width: '100%', paddingBottom: "0.5em" }}>
+                    Create a {type.toLowerCase()} in <b>{this.props.parentDirName}</b> :
+                </div>
+                <div className="p-inputgroup" style={{ width: '100%' }}>
+                    <InputText
+                        ref={this.input}
+                        style={{ width: '100%' }}
+                        onKeyPress={this.onKeyPress}
+                        value={this.state.filename}
+                        placeholder={type + " Name"}
+                        onChange={(e) => this.filenameChanged(e.target.value)}
                     />
-                    <label htmlFor={this.state.inputId}>{type + " Name"}</label>
-                </span>
+                    {!this.props.directoryMode &&
+                        <span className="p-inputgroup-addon">.yml</span>
+                    }
+                </div>
                 {this.state.error &&
-                    <Message style={{width: '100%'}} severity="error" text={ this.state.error}></Message>
+                    <div style={{ width: "100%", paddingTop: "0.5em" }}>
+                        <Message style={{ width: "100%" }} severity="error" text={this.state.error}></Message>
+                    </div>
                 }
             </Dialog>
         )
     }
 
-    onHide = () => {
-        this.props.onHide();
-        this.reset();
-    }
-
     componentDidUpdate(prevProps) {
-        if(!prevProps.visible && this.props.visible) {
-            const input = document.getElementById(this.state.inputId);
-            input.focus();
-            input.setSelectionRange(0,0);
+        if (!prevProps.visible && this.props.visible) {
+            this.input.current.element.focus();
         }
     }
 
@@ -83,59 +82,49 @@ class CreateDialog extends React.Component {
         }
     }
 
-    reset() {
-        if(this.props.directoryMode) {
-            this.filenameChanged("");
-        } else {
-            this.filenameChanged(".yml");
-        }
-    }
-
     filenameChanged = (name) => {
         let error = null;
-        const existingFile = configurationQueries.getFile(this.props.files, this.getBasePath() + name);
-        if(existingFile) {
-            if(configurationQueries.isDirectory(existingFile)) {
+        const existingFile = configurationUtils.getFile(this.props.files, this.getAbsolutePath(name));
+        if (existingFile) {
+            if (configurationUtils.isDirectory(existingFile)) {
                 error = "A directory with the given name already exists";
             } else {
                 error = "A file with the given name already exists";
             }
         }
         this.setState({
-            filename : name,
-            error : error,
+            filename: name,
+            error: error,
         });
     }
 
     canCreateFileOrFolder = () => {
-        if(this.state.error) {
-            return false;
-        } if (this.props.directoryMode) {
-            return this.state.filename;
-        } else {
-            return this.state.filename && !this.state.filename.startsWith(".");
-        }
+        return !this.state.error && !!this.state.filename
     }
 
     createFileOrFolder = () => {
-        const fullPath = this.getBasePath() + this.state.filename;
-        if(this.props.directoryMode) {
+        const fullPath = this.getAbsolutePath(this.state.filename);
+        if (this.props.directoryMode) {
             this.props.createDirectory(fullPath, true)
         } else {
-            this.props.writeFile(fullPath,"",true)
+            this.props.writeFile(fullPath, "", true)
         }
         this.props.onHide();
     }
 
-    getBasePath = () => {
-        const {selection, isDirectorySelected} = this.props;
-        if(!selection) {
-            return "";
+    /**
+     * Returns the absolute path of the current filename relative to the selection
+     */
+    getAbsolutePath = (filename) => {
+        const { selection, isDirectorySelected, directoryMode } = this.props;
+        const suffix = directoryMode ? "" : ".yml"
+        if (!selection) {
+            return "/" + filename + suffix;
         } else if (isDirectorySelected) {
-            return selection + "/";
+            return selection + "/" + filename + suffix;
         } else {
             const lastSlash = selection.lastIndexOf("/");
-            return selection.substring(0, lastSlash+1);
+            return selection.substring(0, lastSlash + 1) + filename + suffix;
         }
     }
 
@@ -143,10 +132,19 @@ class CreateDialog extends React.Component {
 
 function mapStateToProps(state) {
     const { selection, files } = state.configuration;
+    const isDirectorySelected = configurationSelectors.isSelectionDirectory(state);
+    let parentDirName = "root";
+    if (selection && isDirectorySelected) {
+        parentDirName = '"' + selection.split("/").slice(-1)[0] + '"'
+    } else if(selection){
+        let parent = selection.split("/").slice(-2)[0];
+        parentDirName = parent ? '"' + parent + '"' : "root";
+    }
     return {
-        isDirectorySelected: configurationSelectors.isSelectionDirectory(state),
+        isDirectorySelected,
         files,
-        selection
+        selection,
+        parentDirName
     }
 }
 

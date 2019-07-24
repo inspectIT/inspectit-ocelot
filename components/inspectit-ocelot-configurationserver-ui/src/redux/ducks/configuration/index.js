@@ -2,12 +2,12 @@ import reducer from "./reducers";
 
 import * as configurationActions from "./actions";
 import * as configurationSelectors from "./selectors";
-import * as configurationQueries from "./queries";
+import * as configurationUtils from "./utils";
 
 export {
     configurationActions,
     configurationSelectors,
-    configurationQueries
+    configurationUtils
 };
 
 export default reducer;

@@ -93,7 +93,6 @@ export const deleteSelection = (fetchFilesOnSuccess) => {
             })
             .catch((error) => {
                 dispatch({type : types.DELETE_SELECTION_FAILURE});
-                dispatch(notificationActions.showErrorMessage("Could not delete " + selection, "Server responden with " + error.response.status));
             });
     };
 };
@@ -122,7 +121,6 @@ export const writeFile = (file,content,fetchFilesOnSuccess) => {
             })
             .catch((error) => {
                 dispatch({type : types.WRITE_FILE_FAILURE});
-                dispatch(notificationActions.showErrorMessage("Could not write file", "Server responden with " + error.response.status));
             });
     };
 };
@@ -149,7 +147,6 @@ export const createDirectory = (path,fetchFilesOnSuccess) => {
             })
             .catch((error) => {
                 dispatch({type : types.CREATE_DIRECTORY_FAILURE});
-                dispatch(notificationActions.showErrorMessage("Could not create directory", "Server responden with " + error.response.status));
             });
     };
 };

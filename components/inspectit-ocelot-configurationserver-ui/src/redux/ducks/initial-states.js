@@ -11,7 +11,7 @@ const authentication = {
 
 const configuration = {
     /** Specifies how many requests are currently loading in the background */
-    loading: 0,
+    pendingRequests: 0,
     /** The existing configuration files. */
     files: [],
     /** The date when the configuration files have been fetched. */

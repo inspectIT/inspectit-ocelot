@@ -1,20 +1,20 @@
 import * as types from "./types";
-import * as queries from "./queries";
+import * as utils from "./utils";
 import { createReducer } from "../../utils";
 import { configuration as initialState } from '../initial-states';
 
 
-function incrementLoadingCount(state) {
+const incrementPendingRequests = (state) => {
     return {
         ...state,
-        loading: state.loading + 1
+        pendingRequests: state.pendingRequests + 1
     };
 }
 
-function decrementLoadingCount(state) {
+const decrementPendingRequests = (state) => {
     return {
         ...state,
-        loading: state.loading - 1
+        pendingRequests: state.pendingRequests - 1
     };
 }
 
@@ -22,13 +22,13 @@ const configurationReducer = createReducer(initialState)({
     [types.FETCH_FILES_STARTED]: (state, action) => {
         return {
             ...state,
-            loading: state.loading + 1
+            pendingRequests: state.pendingRequests + 1
         };
     },
     [types.FETCH_FILES_FAILURE]: (state, action) => {
         return {
             ...state,
-            loading: state.loading - 1,
+            pendingRequests: state.pendingRequests - 1,
             files: []
         };
     },
@@ -36,12 +36,12 @@ const configurationReducer = createReducer(initialState)({
         const { files } = action.payload;
         //remove the selection in case it does not exist anymore
         let selection = state.selection;
-        if(selection && !queries.getFile(files, selection)) {
+        if (selection && !utils.getFile(files, selection)) {
             selection = null;
         }
         return {
             ...state,
-            loading: state.loading - 1,
+            pendingRequests: state.pendingRequests - 1,
             files,
             selection,
             updateDate: Date.now()
@@ -59,15 +59,15 @@ const configurationReducer = createReducer(initialState)({
             ...initialState
         };
     },
-    [types.DELETE_SELECTION_STARTED]: incrementLoadingCount,
-    [types.DELETE_SELECTION_SUCCESS]: decrementLoadingCount,
-    [types.DELETE_SELECTION_FAILURE]: decrementLoadingCount,
-    [types.WRITE_FILE_STARTED]: incrementLoadingCount,
-    [types.WRITE_FILE_SUCCESS]: decrementLoadingCount,
-    [types.WRITE_FILE_FAILURE]: decrementLoadingCount,
-    [types.CREATE_DIRECTORY_STARTED]: incrementLoadingCount,
-    [types.CREATE_DIRECTORY_SUCCESS]: decrementLoadingCount,
-    [types.CREATE_DIRECTORY_FAILURE]: decrementLoadingCount
+    [types.DELETE_SELECTION_STARTED]: incrementPendingRequests,
+    [types.DELETE_SELECTION_SUCCESS]: decrementPendingRequests,
+    [types.DELETE_SELECTION_FAILURE]: decrementPendingRequests,
+    [types.WRITE_FILE_STARTED]: incrementPendingRequests,
+    [types.WRITE_FILE_SUCCESS]: decrementPendingRequests,
+    [types.WRITE_FILE_FAILURE]: decrementPendingRequests,
+    [types.CREATE_DIRECTORY_STARTED]: incrementPendingRequests,
+    [types.CREATE_DIRECTORY_SUCCESS]: decrementPendingRequests,
+    [types.CREATE_DIRECTORY_FAILURE]: decrementPendingRequests
 
 });
 

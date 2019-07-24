@@ -41,10 +41,10 @@ class FileTree extends React.Component {
 }
 
 function mapStateToProps(state) {
-    const { loading, selection } = state.configuration;
+    const { pendingRequests, selection } = state.configuration;
     return {
         files: configurationSelectors.getFileTree(state),
-        loading,
+        loading : pendingRequests > 0,
         selection
     }
 }
