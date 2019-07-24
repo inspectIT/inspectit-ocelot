@@ -1,7 +1,7 @@
 import React from 'react';
 import ace from 'ace-builds/src-noconflict/ace';
-import 'ace-builds/webpack-resolver';
 
+import 'ace-builds/webpack-resolver';
 import 'ace-builds/src-noconflict/ext-language_tools';
 import 'ace-builds/src-noconflict/ext-searchbox';
 import 'ace-builds/src-noconflict/ext-keybinding_menu';
@@ -18,37 +18,35 @@ class AceEditor extends React.Component {
     constructor(props) {
         super(props);
 
+        this.props.editorRef(this);
         this.divRef = React.createRef();
     }
 
     render() {
-        let style = {
-            width: "100%",
-            height: "100%"
-        }
         return (
-            <div ref={this.divRef} style={style} />
+            <div ref={this.divRef} style={{ width: "100%", height: "100%" }} />
         )
     }
 
     configureEditor() {
-        this.editor.setTheme("ace/theme/" + this.props.theme)
-        this.editor.getSession().setMode("ace/mode/" + this.props.mode);
+        const { theme, mode, options } = this.props;
+        this.editor.setTheme("ace/theme/" + theme)
+        this.editor.getSession().setMode("ace/mode/" + mode);
 
-        if (this.props.options) {
-            this.editor.setOptions(this.props.options);
+        if (options) {
+            this.editor.setOptions(options);
         }
     }
 
     componentDidMount() {
         this.editor = ace.edit(this.divRef.current)
-        var editorRef = this.editor;
+        const editorRef = this.editor;
+        
         ace.config.loadModule("ace/ext/keybinding_menu", function (module) {
             module.init(editorRef);
         })
 
         this.configureEditor();
-        this.props.initEditor(this.editor);
         this.updateValue();
     }
 
@@ -57,10 +55,21 @@ class AceEditor extends React.Component {
         this.updateValue();
     }
 
+    /**
+     * Updates the editor content using the `value` props and sets the cursor to the beginning of the content.
+     */
     updateValue = () => {
         if (this.props.value) {
-            this.editor.setValue(this.props.value);
+            this.editor.setValue(this.props.value, -1);
         }
+    }
+
+    executeCommand = (command) => {
+        this.editor.execCommand(command);
+    }
+
+    showShortcuts = () => {
+        this.editor.showKeyboardShortcuts();
     }
 }
 
