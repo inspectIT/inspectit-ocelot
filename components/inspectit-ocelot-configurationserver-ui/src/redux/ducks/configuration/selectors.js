@@ -1,5 +1,6 @@
 import { createSelector } from 'reselect'
 import { map, find } from 'lodash';
+import { getFile, isDirectory } from './utils';
 
 const configurationSelector = state => state.configuration;
 
@@ -49,30 +50,11 @@ export const getSelectedFile = createSelector(
     configurationSelector,
     configuration => {
         const { selection, files } = configuration;
-
-        if (!selection) {
+        if(selection) {
+            return getFile(files,selection);
+        } else {
             return null;
         }
-
-        const names = selection.split("/");
-
-        let current = files;
-        for (let idx in names) {
-            const name = names[idx];
-            const isLast = idx == names.length - 1;
-
-            if (name === "") {
-                continue;
-            }
-
-            current = find(current, { name });
-
-            if (!isLast) {
-                current = current.children;
-            }
-        }
-
-        return current;
     }
 );
 
@@ -81,11 +63,5 @@ export const getSelectedFile = createSelector(
  */
 export const isSelectionDirectory = createSelector(
     [getSelectedFile],
-    (selectedFile) => {
-        if (selectedFile) {
-            return selectedFile.type === "directory";
-        } else {
-            return false;
-        }
-    }
+    (selectedFile) => isDirectory(selectedFile)
 );
