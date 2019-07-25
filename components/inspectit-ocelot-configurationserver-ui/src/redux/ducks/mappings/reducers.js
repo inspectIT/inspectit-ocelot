@@ -13,7 +13,8 @@ const authorizationReducer = createReducer(initialState)({
         return {
             ...state,
             loading: false,
-            mappings: null
+            mappings: null,
+            updateDate: null
         };
     },
     [types.FETCH_MAPPINGS_SUCCESS]: (state, action) => {
@@ -21,7 +22,8 @@ const authorizationReducer = createReducer(initialState)({
         return {
             ...state,
             loading: false,
-            mappings
+            mappings,
+            updateDate: Date.now()
         };
     },
     [types.PUT_MAPPINGS_STARTED]: (state, action) => {
@@ -41,7 +43,8 @@ const authorizationReducer = createReducer(initialState)({
         return {
             ...state,
             loading: false,
-            mappings
+            mappings,
+            updateDate: Date.now()
         };
     }
 });

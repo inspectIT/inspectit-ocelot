@@ -1,8 +1,8 @@
 import React from 'react';
 import { connect } from 'react-redux'
 import { mappingsActions } from '../../../redux/ducks/mappings';
+import { notificationActions } from '../../../redux/ducks/notification';
 import yaml from 'js-yaml';
-import { isEqual } from 'lodash';
 
 import EditorView from "../../editor/EditorView";
 
@@ -12,20 +12,23 @@ import EditorView from "../../editor/EditorView";
 class AgentMappingsView extends React.Component {
 
     static getDerivedStateFromProps(props, state) {
-        if (!isEqual(props.mappings, state.currentMappings)) {
+        const hasUpdated = props.updateDate != state.lastUpdateDate;
+
+        if (hasUpdated) {
             const yamlMappings = props.mappings ? yaml.safeDump(props.mappings) : "";
 
             return {
-                currentMappings: props.mappings,
-                editorContent: yamlMappings
+                lastUpdateDate: props.updateDate,
+                editorValue: yamlMappings
             }
         }
+
         return null;
     }
 
     state = {
-        currentMappings: null,
-        editorContent: ""
+        lastUpdateDate: null,
+        editorValue: ""
     }
 
     componentDidMount() {
@@ -33,23 +36,36 @@ class AgentMappingsView extends React.Component {
     }
 
     onSave = (content) => {
-        // to prevent editor resets
-        this.setState({
-            editorContent: content
-        });
+        try {
+            const mappings = yaml.safeLoad(content);
 
-        const mappings = yaml.safeLoad(content);
-        this.props.putMappings(mappings);
+            // to prevent editor resets
+            this.setState({
+                editorContent: content
+            });
+
+            this.props.putMappings(mappings);
+        } catch (error) {
+            if (error.name && error.name === "YAMLException") {
+                const { message } = error;
+                this.props.showWarning("YAML Syntax Error", "Error: " + message);
+            }
+        }
     }
 
     onRefresh = () => {
         this.props.fetchMappings();
     }
 
+    onChange = (value) => {
+        this.setState({
+            editorValue: value
+        });
+    }
+
     render = () => {
         const { loading } = this.props;
-        const { editorContent } = this.state;
-
+        const { editorValue } = this.state;
         return (
             <>
                 <style jsx>{`
@@ -70,7 +86,7 @@ class AgentMappingsView extends React.Component {
                 }
                 `}</style>
                 <div className="this">
-                    <EditorView content={editorContent} onSave={this.onSave} onRefresh={this.onRefresh} enableButtons={!loading}>
+                    <EditorView value={editorValue} onSave={this.onSave} onRefresh={this.onRefresh} enableButtons={!loading} onChange={this.onChange}>
                         <div className="header">
                             <i className="pi pi-sitemap"></i>
                             <div>Agent Mappings</div>
@@ -83,16 +99,18 @@ class AgentMappingsView extends React.Component {
 };
 
 function mapStateToProps(state) {
-    const { loading, mappings } = state.mappings;
+    const { loading, mappings, updateDate } = state.mappings;
     return {
         loading,
-        mappings
+        mappings,
+        updateDate
     }
 }
 
 const mapDispatchToProps = {
     fetchMappings: mappingsActions.fetchMappings,
-    putMappings: mappingsActions.putMappings
+    putMappings: mappingsActions.putMappings,
+    showWarning: notificationActions.showWarningMessage
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(AgentMappingsView);

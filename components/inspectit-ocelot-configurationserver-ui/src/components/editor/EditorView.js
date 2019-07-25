@@ -14,7 +14,7 @@ import editorConfig from '../../data/yaml-editor-config.json'
 class EditorView extends React.Component {
 
     render() {
-        const { content, showEditor, hint, onSave, onRefresh, isRefreshing, enableButtons, children } = this.props;
+        const { value, showEditor, hint, onSave, onRefresh, onChange, isRefreshing, enableButtons, children } = this.props;
 
         return (
             <div className="this p-grid p-dir-col p-nogutter">
@@ -43,7 +43,7 @@ class EditorView extends React.Component {
                 </div>
                 <div className="p-col">
                     {showEditor ?
-                        <AceEditor editorRef={(editor) => this.editor = editor} mode="yaml" theme="cobalt" options={editorConfig} value={content} />
+                        <AceEditor editorRef={(editor) => this.editor = editor} mode="yaml" theme="cobalt" options={editorConfig} value={value} onChange={onChange} />
                         :
                         <div className="selection-information">
                             <div>{hint}</div>
