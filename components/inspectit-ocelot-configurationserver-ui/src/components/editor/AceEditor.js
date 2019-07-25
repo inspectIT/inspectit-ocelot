@@ -41,7 +41,7 @@ class AceEditor extends React.Component {
     componentDidMount() {
         this.editor = ace.edit(this.divRef.current)
         const editorRef = this.editor;
-        
+
         ace.config.loadModule("ace/ext/keybinding_menu", function (module) {
             module.init(editorRef);
         })
@@ -71,6 +71,12 @@ class AceEditor extends React.Component {
     showShortcuts = () => {
         this.editor.showKeyboardShortcuts();
     }
+
+    getValue = () => {
+        return this.editor.getSession().getValue();
+    }
+
+
 }
 
 export default AceEditor;

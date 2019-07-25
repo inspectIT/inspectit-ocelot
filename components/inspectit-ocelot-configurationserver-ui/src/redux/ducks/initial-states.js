@@ -25,8 +25,14 @@ const notification = {
     lastNotification: null
 };
 
+const mappings = {
+    loading: false,
+    mappings: null
+}
+
 export {
     authentication,
     configuration,
-    notification
+    notification,
+    mappings
 }

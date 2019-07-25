@@ -31,7 +31,7 @@ class EditorView extends React.Component {
                 <div className="p-col-fixed">
                     <EditorToolbar
                         enableButtons={showEditor}
-                        onSave={onSave}
+                        onSave={() => onSave(this.editor.getValue())}
                         onSearch={() => this.editor.executeCommand("find")}
                         onHelp={() => this.editor.showShortcuts()}>
                         {children}
