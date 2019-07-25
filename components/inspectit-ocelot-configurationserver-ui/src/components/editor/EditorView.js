@@ -14,7 +14,7 @@ import editorConfig from '../../data/yaml-editor-config.json'
 class EditorView extends React.Component {
 
     render() {
-        const { content, showEditor, hint, onSave, onRefresh, isRefreshing, children } = this.props;
+        const { content, showEditor, hint, onSave, onRefresh, isRefreshing, enableButtons, children } = this.props;
 
         return (
             <div className="this p-grid p-dir-col p-nogutter">
@@ -32,7 +32,7 @@ class EditorView extends React.Component {
                 `}</style>
                 <div className="p-col-fixed">
                     <EditorToolbar
-                        enableButtons={showEditor}
+                        enableButtons={enableButtons}
                         onRefresh={onRefresh}
                         isRefreshing={isRefreshing}
                         onSave={() => onSave(this.editor.getValue())}
@@ -68,12 +68,15 @@ EditorView.propTypes = {
     onRefresh: PropTypes.func,
     /** If true, the refresh button is disabled and showing a spinner. */
     isRefreshing: PropTypes.bool,
+    /** Whether the toolbar buttons should be enabled or disabled. */
+    enableButtons: PropTypes.bool,
     /** The children will be shown in the toolbar. Can be used e.g. to show additional information. */
     children: PropTypes.element
 }
 
 EditorView.defaultProps = {
-    showEditor: true
+    showEditor: true,
+    enableButtons: true
 };
 
 export default EditorView;

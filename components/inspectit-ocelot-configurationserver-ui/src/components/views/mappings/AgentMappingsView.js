@@ -70,7 +70,7 @@ class AgentMappingsView extends React.Component {
                 }
                 `}</style>
                 <div className="this">
-                    <EditorView content={editorContent} onSave={this.onSave} onChange={this.onChange} onRefresh={this.onRefresh} isRefreshing={loading}>
+                    <EditorView content={editorContent} onSave={this.onSave} onRefresh={this.onRefresh} enableButtons={!loading}>
                         <div className="header">
                             <i className="pi pi-sitemap"></i>
                             <div>Agent Mappings</div>
