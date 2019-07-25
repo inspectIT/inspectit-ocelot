@@ -26,7 +26,9 @@ const notification = {
 };
 
 const mappings = {
+    /** Specifies whether the agent mappings are currently being loaded. */
     loading: false,
+    /** The current agent mappings. */
     mappings: null
 }
 

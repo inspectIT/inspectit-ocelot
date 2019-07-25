@@ -6,14 +6,18 @@ import { isEqual } from 'lodash';
 
 import EditorView from "../../editor/EditorView";
 
+/**
+ * The view for managing the agent mappings.
+ */
 class AgentMappingsView extends React.Component {
 
     static getDerivedStateFromProps(props, state) {
         if (!isEqual(props.mappings, state.currentMappings)) {
-            console.log("update");
-            
+            const yamlMappings = props.mappings ? yaml.safeDump(props.mappings) : "";
+
             return {
-                currentMappings: props.mappings
+                currentMappings: props.mappings,
+                editorContent: yamlMappings
             }
         }
         return null;
@@ -21,29 +25,30 @@ class AgentMappingsView extends React.Component {
 
     state = {
         currentMappings: null,
-        editorContent: "asd"
+        editorContent: ""
     }
 
     componentDidMount() {
-        this.props.fetchMappings();
+        this.onRefresh();
     }
 
     onSave = (content) => {
+        // to prevent editor resets
+        this.setState({
+            editorContent: content
+        });
+
         const mappings = yaml.safeLoad(content);
         this.props.putMappings(mappings);
     }
 
-    onChange = (value) => {
-        console.log(value);
-        
-        this.setState({
-            editorContent: value
-        });
+    onRefresh = () => {
+        this.props.fetchMappings();
     }
 
     render = () => {
-        const { currentMappings, editorContent } = this.state;
-        const yamlMappings = yaml.safeDump(currentMappings);
+        const { loading } = this.props;
+        const { editorContent } = this.state;
 
         return (
             <>
@@ -65,7 +70,7 @@ class AgentMappingsView extends React.Component {
                 }
                 `}</style>
                 <div className="this">
-                    <EditorView content={editorContent} showEditor={true} onSave={this.onSave} onChange={this.onChange}>
+                    <EditorView content={editorContent} onSave={this.onSave} onChange={this.onChange} onRefresh={this.onRefresh} isRefreshing={loading}>
                         <div className="header">
                             <i className="pi pi-sitemap"></i>
                             <div>Agent Mappings</div>

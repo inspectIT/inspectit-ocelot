@@ -99,7 +99,7 @@ class ConfigurationView extends React.Component {
                     <div className="details">Last update: {this.props.updateDate ? new Date(this.props.updateDate).toLocaleString() : "-"}</div>
                 </div>
                 <EditorView showEditor={showEditor} content={this.props.selection} hint={"Select a file to start editing."} onSave={this.onSave}>
-                    {showHeader && <EditorHeader icon={icon} path={path} name={name} />}
+                    {showHeader ? <EditorHeader icon={icon} path={path} name={name} /> : null}
                 </EditorView>
             </div>
         );
