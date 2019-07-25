@@ -11,6 +11,7 @@ import rocks.inspectit.ocelot.agentconfiguration.AgentConfiguration;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 
+import java.time.Duration;
 import java.util.Date;
 import java.util.Map;
 
@@ -26,6 +27,7 @@ public class AgentStatusManagerTest {
     void init() {
         manager.config = InspectitServerSettings.builder()
                 .maxAgents(100)
+                .agentEvictionDelay(Duration.ofDays(1))
                 .build();
         manager.reset();
     }

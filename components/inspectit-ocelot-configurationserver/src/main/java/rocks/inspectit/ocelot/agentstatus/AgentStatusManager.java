@@ -12,6 +12,7 @@ import javax.annotation.PostConstruct;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Holds a history of when agents last fetched their configuration.
@@ -39,6 +40,7 @@ public class AgentStatusManager {
         attributesToConfigurationCache = CacheBuilder
                 .newBuilder()
                 .maximumSize(config.getMaxAgents())
+                .expireAfterWrite(config.getAgentEvictionDelay().toMillis(), TimeUnit.MILLISECONDS)
                 .build();
     }
 
