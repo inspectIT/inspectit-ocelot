@@ -4,17 +4,28 @@ import rocks.inspectit.ocelot.config.model.InspectitConfig;
 
 /**
  * Base class for all plugins.
- * To be loaded plugins also need to have the {@link OcelotPlugin} annotation.
+ * Plugins need to have the {@link OcelotPlugin} annotation, otherwise they won't be loaded.
  *
  * @param <T> the configuration class for this plugin, see {@link #getConfigurationClass()}
  */
 public interface ConfigurablePlugin<T> {
 
     /**
-     * Invoked when (a) the plugin is first loaded or (b) any configuration property has changed.
+     * Invoked when the plugin is first loaded.
+     * If the user configuration is not valid, e.g. if a a field annotated with @NotBlank is blank, this method will not be called
+     * until the configuration is valid.
+     *
+     * @param inspectitConfig the inspectit main configuration
+     * @param pluginConfig    the plugin specific validated configuration.
+     */
+    void start(InspectitConfig inspectitConfig, T pluginConfig);
+
+    /**
+     * Invoked when any configuration property has changed after {@link #start(InspectitConfig, Object)} has already been invoked.
+     * <p>
      * In this method, the plugin should react to configuration changed (E.g. by starting or stopping an exporter).
      * If the user configuration is not valid, e.g. if a a field annotated with @NotBlank is blank, this method will not be called
-     * until the configuration si fixed.
+     * until the configuration is valid.
      *
      * @param inspectitConfig the inspectit main configuration
      * @param pluginConfig    the plugin specific validated configuration.
@@ -31,7 +42,7 @@ public interface ConfigurablePlugin<T> {
     Class<T> getConfigurationClass();
 
     /**
-     * Invoked when the ocelot shuts down.
+     * Invoked when the ocelot agent shuts down.
      */
     default void destroy() {
     }

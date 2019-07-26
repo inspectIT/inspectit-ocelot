@@ -30,7 +30,7 @@ class LoadedPlugin {
     private final ConfigurablePlugin plugin;
 
     /**
-     * The value of plugin#getConfigurationClass(), stored to prevent inconsistencies by faulting plugins.
+     * The value of{@link ConfigurablePlugin#getConfigurationClass()}, stored to prevent inconsistencies by faulting plugins.
      */
     private final Class<?> configClass;
 
@@ -43,9 +43,16 @@ class LoadedPlugin {
     /**
      * Stores the last config with which plugin.update was called on {@link #plugin}.
      * This is used to ensure that update is only called again if anything has changed.
-     * This object is an Instance
+     * This object is an Instance of the plugins specific configuration,
+     * parsed from inspectit.plugin.{pluginname}.
      */
     private Object lastPluginConfig;
+
+    /**
+     * True, if the plugins {@link ConfigurablePlugin#start(InspectitConfig, Object)} method has already been called.
+     * This means that subsequent updates will only invoke {@link ConfigurablePlugin#update(InspectitConfig, Object)}
+     */
+    boolean startCalled = false;
 
     public LoadedPlugin(ConfigurablePlugin plugin, String name) {
         this.plugin = plugin;
@@ -60,7 +67,6 @@ class LoadedPlugin {
      *
      * @param env the InspectitEnvironment which owns the property sources and the active {@link InspectitConfig}
      */
-    @SuppressWarnings("unchecked")
     public void updateConfiguration(InspectitEnvironment env) {
         InspectitConfig newInspectitConfig = env.getCurrentConfig();
         if (configClass != null) {
@@ -71,18 +77,41 @@ class LoadedPlugin {
                 if (!Objects.equals(newInspectitConfig, lastInspectitConfig) || !Objects.equals(lastPluginConfig, newPluginConfig)) {
                     lastPluginConfig = newPluginConfig;
                     lastInspectitConfig = newInspectitConfig;
-                    withPluginClassloader(() ->
-                            plugin.update(newInspectitConfig, lastPluginConfig));
+                    callStartOrUpdate(newInspectitConfig, lastPluginConfig);
                 }
             }
         } else {
             if (!Objects.equals(newInspectitConfig, lastInspectitConfig)) {
                 lastInspectitConfig = newInspectitConfig;
-                plugin.update(newInspectitConfig, null);
+                callStartOrUpdate(newInspectitConfig, null);
             }
         }
     }
 
+    /**
+     * If {@link ConfigurablePlugin#start(InspectitConfig, Object)} ahs not been invoked yet,
+     * it will be invoked with the given arguments. Otherwise
+     * {@link ConfigurablePlugin#update(InspectitConfig, Object)} (InspectitConfig, Object)} is called.
+     *
+     * @param inspectitConf the inspectit configuration to pass to the plugin
+     * @param pluginConfig  the plugins configuration to pass to the plugin
+     */
+    @SuppressWarnings("unchecked")
+    private void callStartOrUpdate(InspectitConfig inspectitConf, Object pluginConfig) {
+        if (startCalled) {
+            withPluginClassloader(() -> plugin.update(inspectitConf, pluginConfig));
+        } else {
+            startCalled = true;
+            withPluginClassloader(() -> plugin.start(inspectitConf, pluginConfig));
+        }
+    }
+
+    /**
+     * Executes the given function, but sets the context classloader of the thread to the plugins classloader.
+     * This ensures that class-path scanning works correctly if used by any plugin.
+     *
+     * @param r the function to execute
+     */
     public void withPluginClassloader(Runnable r) {
         Thread thread = Thread.currentThread();
         ClassLoader prevContextClassLoader = thread.getContextClassLoader();
@@ -94,6 +123,9 @@ class LoadedPlugin {
         }
     }
 
+    /**
+     * Destroys the loaded plugin.
+     */
     public void destroy() {
         withPluginClassloader(plugin::destroy);
     }

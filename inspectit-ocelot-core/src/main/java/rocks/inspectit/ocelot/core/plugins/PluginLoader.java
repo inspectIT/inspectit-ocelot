@@ -11,6 +11,8 @@ import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.DoNotInstrumentMarker;
+import rocks.inspectit.ocelot.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.config.model.plugins.PluginSettings;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.config.PropertySourcesChangedEvent;
 import rocks.inspectit.ocelot.core.config.util.PropertyUtils;
@@ -27,8 +29,9 @@ import java.util.*;
 
 /**
  * This component scans the path specified by inspectit.plugins.path for Jar-files.
- * These files are in turn scanned for classes having the {@link OcelotPlugin} annotation, which are then loaded.
- * This class also keeps
+ * These files will then be scanned for classes having the {@link OcelotPlugin} annotation, which are then loaded.
+ * This component is also responsible for keeping plugin configurations up-to-date.
+ * If the configuration changes {@link ConfigurablePlugin#update(InspectitConfig, Object)} will be invoked.
  * <p>
  * This component only performs the scanning at startup time, meaning
  * that dynamically adding or removing plugins is currently not supported.
@@ -43,7 +46,6 @@ public class PluginLoader {
      */
     private static final String PROPERTY_SOURCE_NAME = "Plugin Default Configurations";
 
-
     @Autowired
     private InspectitEnvironment env;
 
@@ -53,6 +55,11 @@ public class PluginLoader {
     @VisibleForTesting
     List<LoadedPlugin> plugins = new ArrayList<>();
 
+    /**
+     * Scans the path configured by {@link PluginSettings#getPath()} for Jars.
+     * These jars are scannend for classes having the {@link OcelotPlugin} annotation.
+     * The corresponding plugins are then loaded and initialized.
+     */
     @PostConstruct
     private void scanAndLoadPlugins() {
         String directory = env.getCurrentConfig().getPlugins().getPath();
@@ -103,12 +110,19 @@ public class PluginLoader {
         }
     }
 
-
+    /**
+     * Loads the given jar file into an isolated classloader.
+     * All classes with the {@link OcelotPlugin} annotation are found
+     * and {@link #initializePlugin(Class, Properties)} is invoked for each.
+     *
+     * @param jar
+     * @param defaultConfigurations
+     * @throws MalformedURLException
+     */
     private void loadPluginJar(File jar, Properties defaultConfigurations) throws MalformedURLException {
         ClassLoader pluginLoader = new PluginClassLoader(jar.toURI().toURL());
         //TODO: replace Reflections library with a faster solution which simply scans the given Jar for the annotation
-        //this can be done by enuemrating all .class files using JarFile and then loading the classes using Class.forName()
-        //alternatively we can use ASM to avoid loading the class at all
+        //this can be done by enumerating all .class files using JarFile and then inspecting them with ASM.
         Set<Class<?>> list = new Reflections(pluginLoader)
                 .getTypesAnnotatedWith(OcelotPlugin.class);
         list.stream()
