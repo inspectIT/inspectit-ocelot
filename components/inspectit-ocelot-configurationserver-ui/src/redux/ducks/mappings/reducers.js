@@ -12,9 +12,7 @@ const authorizationReducer = createReducer(initialState)({
     [types.FETCH_MAPPINGS_FAILURE]: (state, action) => {
         return {
             ...state,
-            loading: false,
-            mappings: null,
-            updateDate: null
+            loading: false
         };
     },
     [types.FETCH_MAPPINGS_SUCCESS]: (state, action) => {
