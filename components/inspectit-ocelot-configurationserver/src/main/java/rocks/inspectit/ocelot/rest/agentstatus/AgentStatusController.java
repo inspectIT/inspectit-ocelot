@@ -25,7 +25,7 @@ public class AgentStatusController extends AbstractBaseController {
 
     @ApiOperation(value = "Fetch the List of Agent Statuses", notes = "Gives a list of connected agents")
     @GetMapping(value = "agentstatus")
-    public Collection<AgentStatus> fetchAgentStatuses(@RequestParam Map<String, String> attributes) {
+    public Collection<AgentStatus> getAgentStatuses(@RequestParam Map<String, String> attributes) {
         return statusManager.getAgentStatuses();
     }
 

@@ -15,8 +15,8 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Holds a history of when agents last fetched their configuration.
- * This is useful for detecting which agents are actively connected.
+ * Holds a history when agents last fetched their configuration.
+ * This is useful for detecting which agents are active.
  */
 @Component
 public class AgentStatusManager {
@@ -26,18 +26,17 @@ public class AgentStatusManager {
     InspectitServerSettings config;
 
     /**
-     * Cache mapping attribute-maps to configurations.
-     * This is a loading cache which has all mappings with their configurations in-memory.
-     * If the mappings or any configuration file change, this cache is replaced with a new one.
+     * Cache storing the most recent status for each agent based on its attributes.
+     * This cache is limited in size and has an expiration based on {@link #config}
      */
-    private Cache<Map<String, String>, AgentStatus> attributesToConfigurationCache;
+    private Cache<Map<String, String>, AgentStatus> attributesToAgentStatusCache;
 
     /**
      * Clears the connection history.
      */
     @PostConstruct
     public void reset() {
-        attributesToConfigurationCache = CacheBuilder
+        attributesToAgentStatusCache = CacheBuilder
                 .newBuilder()
                 .maximumSize(config.getMaxAgents())
                 .expireAfterWrite(config.getAgentEvictionDelay().toMillis(), TimeUnit.MILLISECONDS)
@@ -56,13 +55,13 @@ public class AgentStatusManager {
                 .lastConfigFetch(new Date())
                 .mappingName(resultConfiguration == null ? null : resultConfiguration.getMapping().getName())
                 .build();
-        attributesToConfigurationCache.put(agentAttributes, newStatus);
+        attributesToAgentStatusCache.put(agentAttributes, newStatus);
     }
 
     /**
      * @return a collection of all agent statuses since {@link #reset()} was called.
      */
     public Collection<AgentStatus> getAgentStatuses() {
-        return attributesToConfigurationCache.asMap().values();
+        return attributesToAgentStatusCache.asMap().values();
     }
 }
