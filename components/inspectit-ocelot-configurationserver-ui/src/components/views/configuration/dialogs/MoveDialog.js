@@ -73,26 +73,26 @@ class MoveDialog extends React.Component {
     componentDidUpdate() {
         if (this.state.resetSelection) {
             const { targetPath } = this.state;
-            const selStart = targetPath.lastIndexOf("/") + 1
+            const selStart = targetPath.lastIndexOf("/") + 1;
             const selEnd = targetPath.length;
             const inputElem = this.input.current.element;
             inputElem.focus();
             inputElem.setSelectionRange(selStart, selEnd);
-            this.setState({ resetSelection: false })
+            this.setState({ resetSelection: false });
         }
     }
 
     onKeyPress = (e) => {
         if (e.key === 'Enter') {
-            this.performMove()
+            this.performMove();
         }
     }
 
     performMove = () => {
-        const source = this.props.selection
-        const target = this.getAbsoluteTargetPath()
+        const source = this.props.selection;
+        const target = this.getAbsoluteTargetPath();
         if (source != target) {
-            this.props.move(source, target, true)
+            this.props.move(source, target, true);
         }
         this.props.onHide();
     }
@@ -110,7 +110,6 @@ class MoveDialog extends React.Component {
                 targetPath = targetPath.substring(0, lastDot);
             }
         }
-        console.log("A " + targetPath)
         this.setState({ targetPathEnding, targetPath, resetSelection: true });
     }
 

@@ -81,18 +81,18 @@ export const deleteSelection = (fetchFilesOnSuccess) => {
 
         let filePath = selection.startsWith("/") ? selection.substring(1) : selection;
 
-        dispatch({type : types.DELETE_SELECTION_STARTED});
+        dispatch({ type: types.DELETE_SELECTION_STARTED });
 
         axios
-            .delete( (isDirectory ? "/directories/" : "/files/") + filePath)
+            .delete((isDirectory ? "/directories/" : "/files/") + filePath)
             .then(res => {
-                dispatch({type : types.DELETE_SELECTION_SUCCESS});
-                if(fetchFilesOnSuccess) {
+                dispatch({ type: types.DELETE_SELECTION_SUCCESS });
+                if (fetchFilesOnSuccess) {
                     dispatch(fetchFiles());
                 }
             })
             .catch((error) => {
-                dispatch({type : types.DELETE_SELECTION_FAILURE});
+                dispatch({ type: types.DELETE_SELECTION_FAILURE });
             });
     };
 };
@@ -102,25 +102,25 @@ export const deleteSelection = (fetchFilesOnSuccess) => {
  * Attempts to write the given contents to the given file.
  * Triggers fetchFiles() if requested on success.
  */
-export const writeFile = (file,content,fetchFilesOnSuccess) => {
+export const writeFile = (file, content, fetchFilesOnSuccess) => {
     return (dispatch) => {
 
         let filePath = file.startsWith("/") ? file.substring(1) : file;
 
-        dispatch({type : types.WRITE_FILE_STARTED});
+        dispatch({ type: types.WRITE_FILE_STARTED });
 
         axios
             .put("/files/" + filePath, {
                 content
             })
             .then(res => {
-                dispatch({type : types.WRITE_FILE_SUCCESS});
+                dispatch({ type: types.WRITE_FILE_SUCCESS });
                 if (fetchFilesOnSuccess) {
                     dispatch(fetchFiles());
                 }
             })
             .catch((error) => {
-                dispatch({type : types.WRITE_FILE_FAILURE});
+                dispatch({ type: types.WRITE_FILE_FAILURE });
             });
     };
 };
@@ -130,23 +130,23 @@ export const writeFile = (file,content,fetchFilesOnSuccess) => {
  * Attempts to create the given directory.
  * Triggers fetchFiles() if requested on success.
  */
-export const createDirectory = (path,fetchFilesOnSuccess) => {
+export const createDirectory = (path, fetchFilesOnSuccess) => {
     return (dispatch) => {
 
         let dirPath = path.startsWith("/") ? path.substring(1) : path;
 
-        dispatch({type : types.CREATE_DIRECTORY_STARTED});
+        dispatch({ type: types.CREATE_DIRECTORY_STARTED });
 
         axios
             .put("/directories/" + dirPath)
             .then(res => {
-                dispatch({type : types.CREATE_DIRECTORY_SUCCESS});
+                dispatch({ type: types.CREATE_DIRECTORY_SUCCESS });
                 if (fetchFilesOnSuccess) {
                     dispatch(fetchFiles());
                 }
             })
             .catch((error) => {
-                dispatch({type : types.CREATE_DIRECTORY_FAILURE});
+                dispatch({ type: types.CREATE_DIRECTORY_FAILURE });
             });
     };
 };
@@ -155,27 +155,27 @@ export const createDirectory = (path,fetchFilesOnSuccess) => {
 /**
  * Attempts to move the given directory or file.
  */
-export const move = (path,targetPath,fetchFilesOnSuccess) => {
+export const move = (path, targetPath, fetchFilesOnSuccess) => {
     return (dispatch) => {
 
-        dispatch({type : types.MOVE_STARTED});
-        let req = {
+        dispatch({ type: types.MOVE_STARTED });
+        let payload = {
             source: path,
-            target : targetPath
+            target: targetPath
         };
         axios
-            .put("/move" , req)
+            .put("/move", payload)
             .then(res => {
                 dispatch({
-                    type : types.MOVE_SUCCESS,
-                    payload : req
+                    type: types.MOVE_SUCCESS,
+                    payload,
                 });
                 if (fetchFilesOnSuccess) {
                     dispatch(fetchFiles());
                 }
             })
             .catch((error) => {
-                dispatch({type : types.MOVE_FAILURE});
+                dispatch({ type: types.MOVE_FAILURE });
             });
     };
 };

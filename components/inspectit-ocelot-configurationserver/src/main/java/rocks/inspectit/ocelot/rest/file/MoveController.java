@@ -18,16 +18,17 @@ public class MoveController extends FileBaseController {
     @ApiOperation(value = "Move or rename a file or directory")
     @PutMapping(value = "move")
     public void moveFileOrDirectory(@RequestBody FileMoveDescription moveDescription) throws IOException {
-        //remove leading slashes
-        String source = moveDescription.getSource();
-        String target = moveDescription.getTarget();
-        if (StringUtils.startsWith(source, "/")) {
-            source = source.substring(1);
-        }
-        if (StringUtils.startsWith(target, "/")) {
-            target = target.substring(1);
-        }
+        String source = removeLeadingSlash(moveDescription.getSource());
+        String target = removeLeadingSlash(moveDescription.getTarget());
         fileManager.move(source, target);
+    }
+
+    private String removeLeadingSlash(String path) {
+        if (StringUtils.startsWith(path, "/")) {
+            return path.substring(1);
+        } else {
+            return path;
+        }
     }
 
 }

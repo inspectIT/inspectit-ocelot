@@ -21,7 +21,7 @@ const configuration = {
      * With the moveHistory, it is possible to corret the selection, in case the selected file was moved.
      * The moveHistory is cleared after a files have been refetched.
      */
-    moveHistory: [/*{soruce, target}*/],
+    moveHistory: [/*{source, target}*/],
     /** The date when the configuration files have been fetched. */
     updateDate: null,
     /** The (abosolute) path of the currently selected file in the configuration file tree. */

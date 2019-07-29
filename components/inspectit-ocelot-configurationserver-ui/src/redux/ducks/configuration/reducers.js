@@ -18,7 +18,7 @@ const decrementPendingRequests = (state) => {
     };
 }
 
-function movePathIfRequired(path,moveHistory) {
+const movePathIfRequired = (path,moveHistory) => {
     if(!path) return path;
     let resultPath = path;
     for(const {source,target} of moveHistory) {
