@@ -28,7 +28,8 @@ class AgentMappingsView extends React.Component {
 
     state = {
         lastUpdateDate: null,
-        editorValue: ""
+        editorValue: "",
+        yamlError: null
     }
 
     componentDidMount() {
@@ -61,11 +62,24 @@ class AgentMappingsView extends React.Component {
         this.setState({
             editorValue: value
         });
+
+        let errorMessage = null;
+        try {
+            yaml.safeLoad(value);
+        } catch (error) {
+            errorMessage = "YAML cannot be parsed.";
+            if (error.message) {
+                errorMessage = "YAML Syntax Error: " + error.message;
+            }
+        }
+        this.setState({
+            yamlError: errorMessage
+        });
     }
 
     render = () => {
         const { loading } = this.props;
-        const { editorValue } = this.state;
+        const { editorValue, yamlError } = this.state;
         return (
             <>
                 <style jsx>{`
@@ -86,7 +100,16 @@ class AgentMappingsView extends React.Component {
                 }
                 `}</style>
                 <div className="this">
-                    <EditorView value={editorValue} onSave={this.onSave} onRefresh={this.onRefresh} enableButtons={!loading} onChange={this.onChange}>
+                    <EditorView
+                        value={editorValue}
+                        onSave={this.onSave}
+                        onRefresh={this.onRefresh}
+                        enableButtons={!loading}
+                        onChange={this.onChange}
+                        isErrorNotification={true}
+                        canSave={!yamlError}
+                        notificationIcon="pi-exclamation-triangle"
+                        notificationText={yamlError}>
                         <div className="header">
                             <i className="pi pi-sitemap"></i>
                             <div>Agent Mappings</div>

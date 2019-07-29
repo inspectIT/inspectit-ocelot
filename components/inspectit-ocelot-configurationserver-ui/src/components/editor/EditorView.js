@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic'
 const AceEditor = dynamic(() => import('./AceEditor'), { ssr: false });
 
 import editorConfig from '../../data/yaml-editor-config.json'
+import Notificationbar from './Notificationbar';
 
 /**
  * Editor view consisting of the AceEditor and a toolbar.
@@ -14,7 +15,7 @@ import editorConfig from '../../data/yaml-editor-config.json'
 class EditorView extends React.Component {
 
     render() {
-        const { value, showEditor, hint, onSave, onRefresh, onChange, isRefreshing, enableButtons, children } = this.props;
+        const { value, showEditor, hint, onSave, onRefresh, onChange, isRefreshing, enableButtons, isErrorNotification, notificationIcon, notificationText, canSave, children } = this.props;
 
         return (
             <div className="this p-grid p-dir-col p-nogutter">
@@ -33,6 +34,7 @@ class EditorView extends React.Component {
                 <div className="p-col-fixed">
                     <EditorToolbar
                         enableButtons={enableButtons}
+                        canSave={canSave}
                         onRefresh={onRefresh}
                         isRefreshing={isRefreshing}
                         onSave={() => onSave(this.editor.getValue())}
@@ -49,6 +51,9 @@ class EditorView extends React.Component {
                             <div>{hint}</div>
                         </div>
                     }
+                </div>
+                <div className="p-col-fixed">
+                    {notificationText ? <Notificationbar text={notificationText} isError={isErrorNotification} icon={notificationIcon} /> : null}
                 </div>
             </div>
         );
@@ -71,12 +76,21 @@ EditorView.propTypes = {
     /** Whether the toolbar buttons should be enabled or disabled. */
     enableButtons: PropTypes.bool,
     /** The children will be shown in the toolbar. Can be used e.g. to show additional information. */
-    children: PropTypes.element
+    children: PropTypes.element,
+    /** Whether the save button is enabled or not. The save button is enabled only if the `enableButtons` is true.  */
+    canSave: PropTypes.bool,
+    /** Whether the notification bar is showing an error or not. */
+    isErrorNotification: PropTypes.bool,
+    /** The icon class to show in the notification bar. */
+    notificationIcon: PropTypes.string,
+    /** The text to show in the notification bar. */
+    notificationText: PropTypes.string,
 }
 
 EditorView.defaultProps = {
     showEditor: true,
-    enableButtons: true
+    enableButtons: true,
+    canSave: true
 };
 
 export default EditorView;
