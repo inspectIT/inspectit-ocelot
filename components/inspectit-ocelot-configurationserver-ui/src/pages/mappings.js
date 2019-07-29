@@ -3,6 +3,7 @@ import MainLayout from '../layout/MainLayout'
 import Head from 'next/head'
 
 import { BASE_PAGE_TITLE } from '../data/constants'
+import AgentMappingsView from '../components/views/mappings/AgentMappingsView';
 
 class MappingsPage extends React.Component {
 
@@ -13,7 +14,7 @@ class MappingsPage extends React.Component {
           <title>{BASE_PAGE_TITLE} | Agent Mappings</title>
         </Head>
 
-        
+        <AgentMappingsView />
       </MainLayout>
     )
   }
