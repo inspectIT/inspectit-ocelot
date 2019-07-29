@@ -6,20 +6,20 @@ const authorizationReducer = createReducer(initialState)({
     [types.FETCH_MAPPINGS_STARTED]: (state, action) => {
         return {
             ...state,
-            loading: true
+            pendingRequests: state.pendingRequests + 1
         };
     },
     [types.FETCH_MAPPINGS_FAILURE]: (state, action) => {
         return {
             ...state,
-            loading: false
+            pendingRequests: state.pendingRequests - 1
         };
     },
     [types.FETCH_MAPPINGS_SUCCESS]: (state, action) => {
         const { mappings } = action.payload;
         return {
             ...state,
-            loading: false,
+            pendingRequests: state.pendingRequests - 1,
             mappings,
             updateDate: Date.now()
         };
@@ -27,20 +27,20 @@ const authorizationReducer = createReducer(initialState)({
     [types.PUT_MAPPINGS_STARTED]: (state, action) => {
         return {
             ...state,
-            loading: true
+            pendingRequests: state.pendingRequests + 1
         };
     },
     [types.PUT_MAPPINGS_FAILURE]: (state, action) => {
         return {
             ...state,
-            loading: false
+            pendingRequests: state.pendingRequests - 1
         };
     },
     [types.PUT_MAPPINGS_SUCCESS]: (state, action) => {
         const { mappings } = action.payload;
         return {
             ...state,
-            loading: false,
+            pendingRequests: state.pendingRequests - 1,
             mappings,
             updateDate: Date.now()
         };

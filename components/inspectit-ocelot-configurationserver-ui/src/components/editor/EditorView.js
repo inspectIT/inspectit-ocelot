@@ -61,8 +61,8 @@ class EditorView extends React.Component {
 }
 
 EditorView.propTypes = {
-    /** The content of the editor */
-    content: PropTypes.string,
+    /** The value of the editor */
+    value: PropTypes.string,
     /** Whether the editor should be shown or hidden. */
     showEditor: PropTypes.bool,
     /** The hint which will be shown if the editor is hidden. */

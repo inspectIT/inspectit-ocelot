@@ -122,9 +122,9 @@ class AgentMappingsView extends React.Component {
 };
 
 function mapStateToProps(state) {
-    const { loading, mappings, updateDate } = state.mappings;
+    const { pendingRequests, mappings, updateDate } = state.mappings;
     return {
-        loading,
+        loading: pendingRequests > 0,
         mappings,
         updateDate
     }

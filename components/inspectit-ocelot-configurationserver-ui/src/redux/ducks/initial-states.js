@@ -26,8 +26,8 @@ const notification = {
 };
 
 const mappings = {
-    /** Specifies whether the agent mappings are currently being loaded. */
-    loading: false,
+    /** Specifies how many requests are currently loading in the background */
+    pendingRequests: 0,
     /** The current agent mappings. */
     mappings: null,
     /** The date when the agent mappings have been fetched. */
