@@ -30,6 +30,7 @@ const mappings = {
     loading: false,
     /** The current agent mappings. */
     mappings: null,
+    /** The date when the agent mappings have been fetched. */
     updateDate: null
 }
 
