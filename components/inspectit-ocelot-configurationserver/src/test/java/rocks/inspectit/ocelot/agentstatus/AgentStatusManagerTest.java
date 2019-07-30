@@ -36,7 +36,7 @@ public class AgentStatusManagerTest {
     class NotifyAgentConfigurationFetched {
 
         @Test
-        void testNoMappingFound() throws Exception {
+        void testNoMappingFound() {
             Map<String, String> attributes = ImmutableMap.of("service", "test");
             manager.notifyAgentConfigurationFetched(attributes, null);
 
@@ -51,7 +51,7 @@ public class AgentStatusManagerTest {
 
 
         @Test
-        void testMappingFound() throws Exception {
+        void testMappingFound() {
             Map<String, String> attributes = ImmutableMap.of("service", "test");
             AgentConfiguration conf = new AgentConfiguration(
                     AgentMapping.builder()
