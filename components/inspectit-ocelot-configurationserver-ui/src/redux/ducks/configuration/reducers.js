@@ -18,13 +18,13 @@ const decrementPendingRequests = (state) => {
     };
 }
 
-const movePathIfRequired = (path,moveHistory) => {
-    if(!path) return path;
+const movePathIfRequired = (path, moveHistory) => {
+    if (!path) return path;
     let resultPath = path;
-    for(const {source,target} of moveHistory) {
-        if(resultPath == source) { //the file itself was moved
+    for (const { source, target } of moveHistory) {
+        if (resultPath == source) { //the file itself was moved
             resultPath = target;
-        } else if(resultPath.startsWith(source + "/")) { //a parent was moved
+        } else if (resultPath.startsWith(source + "/")) { //a parent was moved
             resultPath = target + resultPath.substring(source.length);
         }
     }
@@ -66,7 +66,7 @@ const configurationReducer = createReducer(initialState)({
         return {
             ...state,
             selection,
-            fileContent: null
+            selectedFileContent: null
         };
     },
     [types.RESET]: (state, action) => {
@@ -87,18 +87,29 @@ const configurationReducer = createReducer(initialState)({
         };
     },
     [types.FETCH_FILE_SUCCESS]: (state, action) => {
-        const {fileContent} = action.payload;
+        const { fileContent } = action.payload;
         return {
             ...state,
             pendingRequests: state.pendingRequests - 1,
-            fileContent 
+            selectedFileContent: fileContent
         };
     },
     [types.DELETE_SELECTION_STARTED]: incrementPendingRequests,
     [types.DELETE_SELECTION_SUCCESS]: decrementPendingRequests,
     [types.DELETE_SELECTION_FAILURE]: decrementPendingRequests,
     [types.WRITE_FILE_STARTED]: incrementPendingRequests,
-    [types.WRITE_FILE_SUCCESS]: decrementPendingRequests,
+    [types.WRITE_FILE_SUCCESS]: (state, action) => {
+        const nextState = {
+            ...state,
+            pendingRequests: state.pendingRequests - 1
+        };
+
+        if (action.payload) {
+            nextState.selectedFileContent = action.payload.content;
+        }
+
+        return nextState;
+    },
     [types.WRITE_FILE_FAILURE]: decrementPendingRequests,
     [types.CREATE_DIRECTORY_STARTED]: incrementPendingRequests,
     [types.CREATE_DIRECTORY_SUCCESS]: decrementPendingRequests,

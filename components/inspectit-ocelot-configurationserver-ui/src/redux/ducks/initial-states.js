@@ -27,7 +27,7 @@ const configuration = {
     /** The (abosolute) path of the currently selected file in the configuration file tree. */
     selection: null,
     /** The content of the currently selected file. */
-    fileContent: null
+    selectedFileContent: null
 };
 
 const notification = {

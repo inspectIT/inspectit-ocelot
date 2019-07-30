@@ -48,7 +48,6 @@ function mapStateToProps(state) {
     const { pendingRequests, selection, files } = state.configuration;
     return {
         files: configurationSelectors.getFileTree(state),
-        rawFiles: files,
         loading: pendingRequests > 0,
         selection
     }
@@ -56,7 +55,6 @@ function mapStateToProps(state) {
 
 const mapDispatchToProps = {
     fetchFiles: configurationActions.fetchFiles,
-    fetchFile: configurationActions.fetchFile,
     selectFile: configurationActions.selectFile
 }
 

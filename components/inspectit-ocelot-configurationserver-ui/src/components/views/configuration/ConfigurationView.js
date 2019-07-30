@@ -77,7 +77,7 @@ class ConfigurationView extends React.Component {
 
     onSave = () => {
         const { currentSelection, currentValue } = this.state;
-        this.props.writeFile(currentSelection, currentValue, false, true);
+        this.props.writeFile(currentSelection, currentValue, false);
     }
 
     onChange = (value) => {
@@ -163,13 +163,13 @@ class ConfigurationView extends React.Component {
 }
 
 function mapStateToProps(state) {
-    const { updateDate, selection, fileContent, pendingRequests } = state.configuration;
+    const { updateDate, selection, selectedFileContent, pendingRequests } = state.configuration;
 
     return {
         updateDate,
         selection,
         isDirectory: configurationSelectors.isSelectionDirectory(state),
-        fileContent,
+        fileContent: selectedFileContent,
         loading: pendingRequests > 0
     }
 }

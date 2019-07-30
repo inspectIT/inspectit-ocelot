@@ -23,19 +23,29 @@ export const fetchFiles = () => {
     };
 };
 
-export const fetchFile = (file) => {
-    return dispatch => {
-        dispatch({ type: types.FETCH_FILE_STARTED });
+/**
+ * Fetches the content of the selected file.
+ */
+export const fetchSelectedFile = () => {
+    return (dispatch, getState) => {
+        const { selection } = getState().configuration;
 
-        axios
-            .get("/files" + file)
-            .then(res => {
-                const fileContent = res.data.content;
-                dispatch({ type: types.FETCH_FILE_SUCCESS, payload: { fileContent } });
-            })
-            .catch(() => {
-                dispatch({ type: types.FETCH_FILE_FAILURE });
-            });
+        const file = configurationUtils.getFile(getState().configuration.files, selection);
+        const isDirectory = configurationUtils.isDirectory(file);
+
+        if (!isDirectory) {
+            dispatch({ type: types.FETCH_FILE_STARTED });
+
+            axios
+                .get("/files" + selection)
+                .then(res => {
+                    const fileContent = res.data.content;
+                    dispatch({ type: types.FETCH_FILE_SUCCESS, payload: { fileContent } });
+                })
+                .catch(() => {
+                    dispatch({ type: types.FETCH_FILE_FAILURE });
+                });
+        }
     };
 };
 
@@ -45,7 +55,7 @@ export const fetchFile = (file) => {
  * @param {string} selection - absolute path of the selected file (e.g. /configs/prod/interfaces.yml)
  */
 export const selectFile = (selection) => {
-    return (dispatch, getState) => {
+    return dispatch => {
         dispatch({
             type: types.SELECT_FILE,
             payload: {
@@ -53,11 +63,7 @@ export const selectFile = (selection) => {
             }
         });
 
-        const file = configurationUtils.getFile(getState().configuration.files, selection);
-        const isDirectory = configurationUtils.isDirectory(file);
-        if (!isDirectory) {
-            dispatch(fetchFile(selection));
-        }
+        dispatch(fetchSelectedFile(selection));
     };
 };
 
@@ -101,8 +107,8 @@ export const deleteSelection = (fetchFilesOnSuccess) => {
  * Attempts to write the given contents to the given file.
  * Triggers fetchFiles() if requested on success.
  */
-export const writeFile = (file, content, fetchFilesOnSuccess, fetchFileContent = false) => {
-    return (dispatch) => {
+export const writeFile = (file, content, fetchFilesOnSuccess) => {
+    return (dispatch, getState) => {
 
         let filePath = file.startsWith("/") ? file.substring(1) : file;
 
@@ -113,12 +119,13 @@ export const writeFile = (file, content, fetchFilesOnSuccess, fetchFileContent =
                 content
             })
             .then(res => {
-                dispatch({ type: types.WRITE_FILE_SUCCESS });
+                const { selection } = getState().configuration;
+                const payload = selection == file ? { content } : null;
+
+                dispatch({ type: types.WRITE_FILE_SUCCESS, payload });
+
                 if (fetchFilesOnSuccess) {
                     dispatch(fetchFiles());
-                }
-                if (fetchFileContent) {
-                    dispatch(fetchFile(file));
                 }
             })
             .catch((error) => {
