@@ -14,6 +14,14 @@ const configuration = {
     pendingRequests: 0,
     /** The existing configuration files. */
     files: [],
+    /**
+     * The history of file-move operations which were executed successfully.
+     * When the files are refetched, it can occur that the selection points to a non existing file.
+     * Normally, the selection is then simply removed.
+     * With the moveHistory, it is possible to corret the selection, in case the selected file was moved.
+     * The moveHistory is cleared after a files have been refetched.
+     */
+    moveHistory: [/*{source, target}*/],
     /** The date when the configuration files have been fetched. */
     updateDate: null,
     /** The (abosolute) path of the currently selected file in the configuration file tree. */
