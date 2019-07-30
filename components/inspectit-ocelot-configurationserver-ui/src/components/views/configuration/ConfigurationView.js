@@ -1,10 +1,12 @@
 import React from 'react';
 import { connect } from 'react-redux'
-import { configurationSelectors } from '../../../redux/ducks/configuration'
+import { configurationActions, configurationSelectors } from '../../../redux/ducks/configuration'
+import { notificationActions } from '../../../redux/ducks/notification';
 
 import FileTree from './FileTree';
 import FileToolbar from './FileToolbar';
 import EditorView from '../../editor/EditorView';
+import yaml from 'js-yaml';
 
 /**
  * The header component of the editor view.
@@ -40,6 +42,27 @@ const EditorHeader = ({ icon, path, name }) => (
  */
 class ConfigurationView extends React.Component {
 
+    static getDerivedStateFromProps(props, state) {
+        const { selection, fileContent } = props;
+        const { currentSelection, initialValue } = state;
+
+        if (selection != currentSelection || initialValue !== fileContent) {
+            return {
+                currentSelection: selection,
+                initialValue: fileContent,
+                currentValue: fileContent
+            }
+        }
+        return null;
+    }
+
+    state = {
+        initialValue: null,
+        currentValue: null,
+        currentSelection: null,
+        yamlError: null
+    }
+
     parsePath = (fullPath) => {
         if (fullPath) {
             const lastIndex = fullPath.lastIndexOf("/") + 1;
@@ -53,12 +76,34 @@ class ConfigurationView extends React.Component {
     }
 
     onSave = () => {
-        console.log("save");
+        const { currentSelection, currentValue } = this.state;
+        this.props.writeFile(currentSelection, currentValue, false, true);
+    }
+
+    onChange = (value) => {
+        this.setState({
+            currentValue: value
+        });
+
+        let errorMessage = null;
+        try {
+            yaml.safeLoad(value);
+        } catch (error) {
+            errorMessage = "YAML cannot be parsed.";
+            if (error.message) {
+                errorMessage = "YAML Syntax Error: " + error.message;
+            }
+        }
+        this.setState({
+            yamlError: errorMessage
+        });
     }
 
     render() {
         const { selection, isDirectory } = this.props;
+        const { initialValue, currentValue, yamlError } = this.state;
         const showEditor = selection && !isDirectory;
+        const isContentModified = initialValue != currentValue;
 
         const { path, name } = this.parsePath(selection);
         const icon = "pi-" + (isDirectory ? "folder" : "file");
@@ -98,7 +143,17 @@ class ConfigurationView extends React.Component {
                     <FileTree className="fileTree" />
                     <div className="details">Last update: {this.props.updateDate ? new Date(this.props.updateDate).toLocaleString() : "-"}</div>
                 </div>
-                <EditorView showEditor={showEditor} value={this.props.selection} hint={"Select a file to start editing."} onSave={this.onSave} enableButtons={showEditor}>
+                <EditorView
+                    showEditor={showEditor}
+                    value={currentValue}
+                    hint={"Select a file to start editing."}
+                    onSave={this.onSave}
+                    enableButtons={showEditor}
+                    onChange={this.onChange}
+                    canSave={isContentModified && !yamlError}
+                    isErrorNotification={true}
+                    notificationIcon="pi-exclamation-triangle"
+                    notificationText={yamlError}>
                     {showHeader ? <EditorHeader icon={icon} path={path} name={name} /> : null}
                 </EditorView>
             </div>
@@ -107,12 +162,18 @@ class ConfigurationView extends React.Component {
 }
 
 function mapStateToProps(state) {
-    const { updateDate, selection } = state.configuration;
+    const { updateDate, selection, fileContent } = state.configuration;
     return {
         updateDate,
         selection,
-        isDirectory: configurationSelectors.isSelectionDirectory(state)
+        isDirectory: configurationSelectors.isSelectionDirectory(state),
+        fileContent
     }
 }
 
-export default connect(mapStateToProps, null)(ConfigurationView);
+const mapDispatchToProps = {
+    showWarning: notificationActions.showWarningMessage,
+    writeFile: configurationActions.writeFile
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(ConfigurationView);

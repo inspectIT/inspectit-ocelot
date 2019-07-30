@@ -65,12 +65,30 @@ const configurationReducer = createReducer(initialState)({
         const { selection } = action.payload;
         return {
             ...state,
-            selection
+            selection,
+            fileContent: null
         };
     },
     [types.RESET]: (state, action) => {
         return {
             ...initialState
+        };
+    },
+    [types.FETCH_FILE_STARTED]: (state, action) => {
+        return {
+            ...state
+        };
+    },
+    [types.FETCH_FILE_FAILURE]: (state, action) => {
+        return {
+            ...state
+        };
+    },
+    [types.FETCH_FILE_SUCCESS]: (state, action) => {
+        const {fileContent} = action.payload;
+        return {
+            ...state,
+            fileContent 
         };
     },
     [types.DELETE_SELECTION_STARTED]: incrementPendingRequests,

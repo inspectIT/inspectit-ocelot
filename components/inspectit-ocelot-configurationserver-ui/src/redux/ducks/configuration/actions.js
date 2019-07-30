@@ -1,6 +1,7 @@
 import * as types from "./types";
 import * as selectors from "./selectors";
 import axios from '../../../lib/axios-api';
+import { configurationUtils } from '../configuration';
 import { notificationActions } from '../notification';
 
 /**
@@ -8,59 +9,57 @@ import { notificationActions } from '../notification';
  */
 export const fetchFiles = () => {
     return dispatch => {
-        dispatch(fetchFilesStarted());
+        dispatch({ type: types.FETCH_FILES_STARTED });
 
         axios
             .get("/directories/")
             .then(res => {
                 const files = res.data;
-                dispatch(fetchFilesSuccess(files));
+                dispatch({ type: types.FETCH_FILES_SUCCESS, payload: { files } });
             })
             .catch(() => {
-                dispatch(fetchFilesFailure());
+                dispatch({ type: types.FETCH_FILES_FAILURE });
             });
     };
 };
 
+export const fetchFile = (file) => {
+    return dispatch => {
+        dispatch({ type: types.FETCH_FILE_STARTED });
 
-/**
- * Is dispatched when the fetching of the configuration files has been started.
- */
-export const fetchFilesStarted = () => ({
-    type: types.FETCH_FILES_STARTED
-});
-
-/**
- * Is dispatched if the fetching of the configuration files was not successful.
- * 
- */
-export const fetchFilesFailure = () => ({
-    type: types.FETCH_FILES_FAILURE
-});
-
-/**
- * Is dispatched when the fetching of the configuration files was successful.
- * 
- * @param {*} files - the fetched files
- */
-export const fetchFilesSuccess = (files) => ({
-    type: types.FETCH_FILES_SUCCESS,
-    payload: {
-        files
-    }
-});
+        axios
+            .get("/files" + file)
+            .then(res => {
+                const fileContent = res.data.content;
+                dispatch({ type: types.FETCH_FILE_SUCCESS, payload: { fileContent } });
+            })
+            .catch(() => {
+                dispatch({ type: types.FETCH_FILE_FAILURE });
+            });
+    };
+};
 
 /**
  * Sets the selection to the given file.
  * 
  * @param {string} selection - absolute path of the selected file (e.g. /configs/prod/interfaces.yml)
  */
-export const selectFile = (selection) => ({
-    type: types.SELECT_FILE,
-    payload: {
-        selection
-    }
-});
+export const selectFile = (selection) => {
+    return (dispatch, getState) => {
+        dispatch({
+            type: types.SELECT_FILE,
+            payload: {
+                selection
+            }
+        });
+
+        const file = configurationUtils.getFile(getState().configuration.files, selection);
+        const isDirectory = configurationUtils.isDirectory(file);
+        if (!isDirectory) {
+            dispatch(fetchFile(selection));
+        }
+    };
+};
 
 /**
  * Resets the configuration state.
@@ -102,7 +101,7 @@ export const deleteSelection = (fetchFilesOnSuccess) => {
  * Attempts to write the given contents to the given file.
  * Triggers fetchFiles() if requested on success.
  */
-export const writeFile = (file, content, fetchFilesOnSuccess) => {
+export const writeFile = (file, content, fetchFilesOnSuccess, fetchFileContent = false) => {
     return (dispatch) => {
 
         let filePath = file.startsWith("/") ? file.substring(1) : file;
@@ -117,6 +116,9 @@ export const writeFile = (file, content, fetchFilesOnSuccess) => {
                 dispatch({ type: types.WRITE_FILE_SUCCESS });
                 if (fetchFilesOnSuccess) {
                     dispatch(fetchFiles());
+                }
+                if (fetchFileContent) {
+                    dispatch(fetchFile(file));
                 }
             })
             .catch((error) => {

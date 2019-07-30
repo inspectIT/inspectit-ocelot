@@ -1,8 +1,9 @@
+export const SELECT_FILE = 'configuration/SELECT_FILE';
+export const RESET = 'configuration/RESET';
+
 export const FETCH_FILES_STARTED = 'configuration/FETCH_FILES_STARTED';
 export const FETCH_FILES_FAILURE = 'configuration/FETCH_FILES_FAILURE';
 export const FETCH_FILES_SUCCESS = 'configuration/FETCH_FILES_SUCCESS';
-export const SELECT_FILE = 'configuration/SELECT_FILE';
-export const RESET = 'configuration/RESET';
 
 export const DELETE_SELECTION_STARTED = 'configuration/DELETE_SELECTION_STARTED';
 export const DELETE_SELECTION_FAILURE = 'configuration/DELETE_SELECTION_FAILURE';
@@ -19,3 +20,7 @@ export const CREATE_DIRECTORY_SUCCESS = 'configuration/CREATE_DIRECTORY_SUCCESS'
 export const MOVE_STARTED = 'configuration/MOVE_STARTED';
 export const MOVE_FAILURE = 'configuration/MOVE_FAILURE';
 export const MOVE_SUCCESS = 'configuration/MOVE_SUCCESS';
+
+export const FETCH_FILE_STARTED = 'configuration/FETCH_FILE_STARTED';
+export const FETCH_FILE_FAILURE = 'configuration/FETCH_FILE_FAILURE';
+export const FETCH_FILE_SUCCESS = 'configuration/FETCH_FILE_SUCCESS';
