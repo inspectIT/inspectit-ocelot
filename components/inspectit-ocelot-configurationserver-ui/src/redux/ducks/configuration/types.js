@@ -24,3 +24,5 @@ export const MOVE_SUCCESS = 'configuration/MOVE_SUCCESS';
 export const FETCH_FILE_STARTED = 'configuration/FETCH_FILE_STARTED';
 export const FETCH_FILE_FAILURE = 'configuration/FETCH_FILE_FAILURE';
 export const FETCH_FILE_SUCCESS = 'configuration/FETCH_FILE_SUCCESS';
+
+export const SELECTED_FILE_CONTENTS_CHANGED = 'configuration/SELECTED_FILE_CONTENTS_CHANGED';

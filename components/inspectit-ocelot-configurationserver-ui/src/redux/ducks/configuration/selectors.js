@@ -10,21 +10,22 @@ const configurationSelector = state => state.configuration;
  * @param {*} parentKey the key (absolute path) of the node's parent
  * @param {*} node the current node (file)
  */
-const _asTreeNode = (parentKey, node) => {
+const _asTreeNode = (parentKey, node, unsavedFileContents) => {
     const { type, name } = node;
     const key = parentKey + name;
 
     if (type === "directory") {
+        const containsUnsavedChanges = Object.keys(unsavedFileContents).find((path) => path.startsWith(key + "/"));
         return {
             key,
-            label: name,
+            label: containsUnsavedChanges ? name +"*" : name,
             icon: "pi pi-fw pi-folder",
-            children: map(node.children, child => _asTreeNode(key + "/", child))
+            children: map(node.children, child => _asTreeNode(key + "/", child, unsavedFileContents))
         };
     } else {
         return {
             key,
-            label: name,
+            label: (key in unsavedFileContents) ? name + "*" : name,
             icon: "pi pi-fw pi-file",
         };
     }
@@ -36,9 +37,9 @@ const _asTreeNode = (parentKey, node) => {
 export const getFileTree = createSelector(
     configurationSelector,
     configuration => {
-        const { files } = configuration;
+        const { files, unsavedFileContents } = configuration;
 
-        const fileTree = map(files, file => _asTreeNode("/", file));
+        const fileTree = map(files, file => _asTreeNode("/", file, unsavedFileContents));
         return fileTree;
     }
 );
@@ -64,4 +65,27 @@ export const getSelectedFile = createSelector(
 export const isSelectionDirectory = createSelector(
     [getSelectedFile],
     (selectedFile) => isDirectory(selectedFile)
+);
+
+/**
+ * Returns contents of the selected file which have not been saved yet.
+ * Null if there are no unsaved changes.
+ */
+export const getSelectedFileUnsavedContents = createSelector(
+    configurationSelector,
+    configuration => {
+        const { selection, unsavedFileContents } = configuration;
+        return selection in unsavedFileContents ? unsavedFileContents[selection] : null;
+    }
+);
+
+/**
+ * Returns true if there are any unsaved configuration changes.
+ */
+export const anyUnsavedChanges = createSelector(
+    configurationSelector,
+    configuration => {
+        const { unsavedFileContents } = configuration;
+        return Object.keys(unsavedFileContents).length > 0;
+    }
 );

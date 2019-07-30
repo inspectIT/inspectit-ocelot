@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux'
-import { mappingsActions } from '../../../redux/ducks/mappings';
+import { mappingsActions, mappingsSelectors } from '../../../redux/ducks/mappings';
 import { notificationActions } from '../../../redux/ducks/notification';
 import yaml from 'js-yaml';
 
@@ -11,41 +11,14 @@ import EditorView from "../../editor/EditorView";
  */
 class AgentMappingsView extends React.Component {
 
-    static getDerivedStateFromProps(props, state) {
-        const hasUpdated = props.updateDate != state.lastUpdateDate;
-
-        if (hasUpdated) {
-            const yamlMappings = props.mappings ? yaml.safeDump(props.mappings) : "";
-
-            return {
-                lastUpdateDate: props.updateDate,
-                editorValue: yamlMappings
-            }
-        }
-
-        return null;
-    }
-
-    state = {
-        lastUpdateDate: null,
-        editorValue: "",
-        yamlError: null
-    }
-
     componentDidMount() {
-        this.onRefresh();
+        this.props.fetchMappings();
     }
 
     onSave = (content) => {
         try {
             const mappings = yaml.safeLoad(content);
-
-            // to prevent editor resets
-            this.setState({
-                editorContent: content
-            });
-
-            this.props.putMappings(mappings);
+            this.props.putMappings(mappings, true);
         } catch (error) {
             if (error.name && error.name === "YAMLException") {
                 const { message } = error;
@@ -56,30 +29,13 @@ class AgentMappingsView extends React.Component {
 
     onRefresh = () => {
         this.props.fetchMappings();
-    }
-
-    onChange = (value) => {
-        this.setState({
-            editorValue: value
-        });
-
-        let errorMessage = null;
-        try {
-            yaml.safeLoad(value);
-        } catch (error) {
-            errorMessage = "YAML cannot be parsed.";
-            if (error.message) {
-                errorMessage = "YAML Syntax Error: " + error.message;
-            }
-        }
-        this.setState({
-            yamlError: errorMessage
-        });
+        //reset the editor
+        this.props.editorContentChanged(null);
     }
 
     render = () => {
-        const { loading } = this.props;
-        const { editorValue, yamlError } = this.state;
+        const { loading, content, yamlError, hasUnsavedChanges } = this.props;
+        const heading = hasUnsavedChanges ? "Agent Mappings*" : "Agent Mappings";
         return (
             <>
                 <style jsx>{`
@@ -101,18 +57,18 @@ class AgentMappingsView extends React.Component {
                 `}</style>
                 <div className="this">
                     <EditorView
-                        value={editorValue}
+                        value={content}
                         onSave={this.onSave}
                         onRefresh={this.onRefresh}
                         enableButtons={!loading}
-                        onChange={this.onChange}
+                        onChange={this.props.editorContentChanged}
                         isErrorNotification={true}
-                        canSave={!yamlError}
+                        canSave={!yamlError && hasUnsavedChanges}
                         notificationIcon="pi-exclamation-triangle"
                         notificationText={yamlError}>
                         <div className="header">
                             <i className="pi pi-sitemap"></i>
-                            <div>Agent Mappings</div>
+                            <div>{heading}</div>
                         </div>
                     </EditorView>
                 </div>
@@ -121,11 +77,28 @@ class AgentMappingsView extends React.Component {
     }
 };
 
+const getYamlError = (content) => {
+    let errorMessage = null;
+    try {
+        yaml.safeLoad(content);
+        return null;
+    } catch (error) {
+        if (error.message) {
+           return "YAML Syntax Error: " + error.message;
+        } else  {
+            return "YAML cannot be parsed.";
+        }
+    }
+}
+
 function mapStateToProps(state) {
-    const { pendingRequests, mappings, updateDate } = state.mappings;
+    const { pendingRequests, updateDate, editorContent } = state.mappings;
+    let content = editorContent == null ? mappingsSelectors.getMappingsAsYaml(state) : editorContent    
     return {
         loading: pendingRequests > 0,
-        mappings,
+        content,
+        hasUnsavedChanges: editorContent != null,
+        yamlError: getYamlError(content),
         updateDate
     }
 }
@@ -133,7 +106,8 @@ function mapStateToProps(state) {
 const mapDispatchToProps = {
     fetchMappings: mappingsActions.fetchMappings,
     putMappings: mappingsActions.putMappings,
-    showWarning: notificationActions.showWarningMessage
+    showWarning: notificationActions.showWarningMessage,
+    editorContentChanged: mappingsActions.editorContentChanged
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(AgentMappingsView);

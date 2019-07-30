@@ -11,7 +11,7 @@ import yaml from 'js-yaml';
 /**
  * The header component of the editor view.
  */
-const EditorHeader = ({ icon, path, name }) => (
+const EditorHeader = ({ icon, path, name, isContentModified }) => (
     <>
         <style jsx>{`
         .header {
@@ -32,7 +32,7 @@ const EditorHeader = ({ icon, path, name }) => (
         <div className="header">
             <i className={"pi " + icon}></i>
             <div className="path">{path}</div>
-            <div className="name">{name}</div>
+            <div className="name">{isContentModified ? name + "*" : name}</div>
         </div>
     </>
 );
@@ -41,27 +41,6 @@ const EditorHeader = ({ icon, path, name }) => (
  * The configuration view component used for managing the agent configurations.
  */
 class ConfigurationView extends React.Component {
-
-    static getDerivedStateFromProps(props, state) {
-        const { selection, fileContent } = props;
-        const { currentSelection, initialValue } = state;
-
-        if (selection != currentSelection || initialValue !== fileContent) {
-            return {
-                currentSelection: selection,
-                initialValue: fileContent,
-                currentValue: fileContent
-            }
-        }
-        return null;
-    }
-
-    state = {
-        initialValue: null,
-        currentValue: null,
-        currentSelection: null,
-        yamlError: null
-    }
 
     parsePath = (fullPath) => {
         if (fullPath) {
@@ -76,34 +55,19 @@ class ConfigurationView extends React.Component {
     }
 
     onSave = () => {
-        const { currentSelection, currentValue } = this.state;
-        this.props.writeFile(currentSelection, currentValue, false);
-    }
+        const { selection, fileContent } = this.props;
+        this.props.writeFile(selection, fileContent, false);
+    }    
 
     onChange = (value) => {
-        this.setState({
-            currentValue: value
-        });
-
-        let errorMessage = null;
-        try {
-            yaml.safeLoad(value);
-        } catch (error) {
-            errorMessage = "YAML cannot be parsed.";
-            if (error.message) {
-                errorMessage = "YAML Syntax Error: " + error.message;
-            }
+        if(!this.props.loading) {
+            this.props.selectedFileContentsChanged(value);
         }
-        this.setState({
-            yamlError: errorMessage
-        });
     }
 
     render() {
-        const { selection, isDirectory, loading } = this.props;
-        const { initialValue, currentValue, yamlError } = this.state;
+        const { selection, isDirectory, loading, isContentModified, fileContent, yamlError} = this.props;
         const showEditor = selection && !isDirectory;
-        const isContentModified = initialValue != currentValue;
 
         const { path, name } = this.parsePath(selection);
         const icon = "pi-" + (isDirectory ? "folder" : "file");
@@ -145,7 +109,7 @@ class ConfigurationView extends React.Component {
                 </div>
                 <EditorView
                     showEditor={showEditor}
-                    value={currentValue}
+                    value={fileContent}
                     hint={"Select a file to start editing."}
                     onSave={this.onSave}
                     enableButtons={showEditor && !loading}
@@ -155,28 +119,48 @@ class ConfigurationView extends React.Component {
                     notificationIcon="pi-exclamation-triangle"
                     notificationText={yamlError}
                     loading={loading}>
-                    {showHeader ? <EditorHeader icon={icon} path={path} name={name} /> : null}
+                    {showHeader ? <EditorHeader icon={icon} path={path} name={name} isContentModified={isContentModified} /> : null}
                 </EditorView>
             </div>
         );
     }
 }
 
+const getYamlError = (content) => {
+    let errorMessage = null;
+    try {
+        yaml.safeLoad(content);
+        return null;
+    } catch (error) {
+        if (error.message) {
+           return "YAML Syntax Error: " + error.message;
+        } else  {
+            return "YAML cannot be parsed.";
+        }
+    }
+}
+
 function mapStateToProps(state) {
     const { updateDate, selection, selectedFileContent, pendingRequests } = state.configuration;
+    const unsavedFileContent = selection ? configurationSelectors.getSelectedFileUnsavedContents(state) : null;
+    const fileContent = unsavedFileContent != null ? unsavedFileContent : selectedFileContent;
 
     return {
         updateDate,
         selection,
         isDirectory: configurationSelectors.isSelectionDirectory(state),
-        fileContent: selectedFileContent,
+        isContentModified: unsavedFileContent != null,
+        originalFileContent: selectedFileContent,
+        fileContent,
+        yamlError : getYamlError(fileContent),
         loading: pendingRequests > 0
     }
 }
 
 const mapDispatchToProps = {
     showWarning: notificationActions.showWarningMessage,
-    writeFile: configurationActions.writeFile
+    writeFile: configurationActions.writeFile,
+    selectedFileContentsChanged: configurationActions.selectedFileContentsChanged
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(ConfigurationView);

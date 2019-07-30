@@ -1,5 +1,6 @@
 import * as types from "./types";
 import * as utils from "./utils";
+import {mapKeys, omitBy} from "lodash"
 import { createReducer } from "../../utils";
 import { configuration as initialState } from '../initial-states';
 
@@ -52,12 +53,20 @@ const configurationReducer = createReducer(initialState)({
         if (selection && !utils.getFile(files, selection)) {
             selection = null;
         }
+        let unsavedFileContents = {};
+        for(const path in state.unsavedFileContents) {
+            let newPath = movePathIfRequired(path, state.moveHistory);
+            if(utils.getFile(files, newPath)) {
+                unsavedFileContents[newPath] = state.unsavedFileContents[path];
+            }
+        }
         return {
             ...state,
             pendingRequests: state.pendingRequests - 1,
             files,
             moveHistory: [],
             selection,
+            unsavedFileContents,
             updateDate: Date.now()
         };
     },
@@ -99,17 +108,13 @@ const configurationReducer = createReducer(initialState)({
     [types.DELETE_SELECTION_FAILURE]: decrementPendingRequests,
     [types.WRITE_FILE_STARTED]: incrementPendingRequests,
     [types.WRITE_FILE_SUCCESS]: (state, action) => {
-        const nextState = {
-            ...state,
-            pendingRequests: state.pendingRequests - 1
-        };
-
         const { file, content } = action.payload;
-        if (state.selection == file) {
-            nextState.selectedFileContent = content;
-        }
-
-        return nextState;
+        return {
+            ...state,
+            pendingRequests: state.pendingRequests - 1,
+            selectedFileContent: state.selection == file ? content : state.selectedFileContent,
+            unsavedFileContents : omitBy(state.unsavedFileContents, (unsavedContent, path) => path==file && unsavedContent==content)
+        };
     },
     [types.WRITE_FILE_FAILURE]: decrementPendingRequests,
     [types.CREATE_DIRECTORY_STARTED]: incrementPendingRequests,
@@ -123,7 +128,25 @@ const configurationReducer = createReducer(initialState)({
             moveHistory: state.moveHistory.concat([action.payload])
         };
     },
-    [types.MOVE_FAILURE]: decrementPendingRequests
+    [types.MOVE_FAILURE]: decrementPendingRequests,
+    [types.SELECTED_FILE_CONTENTS_CHANGED]: (state,action) => {
+        const {content } = action.payload;
+        const {selectedFileContent, selection, unsavedFileContents} = state;
+        if(selection) {
+            const newUnsavedFileContents = {...unsavedFileContents};
+            if(selectedFileContent == content) {
+                delete newUnsavedFileContents[selection];
+            } else {
+                newUnsavedFileContents[selection] = content;
+            }
+            return {
+                ...state,
+                unsavedFileContents: newUnsavedFileContents
+            }
+        } else {
+            return state;
+        }
+    }
 
 });
 
