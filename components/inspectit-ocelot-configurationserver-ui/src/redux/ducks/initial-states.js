@@ -33,8 +33,18 @@ const notification = {
     lastNotification: null
 };
 
+const mappings = {
+    /** Specifies how many requests are currently loading in the background */
+    pendingRequests: 0,
+    /** The current agent mappings. */
+    mappings: null,
+    /** The date when the agent mappings have been fetched. */
+    updateDate: null
+}
+
 export {
     authentication,
     configuration,
-    notification
+    notification,
+    mappings
 }
