@@ -76,18 +76,21 @@ const configurationReducer = createReducer(initialState)({
     },
     [types.FETCH_FILE_STARTED]: (state, action) => {
         return {
-            ...state
+            ...state,
+            pendingRequests: state.pendingRequests + 1
         };
     },
     [types.FETCH_FILE_FAILURE]: (state, action) => {
         return {
-            ...state
+            ...state,
+            pendingRequests: state.pendingRequests - 1
         };
     },
     [types.FETCH_FILE_SUCCESS]: (state, action) => {
         const {fileContent} = action.payload;
         return {
             ...state,
+            pendingRequests: state.pendingRequests - 1,
             fileContent 
         };
     },

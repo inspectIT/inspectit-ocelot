@@ -100,7 +100,7 @@ class ConfigurationView extends React.Component {
     }
 
     render() {
-        const { selection, isDirectory } = this.props;
+        const { selection, isDirectory, loading } = this.props;
         const { initialValue, currentValue, yamlError } = this.state;
         const showEditor = selection && !isDirectory;
         const isContentModified = initialValue != currentValue;
@@ -148,12 +148,13 @@ class ConfigurationView extends React.Component {
                     value={currentValue}
                     hint={"Select a file to start editing."}
                     onSave={this.onSave}
-                    enableButtons={showEditor}
+                    enableButtons={showEditor && !loading}
                     onChange={this.onChange}
                     canSave={isContentModified && !yamlError}
                     isErrorNotification={true}
                     notificationIcon="pi-exclamation-triangle"
-                    notificationText={yamlError}>
+                    notificationText={yamlError}
+                    loading={loading}>
                     {showHeader ? <EditorHeader icon={icon} path={path} name={name} /> : null}
                 </EditorView>
             </div>
@@ -162,12 +163,14 @@ class ConfigurationView extends React.Component {
 }
 
 function mapStateToProps(state) {
-    const { updateDate, selection, fileContent } = state.configuration;
+    const { updateDate, selection, fileContent, pendingRequests } = state.configuration;
+
     return {
         updateDate,
         selection,
         isDirectory: configurationSelectors.isSelectionDirectory(state),
-        fileContent
+        fileContent,
+        loading: pendingRequests > 0
     }
 }
 
