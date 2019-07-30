@@ -18,6 +18,19 @@ const decrementPendingRequests = (state) => {
     };
 }
 
+const movePathIfRequired = (path,moveHistory) => {
+    if(!path) return path;
+    let resultPath = path;
+    for(const {source,target} of moveHistory) {
+        if(resultPath == source) { //the file itself was moved
+            resultPath = target;
+        } else if(resultPath.startsWith(source + "/")) { //a parent was moved
+            resultPath = target + resultPath.substring(source.length);
+        }
+    }
+    return resultPath;
+}
+
 const configurationReducer = createReducer(initialState)({
     [types.FETCH_FILES_STARTED]: (state, action) => {
         return {
@@ -35,7 +48,7 @@ const configurationReducer = createReducer(initialState)({
     [types.FETCH_FILES_SUCCESS]: (state, action) => {
         const { files } = action.payload;
         //remove the selection in case it does not exist anymore
-        let selection = state.selection;
+        let selection = movePathIfRequired(state.selection, state.moveHistory);
         if (selection && !utils.getFile(files, selection)) {
             selection = null;
         }
@@ -43,6 +56,7 @@ const configurationReducer = createReducer(initialState)({
             ...state,
             pendingRequests: state.pendingRequests - 1,
             files,
+            moveHistory: [],
             selection,
             updateDate: Date.now()
         };
@@ -67,7 +81,16 @@ const configurationReducer = createReducer(initialState)({
     [types.WRITE_FILE_FAILURE]: decrementPendingRequests,
     [types.CREATE_DIRECTORY_STARTED]: incrementPendingRequests,
     [types.CREATE_DIRECTORY_SUCCESS]: decrementPendingRequests,
-    [types.CREATE_DIRECTORY_FAILURE]: decrementPendingRequests
+    [types.CREATE_DIRECTORY_FAILURE]: decrementPendingRequests,
+    [types.MOVE_STARTED]: incrementPendingRequests,
+    [types.MOVE_SUCCESS]: (state, action) => {
+        return {
+            ...state,
+            pendingRequests: state.pendingRequests - 1,
+            moveHistory: state.moveHistory.concat([action.payload])
+        };
+    },
+    [types.MOVE_FAILURE]: decrementPendingRequests
 
 });
 

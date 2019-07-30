@@ -6,6 +6,7 @@ import { Toolbar } from 'primereact/toolbar';
 import { Button } from 'primereact/button';
 import DeleteDialog from './dialogs/DeleteDialog'
 import CreateDialog from './dialogs/CreateDialog'
+import MoveDialog from './dialogs/MoveDialog'
 
 /**
  * The toolbar used in the configuration view's file tree.
@@ -16,6 +17,7 @@ class FileToolbar extends React.Component {
         isDeleteFileDialogShown: false,
         isCreateFileDialogShown: false,
         isCreateDirectoryDialogShown : false,
+        isMoveDialogShown : false
     }
 
     fetchFiles = () => this.props.fetchFiles()
@@ -31,6 +33,10 @@ class FileToolbar extends React.Component {
     showCreateDirectoryDialog = () => this.setState({ isCreateDirectoryDialogShown: true })
 
     hideCreateDirectoryDialog = () => this.setState({ isCreateDirectoryDialogShown: false })
+
+    showMoveDialog = () => this.setState({ isMoveDialogShown: true })
+
+    hideMoveDialog = () => this.setState({ isMoveDialogShown: false })
 
     render() {
         const { loading, selection } = this.props;
@@ -58,6 +64,7 @@ class FileToolbar extends React.Component {
                     <div className="p-toolbar-group-left">
                         <Button disabled={loading} tooltip="New file" icon="pi pi-file" tooltipOptions={tooltipOptions} onClick={this.showCreateFileDialog}/>
                         <Button disabled={loading} tooltip="New directory" icon="pi pi-folder-open" tooltipOptions={tooltipOptions}  onClick={this.showCreateDirectoryDialog}/>
+                        <Button disabled={loading || !selection} tooltip="Move/Rename file or directory" icon="pi pi-pencil" tooltipOptions={tooltipOptions} onClick={this.showMoveDialog}/>
                         <Button disabled={loading || !selection} tooltip="Delete file or directory" icon="pi pi-trash" tooltipOptions={tooltipOptions} onClick={this.showDeleteFileDialog}/>
                     </div>
                     <div className="p-toolbar-group-right">
@@ -67,6 +74,7 @@ class FileToolbar extends React.Component {
                 <DeleteDialog visible={this.state.isDeleteFileDialogShown} onHide={this.hideDeleteFileDialog} />
                 <CreateDialog directoryMode={false} visible={this.state.isCreateFileDialogShown} onHide={this.hideCreateFileDialog} />
                 <CreateDialog directoryMode={true} visible={this.state.isCreateDirectoryDialogShown} onHide={this.hideCreateDirectoryDialog} />
+                <MoveDialog visible={this.state.isMoveDialogShown} onHide={this.hideMoveDialog} />
             </div>
         )
     }

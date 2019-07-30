@@ -4,7 +4,7 @@ import { Button } from 'primereact/button';
 /**
  * The toolbar used within the editor view.
  */
-const EditorToolbar = ({ enableButtons, onSave, onSearch, onHelp, children }) => (
+const EditorToolbar = ({ enableButtons, onSave, onSearch, onHelp, onRefresh, isRefreshing, canSave, children }) => (
     <div className="this">
         <style jsx>{`
         .this :global(.p-toolbar) {
@@ -23,9 +23,10 @@ const EditorToolbar = ({ enableButtons, onSave, onSearch, onHelp, children }) =>
                 {children}
             </div>
             <div className="p-toolbar-group-right">
+                {onRefresh && <Button disabled={!enableButtons || isRefreshing} icon={"pi pi-refresh" + (isRefreshing ? " pi-spin" : "")} onClick={onRefresh} />}
                 <Button disabled={!enableButtons} icon="pi pi-question" onClick={onHelp} />
                 <Button disabled={!enableButtons} icon="pi pi-search" onClick={onSearch} />
-                <Button disabled={!enableButtons} onClick={onSave} label="Save" icon="pi pi-save" />
+                <Button disabled={!enableButtons || !canSave} onClick={onSave} label="Save" icon="pi pi-save" />
             </div>
         </Toolbar>
     </div>

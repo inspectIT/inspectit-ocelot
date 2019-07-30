@@ -33,6 +33,8 @@ class AceEditor extends React.Component {
         this.editor.setTheme("ace/theme/" + theme)
         this.editor.getSession().setMode("ace/mode/" + mode);
 
+        this.editor.session.off("change", this.onChange);
+        this.editor.session.on("change", this.onChange);
         if (options) {
             this.editor.setOptions(options);
         }
@@ -41,7 +43,7 @@ class AceEditor extends React.Component {
     componentDidMount() {
         this.editor = ace.edit(this.divRef.current)
         const editorRef = this.editor;
-        
+
         ace.config.loadModule("ace/ext/keybinding_menu", function (module) {
             module.init(editorRef);
         })
@@ -55,11 +57,19 @@ class AceEditor extends React.Component {
         this.updateValue();
     }
 
+    onChange = (event) => {
+        if (this.props.onChange) {
+            this.props.onChange(this.getValue());
+        }
+    }
+
     /**
      * Updates the editor content using the `value` props and sets the cursor to the beginning of the content.
      */
     updateValue = () => {
-        if (this.props.value) {
+        const { value } = this.props;
+        const currentValue = this.getValue();
+        if (value !== currentValue) {
             this.editor.setValue(this.props.value, -1);
         }
     }
@@ -71,6 +81,12 @@ class AceEditor extends React.Component {
     showShortcuts = () => {
         this.editor.showKeyboardShortcuts();
     }
+
+    getValue = () => {
+        return this.editor.getSession().getValue();
+    }
+
+
 }
 
 export default AceEditor;
