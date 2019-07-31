@@ -10,12 +10,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import rocks.inspectit.ocelot.agentconfiguration.AgentConfiguration;
 import rocks.inspectit.ocelot.agentconfiguration.AgentConfigurationManager;
+import rocks.inspectit.ocelot.agentstatus.AgentStatusManager;
 
 import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.anyMap;
-import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class AgentControllerTest {
@@ -26,6 +26,9 @@ public class AgentControllerTest {
     @Mock
     AgentConfigurationManager configManager;
 
+    @Mock
+    AgentStatusManager statusManager;
+
     @Nested
     public class FetchConfiguration {
 
@@ -34,20 +37,25 @@ public class AgentControllerTest {
             doReturn(null)
                     .when(configManager).getConfiguration(anyMap());
 
-            ResponseEntity<String> result = controller.fetchConfiguration(new HashMap<>());
+            HashMap<String, String> attributes = new HashMap<>();
+            ResponseEntity<String> result = controller.fetchConfiguration(attributes);
 
             assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+            verify(statusManager).notifyAgentConfigurationFetched(same(attributes), isNull());
         }
 
         @Test
         public void mappingFound() throws Exception {
-            doReturn(new AgentConfiguration(null, "foo : bar"))
+            AgentConfiguration config = new AgentConfiguration(null, "foo : bar");
+            doReturn(config)
                     .when(configManager).getConfiguration(anyMap());
 
-            ResponseEntity<String> result = controller.fetchConfiguration(new HashMap<>());
+            HashMap<String, String> attributes = new HashMap<>();
+            ResponseEntity<String> result = controller.fetchConfiguration(attributes);
 
             assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(result.getBody()).isEqualTo("foo : bar");
+            verify(statusManager).notifyAgentConfigurationFetched(same(attributes), same(config));
         }
 
 

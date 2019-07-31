@@ -13,6 +13,7 @@ import rocks.inspectit.ocelot.mappings.AgentMappingManager;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 
@@ -40,7 +41,10 @@ public class AgentConfigurationManagerTest {
             return null;
         }).when(executor).submit(any(Runnable.class));
 
-        configManager.config = InspectitServerSettings.builder().maxAgents(1000).build();
+        configManager.config = InspectitServerSettings.builder()
+                .agentEvictionDelay(Duration.ofDays(1))
+                .maxAgents(1000)
+                .build();
         configManager.init();
     }
 

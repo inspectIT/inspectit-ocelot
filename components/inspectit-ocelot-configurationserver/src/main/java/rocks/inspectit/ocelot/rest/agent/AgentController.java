@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import rocks.inspectit.ocelot.agentconfiguration.AgentConfiguration;
 import rocks.inspectit.ocelot.agentconfiguration.AgentConfigurationManager;
+import rocks.inspectit.ocelot.agentstatus.AgentStatusManager;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.rest.AbstractBaseController;
 
@@ -24,7 +25,10 @@ import java.util.Map;
 public class AgentController extends AbstractBaseController {
 
     @Autowired
-    AgentConfigurationManager configManager;
+    private AgentConfigurationManager configManager;
+
+    @Autowired
+    private AgentStatusManager statusManager;
 
     /**
      * Returns the {@link InspectitConfig} for the agent with the given name.
@@ -37,6 +41,7 @@ public class AgentController extends AbstractBaseController {
     @GetMapping(value = "agent/configuration", produces = "text/plain")
     public ResponseEntity<String> fetchConfiguration(@ApiParam("The agent attributes used to select the correct mapping") @RequestParam Map<String, String> attributes) throws IOException {
         AgentConfiguration configuration = configManager.getConfiguration(attributes);
+        statusManager.notifyAgentConfigurationFetched(attributes, configuration);
         if (configuration == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } else {
