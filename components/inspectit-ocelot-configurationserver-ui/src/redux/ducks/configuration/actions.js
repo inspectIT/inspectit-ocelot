@@ -30,21 +30,23 @@ export const fetchSelectedFile = () => {
     return (dispatch, getState) => {
         const { selection } = getState().configuration;
 
-        const file = configurationUtils.getFile(getState().configuration.files, selection);
-        const isDirectory = configurationUtils.isDirectory(file);
+        if (selection) {
+            const file = configurationUtils.getFile(getState().configuration.files, selection);
+            const isDirectory = configurationUtils.isDirectory(file);
 
-        if (!isDirectory) {
-            dispatch({ type: types.FETCH_FILE_STARTED });
+            if (!isDirectory) {
+                dispatch({ type: types.FETCH_FILE_STARTED });
 
-            axios
-                .get("/files" + selection)
-                .then(res => {
-                    const fileContent = res.data.content;
-                    dispatch({ type: types.FETCH_FILE_SUCCESS, payload: { fileContent } });
-                })
-                .catch(() => {
-                    dispatch({ type: types.FETCH_FILE_FAILURE });
-                });
+                axios
+                    .get("/files" + selection)
+                    .then(res => {
+                        const fileContent = res.data.content;
+                        dispatch({ type: types.FETCH_FILE_SUCCESS, payload: { fileContent } });
+                    })
+                    .catch(() => {
+                        dispatch({ type: types.FETCH_FILE_FAILURE });
+                    });
+            }
         }
     };
 };
@@ -120,8 +122,11 @@ export const writeFile = (file, content, fetchFilesOnSuccess) => {
             })
             .then(res => {
                 const { selection } = getState().configuration;
-                const payload = selection == file ? { content } : null;
-
+                const payload = {
+                    selection,
+                    content
+                };
+                
                 dispatch({ type: types.WRITE_FILE_SUCCESS, payload });
 
                 if (fetchFilesOnSuccess) {
