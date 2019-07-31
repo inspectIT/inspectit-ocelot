@@ -15,11 +15,9 @@ const timeFormatter = (time, unit, suffix) => {
 }
 
 /**
- * The talbe listing all agent statuses
+ * The table listing all agent statuses
  */
 class StatusTable extends React.Component {
-
-    containerRef = React.createRef();
 
     render() {
         const { agents } = this.props;
@@ -38,10 +36,10 @@ class StatusTable extends React.Component {
 
         return (
             <DataTable value={agentValues} globalFilter={this.props.filter}>
-                <Column key="attributes" header="Attributes" field="attributesSearchString"
+                <Column header="Attributes" field="attributesSearchString"
                     body={(data) => this.buildAttributesPresentation(data.attributes)} />
-                <Column key="mappingName" field="mappingName" sortable={true} header="Mapping" />
-                <Column key="lastConfigFetch" field="lastConfigFetch" sortable={true} header="Last Connected" excludeGlobalFilter={true}
+                <Column field="mappingName" sortable={true} header="Mapping" />
+                <Column field="lastConfigFetch" sortable={true} header="Last Connected" excludeGlobalFilter={true}
                     body={(data) => (<TimeAgo date={data.lastConfigFetch} formatter={timeFormatter} />)}
                 />
             </DataTable>
