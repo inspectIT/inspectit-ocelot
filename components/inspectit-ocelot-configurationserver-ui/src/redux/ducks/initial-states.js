@@ -25,7 +25,9 @@ const configuration = {
     /** The date when the configuration files have been fetched. */
     updateDate: null,
     /** The (abosolute) path of the currently selected file in the configuration file tree. */
-    selection: null
+    selection: null,
+    /** The content of the currently selected file. */
+    selectedFileContent: null
 };
 
 const notification = {
