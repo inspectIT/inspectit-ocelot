@@ -15,7 +15,7 @@ import Notificationbar from './Notificationbar';
 class EditorView extends React.Component {
 
     render() {
-        const { value, showEditor, hint, onSave, onRefresh, onChange, isRefreshing, enableButtons, isErrorNotification, notificationIcon, notificationText, canSave, children } = this.props;
+        const { value, showEditor, hint, onSave, onRefresh, onChange, isRefreshing, enableButtons, isErrorNotification, notificationIcon, notificationText, canSave, loading, children } = this.props;
 
         return (
             <div className="this p-grid p-dir-col p-nogutter">
@@ -30,6 +30,22 @@ class EditorView extends React.Component {
                     justify-content: center;
                     color: #bbb;
                 }
+                .editor-container {
+                    position: relative;
+                }
+                .loading-overlay {
+                    position: absolute;
+                    left: 0;
+                    top: 0;
+                    right: 0;
+                    bottom: 0;
+                    background-color: #00000080;
+                    color: white;
+                    z-index: 100;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                }
                 `}</style>
                 <div className="p-col-fixed">
                     <EditorToolbar
@@ -43,12 +59,17 @@ class EditorView extends React.Component {
                         {children}
                     </EditorToolbar>
                 </div>
-                <div className="p-col">
+                <div className="p-col editor-container">
                     {showEditor ?
                         <AceEditor editorRef={(editor) => this.editor = editor} mode="yaml" theme="cobalt" options={editorConfig} value={value} onChange={onChange} />
                         :
                         <div className="selection-information">
                             <div>{hint}</div>
+                        </div>
+                    }
+                    {loading &&
+                        <div className="loading-overlay">
+                            <i className="pi pi-spin pi-spinner" style={{ 'fontSize': '2em' }}></i>
                         </div>
                     }
                 </div>
@@ -85,12 +106,15 @@ EditorView.propTypes = {
     notificationIcon: PropTypes.string,
     /** The text to show in the notification bar. */
     notificationText: PropTypes.string,
+    /** Whether the editor should show an loading indicator */
+    loading: PropTypes.bool
 }
 
 EditorView.defaultProps = {
     showEditor: true,
     enableButtons: true,
-    canSave: true
+    canSave: true,
+    loading: false
 };
 
 export default EditorView;
