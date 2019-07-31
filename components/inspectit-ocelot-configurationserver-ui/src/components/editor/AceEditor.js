@@ -70,7 +70,7 @@ class AceEditor extends React.Component {
         const { value } = this.props;
         const currentValue = this.getValue();
         if (value !== currentValue) {
-            this.editor.setValue(this.props.value, -1);
+            this.editor.setValue(value ? value : "", -1);
         }
     }
 
