@@ -4,6 +4,9 @@ const isProduction = process.env.NODE_ENV === 'production';
 module.exports = withCSS({
     distDir: '../.next',
 
+    // Each page will be exported as a directory
+    exportTrailingSlash: true,
+
     assetPrefix: isProduction ? '/ui' : '',
 
     // Will only be available on the server side

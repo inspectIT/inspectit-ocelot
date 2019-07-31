@@ -46,4 +46,9 @@ public class InspectitServerSettings {
      * This is only used to limit internal caches of the server and not as hard limitation.
      */
     private int maxAgents;
+
+    /**
+     * After the given amount of inactivity from an agent, it is evicted from all caches.
+     */
+    private Duration agentEvictionDelay;
 }
