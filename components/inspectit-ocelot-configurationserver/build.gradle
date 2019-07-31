@@ -35,11 +35,20 @@ node {
 }
 
 /**
+ * Task for installing the frontend dependencies.
+ */
+task installFrontend(type: YarnTask) {
+    args = ['install']
+}
+
+/**
  * Task for building the frontend and copying it to the configuration-server project.
  */
 task buildFrontend(type: YarnTask) {
     args = ['export']
 }
+buildFrontend.dependsOn installFrontend
+
 
 def serverMainClass = 'rocks.inspectit.ocelot.ConfigurationServer'
 
