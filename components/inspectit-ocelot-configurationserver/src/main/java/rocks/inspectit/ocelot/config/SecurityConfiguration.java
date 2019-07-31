@@ -10,6 +10,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import rocks.inspectit.ocelot.authentication.JwtTokenFilter;
 import rocks.inspectit.ocelot.authentication.JwtTokenManager;
+import rocks.inspectit.ocelot.authentication.NoPopupBasicAuthenticationEntryPoint;
 import rocks.inspectit.ocelot.user.LocalUserDetailsService;
 
 import java.util.Arrays;
@@ -49,7 +50,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .authorizeRequests().anyRequest().authenticated()
 
                 .and()
-                .httpBasic()
+                .httpBasic().authenticationEntryPoint(new NoPopupBasicAuthenticationEntryPoint())
 
                 .and()
                 //TODO: The "correct" way of selectively enabling token based would be to have multiple spring security configs.
