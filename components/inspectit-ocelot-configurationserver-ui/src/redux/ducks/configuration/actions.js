@@ -121,9 +121,8 @@ export const writeFile = (file, content, fetchFilesOnSuccess) => {
                 content
             })
             .then(res => {
-                const { selection } = getState().configuration;
                 const payload = {
-                    selection,
+                    file,
                     content
                 };
                 
