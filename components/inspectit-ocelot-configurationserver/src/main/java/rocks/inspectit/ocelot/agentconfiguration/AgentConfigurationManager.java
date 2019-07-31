@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Manager responsible for serving the agent configuration based on the set of {@link AgentMapping}s.
@@ -94,6 +95,7 @@ public class AgentConfigurationManager {
     private synchronized void replaceConfigurations(List<AgentConfiguration> newConfigurations) {
         attributesToConfigurationCache = CacheBuilder.newBuilder()
                 .maximumSize(config.getMaxAgents())
+                .expireAfterAccess(config.getAgentEvictionDelay().toMillis(), TimeUnit.MILLISECONDS)
                 .build(new CacheLoader<Map<String, String>, AgentConfiguration>() {
                     @Override
                     public AgentConfiguration load(Map<String, String> agentAttributes) {
