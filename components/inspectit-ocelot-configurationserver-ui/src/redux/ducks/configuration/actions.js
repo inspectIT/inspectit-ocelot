@@ -1,6 +1,7 @@
 import * as types from "./types";
 import * as selectors from "./selectors";
 import axios from '../../../lib/axios-api';
+import { configurationUtils } from '../configuration';
 import { notificationActions } from '../notification';
 
 /**
@@ -8,59 +9,65 @@ import { notificationActions } from '../notification';
  */
 export const fetchFiles = () => {
     return dispatch => {
-        dispatch(fetchFilesStarted());
+        dispatch({ type: types.FETCH_FILES_STARTED });
 
         axios
             .get("/directories/")
             .then(res => {
                 const files = res.data;
-                dispatch(fetchFilesSuccess(files));
+                dispatch({ type: types.FETCH_FILES_SUCCESS, payload: { files } });
             })
             .catch(() => {
-                dispatch(fetchFilesFailure());
+                dispatch({ type: types.FETCH_FILES_FAILURE });
             });
     };
 };
 
-
 /**
- * Is dispatched when the fetching of the configuration files has been started.
+ * Fetches the content of the selected file.
  */
-export const fetchFilesStarted = () => ({
-    type: types.FETCH_FILES_STARTED
-});
+export const fetchSelectedFile = () => {
+    return (dispatch, getState) => {
+        const { selection } = getState().configuration;
 
-/**
- * Is dispatched if the fetching of the configuration files was not successful.
- * 
- */
-export const fetchFilesFailure = () => ({
-    type: types.FETCH_FILES_FAILURE
-});
+        if (selection) {
+            const file = configurationUtils.getFile(getState().configuration.files, selection);
+            const isDirectory = configurationUtils.isDirectory(file);
 
-/**
- * Is dispatched when the fetching of the configuration files was successful.
- * 
- * @param {*} files - the fetched files
- */
-export const fetchFilesSuccess = (files) => ({
-    type: types.FETCH_FILES_SUCCESS,
-    payload: {
-        files
-    }
-});
+            if (!isDirectory) {
+                dispatch({ type: types.FETCH_FILE_STARTED });
+
+                axios
+                    .get("/files" + selection)
+                    .then(res => {
+                        const fileContent = res.data.content;
+                        dispatch({ type: types.FETCH_FILE_SUCCESS, payload: { fileContent } });
+                    })
+                    .catch(() => {
+                        dispatch({ type: types.FETCH_FILE_FAILURE });
+                    });
+            }
+        }
+    };
+};
 
 /**
  * Sets the selection to the given file.
  * 
  * @param {string} selection - absolute path of the selected file (e.g. /configs/prod/interfaces.yml)
  */
-export const selectFile = (selection) => ({
-    type: types.SELECT_FILE,
-    payload: {
-        selection
-    }
-});
+export const selectFile = (selection) => {
+    return dispatch => {
+        dispatch({
+            type: types.SELECT_FILE,
+            payload: {
+                selection
+            }
+        });
+
+        dispatch(fetchSelectedFile(selection));
+    };
+};
 
 /**
  * Resets the configuration state.
@@ -103,7 +110,7 @@ export const deleteSelection = (fetchFilesOnSuccess) => {
  * Triggers fetchFiles() if requested on success.
  */
 export const writeFile = (file, content, fetchFilesOnSuccess) => {
-    return (dispatch) => {
+    return (dispatch, getState) => {
 
         let filePath = file.startsWith("/") ? file.substring(1) : file;
 
@@ -114,10 +121,18 @@ export const writeFile = (file, content, fetchFilesOnSuccess) => {
                 content
             })
             .then(res => {
-                dispatch({ type: types.WRITE_FILE_SUCCESS });
+                const payload = {
+                    file,
+                    content
+                };
+                
+                dispatch({ type: types.WRITE_FILE_SUCCESS, payload });
+
                 if (fetchFilesOnSuccess) {
                     dispatch(fetchFiles());
                 }
+
+                dispatch(notificationActions.showSuccessMessage("Configuration Saved", "The configuration has been successfully saved."));
             })
             .catch((error) => {
                 dispatch({ type: types.WRITE_FILE_FAILURE });

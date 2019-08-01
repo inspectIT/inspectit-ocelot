@@ -18,13 +18,13 @@ const decrementPendingRequests = (state) => {
     };
 }
 
-const movePathIfRequired = (path,moveHistory) => {
-    if(!path) return path;
+const movePathIfRequired = (path, moveHistory) => {
+    if (!path) return path;
     let resultPath = path;
-    for(const {source,target} of moveHistory) {
-        if(resultPath == source) { //the file itself was moved
+    for (const { source, target } of moveHistory) {
+        if (resultPath == source) { //the file itself was moved
             resultPath = target;
-        } else if(resultPath.startsWith(source + "/")) { //a parent was moved
+        } else if (resultPath.startsWith(source + "/")) { //a parent was moved
             resultPath = target + resultPath.substring(source.length);
         }
     }
@@ -65,7 +65,8 @@ const configurationReducer = createReducer(initialState)({
         const { selection } = action.payload;
         return {
             ...state,
-            selection
+            selection,
+            selectedFileContent: null
         };
     },
     [types.RESET]: (state, action) => {
@@ -73,11 +74,43 @@ const configurationReducer = createReducer(initialState)({
             ...initialState
         };
     },
+    [types.FETCH_FILE_STARTED]: (state, action) => {
+        return {
+            ...state,
+            pendingRequests: state.pendingRequests + 1
+        };
+    },
+    [types.FETCH_FILE_FAILURE]: (state, action) => {
+        return {
+            ...state,
+            pendingRequests: state.pendingRequests - 1
+        };
+    },
+    [types.FETCH_FILE_SUCCESS]: (state, action) => {
+        const { fileContent } = action.payload;
+        return {
+            ...state,
+            pendingRequests: state.pendingRequests - 1,
+            selectedFileContent: fileContent
+        };
+    },
     [types.DELETE_SELECTION_STARTED]: incrementPendingRequests,
     [types.DELETE_SELECTION_SUCCESS]: decrementPendingRequests,
     [types.DELETE_SELECTION_FAILURE]: decrementPendingRequests,
     [types.WRITE_FILE_STARTED]: incrementPendingRequests,
-    [types.WRITE_FILE_SUCCESS]: decrementPendingRequests,
+    [types.WRITE_FILE_SUCCESS]: (state, action) => {
+        const nextState = {
+            ...state,
+            pendingRequests: state.pendingRequests - 1
+        };
+
+        const { file, content } = action.payload;
+        if (state.selection == file) {
+            nextState.selectedFileContent = content;
+        }
+
+        return nextState;
+    },
     [types.WRITE_FILE_FAILURE]: decrementPendingRequests,
     [types.CREATE_DIRECTORY_STARTED]: incrementPendingRequests,
     [types.CREATE_DIRECTORY_SUCCESS]: decrementPendingRequests,
