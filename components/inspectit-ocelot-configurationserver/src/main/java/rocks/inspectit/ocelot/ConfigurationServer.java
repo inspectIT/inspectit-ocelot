@@ -18,7 +18,11 @@ import java.io.File;
 @Slf4j
 public class ConfigurationServer {
 
-    private static final ApplicationContextInitializer<ConfigurableApplicationContext> WORKDIR_CREATOR = (ctx) -> {
+    /**
+     * Initializer which ensures that the working directory exists prior to initializing the spring context.
+     * This is required because otherwise the SQLite DB can't create it's database file.
+     */
+    private static final ApplicationContextInitializer<ConfigurableApplicationContext> WORKING_DIRECTORY_INITIALIZER = (ctx) -> {
         InspectitServerSettings settings = Binder
                 .get(ctx.getEnvironment())
                 .bind("inspectit", InspectitServerSettings.class).get();
@@ -31,7 +35,7 @@ public class ConfigurationServer {
 
     public static void main(String[] args) {
         new SpringApplicationBuilder(ConfigurationServer.class)
-                .initializers(WORKDIR_CREATOR)
+                .initializers(WORKING_DIRECTORY_INITIALIZER)
                 .run(args);
     }
 
