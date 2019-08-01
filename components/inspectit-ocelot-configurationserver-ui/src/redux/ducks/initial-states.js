@@ -44,9 +44,22 @@ const mappings = {
     updateDate: null
 }
 
+const agentStatus = {
+    /**
+     * The list of connected agents, each agent is an object with the following structure: 
+     * {attributes: (dictionary), mappingName: string, lastConfigFetch: timestamp}
+    */
+    agents: [],
+    /** Specifies how many requests are currently loading the data in the background */
+    pendingRequests: 0,
+    /** Specifies how many requests are currently clearing the data in the background */
+    pendingClearRequests: 0,
+}
+
 export {
     authentication,
     configuration,
     notification,
-    mappings
+    mappings,
+    agentStatus
 }

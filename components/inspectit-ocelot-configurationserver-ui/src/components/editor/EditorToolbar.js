@@ -8,7 +8,6 @@ const EditorToolbar = ({ enableButtons, onSave, onSearch, onHelp, onRefresh, isR
     <div className="this">
         <style jsx>{`
         .this :global(.p-toolbar) {
-            background: 0;
             border: 0;
             border-radius: 0;
             background-color: #eee;

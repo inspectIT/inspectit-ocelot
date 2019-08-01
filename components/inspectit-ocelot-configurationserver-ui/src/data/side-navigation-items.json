@@ -8,5 +8,10 @@
         "name": "Agent Mappings",
         "icon": "pi-sitemap",
         "href": "/mappings"
+    },
+    {
+        "name": "Agent Status",
+        "icon": "pi-list",
+        "href": "/status"
     }
 ]
