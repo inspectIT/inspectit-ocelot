@@ -104,8 +104,8 @@ const configurationReducer = createReducer(initialState)({
             pendingRequests: state.pendingRequests - 1
         };
 
-        const { selection, content } = action.payload;
-        if (state.selection == selection) {
+        const { file, content } = action.payload;
+        if (state.selection == file) {
             nextState.selectedFileContent = content;
         }
 
