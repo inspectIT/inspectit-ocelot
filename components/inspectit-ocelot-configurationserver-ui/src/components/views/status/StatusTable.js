@@ -14,6 +14,14 @@ const timeFormatter = (time, unit, suffix) => {
     }
 }
 
+const AttributesCell = ({ attributes }) => (
+    <div>
+        {Object.keys(attributes).sort().map((key) => {
+            return (<span key={key}><b>{key}:</b> {attributes[key]}<br /></span>)
+        })}
+    </div>
+);
+
 /**
  * The table listing all agent statuses
  */
@@ -30,6 +38,7 @@ class StatusTable extends React.Component {
                 });
             return {
                 ...agent,
+                mappingName: agent.mappingName || "<no mapping>",
                 attributesSearchString
             }
         })
@@ -37,23 +46,14 @@ class StatusTable extends React.Component {
         return (
             <DataTable value={agentValues} globalFilter={this.props.filter}>
                 <Column header="Attributes" field="attributesSearchString"
-                    body={(data) => this.buildAttributesPresentation(data.attributes)} />
+                    body={(data) => (<AttributesCell attributes={data.attributes} />)} 
+                />
                 <Column field="mappingName" sortable={true} header="Mapping" />
                 <Column field="lastConfigFetch" sortable={true} header="Last Connected" excludeGlobalFilter={true}
                     body={(data) => (<TimeAgo date={data.lastConfigFetch} formatter={timeFormatter} />)}
                 />
             </DataTable>
         );
-    }
-
-    buildAttributesPresentation = (attributes) => {
-        return (
-            <div>
-                {Object.keys(attributes).sort().map((key) => {
-                    return (<span key={key}><b>{key}:</b> {attributes[key]}<br /></span>)
-                })}
-            </div>
-        )
     }
 }
 

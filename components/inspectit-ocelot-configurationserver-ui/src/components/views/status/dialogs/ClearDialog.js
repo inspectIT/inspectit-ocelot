@@ -27,7 +27,7 @@ class ClearDialog extends React.Component {
                     </div>
                 )}
             >
-                Are you sure that you want to clear this history of all agents?
+                Are you sure that you want to clear the history of all agents?
             </Dialog>
         )
     }

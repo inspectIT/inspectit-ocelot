@@ -3,9 +3,11 @@ import { connect } from 'react-redux'
 import { agentStatusActions } from '../../../redux/ducks/agent-status'
 import StatusTable from './StatusTable';
 import StatusToolbar from './StatusToolbar';
-import { ScrollPanel } from 'primereact/scrollpanel';
 
-
+/**
+ * The view presenting a list of connected agents, their mapping and when they last connected to the server.
+ * The view is automatically refreshed and can also be refreshed manually using a refresh button.
+ */
 class StatusView extends React.Component {
 
     state = {
@@ -30,7 +32,7 @@ class StatusView extends React.Component {
 
     componentDidMount() {
         this.fetchNewStatus()
-        this.updateTimer = setInterval(this.fetchNewStatus, 3000);
+        this.updateTimer = setInterval(this.fetchNewStatus, 10000);
     }
 
     componentWillUnmount() {

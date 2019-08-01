@@ -4,7 +4,11 @@ import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import ClearDialog from "./dialogs/ClearDialog";
 import { connect } from 'react-redux'
+import { agentStatusActions } from '../../../redux/ducks/agent-status'
 
+/**
+ * Toolbar in the status view. Allows filtering of statuses, refreshing and clearing all statuses.
+ */
 class StatusToolbar extends React.Component {
 
     state = {
@@ -12,12 +16,17 @@ class StatusToolbar extends React.Component {
     }
 
     render() {
-        const { clearing, clearStatus, filter, onFilterChange } = this.props;
+        const { clearing, refreshing, fetchStatus, filter, onFilterChange } = this.props;
+
+        const tooltipOptions = {
+            showDelay: 500,
+            position: "top"
+        }
+
         return (
             <div className="this">
                 <style jsx>{`
                     .this :global(.p-toolbar) {
-                        background: 0;
                         border: 0;
                         border-radius: 0;
                         background-color: #eee;
@@ -42,6 +51,7 @@ class StatusToolbar extends React.Component {
                     </div>
                     <div className="p-toolbar-group-right">
                         <Button disabled={clearing} onClick={() => this.setState({isClearDialogShown: true})} label="Clear All" />
+                        <Button onClick={fetchStatus} tooltip="Reload" icon={"pi pi-refresh" + (refreshing ? " pi-spin" : "")} tooltipOptions={tooltipOptions} />
                     </div>
                 </Toolbar>
                 <ClearDialog visible={this.state.isClearDialogShown} onHide={() => this.setState({isClearDialogShown: false})}/>
@@ -51,10 +61,15 @@ class StatusToolbar extends React.Component {
 }
 
 function mapStateToProps(state) {
-    const { pendingClearRequests } = state.agentStatus;
+    const { pendingClearRequests, pendingRequests } = state.agentStatus;
     return {
         clearing: pendingClearRequests > 0,
+        refreshing: pendingRequests > 0,
     }
 }
 
-export default connect(mapStateToProps)(StatusToolbar);
+const mapDispatchToProps = {
+    fetchStatus: agentStatusActions.fetchStatus,
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(StatusToolbar);

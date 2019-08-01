@@ -14,7 +14,7 @@ class StatusPage extends React.Component {
           <title>{BASE_PAGE_TITLE} | Agent Status</title>
         </Head>
 
-      <StatusView />
+        <StatusView />
       </MainLayout>
     )
   }
