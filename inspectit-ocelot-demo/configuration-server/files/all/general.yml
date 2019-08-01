@@ -5,3 +5,5 @@ inspectit:
     # root setting for the polling frequency of all metrics
     # when a metrics has no frequency defined separately, this frequency will be used
     frequency: 1s
+  logging:
+    debug: false # set to true to see more details in the agents logs

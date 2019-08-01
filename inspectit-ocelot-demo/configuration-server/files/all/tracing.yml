@@ -122,15 +122,3 @@ inspectit:
             action: replace_attachment_on_this
             constant-input: {key: "span"}
             data-input: {value: span_obj}
-          
-      #we also record jdbc calls including their target database
-      servicegraph_record_jdbc_calls:
-        tracing:
-          start-span: true
-          attributes:
-            database: db_name
-          start-span-conditions:
-            only-if-true: servicegraph_is_entry
-        entry:
-          db_name:
-            action: get_jdbc_statement_connection_name

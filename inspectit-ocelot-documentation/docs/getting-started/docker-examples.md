@@ -128,7 +128,8 @@ A sandbox instance of Wavefront can be obtained here: https://www.wavefront.com/
 ## Changing Agent Configurations
 
 In all demo scenarios the inspectIT Ocelot agents already have their service names and used ports as well as a basic instrumentation set up.
-However, if you want to customize any other configuration option you can provide custom configuration files.
+The demo uses the inspectIT Ocelot configuration server for configuring all services.
+You can visit it on [localhost:8090](http://localhost:8090).
 
 The demo starts the following services, of which each is instrumented with an inspectIT Ocelot Agent:
 
@@ -138,10 +139,3 @@ The demo starts the following services, of which each is instrumented with an in
 - *visits-service*
 - *vets-service*
 - *api-gateway*
-
-For each service you can put your own agent configuration files in the
-correspondingly named subfolders in ```inspectit-ocelot-demo/agentconfig/```.
-For example, if you want to change the configuration of the inspectIT Ocelot
-agent attached to the *vets-service*, you can put a YAML-file into ```inspectit-ocelot-demo/agentconfig/vets-service```.
-
-Note that it is not required to restart the demo! The agents listen for updates of the corresponding directories and reconfigure themselves when required.

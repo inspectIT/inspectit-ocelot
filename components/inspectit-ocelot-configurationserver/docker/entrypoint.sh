@@ -1,1 +1,1 @@
-java -jar /inspectit-ocelot-configurationserver.jar
+exec java -jar /inspectit-ocelot-configurationserver.jar
