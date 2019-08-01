@@ -30,6 +30,16 @@ public class AgentMappingManager {
     private static final String AGENT_MAPPINGS_FILE = "agent_mappings.yaml";
 
     /**
+     * The mapping which is used when no mappings file exists.
+     */
+    @VisibleForTesting
+    static final AgentMapping DEFAULT_MAPPING = AgentMapping.builder()
+            .name("Default Mapping")
+            .source("/")
+            .attribute("service", ".*")
+            .build();
+
+    /**
      * Object mapper utils.
      */
     @Autowired
@@ -43,7 +53,8 @@ public class AgentMappingManager {
     /**
      * The currently used agent mappings. This should be in sync with the content of the {@link #mappingsFile}.
      */
-    private List<AgentMapping> agentMappings;
+    @VisibleForTesting
+    List<AgentMapping> agentMappings;
 
     /**
      * The configuration sued to resolve the working directory where the {@link #AGENT_MAPPINGS_FILE} is stored.
@@ -80,8 +91,8 @@ public class AgentMappingManager {
                 agentMappings = new ArrayList<>();
             }
         } else {
-            log.info("No agent mappings have been loaded - agent mappings file has not been found: {}", mappingsFile.getAbsolutePath());
-            agentMappings = new ArrayList<>();
+            log.info("Creating default agent mapping because agent mappings file has not been found: {}", mappingsFile.getAbsolutePath());
+            agentMappings = new ArrayList<>(Collections.singletonList(DEFAULT_MAPPING));
         }
     }
 

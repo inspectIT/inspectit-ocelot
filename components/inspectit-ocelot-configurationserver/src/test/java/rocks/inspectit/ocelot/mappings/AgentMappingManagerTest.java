@@ -61,6 +61,10 @@ public class AgentMappingManagerTest {
         verify(objectMapperUtils).postConstruct();
     }
 
+    void removeDefaultMapping() {
+        manager.agentMappings.remove(AgentMappingManager.DEFAULT_MAPPING);
+    }
+
     @AfterEach
     public void afterEach() throws IOException {
         FileUtils.deleteDirectory(tempDirectory.toFile());
@@ -89,7 +93,7 @@ public class AgentMappingManagerTest {
             manager.postConstruct();
 
             assertThat((Object) getField("mappingsFile")).isEqualTo(new File(tempDirectory.toFile(), "agent_mappings.yaml"));
-            assertThat((List) getField("agentMappings")).isEmpty();
+            assertThat((List) getField("agentMappings")).containsExactly(AgentMappingManager.DEFAULT_MAPPING);
         }
 
         @Test
@@ -153,6 +157,7 @@ public class AgentMappingManagerTest {
             doThrow(IOException.class).when(objectMapperUtils).writeAgentMappings(any(), any());
 
             manager.postConstruct();
+            removeDefaultMapping();
 
             assertThatExceptionOfType(IOException.class)
                     .isThrownBy(() -> manager.setAgentMappings(Collections.singletonList(mapping)));
@@ -310,6 +315,7 @@ public class AgentMappingManagerTest {
             AgentMapping mappingA = AgentMapping.builder().name("first").build();
 
             manager.postConstruct();
+            removeDefaultMapping();
 
             manager.addAgentMapping(mappingA);
 
@@ -326,6 +332,7 @@ public class AgentMappingManagerTest {
             AgentMapping mappingB = AgentMapping.builder().name("second").build();
 
             manager.postConstruct();
+            removeDefaultMapping();
 
             manager.addAgentMapping(mappingA);
             manager.addAgentMapping(mappingB);
@@ -379,6 +386,8 @@ public class AgentMappingManagerTest {
             AgentMapping mappingA = AgentMapping.builder().name("mapping").build();
 
             manager.postConstruct();
+            removeDefaultMapping();
+
             manager.addAgentMapping(mappingA);
 
             assertThat(manager.getAgentMappings()).containsExactly(mappingA);
