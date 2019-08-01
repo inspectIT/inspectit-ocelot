@@ -1,6 +1,7 @@
 package rocks.inspectit.ocelot.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.ldap.core.DirContextAdapter;
 import org.springframework.ldap.core.DirContextOperations;
 import org.springframework.ldap.core.support.LdapContextSource;
@@ -14,15 +15,18 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.LdapShaPasswordEncoder;
-import org.springframework.security.ldap.userdetails.DefaultLdapAuthoritiesPopulator;
-import org.springframework.security.ldap.userdetails.LdapAuthoritiesPopulator;
-import org.springframework.security.ldap.userdetails.UserDetailsContextMapper;
+import org.springframework.security.ldap.search.FilterBasedLdapUserSearch;
+import org.springframework.security.ldap.search.LdapUserSearch;
+import org.springframework.security.ldap.userdetails.*;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import rocks.inspectit.ocelot.authentication.JwtTokenFilter;
 import rocks.inspectit.ocelot.authentication.JwtTokenManager;
 import rocks.inspectit.ocelot.authentication.NoPopupBasicAuthenticationEntryPoint;
+import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
+import rocks.inspectit.ocelot.config.model.LdapSettings;
 import rocks.inspectit.ocelot.user.LocalUserDetailsService;
 
 import java.util.Arrays;
@@ -36,8 +40,16 @@ import java.util.Set;
 @EnableGlobalMethodSecurity(securedEnabled = true)
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
+    public static final String DEFAUL_ACCESS_USER_ROLE = "OCELOT_ADMIN";
+
     @Autowired
     JwtTokenManager tokenManager;
+
+    @Autowired
+    LdapContextSource ldapContextSource;
+
+    @Autowired
+    InspectitServerSettings serverSettings;
 
     @Override
     public void configure(WebSecurity web) throws Exception {
@@ -63,7 +75,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
                 .and()
                 .authorizeRequests()
-                .anyRequest().hasRole("SHIP_CREW")
+                .anyRequest().hasRole(getAccessRole())
 
                 .and()
                 .httpBasic().authenticationEntryPoint(new NoPopupBasicAuthenticationEntryPoint())
@@ -76,24 +88,32 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 )), BasicAuthenticationFilter.class);
     }
 
+    public String getAccessRole() {
+        if (serverSettings.getSecurity().isLdapEnabled()) {
+            return serverSettings.getSecurity().getLdap().getAdminGroup();
+        } else {
+            return DEFAUL_ACCESS_USER_ROLE;
+        }
+    }
+
     @Autowired
     public void configureAuth(AuthenticationManagerBuilder auth, LocalUserDetailsService detailsService) throws Exception {
-//        auth
-//                .userDetailsService(detailsService)
-//                .passwordEncoder(detailsService.getPasswordEncoder());
+        if (serverSettings.getSecurity().isLdapEnabled()) {
+            LdapSettings ldapSettings = serverSettings.getSecurity().getLdap();
 
-        auth
-                .ldapAuthentication()
+            auth
+                    .ldapAuthentication()
 
-                .userSearchFilter("(uid={0})")
-                .userSearchBase("ou=people,dc=planetexpress,dc=com")
-                .groupSearchFilter("(member={0})")
-                .groupSearchBase("ou=people,dc=planetexpress,dc=com")
+                    .userSearchFilter(ldapSettings.getUserSearchFilter())
+                    .userSearchBase(ldapSettings.getUserSearchBase())
+                    .groupSearchFilter(ldapSettings.getGroupSearchFilter())
+                    .groupSearchBase(ldapSettings.getGroupSearchBase())
 
-                .contextSource()
-                .url("ldap://localhost:389/")
-                .port(389)
-                .managerDn("cn=admin,dc=planetexpress,dc=com")
-                .managerPassword("GoodNewsEveryone");
+                    .contextSource(ldapContextSource);
+        } else {
+            auth
+                    .userDetailsService(detailsService)
+                    .passwordEncoder(detailsService.getPasswordEncoder());
+        }
     }
 }

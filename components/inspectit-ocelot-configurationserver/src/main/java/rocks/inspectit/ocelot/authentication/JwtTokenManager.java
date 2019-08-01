@@ -9,14 +9,19 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.ldap.userdetails.LdapUserDetailsService;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.user.LocalUserDetailsService;
 
 import java.security.Key;
+import java.util.Collection;
 import java.util.Date;
+import java.util.stream.Collectors;
 
 /**
  * Creates and verifies JWT based access tokens.
@@ -30,6 +35,7 @@ public class JwtTokenManager {
     @Autowired
     InspectitServerSettings config;
 
+
     /**
      * We dynamically generate a secret to sign the tokens with at server start.
      * This means that tokens automatically become invalid as soon as the server restarts.
@@ -37,18 +43,22 @@ public class JwtTokenManager {
     private Key secret = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
     @Autowired
-    private LocalUserDetailsService userDetailsService;
+    private LdapUserDetailsService ldapUserDetailsService;
+
+    @Autowired
+    private LocalUserDetailsService locaalUserDetailsService;
 
     /**
      * Creates a token containing the specified username.
      * The token expires after the specified Duration via {@link InspectitServerSettings#getTokenLifespan()} from now.
      *
-     * @param username the username for which the token is generated
+     * @param username    the username for which the token is generated
      * @return the generated token
      */
     public String createToken(String username) {
         Date now = new Date();
         Date expiration = new Date(now.getTime() + config.getTokenLifespan().toMillis());
+
         return Jwts.builder()
                 .setSubject(username)
                 .setExpiration(expiration)
@@ -75,7 +85,15 @@ public class JwtTokenManager {
                 .getBody();
 
         String username = parsedAndValidatedToken.getSubject();
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+        UserDetailsService userService;
+        if (config.getSecurity().isLdapEnabled()) {
+            userService = ldapUserDetailsService;
+        } else {
+            userService = locaalUserDetailsService;
+        }
+
+        UserDetails userDetails = userService.loadUserByUsername(username);
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 

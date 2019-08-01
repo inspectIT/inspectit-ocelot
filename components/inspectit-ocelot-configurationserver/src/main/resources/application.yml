@@ -29,3 +29,16 @@ inspectit:
   max-agents: 10000
   # If an agent didn't fetched its configuration for this duration, it is forgotten and evicted from all caches
   agent-eviction-delay: 1h
+
+  security:
+    ldap-enabled: true
+    ldap:
+      admin-group: "SHIP_CREW"
+      url: "ldap://localhost:389/"
+      base-dn: ""
+      manager-dn: "cn=admin,dc=planetexpress,dc=com"
+      manager-password: "GoodNewsEveryone"
+      user-search-base: "ou=people,dc=planetexpress,dc=com"
+      user-search-filter: "(uid={0})"
+      group-search-base: "ou=people,dc=planetexpress,dc=com"
+      group-search-filter: "(member={0})"

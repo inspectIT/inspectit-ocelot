@@ -51,4 +51,6 @@ public class InspectitServerSettings {
      * After the given amount of inactivity from an agent, it is evicted from all caches.
      */
     private Duration agentEvictionDelay;
+
+    private SecuritySettings security =  new SecuritySettings();
 }

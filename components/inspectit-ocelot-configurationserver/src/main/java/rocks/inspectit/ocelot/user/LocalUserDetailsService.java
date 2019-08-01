@@ -15,6 +15,8 @@ import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import javax.annotation.PostConstruct;
 import java.util.Optional;
 
+import static rocks.inspectit.ocelot.config.SecurityConfiguration.DEFAUL_ACCESS_USER_ROLE;
+
 /**
  * Manages usernames and their (hashed) passwords.
  */
@@ -108,7 +110,7 @@ public class LocalUserDetailsService implements UserDetailsService {
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getUsername())
                 .password(user.getPasswordHash())
-                .authorities("USER") //at least one authority is required by spring, even if we don't use them yet
+                .roles(DEFAUL_ACCESS_USER_ROLE)
                 .build();
     }
 
