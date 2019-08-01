@@ -132,6 +132,8 @@ export const writeFile = (file, content, fetchFilesOnSuccess) => {
                 if (fetchFilesOnSuccess) {
                     dispatch(fetchFiles());
                 }
+
+                dispatch(notificationActions.showSuccessMessage("Configuration Saved", "The configuration has been successfully saved."));
             })
             .catch((error) => {
                 dispatch({ type: types.WRITE_FILE_FAILURE });
