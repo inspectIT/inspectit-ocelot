@@ -1,11 +1,7 @@
 package rocks.inspectit.ocelot.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.ldap.core.DirContextAdapter;
-import org.springframework.ldap.core.DirContextOperations;
 import org.springframework.ldap.core.support.LdapContextSource;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -13,25 +9,16 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.LdapShaPasswordEncoder;
-import org.springframework.security.ldap.search.FilterBasedLdapUserSearch;
-import org.springframework.security.ldap.search.LdapUserSearch;
-import org.springframework.security.ldap.userdetails.*;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import rocks.inspectit.ocelot.authentication.JwtTokenFilter;
 import rocks.inspectit.ocelot.authentication.JwtTokenManager;
 import rocks.inspectit.ocelot.authentication.NoPopupBasicAuthenticationEntryPoint;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.config.model.LdapSettings;
-import rocks.inspectit.ocelot.user.LocalUserDetailsService;
+import rocks.inspectit.ocelot.user.UserDetailsServiceManager;
+import rocks.inspectit.ocelot.user.ldap.LdapUtils;
 
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Set;
 
 /**
  * Spring security configuration enabling authentication on all except excluded endpoints.
@@ -46,7 +33,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     JwtTokenManager tokenManager;
 
     @Autowired
-    LdapContextSource ldapContextSource;
+    UserDetailsServiceManager userDetailsServiceManager;
 
     @Autowired
     InspectitServerSettings serverSettings;
@@ -88,32 +75,31 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 )), BasicAuthenticationFilter.class);
     }
 
-    public String getAccessRole() {
-        if (serverSettings.getSecurity().isLdapEnabled()) {
-            return serverSettings.getSecurity().getLdap().getAdminGroup();
-        } else {
-            return DEFAUL_ACCESS_USER_ROLE;
-        }
-    }
-
-    @Autowired
-    public void configureAuth(AuthenticationManagerBuilder auth, LocalUserDetailsService detailsService) throws Exception {
-        if (serverSettings.getSecurity().isLdapEnabled()) {
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        if (serverSettings.getSecurity().isLdapAuthentication()) {
+            LdapContextSource contextSource = LdapUtils.createLdapContextSource(serverSettings);
             LdapSettings ldapSettings = serverSettings.getSecurity().getLdap();
 
             auth
                     .ldapAuthentication()
-
                     .userSearchFilter(ldapSettings.getUserSearchFilter())
                     .userSearchBase(ldapSettings.getUserSearchBase())
                     .groupSearchFilter(ldapSettings.getGroupSearchFilter())
                     .groupSearchBase(ldapSettings.getGroupSearchBase())
-
-                    .contextSource(ldapContextSource);
+                    .contextSource(contextSource);
         } else {
             auth
-                    .userDetailsService(detailsService)
-                    .passwordEncoder(detailsService.getPasswordEncoder());
+                    .userDetailsService(userDetailsServiceManager.getUserDetailsService())
+                    .passwordEncoder(userDetailsServiceManager.getPasswordEncoder());
+        }
+    }
+
+    private String getAccessRole() {
+        if (serverSettings.getSecurity().isLdapAuthentication()) {
+            return serverSettings.getSecurity().getLdap().getAdminGroup();
+        } else {
+            return DEFAUL_ACCESS_USER_ROLE;
         }
     }
 }

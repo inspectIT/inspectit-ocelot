@@ -9,7 +9,6 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -17,11 +16,10 @@ import org.springframework.security.ldap.userdetails.LdapUserDetailsService;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.user.LocalUserDetailsService;
+import rocks.inspectit.ocelot.user.UserDetailsServiceManager;
 
 import java.security.Key;
-import java.util.Collection;
 import java.util.Date;
-import java.util.stream.Collectors;
 
 /**
  * Creates and verifies JWT based access tokens.
@@ -35,7 +33,6 @@ public class JwtTokenManager {
     @Autowired
     InspectitServerSettings config;
 
-
     /**
      * We dynamically generate a secret to sign the tokens with at server start.
      * This means that tokens automatically become invalid as soon as the server restarts.
@@ -43,10 +40,7 @@ public class JwtTokenManager {
     private Key secret = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
     @Autowired
-    private LdapUserDetailsService ldapUserDetailsService;
-
-    @Autowired
-    private LocalUserDetailsService locaalUserDetailsService;
+    private UserDetailsServiceManager userDetailsServiceManager;
 
     /**
      * Creates a token containing the specified username.
@@ -85,16 +79,13 @@ public class JwtTokenManager {
                 .getBody();
 
         String username = parsedAndValidatedToken.getSubject();
+        UserDetails userDetails = getUserDetails(username);
 
-        UserDetailsService userService;
-        if (config.getSecurity().isLdapEnabled()) {
-            userService = ldapUserDetailsService;
-        } else {
-            userService = locaalUserDetailsService;
-        }
-
-        UserDetails userDetails = userService.loadUserByUsername(username);
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
+    private UserDetails getUserDetails(String username) {
+        UserDetailsService userService = userDetailsServiceManager.getUserDetailsService();
+        return userService.loadUserByUsername(username);
+    }
 }

@@ -3,6 +3,7 @@ package rocks.inspectit.ocelot.user;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -22,6 +23,7 @@ import static rocks.inspectit.ocelot.config.SecurityConfiguration.DEFAUL_ACCESS_
  */
 @Component
 @Slf4j
+@Lazy
 public class LocalUserDetailsService implements UserDetailsService {
 
     @Autowired
@@ -32,7 +34,6 @@ public class LocalUserDetailsService implements UserDetailsService {
 
     @Getter
     private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-
 
     /**
      * @return An iterator over all registered users

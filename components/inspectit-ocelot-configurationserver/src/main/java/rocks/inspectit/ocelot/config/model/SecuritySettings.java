@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class SecuritySettings {
 
-    private boolean ldapEnabled = false;
+    private boolean ldapAuthentication = false;
 
     private LdapSettings ldap = new LdapSettings();
 }

@@ -31,7 +31,7 @@ inspectit:
   agent-eviction-delay: 1h
 
   security:
-    ldap-enabled: true
+    ldap-authentication: true
     ldap:
       admin-group: "SHIP_CREW"
       url: "ldap://localhost:389/"
