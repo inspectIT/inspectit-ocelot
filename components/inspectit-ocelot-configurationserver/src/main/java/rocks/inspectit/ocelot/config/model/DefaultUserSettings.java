@@ -1,7 +1,9 @@
 package rocks.inspectit.ocelot.config.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * Config structure for defining the default admin user which is
@@ -9,6 +11,8 @@ import lombok.Data;
  */
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class DefaultUserSettings {
 
     private String name;
