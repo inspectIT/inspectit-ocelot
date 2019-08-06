@@ -15,7 +15,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
-import sun.plugin2.liveconnect.ArgumentHelper;
 
 import java.security.Key;
 import java.util.Date;

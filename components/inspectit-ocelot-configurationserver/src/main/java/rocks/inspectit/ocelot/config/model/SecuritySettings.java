@@ -13,6 +13,7 @@ public class SecuritySettings {
     /**
      * Whether LDAP should be used for user authentication.
      */
+    @Builder.Default
     private boolean ldapAuthentication = false;
 
     /**

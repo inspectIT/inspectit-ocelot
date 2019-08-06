@@ -31,7 +31,6 @@ public class ApiError {
     /**
      * The date when the exception occurred (current timestamp).
      */
-    @Builder.Default
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm:ss")
     private LocalDateTime timestamp = LocalDateTime.now();
 
