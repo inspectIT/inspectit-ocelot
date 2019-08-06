@@ -17,14 +17,28 @@ import rocks.inspectit.ocelot.config.model.LdapSettings;
 import rocks.inspectit.ocelot.user.userdetails.LocalUserDetailsService;
 import rocks.inspectit.ocelot.utils.LdapUtils;
 
+/**
+ * Spring beans used for user management.
+ */
 @Configuration
 public class UserDetailsConfiguration {
 
+    /**
+     * Returns the password encoder used for the local user storage.
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Returns the {@link UserDetailsService} instance to use. In case LDAP is enabled the object is an instance of type
+     * {@link LdapUserDetailsService} otherwise a {@link LocalUserDetailsService} is returned.
+     *
+     * @param context  the current Spring context
+     * @param settings the current server settings
+     * @return the {@link UserDetailsService} which has to be used
+     */
     @Bean
     @Autowired
     public UserDetailsService userDetailsService(ApplicationContext context, InspectitServerSettings settings) {
@@ -35,6 +49,12 @@ public class UserDetailsConfiguration {
         }
     }
 
+    /**
+     * Creates a {@link LdapUserDetailsService} based on the given settings.
+     *
+     * @param settings the current server settings
+     * @return the created {@link LdapUserDetailsService}
+     */
     private LdapUserDetailsService createLdapUserDetailsService(InspectitServerSettings settings) {
         LdapContextSource contextSource = LdapUtils.createLdapContextSource(settings);
 
