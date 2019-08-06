@@ -7,7 +7,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import rocks.inspectit.ocelot.user.LocalUserDetailsService;
+import rocks.inspectit.ocelot.user.userdetails.LocalUserDetailsService;
 import rocks.inspectit.ocelot.user.User;
 import rocks.inspectit.ocelot.user.UserRepository;
 

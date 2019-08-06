@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.authentication;
+package rocks.inspectit.ocelot.security.jwt;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.jsonwebtoken.Claims;
@@ -12,11 +12,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.ldap.userdetails.LdapUserDetailsService;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
-import rocks.inspectit.ocelot.user.LocalUserDetailsService;
-import rocks.inspectit.ocelot.user.UserDetailsServiceManager;
 
 import java.security.Key;
 import java.util.Date;
@@ -33,20 +30,20 @@ public class JwtTokenManager {
     @Autowired
     InspectitServerSettings config;
 
+    @Autowired
+    private UserDetailsService userDetailsService;
+
     /**
      * We dynamically generate a secret to sign the tokens with at server start.
      * This means that tokens automatically become invalid as soon as the server restarts.
      */
     private Key secret = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
-    @Autowired
-    private UserDetailsServiceManager userDetailsServiceManager;
-
     /**
      * Creates a token containing the specified username.
      * The token expires after the specified Duration via {@link InspectitServerSettings#getTokenLifespan()} from now.
      *
-     * @param username    the username for which the token is generated
+     * @param username the username for which the token is generated
      * @return the generated token
      */
     public String createToken(String username) {
@@ -74,18 +71,13 @@ public class JwtTokenManager {
      * @throws UsernameNotFoundException thrown if the user does not exist
      */
     public Authentication authenticateWithToken(String token) throws JwtException, UsernameNotFoundException {
-        Claims parsedAndValidatedToken = Jwts.parser().setSigningKey(secret)
+        Claims jwtToken = Jwts.parser().setSigningKey(secret)
                 .parseClaimsJws(token)
                 .getBody();
 
-        String username = parsedAndValidatedToken.getSubject();
-        UserDetails userDetails = getUserDetails(username);
+        String username = jwtToken.getSubject();
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
-    }
-
-    private UserDetails getUserDetails(String username) {
-        UserDetailsService userService = userDetailsServiceManager.getUserDetailsService();
-        return userService.loadUserByUsername(username);
     }
 }

@@ -16,10 +16,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import rocks.inspectit.ocelot.authentication.JwtTokenManager;
+import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
+import rocks.inspectit.ocelot.error.exceptions.NotSupportedWithLdapException;
+import rocks.inspectit.ocelot.security.jwt.JwtTokenManager;
 import rocks.inspectit.ocelot.rest.AbstractBaseController;
 import rocks.inspectit.ocelot.rest.ErrorInfo;
-import rocks.inspectit.ocelot.user.LocalUserDetailsService;
+import rocks.inspectit.ocelot.user.userdetails.LocalUserDetailsService;
 import rocks.inspectit.ocelot.user.User;
 
 import java.io.IOException;
@@ -44,6 +46,9 @@ public class AccountController extends AbstractBaseController {
     @Autowired
     private JwtTokenManager tokenManager;
 
+    @Autowired
+    private InspectitServerSettings settings;
+
     @ApiOperation(value = "Create an access token", notes = "Creates a fresh access token for the user making this request." +
             " Instead of using User and Password based HTTP authentication, the user can then user the header 'Authorization: Bearer <TOKEN>' for authentication." +
             "The token expires after the time specified by ${inspectit.token-lifespan}, which by default is 60 minutes." +
@@ -59,6 +64,8 @@ public class AccountController extends AbstractBaseController {
             " This endpoint does not work with token-based authentication, only HTTP basic auth is allowed.")
     @PutMapping("account/password")
     public ResponseEntity<?> changePassword(@RequestBody PasswordChangeRequest newPassword, Authentication user) {
+        verifyLdapDisabled();
+
         if (StringUtils.isEmpty(newPassword.getPassword())) {
             return ResponseEntity.badRequest().body(NO_PASSWORD_ERROR);
         }
@@ -70,6 +77,12 @@ public class AccountController extends AbstractBaseController {
         userDetailsService.addOrUpdateUser(updatedUser);
 
         return ResponseEntity.ok().build();
+    }
+
+    private void verifyLdapDisabled() {
+        if (settings.getSecurity().isLdapAuthentication()) {
+            throw new NotSupportedWithLdapException();
+        }
     }
 
     /**

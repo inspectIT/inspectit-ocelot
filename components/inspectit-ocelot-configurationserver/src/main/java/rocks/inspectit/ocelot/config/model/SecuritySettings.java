@@ -1,11 +1,14 @@
 package rocks.inspectit.ocelot.config.model;
 
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 public class SecuritySettings {
 
     private boolean ldapAuthentication = false;
 
-    private LdapSettings ldap = new LdapSettings();
+    @Builder.Default
+    private LdapSettings ldap = LdapSettings.builder().build();
 }
