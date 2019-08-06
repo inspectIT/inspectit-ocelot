@@ -9,6 +9,9 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import rocks.inspectit.ocelot.error.exceptions.NotSupportedWithLdapException;
 
+/**
+ * The global exception handler.
+ */
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
