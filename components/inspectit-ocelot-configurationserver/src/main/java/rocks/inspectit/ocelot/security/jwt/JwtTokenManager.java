@@ -6,6 +6,7 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -14,6 +15,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
+import sun.plugin2.liveconnect.ArgumentHelper;
 
 import java.security.Key;
 import java.util.Date;
@@ -47,6 +49,10 @@ public class JwtTokenManager {
      * @return the generated token
      */
     public String createToken(String username) {
+        if (StringUtils.isEmpty(username)) {
+            throw new IllegalArgumentException("Username must not be null or empty.");
+        }
+
         Date now = new Date();
         Date expiration = new Date(now.getTime() + config.getTokenLifespan().toMillis());
 

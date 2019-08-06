@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.user.userdetails;
 
+import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -30,7 +31,8 @@ public class LocalUserDetailsService implements UserDetailsService {
     private UserRepository users;
 
     @Autowired
-    private InspectitServerSettings settings;
+    @VisibleForTesting
+    InspectitServerSettings settings;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -122,7 +124,6 @@ public class LocalUserDetailsService implements UserDetailsService {
         }
 
         if (users.count() == 0) {
-
             String name = settings.getDefaultUser().getName();
             String rawPassword = settings.getDefaultUser().getPassword();
 
