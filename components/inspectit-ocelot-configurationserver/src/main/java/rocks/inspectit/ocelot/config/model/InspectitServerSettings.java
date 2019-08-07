@@ -6,7 +6,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.validation.annotation.Validated;
 
+import javax.validation.Valid;
 import java.time.Duration;
 
 /**
@@ -18,6 +20,7 @@ import java.time.Duration;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Validated
 public class InspectitServerSettings {
 
     /**
@@ -52,6 +55,7 @@ public class InspectitServerSettings {
      */
     private Duration agentEvictionDelay;
 
+    @Valid
     @Builder.Default
     private SecuritySettings security =  SecuritySettings.builder().build();
 }

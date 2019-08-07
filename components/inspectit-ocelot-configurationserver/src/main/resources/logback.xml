@@ -8,5 +8,4 @@
     <root level="DEBUG">
         <appender-ref ref="STDOUT" />
     </root>
-
 </configuration>

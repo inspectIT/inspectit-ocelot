@@ -31,14 +31,5 @@ inspectit:
   agent-eviction-delay: 1h
 
   security:
+    # Whether LDAP authentication should be used
     ldap-authentication: false
-    ldap:
-      admin-group: "SHIP_CREW"
-      url: "ldap://localhost:389/"
-      base-dn: ""
-      manager-dn: "cn=admin,dc=planetexpress,dc=com"
-      manager-password: "GoodNewsEveryone"
-      user-search-base: "ou=people,dc=planetexpress,dc=com"
-      user-search-filter: "(uid={0})"
-      group-search-base: "ou=people,dc=planetexpress,dc=com"
-      group-search-filter: "(member={0})"

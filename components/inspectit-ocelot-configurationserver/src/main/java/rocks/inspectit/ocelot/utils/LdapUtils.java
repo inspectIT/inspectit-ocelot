@@ -27,8 +27,14 @@ public class LdapUtils {
         LdapContextSource contextSource = new LdapContextSource();
         contextSource.setUrl(ldapSettings.getUrl());
         contextSource.setBase(ldapSettings.getBaseDn());
-        contextSource.setUserDn(ldapSettings.getManagerDn());
-        contextSource.setPassword(ldapSettings.getManagerPassword());
+
+        if (ldapSettings.getManagerDn() != null) {
+            contextSource.setUserDn(ldapSettings.getManagerDn());
+        }
+        if (ldapSettings.getManagerPassword() != null) {
+            contextSource.setPassword(ldapSettings.getManagerPassword());
+        }
+
         contextSource.afterPropertiesSet();
 
         return contextSource;

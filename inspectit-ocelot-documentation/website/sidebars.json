@@ -33,6 +33,10 @@
     ],
     "End User Monitoring": [
       "enduser-monitoring/enduser-monitoring-server"
+    ],
+    "Configuration Server": [
+      "config-server/overview",
+      "config-server/user-authentication"
     ]
   }
 }
