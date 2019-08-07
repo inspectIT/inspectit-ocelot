@@ -1,0 +1,1 @@
+exec java -jar /inspectit-ocelot-configurationserver.jar

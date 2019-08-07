@@ -1,8 +1,8 @@
+# This configuration defines the application based on the url called at the API-gateway.
+# The application is propagated with service calls.
 inspectit:
-  
   instrumentation:  
     actions:
-      
       get_servlet_application:
         imports:
           - javax.servlet
@@ -29,5 +29,3 @@ inspectit:
           application: 
             action: get_servlet_application
             only-if-null: application
-          
-          
