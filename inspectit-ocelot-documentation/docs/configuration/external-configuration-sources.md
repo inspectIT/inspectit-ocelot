@@ -20,6 +20,7 @@ You can have more than one method active at the same time, thus pulling the conf
 | Method | Dynamic updates | Enabled by default |
 | --- | --- | --- |
 | [File-based Configuration](configuration/external-configuration-sources.md#file-based-configuration) | Yes | No |
+| [HTTP-based Configuration](configuration/external-configuration-sources.md#http-based-configuration) | Yes | No |
 
 ## File-based Configuration
 
@@ -40,3 +41,17 @@ This is done by specifying the duration `inspectit.config.file-based.frequency`.
 |`inspectit.config.file-based.frequency`|`5s`|Specifies the frequency at which the configuration directory will be checked for changes. When setting the frequency to zero, no polling is performed. Instead the agent listens for filesystem events published by the operating system to detect changes.|
 
 > You must make sure that the access to your configuration directory is restricted in the same way you would restrict access to your application code or startup script. Otherwise the concept of [actions](instrumentation/rules#actions) of inspectIT Ocelot could make your application prone to code injection!
+
+## HTTP-based Configuration
+
+The HTTP-based configuration periodically fetches a specified HTTP endpoint in order to receive the agent configuration.
+This configuration source can be used when using the [inspectIT Ocelot Configuration Server](config-server/overview.md).
+
+| Property | Default | Description |
+| --- | --- | --- |
+|`inspectit.config.http.url`|-| The url of the http endpoint to query the configuration.|
+|`inspectit.config.http.enabled`|`true`| Whether the http property source should be used.|
+|`inspectit.config.http.frequency`|`30s`| The frequency of polling the http endpoint to check for configuration changes. |
+|`inspectit.config.http.attributes`|`service: ${inspectit.service-name}`| The following attributes will be sent as http query parameters when fetching the configuration. These are used to map agents to certain configurations. See the section on [Agent Mappings](config-server/agent-mappings.md). |
+
+> Due to security reasons, the HTTP-based configuration has the lowest priority, thus, cannot override configuration properties set by different configuration sources.
