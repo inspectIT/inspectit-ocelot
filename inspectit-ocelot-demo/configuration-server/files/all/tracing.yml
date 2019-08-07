@@ -20,7 +20,7 @@ inspectit:
         value: new StringBuilder(a).append(b).append(c).toString()
             
     rules:    
-      #use the existing rules from the default configuration but enable tracing
+      # use the existing rules from the default configuration but enable tracing
       http_server_servlet_api:
         tracing:
           start-span: true

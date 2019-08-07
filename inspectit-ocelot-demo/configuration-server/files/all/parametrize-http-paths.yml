@@ -1,4 +1,4 @@
-#Parametrizes HTTP paths to be used in metrics
+# Parametrizes HTTP paths to be used in metrics
 inspectit:
   instrumentation:  
     rules:    

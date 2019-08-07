@@ -128,8 +128,8 @@ A sandbox instance of Wavefront can be obtained here: https://www.wavefront.com/
 ## Changing Agent Configurations
 
 In all demo scenarios the inspectIT Ocelot agents already have their service names and used ports as well as a basic instrumentation set up.
-The demo uses the inspectIT Ocelot configuration server for configuring all services.
-You can visit it on [localhost:8090](http://localhost:8090).
+Each scenario uses the *inspectIT Ocelot Configuration Server* for managing and providing the configuration files to the agents.
+The web UI of the configuration server can be accessed via [localhost:8090](http://localhost:8090).
 
 The demo starts the following services, of which each is instrumented with an inspectIT Ocelot Agent:
 

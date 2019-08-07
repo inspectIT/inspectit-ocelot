@@ -14,7 +14,7 @@ inspectit:
       sql: {down-propagation: NONE, is-tag: false}
     
     actions:
-      #Extracts the SQL from a PreparedStatement for HSQLDB
+      # Extracts the SQL from a PreparedStatement for HSQLDB
       hsqldb_prepared_statement_get_sql:
         imports:
           - org.hsqldb.jdbc
@@ -28,7 +28,7 @@ inspectit:
           return sqlField.get(_this); 
           
     rules:    
-      #we also trace jdbc calls including their target database
+      # We also trace JDBC calls including their target database
       servicegraph_record_jdbc_calls:
         tracing:
           start-span: true
@@ -40,7 +40,7 @@ inspectit:
           db_name:
             action: get_jdbc_statement_connection_name
             
-      #extract the sql and add it to the trace
+      # Extract the sql and add it to the trace
       hsqldb_get_prep_statement_sql:
         scopes:
           hsqldb_prepared_statement_execute: true

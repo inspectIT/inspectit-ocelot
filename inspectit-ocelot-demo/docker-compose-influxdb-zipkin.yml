@@ -7,9 +7,9 @@ services:
     volumes:
       - agent-vol:/agent
 
-  ocelotconfig:
+  ocelot-config-server:
     image: inspectit/inspectit-ocelot-configurationserver:${INSPECTIT_OCELOT_VERSION}
-    container_name: ocelotconfig
+    container_name: ocelot-config-server
     mem_limit: 128M
     environment:
       - INSPECTIT_WORKING_DIRECTORY=/configuration-server
@@ -24,10 +24,10 @@ services:
     container_name: config-server
     depends_on:
       - agent
-      - ocelotconfig
+      - ocelot-config-server
     environment:
       - INSPECTIT_SERVICE_NAME=config-server
-      - INSPECTIT_CONFIG_HTTP_URL=http://ocelotconfig:8090/api/v1/agent/configuration
+      - INSPECTIT_CONFIG_HTTP_URL=http://ocelot-config-server:8090/api/v1/agent/configuration
       - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_PORT=9096
       - INSPECTIT_EXPORTERS_TRACING_ZIPKIN_URL=http://zipkin:9411/api/v2/spans
     mem_limit: 512M
@@ -46,13 +46,13 @@ services:
     container_name: discovery-server
     environment:
       - INSPECTIT_SERVICE_NAME=discovery-server
-      - INSPECTIT_CONFIG_HTTP_URL=http://ocelotconfig:8090/api/v1/agent/configuration
+      - INSPECTIT_CONFIG_HTTP_URL=http://ocelot-config-server:8090/api/v1/agent/configuration
       - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_PORT=9095
       - INSPECTIT_EXPORTERS_TRACING_ZIPKIN_URL=http://zipkin:9411/api/v2/spans
     mem_limit: 512M
     depends_on:
       - agent
-      - ocelotconfig
+      - ocelot-config-server
       - config-server
     entrypoint: ["sh", "-c","
       ./dockerize -wait=tcp://config-server:8888 -timeout=120s -- &&
@@ -70,13 +70,13 @@ services:
     container_name: customers-service
     environment:
       - INSPECTIT_SERVICE_NAME=customers-service
-      - INSPECTIT_CONFIG_HTTP_URL=http://ocelotconfig:8090/api/v1/agent/configuration
+      - INSPECTIT_CONFIG_HTTP_URL=http://ocelot-config-server:8090/api/v1/agent/configuration
       - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_PORT=9091
       - INSPECTIT_EXPORTERS_TRACING_ZIPKIN_URL=http://zipkin:9411/api/v2/spans
     mem_limit: 512M
     depends_on:
       - agent
-      - ocelotconfig
+      - ocelot-config-server
       - config-server
       - discovery-server
     entrypoint: ["sh", "-c","
@@ -95,13 +95,13 @@ services:
     container_name: visits-service
     environment:
       - INSPECTIT_SERVICE_NAME=visits-service
-      - INSPECTIT_CONFIG_HTTP_URL=http://ocelotconfig:8090/api/v1/agent/configuration
+      - INSPECTIT_CONFIG_HTTP_URL=http://ocelot-config-server:8090/api/v1/agent/configuration
       - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_PORT=9092
       - INSPECTIT_EXPORTERS_TRACING_ZIPKIN_URL=http://zipkin:9411/api/v2/spans
     mem_limit: 512M
     depends_on:
       - agent
-      - ocelotconfig
+      - ocelot-config-server
       - config-server
       - discovery-server
     entrypoint: ["sh", "-c","
@@ -120,13 +120,13 @@ services:
     container_name: vets-service
     environment:
       - INSPECTIT_SERVICE_NAME=vets-service
-      - INSPECTIT_CONFIG_HTTP_URL=http://ocelotconfig:8090/api/v1/agent/configuration
+      - INSPECTIT_CONFIG_HTTP_URL=http://ocelot-config-server:8090/api/v1/agent/configuration
       - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_PORT=9093
       - INSPECTIT_EXPORTERS_TRACING_ZIPKIN_URL=http://zipkin:9411/api/v2/spans
     mem_limit: 512M
     depends_on:
       - agent
-      - ocelotconfig
+      - ocelot-config-server
       - config-server
       - discovery-server
     entrypoint: ["sh", "-c","
@@ -145,13 +145,13 @@ services:
     container_name: api-gateway
     environment:
       - INSPECTIT_SERVICE_NAME=api-gateway
-      - INSPECTIT_CONFIG_HTTP_URL=http://ocelotconfig:8090/api/v1/agent/configuration
+      - INSPECTIT_CONFIG_HTTP_URL=http://ocelot-config-server:8090/api/v1/agent/configuration
       - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_PORT=9094
       - INSPECTIT_EXPORTERS_TRACING_ZIPKIN_URL=http://zipkin:9411/api/v2/spans
     mem_limit: 512M
     depends_on:
       - agent
-      - ocelotconfig
+      - ocelot-config-server
       - config-server
       - discovery-server
     entrypoint: ["sh", "-c","

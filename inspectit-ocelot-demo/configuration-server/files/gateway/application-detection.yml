@@ -1,5 +1,5 @@
-#This configuration defines the application based on the url called at the API-gateway
-#The application is propagated with service calls
+# This configuration defines the application based on the url called at the API-gateway.
+# The application is propagated with service calls.
 inspectit:
   instrumentation:  
     actions:
