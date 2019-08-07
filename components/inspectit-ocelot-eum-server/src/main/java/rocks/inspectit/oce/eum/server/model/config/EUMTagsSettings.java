@@ -7,21 +7,24 @@ import rocks.inspectit.oce.eum.server.utils.DefaultTags;
 import rocks.inspectit.ocelot.config.model.tags.TagsSettings;
 
 import javax.validation.constraints.AssertTrue;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 
 /**
  * Holds an additional map of tags, which will be resolved based on the EUM beacon.
  */
 @Data
-@EqualsAndHashCode(callSuper=true)
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 public class EUMTagsSettings extends TagsSettings {
+
     /**
      * Maps tag name to beacon key.
      */
     private final Map<String, String> beacon = new HashMap<>();
-
 
     /**
      * List of tags, which are defined as global

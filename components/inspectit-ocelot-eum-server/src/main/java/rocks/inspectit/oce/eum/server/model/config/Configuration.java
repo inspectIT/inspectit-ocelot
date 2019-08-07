@@ -13,7 +13,6 @@ import java.util.Collections;
 import java.util.Map;
 
 /**
- *
  * The configuration of the inspectit-ocelot-eum-server
  */
 @ConfigurationProperties("inspectit-ocelot-eum-server")
@@ -21,6 +20,7 @@ import java.util.Map;
 @Data
 @Validated
 public class Configuration {
+
     /**
      * List of metric definitions
      */

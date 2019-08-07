@@ -37,23 +37,23 @@ public class MeasuresAndViewsManagerTest {
     EUMTagsSettings tagSettings;
 
     @Nested
-    class ProcessBeacon{
+    class ProcessBeacon {
         @BeforeEach
-        void setupConfiguration(){
+        void setupConfiguration() {
             ViewDefinitionSettings view1 = ViewDefinitionSettings.builder().bucketBoundaries(Arrays.asList(0d, 1d))
                     .aggregation(ViewDefinitionSettings.Aggregation.HISTOGRAM)
                     .tag("TAG_1", true)
-                    .tag("TAG_2",true)
+                    .tag("TAG_2", true)
                     .build();
             ViewDefinitionSettings view2 = ViewDefinitionSettings.builder()
                     .aggregation(ViewDefinitionSettings.Aggregation.COUNT)
                     .tag("TAG_1", true)
-                    .tag("TAG_2",true)
+                    .tag("TAG_2", true)
                     .build();
             ViewDefinitionSettings view3 = ViewDefinitionSettings.builder()
                     .aggregation(ViewDefinitionSettings.Aggregation.SUM)
                     .tag("TAG_1", true)
-                    .tag("TAG_2",true)
+                    .tag("TAG_2", true)
                     .build();
             Map<String, ViewDefinitionSettings> views = new HashMap<String, ViewDefinitionSettings>();
             views.put("Dummy metric name/HISTOGRAM", view1);
@@ -81,30 +81,33 @@ public class MeasuresAndViewsManagerTest {
         }
 
         @Test
-        void verifyNoViewIsGeneratedWithEmptyBeacon(){
+        void verifyNoViewIsGeneratedWithEmptyBeacon() {
             when(configuration.getDefinitions()).thenReturn(definitionMap);
-            HashMap<String, String> emptyBeacon =  new HashMap<>();
+            HashMap<String, String> emptyBeacon = new HashMap<>();
+
             measuresAndViewsManager.processBeacon(emptyBeacon);
 
             assertThat(Stats.getViewManager().getAllExportedViews()).isEmpty();
         }
 
         @Test
-        void verifyNoViewIsGeneratedWithFullBeacon(){
+        void verifyNoViewIsGeneratedWithFullBeacon() {
             when(configuration.getDefinitions()).thenReturn(definitionMap);
-            HashMap<String, String> beacon =  new HashMap<String, String>();
+            HashMap<String, String> beacon = new HashMap<String, String>();
             beacon.put("fake_ beacon_field", "12d");
+
             measuresAndViewsManager.processBeacon(beacon);
 
             assertThat(Stats.getViewManager().getAllExportedViews()).isEmpty();
         }
 
         @Test
-        void verifyViewsAreGeneratedGlobalTagIsSet(){
+        void verifyViewsAreGeneratedGlobalTagIsSet() {
             when(configuration.getDefinitions()).thenReturn(definitionMap);
             when(configuration.getTags()).thenReturn(tagSettings);
-            HashMap<String, String> beacon =  new HashMap<String, String>();
+            HashMap<String, String> beacon = new HashMap<String, String>();
             beacon.put("dummy_beacon_field", "12d");
+
             measuresAndViewsManager.processBeacon(beacon);
 
             assertThat(Stats.getViewManager().getAllExportedViews()).hasSize(3);

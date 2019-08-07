@@ -22,9 +22,8 @@ public class BeaconController {
     @CrossOrigin
     @RequestMapping(method = RequestMethod.POST, value = "beacon")
     public ResponseEntity postBeacon(@RequestBody MultiValueMap<String, String> formData) {
-        Map<String, String>  beacon = beaconPreProcessor.preProcessBeacon(formData.toSingleValueMap());
+        Map<String, String> beacon = beaconPreProcessor.preProcessBeacon(formData.toSingleValueMap());
         measuresAndViewsManager.processBeacon(beacon);
         return ResponseEntity.accepted().build();
     }
-
 }
