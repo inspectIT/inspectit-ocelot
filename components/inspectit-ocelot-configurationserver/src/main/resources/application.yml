@@ -29,3 +29,7 @@ inspectit:
   max-agents: 10000
   # If an agent didn't fetched its configuration for this duration, it is forgotten and evicted from all caches
   agent-eviction-delay: 1h
+
+  security:
+    # Whether LDAP authentication should be used
+    ldap-authentication: false

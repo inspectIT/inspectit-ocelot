@@ -9,10 +9,11 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import rocks.inspectit.ocelot.IntegrationTestBase;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.rest.ErrorInfo;
-import rocks.inspectit.ocelot.user.LocalUserDetailsService;
+import rocks.inspectit.ocelot.user.userdetails.LocalUserDetailsService;
 import rocks.inspectit.ocelot.user.User;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,6 +26,9 @@ public class AccountControllerIntTest extends IntegrationTestBase {
 
     @Autowired
     LocalUserDetailsService userDetailsService;
+
+    @Autowired
+    PasswordEncoder passwordEncoder;
 
     @AfterEach
     void cleanupUsers() {
@@ -59,7 +63,7 @@ public class AccountControllerIntTest extends IntegrationTestBase {
             String pwHash = userDetailsService
                     .getUserByName("John").get()
                     .getPasswordHash();
-            assertThat(userDetailsService.getPasswordEncoder()
+            assertThat(passwordEncoder
                     .matches("Foo", pwHash))
                     .isTrue();
         }

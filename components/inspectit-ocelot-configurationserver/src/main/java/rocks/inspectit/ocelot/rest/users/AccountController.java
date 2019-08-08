@@ -11,16 +11,19 @@ import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import rocks.inspectit.ocelot.authentication.JwtTokenManager;
+import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
+import rocks.inspectit.ocelot.error.exceptions.NotSupportedWithLdapException;
 import rocks.inspectit.ocelot.rest.AbstractBaseController;
 import rocks.inspectit.ocelot.rest.ErrorInfo;
-import rocks.inspectit.ocelot.user.LocalUserDetailsService;
+import rocks.inspectit.ocelot.security.jwt.JwtTokenManager;
 import rocks.inspectit.ocelot.user.User;
+import rocks.inspectit.ocelot.user.userdetails.LocalUserDetailsService;
 
 import java.io.IOException;
 
@@ -39,10 +42,13 @@ public class AccountController extends AbstractBaseController {
             .build();
 
     @Autowired
-    private LocalUserDetailsService userDetailsService;
+    private UserDetailsService userDetailsService;
 
     @Autowired
     private JwtTokenManager tokenManager;
+
+    @Autowired
+    private InspectitServerSettings settings;
 
     @ApiOperation(value = "Create an access token", notes = "Creates a fresh access token for the user making this request." +
             " Instead of using User and Password based HTTP authentication, the user can then user the header 'Authorization: Bearer <TOKEN>' for authentication." +
@@ -59,17 +65,27 @@ public class AccountController extends AbstractBaseController {
             " This endpoint does not work with token-based authentication, only HTTP basic auth is allowed.")
     @PutMapping("account/password")
     public ResponseEntity<?> changePassword(@RequestBody PasswordChangeRequest newPassword, Authentication user) {
+        verifyLdapDisabled();
+
+        LocalUserDetailsService localUserDetailsService = (LocalUserDetailsService) userDetailsService;
+
         if (StringUtils.isEmpty(newPassword.getPassword())) {
             return ResponseEntity.badRequest().body(NO_PASSWORD_ERROR);
         }
-        User updatedUser = userDetailsService.getUserByName(user.getName())
+        User updatedUser = localUserDetailsService.getUserByName(user.getName())
                 .get()
                 .toBuilder()
                 .password(newPassword.getPassword())
                 .build();
-        userDetailsService.addOrUpdateUser(updatedUser);
+        localUserDetailsService.addOrUpdateUser(updatedUser);
 
         return ResponseEntity.ok().build();
+    }
+
+    private void verifyLdapDisabled() {
+        if (settings.getSecurity().isLdapAuthentication()) {
+            throw new NotSupportedWithLdapException();
+        }
     }
 
     /**

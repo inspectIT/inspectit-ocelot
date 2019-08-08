@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.authentication;
+package rocks.inspectit.ocelot.security.jwt;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.jsonwebtoken.Claims;
@@ -6,14 +6,15 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
-import rocks.inspectit.ocelot.user.LocalUserDetailsService;
 
 import java.security.Key;
 import java.util.Date;
@@ -30,14 +31,14 @@ public class JwtTokenManager {
     @Autowired
     InspectitServerSettings config;
 
+    @Autowired
+    private UserDetailsService userDetailsService;
+
     /**
      * We dynamically generate a secret to sign the tokens with at server start.
      * This means that tokens automatically become invalid as soon as the server restarts.
      */
     private Key secret = Keys.secretKeyFor(SignatureAlgorithm.HS256);
-
-    @Autowired
-    private LocalUserDetailsService userDetailsService;
 
     /**
      * Creates a token containing the specified username.
@@ -47,8 +48,13 @@ public class JwtTokenManager {
      * @return the generated token
      */
     public String createToken(String username) {
+        if (StringUtils.isEmpty(username)) {
+            throw new IllegalArgumentException("Username must not be null or empty.");
+        }
+
         Date now = new Date();
         Date expiration = new Date(now.getTime() + config.getTokenLifespan().toMillis());
+
         return Jwts.builder()
                 .setSubject(username)
                 .setExpiration(expiration)
@@ -70,13 +76,13 @@ public class JwtTokenManager {
      * @throws UsernameNotFoundException thrown if the user does not exist
      */
     public Authentication authenticateWithToken(String token) throws JwtException, UsernameNotFoundException {
-        Claims parsedAndValidatedToken = Jwts.parser().setSigningKey(secret)
+        Claims jwtToken = Jwts.parser().setSigningKey(secret)
                 .parseClaimsJws(token)
                 .getBody();
 
-        String username = parsedAndValidatedToken.getSubject();
+        String username = jwtToken.getSubject();
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
-
 }

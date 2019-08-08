@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.authentication;
+package rocks.inspectit.ocelot.security.jwt;
 
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -6,7 +6,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.GenericFilterBean;
-import rocks.inspectit.ocelot.config.SecurityConfiguration;
+import rocks.inspectit.ocelot.security.config.SecurityConfiguration;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;

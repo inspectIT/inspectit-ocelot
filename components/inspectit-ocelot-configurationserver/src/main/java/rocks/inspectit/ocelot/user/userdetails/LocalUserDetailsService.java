@@ -1,16 +1,18 @@
-package rocks.inspectit.ocelot.user;
+package rocks.inspectit.ocelot.user.userdetails;
 
-import lombok.Getter;
+import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
+import rocks.inspectit.ocelot.user.User;
+import rocks.inspectit.ocelot.user.UserRepository;
 
 import javax.annotation.PostConstruct;
 import java.util.Optional;
@@ -20,17 +22,20 @@ import java.util.Optional;
  */
 @Component
 @Slf4j
+@Lazy
 public class LocalUserDetailsService implements UserDetailsService {
+
+    public static final String DEFAULT_ACCESS_USER_ROLE = "OCELOT_ADMIN";
 
     @Autowired
     private UserRepository users;
 
     @Autowired
-    private InspectitServerSettings config;
+    @VisibleForTesting
+    InspectitServerSettings settings;
 
-    @Getter
-    private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     /**
      * @return An iterator over all registered users
@@ -108,17 +113,19 @@ public class LocalUserDetailsService implements UserDetailsService {
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getUsername())
                 .password(user.getPasswordHash())
-                .authorities("USER") //at least one authority is required by spring, even if we don't use them yet
+                .roles(DEFAULT_ACCESS_USER_ROLE)
                 .build();
     }
 
-
     @PostConstruct
     private void addDefaultUserIfRequired() {
-        if (users.count() == 0) {
+        if (settings.getSecurity().isLdapAuthentication()) {
+            return;
+        }
 
-            String name = config.getDefaultUser().getName();
-            String rawPassword = config.getDefaultUser().getPassword();
+        if (users.count() == 0) {
+            String name = settings.getDefaultUser().getName();
+            String rawPassword = settings.getDefaultUser().getPassword();
 
             log.warn("Generated default user as no other users were found. Please login and change the password!");
             addOrUpdateUser(

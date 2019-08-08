@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 import rocks.inspectit.ocelot.rest.AbstractBaseController;
 import rocks.inspectit.ocelot.rest.ErrorInfo;
-import rocks.inspectit.ocelot.user.LocalUserDetailsService;
+import rocks.inspectit.ocelot.user.userdetails.LocalUserDetailsService;
 import rocks.inspectit.ocelot.user.User;
 
 import java.util.Collections;

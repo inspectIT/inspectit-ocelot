@@ -104,7 +104,9 @@ dependencies {
             "org.springframework.security:spring-security-web:5.1.5.RELEASE",
             "org.springframework.security:spring-security-config:5.1.5.RELEASE",
             "org.springframework.boot:spring-boot-starter-data-jpa:2.1.4.RELEASE",
-
+            "org.springframework.ldap:spring-ldap-core",
+            "org.springframework.security:spring-security-ldap",
+            
             "org.xerial:sqlite-jdbc:3.28.0",
             "com.github.gwenn:sqlite-dialect:0.1.0",
 
@@ -116,7 +118,7 @@ dependencies {
             "io.springfox:springfox-swagger2:2.9.2",
             "io.springfox:springfox-swagger-ui:2.9.2",
             "commons-io:commons-io:2.6",
-            "org.apache.commons:commons-lang3:3.+",
+            "org.apache.commons:commons-lang3:3.+",            
     )
     testImplementation(
             'org.springframework.boot:spring-boot-starter-test:2.1.6.RELEASE',
