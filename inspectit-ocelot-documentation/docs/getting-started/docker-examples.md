@@ -14,7 +14,9 @@ All of the demo scenarios are fully configured with predefined dashboards, *so y
 
 ### Demo #1 - InfluxDB and Zipkin
 
-Uses InfluxData Telegraf for metrics gathering, InfluxDB for metrics storage and Grafana for Dashboards. Traces are exported to Zipkin.
+Uses InfluxData Telegraf for metrics gathering, InfluxDB for metrics storage and Grafana for Dashboards. 
+Traces are exported to Zipkin.
+[See section below for detailed information](#influxdb-and-zipkin-scenario).
 
 * File: `docker-compose-influxdb-zipkin.yml`
 * [OpenAPM Landscape](https://openapm.io/landscape?agent=inspectit-ocelot-agent&instrumentation-lib=opencensus&collector=influx-telegraf%2Czipkin-server&storage=influx-db&dashboarding=grafana)
@@ -23,7 +25,9 @@ Uses InfluxData Telegraf for metrics gathering, InfluxDB for metrics storage and
 
 ### Demo #2 - Prometheus, Grafana and Jaeger
 
-Uses Prometheus Server for metrics gathering and storage, Grafana for Dashboards. Traces are exported to Jaeger.
+Uses Prometheus Server for metrics gathering and storage, Grafana for Dashboards.
+Traces are exported to Jaeger.
+[See section below for detailed information](#prometheus-and-jaeger-scenario).
 
 * File: `docker-compose-prometheus-jaeger.yml`
 * [OpenAPM Landscape](https://openapm.io/landscape?agent=inspectit-ocelot-agent&instrumentation-lib=opencensus&collector=prometheus-server%2Cjaeger-collector&dashboarding=grafana&visualization=jaeger-query)
@@ -33,6 +37,7 @@ Uses Prometheus Server for metrics gathering and storage, Grafana for Dashboards
 ### Demo #3 - Wavefront and Zipkin
 
 Sends Zipkin traces to Wavefront through a Wavefront proxy running as a Docker container. Collects metrics via Telegraf and sends them to Wavefront.
+[See section below for detailed information](#wavefront-demo-scenario).
 
 * File: `docker-compose-wavefront-zipkin.yml`
 
@@ -76,6 +81,8 @@ For more information, check out the following blog post: [Setting Up Docker for 
 
 ## Demo Scenarios
 
+> In all scenarios you can use `admin` as username and `demo` as password for accessing Grafana and the inspectIT Ocelot Configuration Server. 
+
 ### InfluxDB and Zipkin Scenario
 In this scenario the following components are preconfigured and used for monitoring:
 
@@ -87,7 +94,7 @@ In this scenario the following components are preconfigured and used for monitor
 - *Grafana:* Provides predefined example Dashboards visualizing the metrics collected by the inspectIT Ocelot agent. The query language [Flux](https://docs.influxdata.com/flux) is used to query the data from InfluxDB.
 - *Zipkin:* Zipkin is used to store and query all recorded traces.
 
-You can access Grafana through http://localhost:3001 using `admin` as username and `demo` as password.
+You can access Grafana through http://localhost:3001 and the configuration server via http://localhost:8090.
 The traces can be viewed in Zipkin on http://localhost:9411.
 
 ### Prometheus and Jaeger Scenario
@@ -100,12 +107,24 @@ In this scenario the following components are preconfigured and used for monitor
 - *Grafana:* Provides predefined example Dashboards visualizing the metrics collected by the inspectIT Ocelot agent.
 - *Jaeger:* Jaeger is used to store and query all recorded traces.
 
-You can access Grafana through http://localhost:3001 using `admin` as username and `demo` as password.
+You can access Grafana through http://localhost:3001 and the configuration server via http://localhost:8090.
 The traces can be viewed in Jaeger on http://localhost:16686.
 
 Prometheus can be accessed through http://localhost:9090.
 
-### Demo Grafana Dashboards
+### Wavefront Demo Scenario
+
+Wavefront is a SaaS-based monitoring and tracing solution. In this demo, we are running a local proxy as a Docker container that is responsible for receiving Zipkin traces and sending them to Wavefront. We're also using Telegraf to poll the Prometheus endpoints on the monitored services and send that data to Wavefront through the proxy. 
+
+- *inspectIT Ocelot agent:* Instruments all the target demo application components.
+- *Telegraf:* Polls the Prometheus metric endpoints on the services.
+- *Wavefront Proxy:* Receives Zipkin traces and metrics (via Telegraf), aggregates, secures and compresses them before sending them to Wavefront.
+
+A sandbox instance of Wavefront can be obtained here: https://www.wavefront.com/sign-up/ 
+
+The inspectIT Ocelot Configuration Server can be accessed via http://localhost:8090.
+
+## Demo Grafana Dashboards
 The InfluxDB and Prometheus demo scenarios include the following predefined Grafana Dashboards:
 
 | Name + Grafana Marketplace | Description | Screenshot |
@@ -116,19 +135,12 @@ The InfluxDB and Prometheus demo scenarios include the following predefined Graf
 | JVM Metrics [[InfluxDB]](https://grafana.com/dashboards/9600) [[Prometheus]](https://grafana.com/dashboards/9598) | Shows JVM metrics related to JVM CPU usage, Memory (Heap and Non-Heap) and Garbage Collection. | ![](assets/demo-dashboard-jvm_small.png) |
 | Self Monitoring [[InfluxDB]](https://grafana.com/dashboards/10143) [[Prometheus]](https://grafana.com/dashboards/10140) | Shows the instrumentation state and progress based on [self monitoring metrics](metrics/self-monitoring.md). | ![](assets/demo-dashboard-selfmonitoring_small.png) |
 
-### Wavefront Demo Scenario
-Wavefront is a SaaS-based monitoring and tracing solution. In this demo, we are running a local proxy as a Docker container that is responsible for receiving Zipkin traces and sending them to Wavefront. We're also using Telegraf to poll the Prometheus endpoints on the monitored services and send that data to Wavefront through the proxy. 
-
-- *inspectIT Ocelot agent:* Instruments all the target demo application components.
-- *Telegraf:* Polls the Prometheus metric endpoints on the services.
-- *Wavefront Proxy:* Receives Zipkin traces and metrics (via Telegraf), aggregates, secures and compresses them before sending them to Wavefront.
-
-A sandbox instance of Wavefront can be obtained here: https://www.wavefront.com/sign-up/ 
 
 ## Changing Agent Configurations
 
 In all demo scenarios the inspectIT Ocelot agents already have their service names and used ports as well as a basic instrumentation set up.
-However, if you want to customize any other configuration option you can provide custom configuration files.
+Each scenario uses the *inspectIT Ocelot Configuration Server* for managing and providing the configuration files to the agents.
+The web UI of the configuration server can be accessed via [localhost:8090](http://localhost:8090).
 
 The demo starts the following services, of which each is instrumented with an inspectIT Ocelot Agent:
 
@@ -138,10 +150,3 @@ The demo starts the following services, of which each is instrumented with an in
 - *visits-service*
 - *vets-service*
 - *api-gateway*
-
-For each service you can put your own agent configuration files in the
-correspondingly named subfolders in ```inspectit-ocelot-demo/agentconfig/```.
-For example, if you want to change the configuration of the inspectIT Ocelot
-agent attached to the *vets-service*, you can put a YAML-file into ```inspectit-ocelot-demo/agentconfig/vets-service```.
-
-Note that it is not required to restart the demo! The agents listen for updates of the corresponding directories and reconfigure themselves when required.

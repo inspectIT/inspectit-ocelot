@@ -3,19 +3,32 @@ services:
   agent:
     image: inspectit/inspectit-ocelot-agent:${INSPECTIT_OCELOT_VERSION}
     container_name: agent
-    mem_limit: 512M
+    mem_limit: 128M
     volumes:
       - agent-vol:/agent
 
+  ocelot-config-server:
+    image: inspectit/inspectit-ocelot-configurationserver:${INSPECTIT_OCELOT_VERSION}
+    container_name: ocelot-config-server
+    mem_limit: 128M
+    environment:
+      - INSPECTIT_WORKING_DIRECTORY=/configuration-server
+      - INSPECTIT_DEFAULT_USER_PASSWORD=demo
+    volumes:
+      - ./configuration-server:/configuration-server
+    ports:
+      - 8090:8090
+      
   config-server:
     image: openapm/spring-petclinic-config-server:inspectit-oce-demo
     container_name: config-server
     depends_on:
+      - ocelot-config-server
       - agent
       - wfproxy
     environment:
       - INSPECTIT_SERVICE_NAME=config-server
-      - INSPECTIT_CONFIG_FILE_BASED_PATH=/agentconfig
+      - INSPECTIT_CONFIG_HTTP_URL=http://ocelot-config-server:8090/api/v1/agent/configuration
       - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_PORT=9096
       - INSPECTIT_EXPORTERS_TRACING_ZIPKIN_URL=http://wfproxy:9411/api/v2/spans
     mem_limit: 512M
@@ -24,7 +37,6 @@ services:
       -javaagent:/agent/inspectit-ocelot-agent.jar
       -jar /app.jar"]
     volumes:
-      - ./agentconfig/config-server:/agentconfig
       - agent-vol:/agent
     ports:
       - 8888:8888
@@ -35,11 +47,12 @@ services:
     container_name: discovery-server
     environment:
       - INSPECTIT_SERVICE_NAME=discovery-server
-      - INSPECTIT_CONFIG_FILE_BASED_PATH=/agentconfig
+      - INSPECTIT_CONFIG_HTTP_URL=http://ocelot-config-server:8090/api/v1/agent/configuration
       - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_PORT=9095
       - INSPECTIT_EXPORTERS_TRACING_ZIPKIN_URL=http://wfproxy:9411/api/v2/spans
     mem_limit: 512M
     depends_on:
+      - ocelot-config-server
       - agent
       - wfproxy
       - config-server
@@ -49,7 +62,6 @@ services:
       -javaagent:/agent/inspectit-ocelot-agent.jar
       -jar /app.jar"]
     volumes:
-      - ./agentconfig/discovery-server:/agentconfig
       - agent-vol:/agent
     ports:
       - 8761:8761
@@ -60,11 +72,12 @@ services:
     container_name: customers-service
     environment:
       - INSPECTIT_SERVICE_NAME=customers-service
-      - INSPECTIT_CONFIG_FILE_BASED_PATH=/agentconfig
+      - INSPECTIT_CONFIG_HTTP_URL=http://ocelot-config-server:8090/api/v1/agent/configuration
       - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_PORT=9091
       - INSPECTIT_EXPORTERS_TRACING_ZIPKIN_URL=http://wfproxy:9411/api/v2/spans
     mem_limit: 512M
     depends_on:
+      - ocelot-config-server
       - agent
       - wfproxy
       - config-server
@@ -75,7 +88,6 @@ services:
       -javaagent:/agent/inspectit-ocelot-agent.jar
       -jar /app.jar"]
     volumes:
-      - ./agentconfig/customers-service:/agentconfig
       - agent-vol:/agent
     ports:
       - 8881:8081
@@ -86,11 +98,12 @@ services:
     container_name: visits-service
     environment:
       - INSPECTIT_SERVICE_NAME=visits-service
-      - INSPECTIT_CONFIG_FILE_BASED_PATH=/agentconfig
+      - INSPECTIT_CONFIG_HTTP_URL=http://ocelot-config-server:8090/api/v1/agent/configuration
       - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_PORT=9092
       - INSPECTIT_EXPORTERS_TRACING_ZIPKIN_URL=http://wfproxy:9411/api/v2/spans
     mem_limit: 512M
     depends_on:
+      - ocelot-config-server
       - agent
       - wfproxy
       - config-server
@@ -101,7 +114,6 @@ services:
       -javaagent:/agent/inspectit-ocelot-agent.jar
       -jar /app.jar"]
     volumes:
-      - ./agentconfig/visits-service:/agentconfig
       - agent-vol:/agent
     ports:
       - 8082:8082
@@ -112,11 +124,12 @@ services:
     container_name: vets-service
     environment:
       - INSPECTIT_SERVICE_NAME=vets-service
-      - INSPECTIT_CONFIG_FILE_BASED_PATH=/agentconfig
+      - INSPECTIT_CONFIG_HTTP_URL=http://ocelot-config-server:8090/api/v1/agent/configuration
       - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_PORT=9093
       - INSPECTIT_EXPORTERS_TRACING_ZIPKIN_URL=http://wfproxy:9411/api/v2/spans
     mem_limit: 512M
     depends_on:
+      - ocelot-config-server
       - agent
       - wfproxy
       - config-server
@@ -127,7 +140,6 @@ services:
       -javaagent:/agent/inspectit-ocelot-agent.jar
       -jar /app.jar"]
     volumes:
-      - ./agentconfig/vets-service:/agentconfig
       - agent-vol:/agent
     ports:
       - 8083:8083
@@ -138,11 +150,12 @@ services:
     container_name: api-gateway
     environment:
       - INSPECTIT_SERVICE_NAME=api-gateway
-      - INSPECTIT_CONFIG_FILE_BASED_PATH=/agentconfig
+      - INSPECTIT_CONFIG_HTTP_URL=http://ocelot-config-server:8090/api/v1/agent/configuration
       - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_PORT=9094
       - INSPECTIT_EXPORTERS_TRACING_ZIPKIN_URL=http://wfproxy:9411/api/v2/spans
     mem_limit: 512M
     depends_on:
+      - ocelot-config-server
       - agent
       - wfproxy
       - config-server
@@ -153,7 +166,6 @@ services:
       -javaagent:/agent/inspectit-ocelot-agent.jar
       -jar /app.jar"]
     volumes:
-      - ./agentconfig/api-gateway:/agentconfig
       - agent-vol:/agent
     ports:
       - 8080:8080

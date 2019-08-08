@@ -8,10 +8,9 @@ import io.opencensus.tags.TagValue;
 import io.opencensus.tags.Tags;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import rocks.inspectit.oce.eum.server.model.config.BeaconMetricDefinition;
-import rocks.inspectit.oce.eum.server.model.config.Configuration;
+import rocks.inspectit.oce.eum.server.configuration.model.BeaconMetricDefinition;
+import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
 import rocks.inspectit.oce.eum.server.utils.DefaultTags;
-import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings;
 import rocks.inspectit.ocelot.config.model.metrics.definition.ViewDefinitionSettings;
 
 import java.util.*;
@@ -22,13 +21,20 @@ import java.util.stream.Collectors;
  */
 @Component
 public class MeasuresAndViewsManager {
+
     /**
      * Measures, which are created.
      */
-    HashMap<String, Measure> metrics = new HashMap<>();
+    private HashMap<String, Measure> metrics = new HashMap<>();
 
     @Autowired
-    private Configuration configuration;
+    private EumServerConfiguration configuration;
+
+    @Autowired
+    private StatsRecorder recorder;
+
+    @Autowired
+    private ViewManager viewManager;
 
     /**
      * Processes boomerang beacon
@@ -41,7 +47,7 @@ public class MeasuresAndViewsManager {
             if (beacon.containsKey(metricDefinition.getValue().getBeaconField())) {
                 updateMetrics(metricDefinition.getKey(), metricDefinition.getValue());
                 try (Scope scope = getTagContext(beacon).buildScoped()) {
-                    recordMeasure(metricDefinition.getKey(),metricDefinition.getValue(), beacon.get(metricDefinition.getValue().getBeaconField()));
+                    recordMeasure(metricDefinition.getKey(), metricDefinition.getValue(), beacon.get(metricDefinition.getValue().getBeaconField()));
                 }
             }
         }
@@ -49,24 +55,25 @@ public class MeasuresAndViewsManager {
 
     /**
      * Records the measure,
+     *
      * @param name
      * @param metricDefinition The configuration of the metric, which is activated
      * @param value            The value, which is going to be written.
      */
     private void recordMeasure(String name, BeaconMetricDefinition metricDefinition, String value) {
-        StatsRecorder recorder = Stats.getStatsRecorder();
-            switch (metricDefinition.getType()) {
-                case LONG:
-                        recorder.newMeasureMap().put((Measure.MeasureLong) metrics.get(name), Long.parseLong(value)).record();
-                    break;
-                case DOUBLE:
-                        recorder.newMeasureMap().put((Measure.MeasureDouble) metrics.get(name), Double.parseDouble(value)).record();
-                    break;
+        switch (metricDefinition.getType()) {
+            case LONG:
+                recorder.newMeasureMap().put((Measure.MeasureLong) metrics.get(name), Long.parseLong(value)).record();
+                break;
+            case DOUBLE:
+                recorder.newMeasureMap().put((Measure.MeasureDouble) metrics.get(name), Double.parseDouble(value)).record();
+                break;
         }
     }
 
     /**
      * Updates the metrics
+     *
      * @param name
      * @param metricDefinition
      */
@@ -79,36 +86,15 @@ public class MeasuresAndViewsManager {
     }
 
     private Measure createMeasure(String name, BeaconMetricDefinition metricDefinition) {
-        switch(metricDefinition.getType()){
+        switch (metricDefinition.getType()) {
             case LONG:
                 return Measure.MeasureLong.create(name,
                         metricDefinition.getDescription(), metricDefinition.getUnit());
             case DOUBLE:
                 return Measure.MeasureDouble.create(name,
-                        metricDefinition.getDescription() , metricDefinition.getUnit());
+                        metricDefinition.getDescription(), metricDefinition.getUnit());
             default:
                 throw new RuntimeException("Used measurement type is not supported");
-        }
-    }
-
-    public boolean isParsable(String measurement, MetricDefinitionSettings.MeasureType type) {
-        switch(type){
-            case LONG:
-                try{
-                    java.lang.Long.parseLong(measurement);
-                    return true;
-                } catch (NumberFormatException e){
-                    return false;
-                }
-            case DOUBLE:
-                try{
-                    java.lang.Double.parseDouble(measurement);
-                    return true;
-                } catch (NumberFormatException e){
-                    return false;
-                }
-            default:
-                return false;
         }
     }
 
@@ -118,9 +104,7 @@ public class MeasuresAndViewsManager {
      * @param metricDefinition
      */
     private void updateViews(String metricName, BeaconMetricDefinition metricDefinition) {
-        ViewManager viewManager = Stats.getViewManager();
-
-        for (Map.Entry<String,ViewDefinitionSettings> viewDefinitonSettings : metricDefinition.getViews().entrySet()) {
+        for (Map.Entry<String, ViewDefinitionSettings> viewDefinitonSettings : metricDefinition.getViews().entrySet()) {
             String viewName = viewDefinitonSettings.getKey();
             ViewDefinitionSettings viewDefinitionSettings = viewDefinitonSettings.getValue();
             if (viewManager.getAllExportedViews().stream().noneMatch(v -> v.getName().asString().equals(viewName))) {
@@ -141,11 +125,11 @@ public class MeasuresAndViewsManager {
      * @return Map of tags
      */
     private Set<String> getTagsForView(ViewDefinitionSettings viewDefinitionSettings) {
-        Set<String> tags = new HashSet<>(configuration.getTags().getGlobal());
-         tags.addAll(viewDefinitionSettings.getTags().entrySet().stream()
-                    .filter(entry -> entry.getValue())
-                    .map(entry -> entry.getKey())
-                    .collect(Collectors.toList()));
+        Set<String> tags = new HashSet<>(configuration.getTags().getDefineAsGlobal());
+        tags.addAll(viewDefinitionSettings.getTags().entrySet().stream()
+                .filter(entry -> entry.getValue())
+                .map(entry -> entry.getKey())
+                .collect(Collectors.toList()));
         return tags;
     }
 
@@ -157,18 +141,18 @@ public class MeasuresAndViewsManager {
     private TagContextBuilder getTagContext(Map<String, String> beacon) {
         TagContextBuilder tagContextBuilder = Tags.getTagger().currentBuilder();
 
-        for(Map.Entry<String, String> extraTag : configuration.getTags().getExtra().entrySet()){
+        for (Map.Entry<String, String> extraTag : configuration.getTags().getExtra().entrySet()) {
             tagContextBuilder.putLocal(TagKey.create(extraTag.getKey()), TagValue.create(extraTag.getValue()));
         }
 
-        for(Map.Entry<String, String> beaconTag : configuration.getTags().getBeacon().entrySet()) {
+        for (Map.Entry<String, String> beaconTag : configuration.getTags().getBeacon().entrySet()) {
             if (beacon.containsKey(beaconTag.getValue())) {
                 tagContextBuilder.putLocal(TagKey.create(beaconTag.getKey()), TagValue.create(beacon.get(beaconTag.getValue())));
             }
         }
 
-        for(DefaultTags defaultTag : DefaultTags.values()){
-            if(beacon.containsKey(defaultTag.name())){
+        for (DefaultTags defaultTag : DefaultTags.values()) {
+            if (beacon.containsKey(defaultTag.name())) {
                 tagContextBuilder.putLocal(TagKey.create(defaultTag.name()), TagValue.create(beacon.get(defaultTag.name())));
             }
         }

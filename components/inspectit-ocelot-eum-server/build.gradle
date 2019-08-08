@@ -13,7 +13,7 @@ bootJar {
 	version = '0.1.0'
 
 	manifest {
-		attributes 'Start-Class': 'rocks.inspectit.ocelot.ConfigurationServer'
+		attributes 'Start-Class': 'rocks.inspectit.oce.eum.server.EUMServerApplication'
 	}
 }
 

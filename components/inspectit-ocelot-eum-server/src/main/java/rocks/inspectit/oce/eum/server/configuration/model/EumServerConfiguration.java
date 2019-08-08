@@ -1,4 +1,4 @@
-package rocks.inspectit.oce.eum.server.model.config;
+package rocks.inspectit.oce.eum.server.configuration.model;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -13,14 +13,14 @@ import java.util.Collections;
 import java.util.Map;
 
 /**
- *
  * The configuration of the inspectit-ocelot-eum-server
  */
 @ConfigurationProperties("inspectit-ocelot-eum-server")
 @Component
 @Data
 @Validated
-public class Configuration {
+public class EumServerConfiguration {
+
     /**
      * List of metric definitions
      */
@@ -32,7 +32,7 @@ public class Configuration {
      * Map of tags
      */
     @Valid
-    private EUMTagsSettings tags;
+    private EumTagsSettings tags;
 
     /**
      * The exporters settings
