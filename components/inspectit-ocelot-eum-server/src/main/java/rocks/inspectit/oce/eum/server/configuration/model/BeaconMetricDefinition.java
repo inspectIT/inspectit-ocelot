@@ -1,4 +1,4 @@
-package rocks.inspectit.oce.eum.server.model.config;
+package rocks.inspectit.oce.eum.server.configuration.model;
 
 import lombok.*;
 import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings;
@@ -9,17 +9,18 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.Map;
 
-@Data
-@EqualsAndHashCode(callSuper=true)
-@NoArgsConstructor
-@AllArgsConstructor
 /**
  * Defines the mapping of a beacon value to a OpenCensus Measure and the corresponding views.
  */
+@Data
+@EqualsAndHashCode(callSuper = true)
+@NoArgsConstructor
+@AllArgsConstructor
 public class BeaconMetricDefinition extends MetricDefinitionSettings {
 
     @NotBlank
     private String beaconField;
+
     @Builder(builderMethodName = "beaconMetricBuilder")
     public BeaconMetricDefinition(boolean enabled, @NotBlank String unit, @NotNull MeasureType type, String description,
                                   Map<@NotBlank String, @Valid @NotNull ViewDefinitionSettings> views, @NotBlank String beaconField) {
@@ -29,7 +30,7 @@ public class BeaconMetricDefinition extends MetricDefinitionSettings {
 
     @Override
     public BeaconMetricDefinition getCopyWithDefaultsPopulated(String metricName) {
-        val metricDefinition =  super.getCopyWithDefaultsPopulated(metricName);
+        val metricDefinition = super.getCopyWithDefaultsPopulated(metricName);
         val beaconMetricDefinition = beaconMetricBuilder()
                 .beaconField(getBeaconField())
                 .description(metricDefinition.getDescription())

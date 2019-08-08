@@ -18,6 +18,7 @@ import java.net.InetAddress;
  */
 @Component
 public class GeolocationResolver {
+
     /**
      * Location of the geoip database.
      */

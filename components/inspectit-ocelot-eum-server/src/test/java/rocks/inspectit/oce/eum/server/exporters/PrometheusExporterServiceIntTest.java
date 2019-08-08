@@ -40,9 +40,9 @@ public class PrometheusExporterServiceIntTest {
 
     private static String URL_KEY = "u";
     private static String SUT_URL = "http://test.com/login";
-    private static String  METRIC_NAME = "page_ready_time";
-    private static String  BEACON_KEY_NAME = "t_page";
-    private static String  FAKE_BEACON_KEY_NAME = "does_not_exist";
+    private static String METRIC_NAME = "page_ready_time";
+    private static String BEACON_KEY_NAME = "t_page";
+    private static String FAKE_BEACON_KEY_NAME = "does_not_exist";
 
     @Autowired
     protected MockMvc mockMvc;
@@ -57,6 +57,7 @@ public class PrometheusExporterServiceIntTest {
 
     /**
      * Sends beacon to mocked endpoint /beacon
+     *
      * @param beacon
      * @throws Exception
      */
@@ -65,10 +66,10 @@ public class PrometheusExporterServiceIntTest {
         mockMvc.perform(post("/beacon").contentType(MediaType.APPLICATION_FORM_URLENCODED).content(EntityUtils.toString(new UrlEncodedFormEntity(params)))).andExpect(status().isAccepted());
     }
 
-    private Map<String, String> getBasicBeacon(){
+    private Map<String, String> getBasicBeacon() {
         Map<String, String> beacon = new HashMap<>();
         beacon.put(URL_KEY, SUT_URL);
-        return  beacon;
+        return beacon;
     }
 
     void assertGet200(String url) throws Exception {
@@ -89,11 +90,12 @@ public class PrometheusExporterServiceIntTest {
 
     /**
      * The application should expose no view, since no beacon entry maps to the default implementation.
+     *
      * @throws Exception
      */
     @Test
     public void expectNoViews() throws Exception {
-        Map<String, String> beacon =getBasicBeacon();
+        Map<String, String> beacon = getBasicBeacon();
         beacon.put(FAKE_BEACON_KEY_NAME, "Fake Value");
         sendBeacon(beacon);
 
@@ -105,6 +107,7 @@ public class PrometheusExporterServiceIntTest {
 
     /**
      * The application should expose one view, since one beacon entry maps to the default implementation.
+     *
      * @throws Exception
      */
     @Test

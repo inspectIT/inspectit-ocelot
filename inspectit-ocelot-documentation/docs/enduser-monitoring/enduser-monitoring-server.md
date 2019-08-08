@@ -47,7 +47,9 @@ $ java -Dserver.port=[port] -Dspring.config.location=file:[path-to-config] -jar 
 ```
 
 ## Configuration
+
 The configuration file defines the mapping between the concrete Boomerang metric and a OpenCensus metric, as the following sample configuration file shows:
+
 ```yaml
 inspectit-ocelot-eum-server:
   definitions:
@@ -90,10 +92,11 @@ inspectit-ocelot-eum-server:
     beacon:
       URL: u
       OS: ua.plt
-    global:
+    define-as-global:
       - URL
       - OS
       - COUNTRY_CODE
+
   exporters:
     metrics:
       prometheus:
@@ -101,28 +104,63 @@ inspectit-ocelot-eum-server:
         host: localhost
         port: 8888
 ```
-##### Metrics Definition
-A metric is defined through the following attributes:
-* `name`: Defines the name of the metric. The name of the exposed view will have the used aggregation as suffix.
-* `measure-type`: Can be either `LONG` or `DOUBLE`.
-* `beacon-field`: The beacon key name, which is used as source of metric.
-* `description`: Optional. Defines an additional description of the exposed metric.
-* `unit`: The unit of the metric.
-* `tag-keys`: Optional. Defines a list of tag keys, which are exposed with the current metric.
-* `views`: A list of the views, which should be exposed. The aggregation can be either `SUM`, `COUNT`, `LAST_VALUE` or `HISTORGRAM`. For using `HISTOGRAM`, the field `bucket-boundaries` is mandatory.
-* `bucket-boundaries`: Used for the `HISTOGRAM` aggregation, defines the bucket boundaries as list of Doubles.
 
-##### Tags Definition
+### Metrics Definition
+
+A metric are defined the same way as in the inspectIT Ocelot Java agent. Please see the section [Metrics / Custom Metrics](metrics/custom-metrics.md) for detailed information.
+
+In contrast to the agent's metric definition, the EUM server's metric definition contains additional fields.
+These additional fields are the following:
+
+| Attributes | Note |
+| --- | --- |
+| `beacon-field` | The beacon field key, which is used as value for the metric. |
+
+### Tags Definition
+
 We distinguish between to different types of tags:
-* `extra`- tags: Extra tags define tags, which are manually set in the configuration. The field `extra` holds a list of key-value mappings.
-* `beacon`- tags: Beacon tags define tags, whose tag value is resolved by a beacon entry. The defined value of the `beacon` map will be resolved by using the provided beacon.
-In order to provide selected tags to each measurement by default, tags can be defined as global. `global` holds a list of already defined tags, which will be then exposed for each measurement.
 
-##### Automated Geolocation Detection
-By using the tag `COUNTRY_CODE`, the geolocation of the requester is resolved by using the requester IP and the [GeoLite2 database](https://www.maxmind.com). If the IP cannot be resolved, the tag value will be empty.
+| Attributes | Note |
+| --- | --- |
+| `extra` | Extra tags define tags, which are manually set in the configuration and can be considered as constants. |
+| `beacon` | Beacon tags define tags, whose value is resolved by an incoming beacon entry. |
 
-##### Exporters
-By now, the prometheus exporter is available. If `ènabled` is set to true, the exporter is exposes the metrics under 
-```bash
-http://[host]:[port]/metrics
+For example, the following configuration specifies the two tags `APP` and `URL`.
+The tag `APP` will always be resolved to the value `my-application`, where the tag `URL` will be resolved to the value of the field `u` of a received beacon.
+
+```YAML
+inspectit:
+  tags:
+    extra:
+      APP: my-application
+    beacon:
+      URL: u
 ```
+
+#### Default Tags
+
+The EUM server provides a set of default tags which don't have to be specified and always exist. Currently, the following default tags exist:
+
+| Tag | Description |
+| --- | --- |
+| `COUNTRY_CODE` | Contains the geolocation of the beacon's origin. It is resolved by using the client IP and the [GeoLite2 database](https://www.maxmind.com). If the IP cannot be resolved, the tag value will be empty. |
+
+#### Global Tags
+
+Tags will not be attached to metrics unless a metric explicitly defines to use a certain tag.
+
+In order to simplify the configuration, it is possilbe to define tags which are *always* attached to metrics, even a metric does not explicitly specifies it.
+This can be achieved by adding a tag's name to the `define-as-global` property.
+Each tag which is listed under this property will be added to each registered metric.
+
+For example, the following configuration causes that each metric will be enriched by a tag called `COUNTRY_CODE`.
+
+```YAML
+inspectit:
+  tags:
+    define-as-global:
+      - COUNTRY_CODE
+```
+
+## Exporters
+By now, the prometheus exporter is available. If `enabled` is set to true, the exporter is exposes the metrics under the following HTTP endpoint: `http://[host]:[port]/metrics`
