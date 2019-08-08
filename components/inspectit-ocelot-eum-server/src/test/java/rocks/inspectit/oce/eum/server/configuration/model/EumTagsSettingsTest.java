@@ -6,10 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.oce.eum.server.utils.DefaultTags;
 
-import javax.validation.constraints.AssertFalse;
-
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class EumTagsSettingsTest {
