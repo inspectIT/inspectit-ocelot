@@ -1,38 +1,62 @@
-inspectit-ocelot-eum-server:
+inspectit-eum:
+
   definitions:
     page_ready_time:
       measure-type: LONG
-      beacon-field: t_page
+      beacon-fields:
+        - t_page
+      extractor: SELECT
       unit: ms
       views:
         '[page_ready_time/SUM]': {aggregation: SUM}
         '[page_ready_time/COUNT]': {aggregation: COUNT}
+
     load_time:
       measure-type: LONG
-      beacon-field: t_done
+      beacon-fields:
+        - t_done
+      extractor: SELECT
       unit: ms
       views:
         '[load_time/SUM]': {aggregation: SUM}
         '[load_time/COUNT]': {aggregation: COUNT}
 
+    calc_load_time:
+      measure-type: LONG
+      beacon-fields:
+        - rt.end
+        - rt.tstart
+      extractor: DIFFERENCE
+      unit: ms
+      views:
+        '[calc_load_time/SUM]': {aggregation: SUM}
+        '[calc_load_time/COUNT]': {aggregation: COUNT}
+
     start_timestamp:
       measure-type: LONG
-      beacon-field: rt.tstart
+      beacon-fields:
+        - rt.tstart
+      extractor: SELECT
       unit: ms
 
     navigation_start_timestamp:
       measure-type: LONG
-      beacon-field: rt.nstart
+      beacon-fields:
+        - rt.nstart
+      extractor: SELECT
       unit: ms
 
     end_timestamp:
       measure-type: LONG
-      beacon-field: rt.end
+      beacon-fields:
+        - rt.end
+      extractor: SELECT
       unit: ms
       views:
         end_timestamp:
           aggregation: LAST_VALUE
           tags: {APPLICATION : true}
+
   tags:
     extra:
       APPLICATION: my-application

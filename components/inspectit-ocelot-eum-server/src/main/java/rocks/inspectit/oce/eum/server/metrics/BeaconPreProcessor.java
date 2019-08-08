@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import rocks.inspectit.oce.eum.server.beacon.Beacon;
 import rocks.inspectit.oce.eum.server.utils.DefaultTags;
 import rocks.inspectit.oce.eum.server.utils.IPUtils;
 
@@ -21,9 +22,9 @@ public class BeaconPreProcessor {
     @Autowired
     private GeolocationResolver geolocationResolver;
 
-    public Map<String, String> preProcessBeacon(Map<String, String> beacon) {
-        addCountryCode(beacon);
-        return beacon;
+    public Beacon preProcessBeacon(Map<String, String> beaconMap) {
+        addCountryCode(beaconMap);
+        return Beacon.of(beaconMap);
     }
 
     /**
