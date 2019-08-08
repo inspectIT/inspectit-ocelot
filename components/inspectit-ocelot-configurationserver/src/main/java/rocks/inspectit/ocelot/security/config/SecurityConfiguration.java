@@ -22,7 +22,7 @@ import rocks.inspectit.ocelot.utils.LdapUtils;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Collections;
 
-import static rocks.inspectit.ocelot.user.userdetails.LocalUserDetailsService.DEFAUL_ACCESS_USER_ROLE;
+import static rocks.inspectit.ocelot.user.userdetails.LocalUserDetailsService.DEFAULT_ACCESS_USER_ROLE;
 
 /**
  * Spring security configuration enabling authentication on all except excluded endpoints.
@@ -94,7 +94,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         if (serverSettings.getSecurity().isLdapAuthentication()) {
             return serverSettings.getSecurity().getLdap().getAdminGroup();
         } else {
-            return DEFAUL_ACCESS_USER_ROLE;
+            return DEFAULT_ACCESS_USER_ROLE;
         }
     }
 

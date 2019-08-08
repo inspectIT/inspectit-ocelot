@@ -30,7 +30,7 @@ Furthermore, the HTTP APIs which are related to the user management (`/api/v1/us
 In order to use LDAP for user authentication the `inspectit.security.ldap-authentication` property must be set to `true`.
 
 The LDAP related configuration properties have to be specified using the property `inspectit.security.ldap`.
-The following configuration snippet shows an example LDAP configuration (this configuration was created for this [this](https://github.com/rroemhild/docker-test-openldap) LDAP server).
+The following configuration snippet shows an example LDAP configuration (this configuration was created for [this](https://github.com/rroemhild/docker-test-openldap) LDAP server).
 
 ```YAML
 inspectit:

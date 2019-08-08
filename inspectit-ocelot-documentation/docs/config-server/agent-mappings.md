@@ -4,7 +4,7 @@ title: Agent Mappings
 ---
 
 Agent mappings are used to determine which agent receives which configuration.
-It's important to note that the first matching agent mapping will be used to determin which configuration is shipped to an agent.
+It's important to note that the first matching agent mapping will be used to determine which configuration is shipped to an agent.
 Additional agent mappings which may also match the attributes list sent by an agent will be ignored.
 See section [HTTP-based Configuration](configuration/external-configuration-sources.md#http-based-configuration) for infromation on how to specify which attributes will be send by an agent.
 
@@ -14,7 +14,7 @@ An agent mapping consists of the following properties:
 | --- | --- |
 | `name` | The name of the agent mapping. |
 | `sources` | A list of paths. All configuration files matching this list (Directories are resolved recursively) will be merged together and returned to matching agents. |
-| `attributes` | A map of attributes. This map is used to determin whether an agent will match this agent mapping, thus, get its configuration. |
+| `attributes` | A map of attributes. This map is used to determine whether an agent will match this agent mapping, thus, get its configuration. |
 
 The configuration server is shipped with a default agent mapping.
 This default agent mapping maps each agent to each configuration file.

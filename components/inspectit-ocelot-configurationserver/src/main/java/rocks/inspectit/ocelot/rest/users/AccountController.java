@@ -8,7 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import net.bytebuddy.asm.Advice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -20,12 +19,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.error.exceptions.NotSupportedWithLdapException;
-import rocks.inspectit.ocelot.security.config.UserDetailsConfiguration;
-import rocks.inspectit.ocelot.security.jwt.JwtTokenManager;
 import rocks.inspectit.ocelot.rest.AbstractBaseController;
 import rocks.inspectit.ocelot.rest.ErrorInfo;
-import rocks.inspectit.ocelot.user.userdetails.LocalUserDetailsService;
+import rocks.inspectit.ocelot.security.jwt.JwtTokenManager;
 import rocks.inspectit.ocelot.user.User;
+import rocks.inspectit.ocelot.user.userdetails.LocalUserDetailsService;
 
 import java.io.IOException;
 

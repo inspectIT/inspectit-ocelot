@@ -25,7 +25,7 @@ import java.util.Optional;
 @Lazy
 public class LocalUserDetailsService implements UserDetailsService {
 
-    public static final String DEFAUL_ACCESS_USER_ROLE = "OCELOT_ADMIN";
+    public static final String DEFAULT_ACCESS_USER_ROLE = "OCELOT_ADMIN";
 
     @Autowired
     private UserRepository users;
@@ -113,7 +113,7 @@ public class LocalUserDetailsService implements UserDetailsService {
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getUsername())
                 .password(user.getPasswordHash())
-                .roles(DEFAUL_ACCESS_USER_ROLE)
+                .roles(DEFAULT_ACCESS_USER_ROLE)
                 .build();
     }
 

@@ -5,7 +5,7 @@ sidebar_label: Overview
 ---
 
 The *inspectIT Configuration Server* is a standalone component provided by the inspectIT Ocelot project.
-It can be used to centrally manage configuration files used by inspectIT Ocelot agents and, in addition, provide these files to the agents.
+It can be used to centrally manage and distribute the inspectIT Ocelot agent configuration files.
 For this purpose, HTTP endpoints are provided that can be queried by the agents to obtain the corresponding configuration.
 This has the advantage that the manual administration of the configuration files is not required.
 

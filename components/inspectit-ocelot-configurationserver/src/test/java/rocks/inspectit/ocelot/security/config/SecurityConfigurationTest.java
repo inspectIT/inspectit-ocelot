@@ -37,7 +37,7 @@ class SecurityConfigurationTest {
         AuthenticationManagerBuilder auth;
 
         @Mock
-        DaoAuthenticationConfigurer doAuthenticationConfigurer;
+        DaoAuthenticationConfigurer daoAuthenticationConfigurer;
 
         @Mock
         LdapAuthenticationProviderConfigurer ldapConfigurer;
@@ -48,12 +48,12 @@ class SecurityConfigurationTest {
             InspectitServerSettings settings = InspectitServerSettings.builder().security(securitySettings).build();
             configuration.serverSettings = settings;
 
-            when(auth.userDetailsService(any())).thenReturn(doAuthenticationConfigurer);
+            when(auth.userDetailsService(any())).thenReturn(daoAuthenticationConfigurer);
 
             configuration.configure(auth);
 
             verify(auth).userDetailsService(userDetailsService);
-            verify(doAuthenticationConfigurer).passwordEncoder(passwordEncoder);
+            verify(daoAuthenticationConfigurer).passwordEncoder(passwordEncoder);
             verifyNoMoreInteractions(auth);
         }
 
