@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import rocks.inspectit.oce.eum.server.model.config.Configuration;
+import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
 
 import javax.annotation.PostConstruct;
 
@@ -24,7 +24,7 @@ public class PrometheusExporterService {
     private HTTPServer prometheusClient = null;
 
     @Autowired
-    Configuration configuration;
+    private EumServerConfiguration configuration;
 
     /**
      * Triggered, if exporters.metrics.prometheus.enabled is set to "true".

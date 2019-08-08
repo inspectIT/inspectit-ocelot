@@ -16,10 +16,10 @@ import java.util.Map;
 public class BeaconPreProcessor {
 
     @Autowired
-    IPUtils ipUtils;
+    private IPUtils ipUtils;
 
     @Autowired
-    GeolocationResolver geolocationResolver;
+    private GeolocationResolver geolocationResolver;
 
     public Map<String, String> preProcessBeacon(Map<String, String> beacon) {
         addCountryCode(beacon);

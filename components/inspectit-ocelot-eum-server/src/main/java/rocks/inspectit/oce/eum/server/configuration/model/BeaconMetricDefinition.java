@@ -1,4 +1,4 @@
-package rocks.inspectit.oce.eum.server.model.config;
+package rocks.inspectit.oce.eum.server.configuration.model;
 
 import lombok.*;
 import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings;

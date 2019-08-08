@@ -8,10 +8,9 @@ import io.opencensus.tags.TagValue;
 import io.opencensus.tags.Tags;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import rocks.inspectit.oce.eum.server.model.config.BeaconMetricDefinition;
-import rocks.inspectit.oce.eum.server.model.config.Configuration;
+import rocks.inspectit.oce.eum.server.configuration.model.BeaconMetricDefinition;
+import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
 import rocks.inspectit.oce.eum.server.utils.DefaultTags;
-import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings;
 import rocks.inspectit.ocelot.config.model.metrics.definition.ViewDefinitionSettings;
 
 import java.util.*;
@@ -29,7 +28,13 @@ public class MeasuresAndViewsManager {
     private HashMap<String, Measure> metrics = new HashMap<>();
 
     @Autowired
-    private Configuration configuration;
+    private EumServerConfiguration configuration;
+
+    @Autowired
+    private StatsRecorder recorder;
+
+    @Autowired
+    private ViewManager viewManager;
 
     /**
      * Processes boomerang beacon
@@ -56,7 +61,6 @@ public class MeasuresAndViewsManager {
      * @param value            The value, which is going to be written.
      */
     private void recordMeasure(String name, BeaconMetricDefinition metricDefinition, String value) {
-        StatsRecorder recorder = Stats.getStatsRecorder();
         switch (metricDefinition.getType()) {
             case LONG:
                 recorder.newMeasureMap().put((Measure.MeasureLong) metrics.get(name), Long.parseLong(value)).record();
@@ -100,8 +104,6 @@ public class MeasuresAndViewsManager {
      * @param metricDefinition
      */
     private void updateViews(String metricName, BeaconMetricDefinition metricDefinition) {
-        ViewManager viewManager = Stats.getViewManager();
-
         for (Map.Entry<String, ViewDefinitionSettings> viewDefinitonSettings : metricDefinition.getViews().entrySet()) {
             String viewName = viewDefinitonSettings.getKey();
             ViewDefinitionSettings viewDefinitionSettings = viewDefinitonSettings.getValue();
@@ -123,7 +125,7 @@ public class MeasuresAndViewsManager {
      * @return Map of tags
      */
     private Set<String> getTagsForView(ViewDefinitionSettings viewDefinitionSettings) {
-        Set<String> tags = new HashSet<>(configuration.getTags().getGlobal());
+        Set<String> tags = new HashSet<>(configuration.getTags().getDefineAsGlobal());
         tags.addAll(viewDefinitionSettings.getTags().entrySet().stream()
                 .filter(entry -> entry.getValue())
                 .map(entry -> entry.getKey())

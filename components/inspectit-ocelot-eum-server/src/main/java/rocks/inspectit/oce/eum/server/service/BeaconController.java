@@ -14,10 +14,10 @@ import java.util.Map;
 public class BeaconController {
 
     @Autowired
-    BeaconPreProcessor beaconPreProcessor;
+    private BeaconPreProcessor beaconPreProcessor;
 
     @Autowired
-    MeasuresAndViewsManager measuresAndViewsManager;
+    private MeasuresAndViewsManager measuresAndViewsManager;
 
     @CrossOrigin
     @RequestMapping(method = RequestMethod.POST, value = "beacon")

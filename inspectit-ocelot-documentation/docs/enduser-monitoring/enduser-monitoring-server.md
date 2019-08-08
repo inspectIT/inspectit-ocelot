@@ -122,7 +122,7 @@ In order to provide selected tags to each measurement by default, tags can be de
 By using the tag `COUNTRY_CODE`, the geolocation of the requester is resolved by using the requester IP and the [GeoLite2 database](https://www.maxmind.com). If the IP cannot be resolved, the tag value will be empty.
 
 ##### Exporters
-By now, the prometheus exporter is available. If `ènabled` is set to true, the exporter is exposes the metrics under 
+By now, the prometheus exporter is available. If `enabled` is set to true, the exporter is exposes the metrics under 
 ```bash
 http://[host]:[port]/metrics
 ```
