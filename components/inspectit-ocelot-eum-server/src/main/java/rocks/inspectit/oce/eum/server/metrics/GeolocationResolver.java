@@ -11,12 +11,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
 
-@Slf4j
 /**
  * Resolves the geolocation of given IP, by using the GeoLite2 database
  * (https://dev.maxmind.com/geoip/geoip2/geolite2/)
  */
 @Component
+@Slf4j
 public class GeolocationResolver {
 
     /**
@@ -37,9 +37,8 @@ public class GeolocationResolver {
             CountryResponse response = databaseReader.country(ipAddress);
 
             return response.getCountry().getIsoCode();
-
         } catch (GeoIp2Exception | IOException e) {
-            log.info("The requester address {} could not be resolved", ip);
+            log.debug("The requester address {} could not be resolved", ip);
             return "";
         }
     }
