@@ -21,8 +21,8 @@ inspectit-eum:
         '[load_time/COUNT]': {aggregation: COUNT}
 
     calc_load_time:
-      measure-type: DOUBLE
-      value-expression: "({rt.end} - {rt.tstart}) / 1000"
+      measure-type: LONG
+      value-expression: "{rt.end} - {rt.tstart}"
       beacon-requirements:
         - field: rt.quit
           requirement: NOT_EXISTS

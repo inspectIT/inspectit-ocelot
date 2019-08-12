@@ -89,7 +89,7 @@ public class MeasuresAndViewsManager {
     /**
      * Records the measure,
      *
-     * @param measureName
+     * @param measureName      the name of the measure
      * @param metricDefinition The configuration of the metric, which is activated
      * @param value            The value, which is going to be written.
      */
@@ -110,9 +110,6 @@ public class MeasuresAndViewsManager {
 
     /**
      * Updates the metrics
-     *
-     * @param name
-     * @param metricDefinition
      */
     private void updateMetrics(String name, BeaconMetricDefinition metricDefinition) {
         if (!metrics.containsKey(name)) {
