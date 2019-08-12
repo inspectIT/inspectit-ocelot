@@ -63,6 +63,7 @@ public class MeasuresAndViewsManagerTest {
 
             BeaconMetricDefinition dummyMetricDefinition = BeaconMetricDefinition
                     .beaconMetricBuilder()
+                    .valueExpression("{dummy_beacon_field}")
                     .description("Dummy description")
                     .type(rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings.MeasureType.DOUBLE)
                     .unit("ms")

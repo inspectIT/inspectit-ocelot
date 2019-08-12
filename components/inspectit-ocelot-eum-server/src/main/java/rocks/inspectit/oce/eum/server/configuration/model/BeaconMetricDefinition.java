@@ -20,8 +20,10 @@ import java.util.Map;
 @AllArgsConstructor
 public class BeaconMetricDefinition extends MetricDefinitionSettings {
 
+    @Valid
     private List<BeaconRequirement> requirements;
 
+    @NotEmpty
     private String valueExpression;
 
     @Builder(builderMethodName = "beaconMetricBuilder")
