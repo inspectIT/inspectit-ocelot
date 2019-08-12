@@ -12,7 +12,7 @@ inspectit-eum:
     load_time:
       measure-type: LONG
       value-expression: "{t_done}"
-      requirements:
+      beacon-requirements:
         - field: rt.quit
           requirement: NOT_EXISTS
       unit: ms
@@ -21,9 +21,9 @@ inspectit-eum:
         '[load_time/COUNT]': {aggregation: COUNT}
 
     calc_load_time:
-      measure-type: LONG
-      value-expression: "{rt.end} - {rt.tstart}"
-      requirements:
+      measure-type: DOUBLE
+      value-expression: "({rt.end} - {rt.tstart}) / 1000"
+      beacon-requirements:
         - field: rt.quit
           requirement: NOT_EXISTS
       unit: ms

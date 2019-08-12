@@ -1,43 +1,69 @@
 package rocks.inspectit.oce.eum.server.beacon;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import rocks.inspectit.oce.eum.server.configuration.model.BeaconRequirement;
 
-import java.util.Collections;
+import java.util.Arrays;
+import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 class BeaconTest {
 
     @Nested
-    public class CheckRequirements {
+    public class Contains {
+
+        private Beacon beacon;
+
+        @BeforeEach
+        private void before() {
+            HashMap<String, String> map = new HashMap<>();
+            map.put("first", "1");
+            map.put("second", "2");
+            beacon = Beacon.of(map);
+        }
 
         @Test
-        public void t() {
-            Beacon beacon = Beacon.of(Collections.singletonMap("field", "5"));
-            BeaconRequirement requirement = new BeaconRequirement();
-            requirement.setField("field");
-            requirement.setRequirement(BeaconRequirement.RequirementType.NOT_EXISTS);
+        public void containsField() {
+            boolean result = beacon.contains("first");
 
-            boolean result = beacon.checkRequirements(Collections.singletonList(requirement));
+            assertThat(result).isTrue();
+        }
+
+        @Test
+        public void containsFields() {
+            boolean result = beacon.contains("first", "second");
+
+            assertThat(result).isTrue();
+        }
+
+        @Test
+        public void doesNotContainField() {
+            boolean result = beacon.contains("third");
 
             assertThat(result).isFalse();
         }
 
         @Test
-        public void t2() {
-            Beacon beacon = Beacon.of(Collections.singletonMap("field", "5"));
-            BeaconRequirement requirement = new BeaconRequirement();
-            requirement.setField("another");
-            requirement.setRequirement(BeaconRequirement.RequirementType.NOT_EXISTS);
+        public void doesNotContainFields() {
+            boolean result = beacon.contains("first", "third");
 
-            boolean result = beacon.checkRequirements(Collections.singletonList(requirement));
+            assertThat(result).isFalse();
+        }
+
+        @Test
+        public void containsFieldsAsList() {
+            boolean result = beacon.contains(Arrays.asList("first", "second"));
 
             assertThat(result).isTrue();
         }
 
-    }
+        @Test
+        public void doesNotContainFieldsAsList() {
+            boolean result = beacon.contains(Arrays.asList("first", "third"));
 
+            assertThat(result).isFalse();
+        }
+    }
 }

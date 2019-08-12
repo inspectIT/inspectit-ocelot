@@ -9,14 +9,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 class RawExpressionTest {
 
     @Nested
-    public class T {
+    public class Constructor {
 
         @Test
-        public void t0() {
+        public void withoutFields() {
             RawExpression expression = new RawExpression("2");
 
             assertThat(expression.getFields()).isEmpty();
@@ -24,7 +25,7 @@ class RawExpressionTest {
         }
 
         @Test
-        public void t() {
+        public void withReference() {
             RawExpression expression = new RawExpression("{field}");
 
             assertThat(expression.getFields()).containsExactly("field");
@@ -32,7 +33,7 @@ class RawExpressionTest {
         }
 
         @Test
-        public void t2() {
+        public void withReferences() {
             RawExpression expression = new RawExpression("{field} - {field.second}");
 
             assertThat(expression.getFields()).containsExactly("field", "field.second");
@@ -40,7 +41,7 @@ class RawExpressionTest {
         }
 
         @Test
-        public void t3() {
+        public void withSameReferences() {
             RawExpression expression = new RawExpression("{field} - {field}");
 
             assertThat(expression.getFields()).containsExactly("field");
@@ -52,7 +53,7 @@ class RawExpressionTest {
     public class IsSolvable {
 
         @Test
-        public void t0() {
+        public void notSolvable() {
             Beacon beacon = Beacon.of(Collections.singletonMap("field", "5"));
             RawExpression expression = new RawExpression("{field} - {field.second}");
 
@@ -62,7 +63,7 @@ class RawExpressionTest {
         }
 
         @Test
-        public void t1() {
+        public void isSolvable() {
             Map<String, String> map = new HashMap<>();
             map.put("field", "5");
             map.put("field.second", "10");
@@ -74,11 +75,12 @@ class RawExpressionTest {
             assertThat(result).isTrue();
         }
     }
+
     @Nested
     public class Solve {
 
         @Test
-        public void t0() {
+        public void calculation() {
             Map<String, String> map = new HashMap<>();
             map.put("field", "5");
             map.put("field.second", "10");
@@ -91,7 +93,7 @@ class RawExpressionTest {
         }
 
         @Test
-        public void t1() {
+        public void directReference() {
             Map<String, String> map = new HashMap<>();
             map.put("field", "5");
             map.put("field.second", "10");
@@ -103,5 +105,16 @@ class RawExpressionTest {
             assertThat(result).isEqualTo(10D);
         }
 
+        @Test
+        public void missingField() {
+            Map<String, String> map = new HashMap<>();
+            map.put("field", "5");
+            Beacon beacon = Beacon.of(map);
+            RawExpression expression = new RawExpression("{field.second} - {field}");
+
+            assertThatExceptionOfType(IllegalStateException.class)
+                    .isThrownBy(() -> expression.solve(beacon))
+                    .withMessage("The given beacon does not contain the required field 'field.second'.");
+        }
     }
 }

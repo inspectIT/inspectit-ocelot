@@ -20,18 +20,27 @@ import java.util.Map;
 @AllArgsConstructor
 public class BeaconMetricDefinition extends MetricDefinitionSettings {
 
-    @Valid
-    private List<BeaconRequirement> requirements;
-
+    /**
+     * The expression to extract a value from a beacon.
+     * See {@link rocks.inspectit.oce.eum.server.arithmetic.ArithmeticExpression} for more details.
+     */
     @NotEmpty
     private String valueExpression;
 
+    /**
+     * Requirements which have to be fulfilled by Beacons. Beacons which do not match all requirements will be ignored
+     * by this metric definition.
+     */
+    @Valid
+    private List<BeaconRequirement> beaconRequirements;
+
+
     @Builder(builderMethodName = "beaconMetricBuilder")
     public BeaconMetricDefinition(boolean enabled, @NotBlank String unit, @NotNull MeasureType type, String description,
-                                  Map<@NotBlank String, @Valid @NotNull ViewDefinitionSettings> views, @NotEmpty List<BeaconRequirement> requirements,
+                                  Map<@NotBlank String, @Valid @NotNull ViewDefinitionSettings> views, @NotEmpty List<BeaconRequirement> beaconRequirements,
                                   String valueExpression) {
         super(enabled, unit, type, description, views);
-        this.requirements = requirements;
+        this.beaconRequirements = beaconRequirements;
         this.valueExpression = valueExpression;
     }
 
@@ -40,7 +49,7 @@ public class BeaconMetricDefinition extends MetricDefinitionSettings {
         MetricDefinitionSettings metricDefinition = super.getCopyWithDefaultsPopulated(metricName);
 
         return beaconMetricBuilder()
-                .requirements(getRequirements())
+                .beaconRequirements(getBeaconRequirements())
                 .valueExpression(getValueExpression())
                 .description(metricDefinition.getDescription())
                 .unit(metricDefinition.getUnit())

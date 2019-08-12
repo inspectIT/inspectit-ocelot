@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import rocks.inspectit.oce.eum.server.arithmetic.RawExpression;
 import rocks.inspectit.oce.eum.server.beacon.Beacon;
 import rocks.inspectit.oce.eum.server.configuration.model.BeaconMetricDefinition;
+import rocks.inspectit.oce.eum.server.configuration.model.BeaconRequirement;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
 import rocks.inspectit.oce.eum.server.utils.DefaultTags;
 import rocks.inspectit.ocelot.config.model.metrics.definition.ViewDefinitionSettings;
@@ -40,6 +41,9 @@ public class MeasuresAndViewsManager {
     @Autowired
     private ViewManager viewManager;
 
+    /**
+     * Maps metric definitions to expressions.
+     */
     private Map<BeaconMetricDefinition, RawExpression> expressionCache = new HashMap<>();
 
     /**
@@ -52,23 +56,32 @@ public class MeasuresAndViewsManager {
             String metricName = metricDefinitionEntry.getKey();
             BeaconMetricDefinition metricDefinition = metricDefinitionEntry.getValue();
 
-            if (beacon.checkRequirements(metricDefinition.getRequirements())) {
+            if (BeaconRequirement.validate(beacon, metricDefinition.getBeaconRequirements())) {
                 recordMetric(metricName, metricDefinition, beacon);
             } else {
-                log.info("Skipping beacon because requirements are not fulfilled.");
+                log.debug("Skipping beacon because requirements are not fulfilled.");
             }
         }
     }
 
-    private void recordMetric(String measureName, BeaconMetricDefinition metricDefinition, Beacon beacon) {
+    /**
+     * Extracts the metric value from the given beacon according to the specified metric definition.
+     * In case the metric definition's value expression is not solvable using the given beacon (not all required
+     * fields are existing) nothing is done.
+     *
+     * @param metricName       the metric name
+     * @param metricDefinition the metric's definition
+     * @param beacon           the current beacon
+     */
+    private void recordMetric(String metricName, BeaconMetricDefinition metricDefinition, Beacon beacon) {
         RawExpression expression = expressionCache.computeIfAbsent(metricDefinition, definition -> new RawExpression(definition.getValueExpression()));
 
         if (expression.isSolvable(beacon)) {
             Number value = expression.solve(beacon);
 
-            updateMetrics(measureName, metricDefinition);
+            updateMetrics(metricName, metricDefinition);
             try (Scope scope = getTagContext(beacon).buildScoped()) {
-                recordMeasure(measureName, metricDefinition, value);
+                recordMeasure(metricName, metricDefinition, value);
             }
         }
     }

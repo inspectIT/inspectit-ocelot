@@ -1,20 +1,37 @@
 package rocks.inspectit.oce.eum.server.arithmetic;
 
 /**
- * Boann - https://stackoverflow.com/a/26227947/2478009
+ * Class used to solve arithmetic expressions.
+ * It is mainly based on the following StackOverflow answer by user "Boann".
+ * See the following answer: https://stackoverflow.com/a/26227947/2478009
+ * <p>
+ * Grammar:
+ * * expression = term | expression `+` term | expression `-` term
+ * * term = factor | term `*` factor | term `/` factor
+ * * factor = `+` factor | `-` factor | `(` expression `)` | number | functionName factor | factor `^` factor
  */
 public class ArithmeticExpression {
 
-    final String str;
+    /**
+     * The expression string.
+     */
+    private final String expression;
 
-    int pos = -1, ch;
+    private int pos = -1;
 
-    public ArithmeticExpression(String str) {
-        this.str = str;
+    private int ch;
+
+    /**
+     * Constructor.
+     *
+     * @param expression the expression to solve
+     */
+    public ArithmeticExpression(String expression) {
+        this.expression = expression;
     }
 
     private void nextChar() {
-        ch = (++pos < str.length()) ? str.charAt(pos) : -1;
+        ch = (++pos < expression.length()) ? expression.charAt(pos) : -1;
     }
 
     private boolean eat(int charToEat) {
@@ -26,18 +43,12 @@ public class ArithmeticExpression {
         return false;
     }
 
-    private  double parse() {
+    private double parse() {
         nextChar();
         double x = parseExpression();
-        if (pos < str.length()) throw new RuntimeException("Unexpected: " + (char) ch);
+        if (pos < expression.length()) throw new RuntimeException("Unexpected: " + (char) ch);
         return x;
     }
-
-    // Grammar:
-    // expression = term | expression `+` term | expression `-` term
-    // term = factor | term `*` factor | term `/` factor
-    // factor = `+` factor | `-` factor | `(` expression `)`
-    //        | number | functionName factor | factor `^` factor
 
     private double parseExpression() {
         double x = parseTerm();
@@ -68,10 +79,10 @@ public class ArithmeticExpression {
             eat(')');
         } else if ((ch >= '0' && ch <= '9') || ch == '.') { // numbers
             while ((ch >= '0' && ch <= '9') || ch == '.') nextChar();
-            x = Double.parseDouble(str.substring(startPos, this.pos));
+            x = Double.parseDouble(expression.substring(startPos, this.pos));
         } else if (ch >= 'a' && ch <= 'z') { // functions
             while (ch >= 'a' && ch <= 'z') nextChar();
-            String func = str.substring(startPos, this.pos);
+            String func = expression.substring(startPos, this.pos);
             x = parseFactor();
             if (func.equals("sqrt")) x = Math.sqrt(x);
             else if (func.equals("sin")) x = Math.sin(Math.toRadians(x));
@@ -87,8 +98,12 @@ public class ArithmeticExpression {
         return x;
     }
 
+    /**
+     * Evaluates the expression.
+     *
+     * @return the result of the expression
+     */
     public double eval() {
         return parse();
     }
-
 }
