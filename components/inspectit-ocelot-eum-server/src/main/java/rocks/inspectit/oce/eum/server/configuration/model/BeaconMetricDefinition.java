@@ -1,7 +1,6 @@
 package rocks.inspectit.oce.eum.server.configuration.model;
 
 import lombok.*;
-import rocks.inspectit.oce.eum.server.beacon.extractor.BeaconFieldExtractor;
 import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings;
 import rocks.inspectit.ocelot.config.model.metrics.definition.ViewDefinitionSettings;
 
@@ -21,19 +20,17 @@ import java.util.Map;
 @AllArgsConstructor
 public class BeaconMetricDefinition extends MetricDefinitionSettings {
 
-    @NotNull
-    private BeaconFieldExtractor extractor;
+    private List<BeaconRequirement> requirements;
 
-    @NotEmpty
-    private List<String> beaconFields;
+    private String valueExpression;
 
     @Builder(builderMethodName = "beaconMetricBuilder")
     public BeaconMetricDefinition(boolean enabled, @NotBlank String unit, @NotNull MeasureType type, String description,
-                                  Map<@NotBlank String, @Valid @NotNull ViewDefinitionSettings> views, @NotEmpty List<String> beaconFields,
-                                  @NotNull BeaconFieldExtractor extractor) {
+                                  Map<@NotBlank String, @Valid @NotNull ViewDefinitionSettings> views, @NotEmpty List<BeaconRequirement> requirements,
+                                  String valueExpression) {
         super(enabled, unit, type, description, views);
-        this.beaconFields = beaconFields;
-        this.extractor = extractor;
+        this.requirements = requirements;
+        this.valueExpression = valueExpression;
     }
 
     @Override
@@ -41,8 +38,8 @@ public class BeaconMetricDefinition extends MetricDefinitionSettings {
         MetricDefinitionSettings metricDefinition = super.getCopyWithDefaultsPopulated(metricName);
 
         return beaconMetricBuilder()
-                .beaconFields(getBeaconFields())
-                .extractor(getExtractor())
+                .requirements(getRequirements())
+                .valueExpression(getValueExpression())
                 .description(metricDefinition.getDescription())
                 .unit(metricDefinition.getUnit())
                 .type(metricDefinition.getType())

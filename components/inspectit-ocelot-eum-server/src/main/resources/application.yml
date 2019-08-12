@@ -3,9 +3,7 @@ inspectit-eum:
   definitions:
     page_ready_time:
       measure-type: LONG
-      beacon-fields:
-        - t_page
-      extractor: SELECT
+      value-expression: "{t_page}"
       unit: ms
       views:
         '[page_ready_time/SUM]': {aggregation: SUM}
@@ -13,9 +11,10 @@ inspectit-eum:
 
     load_time:
       measure-type: LONG
-      beacon-fields:
-        - t_done
-      extractor: SELECT
+      value-expression: "{t_done}"
+      requirements:
+        - field: rt.quit
+          requirement: NOT_EXISTS
       unit: ms
       views:
         '[load_time/SUM]': {aggregation: SUM}
@@ -23,10 +22,10 @@ inspectit-eum:
 
     calc_load_time:
       measure-type: LONG
-      beacon-fields:
-        - rt.end
-        - rt.tstart
-      extractor: DIFFERENCE
+      value-expression: "{rt.end} - {rt.tstart}"
+      requirements:
+        - field: rt.quit
+          requirement: NOT_EXISTS
       unit: ms
       views:
         '[calc_load_time/SUM]': {aggregation: SUM}
@@ -34,28 +33,22 @@ inspectit-eum:
 
     start_timestamp:
       measure-type: LONG
-      beacon-fields:
-        - rt.tstart
-      extractor: SELECT
+      value-expression: "{rt.tstart}"
       unit: ms
 
     navigation_start_timestamp:
       measure-type: LONG
-      beacon-fields:
-        - rt.nstart
-      extractor: SELECT
+      value-expression: "{rt.nstart}"
       unit: ms
 
     end_timestamp:
       measure-type: LONG
-      beacon-fields:
-        - rt.end
-      extractor: SELECT
+      value-expression: "{rt.end}"
       unit: ms
       views:
         end_timestamp:
           aggregation: LAST_VALUE
-          tags: {APPLICATION : true}
+          tags: {APPLICATION: true}
 
   tags:
     extra:

@@ -9,8 +9,8 @@ import io.opencensus.tags.Tags;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import rocks.inspectit.oce.eum.server.arithmetic.RawExpression;
 import rocks.inspectit.oce.eum.server.beacon.Beacon;
-import rocks.inspectit.oce.eum.server.beacon.extractor.IBeaconFieldExtractor;
 import rocks.inspectit.oce.eum.server.configuration.model.BeaconMetricDefinition;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
 import rocks.inspectit.oce.eum.server.utils.DefaultTags;
@@ -40,6 +40,8 @@ public class MeasuresAndViewsManager {
     @Autowired
     private ViewManager viewManager;
 
+    private Map<BeaconMetricDefinition, RawExpression> expressionCache = new HashMap<>();
+
     /**
      * Processes boomerang beacon
      *
@@ -49,22 +51,25 @@ public class MeasuresAndViewsManager {
         for (Map.Entry<String, BeaconMetricDefinition> metricDefinitionEntry : configuration.getDefinitions().entrySet()) {
             String metricName = metricDefinitionEntry.getKey();
             BeaconMetricDefinition metricDefinition = metricDefinitionEntry.getValue();
-            List<String> beaconFields = metricDefinition.getBeaconFields();
 
-            if (beacon.contains(beaconFields)) {
+            if (beacon.checkRequirements(metricDefinition.getRequirements())) {
                 recordMetric(metricName, metricDefinition, beacon);
+            } else {
+                log.info("Skipping beacon because requirements are not fulfilled.");
             }
         }
     }
 
     private void recordMetric(String measureName, BeaconMetricDefinition metricDefinition, Beacon beacon) {
-        updateMetrics(measureName, metricDefinition);
+        RawExpression expression = expressionCache.computeIfAbsent(metricDefinition, definition -> new RawExpression(definition.getValueExpression()));
 
-        IBeaconFieldExtractor fieldExtractor = metricDefinition.getExtractor().getFieldExtractor();
-        Number value = fieldExtractor.extractValue(metricDefinition, beacon);
+        if (expression.isSolvable(beacon)) {
+            Number value = expression.solve(beacon);
 
-        try (Scope scope = getTagContext(beacon).buildScoped()) {
-            recordMeasure(measureName, metricDefinition, value);
+            updateMetrics(measureName, metricDefinition);
+            try (Scope scope = getTagContext(beacon).buildScoped()) {
+                recordMeasure(measureName, metricDefinition, value);
+            }
         }
     }
 
