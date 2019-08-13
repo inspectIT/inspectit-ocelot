@@ -5,7 +5,7 @@ import * as authenticationSelectors from "./selectors";
 
 export {
     authenticationActions,
-    authenticationSelectors
+    authenticationSelectors,
 };
 
 export default reducer;

@@ -1,8 +1,9 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { authenticationSelectors } from '../../redux/ducks/authentication'
+import { authenticationSelectors, authenticationActions } from '../../redux/ducks/authentication'
 import Router, { withRouter } from 'next/router';
 import { linkPrefix } from '../../lib/configuration';
+import { RENEW_TOKEN_TIME_INTERVAL, MIN_TOKEN_EXPIRATION_TIME } from '../../data/constants';
 
 /**
  * Handles the routing based on the current authentication (user is logged in/out) status.
@@ -11,10 +12,16 @@ class AuthenticationRouter extends React.Component {
 
     componentDidMount = () => {
         this.checkRoute();
+        this.intervalId = setInterval(this.triggerRenewTokenInterval, RENEW_TOKEN_TIME_INTERVAL);
+
     }
 
     componentDidUpdate = () => {
         this.checkRoute();
+    }
+
+    componentWillUnmount = () => {
+        clearInterval(this.intervalId);
     }
 
     checkRoute = () => {
@@ -31,6 +38,15 @@ class AuthenticationRouter extends React.Component {
         }
     }
 
+    triggerRenewTokenInterval = () => {
+        if (this.props.isAuthenticated) {
+            const isSoonExpired = (this.props.tokenExpirationDate * 1000 - Date.now()) < MIN_TOKEN_EXPIRATION_TIME;
+            if (isSoonExpired) {
+                this.props.renewToken();
+            }
+        }
+    }
+
     render() {
         return (
             <>
@@ -41,9 +57,16 @@ class AuthenticationRouter extends React.Component {
 }
 
 function mapStateToProps(state) {
+    const { token } = state.authentication;
+
     return {
-        isAuthenticated: authenticationSelectors.isAuthenticated(state)
+        isAuthenticated: authenticationSelectors.isAuthenticated(state),
+        tokenExpirationDate: authenticationSelectors.getTokenExpirationDate(state),
     }
 }
 
-export default withRouter(connect(mapStateToProps, null)(AuthenticationRouter));
+const mapDispatchToProps = {
+    renewToken: authenticationActions.renewToken,
+}
+
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(AuthenticationRouter));
