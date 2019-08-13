@@ -6,6 +6,7 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,6 +19,7 @@ import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Creates and verifies JWT based access tokens.
@@ -25,6 +27,7 @@ import java.util.Date;
  * Tokens are only considered valid if the expiration date has not been exceeded yet.
  */
 @Component
+@Slf4j
 public class JwtTokenManager {
 
     @VisibleForTesting
@@ -32,7 +35,7 @@ public class JwtTokenManager {
     InspectitServerSettings config;
 
     @Autowired
-    private UserDetailsService userDetailsService;
+    private List<UserDetailsService> services;
 
     /**
      * We dynamically generate a secret to sign the tokens with at server start.
@@ -81,8 +84,30 @@ public class JwtTokenManager {
                 .getBody();
 
         String username = jwtToken.getSubject();
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        UserDetails userDetails = loadUser(username);
 
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+    }
+
+    /**
+     * Tries to load the user with the given username. All existing {@link UserDetailsService} will be queried until
+     * one of them is returning a user. A {@link UsernameNotFoundException} will be thrown if the desired user does
+     * not exist in any of the details services.
+     *
+     * @param username the username of the desired user
+     * @return the found {@link UserDetails} object
+     * @throws UsernameNotFoundException if the user does not exist
+     */
+    private UserDetails loadUser(String username) throws UsernameNotFoundException {
+        for (UserDetailsService detailsService : services) {
+            try {
+                return detailsService.loadUserByUsername(username);
+            } catch (UsernameNotFoundException exception) {
+                if (log.isDebugEnabled()) {
+                    log.debug("User '{}' could not be loaded using details service {}", username, detailsService.getClass().getSimpleName());
+                }
+            }
+        }
+        throw new UsernameNotFoundException(username);
     }
 }

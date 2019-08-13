@@ -2,6 +2,7 @@ package rocks.inspectit.ocelot.security.config;
 
 import com.google.common.annotations.VisibleForTesting;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -17,12 +18,13 @@ import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.config.model.LdapSettings;
 import rocks.inspectit.ocelot.security.jwt.JwtTokenFilter;
 import rocks.inspectit.ocelot.security.jwt.JwtTokenManager;
+import rocks.inspectit.ocelot.security.userdetails.LocalUserDetailsService;
 import rocks.inspectit.ocelot.utils.LdapUtils;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.Collections;
 
-import static rocks.inspectit.ocelot.user.userdetails.LocalUserDetailsService.DEFAULT_ACCESS_USER_ROLE;
+import static rocks.inspectit.ocelot.security.userdetails.LocalUserDetailsService.DEFAULT_ACCESS_USER_ROLE;
 
 /**
  * Spring security configuration enabling authentication on all except excluded endpoints.
@@ -38,7 +40,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private UserDetailsService userDetailsService;
+    private LocalUserDetailsService localUserDetailsService;
 
     @Autowired
     @VisibleForTesting
@@ -102,9 +104,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         if (serverSettings.getSecurity().isLdapAuthentication()) {
             configureLdapAuthentication(auth);
-        } else {
-            configureLocalAuthentication(auth);
         }
+        configureLocalAuthentication(auth);
     }
 
     /**
@@ -128,7 +129,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
      */
     private void configureLocalAuthentication(AuthenticationManagerBuilder auth) throws Exception {
         auth
-                .userDetailsService(userDetailsService)
+                .userDetailsService(localUserDetailsService)
                 .passwordEncoder(passwordEncoder);
     }
 }

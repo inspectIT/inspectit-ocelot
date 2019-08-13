@@ -8,29 +8,28 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.ldap.userdetails.LdapUserDetails;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
-import rocks.inspectit.ocelot.error.exceptions.NotSupportedWithLdapException;
 import rocks.inspectit.ocelot.rest.AbstractBaseController;
 import rocks.inspectit.ocelot.rest.ErrorInfo;
 import rocks.inspectit.ocelot.security.jwt.JwtTokenManager;
 import rocks.inspectit.ocelot.user.User;
-import rocks.inspectit.ocelot.user.userdetails.LocalUserDetailsService;
-
-import java.io.IOException;
+import rocks.inspectit.ocelot.user.UserService;
 
 /**
  * Rest controller allowing users to manage their own account.
  */
 @RestController
+@Slf4j
 public class AccountController extends AbstractBaseController {
 
     /**
@@ -42,7 +41,7 @@ public class AccountController extends AbstractBaseController {
             .build();
 
     @Autowired
-    private UserDetailsService userDetailsService;
+    private UserService userService;
 
     @Autowired
     private JwtTokenManager tokenManager;
@@ -57,7 +56,13 @@ public class AccountController extends AbstractBaseController {
     @ApiResponse(code = 200, message = "The access token", examples =
     @Example(value = @ExampleProperty(value = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImV4cCI6MTU2MTYyODE1NH0.KelDW1OXg9xlMjSiblwZqui7sya4Crq833b-98p8UZ4", mediaType = "text/plain")))
     @GetMapping("account/token")
-    public String acuireNewAccessToken(Authentication user) throws IOException {
+    public String acuireNewAccessToken(Authentication user) {
+        if (user.getPrincipal() instanceof LdapUserDetails) {
+            if (log.isDebugEnabled()) {
+                log.debug("User `{}` was authenticated using LDAP. Add it to local database if it does not exist.", ((LdapUserDetails) user.getPrincipal()).getUsername());
+            }
+            userService.createUserIfNotExist(user.getName(), true);
+        }
         return tokenManager.createToken(user.getName());
     }
 
@@ -65,27 +70,17 @@ public class AccountController extends AbstractBaseController {
             " This endpoint does not work with token-based authentication, only HTTP basic auth is allowed.")
     @PutMapping("account/password")
     public ResponseEntity<?> changePassword(@RequestBody PasswordChangeRequest newPassword, Authentication user) {
-        verifyLdapDisabled();
-
-        LocalUserDetailsService localUserDetailsService = (LocalUserDetailsService) userDetailsService;
-
         if (StringUtils.isEmpty(newPassword.getPassword())) {
             return ResponseEntity.badRequest().body(NO_PASSWORD_ERROR);
         }
-        User updatedUser = localUserDetailsService.getUserByName(user.getName())
+        User updatedUser = userService.getUserByName(user.getName())
                 .get()
                 .toBuilder()
                 .password(newPassword.getPassword())
                 .build();
-        localUserDetailsService.addOrUpdateUser(updatedUser);
+        userService.addOrUpdateUser(updatedUser);
 
         return ResponseEntity.ok().build();
-    }
-
-    private void verifyLdapDisabled() {
-        if (settings.getSecurity().isLdapAuthentication()) {
-            throw new NotSupportedWithLdapException();
-        }
     }
 
     /**

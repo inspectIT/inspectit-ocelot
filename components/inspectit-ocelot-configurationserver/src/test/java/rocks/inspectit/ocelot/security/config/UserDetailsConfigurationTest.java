@@ -14,7 +14,7 @@ import org.springframework.security.ldap.userdetails.LdapUserDetailsService;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.config.model.LdapSettings;
 import rocks.inspectit.ocelot.config.model.SecuritySettings;
-import rocks.inspectit.ocelot.user.userdetails.LocalUserDetailsService;
+import rocks.inspectit.ocelot.security.userdetails.LocalUserDetailsService;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -24,7 +24,7 @@ import static org.mockito.Mockito.when;
 class UserDetailsConfigurationTest {
 
     @InjectMocks
-    private UserDetailsConfiguration configuration;
+    private SecurityBeanConfiguration configuration;
 
     @Nested
     public class PasswordEncoderBean {
