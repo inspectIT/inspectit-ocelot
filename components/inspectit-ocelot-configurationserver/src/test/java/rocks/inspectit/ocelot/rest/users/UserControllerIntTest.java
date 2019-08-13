@@ -12,6 +12,7 @@ import rocks.inspectit.ocelot.IntegrationTestBase;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.security.userdetails.LocalUserDetailsService;
 import rocks.inspectit.ocelot.user.User;
+import rocks.inspectit.ocelot.user.UserService;
 
 import java.util.List;
 
@@ -23,16 +24,16 @@ public class UserControllerIntTest extends IntegrationTestBase {
     InspectitServerSettings settings;
 
     @Autowired
-    LocalUserDetailsService userDetailsService;
+    UserService userService;
 
     @Autowired
     UserController userController;
 
     @AfterEach
     void cleanupUsers() {
-        userDetailsService.getUsers().forEach(u -> {
+        userService.getUsers().forEach(u -> {
             if (!u.getUsername().equalsIgnoreCase(settings.getDefaultUser().getName())) {
-                userDetailsService.deleteUserById(u.getId());
+                userService.deleteUserById(u.getId());
             }
         });
     }
@@ -42,7 +43,7 @@ public class UserControllerIntTest extends IntegrationTestBase {
 
         @Test
         void noUsernameFilter() {
-            userDetailsService.addOrUpdateUser(User.builder()
+            userService.addOrUpdateUser(User.builder()
                     .username("John")
                     .password("doe")
                     .build());
@@ -74,7 +75,7 @@ public class UserControllerIntTest extends IntegrationTestBase {
 
         @Test
         void emptyUsernameFilter() {
-            userDetailsService.addOrUpdateUser(User.builder()
+            userService.addOrUpdateUser(User.builder()
                     .username("John")
                     .password("doe")
                     .build());
@@ -106,7 +107,7 @@ public class UserControllerIntTest extends IntegrationTestBase {
 
         @Test
         void withUsernameFilter() {
-            userDetailsService.addOrUpdateUser(User.builder()
+            userService.addOrUpdateUser(User.builder()
                     .username("John")
                     .password("doe")
                     .build());
@@ -137,7 +138,7 @@ public class UserControllerIntTest extends IntegrationTestBase {
 
         @Test
         void existingUser() {
-            Long id = userDetailsService.addOrUpdateUser(User.builder()
+            Long id = userService.addOrUpdateUser(User.builder()
                     .username("John")
                     .password("doe")
                     .build())
@@ -238,7 +239,7 @@ public class UserControllerIntTest extends IntegrationTestBase {
 
         @Test
         void ensureIdIgnored() {
-            Long existingId = userDetailsService.getUsers().iterator().next().getId();
+            Long existingId = userService.getUsers().iterator().next().getId();
 
             InputUser userToAdd = new InputUser("John", "DoE", existingId);
 
@@ -286,7 +287,7 @@ public class UserControllerIntTest extends IntegrationTestBase {
 
         @Test
         void userExisting() {
-            Long id = userDetailsService.addOrUpdateUser(User.builder()
+            Long id = userService.addOrUpdateUser(User.builder()
                     .username("John")
                     .password("doe")
                     .build())
@@ -299,8 +300,8 @@ public class UserControllerIntTest extends IntegrationTestBase {
                     String.class);
             assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-            assertThat(userDetailsService.getUserByName("John")).isEmpty();
-            assertThat(userDetailsService.getUserById(id)).isEmpty();
+            assertThat(userService.getUserByName("John")).isEmpty();
+            assertThat(userService.getUserById(id)).isEmpty();
         }
     }
 

@@ -14,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.config.model.LdapSettings;
 import rocks.inspectit.ocelot.config.model.SecuritySettings;
+import rocks.inspectit.ocelot.security.userdetails.LocalUserDetailsService;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -28,7 +29,7 @@ class SecurityConfigurationTest {
     PasswordEncoder passwordEncoder;
 
     @Mock
-    UserDetailsService userDetailsService;
+    LocalUserDetailsService localUserDetailsService;
 
     @Nested
     class Configure_AuthenticationManagerBuilder {
@@ -52,7 +53,7 @@ class SecurityConfigurationTest {
 
             configuration.configure(auth);
 
-            verify(auth).userDetailsService(userDetailsService);
+            verify(auth).userDetailsService(localUserDetailsService);
             verify(daoAuthenticationConfigurer).passwordEncoder(passwordEncoder);
             verifyNoMoreInteractions(auth);
         }
@@ -74,6 +75,7 @@ class SecurityConfigurationTest {
             when(ldapConfigurer.userSearchBase(anyString())).thenReturn(ldapConfigurer);
             when(ldapConfigurer.groupSearchFilter(anyString())).thenReturn(ldapConfigurer);
             when(ldapConfigurer.groupSearchBase(anyString())).thenReturn(ldapConfigurer);
+            when(auth.userDetailsService(any())).thenReturn(daoAuthenticationConfigurer);
 
             configuration.configure(auth);
 
@@ -83,6 +85,8 @@ class SecurityConfigurationTest {
             verify(ldapConfigurer).groupSearchFilter("group-filter");
             verify(ldapConfigurer).groupSearchBase("group-base");
             verify(ldapConfigurer).contextSource(any());
+            verify(auth).userDetailsService(localUserDetailsService);
+            verify(daoAuthenticationConfigurer).passwordEncoder(passwordEncoder);
             verifyNoMoreInteractions(auth, ldapConfigurer);
         }
     }

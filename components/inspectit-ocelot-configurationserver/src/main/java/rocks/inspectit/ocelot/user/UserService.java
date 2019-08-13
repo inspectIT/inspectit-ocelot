@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.user;
 
+import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,7 +19,8 @@ import java.util.Optional;
 public class UserService {
 
     @Autowired
-    private InspectitServerSettings settings;
+    @VisibleForTesting
+    InspectitServerSettings settings;
 
     @Autowired
     private UserRepository userRepository;

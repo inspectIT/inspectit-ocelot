@@ -30,12 +30,13 @@ import java.util.List;
 @Slf4j
 public class JwtTokenManager {
 
-    @VisibleForTesting
     @Autowired
+    @VisibleForTesting
     InspectitServerSettings config;
 
     @Autowired
-    private List<UserDetailsService> services;
+    @VisibleForTesting
+    List<UserDetailsService> services;
 
     /**
      * We dynamically generate a secret to sign the tokens with at server start.
