@@ -30,6 +30,7 @@ public class RawExpression {
     /**
      * List of field keys contained in the {@link #expression}.
      */
+    @Getter
     private List<String> fields;
 
     /**
@@ -82,14 +83,6 @@ public class RawExpression {
     }
 
     /**
-     * Returns the contained fields.
-     */
-    @VisibleForTesting
-    List<String> getFields() {
-        return fields;
-    }
-
-    /**
      * Checks whether the expression is solvable using the given beacon. A expression is not solvable if the beacon
      * does not contain all fields referenced by the expression.
      *
@@ -124,12 +117,17 @@ public class RawExpression {
             resolvedExpression = resolvedExpression.replace("{" + field + "}", fieldValue);
         }
 
-        double value = new ArithmeticExpression(resolvedExpression).eval();
+        try {
+            double value = new ArithmeticExpression(resolvedExpression).eval();
 
-        if (log.isDebugEnabled()) {
-            log.debug("Resolved expression '{}' to '{}' resulting in '{}'.", expression, resolvedExpression, value);
+            if (log.isDebugEnabled()) {
+                log.debug("Resolved expression '{}' to '{}' resulting in '{}'.", expression, resolvedExpression, value);
+            }
+
+            return value;
+        } catch (Exception exception) {
+            log.warn("Expression '{}' could not be solved.", resolvedExpression, exception);
+            return null;
         }
-
-        return value;
     }
 }

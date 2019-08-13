@@ -1,7 +1,6 @@
 package rocks.inspectit.oce.eum.server.beacon;
 
 import lombok.extern.slf4j.Slf4j;
-import rocks.inspectit.oce.eum.server.configuration.model.BeaconRequirement;
 
 import java.util.*;
 

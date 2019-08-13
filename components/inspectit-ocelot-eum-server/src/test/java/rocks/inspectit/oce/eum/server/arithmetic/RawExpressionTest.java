@@ -8,8 +8,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.*;
 
 class RawExpressionTest {
 
@@ -115,6 +114,18 @@ class RawExpressionTest {
             assertThatExceptionOfType(IllegalStateException.class)
                     .isThrownBy(() -> expression.solve(beacon))
                     .withMessage("The given beacon does not contain the required field 'field.second'.");
+        }
+
+        @Test
+        public void invalidExpression() {
+            Map<String, String> map = new HashMap<>();
+            map.put("field", "5");
+            Beacon beacon = Beacon.of(map);
+            RawExpression expression = new RawExpression("5 -* {field}");
+
+            Number result = expression.solve(beacon);
+
+            assertThat(result).isNull();
         }
     }
 }

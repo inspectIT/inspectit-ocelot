@@ -79,9 +79,11 @@ public class MeasuresAndViewsManager {
         if (expression.isSolvable(beacon)) {
             Number value = expression.solve(beacon);
 
-            updateMetrics(metricName, metricDefinition);
-            try (Scope scope = getTagContext(beacon).buildScoped()) {
-                recordMeasure(metricName, metricDefinition, value);
+            if (value != null) {
+                updateMetrics(metricName, metricDefinition);
+                try (Scope scope = getTagContext(beacon).buildScoped()) {
+                    recordMeasure(metricName, metricDefinition, value);
+                }
             }
         }
     }

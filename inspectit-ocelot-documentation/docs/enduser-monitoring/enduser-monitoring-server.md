@@ -124,7 +124,7 @@ inspectit-ocelot-eum-server:
 
 ### Metrics Definition
 
-A metric are defined the same way as in the inspectIT Ocelot Java agent. Please see the section [Metrics / Custom Metrics](metrics/custom-metrics.md) for detailed information.
+A metric is defined the same way as in the inspectIT Ocelot Java agent. Please see the section [Metrics / Custom Metrics](metrics/custom-metrics.md) for detailed information.
 
 In contrast to the agent's metric definition, the EUM server's metric definition contains additional fields.
 These additional fields are the following:
@@ -142,7 +142,7 @@ For example, a valid expression, used to extract the value of a field `t_load`, 
 
 > Note that a beacon has to contain all fields referenced by the expression in order to be evaluated and recorded.
 
-Value expression also support operations for basic arithmetic operations. Thus, to calculate a difference of two beacon fields, the following expression can be used:
+Value expressions also support operations for basic arithmetic operations. Thus, to calculate a difference of two beacon fields, the following expression can be used:
 ```YAML
   ...
     my-metric:
@@ -170,7 +170,7 @@ Using the operations above, complex calculations can be done, for example:
 
 #### Beacon Requirements
 
-The `beacon-requirements` field can be used to specify requirements which hae to be fulfilled by the beacons in order to be evaluated by a certain metric.
+The `beacon-requirements` field can be used to specify requirements which have to be fulfilled by the beacons in order to be evaluated by a certain metric.
 If any requirement does not fit a beacon, the beacon is ignored by the metric.
 
 Beacon requirements consist of two attributes `field` and `requirement`. `field` specified the beacon's field which is validated using the requirement type specified in `NOT_EXISTS`.
@@ -184,7 +184,7 @@ Beacon requirements consist of two attributes `field` and `requirement`. `field`
           requirement: NOT_EXISTS
 ```
 
-The following requirement types are currently be supproted:
+The following requirement types are currently be supported:
 
 | Type | Note |
 | --- | --- |

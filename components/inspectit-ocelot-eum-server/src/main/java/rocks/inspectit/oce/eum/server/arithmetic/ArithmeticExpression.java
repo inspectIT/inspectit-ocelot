@@ -90,7 +90,7 @@ public class ArithmeticExpression {
             else if (func.equals("tan")) x = Math.tan(Math.toRadians(x));
             else throw new RuntimeException("Unknown function: " + func);
         } else {
-            throw new RuntimeException("Unexpected: " + (char) ch);
+            throw new ArithmeticException("Could not solve expression '" + expression + "'. Unexpected character at position " + startPos + ": " + (char) ch);
         }
 
         if (eat('^')) x = Math.pow(x, parseFactor()); // exponentiation
