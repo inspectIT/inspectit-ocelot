@@ -54,39 +54,55 @@ The configuration file defines the mapping between the concrete Boomerang metric
 ```yaml
 inspectit-ocelot-eum-server:
   definitions:
-    page_ready_time:
+     page_ready_time:
       measure-type: LONG
-      beacon-field: t_page
+      value-expression: "{t_page}"
       unit: ms
       views:
         '[page_ready_time/SUM]': {aggregation: SUM}
         '[page_ready_time/COUNT]': {aggregation: COUNT}
+
     load_time:
       measure-type: LONG
-      beacon-field: t_done
+      value-expression: "{t_done}"
+      beacon-requirements:
+        - field: rt.quit
+          requirement: NOT_EXISTS
       unit: ms
       views:
         '[load_time/SUM]': {aggregation: SUM}
         '[load_time/COUNT]': {aggregation: COUNT}
 
+    calc_load_time:
+      measure-type: LONG
+      value-expression: "{rt.end} - {rt.tstart}"
+      beacon-requirements:
+        - field: rt.quit
+          requirement: NOT_EXISTS
+      unit: ms
+      views:
+        '[calc_load_time/SUM]': {aggregation: SUM}
+        '[calc_load_time/COUNT]': {aggregation: COUNT}
+
     start_timestamp:
       measure-type: LONG
-      beacon-field: rt.tstart
+      value-expression: "{rt.tstart}"
       unit: ms
 
     navigation_start_timestamp:
       measure-type: LONG
-      beacon-field: rt.nstart
+      value-expression: "{rt.nstart}"
       unit: ms
 
     end_timestamp:
       measure-type: LONG
-      beacon-field: rt.end
+      value-expression: "{rt.end}"
       unit: ms
       views:
         end_timestamp:
           aggregation: LAST_VALUE
-          tags: {APPLICATION : true}
+          tags: {APPLICATION: true}
+
   tags:
     extra:
       APPLICATION: my-application
@@ -108,14 +124,72 @@ inspectit-ocelot-eum-server:
 
 ### Metrics Definition
 
-A metric are defined the same way as in the inspectIT Ocelot Java agent. Please see the section [Metrics / Custom Metrics](metrics/custom-metrics.md) for detailed information.
+A metric is defined the same way as in the inspectIT Ocelot Java agent. Please see the section [Metrics / Custom Metrics](metrics/custom-metrics.md) for detailed information.
 
 In contrast to the agent's metric definition, the EUM server's metric definition contains additional fields.
 These additional fields are the following:
 
 | Attributes | Note |
 | --- | --- |
-| `beacon-field` | The beacon field key, which is used as value for the metric. |
+| `value-expression` | An expression used to calculate the measure's value from a beacon. |
+| `beacon-requirements` | Requirements which have to be fulfilled by Beacons. Beacons which do not match all requirements will be ignored by this metric definition. |
+
+#### Value Expressions
+
+The `value-expression` field can be used to specify a field which value is used for the specified metrics.
+In order to reference a field, the following pattern is used: `{FIELD_KEY}`.
+For example, a valid expression, used to extract the value of a field `t_load`, would be `{t_load}`.
+
+> Note that a beacon has to contain all fields referenced by the expression in order to be evaluated and recorded.
+
+Value expressions also support operations for basic arithmetic operations. Thus, to calculate a difference of two beacon fields, the following expression can be used:
+```YAML
+  ...
+    my-metric:
+      ...
+      value-expression: "{field.a} - {field.b}"
+      ...
+```
+
+Value expression are supporting the following operations:
+* addition
+* subtraction
+* multiplication
+* division
+* unary plus/minus
+* parentheses
+
+Using the operations above, complex calculations can be done, for example:
+```YAML
+  ...
+    my-metric:
+      ...
+      value-expression: "- {field.c} * ({field.a} - {field.b}) / {field.a}"
+      ...
+```
+
+#### Beacon Requirements
+
+The `beacon-requirements` field can be used to specify requirements which have to be fulfilled by the beacons in order to be evaluated by a certain metric.
+If any requirement does not fit a beacon, the beacon is ignored by the metric.
+
+Beacon requirements consist of two attributes `field` and `requirement`. `field` specified the beacon's field which is validated using the requirement type specified in `NOT_EXISTS`.
+
+```YAML
+  ...
+    my-metric:
+      ...
+      beacon-requirements:
+        - field: rt.quit
+          requirement: NOT_EXISTS
+```
+
+The following requirement types are currently be supported:
+
+| Type | Note |
+| --- | --- |
+| `EXISTS` | The targeted field must exist. |
+| `NOT_EXISTS` | The targeted field must not exist. |
 
 ### Tags Definition
 

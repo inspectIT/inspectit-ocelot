@@ -11,9 +11,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import rocks.inspectit.oce.eum.server.beacon.Beacon;
 import rocks.inspectit.oce.eum.server.configuration.model.BeaconMetricDefinition;
-import rocks.inspectit.oce.eum.server.configuration.model.EumTagsSettings;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
+import rocks.inspectit.oce.eum.server.configuration.model.EumTagsSettings;
 import rocks.inspectit.ocelot.config.model.metrics.definition.ViewDefinitionSettings;
 
 import java.util.*;
@@ -62,7 +63,7 @@ public class MeasuresAndViewsManagerTest {
 
             BeaconMetricDefinition dummyMetricDefinition = BeaconMetricDefinition
                     .beaconMetricBuilder()
-                    .beaconField("dummy_beacon_field")
+                    .valueExpression("{dummy_beacon_field}")
                     .description("Dummy description")
                     .type(rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings.MeasureType.DOUBLE)
                     .unit("ms")
@@ -77,9 +78,9 @@ public class MeasuresAndViewsManagerTest {
         @Test
         void verifyNoViewIsGeneratedWithEmptyBeacon() {
             when(configuration.getDefinitions()).thenReturn(definitionMap);
-            HashMap<String, String> emptyBeacon = new HashMap<>();
+            HashMap<String, String> beaconMap = new HashMap<>();
 
-            measuresAndViewsManager.processBeacon(emptyBeacon);
+            measuresAndViewsManager.processBeacon(Beacon.of(beaconMap));
 
             verifyZeroInteractions(viewManager, statsRecorder);
         }
@@ -87,10 +88,10 @@ public class MeasuresAndViewsManagerTest {
         @Test
         void verifyNoViewIsGeneratedWithFullBeacon() {
             when(configuration.getDefinitions()).thenReturn(definitionMap);
-            HashMap<String, String> beacon = new HashMap<String, String>();
-            beacon.put("fake_beacon_field", "12d");
+            HashMap<String, String> beaconMap = new HashMap<String, String>();
+            beaconMap.put("fake_beacon_field", "12d");
 
-            measuresAndViewsManager.processBeacon(beacon);
+            measuresAndViewsManager.processBeacon(Beacon.of(beaconMap));
 
             verifyZeroInteractions(viewManager, statsRecorder);
         }
@@ -113,13 +114,13 @@ public class MeasuresAndViewsManagerTest {
 
             when(configuration.getDefinitions()).thenReturn(definitionMap);
             when(configuration.getTags()).thenReturn(tagSettings);
-            HashMap<String, String> beacon = new HashMap<String, String>();
-            beacon.put("dummy_beacon_field", "12d");
+            HashMap<String, String> beaconMap = new HashMap<String, String>();
+            beaconMap.put("dummy_beacon_field", "12d");
 
             when(statsRecorder.newMeasureMap()).thenReturn(measureMap);
             doReturn(measureMap).when(measureMap).put(any(), anyDouble());
 
-            measuresAndViewsManager.processBeacon(beacon);
+            measuresAndViewsManager.processBeacon(Beacon.of(beaconMap));
 
             ArgumentCaptor<View> viewCaptor = ArgumentCaptor.forClass(View.class);
             ArgumentCaptor<Measure.MeasureDouble> measureCaptor = ArgumentCaptor.forClass(Measure.MeasureDouble.class);
