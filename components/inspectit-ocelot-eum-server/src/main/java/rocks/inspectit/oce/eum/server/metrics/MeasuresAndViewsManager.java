@@ -6,9 +6,13 @@ import io.opencensus.tags.TagContextBuilder;
 import io.opencensus.tags.TagKey;
 import io.opencensus.tags.TagValue;
 import io.opencensus.tags.Tags;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import rocks.inspectit.oce.eum.server.arithmetic.RawExpression;
+import rocks.inspectit.oce.eum.server.beacon.Beacon;
 import rocks.inspectit.oce.eum.server.configuration.model.BeaconMetricDefinition;
+import rocks.inspectit.oce.eum.server.configuration.model.BeaconRequirement;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
 import rocks.inspectit.oce.eum.server.utils.DefaultTags;
 import rocks.inspectit.ocelot.config.model.metrics.definition.ViewDefinitionSettings;
@@ -20,6 +24,7 @@ import java.util.stream.Collectors;
  * Central component, which is responsible for writing beacon entries as OpenCensus views.
  */
 @Component
+@Slf4j
 public class MeasuresAndViewsManager {
 
     /**
@@ -37,17 +42,47 @@ public class MeasuresAndViewsManager {
     private ViewManager viewManager;
 
     /**
+     * Maps metric definitions to expressions.
+     */
+    private Map<BeaconMetricDefinition, RawExpression> expressionCache = new HashMap<>();
+
+    /**
      * Processes boomerang beacon
      *
      * @param beacon The beacon containing arbitrary key-value pairs.
      */
-    public void processBeacon(Map<String, String> beacon) {
-        for (Map.Entry<String, BeaconMetricDefinition> metricDefinition : configuration.getDefinitions().entrySet()) {
-            metricDefinition.setValue(metricDefinition.getValue().getCopyWithDefaultsPopulated(metricDefinition.getKey()));
-            if (beacon.containsKey(metricDefinition.getValue().getBeaconField())) {
-                updateMetrics(metricDefinition.getKey(), metricDefinition.getValue());
+    public void processBeacon(Beacon beacon) {
+        for (Map.Entry<String, BeaconMetricDefinition> metricDefinitionEntry : configuration.getDefinitions().entrySet()) {
+            String metricName = metricDefinitionEntry.getKey();
+            BeaconMetricDefinition metricDefinition = metricDefinitionEntry.getValue();
+
+            if (BeaconRequirement.validate(beacon, metricDefinition.getBeaconRequirements())) {
+                recordMetric(metricName, metricDefinition, beacon);
+            } else {
+                log.debug("Skipping beacon because requirements are not fulfilled.");
+            }
+        }
+    }
+
+    /**
+     * Extracts the metric value from the given beacon according to the specified metric definition.
+     * In case the metric definition's value expression is not solvable using the given beacon (not all required
+     * fields are existing) nothing is done.
+     *
+     * @param metricName       the metric name
+     * @param metricDefinition the metric's definition
+     * @param beacon           the current beacon
+     */
+    private void recordMetric(String metricName, BeaconMetricDefinition metricDefinition, Beacon beacon) {
+        RawExpression expression = expressionCache.computeIfAbsent(metricDefinition, definition -> new RawExpression(definition.getValueExpression()));
+
+        if (expression.isSolvable(beacon)) {
+            Number value = expression.solve(beacon);
+
+            if (value != null) {
+                updateMetrics(metricName, metricDefinition);
                 try (Scope scope = getTagContext(beacon).buildScoped()) {
-                    recordMeasure(metricDefinition.getKey(), metricDefinition.getValue(), beacon.get(metricDefinition.getValue().getBeaconField()));
+                    recordMeasure(metricName, metricDefinition, value);
                 }
             }
         }
@@ -56,32 +91,34 @@ public class MeasuresAndViewsManager {
     /**
      * Records the measure,
      *
-     * @param name
+     * @param measureName      the name of the measure
      * @param metricDefinition The configuration of the metric, which is activated
      * @param value            The value, which is going to be written.
      */
-    private void recordMeasure(String name, BeaconMetricDefinition metricDefinition, String value) {
+    private void recordMeasure(String measureName, BeaconMetricDefinition metricDefinition, Number value) {
+        if (log.isDebugEnabled()) {
+            log.debug("Recording measure '{}' with value '{}'.", measureName, value);
+        }
+
         switch (metricDefinition.getType()) {
             case LONG:
-                recorder.newMeasureMap().put((Measure.MeasureLong) metrics.get(name), Long.parseLong(value)).record();
+                recorder.newMeasureMap().put((Measure.MeasureLong) metrics.get(measureName), value.longValue()).record();
                 break;
             case DOUBLE:
-                recorder.newMeasureMap().put((Measure.MeasureDouble) metrics.get(name), Double.parseDouble(value)).record();
+                recorder.newMeasureMap().put((Measure.MeasureDouble) metrics.get(measureName), value.doubleValue()).record();
                 break;
         }
     }
 
     /**
      * Updates the metrics
-     *
-     * @param name
-     * @param metricDefinition
      */
     private void updateMetrics(String name, BeaconMetricDefinition metricDefinition) {
         if (!metrics.containsKey(name)) {
-            Measure measure = createMeasure(name, metricDefinition);
+            BeaconMetricDefinition populatedMetricDefinition = metricDefinition.getCopyWithDefaultsPopulated(name);
+            Measure measure = createMeasure(name, populatedMetricDefinition);
             metrics.put(name, measure);
-            updateViews(name, metricDefinition);
+            updateViews(name, populatedMetricDefinition);
         }
     }
 
@@ -138,7 +175,7 @@ public class MeasuresAndViewsManager {
      *
      * @param beacon Used to resolve tag values, which refer to a beacon entry
      */
-    private TagContextBuilder getTagContext(Map<String, String> beacon) {
+    private TagContextBuilder getTagContext(Beacon beacon) {
         TagContextBuilder tagContextBuilder = Tags.getTagger().currentBuilder();
 
         for (Map.Entry<String, String> extraTag : configuration.getTags().getExtra().entrySet()) {
@@ -146,13 +183,13 @@ public class MeasuresAndViewsManager {
         }
 
         for (Map.Entry<String, String> beaconTag : configuration.getTags().getBeacon().entrySet()) {
-            if (beacon.containsKey(beaconTag.getValue())) {
+            if (beacon.contains(beaconTag.getValue())) {
                 tagContextBuilder.putLocal(TagKey.create(beaconTag.getKey()), TagValue.create(beacon.get(beaconTag.getValue())));
             }
         }
 
         for (DefaultTags defaultTag : DefaultTags.values()) {
-            if (beacon.containsKey(defaultTag.name())) {
+            if (beacon.contains(defaultTag.name())) {
                 tagContextBuilder.putLocal(TagKey.create(defaultTag.name()), TagValue.create(beacon.get(defaultTag.name())));
             }
         }

@@ -1,13 +1,20 @@
 package rocks.inspectit.oce.eum.server.configuration.model;
 
 import lombok.*;
+import rocks.inspectit.oce.eum.server.arithmetic.RawExpression;
+import rocks.inspectit.oce.eum.server.beacon.Beacon;
 import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings;
 import rocks.inspectit.ocelot.config.model.metrics.definition.ViewDefinitionSettings;
 
 import javax.validation.Valid;
+import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Defines the mapping of a beacon value to a OpenCensus Measure and the corresponding views.
@@ -18,26 +25,58 @@ import java.util.Map;
 @AllArgsConstructor
 public class BeaconMetricDefinition extends MetricDefinitionSettings {
 
-    @NotBlank
-    private String beaconField;
+    /**
+     * The expression to extract a value from a beacon.
+     * See {@link rocks.inspectit.oce.eum.server.arithmetic.ArithmeticExpression} for more details.
+     */
+    @NotEmpty
+    private String valueExpression;
+
+    /**
+     * Requirements which have to be fulfilled by Beacons. Beacons which do not match all requirements will be ignored
+     * by this metric definition.
+     */
+    @Valid
+    private List<BeaconRequirement> beaconRequirements;
+
 
     @Builder(builderMethodName = "beaconMetricBuilder")
     public BeaconMetricDefinition(boolean enabled, @NotBlank String unit, @NotNull MeasureType type, String description,
-                                  Map<@NotBlank String, @Valid @NotNull ViewDefinitionSettings> views, @NotBlank String beaconField) {
+                                  Map<@NotBlank String, @Valid @NotNull ViewDefinitionSettings> views, @NotEmpty List<BeaconRequirement> beaconRequirements,
+                                  String valueExpression) {
         super(enabled, unit, type, description, views);
-        this.beaconField = beaconField;
+        this.beaconRequirements = beaconRequirements;
+        this.valueExpression = valueExpression;
     }
 
     @Override
     public BeaconMetricDefinition getCopyWithDefaultsPopulated(String metricName) {
-        val metricDefinition = super.getCopyWithDefaultsPopulated(metricName);
-        val beaconMetricDefinition = beaconMetricBuilder()
-                .beaconField(getBeaconField())
+        MetricDefinitionSettings metricDefinition = super.getCopyWithDefaultsPopulated(metricName);
+
+        return beaconMetricBuilder()
+                .beaconRequirements(getBeaconRequirements())
+                .valueExpression(getValueExpression())
                 .description(metricDefinition.getDescription())
                 .unit(metricDefinition.getUnit())
                 .type(metricDefinition.getType())
                 .enabled(metricDefinition.isEnabled())
-                .views(metricDefinition.getViews()).build();
-        return beaconMetricDefinition;
+                .views(metricDefinition.getViews())
+                .build();
+    }
+
+    @AssertTrue(message = "Please verify that your value expression contains a valid syntax.")
+    public boolean isValidValueExpression() {
+        RawExpression expression = new RawExpression(valueExpression);
+
+        Map<String, String> dummyValueMap = expression.getFields().stream()
+                .collect(Collectors.toMap(Function.identity(), x -> String.valueOf(Math.random() + 1D)));
+
+        try {
+            Number result = expression.solve(Beacon.of(dummyValueMap));
+
+            return result != null;
+        } catch (Exception exception) {
+            return false;
+        }
     }
 }
