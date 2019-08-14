@@ -98,39 +98,55 @@ In order to provide a custom configuration, please set the Java property <code>-
 <p>The configuration file defines the mapping between the concrete Boomerang metric and a OpenCensus metric, as the following sample configuration file shows:</p>
 <pre><code class="hljs css language-yaml"><span class="hljs-attr">inspectit-ocelot-eum-server:</span>
 <span class="hljs-attr">  definitions:</span>
-<span class="hljs-attr">    page_ready_time:</span>
+<span class="hljs-attr">     page_ready_time:</span>
 <span class="hljs-attr">      measure-type:</span> <span class="hljs-string">LONG</span>
-<span class="hljs-attr">      beacon-field:</span> <span class="hljs-string">t_page</span>
+<span class="hljs-attr">      value-expression:</span> <span class="hljs-string">"{t_page}"</span>
 <span class="hljs-attr">      unit:</span> <span class="hljs-string">ms</span>
 <span class="hljs-attr">      views:</span>
         <span class="hljs-string">'[page_ready_time/SUM]'</span><span class="hljs-string">:</span> <span class="hljs-string">{aggregation:</span> <span class="hljs-string">SUM}</span>
         <span class="hljs-string">'[page_ready_time/COUNT]'</span><span class="hljs-string">:</span> <span class="hljs-string">{aggregation:</span> <span class="hljs-string">COUNT}</span>
+
 <span class="hljs-attr">    load_time:</span>
 <span class="hljs-attr">      measure-type:</span> <span class="hljs-string">LONG</span>
-<span class="hljs-attr">      beacon-field:</span> <span class="hljs-string">t_done</span>
+<span class="hljs-attr">      value-expression:</span> <span class="hljs-string">"{t_done}"</span>
+<span class="hljs-attr">      beacon-requirements:</span>
+<span class="hljs-attr">        - field:</span> <span class="hljs-string">rt.quit</span>
+<span class="hljs-attr">          requirement:</span> <span class="hljs-string">NOT_EXISTS</span>
 <span class="hljs-attr">      unit:</span> <span class="hljs-string">ms</span>
 <span class="hljs-attr">      views:</span>
         <span class="hljs-string">'[load_time/SUM]'</span><span class="hljs-string">:</span> <span class="hljs-string">{aggregation:</span> <span class="hljs-string">SUM}</span>
         <span class="hljs-string">'[load_time/COUNT]'</span><span class="hljs-string">:</span> <span class="hljs-string">{aggregation:</span> <span class="hljs-string">COUNT}</span>
 
+<span class="hljs-attr">    calc_load_time:</span>
+<span class="hljs-attr">      measure-type:</span> <span class="hljs-string">LONG</span>
+<span class="hljs-attr">      value-expression:</span> <span class="hljs-string">"{rt.end} - {rt.tstart}"</span>
+<span class="hljs-attr">      beacon-requirements:</span>
+<span class="hljs-attr">        - field:</span> <span class="hljs-string">rt.quit</span>
+<span class="hljs-attr">          requirement:</span> <span class="hljs-string">NOT_EXISTS</span>
+<span class="hljs-attr">      unit:</span> <span class="hljs-string">ms</span>
+<span class="hljs-attr">      views:</span>
+        <span class="hljs-string">'[calc_load_time/SUM]'</span><span class="hljs-string">:</span> <span class="hljs-string">{aggregation:</span> <span class="hljs-string">SUM}</span>
+        <span class="hljs-string">'[calc_load_time/COUNT]'</span><span class="hljs-string">:</span> <span class="hljs-string">{aggregation:</span> <span class="hljs-string">COUNT}</span>
+
 <span class="hljs-attr">    start_timestamp:</span>
 <span class="hljs-attr">      measure-type:</span> <span class="hljs-string">LONG</span>
-<span class="hljs-attr">      beacon-field:</span> <span class="hljs-string">rt.tstart</span>
+<span class="hljs-attr">      value-expression:</span> <span class="hljs-string">"{rt.tstart}"</span>
 <span class="hljs-attr">      unit:</span> <span class="hljs-string">ms</span>
 
 <span class="hljs-attr">    navigation_start_timestamp:</span>
 <span class="hljs-attr">      measure-type:</span> <span class="hljs-string">LONG</span>
-<span class="hljs-attr">      beacon-field:</span> <span class="hljs-string">rt.nstart</span>
+<span class="hljs-attr">      value-expression:</span> <span class="hljs-string">"{rt.nstart}"</span>
 <span class="hljs-attr">      unit:</span> <span class="hljs-string">ms</span>
 
 <span class="hljs-attr">    end_timestamp:</span>
 <span class="hljs-attr">      measure-type:</span> <span class="hljs-string">LONG</span>
-<span class="hljs-attr">      beacon-field:</span> <span class="hljs-string">rt.end</span>
+<span class="hljs-attr">      value-expression:</span> <span class="hljs-string">"{rt.end}"</span>
 <span class="hljs-attr">      unit:</span> <span class="hljs-string">ms</span>
 <span class="hljs-attr">      views:</span>
 <span class="hljs-attr">        end_timestamp:</span>
 <span class="hljs-attr">          aggregation:</span> <span class="hljs-string">LAST_VALUE</span>
-<span class="hljs-attr">          tags:</span> <span class="hljs-string">{APPLICATION</span> <span class="hljs-string">:</span> <span class="hljs-literal">true</span><span class="hljs-string">}</span>
+<span class="hljs-attr">          tags:</span> <span class="hljs-string">{APPLICATION:</span> <span class="hljs-literal">true</span><span class="hljs-string">}</span>
+
 <span class="hljs-attr">  tags:</span>
 <span class="hljs-attr">    extra:</span>
 <span class="hljs-attr">      APPLICATION:</span> <span class="hljs-string">my-application</span>
@@ -150,7 +166,7 @@ In order to provide a custom configuration, please set the Java property <code>-
 <span class="hljs-attr">        port:</span> <span class="hljs-number">8888</span>
 </code></pre>
 <h3><a class="anchor" aria-hidden="true" id="metrics-definition"></a><a href="#metrics-definition" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Metrics Definition</h3>
-<p>A metric are defined the same way as in the inspectIT Ocelot Java agent. Please see the section <a href="/inspectit-ocelot/docs/next/metrics/custom-metrics">Metrics / Custom Metrics</a> for detailed information.</p>
+<p>A metric is defined the same way as in the inspectIT Ocelot Java agent. Please see the section <a href="/inspectit-ocelot/docs/next/metrics/custom-metrics">Metrics / Custom Metrics</a> for detailed information.</p>
 <p>In contrast to the agent's metric definition, the EUM server's metric definition contains additional fields.
 These additional fields are the following:</p>
 <table>
@@ -158,7 +174,59 @@ These additional fields are the following:</p>
 <tr><th>Attributes</th><th>Note</th></tr>
 </thead>
 <tbody>
-<tr><td><code>beacon-field</code></td><td>The beacon field key, which is used as value for the metric.</td></tr>
+<tr><td><code>value-expression</code></td><td>An expression used to calculate the measure's value from a beacon.</td></tr>
+<tr><td><code>beacon-requirements</code></td><td>Requirements which have to be fulfilled by Beacons. Beacons which do not match all requirements will be ignored by this metric definition.</td></tr>
+</tbody>
+</table>
+<h4><a class="anchor" aria-hidden="true" id="value-expressions"></a><a href="#value-expressions" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Value Expressions</h4>
+<p>The <code>value-expression</code> field can be used to specify a field which value is used for the specified metrics.
+In order to reference a field, the following pattern is used: <code>{FIELD_KEY}</code>.
+For example, a valid expression, used to extract the value of a field <code>t_load</code>, would be <code>{t_load}</code>.</p>
+<blockquote>
+<p>Note that a beacon has to contain all fields referenced by the expression in order to be evaluated and recorded.</p>
+</blockquote>
+<p>Value expressions also support operations for basic arithmetic operations. Thus, to calculate a difference of two beacon fields, the following expression can be used:</p>
+<pre><code class="hljs css language-YAML">  <span class="hljs-string">...</span>
+<span class="hljs-attr">    my-metric:</span>
+      <span class="hljs-string">...</span>
+<span class="hljs-attr">      value-expression:</span> <span class="hljs-string">"{field.a} - {field.b}"</span>
+      <span class="hljs-string">...</span>
+</code></pre>
+<p>Value expression are supporting the following operations:</p>
+<ul>
+<li>addition</li>
+<li>subtraction</li>
+<li>multiplication</li>
+<li>division</li>
+<li>unary plus/minus</li>
+<li>parentheses</li>
+</ul>
+<p>Using the operations above, complex calculations can be done, for example:</p>
+<pre><code class="hljs css language-YAML">  <span class="hljs-string">...</span>
+<span class="hljs-attr">    my-metric:</span>
+      <span class="hljs-string">...</span>
+<span class="hljs-attr">      value-expression:</span> <span class="hljs-string">"- {field.c} * ({field.a} - {field.b}) / {field.a}"</span>
+      <span class="hljs-string">...</span>
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="beacon-requirements"></a><a href="#beacon-requirements" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Beacon Requirements</h4>
+<p>The <code>beacon-requirements</code> field can be used to specify requirements which have to be fulfilled by the beacons in order to be evaluated by a certain metric.
+If any requirement does not fit a beacon, the beacon is ignored by the metric.</p>
+<p>Beacon requirements consist of two attributes <code>field</code> and <code>requirement</code>. <code>field</code> specified the beacon's field which is validated using the requirement type specified in <code>NOT_EXISTS</code>.</p>
+<pre><code class="hljs css language-YAML">  <span class="hljs-string">...</span>
+<span class="hljs-attr">    my-metric:</span>
+      <span class="hljs-string">...</span>
+<span class="hljs-attr">      beacon-requirements:</span>
+<span class="hljs-attr">        - field:</span> <span class="hljs-string">rt.quit</span>
+<span class="hljs-attr">          requirement:</span> <span class="hljs-string">NOT_EXISTS</span>
+</code></pre>
+<p>The following requirement types are currently be supported:</p>
+<table>
+<thead>
+<tr><th>Type</th><th>Note</th></tr>
+</thead>
+<tbody>
+<tr><td><code>EXISTS</code></td><td>The targeted field must exist.</td></tr>
+<tr><td><code>NOT_EXISTS</code></td><td>The targeted field must not exist.</td></tr>
 </tbody>
 </table>
 <h3><a class="anchor" aria-hidden="true" id="tags-definition"></a><a href="#tags-definition" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Tags Definition</h3>
@@ -204,7 +272,7 @@ Each tag which is listed under this property will be added to each registered me
 </code></pre>
 <h2><a class="anchor" aria-hidden="true" id="exporters"></a><a href="#exporters" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Exporters</h2>
 <p>By now, the prometheus exporter is available. If <code>enabled</code> is set to true, the exporter is exposes the metrics under the following HTTP endpoint: <code>http://[host]:[port]/metrics</code></p>
-</span></div></article></div><div class="docLastUpdate"><em>Last updated on 2019-8-12 by Marius Oehler</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/next/instrumentation/process"><span class="arrow-prev">← </span><span>Instrumentation Process</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/next/config-server/overview"><span>Overview</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#metrics">Metrics</a></li><li><a href="#server-setup">Server Setup</a></li><li><a href="#configuration">Configuration</a><ul class="toc-headings"><li><a href="#metrics-definition">Metrics Definition</a></li><li><a href="#tags-definition">Tags Definition</a></li></ul></li><li><a href="#exporters">Exporters</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2019 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</span></div></article></div><div class="docLastUpdate"><em>Last updated on 2019-8-14 by Marius Oehler</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/next/instrumentation/process"><span class="arrow-prev">← </span><span>Instrumentation Process</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/next/config-server/overview"><span>Overview</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#metrics">Metrics</a></li><li><a href="#server-setup">Server Setup</a></li><li><a href="#configuration">Configuration</a><ul class="toc-headings"><li><a href="#metrics-definition">Metrics Definition</a></li><li><a href="#tags-definition">Tags Definition</a></li></ul></li><li><a href="#exporters">Exporters</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2019 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
