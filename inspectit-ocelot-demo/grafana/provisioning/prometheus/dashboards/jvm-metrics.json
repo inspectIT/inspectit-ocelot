@@ -10701,7 +10701,7 @@
       "type": "text"
     }
   ],
-  "refresh": "5s",
+  "refresh": "30s",
   "schemaVersion": 16,
   "style": "dark",
   "tags": [],
