@@ -12,6 +12,7 @@ import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.user.User;
 import rocks.inspectit.ocelot.user.UserService;
 
+import javax.annotation.PostConstruct;
 import java.util.Optional;
 
 /**
@@ -32,15 +33,19 @@ public class LocalUserDetailsService implements UserDetailsService {
     private UserService userService;
 
     /**
-     * Returns the access role which will be assigned to authenticated users.
-     *
-     * @return the access role name
+     * The access role which will be assigned to the users.
      */
-    private String getAccessRole() {
+    private String accessRole;
+
+    /**
+     * Sets the access role field {@link #accessRole} which will be assigned to authenticated users.
+     */
+    @PostConstruct
+    private void postConstruct() {
         if (settings.getSecurity().isLdapAuthentication()) {
-            return settings.getSecurity().getLdap().getAdminGroup();
+            accessRole = settings.getSecurity().getLdap().getAdminGroup();
         } else {
-            return DEFAULT_ACCESS_USER_ROLE;
+            accessRole = DEFAULT_ACCESS_USER_ROLE;
         }
     }
 
@@ -48,14 +53,14 @@ public class LocalUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<User> userOptional = userService.getUserByName(username);
         if (!userOptional.isPresent()) {
-            throw new UsernameNotFoundException(username);
+            throw new UsernameNotFoundException("User with username '" + username + "' has not been found.");
         }
 
         User user = userOptional.get();
 
         if (user.isLdapUser()) {
-            log.info("User is LDAP user, thus, not returned by this user details service.");
-            throw new UsernameNotFoundException(username);
+            log.debug("User is LDAP user, thus, not returned by this user details service.");
+            throw new UsernameNotFoundException("User with username '" + username + "' has not been found because it is a LDAP user.");
         }
 
         return toUserDetails(user);
@@ -65,7 +70,7 @@ public class LocalUserDetailsService implements UserDetailsService {
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getUsername())
                 .password(user.getPasswordHash())
-                .roles(getAccessRole())
+                .roles(accessRole)
                 .build();
     }
 }
