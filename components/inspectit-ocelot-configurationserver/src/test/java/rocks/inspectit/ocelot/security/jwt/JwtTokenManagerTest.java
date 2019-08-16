@@ -1,13 +1,14 @@
 package rocks.inspectit.ocelot.security.jwt;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import org.apache.commons.lang3.time.DateUtils;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -17,15 +18,12 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 
-import javax.xml.crypto.Data;
 import java.time.Duration;
-import java.time.OffsetTime;
-import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -36,6 +34,12 @@ class JwtTokenManagerTest {
 
     @Mock
     private UserDetailsService userDetailsService;
+
+    @BeforeEach
+    public void before() {
+        manager.services = new ArrayList<>();
+        manager.services.add(userDetailsService);
+    }
 
     @Nested
     public class CreateToken {
@@ -107,6 +111,7 @@ class JwtTokenManagerTest {
             verify(userDetailsService).loadUserByUsername("username");
             verifyNoMoreInteractions(userDetailsService);
         }
+
         @Test
         public void invalidJwtToken() {
             InspectitServerSettings settings = InspectitServerSettings.builder().tokenLifespan(Duration.ofMinutes(1)).build();
@@ -116,6 +121,27 @@ class JwtTokenManagerTest {
                     .isThrownBy(() -> manager.authenticateWithToken("this-is-not-a-token"));
 
             verifyZeroInteractions(userDetailsService);
+        }
+
+        @Test
+        public void multipleUserDetailsServices() {
+            UserDetailsService mockService = mock(UserDetailsService.class);
+            when(mockService.loadUserByUsername(anyString())).thenThrow(UsernameNotFoundException.class);
+            manager.services.add(0, mockService);
+            InspectitServerSettings settings = InspectitServerSettings.builder().tokenLifespan(Duration.ofMinutes(1)).build();
+            manager.config = settings;
+            String token = manager.createToken("username");
+
+            when(userDetailsService.loadUserByUsername(anyString())).thenReturn(userDetails);
+
+            Authentication result = manager.authenticateWithToken(token);
+
+            assertThat(result).isNotNull();
+            assertThat(result.getPrincipal()).isSameAs(userDetails);
+            InOrder inOrder = inOrder(mockService, userDetailsService);
+            inOrder.verify(mockService).loadUserByUsername("username");
+            inOrder.verify(userDetailsService).loadUserByUsername("username");
+            verifyNoMoreInteractions(userDetailsService);
         }
     }
 }

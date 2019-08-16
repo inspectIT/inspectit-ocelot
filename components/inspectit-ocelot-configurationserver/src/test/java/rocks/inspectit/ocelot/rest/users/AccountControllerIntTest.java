@@ -13,8 +13,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import rocks.inspectit.ocelot.IntegrationTestBase;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.rest.ErrorInfo;
-import rocks.inspectit.ocelot.user.userdetails.LocalUserDetailsService;
+import rocks.inspectit.ocelot.security.userdetails.LocalUserDetailsService;
 import rocks.inspectit.ocelot.user.User;
+import rocks.inspectit.ocelot.user.UserService;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static rocks.inspectit.ocelot.rest.users.AccountController.PasswordChangeRequest;
@@ -25,16 +26,18 @@ public class AccountControllerIntTest extends IntegrationTestBase {
     InspectitServerSettings settings;
 
     @Autowired
-    LocalUserDetailsService userDetailsService;
+    UserService userService;
+
+
 
     @Autowired
     PasswordEncoder passwordEncoder;
 
     @AfterEach
     void cleanupUsers() {
-        userDetailsService.getUsers().forEach(u -> {
+        userService.getUsers().forEach(u -> {
             if (!u.getUsername().equalsIgnoreCase(settings.getDefaultUser().getName())) {
-                userDetailsService.deleteUserById(u.getId());
+                userService.deleteUserById(u.getId());
             }
         });
     }
@@ -44,7 +47,7 @@ public class AccountControllerIntTest extends IntegrationTestBase {
 
         @Test
         void testChange() {
-            userDetailsService.addOrUpdateUser(User.builder()
+            userService.addOrUpdateUser(User.builder()
                     .username("John")
                     .password("doe")
                     .build());
@@ -60,7 +63,7 @@ public class AccountControllerIntTest extends IntegrationTestBase {
                             });
             assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-            String pwHash = userDetailsService
+            String pwHash = userService
                     .getUserByName("John").get()
                     .getPasswordHash();
             assertThat(passwordEncoder
@@ -97,6 +100,5 @@ public class AccountControllerIntTest extends IntegrationTestBase {
             assertThat(result.getBody().getError()).isEqualTo(ErrorInfo.Type.NO_PASSWORD);
 
         }
-
     }
 }

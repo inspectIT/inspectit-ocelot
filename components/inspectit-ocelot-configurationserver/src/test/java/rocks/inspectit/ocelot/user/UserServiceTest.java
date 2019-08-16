@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.user.userdetails;
+package rocks.inspectit.ocelot.user;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -12,22 +12,21 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import rocks.inspectit.ocelot.config.model.DefaultUserSettings;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.config.model.SecuritySettings;
-import rocks.inspectit.ocelot.user.userdetails.LocalUserDetailsService;
-import rocks.inspectit.ocelot.user.User;
-import rocks.inspectit.ocelot.user.UserRepository;
+import rocks.inspectit.ocelot.security.userdetails.LocalUserDetailsService;
 
 import java.lang.reflect.Method;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class LocalUserDetailsServiceTest {
+class UserServiceTest {
 
     @InjectMocks
-    LocalUserDetailsService detailsService;
+    UserService userService;
 
     @Mock
     UserRepository repository;
@@ -49,7 +48,7 @@ public class LocalUserDetailsServiceTest {
             when(repository.save(any())).thenReturn(result);
             when(passwordEncoder.encode(anyString())).thenReturn("password-hash");
 
-            User actualResult = detailsService.addOrUpdateUser(input);
+            User actualResult = userService.addOrUpdateUser(input);
 
             ArgumentCaptor<User> argument = ArgumentCaptor.forClass(User.class);
             verify(repository).save(argument.capture());
@@ -64,7 +63,7 @@ public class LocalUserDetailsServiceTest {
 
         @Test
         void verifyUsernameConvertedToLowerCase() {
-            detailsService.getUserByName("CamelCase");
+            userService.getUserByName("CamelCase");
 
             ArgumentCaptor<String> argument = ArgumentCaptor.forClass(String.class);
             verify(repository).findByUsername(argument.capture());
@@ -75,18 +74,18 @@ public class LocalUserDetailsServiceTest {
     @Nested
     class AddDefaultUserIfRequired {
 
-        private Method testMethod = ReflectionUtils.findMethod(LocalUserDetailsService.class, "addDefaultUserIfRequired").get();
+        private Method testMethod = ReflectionUtils.findMethod(UserService.class, "addDefaultUserIfRequired").get();
 
         @Test
         public void addDefaultUser() {
             SecuritySettings securitySettings = SecuritySettings.builder().ldapAuthentication(false).build();
             DefaultUserSettings userSettings = DefaultUserSettings.builder().name("username").password("passwd").build();
             InspectitServerSettings settings = InspectitServerSettings.builder().security(securitySettings).defaultUser(userSettings).build();
-            detailsService.settings = settings;
+            userService.settings = settings;
             when(repository.count()).thenReturn(0L);
             when(passwordEncoder.encode(anyString())).thenReturn("password-hash");
 
-            ReflectionUtils.invokeMethod(testMethod, detailsService);
+            ReflectionUtils.invokeMethod(testMethod, userService);
 
             ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
             verify(repository).save(userCaptor.capture());
@@ -102,24 +101,13 @@ public class LocalUserDetailsServiceTest {
         public void doNothing() {
             SecuritySettings securitySettings = SecuritySettings.builder().ldapAuthentication(false).build();
             InspectitServerSettings settings = InspectitServerSettings.builder().security(securitySettings).build();
-            detailsService.settings = settings;
+            userService.settings = settings;
             when(repository.count()).thenReturn(1L);
 
-            ReflectionUtils.invokeMethod(testMethod, detailsService);
+            ReflectionUtils.invokeMethod(testMethod, userService);
 
             verify(repository).count();
             verifyNoMoreInteractions(repository);
-        }
-
-        @Test
-        public void ldapAuthentication() {
-            SecuritySettings securitySettings = SecuritySettings.builder().ldapAuthentication(true).build();
-            InspectitServerSettings settings = InspectitServerSettings.builder().security(securitySettings).build();
-            detailsService.settings = settings;
-
-            ReflectionUtils.invokeMethod(testMethod, detailsService);
-
-            verifyZeroInteractions(repository);
         }
     }
 }

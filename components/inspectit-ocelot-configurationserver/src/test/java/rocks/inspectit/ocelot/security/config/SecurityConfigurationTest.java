@@ -6,14 +6,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationContext;
+import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configurers.ldap.LdapAuthenticationProviderConfigurer;
 import org.springframework.security.config.annotation.authentication.configurers.userdetails.DaoAuthenticationConfigurer;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.config.model.LdapSettings;
 import rocks.inspectit.ocelot.config.model.SecuritySettings;
+import rocks.inspectit.ocelot.security.userdetails.LocalUserDetailsService;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -28,7 +30,10 @@ class SecurityConfigurationTest {
     PasswordEncoder passwordEncoder;
 
     @Mock
-    UserDetailsService userDetailsService;
+    LocalUserDetailsService localUserDetailsService;
+
+    @Mock
+    ApplicationContext context;
 
     @Nested
     class Configure_AuthenticationManagerBuilder {
@@ -52,7 +57,7 @@ class SecurityConfigurationTest {
 
             configuration.configure(auth);
 
-            verify(auth).userDetailsService(userDetailsService);
+            verify(auth).userDetailsService(localUserDetailsService);
             verify(daoAuthenticationConfigurer).passwordEncoder(passwordEncoder);
             verifyNoMoreInteractions(auth);
         }
@@ -74,6 +79,7 @@ class SecurityConfigurationTest {
             when(ldapConfigurer.userSearchBase(anyString())).thenReturn(ldapConfigurer);
             when(ldapConfigurer.groupSearchFilter(anyString())).thenReturn(ldapConfigurer);
             when(ldapConfigurer.groupSearchBase(anyString())).thenReturn(ldapConfigurer);
+            when(auth.userDetailsService(any())).thenReturn(daoAuthenticationConfigurer);
 
             configuration.configure(auth);
 
@@ -83,6 +89,9 @@ class SecurityConfigurationTest {
             verify(ldapConfigurer).groupSearchFilter("group-filter");
             verify(ldapConfigurer).groupSearchBase("group-base");
             verify(ldapConfigurer).contextSource(any());
+            verify(auth).userDetailsService(localUserDetailsService);
+            verify(daoAuthenticationConfigurer).passwordEncoder(passwordEncoder);
+            verify(context).getBean(LdapContextSource.class);
             verifyNoMoreInteractions(auth, ldapConfigurer);
         }
     }

@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 import rocks.inspectit.ocelot.rest.AbstractBaseController;
 import rocks.inspectit.ocelot.rest.ErrorInfo;
-import rocks.inspectit.ocelot.user.userdetails.LocalUserDetailsService;
 import rocks.inspectit.ocelot.user.User;
+import rocks.inspectit.ocelot.user.UserService;
 
 import java.util.Collections;
 import java.util.List;
@@ -43,7 +43,7 @@ public class UserController extends AbstractBaseController {
             .build();
 
     @Autowired
-    private LocalUserDetailsService userDetailsService;
+    private UserService userService;
 
     @ApiOperation(value = "Select users", notes = "Fetches the list of registered users." +
             " If a username query parameter is given, the list is filtered to contain only the user matching the given username." +
@@ -52,11 +52,11 @@ public class UserController extends AbstractBaseController {
     public List<User> selectUsers(@ApiParam("If specified only the user with the given name is returned")
                                   @RequestParam(required = false) String username) {
         if (!StringUtils.isEmpty(username)) {
-            return userDetailsService.getUserByName(username)
+            return userService.getUserByName(username)
                     .map(Collections::singletonList)
                     .orElse(Collections.emptyList());
         } else {
-            return StreamSupport.stream(userDetailsService.getUsers().spliterator(), false)
+            return StreamSupport.stream(userService.getUsers().spliterator(), false)
                     .collect(Collectors.toList());
         }
     }
@@ -65,7 +65,7 @@ public class UserController extends AbstractBaseController {
     @GetMapping("users/{id}")
     public ResponseEntity<?> getUser(@ApiParam("The ID of the user")
                                      @PathVariable long id) {
-        return userDetailsService.getUserById(id)
+        return userService.getUserById(id)
                 .map(ResponseEntity::<Object>ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -83,7 +83,7 @@ public class UserController extends AbstractBaseController {
             return ResponseEntity.badRequest().body(NO_PASSWORD_ERROR);
         }
         try {
-            User savedUser = userDetailsService.addOrUpdateUser(
+            User savedUser = userService.addOrUpdateUser(
                     user.toBuilder()
                             .id(null)
                             .build());
@@ -102,7 +102,7 @@ public class UserController extends AbstractBaseController {
     public ResponseEntity<?> deleteUser(@ApiParam("The is of the user to delete")
                                         @PathVariable long id) {
         try {
-            userDetailsService.deleteUserById(id);
+            userService.deleteUserById(id);
             return ResponseEntity.ok("");
         } catch (EmptyResultDataAccessException e) {
             log.error("Error deleting user", e);

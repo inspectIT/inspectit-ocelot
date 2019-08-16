@@ -10,19 +10,18 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.config.model.LdapSettings;
 import rocks.inspectit.ocelot.security.jwt.JwtTokenFilter;
 import rocks.inspectit.ocelot.security.jwt.JwtTokenManager;
-import rocks.inspectit.ocelot.utils.LdapUtils;
+import rocks.inspectit.ocelot.security.userdetails.LocalUserDetailsService;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.Collections;
 
-import static rocks.inspectit.ocelot.user.userdetails.LocalUserDetailsService.DEFAULT_ACCESS_USER_ROLE;
+import static rocks.inspectit.ocelot.security.userdetails.LocalUserDetailsService.DEFAULT_ACCESS_USER_ROLE;
 
 /**
  * Spring security configuration enabling authentication on all except excluded endpoints.
@@ -38,7 +37,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private UserDetailsService userDetailsService;
+    private LocalUserDetailsService localUserDetailsService;
 
     @Autowired
     @VisibleForTesting
@@ -102,16 +101,15 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         if (serverSettings.getSecurity().isLdapAuthentication()) {
             configureLdapAuthentication(auth);
-        } else {
-            configureLocalAuthentication(auth);
         }
+        configureLocalAuthentication(auth);
     }
 
     /**
      * Configures the user authentication to use LDAP user management and authentication
      */
     private void configureLdapAuthentication(AuthenticationManagerBuilder auth) throws Exception {
-        LdapContextSource contextSource = LdapUtils.createLdapContextSource(serverSettings);
+        LdapContextSource contextSource = getApplicationContext().getBean(LdapContextSource.class);
         LdapSettings ldapSettings = serverSettings.getSecurity().getLdap();
 
         auth
@@ -128,7 +126,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
      */
     private void configureLocalAuthentication(AuthenticationManagerBuilder auth) throws Exception {
         auth
-                .userDetailsService(userDetailsService)
+                .userDetailsService(localUserDetailsService)
                 .passwordEncoder(passwordEncoder);
     }
 }

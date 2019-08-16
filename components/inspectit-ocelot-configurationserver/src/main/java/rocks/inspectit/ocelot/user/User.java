@@ -45,4 +45,10 @@ public class User {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
+
+    /**
+     * Specifies whether this user has been automatically added due to a LDAP authentication.
+     */
+    @Column(nullable = false)
+    private boolean isLdapUser;
 }
