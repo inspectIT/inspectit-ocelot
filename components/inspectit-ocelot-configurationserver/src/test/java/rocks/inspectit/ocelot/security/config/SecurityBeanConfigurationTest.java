@@ -4,21 +4,15 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationContext;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.ldap.userdetails.LdapUserDetailsService;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.config.model.LdapSettings;
 import rocks.inspectit.ocelot.config.model.SecuritySettings;
-import rocks.inspectit.ocelot.security.userdetails.LocalUserDetailsService;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class SecurityBeanConfigurationTest {
@@ -35,6 +29,38 @@ class SecurityBeanConfigurationTest {
 
             assertThat(result).isNotNull();
             assertThat(result).isInstanceOf(BCryptPasswordEncoder.class);
+        }
+    }
+
+    @Nested
+    class CreateLdapContextSource {
+
+        private InspectitServerSettings createSettings(String url, String baseDn, String managerDn, String managerPassword) {
+            LdapSettings ldapSettings = LdapSettings.builder()
+                    .url(url)
+                    .baseDn(baseDn)
+                    .managerDn(managerDn)
+                    .managerPassword(managerPassword)
+                    .build();
+            SecuritySettings securitySettings = SecuritySettings.builder()
+                    .ldap(ldapSettings)
+                    .build();
+            InspectitServerSettings settings = InspectitServerSettings.builder()
+                    .security(securitySettings)
+                    .build();
+            return settings;
+        }
+
+        @Test
+        void createLdapContextSource() {
+            InspectitServerSettings settings = createSettings("ldap://localhost:389", "ou=base", "manager", "password");
+
+            LdapContextSource result = configuration.ldapContextSource(settings);
+
+            assertThat(result.getUrls()).containsExactly("ldap://localhost:389");
+            assertThat(result.getBaseLdapPathAsString()).isEqualTo("ou=base");
+            assertThat(result.getUserDn()).isEqualTo("manager");
+            assertThat(result.getPassword()).isEqualTo("password");
         }
     }
 }

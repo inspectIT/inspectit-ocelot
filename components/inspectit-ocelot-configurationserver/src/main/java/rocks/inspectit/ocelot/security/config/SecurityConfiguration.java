@@ -2,7 +2,6 @@ package rocks.inspectit.ocelot.security.config;
 
 import com.google.common.annotations.VisibleForTesting;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -11,7 +10,6 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
@@ -19,7 +17,6 @@ import rocks.inspectit.ocelot.config.model.LdapSettings;
 import rocks.inspectit.ocelot.security.jwt.JwtTokenFilter;
 import rocks.inspectit.ocelot.security.jwt.JwtTokenManager;
 import rocks.inspectit.ocelot.security.userdetails.LocalUserDetailsService;
-import rocks.inspectit.ocelot.utils.LdapUtils;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.Collections;
@@ -112,7 +109,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
      * Configures the user authentication to use LDAP user management and authentication
      */
     private void configureLdapAuthentication(AuthenticationManagerBuilder auth) throws Exception {
-        LdapContextSource contextSource = LdapUtils.createLdapContextSource(serverSettings);
+        LdapContextSource contextSource = getApplicationContext().getBean(LdapContextSource.class);
         LdapSettings ldapSettings = serverSettings.getSecurity().getLdap();
 
         auth

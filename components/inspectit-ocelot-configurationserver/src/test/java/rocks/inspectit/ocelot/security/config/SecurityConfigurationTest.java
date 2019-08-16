@@ -6,10 +6,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationContext;
+import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configurers.ldap.LdapAuthenticationProviderConfigurer;
 import org.springframework.security.config.annotation.authentication.configurers.userdetails.DaoAuthenticationConfigurer;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.config.model.LdapSettings;
@@ -30,6 +31,9 @@ class SecurityConfigurationTest {
 
     @Mock
     LocalUserDetailsService localUserDetailsService;
+
+    @Mock
+    ApplicationContext context;
 
     @Nested
     class Configure_AuthenticationManagerBuilder {
@@ -87,6 +91,7 @@ class SecurityConfigurationTest {
             verify(ldapConfigurer).contextSource(any());
             verify(auth).userDetailsService(localUserDetailsService);
             verify(daoAuthenticationConfigurer).passwordEncoder(passwordEncoder);
+            verify(context).getBean(LdapContextSource.class);
             verifyNoMoreInteractions(auth, ldapConfigurer);
         }
     }

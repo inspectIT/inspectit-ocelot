@@ -59,7 +59,7 @@ public class AccountController extends AbstractBaseController {
     public String acuireNewAccessToken(Authentication user) {
         if (user.getPrincipal() instanceof LdapUserDetails) {
             if (log.isDebugEnabled()) {
-                log.debug("User `{}` was authenticated using LDAP. Add it to local database if it does not exist.", ((LdapUserDetails) user.getPrincipal()).getUsername());
+                log.debug("User `{}` was authenticated using LDAP. The user is added to the local database, if it does not exist.", ((LdapUserDetails) user.getPrincipal()).getUsername());
             }
             userService.createUserIfNotExist(user.getName(), true);
         }
