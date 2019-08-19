@@ -9,8 +9,8 @@ version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '1.8'
 
 bootJar {
-	archivesBaseName = 'inspectit-ocelot-configurationserver'
-	version = '0.1.0'
+	archivesBaseName = 'inspectit-ocelot-eum-server'
+	version = "${buildVersion}"
 
 	manifest {
 		attributes 'Start-Class': 'rocks.inspectit.oce.eum.server.EUMServerApplication'
