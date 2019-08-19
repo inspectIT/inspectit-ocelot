@@ -1,80 +1,65 @@
 import * as types from "./types";
-import {axiosPlain} from '../../../lib/axios-api';
-
-import {configurationActions} from '../configuration';
+import { axiosPlain } from "../../../lib/axios-api";
+import axiosBearer from "../../../lib/axios-api";
+import { configurationActions } from "../configuration";
 
 /**
  * Fetches an access token for the given credentials.
- * 
- * @param {string} username 
- * @param {string} password 
+ *
+ * @param {string} username
+ * @param {string} password
  */
 export const fetchToken = (username, password) => {
-    return dispatch => {
-        dispatch(fetchTokenStarted());
+  return (dispatch) => {
+    dispatch({ type: types.FETCH_TOKEN_STARTED });
 
-        axiosPlain
-            .get("/account/token", {
-                auth: {
-                    username: username,
-                    password: password
-                }
-            })
-            .then(res => {
-                const token = res.data;
-                dispatch(fetchTokenSuccess(token, username));
-            })
-            .catch(err => {
-                let message;
-                const { response } = err;
-                if (response && response.status == 401) {
-                    message = "The given credentials are not valid.";
-                } else {
-                    message = err.message;
-                }
-                dispatch(fetchTokenFailure(message));
-            });
-    };
+    axiosPlain
+      .get("/account/token", {
+        auth: {
+          username: username,
+          password: password
+        }
+      })
+      .then(res => {
+        const token = res.data;
+        dispatch({ type: types.FETCH_TOKEN_SUCCESS, payload: { token, username } });
+      })
+      .catch(err => {
+        let message;
+        const { response } = err;
+        if (response && response.status == 401) {
+          message = "The given credentials are not valid.";
+        } else {
+          message = err.message;
+        }
+        dispatch({ type: types.FETCH_TOKEN_FAILURE, payload: { error: message } });
+      });
+  };
 };
 
 /**
- * Is dispatched when the fetching of the access token has been started.
+ * Renews the access token with the existing token.
+ *
  */
-export const fetchTokenStarted = () => ({
-    type: types.FETCH_TOKEN_STARTED
-});
-
-/**
- * Is dispatched if the fetching of the access token was not successful.
- * 
- * @param {*} error 
- */
-export const fetchTokenFailure = (error) => ({
-    type: types.FETCH_TOKEN_FAILURE,
-    payload: {
-        error
-    }
-});
-
-/**
- * Is dispatched when the fetching of the access token was successful.
- * 
- * @param {string} token 
- */
-export const fetchTokenSuccess = (token, username) => ({
-    type: types.FETCH_TOKEN_SUCCESS,
-    payload: {
-        token,
-        username
-    }
-});
+export const renewToken = () => {
+  return (dispatch) => {
+    axiosBearer
+      .get("/account/token")
+      .then(res => {
+        const token = res.data;
+        dispatch({ type: types.RENEW_TOKEN_SUCCESS, payload: { token } });
+      })
+      .catch(err => {
+      });
+  };
+};
 
 /**
  * Logout of the current user.
  */
 export const logout = () => {
-    return dispatch => {
-        dispatch({type: types.LOGOUT});
-        dispatch(configurationActions.resetState());
-    };
+  return dispatch => {
+    dispatch({ type: types.LOGOUT });
+    dispatch(configurationActions.resetState());
+  };
 };

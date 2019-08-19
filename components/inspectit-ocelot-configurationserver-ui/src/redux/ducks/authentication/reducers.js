@@ -1,14 +1,13 @@
 import * as types from "./types";
 import { createReducer } from "../../utils";
 import { isTokenExpired } from '../../../lib/jwt-utils';
-import {authentication as initialState} from '../initial-states';
+import { authentication as initialState } from '../initial-states';
 
 const authorizationReducer = createReducer(initialState)({
     [types.FETCH_TOKEN_STARTED]: (state, action) => {
         return {
             ...state,
             loading: true,
-            unauthorized: false
         };
     },
     [types.FETCH_TOKEN_FAILURE]: (state, action) => {
@@ -37,6 +36,14 @@ const authorizationReducer = createReducer(initialState)({
             error: null,
             token: null,
             username: null
+        };
+    },
+    [types.RENEW_TOKEN_SUCCESS]: (state, action) => {
+        const { token } = action.payload;
+        return {
+            ...state,
+            error: null,
+            token
         };
     },
     // SPECIAL REDUCER - dispatched by redux-persist to rehydrate store
