@@ -26,6 +26,7 @@ class GlobalExceptionHandlerTest {
         public void exception() throws Exception {
             throw new Exception("custom-message");
         }
+
         @RequestMapping("/notSupportedWithLdapException")
         public void notSupportedWithLdapException() {
             throw new NotSupportedWithLdapException();
@@ -54,6 +55,6 @@ class GlobalExceptionHandlerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(APPLICATION_JSON_UTF8))
                 .andExpect(jsonPath("$.message").value("Endpoint is not supported in the current configuration."))
-                .andExpect(jsonPath("$.debugMessage").value("Endpoint is not supported when LDAP authentication is enabled."));
+                .andExpect(jsonPath("$.debugMessage").value("Endpoint is not supported when LDAP authentication is used."));
     }
 }

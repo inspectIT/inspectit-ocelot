@@ -12,13 +12,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.ldap.userdetails.LdapUserDetails;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
+import rocks.inspectit.ocelot.error.exceptions.NotSupportedWithLdapException;
 import rocks.inspectit.ocelot.rest.AbstractBaseController;
 import rocks.inspectit.ocelot.rest.ErrorInfo;
 import rocks.inspectit.ocelot.security.jwt.JwtTokenManager;
@@ -57,12 +57,6 @@ public class AccountController extends AbstractBaseController {
     @Example(value = @ExampleProperty(value = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImV4cCI6MTU2MTYyODE1NH0.KelDW1OXg9xlMjSiblwZqui7sya4Crq833b-98p8UZ4", mediaType = "text/plain")))
     @GetMapping("account/token")
     public String acuireNewAccessToken(Authentication user) {
-        if (user.getPrincipal() instanceof LdapUserDetails) {
-            if (log.isDebugEnabled()) {
-                log.debug("User `{}` was authenticated using LDAP. The user is added to the local database, if it does not exist.", ((LdapUserDetails) user.getPrincipal()).getUsername());
-            }
-            userService.createUserIfNotExist(user.getName(), true);
-        }
         return tokenManager.createToken(user.getName());
     }
 
@@ -73,8 +67,11 @@ public class AccountController extends AbstractBaseController {
         if (StringUtils.isEmpty(newPassword.getPassword())) {
             return ResponseEntity.badRequest().body(NO_PASSWORD_ERROR);
         }
-        User updatedUser = userService.getUserByName(user.getName())
-                .get()
+        User userInDb = userService.getUserByName(user.getName()).get();
+        if (userInDb.isLdapUser()) {
+            throw new NotSupportedWithLdapException();
+        }
+        User updatedUser = userInDb
                 .toBuilder()
                 .password(newPassword.getPassword())
                 .build();
