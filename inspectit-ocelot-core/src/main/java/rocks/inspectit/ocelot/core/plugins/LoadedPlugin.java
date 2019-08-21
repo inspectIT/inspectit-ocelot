@@ -89,7 +89,7 @@ class LoadedPlugin {
     }
 
     /**
-     * If {@link ConfigurablePlugin#start(InspectitConfig, Object)} ahs not been invoked yet,
+     * If {@link ConfigurablePlugin#start(InspectitConfig, Object)} has not been invoked yet,
      * it will be invoked with the given arguments. Otherwise
      * {@link ConfigurablePlugin#update(InspectitConfig, Object)} (InspectitConfig, Object)} is called.
      *
