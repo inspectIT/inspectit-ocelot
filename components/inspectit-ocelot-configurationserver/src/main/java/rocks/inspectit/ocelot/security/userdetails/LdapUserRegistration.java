@@ -36,7 +36,6 @@ public class LdapUserRegistration {
     private void addUserToDatabaseIfNotPresent(UserDetails user) {
         try {
             String name = user.getUsername();
-            //this check is not really needed, it however prevents the printing of unnecessary constraint violation errors
             if (!userService.userExists(name)) {
                 userService.addOrUpdateUser(User.builder()
                         .username(name)
@@ -45,7 +44,7 @@ public class LdapUserRegistration {
                         .build());
                 log.info("User `{}` was authenticated using LDAP and added to the database.", name);
             }
-        } catch (DataAccessException dae) { //thrown if the user already exists, therefore ignored
+        } catch (DataAccessException dae) {
             log.debug("User already exists", dae);
         }
     }

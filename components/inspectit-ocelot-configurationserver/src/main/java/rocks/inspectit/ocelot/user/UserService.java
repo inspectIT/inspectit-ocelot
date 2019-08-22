@@ -49,7 +49,7 @@ public class UserService {
      * Checks if a user with a given name exists.
      *
      * @param name the username, will be turned to lower case before querying
-     * @return the user, if present
+     * @return true, if a user with the given name exists.
      */
     public boolean userExists(String name) {
         return userRepository.existsByUsername(name.toLowerCase());

@@ -63,15 +63,15 @@ public class AccountController extends AbstractBaseController {
     @ApiOperation(value = "Change Password", notes = "Changes the password of the logged in user." +
             " This endpoint does not work with token-based authentication, only HTTP basic auth is allowed.")
     @PutMapping("account/password")
-    public ResponseEntity<?> changePassword(@RequestBody PasswordChangeRequest newPassword, Authentication user) {
+    public ResponseEntity<?> changePassword(@RequestBody PasswordChangeRequest newPassword, Authentication auth) {
         if (StringUtils.isEmpty(newPassword.getPassword())) {
             return ResponseEntity.badRequest().body(NO_PASSWORD_ERROR);
         }
-        User userInDb = userService.getUserByName(user.getName()).get();
-        if (userInDb.isLdapUser()) {
+        User user = userService.getUserByName(auth.getName()).get();
+        if (user.isLdapUser()) {
             throw new NotSupportedWithLdapException();
         }
-        User updatedUser = userInDb
+        User updatedUser = user
                 .toBuilder()
                 .password(newPassword.getPassword())
                 .build();

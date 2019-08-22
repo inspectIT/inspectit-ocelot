@@ -49,7 +49,21 @@ public class LdapUserRegistrationTest {
             LdapUserDetails ldapUser = Mockito.mock(LdapUserDetails.class);
             doReturn("John").when(ldapUser).getUsername();
             when(authEvent.getAuthentication().getPrincipal()).thenReturn(ldapUser);
+            when(userService.userExists("John")).thenReturn(true);
 
+            userRegistration.onAuthentication(authEvent);
+
+            verify(userService).userExists("John");
+            verifyNoMoreInteractions(userService);
+        }
+
+        @Test
+        void verifyExistingLdapUserHandledForConstraintViolation() {
+            LdapUserDetails ldapUser = Mockito.mock(LdapUserDetails.class);
+            doReturn("John").when(ldapUser).getUsername();
+            when(authEvent.getAuthentication().getPrincipal()).thenReturn(ldapUser);
+
+            doReturn(false).when(userService).userExists(any());
             doThrow(new DataAccessException("blub") {
             }).when(userService).addOrUpdateUser(any());
 
