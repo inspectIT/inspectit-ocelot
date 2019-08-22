@@ -1,5 +1,5 @@
 ---
-id: configuration
+id: cs-configuration
 title: Server Configuration
 ---
 
