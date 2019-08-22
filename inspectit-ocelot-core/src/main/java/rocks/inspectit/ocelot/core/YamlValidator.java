@@ -49,9 +49,6 @@ public class YamlValidator {
         LinkedList<String> unmappedStrings = new LinkedList<>();
         for (String propertyName: toMap
              ) {
-            if (propertyName.equals("inspectit.instrumentation.data.apache_http_client_propagation_is_entry.down-propgation")) {
-                System.out.println("Hab dich!");
-            }
             if(propertyName.length() > 8 && propertyName.substring(0, 9).equals("inspectit")) {
                 if (!existsPropertyName(this.parse(propertyName), InspectitConfig.class))
                     unmappedStrings.add(propertyName);
