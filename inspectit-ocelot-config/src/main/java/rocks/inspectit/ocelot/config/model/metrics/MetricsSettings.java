@@ -12,6 +12,7 @@ import rocks.inspectit.ocelot.config.validation.ViolationBuilder;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,6 +31,7 @@ public class MetricsSettings {
      * - no user metrics and views are created
      */
     private boolean enabled;
+    private Duration frequency;
 
     @NotNull
     private Map<@NotBlank String, @NotNull @Valid MetricDefinitionSettings> definitions = Collections.emptyMap();
