@@ -4,8 +4,11 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.stereotype.Component;
+
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
+import lombok.extern.slf4j.Slf4j;
+
 
 import javax.annotation.PostConstruct;
 import java.beans.PropertyDescriptor;
@@ -15,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Component
 public class YamlValidator {
 
@@ -32,8 +36,12 @@ public class YamlValidator {
                     .filter(ps -> ps instanceof EnumerablePropertySource)
                     .map(ps -> (EnumerablePropertySource) ps)
                     .flatMap(ps -> this.findUnmappedStrings(ps.getPropertyNames()).stream())
-                    .collect(Collectors.toList());
-            System.out.println(ls);
+                     .collect(Collectors.toList());
+            for (String s: ls
+                 ) {
+                log.warn("Expression could not be resolved to a property: " + s);
+        }
+
         });
     }
 
@@ -156,7 +164,6 @@ public class YamlValidator {
         PropertyDescriptor foundProperty = null;
         Class<?> nextClass = null;
         PropertyDescriptor[] descriptors = BeanUtils.getPropertyDescriptors(currentBean);
-        String className = null;
         for (PropertyDescriptor descriptor : descriptors
             ) {
                 if (descriptor.getName().equals(this.toCamelCase(currentString))) foundProperty = descriptor;
