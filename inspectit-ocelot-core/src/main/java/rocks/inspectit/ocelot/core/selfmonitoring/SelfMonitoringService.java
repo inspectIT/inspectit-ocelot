@@ -11,13 +11,15 @@ import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
-import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
-import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.config.model.metrics.MetricsSettings;
 import rocks.inspectit.ocelot.config.model.selfmonitoring.SelfMonitoringSettings;
+import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
+import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.metrics.MeasuresAndViewsManager;
 import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
 
+import java.util.Collections;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -118,12 +120,25 @@ public class SelfMonitoringService {
      * @param value       the actual value
      */
     public void recordMeasurement(String measureName, long value) {
+       recordMeasurement(measureName, value, Collections.emptyMap());
+    }
+
+    /**
+     * Records a self-monitoring measurement with the common tags. Adds customTags to the tag context.
+     * The measure has to be defined correctly in the {@link MetricsSettings#getDefinitions()}.
+     * Only records a measurement if self monitoring is enabled.
+     *
+     * @param measureName the name of the measure, excluding the {@link #METRICS_PREFIX}
+     * @param value       the actual value
+     * @param customTags  additional tags, which are added to the measurement.
+     */
+    public void recordMeasurement(String measureName, long value, Map<String, String> customTags) {
         SelfMonitoringSettings conf = env.getCurrentConfig().getSelfMonitoring();
         if (conf.isEnabled()) {
             String fullMeasureName = METRICS_PREFIX + measureName;
             val measure = measureManager.getMeasureLong(fullMeasureName);
             measure.ifPresent(m -> {
-                try (val ct = commonTags.withCommonTagScope()) {
+                try (val ct = commonTags.withCommonTagScope(customTags)) {
                     statsRecorder.newMeasureMap()
                             .put(m, value)
                             .record();
