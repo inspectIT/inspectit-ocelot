@@ -22,14 +22,13 @@ dependencies {
 	implementation(
 			project(':inspectit-ocelot-config'),
 			"org.springframework.boot:spring-boot-starter-web",
+			"org.springframework.security:spring-security-web:5.1.5.RELEASE",
 			"io.opencensus:opencensus-api:${openCensusVersion}",
 			"io.opencensus:opencensus-impl:${openCensusVersion}",
 			"io.prometheus:simpleclient_httpserver:${prometheusClientVersion}",
 			"io.opencensus:opencensus-exporter-stats-prometheus:${openCensusVersion}",
-			'com.maxmind.geoip2:geoip2:2.12.0'
-
-
-	)
+			'com.maxmind.geoip2:geoip2:2.12.0',
+			'commons-net:commons-net:3.3'	)
 	compileOnly "org.projectlombok:lombok:1.18.4"
 	annotationProcessor "org.projectlombok:lombok:1.18.4"
 	testImplementation(
