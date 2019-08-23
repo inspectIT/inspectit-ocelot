@@ -31,6 +31,10 @@ public class MetricsSettings {
      * - no user metrics and views are created
      */
     private boolean enabled;
+
+    /**
+     * Default frequency used when polling metrics
+     */
     private Duration frequency;
 
     @NotNull
