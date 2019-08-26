@@ -1,7 +1,8 @@
 ---
-id: enduser-monitoring-server
+id: version-0.4-enduser-monitoring-server
 title: End User Monitoring Server
 sidebar_label: EUM Server
+original_id: enduser-monitoring-server
 ---
 This server provides Enduser Monitoring data by using the [OpenCensus](https://github.com/census-instrumentation/opencensus-java) toolkit.
 
@@ -106,23 +107,14 @@ inspectit-ocelot-eum-server:
   tags:
     extra:
       APPLICATION: my-application
-    
     beacon:
       URL: u
       OS: ua.plt
-    
     define-as-global:
       - URL
       - OS
       - COUNTRY_CODE
-    
-    custom-ip-mapping:
-      department-1:
-        - 10.10.0.0/16
-        - 11.11.0.3
-      department-2:
-        - 14.14.0.0/16
-        - 14.15.0.1
+
   exporters:
     metrics:
       prometheus:
@@ -229,29 +221,11 @@ The EUM server provides a set of default tags which don't have to be specified a
 | --- | --- |
 | `COUNTRY_CODE` | Contains the geolocation of the beacon's origin. It is resolved by using the client IP and the [GeoLite2 database](https://www.maxmind.com). If the IP cannot be resolved, the tag value will be empty. |
 
-##### Custom COUNTRY_CODE Mapping
-
-Besides using the internal GeoLite2 database, it is possible to define custom IP mappings.
-The property `custom-ip-mapping` holds a map of possible tag values, which are mapped to certain IPs or CIDRs.
-The tag values are published with the tag `COUNTRY_CODE` and have a higher priority than the results of the GeoLite2 database.
-If the IP cannot be resolved with the custom mapping, the mapping of the GeoLite2 database will be used.
-
-```YAML
-inspectit:
-  tags:
-    custom-ip-mapping:
-      department-1:
-        - 10.10.0.0/16
-        - 11.11.0.3
-      department-2:
-        - 14.14.0.0/16
-        - 14.15.0.1
-```
 #### Global Tags
 
 Tags will not be attached to metrics unless a metric explicitly defines to use a certain tag.
 
-In order to simplify the configuration, it is possible to define tags which are *always* attached to metrics, even a metric does not explicitly specifies it.
+In order to simplify the configuration, it is possilbe to define tags which are *always* attached to metrics, even a metric does not explicitly specifies it.
 This can be achieved by adding a tag's name to the `define-as-global` property.
 Each tag which is listed under this property will be added to each registered metric.
 

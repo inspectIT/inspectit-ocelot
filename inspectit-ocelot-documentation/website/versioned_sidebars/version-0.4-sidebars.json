@@ -1,0 +1,43 @@
+{
+  "version-0.4-docs": {
+    "Getting Started": [
+      "version-0.4-doc1",
+      "version-0.4-getting-started/quick-start",
+      "version-0.4-getting-started/docker-examples",
+      "version-0.4-getting-started/installation"
+    ],
+    "Configuration": [
+      "version-0.4-configuration/configuration-sources",
+      "version-0.4-configuration/external-configuration-sources",
+      "version-0.4-configuration/logging-configuration",
+      "version-0.4-configuration/open-census-configuration"
+    ],
+    "Metrics": [
+      "version-0.4-metrics/metrics",
+      "version-0.4-metrics/metric-recorders",
+      "version-0.4-metrics/metric-exporters",
+      "version-0.4-metrics/common-tags",
+      "version-0.4-metrics/custom-metrics",
+      "version-0.4-metrics/self-monitoring"
+    ],
+    "Tracing": [
+      "version-0.4-tracing/tracing",
+      "version-0.4-tracing/trace-exporters"
+    ],
+    "Instrumentation": [
+      "version-0.4-instrumentation/instrumentation",
+      "version-0.4-instrumentation/scopes",
+      "version-0.4-instrumentation/rules",
+      "version-0.4-instrumentation/special-sensors",
+      "version-0.4-instrumentation/process"
+    ],
+    "End User Monitoring": [
+      "version-0.4-enduser-monitoring/enduser-monitoring-server"
+    ],
+    "Configuration Server": [
+      "version-0.4-config-server/overview",
+      "version-0.4-config-server/agent-mappings",
+      "version-0.4-config-server/user-authentication"
+    ]
+  }
+}
