@@ -114,6 +114,11 @@ public class PluginLoaderTest {
         }
 
         @Override
+        public void start(InspectitConfig inspectitConfig, Object pluginConfig) {
+
+        }
+
+        @Override
         public void update(InspectitConfig inspectitConfig, Object pluginConfig) {
 
         }
@@ -136,6 +141,11 @@ public class PluginLoaderTest {
 
 
         @Override
+        public void start(InspectitConfig inspectitConfig, Object pluginConfig) {
+
+        }
+
+        @Override
         public void update(InspectitConfig inspectitConfig, Object pluginConfig) {
 
         }
@@ -152,6 +162,11 @@ public class PluginLoaderTest {
 
         public PluginThrowingException() {
             throw new RuntimeException();
+        }
+
+        @Override
+        public void start(InspectitConfig inspectitConfig, Object pluginConfig) {
+
         }
 
         @Override
