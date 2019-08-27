@@ -19,6 +19,18 @@ services:
     ports:
       - 8090:8090
 
+  ocelot-eum-server:
+    image: inspectit/inspectit-ocelot-eum-server:${INSPECTIT_OCELOT_VERSION}
+    container_name: ocelot-eum-server
+    mem_limit: 128M
+    environment:
+      - spring.config.location=file:/eum-server/eum-server-configuration.yml
+    volumes:
+      - ./eum-server:/eum-server
+    ports:
+      - 8087:8087
+      - 9097:9097
+
   config-server:
     image: openapm/spring-petclinic-config-server:inspectit-oce-demo
     container_name: config-server
@@ -141,7 +153,7 @@ services:
       - 9093:9093
 
   api-gateway:
-    image: openapm/spring-petclinic-api-gateway:inspectit-oce-demo
+    image: openapm/spring-petclinic-api-gateway:inspectit-oce-eum-demo
     container_name: api-gateway
     environment:
       - INSPECTIT_SERVICE_NAME=api-gateway

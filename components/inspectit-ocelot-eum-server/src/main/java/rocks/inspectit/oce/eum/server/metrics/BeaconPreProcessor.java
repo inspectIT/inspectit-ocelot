@@ -42,7 +42,7 @@ public class BeaconPreProcessor {
     private void addCountryCode(Map<String, String> beacon) {
         String ip = ipUtils.getClientIpAddress(((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
         String countryCode = resolveCustomIPMapping(ip);
-        if (countryCode == null){
+        if (countryCode == null) {
             countryCode = geolocationResolver.getCountryCode(ip);
         }
         beacon.put(DefaultTags.COUNTRY_CODE.name(), countryCode);

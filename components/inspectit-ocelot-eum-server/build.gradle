@@ -1,11 +1,11 @@
 plugins {
 	id 'org.springframework.boot' version '2.1.4.RELEASE'
 	id 'java'
+	id 'com.palantir.docker' version "0.21.0"
 }
 apply plugin: 'io.spring.dependency-management'
 
 group = 'rocks.inspectit.oce'
-version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '1.8'
 
 bootJar {
@@ -43,3 +43,20 @@ dependencies {
 	)
 	testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.3.1"
 }
+
+task copyServerJar(type: Copy) {
+	dependsOn bootJar
+	from("${buildDir}/libs/inspectit-ocelot-eum-server-${version}.jar")
+	into("${buildDir}/docker-jar")
+	rename ("inspectit-ocelot-eum-server-${version}\\.jar",
+			'inspectit-ocelot-eum-server.jar')
+}
+
+
+docker {
+	name "inspectit/inspectit-ocelot-eum-server"
+	tags "${version}"
+	dockerfile file('docker/Dockerfile')
+	files 'docker/entrypoint.sh', "$buildDir/docker-jar/inspectit-ocelot-eum-server.jar"
+}
+docker.dependsOn copyServerJar

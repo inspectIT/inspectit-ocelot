@@ -1,0 +1,64 @@
+server:
+  port : 8087
+inspectit-eum:
+
+  definitions:
+    page_ready_time:
+      measure-type: LONG
+      value-expression: "{t_page}"
+      unit: ms
+      views:
+        '[page_ready_time/SUM]': {aggregation: SUM}
+        '[page_ready_time/COUNT]': {aggregation: COUNT}
+
+    load_time:
+      measure-type: LONG
+      value-expression: "{t_done}"
+      beacon-requirements:
+        - field: rt.quit
+          requirement: NOT_EXISTS
+      unit: ms
+      views:
+        '[load_time/SUM]': {aggregation: SUM}
+        '[load_time/COUNT]': {aggregation: COUNT}
+
+    speedindex:
+      measure-type: LONG
+      value-expression: "{speedIndex}"
+      unit: speedindex
+      beacon-requirements:
+        - field: rt.quit
+          requirement: NOT_EXISTS
+      views:
+        '[speedindex/SUM]': {aggregation: SUM}
+        '[speedindex/COUNT]': {aggregation: COUNT}
+
+    visual_ready_time:
+      measure-type: LONG
+      value-expression: "{c.tti.vr}"
+      beacon-requirements:
+        - field: rt.quit
+          requirement: NOT_EXISTS
+      unit: ms
+      views:
+        '[visual_ready_time/SUM]': {aggregation: SUM}
+        '[visual_ready_time/COUNT]': {aggregation: COUNT}
+
+  tags:
+    beacon:
+      URL: u
+      OS: ua.plt
+    define-as-global:
+      - URL
+      - OS
+      - COUNTRY_CODE
+    custom-ip-mapping:
+      DE:
+        - 0.0.0.0/0
+
+  exporters:
+    metrics:
+      prometheus:
+        enabled: true
+        host: 0.0.0.0
+        port: 9097

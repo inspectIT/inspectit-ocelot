@@ -20,7 +20,7 @@ import java.util.*;
 @NoArgsConstructor
 public class EumTagsSettings extends TagsSettings {
 
-    private static final String IP_PATTERN = "^(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])($|(\\/[1-9]$|\\/[1-2][0-9]$|\\/3[0-2]$))";
+    private static final String IP_PATTERN = "^(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])($|(\\/[0-9]$|\\/[1-2][0-9]$|\\/3[0-2]$))";
 
     /**
      * Maps tag name to beacon key.
@@ -58,24 +58,25 @@ public class EumTagsSettings extends TagsSettings {
 
     @AssertTrue(message = "The ip definitions between the different categories must not overlap")
     public boolean isCheckIpRangesDoNotOverlap() {
-      return customIPMapping.values().stream()
-              .allMatch(ipList -> ipList.stream()
-                      .allMatch(adresse -> customIPMapping.values().stream()
-                           .allMatch(listToCompare -> listToCompare == ipList || listToCompare.stream().noneMatch(adresseToCompare -> areOverlapping(adresse, adresseToCompare)))));
+        return customIPMapping.values().stream()
+                .allMatch(ipList -> ipList.stream()
+                        .allMatch(adresse -> customIPMapping.values().stream()
+                                .allMatch(listToCompare -> listToCompare == ipList || listToCompare.stream().noneMatch(adresseToCompare -> areOverlapping(adresse, adresseToCompare)))));
     }
 
     /**
      * Helper method, which compares two address entries.
+     *
      * @param address1
      * @param address2
      * @return
      */
-    private boolean areOverlapping(String address1, String address2){
-        if(address1.contains("/") && address2.contains("/")){
+    private boolean areOverlapping(String address1, String address2) {
+        if (address1.contains("/") && address2.contains("/")) {
             return ipUtils.overlap(address1, address2);
-        } else if (address1.contains("/") && !address2.contains("/")){
+        } else if (address1.contains("/") && !address2.contains("/")) {
             return ipUtils.containsIp(address1, address2);
-        } else if (!address1.contains("/") && address2.contains("/")){
+        } else if (!address1.contains("/") && address2.contains("/")) {
             return ipUtils.containsIp(address2, address1);
         } else {
             return address1.equals(address2);

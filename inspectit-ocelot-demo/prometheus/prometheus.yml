@@ -11,4 +11,4 @@ scrape_configs:
   # scheme defaults to 'http'.
 
   static_configs:
-  - targets: ['customers-service:9091', 'visits-service:9092','vets-service:9093','api-gateway:9094','discovery-server:9095','config-server:9096']
+  - targets: ['customers-service:9091', 'visits-service:9092','vets-service:9093','api-gateway:9094','discovery-server:9095','config-server:9096', 'ocelot-eum-server:9097']

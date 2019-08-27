@@ -18,7 +18,7 @@ services:
       - ./configuration-server:/configuration-server
     ports:
       - 8090:8090
-      
+
   config-server:
     image: openapm/spring-petclinic-config-server:inspectit-oce-demo
     container_name: config-server

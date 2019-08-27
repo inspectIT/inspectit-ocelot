@@ -6,4 +6,5 @@ RUN cd "$GF_PATHS_PLUGINS" && \
 	mkdir grafana-influxdb-flux-datasource && \
 	curl -LO https://github.com/NovatecConsulting/novatec-service-dependency-graph-panel/releases/latest/download/novatec-service-dependency-graph-panel.zip && \
 	unzip novatec-service-dependency-graph-panel.zip -d ./novatec-servicegraph-panel
+RUN grafana-cli plugins install grafana-worldmap-panel
 USER grafana
