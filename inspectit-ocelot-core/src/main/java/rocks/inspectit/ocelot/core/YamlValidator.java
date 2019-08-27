@@ -13,7 +13,6 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -33,33 +32,13 @@ public class YamlValidator {
     @PostConstruct
     public void startStringFinder() {
         env.readPropertySources(propertySources -> {
-            List<String> ls = propertySources.stream()
+            propertySources.stream()
                     .filter(ps -> ps instanceof EnumerablePropertySource)
                     .map(ps -> (EnumerablePropertySource) ps)
-                    .flatMap(ps -> findInvalidPropertyNames(ps.getPropertyNames()).stream())
-                    .collect(Collectors.toList());
-            for (String s : ls) {
-                log.warn("Expression could not be resolved to a property: " + s);
-            }
-
+                    .flatMap(ps -> Arrays.stream(ps.getPropertyNames()))
+                    .filter(ps -> checkPropertyName(ps))
+                    .forEach(ps -> log.warn("Expression could not be resolved to a property: " + ps));
         });
-    }
-
-    /**
-     * Method to determine which given properties do not exists in inspectIt
-     * Used to track down spelling errors
-     *
-     * @param propertyNames A String Array containing the parameters one wants to validate, e.g. 'inspectit.service-name'
-     * @return A List of Strings contained in the given Array which could not be resolved to a property.
-     */
-    public List<String> findInvalidPropertyNames(String[] propertyNames) {
-        ArrayList<String> unmappedStrings = new ArrayList<>();
-        for (String propertyName : propertyNames) {
-            if (checkPropertyName(propertyName)) {
-                unmappedStrings.add(propertyName);
-            }
-        }
-        return unmappedStrings;
     }
 
     /**
@@ -70,7 +49,6 @@ public class YamlValidator {
      */
     boolean checkPropertyName(String propertyName) {
         return propertyName != null
-                && propertyName.length() > 8
                 && propertyName.startsWith("inspectit.")
                 && !checkPropertyExists(parse(propertyName), InspectitConfig.class);
     }
@@ -85,60 +63,64 @@ public class YamlValidator {
      * @return a ArrayList containing containing the parts of the property as String
      */
     List<String> parse(String propertyName) {
-        ArrayList<String> ls = new ArrayList<>();
-        if (propertyName == null || propertyName.isEmpty()) {
-            return ls;
+        ArrayList<String> result = new ArrayList<>();
+        String remainder = propertyName;
+        while (remainder != null && !remainder.isEmpty()) {
+            remainder = extractExpression(remainder, result);
         }
-        char expressionEnd = '.';
-        if (propertyName.charAt(0) == '[') {
-            expressionEnd = ']';
-        }
-        ls.add(cleanString(propertyName.substring(0, grabExpression(propertyName, expressionEnd))));
-        ls.addAll(parse(propertyName.substring(grabExpression(propertyName, expressionEnd))));
-        ls.remove("inspectit");
-        return ls;
+        return result;
     }
 
     /**
-     * Takes a String and a char which resembles the end of an expression, returns the index on which the found expression
-     * ends in the string
+     * Extracts the first path expression from the given propertyName and appends it to the given result list.
+     * The remaidner of the proeprty name is returned
+     * <p>
+     * E.g. inspectit.test.rest -> "inspectit" is added to the list, "test.rest" is returned.
+     * E.g. [inspectit.literal].test.rest -> "inspectit.literal" is added to the list, "test.rest" is returned.
+     * E.g. [inspectit.literal][test].rest -> "inspectit.literal" is added to the list, "[test].rest" is returned.
      *
-     * @param propertyName  String in which an expression should be search
-     * @param expressionEnd Marker for the end of the expression
-     * @return the index at which the expression ends
+     * @param propertyName
+     * @param result
+     * @return
      */
-    private int grabExpression(String propertyName, char expressionEnd) {
-        int i = 0;
-        boolean isFirst = true;
-        for (char charInProperty : propertyName.toCharArray()) {
-            if (!isFirst) {
-                if (expressionEnd == '.' && charInProperty == expressionEnd || charInProperty == '[') {
-                    return i;
-                } else if (charInProperty == expressionEnd) {
-                    return i + 1;
-                }
+    String extractExpression(String propertyName, List<String> result) {
+        if (propertyName.startsWith("[")) {
+            int end = propertyName.indexOf(']');
+            if (end == -1) {
+                throw new IllegalArgumentException("invalid property path");
             }
-            isFirst = false;
-            i++;
+            result.add(propertyName.substring(1, end));
+            return removeLeadingDot(propertyName.substring(end + 1));
+        } else {
+            int end = findFirstIndexOf(propertyName, '.', '[');
+            if (end == -1) {
+                result.add(propertyName);
+                return "";
+            } else {
+                result.add(propertyName.substring(0, end));
+                return removeLeadingDot(propertyName.substring(end));
+            }
         }
-        return propertyName.length();
     }
 
-    /**
-     * Removes literals such as '.', '[' or ']' from Strings
-     *
-     * @param unclean String which should be cleaned
-     * @return cleaned String
-     */
-    private String cleanString(String unclean) {
-        String cleanString;
-        if (unclean.contains("[")) {
-            cleanString = unclean.replace("[", "");
-            cleanString = cleanString.replace("]", "");
+    private int findFirstIndexOf(String propertyName, char first, char second) {
+        int firstIndex = propertyName.indexOf(first);
+        int secondIndex = propertyName.indexOf(second);
+        if (firstIndex == -1) {
+            return secondIndex;
+        } else if (secondIndex == -1) {
+            return firstIndex;
         } else {
-            cleanString = unclean.replace(".", "");
+            return Math.min(firstIndex, secondIndex);
         }
-        return cleanString;
+    }
+
+    private String removeLeadingDot(String string) {
+        if (string.startsWith(".")) {
+            return string.substring(1);
+        } else {
+            return string;
+        }
     }
 
     /**
@@ -150,20 +132,20 @@ public class YamlValidator {
      * @return the given String in camelCase
      */
     String toCamelCase(String name) {
-        String nameToReturn = name;
+        StringBuilder builder = new StringBuilder();
         String[] nameParts = name.split("-");
         boolean isFirst = true;
         for (String part : nameParts) {
             if (isFirst) {
-                nameToReturn = part.toLowerCase();
+                builder.append(part.toLowerCase());
                 isFirst = false;
             } else if (!part.isEmpty()) {
                 part = part.toLowerCase();
                 part = part.substring(0, 1).toUpperCase() + part.substring(1);
-                nameToReturn += part;
+                builder.append(part);
             }
         }
-        return nameToReturn;
+        return builder.toString();
     }
 
 
@@ -174,7 +156,8 @@ public class YamlValidator {
      * @param type          The type in which the current top-level properties should be found
      * @return True: when the property exsits <br> False: when it doesn't
      */
-    private boolean checkPropertyExists(List<String> propertyNames, Type type) {
+    boolean checkPropertyExists(List<String> propertyNames, Type type) {
+        propertyNames.remove("inspectit");
         if (propertyNames.isEmpty()) {
             return true; //base case
         }
@@ -200,7 +183,7 @@ public class YamlValidator {
      * @param mapValueType  The type which is given as value type of a map
      * @return True: The type exists <br> False: the type does not exists
      */
-    private boolean checkPropertyExistsInMap(List<String> propertyNames, Type mapValueType) {
+    boolean checkPropertyExistsInMap(List<String> propertyNames, Type mapValueType) {
         if (WILDCARD_TYPES.contains(mapValueType)) {
             return true;
         } else {
@@ -215,7 +198,7 @@ public class YamlValidator {
      * @param listValueType The type which is given as value type of a list
      * @return True: The type exists <br> False: the type does not exists
      */
-    private boolean checkPropertyExistsInList(List<String> propertyNames, Type listValueType) {
+    boolean checkPropertyExistsInList(List<String> propertyNames, Type listValueType) {
         return checkPropertyExists(propertyNames.subList(1, propertyNames.size()), listValueType);
     }
 
@@ -226,14 +209,13 @@ public class YamlValidator {
      * @param beanType      The bean through which should be searched
      * @return True: the property and all other properties exists <br> False: At least one of the properties does not exist
      */
-    private boolean checkPropertyExistsInBean(List<String> propertyNames, Class<?> beanType) {
+    boolean checkPropertyExistsInBean(List<String> propertyNames, Class<?> beanType) {
         String propertyName = toCamelCase(propertyNames.get(0));
         Optional<PropertyDescriptor> foundProperty =
                 Arrays.stream(BeanUtils.getPropertyDescriptors(beanType))
                         .filter(descriptor -> descriptor.getName().equals(propertyName))
                         .findFirst();
         if (foundProperty.isPresent()) {
-            //Am Ende des Pfades angelangt?
             if (foundProperty.get().getReadMethod() == null) {
                 return true;
             }
