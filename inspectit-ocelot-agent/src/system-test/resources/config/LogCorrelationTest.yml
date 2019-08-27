@@ -1,0 +1,21 @@
+
+inspectit:
+  instrumentation:
+    scopes:
+      LogCorrelationTest-methods:
+        type:
+          name: LogCorrelationTest
+          matcher-mode: ENDS_WITH
+        methods:
+          - name: traced
+
+    rules:
+      LogCorrelationTest-methods:
+        scopes:
+          LogCorrelationTest-methods: true
+        tracing:
+          start-span: true
+          sample-probability: sample_prob
+        entry:
+          sample_prob:
+            action: get_arg1
