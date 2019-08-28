@@ -87,7 +87,6 @@ class PasswordChange extends React.Component{
       <div>
         <style jsx>{`
           .p-dir-col{
-            // width: 50%;
             margin: auto;
           }
           .p-col{
@@ -138,7 +137,6 @@ class PasswordChange extends React.Component{
             </div>
           </div>
         </SettingsElement>
-
       </div>
         
     )

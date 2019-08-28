@@ -34,8 +34,6 @@ export const changePassword = (username, oldPassword, newPassword) => {
 
 export const fetchUsers = () => {
   return dispatch => {
-    dispatch({ type: types.SEARCH_USER_STARTED })
-
     axiosBearer
       .get(`/users`)
       .then(res => {
@@ -49,40 +47,27 @@ export const fetchUsers = () => {
 
 export const deleteUser = (id) =>{
   return dispatch => {
-    dispatch({type: types.DELETE_USER_STARTED})
-
     axiosBearer
       .delete(`/users/${id}`)
-      .then(res => { 
-        dispatch({ type: types.DELETE_USER_SUCCESS })
+      .then(() => { 
         dispatch(fetchUsers())
         dispatch(notificationActions.showSuccessMessage('Request success', `User with ID: ${id} has been deleted`))
-      })
-      .catch(e => { dispatch({ type: types.DELETE_USER_FAILURE}) 
       })
   }
 }
 
 export const addUser = (userObj) => {
   return dispatch => {
-    dispatch({ type: types.ADD_USER_STARTED })
-
     axiosBearer
       .post('/users', {
         username: userObj.username,
         password: userObj.password
       })
       .then(res => {
-        const message = `User ${userObj.username} has been added`
-        dispatch({ type: types.ADD_USER_SUCCESS })
+        const {id, username} = res.data
+        const message = `User "${username}" with ID: ${id} has been added`
         dispatch(fetchUsers())
         dispatch(notificationActions.showSuccessMessage('Request success', message))
-      })
-      .catch(e => { 
-        const {response} = e
-        if(response.status === 400) {
-        }
-        dispatch({ type: types.ADD_USER_FAILURE })
       })
   }
 }

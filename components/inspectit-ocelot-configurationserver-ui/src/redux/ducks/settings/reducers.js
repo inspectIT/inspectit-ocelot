@@ -21,11 +21,6 @@ const settingsReducer = createReducer(initialState)({
       loading: false,
     }
   },
-  [types.SEARCH_USER_STARTED]: (state, action) => {
-    return {
-      ...state
-    }
-  },
   [types.SEARCH_USER_FAILURE]: (state, action) => {
     return {
       ...state,
@@ -37,36 +32,6 @@ const settingsReducer = createReducer(initialState)({
     return {
       ...state,
       users: users,
-    }
-  },
-  [types.DELETE_USER_STARTED]: (state, action) => {
-    return {
-      ...state
-    }
-  },
-  [types.DELETE_USER_FAILURE]: (state, action) => {
-    return {
-      ...state
-    }
-  },
-  [types.DELETE_USER_SUCCESS]: (state, action) => {
-    return {
-      ...state
-    }
-  },
-  [types.ADD_USER_STARTED]: (state, action) => {
-    return {
-      ...state
-    }
-  },
-  [types.ADD_USER_FAILURE]: (state, action) => {
-    return {
-      ...state,
-    }
-  },
-  [types.ADD_USER_SUCCESS]: (state, action) => {
-    return {
-      ...state,
     }
   },
 })

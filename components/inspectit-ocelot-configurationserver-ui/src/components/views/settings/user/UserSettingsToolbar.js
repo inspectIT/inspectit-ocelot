@@ -43,10 +43,11 @@ class UserToolbar extends React.Component {
               <i className="pi pi-users"></i>
               <h4>Users</h4>
               <InputText
-              placeholder='Search'
-              tooltip='Search trough entering an ID or a username'
-              value={this.props.filterValue}
-              onChange={(e) => { this.props.changeFilter(e) } } />
+                placeholder='Search'
+                tooltip='Search trough entering an ID or a username'
+                value={this.props.filterValue}
+                onChange={this.props.changeFilter}
+              />
             </div>
           </div>
           <div className='p-toolbar-group-right'>

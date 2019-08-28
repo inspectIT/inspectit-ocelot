@@ -49,12 +49,19 @@ const SettingsElement = (props) => {
 }
 
 SettingsElement.propTypes = {
+  /** header component which will be displayed instead of the basic header */
   fullHeader: PropTypes.element,
+  /** title which will be displayed in the basic header */
   title: PropTypes.string,
+  /** defines whether a button should be displayed in the lower right corner below content */
   btn: PropTypes.bool,
+  /** label of shown button */
   btnLabel: PropTypes.string,
+  /** primereact icon code */
   btnIcon: PropTypes.string,
+  /** function to dispatch when button is clicked */
   btnOnClick: PropTypes.func,
+  /** defines whether a line should be displayed after the component to seperate from other settingsElements */
   line: PropTypes.bool
 }
 

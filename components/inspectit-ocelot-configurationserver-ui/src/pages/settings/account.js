@@ -2,7 +2,6 @@ import React from 'react'
 import MainLayout from '../../layout/MainLayout'
 import Head from 'next/head'
 import { BASE_PAGE_TITLE } from '../../data/constants'
-
 import SettingsLayout from '../../components/views/settings/layout/SettingsLayout'
 import AccountSettingsView from '../../components/views/settings/account/AccountSettingsView'
 
