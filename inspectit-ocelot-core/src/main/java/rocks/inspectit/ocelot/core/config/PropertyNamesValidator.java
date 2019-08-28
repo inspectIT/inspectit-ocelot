@@ -1,22 +1,23 @@
-package rocks.inspectit.ocelot.core;
+package rocks.inspectit.ocelot.core.config;
 
+import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
-import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 
 import javax.annotation.PostConstruct;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.time.Duration;
 import java.util.*;
 
 @Slf4j
 @Component
-public class YamlValidator {
+public class PropertyNamesValidator {
 
     @Autowired
     private InspectitEnvironment env;
@@ -25,9 +26,9 @@ public class YamlValidator {
      * A HashSet of classes which are used as wildcards in the search for properties. If a found class matches one of these
      * classes, the end of the property path is reached. Mainly used in the search of maps
      */
-    private static final HashSet<Class<?>> WILDCARD_TYPES = new HashSet(Arrays.asList(Object.class, String.class, Integer.class, Long.class,
+    private static final HashSet<Class<?>> TERMINAL_TYPES = new HashSet(Arrays.asList(Object.class, String.class, Integer.class, Long.class,
             Float.class, Double.class, Character.class, Void.class,
-            Boolean.class, Byte.class, Short.class));
+            Boolean.class, Byte.class, Short.class, Duration.class));
 
     @PostConstruct
     public void startStringFinder() {
@@ -36,32 +37,44 @@ public class YamlValidator {
                     .filter(ps -> ps instanceof EnumerablePropertySource)
                     .map(ps -> (EnumerablePropertySource) ps)
                     .flatMap(ps -> Arrays.stream(ps.getPropertyNames()))
-                    .filter(ps -> checkPropertyName(ps))
+                    .filter(ps -> !checkPropertyName(ps))
                     .forEach(ps -> log.warn("Expression could not be resolved to a property: " + ps));
         });
     }
 
     /**
-     * Checks if a propertyName should be added to the List of unmappedStrings or not
+     * Checks if a given property is an inspectit-property and is a valid path in the config model
+     * This method firstly checks if a given String fulfills the basic requirements: being not null and starting with "inspectit."
+     * If a String does not fulfill these basic requirements the method returns false
+     * If these checks are successful, a process for recursive path-checking is triggered with checkPropertyExists.
+     * This process checks each element of the given path for existence. Upon on the first occurrence of a non-existing path,
+     * false is returned. If the path exists, true is returned
      *
      * @param propertyName
-     * @return True: the propertyName does not exists as path <br> False: the propertyName exists as path
+     * @return True: the propertyName exists as path <br> False: the propertyName does not exist as path
      */
+    @VisibleForTesting
     boolean checkPropertyName(String propertyName) {
-        return propertyName != null
-                && propertyName.startsWith("inspectit.")
-                && !checkPropertyExists(parse(propertyName), InspectitConfig.class);
+        ArrayList<String> parsedName = (ArrayList<String>) parse(propertyName);
+        try {
+            return propertyName != null
+                    && propertyName.startsWith("inspectit.")
+                    && checkPropertyExists(parsedName.subList(1, parsedName.size()), InspectitConfig.class);
+        } catch (Exception e) {
+            log.error("Error while checking property existence", e);
+        }
+        return true;
     }
 
     /**
-     * Helper method for findUnmappedStrings
      * This method takes an array of strings and returns each entry as ArrayList containing the parts of each element.
      * <p>
      * 'inspectit.hello-i-am-testing' would be returned as {'inspectit', 'helloIAmTesting'}
      *
-     * @param propertyName A String Array containing property Strings
-     * @return a ArrayList containing containing the parts of the property as String
+     * @param propertyName A String containing the property path
+     * @return a List containing containing the parts of the property path as String
      */
+    @VisibleForTesting
     List<String> parse(String propertyName) {
         ArrayList<String> result = new ArrayList<>();
         String remainder = propertyName;
@@ -73,17 +86,17 @@ public class YamlValidator {
 
     /**
      * Extracts the first path expression from the given propertyName and appends it to the given result list.
-     * The remaidner of the proeprty name is returned
+     * The remainder of the property name is returned
      * <p>
      * E.g. inspectit.test.rest -> "inspectit" is added to the list, "test.rest" is returned.
      * E.g. [inspectit.literal].test.rest -> "inspectit.literal" is added to the list, "test.rest" is returned.
      * E.g. [inspectit.literal][test].rest -> "inspectit.literal" is added to the list, "[test].rest" is returned.
      *
-     * @param propertyName
-     * @param result
-     * @return
+     * @param propertyName A String with the path of a property
+     * @param result       Reference to the list in which the extracted expressions should be saved in
+     * @return the remaining expression
      */
-    String extractExpression(String propertyName, List<String> result) {
+    private String extractExpression(String propertyName, List<String> result) {
         if (propertyName.startsWith("[")) {
             int end = propertyName.indexOf(']');
             if (end == -1) {
@@ -131,7 +144,7 @@ public class YamlValidator {
      * @param name The String which should be changed into camelCase
      * @return the given String in camelCase
      */
-    String toCamelCase(String name) {
+    private String toCamelCase(String name) {
         StringBuilder builder = new StringBuilder();
         String[] nameParts = name.split("-");
         boolean isFirst = true;
@@ -156,10 +169,11 @@ public class YamlValidator {
      * @param type          The type in which the current top-level properties should be found
      * @return True: when the property exsits <br> False: when it doesn't
      */
+    @VisibleForTesting
     boolean checkPropertyExists(List<String> propertyNames, Type type) {
-        propertyNames.remove("inspectit");
         if (propertyNames.isEmpty()) {
-            return true; //base case
+            boolean b = isTerminalOrEnum(type);
+            return b; //base case
         }
         if (type instanceof ParameterizedType) {
             ParameterizedType genericType = (ParameterizedType) type;
@@ -183,8 +197,9 @@ public class YamlValidator {
      * @param mapValueType  The type which is given as value type of a map
      * @return True: The type exists <br> False: the type does not exists
      */
+    @VisibleForTesting
     boolean checkPropertyExistsInMap(List<String> propertyNames, Type mapValueType) {
-        if (WILDCARD_TYPES.contains(mapValueType)) {
+        if (TERMINAL_TYPES.contains(mapValueType)) {
             return true;
         } else {
             return checkPropertyExists(propertyNames.subList(1, propertyNames.size()), mapValueType);
@@ -198,6 +213,7 @@ public class YamlValidator {
      * @param listValueType The type which is given as value type of a list
      * @return True: The type exists <br> False: the type does not exists
      */
+    @VisibleForTesting
     boolean checkPropertyExistsInList(List<String> propertyNames, Type listValueType) {
         return checkPropertyExists(propertyNames.subList(1, propertyNames.size()), listValueType);
     }
@@ -209,7 +225,7 @@ public class YamlValidator {
      * @param beanType      The bean through which should be searched
      * @return True: the property and all other properties exists <br> False: At least one of the properties does not exist
      */
-    boolean checkPropertyExistsInBean(List<String> propertyNames, Class<?> beanType) {
+    private boolean checkPropertyExistsInBean(List<String> propertyNames, Class<?> beanType) {
         String propertyName = toCamelCase(propertyNames.get(0));
         Optional<PropertyDescriptor> foundProperty =
                 Arrays.stream(BeanUtils.getPropertyDescriptors(beanType))
@@ -224,5 +240,15 @@ public class YamlValidator {
         } else {
             return false;
         }
+    }
+
+    /**
+     * Checks if a given type is a terminal type or an enum
+     *
+     * @param type
+     * @return True: the given type is a terminal or an enum False: the given type is neither a terminal type nor an enum
+     */
+    private boolean isTerminalOrEnum(Type type) {
+        return TERMINAL_TYPES.contains(type) || ((Class<?>) type).isEnum();
     }
 }
