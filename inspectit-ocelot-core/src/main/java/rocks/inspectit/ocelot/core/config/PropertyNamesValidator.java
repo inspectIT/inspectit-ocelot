@@ -151,8 +151,7 @@ public class PropertyNamesValidator {
     @VisibleForTesting
     boolean checkPropertyExists(List<String> propertyNames, Type type) {
         if (propertyNames.isEmpty()) {
-            boolean b = isTerminalOrEnum(type);
-            return b; //base case
+            return isTerminalOrEnum(type);
         }
         if (type instanceof ParameterizedType) {
             ParameterizedType genericType = (ParameterizedType) type;
