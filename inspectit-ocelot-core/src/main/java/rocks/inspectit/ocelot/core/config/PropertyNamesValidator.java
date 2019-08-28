@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.core.config.util.CaseUtils;
 
 import javax.annotation.PostConstruct;
 import java.beans.PropertyDescriptor;
@@ -21,6 +22,10 @@ public class PropertyNamesValidator {
 
     @Autowired
     private InspectitEnvironment env;
+
+    @Autowired
+    private CaseUtils caseUtil;
+
 
     /**
      * A HashSet of classes which are used as wildcards in the search for properties. If a found class matches one of these
@@ -137,32 +142,6 @@ public class PropertyNamesValidator {
     }
 
     /**
-     * Helper-Method for parse
-     * Takes any given String and converts it from kebab-case into camelCase
-     * Strings without any dashes are returned unaltered
-     *
-     * @param name The String which should be changed into camelCase
-     * @return the given String in camelCase
-     */
-    private String toCamelCase(String name) {
-        StringBuilder builder = new StringBuilder();
-        String[] nameParts = name.split("-");
-        boolean isFirst = true;
-        for (String part : nameParts) {
-            if (isFirst) {
-                builder.append(part.toLowerCase());
-                isFirst = false;
-            } else if (!part.isEmpty()) {
-                part = part.toLowerCase();
-                part = part.substring(0, 1).toUpperCase() + part.substring(1);
-                builder.append(part);
-            }
-        }
-        return builder.toString();
-    }
-
-
-    /**
      * Checks if a given List of properties exists as path
      *
      * @param propertyNames The list of properties one wants to check
@@ -226,7 +205,7 @@ public class PropertyNamesValidator {
      * @return True: the property and all other properties exists <br> False: At least one of the properties does not exist
      */
     private boolean checkPropertyExistsInBean(List<String> propertyNames, Class<?> beanType) {
-        String propertyName = toCamelCase(propertyNames.get(0));
+        String propertyName = caseUtil.kebabCaseToCamelCase(propertyNames.get(0));
         Optional<PropertyDescriptor> foundProperty =
                 Arrays.stream(BeanUtils.getPropertyDescriptors(beanType))
                         .filter(descriptor -> descriptor.getName().equals(propertyName))

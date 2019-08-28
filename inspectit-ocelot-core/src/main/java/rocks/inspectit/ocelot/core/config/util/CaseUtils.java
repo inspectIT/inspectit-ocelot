@@ -23,4 +23,28 @@ public class CaseUtils {
         }
         return str;
     }
+
+    /**
+     * Converts the given kebab-case String into camelCase
+     *
+     * @param name The string in kebab-case
+     * @return the string in camel-case
+     */
+    public String kebabCaseToCamelCase(String name) {
+        StringBuilder builder = new StringBuilder();
+        String[] nameParts = name.split("-");
+        boolean isFirst = true;
+        for (String part : nameParts) {
+            if (isFirst) {
+                builder.append(part.toLowerCase());
+                isFirst = false;
+            } else if (!part.isEmpty()) {
+                part = part.toLowerCase();
+                part = part.substring(0, 1).toUpperCase() + part.substring(1);
+                builder.append(part);
+            }
+        }
+        return builder.toString();
+    }
+
 }
