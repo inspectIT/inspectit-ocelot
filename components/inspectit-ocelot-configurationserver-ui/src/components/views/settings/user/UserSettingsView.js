@@ -24,7 +24,7 @@ class UserSettingsView extends React.Component {
             position: fixed;
             top: 6.5rem;
             width: calc(100vw - 4rem);
-            overflow: autp auto;
+            overflow: auto auto;
           }
           .content{
             margin-top: 3rem;
