@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.EnumerablePropertySource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.core.config.util.CaseUtils;
@@ -13,6 +14,8 @@ import javax.annotation.PostConstruct;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.net.URL;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.*;
 
@@ -23,9 +26,6 @@ public class PropertyNamesValidator {
     @Autowired
     private InspectitEnvironment env;
 
-    @Autowired
-    private CaseUtils caseUtil;
-
 
     /**
      * A HashSet of classes which are used as wildcards in the search for properties. If a found class matches one of these
@@ -33,7 +33,7 @@ public class PropertyNamesValidator {
      */
     private static final HashSet<Class<?>> TERMINAL_TYPES = new HashSet(Arrays.asList(Object.class, String.class, Integer.class, Long.class,
             Float.class, Double.class, Character.class, Void.class,
-            Boolean.class, Byte.class, Short.class, Duration.class));
+            Boolean.class, Byte.class, Short.class, Duration.class, Path.class, URL.class, FileSystemResource.class));
 
     @PostConstruct
     public void startStringFinder() {
@@ -42,8 +42,8 @@ public class PropertyNamesValidator {
                     .filter(ps -> ps instanceof EnumerablePropertySource)
                     .map(ps -> (EnumerablePropertySource) ps)
                     .flatMap(ps -> Arrays.stream(ps.getPropertyNames()))
-                    .filter(ps -> !checkPropertyName(ps))
-                    .forEach(ps -> log.warn("Expression could not be resolved to a property: " + ps));
+                    .filter(ps -> checkPropertyName(ps))
+                    .forEach(ps -> log.warn("The specified property '{}' does not exist! ", ps));
         });
     }
 
@@ -64,11 +64,11 @@ public class PropertyNamesValidator {
         try {
             return propertyName != null
                     && propertyName.startsWith("inspectit.")
-                    && checkPropertyExists(parsedName.subList(1, parsedName.size()), InspectitConfig.class);
+                    && !checkPropertyExists(parsedName.subList(1, parsedName.size()), InspectitConfig.class);
         } catch (Exception e) {
             log.error("Error while checking property existence", e);
         }
-        return true;
+        return false;
     }
 
     /**
@@ -177,7 +177,7 @@ public class PropertyNamesValidator {
      */
     @VisibleForTesting
     boolean checkPropertyExistsInMap(List<String> propertyNames, Type mapValueType) {
-        if (TERMINAL_TYPES.contains(mapValueType)) {
+        if (isTerminalOrEnum(mapValueType)) {
             return true;
         } else {
             return checkPropertyExists(propertyNames.subList(1, propertyNames.size()), mapValueType);
@@ -193,7 +193,11 @@ public class PropertyNamesValidator {
      */
     @VisibleForTesting
     boolean checkPropertyExistsInList(List<String> propertyNames, Type listValueType) {
-        return checkPropertyExists(propertyNames.subList(1, propertyNames.size()), listValueType);
+        if (isTerminalOrEnum(listValueType)) {
+            return true;
+        } else {
+            return checkPropertyExists(propertyNames.subList(1, propertyNames.size()), listValueType);
+        }
     }
 
     /**
@@ -204,10 +208,10 @@ public class PropertyNamesValidator {
      * @return True: the property and all other properties exists <br> False: At least one of the properties does not exist
      */
     private boolean checkPropertyExistsInBean(List<String> propertyNames, Class<?> beanType) {
-        String propertyName = caseUtil.kebabCaseToCamelCase(propertyNames.get(0));
+        String propertyName = CaseUtils.kebabCaseToCamelCase(propertyNames.get(0));
         Optional<PropertyDescriptor> foundProperty =
                 Arrays.stream(BeanUtils.getPropertyDescriptors(beanType))
-                        .filter(descriptor -> descriptor.getName().equals(propertyName))
+                        .filter(descriptor -> descriptor.getName().equalsIgnoreCase(propertyName))
                         .findFirst();
         if (foundProperty.isPresent()) {
             if (foundProperty.get().getReadMethod() == null) {
@@ -227,6 +231,19 @@ public class PropertyNamesValidator {
      * @return True: the given type is a terminal or an enum False: the given type is neither a terminal type nor an enum
      */
     private boolean isTerminalOrEnum(Type type) {
-        return TERMINAL_TYPES.contains(type) || ((Class<?>) type).isEnum();
+        if (type instanceof ParameterizedType) {
+            int typeIndex = 0;
+            ParameterizedType genericType = (ParameterizedType) type;
+            if (genericType.getRawType() == Map.class) {
+                typeIndex = 1;
+            }
+            return isTerminalOrEnum(genericType.getActualTypeArguments()[typeIndex]);
+        }
+        if (TERMINAL_TYPES.contains(type)) {
+            return true;
+        } else if (type instanceof Class) {
+            return ((Class<?>) type).isEnum() || ((Class<?>) type).isPrimitive();
+        }
+        return false;
     }
 }

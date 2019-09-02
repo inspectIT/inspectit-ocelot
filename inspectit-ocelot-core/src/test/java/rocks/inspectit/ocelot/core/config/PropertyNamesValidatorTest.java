@@ -26,7 +26,7 @@ public class PropertyNamesValidatorTest {
     public class Parse {
         @Test
         void kebabCaseTest() {
-            ArrayList<String> output = new ArrayList<>(Arrays.asList("inspectit", "iCan-parse-kebab", "case", "even-in-brackets\\wow", "thisIs-awesome"));
+            List<String> output = Arrays.asList("inspectit", "iCan-parse-kebab", "case", "even-in-brackets\\wow", "thisIs-awesome");
 
             assertThat(validator.parse("inspectit.iCan-parse-kebab.case[even-in-brackets\\wow].thisIs-awesome")).isEqualTo(output);
         }
@@ -48,14 +48,14 @@ public class PropertyNamesValidatorTest {
 
         @Test
         void bracketAfterBracket() {
-            ArrayList<String> output = new ArrayList<>(Arrays.asList("inspectit", "property", "first", "second"));
+            List<String> output = Arrays.asList("inspectit", "property", "first", "second");
 
             assertThat(validator.parse("inspectit.property[first][second]")).isEqualTo(output);
         }
 
         @Test
         void dotInBrackets() {
-            ArrayList<String> output = new ArrayList<>(Arrays.asList("inspectit", "property", "first.second"));
+            List<String> output = Arrays.asList("inspectit", "property", "first.second");
 
             assertThat(validator.parse("inspectit.property[first.second]")).isEqualTo(output);
         }
@@ -77,14 +77,14 @@ public class PropertyNamesValidatorTest {
         void wrongProperty() {
             String property = "inspectit.iDoNotExist";
 
-            assertThat(validator.checkPropertyName(property)).isEqualTo(false);
+            assertThat(validator.checkPropertyName(property)).isEqualTo(true);
         }
 
         @Test
         void correctProperty() {
             String property = "inspectit.service-name";
 
-            assertThat(validator.checkPropertyName(property)).isEqualTo(true);
+            assertThat(validator.checkPropertyName(property)).isEqualTo(false);
         }
 
         @Test
@@ -106,51 +106,65 @@ public class PropertyNamesValidatorTest {
     public class CheckPropertyExists {
         @Test
         void termminalTest() {
-            ArrayList<String> list = new ArrayList<>(Arrays.asList("config", "file-based", "path"));
+            List<String> list = Arrays.asList("config", "file-based", "path");
 
             assertThat(validator.checkPropertyExists(list, InspectitConfig.class)).isEqualTo(true);
         }
 
         @Test
         void nonTermminalTest() {
-            ArrayList<String> list = new ArrayList<>(Arrays.asList("exporters", "metrics", "prometheus"));
+            List<String> list = Arrays.asList("exporters", "metrics", "prometheus");
 
             assertThat(validator.checkPropertyExists(list, InspectitConfig.class)).isEqualTo(false);
         }
 
         @Test
         void emptyString() {
-            ArrayList<String> list = new ArrayList<>(Arrays.asList(""));
+            List<String> list = Arrays.asList("");
 
             assertThat(validator.checkPropertyExists(list, InspectitConfig.class)).isEqualTo(false);
         }
 
         @Test
         void existingList() {
-            ArrayList<String> list = new ArrayList<>(Arrays.asList("instrumentation", "scopes", "jdbc_statement_execute", "interfaces", "0", "matcher-mode"));
+            List<String> list = Arrays.asList("instrumentation", "scopes", "jdbc_statement_execute", "interfaces", "0", "matcher-mode");
 
             assertThat(validator.checkPropertyExists(list, InspectitConfig.class)).isEqualTo(true);
         }
 
         @Test
         void existingMap() {
-            ArrayList<String> list = new ArrayList<>(Arrays.asList("metrics", "definitions", "jvm/gc/concurrent/phase/time", "description"));
+            List<String> list = Arrays.asList("metrics", "definitions", "jvm/gc/concurrent/phase/time", "description");
 
             assertThat(validator.checkPropertyExists(list, InspectitConfig.class)).isEqualTo(true);
         }
 
         @Test
         void readMethodIsNull() {
-            ArrayList<String> list = new ArrayList<>(Arrays.asList("instrumentation", "data", "method_duration", "is-tag"));
+            List<String> list = Arrays.asList("instrumentation", "data", "method_duration", "is-tag");
 
             assertThat(validator.checkPropertyExists(list, InspectitConfig.class)).isEqualTo(true);
         }
 
         @Test
         void endsInWildcardType() {
-            ArrayList<String> list = new ArrayList<>(Arrays.asList("instrumentation", "actions", "string_replace_all", "input", "regex"));
+            List<String> list = Arrays.asList("instrumentation", "actions", "string_replace_all", "input", "regex");
 
             assertThat(validator.checkPropertyExists(list, InspectitConfig.class)).isEqualTo(true);
+        }
+
+        @Test
+        void terminalListTest() {
+            List<String> list = Arrays.asList("inspectit", "instrumentation", "scopes", "httpurlconnection_getInputStream.methods", "0", "arguments");
+
+            assertThat(validator.checkPropertyExists(list, InspectitConfig.class)).isEqualTo(false);
+        }
+
+        @Test
+        void nonInspectItInput() {
+            List<String> list = Arrays.asList("java", "specification", "version");
+
+            assertThat(validator.checkPropertyExists(list, InspectitConfig.class)).isEqualTo(false);
         }
     }
 
@@ -158,19 +172,18 @@ public class PropertyNamesValidatorTest {
     public class CheckPropertyExistsInMap {
         @Test
         void nonTerminalMapTest() {
-            ArrayList<String> list = new ArrayList<>(Arrays.asList("matcher-mode"));
+            List<String> list = Arrays.asList("matcher-mode");
 
             assertThat(validator.checkPropertyExistsInMap(list, Map.class)).isEqualTo(false);
 
         }
     }
 
-
     @Nested
     public class CheckPropertyExistsInList {
         @Test
         void nonTerminalListTest() {
-            ArrayList<String> list = new ArrayList(Arrays.asList("matcher-mode"));
+            List<String> list = Arrays.asList("matcher-mode");
 
             assertThat(validator.checkPropertyExistsInList(list, List.class)).isEqualTo(false);
         }
