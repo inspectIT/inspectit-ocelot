@@ -63,6 +63,7 @@ public class PropertyNamesValidator {
         ArrayList<String> parsedName = (ArrayList<String>) parse(propertyName);
         try {
             return propertyName != null
+                    && !propertyName.startsWith("inspectit.publishOpenCensusToBootstrap")
                     && propertyName.startsWith("inspectit.")
                     && !checkPropertyExists(parsedName.subList(1, parsedName.size()), InspectitConfig.class);
         } catch (Exception e) {
@@ -214,10 +215,12 @@ public class PropertyNamesValidator {
                         .filter(descriptor -> descriptor.getName().equalsIgnoreCase(propertyName))
                         .findFirst();
         if (foundProperty.isPresent()) {
-            if (foundProperty.get().getReadMethod() == null) {
-                return true;
+            Type propertyType;
+            if (foundProperty.get().getReadMethod() != null) {
+                propertyType = foundProperty.get().getReadMethod().getGenericReturnType();
+            } else {
+                propertyType = foundProperty.get().getPropertyType();
             }
-            Type propertyType = foundProperty.get().getReadMethod().getGenericReturnType();
             return checkPropertyExists(propertyNames.subList(1, propertyNames.size()), propertyType);
         } else {
             return false;
