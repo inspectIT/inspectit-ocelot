@@ -2,6 +2,7 @@ package rocks.inspectit.ocelot.core.config.util;
 
 import lombok.experimental.UtilityClass;
 
+
 @UtilityClass
 public class CaseUtils {
 

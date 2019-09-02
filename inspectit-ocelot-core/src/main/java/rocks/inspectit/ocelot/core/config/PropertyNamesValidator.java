@@ -4,11 +4,12 @@ import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.EventListener;
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
-import rocks.inspectit.ocelot.core.config.util.CaseUtils;
+import rocks.inspectit.ocelot.config.utils.CaseUtils;
 
 import javax.annotation.PostConstruct;
 import java.beans.PropertyDescriptor;
@@ -36,7 +37,8 @@ public class PropertyNamesValidator {
             Boolean.class, Byte.class, Short.class, Duration.class, Path.class, URL.class, FileSystemResource.class));
 
     @PostConstruct
-    public void startStringFinder() {
+    @EventListener(InspectitConfigChangedEvent.class)
+    public void logInvalidPropertyNames() {
         env.readPropertySources(propertySources -> {
             propertySources.stream()
                     .filter(ps -> ps instanceof EnumerablePropertySource)
@@ -66,6 +68,7 @@ public class PropertyNamesValidator {
                     && !propertyName.startsWith("inspectit.publishOpenCensusToBootstrap")
                     && propertyName.startsWith("inspectit.")
                     && !checkPropertyExists(parsedName.subList(1, parsedName.size()), InspectitConfig.class);
+
         } catch (Exception e) {
             log.error("Error while checking property existence", e);
         }
@@ -152,7 +155,7 @@ public class PropertyNamesValidator {
     @VisibleForTesting
     boolean checkPropertyExists(List<String> propertyNames, Type type) {
         if (propertyNames.isEmpty()) {
-            return isTerminalOrEnum(type);
+            return isTerminal(type) || isListOfTerminalTypes(type);
         }
         if (type instanceof ParameterizedType) {
             ParameterizedType genericType = (ParameterizedType) type;
@@ -178,7 +181,7 @@ public class PropertyNamesValidator {
      */
     @VisibleForTesting
     boolean checkPropertyExistsInMap(List<String> propertyNames, Type mapValueType) {
-        if (isTerminalOrEnum(mapValueType)) {
+        if (isTerminal(mapValueType)) {
             return true;
         } else {
             return checkPropertyExists(propertyNames.subList(1, propertyNames.size()), mapValueType);
@@ -194,7 +197,7 @@ public class PropertyNamesValidator {
      */
     @VisibleForTesting
     boolean checkPropertyExistsInList(List<String> propertyNames, Type listValueType) {
-        if (isTerminalOrEnum(listValueType)) {
+        if (isTerminal(listValueType)) {
             return true;
         } else {
             return checkPropertyExists(propertyNames.subList(1, propertyNames.size()), listValueType);
@@ -233,19 +236,30 @@ public class PropertyNamesValidator {
      * @param type
      * @return True: the given type is a terminal or an enum False: the given type is neither a terminal type nor an enum
      */
-    private boolean isTerminalOrEnum(Type type) {
+    private boolean isTerminal(Type type) {
+        if (TERMINAL_TYPES.contains(type)) {
+            return true;
+        } else if (type instanceof Class) {
+            return ((Class<?>) type).isEnum() || ((Class<?>) type).isPrimitive();
+        }
+        return false;
+    }
+
+
+    /**
+     * Checks if a given type is a list of terminal types
+     *
+     * @param type
+     * @return True: the given type is a list of a terminal type. False: either the given type is not a list or not a list of terminal types
+     */
+    private boolean isListOfTerminalTypes(Type type) {
         if (type instanceof ParameterizedType) {
             int typeIndex = 0;
             ParameterizedType genericType = (ParameterizedType) type;
             if (genericType.getRawType() == Map.class) {
                 typeIndex = 1;
             }
-            return isTerminalOrEnum(genericType.getActualTypeArguments()[typeIndex]);
-        }
-        if (TERMINAL_TYPES.contains(type)) {
-            return true;
-        } else if (type instanceof Class) {
-            return ((Class<?>) type).isEnum() || ((Class<?>) type).isPrimitive();
+            return isTerminal(genericType.getActualTypeArguments()[typeIndex]);
         }
         return false;
     }
