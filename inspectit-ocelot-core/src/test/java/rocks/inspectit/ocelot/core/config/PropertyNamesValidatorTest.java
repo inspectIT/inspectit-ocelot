@@ -72,33 +72,33 @@ public class PropertyNamesValidatorTest {
     }
 
     @Nested
-    public class CheckPropertyName {
+    public class IsInvalidPropertyName {
         @Test
         void wrongProperty() {
             String property = "inspectit.iDoNotExist";
 
-            assertThat(validator.checkPropertyName(property)).isEqualTo(true);
+            assertThat(validator.isInvalidPropertyName(property)).isEqualTo(true);
         }
 
         @Test
         void correctProperty() {
             String property = "inspectit.service-name";
 
-            assertThat(validator.checkPropertyName(property)).isEqualTo(false);
+            assertThat(validator.isInvalidPropertyName(property)).isEqualTo(false);
         }
 
         @Test
         void emptyString() {
             String property = "";
 
-            assertThat(validator.checkPropertyName(property)).isEqualTo(false);
+            assertThat(validator.isInvalidPropertyName(property)).isEqualTo(false);
         }
 
         @Test
         void noneInspectitInput() {
             String property = "thisHasNothingToDoWithInspectit";
 
-            assertThat(validator.checkPropertyName(property)).isEqualTo(false);
+            assertThat(validator.isInvalidPropertyName(property)).isEqualTo(false);
         }
     }
 
