@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.core.config.util;
+package rocks.inspectit.ocelot.config.utils;
 
 import org.junit.jupiter.api.Test;
 
