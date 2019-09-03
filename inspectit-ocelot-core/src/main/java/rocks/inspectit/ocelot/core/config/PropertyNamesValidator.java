@@ -249,12 +249,10 @@ public class PropertyNamesValidator {
      */
     private boolean isListOfTerminalTypes(Type type) {
         if (type instanceof ParameterizedType) {
-            int typeIndex = 0;
             ParameterizedType genericType = (ParameterizedType) type;
-            if (genericType.getRawType() == Map.class) {
-                typeIndex = 1;
+            if (genericType.getRawType() == List.class) {
+                return isTerminal(genericType.getActualTypeArguments()[0]);
             }
-            return isTerminal(genericType.getActualTypeArguments()[typeIndex]);
         }
         return false;
     }
