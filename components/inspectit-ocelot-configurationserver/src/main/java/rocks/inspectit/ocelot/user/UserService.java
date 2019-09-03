@@ -46,6 +46,16 @@ public class UserService {
     }
 
     /**
+     * Checks if a user with a given name exists.
+     *
+     * @param name the username, will be turned to lower case before querying
+     * @return true, if a user with the given name exists.
+     */
+    public boolean userExists(String name) {
+        return userRepository.existsByUsername(name.toLowerCase());
+    }
+
+    /**
      * Fetches a user based on his ID.
      *
      * @param id the id of the user
@@ -62,26 +72,6 @@ public class UserService {
      */
     public void deleteUserById(long id) {
         userRepository.deleteById(id);
-    }
-
-    /**
-     * Creates a user with the given name in case a user with the given name does not exist already.
-     *
-     * @param username   the user's name
-     * @param isLdapUser whether the user is added due to a LDAP authentication
-     */
-    public synchronized void createUserIfNotExist(String username, boolean isLdapUser) {
-        boolean exists = getUserByName(username).isPresent();
-
-        if (!exists) {
-            User user = User.builder()
-                    .username(username)
-                    .passwordHash("<EMPTY>")
-                    .isLdapUser(isLdapUser)
-                    .build();
-
-            userRepository.save(user);
-        }
     }
 
     /**
@@ -112,7 +102,7 @@ public class UserService {
 
     @PostConstruct
     private void addDefaultUserIfRequired() {
-        if (userRepository.count() == 0) {
+        if (!settings.getSecurity().isLdapAuthentication() && userRepository.count() == 0) {
             String name = settings.getDefaultUser().getName();
             String rawPassword = settings.getDefaultUser().getPassword();
 

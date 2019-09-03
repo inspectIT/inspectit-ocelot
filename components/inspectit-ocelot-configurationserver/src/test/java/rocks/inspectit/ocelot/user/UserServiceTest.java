@@ -12,12 +12,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import rocks.inspectit.ocelot.config.model.DefaultUserSettings;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.config.model.SecuritySettings;
-import rocks.inspectit.ocelot.security.userdetails.LocalUserDetailsService;
 
 import java.lang.reflect.Method;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -98,7 +96,7 @@ class UserServiceTest {
         }
 
         @Test
-        public void doNothing() {
+        public void doNothingIfUserPresent() {
             SecuritySettings securitySettings = SecuritySettings.builder().ldapAuthentication(false).build();
             InspectitServerSettings settings = InspectitServerSettings.builder().security(securitySettings).build();
             userService.settings = settings;
@@ -109,5 +107,18 @@ class UserServiceTest {
             verify(repository).count();
             verifyNoMoreInteractions(repository);
         }
+
+
+        @Test
+        public void doNothingIfLdapUsed() {
+            SecuritySettings securitySettings = SecuritySettings.builder().ldapAuthentication(true).build();
+            InspectitServerSettings settings = InspectitServerSettings.builder().security(securitySettings).build();
+            userService.settings = settings;
+
+            ReflectionUtils.invokeMethod(testMethod, userService);
+
+            verifyNoMoreInteractions(repository);
+        }
     }
+
 }
