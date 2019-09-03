@@ -36,6 +36,7 @@
     ],
     "Configuration Server": [
       "config-server/overview",
+      "config-server/cs-configuration",
       "config-server/agent-mappings",
       "config-server/user-authentication"
     ]
