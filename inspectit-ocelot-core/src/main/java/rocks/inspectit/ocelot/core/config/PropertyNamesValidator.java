@@ -9,7 +9,7 @@ import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
-import rocks.inspectit.ocelot.config.util.CaseUtils;
+import rocks.inspectit.ocelot.config.utils.CaseUtils;
 
 import javax.annotation.PostConstruct;
 import java.beans.PropertyDescriptor;

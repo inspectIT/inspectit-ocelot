@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.core.config.util;
+package rocks.inspectit.ocelot.config.utils;
 
 import lombok.experimental.UtilityClass;
 
