@@ -44,24 +44,23 @@ public class PropertyNamesValidator {
                     .filter(ps -> ps instanceof EnumerablePropertySource)
                     .map(ps -> (EnumerablePropertySource) ps)
                     .flatMap(ps -> Arrays.stream(ps.getPropertyNames()))
-                    .filter(ps -> checkPropertyName(ps))
+                    .filter(ps -> isInvalidPropertyName(ps))
                     .forEach(ps -> log.warn("The specified property '{}' does not exist! ", ps));
         });
     }
 
     /**
-     * Checks if a given property is an inspectit-property and is a valid path in the config model
-     * This method firstly checks if a given String fulfills the basic requirements: being not null and starting with "inspectit."
-     * If a String does not fulfill these basic requirements the method returns false
-     * If these checks are successful, a process for recursive path-checking is triggered with checkPropertyExists.
-     * This process checks each element of the given path for existence. Upon on the first occurrence of a non-existing path,
-     * false is returned. If the path exists, true is returned
+     * Checks if a given property should be handled as an invalid property. Invalid properties are properties which
+     * apparently are meant to be found in the inspectit environment but are not. This applies for all properties
+     * starting with "inspectit.". Further it is checked whether or not a given property exists in the model and ends
+     * in a terminal-type. Terminal types are all enums, primitive types and their corresponding wrapper classes as well
+     * as Duration.class, Path.class, URL.class and FileSystemResource.class
      *
      * @param propertyName
      * @return True: the propertyName exists as path <br> False: the propertyName does not exist as path
      */
     @VisibleForTesting
-    boolean checkPropertyName(String propertyName) {
+    boolean isInvalidPropertyName(String propertyName) {
         ArrayList<String> parsedName = (ArrayList<String>) parse(propertyName);
         try {
             return propertyName != null
