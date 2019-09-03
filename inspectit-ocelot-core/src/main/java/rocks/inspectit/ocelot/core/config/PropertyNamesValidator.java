@@ -9,7 +9,7 @@ import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
-import rocks.inspectit.ocelot.config.utils.CaseUtils;
+import rocks.inspectit.ocelot.config.util.CaseUtils;
 
 import javax.annotation.PostConstruct;
 import java.beans.PropertyDescriptor;
@@ -196,11 +196,7 @@ public class PropertyNamesValidator {
      */
     @VisibleForTesting
     boolean checkPropertyExistsInList(List<String> propertyNames, Type listValueType) {
-        if (isTerminal(listValueType)) {
-            return true;
-        } else {
-            return checkPropertyExists(propertyNames.subList(1, propertyNames.size()), listValueType);
-        }
+        return checkPropertyExists(propertyNames.subList(1, propertyNames.size()), listValueType);
     }
 
     /**
