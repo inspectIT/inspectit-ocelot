@@ -6,7 +6,7 @@ import Link from '../basics/Link'
  */
 const SideNavigationItem = ({ href, icon, name, router, hrefBase }) => {
     const regEx = new RegExp(`${hrefBase}(?!\\w)`)
-    const isActive = router.pathname.search(regEx) !== -1 ? true : false
+    const isActive = router.pathname.search(regEx) !== -1
 
     return (
         <Link className="this" href={href}>

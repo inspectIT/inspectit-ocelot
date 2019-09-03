@@ -12,8 +12,8 @@ class UserSettingsView extends React.Component {
     }
   }
 
-  handleChange = (e) => {
-    this.setState({filter: e.target.value})
+  handleChange = (newFilter) => {
+    this.setState({filter: newFilter})
   }
 
   render() {
@@ -32,7 +32,7 @@ class UserSettingsView extends React.Component {
             overflow: auto auto;
           }
         `}</style>
-        <div className='fixed'><UserToolbar filterValue={this.state.filter} changeFilter={this.handleChange}/></div>
+        <div className='fixed'><UserToolbar filterValue={this.state.filter} onFilterChange={this.handleChange}/></div>
         <div className='content'>
             <UserDataTable filterValue={this.state.filter}/>
         </div>

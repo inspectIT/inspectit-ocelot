@@ -12,8 +12,7 @@ class UserDataTable extends React.Component{
   constructor(props){
     super(props)
     this.state = {
-      isDeleteUserDialogShown: false,
-      userToDelete: -1, 
+      userToDelete: null, 
       newUser: {}
     }
   }
@@ -22,12 +21,12 @@ class UserDataTable extends React.Component{
     this.props.getUsers()
   }
 
-  startDeleteUserDialog = (user) => {this.setState({isDeleteUserDialogShown: true, userToDelete: user})}
-  stopDeleteUserDialog = () => {this.setState({isDeleteUserDialogShown: false, userToDelete: -1})}
+  startDeleteUserDialog = (user) => {this.setState({userToDelete: user})}
+  stopDeleteUserDialog = () => {this.setState({userToDelete: null})}
 
   addUser = () => {
     const {newUser} = this.state
-    if(!newUser.username || newUser.username === '' || !newUser.password || newUser.password === ''){
+    if(!newUser.username || !newUser.password){
       this.props.showErrorMessage('Missing Input', 'username or password is missing')
       return
     }
@@ -36,35 +35,37 @@ class UserDataTable extends React.Component{
     this.props.addUser(newUser)
   }
 
-  templateAdditionNewUser = (string) => {
+  templateForNewUserUsername = () => {
     const {newUser} = this.state
-    switch(string){
-      case 'usernameColumn':
-        return (
-          <InputText
-            value={newUser.username}
-            keyfilter='alphanum'
-            onChange={(e) => { this.setState({ newUser: { ...newUser, username: e.target.value } })
-            }}
-          />
-        )
-      case 'passwordColumn':
-        return (
-          <Password 
-            value={newUser.password} 
-            feedback={false} 
-            onChange={(e) => { this.setState({ newUser: { ...newUser, password: e.target.value } })
-            }}
-          />
-        )
-      case 'buttonColumn':
-        return <Button icon='pi pi-plus' onClick={this.addUser}/>
-    }
+    return (
+      <InputText
+        value={newUser.username}
+        keyfilter='alphanum'
+        onChange={(e) => { this.setState({ newUser: { ...newUser, username: e.target.value } })
+        }}
+      />
+    )
+  }
+
+  templateForNewUserPassword = () => {
+    const {newUser} = this.state
+    return (
+      <Password 
+        value={newUser.password} 
+        feedback={false} 
+        onChange={(e) => { this.setState({ newUser: { ...newUser, password: e.target.value } })
+        }}
+      />
+    )
+  }
+
+  templateForNewUserButtonColumn = () => {
+    return <Button icon='pi pi-plus' onClick={this.addUser}/>
   }
 
   itemTemplate = (user) => {
       return (
-        <div className={`p-grid p-align-center ${user.head ? 'head': ''}`}>
+        <div className={`p-grid p-align-center ${user.isHeader ? 'header': ''}`}>
           <style jsx>{`
             .p-grid:after{
               content: "";
@@ -77,22 +78,22 @@ class UserDataTable extends React.Component{
               top: 0.5rem;
               left: calc(1% / 2);
             }
-            .head{
+            .header{
               font-weight: bold;
             }
             .p-grid{
               margin: 0.5rem;
             }
           `}</style>
-          <div className='p-col-1'>{user.head ? 'ID' : user.newUser? '' : user.id}</div>
+          <div className='p-col-1'>{user.isHeader ? 'ID' : user.isAddUserMask? '' : user.id}</div>
           <div className='p-col'>
-          {user.head ? 'Username' : user.newUser ? this.templateAdditionNewUser('usernameColumn') : `${user.username}`}
+          {user.isHeader ? 'Username' : user.isAddUserMask ? this.templateForNewUserUsername() : `${user.username}`}
           </div>
           <div className='p-col'>
-          {user.head ? 'Password' : user.newUser ? this.templateAdditionNewUser('passwordColumn') : `*****`}
+          {user.isHeader ? 'Password' : user.isAddUserMask ? this.templateForNewUserPassword() : `*****`}
           </div>
           <div className='p-col-1'>
-            {user.head ? '' : user.newUser ? this.templateAdditionNewUser('buttonColumn') : <Button icon='pi pi-trash' onClick={() => this.startDeleteUserDialog(user)} style={{marginRight:'.25em'}}/> }
+            {user.isHeader ? '' : user.isAddUserMask ? this.templateForNewUserButtonColumn() : <Button icon='pi pi-trash' onClick={() => this.startDeleteUserDialog(user)} style={{marginRight:'.25em'}}/> }
           </div>
         </div>
       );
@@ -101,8 +102,8 @@ class UserDataTable extends React.Component{
   render() {
     const {filterValue} = this.props
     let filteredUsers = this.props.users.filter((user) => {
-      if(user.head || user.newUser || user.username || user.id){
-        return user.head || user.newUser || user.username.includes(filterValue) || user.id.toString().includes(filterValue)
+      if(user.isHeader || user.isAddUserMask || user.username || user.id){
+        return user.isHeader || user.isAddUserMask || user.username.includes(filterValue) || user.id.toString().includes(filterValue)
       }
     })
 
@@ -115,18 +116,17 @@ class UserDataTable extends React.Component{
           }
         `}</style>
         <DataView value={filteredUsers} itemTemplate={this.itemTemplate} style={{marginBottom: '2.5rem'}}></DataView>
-        <DeleteDialog user={this.state.userToDelete} visible={this.state.isDeleteUserDialogShown} onHide={this.stopDeleteUserDialog} />
+        <DeleteDialog user={this.state.userToDelete ? this.state.userToDelete : {}} visible={this.state.userToDelete} onHide={this.stopDeleteUserDialog} />
       </div>
     )
   }
 }
   
-
 /** change incoming user array into required usage */ 
 const prepareUsers = (users) => {
   let res = []
-  res.push({ head: true })
-  res.push({ newUser: true })
+  res.push({ isHeader: true })
+  res.push({ isAddUserMask: true })
   users.forEach(element => {
     res.push(element)
   });

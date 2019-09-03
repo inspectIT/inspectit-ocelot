@@ -46,7 +46,7 @@ class UserToolbar extends React.Component {
                 placeholder='Search'
                 tooltip='Search trough entering an ID or a username'
                 value={this.props.filterValue}
-                onChange={this.props.changeFilter}
+                onChange={e => this.props.onFilterChange(e.target.value)}
               />
             </div>
           </div>

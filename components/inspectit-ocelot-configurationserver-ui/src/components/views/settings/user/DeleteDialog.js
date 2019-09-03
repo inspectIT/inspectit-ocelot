@@ -10,39 +10,40 @@ import { Dialog } from 'primereact/dialog';
  */
 class DeleteDialog extends React.Component {
 
-    deleteButton = React.createRef();
+  deleteButton = React.createRef();
 
-    render() {
-        const { id, username } = this.props.user;
+  render() {
 
-        return (
-            <Dialog
-                header={"Delete User"}
-                modal={true}
-                visible={this.props.visible}
-                onHide={this.props.onHide}
-                footer={(
-                    <div>
-                        <Button label="Delete" ref={this.deleteButton} className="p-button-danger" onClick={this.deleteUser} />
-                        <Button label="Cancel" className="p-button-secondary" onClick={this.props.onHide} />
-                    </div>
-                )}
-            >
-                Are you sure you want to delete <b>"{username}"</b> with the ID: <b>"{id}"</b> ? This cannot be undone!
-            </Dialog>
-        )
+    const { id, username } = this.props.user;
+
+    return (
+      <Dialog
+        header={"Delete User"}
+        modal={true}
+        visible={this.props.visible}
+        onHide={this.props.onHide}
+        footer={(
+        <div>
+          <Button label="Delete" ref={this.deleteButton} className="p-button-danger" onClick={this.deleteUser} />
+          <Button label="Cancel" className="p-button-secondary" onClick={this.props.onHide} />
+        </div>
+        )}
+      >
+        Are you sure you want to delete <b>"{username}"</b> with the ID: <b>"{id}"</b> ? This cannot be undone!
+      </Dialog>
+     )
+  }
+
+  deleteUser = () => {
+    this.props.deleteUser(this.props.user.id);
+    this.props.onHide();
+  }
+
+  componentDidUpdate(prevProps) {
+    if (!prevProps.visible && this.props.visible) {
+      this.deleteButton.current.element.focus();
     }
-
-    deleteUser = () => {
-        this.props.deleteUser(this.props.user.id);
-        this.props.onHide();
-    }
-
-    componentDidUpdate(prevProps) {
-        if (!prevProps.visible && this.props.visible) {
-            this.deleteButton.current.element.focus();
-        }
-    }
+  }
 
 }
 
