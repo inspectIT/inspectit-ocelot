@@ -4,6 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.DoNotInstrumentMarker;
+import rocks.inspectit.ocelot.core.instrumentation.correlation.log.adapters.Log4J2MDCAdapter;
 import rocks.inspectit.ocelot.core.instrumentation.correlation.log.adapters.MDCAdapter;
 import rocks.inspectit.ocelot.core.instrumentation.correlation.log.adapters.Slf4jMDCAdapter;
 import rocks.inspectit.ocelot.core.instrumentation.event.IClassDiscoveryListener;
@@ -34,6 +35,7 @@ public class MDCAccess implements IClassDiscoveryListener {
 
     static {
         MDC_ADAPTER_BUILDERS.put(Slf4jMDCAdapter.MDC_CLASS, Slf4jMDCAdapter::get);
+        MDC_ADAPTER_BUILDERS.put(Log4J2MDCAdapter.THREAD_CONTEXT_CLASS, Log4J2MDCAdapter::get);
     }
 
     /**
