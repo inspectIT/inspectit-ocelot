@@ -41,7 +41,7 @@ public class ActionAutoCompleter implements AutoCompleter {
      *
      * @return
      */
-    private List<String> getActions() {
+    List<String> getActions() {
         actionPathsToRetrieve.set(6, "action");
         return ACTION_OPTIONS.stream()
                 .map(option -> actionPathsToRetrieve.set(4, option))
