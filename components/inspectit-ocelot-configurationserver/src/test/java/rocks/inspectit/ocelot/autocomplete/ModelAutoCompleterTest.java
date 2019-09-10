@@ -93,6 +93,14 @@ public class ModelAutoCompleterTest {
 
             assertThat(completer.getSuggestions(input)).doesNotContainSequence("class");
         }
+
+        @Test
+        void emptyString() {
+            List<String> input = Arrays.asList("");
+            ArrayList<String> output = new ArrayList<>();
+
+            assertThat(completer.getSuggestions(input)).isEqualTo(output);
+        }
     }
 
     @Nested

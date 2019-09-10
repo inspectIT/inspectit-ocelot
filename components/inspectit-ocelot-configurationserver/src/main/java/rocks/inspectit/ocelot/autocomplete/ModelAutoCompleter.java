@@ -19,7 +19,10 @@ public class ModelAutoCompleter implements AutoCompleter {
 
     @Override
     public List<String> getSuggestions(List<String> path) {
-        return collectProperties(path.subList(1, path.size()));
+        if (path.size() > 0 && !path.get(0).equals("")) {
+            return collectProperties(path.subList(1, path.size()));
+        }
+        return Arrays.asList();
     }
 
     /**
