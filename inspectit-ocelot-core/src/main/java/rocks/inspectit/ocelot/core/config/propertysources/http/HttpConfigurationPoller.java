@@ -1,28 +1,13 @@
 package rocks.inspectit.ocelot.core.config.propertysources.http;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.Header;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.stereotype.Service;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.config.HttpConfigSettings;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
-import rocks.inspectit.ocelot.core.config.util.PropertyUtils;
 import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 
-import javax.validation.Valid;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Properties;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
