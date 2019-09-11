@@ -60,12 +60,7 @@ public class YamlLoader {
     Object loadYaml(String path) {
         Yaml yaml = new Yaml();
         String src;
-        try {
-            src = fileManager.readFile(path);
-        } catch (IOException e) {
-            log.warn("Unable to load file with path {}", path);
-            return null;
-        }
+        src = fileManager.readFile(path, true);
         if (src != null) {
             return yaml.load(src);
         }

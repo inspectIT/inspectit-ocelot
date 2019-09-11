@@ -160,7 +160,7 @@ class AgentConfigurationReloadTask implements Runnable {
      */
     private Object loadAndMergeYaml(Object toMerge, String path) throws IOException {
         Yaml yaml = new Yaml();
-        String src = fileManager.readFile(path);
+        String src = fileManager.readFile(path, true);
         Object loadedYaml = yaml.load(src);
         if (toMerge == null) {
             return loadedYaml;

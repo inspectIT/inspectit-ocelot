@@ -54,7 +54,7 @@ public class FileController extends FileBaseController {
                            @ApiParam("If true, the response body is not formatted as json and is instead the plain text content of the file.")
                            @RequestParam(defaultValue = "false") boolean raw) throws IOException {
         String path = RequestUtil.getRequestSubPath(request);
-        String content = fileManager.readFile(path);
+        String content = fileManager.readFile(path, true);
         if (raw) {
             return content;
         } else {
