@@ -33,7 +33,7 @@ public class SecuritySettings {
      * If enabled, all authorized and unauthorized accesses attempts to secured endpoints will be logged.
      */
     @Builder.Default
-    private boolean accessLog = false;
+    private boolean accessLog = true;
 
     /**
      * Verify that LDAP settings exist if LDAP is enabled.

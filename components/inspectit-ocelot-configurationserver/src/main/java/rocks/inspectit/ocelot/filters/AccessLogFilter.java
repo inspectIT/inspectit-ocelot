@@ -3,6 +3,7 @@ package rocks.inspectit.ocelot.filters;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
+import org.springframework.security.access.event.AuthorizationFailureEvent;
 import org.springframework.security.authentication.event.AbstractAuthenticationFailureEvent;
 import org.springframework.security.authentication.event.AuthenticationSuccessEvent;
 import org.springframework.security.core.Authentication;
@@ -42,11 +43,24 @@ public class AccessLogFilter {
         }
     }
 
+
+    //triggered on access with invalidcredentials
+    @EventListener
+    private void authFailure(AuthorizationFailureEvent event) {
+        handleAuthFailure(event.getAuthentication(), event.getAccessDeniedException());
+    }
+
+    //triggered on anonymous access
     @EventListener
     private void authFailure(AbstractAuthenticationFailureEvent event) {
-        if (config.getSecurity().isAccessLog()) {
-            Authentication authentication = event.getAuthentication();
-            log.info("Authentication ({}) failed for {}", authentication.getName(), requestIdentifier.get(), event.getException());
+        handleAuthFailure(event.getAuthentication(), event.getException());
+    }
+
+    private void handleAuthFailure(Authentication authentication, Exception authException) {
+        String url = requestIdentifier.get();
+        if (config.getSecurity().isAccessLog() && url != null) {
+            requestIdentifier.remove();
+            log.info("Authentication ({}) failed for {}, Reason: {}", authentication.getName(), url, authException.getMessage());
         }
     }
 

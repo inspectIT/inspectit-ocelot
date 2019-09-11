@@ -67,11 +67,11 @@ Each property is located below the property `inspectit.security.ldap`.
 
 ## Access Log
 
-If required, access logging can be enabled. When enabled, the server will log all authorized and unauthorized access attempts to secured endpoints.
-Access logging is by default disabled.
+By default, the server will log all authorized and unauthorized access attempts to secured endpoints.
+Access logging can be disabled using the following property:
 
 ```YAML
 inspectit:
     security:
-        access-log: true
+        access-log: false
 ```
