@@ -1,11 +1,9 @@
 package rocks.inspectit.ocelot.core.instrumentation.config.callsorting;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Value;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.instrumentation.actions.ActionCallSettings;
+import rocks.inspectit.ocelot.config.model.instrumentation.actions.OrderSettings;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.ActionCallConfig;
 
 import java.util.*;
@@ -22,8 +20,8 @@ import java.util.stream.Stream;
  * <p>
  * Dependencies occur implicity due to the name of the call (= the result data key written)
  * the used input data ({@link ActionCallSettings#getDataInput()}, {@link ActionCallSettings#getOnlyIfTrue()}, etc)
- * and the explicitly defined dependencies: ({@link ActionCallSettings#getReads()}, {@link ActionCallSettings#getWrites()},
- * {@link ActionCallSettings#getReadsBeforeWritten()}).
+ * and the explicitly defined dependencies: ({@link OrderSettings#getReads()}, {@link OrderSettings#getWrites()},
+ * {@link OrderSettings#getReadsBeforeWritten()}).
  * <p>
  * The ordering happens so that the following three constraints are always fulfilled:
  * <p>
@@ -74,12 +72,12 @@ public class GenericActionCallSorter {
      */
     private Set<ActionCallConfig> getActionDependencies(CallDependencies call, CallDependencyIndex index) {
         //Rule: calls ONLY reading (and not writing) a data key are executed after any call writing the given data key
-        Stream<CallDependencies> readOnlyDeps = call.getReads().stream()
+        Stream<CallDependencies> readOnlyDependencies = call.getReads().stream()
                 .filter(key -> !call.getWrites().contains(key))
                 .flatMap(key -> index.getCallsWriting(key).stream());
 
         //Rule: calls reading AND writing data keys are executed after any call ONLY writing (and not reading) the given data key
-        Stream<CallDependencies> readAndWriteDeps = call.getReads().stream()
+        Stream<CallDependencies> readAndWriteDependencies = call.getReads().stream()
                 .filter(key -> call.getWrites().contains(key))
                 .flatMap(key ->
                         index.getCallsWriting(key).stream()
@@ -87,14 +85,13 @@ public class GenericActionCallSorter {
                 );
 
         //Rule: calls writing a data key are executed after any call with a "reads-before-overriden" on the corresponding key
-        Stream<CallDependencies> writeDeps = call.getWrites().stream()
-                .flatMap(key -> index.getCallsReadingBeforeOverridden(key).stream());
+        Stream<CallDependencies> writeDependencies = call.getWrites().stream()
+                .flatMap(key -> index.getCallsReadingBeforeWritten(key).stream());
 
-        return Stream.concat(readOnlyDeps, Stream.concat(readAndWriteDeps, writeDeps))
+        return Stream.concat(readOnlyDependencies, Stream.concat(readAndWriteDependencies, writeDependencies))
                 .map(CallDependencies::getSource)
                 .collect(Collectors.toSet());
     }
-
 
     /**
      * Topologically sorts the given data keys using a depth-first search.
@@ -113,17 +110,21 @@ public class GenericActionCallSorter {
                 sortedDependencyGraph.stream()
                         .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
 
-        ActionCallStack result = new ActionCallStack();
-        //we remember which nodes we visited via a "stack-trace" to detect dependency cycles
-        ActionCallStack stackTrace = new ActionCallStack();
-
+        LinkedHashSet<ActionCallConfig> result = new LinkedHashSet<>();
 
         for (Pair<ActionCallConfig, List<ActionCallConfig>> callWithDependencies : sortedDependencyGraph) {
-            putInTopologicalOrder(result, callWithDependencies.getLeft(), sortedLookup, stackTrace);
+            putInTopologicalOrder(result, callWithDependencies.getLeft(), sortedLookup, new LinkedHashSet<>());
         }
-        return result.getList();
+        return new ArrayList<>(result);
     }
 
+    /**
+     * Sorts the edges in the given dependency graph by name.
+     * This ensures a deterministic order of the action calls.
+     *
+     * @param dependencyGraph the unsorted dependency graph
+     * @return the sorted graph
+     */
     private List<Pair<ActionCallConfig, List<ActionCallConfig>>> sortDependencyGraph(Map<ActionCallConfig, Set<ActionCallConfig>> dependencyGraph) {
         List<Pair<ActionCallConfig, List<ActionCallConfig>>> sorted = new ArrayList<>();
         dependencyGraph.forEach((call, deps) -> {
@@ -135,62 +136,43 @@ public class GenericActionCallSorter {
         return sorted;
     }
 
-    private void putInTopologicalOrder(ActionCallStack result,
+    /**
+     * Puts all dependencies of "current" ActionCallConfig in transitive order onto the result stack.
+     *
+     * @param result          the resulting LinkedHashSet to put the calls onto in topological order
+     * @param current         the ActionCall for which all dependencies shall be put onto the result stack
+     * @param dependencyGraph the dependency graph, mapping calls to all calls which should be executed prior to them
+     * @param stackTrace      stack trace of visited calls, only used to detect cyclic dependencies
+     * @throws CyclicDataDependencyException
+     */
+    private void putInTopologicalOrder(LinkedHashSet<ActionCallConfig> result,
                                        ActionCallConfig current,
                                        Map<ActionCallConfig, ? extends Collection<ActionCallConfig>> dependencyGraph,
-                                       ActionCallStack stackTrace) throws CyclicDataDependencyException {
+                                       LinkedHashSet<ActionCallConfig> stackTrace) throws CyclicDataDependencyException {
 
         if (result.contains(current)) {
             return; //this action call has already been processed
         }
 
-        stackTrace.push(current);
+        stackTrace.add(current);
         for (ActionCallConfig dependency : dependencyGraph.get(current)) {
             //ignore dependencies to itself
             if (!dependency.equals(current)) {
                 if (!stackTrace.contains(dependency)) {
                     putInTopologicalOrder(result, dependency, dependencyGraph, stackTrace);
                 } else {
-                    ArrayList<ActionCallConfig> stackTraceList = stackTrace.getList();
+                    ArrayList<ActionCallConfig> stackTraceList = new ArrayList<>(stackTrace);
                     int idx = stackTraceList.indexOf(dependency);
-                    throw new CyclicDataDependencyException(stackTraceList.subList(idx, stackTraceList.size())
+                    List<String> dependencyCycle = stackTraceList.subList(idx, stackTraceList.size())
                             .stream()
                             .map(ActionCallConfig::getName)
-                            .collect(Collectors.toList()));
+                            .collect(Collectors.toList());
+                    throw new CyclicDataDependencyException(dependencyCycle);
                 }
             }
         }
-        result.push(current);
-        stackTrace.removeTop();
+        result.add(current);
+        stackTrace.remove(current);
     }
 
-    private static class ActionCallStack {
-        @Getter
-        private ArrayList<ActionCallConfig> list = new ArrayList<>();
-
-        private HashSet<ActionCallConfig> set = new HashSet<>();
-
-        void push(ActionCallConfig call) {
-            list.add(call);
-            set.add(call);
-        }
-
-        void removeTop() {
-            ActionCallConfig call = list.remove(list.size() - 1);
-            set.remove(call);
-        }
-
-        boolean contains(ActionCallConfig call) {
-            return set.contains(call);
-        }
-    }
-
-    @Value
-    @EqualsAndHashCode(callSuper = true)
-    public static class CyclicDataDependencyException extends Exception {
-        /**
-         * A list of data keys representing the dependency cycle.
-         */
-        private List<String> dependencyCycle;
-    }
 }

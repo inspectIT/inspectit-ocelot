@@ -1,9 +1,8 @@
-package rocks.inspectit.ocelot.core.instrumentation.config;
+package rocks.inspectit.ocelot.core.instrumentation.config.callsorting;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import rocks.inspectit.ocelot.config.model.instrumentation.actions.ActionCallSettings;
-import rocks.inspectit.ocelot.core.instrumentation.config.callsorting.GenericActionCallSorter;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.ActionCallConfig;
 
 import java.util.Arrays;
@@ -46,37 +45,37 @@ public class GenericActionCallSorterTest {
         }
 
         TestCallBuilder withRead(String data) {
-            Map<String, Boolean> read = new HashMap<>(settings.getReads());
+            Map<String, Boolean> read = new HashMap<>(settings.getOrder().getReads());
             read.put(data, true);
-            settings.setReads(read);
+            settings.getOrder().setReads(read);
             return this;
         }
 
         TestCallBuilder withRemovedRead(String data) {
-            Map<String, Boolean> read = new HashMap<>(settings.getReads());
+            Map<String, Boolean> read = new HashMap<>(settings.getOrder().getReads());
             read.put(data, false);
-            settings.setReads(read);
+            settings.getOrder().setReads(read);
             return this;
         }
 
         TestCallBuilder withWrite(String data) {
-            Map<String, Boolean> writes = new HashMap<>(settings.getWrites());
+            Map<String, Boolean> writes = new HashMap<>(settings.getOrder().getWrites());
             writes.put(data, true);
-            settings.setWrites(writes);
+            settings.getOrder().setWrites(writes);
             return this;
         }
 
         TestCallBuilder withRemovedWrite(String data) {
-            Map<String, Boolean> writes = new HashMap<>(settings.getWrites());
+            Map<String, Boolean> writes = new HashMap<>(settings.getOrder().getWrites());
             writes.put(data, false);
-            settings.setWrites(writes);
+            settings.getOrder().setWrites(writes);
             return this;
         }
 
         TestCallBuilder withReadsBeforeWritten(String data) {
-            Map<String, Boolean> readsBeforeWritten = new HashMap<>(settings.getReadsBeforeWritten());
+            Map<String, Boolean> readsBeforeWritten = new HashMap<>(settings.getOrder().getReadsBeforeWritten());
             readsBeforeWritten.put(data, true);
-            settings.setReadsBeforeWritten(readsBeforeWritten);
+            settings.getOrder().setReadsBeforeWritten(readsBeforeWritten);
             return this;
         }
 
@@ -165,7 +164,7 @@ public class GenericActionCallSorterTest {
             );
 
             assertThatThrownBy(() -> scheduler.orderActionCalls(input))
-                    .isInstanceOf(GenericActionCallSorter.CyclicDataDependencyException.class);
+                    .isInstanceOf(CyclicDataDependencyException.class);
         }
 
         @Test
@@ -178,7 +177,7 @@ public class GenericActionCallSorterTest {
             );
 
             assertThatThrownBy(() -> scheduler.orderActionCalls(input))
-                    .isInstanceOf(GenericActionCallSorter.CyclicDataDependencyException.class);
+                    .isInstanceOf(CyclicDataDependencyException.class);
         }
 
 

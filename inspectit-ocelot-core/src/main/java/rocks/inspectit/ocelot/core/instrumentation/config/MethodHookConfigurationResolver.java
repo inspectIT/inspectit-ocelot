@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.instrumentation.actions.ConditionalActionSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.RuleTracingSettings;
+import rocks.inspectit.ocelot.core.instrumentation.config.callsorting.CyclicDataDependencyException;
 import rocks.inspectit.ocelot.core.instrumentation.config.callsorting.GenericActionCallSorter;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.ActionCallConfig;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.InstrumentationConfiguration;
@@ -217,10 +218,10 @@ public class MethodHookConfigurationResolver {
      * @param rules         the rules whose generic action calls should be merged
      * @param actionsGetter the getter to access the rules to process, e.g. {@link InstrumentationRule#getEntryActions()}
      * @return a map mapping the data keys to the action call which define the values
-     * @throws GenericActionCallSorter.CyclicDataDependencyException if the action calls have cyclic dependencies preventing a scheduling
+     * @throws CyclicDataDependencyException if the action calls have cyclic dependencies preventing a scheduling
      */
     private List<ActionCallConfig> combineAndOrderActionCalls(Set<InstrumentationRule> rules, Function<InstrumentationRule, Collection<ActionCallConfig>> actionsGetter)
-            throws GenericActionCallSorter.CyclicDataDependencyException {
+            throws CyclicDataDependencyException {
 
         List<ActionCallConfig> allCalls = rules.stream()
                 .map(actionsGetter)

@@ -3,6 +3,7 @@ package rocks.inspectit.ocelot.core.instrumentation.config.callsorting;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import rocks.inspectit.ocelot.config.model.instrumentation.actions.ActionCallSettings;
+import rocks.inspectit.ocelot.config.model.instrumentation.actions.OrderSettings;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.ActionCallConfig;
 
 import java.util.Collection;
@@ -38,6 +39,15 @@ class CallDependencies {
     @Getter
     private Set<String> readsBeforeWritten = new HashSet<>();
 
+    private CallDependencies(ActionCallConfig call) {
+        source = call;
+        collectImplicitDependencies();
+        //explicit dependencies replace implicit ones
+        collectExplicitDependencies();
+        //"reads-before-overriden" takes precendence over "reads"
+        readsBeforeWritten.forEach(reads::remove);
+    }
+
     /**
      * Reads teh given action call configuration and extracts all dependencies.
      *
@@ -45,37 +55,31 @@ class CallDependencies {
      * @return the dependencies of the call.
      */
     static CallDependencies collectFor(ActionCallConfig call) {
-        CallDependencies result = new CallDependencies();
-        result.source = call;
-
-        collectImplicitDependencies(call, result);
-        //explicit dependencies replace the implicit ones from above
-        collectExplicitDependencies(call, result);
-
-        //"reads-before-overriden" takes precendence over "reads"
-        result.readsBeforeWritten.forEach(result.reads::remove);
-
-        return result;
+        return new CallDependencies(call);
     }
 
-    private static void collectImplicitDependencies(ActionCallConfig call, CallDependencies result) {
-        result.writes.add(call.getName());
-        ActionCallSettings settings = call.getCallSettings();
+    /**
+     * Collects dependencies which are not explicitly specified through {@link ActionCallSettings#getOrder()}.
+     * Implicit dependencies are for example data-inputs used by the action.
+     */
+    private void collectImplicitDependencies() {
+        writes.add(source.getName());
+        ActionCallSettings settings = source.getCallSettings();
 
-        addIfNotBlank(settings.getOnlyIfFalse(), result.reads);
-        addIfNotBlank(settings.getOnlyIfTrue(), result.reads);
-        addIfNotBlank(settings.getOnlyIfNotNull(), result.reads);
-        addIfNotBlank(settings.getOnlyIfNull(), result.reads);
+        addIfNotBlank(settings.getOnlyIfFalse(), reads);
+        addIfNotBlank(settings.getOnlyIfTrue(), reads);
+        addIfNotBlank(settings.getOnlyIfNotNull(), reads);
+        addIfNotBlank(settings.getOnlyIfNull(), reads);
 
-        settings.getDataInput().values().forEach(key -> addIfNotBlank(key, result.reads));
+        settings.getDataInput().values().forEach(key -> addIfNotBlank(key, reads));
     }
 
-    private static void collectExplicitDependencies(ActionCallConfig call, CallDependencies result) {
-        ActionCallSettings settings = call.getCallSettings();
+    private void collectExplicitDependencies() {
+        OrderSettings order = source.getCallSettings().getOrder();
 
-        settings.getWrites().forEach((data, written) -> addOrRemove(data, written, result.writes));
-        settings.getReads().forEach((data, read) -> addOrRemove(data, read, result.reads));
-        settings.getReadsBeforeWritten().forEach((data, read) -> addOrRemove(data, read, result.readsBeforeWritten));
+        order.getWrites().forEach((data, written) -> addOrRemove(data, written, writes));
+        order.getReads().forEach((data, read) -> addOrRemove(data, read, reads));
+        order.getReadsBeforeWritten().forEach((data, read) -> addOrRemove(data, read, readsBeforeWritten));
     }
 
 
