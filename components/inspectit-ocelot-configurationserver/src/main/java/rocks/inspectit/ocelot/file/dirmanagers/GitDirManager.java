@@ -36,7 +36,7 @@ import java.util.List;
 public class GitDirManager {
 
     private static final Charset ENCODING = StandardCharsets.UTF_8;
-    private static final String FILES_SUBFOLDER = "git/files";
+    private static final String FILES_SUBFOLDER = "git/mapping";
 
     /**
      * The path under which the file system accessible by this component lies.

@@ -82,8 +82,8 @@ public class AgentConfigurationManagerTest {
 
             doReturn(true).when(fileManager).exists(any());
             doReturn(false).when(fileManager).isDirectory(any());
-            doReturn("a: test").when(fileManager).readFile("test.yml");
-            doReturn("a: default").when(fileManager).readFile("default.yml");
+            doReturn("a: test").when(fileManager).readFile("test.yml", true);
+            doReturn("a: default").when(fileManager).readFile("default.yml", true);
 
             init();
 
@@ -107,7 +107,7 @@ public class AgentConfigurationManagerTest {
 
             doReturn(true).when(fileManager).exists(any());
             doReturn(false).when(fileManager).isDirectory(any());
-            doReturn("a: test").when(fileManager).readFile("test.yml");
+            doReturn("a: test").when(fileManager).readFile("test.yml", true);
 
             init();
 

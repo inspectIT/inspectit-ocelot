@@ -29,7 +29,7 @@ public class YamlLoaderTest {
         public void testLoadYaml() throws IOException {
             String testPath = "mockPath";
             String mockObject = "mock";
-            when(fileManager.readFile(any())).thenReturn(mockObject);
+            when(fileManager.readFile(any(), any())).thenReturn(mockObject);
 
             assertThat(yamlLoader.loadYaml(testPath)).isEqualTo(mockObject);
         }
@@ -37,7 +37,7 @@ public class YamlLoaderTest {
         @Test
         public void fileManagerReturnsNull() throws IOException {
             String testPath = "mockPath";
-            when(fileManager.readFile(any())).thenReturn(null);
+            when(fileManager.readFile(any(), any())).thenReturn(null);
 
             assertThat(yamlLoader.loadYaml(testPath)).isEqualTo(null);
         }
