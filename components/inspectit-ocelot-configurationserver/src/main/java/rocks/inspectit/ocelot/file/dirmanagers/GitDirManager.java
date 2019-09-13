@@ -80,7 +80,7 @@ public class GitDirManager {
     }
 
     private boolean isFirstGitInit() {
-        return !Files.exists(Paths.get(config.getWorkingDirectory()).resolve("git/lol").toAbsolutePath().normalize());
+        return !(Files.exists(Paths.get(config.getWorkingDirectory()).resolve("git/.git").toAbsolutePath().normalize()));
     }
 
     /**
