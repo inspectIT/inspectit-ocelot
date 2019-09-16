@@ -22,34 +22,35 @@ public class PropertyNamesValidatorTest {
         void wrongProperty() {
             String property = "inspectit.iDoNotExist";
 
-            assertThat(validator.checkPropertyName(property)).isEqualTo(false);
+            assertThat(validator.isInvalidPropertyName(property)).isEqualTo(false);
         }
 
         @Test
         void correctPropertyButNotAtPathEnd() {
             String property = "inspectit.service-name";
 
-            assertThat(validator.checkPropertyName(property)).isEqualTo(true);
+            assertThat(validator.isInvalidPropertyName(property)).isEqualTo(true);
         }
 
         @Test
         void emptyString() {
             String property = "";
 
-            assertThat(validator.checkPropertyName(property)).isEqualTo(false);
+            assertThat(validator.isInvalidPropertyName(property)).isEqualTo(false);
         }
 
         @Test
         void noneInspectitInput() {
             String property = "thisHasNothingToDoWithInspectit";
 
-            assertThat(validator.checkPropertyName(property)).isEqualTo(false);
+            assertThat(validator.isInvalidPropertyName(property)).isEqualTo(false);
         }
 
         @Test
         void endsInWildcardType() {
+            String property = "inspectit.instrumentation.actions.string_replace_all.input.regex";
 
-            assertThat(validator.checkPropertyName("inspectit.instrumentation.actions.string_replace_all.input.regex")).isEqualTo(true);
+            assertThat(validator.isInvalidPropertyName(property)).isEqualTo(true);
         }
     }
 }
