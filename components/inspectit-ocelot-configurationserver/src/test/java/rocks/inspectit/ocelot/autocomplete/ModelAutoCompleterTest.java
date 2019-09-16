@@ -61,6 +61,7 @@ public class ModelAutoCompleterTest {
                     "instrumentation",
                     "logging",
                     "metrics",
+                    "publish-open-census-to-bootstrap",
                     "self-monitoring",
                     "service-name",
                     "tags",
@@ -112,10 +113,12 @@ public class ModelAutoCompleterTest {
                     "instrumentation",
                     "logging",
                     "metrics",
+                    "publish-open-census-to-bootstrap",
                     "self-monitoring",
                     "service-name",
                     "tags",
                     "thread-pool-size",
+
                     "tracing");
 
             assertThat(completer.getProperties(InspectitConfig.class)).isEqualTo(output);
