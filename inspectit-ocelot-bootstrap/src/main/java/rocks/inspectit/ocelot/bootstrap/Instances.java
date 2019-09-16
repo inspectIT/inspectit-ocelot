@@ -24,6 +24,12 @@ public class Instances {
      */
     public static URL BOOTSTRAP_JAR_URL;
 
+    /**
+     * Contains the URL pointing to the agent-jar file containing with which the target application was started.
+     * The AgentMain class is responsible for setting the value correctly.
+     */
+    public static URL AGENT_JAR_URL;
+
     public static IContextManager contextManager = NoopContextManager.INSTANCE;
 
     public static IHookManager hookManager = NoopHookManager.INSTANCE;

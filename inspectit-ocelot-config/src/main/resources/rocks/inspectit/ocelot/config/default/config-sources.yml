@@ -20,6 +20,8 @@ inspectit:
     http:
       # the url of the http endpoint to query the configuration
       url:
+      # a file used to persist the fetched HTTP config. Ensures that the last config is used in case of a JVM restart
+      persistence-file: ${inspectit.env.jar-dir}/${inspectit.service-name}/last-http-config.yml
       # whether the http property source should be used
       enabled: true
       # the frequency of polling the http endpoint to check for configuration changes

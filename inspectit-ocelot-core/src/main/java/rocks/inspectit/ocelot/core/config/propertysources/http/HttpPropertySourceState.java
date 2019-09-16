@@ -6,7 +6,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
@@ -22,6 +21,11 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.FileTime;
+import java.util.Date;
 import java.util.Properties;
 
 /**
@@ -80,10 +84,11 @@ public class HttpPropertySourceState {
      * created which can be accessed using {@link #getCurrentPropertySource()}. In case of an error or if the server responds
      * that the configuration has not be changed the property source will not be updated!
      *
+     * @param fallBackToFile if true, the configured persisted configuration will be loaded in case of an error
      * @return returns true if a new property source has been created, otherwise false.
      */
-    public boolean update() {
-        String configuration = fetchConfiguration();
+    public boolean update(boolean fallBackToFile) {
+        String configuration = fetchConfiguration(fallBackToFile);
         if (configuration != null) {
             try {
                 Properties properties = parseProperties(configuration);
@@ -144,7 +149,7 @@ public class HttpPropertySourceState {
      * @return The requests response body representing the configuration in a JSON format. null is returned if request fails or the
      * server returns 304 (not modified).
      */
-    private String fetchConfiguration() {
+    private String fetchConfiguration(boolean fallBackToFile) {
         HttpGet httpGet;
         try {
             URI uri = getEffectiveRequestUri();
@@ -164,13 +169,16 @@ public class HttpPropertySourceState {
 
         try {
             HttpResponse response = createHttpClient().execute(httpGet);
-            return processHttpResponse(response);
-        } catch (ClientProtocolException e) {
-            log.error("HTTP protocol error occurred while fetching configuration.", e);
-        } catch (IOException e) {
-            log.error("A connection problem occurred while fetching configuration.", e);
+            String newConfig = processHttpResponse(response);
+            if (newConfig != null) {
+                writePersistenceFile(newConfig);
+            }
+            return newConfig;
         } catch (Exception e) {
             log.error("Exception occurred while fetching configuration.", e);
+            if (fallBackToFile) {
+                return loadPersistenceFile();
+            }
         } finally {
             httpGet.releaseConnection();
         }
@@ -196,8 +204,8 @@ public class HttpPropertySourceState {
      * If the response contains a 'Last-Modified' header, its value will be stored.
      *
      * @param response the HTTP response object
-     * @return the response body or null in case of an error or if the server sends 304 (not modified)
-     * @throws IOException if an error occurs reading the input stream
+     * @return the response body or null in case server sends 304 (not modified)
+     * @throws IOException if an error occurs reading the input stream or if the server returned an unexpected status code
      */
     private String processHttpResponse(HttpResponse response) throws IOException {
         int statusCode = response.getStatusLine().getStatusCode();
@@ -219,15 +227,50 @@ public class HttpPropertySourceState {
                 latestETag = null;
             }
 
-            log.debug("Configuration has successfully been fetched.");
+            log.info("HTTP Configuration has successfully been fetched.");
 
             return responseBody;
         } else if (statusCode == HttpStatus.SC_NOT_MODIFIED) {
             log.debug("Server returned 304 - configuration has not been changed since the last time.");
             return null;
         } else {
-            log.warn("Server returned an unexpected status code: " + statusCode);
-            return null;
+            throw new IOException("Server returned an unexpected status code: " + statusCode);
         }
     }
+
+    private void writePersistenceFile(String content) {
+        try {
+            String file = currentSettings.getPersistenceFile();
+            if (!StringUtils.isBlank(file)) {
+                log.debug("Writing HTTP Configuration persistence file '{}'", file);
+                Path path = Paths.get(file);
+                Files.createDirectories(path.getParent());
+                Files.write(path, content.getBytes(StandardCharsets.UTF_8));
+            }
+        } catch (Exception e) {
+            log.error("Could not write persistence file for HTTP-configuration", e);
+        }
+    }
+
+    private String loadPersistenceFile() {
+        String file = currentSettings.getPersistenceFile();
+        if (!StringUtils.isBlank(file)) {
+            Path path = Paths.get(file);
+            if (Files.exists(path)) {
+                try {
+                    byte[] content = Files.readAllBytes(path);
+                    FileTime lastModified = Files.getLastModifiedTime(path);
+                    log.info("Loading HTTP Configuration persistence file '{}' from {} as fallback", file, new Date(lastModified.toMillis()));
+                    return new String(content, StandardCharsets.UTF_8);
+                } catch (Exception e) {
+                    log.error("Error loading HTTP Configuration persistence file '{}'", file, e);
+                }
+            } else {
+                log.warn("HTTP Configuration persistence file '{}' not found, using default configuration", file);
+            }
+        }
+        return null;
+    }
+
+
 }

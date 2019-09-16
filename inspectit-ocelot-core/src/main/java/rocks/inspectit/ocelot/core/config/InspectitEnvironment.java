@@ -15,6 +15,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.config.ConfigSettings;
 import rocks.inspectit.ocelot.config.utils.CaseUtils;
+import rocks.inspectit.ocelot.core.config.propertysources.EnvironmentInformationPropertySource;
 import rocks.inspectit.ocelot.core.config.propertysources.file.DirectoryPropertySource;
 import rocks.inspectit.ocelot.core.config.propertysources.http.HttpPropertySourceState;
 import rocks.inspectit.ocelot.core.config.util.PropertyUtils;
@@ -51,6 +52,8 @@ public class InspectitEnvironment extends StandardEnvironment {
 
     private static final String DEFAULT_CONFIG_PATH = "default";
     public static final String DEFAULT_CONFIG_PROPERTYSOURCE_NAME = "inspectitDefaults";
+
+    private static final String INSPECTIT_ENV_PROPERTYSOURCE_NAME = "inspectitEnvironment";
 
     private static final String FALLBACK_CONFIG_PATH = "fallback";
     private static final String FALLBACK_CONFIG_PROPERTYSOURCE_NAME = "inspectitFallbackOverwrites";
@@ -147,6 +150,7 @@ public class InspectitEnvironment extends StandardEnvironment {
 
         PropertySource defaultSettings = loadAgentResourceYaml(DEFAULT_CONFIG_PATH, DEFAULT_CONFIG_PROPERTYSOURCE_NAME);
         propsList.addLast(defaultSettings);
+        propsList.addLast(new EnvironmentInformationPropertySource(INSPECTIT_ENV_PROPERTYSOURCE_NAME));
 
         Optional<ConfigSettings> appliedConfigSettings = initializeConfigurationSources(propsList);
 
@@ -303,7 +307,7 @@ public class InspectitEnvironment extends StandardEnvironment {
             } catch (URISyntaxException e) {
                 log.error("The syntax of the URL of the HTTP based configuration is not valid", e);
             }
-            httpSourceState.update();
+            httpSourceState.update(true);
             propsList.addBefore(InspectitEnvironment.DEFAULT_CONFIG_PROPERTYSOURCE_NAME, httpSourceState.getCurrentPropertySource());
         }
     }

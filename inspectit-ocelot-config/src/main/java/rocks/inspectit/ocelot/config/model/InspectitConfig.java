@@ -3,6 +3,7 @@ package rocks.inspectit.ocelot.config.model;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import rocks.inspectit.ocelot.config.model.config.ConfigSettings;
+import rocks.inspectit.ocelot.config.model.env.EnvironmentSettings;
 import rocks.inspectit.ocelot.config.model.exporters.ExportersSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.ocelot.config.model.logging.LoggingSettings;
@@ -97,6 +98,12 @@ public class InspectitConfig {
      * If true, OpenCensus will be loaded to the bootstrap and accessible by the target application.
      */
     private boolean publishOpenCensusToBootstrap;
+
+    /**
+     * Environment information.
+     * Usually not specified by the user, instead the values are populated by inspectIT on startup.
+     */
+    private EnvironmentSettings env;
 
     /**
      * Allows all nested configs to evaluate context sensitive config properties regarding their correctness.
