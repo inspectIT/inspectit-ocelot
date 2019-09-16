@@ -77,9 +77,9 @@ public class PropertyNamesValidator {
     private boolean isInvalidPath(ArrayList<String> parsedName) {
         Type t = PropertyPathHelper.getPathEndType(parsedName.subList(1, parsedName.size()), InspectitConfig.class);
         if (t == null) {
-            return false;
+            return true;
         }
-        return PropertyPathHelper.isTerminal(t) || PropertyPathHelper.isListOfTerminalTypes(t);
+        return !PropertyPathHelper.isTerminal(t) && !PropertyPathHelper.isListOfTerminalTypes(t);
     }
 
 }
