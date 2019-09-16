@@ -46,7 +46,6 @@ public class ModelAutoCompleterTest {
             List<String> output = Arrays.asList("advanced",
                     "interfaces",
                     "methods",
-                    "narrow-scope",
                     "superclass",
                     "type");
 
