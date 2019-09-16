@@ -40,7 +40,7 @@ public class PropertyNamesValidator {
                     .map(ps -> (EnumerablePropertySource) ps)
                     .flatMap(ps -> Arrays.stream(ps.getPropertyNames()))
                     .filter(ps -> isInvalidPropertyName(ps))
-                    .forEach(ps -> log.warn("Expression could not be resolved to a property: " + ps));
+                    .forEach(ps -> log.warn("The specified property '{}' does not exist! ", ps));
         });
     }
 
