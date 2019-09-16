@@ -4,6 +4,7 @@ plugins {
 
 
 apply plugin: 'java'
+compileJava.options.encoding = 'UTF-8'
 
 configurations {
     buildTools
