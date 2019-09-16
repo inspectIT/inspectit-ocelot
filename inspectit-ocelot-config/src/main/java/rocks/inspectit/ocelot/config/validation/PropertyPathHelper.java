@@ -91,11 +91,7 @@ public class PropertyPathHelper {
                         .findFirst();
         if (foundProperty.isPresent()) {
             Type propertyType;
-            if (foundProperty.get().getReadMethod() != null) {
-                propertyType = foundProperty.get().getReadMethod().getGenericReturnType();
-            } else {
-                propertyType = foundProperty.get().getPropertyType();
-            }
+            propertyType = foundProperty.get().getWriteMethod().getParameters()[0].getParameterizedType();
             return getPathEndType(propertyNames.subList(1, propertyNames.size()), propertyType);
         } else {
             return null;
