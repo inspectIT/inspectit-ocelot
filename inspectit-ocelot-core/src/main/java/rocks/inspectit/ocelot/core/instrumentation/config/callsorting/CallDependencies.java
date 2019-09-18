@@ -16,6 +16,16 @@ import java.util.Set;
  */
 class CallDependencies {
 
+    /**
+     * Reads teh given action call configuration and extracts all dependencies.
+     *
+     * @param call the call to analyze
+     * @return the dependencies of the call.
+     */
+    public static CallDependencies collectFor(ActionCallConfig call) {
+        return new CallDependencies(call);
+    }
+
     @Getter
     private ActionCallConfig source;
 
@@ -49,16 +59,6 @@ class CallDependencies {
     }
 
     /**
-     * Reads teh given action call configuration and extracts all dependencies.
-     *
-     * @param call the call to analyze
-     * @return the dependencies of the call.
-     */
-    static CallDependencies collectFor(ActionCallConfig call) {
-        return new CallDependencies(call);
-    }
-
-    /**
      * Collects dependencies which are not explicitly specified through {@link ActionCallSettings#getOrder()}.
      * Implicit dependencies are for example data-inputs used by the action.
      */
@@ -82,7 +82,6 @@ class CallDependencies {
         order.getReadsBeforeWritten().forEach((data, read) -> addOrRemove(data, read, readsBeforeWritten));
     }
 
-
     private static void addOrRemove(String value, boolean shouldBeContained, Collection<? super String> sink) {
         if (shouldBeContained) {
             sink.add(value);
@@ -96,5 +95,4 @@ class CallDependencies {
             sink.add(value);
         }
     }
-
 }

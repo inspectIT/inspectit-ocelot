@@ -24,7 +24,6 @@ import java.util.stream.Stream;
 @EqualsAndHashCode(callSuper = true)
 public class ActionCallSettings extends ConditionalActionSettings {
 
-
     /**
      * The name of the action.
      * References the defined actions in {@link InstrumentationSettings#getActions()}.
@@ -180,5 +179,4 @@ public class ActionCallSettings extends ConditionalActionSettings {
             return conversionService.convert(value, targetType);
         }
     }
-
 }

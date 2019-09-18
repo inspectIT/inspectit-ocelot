@@ -174,5 +174,4 @@ public class GenericActionCallSorter {
         result.add(current);
         stackTrace.remove(current);
     }
-
 }

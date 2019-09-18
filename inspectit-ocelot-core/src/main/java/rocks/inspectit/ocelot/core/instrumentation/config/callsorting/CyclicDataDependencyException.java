@@ -8,6 +8,7 @@ import java.util.List;
 @Value
 @EqualsAndHashCode(callSuper = true)
 public class CyclicDataDependencyException extends Exception {
+
     /**
      * A list of data keys representing the dependency cycle.
      */

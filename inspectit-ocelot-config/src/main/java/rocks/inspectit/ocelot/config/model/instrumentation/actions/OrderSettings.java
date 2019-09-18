@@ -27,7 +27,7 @@ public class OrderSettings {
 
     /**
      * Allows to explicitly define which data keys this call reads or does not read.
-     * Implicitly, all data keys used as {@link #dataInput} or in the conditions are marked as "read".
+     * Implicitly, all data keys used as 'dataInput' or in the conditions are marked as "read".
      * These implicit dependencies can be removed by adding them with the value "false" to this map.
      * Additional dependencies can be added with the value "true".
      * These dependencies influence the execution order of calls, e.g. calls reading data are executed
