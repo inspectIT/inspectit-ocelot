@@ -77,7 +77,10 @@ class HttpPropertySourceStateTest {
 
         @Test
         public void fetchingEmptyResponse() {
-            mockServer.stubFor(get(urlPathEqualTo("/")).willReturn(aResponse().withStatus(200).withBody("")));
+            mockServer.stubFor(get(urlPathEqualTo("/"))
+                    .willReturn(aResponse()
+                            .withStatus(200)
+                            .withBody("")));
 
             boolean updateResult = state.update();
 
