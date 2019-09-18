@@ -29,6 +29,7 @@ import java.util.Properties;
  */
 @Slf4j
 public class HttpPropertySourceState {
+    private static final Properties EMPTY_PROPERTY = new Properties();
 
     /**
      * The name used for the property source.
@@ -79,7 +80,7 @@ public class HttpPropertySourceState {
      */
     public boolean update() {
         String configuration = fetchConfiguration();
-        if (StringUtils.isNotBlank(configuration)) {
+        if (configuration != null) {
             try {
                 Properties properties = parseProperties(configuration);
                 currentPropertySource = new PropertiesPropertySource(name, properties);
@@ -100,6 +101,9 @@ public class HttpPropertySourceState {
      * @return the parsed {@link Properties} object
      */
     private Properties parseProperties(String rawProperties) {
+        if(StringUtils.isBlank(rawProperties)) {
+            return EMPTY_PROPERTY;
+        }
         try {
             return PropertyUtils.readJson(rawProperties);
         } catch (IOException e) {
