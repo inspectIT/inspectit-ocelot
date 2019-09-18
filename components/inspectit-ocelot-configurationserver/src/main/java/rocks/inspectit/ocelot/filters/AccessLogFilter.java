@@ -19,11 +19,14 @@ import javax.servlet.http.HttpServletRequest;
 /**
  * Filter for printing messages on authentication failure and success.
  * Does not directly inherit from {@link Filter} to ensure that spring does not automatically place it in the Filter chain.
- * Instead, the filter is manually registered in the right postion by the {@link rocks.inspectit.ocelot.security.config.SecurityConfiguration}.
+ * Instead, the filter is manually registered in the right position by the {@link rocks.inspectit.ocelot.security.config.SecurityConfiguration}.
  */
 @Slf4j
 @Component
 public class AccessLogFilter {
+
+    @Autowired
+    private InspectitServerSettings config;
 
     /**
      * The event listeners do not have access to the {@link HttpServletRequest}.
@@ -32,35 +35,47 @@ public class AccessLogFilter {
      */
     private ThreadLocal<String> requestIdentifier = new ThreadLocal<>();
 
-    @Autowired
-    private InspectitServerSettings config;
-
     @EventListener
     private void authSuccess(AuthenticationSuccessEvent event) {
         if (config.getSecurity().isAccessLog()) {
             String user = event.getAuthentication().getName();
-            log.info("'{}' accessed {}", user, requestIdentifier.get());
+            log.info("'{}' accessed '{}'", user, requestIdentifier.get());
         }
     }
 
-
-    //triggered on access with invalidcredentials
+    /**
+     * This event is triggered if an authentication fails due to bad credentials.
+     *
+     * @param event - the {@link AuthorizationFailureEvent}
+     */
     @EventListener
     private void authFailure(AuthorizationFailureEvent event) {
         handleAuthFailure(event.getAuthentication(), event.getAccessDeniedException());
     }
 
-    //triggered on anonymous access
+    /**
+     * This event is triggered if an authentication fails because no credentials have been provided.
+     *
+     * @param event the {@link AbstractAuthenticationFailureEvent}
+     */
     @EventListener
     private void authFailure(AbstractAuthenticationFailureEvent event) {
         handleAuthFailure(event.getAuthentication(), event.getException());
     }
 
-    private void handleAuthFailure(Authentication authentication, Exception authException) {
+    /**
+     * Handles and logs the failed authentications.
+     *
+     * @param authentication the {@link Authentication} used for requesting access
+     * @param exception      the reason why an authentication has failed
+     */
+    private void handleAuthFailure(Authentication authentication, Exception exception) {
         String url = requestIdentifier.get();
-        if (config.getSecurity().isAccessLog() && url != null) {
+        if (url != null) {
             requestIdentifier.remove();
-            log.info("Authentication ({}) failed for {}, Reason: {}", authentication.getName(), url, authException.getMessage());
+            if (config.getSecurity().isAccessLog()) {
+                log.info("Authentication ({}) failed for '{}': {}", authentication.getName(), url, exception.getMessage());
+            }
         }
     }
 
@@ -68,8 +83,8 @@ public class AccessLogFilter {
         return (ServletRequest request, ServletResponse response, FilterChain chain) -> {
             try {
                 if (request instanceof HttpServletRequest) {
-                    HttpServletRequest httpReq = (HttpServletRequest) request;
-                    requestIdentifier.set(httpReq.getMethod() + " " + httpReq.getServletPath());
+                    HttpServletRequest httpRequest = (HttpServletRequest) request;
+                    requestIdentifier.set(httpRequest.getMethod() + " " + httpRequest.getServletPath());
                 }
                 chain.doFilter(request, response);
             } finally {
