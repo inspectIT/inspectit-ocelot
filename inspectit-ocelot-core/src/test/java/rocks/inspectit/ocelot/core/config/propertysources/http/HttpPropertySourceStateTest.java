@@ -49,8 +49,10 @@ class HttpPropertySourceStateTest {
 
         @Test
         public void fetchingYaml() {
-            mockServer.stubFor(get(urlPathEqualTo("/")).willReturn(aResponse().withStatus(200)
-                    .withBody("inspectit:\n  service-name: test-name")));
+            mockServer.stubFor(get(urlPathEqualTo("/"))
+                    .willReturn(aResponse()
+                            .withStatus(200)
+                            .withBody("inspectit:\n  service-name: test-name")));
 
             boolean updateResult = state.update();
             PropertySource result = state.getCurrentPropertySource();
@@ -61,8 +63,10 @@ class HttpPropertySourceStateTest {
 
         @Test
         public void fetchingJson() {
-            mockServer.stubFor(get(urlPathEqualTo("/")).willReturn(aResponse().withStatus(200)
-                    .withBody("{\"inspectit\": {\"service-name\": \"test-name\"}}")));
+            mockServer.stubFor(get(urlPathEqualTo("/"))
+                    .willReturn(aResponse()
+                            .withStatus(200)
+                            .withBody("{\"inspectit\": {\"service-name\": \"test-name\"}}")));
 
             boolean updateResult = state.update();
             PropertySource result = state.getCurrentPropertySource();
@@ -82,8 +86,10 @@ class HttpPropertySourceStateTest {
 
         @Test
         public void multipleFetchingWithoutCaching() {
-            mockServer.stubFor(get(urlPathEqualTo("/")).willReturn(aResponse().withStatus(200)
-                    .withBody("{\"inspectit\": {\"service-name\": \"test-name\"}}")));
+            mockServer.stubFor(get(urlPathEqualTo("/"))
+                    .willReturn(aResponse()
+                            .withStatus(200)
+                            .withBody("{\"inspectit\": {\"service-name\": \"test-name\"}}")));
 
             boolean updateResultFirst = state.update();
             PropertySource resultFirst = state.getCurrentPropertySource();
@@ -100,11 +106,15 @@ class HttpPropertySourceStateTest {
 
         @Test
         public void usingLastModifiedHeader() {
-            mockServer.stubFor(get(urlPathEqualTo("/")).willReturn(aResponse().withStatus(200)
-                    .withBody("{\"inspectit\": {\"service-name\": \"test-name\"}}")
-                    .withHeader("Last-Modified", "last_modified_header")));
-            mockServer.stubFor(get(urlPathEqualTo("/")).withHeader("If-Modified-Since", equalTo("last_modified_header"))
-                    .willReturn(aResponse().withStatus(304)));
+            mockServer.stubFor(get(urlPathEqualTo("/"))
+                    .willReturn(aResponse()
+                            .withStatus(200)
+                            .withBody("{\"inspectit\": {\"service-name\": \"test-name\"}}")
+                            .withHeader("Last-Modified", "last_modified_header")));
+            mockServer.stubFor(get(urlPathEqualTo("/"))
+                    .withHeader("If-Modified-Since", equalTo("last_modified_header"))
+                    .willReturn(aResponse()
+                            .withStatus(304)));
 
             boolean updateResultFirst = state.update();
             PropertySource resultFirst = state.getCurrentPropertySource();
@@ -120,11 +130,15 @@ class HttpPropertySourceStateTest {
 
         @Test
         public void usingETagHeader() {
-            mockServer.stubFor(get(urlPathEqualTo("/")).willReturn(aResponse().withStatus(200)
-                    .withBody("{\"inspectit\": {\"service-name\": \"test-name\"}}")
-                    .withHeader("ETag", "etag_header")));
-            mockServer.stubFor(get(urlPathEqualTo("/")).withHeader("If-None-Match", matching("etag_header.*")) // regex required because this header can be different - e.g. Jetty adds "--gzip" to the ETag header value
-                    .willReturn(aResponse().withStatus(304)));
+            mockServer.stubFor(get(urlPathEqualTo("/"))
+                    .willReturn(aResponse()
+                            .withStatus(200)
+                            .withBody("{\"inspectit\": {\"service-name\": \"test-name\"}}")
+                            .withHeader("ETag", "etag_header")));
+            mockServer.stubFor(get(urlPathEqualTo("/"))
+                    .withHeader("If-None-Match", matching("etag_header.*")) // regex required because this header can be different - e.g. Jetty adds "--gzip" to the ETag header value
+                    .willReturn(aResponse()
+                            .withStatus(304)));
 
             boolean updateResultFirst = state.update();
             PropertySource resultFirst = state.getCurrentPropertySource();
@@ -140,7 +154,9 @@ class HttpPropertySourceStateTest {
 
         @Test
         public void serverReturnsError() {
-            mockServer.stubFor(get(urlPathEqualTo("/")).willReturn(aResponse().withStatus(500)));
+            mockServer.stubFor(get(urlPathEqualTo("/"))
+                    .willReturn(aResponse()
+                            .withStatus(500)));
 
             boolean updateResult = state.update();
             PropertySource result = state.getCurrentPropertySource();
@@ -177,8 +193,7 @@ class HttpPropertySourceStateTest {
 
             state = new HttpPropertySourceState("test-state", httpSettings);
 
-            assertThat(state.getEffectiveRequestUri()
-                    .toString()).isEqualTo("http://localhost:4242/endpoint?fixed=something&service=myservice");
+            assertThat(state.getEffectiveRequestUri().toString()).isEqualTo("http://localhost:4242/endpoint?fixed=something&service=myservice");
         }
     }
 }
