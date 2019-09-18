@@ -168,6 +168,12 @@ jobs:
             BODY=$(cat ~/inspectit/changelog/release_body.md)
             ghr -t ${GITHUB_TOKEN} -u inspectIT -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -n "Version ${CIRCLE_TAG}" -b "${BODY}" ${VERSION} ~/inspectit/artifacts/
 
+  publish_dashboards_to_marketplace:
+    docker:
+      - image: circleci/openjdk:8-jdk
+    working_directory: ~/inspectit/repo/inspectit-ocelot-demo/grafana/marketplace
+    steps:
+      - run: ~/inspectit/repo/resources/upload-all-dashboards.sh
   # Deploy pre-release documentation
   deploy-master-documentation:
     docker:
@@ -296,6 +302,11 @@ workflows:
       - generate_changelog:
           filters:
             <<: *filter_release
+          requires:
+            - checkout
+      - publish_dashboards_to_marketplace:
+          filters:
+            <<: *filter_release      
           requires:
             - checkout
       - publish_github_release:
