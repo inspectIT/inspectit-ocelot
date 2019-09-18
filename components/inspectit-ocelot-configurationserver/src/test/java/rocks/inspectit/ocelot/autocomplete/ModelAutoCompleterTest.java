@@ -46,7 +46,6 @@ public class ModelAutoCompleterTest {
             List<String> output = Arrays.asList("advanced",
                     "interfaces",
                     "methods",
-                    "narrow-scope",
                     "superclass",
                     "type");
 
@@ -61,6 +60,7 @@ public class ModelAutoCompleterTest {
                     "instrumentation",
                     "logging",
                     "metrics",
+                    "publish-open-census-to-bootstrap",
                     "self-monitoring",
                     "service-name",
                     "tags",
@@ -112,10 +112,12 @@ public class ModelAutoCompleterTest {
                     "instrumentation",
                     "logging",
                     "metrics",
+                    "publish-open-census-to-bootstrap",
                     "self-monitoring",
                     "service-name",
                     "tags",
                     "thread-pool-size",
+
                     "tracing");
 
             assertThat(completer.getProperties(InspectitConfig.class)).isEqualTo(output);

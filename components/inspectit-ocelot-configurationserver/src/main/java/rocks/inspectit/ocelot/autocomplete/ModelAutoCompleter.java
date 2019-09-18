@@ -48,8 +48,8 @@ public class ModelAutoCompleter implements AutoCompleter {
     @VisibleForTesting
     List<String> getProperties(Class<?> beanClass) {
         return Arrays.stream(BeanUtils.getPropertyDescriptors(beanClass))
+                .filter(propertyDescriptor -> propertyDescriptor.getWriteMethod() != null)
                 .map(PropertyDescriptor::getName)
-                .filter(p -> !CaseUtils.compareIgnoreCamelOrKebabCase(p, "class"))
                 .map(CaseUtils::camelCaseToKebabCase)
                 .collect(Collectors.toList());
     }

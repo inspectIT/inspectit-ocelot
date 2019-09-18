@@ -30,6 +30,12 @@ public class SecuritySettings {
     private LdapSettings ldap;
 
     /**
+     * If enabled, all authorized and unauthorized accesses attempts to secured endpoints will be logged.
+     */
+    @Builder.Default
+    private boolean accessLog = true;
+
+    /**
      * Verify that LDAP settings exist if LDAP is enabled.
      */
     @AssertFalse(message = "LDAP setting must not be null when LDAP authentication is enabled.")

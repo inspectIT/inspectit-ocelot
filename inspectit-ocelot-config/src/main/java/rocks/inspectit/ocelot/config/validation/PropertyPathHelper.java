@@ -6,6 +6,7 @@ import org.springframework.core.io.FileSystemResource;
 import rocks.inspectit.ocelot.config.utils.CaseUtils;
 
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.net.URL;
@@ -91,11 +92,11 @@ public class PropertyPathHelper {
                         .findFirst();
         if (foundProperty.isPresent()) {
             Type propertyType;
-            if (foundProperty.get().getReadMethod() != null) {
-                propertyType = foundProperty.get().getReadMethod().getGenericReturnType();
-            } else {
-                propertyType = foundProperty.get().getPropertyType();
+            Method writeMethod = foundProperty.get().getWriteMethod();
+            if (writeMethod == null) {
+                return null;
             }
+            propertyType = writeMethod.getParameters()[0].getParameterizedType();
             return getPathEndType(propertyNames.subList(1, propertyNames.size()), propertyType);
         } else {
             return null;

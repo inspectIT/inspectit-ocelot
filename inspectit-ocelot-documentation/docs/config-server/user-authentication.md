@@ -64,3 +64,14 @@ Each property is located below the property `inspectit.security.ldap`.
 | `user-search-filter` | The LDAP filter used to search for users. For example `(uid={0})`. |
 | `group-search-base` | The search base for group membership searches. |
 | `group-search-filter` | The LDAP filter to search for groups. |
+
+## Access Log
+
+By default, the server will log all authorized and unauthorized access attempts to secured endpoints.
+Access logging can be disabled using the following property:
+
+```YAML
+inspectit:
+    security:
+        access-log: false
+```
