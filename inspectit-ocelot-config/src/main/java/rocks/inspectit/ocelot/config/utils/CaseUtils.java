@@ -48,4 +48,17 @@ public class CaseUtils {
         return builder.toString();
     }
 
+    /**
+     * Compares two given Strings and checks if they are the same, ignores if the strings are written in different case-styles
+     *
+     * @param a the first string to be compared
+     * @param b the second string to be compared
+     * @return
+     */
+    public boolean compareIgnoreCamelOrKebabCase(String a, String b) {
+        a = CaseUtils.kebabCaseToCamelCase(a);
+        b = CaseUtils.kebabCaseToCamelCase(b);
+        return a.equalsIgnoreCase(b);
+    }
+
 }
