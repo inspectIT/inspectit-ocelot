@@ -107,7 +107,7 @@ dependencies {
             "org.springframework.ldap:spring-ldap-core",
             "org.springframework.security:spring-security-ldap",
             'org.springframework.boot:spring-boot-starter-actuator',
-            
+
             "org.xerial:sqlite-jdbc:3.28.0",
             "com.github.gwenn:sqlite-dialect:0.1.0",
 
@@ -120,7 +120,8 @@ dependencies {
             "io.springfox:springfox-swagger-ui:2.9.2",
             "commons-io:commons-io:2.6",
             "org.apache.commons:commons-lang3:3.+",
-            
+            "org.eclipse.jgit:org.eclipse.jgit:5.4.3.201909031940-r",
+
             "io.opencensus:opencensus-impl:${openCensusVersion}"
     )
     testImplementation(

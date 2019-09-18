@@ -9,9 +9,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
+import rocks.inspectit.ocelot.file.dirmanagers.GitDirManager;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,6 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class FileManagerTest {
@@ -29,8 +33,15 @@ public class FileManagerTest {
     private static final Path rootWorkDir = Paths.get("temp_test_workdir");
     private static final Path fmRoot = rootWorkDir.resolve("root");
 
+    private static final Charset ENCODING = StandardCharsets.UTF_8;
+    static final String FILES_SUBFOLDER = "files/configuration";
+
+
     @InjectMocks
     private FileManager fm;
+
+    @Mock
+    private GitDirManager gdm;
 
     @Mock
     ApplicationEventPublisher eventPublisher;
@@ -83,6 +94,11 @@ public class FileManagerTest {
         for (Path f : files) {
             Files.delete(f);
         }
+    }
+
+    private static String readFile(String path) throws IOException {
+        Path file = fmRoot.resolve(FILES_SUBFOLDER).resolve(path);
+        return new String(Files.readAllBytes(file), ENCODING);
     }
 
     @FunctionalInterface
@@ -190,6 +206,7 @@ public class FileManagerTest {
         @Test
         void createDirInRootDirect() throws Exception {
             setupTestFiles("topA", "topB");
+            when(gdm.commitAllChanges()).thenReturn(true);
 
             fm.createDirectory("myDir");
 
@@ -215,6 +232,7 @@ public class FileManagerTest {
         @Test
         void createDirInRootIndirect() throws Exception {
             setupTestFiles("topA", "topB");
+            when(gdm.commitAllChanges()).thenReturn(true);
 
             fm.createDirectory("topB/.././myDir");
 
@@ -240,6 +258,7 @@ public class FileManagerTest {
         @Test
         void createDirInSubFolder() throws Exception {
             setupTestFiles("topA", "topB");
+            when(gdm.commitAllChanges()).thenReturn(true);
 
             fm.createDirectory("topA/subA/subB");
 
@@ -273,6 +292,7 @@ public class FileManagerTest {
         @Test
         void createDirOnExistingDir() throws Exception {
             setupTestFiles("topA/subA", "topB");
+            when(gdm.commitAllChanges()).thenReturn(true);
 
             fm.createDirectory("topA/subA");
 
@@ -415,6 +435,7 @@ public class FileManagerTest {
         @Test
         void readEmptyFile() throws Exception {
             setupTestFiles("fileA=", "fileB=something");
+            when(gdm.readFile(any())).thenReturn("");
 
             assertThat(fm.readFile("fileA")).isEqualTo("");
             assertThat(fm.readFile("./fileA")).isEqualTo("");
@@ -423,30 +444,10 @@ public class FileManagerTest {
         @Test
         void readNonEmptyFile() throws Exception {
             setupTestFiles("fileA=", "sub/fileB=something\nsomething else");
+            when(gdm.readFile(any())).thenReturn("something\nsomething else");
 
             assertThat(fm.readFile("sub/fileB")).isEqualTo("something\nsomething else");
             assertThat(fm.readFile("./sub/../sub/fileB")).isEqualTo("something\nsomething else");
-        }
-
-
-        @Test
-        void readDirectory() {
-            setupTestFiles("dirA");
-
-            assertThatThrownBy(() -> fm.readFile("dirA"))
-                    .isInstanceOf(AccessDeniedException.class);
-        }
-
-        @Test
-        void verifyFilesOutsideWorkdirNotAccessible() {
-            setupTestFiles("top");
-
-            assertThatThrownBy(() -> fm.readFile("../someFile"))
-                    .isInstanceOf(AccessDeniedException.class);
-            assertThatThrownBy(() -> fm.readFile("top/../../foo"))
-                    .isInstanceOf(AccessDeniedException.class);
-            assertThatThrownBy(() -> fm.readFile("../../bar"))
-                    .isInstanceOf(AccessDeniedException.class);
         }
     }
 
@@ -457,20 +458,22 @@ public class FileManagerTest {
         @Test
         void createNewFileInRootDirectory() throws Exception {
             setupTestFiles("fileA=foo", "topB");
+            when(gdm.commitAllChanges()).thenReturn(true);
 
             fm.createOrReplaceFile("myFile", "content");
 
-            assertThat(fm.readFile("myFile")).isEqualTo("content");
+            assertThat(readFile("myFile")).isEqualTo("content");
             verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
         }
 
         @Test
         void createNewFileInSubDirectory() throws Exception {
             setupTestFiles("fileA=foo", "topB");
+            when(gdm.commitAllChanges()).thenReturn(true);
 
             fm.createOrReplaceFile("topB/../topB/./sub/myFile", "content");
 
-            assertThat(fm.readFile("topB/sub/myFile")).isEqualTo("content");
+            assertThat(readFile("topB/sub/myFile")).isEqualTo("content");
             verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
         }
 
@@ -478,20 +481,22 @@ public class FileManagerTest {
         @Test
         void removeFileContent() throws Exception {
             setupTestFiles("fileA=foo", "topB");
+            when(gdm.commitAllChanges()).thenReturn(true);
 
             fm.createOrReplaceFile("fileA", "");
 
-            assertThat(fm.readFile("fileA")).isEqualTo("");
+            assertThat(readFile("fileA")).isEqualTo("");
             verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
         }
 
         @Test
         void replaceFileContent() throws Exception {
             setupTestFiles("topA/fileA=foo", "topB");
+            when(gdm.commitAllChanges()).thenReturn(true);
 
             fm.createOrReplaceFile("topA/fileA", "bar");
 
-            assertThat(fm.readFile("topA/fileA")).isEqualTo("bar");
+            assertThat(readFile("topA/fileA")).isEqualTo("bar");
             verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
         }
 
@@ -623,6 +628,7 @@ public class FileManagerTest {
         @Test
         void renameFile() throws Exception {
             setupTestFiles("top", "foo=foo");
+            when(gdm.commitAllChanges()).thenReturn(true);
 
             fm.move("foo", "bar");
 
@@ -636,7 +642,7 @@ public class FileManagerTest {
                         assertThat(f.getType()).isEqualTo(FileInfo.Type.FILE);
                         assertThat(f.getName()).isEqualTo("bar");
                     });
-            assertThat(fm.readFile("bar")).isEqualTo("foo");
+            assertThat(readFile("bar")).isEqualTo("foo");
             verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
         }
 
@@ -644,6 +650,7 @@ public class FileManagerTest {
         @Test
         void renameFolder() throws Exception {
             setupTestFiles("top", "foo/sub/something=text");
+            when(gdm.commitAllChanges()).thenReturn(true);
 
             fm.move("foo/sub", "foo/bar");
 
@@ -670,13 +677,14 @@ public class FileManagerTest {
                                             });
                                 });
                     });
-            assertThat(fm.readFile("foo/bar/something")).isEqualTo("text");
+            assertThat(readFile("foo/bar/something")).isEqualTo("text");
             verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
         }
 
         @Test
         void moveDirectoryWithContents() throws Exception {
             setupTestFiles("top", "foo/sub/something=text", "foo/sub/a/b");
+            when(gdm.commitAllChanges()).thenReturn(true);
 
             fm.move("foo/sub", "sub");
 
@@ -711,7 +719,7 @@ public class FileManagerTest {
                                     assertThat(f2.getName()).isEqualTo("something");
                                 });
                     });
-            assertThat(fm.readFile("sub/something")).isEqualTo("text");
+            assertThat(readFile("sub/something")).isEqualTo("text");
             verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
         }
 
@@ -719,6 +727,7 @@ public class FileManagerTest {
         @Test
         void moveFile() throws Exception {
             setupTestFiles("file=");
+            when(gdm.commitAllChanges()).thenReturn(true);
 
             fm.move("file", "a/b/file");
 
@@ -740,7 +749,7 @@ public class FileManagerTest {
                                             });
                                 });
                     });
-            assertThat(fm.readFile("a/b/file")).isEqualTo("");
+            assertThat(readFile("a/b/file")).isEqualTo("");
             verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
         }
 

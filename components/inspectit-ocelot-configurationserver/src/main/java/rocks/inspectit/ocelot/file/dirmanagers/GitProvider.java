@@ -39,7 +39,7 @@ import java.util.List;
 public class GitProvider {
 
     private static final Charset ENCODING = StandardCharsets.UTF_8;
-    private static final String FILES_SUBFOLDER = "git";
+    private static final String FILES_SUBFOLDER = "files";
     private Path filesRoot;
 
     @VisibleForTesting
@@ -61,7 +61,7 @@ public class GitProvider {
     void init() {
         try {
             boolean isFirstInit = isFirstGitInit();
-            Path filesRoot = Paths.get(config.getWorkingDirectory()).resolve("git").toAbsolutePath().normalize();
+            Path filesRoot = Paths.get(config.getWorkingDirectory()).resolve("files").toAbsolutePath().normalize();
             Files.createDirectories(filesRoot);
             File localPath = new File(String.valueOf(filesRoot));
             filesRoot = Paths.get(config.getWorkingDirectory()).resolve(FILES_SUBFOLDER).toAbsolutePath().normalize();
@@ -164,11 +164,11 @@ public class GitProvider {
                 if (isInPath(treeWalk, filePrefix)) {
                     String fileName = treeWalk.getPathString();
                     if (specialFiles) {
-                        if (!fileName.startsWith("files")) {
+                        if (!fileName.startsWith("configuration")) {
                             filesFromLastCommit.add(fileName.replace(filePrefix, ""));
                         }
                     } else {
-                        if (fileName.startsWith("files")) {
+                        if (fileName.startsWith("configuration")) {
                             filesFromLastCommit.add(fileName.replace(filePrefix, ""));
                         }
                     }

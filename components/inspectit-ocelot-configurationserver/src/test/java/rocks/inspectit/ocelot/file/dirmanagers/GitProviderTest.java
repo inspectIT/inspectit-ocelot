@@ -31,7 +31,7 @@ public class GitProviderTest {
 
     private static final Path rootWorkDir = Paths.get("temp_test_workdir");
     private static final Path fmRoot = rootWorkDir.resolve("root");
-    private static final String FILES_SUBFOLDER = "git";
+    private static final String FILES_SUBFOLDER = "files";
 
     @InjectMocks
     GitProvider gitProvider;
@@ -53,7 +53,7 @@ public class GitProviderTest {
     }
 
     private void initTestGit(InspectitServerSettings config) throws IOException, GitAPIException {
-        Path filesRoot = Paths.get(config.getWorkingDirectory()).resolve("git").toAbsolutePath().normalize();
+        Path filesRoot = Paths.get(config.getWorkingDirectory()).resolve("files").toAbsolutePath().normalize();
         Files.createDirectories(filesRoot);
         File localPath = new File(String.valueOf(filesRoot));
         filesRoot = Paths.get(config.getWorkingDirectory()).resolve(FILES_SUBFOLDER).toAbsolutePath().normalize();
@@ -125,8 +125,8 @@ public class GitProviderTest {
         @Test
         void testCommit() throws GitAPIException, IOException {
             setupTestFiles(false, "/a");
-            setupTestFiles(true, "git/b");
-            List<String> output = Arrays.asList("b", "files/a");
+            setupTestFiles(true, "files/b");
+            List<String> output = Arrays.asList("b", "configuration/a");
             gitProvider.commitAllChanges();
             List<String> fileList = gitProvider.listFiles("", true);
             fileList.addAll(gitProvider.listFiles("", false));
@@ -140,9 +140,9 @@ public class GitProviderTest {
         @Test
         void singleFileCommit() throws IOException, GitAPIException {
             createFileWithContent("/a", "testContent");
-            gitProvider.commitFile("files");
+            gitProvider.commitFile("configuration");
 
-            assertThat(gitProvider.readFile("files/a")).isEqualTo("testContent");
+            assertThat(gitProvider.readFile("configuration/a")).isEqualTo("testContent");
         }
     }
 
@@ -151,9 +151,9 @@ public class GitProviderTest {
         @Test
         void testlistSpecialFiles() throws GitAPIException, IOException {
             setupTestFiles(false, "/a");
-            setupTestFiles(true, "git/b");
+            setupTestFiles(true, "files/b");
             git.add().addFilepattern("b").call();
-            git.add().addFilepattern("files/a").call();
+            git.add().addFilepattern("configuration/a").call();
             git.commit().setAll(true)
                     .setMessage("testCommit")
                     .call();
@@ -168,23 +168,23 @@ public class GitProviderTest {
         @Test
         void readExistingFile() throws IOException, GitAPIException {
             createFileWithContent("/a", "testContent");
-            git.add().addFilepattern("files/a").call();
+            git.add().addFilepattern(".").call();
             git.commit().setAll(true)
                     .setMessage("testCommit")
                     .call();
 
-            assertThat(gitProvider.readFile("files/a")).isEqualTo("testContent");
+            assertThat(gitProvider.readFile("configuration/a")).isEqualTo("testContent");
         }
 
         @Test
         void readNonExistingFile() throws IOException, GitAPIException {
             createFileWithContent("/a", "testContent");
-            git.add().addFilepattern("files/a").call();
+            git.add().addFilepattern("configuration/a").call();
             git.commit().setAll(true)
                     .setMessage("testCommit")
                     .call();
 
-            assertThat(gitProvider.readFile("files/b")).isEqualTo(null);
+            assertThat(gitProvider.readFile("configuration/b")).isEqualTo(null);
         }
     }
 

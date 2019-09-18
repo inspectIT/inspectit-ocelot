@@ -22,9 +22,9 @@ public class GitDirManager {
      */
     private static final String AGENT_MAPPINGS_FILE = "agent_mappings.yaml";
 
-    private static final String FILES_SUBFOLDER = "git/files";
+    private static final String FILES_SUBFOLDER = "files/configuration";
 
-    private static final String FILE_PREFIX = "files/";
+    private static final String FILE_PREFIX = "configuration/";
 
     /**
      * The path under which the file system accessible by this component lies.
@@ -46,7 +46,7 @@ public class GitDirManager {
     @VisibleForTesting
     void init() {
         try {
-            filesRoot = Paths.get(config.getWorkingDirectory()).resolve("git/files").toAbsolutePath().normalize();
+            filesRoot = Paths.get(config.getWorkingDirectory()).resolve("files/configuration").toAbsolutePath().normalize();
             Files.createDirectories(filesRoot);
             filesRoot = Paths.get(config.getWorkingDirectory()).resolve(FILES_SUBFOLDER).toAbsolutePath().normalize();
             Files.createDirectories(filesRoot);
@@ -73,7 +73,7 @@ public class GitDirManager {
      * @throws IOException
      */
     public boolean commitFiles() throws GitAPIException, IOException {
-        gitProvider.commitFile("files/");
+        gitProvider.commitFile("configuration/");
         return true;
     }
 

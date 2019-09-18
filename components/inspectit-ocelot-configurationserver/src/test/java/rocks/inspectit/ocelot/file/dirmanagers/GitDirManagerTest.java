@@ -51,7 +51,6 @@ public class GitDirManagerTest {
         gp = new GitProvider();
         gp.config = conf;
         gp.init();
-        //   gdm.workingDirManager = wdm;
         gdm.gitProvider = gp;
         gdm.config = conf;
         gdm.init();
@@ -129,6 +128,7 @@ public class GitDirManagerTest {
             List<String> afterCommit = Arrays.asList("a", "b", "c");
 
             gdm.commitAllChanges();
+
             assertThat(beforeCommit).isNotEqualTo(afterCommit);
             assertThat(gdm.listFiles()).isEqualTo(afterCommit);
         }
@@ -185,6 +185,7 @@ public class GitDirManagerTest {
             createFileWithContent("dummyFile", "But this is one =)");
 
             gdm.commitAgentMappingFile();
+
             String agentMappingContent = gdm.readAgentMappingFile();
             String dummyFileContent = gdm.readFile("dummyFile");
             boolean agentMappingChanged = "This is not an easter egg!".equals(agentMappingContent);
@@ -202,6 +203,7 @@ public class GitDirManagerTest {
             createFileWithContent("dummyFile", "But this is one =)");
 
             gdm.commitAgentMappingFile();
+
             String agentMappingContent = gdm.readAgentMappingFile();
             String dummyFileContent = gdm.readFile("dummyFile");
             boolean agentMappingChanged = "This is not an easter egg!".equals(agentMappingContent);
@@ -223,6 +225,7 @@ public class GitDirManagerTest {
             createFileWithContent("dummyFile", "But this is one =)");
 
             gdm.commitFiles();
+
             String agentMappingContent = gdm.readAgentMappingFile();
             String dummyFileContent = gdm.readFile("dummyFile");
             boolean agentMappingChanged = "Hello World!".equals(agentMappingContent);

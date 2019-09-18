@@ -36,10 +36,10 @@ public class WorkingDirManager {
      * filesRoot for the files and directories managed by this class.
      */
     @VisibleForTesting
-    static final String FILES_SUBFOLDER = "git/files";
+    static final String FILES_SUBFOLDER = "files/configuration";
 
     @VisibleForTesting
-    static final String AGENT_MAPPING_SUBFOLDER = "git";
+    static final String AGENT_MAPPING_SUBFOLDER = "files";
 
     @VisibleForTesting
     static final Charset ENCODING = StandardCharsets.UTF_8;

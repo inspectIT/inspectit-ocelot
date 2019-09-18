@@ -34,7 +34,7 @@ public class FileManager {
      * filesRoot for the files and directories managed by this class.
      */
     @VisibleForTesting
-    static final String FILES_SUBFOLDER = "git/files";
+    static final String FILES_SUBFOLDER = "files/configuration";
 
     @VisibleForTesting
     static final Charset ENCODING = StandardCharsets.UTF_8;
@@ -378,8 +378,7 @@ public class FileManager {
      */
     public boolean commitAllChanges() {
         try {
-            gitDirManager.commitAllChanges();
-            return true;
+            return gitDirManager.commitAllChanges();
         } catch (GitAPIException e) {
             e.printStackTrace();
             log.error("An error occurred while committing files to git directory");
