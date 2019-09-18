@@ -3,11 +3,14 @@ package rocks.inspectit.ocelot.file;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
+import rocks.inspectit.ocelot.file.dirmanagers.GitDirManager;
+import rocks.inspectit.ocelot.file.dirmanagers.WorkingDirManager;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
@@ -31,7 +34,7 @@ public class FileManager {
      * filesRoot for the files and directories managed by this class.
      */
     @VisibleForTesting
-    static final String FILES_SUBFOLDER = "files";
+    static final String FILES_SUBFOLDER = "git/files";
 
     @VisibleForTesting
     static final Charset ENCODING = StandardCharsets.UTF_8;
@@ -42,6 +45,12 @@ public class FileManager {
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
+
+    @Autowired
+    private GitDirManager gitDirManager;
+
+    @Autowired
+    private WorkingDirManager workingDirManager;
 
     /**
      * The path under which the file system accessible by this component lies.
@@ -89,6 +98,31 @@ public class FileManager {
     }
 
     /**
+     * Returns all file names found in the files folder, either from the last commit or the working directory
+     *
+     * @param fromWorkingDir if true, the entire file tree within this directory is returned. Otherwise the last committed
+     *                       file tree is returned
+     * @return the given file names as a List of type String
+     */
+    public synchronized List<String> listFiles(boolean fromWorkingDir) {
+        if (fromWorkingDir) {
+            try {
+                return workingDirManager.listFiles("");
+            } catch (IOException e) {
+                log.error("An error occurred while listing files in working directory");
+                return null;
+            }
+        } else {
+            try {
+                return gitDirManager.listFiles();
+            } catch (IOException e) {
+                log.error("An error occurred while listing files from git directory");
+                return null;
+            }
+        }
+    }
+
+    /**
      * @param path the path to check
      * @return true if the given path denotes a directory
      * @throws AccessDeniedException if access is forbidden
@@ -120,6 +154,7 @@ public class FileManager {
 
         FileUtils.forceMkdir(dir.toFile());
         fireFileChangeEvent();
+        commitAllChanges();
     }
 
     /**
@@ -141,19 +176,73 @@ public class FileManager {
     }
 
     /**
-     * Reads the given file content into a string
+     * Reads the given file's content as it is found in the working directory as string
      *
-     * @param path the path of the file
+     * @param filePath the path of the file
      * @return the files content
      * @throws IOException if the file could not be read
      */
-    public synchronized String readFile(String path) throws IOException {
-        assertValidSubPath(path);
-        Path file = filesRoot.resolve(path);
-        if (Files.exists(file) && !Files.isRegularFile(file)) {
-            throw new AccessDeniedException(path + " is a directory!");
+    public synchronized String readFile(String filePath) {
+        return readFile(filePath, false);
+    }
+
+    /**
+     * Reads the given file's content as string. Can either read the file as it is currently found in the working directory
+     * or last committed version of the file.
+     *
+     * @param fromWorkingDir if true, the file as it is currently stored in the working directory is returned. Otherwise,
+     *                       the file as it was last committed is returned.
+     * @param filePath       the path of the file
+     * @return the files content
+     * @throws IOException if the file could not be read
+     */
+    public synchronized String readFile(String filePath, boolean fromWorkingDir) {
+        if (fromWorkingDir) {
+            try {
+                return workingDirManager.readFile(filePath);
+            } catch (IOException e) {
+                log.error("Could not read file: {}", filePath);
+                return null;
+            }
+        } else {
+            try {
+                return gitDirManager.readFile(filePath);
+            } catch (IOException e) {
+                log.error("Could not read file: {}", filePath);
+                return null;
+            }
         }
-        return new String(Files.readAllBytes(file), ENCODING);
+    }
+
+
+    public synchronized String readAgentMapping() {
+        return readAgentMapping(false);
+    }
+
+    /**
+     * Reads the agent
+     *
+     * @param fromWorkingDir if true, the file as it is currently stored in the working directory is returned. Otherwise,
+     *                       the file as it was last committed is returned.
+     * @return the files content
+     * @throws IOException if the file could not be read
+     */
+    public synchronized String readAgentMapping(boolean fromWorkingDir) {
+        if (fromWorkingDir) {
+            try {
+                return workingDirManager.readAgentMappingFile();
+            } catch (IOException e) {
+                log.error("Could not read AgentMapping from disk");
+                return null;
+            }
+        } else {
+            try {
+                return gitDirManager.readAgentMappingFile();
+            } catch (IOException e) {
+                log.error("Could not read AgentMapping from last git commit");
+                return null;
+            }
+        }
     }
 
     /**
@@ -164,7 +253,7 @@ public class FileManager {
      * @param content the content of the file
      * @throws IOException if the file could not be written
      */
-    public synchronized void createOrReplaceFile(String path, String content) throws IOException {
+    public synchronized void createOrReplaceFile(String path, String content) throws IOException, GitAPIException {
         assertValidSubPath(path);
         Path file = filesRoot.resolve(path);
         if (Files.exists(file) && !Files.isRegularFile(file)) {
@@ -173,6 +262,20 @@ public class FileManager {
         FileUtils.forceMkdir(file.getParent().toFile());
         Files.write(file, content.getBytes(ENCODING));
         fireFileChangeEvent();
+        commitAllChanges();
+    }
+
+    /**
+     * Creates or replaces the file under the given path with the given content.
+     * If required, parent directories are automatically created.
+     *
+     * @param path    the path of the file
+     * @param content the content of the file
+     * @throws IOException if the file could not be written
+     */
+    public synchronized void writeFile(String path, String content) throws IOException, GitAPIException {
+        workingDirManager.writeFile(path, content);
+        //commitAllChanges();
     }
 
     /**
@@ -200,7 +303,7 @@ public class FileManager {
      * @param destination the target file or directory path
      * @throws IOException if the given file or directory could not be renamed / moved
      */
-    public synchronized void move(String source, String destination) throws IOException {
+    public synchronized void move(String source, String destination) throws IOException, GitAPIException {
         assertValidSubPath(source);
         assertValidSubPath(destination);
         Path src = filesRoot.resolve(source);
@@ -214,6 +317,7 @@ public class FileManager {
             FileUtils.moveFile(src.toFile(), dest.toFile());
         }
         fireFileChangeEvent();
+        commitAllChanges();
     }
 
     private void fireFileChangeEvent() {
@@ -266,4 +370,22 @@ public class FileManager {
             throw new AccessDeniedException(path);
         }
     }
+
+    /**
+     * Commits all current changes to the local git repo.
+     *
+     * @return Returns true if the commit was successful, returns false if any errors occurred during the process
+     */
+    public boolean commitAllChanges() {
+        try {
+            gitDirManager.commitAllChanges();
+            return true;
+        } catch (GitAPIException e) {
+            e.printStackTrace();
+            log.error("An error occurred while committing files to git directory");
+        }
+        return false;
+    }
+
+
 }

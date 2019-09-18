@@ -2,6 +2,7 @@ package rocks.inspectit.ocelot.rest.file;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.*;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import rocks.inspectit.ocelot.file.FileData;
@@ -31,7 +32,7 @@ public class FileController extends FileBaseController {
                                   })
                           )
 
-                          @RequestBody(required = false) String content) throws IOException {
+                          @RequestBody(required = false) String content) throws IOException, GitAPIException {
         String path = RequestUtil.getRequestSubPath(request);
         if (raw || content == null) {
             fileManager.createOrReplaceFile(path, content == null ? "" : content);
