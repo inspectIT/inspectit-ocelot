@@ -79,7 +79,7 @@ public class HttpPropertySourceState {
      */
     public boolean update() {
         String configuration = fetchConfiguration();
-        if (configuration != null) {
+        if (StringUtils.isNotBlank(configuration)) {
             try {
                 Properties properties = parseProperties(configuration);
                 currentPropertySource = new PropertiesPropertySource(name, properties);
