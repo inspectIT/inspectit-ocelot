@@ -14,6 +14,8 @@ import Notificationbar from './Notificationbar';
  */
 class EditorView extends React.Component {
 
+    handleSave = () => this.props.onSave(this.editor.getValue());
+
     render() {
         const { value, showEditor, hint, onSave, onRefresh, onChange, isRefreshing, enableButtons, isErrorNotification, notificationIcon, notificationText, canSave, loading, children } = this.props;
 
@@ -53,7 +55,7 @@ class EditorView extends React.Component {
                         canSave={canSave}
                         onRefresh={onRefresh}
                         isRefreshing={isRefreshing}
-                        onSave={() => onSave(this.editor.getValue())}
+                        onSave={this.handleSave}
                         onSearch={() => this.editor.executeCommand("find")}
                         onHelp={() => this.editor.showShortcuts()}>
                         {children}
@@ -61,7 +63,7 @@ class EditorView extends React.Component {
                 </div>
                 <div className="p-col editor-container">
                     {showEditor ?
-                        <AceEditor editorRef={(editor) => this.editor = editor} mode="yaml" theme="cobalt" options={editorConfig} value={value} onChange={onChange} />
+                        <AceEditor editorRef={(editor) => this.editor = editor} mode="yaml" theme="cobalt" options={editorConfig} value={value} onChange={onChange} onSave={this.handleSave}/>
                         :
                         <div className="selection-information">
                             <div>{hint}</div>

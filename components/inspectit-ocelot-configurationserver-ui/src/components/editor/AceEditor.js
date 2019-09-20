@@ -10,6 +10,17 @@ import 'ace-builds/src-noconflict/ext-keybinding_menu';
 import 'ace-builds/src-noconflict/mode-yaml';
 import 'ace-builds/src-noconflict/theme-cobalt';
 
+const saveCommand = (onSave) => {
+    return {
+        name: 'saveFile',
+        bindKey: {
+            win: 'Ctrl-S',
+            mac: 'Command-S',
+        },
+        exec: onSave
+    }
+}
+
 /**
  * Component which wraps the AceEditor.
  */
@@ -35,6 +46,7 @@ class AceEditor extends React.Component {
 
         this.editor.session.off("change", this.onChange);
         this.editor.session.on("change", this.onChange);
+        this.editor.commands.addCommand(saveCommand(this.props.onSave))
         if (options) {
             this.editor.setOptions(options);
         }
