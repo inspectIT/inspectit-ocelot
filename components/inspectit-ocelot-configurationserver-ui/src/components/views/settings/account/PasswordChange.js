@@ -84,61 +84,48 @@ class PasswordChange extends React.Component{
     const {currentPwErrorMsg, newPwErrorMsg, confirmPwErrorMsg, minPwLength} = this.state
 
     return(
-      <div>
-        <style jsx>{`
-          .p-dir-col{
-            margin: auto;
-          }
-          .p-col{
-            padding-top: 0;
-            padding-botom: 0;
-          }
-          .errorMessage{
-            font-size: 0.8rem;
-            color: red;
-            padding-left: 6rem;
-          }
-        `}</style>
-        <SettingsElement title='Change Password' line>
-          <div className="p-grid p-dir-col">
-            <div className="p-col">
-              <div className='p-grid p-align-center'>
-                <div className='p-col-6 p-md-4 p-md-offset-2 p-lg-3 p-lg-offset-3 p-xl-2 p-xl-offset-4'>Current password</div>
-                <div className='p-col-6'>
-                  <Password feedback={false} value={this.state.oldPassword} onChange={(e) => this.setState({oldPassword: e.target.value})} />
-                </div>
-                <div className='p-col-12 p-md-10 p-md-offset-2 p-lg-8 p-lg-offset-4 errorMessage'>
-                  {currentPwErrorMsg !== '' ? currentPwErrorMsg : ''}
-                </div>
-              </div>
-            </div>
-            <div className="p-col">
-              <div className='p-grid p-align-center'>
-                <div className='p-col-6 p-md-4 p-md-offset-2 p-lg-3 p-lg-offset-3 p-xl-2 p-xl-offset-4'>New password</div>
-                <div className='p-col-6'>
-                  <Password feedback={false} tooltip={`Your password needs to have at least ${minPwLength} characters.`} value={this.state.newPassword} onChange={(e) => this.setState({newPassword: e.target.value})} />
-                </div>
-                <div className='p-col-12 p-md-10 p-md-offset-2 p-lg-8 p-lg-offset-4 errorMessage'>
-                  {newPwErrorMsg !== '' ? newPwErrorMsg : ''}
-                </div>
-              </div>
-            </div>
-            <div className="p-col">
-              <div className='p-grid p-align-center'>
-                <div className='p-col-6 p-md-4 p-md-offset-2 p-lg-3 p-lg-offset-3 p-xl-2 p-xl-offset-4'>Confirm password</div>
-                <div className='p-col-6'>
-                  <Password feedback={false} value={this.state.newPasswordSecond} onChange={(e) => this.setState({newPasswordSecond: e.target.value})} />
-                </div>
-                <div className='p-col-12 p-md-10 p-md-offset-2 p-lg-8 p-lg-offset-4 errorMessage'>
-                  {confirmPwErrorMsg !== '' ? confirmPwErrorMsg : ''}
-                </div>
-                <div className='p-col p-offset-9 p-lg-offset-8 p-xl-offset-7'><Button label='Change' onClick={this.changePassword}/></div>
-              </div>
-            </div>
+      <SettingsElement title='Change Password' line>
+        <div className='this'>
+          <style jsx>{`
+            .this{
+              display: flex;
+              flex-direction: column;
+            }
+            .row{
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+            }
+            .row p {
+              margin-right: 5rem;
+            }
+            .lastRow{
+              display: flex;
+              justify-content: end;
+            }
+          `}</style>
+          <div className='row'>
+            <p>Current Password</p>
+            <Password feedback={false} value={this.state.oldPassword} onChange={(e) => this.setState({oldPassword: e.target.value})} />
           </div>
-        </SettingsElement>
-      </div>
-        
+          {currentPwErrorMsg !== '' ? currentPwErrorMsg : ''}
+          <div className='row'>
+            
+            <p>New password</p>
+            <Password feedback={false} tooltip={`Your password needs to have at least ${minPwLength} characters.`} value={this.state.newPassword} onChange={(e) => this.setState({newPassword: e.target.value})} />
+          </div>
+          {newPwErrorMsg !== '' ? newPwErrorMsg : ''}
+          <div className='row'>
+            
+            <p>Confirm password</p>
+            <Password feedback={false} value={this.state.newPasswordSecond} onChange={(e) => this.setState({newPasswordSecond: e.target.value})} />
+          </div>
+          {confirmPwErrorMsg !== '' ? confirmPwErrorMsg : ''}
+          <div className='lastRow'>
+            <Button label='Change' onClick={this.changePassword} />
+          </div>
+        </div>
+      </SettingsElement>
     )
   }
 }
