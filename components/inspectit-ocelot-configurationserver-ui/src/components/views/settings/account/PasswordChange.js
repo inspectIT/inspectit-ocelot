@@ -103,24 +103,29 @@ class PasswordChange extends React.Component{
               display: flex;
               justify-content: end;
             }
+            .errorMessage{
+              font-size: 0.8rem;
+              color: red;
+              padding-left: 4rem;
+            }
           `}</style>
           <div className='row'>
             <p>Current Password</p>
             <Password feedback={false} value={this.state.oldPassword} onChange={(e) => this.setState({oldPassword: e.target.value})} />
           </div>
-          {currentPwErrorMsg !== '' ? currentPwErrorMsg : ''}
+          <div className='errorMessage'>{currentPwErrorMsg !== '' ? currentPwErrorMsg : ''}</div>
           <div className='row'>
-            
             <p>New password</p>
             <Password feedback={false} tooltip={`Your password needs to have at least ${minPwLength} characters.`} value={this.state.newPassword} onChange={(e) => this.setState({newPassword: e.target.value})} />
           </div>
-          {newPwErrorMsg !== '' ? newPwErrorMsg : ''}
+          <div className='errorMessage'>{newPwErrorMsg !== '' ? newPwErrorMsg : ''}</div>
+
           <div className='row'>
             
             <p>Confirm password</p>
             <Password feedback={false} value={this.state.newPasswordSecond} onChange={(e) => this.setState({newPasswordSecond: e.target.value})} />
           </div>
-          {confirmPwErrorMsg !== '' ? confirmPwErrorMsg : ''}
+          <div className='errorMessage'>{confirmPwErrorMsg !== '' ? confirmPwErrorMsg : ''}</div>
           <div className='lastRow'>
             <Button label='Change' onClick={this.changePassword} />
           </div>
