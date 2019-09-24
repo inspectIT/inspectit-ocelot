@@ -29,7 +29,11 @@ import java.util.Properties;
  */
 @Slf4j
 public class HttpPropertySourceState {
-    private static final Properties EMPTY_PROPERTY = new Properties();
+
+    /**
+     * Used in case the properties fetched via HTTP are empty.
+     */
+    private static final Properties EMPTY_PROPERTIES = new Properties();
 
     /**
      * The name used for the property source.
@@ -101,8 +105,8 @@ public class HttpPropertySourceState {
      * @return the parsed {@link Properties} object
      */
     private Properties parseProperties(String rawProperties) {
-        if(StringUtils.isBlank(rawProperties)) {
-            return EMPTY_PROPERTY;
+        if (StringUtils.isBlank(rawProperties)) {
+            return EMPTY_PROPERTIES;
         }
         try {
             return PropertyUtils.readJson(rawProperties);
