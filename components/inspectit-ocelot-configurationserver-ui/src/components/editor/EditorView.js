@@ -63,7 +63,7 @@ class EditorView extends React.Component {
                 </div>
                 <div className="p-col editor-container">
                     {showEditor ?
-                        <AceEditor editorRef={(editor) => this.editor = editor} mode="yaml" theme="cobalt" options={editorConfig} value={value} onChange={onChange} onSave={this.handleSave}/>
+                        <AceEditor editorRef={(editor) => this.editor = editor} mode="yaml" theme="cobalt" options={editorConfig} value={value} onChange={onChange} canSave={canSave} onSave={this.handleSave}/>
                         :
                         <div className="selection-information">
                             <div>{hint}</div>
