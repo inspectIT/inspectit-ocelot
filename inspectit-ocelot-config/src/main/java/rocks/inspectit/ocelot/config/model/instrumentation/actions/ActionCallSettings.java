@@ -12,6 +12,7 @@ import rocks.inspectit.ocelot.config.utils.AutoboxingHelper;
 import rocks.inspectit.ocelot.config.utils.ConfigUtils;
 import rocks.inspectit.ocelot.config.validation.ViolationBuilder;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.Collections;
@@ -22,7 +23,6 @@ import java.util.stream.Stream;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class ActionCallSettings extends ConditionalActionSettings {
-
 
     /**
      * The name of the action.
@@ -49,17 +49,12 @@ public class ActionCallSettings extends ConditionalActionSettings {
     private Map<@NotBlank String, @NotBlank String> dataInput = Collections.emptyMap();
 
     /**
-     * Normally, we assume references to data keys implicitly define a dependency.
-     * For example, when defining data-input: { x: my_data} we assume that this action uses the value of the data key
-     * my_data to populate the action parameter "x".
-     * We then assume that if any action on the same method within the same entry / exit section writes "my_data" it has to be executed before.
-     * This however is not always the case: in some cases we want to read a down-propagated value before it is overridden.
-     * <p>
-     * This map serves this purpose: it defines a set of data_keys.
-     * The action is now scheduled in a way that it is executed before any data-key mentioned in this set is written within
-     * the same method entry or exit phase
+     * Defines before and after which other action calls this call needs to be executed.
+     * Through these dependencies an order is derived in which action calls are executed.
      */
-    private Map<@NotBlank String, @NotNull Boolean> before = Collections.emptyMap();
+    @NotNull
+    @Valid
+    private OrderSettings order = new OrderSettings();
 
     public void performValidation(InstrumentationSettings container, ViolationBuilder vios) {
         val actionConf = container.getActions().get(action);
@@ -184,5 +179,4 @@ public class ActionCallSettings extends ConditionalActionSettings {
             return conversionService.convert(value, targetType);
         }
     }
-
 }
