@@ -31,6 +31,11 @@ import java.util.Properties;
 public class HttpPropertySourceState {
 
     /**
+     * Used in case the properties fetched via HTTP are empty.
+     */
+    private static final Properties EMPTY_PROPERTIES = new Properties();
+
+    /**
      * The name used for the property source.
      */
     @Getter
@@ -100,6 +105,9 @@ public class HttpPropertySourceState {
      * @return the parsed {@link Properties} object
      */
     private Properties parseProperties(String rawProperties) {
+        if (StringUtils.isBlank(rawProperties)) {
+            return EMPTY_PROPERTIES;
+        }
         try {
             return PropertyUtils.readJson(rawProperties);
         } catch (IOException e) {
