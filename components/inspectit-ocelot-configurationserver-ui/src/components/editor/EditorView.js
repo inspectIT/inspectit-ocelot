@@ -14,10 +14,12 @@ import Notificationbar from './Notificationbar';
  */
 class EditorView extends React.Component {
 
-    handleSave = () => this.props.onSave(this.editor.getValue());
+    handleSave = () => {
+        this.props.onSave(this.editor.getValue());
+    }
 
     render() {
-        const { value, showEditor, hint, onSave, onRefresh, onChange, isRefreshing, enableButtons, isErrorNotification, notificationIcon, notificationText, canSave, loading, children } = this.props;
+        const { value, showEditor, hint, onRefresh, onChange, isRefreshing, enableButtons, isErrorNotification, notificationIcon, notificationText, canSave, loading, children } = this.props;
 
         return (
             <div className="this p-grid p-dir-col p-nogutter">
