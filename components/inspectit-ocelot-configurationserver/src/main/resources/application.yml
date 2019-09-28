@@ -33,3 +33,8 @@ inspectit:
   security:
     # Whether LDAP authentication should be used
     ldap-authentication: false
+
+management:
+  endpoints.enabled-by-default: false
+  endpoint.health.enabled: true
+  health.ldap.enabled: ${inspectit.security.ldap-authentication}

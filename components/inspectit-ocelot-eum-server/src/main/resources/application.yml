@@ -69,8 +69,5 @@ inspectit-eum:
         port: 8888
 
 management:
-  endpoints:
-    enabled-by-default: false
-  endpoint:
-    health:
-      enabled: true
+  endpoints.enabled-by-default: false
+  endpoint.health.enabled: true
