@@ -67,3 +67,10 @@ inspectit-eum:
         enabled: true
         host: localhost
         port: 8888
+
+management:
+  endpoints:
+    enabled-by-default: false
+  endpoint:
+    health:
+      enabled: true
