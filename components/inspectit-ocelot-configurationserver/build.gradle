@@ -106,6 +106,7 @@ dependencies {
             "org.springframework.boot:spring-boot-starter-data-jpa:2.1.4.RELEASE",
             "org.springframework.ldap:spring-ldap-core",
             "org.springframework.security:spring-security-ldap",
+            'org.springframework.boot:spring-boot-starter-actuator',
             
             "org.xerial:sqlite-jdbc:3.28.0",
             "com.github.gwenn:sqlite-dialect:0.1.0",
