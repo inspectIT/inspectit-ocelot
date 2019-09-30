@@ -36,7 +36,9 @@ public class LogMetricsAppender extends AppenderBase<ILoggingEvent> {
      */
     public static void registerRecorder(LogMetricsRecorder logMetricsRecorder) {
         LogMetricsAppender.logMetricsRecorder = logMetricsRecorder;
-        logCounts.entrySet().stream().forEach(entry -> logMetricsRecorder.increment(entry.getKey(), entry.getValue()));
-        logCounts.clear();
+        if (logMetricsRecorder != null) {
+            logCounts.entrySet().stream().forEach(entry -> logMetricsRecorder.increment(entry.getKey(), entry.getValue()));
+            logCounts.clear();
+        }
     }
 }

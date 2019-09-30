@@ -28,7 +28,9 @@ dependencies {
 			"io.prometheus:simpleclient_httpserver:${prometheusClientVersion}",
 			"io.opencensus:opencensus-exporter-stats-prometheus:${openCensusVersion}",
 			'com.maxmind.geoip2:geoip2:2.12.0',
-			'commons-net:commons-net:3.3'	)
+			'commons-net:commons-net:3.3',
+			'org.springframework.boot:spring-boot-starter-actuator'
+	)
 	compileOnly "org.projectlombok:lombok:1.18.4"
 	annotationProcessor "org.projectlombok:lombok:1.18.4"
 	testImplementation(
