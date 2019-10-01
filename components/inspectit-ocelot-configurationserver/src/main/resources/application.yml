@@ -34,7 +34,14 @@ inspectit:
     # Whether LDAP authentication should be used
     ldap-authentication: false
 
+# ACTUATOR PROPERTIES
 management:
+  # Whether to enable or disable all endpoints by default.
   endpoints.enabled-by-default: false
-  endpoint.health.enabled: true
-  health.ldap.enabled: ${inspectit.security.ldap-authentication}
+  endpoint:
+    # Whether to enable the health endpoint.
+    health.enabled: true
+  # HEALTH INDICATORS
+  health:
+    # Whether to enable LDAP health check.
+    ldap.enabled: ${inspectit.security.ldap-authentication}
