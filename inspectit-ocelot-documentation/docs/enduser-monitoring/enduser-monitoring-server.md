@@ -10,8 +10,8 @@ The inspectit-ocelot server offers a backend for Javascript monitoring with [Boo
 Boomerang is a Javascript metrics agent, which is able to capture arbitrary customizable metrics. 
 By injecting the following snipped in your webpage, all measured metrics are sent to the inspectit-ocelot-eum-server:
 ```javascript
-<script src="boomerang-1.0.0.min.js"></script>
- <script src="plugins/rt.js"></script>
+<script src="http://{eum-server-address}/boomerang/boomerang-1.650.0.min.js"></script>
+ <script src="http://{eum-server-address}/boomerang/plugins/rt.min.js"></script>
  <!-- any other plugins you want to include -->
  <script>
    BOOMR.init({
@@ -21,6 +21,12 @@ By injecting the following snipped in your webpage, all measured metrics are sen
 ```
 Boomerang recommends to use an advanced injection, where the boomerang agent is loaded in an asynchronous way. 
 For further information, please visit the [Boomerang documentation](https://developer.akamai.com/tools/boomerang/docs/index.html).
+
+All boomerang-specific scripts are exposed by the eum server under `http://{eum-server}/boomerang/**`.
+
+You can access the boomerang main script under: `http://{eum-server}/boomerang/boomerang-1.650.0.(js|min.js|js.gz|min.js.gz)`.
+All boomerang plugins get be downloaded under `http://{eum-server}/boomerang/plugins/{plugin_name}.(js|min.js|js.gz|min.js.gz)`.
+All existing plugins are available [here](http://akamai.github.io/boomerang/BOOMR.plugins.html).
 
 If enabled, the server exposes the metrics by using the [Prometheus exporter](https://github.com/census-instrumentation/opencensus-java/tree/master/exporters/stats/prometheus).
 A tutorial on how to install Prometheus can be found [here](https://opencensus.io/codelabs/prometheus/#0).

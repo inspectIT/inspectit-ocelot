@@ -1,11 +1,17 @@
 plugins {
 	id 'org.springframework.boot' version '2.1.4.RELEASE'
 	id 'java'
+	id "com.moowork.grunt" version "1.2.0"
+	id "de.undercouch.download" version "4.0.0"
 }
+
 apply plugin: 'io.spring.dependency-management'
+apply plugin: 'de.undercouch.download'
+apply plugin: 'com.moowork.grunt'
 
 group = 'rocks.inspectit.oce'
 version = '0.0.1-SNAPSHOT'
+def boomerangVersion = '1.650.0'
 sourceCompatibility = '1.8'
 
 bootJar {
@@ -15,6 +21,16 @@ bootJar {
 	manifest {
 		attributes 'Start-Class': 'rocks.inspectit.oce.eum.server.EUMServerApplication'
 	}
+}
+
+node {
+	nodeModulesDir = file("${project.buildDir}/boomerang-${boomerangVersion}")
+	version = '10.16.0'
+}
+
+grunt {
+	workDir = file("${project.buildDir}/boomerang-${boomerangVersion}")
+	bufferOutput = true
 }
 
 
@@ -45,3 +61,35 @@ dependencies {
 	)
 	testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.3.1"
 }
+
+task downloadZipFile(type: Download) {
+	src "https://github.com/akamai/boomerang/archive/${boomerangVersion}.zip"
+	dest new File(buildDir, 'boomerang-source.zip')
+	overwrite false
+}
+
+task downloadAndUnzipFile(dependsOn: downloadZipFile, type: Copy) {
+	from zipTree(downloadZipFile.dest)
+	into project.buildDir
+}
+
+
+
+task addBoomerangArtifacts(dependsOn: grunt_build, type: Copy) {
+	from ("$buildDir/boomerang-${boomerangVersion}/build"){
+		include "plugins/**"
+		include "**/*.js"
+		include "**/*.gz"
+		exclude '**/*.map', 'snippets/**'
+		rename "1.0.0", "${boomerangVersion}"
+	}
+	into "$project.projectDir/src/main/resources/static/boomerang"
+}
+
+clean {
+	delete "$project.projectDir/src/main/resources/static/boomerang"
+}
+
+npmInstall.dependsOn downloadAndUnzipFile
+grunt_build.dependsOn npmInstall
+compileJava.dependsOn addBoomerangArtifacts
