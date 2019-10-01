@@ -15,7 +15,7 @@ import java.util.Map;
 /**
  * The configuration of the inspectit-ocelot-eum-server
  */
-@ConfigurationProperties("inspectit-eum")
+@ConfigurationProperties("inspectit-ocelot-eum-server")
 @Component
 @Data
 @Validated
