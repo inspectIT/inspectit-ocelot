@@ -1,11 +1,16 @@
 package rocks.inspectit.ocelot.mappings.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Singular;
 import lombok.Value;
+import rocks.inspectit.ocelot.security.audit.AuditDetail;
+import rocks.inspectit.ocelot.security.audit.AuditEventListener;
+import rocks.inspectit.ocelot.security.audit.Auditable;
 
+import javax.persistence.EntityListeners;
 import javax.validation.constraints.NotBlank;
 import java.util.Collections;
 import java.util.List;
@@ -16,7 +21,8 @@ import java.util.Map;
  */
 @Value
 @Builder(toBuilder = true)
-public class AgentMapping {
+@EntityListeners(AuditEventListener.class)
+public class AgentMapping implements Auditable {
 
     /**
      * The name of this mapping.
@@ -57,5 +63,12 @@ public class AgentMapping {
             }
         }
         return true;
+    }
+
+    @Override
+    @JsonIgnore
+    public AuditDetail getAuditDetail() {
+        String identifier = "Name: " + name;
+        return new AuditDetail(AuditDetail.ENTITY_TYPE.AGENT_MAPPINGS, identifier);
     }
 }
