@@ -93,6 +93,12 @@ public class InspectitConfig {
     private int threadPoolSize;
 
     /**
+     * Can only be specified as JVM-property.
+     * If true, OpenCensus will be loaded to the bootstrap and accessible by the target application.
+     */
+    private boolean publishOpenCensusToBootstrap;
+
+    /**
      * Allows all nested configs to evaluate context sensitive config properties regarding their correctness.
      *
      * @param vios the violation builder which is used to output violations

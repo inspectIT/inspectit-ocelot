@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.security.userdetails;
+package rocks.inspectit.ocelot.user;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -9,8 +9,6 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.security.authentication.event.AuthenticationSuccessEvent;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.ldap.userdetails.LdapUserDetails;
-import rocks.inspectit.ocelot.user.User;
-import rocks.inspectit.ocelot.user.UserService;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;

@@ -38,15 +38,6 @@ jobs:
     steps:
       - checkout:
           path: ~/inspectit/repo
-      - run:
-          name: Commit Message Validation
-          working_directory: ~/inspectit/repo
-          command: |
-            message=$(git log --format=%B -n 1 $CIRCLE_SHA1);
-            if  [[  ( ! $message =~ .*#[0-9].*) || ( $message =~ Closes[[:space:]]#[0-9]*[[:space:]]-[[:space:]].* ) ]]; then
-              echo "Commit Message is well formatted";
-            else echo "Commit Message does not meet the requirements. If you reference an issue, please follow the following format: Closes #{ID} - {Issue title}"; exit 1;
-            fi
       - persist_to_workspace:
           root: ~/inspectit
           paths:
@@ -168,6 +159,12 @@ jobs:
             BODY=$(cat ~/inspectit/changelog/release_body.md)
             ghr -t ${GITHUB_TOKEN} -u inspectIT -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -n "Version ${CIRCLE_TAG}" -b "${BODY}" ${VERSION} ~/inspectit/artifacts/
 
+  publish_dashboards_to_marketplace:
+    docker:
+      - image: circleci/openjdk:8-jdk
+    working_directory: ~/inspectit/repo/inspectit-ocelot-demo/grafana/marketplace
+    steps:
+      - run: ~/inspectit/repo/resources/upload-all-dashboards.sh
   # Deploy pre-release documentation
   deploy-master-documentation:
     docker:
@@ -296,6 +293,11 @@ workflows:
       - generate_changelog:
           filters:
             <<: *filter_release
+          requires:
+            - checkout
+      - publish_dashboards_to_marketplace:
+          filters:
+            <<: *filter_release      
           requires:
             - checkout
       - publish_github_release:
