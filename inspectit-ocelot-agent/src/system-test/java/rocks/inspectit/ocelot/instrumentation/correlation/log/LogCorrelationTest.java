@@ -15,8 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class LogCorrelationTest {
 
-    public static final String TRACEID_MDC = "traceid";
-    private static final String MDC_KEY = TRACEID_MDC;
+    public static final String MDC_KEY = "traceid";
 
     @BeforeAll
     private static void beforeAll() throws InterruptedException {
@@ -39,22 +38,22 @@ public class LogCorrelationTest {
 
         @Test
         void verifyCorrelation() {
-            assertThat(org.slf4j.MDC.get(TRACEID_MDC)).isNull();
+            assertThat(org.slf4j.MDC.get(MDC_KEY)).isNull();
             traced(() -> {
                 String trace = Tracing.getTracer().getCurrentSpan().getContext().getTraceId().toLowerBase16();
-                assertThat(org.slf4j.MDC.get(TRACEID_MDC)).isEqualTo(trace);
+                assertThat(org.slf4j.MDC.get(MDC_KEY)).isEqualTo(trace);
             }, 1.0);
-            assertThat(org.slf4j.MDC.get(TRACEID_MDC)).isNull();
+            assertThat(org.slf4j.MDC.get(MDC_KEY)).isNull();
         }
 
         @Test
         void verifyNoCorrelationForUnsampled() {
-            assertThat(org.slf4j.MDC.get(TRACEID_MDC)).isNull();
+            assertThat(org.slf4j.MDC.get(MDC_KEY)).isNull();
             traced(() -> {
                 assertThat(Tracing.getTracer().getCurrentSpan().getContext().isValid()).isTrue();
-                assertThat(org.slf4j.MDC.get(TRACEID_MDC)).isNull();
+                assertThat(org.slf4j.MDC.get(MDC_KEY)).isNull();
             }, 0.0);
-            assertThat(org.slf4j.MDC.get(TRACEID_MDC)).isNull();
+            assertThat(org.slf4j.MDC.get(MDC_KEY)).isNull();
         }
     }
 
@@ -67,7 +66,7 @@ public class LogCorrelationTest {
             traced(() -> {
                 String trace = Tracing.getTracer().getCurrentSpan().getContext().getTraceId().toLowerBase16();
                 newThread.set(new Thread(() -> {
-                    assertThat(MDC.get(TRACEID_MDC)).isEqualTo(trace);
+                    assertThat(MDC.get(MDC_KEY)).isEqualTo(trace);
                 }));
             }, 1.0);
 
@@ -81,7 +80,7 @@ public class LogCorrelationTest {
             traced(() -> {
                 newThread.set(new Thread(() -> {
                     assertThat(Tracing.getTracer().getCurrentSpan().getContext().isValid()).isTrue();
-                    assertThat(MDC.get(TRACEID_MDC)).isNull();
+                    assertThat(MDC.get(MDC_KEY)).isNull();
                 }));
             }, 0.0);
 
@@ -101,7 +100,7 @@ public class LogCorrelationTest {
             traced(() -> {
                 String trace = Tracing.getTracer().getCurrentSpan().getContext().getTraceId().toLowerBase16();
                 future.set(es.submit(() -> {
-                    assertThat(MDC.get(TRACEID_MDC)).isEqualTo(trace);
+                    assertThat(MDC.get(MDC_KEY)).isEqualTo(trace);
                 }));
             }, 1.0);
 
@@ -115,7 +114,7 @@ public class LogCorrelationTest {
             traced(() -> {
                 future.set(es.submit(() -> {
                     assertThat(Tracing.getTracer().getCurrentSpan().getContext().isValid()).isTrue();
-                    assertThat(MDC.get(TRACEID_MDC)).isNull();
+                    assertThat(MDC.get(MDC_KEY)).isNull();
                 }));
             }, 0.0);
 
@@ -130,7 +129,7 @@ public class LogCorrelationTest {
             traced(() -> {
                 String trace = Tracing.getTracer().getCurrentSpan().getContext().getTraceId().toLowerBase16();
                 future.set(es.submit(() -> {
-                    assertThat(MDC.get(TRACEID_MDC)).isEqualTo(trace);
+                    assertThat(MDC.get(MDC_KEY)).isEqualTo(trace);
                     return "I'm a callable";
                 }));
             }, 1.0);
@@ -145,7 +144,7 @@ public class LogCorrelationTest {
             traced(() -> {
                 future.set(es.submit(() -> {
                     assertThat(Tracing.getTracer().getCurrentSpan().getContext().isValid()).isTrue();
-                    assertThat(MDC.get(TRACEID_MDC)).isNull();
+                    assertThat(MDC.get(MDC_KEY)).isNull();
                     return "I'm a callable";
                 }));
             }, 0.0);
@@ -165,7 +164,7 @@ public class LogCorrelationTest {
             traced(() -> {
                 String trace = Tracing.getTracer().getCurrentSpan().getContext().getTraceId().toLowerBase16();
                 future.set(es.schedule(() -> {
-                    assertThat(MDC.get(TRACEID_MDC)).isEqualTo(trace);
+                    assertThat(MDC.get(MDC_KEY)).isEqualTo(trace);
                 }, 10, TimeUnit.MILLISECONDS));
             }, 1.0);
             future.get().get();
@@ -179,7 +178,7 @@ public class LogCorrelationTest {
             traced(() -> {
                 future.set(es.schedule(() -> {
                     assertThat(Tracing.getTracer().getCurrentSpan().getContext().isValid()).isTrue();
-                    assertThat(MDC.get(TRACEID_MDC)).isNull();
+                    assertThat(MDC.get(MDC_KEY)).isNull();
                 }, 10, TimeUnit.MILLISECONDS));
             }, 0.0);
 
@@ -194,7 +193,7 @@ public class LogCorrelationTest {
             traced(() -> {
                 String trace = Tracing.getTracer().getCurrentSpan().getContext().getTraceId().toLowerBase16();
                 future.set(es.schedule(() -> {
-                    assertThat(MDC.get(TRACEID_MDC)).isEqualTo(trace);
+                    assertThat(MDC.get(MDC_KEY)).isEqualTo(trace);
                     return "I'm a callable";
                 }, 10, TimeUnit.MILLISECONDS));
             }, 1.0);
@@ -209,7 +208,7 @@ public class LogCorrelationTest {
             traced(() -> {
                 future.set(es.schedule(() -> {
                     assertThat(Tracing.getTracer().getCurrentSpan().getContext().isValid()).isTrue();
-                    assertThat(MDC.get(TRACEID_MDC)).isNull();
+                    assertThat(MDC.get(MDC_KEY)).isNull();
                     return "I'm a callable";
                 }, 10, TimeUnit.MILLISECONDS));
             }, 0.0);
@@ -224,7 +223,7 @@ public class LogCorrelationTest {
             traced(() -> {
                 String trace = Tracing.getTracer().getCurrentSpan().getContext().getTraceId().toLowerBase16();
                 es.scheduleWithFixedDelay(() -> {
-                    assertThat(MDC.get(TRACEID_MDC)).isEqualTo(trace);
+                    assertThat(MDC.get(MDC_KEY)).isEqualTo(trace);
                     csl.countDown();
                 }, 0, 5, TimeUnit.MILLISECONDS);
             }, 1.0);
@@ -239,7 +238,7 @@ public class LogCorrelationTest {
             traced(() -> {
                 es.scheduleWithFixedDelay(() -> {
                     assertThat(Tracing.getTracer().getCurrentSpan().getContext().isValid()).isTrue();
-                    assertThat(MDC.get(TRACEID_MDC)).isNull();
+                    assertThat(MDC.get(MDC_KEY)).isNull();
                     csl.countDown();
                 }, 0, 5, TimeUnit.MILLISECONDS);
             }, 0.0);
