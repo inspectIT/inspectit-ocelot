@@ -63,6 +63,7 @@ public class ThreadStartContextPropagationSensor implements SpecialSensor {
         public static void onMethodEnter(@Advice.This Thread thread) {
             if (Thread.currentThread() == thread) {
                 Instances.contextManager.attachContextToThread(thread);
+                Instances.logTraceCorrelator.applyCorrelationToMDC();
             }
         }
 
