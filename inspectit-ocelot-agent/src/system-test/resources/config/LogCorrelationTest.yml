@@ -1,5 +1,8 @@
 
 inspectit:
+  tracing:
+      log-correlation:
+        enabled: true
   instrumentation:
     scopes:
       LogCorrelationTest-methods:

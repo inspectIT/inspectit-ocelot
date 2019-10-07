@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
 import rocks.inspectit.ocelot.utils.TestUtils;
 
+import java.util.Arrays;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -20,7 +21,8 @@ public class LogCorrelationTest {
     @BeforeAll
     private static void beforeAll() throws InterruptedException {
         MDC.get("test"); //load the MDC classes
-        TestUtils.waitForClassInstrumentation(LogCorrelationTest.class, 15, TimeUnit.SECONDS);
+        TestUtils.waitForClassInstrumentations(Arrays.asList(LogCorrelationTest.class, Thread.class, AbstractExecutorService.class, ScheduledThreadPoolExecutor.class),
+                15, TimeUnit.SECONDS);
     }
 
     /**
@@ -223,8 +225,12 @@ public class LogCorrelationTest {
             traced(() -> {
                 String trace = Tracing.getTracer().getCurrentSpan().getContext().getTraceId().toLowerBase16();
                 es.scheduleWithFixedDelay(() -> {
-                    assertThat(MDC.get(MDC_KEY)).isEqualTo(trace);
-                    csl.countDown();
+                    try {
+                        assertThat(MDC.get(MDC_KEY)).isEqualTo(trace);
+                    } finally {
+                        csl.countDown();
+
+                    }
                 }, 0, 5, TimeUnit.MILLISECONDS);
             }, 1.0);
             csl.await();
@@ -237,9 +243,13 @@ public class LogCorrelationTest {
             CountDownLatch csl = new CountDownLatch(3);
             traced(() -> {
                 es.scheduleWithFixedDelay(() -> {
-                    assertThat(Tracing.getTracer().getCurrentSpan().getContext().isValid()).isTrue();
-                    assertThat(MDC.get(MDC_KEY)).isNull();
-                    csl.countDown();
+                    try {
+                        assertThat(Tracing.getTracer().getCurrentSpan().getContext().isValid()).isTrue();
+                        assertThat(MDC.get(MDC_KEY)).isNull();
+                    } finally {
+                        csl.countDown();
+
+                    }
                 }, 0, 5, TimeUnit.MILLISECONDS);
             }, 0.0);
             csl.await();
