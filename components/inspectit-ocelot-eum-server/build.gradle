@@ -17,6 +17,9 @@ bootJar {
 	}
 }
 
+test {
+	useJUnitPlatform()
+}
 
 dependencies {
 	implementation(
