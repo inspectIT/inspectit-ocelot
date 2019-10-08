@@ -25,8 +25,8 @@ all measured metrics back to it:
 All boomerang-specific scripts are exposed by the eum server under `http://{eum-server}/boomerang/**`.
 
 You can access the boomerang main script under: `http://[inspectit-eum-server-url]/boomerang/boomerang.js`.
-All boomerang plugins get be downloaded under `http://[inspectit-eum-server-url]/boomerang/plugins/{plugin_name}.js`.
-All available plugins are listed [here](http://akamai.github.io/boomerang/BOOMR.plugins.html).
+All boomerang plugins can be downloaded under `http://[inspectit-eum-server-url]/boomerang/plugins/{plugin_name}.js`.
+The list of available plugins can be found [here](http://akamai.github.io/boomerang/BOOMR.plugins.html).
 
 Note that this approach is not recommended for production use as the scripts are not minified and are loaded synchronously.
 
