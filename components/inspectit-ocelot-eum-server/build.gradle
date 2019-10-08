@@ -1,20 +1,22 @@
 plugins {
 	id 'org.springframework.boot' version '2.1.4.RELEASE'
 	id 'java'
-	id "de.undercouch.download" version "4.0.0"
 }
 
 apply plugin: 'io.spring.dependency-management'
-apply plugin: 'de.undercouch.download'
 
 group = 'rocks.inspectit.oce'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '1.8'
 
-task downloadBoomerangZipFile(type: Download) {
-	src "https://github.com/akamai/boomerang/archive/${boomerangVersion}.zip"
-	dest new File(buildDir, 'boomerang-source.zip')
-	overwrite false
+task downloadBoomerangZipFile() {
+	ext.dest = new File(buildDir, "boomerang-source-${boomerangVersion}.zip")
+	outputs.files(ext.dest)
+	doLast {
+		def f = ext.dest
+		new URL("https://github.com/akamai/boomerang/archive/${boomerangVersion}.zip")
+				.withInputStream{ i -> f.withOutputStream{ it << i }}
+	}
 }
 
 task downloadAndUnzipBoomerang(dependsOn: downloadBoomerangZipFile, type: Copy) {
