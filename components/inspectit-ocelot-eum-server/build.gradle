@@ -39,6 +39,10 @@ bootJar {
 	}
 }
 
+test {
+	useJUnitPlatform()
+}
+
 dependencies {
 	implementation(
 			project(':inspectit-ocelot-config'),
