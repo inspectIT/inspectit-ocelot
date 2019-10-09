@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.core.instrumentation.config.callsorting;
 
+import com.google.common.base.Equivalence;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.instrumentation.actions.ActionCallSettings;
@@ -18,7 +19,7 @@ import java.util.stream.Stream;
  * The edges are direct and an edge from call_A to call_B reads as
  * "The call_B must be executed before the call_A"
  * <p>
- * Dependencies occur implicity due to the name of the call (= the result data key written)
+ * Dependencies occur implicitly due to the name of the call (= the result data key written)
  * the used input data ({@link ActionCallSettings#getDataInput()}, {@link ActionCallSettings#getOnlyIfTrue()}, etc)
  * and the explicitly defined dependencies: ({@link OrderSettings#getReads()}, {@link OrderSettings#getWrites()},
  * {@link OrderSettings#getReadsBeforeWritten()}).
@@ -45,12 +46,12 @@ public class GenericActionCallSorter {
      */
     public List<ActionCallConfig> orderActionCalls(Collection<ActionCallConfig> calls) throws CyclicDataDependencyException {
 
-        Map<ActionCallConfig, Set<ActionCallConfig>> dependencyGraph = buildDependencyGraph(calls);
+        IdentityHashMap<ActionCallConfig, Set<ActionCallConfig>> dependencyGraph = buildDependencyGraph(calls);
 
         return getInTopologicalOrder(dependencyGraph);
     }
 
-    private Map<ActionCallConfig, Set<ActionCallConfig>> buildDependencyGraph(Collection<ActionCallConfig> calls) {
+    private IdentityHashMap<ActionCallConfig, Set<ActionCallConfig>> buildDependencyGraph(Collection<ActionCallConfig> calls) {
 
         List<CallDependencies> dependencies = calls.stream()
                 .map(CallDependencies::collectFor)
@@ -59,8 +60,9 @@ public class GenericActionCallSorter {
         CallDependencyIndex index = new CallDependencyIndex();
         dependencies.forEach(index::add);
 
-        return dependencies.stream()
-                .collect(Collectors.toMap(CallDependencies::getSource, call -> getActionDependencies(call, index)));
+        IdentityHashMap<ActionCallConfig, Set<ActionCallConfig>> result = new IdentityHashMap<>();
+        dependencies.forEach(dep -> result.put(dep.getSource(), getActionDependencies(dep, index)));
+        return result;
     }
 
     /**
@@ -102,20 +104,21 @@ public class GenericActionCallSorter {
      * @return a sorted list containing all data keys
      * @throws CyclicDataDependencyException if there is a cyclic dependency, topological sorting is not possible
      */
-    private List<ActionCallConfig> getInTopologicalOrder(Map<ActionCallConfig, Set<ActionCallConfig>> dependencyGraph) throws CyclicDataDependencyException {
+    private List<ActionCallConfig> getInTopologicalOrder(IdentityHashMap<ActionCallConfig, Set<ActionCallConfig>> dependencyGraph) throws CyclicDataDependencyException {
 
         //make the order deterministic to get deterministic error messages, e.g. in case of multiple dependency cycles
         List<Pair<ActionCallConfig, List<ActionCallConfig>>> sortedDependencyGraph = sortDependencyGraph(dependencyGraph);
-        Map<ActionCallConfig, List<ActionCallConfig>> sortedLookup =
-                sortedDependencyGraph.stream()
-                        .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
+        IdentityHashMap<ActionCallConfig, List<ActionCallConfig>> sortedLookup = new IdentityHashMap<>();
+        sortedDependencyGraph.forEach(p -> sortedLookup.put(p.getLeft(), p.getRight()));
 
-        LinkedHashSet<ActionCallConfig> result = new LinkedHashSet<>();
+        LinkedHashSet<Equivalence.Wrapper<ActionCallConfig>> result = new LinkedHashSet<>();
 
         for (Pair<ActionCallConfig, List<ActionCallConfig>> callWithDependencies : sortedDependencyGraph) {
             putInTopologicalOrder(result, callWithDependencies.getLeft(), sortedLookup, new LinkedHashSet<>());
         }
-        return new ArrayList<>(result);
+        return result.stream()
+                .map(Equivalence.Wrapper::get)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -125,7 +128,7 @@ public class GenericActionCallSorter {
      * @param dependencyGraph the unsorted dependency graph
      * @return the sorted graph
      */
-    private List<Pair<ActionCallConfig, List<ActionCallConfig>>> sortDependencyGraph(Map<ActionCallConfig, Set<ActionCallConfig>> dependencyGraph) {
+    private List<Pair<ActionCallConfig, List<ActionCallConfig>>> sortDependencyGraph(IdentityHashMap<ActionCallConfig, Set<ActionCallConfig>> dependencyGraph) {
         List<Pair<ActionCallConfig, List<ActionCallConfig>>> sorted = new ArrayList<>();
         dependencyGraph.forEach((call, deps) -> {
             ArrayList<ActionCallConfig> sortedDeps = new ArrayList<>(deps);
@@ -145,33 +148,36 @@ public class GenericActionCallSorter {
      * @param stackTrace      stack trace of visited calls, only used to detect cyclic dependencies
      * @throws CyclicDataDependencyException
      */
-    private void putInTopologicalOrder(LinkedHashSet<ActionCallConfig> result,
+    private void putInTopologicalOrder(LinkedHashSet<Equivalence.Wrapper<ActionCallConfig>> result,
                                        ActionCallConfig current,
-                                       Map<ActionCallConfig, ? extends Collection<ActionCallConfig>> dependencyGraph,
-                                       LinkedHashSet<ActionCallConfig> stackTrace) throws CyclicDataDependencyException {
+                                       IdentityHashMap<ActionCallConfig, ? extends Collection<ActionCallConfig>> dependencyGraph,
+                                       LinkedHashSet<Equivalence.Wrapper<ActionCallConfig>> stackTrace) throws CyclicDataDependencyException {
 
-        if (result.contains(current)) {
+        Equivalence.Wrapper<ActionCallConfig> currentIdentity = Equivalence.identity().wrap(current);
+        if (result.contains(currentIdentity)) {
             return; //this action call has already been processed
         }
 
-        stackTrace.add(current);
+        stackTrace.add(currentIdentity);
         for (ActionCallConfig dependency : dependencyGraph.get(current)) {
+            Equivalence.Wrapper<ActionCallConfig> dependencyIdentity = Equivalence.identity().wrap(dependency);
             //ignore dependencies to itself
-            if (!dependency.equals(current)) {
-                if (!stackTrace.contains(dependency)) {
+            if (dependency != current) {
+                if (!stackTrace.contains(dependencyIdentity)) {
                     putInTopologicalOrder(result, dependency, dependencyGraph, stackTrace);
                 } else {
-                    ArrayList<ActionCallConfig> stackTraceList = new ArrayList<>(stackTrace);
-                    int idx = stackTraceList.indexOf(dependency);
+                    ArrayList<Equivalence.Wrapper<ActionCallConfig>> stackTraceList = new ArrayList<>(stackTrace);
+                    int idx = stackTraceList.indexOf(dependencyIdentity);
                     List<String> dependencyCycle = stackTraceList.subList(idx, stackTraceList.size())
                             .stream()
+                            .map(Equivalence.Wrapper::get)
                             .map(ActionCallConfig::getName)
                             .collect(Collectors.toList());
                     throw new CyclicDataDependencyException(dependencyCycle);
                 }
             }
         }
-        result.add(current);
-        stackTrace.remove(current);
+        result.add(currentIdentity);
+        stackTrace.remove(currentIdentity);
     }
 }
