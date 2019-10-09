@@ -6,12 +6,15 @@ sidebar_label: EUM Server
 This server provides Enduser Monitoring data by using the [OpenCensus](https://github.com/census-instrumentation/opencensus-java) toolkit.
 
 ## Metrics
-The inspectit-ocelot server offers a backend for Javascript monitoring with [Boomerang](https://developer.akamai.com/tools/boomerang/docs/index.html).
+The Ocelot EUM server offers a backend for Javascript monitoring with [Boomerang](https://developer.akamai.com/tools/boomerang/docs/index.html).
 Boomerang is a Javascript metrics agent, which is able to capture arbitrary customizable metrics. 
-By injecting the following snipped in your webpage, all measured metrics are sent to the inspectit-ocelot-eum-server:
+
+For testing purposes, you can inject the following snipped in your webpage.
+This snippet loads the boomerang version shipped with the Ocelot server and sends 
+all measured metrics back to it:
 ```javascript
-<script src="boomerang-1.0.0.min.js"></script>
- <script src="plugins/rt.js"></script>
+<script src="http://[inspectit-eum-server-url]/boomerang/boomerang.js"></script>
+ <script src="http://[inspectit-eum-server-url]/boomerang/plugins/rt.js"></script>
  <!-- any other plugins you want to include -->
  <script>
    BOOMR.init({
@@ -19,8 +22,16 @@ By injecting the following snipped in your webpage, all measured metrics are sen
    });
  </script>
 ```
-Boomerang recommends to use an advanced injection, where the boomerang agent is loaded in an asynchronous way. 
-For further information, please visit the [Boomerang documentation](https://developer.akamai.com/tools/boomerang/docs/index.html).
+All boomerang-specific scripts are exposed by the eum server under `http://{eum-server}/boomerang/**`.
+
+You can access the boomerang main script under: `http://[inspectit-eum-server-url]/boomerang/boomerang.js`.
+All boomerang plugins can be downloaded under `http://[inspectit-eum-server-url]/boomerang/plugins/{plugin_name}.js`.
+The list of available plugins can be found [here](http://akamai.github.io/boomerang/BOOMR.plugins.html).
+
+Note that this approach is not recommended for production use as the scripts are not minified and are loaded synchronously.
+
+Boomerang recommends that you use a [minified JS containing all your plugins](https://developer.akamai.com/tools/boomerang/docs/tutorial-building.html#asynchronously). 
+In addition you should use asynchronous injection as described in the [Boomerang documentation](https://developer.akamai.com/tools/boomerang/docs/index.html).
 
 If enabled, the server exposes the metrics by using the [Prometheus exporter](https://github.com/census-instrumentation/opencensus-java/tree/master/exporters/stats/prometheus).
 A tutorial on how to install Prometheus can be found [here](https://opencensus.io/codelabs/prometheus/#0).
