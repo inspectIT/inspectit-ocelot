@@ -1,6 +1,7 @@
 package rocks.inspectit.ocelot.core.config.propertysources;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.env.PropertiesPropertySource;
 import rocks.inspectit.ocelot.bootstrap.Instances;
 
@@ -31,6 +32,18 @@ public class EnvironmentInformationPropertySource extends PropertiesPropertySour
             }
         }
         //fallback to the "temp" directory
-        return System.getProperty("java.io.tmpdir");
+        return getTempDir();
+    }
+
+    private static String getTempDir() {
+        String tempdir = System.getProperty("java.io.tmpdir");
+        if (StringUtils.isBlank(tempdir)) {
+            return "";
+        }
+        if (tempdir.endsWith("/") || tempdir.endsWith("\\")) {
+            return tempdir.substring(0, tempdir.length() - 1);
+        } else {
+            return tempdir;
+        }
     }
 }

@@ -98,22 +98,22 @@ class HttpConfigurationPollerTest {
 
         @Test
         public void stateNotUpdated() {
-            when(currentState.update(any())).thenReturn(false);
+            doReturn(false).when(currentState).update(anyBoolean());
 
             poller.run();
 
-            verify(currentState).update(any());
+            verify(currentState).update(eq(false));
             verifyNoMoreInteractions(currentState);
             verifyZeroInteractions(env);
         }
 
         @Test
         public void stateUpdated() {
-            when(currentState.update(any())).thenReturn(true);
+            doReturn(true).when(currentState).update(anyBoolean());
 
             poller.run();
 
-            verify(currentState).update(any());
+            verify(currentState).update(eq(false));
             verify(env).updatePropertySources(any());
             verifyNoMoreInteractions(currentState, env);
         }

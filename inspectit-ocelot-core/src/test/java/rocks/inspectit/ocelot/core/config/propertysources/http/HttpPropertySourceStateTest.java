@@ -16,10 +16,10 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Properties;
-import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
@@ -46,8 +46,19 @@ class HttpPropertySourceStateTest {
             httpSettings = new HttpConfigSettings();
             httpSettings.setUrl(new URL("http://localhost:" + mockServer.port() + "/"));
             httpSettings.setAttributes(new HashMap<>());
-            httpSettings.setPersistenceFile(System.getProperty("java.io.tmpdir") + "inspectit-" + UUID.randomUUID());
+            httpSettings.setPersistenceFile(generateTempFilePath());
             state = new HttpPropertySourceState("test-state", httpSettings);
+        }
+
+
+        private String generateTempFilePath() {
+            try {
+                Path tempFile = Files.createTempFile("inspectit", "");
+                Files.delete(tempFile);
+                return tempFile.toString();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         @AfterEach
@@ -224,6 +235,7 @@ class HttpPropertySourceStateTest {
             assertThat(new File(httpSettings.getPersistenceFile())).doesNotExist();
         }
     }
+
 
     @Nested
     public class GetEffectiveRequestUri {

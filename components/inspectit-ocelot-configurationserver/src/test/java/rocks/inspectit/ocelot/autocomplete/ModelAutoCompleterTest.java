@@ -56,6 +56,7 @@ public class ModelAutoCompleterTest {
         void pastList() {
             List<String> input = Arrays.asList("inspectit.");
             ArrayList<String> output = new ArrayList<>(Arrays.asList("config",
+                    "env",
                     "exporters",
                     "instrumentation",
                     "logging",
@@ -108,6 +109,7 @@ public class ModelAutoCompleterTest {
         @Test
         void getPropertiesInspectit() {
             List<String> output = Arrays.asList("config",
+                    "env",
                     "exporters",
                     "instrumentation",
                     "logging",
