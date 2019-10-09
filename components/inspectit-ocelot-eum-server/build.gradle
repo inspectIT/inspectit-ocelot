@@ -2,18 +2,42 @@ plugins {
 	id 'org.springframework.boot' version '2.1.4.RELEASE'
 	id 'java'
 }
+
 apply plugin: 'io.spring.dependency-management'
 
 group = 'rocks.inspectit.oce'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '1.8'
 
+task downloadBoomerangZipFile() {
+	ext.dest = new File(buildDir, "boomerang-source-${boomerangVersion}.zip")
+	outputs.files(ext.dest)
+	doLast {
+		def f = ext.dest
+		new URL("https://github.com/akamai/boomerang/archive/${boomerangVersion}.zip")
+				.withInputStream{ i -> f.withOutputStream{ it << i }}
+	}
+}
+
+task downloadAndUnzipBoomerang(dependsOn: downloadBoomerangZipFile, type: Copy) {
+	from zipTree(downloadBoomerangZipFile.dest)
+	into project.buildDir
+}
+
 bootJar {
+	dependsOn downloadAndUnzipBoomerang
+
 	archivesBaseName = 'inspectit-ocelot-eum-server'
 	version = "${buildVersion}"
 
 	manifest {
 		attributes 'Start-Class': 'rocks.inspectit.oce.eum.server.EUMServerApplication'
+	}
+
+	from ("$buildDir/boomerang-${boomerangVersion}"){
+		include "plugins/*.js"
+		include "boomerang.js"
+		into "static/boomerang"
 	}
 }
 
