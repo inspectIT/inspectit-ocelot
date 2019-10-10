@@ -45,14 +45,12 @@ public class GenericActionCallSorter {
      * @throws CyclicDataDependencyException if the action calls have a cyclic dependency and therefore cannot be ordered
      */
     public List<ActionCallConfig> orderActionCalls(Collection<ActionCallConfig> calls) throws CyclicDataDependencyException {
-
         IdentityHashMap<ActionCallConfig, Set<ActionCallConfig>> dependencyGraph = buildDependencyGraph(calls);
 
         return getInTopologicalOrder(dependencyGraph);
     }
 
     private IdentityHashMap<ActionCallConfig, Set<ActionCallConfig>> buildDependencyGraph(Collection<ActionCallConfig> calls) {
-
         List<CallDependencies> dependencies = calls.stream()
                 .map(CallDependencies::collectFor)
                 .collect(Collectors.toList());
@@ -61,7 +59,7 @@ public class GenericActionCallSorter {
         dependencies.forEach(index::add);
 
         IdentityHashMap<ActionCallConfig, Set<ActionCallConfig>> result = new IdentityHashMap<>();
-        dependencies.forEach(dep -> result.put(dep.getSource(), getActionDependencies(dep, index)));
+        dependencies.forEach(dependency -> result.put(dependency.getSource(), getActionDependencies(dependency, index)));
         return result;
     }
 
@@ -166,18 +164,22 @@ public class GenericActionCallSorter {
                 if (!stackTrace.contains(dependencyIdentity)) {
                     putInTopologicalOrder(result, dependency, dependencyGraph, stackTrace);
                 } else {
-                    ArrayList<Equivalence.Wrapper<ActionCallConfig>> stackTraceList = new ArrayList<>(stackTrace);
-                    int idx = stackTraceList.indexOf(dependencyIdentity);
-                    List<String> dependencyCycle = stackTraceList.subList(idx, stackTraceList.size())
-                            .stream()
-                            .map(Equivalence.Wrapper::get)
-                            .map(ActionCallConfig::getName)
-                            .collect(Collectors.toList());
-                    throw new CyclicDataDependencyException(dependencyCycle);
+                    throw buildCyclicDataDependencyException(stackTrace, dependencyIdentity);
                 }
             }
         }
         result.add(currentIdentity);
         stackTrace.remove(currentIdentity);
+    }
+
+    private CyclicDataDependencyException buildCyclicDataDependencyException(LinkedHashSet<Equivalence.Wrapper<ActionCallConfig>> stackTrace, Equivalence.Wrapper<ActionCallConfig> cycleStart) {
+        ArrayList<Equivalence.Wrapper<ActionCallConfig>> stackTraceList = new ArrayList<>(stackTrace);
+        int idx = stackTraceList.indexOf(cycleStart);
+        List<String> dependencyCycle = stackTraceList.subList(idx, stackTraceList.size())
+                .stream()
+                .map(Equivalence.Wrapper::get)
+                .map(ActionCallConfig::getName)
+                .collect(Collectors.toList());
+        return new CyclicDataDependencyException(dependencyCycle);
     }
 }
