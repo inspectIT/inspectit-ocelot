@@ -1,6 +1,7 @@
 package rocks.inspectit.ocelot.core.instrumentation.correlation.log.adapters;
 
 import lombok.extern.slf4j.Slf4j;
+import rocks.inspectit.ocelot.core.instrumentation.correlation.log.MDCAccess;
 import rocks.inspectit.ocelot.core.utils.WeakMethodReference;
 
 import java.lang.reflect.Method;
@@ -11,10 +12,24 @@ import java.lang.reflect.Method;
 @Slf4j
 public class Log4J2MDCAdapter implements MDCAdapter {
 
+    /**
+     * The name of the MDC class of Log4j2.
+     */
     public static final String THREAD_CONTEXT_CLASS = "org.apache.logging.log4j.ThreadContext";
 
+    /**
+     * Reference to the org.apache.logging.log4j.ThreadContext.put(key,value) method.
+     */
     private WeakMethodReference putMethod;
+
+    /**
+     * Reference to the org.apache.logging.log4j.ThreadContext.get(key) method.
+     */
     private WeakMethodReference getMethod;
+
+    /**
+     * Reference to the org.apache.logging.log4j.ThreadContext.remove(key) method.
+     */
     private WeakMethodReference removeMethod;
 
     private Log4J2MDCAdapter(WeakMethodReference put, WeakMethodReference get, WeakMethodReference remove) {
@@ -23,6 +38,12 @@ public class Log4J2MDCAdapter implements MDCAdapter {
         removeMethod = remove;
     }
 
+    /**
+     * Creates an Adapater given a ThreadContext class.
+     *
+     * @param mdcClazz the org.apache.logging.log4j.ThreadContext class
+     * @return and adapter for setting values on the given thread context.
+     */
     public static Log4J2MDCAdapter get(Class<?> mdcClazz) {
         try {
             WeakMethodReference put = WeakMethodReference.create(mdcClazz, "put", String.class, String.class);
@@ -35,14 +56,13 @@ public class Log4J2MDCAdapter implements MDCAdapter {
     }
 
     @Override
-    public Undo set(String key, String value) {
+    public MDCAccess.Undo set(String key, String value) {
         Method put = putMethod.get();
         Method get = getMethod.get();
         Method remove = removeMethod.get();
 
         if (put == null || get == null || remove == null) {
-            return () -> {
-            }; //the MDC has been garbage collected
+            return MDCAccess.Undo.NOOP; //the MDC has been garbage collected
         }
 
         try {
@@ -67,10 +87,7 @@ public class Log4J2MDCAdapter implements MDCAdapter {
             };
         } catch (Throwable e) {
             log.error("Could not write to MDC", e);
-            return () -> {
-            };
+            return MDCAccess.Undo.NOOP;
         }
-
-
     }
 }

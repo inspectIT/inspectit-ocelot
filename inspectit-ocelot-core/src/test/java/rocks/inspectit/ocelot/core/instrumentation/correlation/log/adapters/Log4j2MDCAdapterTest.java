@@ -66,14 +66,14 @@ public class Log4j2MDCAdapterTest {
         void ensureUndoPreservesPreviousValue() {
             DummyMDC.put("myKey", "someValue");
 
-            adapter.set("myKey", null).undoChange();
+            adapter.set("myKey", null).close();
 
             assertThat(DummyMDC.get("myKey")).isEqualTo("someValue");
         }
 
         @Test
         void ensureUndoPreservesPreviousNull() {
-            adapter.set("myKey", "something").undoChange();
+            adapter.set("myKey", "something").close();
 
             assertThat(DummyMDC.contents.containsKey("myKey")).isFalse();
         }

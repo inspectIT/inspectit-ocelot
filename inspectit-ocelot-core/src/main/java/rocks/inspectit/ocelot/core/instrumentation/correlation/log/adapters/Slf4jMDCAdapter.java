@@ -1,6 +1,7 @@
 package rocks.inspectit.ocelot.core.instrumentation.correlation.log.adapters;
 
 import lombok.extern.slf4j.Slf4j;
+import rocks.inspectit.ocelot.core.instrumentation.correlation.log.MDCAccess;
 import rocks.inspectit.ocelot.core.utils.WeakMethodReference;
 
 import java.lang.reflect.Method;
@@ -36,14 +37,13 @@ public class Slf4jMDCAdapter implements MDCAdapter {
     }
 
     @Override
-    public Undo set(String key, String value) {
+    public MDCAccess.Undo set(String key, String value) {
         Method put = putMethod.get();
         Method get = getMethod.get();
         Method remove = removeMethod.get();
 
         if (put == null || get == null || remove == null) {
-            return () -> {
-            }; //the MDC has been garbage collected
+            return MDCAccess.Undo.NOOP; //the MDC has been garbage collected
         }
 
         try {
@@ -68,10 +68,7 @@ public class Slf4jMDCAdapter implements MDCAdapter {
             };
         } catch (Throwable e) {
             log.error("Could not write to MDC", e);
-            return () -> {
-            };
+            return MDCAccess.Undo.NOOP;
         }
-
-
     }
 }
