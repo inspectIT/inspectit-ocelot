@@ -15,8 +15,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 3,
-  "iteration": 1556280616734,
+  "id": 1,
+  "iteration": 1567689181673,
   "links": [],
   "panels": [
     {
@@ -209,7 +209,7 @@
           "unit": "short"
         },
         {
-          "alias": "Number of Classes",
+          "alias": "Count",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -327,6 +327,78 @@
               "key": "service",
               "operator": "=~",
               "value": "/^$service$/"
+            }
+          ]
+        },
+        {
+          "alias": "# errors since startup",
+          "groupBy": [],
+          "measurement": "inspectit_self_logs",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "D",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "counter"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "service",
+              "operator": "=~",
+              "value": "/^$service$/"
+            },
+            {
+              "condition": "AND",
+              "key": "level",
+              "operator": "=",
+              "value": "ERROR"
+            }
+          ]
+        },
+        {
+          "alias": "# warnings since startup",
+          "groupBy": [],
+          "measurement": "inspectit_self_logs",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "E",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "counter"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "service",
+              "operator": "=~",
+              "value": "/^$service$/"
+            },
+            {
+              "condition": "AND",
+              "key": "level",
+              "operator": "=",
+              "value": "WARN"
             }
           ]
         }
@@ -455,6 +527,141 @@
       "valueName": "avg"
     },
     {
+      "cacheTimeout": null,
+      "colorBackground": true,
+      "colorValue": false,
+      "colors": [
+        "rgb(33,33,36)",
+        "#890f02",
+        "#d44a3a"
+      ],
+      "datasource": "LocalInflux",
+      "format": "none",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 2,
+        "x": 12,
+        "y": 1
+      },
+      "id": 76,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "api-gateway",
+          "value": "api-gateway"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "inspectit_self_logs",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT SUM(\"diffs\") FROM (SELECT non_negative_difference(\"counter\") AS \"diffs\" FROM \"inspectit_self_logs\" WHERE (\"service\" =~ /^$service$/ AND \"level\" =~ /^ERROR$/ ) AND $timeFilter)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "counter"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "sum"
+              },
+              {
+                "params": [],
+                "type": "non_negative_difference"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "service",
+              "operator": "=~",
+              "value": "/^$service$/"
+            },
+            {
+              "condition": "AND",
+              "key": "level",
+              "operator": "=",
+              "value": "ERROR"
+            }
+          ]
+        }
+      ],
+      "thresholds": "1",
+      "title": "Errors",
+      "type": "singlestat",
+      "valueFontSize": "100%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "0",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
       "aliasColors": {
         "classes pending for hook": "#99440a"
       },
@@ -465,8 +672,8 @@
       "fill": 5,
       "gridPos": {
         "h": 6,
-        "w": 12,
-        "x": 12,
+        "w": 10,
+        "x": 14,
         "y": 1
       },
       "id": 49,
@@ -739,6 +946,276 @@
       }
     },
     {
+      "cacheTimeout": null,
+      "colorBackground": true,
+      "colorValue": false,
+      "colors": [
+        "rgb(33,33,36)",
+        "#967302",
+        "#d44a3a"
+      ],
+      "datasource": "LocalInflux",
+      "format": "none",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 2,
+        "x": 12,
+        "y": 3
+      },
+      "id": 107,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "api-gateway",
+          "value": "api-gateway"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "inspectit_self_logs",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT SUM(\"diffs\") FROM (SELECT non_negative_difference(\"counter\") AS \"diffs\" FROM \"inspectit_self_logs\" WHERE (\"service\" =~ /^$service$/ AND \"level\" =~ /^WARN$/ ) AND $timeFilter)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "counter"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "sum"
+              },
+              {
+                "params": [],
+                "type": "non_negative_difference"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "service",
+              "operator": "=~",
+              "value": "/^$service$/"
+            },
+            {
+              "condition": "AND",
+              "key": "level",
+              "operator": "=",
+              "value": "ERROR"
+            }
+          ]
+        }
+      ],
+      "thresholds": "1",
+      "title": "Warnings",
+      "type": "singlestat",
+      "valueFontSize": "100%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "0",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "rgb(33,33,36)",
+        "#967302",
+        "#d44a3a"
+      ],
+      "datasource": "LocalInflux",
+      "format": "none",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 2,
+        "x": 12,
+        "y": 5
+      },
+      "id": 108,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "api-gateway",
+          "value": "api-gateway"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "inspectit_self_logs",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT SUM(\"diffs\") FROM (SELECT non_negative_difference(\"counter\") AS \"diffs\" FROM \"inspectit_self_logs\" WHERE (\"service\" =~ /^$service$/ AND \"level\" =~ /^INFO|DEBUG|TRACE$/ ) AND $timeFilter)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "counter"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "sum"
+              },
+              {
+                "params": [],
+                "type": "non_negative_difference"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "service",
+              "operator": "=~",
+              "value": "/^$service$/"
+            },
+            {
+              "condition": "AND",
+              "key": "level",
+              "operator": "=",
+              "value": "ERROR"
+            }
+          ]
+        }
+      ],
+      "thresholds": "1",
+      "title": "Other Logs",
+      "type": "singlestat",
+      "valueFontSize": "100%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "0",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
       "collapsed": false,
       "gridPos": {
         "h": 1,
@@ -746,16 +1223,16 @@
         "x": 0,
         "y": 7
       },
-      "id": 50,
+      "id": 109,
       "panels": [],
       "repeat": null,
-      "repeatIteration": 1556280616734,
+      "repeatIteration": 1567689181673,
       "repeatPanelId": 2,
       "scopedVars": {
         "service": {
           "selected": false,
-          "text": "customers-service",
-          "value": "customers-service"
+          "text": "config-server",
+          "value": "config-server"
         }
       },
       "title": "$service",
@@ -786,7 +1263,7 @@
         "x": 0,
         "y": 8
       },
-      "id": 51,
+      "id": 110,
       "interval": null,
       "links": [],
       "mappingType": 1,
@@ -814,14 +1291,14 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1556280616734,
+      "repeatIteration": 1567689181673,
       "repeatPanelId": 4,
       "repeatedByRow": true,
       "scopedVars": {
         "service": {
           "selected": false,
-          "text": "customers-service",
-          "value": "customers-service"
+          "text": "config-server",
+          "value": "config-server"
         }
       },
       "sparkline": {
@@ -893,17 +1370,17 @@
         "x": 3,
         "y": 8
       },
-      "id": 52,
+      "id": 111,
       "links": [],
       "pageSize": null,
-      "repeatIteration": 1556280616734,
+      "repeatIteration": 1567689181673,
       "repeatPanelId": 47,
       "repeatedByRow": true,
       "scopedVars": {
         "service": {
           "selected": false,
-          "text": "customers-service",
-          "value": "customers-service"
+          "text": "config-server",
+          "value": "config-server"
         }
       },
       "scroll": true,
@@ -936,7 +1413,7 @@
           "unit": "short"
         },
         {
-          "alias": "Number of Classes",
+          "alias": "Count",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -1056,6 +1533,78 @@
               "value": "/^$service$/"
             }
           ]
+        },
+        {
+          "alias": "# errors since startup",
+          "groupBy": [],
+          "measurement": "inspectit_self_logs",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "D",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "counter"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "service",
+              "operator": "=~",
+              "value": "/^$service$/"
+            },
+            {
+              "condition": "AND",
+              "key": "level",
+              "operator": "=",
+              "value": "ERROR"
+            }
+          ]
+        },
+        {
+          "alias": "# warnings since startup",
+          "groupBy": [],
+          "measurement": "inspectit_self_logs",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "E",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "counter"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "service",
+              "operator": "=~",
+              "value": "/^$service$/"
+            },
+            {
+              "condition": "AND",
+              "key": "level",
+              "operator": "=",
+              "value": "WARN"
+            }
+          ]
         }
       ],
       "title": "Instrumentation State",
@@ -1086,7 +1635,7 @@
         "x": 9,
         "y": 8
       },
-      "id": 53,
+      "id": 112,
       "interval": null,
       "links": [],
       "mappingType": 1,
@@ -1114,14 +1663,14 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1556280616734,
+      "repeatIteration": 1567689181673,
       "repeatPanelId": 23,
       "repeatedByRow": true,
       "scopedVars": {
         "service": {
           "selected": false,
-          "text": "customers-service",
-          "value": "customers-service"
+          "text": "config-server",
+          "value": "config-server"
         }
       },
       "sparkline": {
@@ -1185,6 +1734,144 @@
       "valueName": "avg"
     },
     {
+      "cacheTimeout": null,
+      "colorBackground": true,
+      "colorValue": false,
+      "colors": [
+        "rgb(33,33,36)",
+        "#890f02",
+        "#d44a3a"
+      ],
+      "datasource": "LocalInflux",
+      "format": "none",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 2,
+        "x": 12,
+        "y": 8
+      },
+      "id": 113,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatIteration": 1567689181673,
+      "repeatPanelId": 76,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "config-server",
+          "value": "config-server"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "inspectit_self_logs",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT SUM(\"diffs\") FROM (SELECT non_negative_difference(\"counter\") AS \"diffs\" FROM \"inspectit_self_logs\" WHERE (\"service\" =~ /^$service$/ AND \"level\" =~ /^ERROR$/ ) AND $timeFilter)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "counter"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "sum"
+              },
+              {
+                "params": [],
+                "type": "non_negative_difference"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "service",
+              "operator": "=~",
+              "value": "/^$service$/"
+            },
+            {
+              "condition": "AND",
+              "key": "level",
+              "operator": "=",
+              "value": "ERROR"
+            }
+          ]
+        }
+      ],
+      "thresholds": "1",
+      "title": "Errors",
+      "type": "singlestat",
+      "valueFontSize": "100%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "0",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
       "aliasColors": {
         "classes pending for hook": "#99440a"
       },
@@ -1195,11 +1882,11 @@
       "fill": 5,
       "gridPos": {
         "h": 6,
-        "w": 12,
-        "x": 12,
+        "w": 10,
+        "x": 14,
         "y": 8
       },
-      "id": 54,
+      "id": 114,
       "legend": {
         "avg": false,
         "current": false,
@@ -1217,14 +1904,14 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1556280616734,
+      "repeatIteration": 1567689181673,
       "repeatPanelId": 49,
       "repeatedByRow": true,
       "scopedVars": {
         "service": {
           "selected": false,
-          "text": "customers-service",
-          "value": "customers-service"
+          "text": "config-server",
+          "value": "config-server"
         }
       },
       "seriesOverrides": [
@@ -1470,6 +2157,282 @@
         "align": false,
         "alignLevel": null
       }
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": true,
+      "colorValue": false,
+      "colors": [
+        "rgb(33,33,36)",
+        "#967302",
+        "#d44a3a"
+      ],
+      "datasource": "LocalInflux",
+      "format": "none",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 2,
+        "x": 12,
+        "y": 10
+      },
+      "id": 115,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatIteration": 1567689181673,
+      "repeatPanelId": 107,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "config-server",
+          "value": "config-server"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "inspectit_self_logs",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT SUM(\"diffs\") FROM (SELECT non_negative_difference(\"counter\") AS \"diffs\" FROM \"inspectit_self_logs\" WHERE (\"service\" =~ /^$service$/ AND \"level\" =~ /^WARN$/ ) AND $timeFilter)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "counter"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "sum"
+              },
+              {
+                "params": [],
+                "type": "non_negative_difference"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "service",
+              "operator": "=~",
+              "value": "/^$service$/"
+            },
+            {
+              "condition": "AND",
+              "key": "level",
+              "operator": "=",
+              "value": "ERROR"
+            }
+          ]
+        }
+      ],
+      "thresholds": "1",
+      "title": "Warnings",
+      "type": "singlestat",
+      "valueFontSize": "100%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "0",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "rgb(33,33,36)",
+        "#967302",
+        "#d44a3a"
+      ],
+      "datasource": "LocalInflux",
+      "format": "none",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 2,
+        "x": 12,
+        "y": 12
+      },
+      "id": 116,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatIteration": 1567689181673,
+      "repeatPanelId": 108,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "config-server",
+          "value": "config-server"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "inspectit_self_logs",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT SUM(\"diffs\") FROM (SELECT non_negative_difference(\"counter\") AS \"diffs\" FROM \"inspectit_self_logs\" WHERE (\"service\" =~ /^$service$/ AND \"level\" =~ /^INFO|DEBUG|TRACE$/ ) AND $timeFilter)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "counter"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "sum"
+              },
+              {
+                "params": [],
+                "type": "non_negative_difference"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "service",
+              "operator": "=~",
+              "value": "/^$service$/"
+            },
+            {
+              "condition": "AND",
+              "key": "level",
+              "operator": "=",
+              "value": "ERROR"
+            }
+          ]
+        }
+      ],
+      "thresholds": "1",
+      "title": "Other Logs",
+      "type": "singlestat",
+      "valueFontSize": "100%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "0",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
     },
     {
       "collapsed": false,
@@ -1479,16 +2442,16 @@
         "x": 0,
         "y": 14
       },
-      "id": 55,
+      "id": 117,
       "panels": [],
       "repeat": null,
-      "repeatIteration": 1556280616734,
+      "repeatIteration": 1567689181673,
       "repeatPanelId": 2,
       "scopedVars": {
         "service": {
           "selected": false,
-          "text": "config-server",
-          "value": "config-server"
+          "text": "customers-service",
+          "value": "customers-service"
         }
       },
       "title": "$service",
@@ -1519,7 +2482,7 @@
         "x": 0,
         "y": 15
       },
-      "id": 56,
+      "id": 118,
       "interval": null,
       "links": [],
       "mappingType": 1,
@@ -1547,14 +2510,14 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1556280616734,
+      "repeatIteration": 1567689181673,
       "repeatPanelId": 4,
       "repeatedByRow": true,
       "scopedVars": {
         "service": {
           "selected": false,
-          "text": "config-server",
-          "value": "config-server"
+          "text": "customers-service",
+          "value": "customers-service"
         }
       },
       "sparkline": {
@@ -1626,17 +2589,17 @@
         "x": 3,
         "y": 15
       },
-      "id": 57,
+      "id": 119,
       "links": [],
       "pageSize": null,
-      "repeatIteration": 1556280616734,
+      "repeatIteration": 1567689181673,
       "repeatPanelId": 47,
       "repeatedByRow": true,
       "scopedVars": {
         "service": {
           "selected": false,
-          "text": "config-server",
-          "value": "config-server"
+          "text": "customers-service",
+          "value": "customers-service"
         }
       },
       "scroll": true,
@@ -1669,7 +2632,7 @@
           "unit": "short"
         },
         {
-          "alias": "Number of Classes",
+          "alias": "Count",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -1789,6 +2752,78 @@
               "value": "/^$service$/"
             }
           ]
+        },
+        {
+          "alias": "# errors since startup",
+          "groupBy": [],
+          "measurement": "inspectit_self_logs",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "D",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "counter"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "service",
+              "operator": "=~",
+              "value": "/^$service$/"
+            },
+            {
+              "condition": "AND",
+              "key": "level",
+              "operator": "=",
+              "value": "ERROR"
+            }
+          ]
+        },
+        {
+          "alias": "# warnings since startup",
+          "groupBy": [],
+          "measurement": "inspectit_self_logs",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "E",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "counter"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "service",
+              "operator": "=~",
+              "value": "/^$service$/"
+            },
+            {
+              "condition": "AND",
+              "key": "level",
+              "operator": "=",
+              "value": "WARN"
+            }
+          ]
         }
       ],
       "title": "Instrumentation State",
@@ -1819,7 +2854,7 @@
         "x": 9,
         "y": 15
       },
-      "id": 58,
+      "id": 120,
       "interval": null,
       "links": [],
       "mappingType": 1,
@@ -1847,14 +2882,14 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1556280616734,
+      "repeatIteration": 1567689181673,
       "repeatPanelId": 23,
       "repeatedByRow": true,
       "scopedVars": {
         "service": {
           "selected": false,
-          "text": "config-server",
-          "value": "config-server"
+          "text": "customers-service",
+          "value": "customers-service"
         }
       },
       "sparkline": {
@@ -1918,6 +2953,144 @@
       "valueName": "avg"
     },
     {
+      "cacheTimeout": null,
+      "colorBackground": true,
+      "colorValue": false,
+      "colors": [
+        "rgb(33,33,36)",
+        "#890f02",
+        "#d44a3a"
+      ],
+      "datasource": "LocalInflux",
+      "format": "none",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 2,
+        "x": 12,
+        "y": 15
+      },
+      "id": 121,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatIteration": 1567689181673,
+      "repeatPanelId": 76,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "customers-service",
+          "value": "customers-service"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "inspectit_self_logs",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT SUM(\"diffs\") FROM (SELECT non_negative_difference(\"counter\") AS \"diffs\" FROM \"inspectit_self_logs\" WHERE (\"service\" =~ /^$service$/ AND \"level\" =~ /^ERROR$/ ) AND $timeFilter)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "counter"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "sum"
+              },
+              {
+                "params": [],
+                "type": "non_negative_difference"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "service",
+              "operator": "=~",
+              "value": "/^$service$/"
+            },
+            {
+              "condition": "AND",
+              "key": "level",
+              "operator": "=",
+              "value": "ERROR"
+            }
+          ]
+        }
+      ],
+      "thresholds": "1",
+      "title": "Errors",
+      "type": "singlestat",
+      "valueFontSize": "100%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "0",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
       "aliasColors": {
         "classes pending for hook": "#99440a"
       },
@@ -1928,11 +3101,11 @@
       "fill": 5,
       "gridPos": {
         "h": 6,
-        "w": 12,
-        "x": 12,
+        "w": 10,
+        "x": 14,
         "y": 15
       },
-      "id": 59,
+      "id": 122,
       "legend": {
         "avg": false,
         "current": false,
@@ -1950,14 +3123,14 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1556280616734,
+      "repeatIteration": 1567689181673,
       "repeatPanelId": 49,
       "repeatedByRow": true,
       "scopedVars": {
         "service": {
           "selected": false,
-          "text": "config-server",
-          "value": "config-server"
+          "text": "customers-service",
+          "value": "customers-service"
         }
       },
       "seriesOverrides": [
@@ -2203,6 +3376,282 @@
         "align": false,
         "alignLevel": null
       }
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": true,
+      "colorValue": false,
+      "colors": [
+        "rgb(33,33,36)",
+        "#967302",
+        "#d44a3a"
+      ],
+      "datasource": "LocalInflux",
+      "format": "none",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 2,
+        "x": 12,
+        "y": 17
+      },
+      "id": 123,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatIteration": 1567689181673,
+      "repeatPanelId": 107,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "customers-service",
+          "value": "customers-service"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "inspectit_self_logs",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT SUM(\"diffs\") FROM (SELECT non_negative_difference(\"counter\") AS \"diffs\" FROM \"inspectit_self_logs\" WHERE (\"service\" =~ /^$service$/ AND \"level\" =~ /^WARN$/ ) AND $timeFilter)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "counter"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "sum"
+              },
+              {
+                "params": [],
+                "type": "non_negative_difference"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "service",
+              "operator": "=~",
+              "value": "/^$service$/"
+            },
+            {
+              "condition": "AND",
+              "key": "level",
+              "operator": "=",
+              "value": "ERROR"
+            }
+          ]
+        }
+      ],
+      "thresholds": "1",
+      "title": "Warnings",
+      "type": "singlestat",
+      "valueFontSize": "100%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "0",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "rgb(33,33,36)",
+        "#967302",
+        "#d44a3a"
+      ],
+      "datasource": "LocalInflux",
+      "format": "none",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 2,
+        "x": 12,
+        "y": 19
+      },
+      "id": 124,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatIteration": 1567689181673,
+      "repeatPanelId": 108,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "customers-service",
+          "value": "customers-service"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "inspectit_self_logs",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT SUM(\"diffs\") FROM (SELECT non_negative_difference(\"counter\") AS \"diffs\" FROM \"inspectit_self_logs\" WHERE (\"service\" =~ /^$service$/ AND \"level\" =~ /^INFO|DEBUG|TRACE$/ ) AND $timeFilter)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "counter"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "sum"
+              },
+              {
+                "params": [],
+                "type": "non_negative_difference"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "service",
+              "operator": "=~",
+              "value": "/^$service$/"
+            },
+            {
+              "condition": "AND",
+              "key": "level",
+              "operator": "=",
+              "value": "ERROR"
+            }
+          ]
+        }
+      ],
+      "thresholds": "1",
+      "title": "Other Logs",
+      "type": "singlestat",
+      "valueFontSize": "100%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "0",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
     },
     {
       "collapsed": false,
@@ -2212,16 +3661,16 @@
         "x": 0,
         "y": 21
       },
-      "id": 60,
+      "id": 125,
       "panels": [],
       "repeat": null,
-      "repeatIteration": 1556280616734,
+      "repeatIteration": 1567689181673,
       "repeatPanelId": 2,
       "scopedVars": {
         "service": {
           "selected": false,
-          "text": "visits-service",
-          "value": "visits-service"
+          "text": "discovery-server",
+          "value": "discovery-server"
         }
       },
       "title": "$service",
@@ -2252,7 +3701,7 @@
         "x": 0,
         "y": 22
       },
-      "id": 61,
+      "id": 126,
       "interval": null,
       "links": [],
       "mappingType": 1,
@@ -2280,14 +3729,14 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1556280616734,
+      "repeatIteration": 1567689181673,
       "repeatPanelId": 4,
       "repeatedByRow": true,
       "scopedVars": {
         "service": {
           "selected": false,
-          "text": "visits-service",
-          "value": "visits-service"
+          "text": "discovery-server",
+          "value": "discovery-server"
         }
       },
       "sparkline": {
@@ -2359,17 +3808,17 @@
         "x": 3,
         "y": 22
       },
-      "id": 62,
+      "id": 127,
       "links": [],
       "pageSize": null,
-      "repeatIteration": 1556280616734,
+      "repeatIteration": 1567689181673,
       "repeatPanelId": 47,
       "repeatedByRow": true,
       "scopedVars": {
         "service": {
           "selected": false,
-          "text": "visits-service",
-          "value": "visits-service"
+          "text": "discovery-server",
+          "value": "discovery-server"
         }
       },
       "scroll": true,
@@ -2402,7 +3851,7 @@
           "unit": "short"
         },
         {
-          "alias": "Number of Classes",
+          "alias": "Count",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -2522,6 +3971,78 @@
               "value": "/^$service$/"
             }
           ]
+        },
+        {
+          "alias": "# errors since startup",
+          "groupBy": [],
+          "measurement": "inspectit_self_logs",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "D",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "counter"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "service",
+              "operator": "=~",
+              "value": "/^$service$/"
+            },
+            {
+              "condition": "AND",
+              "key": "level",
+              "operator": "=",
+              "value": "ERROR"
+            }
+          ]
+        },
+        {
+          "alias": "# warnings since startup",
+          "groupBy": [],
+          "measurement": "inspectit_self_logs",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "E",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "counter"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "service",
+              "operator": "=~",
+              "value": "/^$service$/"
+            },
+            {
+              "condition": "AND",
+              "key": "level",
+              "operator": "=",
+              "value": "WARN"
+            }
+          ]
         }
       ],
       "title": "Instrumentation State",
@@ -2552,7 +4073,7 @@
         "x": 9,
         "y": 22
       },
-      "id": 63,
+      "id": 128,
       "interval": null,
       "links": [],
       "mappingType": 1,
@@ -2580,14 +4101,14 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1556280616734,
+      "repeatIteration": 1567689181673,
       "repeatPanelId": 23,
       "repeatedByRow": true,
       "scopedVars": {
         "service": {
           "selected": false,
-          "text": "visits-service",
-          "value": "visits-service"
+          "text": "discovery-server",
+          "value": "discovery-server"
         }
       },
       "sparkline": {
@@ -2651,6 +4172,144 @@
       "valueName": "avg"
     },
     {
+      "cacheTimeout": null,
+      "colorBackground": true,
+      "colorValue": false,
+      "colors": [
+        "rgb(33,33,36)",
+        "#890f02",
+        "#d44a3a"
+      ],
+      "datasource": "LocalInflux",
+      "format": "none",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 2,
+        "x": 12,
+        "y": 22
+      },
+      "id": 129,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatIteration": 1567689181673,
+      "repeatPanelId": 76,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "discovery-server",
+          "value": "discovery-server"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "inspectit_self_logs",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT SUM(\"diffs\") FROM (SELECT non_negative_difference(\"counter\") AS \"diffs\" FROM \"inspectit_self_logs\" WHERE (\"service\" =~ /^$service$/ AND \"level\" =~ /^ERROR$/ ) AND $timeFilter)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "counter"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "sum"
+              },
+              {
+                "params": [],
+                "type": "non_negative_difference"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "service",
+              "operator": "=~",
+              "value": "/^$service$/"
+            },
+            {
+              "condition": "AND",
+              "key": "level",
+              "operator": "=",
+              "value": "ERROR"
+            }
+          ]
+        }
+      ],
+      "thresholds": "1",
+      "title": "Errors",
+      "type": "singlestat",
+      "valueFontSize": "100%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "0",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
       "aliasColors": {
         "classes pending for hook": "#99440a"
       },
@@ -2661,11 +4320,11 @@
       "fill": 5,
       "gridPos": {
         "h": 6,
-        "w": 12,
-        "x": 12,
+        "w": 10,
+        "x": 14,
         "y": 22
       },
-      "id": 64,
+      "id": 130,
       "legend": {
         "avg": false,
         "current": false,
@@ -2683,14 +4342,14 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1556280616734,
+      "repeatIteration": 1567689181673,
       "repeatPanelId": 49,
       "repeatedByRow": true,
       "scopedVars": {
         "service": {
           "selected": false,
-          "text": "visits-service",
-          "value": "visits-service"
+          "text": "discovery-server",
+          "value": "discovery-server"
         }
       },
       "seriesOverrides": [
@@ -2936,6 +4595,282 @@
         "align": false,
         "alignLevel": null
       }
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": true,
+      "colorValue": false,
+      "colors": [
+        "rgb(33,33,36)",
+        "#967302",
+        "#d44a3a"
+      ],
+      "datasource": "LocalInflux",
+      "format": "none",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 2,
+        "x": 12,
+        "y": 24
+      },
+      "id": 131,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatIteration": 1567689181673,
+      "repeatPanelId": 107,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "discovery-server",
+          "value": "discovery-server"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "inspectit_self_logs",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT SUM(\"diffs\") FROM (SELECT non_negative_difference(\"counter\") AS \"diffs\" FROM \"inspectit_self_logs\" WHERE (\"service\" =~ /^$service$/ AND \"level\" =~ /^WARN$/ ) AND $timeFilter)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "counter"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "sum"
+              },
+              {
+                "params": [],
+                "type": "non_negative_difference"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "service",
+              "operator": "=~",
+              "value": "/^$service$/"
+            },
+            {
+              "condition": "AND",
+              "key": "level",
+              "operator": "=",
+              "value": "ERROR"
+            }
+          ]
+        }
+      ],
+      "thresholds": "1",
+      "title": "Warnings",
+      "type": "singlestat",
+      "valueFontSize": "100%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "0",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "rgb(33,33,36)",
+        "#967302",
+        "#d44a3a"
+      ],
+      "datasource": "LocalInflux",
+      "format": "none",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 2,
+        "x": 12,
+        "y": 26
+      },
+      "id": 132,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatIteration": 1567689181673,
+      "repeatPanelId": 108,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "discovery-server",
+          "value": "discovery-server"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "inspectit_self_logs",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT SUM(\"diffs\") FROM (SELECT non_negative_difference(\"counter\") AS \"diffs\" FROM \"inspectit_self_logs\" WHERE (\"service\" =~ /^$service$/ AND \"level\" =~ /^INFO|DEBUG|TRACE$/ ) AND $timeFilter)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "counter"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "sum"
+              },
+              {
+                "params": [],
+                "type": "non_negative_difference"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "service",
+              "operator": "=~",
+              "value": "/^$service$/"
+            },
+            {
+              "condition": "AND",
+              "key": "level",
+              "operator": "=",
+              "value": "ERROR"
+            }
+          ]
+        }
+      ],
+      "thresholds": "1",
+      "title": "Other Logs",
+      "type": "singlestat",
+      "valueFontSize": "100%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "0",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
     },
     {
       "collapsed": false,
@@ -2945,16 +4880,16 @@
         "x": 0,
         "y": 28
       },
-      "id": 65,
+      "id": 133,
       "panels": [],
       "repeat": null,
-      "repeatIteration": 1556280616734,
+      "repeatIteration": 1567689181673,
       "repeatPanelId": 2,
       "scopedVars": {
         "service": {
           "selected": false,
-          "text": "discovery-server",
-          "value": "discovery-server"
+          "text": "vets-service",
+          "value": "vets-service"
         }
       },
       "title": "$service",
@@ -2985,7 +4920,7 @@
         "x": 0,
         "y": 29
       },
-      "id": 66,
+      "id": 134,
       "interval": null,
       "links": [],
       "mappingType": 1,
@@ -3013,14 +4948,14 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1556280616734,
+      "repeatIteration": 1567689181673,
       "repeatPanelId": 4,
       "repeatedByRow": true,
       "scopedVars": {
         "service": {
           "selected": false,
-          "text": "discovery-server",
-          "value": "discovery-server"
+          "text": "vets-service",
+          "value": "vets-service"
         }
       },
       "sparkline": {
@@ -3092,17 +5027,17 @@
         "x": 3,
         "y": 29
       },
-      "id": 67,
+      "id": 135,
       "links": [],
       "pageSize": null,
-      "repeatIteration": 1556280616734,
+      "repeatIteration": 1567689181673,
       "repeatPanelId": 47,
       "repeatedByRow": true,
       "scopedVars": {
         "service": {
           "selected": false,
-          "text": "discovery-server",
-          "value": "discovery-server"
+          "text": "vets-service",
+          "value": "vets-service"
         }
       },
       "scroll": true,
@@ -3135,7 +5070,7 @@
           "unit": "short"
         },
         {
-          "alias": "Number of Classes",
+          "alias": "Count",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -3255,6 +5190,78 @@
               "value": "/^$service$/"
             }
           ]
+        },
+        {
+          "alias": "# errors since startup",
+          "groupBy": [],
+          "measurement": "inspectit_self_logs",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "D",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "counter"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "service",
+              "operator": "=~",
+              "value": "/^$service$/"
+            },
+            {
+              "condition": "AND",
+              "key": "level",
+              "operator": "=",
+              "value": "ERROR"
+            }
+          ]
+        },
+        {
+          "alias": "# warnings since startup",
+          "groupBy": [],
+          "measurement": "inspectit_self_logs",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "E",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "counter"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "service",
+              "operator": "=~",
+              "value": "/^$service$/"
+            },
+            {
+              "condition": "AND",
+              "key": "level",
+              "operator": "=",
+              "value": "WARN"
+            }
+          ]
         }
       ],
       "title": "Instrumentation State",
@@ -3285,7 +5292,7 @@
         "x": 9,
         "y": 29
       },
-      "id": 68,
+      "id": 136,
       "interval": null,
       "links": [],
       "mappingType": 1,
@@ -3313,14 +5320,14 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1556280616734,
+      "repeatIteration": 1567689181673,
       "repeatPanelId": 23,
       "repeatedByRow": true,
       "scopedVars": {
         "service": {
           "selected": false,
-          "text": "discovery-server",
-          "value": "discovery-server"
+          "text": "vets-service",
+          "value": "vets-service"
         }
       },
       "sparkline": {
@@ -3384,6 +5391,144 @@
       "valueName": "avg"
     },
     {
+      "cacheTimeout": null,
+      "colorBackground": true,
+      "colorValue": false,
+      "colors": [
+        "rgb(33,33,36)",
+        "#890f02",
+        "#d44a3a"
+      ],
+      "datasource": "LocalInflux",
+      "format": "none",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 2,
+        "x": 12,
+        "y": 29
+      },
+      "id": 137,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatIteration": 1567689181673,
+      "repeatPanelId": 76,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "vets-service",
+          "value": "vets-service"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "inspectit_self_logs",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT SUM(\"diffs\") FROM (SELECT non_negative_difference(\"counter\") AS \"diffs\" FROM \"inspectit_self_logs\" WHERE (\"service\" =~ /^$service$/ AND \"level\" =~ /^ERROR$/ ) AND $timeFilter)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "counter"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "sum"
+              },
+              {
+                "params": [],
+                "type": "non_negative_difference"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "service",
+              "operator": "=~",
+              "value": "/^$service$/"
+            },
+            {
+              "condition": "AND",
+              "key": "level",
+              "operator": "=",
+              "value": "ERROR"
+            }
+          ]
+        }
+      ],
+      "thresholds": "1",
+      "title": "Errors",
+      "type": "singlestat",
+      "valueFontSize": "100%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "0",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
       "aliasColors": {
         "classes pending for hook": "#99440a"
       },
@@ -3394,11 +5539,11 @@
       "fill": 5,
       "gridPos": {
         "h": 6,
-        "w": 12,
-        "x": 12,
+        "w": 10,
+        "x": 14,
         "y": 29
       },
-      "id": 69,
+      "id": 138,
       "legend": {
         "avg": false,
         "current": false,
@@ -3416,14 +5561,14 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1556280616734,
+      "repeatIteration": 1567689181673,
       "repeatPanelId": 49,
       "repeatedByRow": true,
       "scopedVars": {
         "service": {
           "selected": false,
-          "text": "discovery-server",
-          "value": "discovery-server"
+          "text": "vets-service",
+          "value": "vets-service"
         }
       },
       "seriesOverrides": [
@@ -3669,6 +5814,282 @@
         "align": false,
         "alignLevel": null
       }
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": true,
+      "colorValue": false,
+      "colors": [
+        "rgb(33,33,36)",
+        "#967302",
+        "#d44a3a"
+      ],
+      "datasource": "LocalInflux",
+      "format": "none",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 2,
+        "x": 12,
+        "y": 31
+      },
+      "id": 139,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatIteration": 1567689181673,
+      "repeatPanelId": 107,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "vets-service",
+          "value": "vets-service"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "inspectit_self_logs",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT SUM(\"diffs\") FROM (SELECT non_negative_difference(\"counter\") AS \"diffs\" FROM \"inspectit_self_logs\" WHERE (\"service\" =~ /^$service$/ AND \"level\" =~ /^WARN$/ ) AND $timeFilter)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "counter"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "sum"
+              },
+              {
+                "params": [],
+                "type": "non_negative_difference"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "service",
+              "operator": "=~",
+              "value": "/^$service$/"
+            },
+            {
+              "condition": "AND",
+              "key": "level",
+              "operator": "=",
+              "value": "ERROR"
+            }
+          ]
+        }
+      ],
+      "thresholds": "1",
+      "title": "Warnings",
+      "type": "singlestat",
+      "valueFontSize": "100%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "0",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "rgb(33,33,36)",
+        "#967302",
+        "#d44a3a"
+      ],
+      "datasource": "LocalInflux",
+      "format": "none",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 2,
+        "x": 12,
+        "y": 33
+      },
+      "id": 140,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatIteration": 1567689181673,
+      "repeatPanelId": 108,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "vets-service",
+          "value": "vets-service"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "inspectit_self_logs",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT SUM(\"diffs\") FROM (SELECT non_negative_difference(\"counter\") AS \"diffs\" FROM \"inspectit_self_logs\" WHERE (\"service\" =~ /^$service$/ AND \"level\" =~ /^INFO|DEBUG|TRACE$/ ) AND $timeFilter)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "counter"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "sum"
+              },
+              {
+                "params": [],
+                "type": "non_negative_difference"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "service",
+              "operator": "=~",
+              "value": "/^$service$/"
+            },
+            {
+              "condition": "AND",
+              "key": "level",
+              "operator": "=",
+              "value": "ERROR"
+            }
+          ]
+        }
+      ],
+      "thresholds": "1",
+      "title": "Other Logs",
+      "type": "singlestat",
+      "valueFontSize": "100%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "0",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
     },
     {
       "collapsed": false,
@@ -3678,16 +6099,16 @@
         "x": 0,
         "y": 35
       },
-      "id": 70,
+      "id": 141,
       "panels": [],
       "repeat": null,
-      "repeatIteration": 1556280616734,
+      "repeatIteration": 1567689181673,
       "repeatPanelId": 2,
       "scopedVars": {
         "service": {
           "selected": false,
-          "text": "vets-service",
-          "value": "vets-service"
+          "text": "visits-service",
+          "value": "visits-service"
         }
       },
       "title": "$service",
@@ -3718,7 +6139,7 @@
         "x": 0,
         "y": 36
       },
-      "id": 71,
+      "id": 142,
       "interval": null,
       "links": [],
       "mappingType": 1,
@@ -3746,14 +6167,14 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1556280616734,
+      "repeatIteration": 1567689181673,
       "repeatPanelId": 4,
       "repeatedByRow": true,
       "scopedVars": {
         "service": {
           "selected": false,
-          "text": "vets-service",
-          "value": "vets-service"
+          "text": "visits-service",
+          "value": "visits-service"
         }
       },
       "sparkline": {
@@ -3825,17 +6246,17 @@
         "x": 3,
         "y": 36
       },
-      "id": 72,
+      "id": 143,
       "links": [],
       "pageSize": null,
-      "repeatIteration": 1556280616734,
+      "repeatIteration": 1567689181673,
       "repeatPanelId": 47,
       "repeatedByRow": true,
       "scopedVars": {
         "service": {
           "selected": false,
-          "text": "vets-service",
-          "value": "vets-service"
+          "text": "visits-service",
+          "value": "visits-service"
         }
       },
       "scroll": true,
@@ -3868,7 +6289,7 @@
           "unit": "short"
         },
         {
-          "alias": "Number of Classes",
+          "alias": "Count",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -3988,6 +6409,78 @@
               "value": "/^$service$/"
             }
           ]
+        },
+        {
+          "alias": "# errors since startup",
+          "groupBy": [],
+          "measurement": "inspectit_self_logs",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "D",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "counter"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "service",
+              "operator": "=~",
+              "value": "/^$service$/"
+            },
+            {
+              "condition": "AND",
+              "key": "level",
+              "operator": "=",
+              "value": "ERROR"
+            }
+          ]
+        },
+        {
+          "alias": "# warnings since startup",
+          "groupBy": [],
+          "measurement": "inspectit_self_logs",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "E",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "counter"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "service",
+              "operator": "=~",
+              "value": "/^$service$/"
+            },
+            {
+              "condition": "AND",
+              "key": "level",
+              "operator": "=",
+              "value": "WARN"
+            }
+          ]
         }
       ],
       "title": "Instrumentation State",
@@ -4018,7 +6511,7 @@
         "x": 9,
         "y": 36
       },
-      "id": 73,
+      "id": 144,
       "interval": null,
       "links": [],
       "mappingType": 1,
@@ -4046,14 +6539,14 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1556280616734,
+      "repeatIteration": 1567689181673,
       "repeatPanelId": 23,
       "repeatedByRow": true,
       "scopedVars": {
         "service": {
           "selected": false,
-          "text": "vets-service",
-          "value": "vets-service"
+          "text": "visits-service",
+          "value": "visits-service"
         }
       },
       "sparkline": {
@@ -4117,6 +6610,144 @@
       "valueName": "avg"
     },
     {
+      "cacheTimeout": null,
+      "colorBackground": true,
+      "colorValue": false,
+      "colors": [
+        "rgb(33,33,36)",
+        "#890f02",
+        "#d44a3a"
+      ],
+      "datasource": "LocalInflux",
+      "format": "none",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 2,
+        "x": 12,
+        "y": 36
+      },
+      "id": 145,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatIteration": 1567689181673,
+      "repeatPanelId": 76,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "visits-service",
+          "value": "visits-service"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "inspectit_self_logs",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT SUM(\"diffs\") FROM (SELECT non_negative_difference(\"counter\") AS \"diffs\" FROM \"inspectit_self_logs\" WHERE (\"service\" =~ /^$service$/ AND \"level\" =~ /^ERROR$/ ) AND $timeFilter)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "counter"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "sum"
+              },
+              {
+                "params": [],
+                "type": "non_negative_difference"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "service",
+              "operator": "=~",
+              "value": "/^$service$/"
+            },
+            {
+              "condition": "AND",
+              "key": "level",
+              "operator": "=",
+              "value": "ERROR"
+            }
+          ]
+        }
+      ],
+      "thresholds": "1",
+      "title": "Errors",
+      "type": "singlestat",
+      "valueFontSize": "100%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "0",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
       "aliasColors": {
         "classes pending for hook": "#99440a"
       },
@@ -4127,11 +6758,11 @@
       "fill": 5,
       "gridPos": {
         "h": 6,
-        "w": 12,
-        "x": 12,
+        "w": 10,
+        "x": 14,
         "y": 36
       },
-      "id": 74,
+      "id": 146,
       "legend": {
         "avg": false,
         "current": false,
@@ -4149,14 +6780,14 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1556280616734,
+      "repeatIteration": 1567689181673,
       "repeatPanelId": 49,
       "repeatedByRow": true,
       "scopedVars": {
         "service": {
           "selected": false,
-          "text": "vets-service",
-          "value": "vets-service"
+          "text": "visits-service",
+          "value": "visits-service"
         }
       },
       "seriesOverrides": [
@@ -4402,6 +7033,282 @@
         "align": false,
         "alignLevel": null
       }
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": true,
+      "colorValue": false,
+      "colors": [
+        "rgb(33,33,36)",
+        "#967302",
+        "#d44a3a"
+      ],
+      "datasource": "LocalInflux",
+      "format": "none",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 2,
+        "x": 12,
+        "y": 38
+      },
+      "id": 147,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatIteration": 1567689181673,
+      "repeatPanelId": 107,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "visits-service",
+          "value": "visits-service"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "inspectit_self_logs",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT SUM(\"diffs\") FROM (SELECT non_negative_difference(\"counter\") AS \"diffs\" FROM \"inspectit_self_logs\" WHERE (\"service\" =~ /^$service$/ AND \"level\" =~ /^WARN$/ ) AND $timeFilter)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "counter"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "sum"
+              },
+              {
+                "params": [],
+                "type": "non_negative_difference"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "service",
+              "operator": "=~",
+              "value": "/^$service$/"
+            },
+            {
+              "condition": "AND",
+              "key": "level",
+              "operator": "=",
+              "value": "ERROR"
+            }
+          ]
+        }
+      ],
+      "thresholds": "1",
+      "title": "Warnings",
+      "type": "singlestat",
+      "valueFontSize": "100%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "0",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "rgb(33,33,36)",
+        "#967302",
+        "#d44a3a"
+      ],
+      "datasource": "LocalInflux",
+      "format": "none",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 2,
+        "x": 12,
+        "y": 40
+      },
+      "id": 148,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatIteration": 1567689181673,
+      "repeatPanelId": 108,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "visits-service",
+          "value": "visits-service"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "inspectit_self_logs",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT SUM(\"diffs\") FROM (SELECT non_negative_difference(\"counter\") AS \"diffs\" FROM \"inspectit_self_logs\" WHERE (\"service\" =~ /^$service$/ AND \"level\" =~ /^INFO|DEBUG|TRACE$/ ) AND $timeFilter)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "counter"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "sum"
+              },
+              {
+                "params": [],
+                "type": "non_negative_difference"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "service",
+              "operator": "=~",
+              "value": "/^$service$/"
+            },
+            {
+              "condition": "AND",
+              "key": "level",
+              "operator": "=",
+              "value": "ERROR"
+            }
+          ]
+        }
+      ],
+      "thresholds": "1",
+      "title": "Other Logs",
+      "type": "singlestat",
+      "valueFontSize": "100%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "0",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
     }
   ],
   "refresh": "30s",
