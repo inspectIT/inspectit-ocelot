@@ -1,13 +1,13 @@
 package rocks.inspectit.ocelot.core.instrumentation.hook.actions.span;
 
 import io.opencensus.trace.*;
-import io.opencensus.trace.samplers.Samplers;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.RuleTracingSettings;
 import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
 import rocks.inspectit.ocelot.core.instrumentation.hook.MethodReflectionInformation;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
+import rocks.inspectit.ocelot.core.opencensus.OcelotProbabilitySampler;
 
 import java.util.function.Predicate;
 
@@ -92,9 +92,9 @@ public class ContinueOrStartSpanAction implements IHookAction {
             if (sampler == null) {
                 Object probability = ctx.getData(dynamicSampleProbabilityKey);
                 if (probability instanceof Number) {
-                    sampler = Samplers.probabilitySampler(Math.min(1, Math.max(0, ((Number) probability).doubleValue())));
+                    sampler = new OcelotProbabilitySampler(Math.min(1, Math.max(0, ((Number) probability).doubleValue())));
                 } else {
-                    sampler = Samplers.neverSample();
+                    sampler = new OcelotProbabilitySampler(0.0);
                 }
             }
 

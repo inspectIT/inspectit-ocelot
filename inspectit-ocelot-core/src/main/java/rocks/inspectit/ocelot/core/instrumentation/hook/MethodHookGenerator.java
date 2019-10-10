@@ -1,7 +1,6 @@
 package rocks.inspectit.ocelot.core.instrumentation.hook;
 
 import io.opencensus.stats.StatsRecorder;
-import io.opencensus.trace.samplers.Samplers;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import net.bytebuddy.description.method.MethodDescription;
@@ -19,6 +18,7 @@ import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.EndSpanActi
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.StoreSpanAction;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.WriteSpanAttributesAction;
 import rocks.inspectit.ocelot.core.metrics.MeasuresAndViewsManager;
+import rocks.inspectit.ocelot.core.opencensus.OcelotProbabilitySampler;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -129,13 +129,8 @@ public class MethodHookGenerator {
         // InstrumentationRuleResolver resolves null to the default sample probability
         try {
             double fixedProbability = Double.parseDouble(tracing.getSampleProbability());
-            if (fixedProbability <= 0) {
-                actionBuilder.staticSampler(Samplers.neverSample());
-            } else if (fixedProbability >= 1) {
-                actionBuilder.staticSampler(Samplers.alwaysSample());
-            } else {
-                actionBuilder.staticSampler(Samplers.probabilitySampler(fixedProbability));
-            }
+            double clampedProbability = Math.max(0.0, Math.min(1.0, fixedProbability));
+            actionBuilder.staticSampler(new OcelotProbabilitySampler(clampedProbability));
         } catch (NumberFormatException e) {
             actionBuilder.dynamicSampleProbabilityKey(tracing.getSampleProbability());
         }
