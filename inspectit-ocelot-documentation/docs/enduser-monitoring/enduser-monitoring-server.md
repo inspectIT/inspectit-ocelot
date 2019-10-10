@@ -266,3 +266,24 @@ inspectit-ocelot-eum-server:
 
 ## Exporters
 By now, the prometheus exporter is available. If `enabled` is set to true, the exporter is exposes the metrics under the following HTTP endpoint: `http://[host]:[port]/metrics`
+
+## Selfmonitoring
+The EUM server of capable expose self monitoring metrics. Currently, the following self monitoring metrics are available.
+
+| Metric name | Description |
+| --- | --- |
+| `beacons_received` | Counts the number of received beacons |
+
+```YAML
+inspectit-ocelot-eum-server:
+  self-monitoring:
+    enabled: true
+    metrics:
+      beacons_received:
+        measure-type: LONG
+        unit: amount
+        views:
+          '[inspectit-eum/self/beacons_received/COUNT]': {aggregation: COUNT}
+```
+
+By default, all self monitoring metrics are enabled. 

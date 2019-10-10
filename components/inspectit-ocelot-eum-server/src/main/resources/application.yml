@@ -68,6 +68,19 @@ inspectit-ocelot-eum-server:
         host: localhost
         port: 8888
 
+
+  self-monitoring:
+    enabled: true
+    metrics:
+      beacons_received:
+        measure-type: LONG
+        unit: amount
+        views:
+          '[inspectit-eum/self/beacons_received/COUNT]': {aggregation: COUNT}
+
+
+
+
 # ACTUATOR PROPERTIES
 management:
   # Whether to enable or disable all endpoints by default.

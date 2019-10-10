@@ -1,9 +1,9 @@
 package rocks.inspectit.oce.eum.server.arithmetic;
 
-import com.google.common.annotations.VisibleForTesting;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import rocks.inspectit.oce.eum.server.beacon.Beacon;
+import rocks.inspectit.oce.eum.server.configuration.model.BeaconMetricDefinitionSettings;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,7 +12,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Used to resolve the value expressions of {@link rocks.inspectit.oce.eum.server.configuration.model.BeaconMetricDefinition}s.
+ * Used to resolve the value expressions of {@link BeaconMetricDefinitionSettings}s.
  */
 @Slf4j
 public class RawExpression {
@@ -79,7 +79,7 @@ public class RawExpression {
             }
         }
 
-        this.fields = Collections.unmodifiableList(fieldList);
+        fields = Collections.unmodifiableList(fieldList);
     }
 
     /**

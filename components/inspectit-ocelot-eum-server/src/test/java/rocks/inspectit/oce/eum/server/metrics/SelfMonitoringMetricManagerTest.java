@@ -11,25 +11,26 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import rocks.inspectit.oce.eum.server.beacon.Beacon;
-import rocks.inspectit.oce.eum.server.configuration.model.BeaconMetricDefinition;
+import rocks.inspectit.oce.eum.server.configuration.model.EumSelfMonitoringSettings;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
 import rocks.inspectit.oce.eum.server.configuration.model.EumTagsSettings;
+import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings;
 import rocks.inspectit.ocelot.config.model.metrics.definition.ViewDefinitionSettings;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 /**
- * Tests {@link MeasuresAndViewsManager}
+ * Tests {@link SelfMonitoringMetricManager}
  */
 @ExtendWith(MockitoExtension.class)
-public class MeasuresAndViewsManagerTest {
+public class SelfMonitoringMetricManagerTest {
 
     @InjectMocks
-    MeasuresAndViewsManager measuresAndViewsManager;
+    SelfMonitoringMetricManager selfMonitoringMetricManager;
 
     @Mock
     EumServerConfiguration configuration;
@@ -47,80 +48,70 @@ public class MeasuresAndViewsManagerTest {
     MeasureMap measureMap;
 
     @Nested
-    class ProcessBeacon {
+    class record {
 
-        private Map<String, BeaconMetricDefinition> definitionMap;
+        private EumSelfMonitoringSettings eumSelfMonitoringSettings = new EumSelfMonitoringSettings();
 
         @BeforeEach
         void setupConfiguration() {
-            ViewDefinitionSettings view = ViewDefinitionSettings.builder().bucketBoundaries(Arrays.asList(0d, 1d))
-                    .aggregation(ViewDefinitionSettings.Aggregation.HISTOGRAM)
+            ViewDefinitionSettings view = ViewDefinitionSettings.builder()
+                    .aggregation(ViewDefinitionSettings.Aggregation.COUNT)
                     .tag("TAG_1", true)
-                    .tag("TAG_2", true)
                     .build();
-            Map<String, ViewDefinitionSettings> views = new HashMap<String, ViewDefinitionSettings>();
-            views.put("Dummy metric name/HISTOGRAM", view);
+            Map<String, ViewDefinitionSettings> views = new HashMap<>();
+            views.put("inspectit-eum/self/beacons_received/COUNT", view);
 
-            BeaconMetricDefinition dummyMetricDefinition = BeaconMetricDefinition
-                    .beaconMetricBuilder()
-                    .valueExpression("{dummy_beacon_field}")
+            MetricDefinitionSettings dummyMetricDefinition = MetricDefinitionSettings.builder()
                     .description("Dummy description")
                     .type(rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings.MeasureType.DOUBLE)
-                    .unit("ms")
+                    .unit("number")
                     .enabled(true)
                     .views(views)
                     .build();
 
-            definitionMap = new HashMap<>();
-            definitionMap.put("Dummy metric name", dummyMetricDefinition);
+            Map<String, MetricDefinitionSettings> definitionMap = new HashMap<>();
+            definitionMap.put("beacons_received", dummyMetricDefinition);
+            eumSelfMonitoringSettings.setEnabled(true);
+            eumSelfMonitoringSettings.setMetrics(definitionMap);
+
+
         }
 
         @Test
-        void verifyNoViewIsGeneratedWithEmptyBeacon() {
-            when(configuration.getDefinitions()).thenReturn(definitionMap);
-            HashMap<String, String> beaconMap = new HashMap<>();
+        void verifyNoViewIsGeneratedWithDisabledSelfMonitoring() {
+            eumSelfMonitoringSettings.setEnabled(false);
+            when(configuration.getSelfMonitoring()).thenReturn(eumSelfMonitoringSettings);
 
-            measuresAndViewsManager.processBeacon(Beacon.of(beaconMap));
+            selfMonitoringMetricManager.record("beacons_received", 1);
 
             verifyZeroInteractions(viewManager, statsRecorder);
         }
 
         @Test
-        void verifyNoViewIsGeneratedWithFullBeacon() {
-            when(configuration.getDefinitions()).thenReturn(definitionMap);
-            HashMap<String, String> beaconMap = new HashMap<String, String>();
-            beaconMap.put("fake_beacon_field", "12d");
+        void verifyNoViewIsGeneratedWithNonExistentMetric() {
+            when(configuration.getSelfMonitoring()).thenReturn(eumSelfMonitoringSettings);
 
-            measuresAndViewsManager.processBeacon(Beacon.of(beaconMap));
+            selfMonitoringMetricManager.record("apples_received", 1);
 
             verifyZeroInteractions(viewManager, statsRecorder);
         }
 
         @Test
-        void verifyViewsAreGeneratedGlobalTagIsSet() {
+        void verifyViewsAreGeneratedExtraTagIsSet() {
             Map<String, String> extraTags = new HashMap<>();
             extraTags.put("TAG_1", "tag_value_1");
             extraTags.put("TAG_2", "tag_value_2");
 
-            Map<String, String> beaconTags = new HashMap<>();
-            beaconTags.put("URL", "http://localhost");
-
-            Set<String> globalTags = new HashSet<>();
-            globalTags.add("URL");
-
             when(tagSettings.getExtra()).thenReturn(extraTags);
-            when(tagSettings.getBeacon()).thenReturn(beaconTags);
-            when(tagSettings.getDefineAsGlobal()).thenReturn(globalTags);
 
-            when(configuration.getDefinitions()).thenReturn(definitionMap);
+            when(configuration.getSelfMonitoring()).thenReturn(eumSelfMonitoringSettings);
             when(configuration.getTags()).thenReturn(tagSettings);
-            HashMap<String, String> beaconMap = new HashMap<String, String>();
-            beaconMap.put("dummy_beacon_field", "12d");
+            HashMap<String, String> beaconMap = new HashMap<>();
 
             when(statsRecorder.newMeasureMap()).thenReturn(measureMap);
             doReturn(measureMap).when(measureMap).put(any(), anyDouble());
 
-            measuresAndViewsManager.processBeacon(Beacon.of(beaconMap));
+            selfMonitoringMetricManager.record("beacons_received", 1);
 
             ArgumentCaptor<View> viewCaptor = ArgumentCaptor.forClass(View.class);
             ArgumentCaptor<Measure.MeasureDouble> measureCaptor = ArgumentCaptor.forClass(Measure.MeasureDouble.class);
@@ -132,13 +123,13 @@ public class MeasuresAndViewsManagerTest {
             verify(measureMap).record();
             verifyNoMoreInteractions(viewManager, statsRecorder, measureMap);
 
-            assertThat(viewCaptor.getValue().getName().asString()).isEqualTo("Dummy metric name/HISTOGRAM");
-            assertThat(viewCaptor.getValue().getColumns()).extracting(TagKey::getName).containsExactly("TAG_1", "TAG_2", "URL");
+            assertThat(viewCaptor.getValue().getName().asString()).isEqualTo("inspectit-eum/self/beacons_received/COUNT");
+            assertThat(viewCaptor.getValue().getColumns()).extracting(TagKey::getName).containsExactly("TAG_1");
             assertThat(viewCaptor.getValue().getDescription()).isEqualTo("Dummy description");
-            assertThat(measureCaptor.getValue().getName()).isEqualTo("Dummy metric name");
-            assertThat(measureCaptor.getValue().getUnit()).isEqualTo("ms");
+            assertThat(measureCaptor.getValue().getName()).isEqualTo("inspectit-eum/self/beacons_received");
+            assertThat(measureCaptor.getValue().getUnit()).isEqualTo("number");
             assertThat(measureCaptor.getValue().getDescription()).isEqualTo("Dummy description");
-            assertThat(doubleCaptor.getValue()).isEqualTo(12D);
+            assertThat(doubleCaptor.getValue()).isEqualTo(1);
         }
     }
 }
