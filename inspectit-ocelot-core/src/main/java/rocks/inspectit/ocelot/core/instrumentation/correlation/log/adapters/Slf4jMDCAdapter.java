@@ -13,10 +13,24 @@ import java.lang.reflect.Method;
 @Slf4j
 public class Slf4jMDCAdapter implements MDCAdapter {
 
+    /**
+     * The name of the SLF4J (and logback) MDC class
+     */
     public static final String MDC_CLASS = "org.slf4j.MDC";
 
+    /**
+     * Reference to the org.slf4j.MDC.put(key,value) method.
+     */
     private WeakMethodReference putMethod;
+
+    /**
+     * Reference to the org.slf4j.MDC.get(key) method.
+     */
     private WeakMethodReference getMethod;
+
+    /**
+     * Reference to the org.slf4j.MDC.remove(key) method.
+     */
     private WeakMethodReference removeMethod;
 
     private Slf4jMDCAdapter(WeakMethodReference put, WeakMethodReference get, WeakMethodReference remove) {
@@ -25,6 +39,12 @@ public class Slf4jMDCAdapter implements MDCAdapter {
         removeMethod = remove;
     }
 
+    /**
+     * Creates an adapter for a given org.slf4j.MDC class.
+     *
+     * @param mdcClazz reference to the org.slf4j.MDC class
+     * @return an adapter for the given class
+     */
     public static Slf4jMDCAdapter get(Class<?> mdcClazz) {
         try {
             WeakMethodReference put = WeakMethodReference.create(mdcClazz, "put", String.class, String.class);
