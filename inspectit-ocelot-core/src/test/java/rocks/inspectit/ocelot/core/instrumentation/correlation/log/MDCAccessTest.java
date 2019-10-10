@@ -51,10 +51,10 @@ public class MDCAccessTest {
             List<Object> setOrder = new ArrayList<>();
             List<Object> undoOrder = new ArrayList<>();
 
-            Answer<MDCAdapter.Undo> orderRemember = (invoc) -> {
+            Answer<MDCAccess.Undo> orderRemember = (invoc) -> {
                 setOrder.add(invoc.getMock());
-                MDCAdapter.Undo undo = Mockito.mock(MDCAdapter.Undo.class);
-                doAnswer((invoc2) -> undoOrder.add(invoc.getMock())).when(undo).undoChange();
+                MDCAccess.Undo undo = Mockito.mock(MDCAccess.Undo.class);
+                doAnswer((invoc2) -> undoOrder.add(invoc.getMock())).when(undo).close();
                 return undo;
             };
             doAnswer(orderRemember).when(adapterA).set(eq("key"), eq("value"));

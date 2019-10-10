@@ -13,7 +13,7 @@ For testing purposes, you can inject the following snipped in your webpage.
 This snippet loads the boomerang version shipped with the Ocelot server and sends 
 all measured metrics back to it:
 ```javascript
-<script src="http://[inspectit-eum-server-url]/boomerang/boomerang.js"></script>
+ <script src="http://[inspectit-eum-server-url]/boomerang/boomerang.js"></script>
  <script src="http://[inspectit-eum-server-url]/boomerang/plugins/rt.js"></script>
  <!-- any other plugins you want to include -->
  <script>

@@ -1,16 +1,11 @@
 package rocks.inspectit.ocelot.core.instrumentation.correlation.log.adapters;
 
+import rocks.inspectit.ocelot.core.instrumentation.correlation.log.MDCAccess;
+
 /**
  * Interface for all adapters for accessing the MDC of a given logging library.
  */
 public interface MDCAdapter {
-
-    /**
-     * A function to undo changes made to the MDC.
-     */
-    interface Undo {
-        void undoChange();
-    }
 
     /**
      * Writes a given entry to the MDC.
@@ -20,5 +15,5 @@ public interface MDCAdapter {
      * @param value the value to place in the MDC, null if the value for the key should be erased
      * @return a {@link Undo} which reverts the change performed by this method call.
      */
-    Undo set(String key, String value);
+    MDCAccess.Undo set(String key, String value);
 }
