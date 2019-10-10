@@ -15,17 +15,19 @@ const _asTreeNode = (parentKey, node, unsavedFileContents) => {
     const key = parentKey + name;
 
     if (type === "directory") {
-        const containsUnsavedChanges = Object.keys(unsavedFileContents).find((path) => path.startsWith(key + "/"));
+        const hasUnsavedChanges = Object.keys(unsavedFileContents).find((path) => path.startsWith(key + "/"));
+        const labelValue = name + (hasUnsavedChanges ? " *" : "");
         return {
             key,
-            label: containsUnsavedChanges ? name +"*" : name,
+            label: labelValue,
             icon: "pi pi-fw pi-folder",
             children: map(node.children, child => _asTreeNode(key + "/", child, unsavedFileContents))
         };
     } else {
+        const labelValue = name + ((key in unsavedFileContents) ? " *" : "");
         return {
             key,
-            label: (key in unsavedFileContents) ? name + "*" : name,
+            label: labelValue,
             icon: "pi pi-fw pi-file",
         };
     }
@@ -51,8 +53,8 @@ export const getSelectedFile = createSelector(
     configurationSelector,
     configuration => {
         const { selection, files } = configuration;
-        if(selection) {
-            return getFile(files,selection);
+        if (selection) {
+            return getFile(files, selection);
         } else {
             return null;
         }
@@ -82,7 +84,7 @@ export const getSelectedFileUnsavedContents = createSelector(
 /**
  * Returns true if there are any unsaved configuration changes.
  */
-export const anyUnsavedChanges = createSelector(
+export const hasUnsavedChanges = createSelector(
     configurationSelector,
     configuration => {
         const { unsavedFileContents } = configuration;

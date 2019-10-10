@@ -13,6 +13,6 @@ export const getMappingsAsYaml = createSelector(
 * Returns the fetched mappigns as YAML given the mappings config section.
 */
 export const getMappingsAsYamlFromMappingsState = createSelector(
-   mappings => mappings.mappings,
-   mappings => mappings ? yaml.safeDump(mappings) : ""
+    state => state.mappings,
+    mappings => mappings ? yaml.safeDump(mappings) : ""
 );

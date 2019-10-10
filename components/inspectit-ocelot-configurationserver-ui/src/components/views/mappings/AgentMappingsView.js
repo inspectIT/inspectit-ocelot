@@ -29,13 +29,11 @@ class AgentMappingsView extends React.Component {
 
     onRefresh = () => {
         this.props.fetchMappings();
-        //reset the editor
         this.props.editorContentChanged(null);
     }
 
     render = () => {
         const { loading, content, yamlError, hasUnsavedChanges } = this.props;
-        const heading = hasUnsavedChanges ? "Agent Mappings*" : "Agent Mappings";
         return (
             <>
                 <style jsx>{`
@@ -54,6 +52,10 @@ class AgentMappingsView extends React.Component {
                     color: #aaa;
                     margin-right: 1rem;
                 }
+                .dirtyStateMarker {
+                    margin-left: .25rem;
+                    color: #999;
+                }
                 `}</style>
                 <div className="this">
                     <EditorView
@@ -68,7 +70,8 @@ class AgentMappingsView extends React.Component {
                         notificationText={yamlError}>
                         <div className="header">
                             <i className="pi pi-sitemap"></i>
-                            <div>{heading}</div>
+                            <div>Agent Mappings</div>
+                            {hasUnsavedChanges && <div className="dirtyStateMarker">*</div>}
                         </div>
                     </EditorView>
                 </div>
@@ -78,14 +81,13 @@ class AgentMappingsView extends React.Component {
 };
 
 const getYamlError = (content) => {
-    let errorMessage = null;
     try {
         yaml.safeLoad(content);
         return null;
     } catch (error) {
         if (error.message) {
-           return "YAML Syntax Error: " + error.message;
-        } else  {
+            return "YAML Syntax Error: " + error.message;
+        } else {
             return "YAML cannot be parsed.";
         }
     }
@@ -93,7 +95,7 @@ const getYamlError = (content) => {
 
 function mapStateToProps(state) {
     const { pendingRequests, updateDate, editorContent } = state.mappings;
-    let content = editorContent == null ? mappingsSelectors.getMappingsAsYaml(state) : editorContent    
+    let content = editorContent == null ? mappingsSelectors.getMappingsAsYaml(state) : editorContent
     return {
         loading: pendingRequests > 0,
         content,

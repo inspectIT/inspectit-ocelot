@@ -32,7 +32,7 @@ const configuration = {
      * A map of unsaved file changes.
      * Maps the absolute file path to the files contents.
      */
-    unsavedFileContents: {/* fileName: fileContents*/}
+    unsavedFileContents: {/* fileName: fileContents*/ }
 };
 
 const notification = {
@@ -45,10 +45,8 @@ const mappings = {
     pendingRequests: 0,
     /** The current agent mappings. */
     mappings: null,
-    /**
-     * The YAML content of the editor. Null if no changes have been made to the mappings.
-     */
-    editorContent : null,
+    /** The YAML content of the editor. Null if no changes have been made to the mappings. */
+    editorContent: null,
     /** The date when the agent mappings have been fetched. */
     updateDate: null
 }

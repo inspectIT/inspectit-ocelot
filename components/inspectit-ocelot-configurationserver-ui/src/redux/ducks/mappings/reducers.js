@@ -18,13 +18,14 @@ const mappingsReducer = createReducer(initialState)({
         };
     },
     [types.FETCH_MAPPINGS_SUCCESS]: (state, action) => {
+        const { pendingRequests, editorContent } = state;
         const { mappings } = action.payload;
         const mappingsYaml = mappings ? yaml.safeDump(mappings) : "";
         return {
             ...state,
-            pendingRequests: state.pendingRequests - 1,
+            pendingRequests: pendingRequests - 1,
             mappings,
-            editorContent: state.editorContent == mappingsYaml ? null : state.editorContent,
+            editorContent: editorContent == mappingsYaml ? null : editorContent,
             updateDate: Date.now()
         };
     },

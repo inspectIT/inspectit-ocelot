@@ -28,11 +28,16 @@ const EditorHeader = ({ icon, path, name, isContentModified }) => (
         .path {
             color: #999;
         }
+        .dirtyStateMarker {
+            margin-left: .25rem;
+            color: #999;
+        }
         `}</style>
         <div className="header">
             <i className={"pi " + icon}></i>
             <div className="path">{path}</div>
-            <div className="name">{isContentModified ? name + "*" : name}</div>
+            <div className="name">{name}</div>
+            {isContentModified && <div className="dirtyStateMarker">*</div>}
         </div>
     </>
 );
@@ -57,16 +62,20 @@ class ConfigurationView extends React.Component {
     onSave = () => {
         const { selection, fileContent } = this.props;
         this.props.writeFile(selection, fileContent, false);
-    }    
+    }
 
     onChange = (value) => {
-        if(!this.props.loading) {
+        if (!this.props.loading) {
             this.props.selectedFileContentsChanged(value);
         }
     }
 
+    onRefresh = () => {
+        this.props.selectedFileContentsChanged(null);
+    }
+
     render() {
-        const { selection, isDirectory, loading, isContentModified, fileContent, yamlError} = this.props;
+        const { selection, isDirectory, loading, isContentModified, fileContent, yamlError } = this.props;
         const showEditor = selection && !isDirectory;
 
         const { path, name } = this.parsePath(selection);
@@ -114,6 +123,7 @@ class ConfigurationView extends React.Component {
                     onSave={this.onSave}
                     enableButtons={showEditor && !loading}
                     onChange={this.onChange}
+                    onRefresh={this.onRefresh}
                     canSave={isContentModified && !yamlError}
                     isErrorNotification={true}
                     notificationIcon="pi-exclamation-triangle"
@@ -127,14 +137,13 @@ class ConfigurationView extends React.Component {
 }
 
 const getYamlError = (content) => {
-    let errorMessage = null;
     try {
         yaml.safeLoad(content);
         return null;
     } catch (error) {
         if (error.message) {
-           return "YAML Syntax Error: " + error.message;
-        } else  {
+            return "YAML Syntax Error: " + error.message;
+        } else {
             return "YAML cannot be parsed.";
         }
     }
@@ -150,9 +159,8 @@ function mapStateToProps(state) {
         selection,
         isDirectory: configurationSelectors.isSelectionDirectory(state),
         isContentModified: unsavedFileContent != null,
-        originalFileContent: selectedFileContent,
         fileContent,
-        yamlError : getYamlError(fileContent),
+        yamlError: getYamlError(fileContent),
         loading: pendingRequests > 0
     }
 }

@@ -17,7 +17,7 @@ export const fetchFiles = () => {
                 const files = res.data;
                 dispatch({ type: types.FETCH_FILES_SUCCESS, payload: { files } });
             })
-            .catch((err) => {
+            .catch(() => {
                 dispatch({ type: types.FETCH_FILES_FAILURE });
             });
     };

@@ -1,6 +1,6 @@
 import * as types from "./types";
 import * as utils from "./utils";
-import {mapKeys, omitBy} from "lodash"
+import { mapKeys, omitBy } from "lodash"
 import { createReducer } from "../../utils";
 import { configuration as initialState } from '../initial-states';
 
@@ -54,9 +54,9 @@ const configurationReducer = createReducer(initialState)({
             selection = null;
         }
         let unsavedFileContents = {};
-        for(const path in state.unsavedFileContents) {
+        for (const path in state.unsavedFileContents) {
             let newPath = movePathIfRequired(path, state.moveHistory);
-            if(utils.getFile(files, newPath)) {
+            if (utils.getFile(files, newPath)) {
                 unsavedFileContents[newPath] = state.unsavedFileContents[path];
             }
         }
@@ -113,7 +113,7 @@ const configurationReducer = createReducer(initialState)({
             ...state,
             pendingRequests: state.pendingRequests - 1,
             selectedFileContent: state.selection == file ? content : state.selectedFileContent,
-            unsavedFileContents : omitBy(state.unsavedFileContents, (unsavedContent, path) => path==file && unsavedContent==content)
+            unsavedFileContents: omitBy(state.unsavedFileContents, (unsavedContent, path) => path == file && unsavedContent == content)
         };
     },
     [types.WRITE_FILE_FAILURE]: decrementPendingRequests,
@@ -129,16 +129,19 @@ const configurationReducer = createReducer(initialState)({
         };
     },
     [types.MOVE_FAILURE]: decrementPendingRequests,
-    [types.SELECTED_FILE_CONTENTS_CHANGED]: (state,action) => {
-        const {content } = action.payload;
-        const {selectedFileContent, selection, unsavedFileContents} = state;
-        if(selection) {
-            const newUnsavedFileContents = {...unsavedFileContents};
-            if(selectedFileContent == content) {
+    [types.SELECTED_FILE_CONTENTS_CHANGED]: (state, action) => {
+        const { selection } = state;
+        if (selection) {
+            const { selectedFileContent, unsavedFileContents } = state;
+            const { content } = action.payload;
+            const newUnsavedFileContents = { ...unsavedFileContents };
+
+            if (content == null || selectedFileContent == content) {
                 delete newUnsavedFileContents[selection];
             } else {
                 newUnsavedFileContents[selection] = content;
             }
+
             return {
                 ...state,
                 unsavedFileContents: newUnsavedFileContents
