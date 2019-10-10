@@ -9,7 +9,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class Slf4jMDCAdapterTest {
+public class Log4j2MDCAdapterTest {
 
     public static class DummyMDC {
 
@@ -32,12 +32,12 @@ public class Slf4jMDCAdapterTest {
         }
     }
 
-    private Slf4jMDCAdapter adapter;
+    private Log4J2MDCAdapter adapter;
 
     @BeforeEach
     void setup() {
         DummyMDC.reset();
-        adapter = Slf4jMDCAdapter.get(DummyMDC.class);
+        adapter = Log4J2MDCAdapter.get(DummyMDC.class);
     }
 
     @Nested

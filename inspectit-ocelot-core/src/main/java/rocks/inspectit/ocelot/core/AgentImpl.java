@@ -20,6 +20,11 @@ import java.util.Optional;
  */
 public class AgentImpl implements IAgent {
 
+    /**
+     * References the classloader which contains all ocelot classes.
+     */
+    public static final ClassLoader INSPECTIT_CLASS_LOADER = AgentImpl.class.getClassLoader();
+
     // statically initialize our default logging before doing anything
     static {
         LogbackInitializer.initDefaultLogging();

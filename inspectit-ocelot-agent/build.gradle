@@ -103,7 +103,11 @@ dependencies {
             'org.eclipse.jetty:jetty-server:9.4.3.v20170317',
             'org.eclipse.jetty:jetty-servlet:9.4.3.v20170317',
             
-            'com.h2database:h2:1.4.199'
+            'com.h2database:h2:1.4.199',
+
+            // for log-correlation tests
+            'org.apache.logging.log4j:log4j-api:2.12.1',
+            'org.apache.logging.log4j:log4j-core:2.12.1'
     )
 
     jmh(
