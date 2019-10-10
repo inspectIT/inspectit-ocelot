@@ -138,6 +138,18 @@ public class GenericActionCallSorterTest {
         }
 
         @Test
+        void testIdenticalActions() throws Exception {
+            List<ActionCallConfig> input = Arrays.asList(
+                    new TestCallBuilder("A").build(),
+                    new TestCallBuilder("A").build()
+            );
+
+            List<String> result = getNames(scheduler.orderActionCalls(input));
+
+            assertThat(result).containsExactly("A", "A");
+        }
+
+        @Test
         void testDAGOrdering() throws Exception {
 
             List<ActionCallConfig> input = Arrays.asList(
