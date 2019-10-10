@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
@@ -167,22 +168,29 @@ public class HttpPropertySourceState {
             httpGet.setHeader("If-None-Match", latestETag);
         }
 
+        String configuration = null;
+        boolean isError = true;
         try {
             HttpResponse response = createHttpClient().execute(httpGet);
-            String newConfig = processHttpResponse(response);
-            if (newConfig != null) {
-                writePersistenceFile(newConfig);
-            }
-            return newConfig;
+            configuration = processHttpResponse(response);
+            isError = false;
+        } catch (ClientProtocolException e) {
+            log.error("HTTP protocol error occurred while fetching configuration.", e);
+        } catch (IOException e) {
+            log.error("A IO problem occurred while fetching configuration.", e);
         } catch (Exception e) {
             log.error("Exception occurred while fetching configuration.", e);
-            if (fallBackToFile) {
-                return loadPersistenceFile();
-            }
         } finally {
             httpGet.releaseConnection();
         }
-        return null;
+
+        if (!isError && configuration != null) {
+            writePersistenceFile(configuration);
+        } else if (isError && fallBackToFile) {
+            configuration = readPersistenceFile();
+        }
+
+        return configuration;
     }
 
     /**
@@ -238,6 +246,11 @@ public class HttpPropertySourceState {
         }
     }
 
+    /**
+     * Writes the given content to the file specified via {@link HttpConfigSettings#getPersistenceFile()}.
+     *
+     * @param content the content to write to the file (normally the most recent configuration)
+     */
     private void writePersistenceFile(String content) {
         try {
             String file = currentSettings.getPersistenceFile();
@@ -252,7 +265,12 @@ public class HttpPropertySourceState {
         }
     }
 
-    private String loadPersistenceFile() {
+    /**
+     * Attempts to read the file specified via {@link HttpConfigSettings#getPersistenceFile()}.
+     *
+     * @return the content of the file (if it exists, otherwise null
+     */
+    private String readPersistenceFile() {
         String file = currentSettings.getPersistenceFile();
         if (!StringUtils.isBlank(file)) {
             Path path = Paths.get(file);
