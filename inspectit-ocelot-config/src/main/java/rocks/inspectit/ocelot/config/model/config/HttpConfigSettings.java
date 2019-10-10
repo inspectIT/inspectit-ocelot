@@ -29,6 +29,12 @@ public class HttpConfigSettings {
     private URL url;
 
     /**
+     * If specified, the agent will persist the last fetched configuration to the given file.
+     * When the JVM restarts and the config server is not reachable
+     */
+    private String persistenceFile;
+
+    /**
      * Contains additional attributes which will be added as query parameters to the request URL.
      * If the value for a given key is blank or null, the given attribute will not be sent.
      */
