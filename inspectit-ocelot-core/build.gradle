@@ -2,7 +2,6 @@ plugins {
     id "me.champeau.gradle.jmh" version "0.4.8"
 }
 
-
 apply plugin: 'java'
 
 configurations {
@@ -117,6 +116,9 @@ jar.dependsOn checkDependencyJavaVersions
 
 jar {
     archiveName = "${project.name}.jar"
+
+    def currentDate = new Date().format('yyyyMMddHHmm')
+    file("${sourceSets.main.output.resourcesDir}/ocelot-version.info").text = "$version.$currentDate"
 
     //include all "implementation" dependencies in fat jar
     from {
