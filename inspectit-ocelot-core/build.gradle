@@ -24,7 +24,7 @@ dependencies {
             'jarcheck:jarcheck:1.5'
     )
     annotationProcessor 'org.projectlombok:lombok:1.18.4'
-    testImplementation (
+    testImplementation(
             'org.junit.jupiter:junit-jupiter-api:5.3.1',
             'org.mockito:mockito-junit-jupiter:2.23.0'
     )
@@ -79,7 +79,7 @@ dependencies {
             "io.grpc:grpc-stub:1.20.0",
     )
 
-    jmh (
+    jmh(
             project(':inspectit-ocelot-bootstrap')
     )
 
@@ -117,8 +117,14 @@ jar.dependsOn checkDependencyJavaVersions
 jar {
     archiveName = "${project.name}.jar"
 
+    def targetDirectory = new File("${sourceSets.main.output.resourcesDir}")
+    if (!targetDirectory.exists()) {
+        targetDirectory.mkdirs()
+    }
     def currentDate = new Date().format('yyyyMMddHHmm')
-    file("${sourceSets.main.output.resourcesDir}/ocelot-version.info").text = "$version.$currentDate"
+    new File(targetDirectory, "/ocelot-version.info").withWriterAppend { writer ->
+        writer << "$version.$currentDate"
+    }
 
     //include all "implementation" dependencies in fat jar
     from {
