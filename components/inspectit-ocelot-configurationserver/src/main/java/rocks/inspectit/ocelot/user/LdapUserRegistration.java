@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.security.userdetails;
+package rocks.inspectit.ocelot.user;
 
 import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
@@ -10,8 +10,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.ldap.userdetails.LdapUserDetails;
 import org.springframework.stereotype.Component;
-import rocks.inspectit.ocelot.user.User;
-import rocks.inspectit.ocelot.user.UserService;
 
 /**
  * This class is responsible for adding Users which are authenticated via LDAP

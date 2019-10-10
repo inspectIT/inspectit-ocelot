@@ -51,6 +51,7 @@ public class LogbackInitializer {
     // flags for the filters
     static boolean consoleEnabled = true;
     static boolean fileEnabled = true;
+    static boolean selfMonitoringEnabled = true;
 
 
     public static void initDefaultLogging() {
@@ -101,6 +102,7 @@ public class LogbackInitializer {
     private static void setPropertiesFromConfig(InspectitConfig config) {
         consoleEnabled = config.getLogging().getConsole().isEnabled();
         fileEnabled = config.getLogging().getFile().isEnabled();
+        selfMonitoringEnabled = config.getSelfMonitoring().isEnabled();
 
         LoggingSettings loggingSettings = config.getLogging();
         // path
@@ -188,6 +190,18 @@ public class LogbackInitializer {
         @Override
         public FilterReply decide(Object event) {
             if (fileEnabled) {
+                return FilterReply.NEUTRAL;
+            } else {
+                return FilterReply.DENY;
+            }
+        }
+    }
+
+    public static class SelfMonitoringFilter extends Filter {
+
+        @Override
+        public FilterReply decide(Object event) {
+            if (selfMonitoringEnabled) {
                 return FilterReply.NEUTRAL;
             } else {
                 return FilterReply.DENY;

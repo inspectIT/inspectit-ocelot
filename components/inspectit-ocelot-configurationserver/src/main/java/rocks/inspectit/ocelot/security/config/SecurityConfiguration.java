@@ -2,6 +2,7 @@ package rocks.inspectit.ocelot.security.config;
 
 import com.google.common.annotations.VisibleForTesting;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -14,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.config.model.LdapSettings;
+import rocks.inspectit.ocelot.filters.AccessLogFilter;
 import rocks.inspectit.ocelot.security.jwt.JwtTokenFilter;
 import rocks.inspectit.ocelot.security.jwt.JwtTokenManager;
 import rocks.inspectit.ocelot.security.userdetails.LocalUserDetailsService;
@@ -31,7 +33,13 @@ import static rocks.inspectit.ocelot.security.userdetails.LocalUserDetailsServic
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
+    @Autowired
     private JwtTokenManager tokenManager;
+
+    @Autowired
+    private AccessLogFilter accessLogFilter;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -51,6 +59,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 "/csrf",
                 "/",
                 "/ui/**",
+                "/actuator/**",
                 "/swagger*/**",
                 "/webjars/**",
                 "/api/v1/agent/configuration");
@@ -78,9 +87,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 //TODO: The "correct" way of selectively enabling token based would be to have multiple spring security configs.
                 //However, previous attempts of doing so were unsuccessful, therefore we simply exclude them manually in the filter
                 .addFilterBefore(
-                        new JwtTokenFilter(tokenManager, Collections.singletonList("/api/v1/account/password")),
+                        new JwtTokenFilter(tokenManager, eventPublisher, Collections.singletonList("/api/v1/account/password")),
                         BasicAuthenticationFilter.class
-                );
+                ).addFilterBefore(accessLogFilter.getFilter(), JwtTokenFilter.class);
     }
 
     /**

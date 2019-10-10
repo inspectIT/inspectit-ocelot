@@ -1,6 +1,11 @@
 package rocks.inspectit.ocelot.security.jwt;
 
 import lombok.AllArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.event.AuthenticationFailureBadCredentialsEvent;
+import org.springframework.security.authentication.event.AuthenticationSuccessEvent;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.AntPathMatcher;
@@ -14,6 +19,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -25,6 +31,8 @@ import java.util.List;
 public class JwtTokenFilter extends GenericFilterBean {
 
     private JwtTokenManager tokenManager;
+
+    private ApplicationEventPublisher eventDrain;
 
     private List<String> excludePatterns;
 
@@ -50,8 +58,11 @@ public class JwtTokenFilter extends GenericFilterBean {
             try {
                 Authentication authentication = tokenManager.authenticateWithToken(token);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+                eventDrain.publishEvent(new AuthenticationSuccessEvent(authentication));
                 authenticationThroughFilter = true;
             } catch (Exception e) {
+                Authentication dummyAuth = new UsernamePasswordAuthenticationToken("<unknown>", "", Collections.emptyList());
+                eventDrain.publishEvent(new AuthenticationFailureBadCredentialsEvent(dummyAuth, new BadCredentialsException("Invalid JWT token")));
                 logger.debug("Token-based authentication failed: {}", e);
             }
         }

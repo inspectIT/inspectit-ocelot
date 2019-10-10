@@ -1,0 +1,10 @@
+10138=prometheus/http.json
+9598=prometheus/jvm.json
+10140=prometheus/selfmonitoring.json
+10139=prometheus/servicegraph.json
+9599=prometheus/system.json
+10141=influx/http.json
+9600=influx/jvm.json
+10143=influx/selfmonitoring.json
+10142=influx/servicegraph.json
+9601=influx/system.json

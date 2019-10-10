@@ -1,4 +1,4 @@
-inspectit-eum:
+inspectit-ocelot-eum-server:
 
   definitions:
     page_ready_time:
@@ -67,3 +67,11 @@ inspectit-eum:
         enabled: true
         host: localhost
         port: 8888
+
+# ACTUATOR PROPERTIES
+management:
+  # Whether to enable or disable all endpoints by default.
+  endpoints.enabled-by-default: false
+  endpoint:
+    # Whether to enable the health endpoint.
+    health.enabled: true
