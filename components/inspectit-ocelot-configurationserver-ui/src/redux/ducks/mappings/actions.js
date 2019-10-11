@@ -26,8 +26,9 @@ export const fetchMappings = () => {
  * The given mappings will also be stored in the state when the request was successful.
  * 
  * @param {*} mappings - the agent mappings to store
+ * @param {*} resetEditor - if true, the YAML editors contents will be reset on success
  */
-export const putMappings = (mappings) => {
+export const putMappings = (mappings, resetEditor) => {
     return dispatch => {
         dispatch({ type: types.PUT_MAPPINGS_STARTED });
 
@@ -36,7 +37,7 @@ export const putMappings = (mappings) => {
                 headers: { "content-type": "application/json" }
             })
             .then(response => {
-                dispatch({ type: types.PUT_MAPPINGS_SUCCESS, payload: { mappings } });
+                dispatch({ type: types.PUT_MAPPINGS_SUCCESS, payload: { mappings, resetEditor } });
                 dispatch(notificationActions.showSuccessMessage("Agent Mappings Saved", "The agent mappings have been successfully saved."));
             })
             .catch(error => {
@@ -44,3 +45,14 @@ export const putMappings = (mappings) => {
             });
     };
 };
+
+/**
+ * Stores the new contents of the YAML editor for mappings in the state.
+ * Can be set to "null", which means that no changes to the mappings have been made.
+ */
+export const editorContentChanged = (content) => ({
+    type: types.EDITOR_CONTENT_CHANGED,
+    payload: {
+        content
+    }
+});
