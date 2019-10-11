@@ -96,8 +96,7 @@ public class AgentImpl implements IAgent {
      * Loads the agent's version information from the {@link #AGENT_VERSION_INFORMATION_FILE} file.
      */
     private void readVersionInformation() {
-        try {
-            InputStream inputStream = AgentImpl.class.getResourceAsStream(AGENT_VERSION_INFORMATION_FILE);
+        try (InputStream inputStream = AgentImpl.class.getResourceAsStream(AGENT_VERSION_INFORMATION_FILE)) {
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             agentVersion = reader.readLine();
             agentBuildDate = reader.readLine();
