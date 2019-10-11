@@ -2,7 +2,6 @@ plugins {
     id "me.champeau.gradle.jmh" version "0.4.8"
 }
 
-
 apply plugin: 'java'
 
 configurations {
@@ -25,7 +24,7 @@ dependencies {
             'jarcheck:jarcheck:1.5'
     )
     annotationProcessor 'org.projectlombok:lombok:1.18.4'
-    testImplementation (
+    testImplementation(
             'org.junit.jupiter:junit-jupiter-api:5.3.1',
             'org.mockito:mockito-junit-jupiter:2.23.0'
     )
@@ -80,7 +79,7 @@ dependencies {
             "io.grpc:grpc-stub:1.20.0",
     )
 
-    jmh (
+    jmh(
             project(':inspectit-ocelot-bootstrap')
     )
 
@@ -113,10 +112,25 @@ task checkDependencyJavaVersions {
         }
     }
 }
+
+task generateVersionFile {
+    ext.versionFile = new File(buildDir, "ocelot-version.info")
+    doLast {
+        def currentDate = new Date().toString()
+        ext.versionFile.withWriter('UTF-8') { writer ->
+            writer << "$version\n$currentDate"
+        }
+    }
+}
+
 jar.dependsOn checkDependencyJavaVersions
+jar.dependsOn generateVersionFile
 
 jar {
     archiveName = "${project.name}.jar"
+
+    // include version file
+    from generateVersionFile.versionFile
 
     //include all "implementation" dependencies in fat jar
     from {
