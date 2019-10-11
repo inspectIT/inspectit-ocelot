@@ -13,7 +13,6 @@ class AuthenticationRouter extends React.Component {
     componentDidMount = () => {
         this.checkRoute();
         this.intervalId = setInterval(this.triggerRenewTokenInterval, RENEW_TOKEN_TIME_INTERVAL);
-
     }
 
     componentDidUpdate = () => {
