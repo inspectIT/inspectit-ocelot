@@ -1,139 +1,101 @@
 package rocks.inspectit.ocelot.file.dirmanagers;
 
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.ObjectId;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationEventPublisher;
+import rocks.inspectit.ocelot.file.FileVersionResponse;
 
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class GitDirectoryManagerTest {
 
-    private static final Path rootWorkDir = Paths.get("temp_test_workdir");
-    private static final Path fmRoot = rootWorkDir.resolve("root");
-
     @InjectMocks
-    private GitDirectoryManager gdm;
+    private GitDirectoryManager gitDirectoryManager;
 
     @Mock
-    private VersionController gp;
-
-    @Mock
-    private WorkingDirectoryManager wdm;
-
-    @Mock
-    ApplicationEventPublisher eventPublisher;
-
+    private VersionController versionController;
 
     @Nested
-    public class CommitAllChanges {
+    public class GetAllCommits {
         @Test
-        void testCommit() throws IOException, GitAPIException {
-            List<String> beforeCommit = gdm.listFiles();
-            List<String> afterCommit = Arrays.asList("a", "b", "c");
+        void noCommits() throws IOException, GitAPIException {
+            when(versionController.getAllCommits()).thenReturn(Collections.emptyList());
 
-            gdm.commitAllChanges();
+            List<FileVersionResponse> output = gitDirectoryManager.getAllCommits();
 
-            assertThat(beforeCommit).isNotEqualTo(afterCommit);
-            assertThat(gdm.listFiles()).isEqualTo(afterCommit);
+            assertThat(output).isEqualTo(Collections.emptyList());
+        }
+
+        @Test
+        void hasCommits() throws IOException, GitAPIException {
+            ObjectId mockObjectId = mock(ObjectId.class);
+            List<ObjectId> mockObjectIdList = Arrays.asList(mockObjectId);
+            when(versionController.getAllCommits()).thenReturn(mockObjectIdList);
+            when(versionController.getFullMessageOfCommit(mockObjectId)).thenReturn("test message");
+            when(versionController.getPathsOfCommit(mockObjectId)).thenReturn(Collections.emptyList());
+            when(versionController.getTimeOfCommit(mockObjectId)).thenReturn(1);
+            when(versionController.getAuthorOfCommit(mockObjectId)).thenReturn("test author");
+            GitDirectoryManager spyGitDirectoryManager = spy(gitDirectoryManager);
+            doReturn("testName").when(spyGitDirectoryManager).getNameOfObjectId(any());
+
+            List<FileVersionResponse> output = spyGitDirectoryManager.getAllCommits();
+
+            assertThat(output.size()).isEqualTo(1);
+            FileVersionResponse response = output.get(0);
+            assertThat(response.getCommitTitle()).isEqualTo("test message");
+            assertThat(response.getCommitId()).isEqualTo("testName");
+            assertThat(((List) response.getCommitContent())).isEqualTo(Collections.emptyList());
+            assertThat(response.getTimeinMilis()).isEqualTo(1);
+            assertThat(response.getAuthor()).isEqualTo("test author");
         }
     }
 
     @Nested
-    public class ListFiles {
+    public class GetCommitsOfFile {
         @Test
-        void listEmptyRepo() throws IOException {
-            List<String> emptyList = Collections.emptyList();
+        void noCommits() throws IOException, GitAPIException {
+            when(versionController.getAllCommits()).thenReturn(Collections.emptyList());
 
-            assertThat(gdm.listFiles()).isEqualTo(emptyList);
+            List<FileVersionResponse> output = gitDirectoryManager.getAllCommits();
+
+            assertThat(output).isEqualTo(Collections.emptyList());
         }
 
         @Test
-        void listRepoTest() throws GitAPIException, IOException {
-            gdm.commitAllChanges();
-            List<String> output = Arrays.asList("a", "b", "c");
+        void hasCommits() throws IOException, GitAPIException {
+            ObjectId mockObjectId = mock(ObjectId.class);
+            List<ObjectId> mockObjectIdList = Arrays.asList(mockObjectId);
+            when(versionController.getCommitsOfFile("testPath")).thenReturn(mockObjectIdList);
+            when(versionController.getFullMessageOfCommit(mockObjectId)).thenReturn("test message");
+            when(versionController.getPathsOfCommit(mockObjectId)).thenReturn(Collections.emptyList());
+            when(versionController.getTimeOfCommit(mockObjectId)).thenReturn(1);
+            when(versionController.getAuthorOfCommit(mockObjectId)).thenReturn("test author");
+            GitDirectoryManager spyGitDirectoryManager = spy(gitDirectoryManager);
+            doReturn("testName").when(spyGitDirectoryManager).getNameOfObjectId(any());
 
-            assertThat(gdm.listFiles()).isEqualTo(output);
-        }
-    }
+            List<FileVersionResponse> output = spyGitDirectoryManager.getCommitsOfFile("testPath");
 
-    @Nested
-    public class ReadFile {
-        @Test
-        void readFile() throws IOException, GitAPIException {
-            gdm.commitAllChanges();
-
-            assertThat(gdm.readFile("hello")).isEqualTo("world");
-        }
-    }
-
-    @Nested
-    public class ReadAgentMappingFiles {
-        @Test
-        void readAgentMappingFile() throws GitAPIException, IOException {
-            gdm.commitAllChanges();
-
-            assertThat(gdm.readAgentMappingFile()).isEqualTo("Hello World!");
-        }
-    }
-
-    @Nested
-    public class CommitAgentMappingFiles {
-        @Test
-        void newFileCreated() throws IOException, GitAPIException {
-            gdm.commitAllChanges();
-
-            gdm.commitAgentMappingFile();
-
-            String agentMappingContent = gdm.readAgentMappingFile();
-            String dummyFileContent = gdm.readFile("dummyFile");
-            boolean agentMappingChanged = "This is not an easter egg!".equals(agentMappingContent);
-            boolean dummyFileNotChanged = dummyFileContent == null;
-            assertThat(agentMappingChanged && dummyFileNotChanged).isEqualTo(true);
-
+            assertThat(output.size()).isEqualTo(1);
+            FileVersionResponse response = output.get(0);
+            assertThat(response.getCommitTitle()).isEqualTo("test message");
+            assertThat(response.getCommitId()).isEqualTo("testName");
+            assertThat(((List) response.getCommitContent())).isEqualTo(Collections.emptyList());
+            assertThat(response.getTimeinMilis()).isEqualTo(1);
+            assertThat(response.getAuthor()).isEqualTo("test author");
         }
 
-        @Test
-        void commitAgentMappingOnly() throws IOException, GitAPIException {
-            gdm.commitAllChanges();
-
-            gdm.commitAgentMappingFile();
-
-            String agentMappingContent = gdm.readAgentMappingFile();
-            String dummyFileContent = gdm.readFile("dummyFile");
-            boolean agentMappingChanged = "This is not an easter egg!".equals(agentMappingContent);
-            boolean dummyFileNotChanged = "Hello User!".equals(dummyFileContent);
-            assertThat(agentMappingChanged && dummyFileNotChanged).isEqualTo(true);
-
-        }
-
-    }
-
-    @Nested
-    public class CommitFiles {
-        @Test
-        void commitOnlyFiles() throws IOException, GitAPIException {
-            gdm.commitAllChanges();
-            gdm.commitFiles();
-
-            String agentMappingContent = gdm.readAgentMappingFile();
-            String dummyFileContent = gdm.readFile("dummyFile");
-            boolean agentMappingChanged = "Hello World!".equals(agentMappingContent);
-            boolean dummyFileNotChanged = "But this is one =)".equals(dummyFileContent);
-            assertThat(agentMappingChanged && dummyFileNotChanged).isEqualTo(true);
-        }
     }
 
 }

@@ -9,8 +9,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
-import rocks.inspectit.ocelot.file.dirmanagers.GitDirManager;
-import rocks.inspectit.ocelot.file.dirmanagers.WorkingDirManager;
+import rocks.inspectit.ocelot.file.dirmanagers.GitDirectoryManager;
+import rocks.inspectit.ocelot.file.dirmanagers.WorkingDirectoryManager;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
@@ -47,10 +47,10 @@ public class FileManager {
     private ApplicationEventPublisher eventPublisher;
 
     @Autowired
-    private GitDirManager gitDirManager;
+    private GitDirectoryManager gitDirectoryManager;
 
     @Autowired
-    private WorkingDirManager workingDirManager;
+    private WorkingDirectoryManager workingDirectoryManager;
 
     /**
      * The path under which the file system accessible by this component lies.
@@ -100,25 +100,16 @@ public class FileManager {
     /**
      * Returns all file names found in the files folder, either from the last commit or the working directory
      *
-     * @param fromWorkingDir if true, the entire file tree within this directory is returned. Otherwise the last committed
-     *                       file tree is returned
+     * @param versioning         if true,  the last committed file tree is returned. Otherwise the entire file tree within this
+     *                           directory is returned.
+     * @param onlyConfigurations if true, only files found in the configurations folder are returned.
      * @return the given file names as a List of type String
      */
-    public synchronized List<String> listFiles(boolean fromWorkingDir) {
-        if (fromWorkingDir) {
-            try {
-                return workingDirManager.listFiles("");
-            } catch (IOException e) {
-                log.error("An error occurred while listing files in working directory");
-                return null;
-            }
+    public synchronized List<String> listFiles(boolean versioning, boolean onlyConfigurations) throws IOException {
+        if (versioning) {
+            return gitDirectoryManager.listFiles(onlyConfigurations);
         } else {
-            try {
-                return gitDirManager.listFiles();
-            } catch (IOException e) {
-                log.error("An error occurred while listing files from git directory");
-                return null;
-            }
+            return workingDirectoryManager.listFiles("", onlyConfigurations);
         }
     }
 
@@ -148,7 +139,7 @@ public class FileManager {
      * @param path the path of the directory to create
      * @throws IOException if the directory already exists or could not be created for any reason
      */
-    public synchronized void createDirectory(String path) throws IOException {
+    public synchronized void createDirectory(String path) throws IOException, GitAPIException {
         assertValidSubPath(path);
         Path dir = filesRoot.resolve(path);
 
@@ -199,14 +190,14 @@ public class FileManager {
     public synchronized String readFile(String filePath, boolean fromWorkingDir) {
         if (fromWorkingDir) {
             try {
-                return workingDirManager.readFile(filePath);
+                return workingDirectoryManager.readFile(filePath);
             } catch (IOException e) {
                 log.error("Could not read file: {}", filePath);
                 return null;
             }
         } else {
             try {
-                return gitDirManager.readFile(filePath);
+                return gitDirectoryManager.readFile(filePath);
             } catch (IOException e) {
                 log.error("Could not read file: {}", filePath);
                 return null;
@@ -230,14 +221,14 @@ public class FileManager {
     public synchronized String readAgentMapping(boolean fromWorkingDir) {
         if (fromWorkingDir) {
             try {
-                return workingDirManager.readAgentMappingFile();
+                return workingDirectoryManager.readAgentMappingFile();
             } catch (IOException e) {
                 log.error("Could not read AgentMapping from disk");
                 return null;
             }
         } else {
             try {
-                return gitDirManager.readAgentMappingFile();
+                return gitDirectoryManager.readAgentMappingFile();
             } catch (IOException e) {
                 log.error("Could not read AgentMapping from last git commit");
                 return null;
@@ -274,7 +265,7 @@ public class FileManager {
      * @throws IOException if the file could not be written
      */
     public synchronized void writeFile(String path, String content) throws IOException, GitAPIException {
-        workingDirManager.writeFile(path, content);
+        workingDirectoryManager.writeFile(path, content);
         commitAllChanges();
     }
 
@@ -376,14 +367,8 @@ public class FileManager {
      *
      * @return Returns true if the commit was successful, returns false if any errors occurred during the process
      */
-    public boolean commitAllChanges() {
-        try {
-            return gitDirManager.commitAllChanges();
-        } catch (GitAPIException e) {
-            e.printStackTrace();
-            log.error("An error occurred while committing files to git directory");
-        }
-        return false;
+    public void commitAllChanges() throws GitAPIException {
+        gitDirectoryManager.commitAllChanges();
     }
 
 

@@ -3,6 +3,7 @@ package rocks.inspectit.ocelot.rest.file;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.web.bind.annotation.*;
 import rocks.inspectit.ocelot.file.FileInfo;
 import rocks.inspectit.ocelot.rest.util.RequestUtil;
@@ -33,7 +34,7 @@ public class DirectoryController extends FileBaseController {
     @ApiOperation(value = "Create a directory", notes = "Creates a new, empty directory including its parent folders. Does nothing if the directory already exists.")
     @ApiImplicitParam(name = "Path", value = "The part of the url after /directories/ define the path of the directory to create.")
     @PutMapping(value = "directories/**")
-    public void createNewDirectory(HttpServletRequest request) throws IOException {
+    public void createNewDirectory(HttpServletRequest request) throws IOException, GitAPIException {
         String path = RequestUtil.getRequestSubPath(request);
         fileManager.createDirectory(path);
     }

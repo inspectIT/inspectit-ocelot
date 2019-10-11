@@ -1,8 +1,11 @@
 package rocks.inspectit.ocelot.file.dirmanagers;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.Data;
 
-@Slf4j
+/**
+ * This class is used to store the data of the stored data is used in the version controller to set the author for commits.
+ */
+@Data
 public class GitAuthor {
     /**
      * The name of the author of an commit

@@ -202,7 +202,6 @@ public class FileManagerTest {
         @Test
         void createDirInRootDirect() throws Exception {
             setupTestFiles("topA", "topB");
-            when(gdm.commitAllChanges()).thenReturn(true);
 
             fm.createDirectory("myDir");
 
@@ -227,7 +226,6 @@ public class FileManagerTest {
         @Test
         void createDirInRootIndirect() throws Exception {
             setupTestFiles("topA", "topB");
-            when(gdm.commitAllChanges()).thenReturn(true);
 
             fm.createDirectory("topB/.././myDir");
 
@@ -252,7 +250,6 @@ public class FileManagerTest {
         @Test
         void createDirInSubFolder() throws Exception {
             setupTestFiles("topA", "topB");
-            when(gdm.commitAllChanges()).thenReturn(true);
 
             fm.createDirectory("topA/subA/subB");
 
@@ -286,7 +283,6 @@ public class FileManagerTest {
         @Test
         void createDirOnExistingDir() throws Exception {
             setupTestFiles("topA/subA", "topB");
-            when(gdm.commitAllChanges()).thenReturn(true);
 
             fm.createDirectory("topA/subA");
 
@@ -446,7 +442,6 @@ public class FileManagerTest {
         @Test
         void createNewFileInRootDirectory() throws Exception {
             setupTestFiles("fileA=foo", "topB");
-            when(gdm.commitAllChanges()).thenReturn(true);
 
             fm.createOrReplaceFile("myFile", "content");
 
@@ -457,7 +452,6 @@ public class FileManagerTest {
         @Test
         void createNewFileInSubDirectory() throws Exception {
             setupTestFiles("fileA=foo", "topB");
-            when(gdm.commitAllChanges()).thenReturn(true);
 
             fm.createOrReplaceFile("topB/../topB/./sub/myFile", "content");
 
@@ -468,7 +462,6 @@ public class FileManagerTest {
         @Test
         void removeFileContent() throws Exception {
             setupTestFiles("fileA=foo", "topB");
-            when(gdm.commitAllChanges()).thenReturn(true);
 
             fm.createOrReplaceFile("fileA", "");
 
@@ -479,8 +472,6 @@ public class FileManagerTest {
         @Test
         void replaceFileContent() throws Exception {
             setupTestFiles("topA/fileA=foo", "topB");
-            when(gdm.commitAllChanges()).thenReturn(true);
-
             fm.createOrReplaceFile("topA/fileA", "bar");
 
             assertThat(readFile("topA/fileA")).isEqualTo("bar");

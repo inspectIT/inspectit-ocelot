@@ -61,6 +61,8 @@ public class VersionController {
      */
     private Path filesRoot;
 
+    private GitAuthor author;
+
     @VisibleForTesting
     @Autowired
     InspectitServerSettings config;
@@ -83,17 +85,18 @@ public class VersionController {
     void init() {
         try {
             //Setup the files folder in the working directory
-            Path filesRoot = resolvePath("files");
+            Path filesRoot = getNormalizedPath("files");
             Files.createDirectories(filesRoot);
 
             //Setup the configuration folder in the files folder
             File localPath = new File(String.valueOf(filesRoot));
-            Path configurationRoot = resolvePath(FILES_SUBFOLDER);
+            Path configurationRoot = getNormalizedPath(FILES_SUBFOLDER);
             Files.createDirectories(configurationRoot);
 
             //Initialise git
             git = Git.init().setDirectory(localPath).call();
             repo = git.getRepository();
+            setAuthor("System", "maintainer@test.de");
 
             //If there is no .git folder present, commit all files found in the directory to the local repo.
             if (isGitRepository()) {
@@ -112,7 +115,7 @@ public class VersionController {
      * @return True: the .git folder was found and thus git has been setup on the file system.
      */
     private boolean isGitRepository() {
-        return !Files.exists(resolvePath("git/.git"));
+        return Files.exists(getNormalizedPath("git/.git"));
     }
 
     /**
@@ -122,7 +125,7 @@ public class VersionController {
      * @param pathToResolve The path one wants to resolve.
      * @return The resolved path.
      */
-    private Path resolvePath(String pathToResolve) {
+    private Path getNormalizedPath(String pathToResolve) {
         return Paths.get(config.getWorkingDirectory()).resolve(pathToResolve).toAbsolutePath().normalize();
     }
 
@@ -141,12 +144,12 @@ public class VersionController {
      *
      * @return Returns true of the commits was successful.
      */
-    //TODO Return values entfernen
     private void commitAll() throws GitAPIException {
         SimpleDateFormat formatter = new SimpleDateFormat(DATETIME_FORMAT);
         Date date = new Date();
         git.commit()
                 .setAll(true)
+                .setAuthor(author.getName(), author.getMail())
                 .setMessage("Commit changes to all files on " + formatter.format(date))
                 .call();
 
@@ -165,6 +168,7 @@ public class VersionController {
         SimpleDateFormat formatter = new SimpleDateFormat(DATETIME_FORMAT);
         Date date = new Date();
         commitCommand.setMessage("Committed changes to files on " + formatter.format(date))
+                .setAuthor(author.getName(), author.getMail())
                 .call();
 
         log.info("Committed changes to repository at {}", repo.getDirectory());
@@ -179,16 +183,15 @@ public class VersionController {
                 .call();
     }
 
-
     /**
      * Commits all files found in the given path.
      *
      * @Return returns true if the commit was successful.
      */
     public void commitFile(String filePath) throws GitAPIException {
-        commit(git.commit().setOnly(filePath));
+        CommitCommand commitCommand = git.commit().setOnly(filePath);
+        commit(commitCommand);
     }
-
 
     /**
      * Lists all file paths in the last commit which do not start with the given prefix.
@@ -225,7 +228,7 @@ public class VersionController {
     }
 
     /**
-     * Returns the TreeWalk Object from the current repo.
+     * Returns the TreeWalk Object from the last commit.
      *
      * @return The TreeWalk Object from the current repo.
      */
@@ -234,7 +237,22 @@ public class VersionController {
         RevTree tree = getTree();
         TreeWalk treeWalk = new TreeWalk(repo);
         treeWalk.addTree(tree);
-        treeWalk.setRecursive(false);
+        treeWalk.setRecursive(true);
+        return treeWalk;
+    }
+
+    /**
+     * Returns the TreeWalk Object from the commit with the given id.
+     *
+     * @return The TreeWalk Object from the current repo.
+     */
+    @VisibleForTesting
+    TreeWalk getTreeWalk(ObjectId commitId) throws IOException {
+        RevCommit commit = getCommitById(commitId);
+        RevTree tree = commit.getTree();
+        TreeWalk treeWalk = new TreeWalk(repo);
+        treeWalk.addTree(tree);
+        treeWalk.setRecursive(true);
         return treeWalk;
     }
 
@@ -274,42 +292,72 @@ public class VersionController {
     }
 
     /**
-     * Reads the content of a file from the current repo.
+     * Reads the content of a file from the latest commit.
      *
-     * @return The content of the file as String.
+     * @param filePath the path to the file.
+     * @return The file's content as it is found in the latest commit.
      */
     public String readFile(String filePath) throws IOException {
-        ObjectLoader loader;
         ObjectId lastCommitId = repo.resolve(Constants.HEAD);
-        RevWalk revWalk = getRevWalk();
-        try {
-            RevCommit commit = revWalk.parseCommit(lastCommitId);
-            RevTree tree = commit.getTree();
-            TreeWalk treeWalk = new TreeWalk(repo);
-            try {
-                treeWalk.addTree(tree);
-                treeWalk.setRecursive(true);
-                treeWalk.setFilter(PathFilter.create(filePath));
-                if (!treeWalk.next()) {
-                    log.error("Could not read file {} from git repo", filePath);
-                    return null;
-                }
-                ObjectId objectId = treeWalk.getObjectId(0);
-                loader = repo.open(objectId);
-            } finally {
-                treeWalk.close();
-            }
-            if (loader != null) {
-                return new String(loader.getBytes(), ENCODING);
-            }
-        } finally {
-            revWalk.dispose();
+        return readFileFromCommit(filePath, lastCommitId);
+    }
+
+    /**
+     * Returns the content of a given path as it was in the given commit.
+     *
+     * @param path   The path to the file one wants the content of.
+     * @param commit The commit id one wants to get the files content from.
+     * @return The file's content as it is found in the given commit.
+     */
+    public String getFileFromVersion(String path, Object commit) throws IOException {
+        return readFileFromCommit(path, commit);
+    }
+
+    /**
+     * Searches for a commit with the given ID. Then searches within this commit for a file with a given path at returns
+     * the files content as it is present in the given commit.
+     * Returns null if the file is not found in the given commit.
+     *
+     * @param filePath The path to the file.
+     * @param commitId The ID of the commit the file's content needs to be retrieved from.
+     * @return The file's content as it is found in the given commit.
+     */
+    private String readFileFromCommit(String filePath, Object commitId) throws IOException {
+        ObjectId resolvedId = resolveCommitId(commitId);
+        if (resolvedId == null) {
+            log.error("Could not find commit with id {} from git repo", commitId);
+            return null;
+        }
+
+        TreeWalk treeWalk = getTreeWalk(resolvedId);
+        treeWalk.setFilter(PathFilter.create(filePath));
+        if (!treeWalk.next()) {
+            log.error("Could not read file {} from git repo", filePath);
+            return null;
+        }
+
+        ObjectId objectId = treeWalk.getObjectId(0);
+        ObjectLoader loader = repo.open(objectId);
+        if (loader != null) {
+            return getStringFromLoader(loader);
         }
         return null;
     }
 
+    String getStringFromLoader(ObjectLoader loader) {
+        return new String(loader.getBytes(), ENCODING);
+    }
 
-    private ObjectId resolveCommitId(Object id) {
+    /**
+     * If a String is passed as an argument to this method it returns an ObjectId instance based on this string.
+     * If an ObjectId instance is passed, this instance is returned.
+     * If neither a String nor an ObjectId is passed null is returned.
+     *
+     * @param id The Id which should be turned into an ObjectId.
+     * @return An ObjectId instance based on the given parameter.
+     */
+    @VisibleForTesting
+    ObjectId resolveCommitId(Object id) {
         ObjectId objectId = null;
         if (id instanceof String) {
             objectId = ObjectId.fromString((String) id);
@@ -322,11 +370,9 @@ public class VersionController {
     }
 
     /**
-     * Returns the ids of all commits present on the local repo
+     * Returns the ids of all commits present on the local repo.
      *
-     * @return The ids of the commits present on the local repo
-     * @throws IOException
-     * @throws GitAPIException
+     * @return The ids of the commits present on the local repo.
      */
     public List<ObjectId> getAllCommits() throws IOException, GitAPIException {
         String treeName = "refs/heads/master";
@@ -342,12 +388,10 @@ public class VersionController {
     }
 
     /**
-     * Returns all the ids of all commits which introduced a new version of a given file
+     * Returns all the ids of all commits which introduced a new version of a given file.
      *
-     * @param filePath the file
-     * @return
-     * @throws IOException
-     * @throws GitAPIException
+     * @param filePath the file.
+     * @return A List of ObjectIds of all commits where the given file was edited.
      */
     public List<ObjectId> getCommitsOfFile(String filePath) throws IOException, GitAPIException {
         return getAllCommits().stream()
@@ -356,8 +400,17 @@ public class VersionController {
 
     }
 
+    /**
+     * Returns true if a given file was edited in a given commit.
+     * Uses the resolveCommitId method. Therefore either a String or an ObjectId can be used as commit Id.
+     *
+     * @param filePath the path of the file one wants to check.
+     * @param commitId the id of the commit one wants to check.
+     * @return Returns true if the given file was edited in the given commit.
+     */
+    @VisibleForTesting
     boolean commitContainsPath(String filePath, Object commitId) {
-        ObjectId resolvedCommmitId = resolveCommitId(commitId);
+        ObjectId resolvedCommitId = resolveCommitId(commitId);
         LogCommand logCommand = null;
         try {
             logCommand = git.log()
@@ -368,7 +421,7 @@ public class VersionController {
         }
         try {
             for (RevCommit revCommit : logCommand.call()) {
-                if (revCommit.getId().equals(resolvedCommmitId)) {
+                if (revCommit.getId().equals(resolvedCommitId)) {
                     return true;
                 }
             }
@@ -379,13 +432,11 @@ public class VersionController {
     }
 
     /**
-     * This method sets the author of the commits added to the local repo
+     * This method sets the author of the commits added to the local repo.
      *
-     * @param name the authors username
-     * @param mail the authors email adress
-     * @return
+     * @param name the authors username.
+     * @param mail the authors email adress.
      */
-
     public void setAuthor(String name, String mail) {
         author = new GitAuthor(name, mail);
     }
@@ -393,9 +444,8 @@ public class VersionController {
     /**
      * Returns the time the commit with the given id was committed on.
      *
-     * @param commitId The id of the commit one wants the time of
-     * @return The time when the commit was committed in milliseconds
-     * @throws IOException
+     * @param commitId The id of the commit one wants the time of.
+     * @return The time when the commit was committed in milliseconds.
      */
     public int getTimeOfCommit(Object commitId) throws IOException {
         RevCommit commit = getCommitById(commitId);
@@ -404,11 +454,10 @@ public class VersionController {
     }
 
     /**
-     * Returns AuthorIdent of the author of a commit
+     * Returns the author's name of a commit.
      *
-     * @param commitId
-     * @return
-     * @throws IOException
+     * @param commitId the id of the commit of which one wants to get the author's name from.
+     * @return The author's name.
      */
     public String getAuthorOfCommit(Object commitId) throws IOException {
         RevCommit commit = getCommitById(commitId);
@@ -416,57 +465,111 @@ public class VersionController {
     }
 
     /**
-     * Returns a commit which can be found under a specific id as RevCommit object
+     * Returns the full message of a commit.
      *
-     * @param id The id of the commit one wants to get
-     * @return the commit as RevCommit object
-     * @throws IOException
+     * @param commitId the id of the commit of which one wants to get the full message from.
+     * @return the full message.
+     */
+    public String getFullMessageOfCommit(Object commitId) throws IOException {
+        RevCommit commit = getCommitById(commitId);
+        return commit.getFullMessage();
+    }
+
+    /**
+     * Returns a commit which can be found under a specific id as RevCommit object.
+     *
+     * @param id The id of the commit one wants to get.
+     * @return the commit as RevCommit object.
      */
     public RevCommit getCommitById(Object id) throws IOException {
-        ObjectId commitId = resolveCommitId(id);
         RevCommit commit;
-        try (Repository repository = repo) {
-            ObjectId lastCommitId = resolveCommitId(commitId);
-            try (RevWalk revWalk = new RevWalk(repository)) {
-                commit = revWalk.parseCommit(lastCommitId);
-                revWalk.dispose();
-            }
-
+        ObjectId lastCommitId = resolveCommitId(resolveCommitId(id));
+        try (RevWalk revWalk = getRevWalk()) {
+            commit = revWalk.parseCommit(lastCommitId);
         }
         return commit;
     }
 
     /**
-     * Returns all file paths present in a commit
+     * Returns all file paths present in a commit.
      *
-     * @param id The id of the commit one wants to get the paths of
-     * @return A List of paths found in the commit
-     * @throws IOException
+     * @param id The id of the commit one wants to get the paths of.
+     * @return A List of paths found in the commit.
      */
     public List<String> getPathsOfCommit(Object id) throws IOException {
-        RevWalk rw = new RevWalk(repo);
+        RevWalk revWalk = getRevWalk();
         ObjectId head = repo.resolve(Constants.HEAD);
-        RevCommit commit = rw.parseCommit(head);
-        RevCommit[] parentList = commit.getParents();
+        RevCommit commit = revWalk.parseCommit(head);
+        RevCommit[] parentList = getParentsOfRevCommit(commit);
         if (parentList.length == 0) {
             return getAllFiles(id);
         }
-        RevCommit parent = rw.parseCommit(commit.getParent(0).getId());
-        DiffFormatter df = new DiffFormatter(DisabledOutputStream.INSTANCE);
+        RevCommit parent = revWalk.parseCommit(getParentOfRevCommit(commit, 0).getId());
+        DiffFormatter df = getDiffFormatter();
         df.setRepository(repo);
         df.setDiffComparator(RawTextComparator.DEFAULT);
         df.setDetectRenames(true);
-        return df.scan(parent.getTree(), commit.getTree())
+        return df.scan(getRevtreeOfRevCommit(parent), getRevtreeOfRevCommit(commit))
                 .stream()
                 .map(diff -> diff.getNewPath())
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Creates and returns a new instance of the gitDiffFormatter class. Used 'DisabledOutputStream.INSTANCE' as
+     * constructor argument for the instance.
+     *
+     * @return A new instance of the DiffFormatter class.
+     */
+    @VisibleForTesting
+    DiffFormatter getDiffFormatter() {
+        return new DiffFormatter(DisabledOutputStream.INSTANCE);
+    }
+
+    /**
+     * Invokes the getParents method of a given commit and returns it's result.
+     *
+     * @param commit The commit getParents() should be called on.
+     * @return The parent RevWalk of the commit as array.
+     */
+    @VisibleForTesting
+    RevCommit[] getParentsOfRevCommit(RevCommit commit) {
+        return commit.getParents();
+    }
+
+    /**
+     * Invokes the getParent method of a given commit with a given integer and returns it's result.
+     *
+     * @param commit      The commit getParent should be called on.
+     * @param parentIndex The index which should be passed to the getParent method.
+     * @return The parent RevWalk that can be found in the given index.
+     */
+    @VisibleForTesting
+    RevCommit getParentOfRevCommit(RevCommit commit, int parentIndex) {
+        return commit.getParent(parentIndex);
+    }
+
+    /**
+     * Invokes the getTree method of a given commit and returns the value returned by the method.
+     *
+     * @param commit The commit getTree should be called on.
+     * @return The RevTree which was returned by the getTree method.
+     */
+    @VisibleForTesting
+    RevTree getRevtreeOfRevCommit(RevCommit commit) {
+        return commit.getTree();
+    }
+
+    /**
+     * Returns a List of files which have been edited in the given commit.
+     *
+     * @param id the id of the commit the files should be retrieved from.
+     * @return The List of files changed in the given commit.
+     */
     private List<String> getAllFiles(Object id) throws IOException {
         List<String> filePaths = new ArrayList<>();
-        try (TreeWalk treeWalk = new TreeWalk(repo)) {
+        try (TreeWalk treeWalk = getTreeWalk()) {
             treeWalk.reset(getCommitById(id).getTree());
-            treeWalk.setRecursive(true);
             while (treeWalk.next()) {
                 filePaths.add(treeWalk.getPathString());
             }

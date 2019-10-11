@@ -30,6 +30,7 @@ public abstract class DirectoryManager {
     /**
      * The agent mapping subfolder resolved as a path object.
      */
+    @VisibleForTesting
     Path workingDirRoot;
 
     /**
@@ -49,7 +50,8 @@ public abstract class DirectoryManager {
     static final Charset ENCODING = StandardCharsets.UTF_8;
 
     @Autowired
-    private InspectitServerSettings config;
+    @VisibleForTesting
+    InspectitServerSettings config;
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
@@ -58,12 +60,12 @@ public abstract class DirectoryManager {
      * The path under which the file system accessible by this component lies.
      * This is the absolute, normalized path represented by {@link InspectitServerSettings#getWorkingDirectory()} with {@link #FILES_SUBFOLDER} appended.
      */
+    @VisibleForTesting
     Path configurationRoot;
 
     @PostConstruct
     @VisibleForTesting
     void init() throws IOException {
-        String s = config.getWorkingDirectory();
         configurationRoot = Paths.get(config.getWorkingDirectory()).resolve(FILES_SUBFOLDER).toAbsolutePath().normalize();
         Files.createDirectories(configurationRoot);
         workingDirRoot = Paths.get(config.getWorkingDirectory()).resolve(AGENT_MAPPING_SUBFOLDER).toAbsolutePath().normalize();

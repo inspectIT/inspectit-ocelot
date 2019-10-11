@@ -39,7 +39,7 @@ public class WorkingDirectoryManager extends DirectoryManager {
      * @return the directory contents.
      * @throws IOException If the input was not valid or something in the filesystem went wrong.
      */
-    private synchronized List<String> listFiles(String path, boolean onlyConfigurations) throws IOException {
+    public synchronized List<String> listFiles(String path, boolean onlyConfigurations) throws IOException {
         Path dir = setDir(path, onlyConfigurations);
         if (path.equals(".git")) {
             return Arrays.asList();
