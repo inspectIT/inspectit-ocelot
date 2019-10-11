@@ -48,9 +48,9 @@ public class ZipkinExporterServiceIntTest extends SpringTestBase {
                 .setSampler(Samplers.alwaysSample())
                 .startSpanAndRun(() -> {
                 });
-        await().atMost(15, TimeUnit.SECONDS).untilAsserted(() -> {
+
+        await().atMost(15, TimeUnit.SECONDS).pollInterval(1, TimeUnit.SECONDS).untilAsserted(() -> {
             verify(postRequestedFor(urlPathEqualTo(ZIPKIN_PATH)).withRequestBody(containing("zipkinspan")));
         });
     }
-
 }
