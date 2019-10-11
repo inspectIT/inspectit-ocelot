@@ -10,7 +10,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class StaticMapMDCAdapterTest {
+public class AbstractStaticMapMDCAdapterTest {
 
     public static class DummyMDC {
 
@@ -33,7 +33,7 @@ public class StaticMapMDCAdapterTest {
         }
     }
 
-    private StaticMapMDCAdapter adapter;
+    private AbstractStaticMapMDCAdapter adapter;
 
     @BeforeEach
     void setup() throws Exception {
@@ -41,7 +41,8 @@ public class StaticMapMDCAdapterTest {
         WeakMethodReference put = WeakMethodReference.create(DummyMDC.class, "put", String.class, String.class);
         WeakMethodReference get = WeakMethodReference.create(DummyMDC.class, "get", String.class);
         WeakMethodReference remove = WeakMethodReference.create(DummyMDC.class, "remove", String.class);
-        adapter = new StaticMapMDCAdapter(put, get, remove);
+        adapter = new AbstractStaticMapMDCAdapter(put, get, remove) {
+        };
     }
 
     @Nested

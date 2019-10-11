@@ -10,7 +10,7 @@ import java.lang.reflect.Method;
  * Implementation for all MDCs in form of a static Map which offer a put, get and remove method.
  */
 @Slf4j
-public class StaticMapMDCAdapter implements MDCAdapter {
+public abstract class AbstractStaticMapMDCAdapter implements MDCAdapter {
 
     /**
      * Reference to the put(key,value) method.
@@ -34,7 +34,7 @@ public class StaticMapMDCAdapter implements MDCAdapter {
      * @param get    the static get(key) method of the MDC
      * @param remove the static remove(key) method of the MDC
      */
-    protected StaticMapMDCAdapter(WeakMethodReference put, WeakMethodReference get, WeakMethodReference remove) {
+    protected AbstractStaticMapMDCAdapter(WeakMethodReference put, WeakMethodReference get, WeakMethodReference remove) {
         putMethod = put;
         getMethod = get;
         removeMethod = remove;

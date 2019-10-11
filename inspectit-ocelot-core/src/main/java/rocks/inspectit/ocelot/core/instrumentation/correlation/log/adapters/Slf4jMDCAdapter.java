@@ -8,7 +8,7 @@ import rocks.inspectit.ocelot.core.utils.WeakMethodReference;
  * As Logback natively uses this MDC class it automatically includes logback support.
  */
 @Slf4j
-public class Slf4jMDCAdapter extends StaticMapMDCAdapter {
+public class Slf4jMDCAdapter extends AbstractStaticMapMDCAdapter {
 
     /**
      * The name of the SLF4J (and logback) MDC class

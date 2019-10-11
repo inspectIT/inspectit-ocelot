@@ -7,7 +7,7 @@ import rocks.inspectit.ocelot.core.utils.WeakMethodReference;
  * Provides access to Log4j2s ThreadContext.
  */
 @Slf4j
-public class Log4J2MDCAdapter extends StaticMapMDCAdapter {
+public class Log4J2MDCAdapter extends AbstractStaticMapMDCAdapter {
 
     /**
      * The name of the MDC class of Log4j2.
