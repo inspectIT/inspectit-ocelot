@@ -112,19 +112,25 @@ task checkDependencyJavaVersions {
         }
     }
 }
+
+task generateVersionFile {
+    ext.versionFile = new File(buildDir, "ocelot-version.info")
+    doLast {
+        def currentDate = new Date().toString()
+        ext.versionFile.withWriter('UTF-8') { writer ->
+            writer << "$version\n$currentDate"
+        }
+    }
+}
+
 jar.dependsOn checkDependencyJavaVersions
+jar.dependsOn generateVersionFile
 
 jar {
     archiveName = "${project.name}.jar"
 
-    def targetDirectory = new File("${sourceSets.main.output.resourcesDir}")
-    if (!targetDirectory.exists()) {
-        targetDirectory.mkdirs()
-    }
-    def currentDate = new Date().format('yyyyMMddHHmm')
-    new File(targetDirectory, "/ocelot-version.info").withWriterAppend { writer ->
-        writer << "$version.$currentDate"
-    }
+    // include version file
+    from generateVersionFile.versionFile
 
     //include all "implementation" dependencies in fat jar
     from {

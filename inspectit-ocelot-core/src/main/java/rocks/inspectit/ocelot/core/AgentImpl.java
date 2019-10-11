@@ -36,7 +36,7 @@ public class AgentImpl implements IAgent {
     /**
      * The file used to load the agent's version.
      */
-    private static final String AGENT_VERSION_FILE = "/ocelot-version.info";
+    private static final String AGENT_VERSION_INFORMATION_FILE = "/ocelot-version.info";
 
     // statically initialize our default logging before doing anything
     static {
@@ -54,11 +54,18 @@ public class AgentImpl implements IAgent {
      */
     private String agentVersion;
 
+    /**
+     * The date the agent was built.
+     */
+    private String agentBuildDate;
+
     @Override
     public void start(String cmdArgs, Instrumentation instrumentation) {
         ClassLoader classloader = AgentImpl.class.getClassLoader();
 
-        LOGGER.info("Starting inspectIT Ocelot Agent [version: {}]...", getVersion());
+        LOGGER.info("Starting inspectIT Ocelot Agent...", getVersion());
+        LOGGER.info("\tVersion: {}", getVersion());
+        LOGGER.info("\tBuild Date: {}", getBuildDate());
         logOpenCensusClassLoader();
 
         ctx = new AnnotationConfigApplicationContext();
@@ -85,18 +92,36 @@ public class AgentImpl implements IAgent {
         }
     }
 
+    /**
+     * Loads the agent's version information from the {@link #AGENT_VERSION_INFORMATION_FILE} file.
+     */
+    private void readVersionInformation() {
+        try {
+            InputStream inputStream = AgentImpl.class.getResourceAsStream(AGENT_VERSION_INFORMATION_FILE);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+            agentVersion = reader.readLine();
+            agentBuildDate = reader.readLine();
+        } catch (Exception e) {
+            LOGGER.warn("Could not read agent version information file.");
+            agentVersion = "UNKNOWN";
+            agentBuildDate = "UNKNOWN";
+        }
+    }
+
     @Override
     public String getVersion() {
         if (agentVersion == null) {
-            try {
-                InputStream inputStream = AgentImpl.class.getResourceAsStream(AGENT_VERSION_FILE);
-                agentVersion = new BufferedReader(new InputStreamReader(inputStream)).readLine();
-            } catch (Exception e) {
-                LOGGER.warn("Could not read agent version file.");
-                agentVersion = "UNKNOWN";
-            }
+            readVersionInformation();
         }
         return agentVersion;
+    }
+
+    @Override
+    public String getBuildDate() {
+        if (agentBuildDate == null) {
+            readVersionInformation();
+        }
+        return agentBuildDate;
     }
 
     @Override

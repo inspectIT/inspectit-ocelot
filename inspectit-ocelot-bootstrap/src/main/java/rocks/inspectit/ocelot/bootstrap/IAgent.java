@@ -28,4 +28,11 @@ public interface IAgent {
      * @return the version of the currently used agent
      */
     String getVersion();
+
+    /**
+     * Returns the date the agent has been built.
+     *
+     * @return string representing when the date the agent has been built
+     */
+    String getBuildDate();
 }
