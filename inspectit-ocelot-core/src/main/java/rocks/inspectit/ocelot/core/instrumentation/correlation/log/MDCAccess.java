@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.DoNotInstrumentMarker;
 import rocks.inspectit.ocelot.core.AgentImpl;
+import rocks.inspectit.ocelot.core.instrumentation.correlation.log.adapters.Log4J1MDCAdapter;
 import rocks.inspectit.ocelot.core.instrumentation.correlation.log.adapters.Log4J2MDCAdapter;
 import rocks.inspectit.ocelot.core.instrumentation.correlation.log.adapters.MDCAdapter;
 import rocks.inspectit.ocelot.core.instrumentation.correlation.log.adapters.Slf4jMDCAdapter;
@@ -54,6 +55,7 @@ public class MDCAccess implements IClassDiscoveryListener {
     void registerAdapters() {
         mdcAdapterBuilders.put(Slf4jMDCAdapter.MDC_CLASS, Slf4jMDCAdapter::get);
         mdcAdapterBuilders.put(Log4J2MDCAdapter.THREAD_CONTEXT_CLASS, Log4J2MDCAdapter::get);
+        mdcAdapterBuilders.put(Log4J1MDCAdapter.MDC_CLASS, Log4J1MDCAdapter::get);
     }
 
     /**
