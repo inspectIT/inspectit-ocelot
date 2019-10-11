@@ -23,6 +23,7 @@ public class LogCorrelationTest {
     private static void beforeAll() throws InterruptedException {
         //load the MDC classes
         MDC.get("test");
+        org.apache.log4j.MDC.get("test");
         ThreadContext.get("test");
         TestUtils.waitForClassInstrumentations(Arrays.asList(LogCorrelationTest.class, Thread.class, AbstractExecutorService.class, ScheduledThreadPoolExecutor.class),
                 15, TimeUnit.SECONDS);
@@ -42,9 +43,11 @@ public class LogCorrelationTest {
         if (expected == null) {
             assertThat(org.slf4j.MDC.get(MDC_KEY)).isNull();
             assertThat(org.apache.logging.log4j.ThreadContext.get(MDC_KEY)).isNull();
+            assertThat(org.apache.log4j.MDC.get(MDC_KEY)).isNull();
         } else {
             assertThat(org.slf4j.MDC.get(MDC_KEY)).isEqualTo(expected);
             assertThat(org.apache.logging.log4j.ThreadContext.get(MDC_KEY)).isEqualTo(expected);
+            assertThat(org.apache.log4j.MDC.get(MDC_KEY)).isEqualTo(expected);
         }
     }
 
