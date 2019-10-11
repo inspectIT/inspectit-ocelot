@@ -107,7 +107,9 @@ dependencies {
 
             // for log-correlation tests
             'org.apache.logging.log4j:log4j-api:2.12.1',
-            'org.apache.logging.log4j:log4j-core:2.12.1'
+            'org.apache.logging.log4j:log4j-core:2.12.1',
+            'log4j:log4j:1.2.16'
+
     )
 
     jmh(

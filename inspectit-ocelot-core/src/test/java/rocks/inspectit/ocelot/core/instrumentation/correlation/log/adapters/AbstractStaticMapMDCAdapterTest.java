@@ -3,13 +3,14 @@ package rocks.inspectit.ocelot.core.instrumentation.correlation.log.adapters;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import rocks.inspectit.ocelot.core.utils.WeakMethodReference;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class Log4j2MDCAdapterTest {
+public class AbstractStaticMapMDCAdapterTest {
 
     public static class DummyMDC {
 
@@ -32,12 +33,16 @@ public class Log4j2MDCAdapterTest {
         }
     }
 
-    private Log4J2MDCAdapter adapter;
+    private AbstractStaticMapMDCAdapter adapter;
 
     @BeforeEach
-    void setup() {
+    void setup() throws Exception {
         DummyMDC.reset();
-        adapter = Log4J2MDCAdapter.get(DummyMDC.class);
+        WeakMethodReference put = WeakMethodReference.create(DummyMDC.class, "put", String.class, String.class);
+        WeakMethodReference get = WeakMethodReference.create(DummyMDC.class, "get", String.class);
+        WeakMethodReference remove = WeakMethodReference.create(DummyMDC.class, "remove", String.class);
+        adapter = new AbstractStaticMapMDCAdapter(put, get, remove) {
+        };
     }
 
     @Nested
