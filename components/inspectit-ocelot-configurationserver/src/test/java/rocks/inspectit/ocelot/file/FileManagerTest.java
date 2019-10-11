@@ -9,7 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
-import rocks.inspectit.ocelot.file.dirmanagers.GitDirManager;
+import rocks.inspectit.ocelot.file.dirmanagers.GitDirectoryManager;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -36,12 +36,11 @@ public class FileManagerTest {
     private static final Charset ENCODING = StandardCharsets.UTF_8;
     static final String FILES_SUBFOLDER = "files/configuration";
 
-
     @InjectMocks
     private FileManager fm;
 
     @Mock
-    private GitDirManager gdm;
+    private GitDirectoryManager gdm;
 
     @Mock
     ApplicationEventPublisher eventPublisher;
@@ -68,7 +67,6 @@ public class FileManagerTest {
     private void cleanFileManager() throws Exception {
         deleteDirectory(fmRoot);
     }
-
 
     private static void setupTestFiles(String... paths) {
         try {
@@ -105,7 +103,6 @@ public class FileManagerTest {
     private interface Verfification<T> {
         void verify(T t) throws Exception;
     }
-
 
     @Nested
     class GetFilesInDirectory {
@@ -186,7 +183,6 @@ public class FileManagerTest {
                     });
         }
 
-
         @Test
         void verifyFilesOutsideWorkdirNotAccessible() {
             setupTestFiles("top");
@@ -228,7 +224,6 @@ public class FileManagerTest {
             verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
         }
 
-
         @Test
         void createDirInRootIndirect() throws Exception {
             setupTestFiles("topA", "topB");
@@ -253,7 +248,6 @@ public class FileManagerTest {
 
             verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
         }
-
 
         @Test
         void createDirInSubFolder() throws Exception {
@@ -307,7 +301,6 @@ public class FileManagerTest {
                     .isInstanceOf(IOException.class);
         }
 
-
         @Test
         void createDirBeneathExistingFile() {
             setupTestFiles("topA=content");
@@ -335,7 +328,6 @@ public class FileManagerTest {
         }
     }
 
-
     @Nested
     class DeleteDirectory {
 
@@ -355,7 +347,6 @@ public class FileManagerTest {
             verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
         }
 
-
         @Test
         void deleteDirInRootIndirect() throws Exception {
             setupTestFiles("topA", "topB");
@@ -371,7 +362,6 @@ public class FileManagerTest {
 
             verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
         }
-
 
         @Test
         void deleteDirInSubFolderWithContents() throws Exception {
@@ -428,7 +418,6 @@ public class FileManagerTest {
         }
     }
 
-
     @Nested
     class ReadFile {
 
@@ -450,7 +439,6 @@ public class FileManagerTest {
             assertThat(fm.readFile("./sub/../sub/fileB")).isEqualTo("something\nsomething else");
         }
     }
-
 
     @Nested
     class CreateOrReplaceFile {
@@ -476,7 +464,6 @@ public class FileManagerTest {
             assertThat(readFile("topB/sub/myFile")).isEqualTo("content");
             verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
         }
-
 
         @Test
         void removeFileContent() throws Exception {
@@ -527,7 +514,6 @@ public class FileManagerTest {
         }
     }
 
-
     @Nested
     class DeleteFile {
 
@@ -544,7 +530,6 @@ public class FileManagerTest {
             verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
         }
 
-
         @Test
         void deleteFileInRootIndirect() throws Exception {
             setupTestFiles("topA=foo", "topB");
@@ -557,7 +542,6 @@ public class FileManagerTest {
                     );
             verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
         }
-
 
         @Test
         void deleteEmptyFile() throws Exception {
@@ -621,14 +605,12 @@ public class FileManagerTest {
         }
     }
 
-
     @Nested
     class Move {
 
         @Test
         void renameFile() throws Exception {
             setupTestFiles("top", "foo=foo");
-            when(gdm.commitAllChanges()).thenReturn(true);
 
             fm.move("foo", "bar");
 
@@ -646,11 +628,9 @@ public class FileManagerTest {
             verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
         }
 
-
         @Test
         void renameFolder() throws Exception {
             setupTestFiles("top", "foo/sub/something=text");
-            when(gdm.commitAllChanges()).thenReturn(true);
 
             fm.move("foo/sub", "foo/bar");
 
@@ -684,7 +664,6 @@ public class FileManagerTest {
         @Test
         void moveDirectoryWithContents() throws Exception {
             setupTestFiles("top", "foo/sub/something=text", "foo/sub/a/b");
-            when(gdm.commitAllChanges()).thenReturn(true);
 
             fm.move("foo/sub", "sub");
 
@@ -723,11 +702,9 @@ public class FileManagerTest {
             verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
         }
 
-
         @Test
         void moveFile() throws Exception {
             setupTestFiles("file=");
-            when(gdm.commitAllChanges()).thenReturn(true);
 
             fm.move("file", "a/b/file");
 
@@ -752,7 +729,6 @@ public class FileManagerTest {
             assertThat(readFile("a/b/file")).isEqualTo("");
             verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
         }
-
 
         @Test
         void moveNonExistingFile() throws Exception {

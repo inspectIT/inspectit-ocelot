@@ -21,18 +21,22 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class WorkingDirManagerTest {
+public class WorkingDirectoryManagerTest {
 
     private static final Path rootWorkDir = Paths.get("temp_test_workdir");
     private static final Path fmRoot = rootWorkDir.resolve("root");
 
     @InjectMocks
-    private WorkingDirManager wdm;
+    private WorkingDirectoryManager wdm;
 
     @Mock
     ApplicationEventPublisher eventPublisher;
+
+    @Mock
+    InspectitServerSettings config;
 
     @BeforeAll
     private static void setup() throws Exception {
@@ -46,9 +50,7 @@ public class WorkingDirManagerTest {
 
     @BeforeEach
     private void setupFileManager() throws Exception {
-        InspectitServerSettings conf = new InspectitServerSettings();
-        conf.setWorkingDirectory(fmRoot.toString());
-        wdm.config = conf;
+        when(config.getWorkingDirectory()).thenReturn(fmRoot.toString());
         wdm.init();
     }
 
@@ -63,11 +65,11 @@ public class WorkingDirManagerTest {
                 if (!agentmapping) {
                     if (path.contains("/")) {
                         String[] pathArray = path.split("/");
-                        Files.createDirectories(fmRoot.resolve(WorkingDirManager.FILES_SUBFOLDER).resolve(pathArray[0]));
-                        String newPaths = WorkingDirManager.FILES_SUBFOLDER + "/" + pathArray[0];
+                        Files.createDirectories(fmRoot.resolve(WorkingDirectoryManager.FILES_SUBFOLDER).resolve(pathArray[0]));
+                        String newPaths = WorkingDirectoryManager.FILES_SUBFOLDER + "/" + pathArray[0];
                         Files.createFile(fmRoot.resolve(newPaths).resolve(pathArray[1]));
                     } else {
-                        Files.createFile(fmRoot.resolve(WorkingDirManager.FILES_SUBFOLDER).resolve(path));
+                        Files.createFile(fmRoot.resolve(WorkingDirectoryManager.FILES_SUBFOLDER).resolve(path));
                     }
                 } else {
                     if (path.contains("/")) {
@@ -96,24 +98,18 @@ public class WorkingDirManagerTest {
         File f;
         if (path.contains("/")) {
             String paths[] = path.split("/");
-            Files.createDirectories(fmRoot.resolve(WorkingDirManager.FILES_SUBFOLDER).resolve(paths[0]));
-            String finalPath = WorkingDirManager.FILES_SUBFOLDER + "/" + paths[0];
+            Files.createDirectories(fmRoot.resolve(WorkingDirectoryManager.FILES_SUBFOLDER).resolve(paths[0]));
+            String finalPath = WorkingDirectoryManager.FILES_SUBFOLDER + "/" + paths[0];
             f = new File(String.valueOf(fmRoot.resolve(finalPath).resolve(paths[1])));
 
         } else {
-            f = new File(String.valueOf(fmRoot.resolve(WorkingDirManager.FILES_SUBFOLDER).resolve(path)));
+            f = new File(String.valueOf(fmRoot.resolve(WorkingDirectoryManager.FILES_SUBFOLDER).resolve(path)));
         }
         FileWriter fw = new FileWriter(f);
         fw.write(content);
         fw.flush();
         fw.close();
     }
-
-    private static String readFile(String path) throws IOException {
-        Path file = fmRoot.resolve(WorkingDirManager.FILES_SUBFOLDER).resolve(path);
-        return new String(Files.readAllBytes(file), WorkingDirManager.ENCODING);
-    }
-
 
     @Nested
     public class ReadFile {
@@ -136,16 +132,16 @@ public class WorkingDirManagerTest {
     public class WriteFile {
         @Test
         void writeTopLevelFile() throws IOException {
-            wdm.writeFile("name", "content");
+            wdm.writeFile("configuration/name", "content");
 
-            assertThat(readFile("name")).isEqualTo("content");
+            assertThat(wdm.readFile("name")).isEqualTo("content");
         }
 
         @Test
         void writeFileAndSubfolder() throws IOException {
-            wdm.writeFile("dir/name", "content");
+            wdm.writeFile("configuration/dir/name", "content");
 
-            assertThat(readFile("dir/name")).isEqualTo("content");
+            assertThat(wdm.readFile("dir/name")).isEqualTo("content");
         }
 
 
@@ -156,7 +152,7 @@ public class WorkingDirManagerTest {
         @Test
         void listFilesTopLevel() throws IOException {
             setupTestFiles(false, "a", "b", "c");
-            List<String> output = Arrays.asList("a", "b", "c");
+            List<String> output = Arrays.asList("configuration/a", "configuration/b", "configuration/c");
 
             assertThat(wdm.listFiles("")).isEqualTo(output);
         }
@@ -164,7 +160,7 @@ public class WorkingDirManagerTest {
         @Test
         void listFilesSubFolder() throws IOException {
             setupTestFiles(false, "directory/a");
-            List<String> output = Arrays.asList("directory/a");
+            List<String> output = Arrays.asList("configuration/directory/a");
 
             assertThat(wdm.listFiles("")).isEqualTo(output);
         }

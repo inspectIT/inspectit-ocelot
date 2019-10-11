@@ -275,7 +275,7 @@ public class FileManager {
      */
     public synchronized void writeFile(String path, String content) throws IOException, GitAPIException {
         workingDirManager.writeFile(path, content);
-        //commitAllChanges();
+        commitAllChanges();
     }
 
     /**
