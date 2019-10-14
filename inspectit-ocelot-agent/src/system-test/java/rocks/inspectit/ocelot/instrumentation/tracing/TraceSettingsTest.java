@@ -259,6 +259,7 @@ public class TraceSettingsTest extends TraceTestBase {
             dynamicSamplingRateTest("dynamic_0.2", 0.2);
             dynamicSamplingRateTest("dynamic_0.7", 0.7);
             dynamicSamplingRateTest("invalid", "not a number! haha!");
+            dynamicSamplingRateTest("null", null);
         }
         samplingTestEndMarker("dynamic_end");
 
@@ -279,7 +280,10 @@ public class TraceSettingsTest extends TraceTestBase {
 
         //ensure that an invalid probability is equal to "never sample"
         long numSpansInvalid = exportedSpans.stream().filter(sp -> sp.getName().equals("invalid")).count();
-        assertThat(numSpansInvalid).isZero();
+        assertThat(numSpansInvalid).isEqualTo(10000L);
+
+        long numSpansNull = exportedSpans.stream().filter(sp -> sp.getName().equals("null")).count();
+        assertThat(numSpansNull).isEqualTo(10000L);
     }
 
 
@@ -332,7 +336,7 @@ public class TraceSettingsTest extends TraceTestBase {
 
         assertThat(exportedSpans)
                 .noneSatisfy(sp -> assertThat(sp.getName()).isEqualTo("TraceSettingsTest.nestedSamplingTestRoot"))
-                .noneSatisfy(sp -> assertThat(sp.getName()).isEqualTo("TraceSettingsTest.nestedSamplingTestNested"));
+                .anySatisfy(sp -> assertThat(sp.getName()).isEqualTo("TraceSettingsTest.nestedSamplingTestNested"));
     }
 
 

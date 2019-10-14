@@ -1,9 +1,12 @@
 package rocks.inspectit.ocelot.core.instrumentation.hook;
 
 import io.opencensus.stats.StatsRecorder;
+import io.opencensus.trace.Sampler;
+import io.opencensus.trace.samplers.Samplers;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import net.bytebuddy.description.method.MethodDescription;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.RuleTracingSettings;
@@ -18,7 +21,6 @@ import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.EndSpanActi
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.StoreSpanAction;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.WriteSpanAttributesAction;
 import rocks.inspectit.ocelot.core.metrics.MeasuresAndViewsManager;
-import rocks.inspectit.ocelot.core.opencensus.OcelotProbabilitySampler;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -127,12 +129,15 @@ public class MethodHookGenerator {
     private void configureSampling(RuleTracingSettings tracing, ContinueOrStartSpanAction.ContinueOrStartSpanActionBuilder actionBuilder) {
         // tracing.getSampleProbability() never returns null here because the
         // InstrumentationRuleResolver resolves null to the default sample probability
-        try {
-            double fixedProbability = Double.parseDouble(tracing.getSampleProbability());
-            double clampedProbability = Math.max(0.0, Math.min(1.0, fixedProbability));
-            actionBuilder.staticSampler(new OcelotProbabilitySampler(clampedProbability));
-        } catch (NumberFormatException e) {
-            actionBuilder.dynamicSampleProbabilityKey(tracing.getSampleProbability());
+        String sampleProbability = tracing.getSampleProbability();
+        if (!StringUtils.isBlank(sampleProbability)) {
+            try {
+                double fixedProbability = Double.parseDouble(sampleProbability);
+                Sampler sampler = Samplers.probabilitySampler(Math.max(0.0, Math.min(1.0, fixedProbability)));
+                actionBuilder.staticSampler(sampler);
+            } catch (NumberFormatException e) {
+                actionBuilder.dynamicSampleProbabilityKey(sampleProbability);
+            }
         }
     }
 
