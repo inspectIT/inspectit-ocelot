@@ -22,7 +22,8 @@
     ],
     "Tracing": [
       "tracing/tracing",
-      "tracing/trace-exporters"
+      "tracing/trace-exporters",
+      "tracing/log-correlation"
     ],
     "Instrumentation": [
       "instrumentation/instrumentation",
