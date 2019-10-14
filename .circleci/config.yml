@@ -26,6 +26,8 @@ commands:
           path: ~/inspectit/repo/components/inspectit-ocelot-configurationserver/build/test-results
       - store_test_results:
           path: ~/inspectit/repo/components/inspectit-ocelot-eum-server/build/test-results
+      - store_artifacts:
+          path: /home/circleci/inspectit/repo/heapdump.bin
 
 # ###############################################################
 # Jobs
