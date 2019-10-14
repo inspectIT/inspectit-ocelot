@@ -1,7 +1,6 @@
 package rocks.inspectit.ocelot.core.exporter;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
-import io.opencensus.exporter.trace.jaeger.JaegerTraceExporter;
 import io.opencensus.trace.Tracing;
 import io.opencensus.trace.samplers.Samplers;
 import org.junit.jupiter.api.AfterEach;
@@ -12,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import rocks.inspectit.ocelot.core.SpringTestBase;
+import rocks.inspectit.ocelot.core.testutils.OpenCensusUtils;
 
 import java.util.concurrent.TimeUnit;
 
@@ -36,10 +36,9 @@ public class JaegerExporterServiceIntTest extends SpringTestBase {
         wireMockServer = new WireMockServer(options().port(JAEGER_PORT));
         wireMockServer.start();
         configureFor(wireMockServer.port());
-        stubFor(get(urlPathEqualTo(JAEGER_PATH))
-                .willReturn(aResponse()
-                        .withStatus(200)));
 
+        stubFor(post(urlPathEqualTo(JAEGER_PATH))
+                .willReturn(aResponse().withStatus(200)));
     }
 
     @AfterEach
@@ -54,18 +53,13 @@ public class JaegerExporterServiceIntTest extends SpringTestBase {
                 .startSpanAndRun(() -> {
                 });
 
-        // Shutdown the export component to force a flush. This will cause problems if multiple tests
-        // are added in this class, but this is not the case for the moment.
-        Tracing.getExportComponent().shutdown();
-        JaegerTraceExporter.unregister();
-
         logger.info("Wait for Jaeger to process the span...");
-        long timeWaitingForSpansToBeExportedInMillis = 1100L;
-        Thread.sleep(timeWaitingForSpansToBeExportedInMillis);
+        Thread.sleep(1100L);
+
+        OpenCensusUtils.flushSpanExporter();
 
         await().atMost(15, TimeUnit.SECONDS).pollInterval(1, TimeUnit.SECONDS).untilAsserted(() -> {
             verify(postRequestedFor(urlPathEqualTo(JAEGER_PATH)));
         });
     }
-
 }
