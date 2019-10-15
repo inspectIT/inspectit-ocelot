@@ -2,15 +2,8 @@ import axios from '../../../lib/axios-api';
 import { notificationActions } from '../notification';
 import yaml from 'js-yaml';
 
-import { camelCase } from 'lodash'
-
-export const fetchConfigurationFile = (attributes, mappingName) => {
-	let fileName
-	if(!mappingName){
-		fileName='configFile'
-	} else{
-		fileName = camelCase(mappingName)
-	}
+export const fetchConfigurationFile = (attributes) => {
+	let fileName = 'agent-config'
 
 	return dispatch => {
 		axios

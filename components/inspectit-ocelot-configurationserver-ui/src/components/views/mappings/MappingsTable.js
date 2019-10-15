@@ -28,7 +28,7 @@ const ButtonCell = ({mapping, onEdit, onDelete, onDownload, saved, showInfo}) =>
           if(!saved()){
             showInfo('Unsaved changes', 'The downloaded configuration file is based on unsaved changes and might not be as expected')
           }
-          onDownload(mapping.attributes, mapping.name)}
+          onDownload(mapping.attributes)}
         } 
         tooltip="Click here to download the configuration file for this mapping" 
         style={{marginTop: "0.25em"}}
