@@ -68,7 +68,7 @@ public class ModelAutoCompleterTest {
                     "thread-pool-size",
                     "tracing"));
 
-            assertThat(completer.getSuggestions(input)).isEqualTo(output);
+            assertThat(completer.getSuggestions(input)).containsAll(output);
         }
 
         @Test
@@ -122,7 +122,7 @@ public class ModelAutoCompleterTest {
 
                     "tracing");
 
-            assertThat(completer.getProperties(InspectitConfig.class)).isEqualTo(output);
+            assertThat(completer.getProperties(InspectitConfig.class)).containsAll(output);
         }
     }
 }

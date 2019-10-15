@@ -7,6 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.config.model.plugins.PluginSettings;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.sdk.ConfigurablePlugin;
 
@@ -51,7 +52,7 @@ public class LoadedPluginTest {
             loaded.updateConfiguration(env);
             loaded.updateConfiguration(env);
 
-            verify(plugin).update(same(confA), isNull());
+            verify(plugin).start(same(confA), isNull());
             verify(plugin).update(same(confB), isNull());
             verifyNoMoreInteractions(plugin);
         }
@@ -61,7 +62,7 @@ public class LoadedPluginTest {
         @Test
         void testConfigUpdateOnInspectitConfigChange() {
             when(plugin.getConfigurationClass()).thenReturn((Class) String.class);
-            when(env.loadAndValidateFromProperties(LoadedPlugin.PLUGIN_CONFIG_PREFIX + "test", String.class))
+            when(env.loadAndValidateFromProperties(PluginSettings.PLUGIN_CONFIG_PREFIX + "test", String.class))
                     .thenReturn(Optional.of("foo"));
             LoadedPlugin loaded = new LoadedPlugin(plugin, "test");
 
@@ -73,7 +74,7 @@ public class LoadedPluginTest {
             loaded.updateConfiguration(env);
             loaded.updateConfiguration(env);
 
-            verify(plugin).update(same(confA), eq("foo"));
+            verify(plugin).start(same(confA), eq("foo"));
             verify(plugin).update(same(confB), eq("foo"));
             verifyNoMoreInteractions(plugin);
         }
@@ -83,20 +84,20 @@ public class LoadedPluginTest {
         @Test
         void testConfigUpdateOnPluginConfigChange() {
             when(plugin.getConfigurationClass()).thenReturn((Class) String.class);
-            when(env.loadAndValidateFromProperties(LoadedPlugin.PLUGIN_CONFIG_PREFIX + "test", String.class))
+            when(env.loadAndValidateFromProperties(PluginSettings.PLUGIN_CONFIG_PREFIX + "test", String.class))
                     .thenReturn(Optional.of("foo"));
             LoadedPlugin loaded = new LoadedPlugin(plugin, "test");
 
             loaded.updateConfiguration(env);
             loaded.updateConfiguration(env); //call twice to make sure it is called once
 
-            when(env.loadAndValidateFromProperties(LoadedPlugin.PLUGIN_CONFIG_PREFIX + "test", String.class))
+            when(env.loadAndValidateFromProperties(PluginSettings.PLUGIN_CONFIG_PREFIX + "test", String.class))
                     .thenReturn(Optional.of("bar"));
 
             loaded.updateConfiguration(env);
             loaded.updateConfiguration(env);
 
-            verify(plugin).update(same(confA), eq("foo"));
+            verify(plugin).start(same(confA), eq("foo"));
             verify(plugin).update(same(confA), eq("bar"));
             verifyNoMoreInteractions(plugin);
         }
@@ -106,20 +107,20 @@ public class LoadedPluginTest {
         @Test
         void testNoConfigUpdateOnInvalidConfigChange() {
             when(plugin.getConfigurationClass()).thenReturn((Class) String.class);
-            when(env.loadAndValidateFromProperties(LoadedPlugin.PLUGIN_CONFIG_PREFIX + "test", String.class))
+            when(env.loadAndValidateFromProperties(PluginSettings.PLUGIN_CONFIG_PREFIX + "test", String.class))
                     .thenReturn(Optional.of("foo"));
             LoadedPlugin loaded = new LoadedPlugin(plugin, "test");
 
             loaded.updateConfiguration(env);
             loaded.updateConfiguration(env); //call twice to make sure it is called once
 
-            when(env.loadAndValidateFromProperties(LoadedPlugin.PLUGIN_CONFIG_PREFIX + "test", String.class))
+            when(env.loadAndValidateFromProperties(PluginSettings.PLUGIN_CONFIG_PREFIX + "test", String.class))
                     .thenReturn(Optional.empty());
 
             loaded.updateConfiguration(env);
             loaded.updateConfiguration(env);
 
-            verify(plugin).update(same(confA), eq("foo"));
+            verify(plugin).start(same(confA), eq("foo"));
             verifyNoMoreInteractions(plugin);
         }
 

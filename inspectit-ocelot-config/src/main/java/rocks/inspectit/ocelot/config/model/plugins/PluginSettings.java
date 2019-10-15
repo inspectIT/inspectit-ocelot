@@ -12,6 +12,11 @@ import lombok.Data;
 public class PluginSettings {
 
     /**
+     * The configuration path under which plugin-specific configurations are placed.
+     */
+    public static final String PLUGIN_CONFIG_PREFIX = "inspectit.plugins.";
+
+    /**
      * The path of the directory to scan for plugins.
      */
     String path;

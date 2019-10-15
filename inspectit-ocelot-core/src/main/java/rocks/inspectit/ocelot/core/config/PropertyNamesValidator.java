@@ -7,14 +7,13 @@ import org.springframework.context.event.EventListener;
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.config.model.plugins.PluginSettings;
 import rocks.inspectit.ocelot.config.validation.PropertyPathHelper;
 
 import javax.annotation.PostConstruct;
 import java.lang.reflect.Type;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 
 @Slf4j
 @Component
@@ -23,16 +22,8 @@ public class PropertyNamesValidator {
     @Autowired
     private InspectitEnvironment env;
 
-    /**
-     * A HashSet of classes which are used as wildcards in the search for properties. If a found class matches one of these
-     * classes, the end of the property path is reached. Mainly used in the search of maps
-     */
-    private static final HashSet<Class<?>> TERMINAL_TYPES = new HashSet(Arrays.asList(Object.class, String.class, Integer.class, Long.class,
-            Float.class, Double.class, Character.class, Void.class,
-            Boolean.class, Byte.class, Short.class, Duration.class));
-
     @PostConstruct
-    @EventListener(InspectitConfigChangedEvent.class)
+    @EventListener(PropertySourcesChangedEvent.class)
     public void logInvalidPropertyNames() {
         env.readPropertySources(propertySources -> {
             propertySources.stream()
@@ -60,6 +51,7 @@ public class PropertyNamesValidator {
         try {
             return propertyName != null
                     && propertyName.startsWith("inspectit.")
+                    && !propertyName.startsWith(PluginSettings.PLUGIN_CONFIG_PREFIX)
                     && isInvalidPath(parsedName);
         } catch (Exception e) {
             log.error("Error while checking property existence", e);

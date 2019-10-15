@@ -2,6 +2,7 @@ package rocks.inspectit.ocelot.core.plugins;
 
 import lombok.Getter;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.config.model.plugins.PluginSettings;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.sdk.ConfigurablePlugin;
 
@@ -12,11 +13,6 @@ import java.util.Optional;
  * Container for a running {@link ConfigurablePlugin}.
  */
 class LoadedPlugin {
-
-    /**
-     * The configuration path under which plugin-specific configurations are placed.
-     */
-    public static final String PLUGIN_CONFIG_PREFIX = "inspectit.plugins.";
 
     /**
      * The name of the plugin which is used with PLUGIN_CONFIG_PREFIX to bind the configuration.
@@ -70,7 +66,7 @@ class LoadedPlugin {
     public void updateConfiguration(InspectitEnvironment env) {
         InspectitConfig newInspectitConfig = env.getCurrentConfig();
         if (configClass != null) {
-            Optional<?> configOpt = env.loadAndValidateFromProperties(PLUGIN_CONFIG_PREFIX + name, configClass);
+            Optional<?> configOpt = env.loadAndValidateFromProperties(PluginSettings.PLUGIN_CONFIG_PREFIX + name, configClass);
             //no need to print an error if the Optional is not present, this is already done by loadAndValidateFromProperties
             if (configOpt.isPresent()) {
                 Object newPluginConfig = configOpt.get();

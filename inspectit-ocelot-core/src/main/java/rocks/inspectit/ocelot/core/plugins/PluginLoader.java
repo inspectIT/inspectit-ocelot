@@ -115,8 +115,8 @@ public class PluginLoader {
      * All classes with the {@link OcelotPlugin} annotation are found
      * and {@link #initializePlugin(Class, Properties)} is invoked for each.
      *
-     * @param jar
-     * @param defaultConfigurations
+     * @param jar                   the jar file to load
+     * @param defaultConfigurations the Properties to place the default configurations in
      * @throws MalformedURLException
      */
     private void loadPluginJar(File jar, Properties defaultConfigurations) throws MalformedURLException {
