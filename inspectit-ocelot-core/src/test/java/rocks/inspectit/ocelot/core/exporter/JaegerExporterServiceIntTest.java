@@ -6,9 +6,12 @@ import io.opencensus.trace.samplers.Samplers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import rocks.inspectit.ocelot.core.SpringTestBase;
+import rocks.inspectit.ocelot.core.testutils.OpenCensusUtils;
 
 import java.util.concurrent.TimeUnit;
 
@@ -22,6 +25,8 @@ import static org.awaitility.Awaitility.await;
 @DirtiesContext
 public class JaegerExporterServiceIntTest extends SpringTestBase {
 
+    private static final Logger logger = LoggerFactory.getLogger(JaegerExporterServiceIntTest.class);
+
     public static final int JAEGER_PORT = 14268;
     public static final String JAEGER_PATH = "/api/traces";
     private WireMockServer wireMockServer;
@@ -31,10 +36,9 @@ public class JaegerExporterServiceIntTest extends SpringTestBase {
         wireMockServer = new WireMockServer(options().port(JAEGER_PORT));
         wireMockServer.start();
         configureFor(wireMockServer.port());
-        stubFor(get(urlPathEqualTo(JAEGER_PATH))
-                .willReturn(aResponse()
-                        .withStatus(200)));
 
+        stubFor(post(urlPathEqualTo(JAEGER_PATH))
+                .willReturn(aResponse().withStatus(200)));
     }
 
     @AfterEach
@@ -43,14 +47,19 @@ public class JaegerExporterServiceIntTest extends SpringTestBase {
     }
 
     @Test
-    void verifyTraceSent() {
+    void verifyTraceSent() throws InterruptedException {
         Tracing.getTracer().spanBuilder("jaegerspan")
                 .setSampler(Samplers.alwaysSample())
                 .startSpanAndRun(() -> {
                 });
-        await().atMost(15, TimeUnit.SECONDS).untilAsserted(() -> {
+
+        logger.info("Wait for Jaeger to process the span...");
+        Thread.sleep(1100L);
+
+        OpenCensusUtils.flushSpanExporter();
+
+        await().atMost(15, TimeUnit.SECONDS).pollInterval(1, TimeUnit.SECONDS).untilAsserted(() -> {
             verify(postRequestedFor(urlPathEqualTo(JAEGER_PATH)));
         });
     }
-
 }

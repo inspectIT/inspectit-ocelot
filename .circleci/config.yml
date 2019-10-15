@@ -13,9 +13,9 @@ commands:
           at: ~/inspectit
   build_and_test_agent:
     steps:
-      - run: cd repo && ./gradlew assemble
-      - run: cd repo && ./gradlew test
-      - run: cd repo && ./gradlew systemTest
+      - run: cd repo && ./gradlew assemble --max-workers=2 --no-daemon
+      - run: cd repo && ./gradlew test --max-workers=2 --no-daemon
+      - run: cd repo && ./gradlew systemTest --max-workers=2 --no-daemon
       - store_test_results:
           path: ~/inspectit/repo/inspectit-ocelot-agent/build/test-results
       - store_test_results:
@@ -26,6 +26,8 @@ commands:
           path: ~/inspectit/repo/components/inspectit-ocelot-configurationserver/build/test-results
       - store_test_results:
           path: ~/inspectit/repo/components/inspectit-ocelot-eum-server/build/test-results
+      - store_artifacts:
+          path: /home/circleci/inspectit/repo/heapdump.bin
 
 # ###############################################################
 # Jobs
