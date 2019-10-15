@@ -6,39 +6,53 @@ import { agentConfigActions } from '../../../redux/ducks/agent-config';
 import {DataTable} from 'primereact/datatable';
 import {Column} from 'primereact/column';
 import {Button} from 'primereact/button';
+import {TieredMenu} from 'primereact/tieredmenu';
 
 import {isEqual} from 'lodash';
 import { notificationActions } from '../../../redux/ducks/notification';
 
 const ButtonCell = ({mapping, onEdit, onDelete, onDownload, saved, showInfo}) => {
+  const this_cell = {}
+  var domElement_body = document.getElementsByTagName("BODY")[0]; 
+  const menuItems = [
+    {
+      label: 'Edit',
+      icon: 'pi pi-fw pi-pencil',
+      command: (e) => {
+        this_cell.menu.toggle(e)
+        onEdit(mapping)
+      },
+    },
+    {
+      label: 'Delete',
+      icon: 'pi pi-fw pi-trash',
+      command: (e) => {
+        this_cell.menu.toggle(e)
+        onDelete(mapping)
+      },
+    },
+    {
+      label: 'Configuration',
+      icon: 'pi pi-fw pi-download',
+      command: (e) => {
+        this_cell.menu.toggle(e)
+        if(!saved()){
+          showInfo('Unsaved changes', 'The downloaded configuration file is based on unsaved changes and might not be as expected')
+        }
+        onDownload(mapping.attributes)
+      }
+    }
+  ]
   return(
     <div>
-      <Button 
-        icon='pi pi-pencil' 
-        onClick={() => {onEdit(mapping)}}
-      />
-      <Button 
-        icon='pi pi-trash' 
-        onClick={() => {onDelete(mapping)}}
-        style={{marginTop: "0.25em"}}
-      />
-      <Button 
-        icon='pi pi-download' 
-        onClick={() => {
-          if(!saved()){
-            showInfo('Unsaved changes', 'The downloaded configuration file is based on unsaved changes and might not be as expected')
-          }
-          onDownload(mapping.attributes)}
-        } 
-        tooltip="Click here to download the configuration file for this mapping" 
-        style={{marginTop: "0.25em"}}
-      />
-    </div>
+    <TieredMenu model={menuItems} popup={true} appendTo={domElement_body} ref={el => this_cell.menu = el} />
+    <Button icon="pi pi-bars" onClick={(event) => this_cell.menu.toggle(event)}/>
+  </div>
   )
 }
 
 const SourceCell = ({sources}) => {
-  if(!sources) {return}
+  if(!sources) {return null}
   return (
     <div>
       <style>{` p{ margin: 0.2em; } `}</style>
@@ -56,7 +70,7 @@ const SourceCell = ({sources}) => {
 }
 
 const AttributesCell = ({attributes}) => {
-if(!attributes) {return}
+if(!attributes) {return null}
 
 const keys = Object.keys(attributes);
   return (
