@@ -26,11 +26,9 @@ const AttributesCell = ({ data, onDownload }) => {
                     background: #ddd;
                     border-color: #ddd;
                 }
-                .this:hover :global(.p-button){
-                    
-                }
                 .this{
                     position: relative;
+                    min-height: 1.2rem;
                 }
             `}</style>
             {Object.keys(attributes).sort().map((key) => {
@@ -43,17 +41,16 @@ const AttributesCell = ({ data, onDownload }) => {
 
 const showDownloadBtn = (data, onDownload) => {
     const {attributes, mappingName} = data
-    if(Object.keys(attributes).length <= 0 || mappingName === '<no mapping>'){
-        return
+    if(mappingName !== '<no mapping>'){
+        return (
+            <Button 
+                icon='pi pi-download' 
+                onClick={() => onDownload(attributes.attributes ? convertToObj(attributes.attributes) : attributes)} 
+                tooltip='Click here to download the configuration file for this agent'
+                style={{width: '1.2rem', height: '1.2rem', position: 'absolute', right: 0, top: 0}}
+            />
+        )
     }
-    return (
-        <Button 
-            icon='pi pi-download' 
-            onClick={() => onDownload(attributes.attributes ? convertToObj(attributes.attributes) : attributes)} 
-            tooltip='Click here to download the configuration file for this mapping'
-            style={{width: '1.2rem', height: '1.2rem', position: 'absolute', right: 0, top: 0}}
-        />
-    )
 }
 
 const convertToObj = (string) => {
