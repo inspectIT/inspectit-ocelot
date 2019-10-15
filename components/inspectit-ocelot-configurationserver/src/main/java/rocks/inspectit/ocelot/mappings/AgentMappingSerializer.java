@@ -4,19 +4,26 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
+import rocks.inspectit.ocelot.security.audit.AuditDetail;
+import rocks.inspectit.ocelot.security.audit.EntityAuditLogger;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Utility for reading and writing objects as a Yaml represented string into files.
  */
 @Component
 public class AgentMappingSerializer {
+
+    @Autowired
+    private EntityAuditLogger auditLogger;
 
     private ObjectMapper ymlMapper;
 
@@ -53,5 +60,9 @@ public class AgentMappingSerializer {
      */
     public void writeAgentMappings(List<AgentMapping> agentMappings, File mappingsFile) throws IOException {
         ymlMapper.writeValue(mappingsFile, agentMappings);
+        auditLogger.logEntityCreation(() -> {
+            String mappings = agentMappings.stream().map(AgentMapping::getName).collect(Collectors.joining(","));
+            return new AuditDetail("Agent Mappings", mappings);
+        });
     }
 }

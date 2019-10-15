@@ -13,24 +13,10 @@ public class AuditDetail {
     /**
      * The type of entity to be audited.
      */
-    ENTITY_TYPE entityType;
+    String entityType;
 
     /**
      * The identifier to be logged.
      */
-    String auditIdentifier;
-
-    /**
-     * Specifies entities which should be audited.
-     */
-    @Getter
-    public enum ENTITY_TYPE {
-        USER("A User"), AGENT_MAPPINGS("An Agent-Mapping");
-
-        private final String value;
-
-        ENTITY_TYPE(String value) {
-            this.value = value;
-        }
-    }
+    String entityIdentifier;
 }

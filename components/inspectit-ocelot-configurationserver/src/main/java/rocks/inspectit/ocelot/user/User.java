@@ -7,8 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import rocks.inspectit.ocelot.security.audit.AuditEventListener;
 import rocks.inspectit.ocelot.security.audit.AuditDetail;
+import rocks.inspectit.ocelot.security.audit.AuditEventListener;
 import rocks.inspectit.ocelot.security.audit.Auditable;
 
 import javax.persistence.*;
@@ -59,7 +59,7 @@ public class User implements Auditable {
     @Override
     @JsonIgnore
     public AuditDetail getAuditDetail() {
-        String identifier = "Username: " + getUsername();
-        return new AuditDetail(AuditDetail.ENTITY_TYPE.USER, identifier);
+        String identifier = "Username:" + getUsername();
+        return new AuditDetail("User", identifier);
     }
 }

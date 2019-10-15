@@ -7,10 +7,8 @@ import lombok.Builder;
 import lombok.Singular;
 import lombok.Value;
 import rocks.inspectit.ocelot.security.audit.AuditDetail;
-import rocks.inspectit.ocelot.security.audit.AuditEventListener;
 import rocks.inspectit.ocelot.security.audit.Auditable;
 
-import javax.persistence.EntityListeners;
 import javax.validation.constraints.NotBlank;
 import java.util.Collections;
 import java.util.List;
@@ -21,7 +19,6 @@ import java.util.Map;
  */
 @Value
 @Builder(toBuilder = true)
-@EntityListeners(AuditEventListener.class)
 public class AgentMapping implements Auditable {
 
     /**
@@ -68,7 +65,7 @@ public class AgentMapping implements Auditable {
     @Override
     @JsonIgnore
     public AuditDetail getAuditDetail() {
-        String identifier = "Name: " + name;
-        return new AuditDetail(AuditDetail.ENTITY_TYPE.AGENT_MAPPINGS, identifier);
+        String identifier = "Name:" + name;
+        return new AuditDetail("Agent Mapping", identifier);
     }
 }
