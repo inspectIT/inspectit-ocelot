@@ -16,7 +16,7 @@ class DeleteDialog extends React.Component {
     render() {
         return (
             <Dialog
-                header={"Delete mapping"}
+                header={"Delete Mapping"}
                 modal={true}
                 visible={this.props.visible}
                 onHide={this.props.onHide}

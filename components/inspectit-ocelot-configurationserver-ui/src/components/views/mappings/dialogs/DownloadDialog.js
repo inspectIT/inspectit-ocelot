@@ -57,7 +57,7 @@ class DownloadDialog extends React.Component {
     render() {
         return (
             <Dialog
-                header={'Download configuration file'}
+                header={'Download Configuration File'}
                 modal={true}
                 visible={this.props.visible}
                 onHide={this.props.onHide}
@@ -69,6 +69,10 @@ class DownloadDialog extends React.Component {
                     </div>
                 )}
             >
+                <p>
+                    Enter key/value pairs to download the correlating agent configuration. 
+                    <br/> You will get a different result depending on the mapping that fits your input.
+                </p>
                 <EditAttributes 
                     onChValueOrAddAttribute={this.handleChangeValueOrAddAttribute}
                     onChangeAttributeKey={this.handleChangeAttributeKey}
