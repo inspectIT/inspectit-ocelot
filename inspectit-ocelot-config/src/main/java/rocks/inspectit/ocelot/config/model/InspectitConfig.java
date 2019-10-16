@@ -8,6 +8,7 @@ import rocks.inspectit.ocelot.config.model.exporters.ExportersSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.ocelot.config.model.logging.LoggingSettings;
 import rocks.inspectit.ocelot.config.model.metrics.MetricsSettings;
+import rocks.inspectit.ocelot.config.model.plugins.PluginSettings;
 import rocks.inspectit.ocelot.config.model.selfmonitoring.SelfMonitoringSettings;
 import rocks.inspectit.ocelot.config.model.tags.TagsSettings;
 import rocks.inspectit.ocelot.config.model.tracing.TracingSettings;
@@ -86,6 +87,9 @@ public class InspectitConfig {
 
     @Valid
     private InstrumentationSettings instrumentation;
+
+    @Valid
+    private PluginSettings plugins = new PluginSettings();
 
     /**
      * Defines how many threads inspectIT may start for its internal tasks.
