@@ -7,12 +7,13 @@ import {DataTable} from 'primereact/datatable';
 import {Column} from 'primereact/column';
 import {Button} from 'primereact/button';
 import {TieredMenu} from 'primereact/tieredmenu';
+import {OverlayPanel} from 'primereact/overlaypanel';
 
 import { notificationActions } from '../../../redux/ducks/notification';
 
 const ButtonCell = ({mapping, onEdit, onDelete, onDownload, saved, showInfo}) => {
   const this_cell = {}
-  var domElement_body = document.getElementsByTagName("BODY")[0]; 
+  const domElement_body = document.getElementsByTagName("BODY")[0]; 
   const menuItems = [
     {
       label: 'Edit',
@@ -52,16 +53,26 @@ const ButtonCell = ({mapping, onEdit, onDelete, onDownload, saved, showInfo}) =>
 
 const SourceCell = ({sources}) => {
   if(!sources) {return null}
+
+  const this_cell = {}
+  const domElement_body = document.getElementsByTagName("BODY")[0]; 
+
   return (
     <div>
       <style>{` p{ margin: 0.2em; } `}</style>
       {
         sources.length <= 5 ? 
         sources.map(source => ( <p>{source}</p> )) :
-        <div>
+        <div 
+          onMouseEnter={e => this_cell.op.show(e)} 
+          onMouseLeave={e => this_cell.op.hide(e)}
+        >
           <p>{sources[0]}</p><p>{sources[1]}</p>
           <p>{sources[2]}</p><p>{sources[3]}</p>
           <p>{sources[4]}</p><p>...</p>
+          <OverlayPanel appendTo={domElement_body} ref={(el) => this_cell.op = el}>
+            {sources.map(source => ( <p>{source}</p> ))}
+          </OverlayPanel>
         </div>
       }
     </div>
@@ -71,6 +82,9 @@ const SourceCell = ({sources}) => {
 const AttributesCell = ({attributes}) => {
 if(!attributes) {return null}
 
+const this_cell = {}
+const domElement_body = document.getElementsByTagName("BODY")[0]; 
+
 const keys = Object.keys(attributes);
   return (
     <div>
@@ -78,13 +92,19 @@ const keys = Object.keys(attributes);
       {
         keys && keys.length <= 5 ?
         keys.map(key => ( <p>{`${key}: ${attributes[key]}`}</p> )) :
-        <div>
+        <div 
+          onMouseEnter={e => this_cell.op.show(e)} 
+          onMouseLeave={e => this_cell.op.hide(e)}
+        >
           <p>{`${keys[0]}: ${attributes[keys[0]]}`}</p>
           <p>{`${keys[1]}: ${attributes[keys[1]]}`}</p>
           <p>{`${keys[2]}: ${attributes[keys[2]]}`}</p>
           <p>{`${keys[3]}: ${attributes[keys[3]]}`}</p>
           <p>{`${keys[4]}: ${attributes[keys[4]]}`}</p>
           <p>...</p>
+          <OverlayPanel appendTo={domElement_body} ref={(el) => this_cell.op = el}>
+            {keys.map(key => ( <p>{`${key}: ${attributes[key]}`}</p> ))}
+          </OverlayPanel>
         </div>
       }
     </div>
