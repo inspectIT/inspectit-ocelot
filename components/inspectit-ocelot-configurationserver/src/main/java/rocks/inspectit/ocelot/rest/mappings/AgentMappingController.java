@@ -124,10 +124,6 @@ public class AgentMappingController extends AbstractBaseController {
         }
 
         auditLogger.logEntityCreation(agentMapping);
-        Map<String, String> sampleMap = new HashMap<>(2);
-        sampleMap.put("Abhishek", "Bhuskute");
-        sampleMap.put("Vrushali", "Bhuskute");
-        log.info(sampleMap.toString());
         return ResponseEntity.ok().build();
     }
 }
