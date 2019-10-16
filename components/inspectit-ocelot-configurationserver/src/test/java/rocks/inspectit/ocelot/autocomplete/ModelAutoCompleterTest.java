@@ -56,6 +56,7 @@ public class ModelAutoCompleterTest {
         void pastList() {
             List<String> input = Arrays.asList("inspectit.");
             ArrayList<String> output = new ArrayList<>(Arrays.asList("config",
+                    "env",
                     "exporters",
                     "instrumentation",
                     "logging",
@@ -67,7 +68,7 @@ public class ModelAutoCompleterTest {
                     "thread-pool-size",
                     "tracing"));
 
-            assertThat(completer.getSuggestions(input)).isEqualTo(output);
+            assertThat(completer.getSuggestions(input)).containsAll(output);
         }
 
         @Test
@@ -108,6 +109,7 @@ public class ModelAutoCompleterTest {
         @Test
         void getPropertiesInspectit() {
             List<String> output = Arrays.asList("config",
+                    "env",
                     "exporters",
                     "instrumentation",
                     "logging",
@@ -120,7 +122,7 @@ public class ModelAutoCompleterTest {
 
                     "tracing");
 
-            assertThat(completer.getProperties(InspectitConfig.class)).isEqualTo(output);
+            assertThat(completer.getProperties(InspectitConfig.class)).containsAll(output);
         }
     }
 }

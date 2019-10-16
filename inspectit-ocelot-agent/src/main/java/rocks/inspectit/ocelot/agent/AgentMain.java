@@ -94,6 +94,8 @@ public class AgentMain {
 
         Instances.BOOTSTRAP_JAR_URL = bootstrapJar.toUri().toURL();
 
+        Instances.AGENT_JAR_URL = AgentMain.class.getProtectionDomain().getCodeSource().getLocation();
+
         Path coreJar = copyResourceToTempJarFile(INSPECTIT_CORE_JAR_PATH);
         InspectITClassLoader icl = new InspectITClassLoader(new URL[]{coreJar.toUri().toURL()});
 
