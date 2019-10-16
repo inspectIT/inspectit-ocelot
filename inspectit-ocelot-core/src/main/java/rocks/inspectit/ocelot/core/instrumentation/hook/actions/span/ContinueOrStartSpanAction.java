@@ -102,23 +102,25 @@ public class ContinueOrStartSpanAction implements IHookAction {
                 builder = Tracing.getTracer().spanBuilder(spanName);
             }
             builder.setSpanKind(spanKind);
-            configureSampler(builder, ctx);
+            Sampler sampler = getSampler(ctx);
+            if (sampler != null) {
+                builder.setSampler(sampler);
+            }
 
             ctx.enterSpan(builder.startSpan());
         }
     }
 
     /**
-     * If configured, adds a span-scoped sampler to the given spanBuilder.
+     * If configured, returns a span-scoped sampler to set for the newly created span.
      * This can be either {@link #staticSampler} if a constant sampling probability was specified,
      * or a probability read from {@link InspectitContext} for a given data-key.
-     * If neither is specified, no span-scoped sampler will be attached.
+     * If neither is specified, null wil lbe returned.
      *
-     * @param spanBuilder the spanBuilder
-     * @param context     the context used to query a dynamic probability
+     * @param context the context used to query a dynamic probability
      */
     @VisibleForTesting
-    void configureSampler(SpanBuilder spanBuilder, InspectitContext context) {
+    Sampler getSampler(InspectitContext context) {
         Sampler sampler = staticSampler;
         if (dynamicSampleProbabilityKey != null) {
             Object probability = context.getData(dynamicSampleProbabilityKey);
@@ -126,9 +128,7 @@ public class ContinueOrStartSpanAction implements IHookAction {
                 sampler = Samplers.probabilitySampler(Math.min(1, Math.max(0, ((Number) probability).doubleValue())));
             }
         }
-        if (sampler != null) {
-            spanBuilder.setSampler(sampler);
-        }
+        return sampler;
     }
 
     private String getSpanName(InspectitContextImpl inspectitContext, MethodReflectionInformation methodInfo) {
