@@ -6,7 +6,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Component
@@ -29,8 +28,7 @@ public class EntityAuditLogger {
 
     private void logEvent(AuditDetail detail, String eventDescription) {
         String principal = getPrincipalUsername();
-        log.info("{}({}) {} by {} on {}", detail.getEntityType(), detail.getEntityIdentifier(), eventDescription, principal, LocalDateTime
-                .now());
+        log.info("{}({}) {} by {}", detail.getEntityType(), detail.getEntityIdentifier(), eventDescription, principal);
     }
 
     private String getPrincipalUsername() {

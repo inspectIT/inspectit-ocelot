@@ -1,13 +1,13 @@
 package rocks.inspectit.ocelot.security.audit;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Value;
 
 /**
  * This provides fields for auditing useful entity information. Fields can be added, as and when required.
  */
-@Getter
 @AllArgsConstructor
+@Value
 public class AuditDetail {
 
     /**

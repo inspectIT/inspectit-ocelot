@@ -42,7 +42,7 @@ public class AgentController extends AbstractBaseController {
     @ApiOperation(value = "Fetch the Agent Configuration", notes = "Reads the configuration for the given agent and returns it as a yaml string")
     @GetMapping(value = "agent/configuration", produces = "text/plain")
     public ResponseEntity<String> fetchConfiguration(@ApiParam("The agent attributes used to select the correct mapping") @RequestParam Map<String, String> attributes) throws IOException {
-        log.debug("Fetching the Agent Configuration.");
+        log.debug("Fetching the agent configuration for agent ({})", attributes.toString());
         AgentConfiguration configuration = configManager.getConfiguration(attributes);
         statusManager.notifyAgentConfigurationFetched(attributes, configuration);
         if (configuration == null) {

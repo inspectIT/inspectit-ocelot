@@ -8,8 +8,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
-import rocks.inspectit.ocelot.security.audit.AuditDetail;
-import rocks.inspectit.ocelot.security.audit.EntityAuditLogger;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
@@ -46,9 +44,6 @@ public class AgentMappingManager {
      */
     @Autowired
     private AgentMappingSerializer serializer;
-
-    @Autowired
-    private EntityAuditLogger auditLogger;
 
     /**
      * The agent mappings Yaml file.
@@ -170,7 +165,6 @@ public class AgentMappingManager {
             writeAgentMappingsToFile(newAgentMappings);
             agentMappings = newAgentMappings;
             fireMappingsChangeEvent();
-            auditLogger.logEntityDeletion(() -> new AuditDetail("Agent Mapping", "Name:" + mappingName));
         }
         return removed;
     }
