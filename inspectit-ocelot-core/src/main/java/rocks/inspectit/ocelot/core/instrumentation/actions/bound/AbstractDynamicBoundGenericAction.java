@@ -4,13 +4,13 @@ import lombok.val;
 import org.apache.commons.lang3.tuple.Pair;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.IGenericAction;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.GenericActionConfig;
+import rocks.inspectit.ocelot.core.instrumentation.hook.VariableAccessor;
 import rocks.inspectit.ocelot.core.instrumentation.injection.InjectedClass;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
 
 /**
@@ -33,11 +33,11 @@ abstract class AbstractDynamicBoundGenericAction extends BoundGenericAction {
      * Therefore the index corresponds to the position in the additionalArgumetns array with which the
      * {@link IGenericAction#execute(Object[], Object, Object, Throwable, Object[])} function is called.
      */
-    private Pair<Integer, Function<ExecutionContext, Object>>[] dynamicAssignments;
+    private Pair<Integer, VariableAccessor>[] dynamicAssignments;
 
     AbstractDynamicBoundGenericAction(String callName, GenericActionConfig actionConfig,
                                       InjectedClass<?> action, Map<String, Object> constantAssignments,
-                                      Map<String, Function<ExecutionContext, Object>> dynamicAssignments) {
+                                      Map<String, VariableAccessor> dynamicAssignments) {
         super(callName, actionConfig, action);
 
         // the sorted additionalArgumentTypes map defines the number and the order of the additional input
@@ -46,7 +46,7 @@ abstract class AbstractDynamicBoundGenericAction extends BoundGenericAction {
         int numArgs = actionConfig.getAdditionalArgumentTypes().size();
         argumentsTemplate = new Object[numArgs];
 
-        List<Pair<Integer, Function<ExecutionContext, Object>>> dynamicAssignmentsWithIndices = new ArrayList<>();
+        List<Pair<Integer, VariableAccessor>> dynamicAssignmentsWithIndices = new ArrayList<>();
 
         //we now loop over the additionalArgumentTypes map and remember the index of the corresponding parameter
         //If the parameter is defined through a constant assignment we simply place it in the argumentsTemplate at the
@@ -73,7 +73,7 @@ abstract class AbstractDynamicBoundGenericAction extends BoundGenericAction {
         Object[] args = Arrays.copyOf(argumentsTemplate, argumentsTemplate.length);
 
         for (val assignment : dynamicAssignments) {
-            args[assignment.getLeft()] = assignment.getRight().apply(context);
+            args[assignment.getLeft()] = assignment.getRight().get(context);
         }
         return args;
     }

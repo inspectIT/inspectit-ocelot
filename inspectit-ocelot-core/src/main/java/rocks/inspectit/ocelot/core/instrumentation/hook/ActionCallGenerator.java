@@ -3,9 +3,7 @@ package rocks.inspectit.ocelot.core.instrumentation.hook;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import rocks.inspectit.ocelot.bootstrap.exposed.ObjectAttachments;
 import rocks.inspectit.ocelot.config.model.instrumentation.actions.ActionCallSettings;
-import rocks.inspectit.ocelot.config.model.instrumentation.actions.GenericActionSettings;
 import rocks.inspectit.ocelot.config.utils.ConfigUtils;
 import rocks.inspectit.ocelot.core.instrumentation.actions.GenericActionGenerator;
 import rocks.inspectit.ocelot.core.instrumentation.actions.bound.BoundGenericAction;
@@ -16,8 +14,8 @@ import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
-import java.util.function.Function;
 
 @Component
 public class ActionCallGenerator {
@@ -26,7 +24,7 @@ public class ActionCallGenerator {
     private GenericActionGenerator genericActionGenerator;
 
     @Autowired
-    private ObjectAttachments objectAttachments;
+    private VariableAccess variableAccess;
 
     /**
      * Generates a action and binds its arguments.
@@ -45,7 +43,7 @@ public class ActionCallGenerator {
 
         IHookAction actionCall = BoundGenericAction.bind(actionCallConfig.getName(), actionConfig, injectedActionClass, constantAssignments, dynamicAssignments);
 
-        return ConditionalHookAction.wrapWithConditionChecks(callSettings, actionCall);
+        return ConditionalHookAction.wrapWithConditionChecks(callSettings, actionCall, variableAccess);
     }
 
     /**
@@ -70,11 +68,12 @@ public class ActionCallGenerator {
                     Object convertedValue = callSettings.getConstantInputAsType(argName, expectedValueType);
                     constantAssignments.put(argName, convertedValue);
                 });
-        if (actionArgumentTypes.containsKey(GenericActionSettings.METHOD_NAME_VARIABLE)) {
-            constantAssignments.put(GenericActionSettings.METHOD_NAME_VARIABLE, methodInfo.getName());
-        }
-        if (actionArgumentTypes.containsKey(GenericActionSettings.OBJECT_ATTACHMENTS_VARIABLE)) {
-            constantAssignments.put(GenericActionSettings.OBJECT_ATTACHMENTS_VARIABLE, objectAttachments);
+
+        for (String variable : actionArgumentTypes.keySet()) {
+            Object constantSpecialValue = variableAccess.getConstantSpecialVariable(variable, methodInfo);
+            if (constantSpecialValue != null) {
+                constantAssignments.put(variable, constantSpecialValue);
+            }
         }
         return constantAssignments;
     }
@@ -88,21 +87,19 @@ public class ActionCallGenerator {
      * @return a map mapping the parameter names to functions which are evaluated during
      * {@link IHookAction#execute(IHookAction.ExecutionContext)}  to find the concrete value for the parameter.
      */
-    private Map<String, Function<IHookAction.ExecutionContext, Object>> getDynamicInputAssignments(MethodReflectionInformation methodInfo, ActionCallConfig actionCallConfig) {
-        Map<String, Function<IHookAction.ExecutionContext, Object>> dynamicAssignments = new HashMap<>();
+    private Map<String, VariableAccessor> getDynamicInputAssignments(MethodReflectionInformation methodInfo, ActionCallConfig actionCallConfig) {
+        Map<String, VariableAccessor> dynamicAssignments = new HashMap<>();
         actionCallConfig.getCallSettings().getDataInput()
                 .forEach((argName, dataName) ->
-                        dynamicAssignments.put(argName, (ctx) -> ctx.getInspectitContext().getData(dataName))
+                        dynamicAssignments.put(argName, variableAccess.getVariableAccessor(dataName))
                 );
-        val additionalInputVars = actionCallConfig.getAction().getAdditionalArgumentTypes().keySet();
-        if (additionalInputVars.contains(GenericActionSettings.METHOD_PARAMETER_TYPES_VARIABLE)) {
-            dynamicAssignments.put(GenericActionSettings.METHOD_PARAMETER_TYPES_VARIABLE, (ex) -> methodInfo.getParameterTypes());
-        }
-        if (additionalInputVars.contains(GenericActionSettings.CLASS_VARIABLE)) {
-            dynamicAssignments.put(GenericActionSettings.CLASS_VARIABLE, (ex) -> methodInfo.getDeclaringClass());
-        }
-        if (additionalInputVars.contains(GenericActionSettings.CONTEXT_VARIABLE)) {
-            dynamicAssignments.put(GenericActionSettings.CONTEXT_VARIABLE, IHookAction.ExecutionContext::getInspectitContext);
+        Set<String> additionalInputVars = actionCallConfig.getAction().getAdditionalArgumentTypes().keySet();
+        for (String variable : additionalInputVars) {
+            Object constantSpecialValue = variableAccess.getConstantSpecialVariable(variable, methodInfo);
+            VariableAccessor dynamicSpecialValue = variableAccess.getSpecialVariableAccessor(variable);
+            if (constantSpecialValue == null && dynamicSpecialValue != null) {
+                dynamicAssignments.put(variable, dynamicSpecialValue);
+            }
         }
         return dynamicAssignments;
     }

@@ -6,9 +6,11 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
-import rocks.inspectit.ocelot.bootstrap.exposed.InspectitContext;
+import rocks.inspectit.ocelot.core.instrumentation.hook.VariableAccessor;
+import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -20,7 +22,7 @@ public class ContinueOrStartSpanActionTest {
     public class ConfigureSampler {
 
         @Mock
-        InspectitContext context;
+        IHookAction.ExecutionContext context;
 
         @Test
         void noSampler() {
@@ -48,31 +50,33 @@ public class ContinueOrStartSpanActionTest {
 
         @Test
         void dynamicNonNullProbability() {
-            doReturn(0.42).when(context).getData("my_key");
+            VariableAccessor dynamicProbability = Mockito.mock(VariableAccessor.class);
+            when(dynamicProbability.get(any())).thenReturn(0.42);
 
             Sampler result = ContinueOrStartSpanAction.builder()
-                    .dynamicSampleProbabilityKey("my_key")
+                    .dynamicSampleProbability(dynamicProbability)
                     .build()
                     .getSampler(context);
 
             Object configuredProbability = ReflectionTestUtils.invokeMethod(result, "getProbability");
             assertThat((Double) configuredProbability).isEqualTo(0.42);
-            verify(context).getData("my_key");
+            verify(dynamicProbability).get(any());
             verifyNoMoreInteractions(context);
         }
 
 
         @Test
         void dynamicNullProbability() {
-            doReturn(null).when(context).getData("my_key");
+            VariableAccessor dynamicProbability = Mockito.mock(VariableAccessor.class);
+            when(dynamicProbability.get(any())).thenReturn(null);
 
             Sampler result = ContinueOrStartSpanAction.builder()
-                    .dynamicSampleProbabilityKey("my_key")
+                    .dynamicSampleProbability(dynamicProbability)
                     .build()
                     .getSampler(context);
 
             assertThat(result).isNull();
-            verify(context).getData("my_key");
+            verify(dynamicProbability).get(any());
             verifyNoMoreInteractions(context);
         }
 

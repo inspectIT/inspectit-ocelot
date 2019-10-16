@@ -9,7 +9,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import rocks.inspectit.ocelot.core.instrumentation.hook.VariableAccessor;
 import rocks.inspectit.ocelot.core.metrics.MeasuresAndViewsManager;
 
 import java.util.Collections;
@@ -43,17 +45,18 @@ public class MetricsRecorderTest {
 
         @Test
         void verifyNullValueDataMetricIgnored() {
+            VariableAccessor variableAccess = Mockito.mock(VariableAccessor.class);
 
-            when(executionContext.getInspectitContext().getData(eq("my_data"))).thenReturn(null);
+            when(variableAccess.get(any())).thenReturn(null);
 
-            MetricsRecorder rec = new MetricsRecorder(Collections.emptyMap(), Maps.newHashMap("my_metric", "my_data"), metricsManager, statsRecorder);
+            MetricsRecorder rec = new MetricsRecorder(Collections.emptyMap(), Maps.newHashMap("my_metric", variableAccess), metricsManager, statsRecorder);
 
             rec.execute(executionContext);
 
             verify(measureMap, times(1)).record();
             verify(metricsManager, never()).tryRecordingMeasurement(eq("my_metric"), same(measureMap), any(Number.class));
 
-            when(executionContext.getInspectitContext().getData(eq("my_data"))).thenReturn(100L);
+            when(variableAccess.get(any())).thenReturn(100L);
 
             rec.execute(executionContext);
 
@@ -66,33 +69,27 @@ public class MetricsRecorderTest {
         @Test
         void verifyInvalidDataTypeHandled() {
 
-            when(executionContext.getInspectitContext().getData(any())).thenAnswer(invoc -> {
-                String dataKey = invoc.getArgument(0);
-                if ("my_data1".equals(dataKey)) {
-                    return 100.0;
-                } else if ("my_data2".equals(dataKey)) {
-                    return "notanumber";
-                } else {
-                    return null;
-                }
-            });
+            VariableAccessor dataA = Mockito.mock(VariableAccessor.class);
+            VariableAccessor dataB = Mockito.mock(VariableAccessor.class);
+            when(dataA.get(any())).thenReturn(100.0);
+            when(dataB.get(any())).thenReturn("notanumber");
 
-            HashMap<String, String> metricsToData = new HashMap<>();
-            metricsToData.put("my_metric1", "my_data1");
-            metricsToData.put("my_metric2", "my_data2");
+            HashMap<String, VariableAccessor> metricsToData = new HashMap<>();
+            metricsToData.put("my_metric1", dataA);
+            metricsToData.put("my_metric2", dataB);
 
             MetricsRecorder rec = new MetricsRecorder(Collections.emptyMap(), metricsToData, metricsManager, statsRecorder);
 
             rec.execute(executionContext);
 
-            verify(executionContext.getInspectitContext(), times(1)).getData(eq("my_data2"));
+            verify(dataB).get(any());
             verify(measureMap, times(1)).record();
             verify(metricsManager, times(1)).tryRecordingMeasurement(any(String.class), same(measureMap), any(Number.class));
             verify(metricsManager, times(1)).tryRecordingMeasurement(eq("my_metric1"), same(measureMap), eq((Number) 100.0d));
 
             rec.execute(executionContext);
 
-            verify(executionContext.getInspectitContext(), times(1)).getData(eq("my_data2"));
+            verify(dataB).get(any());
             verify(measureMap, times(2)).record();
             verify(metricsManager, times(2)).tryRecordingMeasurement(any(String.class), same(measureMap), any(Number.class));
             verify(metricsManager, times(2)).tryRecordingMeasurement(eq("my_metric1"), same(measureMap), eq((Number) 100.0d));
