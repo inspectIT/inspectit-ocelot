@@ -1,0 +1,4 @@
+inspectit:
+  plugins:
+    my-plugin:
+      foo: bar
