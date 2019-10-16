@@ -115,7 +115,7 @@ public class ContinueOrStartSpanAction implements IHookAction {
      * If configured, returns a span-scoped sampler to set for the newly created span.
      * This can be either {@link #staticSampler} if a constant sampling probability was specified,
      * or a probability read from {@link InspectitContext} for a given data-key.
-     * If neither is specified, null wil lbe returned.
+     * If neither is specified, null will be returned.
      *
      * @param context the context used to query a dynamic probability
      */
