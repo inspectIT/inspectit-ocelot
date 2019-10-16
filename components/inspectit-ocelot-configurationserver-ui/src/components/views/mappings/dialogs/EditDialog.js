@@ -43,39 +43,38 @@ class EditMappingDialog extends React.Component {
 	handleUpdateSources = (newSources) => this.setState({ mapping: {...this.state.mapping, sources: newSources} });
 
 	handleChangeAttributeKey = (oldKey, newKey) => {
-		if (oldKey === newKey){return}
+		if (oldKey === newKey){
+			return
+		}
+
 		const {mapping} = this.state;
-
-    const oldKeys = Object.keys(mapping.attributes);
-		let newAttributes = {};
-
-		oldKeys.forEach(key => {
-			if(oldKey === key && !newAttributes[newKey]){
-				newAttributes[newKey] = mapping.attributes[key];
-			} else if (!(oldKey === key && newAttributes[keyValue])){
-				newAttributes[key] = mapping.attributes[key];
+    let newAttributes = {}
+		if(!oldKey){
+			newAttributes = cloneDeep(mapping.attributes)
+			if(!newAttributes){
+				newAttributes = {}
 			}
-		})
+			newAttributes[newKey] = '.*'
+		} else {
+				const oldKeys = Object.keys(mapping.attributes);
+				oldKeys.forEach(key => {
+						if(oldKey === key && !newAttributes[newKey]){
+								newAttributes[newKey] = mapping.attributes[key]
+						} else if(oldKey !== key && !newAttributes[oldKey]){
+								newAttributes[key] = mapping.attributes[key]
+						}
+				})
+		}
+
 		this.setState({ mapping: {...mapping, attributes: newAttributes} });
 	}
 	
 	handleChangeValueOrAddAttribute = (key, value) => this.setState({ mapping: {...this.state.mapping, attributes: {...this.state.mapping.attributes, [key]: value }} });
 
-	handleDeleteAttribute = (attributes) => {
-		const {mapping} = this.state
-    let newAttributes = {};
-    Object.keys(mapping.attributes).forEach(key => {
-      newAttributes[key] = mapping.attributes[key];
-    })
-
-    attributes.forEach(element => {
-      const key =  Object.keys(element)[0];
-      const value = element[Object.keys(element)[0]];
-      if(newAttributes[key] && newAttributes[key] === value){
-        delete newAttributes[key];
-      }
-    })
-    this.setState({ mapping: {...mapping, attributes: newAttributes} });
+	handleDeleteAttribute = (attribute) => {
+		let newAttributes = cloneDeep(this.state.mapping.attributes)
+		delete newAttributes[Object.keys(attribute)[0]]
+		this.setState({ mapping: {...mapping, attributes: newAttributes} });
   }
 
   render() {

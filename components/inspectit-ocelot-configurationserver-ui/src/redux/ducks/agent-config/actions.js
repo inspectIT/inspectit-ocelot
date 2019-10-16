@@ -26,7 +26,7 @@ export const fetchConfigurationFile = (attributes) => {
 				data = yaml.safeDump(yaml.safeLoad(res.data))
 				fileName = fileName + '.yml'
 			} catch (a) {
-				dispatch(notificationActions.showInfoMessage("parsing to YAML failed", "The file will be downloaded as .txt"));
+				dispatch(notificationActions.showInfoMessage("Parsing to YAML Failed", "The file will be downloaded as .txt"));
 				data = res.data
 				fileName = fileName + '.txt'
 			} finally {
@@ -42,7 +42,7 @@ export const fetchConfigurationFile = (attributes) => {
 			}
 		})
 		.catch(() => {
-			dispatch(notificationActions.showInfoMessage("Downloading config file failed", "No file could have been retrieved. There might not be a configuration for the given attributes"));
+			dispatch(notificationActions.showInfoMessage("Downloading Config File Failed", "No file could have been retrieved. There might not be a configuration for the given attributes"));
 		})
 	}
 }

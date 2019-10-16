@@ -11,7 +11,7 @@ import {OverlayPanel} from 'primereact/overlaypanel';
 
 import { notificationActions } from '../../../redux/ducks/notification';
 
-const ButtonCell = ({mapping, onEdit, onDelete, onDownload, saved, showInfo}) => {
+const ButtonCell = ({mapping, onEdit, onDelete, onDownload}) => {
   const this_cell = {}
   const domElement_body = document.getElementsByTagName("BODY")[0]; 
   const menuItems = [
@@ -36,9 +36,6 @@ const ButtonCell = ({mapping, onEdit, onDelete, onDownload, saved, showInfo}) =>
       icon: 'pi pi-fw pi-download',
       command: (e) => {
         this_cell.menu.toggle(e)
-        if(!saved()){
-          showInfo('Unsaved changes', 'The downloaded configuration file is based on unsaved changes and might not be as expected')
-        }
         onDownload(mapping.attributes)
       }
     }
@@ -121,7 +118,7 @@ class MappingsTable extends React.Component{
         <Column columnKey="name" field="name" header="Name"/>
         <Column columnKey="sources" field="sources" body={(data) => (<SourceCell sources={data.sources}/>)} header="Source" />
         <Column columnKey="attributes" field="attributes" body={(data) => (<AttributesCell attributes={data.attributes} />)} header="Attributes" />
-        <Column columnKey="buttons" field="" body={(data) => (<ButtonCell mapping={data} onEdit={this.props.onEditMapping} onDelete={this.props.onDeleteMapping} onDownload={this.props.downloadConfigFile} saved={this.areMappingsChanged} showInfo={this.props.showInfoMessage} />)} header="" style={{width: '4em'}} />
+        <Column columnKey="buttons" field="" body={(data) => (<ButtonCell mapping={data} onEdit={this.props.onEditMapping} onDelete={this.props.onDeleteMapping} onDownload={this.props.downloadConfigFile} />)} style={{width: '4em'}} />
       </DataTable>
     )
   }
@@ -175,7 +172,6 @@ const mapDispatchToProps = {
   fetchMappings: mappingsActions.fetchMappings,
   putMappings: mappingsActions.putMappings,
   downloadConfigFile: agentConfigActions.fetchConfigurationFile,
-  showInfoMessage: notificationActions.showInfoMessage
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(MappingsTable)

@@ -7,6 +7,8 @@ import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import EditAttributes from '../editComponents/EditAttributes';
 
+import {cloneDeep} from 'lodash';
+
 /**
  * Dialog for downloading a configuration file.
  */
@@ -15,43 +17,42 @@ class DownloadDialog extends React.Component {
     downloadButton = React.createRef();
 
     state = {
-        attributes : null
+        attributes : {}
     }
 
     handleChangeAttributeKey = (oldKey, newKey) => {
-		if (oldKey === newKey){return}
-		const {attributes} = this.state;
-
-        const oldKeys = Object.keys(attributes);
-		let newAttributes = {};
-
-		oldKeys.forEach(key => {
-			if(oldKey === key && !newAttributes[newKey]){
-				newAttributes[newKey] = attributes[key];
-			} else if (!(oldKey === key && newAttributes[keyValue])){
-				newAttributes[key] = attributes[key];
+		if (oldKey === newKey){
+            return
+        }
+        
+        const {attributes} = this.state;
+        let newAttributes = {}
+        if(!oldKey){
+            newAttributes = cloneDeep(attributes)
+            if(!newAttributes){
+				newAttributes = {}
 			}
-		})
-		this.setState({ attributes: newAttributes });
+            newAttributes[newKey] = 'value'
+        } else {
+            const oldKeys = Object.keys(attributes);
+            oldKeys.forEach(key => {
+                if(oldKey === key && !newAttributes[newKey]){
+                    newAttributes[newKey] = attributes[key]
+                } else if(oldKey !== key && !newAttributes[oldKey]){
+                    newAttributes[key] = attributes[key]
+                }
+            })
+        }
+
+        this.setState({ attributes: newAttributes });
 	}
 	
 	handleChangeValueOrAddAttribute = (key, value) => this.setState({ attributes: {...this.state.attributes, [key]: value} });
 
-	handleDeleteAttribute = (deletable) => {
-        const {attributes} = this.state
-        let newAttributes = {};
-        Object.keys(attributes).forEach(key => {
-            newAttributes[key] = attributes[key];
-        })
-
-        deletable.forEach(element => {
-            const key =  Object.keys(element)[0];
-            const value = element[Object.keys(element)[0]];
-            if(newAttributes[key] && newAttributes[key] === value){
-                delete newAttributes[key];
-            }                                                       
-        })
-        this.setState({ attributes: newAttributes });
+	handleDeleteAttribute = (attribute) => {
+        let newAttributes = cloneDeep(this.state.attributes)
+        delete newAttributes[Object.keys(attribute)[0]]
+        this.setState({attributes: newAttributes})
     }
 
     render() {
