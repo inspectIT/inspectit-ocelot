@@ -1,10 +1,12 @@
 package rocks.inspectit.ocelot.core.instrumentation.hook;
 
 import io.opencensus.stats.StatsRecorder;
+import io.opencensus.trace.Sampler;
 import io.opencensus.trace.samplers.Samplers;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import net.bytebuddy.description.method.MethodDescription;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.RuleTracingSettings;
@@ -125,19 +127,15 @@ public class MethodHookGenerator {
     }
 
     private void configureSampling(RuleTracingSettings tracing, ContinueOrStartSpanAction.ContinueOrStartSpanActionBuilder actionBuilder) {
-        // tracing.getSampleProbability() never returns null here because the
-        // InstrumentationRuleResolver resolves null to the default sample probability
-        try {
-            double fixedProbability = Double.parseDouble(tracing.getSampleProbability());
-            if (fixedProbability <= 0) {
-                actionBuilder.staticSampler(Samplers.neverSample());
-            } else if (fixedProbability >= 1) {
-                actionBuilder.staticSampler(Samplers.alwaysSample());
-            } else {
-                actionBuilder.staticSampler(Samplers.probabilitySampler(fixedProbability));
+        String sampleProbability = tracing.getSampleProbability();
+        if (!StringUtils.isBlank(sampleProbability)) {
+            try {
+                double constantProbability = Double.parseDouble(sampleProbability);
+                Sampler sampler = Samplers.probabilitySampler(Math.max(0.0, Math.min(1.0, constantProbability)));
+                actionBuilder.staticSampler(sampler);
+            } catch (NumberFormatException e) {
+                actionBuilder.dynamicSampleProbabilityKey(sampleProbability);
             }
-        } catch (NumberFormatException e) {
-            actionBuilder.dynamicSampleProbabilityKey(tracing.getSampleProbability());
         }
     }
 
