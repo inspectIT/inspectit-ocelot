@@ -34,7 +34,7 @@ class LoadedPlugin {
      * Stores the last config with which plugin.update was called on {@link #plugin}.
      * This is used to ensure that update is only called again if anything has changed.
      */
-    private InspectitConfig lastInspectitConfig;
+    private InspectitConfig currentInspectitConfig;
 
     /**
      * Stores the last config with which plugin.update was called on {@link #plugin}.
@@ -42,13 +42,13 @@ class LoadedPlugin {
      * This object is an Instance of the plugins specific configuration,
      * parsed from inspectit.plugin.{pluginname}.
      */
-    private Object lastPluginConfig;
+    private Object currentPluginConfig;
 
     /**
      * True, if the plugins {@link ConfigurablePlugin#start(InspectitConfig, Object)} method has already been called.
      * This means that subsequent updates will only invoke {@link ConfigurablePlugin#update(InspectitConfig, Object)}
      */
-    boolean startCalled = false;
+    boolean initialized = false;
 
     public LoadedPlugin(ConfigurablePlugin plugin, String name) {
         this.plugin = plugin;
@@ -70,16 +70,16 @@ class LoadedPlugin {
             //no need to print an error if the Optional is not present, this is already done by loadAndValidateFromProperties
             if (configOpt.isPresent()) {
                 Object newPluginConfig = configOpt.get();
-                if (!Objects.equals(newInspectitConfig, lastInspectitConfig) || !Objects.equals(lastPluginConfig, newPluginConfig)) {
-                    lastPluginConfig = newPluginConfig;
-                    lastInspectitConfig = newInspectitConfig;
-                    callStartOrUpdate(newInspectitConfig, lastPluginConfig);
+                if (!Objects.equals(newInspectitConfig, currentInspectitConfig) || !Objects.equals(currentPluginConfig, newPluginConfig)) {
+                    currentPluginConfig = newPluginConfig;
+                    currentInspectitConfig = newInspectitConfig;
+                    startOrUpdate(newInspectitConfig, currentPluginConfig);
                 }
             }
         } else {
-            if (!Objects.equals(newInspectitConfig, lastInspectitConfig)) {
-                lastInspectitConfig = newInspectitConfig;
-                callStartOrUpdate(newInspectitConfig, null);
+            if (!Objects.equals(newInspectitConfig, currentInspectitConfig)) {
+                currentInspectitConfig = newInspectitConfig;
+                startOrUpdate(newInspectitConfig, null);
             }
         }
     }
@@ -93,11 +93,11 @@ class LoadedPlugin {
      * @param pluginConfig  the plugins configuration to pass to the plugin
      */
     @SuppressWarnings("unchecked")
-    private void callStartOrUpdate(InspectitConfig inspectitConf, Object pluginConfig) {
-        if (startCalled) {
+    private void startOrUpdate(InspectitConfig inspectitConf, Object pluginConfig) {
+        if (initialized) {
             withPluginClassloader(() -> plugin.update(inspectitConf, pluginConfig));
         } else {
-            startCalled = true;
+            initialized = true;
             withPluginClassloader(() -> plugin.start(inspectitConf, pluginConfig));
         }
     }
@@ -106,14 +106,14 @@ class LoadedPlugin {
      * Executes the given function, but sets the context classloader of the thread to the plugins classloader.
      * This ensures that class-path scanning works correctly if used by any plugin.
      *
-     * @param r the function to execute
+     * @param task the function to execute
      */
-    public void withPluginClassloader(Runnable r) {
+    public void withPluginClassloader(Runnable task) {
         Thread thread = Thread.currentThread();
         ClassLoader prevContextClassLoader = thread.getContextClassLoader();
         thread.setContextClassLoader(plugin.getClass().getClassLoader());
         try {
-            r.run();
+            task.run();
         } finally {
             thread.setContextClassLoader(prevContextClassLoader);
         }

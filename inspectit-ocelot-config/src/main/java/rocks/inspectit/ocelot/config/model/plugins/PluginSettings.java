@@ -19,5 +19,5 @@ public class PluginSettings {
     /**
      * The path of the directory to scan for plugins.
      */
-    String path;
+    private String path;
 }

@@ -63,7 +63,7 @@ public class PluginLoader {
     @PostConstruct
     private void scanAndLoadPlugins() {
         String directory = env.getCurrentConfig().getPlugins().getPath();
-        if (!StringUtils.isEmpty(directory)) {
+        if (!StringUtils.isBlank(directory)) {
             log.info("Scanning '{}' for plugins", directory);
 
             Properties defaultConfigurations = new Properties();
@@ -115,12 +115,12 @@ public class PluginLoader {
      * All classes with the {@link OcelotPlugin} annotation are found
      * and {@link #initializePlugin(Class, Properties)} is invoked for each.
      *
-     * @param jar                   the jar file to load
+     * @param pluginJar             the jar file to load
      * @param defaultConfigurations the Properties to place the default configurations in
      * @throws MalformedURLException
      */
-    private void loadPluginJar(File jar, Properties defaultConfigurations) throws MalformedURLException {
-        ClassLoader pluginLoader = new PluginClassLoader(jar.toURI().toURL());
+    private void loadPluginJar(File pluginJar, Properties defaultConfigurations) throws MalformedURLException {
+        ClassLoader pluginLoader = new PluginClassLoader(pluginJar.toURI().toURL());
         //TODO: replace Reflections library with a faster solution which simply scans the given Jar for the annotation
         //this can be done by enumerating all .class files using JarFile and then inspecting them with ASM.
         Set<Class<?>> list = new Reflections(pluginLoader)

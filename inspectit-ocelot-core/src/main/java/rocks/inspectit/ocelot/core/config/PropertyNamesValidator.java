@@ -15,6 +15,12 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+/**
+ * On startup and whenever the configured property sources change,
+ * this component scans the properties for ones starting with "inspectit." but not matching the configuration model.
+ * If any are found, a warning is printed.
+ * This helps with detecting typos or indentation issues in YAML.
+ */
 @Slf4j
 @Component
 public class PropertyNamesValidator {
