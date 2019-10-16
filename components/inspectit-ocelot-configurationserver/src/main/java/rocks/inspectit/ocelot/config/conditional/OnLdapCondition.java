@@ -11,7 +11,7 @@ public class OnLdapCondition implements Condition {
 
     @Override
     public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
-        String boolString = context.getEnvironment().getProperty("inspectit.security.ldap-authentication", "false");
+        String boolString = context.getEnvironment().getProperty("inspectit-config-server.security.ldap-authentication", "false");
         return Boolean.parseBoolean(boolString);
     }
 }

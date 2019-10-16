@@ -44,4 +44,4 @@ management:
   # HEALTH INDICATORS
   health:
     # Whether to enable LDAP health check.
-    ldap.enabled: ${inspectit.security.ldap-authentication}
+    ldap.enabled: ${inspectit-config-server.security.ldap-authentication}
