@@ -6,12 +6,11 @@ repositories {
     mavenLocal()
 }
 
-group = "inspectit-ocelot"
+group = "rocks.inspectit.ocelot"
 
 sourceCompatibility = 1.8
 
 dependencies {
-
     implementation project(':inspectit-ocelot-config')
     implementation 'org.slf4j:slf4j-api:1.7.25'
 
