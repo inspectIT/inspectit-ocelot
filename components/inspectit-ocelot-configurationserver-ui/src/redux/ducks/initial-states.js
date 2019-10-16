@@ -45,8 +45,6 @@ const mappings = {
     pendingRequests: 0,
     /** The current agent mappings. */
     mappings: [],
-    /** The current agent mappings with any changes */
-    editableMappings: [],
     /** The date when the agent mappings have been fetched. */
     updateDate: null
 }

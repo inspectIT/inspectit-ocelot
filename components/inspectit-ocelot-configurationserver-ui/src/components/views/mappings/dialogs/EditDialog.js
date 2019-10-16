@@ -8,22 +8,25 @@ import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 
 import EditSources from '../editComponents/EditSources'
-import {cloneDeep} from 'lodash';
+import {cloneDeep, isEqual} from 'lodash';
 import EditAttributes from '../editComponents/EditAttributes';
 
 /**
  * Dialog for editing the given mapping.
  */
 
-class EditMappingDialog extends React.Component {
+const defaultMapping = {
+	name: '',
+	sources: [],
+	attributes: {}
+}
 
-	editNameField = React.createRef();
+class EditMappingDialog extends React.Component {
 
 	constructor(props){
 		super(props);
 		this.state = {
 			mapping: {},
-			editName: false
 		};
 	}
 
@@ -140,7 +143,12 @@ class EditMappingDialog extends React.Component {
 	
 	componentWillReceiveProps(nextProps){
 		if(nextProps.mapping !== this.props.mapping){
-			this.setState({mapping: cloneDeep(nextProps.mapping), isNewMapping: nextProps.mapping.name ? false : true});
+			if(!nextProps.mapping.name){
+				this.setState({ mapping : defaultMapping, isNewMapping: true})
+			}
+			else {
+				this.setState({mapping: cloneDeep(nextProps.mapping), isNewMapping: false});
+			}
 		}
 	}
 
@@ -152,30 +160,61 @@ class EditMappingDialog extends React.Component {
 	}
 
   handleClick = () => {
-		if(!this.state.mapping.name){
-			this.props.showWarningMessage('Mappings could not be updated', 'Enter a name for your mapping');
-			return
+		if(!this.state.mapping.name  || (this.props.mapping.name !== this.state.mapping.name && checkIfNameAlreadyExists(this.props.mappings, this.state.mapping.name)) ){
+			const msg = !this.state.mapping.name ? 'Enter a name for your mapping' : 'A Mapping with this name already exists';
+			this.props.showWarningMessage('Mappings could not be updated', msg);
+			return	
 		}
-
-		this.props.onHide();
+		
 		if(this.state.isNewMapping){
-			this.props.addEditableMapping(this.state.mapping);
+			this.props.addMapping(this.state.mapping, this.callbackOnSavingSuccess)
 		} else{
-			this.props.updateEditableMapping(this.state.mapping, this.props.mapping);
+			let newMappings = cloneDeep(this.props.mappings);
+    	let indexToUpdate;
+    	newMappings.forEach((element, index) => {
+      	if(isEqual(element, this.props.mapping)) { 
+					indexToUpdate = index; 
+				}
+    	});
+			newMappings.splice(indexToUpdate, 1, this.state.mapping);
+			this.props.putMappings(newMappings, this.callbackOnSavingSuccess)
 		}
-		this.setState({mapping: null, isNewMapping: null});
 	}
 	
 	handleCancel = () => {
 		this.props.onHide();
 		this.setState({mapping: null, isNewMapping: null});
 	}
+
+	callbackOnSavingSuccess = (savingSuccessful) => {
+		if(savingSuccessful){
+			this.props.onHide();
+			this.setState({mapping: {}, isNewMapping: null});
+		}
+	}
+}
+
+const checkIfNameAlreadyExists = (allMappings, newName) => {
+	let res
+	allMappings.forEach(mapping => {
+		if(mapping.name === newName){
+			res = true
+		}
+	})
+	return res
+}
+
+function mapStateToProps(state) {
+  const {mappings} = state.mappings;
+  return {
+    mappings
+  }
 }
 
 const mapDispatchToProps = {
-	updateEditableMapping: mappingsActions.updateEditableMapping,
-	addEditableMapping: mappingsActions.addEditableMapping,
+	addMapping: mappingsActions.putMapping,
+	putMappings: mappingsActions.putMappings,
 	showWarningMessage: notificationActions.showWarningMessage,
 }
 
-export default connect(null, mapDispatchToProps)(EditMappingDialog);
+export default connect(mapStateToProps, mapDispatchToProps)(EditMappingDialog);

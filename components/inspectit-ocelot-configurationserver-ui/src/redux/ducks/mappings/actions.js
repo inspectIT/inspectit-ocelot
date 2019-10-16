@@ -28,9 +28,8 @@ export const fetchMappings = () => {
  * The given mappings will also be stored in the state when the request was successful.
  * 
  * @param {*} mappings - the agent mappings to store
- * @param {*} resetEditor - if true, the YAML editors contents will be reset on success
  */
-export const putMappings = (mappings, resetEditor) => {
+export const putMappings = (mappings, callback=()=>{}) => {
     return dispatch => {
         dispatch({ type: types.PUT_MAPPINGS_STARTED });
 
@@ -39,78 +38,68 @@ export const putMappings = (mappings, resetEditor) => {
                 headers: { "content-type": "application/json" }
             })
             .then(response => {
-                dispatch({ type: types.PUT_MAPPINGS_SUCCESS, payload: { mappings, resetEditor } });
+                dispatch({ type: types.PUT_MAPPINGS_SUCCESS, payload: { mappings } });
                 dispatch(notificationActions.showSuccessMessage("Agent Mappings Saved", "The agent mappings have been successfully saved."));
+                dispatch(fetchMappings());
+                callback(true)
             })
             .catch(error => {
                 dispatch({ type: types.PUT_MAPPINGS_FAILURE });
+                callback(false)
             });
     };
 };
 
 /**
- * Replaces the current mapping copy. 
- * Won't affect original mappings or the data stored on the server.
+ * Stores the given agent mapping on the server. 
+ * This mapping replaces other mappings with the same name or creates a new mapping
+ * and triggers fetchMappings in case of success
  * 
- * @param {*} mappings - the mappings which will replace the current mappings copy
+ * @param {*} mappings - the agent mapping to store
  */
-export const replaceEditableMappings = (mappings) => ({
-  type: types.UPDATE_MAPPING_IN_COPY,
-  payload: {mappings}
-});
+export const putMapping = (mapping, callback=()=>{}) => {
+  return dispatch => {
+      dispatch({ type: types.PUT_MAPPING_STARTED });
+
+      axios
+          .put(`/mappings/${mapping.name}`, mapping, {
+              headers: { "content-type": "application/json" }
+          })
+          .then(response => {
+              dispatch({ type: types.PUT_MAPPING_SUCCESS });
+              dispatch(notificationActions.showSuccessMessage("Agent Mappings Saved", "The agent mappings have been successfully saved."));
+              dispatch(fetchMappings());
+              callback(true)
+          })
+          .catch(error => {
+              dispatch({ type: types.PUT_MAPPING_FAILURE });
+              callback(false)
+          });
+  };
+};
 
 /**
- * Removes the given mapping out of the mapping copy.
- * Won't affect original mappings or the data stored on the server.
+ * Deletes the given mapping respectively its mapping name
+ * and triggers fetchMappings in case of success
  * 
- * @param {*} mapping - the mapping which should be deleted
+ * @param {mapping || string} mapping - the mapping or mapping name which should be deleted
  */
-export const deleteEditableMapping = (mapping) => {
-  return (dispatch, getState) => {
-    const mappings = cloneDeep(getState().mappings.editableMappings)
+export const deleteMapping = (mapping) => {
+  const nameToDelete = mapping.name ? mapping.name : mapping
 
-    let indexToDelete;
-    mappings.forEach((element, index) => {
-      if(element === mapping) { indexToDelete = index; }
-    });
-  
-    mappings.splice(indexToDelete, 1);
-  
-    dispatch({ type: types.UPDATE_MAPPING_IN_COPY, payload: {mappings} });
-  }
+  return (dispatch) => {
+    dispatch({ type: types.DELETE_MAPPING_STARTED });
+
+    axios
+        .delete(`/mappings/${nameToDelete}`)
+        .then(response => {
+          dispatch({ type: types.DELETE_MAPPING_SUCCESS });
+          dispatch(notificationActions.showSuccessMessage("Mapping Deleted", "The mappings has been successfully deleted."));
+          dispatch(fetchMappings());
+        })
+        .catch(error => {
+            dispatch({ type: types.DELETE_MAPPING_FAILURE });
+        });
+    };
 }
 
-/**
- * Replaces a single mapping within mapping copy.
- * 
- * @param {*} mapping - the mapping which will replace old mapping
- * @param {*} oldMapping - the mapping which will be replaced
- */
-export const updateEditableMapping = (mapping, oldMapping) => {
-  return (dispatch, getState) => {
-    const mappings = cloneDeep(getState().mappings.editableMappings)
-    
-    let indexToUpdate;
-    mappings.forEach((element, index) => {
-      if(element.name === oldMapping.name) { indexToUpdate = index; }
-    });
-
-    mappings.splice(indexToUpdate, 1, mapping);
-
-    dispatch({ type: types.UPDATE_MAPPING_IN_COPY, payload: {mappings} });
-  }
-}
-
-/**
- * Inserts a single mapping at the beginning.
- * 
- * @param {*} newMapping - the new mapping which will be added
- */
-export const addEditableMapping = (newMapping) => {
-  return (dispatch, getState) => {
-    const mappings = cloneDeep(getState().mappings.editableMappings)
-
-    mappings.unshift(newMapping)
-    dispatch({ type: types.UPDATE_MAPPING_IN_COPY, payload: {mappings} });
-  }
-}

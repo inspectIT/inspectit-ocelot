@@ -37,18 +37,10 @@ class MappingToolbar extends React.Component {
         <div className='p-toolbar-group-right'>
           <Button icon='pi pi-refresh' onClick={this.props.onClickRefresh} style={{marginRight:'.25em'}}/>
           <Button icon='pi pi-plus' onClick={this.props.onAddNewMapping} style={{marginRight:'.25em'}} />
-          <Button icon='pi pi-download' label='Config File' onClick={this.props.onDownload} style={{marginRight:'.25em'}} />
-          <Button icon='pi pi-save' disabled={this.props.isSaveDisabled} label='Save' onClick={() => {this.props.putMappings(this.props.editableMappings)}} />
+          <Button icon='pi pi-download' label='Config File' onClick={this.props.onDownload} />
         </div>
       </Toolbar>
     )
-  }
-}
-
-function mapStateToProps(state) {
-  const {editableMappings} = state.mappings;
-  return {
-    editableMappings,
   }
 }
 
@@ -56,4 +48,4 @@ const mapDispatchToProps = {
   putMappings: mappingsActions.putMappings,
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(MappingToolbar)
+export default connect(null, mapDispatchToProps)(MappingToolbar)

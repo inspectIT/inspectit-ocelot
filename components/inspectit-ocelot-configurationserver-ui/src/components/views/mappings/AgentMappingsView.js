@@ -64,7 +64,6 @@ class AgentMappingView extends React.Component {
         <div className='content'>
           <MappingsTable 
             filterValue={this.state.filter} 
-            onMappingsChanged={this.handleDisableSaveOptionChange}
             onDeleteMapping={this.showDeleteMappingDialog} 
             onEditMapping={this.showEditMappingDialog}
           />

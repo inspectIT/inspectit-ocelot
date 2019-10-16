@@ -17,9 +17,8 @@ const mappingsReducer = createReducer(initialState)({
         };
     },
     [types.FETCH_MAPPINGS_SUCCESS]: (state, action) => {
-        const { pendingRequests, editorContent } = state;
+        const { pendingRequests } = state;
         const { mappings } = action.payload;
-        const mappingsYaml = mappings ? yaml.safeDump(mappings) : "";
         return {
             ...state,
             pendingRequests: pendingRequests - 1,
@@ -41,22 +40,32 @@ const mappingsReducer = createReducer(initialState)({
         };
     },
     [types.PUT_MAPPINGS_SUCCESS]: (state, action) => {
-        const { mappings, resetEditor } = action.payload;
+        const { mappings } = action.payload;
         return {
             ...state,
             pendingRequests: state.pendingRequests - 1,
-            editorContent: resetEditor ? null : state.editorContent,
             mappings,
             editableMappings: cloneDeep(mappings),
             updateDate: Date.now()
         };
     },
-    [types.UPDATE_MAPPING_IN_COPY]: (state, action) => {
-      const { mappings } = action.payload
-      return {
-        ...state,
-        editableMappings: mappings
-      }
+    [types.DELETE_MAPPING_STARTED]: (state, action) => {
+        return {
+            ...state,
+            pendingRequests: state.pendingRequests + 1
+        }
+    },
+    [types.DELETE_MAPPING_FAILURE]: (state, action) => {
+        return {
+            ...state,
+            pendingRequests: state.pendingRequests - 1
+        }
+    },
+    [types.DELETE_MAPPING_SUCCESS]: (state, action) => {
+        return {
+            ...state,
+            pendingRequests: state.pendingRequests - 1
+        }
     }
 });
 

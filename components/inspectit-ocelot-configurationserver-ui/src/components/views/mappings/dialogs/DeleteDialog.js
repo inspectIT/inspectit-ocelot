@@ -27,14 +27,14 @@ class DeleteDialog extends React.Component {
                     </div>
                 )}
             >
-                Are you sure you want to delete this mapping? Your changes will be lost after saving your mappings.
+                Are you sure you want to delete this mapping? Your changes will be lost. This cannot be undone!
             </Dialog>
         )
     }
 
     handleClick = () => {
 			this.props.onHide();
-			this.props.deleteEditableMapping(this.props.mapping.name);
+            this.props.deleteMapping(this.props.mapping.name)
     }
 
     componentDidUpdate(prevProps) {
@@ -45,7 +45,7 @@ class DeleteDialog extends React.Component {
 }
 
 const mapDispatchToProps = {
-  deleteEditableMapping: mappingsActions.deleteEditableMapping,
+  deleteMapping: mappingsActions.deleteMapping,
 }
 
 export default connect(null, mapDispatchToProps)(DeleteDialog);

@@ -8,7 +8,6 @@ import {Column} from 'primereact/column';
 import {Button} from 'primereact/button';
 import {TieredMenu} from 'primereact/tieredmenu';
 
-import {isEqual} from 'lodash';
 import { notificationActions } from '../../../redux/ducks/notification';
 
 const ButtonCell = ({mapping, onEdit, onDelete, onDownload, saved, showInfo}) => {
@@ -95,9 +94,9 @@ const keys = Object.keys(attributes);
 class MappingsTable extends React.Component{
 
   render() {
-    const filteredMappings = this.filterMappings(this.props.editableMappings);
+    const filteredMappings = this.filterMappings(this.props.mappings);
     return(
-      <DataTable value={filteredMappings} reorderableRows={true} onRowReorder={(e) => {this.props.onUpdateEditMappings(e.value)}} autoLayout={true} >
+      <DataTable value={filteredMappings} reorderableRows={true} onRowReorder={(e) => {this.props.putMappings(e.value)}} autoLayout={true} >
         <Column rowReorder={true} style={{width: '3em'}} />
         <Column columnKey="name" field="name" header="Name"/>
         <Column columnKey="sources" field="sources" body={(data) => (<SourceCell sources={data.sources}/>)} header="Source" />
@@ -108,12 +107,6 @@ class MappingsTable extends React.Component{
   }
 
   componentDidMount = () => this.props.fetchMappings();
-
-  componentDidUpdate = () => this.props.onMappingsChanged(this.areMappingsChanged());
-
-  areMappingsChanged = () => {
-    return isEqual(this.props.editableMappings, this.props.mappings)
-  }
 
   filterMappings = (mappings) => {
     const {filterValue} = this.props;
@@ -151,16 +144,15 @@ class MappingsTable extends React.Component{
 }
 
 function mapStateToProps(state) {
-  const {editableMappings, mappings} = state.mappings;
+  const {mappings} = state.mappings;
   return {
-    editableMappings,
     mappings
   }
 }
 
 const mapDispatchToProps = {
   fetchMappings: mappingsActions.fetchMappings,
-  onUpdateEditMappings: mappingsActions.replaceEditableMappings,
+  putMappings: mappingsActions.putMappings,
   downloadConfigFile: agentConfigActions.fetchConfigurationFile,
   showInfoMessage: notificationActions.showInfoMessage
 }
