@@ -15,7 +15,7 @@ spring:
 server:
   port: 8090
 
-inspectit-server-config:
+inspectit-ocelot-configuration-server:
   working-directory: working_directory
   token-lifespan: 60m
   default-user:

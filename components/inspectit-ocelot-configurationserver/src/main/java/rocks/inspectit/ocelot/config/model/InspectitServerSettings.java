@@ -15,7 +15,7 @@ import java.time.Duration;
  * Configuration object allowing relaxed configuration binding via spring.
  */
 @Data
-@ConfigurationProperties("inspectit")
+@ConfigurationProperties("inspectit-ocelot-configuration-server")
 @Configuration
 @Builder
 @NoArgsConstructor
