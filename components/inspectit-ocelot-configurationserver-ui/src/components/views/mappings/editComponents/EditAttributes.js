@@ -169,6 +169,7 @@ class EditAttributes extends React.Component{
           <Column 
             columnKey='value' 
             field='value' 
+            header='Attribute Value'
             body={rowData => rowData[Object.keys(rowData)[0]]} 
             editor={this.valueEditor} 
             />

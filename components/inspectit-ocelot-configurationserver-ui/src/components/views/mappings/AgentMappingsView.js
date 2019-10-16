@@ -48,7 +48,6 @@ class AgentMappingView extends React.Component {
           .content{
             margin-top: 3rem;
             height: calc(100vh - 7rem);
-            overflow: auto auto;
           }
         `}</style>
         <div className='fixed-toolbar'>

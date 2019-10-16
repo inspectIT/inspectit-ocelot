@@ -46,7 +46,7 @@ const ButtonCell = ({mapping, onEdit, onDelete, onDownload, saved, showInfo}) =>
   return(
     <div>
     <TieredMenu model={menuItems} popup={true} appendTo={domElement_body} ref={el => this_cell.menu = el} />
-    <Button icon="pi pi-bars" onClick={(event) => this_cell.menu.toggle(event)}/>
+    <Button icon="pi pi-bars" onClick={(event) => this_cell.menu.toggle(event)} style={{'margin-right': '5.25m'}}/>
   </div>
   )
 }
@@ -116,12 +116,12 @@ class MappingsTable extends React.Component{
   render() {
     const filteredMappings = this.filterMappings(this.props.mappings);
     return(
-      <DataTable value={filteredMappings} reorderableRows={true} onRowReorder={(e) => {this.props.putMappings(e.value)}} autoLayout={true} >
+      <DataTable value={filteredMappings} reorderableRows={true} scrollable={true} scrollHeight={'100%'} onRowReorder={(e) => {this.props.putMappings(e.value)}}  >
         <Column rowReorder={true} style={{width: '3em'}} />
         <Column columnKey="name" field="name" header="Name"/>
         <Column columnKey="sources" field="sources" body={(data) => (<SourceCell sources={data.sources}/>)} header="Source" />
         <Column columnKey="attributes" field="attributes" body={(data) => (<AttributesCell attributes={data.attributes} />)} header="Attributes" />
-        <Column columnKey="buttons" field="" body={(data) => (<ButtonCell mapping={data} onEdit={this.props.onEditMapping} onDelete={this.props.onDeleteMapping} onDownload={this.props.downloadConfigFile} saved={this.areMappingsChanged} showInfo={this.props.showInfoMessage} />)} header="" style={{width: '3em'}} />
+        <Column columnKey="buttons" field="" body={(data) => (<ButtonCell mapping={data} onEdit={this.props.onEditMapping} onDelete={this.props.onDeleteMapping} onDownload={this.props.downloadConfigFile} saved={this.areMappingsChanged} showInfo={this.props.showInfoMessage} />)} header="" style={{width: '4em'}} />
       </DataTable>
     )
   }

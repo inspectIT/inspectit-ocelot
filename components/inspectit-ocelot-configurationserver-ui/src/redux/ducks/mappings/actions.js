@@ -58,7 +58,7 @@ export const putMappings = (mappings, callback=()=>{}) => {
  * @param {*} mappings - the agent mapping to store
  */
 export const putMapping = (mapping, callback=()=>{}) => {
-  return dispatch => {
+  return (dispatch, getState) => {
       dispatch({ type: types.PUT_MAPPING_STARTED });
 
       axios
@@ -66,10 +66,13 @@ export const putMapping = (mapping, callback=()=>{}) => {
               headers: { "content-type": "application/json" }
           })
           .then(response => {
-              dispatch({ type: types.PUT_MAPPING_SUCCESS });
-              dispatch(notificationActions.showSuccessMessage("Agent Mappings Saved", "The agent mappings have been successfully saved."));
-              dispatch(fetchMappings());
-              callback(true)
+            const state = getState();
+            const mappings = cloneDeep(state.mappings.mappings)
+            mappings.unshift(mapping)
+
+            dispatch({ type: types.PUT_MAPPING_SUCCESS, payload: { mappings } });
+            dispatch(notificationActions.showSuccessMessage("Agent Mappings Saved", "The agent mappings have been successfully saved."));
+            callback(true)
           })
           .catch(error => {
               dispatch({ type: types.PUT_MAPPING_FAILURE });
