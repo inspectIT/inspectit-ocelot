@@ -12,8 +12,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import rocks.inspectit.ocelot.bootstrap.exposed.InspectitContext;
 
-import java.lang.reflect.InvocationTargetException;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.*;
@@ -32,14 +30,11 @@ public class ContinueOrStartSpanActionTest {
 
         @Test
         void noSampler() {
-            Sampler sampler = Samplers.probabilitySampler(0.5);
-
             ContinueOrStartSpanAction.builder()
                     .build()
                     .configureSampler(spanBuilder, context);
 
-            verifyZeroInteractions(spanBuilder);
-            verifyZeroInteractions(context);
+            verifyZeroInteractions(spanBuilder, context);
         }
 
         @Test
@@ -58,7 +53,7 @@ public class ContinueOrStartSpanActionTest {
 
 
         @Test
-        void dynamicNonNullProbability() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        void dynamicNonNullProbability() {
             doReturn(0.42).when(context).getData("my_key");
 
             ContinueOrStartSpanAction.builder()
@@ -69,16 +64,15 @@ public class ContinueOrStartSpanActionTest {
             ArgumentCaptor<Sampler> sampler = ArgumentCaptor.forClass(Sampler.class);
             verify(spanBuilder).setSampler(sampler.capture());
 
-            assertThat((Double) ReflectionTestUtils.invokeMethod(sampler.getValue(), "getProbability"))
-                    .isEqualTo(0.42);
+            Object configuredProbability = ReflectionTestUtils.invokeMethod(sampler.getValue(), "getProbability");
+            assertThat((Double) configuredProbability).isEqualTo(0.42);
             verify(context).getData("my_key");
-            verifyNoMoreInteractions(spanBuilder);
-            verifyNoMoreInteractions(context);
+            verifyNoMoreInteractions(spanBuilder, context);
         }
 
 
         @Test
-        void dynamicNullProbability() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        void dynamicNullProbability() {
             doReturn(null).when(context).getData("my_key");
 
             ContinueOrStartSpanAction.builder()
@@ -87,8 +81,7 @@ public class ContinueOrStartSpanActionTest {
                     .configureSampler(spanBuilder, context);
 
             verify(context).getData("my_key");
-            verifyNoMoreInteractions(spanBuilder);
-            verifyNoMoreInteractions(context);
+            verifyNoMoreInteractions(spanBuilder, context);
         }
 
     }

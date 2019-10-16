@@ -127,13 +127,11 @@ public class MethodHookGenerator {
     }
 
     private void configureSampling(RuleTracingSettings tracing, ContinueOrStartSpanAction.ContinueOrStartSpanActionBuilder actionBuilder) {
-        // tracing.getSampleProbability() never returns null here because the
-        // InstrumentationRuleResolver resolves null to the default sample probability
         String sampleProbability = tracing.getSampleProbability();
         if (!StringUtils.isBlank(sampleProbability)) {
             try {
-                double fixedProbability = Double.parseDouble(sampleProbability);
-                Sampler sampler = Samplers.probabilitySampler(Math.max(0.0, Math.min(1.0, fixedProbability)));
+                double constantProbability = Double.parseDouble(sampleProbability);
+                Sampler sampler = Samplers.probabilitySampler(Math.max(0.0, Math.min(1.0, constantProbability)));
                 actionBuilder.staticSampler(sampler);
             } catch (NumberFormatException e) {
                 actionBuilder.dynamicSampleProbabilityKey(sampleProbability);

@@ -40,14 +40,15 @@ public class ContinueOrStartSpanAction implements IHookAction {
     /**
      * If the sample probability is fixed, this attribute holds the corresponding sampler.
      * If a dynamic sample probability is used, this value is null and {@link #dynamicSampleProbabilityKey} is not null.
-     * If both {@link #staticSampler} and {@link #dynamicSampleProbabilityKey} are null, no span-scoped sampler wil lbe used.
+     * If both {@link #staticSampler} and {@link #dynamicSampleProbabilityKey} are null, no span-scoped sampler will be used.
      */
     private final Sampler staticSampler;
 
     /**
      * If the sample probability is dynamic, this attribute holds the datakey under which the sample probability is looked up from the context.
+     * It must either be null or a non-blank string.
      * If no dynamic sample probability is used, {@link #staticSampler} is used if it is not null.
-     * If both {@link #staticSampler} and {@link #dynamicSampleProbabilityKey} are null, no span-scoped sampler wil lbe used.
+     * If both {@link #staticSampler} and {@link #dynamicSampleProbabilityKey} are null, no span-scoped sampler will be used.
      */
     private final String dynamicSampleProbabilityKey;
 
@@ -107,6 +108,15 @@ public class ContinueOrStartSpanAction implements IHookAction {
         }
     }
 
+    /**
+     * If configured, adds a span-scoped sampler to the given spanBuilder.
+     * This can be either {@link #staticSampler} if a constant sampling probability was specified,
+     * or a probability read from {@link InspectitContext} for a given data-key.
+     * If neither is specified, no span-scoped sampler will be attached.
+     *
+     * @param spanBuilder the spanBuilder
+     * @param context     the context used to query a dynamic probability
+     */
     @VisibleForTesting
     void configureSampler(SpanBuilder spanBuilder, InspectitContext context) {
         Sampler sampler = staticSampler;

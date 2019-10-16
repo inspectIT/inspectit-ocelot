@@ -14,7 +14,7 @@ import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import javax.annotation.PostConstruct;
 
 /**
- * Configures the global OpenCensus sample with the probability configured via Ocelot.
+ * Configures the global OpenCensus sampler with the probability configured via Ocelot.
  */
 @Component
 public class GlobalSamplerConfigurer {
