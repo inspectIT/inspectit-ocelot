@@ -31,7 +31,7 @@ class MappingToolbar extends React.Component {
         <div className='searchbox'>
           <i className="pi pi-sitemap"></i>
           <h4 style={{'font-weight': 'normal', 'margin-right': '1rem'}}>Agent Mappings</h4>
-          <InputText placeholder='Search' value={this.props.filterValue}  onChange={this.props.onChangeFilter} />
+          <InputText placeholder='Search' value={this.props.filterValue}  onChange={this.props.onChangeFilter} tooltip={searchFieldTooltipText}/>
         </div>
         </div>
         <div className='p-toolbar-group-right'>
@@ -44,8 +44,6 @@ class MappingToolbar extends React.Component {
   }
 }
 
-const mapDispatchToProps = {
-  putMappings: mappingsActions.putMappings,
-}
+const searchFieldTooltipText = 'Enter a mapping name, a source or an attribute key/value pair to filter matching mappings. The filter is not case sensitive.'
 
-export default connect(null, mapDispatchToProps)(MappingToolbar)
+export default MappingToolbar

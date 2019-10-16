@@ -129,18 +129,19 @@ class MappingsTable extends React.Component{
   componentDidMount = () => this.props.fetchMappings();
 
   filterMappings = (mappings) => {
-    const {filterValue} = this.props;
+    let {filterValue} = this.props;
+    filterValue = filterValue.toLowerCase()
     let res = [];
 
     mappings.forEach(element => {
       if (element.head) {
         res.push(element);
-     } else if (element.name && element.name.includes(filterValue)) {
+     } else if (element.name && element.name.toLowerCase().includes(filterValue)) {
         res.push(element);
       } else if (element.sources) {
         let pushed = false;
         for(let i = 0; i < element.sources.length; i++){
-          if(element.sources[i].includes(filterValue)) {
+          if(element.sources[i].toLowerCase().includes(filterValue)) {
             res.push(element);
             pushed = true;
             break;
@@ -150,7 +151,7 @@ class MappingsTable extends React.Component{
           let keys = Object.keys(element.attributes);
           for (let i = 0; i < keys.length; i++) {
             const attribute = `${keys[i]}: ${element.attributes[keys[i]]}`;
-            if(attribute.includes(filterValue)) {
+            if(attribute.toLowerCase().includes(filterValue)) {
               res.push(element);
               pushed = true;
               break;
