@@ -63,7 +63,7 @@ $ java -Dserver.port=[port] -Dspring.config.location=file:[path-to-config] -jar 
 The configuration file defines the mapping between the concrete Boomerang metric and a OpenCensus metric, as the following sample configuration file shows:
 
 ```yaml
-inspectit-ocelot-eum-server:
+inspectit-eum-server:
   definitions:
      page_ready_time:
       measure-type: LONG
@@ -224,7 +224,7 @@ For example, the following configuration specifies the two tags `APP` and `URL`.
 The tag `APP` will always be resolved to the value `my-application`, where the tag `URL` will be resolved to the value of the field `u` of a received beacon.
 
 ```YAML
-inspectit-ocelot-eum-server:
+inspectit-eum-server:
   tags:
     extra:
       APP: my-application
@@ -248,7 +248,7 @@ The tag values are published with the tag `COUNTRY_CODE` and have a higher prior
 If the IP cannot be resolved with the custom mapping, the mapping of the GeoLite2 database will be used.
 
 ```YAML
-inspectit-ocelot-eum-server:
+inspectit-eum-server:
   tags:
     custom-ip-mapping:
       department-1:
@@ -269,7 +269,7 @@ Each tag which is listed under this property will be added to each registered me
 For example, the following configuration causes that each metric will be enriched by a tag called `COUNTRY_CODE`.
 
 ```YAML
-inspectit-ocelot-eum-server:
+inspectit-eum-server:
   tags:
     define-as-global:
       - COUNTRY_CODE
