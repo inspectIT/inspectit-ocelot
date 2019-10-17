@@ -15,9 +15,16 @@ class SourceToolbar extends React.Component{
 
 	render(){
 		return(
-			<div>
-				<InputText value={this.state.newSource} placeholder='new Source' onChange={this.handleChange} onKeyPress={e => {if(e.key === 'Enter'){this.handleClick()}}} />
-				<Button icon='pi pi-plus' disabled={!this.state.newSource || this.state.newSource === '/'} onClick={this.handleClick} style={{marginLeft: "0.25rem"}}/>
+			<div className="p-inputgroup" style = {{display: "inline-flex", verticalAlign: "middle", width: '100%', 'margin-bottom': '0.5em'}}>
+				<span className="pi p-inputgroup-addon" style={{background: 'inherit', 'border-color': '#656565'}}>/</span>
+					<InputText 
+						value={this.state.newSource} 
+						placeholder='new Source' 
+						onChange={this.handleChange} 
+						onKeyPress={e => {if(e.key === 'Enter'){this.handleClick()}}} 
+						style={{width: '100%'}} 
+					/>
+					<Button icon='pi pi-plus' disabled={!this.state.newSource || this.state.newSource === '/'} onClick={this.handleClick} style={{width: '3rem'}}/>
 			</div>
 		)
 	}

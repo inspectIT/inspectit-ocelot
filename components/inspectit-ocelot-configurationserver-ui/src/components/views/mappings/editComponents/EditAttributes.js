@@ -86,25 +86,27 @@ class EditAttributes extends React.Component{
       <DataTable 
         value={attributesArray} 
         scrollable={true} 
-        scrollHeight={`100%`} 
+        scrollHeight={this.props.maxHeight ? this.props.maxHeight : '100%'}
       >
         <Column 
           columnKey='key' 
           field='key' 
           header='Attribute Key'
-          body={rowData => Object.keys(rowData)[0] ? Object.keys(rowData)[0] : <p style={{color: 'grey'}}>add new key</p>} 
+          headerStyle={{'font-weight': 'normal'}}
+          body={rowData => Object.keys(rowData)[0] ? Object.keys(rowData)[0] : <p style={{color: 'grey'}}>click here to add new key</p>} 
           editor={this.keyEditor} 
           />
         <Column 
           columnKey='value' 
           field='value' 
           header='Attribute Value'
-          body={rowData => rowData[Object.keys(rowData)[0]] ?rowData[Object.keys(rowData)[0]] : <p style={{color: 'grey'}}>add new value</p>} 
+          headerStyle={{'font-weight': 'normal'}}
+          body={rowData => rowData[Object.keys(rowData)[0]] ? rowData[Object.keys(rowData)[0]] : <p style={{color: 'grey'}}>click here to add new value</p>} 
           editor={this.valueEditor} 
           />
         <Column 
           columnKey='buttonRow'
-          body={rowData => <Button icon='pi pi-trash' onClick={() => this.props.onDeleteAttribute(rowData)}/>}
+          body={rowData => Object.keys(rowData)[0] ? <Button icon='pi pi-trash' onClick={() => this.props.onDeleteAttribute(rowData)}/> : ''}
           style={{width: '4em'}}
         />
       </DataTable>

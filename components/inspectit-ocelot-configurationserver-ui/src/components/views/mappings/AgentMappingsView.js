@@ -37,6 +37,7 @@ class AgentMappingView extends React.Component {
   hideDownloadDialog = () => this.setState({isDownloadDialogShown: false});
 
   render(){
+    const contentHeight = 'calc(100vh - 7rem)'
     return (
       <div className='this'>
         <style jsx>{`
@@ -47,7 +48,8 @@ class AgentMappingView extends React.Component {
           }
           .content{
             margin-top: 3rem;
-            height: calc(100vh - 7rem);
+            height: ${contentHeight};
+            overflow: hidden;
           }
         `}</style>
         <div className='fixed-toolbar'>
@@ -58,6 +60,7 @@ class AgentMappingView extends React.Component {
             onClickRefresh={this.showRefreshDialog} 
             onAddNewMapping={this.showEditMappingDialog}
             onDownload={this.showDownloadDialog}
+            maxHeight={contentHeight}
           />
         </div>
         <div className='content'>

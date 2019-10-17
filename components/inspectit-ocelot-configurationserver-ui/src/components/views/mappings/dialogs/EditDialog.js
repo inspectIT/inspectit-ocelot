@@ -6,6 +6,7 @@ import { notificationActions } from '../../../../redux/ducks/notification';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
+import { Fieldset } from 'primereact/fieldset';
 
 import EditSources from '../editComponents/EditSources'
 import {cloneDeep, isEqual} from 'lodash';
@@ -74,11 +75,12 @@ class EditMappingDialog extends React.Component {
 	handleDeleteAttribute = (attribute) => {
 		let newAttributes = cloneDeep(this.state.mapping.attributes)
 		delete newAttributes[Object.keys(attribute)[0]]
-		this.setState({ mapping: {...mapping, attributes: newAttributes} });
+		this.setState({ mapping: {...this.state.mapping, attributes: newAttributes} });
   }
 
   render() {
 		const {mapping} = this.state;
+		const maxHeightFieldset = this.state.height * 0.35
     return (
 			<div className='this'>
 				<style jsx>{`
@@ -93,19 +95,7 @@ class EditMappingDialog extends React.Component {
 					}
 				`}</style>
 				<Dialog
-					header={
-						<span>{this.props.mapping.name ? `Edit`:'Add' } 
-							<div className="p-inputgroup" style = {{display: "inline-flex", verticalAlign: "middle", 'margin-left': '0.5em', width: '90%',}}>
-                
-									<InputText 
-										placeholder='Enter new name'
-										value={mapping.name ? mapping.name : ''} 
-										onChange={e => this.setState({mapping: {...mapping, name: e.target.value}}) }
-										style={{width: '100%', background: 'inherit', color: 'white', 'border-color': '#656565'}} 
-									/>
-									<span className="pi p-inputgroup-addon pi-pencil" style={{background: 'inherit', 'border-color': '#656565'}}/>
-							</div>
-						</span>}
+					header={this.state.isNewMapping ? 'Add Mapping' : 'Edit Mapping'}
 					modal={true}
 					visible={this.props.visible}
 					onHide={this.handleCancel}
@@ -117,24 +107,37 @@ class EditMappingDialog extends React.Component {
 						</div>
 					)}
 				>
-					<div className='middle'>
+					<Fieldset legend='Mapping Name' style={{'padding-top': 0, overflow: 'hidden'}}>
+						<span>
+							<div className="p-inputgroup" style = {{display: "inline-flex", verticalAlign: "middle", width: '100%',}}>
+									<InputText 
+										placeholder='Enter new name'
+										value={mapping.name ? mapping.name : ''} 
+										onChange={e => this.setState({mapping: {...mapping, name: e.target.value}}) }
+										style={{width: '100%'}} 
+									/>
+									<span className="pi p-inputgroup-addon pi-pencil" style={{background: 'inherit', 'border-color': '#656565'}}/>
+							</div>
+						</span>
+					</Fieldset>
+					<Fieldset legend='Sources' style={{'padding-top': 0, 'max-height': maxHeightFieldset, overflow: 'hidden'}}>
 						<EditSources
-							visible={this.props.visible}
-							sources={mapping.sources} 
-							onUpdateAllSources={this.handleUpdateSources}
-							onAddSource={this.handleAddSource}
-							height={this.state.height * 0.25}
-						/> 
-					</div>
-					<div className='bottom'>
+								visible={this.props.visible}
+								sources={mapping.sources} 
+								onUpdateAllSources={this.handleUpdateSources}
+								onAddSource={this.handleAddSource}
+								maxHeight={`calc(${maxHeightFieldset}px - 10em)`}
+							/> 
+					</Fieldset>
+					<Fieldset legend='Attributes' style={{'padding-top': 0, 'max-height': maxHeightFieldset, overflow: 'hidden'}}>
 						<EditAttributes 
 							attributes={mapping.attributes}
 							onChangeAttributeKey={this.handleChangeAttributeKey}
 							onDeleteAttribute={this.handleDeleteAttribute}
 							onChValueOrAddAttribute={this.handleChangeValueOrAddAttribute}
-							height={this.state.height * 0.25}
+							maxHeight={`calc(${maxHeightFieldset}px - 10em)`}
 						/>
-					</div>
+					</Fieldset>
 				</Dialog>
 			</div>
     )
@@ -161,7 +164,7 @@ class EditMappingDialog extends React.Component {
   handleClick = () => {
 		if(!this.state.mapping.name  || (this.props.mapping.name !== this.state.mapping.name && checkIfNameAlreadyExists(this.props.mappings, this.state.mapping.name)) ){
 			const msg = !this.state.mapping.name ? 'Enter a name for your mapping' : 'A Mapping with this name already exists';
-			this.props.showWarningMessage('Mappings could not be updated', msg);
+			this.props.showWarningMessage('Mappings Could not be Updated', msg);
 			return	
 		}
 		

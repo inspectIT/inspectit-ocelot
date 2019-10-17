@@ -2,7 +2,6 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { configurationActions, configurationSelectors } from '../../../../redux/ducks/configuration';
 
-import {ScrollPanel} from 'primereact/scrollpanel';
 import TreeTable from './SourceTree';
 import SourceTable from './SourceTable';
 import EditSourceToolbar from './SourceToolbar';
@@ -42,8 +41,47 @@ class EditSources extends React.Component{
             padding-top: 0.25em;
             margin: 0.5em;
           }
+          .left{
+            width: 50%;
+          }
+          .right{
+            width: 50%;
+            border: 1px solid #ddd;
+            margin-left: 0.5em;
+            max-height: ${this.props.maxHeight};
+            overflow: auto;
+          }
+          .right :global(.p-tree){
+            border: none;
+            margin: 0;
+            padding: 0;
+            margin-left: 0.5em;
+            // overflow: auto auto;
+          }
         `}</style>
-        <div className='containerLeft'>
+        <div className='left'>
+          <EditSourceToolbar 
+            sourcePaths={this.props.sources}
+            onAddSource={this.handleAddSource}
+            tree={this.state.tree}
+          />
+          <SourceTable 
+            sourcePaths={this.props.sources}
+            onRowReoder={this.props.onUpdateAllSources}  
+            maxHeight={this.props.maxHeight ? `calc(${this.props.maxHeight} - 2.95em)` : ''}
+          />
+        </div>
+        <div className='right'>
+          <TreeTable 
+            sourcePaths={this.props.sources}
+            tree={this.state.tree}
+            onChangeSources={this.cleanUpSourcePaths}
+          />
+        </div>
+
+
+
+        {/* <div className='containerLeft'>
           <div className='innerContainerTop'>
             <EditSourceToolbar 
               sourcePaths={this.props.sources}
@@ -51,11 +89,7 @@ class EditSources extends React.Component{
               tree={this.state.tree}
             />
           </div>
-            <SourceTable 
-              sourcePaths={this.props.sources}
-              onRowReoder={this.props.onUpdateAllSources}  
-              height={`${this.props.height}px`}
-            />
+            
         </div>
         <div className='containerRight'>
           <ScrollPanel style={{height: `${this.props.height+45}px`}}>
@@ -65,7 +99,7 @@ class EditSources extends React.Component{
               onChangeSources={this.cleanUpSourcePaths}
             />
           </ScrollPanel>
-        </div>
+        </div> */}
       </div>
     )
   }

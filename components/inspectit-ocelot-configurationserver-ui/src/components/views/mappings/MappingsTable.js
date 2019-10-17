@@ -9,8 +9,6 @@ import {Button} from 'primereact/button';
 import {TieredMenu} from 'primereact/tieredmenu';
 import {OverlayPanel} from 'primereact/overlaypanel';
 
-import { notificationActions } from '../../../redux/ducks/notification';
-
 const ButtonCell = ({mapping, onEdit, onDelete, onDownload}) => {
   const this_cell = {}
   const domElement_body = document.getElementsByTagName("BODY")[0]; 
@@ -113,7 +111,7 @@ class MappingsTable extends React.Component{
   render() {
     const filteredMappings = this.filterMappings(this.props.mappings);
     return(
-      <DataTable value={filteredMappings} reorderableRows={true} scrollable={true} scrollHeight={'100%'} onRowReorder={(e) => {this.props.putMappings(e.value)}}  >
+      <DataTable value={filteredMappings} reorderableRows={true} scrollable={true} scrollHeight={this.props.maxHeight ? this.props.maxHeight : '100%'} onRowReorder={(e) => {this.props.putMappings(e.value)}}  >
         <Column rowReorder={true} style={{width: '3em'}} />
         <Column columnKey="name" field="name" header="Name"/>
         <Column columnKey="sources" field="sources" body={(data) => (<SourceCell sources={data.sources}/>)} header="Source" />

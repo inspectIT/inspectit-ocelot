@@ -19,7 +19,7 @@ class SourceTable extends React.Component{
 					onRowReorder={(e) => {this.props.onRowReoder(e.value)}}
 					resizableColumns={true}
 					scrollable={true} 
-					scrollHeight={this.props.height}
+					scrollHeight={this.props.maxHeight ? this.props.maxHeight : '100%'} 
 				>
 					<Column rowReorder={true} style={{width: '3em'}} />
 					<Column body={rowData => rowData}/>

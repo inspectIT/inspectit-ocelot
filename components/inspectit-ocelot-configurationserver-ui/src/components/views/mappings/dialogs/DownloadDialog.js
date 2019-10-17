@@ -70,7 +70,7 @@ class DownloadDialog extends React.Component {
                     </div>
                 )}
             >
-                <p>
+                <p style={{'margin-bottom': '1em'}}>
                     Enter key/value pairs to download the correlating agent configuration. 
                     <br/> You will get a different result depending on the mapping that fits your input.
                 </p>
