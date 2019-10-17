@@ -10,7 +10,9 @@ import * as utils from './utils';
 class SourceToolbar extends React.Component{
 	constructor(props){
 		super(props);
-		this.state = {};
+		this.state = {
+			newSource: ''
+		};
 	}
 
 	render(){
@@ -24,33 +26,27 @@ class SourceToolbar extends React.Component{
 						onKeyPress={e => {if(e.key === 'Enter'){this.handleClick()}}} 
 						style={{width: '100%'}} 
 					/>
-					<Button icon='pi pi-plus' disabled={!this.state.newSource || this.state.newSource === '/'} onClick={this.handleClick} style={{width: '3rem'}}/>
+					<Button icon='pi pi-plus' onClick={this.handleClick} style={{width: '3rem'}}/>
 			</div>
 		)
 	}
 
 	handleClick = () => {
-		const {newSource} = this.state;
-		if(!newSource || newSource === '/') {
-			return
-		}
+		const source = '/' + this.state.newSource
 
-		if(this.checkExistingFile(newSource)){
-			this.props.showInfoMessage('Path has not been added', `The path "${newSource}" could not be added. It might be included already.`);
+		if(this.checkExistingFile(source)){
+			this.props.showInfoMessage('Path has not been Added', `The path "${source}" could not be added. It might be included already.`);
 			return
 		}
 		
-		this.props.onAddSource(newSource);
+		this.props.onAddSource(source);
 		this.setState({newSource: ''});
 	}
 
 	handleChange = (e) => {
 		const {value, style} = e.target;
-		const newSource = value.startsWith('/') ? value : `/${value}`;
-
-		style.color = this.checkExistingFile(newSource) ? 'red' : 'black';
-
-		this.setState({newSource});
+		style.color = this.checkExistingFile(`/${value}`) ? 'red' : 'black';
+		this.setState({newSource: value});
 	}
 
 	checkExistingFile = (newSource) => {
@@ -58,7 +54,7 @@ class SourceToolbar extends React.Component{
 		if(!this.props.sourcePaths){return res;}
 
 		this.props.sourcePaths.forEach(source => {
-			if(source === newSource || (source.endsWith('/*') && newSource.startsWith(source.slice(0, -2)) && newSource.search(new RegExp(`${escapeRegExp(source.slice(0, -2))}(?!\\w)(\\/|(?!\\W))`)) !== -1 )){
+			if(source === newSource || (newSource.length > source.length && newSource.search(new RegExp(`${escapeRegExp(source.slice(0, -2))}(?!\\w)(\\/|(?!\\W))`)) !== -1 )){
 				res = true;
 			}
 		});

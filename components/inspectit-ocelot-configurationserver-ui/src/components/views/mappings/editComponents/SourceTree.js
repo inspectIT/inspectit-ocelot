@@ -19,6 +19,7 @@ class TreeTable extends React.Component{
 			  selectionMode='checkbox'
 			  selectionKeys={this.state.selectedSources}
 				onSelectionChange={e => this.handleSelectionChange(e.value)}
+				expandedKeys={this.props.expandedKeys}
 			/>
 	  )
 	}
@@ -27,7 +28,6 @@ class TreeTable extends React.Component{
 
 	updateSelection = () => {
 		if(!this.props.sourcePaths){ return }
-
 		let selectionRes = {}
 	  this.props.sourcePaths.forEach(source => {
 			selectionRes = Object.assign(selectionRes, this.checkPath(source));
@@ -78,7 +78,7 @@ class TreeTable extends React.Component{
 			}
 		})
 
-		const	isNode = utils.findNode((this.props.tree), `${nodePath.endsWith('/*') ? nodePath.slice(0, -2) : nodePath}`);
+		const	isNode = utils.findNode((this.props.tree), nodePath);
 		if(isNode && isNode.children){
 			this.checkTreeChildren(isNode.children, selectionResult);
 		}

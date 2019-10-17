@@ -79,7 +79,7 @@ class DownloadDialog extends React.Component {
                     onChangeAttributeKey={this.handleChangeAttributeKey}
                     onDeleteAttribute={this.handleDeleteAttribute}
                     attributes={this.state.attributes}
-                    height={200}
+                    maxHeight={`300px`}
                 />
             </Dialog>
         )

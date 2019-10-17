@@ -1,10 +1,19 @@
 import { find, isEqual, cloneDeep, escapeRegExp } from 'lodash';
 
+/**
+ * 
+ * @param {array} root - array of objects which include at least key: string and children: array in case of nesting
+ * @param {string} keyNode - the string/ node key which will be looked for
+ */
 export const findNode = (root, keyNode) => {
-  if(!root || !keyNode) {return null}
+  if(!root || !keyNode){
+    return null
+  }
 
   let res = find(root, {key: keyNode});
-  if(res) {return res}
+  if(res){
+    return res
+  }
 
   for(let i = 0; !res && i < root.length; i++){
     let childNodes = root[i].children;
@@ -41,7 +50,7 @@ export const addNode = (root, path) => {
 		}
 	})
 
-	if(!added && keys[0] !== '*'){
+	if(!added){
 		let newNode = {
 			key: newKey,
 			label: keys[0],
@@ -60,13 +69,17 @@ export const addNode = (root, path) => {
 export const toNodeKey = (string) => {
   if(!string) {return ''}
   let res = string.startsWith('/') ? string : `/${string}`;
-  return res.endsWith('/*') ? res.slice(0,-2) : res;
+  return res
 }
 
 /** '/folder/folder/file.yml' becomes ['/folder', '/folder/foler', '/folder/folder/file.yml'] */
 export const getTreeKeysArray = (string) => {
+  if(string === '/'){
+    return ['/']
+  }
+
   let substrings = string.split('/')
-  .filter(string => string !== '' && string !== '*')
+  .filter(string => string !== '')
   .map(string => `/${string}`)
   .map((value, index, array) => {
     let splitArray = array.slice(0, index)
@@ -97,9 +110,11 @@ export const removeSequelPaths = (sources, icludedItems) => {
   let res = cloneDeep(sources);
   icludedItems.forEach(item => {
     sources.forEach(source => {
-      if(isSubfile(source, item.path)){
-
-        if(item.isFolder && source.slice(0, -2) > item.path){
+      if(item.path === '/'){
+        res = res.filter(path => path === item.path)
+      }
+      else if(isSubfile(source, item.path)){
+        if(item.isFolder && source > item.path){
           res = res.filter(path => path !== source);
         }
         else if (!item.isFolder && source !== item.path){

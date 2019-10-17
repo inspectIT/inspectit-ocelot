@@ -2,6 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { mappingsActions } from '../../../redux/ducks/mappings';
 import { agentConfigActions } from '../../../redux/ducks/agent-config';
+import { configurationActions } from '../../../redux/ducks/configuration';
 
 import {DataTable} from 'primereact/datatable';
 import {Column} from 'primereact/column';
@@ -121,7 +122,9 @@ class MappingsTable extends React.Component{
     )
   }
 
-  componentDidMount = () => this.props.fetchMappings();
+  componentDidMount = () => {
+    this.props.fetchMappings()
+  };
 
   filterMappings = (mappings) => {
     let {filterValue} = this.props;
@@ -170,6 +173,7 @@ const mapDispatchToProps = {
   fetchMappings: mappingsActions.fetchMappings,
   putMappings: mappingsActions.putMappings,
   downloadConfigFile: agentConfigActions.fetchConfigurationFile,
+  fetchFiles: configurationActions.fetchFiles,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(MappingsTable)

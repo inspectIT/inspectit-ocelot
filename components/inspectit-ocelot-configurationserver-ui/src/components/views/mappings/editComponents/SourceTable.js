@@ -12,6 +12,9 @@ class SourceTable extends React.Component{
 				  .this :global(.p-datatable table thead.p-datatable-thead){
 						display: none;
 					}
+					.this{
+						border-top: 1px solid #ddd;
+					}
 				`}</style>
 				<DataTable 
 					value={this.props.sourcePaths}
