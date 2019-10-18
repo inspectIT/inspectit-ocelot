@@ -66,8 +66,8 @@ By default, the local user authentication is used.</p>
 <p>By default, the configuration server uses an internal user management.
 When using this authentication mode, users and their credentials will be managed by the configuration server itself.</p>
 <p>Administrators can add and modify users via the provided web UI.</p>
-<p>In order to use the local user authentication the <code>inspectit.security.ldap-authentication</code> property must be set to <code>false</code>.</p>
-<pre><code class="hljs css language-YAML"><span class="hljs-attr">inspectit:</span>
+<p>In order to use the local user authentication the <code>inspectit-config-server.security.ldap-authentication</code> property must be set to <code>false</code>.</p>
+<pre><code class="hljs css language-YAML"><span class="hljs-attr">inspectit-config-server:</span>
 <span class="hljs-attr">    security:</span>
 <span class="hljs-attr">        ldap-authentication:</span> <span class="hljs-literal">false</span>
 </code></pre>
@@ -75,10 +75,10 @@ When using this authentication mode, users and their credentials will be managed
 <p>The configuration server also supports user authentication via LDAP.
 When using LDAP, users which are added using the <em>local user authentication</em> mode will not be available.
 Furthermore, the HTTP APIs which are related to the user management (<code>/api/v1/users</code>, <code>/api/v1/account/password</code>) cannot be used.</p>
-<p>In order to use LDAP for user authentication the <code>inspectit.security.ldap-authentication</code> property must be set to <code>true</code>.</p>
-<p>The LDAP related configuration properties have to be specified using the property <code>inspectit.security.ldap</code>.
+<p>In order to use LDAP for user authentication the <code>inspectit-config-server.security.ldap-authentication</code> property must be set to <code>true</code>.</p>
+<p>The LDAP related configuration properties have to be specified using the property <code>inspectit-config-server.security.ldap</code>.
 The following configuration snippet shows an example LDAP configuration (this configuration was created for <a href="https://github.com/rroemhild/docker-test-openldap">this</a> LDAP server).</p>
-<pre><code class="hljs css language-YAML"><span class="hljs-attr">inspectit:</span>
+<pre><code class="hljs css language-YAML"><span class="hljs-attr">inspectit-config-server:</span>
 <span class="hljs-attr">    security:</span>
 <span class="hljs-attr">        ldap-authentication:</span> <span class="hljs-literal">true</span>
 <span class="hljs-attr">        ldap:</span>
@@ -94,7 +94,7 @@ The following configuration snippet shows an example LDAP configuration (this co
 </code></pre>
 <h3><a class="anchor" aria-hidden="true" id="ldap-configuration-properties"></a><a href="#ldap-configuration-properties" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>LDAP Configuration Properties</h3>
 <p>The following tables contains the required LDAP configuration properties including a description for each property.
-Each property is located below the property <code>inspectit.security.ldap</code>.</p>
+Each property is located below the property <code>inspectit-config-server.security.ldap</code>.</p>
 <table>
 <thead>
 <tr><th>Property</th><th>Note</th></tr>
@@ -114,11 +114,11 @@ Each property is located below the property <code>inspectit.security.ldap</code>
 <h2><a class="anchor" aria-hidden="true" id="access-log"></a><a href="#access-log" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Access Log</h2>
 <p>By default, the server will log all authorized and unauthorized access attempts to secured endpoints.
 Access logging can be disabled using the following property:</p>
-<pre><code class="hljs css language-YAML"><span class="hljs-attr">inspectit:</span>
+<pre><code class="hljs css language-YAML"><span class="hljs-attr">inspectit-config-server:</span>
 <span class="hljs-attr">    security:</span>
 <span class="hljs-attr">        access-log:</span> <span class="hljs-literal">false</span>
 </code></pre>
-</span></div></article></div><div class="docLastUpdate"><em>Last updated on 2019-9-18 by Jonas Kunz</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/next/config-server/agent-mappings"><span class="arrow-prev">← </span><span>Agent Mappings</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#local-user-authentication">Local User Authentication</a></li><li><a href="#ldap-user-authentication">LDAP User Authentication</a><ul class="toc-headings"><li><a href="#ldap-configuration-properties">LDAP Configuration Properties</a></li></ul></li><li><a href="#access-log">Access Log</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2019 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</span></div></article></div><div class="docLastUpdate"><em>Last updated on 2019-10-16 by Marius Brill</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/next/config-server/agent-mappings"><span class="arrow-prev">← </span><span>Agent Mappings</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#local-user-authentication">Local User Authentication</a></li><li><a href="#ldap-user-authentication">LDAP User Authentication</a><ul class="toc-headings"><li><a href="#ldap-configuration-properties">LDAP Configuration Properties</a></li></ul></li><li><a href="#access-log">Access Log</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2019 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
