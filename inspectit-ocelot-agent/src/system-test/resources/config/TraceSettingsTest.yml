@@ -15,8 +15,7 @@ inspectit:
           name: TraceSettingsTest
           matcher-mode: ENDS_WITH
         methods:
-          - name: nested
-            matcher-mode: STARTS_WITH
+          - name: nestedC
 
       TraceSettingsTest-attributesSetterWithoutSpan:
         type:
@@ -74,6 +73,15 @@ inspectit:
           matcher-mode: ENDS_WITH
         methods:
           - name: dynamicSamplingRateTest
+
+      TraceSettingsTest-nestedSamplingTest:
+        type:
+          name: TraceSettingsTest
+          matcher-mode: ENDS_WITH
+        methods:
+          - name: nestedSamplingTestRoot
+          - name: nestedSamplingTestNested
+
 
     rules:
       TraceSettingsTest-startspan:
@@ -203,3 +211,13 @@ inspectit:
             action: get_arg0
           sample_prob:
             action: get_arg1
+
+      TraceSettingsTest-nestedSamplingTest:
+        scopes:
+          TraceSettingsTest-nestedSamplingTest: true
+        tracing:
+          start-span: true
+          sample-probability: sample_prob
+        entry:
+          sample_prob:
+            action: get_arg0

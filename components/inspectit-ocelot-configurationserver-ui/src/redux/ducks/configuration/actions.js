@@ -125,7 +125,7 @@ export const writeFile = (file, content, fetchFilesOnSuccess) => {
                     file,
                     content
                 };
-                
+
                 dispatch({ type: types.WRITE_FILE_SUCCESS, payload });
 
                 if (fetchFilesOnSuccess) {
@@ -194,3 +194,13 @@ export const move = (path, targetPath, fetchFilesOnSuccess) => {
             });
     };
 };
+
+/**
+ * Persists unsaved changes for the selected file in the browser if required.
+ */
+export const selectedFileContentsChanged = (content) => ({
+    type: types.SELECTED_FILE_CONTENTS_CHANGED,
+    payload: {
+        content
+    }
+});
