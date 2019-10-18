@@ -8,11 +8,16 @@ import org.springframework.web.bind.annotation.*;
 import rocks.inspectit.ocelot.mappings.AgentMappingManager;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 import rocks.inspectit.ocelot.rest.AbstractBaseController;
+import rocks.inspectit.ocelot.security.audit.AuditDetail;
+import rocks.inspectit.ocelot.security.audit.EntityAuditLogger;
 
 import javax.validation.Valid;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -25,6 +30,9 @@ public class AgentMappingController extends AbstractBaseController {
 
     @Autowired
     private AgentMappingManager mappingManager;
+
+    @Autowired
+    private EntityAuditLogger auditLogger;
 
     /**
      * Returns all existing agent mappings.
@@ -46,6 +54,10 @@ public class AgentMappingController extends AbstractBaseController {
     @PutMapping(value = "mappings")
     public void putMappings(@Valid @RequestBody List<AgentMapping> agentMappings) throws IOException {
         mappingManager.setAgentMappings(agentMappings);
+        auditLogger.logEntityCreation(() -> {
+            String mappings = agentMappings.stream().map(AgentMapping::getName).collect(Collectors.joining(","));
+            return new AuditDetail("Agent Mappings", mappings);
+        });
     }
 
     /**
@@ -72,6 +84,7 @@ public class AgentMappingController extends AbstractBaseController {
         boolean isDeleted = mappingManager.deleteAgentMapping(mappingName);
 
         if (isDeleted) {
+            auditLogger.logEntityDeletion(() -> new AuditDetail("Agent Mapping", "Name:" + mappingName));
             return ResponseEntity.ok().build();
         } else {
             return ResponseEntity.notFound().build();
@@ -110,6 +123,7 @@ public class AgentMappingController extends AbstractBaseController {
             mappingManager.addAgentMapping(agentMapping);
         }
 
+        auditLogger.logEntityCreation(agentMapping);
         return ResponseEntity.ok().build();
     }
 }
