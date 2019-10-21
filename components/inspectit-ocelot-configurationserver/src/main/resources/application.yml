@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:sqlite:${inspectit.working-directory}/users.db
+    url: jdbc:sqlite:${inspectit-config-server.working-directory}/users.db
     driver-class-name: org.sqlite.JDBC
     username: ""
     password: ""
