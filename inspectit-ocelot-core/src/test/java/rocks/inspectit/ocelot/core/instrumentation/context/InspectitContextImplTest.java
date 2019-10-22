@@ -6,12 +6,17 @@ import io.opencensus.tags.*;
 import io.opencensus.trace.Span;
 import io.opencensus.trace.SpanContext;
 import io.opencensus.trace.Tracing;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
+import rocks.inspectit.ocelot.bootstrap.correlation.noop.NoopLogTraceCorrelator;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.DataProperties;
 import rocks.inspectit.ocelot.core.testutils.GcUtils;
 
@@ -67,6 +72,19 @@ public class InspectitContextImplTest {
     @Nested
     public class EnterSpan {
 
+        @Spy
+        NoopLogTraceCorrelator traceCorrelator;
+
+        @BeforeEach
+        void setup() {
+            Instances.logTraceCorrelator = traceCorrelator;
+        }
+
+        @AfterEach
+        void reset() {
+            Instances.logTraceCorrelator = NoopLogTraceCorrelator.INSTANCE;
+        }
+
         @Test
         void spanEntered() {
             Span mySpan = Tracing.getTracer().spanBuilder("blub").startSpan();
@@ -75,6 +93,9 @@ public class InspectitContextImplTest {
             assertThat(ctx.enteredSpan()).isFalse();
 
             ctx.enterSpan(mySpan);
+
+            verify(traceCorrelator).startCorrelatedSpanScope(any());
+
             ctx.makeActive();
 
             assertThat(ctx.enteredSpan()).isTrue();
@@ -84,6 +105,7 @@ public class InspectitContextImplTest {
 
             assertThat(Tracing.getTracer().getCurrentSpan()).isNotSameAs(mySpan);
         }
+
 
     }
 

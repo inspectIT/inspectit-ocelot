@@ -2,7 +2,9 @@ package rocks.inspectit.ocelot;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.context.ApplicationContextInitializer;
@@ -16,6 +18,7 @@ import java.io.File;
  */
 @SpringBootApplication
 @Slf4j
+@EnableAutoConfiguration(exclude = {ErrorMvcAutoConfiguration.class})
 public class ConfigurationServer {
 
     /**
@@ -25,7 +28,7 @@ public class ConfigurationServer {
     private static final ApplicationContextInitializer<ConfigurableApplicationContext> WORKING_DIRECTORY_INITIALIZER = (ctx) -> {
         InspectitServerSettings settings = Binder
                 .get(ctx.getEnvironment())
-                .bind("inspectit", InspectitServerSettings.class).get();
+                .bind("inspectit-config-server", InspectitServerSettings.class).get();
         try {
             FileUtils.forceMkdir(new File(settings.getWorkingDirectory()));
         } catch (Exception e) {

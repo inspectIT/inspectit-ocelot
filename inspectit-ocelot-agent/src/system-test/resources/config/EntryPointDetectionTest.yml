@@ -38,8 +38,9 @@ inspectit:
           entry_point_found: {action: set, constant-input: {value: true}}
           is_entry_point:
             only-if-null: entry_point_found
-            before:
-              entry_point_found : true
+            order:
+              reads-before-written:
+                entry_point_found : true
             action: set
             constant-input: {value: 1}
         metrics:

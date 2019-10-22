@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.instrumentation.actions.ConditionalActionSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.RuleTracingSettings;
+import rocks.inspectit.ocelot.core.instrumentation.config.callsorting.CyclicDataDependencyException;
+import rocks.inspectit.ocelot.core.instrumentation.config.callsorting.GenericActionCallSorter;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.ActionCallConfig;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.InstrumentationConfiguration;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.InstrumentationRule;
@@ -211,34 +213,21 @@ public class MethodHookConfigurationResolver {
     }
 
     /**
-     * Combines and correctly orders all action calls from the given rules to a single map
+     * Combines and correctly orders all action calls from the given rules to a single ordered sequence of calls
      *
      * @param rules         the rules whose generic action calls should be merged
      * @param actionsGetter the getter to access the rules to process, e.g. {@link InstrumentationRule#getEntryActions()}
      * @return a map mapping the data keys to the action call which define the values
-     * @throws ConflictingDefinitionsException                       if the same data key is defined with different generic action calls
-     * @throws GenericActionCallSorter.CyclicDataDependencyException if the action calls have cyclic dependencies preventing a scheduling
+     * @throws CyclicDataDependencyException if the action calls have cyclic dependencies preventing a scheduling
      */
     private List<ActionCallConfig> combineAndOrderActionCalls(Set<InstrumentationRule> rules, Function<InstrumentationRule, Collection<ActionCallConfig>> actionsGetter)
-            throws ConflictingDefinitionsException, GenericActionCallSorter.CyclicDataDependencyException {
-        Map<String, InstrumentationRule> dataOrigins = new HashMap<>();
-        Map<String, ActionCallConfig> dataDefinitions = new HashMap<>();
-        for (val rule : rules) {
-            Collection<ActionCallConfig> actions = actionsGetter.apply(rule);
-            for (val dataDefinition : actions) {
-                String dataKey = dataDefinition.getName();
+            throws CyclicDataDependencyException {
 
-                //check if we have previously already encountered a differing definition for the key
-                if (dataOrigins.containsKey(dataKey) && !dataDefinition.equals(dataDefinitions.get(dataKey))) {
-                    throw new ConflictingDefinitionsException(dataOrigins.get(dataKey), rule, "the data key '" + dataKey + "'");
-                }
-
-                dataOrigins.put(dataKey, rule);
-                dataDefinitions.put(dataKey, dataDefinition);
-            }
-        }
-
-        return scheduler.orderActionCalls(dataDefinitions.values());
+        List<ActionCallConfig> allCalls = rules.stream()
+                .map(actionsGetter)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
+        return scheduler.orderActionCalls(allCalls);
     }
 
     @Value

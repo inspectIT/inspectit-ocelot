@@ -3,6 +3,7 @@ package rocks.inspectit.ocelot.config.model.tracing;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 
@@ -25,5 +26,8 @@ public class TracingSettings {
     @Max(1)
     @Min(0)
     private double sampleProbability;
+
+    @Valid
+    private LogCorrelationSettings logCorrelation;
 
 }

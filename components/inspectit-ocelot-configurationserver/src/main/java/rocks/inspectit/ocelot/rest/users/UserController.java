@@ -86,6 +86,7 @@ public class UserController extends AbstractBaseController {
             User savedUser = userService.addOrUpdateUser(
                     user.toBuilder()
                             .id(null)
+                            .isLdapUser(false)
                             .build());
             return ResponseEntity.created(
                     builder.path("users/{id}").buildAndExpand(savedUser.getId()).toUri())

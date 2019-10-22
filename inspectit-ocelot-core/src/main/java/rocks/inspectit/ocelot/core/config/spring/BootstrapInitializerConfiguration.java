@@ -5,9 +5,12 @@ import org.springframework.context.annotation.Configuration;
 import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.bootstrap.context.noop.NoopContextManager;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.noop.NoopObjectAttachments;
+import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.instrumentation.config.InstrumentationConfigurationResolver;
 import rocks.inspectit.ocelot.core.instrumentation.context.ContextManager;
 import rocks.inspectit.ocelot.core.instrumentation.context.ObjectAttachmentsImpl;
+import rocks.inspectit.ocelot.core.instrumentation.correlation.log.LogTraceCorrelatorImpl;
+import rocks.inspectit.ocelot.core.instrumentation.correlation.log.MDCAccess;
 import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
 
 import javax.annotation.PreDestroy;
@@ -35,6 +38,13 @@ public class BootstrapInitializerConfiguration {
         ObjectAttachmentsImpl attachments = new ObjectAttachmentsImpl();
         Instances.attachments = attachments;
         return attachments;
+    }
+
+    @Bean(LogTraceCorrelatorImpl.BEAN_NAME)
+    public LogTraceCorrelatorImpl getLogTraceCorrelator(MDCAccess access, InspectitEnvironment env) {
+        String key = env.getCurrentConfig().getTracing().getLogCorrelation().getKey();
+        LogTraceCorrelatorImpl correlator = new LogTraceCorrelatorImpl(access, key);
+        return correlator;
     }
 
     @PreDestroy

@@ -8,9 +8,10 @@ import org.springframework.context.event.EventListener;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
-import rocks.inspectit.ocelot.config.model.InspectitConfig;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
@@ -74,6 +75,30 @@ public class CommonTagsManager {
      */
     public Scope withCommonTagScope() {
         return Tags.getTagger().withTagContext(commonTagContext);
+    }
+
+    /**
+     * Returns newly created scope with common tag context including the additional given tags. Metrics collectors should use this Scope with the try/resource block:
+     * <code>
+     * try (Scope scope = withCommonTagScope()) {
+     * Stats.getStatsRecorder().newMeasureMap().put(M_ERRORS, 1L).record();
+     * }
+     * </code>
+     *
+     * @param customTagMap Map with additional tags.
+     * @return Returns newly created scope with default tag context including the additional given tags.
+     */
+    public Scope withCommonTagScope(Map<String, String> customTagMap) {
+        if (CollectionUtils.isEmpty(customTagMap)) {
+            return withCommonTagScope();
+        }
+
+        TagContextBuilder tagContextBuilder = Tags.getTagger().currentBuilder();
+        HashMap<String, String> tags = new HashMap<>(commonTagValueMap);
+        tags.putAll(customTagMap);
+        tags.entrySet().stream()
+                .forEach(entry -> tagContextBuilder.putLocal(TagKey.create(entry.getKey()), TagValue.create(entry.getValue())));
+        return tagContextBuilder.buildScoped();
     }
 
 

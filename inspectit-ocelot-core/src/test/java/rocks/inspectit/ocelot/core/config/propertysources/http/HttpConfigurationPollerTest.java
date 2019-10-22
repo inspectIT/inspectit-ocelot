@@ -40,7 +40,7 @@ class HttpConfigurationPollerTest {
         @Test
         public void successfullyEnabled() {
             InspectitConfig configuration = new InspectitConfig();
-            configuration.setConfig( new ConfigSettings());
+            configuration.setConfig(new ConfigSettings());
             configuration.getConfig().setHttp(new HttpConfigSettings());
             configuration.getConfig().getHttp().setFrequency(Duration.ofMillis(5000L));
             ScheduledFuture future = Mockito.mock(ScheduledFuture.class);
@@ -68,7 +68,7 @@ class HttpConfigurationPollerTest {
         @Test
         public void isEnabled() {
             InspectitConfig configuration = new InspectitConfig();
-            configuration.setConfig( new ConfigSettings());
+            configuration.setConfig(new ConfigSettings());
             configuration.getConfig().setHttp(new HttpConfigSettings());
             configuration.getConfig().getHttp().setFrequency(Duration.ofMillis(5000L));
             ScheduledFuture future = Mockito.mock(ScheduledFuture.class);
@@ -98,22 +98,22 @@ class HttpConfigurationPollerTest {
 
         @Test
         public void stateNotUpdated() {
-            when(currentState.update()).thenReturn(false);
+            doReturn(false).when(currentState).update(anyBoolean());
 
             poller.run();
 
-            verify(currentState).update();
+            verify(currentState).update(eq(false));
             verifyNoMoreInteractions(currentState);
             verifyZeroInteractions(env);
         }
 
         @Test
         public void stateUpdated() {
-            when(currentState.update()).thenReturn(true);
+            doReturn(true).when(currentState).update(anyBoolean());
 
             poller.run();
 
-            verify(currentState).update();
+            verify(currentState).update(eq(false));
             verify(env).updatePropertySources(any());
             verifyNoMoreInteractions(currentState, env);
         }

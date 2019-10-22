@@ -48,11 +48,17 @@
         </filter>
     </appender>
 
+    <!-- Appender, which counts the number of log events. Is only activated, if self monitoring is activated.-->
+    <appender name="logMetrics" class="rocks.inspectit.ocelot.core.selfmonitoring.LogMetricsAppender">
+        <filter class="rocks.inspectit.ocelot.core.logging.logback.LogbackInitializer$SelfMonitoringFilter" />
+    </appender>
+
     <!-- set log levels - for more verbose logging change inspectit.logging.trace or inspectit.logging.debug to true -->
     <root level="${INSPECTIT_LOG_LEVEL:-INFO}">
         <appender-ref ref="stdout" />
         <appender-ref ref="file" />
         <appender-ref ref="exceptions" />
+        <appender-ref ref="logMetrics" />
     </root>
 
     <!-- deactivate all other loggers, except for errors -->

@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:sqlite:${inspectit.working-directory}/users.db
+    url: jdbc:sqlite:${inspectit-config-server.working-directory}/users.db
     driver-class-name: org.sqlite.JDBC
     username: ""
     password: ""
@@ -15,7 +15,7 @@ spring:
 server:
   port: 8090
 
-inspectit:
+inspectit-config-server:
   working-directory: working_directory
   token-lifespan: 60m
   default-user:
@@ -33,3 +33,15 @@ inspectit:
   security:
     # Whether LDAP authentication should be used
     ldap-authentication: false
+
+# ACTUATOR PROPERTIES
+management:
+  # Whether to enable or disable all endpoints by default.
+  endpoints.enabled-by-default: false
+  endpoint:
+    # Whether to enable the health endpoint.
+    health.enabled: true
+  # HEALTH INDICATORS
+  health:
+    # Whether to enable LDAP health check.
+    ldap.enabled: ${inspectit-config-server.security.ldap-authentication}

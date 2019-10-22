@@ -26,3 +26,13 @@ inspectit:
         type: LONG
         unit: classes
         description: "the number of classes currently instrumented by inspectIT"
+
+      '[inspectit/self/logs]':
+        enabled: ${inspectit.self-monitoring.enabled}
+        type: LONG
+        unit: log events
+        description: "the number of log events"
+        views:
+          '[inspectit/self/logs]':
+            aggregation: SUM
+            tags: {"level": true}

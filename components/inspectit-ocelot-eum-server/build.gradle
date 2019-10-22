@@ -2,33 +2,61 @@ plugins {
 	id 'org.springframework.boot' version '2.1.4.RELEASE'
 	id 'java'
 }
+
 apply plugin: 'io.spring.dependency-management'
 
 group = 'rocks.inspectit.oce'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '1.8'
 
+task downloadBoomerangZipFile() {
+	ext.dest = new File(buildDir, "boomerang-source-${boomerangVersion}.zip")
+	outputs.files(ext.dest)
+	doLast {
+		def f = ext.dest
+		new URL("https://github.com/akamai/boomerang/archive/${boomerangVersion}.zip")
+				.withInputStream{ i -> f.withOutputStream{ it << i }}
+	}
+}
+
+task downloadAndUnzipBoomerang(dependsOn: downloadBoomerangZipFile, type: Copy) {
+	from zipTree(downloadBoomerangZipFile.dest)
+	into project.buildDir
+}
+
 bootJar {
+	dependsOn downloadAndUnzipBoomerang
+
 	archivesBaseName = 'inspectit-ocelot-eum-server'
 	version = "${buildVersion}"
 
 	manifest {
 		attributes 'Start-Class': 'rocks.inspectit.oce.eum.server.EUMServerApplication'
 	}
+
+	from ("$buildDir/boomerang-${boomerangVersion}"){
+		include "plugins/*.js"
+		include "boomerang.js"
+		into "static/boomerang"
+	}
 }
 
+test {
+	useJUnitPlatform()
+}
 
 dependencies {
 	implementation(
 			project(':inspectit-ocelot-config'),
 			"org.springframework.boot:spring-boot-starter-web",
+			"org.springframework.security:spring-security-web:5.1.5.RELEASE",
 			"io.opencensus:opencensus-api:${openCensusVersion}",
 			"io.opencensus:opencensus-impl:${openCensusVersion}",
 			"io.prometheus:simpleclient_httpserver:${prometheusClientVersion}",
 			"io.opencensus:opencensus-exporter-stats-prometheus:${openCensusVersion}",
-			'com.maxmind.geoip2:geoip2:2.12.0'
-
-
+			'com.maxmind.geoip2:geoip2:2.12.0',
+			'commons-net:commons-net:3.3',
+			'org.springframework.boot:spring-boot-starter-actuator'
 	)
 	compileOnly "org.projectlombok:lombok:1.18.4"
 	annotationProcessor "org.projectlombok:lombok:1.18.4"
