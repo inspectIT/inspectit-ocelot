@@ -26,6 +26,7 @@ dependencies {
     implementation(
             "org.springframework.boot:spring-boot:${springVersion}",
             'org.hibernate.validator:hibernate-validator:6.0.13.Final',
+            'commons-io:commons-io:2.5',
     )
 
     testImplementation(

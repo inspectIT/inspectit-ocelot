@@ -1,0 +1,123 @@
+package rocks.inspectit.ocelot.config.loaders;
+
+import lombok.experimental.UtilityClass;
+import org.apache.commons.io.IOUtils;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * This class is used to load the default and fallback configs present in the resource folder.
+ */
+@UtilityClass
+public class ConfigFileLoader {
+    /**
+     * The encoding used to decode the content of the loaded files.
+     */
+    static final Charset ENCODING = StandardCharsets.UTF_8;
+
+    /**
+     * This String resembles the classpaths that are searched to get the default config files.
+     */
+    static final String DEFAULT_CLASSPATH = "classpath:rocks/inspectit/ocelot/config/default/**/*.yml";
+
+    /**
+     * This String resembles the classpaths that are searched to get the fallback config files.
+     */
+    static final String FALLBACK_CLASSPATH = "classpath:rocks/inspectit/ocelot/config/fallback/**/*.yml";
+
+    /**
+     * Returns all files found in the default config path as a key value pair consisting of the path to the file and
+     * it's content.
+     *
+     * @return A Map consisting of the paths and the values of all files.
+     */
+    public Map<String, String> getDefaultConfigFiles() throws IOException {
+        return loadConfig(DEFAULT_CLASSPATH);
+    }
+
+    /**
+     * Returns all files found in the fallback config path as a key value pair consisting of the path to the file and
+     * it's content.
+     *
+     * @return A Map consisting of the paths and the values of all files.
+     */
+    public Map<String, String> getFallbackConfigFiles() throws IOException {
+        return loadConfig(FALLBACK_CLASSPATH);
+    }
+
+    /**
+     * Returns all files found in the default config path as an array of resource objects.
+     *
+     * @return An array containing all default config files as resource objects.
+     */
+    public Resource[] getDefaultResources() throws IOException {
+        return getRessources(DEFAULT_CLASSPATH);
+    }
+
+    /**
+     * Returns all files found in the fallback config path as an array of resource objects.
+     *
+     * @return An array containing all fallback config files as resource objects.
+     */
+    public Resource[] getFallBackResources() throws IOException {
+        return getRessources(DEFAULT_CLASSPATH);
+    }
+
+    /**
+     * This method loads all default config files present in the resource directory of the config project.
+     * The files are returned in a map. The keys are the path of the file, and the values are the the file's content.
+     * The path to the file is cleaned. The whole section leading to the /default folder is removed.
+     *
+     * @return A Map containing pairs of file paths and contents, both as String.
+     */
+    private HashMap<String, String> loadConfig(String path) throws IOException {
+        HashMap<String, String> configMap = new HashMap<>();
+        for (Resource resource : getRessources(path)) {
+            configMap.put(getPathOfResource(resource), readResourceContent(resource));
+        }
+        return configMap;
+    }
+
+    /**
+     * This method takes a resource instance as parameter and returns it's content.
+     *
+     * @param resource The resource instance the content should be returned from.
+     * @return The content of the resource.
+     */
+    private String readResourceContent(Resource resource) throws IOException {
+        return IOUtils.toString(resource.getInputStream(), ENCODING);
+    }
+
+    /**
+     * Takes a path as parameter and returns the resource found in the path.
+     *
+     * @param path the path to the resource that should be loaded.
+     * @return the loaded resource.
+     */
+    private Resource[] getRessources(String path) throws IOException {
+        return new PathMatchingResourcePatternResolver(ConfigFileLoader.class.getClassLoader()).getResources(path);
+
+    }
+
+    /**
+     * Returns the path of a given resource instance. Invokes .getPath if the given attribute is an instance of
+     * ClassPathResource otherwise the method invokes .getDescription.
+     *
+     * @param resource The resource the path should be returned of.
+     * @return The path of the given resource.
+     */
+    private String getPathOfResource(Resource resource) {
+        if (resource instanceof ClassPathResource) {
+            return ((ClassPathResource) resource).getPath();
+        } else {
+            return resource.getDescription();
+        }
+    }
+}
