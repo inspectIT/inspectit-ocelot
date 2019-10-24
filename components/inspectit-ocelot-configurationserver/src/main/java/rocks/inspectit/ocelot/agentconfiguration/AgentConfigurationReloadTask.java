@@ -138,7 +138,7 @@ class AgentConfigurationReloadTask implements Runnable {
         }
         if (fileManager.exists(cleanedPath)) {
             if (fileManager.isDirectory(cleanedPath)) {
-                return fileManager.getFilesInDirectory(cleanedPath, true).stream()
+                return fileManager.listSpecialFiles(cleanedPath, true, true).stream()
                         .flatMap(f -> f.getAbsoluteFilePaths(cleanedPath))
                         .filter(HAS_YAML_ENDING)
                         .sorted()
@@ -160,7 +160,7 @@ class AgentConfigurationReloadTask implements Runnable {
      */
     private Object loadAndMergeYaml(Object toMerge, String path) throws IOException {
         Yaml yaml = new Yaml();
-        String src = fileManager.readFile(path);
+        String src = fileManager.readSpecialFile(path, true);
         Object loadedYaml = yaml.load(src);
         if (toMerge == null) {
             return loadedYaml;

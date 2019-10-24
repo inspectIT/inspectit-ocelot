@@ -65,7 +65,7 @@ public class VersionControllerTest {
             when(author.getName()).thenReturn("test");
             when(author.getMail()).thenReturn("test");
 
-            versionController.commitAllChanges();
+            versionController.commitAll();
 
             verify(git).add();
             verify(mockAddCommand).addFilepattern(".");
@@ -75,7 +75,6 @@ public class VersionControllerTest {
             verify(mockCommitCommand).setMessage(any());
             verify(mockCommitCommand).setAuthor("test", "test");
             verify(mockCommitCommand).call();
-            verify(git).reset();
             verify(author).getName();
             verify(author).getMail();
             verifyNoMoreInteractions(mockAddCommand, mockCommitCommand, author);
@@ -92,7 +91,7 @@ public class VersionControllerTest {
             when(author.getMail()).thenReturn("test");
 
             assertThatExceptionOfType(GitAPIException.class)
-                    .isThrownBy(() -> versionController.commitAllChanges());
+                    .isThrownBy(() -> versionController.commitAll());
 
             verify(git).add();
             verify(mockAddCommand).addFilepattern(".");
@@ -111,7 +110,7 @@ public class VersionControllerTest {
     @Nested
     public class CommitFile {
         @Test
-        void singleFileCommit() throws GitAPIException {
+        void singleFileCommit() throws GitAPIException, IOException {
             AddCommand mockAddCommand = mock(AddCommand.class, Answers.RETURNS_SELF);
             when(git.add()).thenReturn(mockAddCommand);
             CommitCommand mockCommitCommand = mock(CommitCommand.class, Answers.RETURNS_SELF);
@@ -122,6 +121,7 @@ public class VersionControllerTest {
             when(author.getMail()).thenReturn("test");
 
             mockedController.commitFile("configuration/a");
+            versionController.listFiles("", true);
 
             verify(mockAddCommand).addFilepattern(".");
             verify(mockAddCommand).call();
@@ -145,15 +145,18 @@ public class VersionControllerTest {
             VersionController spyVersionController = Mockito.spy(versionController);
             doReturn(mockTreeWalk)
                     .when(spyVersionController)
-                    .getTreeWalk();
+                    .getTreeWalk(true);
             ObjectId mockId = mock(ObjectId.class);
             when(repo.resolve(Constants.HEAD)).thenReturn(mockId);
 
             spyVersionController.listFiles("", true);
+
             verify(repo).resolve(Constants.HEAD);
-            verify(spyVersionController).getTreeWalk();
+            verify(spyVersionController).getTreeWalk(true);
+            verify(spyVersionController).getFileType(any());
             verify(mockTreeWalk, times(2)).next();
             verify(mockTreeWalk).isSubtree();
+            verify(mockTreeWalk).getFileMode();
             verifyNoMoreInteractions(mockTreeWalk, repo, git);
         }
 

@@ -58,7 +58,7 @@ public class AgentConfigurationReloadTaskTest {
         void nonYamlIgnored() throws IOException {
             doReturn(true).when(fileManager).exists(any());
             doReturn(false).when(fileManager).isDirectory(any());
-            doReturn("").when(fileManager).readFile(any());
+            doReturn("").when(fileManager).readSpecialFile(any(), anyBoolean());
 
             String result = reloadTask.loadConfigForMapping(
                     AgentMapping.builder()
@@ -69,11 +69,11 @@ public class AgentConfigurationReloadTaskTest {
                             .build());
 
             assertThat(result).isEmpty();
-            verify(fileManager).readFile("a.yml");
-            verify(fileManager).readFile("b.YmL");
-            verify(fileManager).readFile("c.yaml");
+            verify(fileManager).readSpecialFile("a.yml", true);
+            verify(fileManager).readSpecialFile("b.YmL", true);
+            verify(fileManager).readSpecialFile("c.yaml", true);
 
-            verify(fileManager, never()).readFile("d.txt");
+            verify(fileManager, never()).readSpecialFile("d.txt", true);
         }
 
 
@@ -114,11 +114,11 @@ public class AgentConfigurationReloadTaskTest {
                             .name("somethingelse")
                             .build()
 
-            )).when(fileManager).getFilesInDirectory("folder", true);
+            )).when(fileManager).listSpecialFiles("folder", true, true);
 
-            doReturn("{ val1: z}").when(fileManager).readFile("z.yml");
-            doReturn("{ val1: a, val2: a}").when(fileManager).readFile("folder/a.yml");
-            doReturn("{ val1: b, val2: b, val3: b}").when(fileManager).readFile("folder/b.yml");
+            doReturn("{ val1: z}").when(fileManager).readSpecialFile("z.yml", true);
+            doReturn("{ val1: a, val2: a}").when(fileManager).readSpecialFile("folder/a.yml", true);
+            doReturn("{ val1: b, val2: b, val3: b}").when(fileManager).readSpecialFile("folder/b.yml", true);
 
 
             String result = reloadTask.loadConfigForMapping(
@@ -129,7 +129,7 @@ public class AgentConfigurationReloadTaskTest {
 
 
             assertThat(result).isEqualTo("{val1: z, val2: a, val3: b}\n");
-            verify(fileManager, never()).readFile("folder/somethingelse");
+            verify(fileManager, never()).readSpecialFile("folder/somethingelse", false);
         }
     }
 }

@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
+import rocks.inspectit.ocelot.file.FileInfo;
 import rocks.inspectit.ocelot.file.FileVersionResponse;
 
 import java.io.File;
@@ -32,7 +33,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 public class GitDirectoryManagerIntTest {
 
     private static final Path rootWorkDir = Paths.get("temp_test_workdir");
-    private static final Path fmRoot = rootWorkDir.resolve("root");
 
     @Autowired
     private GitDirectoryManager gitDirectoryManager;
@@ -49,7 +49,7 @@ public class GitDirectoryManagerIntTest {
     private void setupFileManager() throws Exception {
         Files.createDirectories(rootWorkDir);
         InspectitServerSettings conf = new InspectitServerSettings();
-        conf.setWorkingDirectory(fmRoot.toString());
+        conf.setWorkingDirectory(rootWorkDir.toString());
         versionController = new VersionController();
         versionController.config = conf;
         versionController.init();
@@ -57,7 +57,7 @@ public class GitDirectoryManagerIntTest {
         gitDirectoryManager = new GitDirectoryManager();
         gitDirectoryManager.versionController = versionController;
         gitDirectoryManager.config = conf;
-        gitDirectoryManager.init();
+        Files.createDirectory(rootWorkDir.resolve("files/configuration"));
     }
 
     @AfterEach
@@ -84,20 +84,20 @@ public class GitDirectoryManagerIntTest {
                 if (!specialFiles) {
                     if (path.contains("/")) {
                         String[] pathArray = path.split("/");
-                        Files.createDirectories(fmRoot.resolve(WorkingDirectoryManager.FILES_SUBFOLDER).resolve(pathArray[0]));
-                        String newPaths = WorkingDirectoryManager.FILES_SUBFOLDER + "/" + pathArray[0];
-                        Files.createFile(fmRoot.resolve(newPaths).resolve(pathArray[1]));
+                        Files.createDirectories(rootWorkDir.resolve("files/configuration").resolve(pathArray[0]));
+                        String newPaths = "files/configuration/" + pathArray[0];
+                        Files.createFile(rootWorkDir.resolve(newPaths).resolve(pathArray[1]));
                     } else {
-                        Files.createFile(fmRoot.resolve(WorkingDirectoryManager.FILES_SUBFOLDER).resolve(path));
+                        Files.createFile(rootWorkDir.resolve("files/configuration").resolve(path));
                     }
                 } else {
                     if (path.contains("/")) {
                         String[] pathArray = path.split("/");
-                        Files.createDirectories(fmRoot.resolve(pathArray[0]));
+                        Files.createDirectories(rootWorkDir.resolve(pathArray[0]));
                         String newPaths = pathArray[0];
-                        Files.createFile(fmRoot.resolve(newPaths).resolve(pathArray[1]));
+                        Files.createFile(rootWorkDir.resolve(newPaths).resolve(pathArray[1]));
                     } else {
-                        Files.createFile(fmRoot.resolve(path));
+                        Files.createFile(rootWorkDir.resolve(path));
                     }
                 }
             }
@@ -118,12 +118,12 @@ public class GitDirectoryManagerIntTest {
         File f;
         if (path.contains("/")) {
             String paths[] = path.split("/");
-            Files.createDirectories(fmRoot.resolve(WorkingDirectoryManager.FILES_SUBFOLDER).resolve(paths[0]));
-            String finalPath = WorkingDirectoryManager.FILES_SUBFOLDER + "/" + paths[0];
-            f = new File(String.valueOf(fmRoot.resolve(finalPath).resolve(paths[1])));
+            Files.createDirectories(rootWorkDir.resolve("files/configuration").resolve(paths[0]));
+            String finalPath = "files/configuration/" + paths[0];
+            f = new File(String.valueOf(rootWorkDir.resolve(finalPath).resolve(paths[1])));
 
         } else {
-            f = new File(String.valueOf(fmRoot.resolve(WorkingDirectoryManager.FILES_SUBFOLDER).resolve(path)));
+            f = new File(String.valueOf(rootWorkDir.resolve("files/configuration").resolve(path)));
         }
         FileWriter fw = new FileWriter(f);
         fw.write(content);
@@ -132,22 +132,36 @@ public class GitDirectoryManagerIntTest {
     }
 
     private static String readFile(String path) throws IOException {
-        Path file = fmRoot.resolve(WorkingDirectoryManager.FILES_SUBFOLDER).resolve(path);
+        Path file = rootWorkDir.resolve("files/configuration").resolve(path);
         return new String(Files.readAllBytes(file), WorkingDirectoryManager.ENCODING);
+    }
+
+    private static FileInfo buildFileInfo(String name, String type) {
+        FileInfo.Type fileType = FileInfo.Type.FILE;
+        if (!type.equals("file")) {
+            fileType = FileInfo.Type.DIRECTORY;
+        }
+        FileInfo.FileInfoBuilder builder = FileInfo.builder()
+                .name(name)
+                .type(fileType);
+        return builder.build();
     }
 
     @Nested
     public class CommitAllChanges {
         @Test
         void testCommit() throws IOException, GitAPIException {
-            List<String> beforeCommit = gitDirectoryManager.listFiles();
+            List<FileInfo> beforeCommit = gitDirectoryManager.listFiles("", true);
             setupTestFiles(false, "a", "b", "c");
-            List<String> afterCommit = Arrays.asList("a", "b", "c");
+            FileInfo file1 = buildFileInfo("configuration/a", "file");
+            FileInfo file2 = buildFileInfo("configuration/b", "file");
+            FileInfo file3 = buildFileInfo("configuration/c", "file");
+            List<FileInfo> afterCommit = Arrays.asList(file1, file2, file3);
 
             gitDirectoryManager.commitAllChanges();
 
             assertThat(beforeCommit).isNotEqualTo(afterCommit);
-            assertThat(gitDirectoryManager.listFiles()).isEqualTo(afterCommit);
+            assertThat(gitDirectoryManager.listFiles("", true)).isEqualTo(afterCommit);
         }
     }
 
@@ -157,7 +171,7 @@ public class GitDirectoryManagerIntTest {
         void listEmptyRepo() throws IOException {
             List<String> emptyList = Arrays.asList();
 
-            List<String> output = gitDirectoryManager.listFiles();
+            List<FileInfo> output = gitDirectoryManager.listFiles("", true);
 
             assertThat(output).isEqualTo(emptyList);
         }
@@ -166,9 +180,12 @@ public class GitDirectoryManagerIntTest {
         void listRepoTest() throws GitAPIException, IOException {
             setupTestFiles(false, "a", "b", "c");
             commitAll();
-            List<String> expected = Arrays.asList("a", "b", "c");
+            FileInfo file1 = buildFileInfo("configuration/a", "file");
+            FileInfo file2 = buildFileInfo("configuration/b", "file");
+            FileInfo file3 = buildFileInfo("configuration/c", "file");
+            List<FileInfo> expected = Arrays.asList(file1, file2, file3);
 
-            List<String> output = gitDirectoryManager.listFiles();
+            List<FileInfo> output = gitDirectoryManager.listFiles("", true);
 
             assertThat(output).isEqualTo(expected);
         }
@@ -181,61 +198,10 @@ public class GitDirectoryManagerIntTest {
             createFileWithContent("hello", "world");
             commitAll();
 
-            String output = gitDirectoryManager.readFile("hello");
+            String output = gitDirectoryManager.readFile("configuration/hello");
 
             assertThat(output).isEqualTo("world");
         }
-    }
-
-    @Nested
-    public class ReadAgentMappingFiles {
-        @Test
-        void readAgentMappingFile() throws GitAPIException, IOException {
-            createFileWithContent("../agent_mappings.yaml", "Hello World!");
-            commitAll();
-
-            String output = gitDirectoryManager.readAgentMappingFile();
-
-            assertThat(output).isEqualTo("Hello World!");
-        }
-    }
-
-    @Nested
-    public class CommitAgentMappingFiles {
-        @Test
-        void newFileCreated() throws IOException, GitAPIException {
-            createFileWithContent("../agent_mappings.yaml", "Hello World!");
-            commitAll();
-            createFileWithContent("../agent_mappings.yaml", "This is not an easter egg!");
-            createFileWithContent("dummyFile", "But this is one =)");
-
-            gitDirectoryManager.commitAgentMappingFile();
-
-            String agentMappingContent = gitDirectoryManager.readAgentMappingFile();
-            String dummyFileContent = gitDirectoryManager.readFile("dummyFile");
-            boolean agentMappingChanged = "This is not an easter egg!".equals(agentMappingContent);
-            boolean dummyFileNotChanged = dummyFileContent == null;
-            assertThat(agentMappingChanged && dummyFileNotChanged).isEqualTo(true);
-
-        }
-
-        @Test
-        void commitAgentMappingOnly() throws IOException, GitAPIException {
-            createFileWithContent("../agent_mappings.yaml", "Hello World!");
-            createFileWithContent("dummyFile", "Hello User!");
-            commitAll();
-            createFileWithContent("../agent_mappings.yaml", "This is not an easter egg!");
-            createFileWithContent("dummyFile", "But this is one =)");
-
-            gitDirectoryManager.commitAgentMappingFile();
-
-            String agentMappingContent = gitDirectoryManager.readAgentMappingFile();
-            String dummyFileContent = gitDirectoryManager.readFile("dummyFile");
-            boolean agentMappingChanged = "This is not an easter egg!".equals(agentMappingContent);
-            boolean dummyFileNotChanged = "Hello User!".equals(dummyFileContent);
-            assertThat(agentMappingChanged && dummyFileNotChanged).isEqualTo(true);
-        }
-
     }
 
     @Nested
@@ -250,8 +216,8 @@ public class GitDirectoryManagerIntTest {
 
             gitDirectoryManager.commitFiles();
 
-            String agentMappingContent = gitDirectoryManager.readAgentMappingFile();
-            String dummyFileContent = gitDirectoryManager.readFile("dummyFile");
+            String agentMappingContent = gitDirectoryManager.readFile("agent_mappings.yaml");
+            String dummyFileContent = gitDirectoryManager.readFile("configuration/dummyFile");
             boolean agentMappingChanged = "Hello World!".equals(agentMappingContent);
             boolean dummyFileNotChanged = "But this is one =)".equals(dummyFileContent);
             assertThat(agentMappingChanged && dummyFileNotChanged).isEqualTo(true);

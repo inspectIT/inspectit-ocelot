@@ -1,10 +1,12 @@
 package rocks.inspectit.ocelot.file.dirmanagers;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 /**
  * This class is used to store the data of the stored data is used in the version controller to set the author for commits.
  */
+@AllArgsConstructor
 @Data
 public class GitAuthor {
     /**
@@ -16,9 +18,4 @@ public class GitAuthor {
      * The mail of an author of an commit
      */
     private String mail;
-
-    public GitAuthor(String name, String mail) {
-        setName(name);
-        setMail(mail);
-    }
 }

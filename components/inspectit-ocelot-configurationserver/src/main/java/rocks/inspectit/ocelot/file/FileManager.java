@@ -17,10 +17,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Encapsulates access to the file system storing the source config files managed by this server.
@@ -34,7 +31,13 @@ public class FileManager {
      * filesRoot for the files and directories managed by this class.
      */
     @VisibleForTesting
-    static final String FILES_SUBFOLDER = "files/configuration";
+    static final String FILES_SUBFOLDER = "files";
+
+    /**
+     * The subfolder within the working directory in which all configuration files are stored.
+     */
+    @VisibleForTesting
+    static final String CONFIG_SUBFOLDER = "configuration";
 
     @VisibleForTesting
     static final Charset ENCODING = StandardCharsets.UTF_8;
@@ -66,52 +69,48 @@ public class FileManager {
     }
 
     /**
-     * Returns all files recursively contained under the given path.
+     * Lists all files found in the configuration folder.
      *
-     * @param path      the path of the directory
-     * @param recursive if true, the entire file tree within this directory is returned. Otherwise only the direct children.
-     * @return the directory contents
-     * @throws IOException If the input was not valid or something in the filesystem went wrong
+     * @param path       the path to the subfolder of which the files should be listed of. Use "" to list all files in
+     *                   configuration
+     * @param recursive  if true, all subfolders of the given path are searched.
+     * @param versioning if true, the directories of the last committed version are searched.
+     *                   if false, the directories as they are on the drive are searched.
+     * @return A list of files found in the given path.
      */
-    public synchronized List<FileInfo> getFilesInDirectory(String path, boolean recursive) throws IOException {
-        Path dir;
-        if (StringUtils.isEmpty(path)) {
-            dir = filesRoot;
-        } else {
+    public List<FileInfo> listConfigurationFiles(String path, boolean recursive, boolean versioning) throws IOException {
+        if (!StringUtils.isEmpty(path)) {
             assertPathWithinFilesRoot(path);
-            dir = filesRoot.resolve(path);
         }
-        try (Stream<Path> files = Files.list(dir)) {
-            List<FileInfo> result = new ArrayList<>();
-            for (Path child : files.collect(Collectors.toList())) {
-                boolean isDirectory = Files.isDirectory(child);
-                FileInfo.FileInfoBuilder builder = FileInfo.builder()
-                        .name(child.getFileName().toString())
-                        .type(isDirectory ? FileInfo.Type.DIRECTORY : FileInfo.Type.FILE);
-                if (isDirectory && recursive) {
-                    builder.children(getFilesInDirectory(getRelativePath(child), true));
-                }
-                result.add(builder.build());
-            }
-            return result;
+        if (versioning) {
+            return gitDirectoryManager.listFiles(setToPathInConfig(path), recursive);
+        } else {
+            return workingDirectoryManager.listFiles(setToPathInConfig(path), recursive);
         }
     }
 
     /**
-     * Returns all file names found in the files folder, either from the last commit or the working directory
-     *
-     * @param versioning         if true,  the last committed file tree is returned. Otherwise the entire file tree within this
-     *                           directory is returned.
-     * @param onlyConfigurations if true, only files found in the configurations folder are returned.
-     * @return the given file names as a List of type String
+     * @param path       the path to the subfolder of which the files should be listed of. Use "" to list all files in
+     *                   files
+     * @param recursive  if true, all subfolders of the given path are searched.
+     * @param versioning if true, the directories of the last committed version are searched.
+     *                   if false, the directories as they are on the drive are searched.
+     * @return A list of files found in the given path.
      */
-    public synchronized List<String> listFiles(boolean versioning, boolean onlyConfigurations) throws IOException {
+    public List<FileInfo> listSpecialFiles(String path, boolean recursive, boolean versioning) throws IOException {
+        if (!StringUtils.isEmpty(path)) {
+            assertPathWithinFilesRoot(path);
+        }
         if (versioning) {
-            return gitDirectoryManager.listFiles(onlyConfigurations);
+            return gitDirectoryManager.listFiles(path, recursive);
         } else {
-            return workingDirectoryManager.listFiles("", onlyConfigurations);
+            return workingDirectoryManager.listFiles(path, recursive);
         }
     }
+
+   /* public List<FileInfo> listFiles(String path, boolean recursive) throws IOException {
+        return workingDirectoryManager.listFiles(path, recursive);
+    }*/
 
     /**
      * @param path the path to check
@@ -145,7 +144,6 @@ public class FileManager {
 
         FileUtils.forceMkdir(dir.toFile());
         fireFileChangeEvent();
-        commitAllChanges();
     }
 
     /**
@@ -154,7 +152,7 @@ public class FileManager {
      * @param path the path of the directory
      * @throws IOException if the directory could not be deleted
      */
-    public synchronized void deleteDirectory(String path) throws IOException {
+    public synchronized void deleteDirectory(String path) throws IOException, GitAPIException {
         assertValidSubPath(path);
         Path dir = filesRoot.resolve(path);
         // throw a more meaningful exception instead of the illegal argument exception thrown by
@@ -163,110 +161,93 @@ public class FileManager {
             throw new NotDirectoryException(getRelativePath(dir));
         }
         FileUtils.deleteDirectory(dir.toFile());
-        fireFileChangeEvent();
-    }
-
-    /**
-     * Reads the given file's content as it is found in the working directory as string
-     *
-     * @param filePath the path of the file
-     * @return the files content
-     * @throws IOException if the file could not be read
-     */
-    public synchronized String readFile(String filePath) {
-        return readFile(filePath, false);
-    }
-
-    /**
-     * Reads the given file's content as string. Can either read the file as it is currently found in the working directory
-     * or last committed version of the file.
-     *
-     * @param fromWorkingDir if true, the file as it is currently stored in the working directory is returned. Otherwise,
-     *                       the file as it was last committed is returned.
-     * @param filePath       the path of the file
-     * @return the files content
-     * @throws IOException if the file could not be read
-     */
-    public synchronized String readFile(String filePath, boolean fromWorkingDir) {
-        if (fromWorkingDir) {
-            try {
-                return workingDirectoryManager.readFile(filePath);
-            } catch (IOException e) {
-                log.error("Could not read file: {}", filePath);
-                return null;
-            }
-        } else {
-            try {
-                return gitDirectoryManager.readFile(filePath);
-            } catch (IOException e) {
-                log.error("Could not read file: {}", filePath);
-                return null;
-            }
-        }
-    }
-
-
-    public synchronized String readAgentMapping() {
-        return readAgentMapping(false);
-    }
-
-    /**
-     * Reads the agent
-     *
-     * @param fromWorkingDir if true, the file as it is currently stored in the working directory is returned. Otherwise,
-     *                       the file as it was last committed is returned.
-     * @return the files content
-     * @throws IOException if the file could not be read
-     */
-    public synchronized String readAgentMapping(boolean fromWorkingDir) {
-        if (fromWorkingDir) {
-            try {
-                return workingDirectoryManager.readAgentMappingFile();
-            } catch (IOException e) {
-                log.error("Could not read AgentMapping from disk");
-                return null;
-            }
-        } else {
-            try {
-                return gitDirectoryManager.readAgentMappingFile();
-            } catch (IOException e) {
-                log.error("Could not read AgentMapping from last git commit");
-                return null;
-            }
-        }
-    }
-
-    /**
-     * Creates or replaces the file under the given path with the given content.
-     * If required, parent directories are automatically created.
-     *
-     * @param path    the path of the file
-     * @param content the content of the file
-     * @throws IOException if the file could not be written
-     */
-    public synchronized void createOrReplaceFile(String path, String content) throws IOException, GitAPIException {
-        assertValidSubPath(path);
-        Path file = filesRoot.resolve(path);
-        if (Files.exists(file) && !Files.isRegularFile(file)) {
-            throw new AccessDeniedException(path + " is a directory!");
-        }
-        FileUtils.forceMkdir(file.getParent().toFile());
-        Files.write(file, content.getBytes(ENCODING));
-        fireFileChangeEvent();
         commitAllChanges();
+        fireFileChangeEvent();
+    }
+
+    /**
+     * Reads the given file's content as a string.
+     * Only Reads files in sub directories of or directly from /configuration
+     *
+     * @param path the path of the file.
+     * @return the files content.
+     * @throws IOException if the file could not be read.
+     */
+    public String readConfigurationFile(String path, boolean versioning) throws AccessDeniedException {
+        assertValidSubPath(path);
+        if (!versioning) {
+            try {
+                return workingDirectoryManager.readFile(setToPathInConfig(path));
+            } catch (IOException e) {
+                log.error("Could not read file: {}", path);
+                return null;
+            }
+        } else {
+            try {
+                return gitDirectoryManager.readFile(setToPathInConfig(path));
+            } catch (IOException e) {
+                log.error("Could not read file: {}", path);
+                return null;
+            }
+        }
+    }
+
+    /**
+     * Reads the given file's content as a string.
+     * Reads all files in the files folder.
+     *
+     * @param path the path to the file that should be read
+     * @return the files content.
+     * @throws IOException if the file could not be read.
+     */
+    public String readSpecialFile(String path, boolean versioning) throws AccessDeniedException {
+        assertValidSubPath(path);
+        if (!versioning) {
+            try {
+                return workingDirectoryManager.readFile(path);
+            } catch (IOException e) {
+                log.error("Could not read file: {}", path);
+                return null;
+            }
+        } else {
+            try {
+                return gitDirectoryManager.readFile(path);
+            } catch (IOException e) {
+                log.error("Could not read file: {}", path);
+                return null;
+            }
+        }
     }
 
     /**
      * Creates or replaces the file under the given path with the given content.
      * If required, parent directories are automatically created.
+     * Writes all files in the 'configuration' folder.
      *
      * @param path    the path of the file
      * @param content the content of the file
      * @throws IOException if the file could not be written
      */
-    public synchronized void writeFile(String path, String content) throws IOException, GitAPIException {
+    public synchronized void writeConfigurationFile(String path, String content) throws IOException, GitAPIException {
+        assertValidSubPath(path);
+        workingDirectoryManager.writeFile(setToPathInConfig(path), content);
+        commitAllChanges();
+        fireFileChangeEvent();
+    }
+
+    /**
+     * Creates or replaces the file under the given path with the given content.
+     * If required, parent directories are automatically created.
+     * Writes all files in the 'files' folder
+     *
+     * @param path    the path of the file
+     * @param content the content of the file
+     * @throws IOException if the file could not be written
+     */
+    public synchronized void writeSpecialFile(String path, String content) throws IOException, GitAPIException {
         workingDirectoryManager.writeFile(path, content);
         commitAllChanges();
+        fireFileChangeEvent();
     }
 
     /**
@@ -297,17 +278,7 @@ public class FileManager {
     public synchronized void move(String source, String destination) throws IOException, GitAPIException {
         assertValidSubPath(source);
         assertValidSubPath(destination);
-        Path src = filesRoot.resolve(source);
-        Path dest = filesRoot.resolve(destination);
-
-        FileUtils.forceMkdir(dest.getParent().toFile());
-
-        if (Files.isDirectory(src)) {
-            FileUtils.moveDirectory(src.toFile(), dest.toFile());
-        } else {
-            FileUtils.moveFile(src.toFile(), dest.toFile());
-        }
-        fireFileChangeEvent();
+        workingDirectoryManager.move(source, destination);
         commitAllChanges();
     }
 
@@ -371,5 +342,15 @@ public class FileManager {
         gitDirectoryManager.commitAllChanges();
     }
 
-
+    /**
+     * Creates a new String with the configuration path in front of a given path and returns it.
+     *
+     * @param path the path which should be added.
+     * @return The path with the configuration path added.
+     */
+    private String setToPathInConfig(String path) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(CONFIG_SUBFOLDER).append("/").append(path);
+        return builder.toString();
+    }
 }

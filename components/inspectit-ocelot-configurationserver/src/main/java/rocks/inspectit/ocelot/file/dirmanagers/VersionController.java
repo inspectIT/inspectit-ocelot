@@ -8,10 +8,7 @@ import org.eclipse.jgit.api.LogCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.diff.RawTextComparator;
-import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.ObjectLoader;
-import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
@@ -21,6 +18,8 @@ import org.eclipse.jgit.util.io.DisabledOutputStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
+import rocks.inspectit.ocelot.file.FileInfo;
+import rocks.inspectit.ocelot.file.FileInfo.Type;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
@@ -36,6 +35,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+
 
 @Component
 @Slf4j
@@ -101,7 +101,7 @@ public class VersionController {
             //If there is no .git folder present, commit all files found in the directory to the local repo.
             if (isGitRepository()) {
                 log.info("Initially committing files in the directory...");
-                commitAllChanges();
+                commitAll();
             }
             log.info("Git directory set up successfully at {} !", localPath.toString());
         } catch (GitAPIException | IOException e) {
@@ -130,31 +130,12 @@ public class VersionController {
     }
 
     /**
-     * Adds all local files and commits them to the repo.
-     *
-     * @return returns true if the commit was successful.
-     */
-    public void commitAllChanges() throws GitAPIException {
-        addAllFiles();
-        commitAll();
-    }
-
-    /**
      * Commits all changes to the master branch of the local repo.
      *
      * @return Returns true of the commits was successful.
      */
-    private void commitAll() throws GitAPIException {
-        SimpleDateFormat formatter = new SimpleDateFormat(DATETIME_FORMAT);
-        Date date = new Date();
-        git.commit()
-                .setAll(true)
-                .setAuthor(author.getName(), author.getMail())
-                .setMessage("Commit changes to all files on " + formatter.format(date))
-                .call();
-
-        log.info("Committed all changes to repository at {}", repo.getDirectory());
-        git.reset();
+    public void commitAll() throws GitAPIException {
+        commit(git.commit().setAll(true));
     }
 
     /**
@@ -198,33 +179,44 @@ public class VersionController {
      *
      * @return A list of paths which have been updated in the last commit.
      */
-    public List<String> listFiles(String filePrefix, boolean onlyConfigurations) throws IOException {
+    public List<FileInfo> listFiles(String path, boolean recursive) throws IOException {
         if (repo.resolve(Constants.HEAD) == null) {
             return Collections.emptyList();
         }
-        ArrayList<String> filesFromLastCommit = new ArrayList<>();
-        TreeWalk treeWalk = getTreeWalk();
+        ArrayList<FileInfo> filesFromLastCommit = new ArrayList<>();
+        TreeWalk treeWalk = getTreeWalk(recursive);
         while (treeWalk.next()) {
-            if (treeWalk.isSubtree()) {
+            if (treeWalk.isSubtree() && recursive) {
                 treeWalk.enterSubtree();
             } else {
-                if (isInPath(treeWalk, filePrefix)) {
+                if (isInPath(treeWalk, path)) {
                     String fileName = treeWalk.getPathString();
-                    if (onlyConfigurations) {
-                        if (fileName.startsWith("configuration")) {
-                            if (fileName.startsWith(filePrefix)) {
-                                filesFromLastCommit.add(fileName.replaceFirst(filePrefix, ""));
-                            }
-                        }
-                    } else {
-                        if (fileName.startsWith(filePrefix)) {
-                            filesFromLastCommit.add(fileName.replaceFirst(filePrefix, ""));
-                        }
+                    if (fileName.startsWith(path)) {
+                        FileInfo.FileInfoBuilder builder = FileInfo.builder()
+                                .name(fileName)
+                                .type(getFileType(treeWalk));
+                        filesFromLastCommit.add(builder.build());
                     }
                 }
             }
         }
         return filesFromLastCommit;
+    }
+
+    /**
+     * Returns the type of a file of a TreeWalk object
+     *
+     * @param treeWalk the TreeWalk object to get the file from.
+     * @return The Type of the file. Either File or Directory
+     */
+    @VisibleForTesting
+    Type getFileType(TreeWalk treeWalk) {
+        Type fileType = FileInfo.Type.DIRECTORY;
+        FileMode fileMode = treeWalk.getFileMode();
+        if (fileMode == FileMode.REGULAR_FILE || fileMode == FileMode.EXECUTABLE_FILE) {
+            fileType = FileInfo.Type.FILE;
+        }
+        return fileType;
     }
 
     /**
@@ -238,6 +230,21 @@ public class VersionController {
         TreeWalk treeWalk = new TreeWalk(repo);
         treeWalk.addTree(tree);
         treeWalk.setRecursive(true);
+        return treeWalk;
+    }
+
+    /**
+     * Returns the TreeWalk Object from the last commit.
+     *
+     * @param recursive if true, TreeWalk iterates the RevTree recursively.
+     * @return The TreeWalk Object from the current repo.
+     */
+    @VisibleForTesting
+    TreeWalk getTreeWalk(boolean recursive) throws IOException {
+        RevTree tree = getTree();
+        TreeWalk treeWalk = new TreeWalk(repo);
+        treeWalk.addTree(tree);
+        treeWalk.setRecursive(recursive);
         return treeWalk;
     }
 
