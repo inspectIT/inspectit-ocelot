@@ -6,6 +6,8 @@ import { Button } from 'primereact/button';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 
+import { isNull } from 'lodash';
+
 class EditAttributes extends React.Component{
 
   constructor(props){
@@ -24,10 +26,10 @@ class EditAttributes extends React.Component{
       <InputText 
         value={attKey === null ? Object.keys(columnProps.rowData)[0] : attKey}
         onChange={e => this.setState({attKey: e.target.value})}
-        onBlur={e => this.onBlur_KeyField(e.target.value, columnProps)}
+        onBlur={e => this.handleBlur(e.target.value, null, columnProps)}
         onKeyDown={e => {
           if(e.key === 'Enter' || e.key === 'Tab'){
-            this.onBlur_KeyField(e.target.value, columnProps)}
+            this.handleBlur(e.target.value, null, columnProps)}
             if(e.key === 'Tab'){
               this.setState({attValue: ''})
             }
@@ -43,39 +45,32 @@ class EditAttributes extends React.Component{
       <InputText 
         value={attValue === null ? columnProps.rowData[Object.keys(columnProps.rowData)[0]] : attValue}
         onChange={e => this.setState({attValue: e.target.value})} 
-        onBlur={e => this.onBlur_ValueField(e.target.value, columnProps.rowData)}
+        onBlur={e => this.handleBlur(null, e.target.value, columnProps)}
         onKeyDown={e =>{
           if(e.key === 'Enter' || e.key === 'Tab'){
-            this.onBlur_ValueField(e.target.value, columnProps.rowData)
+            this.handleBlur(null, e.target.value, columnProps)
           } 
         }}
       /> 
     )
   }
 
-  onBlur_KeyField = (newKey, columnProps) => {
+  handleBlur = (attKey, attValue, columnProps) => {
     const allAttKeys = Object.keys(this.props.attributes);
+    const oldKey = Object.keys(columnProps.rowData)[0];
 
-    if(newKey !== '' && !allAttKeys.includes(newKey)){
-      const oldKey = Object.keys(columnProps.rowData)[0];
-      this.props.onChangeAttributeKey(oldKey, newKey);
-    } 
-    else if (allAttKeys[columnProps.rowIndex] !== newKey) {
-      this.props.showWarningMessage('Attribute has not been Changed', !newKey ? 'The attribute key cannot be empty' : 'This mapping already has an attribute with the given key');
-    }
-    this.setState({attKey: null});
-  }
-
-  onBlur_ValueField = (newValue, rowData) => {
-    const key = Object.keys(rowData)[0];
-
-    if(newValue !== '') {
-      this.props.onChValueOrAddAttribute(key, newValue);
+    if(
+      ( !isNull(attKey) && (allAttKeys.includes(attKey) && allAttKeys[columnProps.rowIndex] !== attKey) )
+      || ( !isNull(attKey) && columnProps.rowData[attKey] || !isNull(attValue) && attValue === columnProps.rowData[oldKey] )
+      || ( oldKey == null && !attKey && !attValue )
+      || ( isNull(attKey) && oldKey == null && allAttKeys.includes('') )
+    ) {
+      // attribute has not been changed in a way there should be a callback
     } else {
-      this.props.showWarningMessage('Attribute has not been Changed', 'The attribute value cannot be empty');
+      this.props.onAttributeChange(oldKey, attKey, attValue)
     }
 
-    this.setState({attValue: null});
+    this.setState({attKey: null, attValue: null});
   }
 
   render() {
@@ -106,7 +101,7 @@ class EditAttributes extends React.Component{
           />
         <Column 
           columnKey='buttonRow'
-          body={rowData => Object.keys(rowData)[0] ? <Button icon='pi pi-trash' onClick={() => this.props.onDeleteAttribute(rowData)}/> : ''}
+          body={rowData => Object.keys(rowData)[0] != null ? <Button icon='pi pi-trash' onClick={() => this.props.onDeleteAttribute(rowData)}/> : ''}
           style={{width: '4em'}}
         />
       </DataTable>

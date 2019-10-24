@@ -12,6 +12,8 @@ import EditSources from '../editComponents/EditSources'
 import {cloneDeep, isEqual} from 'lodash';
 import EditAttributes from '../editComponents/EditAttributes';
 
+import { isNull } from 'lodash';
+
 /**
  * Dialog for editing the given mapping.
  */
@@ -32,45 +34,12 @@ class EditMappingDialog extends React.Component {
 	}
 
 	handleAddSource = (newSource) => {
-		let sourceCopy = cloneDeep(this.state.mapping.sources);
-		if(!sourceCopy){
-			sourceCopy = [];
-		}
-
+		let sourceCopy = cloneDeep(this.state.mapping.sources) || [];
 		sourceCopy.unshift(newSource);
 		this.setState({ mapping: {...this.state.mapping, sources: sourceCopy} });
   }
 
 	handleUpdateSources = (newSources) => this.setState({ mapping: {...this.state.mapping, sources: newSources} });
-
-	handleChangeAttributeKey = (oldKey, newKey) => {
-		if (oldKey === newKey){
-			return
-		}
-
-		const {mapping} = this.state;
-    let newAttributes = {}
-		if(!oldKey){
-			newAttributes = cloneDeep(mapping.attributes)
-			if(!newAttributes){
-				newAttributes = {}
-			}
-			newAttributes[newKey] = '.*'
-		} else {
-				const oldKeys = Object.keys(mapping.attributes);
-				oldKeys.forEach(key => {
-						if(oldKey === key && !newAttributes[newKey]){
-								newAttributes[newKey] = mapping.attributes[key]
-						} else if(oldKey !== key && !newAttributes[oldKey]){
-								newAttributes[key] = mapping.attributes[key]
-						}
-				})
-		}
-
-		this.setState({ mapping: {...mapping, attributes: newAttributes} });
-	}
-	
-	handleChangeValueOrAddAttribute = (key, value) => this.setState({ mapping: {...this.state.mapping, attributes: {...this.state.mapping.attributes, [key]: value }} });
 
 	handleDeleteAttribute = (attribute) => {
 		let newAttributes = cloneDeep(this.state.mapping.attributes)
@@ -78,20 +47,38 @@ class EditMappingDialog extends React.Component {
 		this.setState({ mapping: {...this.state.mapping, attributes: newAttributes} });
   }
 
+  handleAttributeChange = (oldKey, newKey, newValue) => {
+	const {attributes} = this.state.mapping;
+	let newAttributes = cloneDeep(attributes);
+
+	if(oldKey == null && ( newKey || newValue )) {
+		if(newKey) {
+			newAttributes[newKey] = '';
+		} else {
+			newAttributes[''] = newValue;
+		}
+	} else if(!isNull(oldKey)) {
+		if(!isNull(newKey)) {
+			delete newAttributes[oldKey];
+			newAttributes[newKey] = attributes[oldKey];
+		} else {
+			newAttributes[oldKey] = newValue;
+		}
+	}
+
+	this.setState({ mapping: {...this.state.mapping, attributes: newAttributes} });
+  }
+
   render() {
 		const {mapping} = this.state;
-		const maxHeightFieldset = this.state.height * 0.35
+		const maxHeightFieldset = this.state.height * 0.45
     return (
 			<div className='this'>
 				<style jsx>{`
 					.this :global(.p-dialog-content){
-						padding: 0.25em 0em 0em 0em;
+						// padding: 0.25em 0em 0em 0em;
 						border-left: 1px solid #ddd;
 						border-right: 1px solid #ddd;
-					}
-					.middle{
-					 border-top: 2px solid #ddd;
-					 border-bottom: 2px solid #ddd;
 					}
 				`}</style>
 				<Dialog
@@ -107,37 +94,38 @@ class EditMappingDialog extends React.Component {
 						</div>
 					)}
 				>
-					<Fieldset legend='Mapping Name' style={{'padding-top': 0, overflow: 'hidden'}}>
-						<span>
-							<div className="p-inputgroup" style = {{display: "inline-flex", verticalAlign: "middle", width: '100%',}}>
-									<InputText 
-										placeholder='Enter new name'
-										value={mapping.name ? mapping.name : ''} 
-										onChange={e => this.setState({mapping: {...mapping, name: e.target.value}}) }
-										style={{width: '100%'}} 
-									/>
-									<span className="pi p-inputgroup-addon pi-pencil" style={{background: 'inherit', 'border-color': '#656565'}}/>
-							</div>
-						</span>
-					</Fieldset>
+					<span style={{display: 'flex', alignItems: 'center'}}>
+						<p style={{width: '9rem'}}>Mapping Name: </p>
+						<div className="p-inputgroup" style = {{display: "inline-flex", verticalAlign: "middle", width: '100%' }}>
+								<InputText 
+									placeholder='Enter new name'
+									value={mapping.name ? mapping.name : ''} 
+									onChange={e => this.setState({mapping: {...mapping, name: e.target.value}}) }
+									style={{width: '100%'}} 
+								/>
+								<span className="pi p-inputgroup-addon pi-pencil" style={{background: 'inherit', 'border-color': '#656565'}}/>
+						</div>
+					</span>
 					<Fieldset legend='Sources' style={{'padding-top': 0, 'max-height': maxHeightFieldset, overflow: 'hidden'}}>
 						<EditSources
-								visible={this.props.visible}
-								sources={mapping.sources} 
-								onUpdateAllSources={this.handleUpdateSources}
-								onAddSource={this.handleAddSource}
-								maxHeight={`calc(${maxHeightFieldset}px - 10em)`}
-							/> 
-					</Fieldset>
-					<Fieldset legend='Attributes' style={{'padding-top': 0, 'max-height': maxHeightFieldset, overflow: 'hidden'}}>
-						<EditAttributes 
-							attributes={mapping.attributes}
-							onChangeAttributeKey={this.handleChangeAttributeKey}
-							onDeleteAttribute={this.handleDeleteAttribute}
-							onChValueOrAddAttribute={this.handleChangeValueOrAddAttribute}
+							visible={this.props.visible}
+							sources={mapping.sources} 
+							onUpdateAllSources={this.handleUpdateSources}
+							onAddSource={this.handleAddSource}
 							maxHeight={`calc(${maxHeightFieldset}px - 10em)`}
-						/>
+						/> 
 					</Fieldset>
+					<div style={{'margin-top': '1em'}}>
+					{/* <Fieldset legend='Attributes' style={{'padding-top': 0, 'max-height': maxHeightFieldset, overflow: 'hidden'}}> */}
+					<EditAttributes 
+						attributes={mapping.attributes}
+						onAttributeChange={this.handleAttributeChange}
+						onDeleteAttribute={this.handleDeleteAttribute}
+						maxHeight={`calc(${maxHeightFieldset}px - 10em)`}
+					/>
+					{/* </Fieldset> */}
+					</div>
+
 				</Dialog>
 			</div>
     )
@@ -166,6 +154,9 @@ class EditMappingDialog extends React.Component {
 			const msg = !this.state.mapping.name ? 'Enter a name for your mapping' : 'A Mapping with this name already exists';
 			this.props.showWarningMessage('Mappings Could not be Updated', msg);
 			return	
+		} else if(checkIfValuesOrKeysAreEmpty(this.state.mapping.attributes)){
+			this.props.showWarningMessage('Mappings Could not be Updated', 'Attribute keys or values should not be empty');
+			return
 		}
 		
 		if(this.state.isNewMapping){
@@ -200,6 +191,23 @@ const checkIfNameAlreadyExists = (allMappings, newName) => {
 	let res
 	allMappings.forEach(mapping => {
 		if(mapping.name === newName){
+			res = true
+		}
+	})
+	return res
+}
+
+const checkIfValuesOrKeysAreEmpty = (obj) => {
+	if(!obj){
+		return false
+	}
+	const allkeys = Object.keys(obj)
+	if(allkeys.includes('')){
+		return true
+	}
+	let res = false
+	allkeys.forEach(key => {
+		if(obj[key] === '') {
 			res = true
 		}
 	})

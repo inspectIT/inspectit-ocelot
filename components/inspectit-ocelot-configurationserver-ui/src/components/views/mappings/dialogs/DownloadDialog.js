@@ -1,13 +1,13 @@
-import React from 'react'
+import React from 'react';
 
-import { connect } from 'react-redux'
-import { agentConfigActions } from '../../../../redux/ducks/agent-config'
+import { connect } from 'react-redux';
+import { agentConfigActions } from '../../../../redux/ducks/agent-config';
 
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import EditAttributes from '../editComponents/EditAttributes';
 
-import {cloneDeep} from 'lodash';
+import {cloneDeep, isNull} from 'lodash';
 
 /**
  * Dialog for downloading a configuration file.
@@ -20,40 +20,33 @@ class DownloadDialog extends React.Component {
         attributes : {}
     }
 
-    handleChangeAttributeKey = (oldKey, newKey) => {
-		if (oldKey === newKey){
-            return
-        }
-        
-        const {attributes} = this.state;
-        let newAttributes = {}
-        if(!oldKey){
-            newAttributes = cloneDeep(attributes)
-            if(!newAttributes){
-				newAttributes = {}
-			}
-            newAttributes[newKey] = 'value'
-        } else {
-            const oldKeys = Object.keys(attributes);
-            oldKeys.forEach(key => {
-                if(oldKey === key && !newAttributes[newKey]){
-                    newAttributes[newKey] = attributes[key]
-                } else if(oldKey !== key && !newAttributes[oldKey]){
-                    newAttributes[key] = attributes[key]
-                }
-            })
-        }
-
-        this.setState({ attributes: newAttributes });
-	}
-	
-	handleChangeValueOrAddAttribute = (key, value) => this.setState({ attributes: {...this.state.attributes, [key]: value} });
-
 	handleDeleteAttribute = (attribute) => {
-        let newAttributes = cloneDeep(this.state.attributes)
-        delete newAttributes[Object.keys(attribute)[0]]
-        this.setState({attributes: newAttributes})
+        let newAttributes = cloneDeep(this.state.attributes);
+        delete newAttributes[Object.keys(attribute)[0]];
+        this.setState({attributes: newAttributes});
     }
+
+    handleAttributeChange = (oldKey, newKey, newValue) => {
+        const {attributes} = this.state;
+        let newAttributes = cloneDeep(attributes);
+    
+        if(oldKey == null && ( newKey || newValue )) {
+            if(newKey) {
+                newAttributes[newKey] = '';
+            } else {
+                newAttributes[''] = newValue;
+            }
+        } else if(!isNull(oldKey)) {
+            if(!isNull(newKey)) {
+                delete newAttributes[oldKey];
+                newAttributes[newKey] = attributes[oldKey];
+            } else {
+                newAttributes[oldKey] = newValue;
+            }
+        }
+    
+        this.setState({attributes: newAttributes});
+      }
 
     render() {
         return (
@@ -75,8 +68,7 @@ class DownloadDialog extends React.Component {
                     <br/> You will get a different result depending on the mapping that fits your input.
                 </p>
                 <EditAttributes 
-                    onChValueOrAddAttribute={this.handleChangeValueOrAddAttribute}
-                    onChangeAttributeKey={this.handleChangeAttributeKey}
+                    onAttributeChange={this.handleAttributeChange}
                     onDeleteAttribute={this.handleDeleteAttribute}
                     attributes={this.state.attributes}
                     maxHeight={`300px`}

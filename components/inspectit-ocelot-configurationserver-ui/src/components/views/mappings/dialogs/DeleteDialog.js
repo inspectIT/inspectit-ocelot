@@ -34,7 +34,7 @@ class DeleteDialog extends React.Component {
 
     handleClick = () => {
 			this.props.onHide();
-            this.props.deleteMapping(this.props.mapping.name)
+            this.props.deleteMapping(this.props.mapping.name);
     }
 
     componentDidUpdate(prevProps) {
