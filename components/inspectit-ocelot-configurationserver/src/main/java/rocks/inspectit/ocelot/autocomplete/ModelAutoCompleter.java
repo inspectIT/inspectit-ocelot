@@ -9,8 +9,8 @@ import rocks.inspectit.ocelot.config.validation.PropertyPathHelper;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,10 +19,12 @@ public class ModelAutoCompleter implements AutoCompleter {
 
     @Override
     public List<String> getSuggestions(List<String> path) {
-        if (path.size() > 0 && !path.get(0).equals("")) {
-            return collectProperties(path.subList(1, path.size()));
+        if (path.size() == 0 || (path.size() == 1 && "inspectit".startsWith(path.get(0).replace("\"", "")))) {
+            return Arrays.asList("inspectit");
+        } else if (path.size() == 1) {
+            return Collections.emptyList();
         }
-        return Arrays.asList();
+        return collectProperties(path.subList(1, path.size()));
     }
 
     /**
@@ -33,8 +35,11 @@ public class ModelAutoCompleter implements AutoCompleter {
      */
     private List<String> collectProperties(List<String> propertyPath) {
         Type endType = PropertyPathHelper.getPathEndType(propertyPath, InspectitConfig.class);
+        if ((propertyPath.size() == 1 && (propertyPath.get(0).replace("\"", "").equals("")) || propertyPath.get(0) == null) || propertyPath.size() == 0) {
+            return getProperties(InspectitConfig.class);
+        }
         if (endType == null || PropertyPathHelper.isTerminal(endType) || PropertyPathHelper.isListOfTerminalTypes(endType) || !(endType instanceof Class<?>)) {
-            return new ArrayList<>();
+            return Collections.emptyList();
         }
         return getProperties((Class<?>) endType);
     }

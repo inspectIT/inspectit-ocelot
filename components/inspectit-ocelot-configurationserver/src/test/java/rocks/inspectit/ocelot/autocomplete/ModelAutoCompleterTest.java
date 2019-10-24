@@ -8,6 +8,7 @@ import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -54,7 +55,7 @@ public class ModelAutoCompleterTest {
 
         @Test
         void pastList() {
-            List<String> input = Arrays.asList("inspectit.");
+            List<String> input = Arrays.asList("inspectit", "");
             ArrayList<String> output = new ArrayList<>(Arrays.asList("config",
                     "exporters",
                     "instrumentation",
@@ -97,9 +98,24 @@ public class ModelAutoCompleterTest {
         @Test
         void emptyString() {
             List<String> input = Arrays.asList("");
-            ArrayList<String> output = new ArrayList<>();
+            List<String> output = Arrays.asList("inspectit");
 
             assertThat(completer.getSuggestions(input)).isEqualTo(output);
+        }
+
+        @Test
+        void startsLikeInspectit() {
+            List<String> input = Arrays.asList("inspe");
+            List<String> output = Arrays.asList("inspectit");
+
+            assertThat(completer.getSuggestions(input)).isEqualTo(output);
+        }
+
+        @Test
+        void startsNotLikeInspectit() {
+            List<String> input = Arrays.asList("test");
+
+            assertThat(completer.getSuggestions(input)).isEqualTo(Collections.emptyList());
         }
     }
 
