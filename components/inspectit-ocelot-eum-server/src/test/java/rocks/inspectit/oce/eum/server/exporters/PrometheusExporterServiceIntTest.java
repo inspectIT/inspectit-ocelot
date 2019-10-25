@@ -10,15 +10,13 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.HashMap;
@@ -33,7 +31,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * Integration test of PrometheusExporterService
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
 public class PrometheusExporterServiceIntTest {
@@ -49,7 +46,7 @@ public class PrometheusExporterServiceIntTest {
 
     private static CloseableHttpClient testClient;
 
-    @Before
+    @BeforeEach
     public void initClient() {
         HttpClientBuilder builder = HttpClientBuilder.create();
         testClient = builder.build();
@@ -78,7 +75,7 @@ public class PrometheusExporterServiceIntTest {
         assertThat(statusCode).isEqualTo(200);
     }
 
-    @After
+    @AfterEach
     public void closeClient() throws Exception {
         testClient.close();
     }

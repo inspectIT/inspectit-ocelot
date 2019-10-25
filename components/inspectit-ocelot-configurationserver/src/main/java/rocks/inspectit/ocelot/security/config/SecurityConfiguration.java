@@ -59,6 +59,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 "/csrf",
                 "/",
                 "/ui/**",
+                "/actuator/**",
                 "/swagger*/**",
                 "/webjars/**",
                 "/api/v1/agent/configuration");

@@ -58,7 +58,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1567608037333,
+  "iteration": 1567683957608,
   "links": [],
   "panels": [
     {
@@ -175,8 +175,8 @@
       "scroll": true,
       "showHeader": true,
       "sort": {
-        "col": 1,
-        "desc": false
+        "col": 2,
+        "desc": true
       },
       "styles": [
         {
@@ -202,7 +202,7 @@
           "unit": "short"
         },
         {
-          "alias": "Number of Classes",
+          "alias": "Count",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -337,11 +337,112 @@
               "value": "/^$service$/"
             }
           ]
+        },
+        {
+          "expr": "inspectit_self_logs{service=\"$service\",level=\"ERROR\"}",
+          "format": "time_series",
+          "instant": true,
+          "intervalFactor": 1,
+          "legendFormat": "# errors since startup",
+          "refId": "D"
+        },
+        {
+          "expr": "inspectit_self_logs{service=\"$service\",level=\"WARN\"}",
+          "format": "time_series",
+          "instant": true,
+          "intervalFactor": 1,
+          "legendFormat": "# warnings since startup",
+          "refId": "E"
         }
       ],
       "title": "Instrumentation State",
       "transform": "timeseries_to_rows",
       "type": "table"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": true,
+      "colorPostfix": false,
+      "colorValue": false,
+      "colors": [
+        "rgb(33, 33, 36)",
+        "#890f02",
+        "#299c46"
+      ],
+      "datasource": "${DS_LOCALPROMETHEUS}",
+      "decimals": 0,
+      "description": "Number of newly logged errors. This metric can display too low numbers in case the agent just restarted!",
+      "format": "none",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 2,
+        "x": 10,
+        "y": 1
+      },
+      "id": 76,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": " ",
+      "postfixFontSize": "30%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "host",
+      "targets": [
+        {
+          "expr": "sum(increase(inspectit_self_logs{service=~\"$service\",level=~\"FATAL|ERROR\"}[$__range]))",
+          "format": "time_series",
+          "instant": true,
+          "intervalFactor": 1,
+          "refId": "A"
+        }
+      ],
+      "thresholds": "1",
+      "title": "Errors",
+      "transparent": false,
+      "type": "singlestat",
+      "valueFontSize": "100%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "0",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
     },
     {
       "cacheTimeout": null,
@@ -364,7 +465,7 @@
       "gridPos": {
         "h": 6,
         "w": 3,
-        "x": 10,
+        "x": 12,
         "y": 1
       },
       "id": 23,
@@ -437,8 +538,8 @@
       "fill": 5,
       "gridPos": {
         "h": 6,
-        "w": 11,
-        "x": 13,
+        "w": 9,
+        "x": 15,
         "y": 1
       },
       "id": 49,
@@ -663,6 +764,176 @@
         "align": false,
         "alignLevel": null
       }
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": true,
+      "colorPostfix": false,
+      "colorValue": false,
+      "colors": [
+        "rgba(33, 33, 36, 1)",
+        "#967302",
+        "#299c46"
+      ],
+      "datasource": "${DS_LOCALPROMETHEUS}",
+      "decimals": 0,
+      "description": "Number of newly logged warnings. This metric can display too low numbers in case the agent just restarted!",
+      "format": "none",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 2,
+        "x": 10,
+        "y": 3
+      },
+      "id": 107,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "30%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "host",
+      "targets": [
+        {
+          "expr": "increase(inspectit_self_logs{service=~\"$service\",level=~\"WARN\"}[$__range])",
+          "format": "time_series",
+          "instant": true,
+          "intervalFactor": 1,
+          "refId": "A"
+        }
+      ],
+      "thresholds": "1",
+      "title": "Warnings",
+      "transparent": false,
+      "type": "singlestat",
+      "valueFontSize": "100%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "0",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorPostfix": false,
+      "colorValue": false,
+      "colors": [
+        "rgba(28, 26, 25, 0)",
+        "#eab839",
+        "#299c46"
+      ],
+      "datasource": "${DS_LOCALPROMETHEUS}",
+      "decimals": 0,
+      "description": "Number of newly logged infos. This metric can display too low numbers in case the agent just restarted!",
+      "format": "none",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 2,
+        "x": 10,
+        "y": 5
+      },
+      "id": 143,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "30%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "host",
+      "targets": [
+        {
+          "expr": "SUM(increase(inspectit_self_logs{service=~\"$service\",level=~\"INFO|DEBUG|TRACE\"}[$__range]))",
+          "format": "time_series",
+          "instant": true,
+          "intervalFactor": 1,
+          "refId": "A"
+        }
+      ],
+      "thresholds": "",
+      "title": "Other Logs",
+      "transparent": false,
+      "type": "singlestat",
+      "valueFontSize": "100%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "0",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
     }
   ],
   "refresh": "30s",
@@ -696,7 +967,7 @@
     ]
   },
   "time": {
-    "from": "now-1h",
+    "from": "now-30m",
     "to": "now"
   },
   "timepicker": {
@@ -726,6 +997,6 @@
   },
   "timezone": "",
   "title": "inspectIT Agent Self-Monitoring",
-  "uid": "D-asd5R_ik",
-  "version": 1
+  "uid": "oG69sg5Zk",
+  "version": 3
 }

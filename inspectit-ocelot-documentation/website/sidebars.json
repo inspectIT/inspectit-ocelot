@@ -10,7 +10,8 @@
       "configuration/configuration-sources",
       "configuration/external-configuration-sources",
       "configuration/logging-configuration",
-      "configuration/open-census-configuration"
+      "configuration/open-census-configuration",
+      "configuration/plugin-configuration"
     ],
     "Metrics": [
       "metrics/metrics",
@@ -22,7 +23,8 @@
     ],
     "Tracing": [
       "tracing/tracing",
-      "tracing/trace-exporters"
+      "tracing/trace-exporters",
+      "tracing/log-correlation"
     ],
     "Instrumentation": [
       "instrumentation/instrumentation",

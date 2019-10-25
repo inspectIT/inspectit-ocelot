@@ -31,6 +31,10 @@ inspectit:
     # this value can be overridden by the tracing settings of individual instrumentation rules.
     sample-probability: 1.0
 
+    log-correlation:
+      enabled: false
+      key: "traceid"
+
   # general settings regarding metrics capturing
   metrics:
     # master switch for metrics capturing. When set to false the following happens:

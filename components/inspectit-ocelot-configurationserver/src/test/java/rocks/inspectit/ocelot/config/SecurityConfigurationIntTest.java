@@ -10,9 +10,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 
 @TestPropertySource(properties = {
-        "inspectit.default-user.name=master",
-        "inspectit.default-user.password=foo",
-        "inspectit.token-lifespan=2s"
+        "inspectit-config-server.default-user.name=master",
+        "inspectit-config-server.default-user.password=foo",
+        "inspectit-config-server.token-lifespan=2s"
 })
 public class SecurityConfigurationIntTest extends IntegrationTestBase {
 

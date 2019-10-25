@@ -1,9 +1,10 @@
 import reducer from "./reducers";
 
 import * as mappingsActions from "./actions";
+import * as mappingsSelectors from "./selectors";
 
 export {
-    mappingsActions
+    mappingsActions, mappingsSelectors
 };
 
 export default reducer;

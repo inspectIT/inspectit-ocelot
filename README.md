@@ -105,7 +105,7 @@ If you cannot wait for the next stable release and want to use an agent based on
 ## Contribution and Development
 
 If you want to contribute anything to this project, feel free to open a pull request or reach out to us!
-A good starting point is the [CONRIBUTION.md](CONTRIBUTION.md).
+A good starting point is the [CONTRIBUTING.md](CONTRIBUTING.md).
 
 If you need additional or in-depth information on the actual implementation of inspectIT Ocelot, check out the README files in the child projects of this repository. 
 
