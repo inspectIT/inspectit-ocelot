@@ -3,6 +3,7 @@ package rocks.inspectit.ocelot.autocomplete;
 import com.google.common.annotations.VisibleForTesting;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.utils.CaseUtils;
 import rocks.inspectit.ocelot.config.validation.PropertyPathHelper;
@@ -19,9 +20,9 @@ public class ModelAutoCompleter implements AutoCompleter {
 
     @Override
     public List<String> getSuggestions(List<String> path) {
-        if (path.size() == 0 || (path.size() == 1 && "inspectit".startsWith(path.get(0).replace("\"", "")))) {
-            return Arrays.asList("inspectit");
-        } else if (path.size() == 1) {
+        if (CollectionUtils.isEmpty(path) || (path.size() == 1 && "inspectit".startsWith(path.get(0)))) {
+            return Collections.singletonList("inspectit");
+        } else if (path.size() >= 1 && !path.get(0).equals("inspectit")) {
             return Collections.emptyList();
         }
         return collectProperties(path.subList(1, path.size()));
@@ -35,7 +36,7 @@ public class ModelAutoCompleter implements AutoCompleter {
      */
     private List<String> collectProperties(List<String> propertyPath) {
         Type endType = PropertyPathHelper.getPathEndType(propertyPath, InspectitConfig.class);
-        if ((propertyPath.size() == 1 && (propertyPath.get(0).replace("\"", "").equals("")) || propertyPath.get(0) == null) || propertyPath.size() == 0) {
+        if (CollectionUtils.isEmpty(propertyPath) || ((propertyPath.size() == 1) && propertyPath.get(0).equals(""))) {
             return getProperties(InspectitConfig.class);
         }
         if (endType == null || PropertyPathHelper.isTerminal(endType) || PropertyPathHelper.isListOfTerminalTypes(endType) || !(endType instanceof Class<?>)) {

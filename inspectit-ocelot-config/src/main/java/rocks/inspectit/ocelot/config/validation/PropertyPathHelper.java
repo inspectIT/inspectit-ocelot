@@ -177,6 +177,12 @@ public class PropertyPathHelper {
             if (end == -1) {
                 result.add(propertyName);
                 return "";
+
+            }
+            if (end == propertyName.length() - 1) {
+                result.add(propertyName.substring(0, end));
+                result.add("");
+                return "";
             } else {
                 result.add(propertyName.substring(0, end));
                 return removeLeadingDot(propertyName.substring(end));
