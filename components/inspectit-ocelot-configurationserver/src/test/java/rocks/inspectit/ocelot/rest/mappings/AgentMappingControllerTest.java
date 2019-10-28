@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import rocks.inspectit.ocelot.mappings.AgentMappingManager;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
+import rocks.inspectit.ocelot.security.audit.EntityAuditLogger;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,6 +30,9 @@ public class AgentMappingControllerTest {
 
     @Mock
     AgentMappingManager mappingManager;
+
+    @Mock
+    EntityAuditLogger auditLogger;
 
     @Nested
     public class GetMappings {

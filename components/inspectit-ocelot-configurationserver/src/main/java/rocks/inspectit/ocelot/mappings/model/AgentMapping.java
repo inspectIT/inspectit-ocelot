@@ -1,10 +1,13 @@
 package rocks.inspectit.ocelot.mappings.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Singular;
 import lombok.Value;
+import rocks.inspectit.ocelot.security.audit.AuditDetail;
+import rocks.inspectit.ocelot.security.audit.Auditable;
 
 import javax.validation.constraints.NotBlank;
 import java.util.Collections;
@@ -16,7 +19,7 @@ import java.util.Map;
  */
 @Value
 @Builder(toBuilder = true)
-public class AgentMapping {
+public class AgentMapping implements Auditable {
 
     /**
      * The name of this mapping.
@@ -57,5 +60,12 @@ public class AgentMapping {
             }
         }
         return true;
+    }
+
+    @Override
+    @JsonIgnore
+    public AuditDetail getAuditDetail() {
+        String identifier = "Name:" + name;
+        return new AuditDetail("Agent Mapping", identifier);
     }
 }

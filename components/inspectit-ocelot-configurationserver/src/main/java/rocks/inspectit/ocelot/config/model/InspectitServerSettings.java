@@ -15,7 +15,7 @@ import java.time.Duration;
  * Configuration object allowing relaxed configuration binding via spring.
  */
 @Data
-@ConfigurationProperties("inspectit")
+@ConfigurationProperties("inspectit-config-server")
 @Configuration
 @Builder
 @NoArgsConstructor
