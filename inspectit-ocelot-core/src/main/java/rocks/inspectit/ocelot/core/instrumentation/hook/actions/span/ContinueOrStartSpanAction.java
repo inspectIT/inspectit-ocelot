@@ -22,11 +22,11 @@ import java.util.function.Predicate;
 public class ContinueOrStartSpanAction implements IHookAction {
 
     /**
-     * The name to fetch from the current context which will then be used as name for a newly began span.
+     * The variable accessor used to fetch the name for a newly began span.
      * Is configured using {@link RuleTracingSettings#getName()}
      * If this field is null or the returned value is null, the methods FQN without the package will be used as span name.
      */
-    private final VariableAccessor name;
+    private final VariableAccessor nameAccessor;
 
     /**
      * The span kind to use when beginning a new span, can be null.
@@ -40,8 +40,8 @@ public class ContinueOrStartSpanAction implements IHookAction {
 
     /**
      * If the sample probability is fixed, this attribute holds the corresponding sampler.
-     * If a dynamic sample probability is used, this value is null and {@link #dynamicSampleProbability} is not null.
-     * If both {@link #staticSampler} and {@link #dynamicSampleProbability} are null, no span-scoped sampler will be used.
+     * If a dynamic sample probability is used, this value is null and {@link #dynamicSampleProbabilityAccessor} is not null.
+     * If both {@link #staticSampler} and {@link #dynamicSampleProbabilityAccessor} are null, no span-scoped sampler will be used.
      */
     private final Sampler staticSampler;
 
@@ -49,9 +49,9 @@ public class ContinueOrStartSpanAction implements IHookAction {
      * If the sample probability is dynamic, this attribute holds the accessor under which the sample probability is looked up from the context.
      * It must either be null or a valid accessor.
      * If no dynamic sample probability is used, {@link #staticSampler} is used if it is not null.
-     * If both {@link #staticSampler} and {@link #dynamicSampleProbability} are null, no span-scoped sampler will be used.
+     * If both {@link #staticSampler} and {@link #dynamicSampleProbabilityAccessor} are null, no span-scoped sampler will be used.
      */
-    private final VariableAccessor dynamicSampleProbability;
+    private final VariableAccessor dynamicSampleProbabilityAccessor;
 
     /**
      * The condition which defines if this actions attempts to continue the span defined by {@link #continueSpanDataKey}.
@@ -123,8 +123,8 @@ public class ContinueOrStartSpanAction implements IHookAction {
     @VisibleForTesting
     Sampler getSampler(ExecutionContext context) {
         Sampler sampler = staticSampler;
-        if (dynamicSampleProbability != null) {
-            Object probability = dynamicSampleProbability.get(context);
+        if (dynamicSampleProbabilityAccessor != null) {
+            Object probability = dynamicSampleProbabilityAccessor.get(context);
             if (probability instanceof Number) {
                 sampler = Samplers.probabilitySampler(Math.min(1, Math.max(0, ((Number) probability).doubleValue())));
             }
@@ -134,8 +134,8 @@ public class ContinueOrStartSpanAction implements IHookAction {
 
     private String getSpanName(ExecutionContext context, MethodReflectionInformation methodInfo) {
         String name = null;
-        if (this.name != null) {
-            Object data = this.name.get(context);
+        if (nameAccessor != null) {
+            Object data = nameAccessor.get(context);
             if (data != null) {
                 name = data.toString();
             }

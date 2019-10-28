@@ -19,7 +19,7 @@ import static rocks.inspectit.ocelot.config.model.instrumentation.actions.Generi
  */
 @Component
 @Slf4j
-public class VariableAccess {
+public class VariableAccessorFactory {
 
     @Autowired
     private ObjectAttachments attachments;

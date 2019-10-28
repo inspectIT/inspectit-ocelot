@@ -24,7 +24,7 @@ public class ActionCallGenerator {
     private GenericActionGenerator genericActionGenerator;
 
     @Autowired
-    private VariableAccess variableAccess;
+    private VariableAccessorFactory variableAccessorFactory;
 
     /**
      * Generates a action and binds its arguments.
@@ -43,7 +43,7 @@ public class ActionCallGenerator {
 
         IHookAction actionCall = BoundGenericAction.bind(actionCallConfig.getName(), actionConfig, injectedActionClass, constantAssignments, dynamicAssignments);
 
-        return ConditionalHookAction.wrapWithConditionChecks(callSettings, actionCall, variableAccess);
+        return ConditionalHookAction.wrapWithConditionChecks(callSettings, actionCall, variableAccessorFactory);
     }
 
     /**
@@ -70,7 +70,7 @@ public class ActionCallGenerator {
                 });
 
         for (String variable : actionArgumentTypes.keySet()) {
-            Object constantSpecialValue = variableAccess.getConstantSpecialVariable(variable, methodInfo);
+            Object constantSpecialValue = variableAccessorFactory.getConstantSpecialVariable(variable, methodInfo);
             if (constantSpecialValue != null) {
                 constantAssignments.put(variable, constantSpecialValue);
             }
@@ -91,12 +91,12 @@ public class ActionCallGenerator {
         Map<String, VariableAccessor> dynamicAssignments = new HashMap<>();
         actionCallConfig.getCallSettings().getDataInput()
                 .forEach((argName, dataName) ->
-                        dynamicAssignments.put(argName, variableAccess.getVariableAccessor(dataName))
+                        dynamicAssignments.put(argName, variableAccessorFactory.getVariableAccessor(dataName))
                 );
         Set<String> additionalInputVars = actionCallConfig.getAction().getAdditionalArgumentTypes().keySet();
         for (String variable : additionalInputVars) {
-            Object constantSpecialValue = variableAccess.getConstantSpecialVariable(variable, methodInfo);
-            VariableAccessor dynamicSpecialValue = variableAccess.getSpecialVariableAccessor(variable);
+            Object constantSpecialValue = variableAccessorFactory.getConstantSpecialVariable(variable, methodInfo);
+            VariableAccessor dynamicSpecialValue = variableAccessorFactory.getSpecialVariableAccessor(variable);
             if (constantSpecialValue == null && dynamicSpecialValue != null) {
                 dynamicAssignments.put(variable, dynamicSpecialValue);
             }

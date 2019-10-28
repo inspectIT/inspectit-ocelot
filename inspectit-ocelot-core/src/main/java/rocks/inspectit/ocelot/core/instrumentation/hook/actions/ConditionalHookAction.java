@@ -3,8 +3,8 @@ package rocks.inspectit.ocelot.core.instrumentation.hook.actions;
 import lombok.Value;
 import org.apache.commons.lang3.StringUtils;
 import rocks.inspectit.ocelot.config.model.instrumentation.actions.ConditionalActionSettings;
-import rocks.inspectit.ocelot.core.instrumentation.hook.VariableAccess;
 import rocks.inspectit.ocelot.core.instrumentation.hook.VariableAccessor;
+import rocks.inspectit.ocelot.core.instrumentation.hook.VariableAccessorFactory;
 
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -34,13 +34,13 @@ public class ConditionalHookAction implements IHookAction {
      * If a action contains values for the "only-if-..." settings the provider is meant to be only executed conditionally.
      * Therefore in this method we wrap the call in {@link ConditionalHookAction} which check the corresponding preconditions.
      *
-     * @param conditions     the definitions of the conditions to check
-     * @param inputAction    the action to execute only conditionally
-     * @param variableAccess the accessor used for accessing context variables as well as special variables
+     * @param conditions              the definitions of the conditions to check
+     * @param inputAction             the action to execute only conditionally
+     * @param variableAccessorFactory the accessor used for accessing context variables as well as special variables
      * @return the wrapped action in case conditions are defined
      */
-    public static IHookAction wrapWithConditionChecks(ConditionalActionSettings conditions, IHookAction inputAction, VariableAccess variableAccess) {
-        Predicate<ExecutionContext> predicate = getAsPredicate(conditions, variableAccess);
+    public static IHookAction wrapWithConditionChecks(ConditionalActionSettings conditions, IHookAction inputAction, VariableAccessorFactory variableAccessorFactory) {
+        Predicate<ExecutionContext> predicate = getAsPredicate(conditions, variableAccessorFactory);
         if (predicate == ALWAYS_TRUE) {
             return inputAction;
         } else {
@@ -51,34 +51,38 @@ public class ConditionalHookAction implements IHookAction {
     /**
      * Returns a predicate for evaluating the given conditions.
      *
-     * @param conditions     the conditions to evaluate
-     * @param variableAccess the accessor used for accessing context variables as well as special variables
+     * @param conditions              the conditions to evaluate
+     * @param variableAccessorFactory the accessor used for accessing context variables as well as special variables
      * @return the predicate, which is {@link #ALWAYS_TRUE} if no conditions are present
      */
-    public static Predicate<ExecutionContext> getAsPredicate(ConditionalActionSettings conditions, VariableAccess variableAccess) {
+    public static Predicate<ExecutionContext> getAsPredicate(ConditionalActionSettings conditions, VariableAccessorFactory variableAccessorFactory) {
         Predicate<ExecutionContext> result = null;
         if (!StringUtils.isEmpty(conditions.getOnlyIfTrue())) {
-            VariableAccessor conditionData = variableAccess.getVariableAccessor(conditions.getOnlyIfTrue());
+            String dataKey = conditions.getOnlyIfTrue();
+            VariableAccessor conditionDataAccessor = variableAccessorFactory.getVariableAccessor(dataKey);
             result = and(result, (ctx) -> {
-                Object val = conditionData.get(ctx);
+                Object val = conditionDataAccessor.get(ctx);
                 return val != null && (Boolean) val;
             });
         }
         if (!StringUtils.isEmpty(conditions.getOnlyIfFalse())) {
-            VariableAccessor conditionData = variableAccess.getVariableAccessor(conditions.getOnlyIfFalse());
+            String dataKey = conditions.getOnlyIfFalse();
+            VariableAccessor conditionDataAccessor = variableAccessorFactory.getVariableAccessor(dataKey);
             result = and(result, (ctx) -> {
-                Object val = conditionData.get(ctx);
+                Object val = conditionDataAccessor.get(ctx);
                 return val != null && !(Boolean) val;
             });
         }
 
         if (!StringUtils.isEmpty(conditions.getOnlyIfNotNull())) {
-            VariableAccessor conditionData = variableAccess.getVariableAccessor(conditions.getOnlyIfNotNull());
-            result = and(result, (ctx) -> conditionData.get(ctx) != null);
+            String dataKey = conditions.getOnlyIfNotNull();
+            VariableAccessor conditionDataAccessor = variableAccessorFactory.getVariableAccessor(dataKey);
+            result = and(result, (ctx) -> conditionDataAccessor.get(ctx) != null);
         }
         if (!StringUtils.isEmpty(conditions.getOnlyIfNull())) {
-            VariableAccessor conditionData = variableAccess.getVariableAccessor(conditions.getOnlyIfNull());
-            result = and(result, (ctx) -> conditionData.get(ctx) == null);
+            String dataKey = conditions.getOnlyIfNull();
+            VariableAccessor conditionDataAccessor = variableAccessorFactory.getVariableAccessor(dataKey);
+            result = and(result, (ctx) -> conditionDataAccessor.get(ctx) == null);
         }
         return Optional.ofNullable(result).orElse(ALWAYS_TRUE);
     }

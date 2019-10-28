@@ -28,9 +28,9 @@ abstract class AbstractDynamicBoundGenericAction extends BoundGenericAction {
     private final Object[] argumentsTemplate;
 
     /**
-     * An array containing (a) the index of the addition input to assign and (b) a function for defining the value.
+     * An array containing (a) the index of the addition input to assign and (b) a variable accessor for querying the value.
      * The index corresponds to the index of the parameter in {@link GenericActionConfig#getAdditionalArgumentTypes()}.
-     * Therefore the index corresponds to the position in the additionalArgumetns array with which the
+     * Therefore the index corresponds to the position in the additionalArguments array with which the
      * {@link IGenericAction#execute(Object[], Object, Object, Throwable, Object[])} function is called.
      */
     private Pair<Integer, VariableAccessor>[] dynamicAssignments;
@@ -69,7 +69,7 @@ abstract class AbstractDynamicBoundGenericAction extends BoundGenericAction {
         this.dynamicAssignments = dynamicAssignmentsWithIndices.toArray(new Pair[0]);
     }
 
-    Object[] buildAdditionalArguments(ExecutionContext context) {
+    protected Object[] buildAdditionalArguments(ExecutionContext context) {
         Object[] args = Arrays.copyOf(argumentsTemplate, argumentsTemplate.length);
 
         for (val assignment : dynamicAssignments) {

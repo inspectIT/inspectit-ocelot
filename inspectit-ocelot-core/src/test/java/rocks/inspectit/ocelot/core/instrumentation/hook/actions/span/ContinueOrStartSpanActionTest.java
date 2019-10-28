@@ -54,7 +54,7 @@ public class ContinueOrStartSpanActionTest {
             when(dynamicProbability.get(any())).thenReturn(0.42);
 
             Sampler result = ContinueOrStartSpanAction.builder()
-                    .dynamicSampleProbability(dynamicProbability)
+                    .dynamicSampleProbabilityAccessor(dynamicProbability)
                     .build()
                     .getSampler(context);
 
@@ -71,7 +71,7 @@ public class ContinueOrStartSpanActionTest {
             when(dynamicProbability.get(any())).thenReturn(null);
 
             Sampler result = ContinueOrStartSpanAction.builder()
-                    .dynamicSampleProbability(dynamicProbability)
+                    .dynamicSampleProbabilityAccessor(dynamicProbability)
                     .build()
                     .getSampler(context);
 

@@ -15,13 +15,13 @@ import java.util.Map;
 @AllArgsConstructor
 public class WriteSpanAttributesAction implements IHookAction {
 
-    private final Map<String, VariableAccessor> attributes;
+    private final Map<String, VariableAccessor> attributeAccessors;
 
     @Override
     public void execute(ExecutionContext context) {
         val span = Tracing.getTracer().getCurrentSpan();
         if (span.getContext().isValid()) {
-            for (val entry : attributes.entrySet()) {
+            for (val entry : attributeAccessors.entrySet()) {
                 Object value = entry.getValue().get(context);
                 if (value != null) {
                     span.putAttribute(entry.getKey(), AttributeValue.stringAttributeValue(value.toString()));

@@ -46,7 +46,7 @@ public class MethodHookGenerator {
     private ActionCallGenerator actionCallGenerator;
 
     @Autowired
-    private VariableAccess variableAccess;
+    private VariableAccessorFactory variableAccessorFactory;
 
     /**
      * Builds a executable method hook based on the given configuration.
@@ -98,10 +98,10 @@ public class MethodHookGenerator {
 
             if (tracing.getStartSpan()) {
                 VariableAccessor name = Optional.ofNullable(tracing.getName())
-                        .map(variableAccess::getVariableAccessor).orElse(null);
+                        .map(variableAccessorFactory::getVariableAccessor).orElse(null);
                 actionBuilder
-                        .startSpanCondition(ConditionalHookAction.getAsPredicate(tracing.getStartSpanConditions(), variableAccess))
-                        .name(name)
+                        .startSpanCondition(ConditionalHookAction.getAsPredicate(tracing.getStartSpanConditions(), variableAccessorFactory))
+                        .nameAccessor(name)
                         .spanKind(tracing.getKind());
                 configureSampling(tracing, actionBuilder);
             } else {
@@ -110,7 +110,7 @@ public class MethodHookGenerator {
 
             if (tracing.getContinueSpan() != null) {
                 actionBuilder
-                        .continueSpanCondition(ConditionalHookAction.getAsPredicate(tracing.getContinueSpanConditions(), variableAccess))
+                        .continueSpanCondition(ConditionalHookAction.getAsPredicate(tracing.getContinueSpanConditions(), variableAccessorFactory))
                         .continueSpanDataKey(tracing.getContinueSpan());
             } else {
                 actionBuilder.continueSpanCondition(ctx -> false);
@@ -136,8 +136,8 @@ public class MethodHookGenerator {
                 Sampler sampler = Samplers.probabilitySampler(Math.max(0.0, Math.min(1.0, constantProbability)));
                 actionBuilder.staticSampler(sampler);
             } catch (NumberFormatException e) {
-                VariableAccessor probabilityAccessor = variableAccess.getVariableAccessor(sampleProbability);
-                actionBuilder.dynamicSampleProbability(probabilityAccessor);
+                VariableAccessor probabilityAccessor = variableAccessorFactory.getVariableAccessor(sampleProbability);
+                actionBuilder.dynamicSampleProbabilityAccessor(probabilityAccessor);
             }
         }
     }
@@ -148,14 +148,14 @@ public class MethodHookGenerator {
         val attributes = tracing.getAttributes();
         if (!attributes.isEmpty()) {
             Map<String, VariableAccessor> attributeAccessors = new HashMap<>();
-            attributes.forEach((attribute, variable) -> attributeAccessors.put(attribute, variableAccess.getVariableAccessor(variable)));
+            attributes.forEach((attribute, variable) -> attributeAccessors.put(attribute, variableAccessorFactory.getVariableAccessor(variable)));
             IHookAction endTraceAction = new WriteSpanAttributesAction(attributeAccessors);
-            IHookAction actionWithConditions = ConditionalHookAction.wrapWithConditionChecks(tracing.getAttributeConditions(), endTraceAction, variableAccess);
+            IHookAction actionWithConditions = ConditionalHookAction.wrapWithConditionChecks(tracing.getAttributeConditions(), endTraceAction, variableAccessorFactory);
             result.add(actionWithConditions);
         }
 
         if (tracing.getEndSpan() && (tracing.getStartSpan() || tracing.getContinueSpan() != null)) {
-            val endSpanAction = new EndSpanAction(ConditionalHookAction.getAsPredicate(tracing.getEndSpanConditions(), variableAccess));
+            val endSpanAction = new EndSpanAction(ConditionalHookAction.getAsPredicate(tracing.getEndSpanConditions(), variableAccessorFactory));
             result.add(endSpanAction);
         }
         return result;
@@ -164,7 +164,7 @@ public class MethodHookGenerator {
     private Optional<IHookAction> buildMetricsRecorder(MethodHookConfiguration config) {
         if (!config.getConstantMetrics().isEmpty() || !config.getDataMetrics().isEmpty()) {
             Map<String, VariableAccessor> dataMetrics = new HashMap<>();
-            config.getDataMetrics().forEach((metric, data) -> dataMetrics.put(metric, variableAccess.getVariableAccessor(data)));
+            config.getDataMetrics().forEach((metric, data) -> dataMetrics.put(metric, variableAccessorFactory.getVariableAccessor(data)));
             MetricsRecorder recorder = new MetricsRecorder(config.getConstantMetrics(), dataMetrics, metricsManager, statsRecorder);
             return Optional.of(recorder);
         } else {
