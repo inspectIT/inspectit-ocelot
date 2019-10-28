@@ -20,7 +20,7 @@ public class ModelAutoCompleter implements AutoCompleter {
 
     @Override
     public List<String> getSuggestions(List<String> path) {
-        if (CollectionUtils.isEmpty(path) || (path.size() == 1 && "inspecti".startsWith(path.get(0)))) {
+        if (CollectionUtils.isEmpty(path)) {
             return Collections.singletonList("inspectit");
         } else if (path.size() >= 1 && !path.get(0).equals("inspectit")) {
             return Collections.emptyList();
