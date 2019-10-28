@@ -8,6 +8,8 @@ There are several ways to customize the server settings according to your needs.
 
 In the following section, we use the approach of using an `application.yml` file to specify the customized settings which is located in the same directory as the server's JAR file.
 
+> Please note that the inspectIT Ocelot configuration server uses the prefix `inspectit-config-server` for its specific inspectIT properties. Up to version 0.4, the prefix `inspectit` was used which has been changed to avoid confusion between the configurations of the different components.
+
 ## Configure the HTTP(S) Port
 
 By default, the configuration server uses port 8090 to bind its HTTP endpoints.
