@@ -18,7 +18,4 @@ inspectit:
           LogCorrelationTest-methods: true
         tracing:
           start-span: true
-          sample-probability: sample_prob
-        entry:
-          sample_prob:
-            action: get_arg1
+          sample-probability: _arg1

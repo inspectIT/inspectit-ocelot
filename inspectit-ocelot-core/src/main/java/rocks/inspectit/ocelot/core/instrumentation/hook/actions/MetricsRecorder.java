@@ -5,6 +5,7 @@ import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.tuple.Pair;
+import rocks.inspectit.ocelot.core.instrumentation.hook.VariableAccessor;
 import rocks.inspectit.ocelot.core.metrics.MeasuresAndViewsManager;
 
 import java.util.ArrayList;
@@ -26,10 +27,10 @@ public class MetricsRecorder implements IHookAction {
     private final List<Pair<String, ? extends Number>> constantMetrics = new ArrayList<>();
 
     /**
-     * A list of metric names and corresponding data keys which will be used to find the value for the metric.
+     * A list of metric names and corresponding variable accessors which will be used to find the value for the metric.
      * This is stored as list and not a map because it is faster to iterate over a list than a map.
      */
-    private final CopyOnWriteArrayList<Pair<String, String>> dataMetrics = new CopyOnWriteArrayList<>();
+    private final CopyOnWriteArrayList<Pair<String, VariableAccessor>> dataMetrics = new CopyOnWriteArrayList<>();
 
     /**
      * The manager to acquire the actual OpenCensus metrics from
@@ -41,7 +42,7 @@ public class MetricsRecorder implements IHookAction {
      */
     private StatsRecorder statsRecorder;
 
-    public MetricsRecorder(Map<String, ? extends Number> constantMetrics, Map<String, String> dataMetrics, MeasuresAndViewsManager metricsManager, StatsRecorder statsRecorder) {
+    public MetricsRecorder(Map<String, ? extends Number> constantMetrics, Map<String, VariableAccessor> dataMetrics, MeasuresAndViewsManager metricsManager, StatsRecorder statsRecorder) {
         constantMetrics.forEach((m, v) -> this.constantMetrics.add(Pair.of(m, v)));
         dataMetrics.forEach((m, v) -> this.dataMetrics.add(Pair.of(m, v)));
 
@@ -59,7 +60,7 @@ public class MetricsRecorder implements IHookAction {
             }
 
             for (val measureAndDataKey : dataMetrics) {
-                Object value = context.getInspectitContext().getData(measureAndDataKey.getValue());
+                Object value = measureAndDataKey.getValue().get(context);
                 //only record metrics where a value is present
                 //this allows to disable the recording of a metric depending on the results of action executions
                 if (value != null) {

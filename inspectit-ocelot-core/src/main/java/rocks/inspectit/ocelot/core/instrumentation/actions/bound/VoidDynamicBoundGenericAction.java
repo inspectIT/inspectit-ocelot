@@ -1,10 +1,10 @@
 package rocks.inspectit.ocelot.core.instrumentation.actions.bound;
 
 import rocks.inspectit.ocelot.core.instrumentation.config.model.GenericActionConfig;
+import rocks.inspectit.ocelot.core.instrumentation.hook.VariableAccessor;
 import rocks.inspectit.ocelot.core.instrumentation.injection.InjectedClass;
 
 import java.util.Map;
-import java.util.function.Function;
 
 
 /**
@@ -17,7 +17,7 @@ class VoidDynamicBoundGenericAction extends AbstractDynamicBoundGenericAction {
 
     VoidDynamicBoundGenericAction(String callName, GenericActionConfig actionConfig,
                                   InjectedClass<?> action, Map<String, Object> constantAssignments,
-                                  Map<String, Function<ExecutionContext, Object>> dynamicAssignments) {
+                                  Map<String, VariableAccessor> dynamicAssignments) {
         super(callName, actionConfig, action, constantAssignments, dynamicAssignments);
     }
 

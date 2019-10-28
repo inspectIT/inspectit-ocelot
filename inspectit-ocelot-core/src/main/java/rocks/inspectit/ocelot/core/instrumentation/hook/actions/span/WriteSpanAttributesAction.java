@@ -4,6 +4,7 @@ import io.opencensus.trace.AttributeValue;
 import io.opencensus.trace.Tracing;
 import lombok.AllArgsConstructor;
 import lombok.val;
+import rocks.inspectit.ocelot.core.instrumentation.hook.VariableAccessor;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
 
 import java.util.Map;
@@ -14,15 +15,14 @@ import java.util.Map;
 @AllArgsConstructor
 public class WriteSpanAttributesAction implements IHookAction {
 
-    private final Map<String, String> attributes;
+    private final Map<String, VariableAccessor> attributeAccessors;
 
     @Override
     public void execute(ExecutionContext context) {
         val span = Tracing.getTracer().getCurrentSpan();
         if (span.getContext().isValid()) {
-            val ctx = context.getInspectitContext();
-            for (val entry : attributes.entrySet()) {
-                Object value = ctx.getData(entry.getValue());
+            for (val entry : attributeAccessors.entrySet()) {
+                Object value = entry.getValue().get(context);
                 if (value != null) {
                     span.putAttribute(entry.getKey(), AttributeValue.stringAttributeValue(value.toString()));
                 }

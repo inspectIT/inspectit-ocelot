@@ -104,7 +104,8 @@ inspectit:
             constant-input: {value: "const"}
         exit:
           exit_val:
-            action: get_return_value
+            action: set
+            data-input: {value: _returnValue}
 
 
       TraceSettingsTest-attributesSetterWithoutSpanWithConditions:
@@ -115,16 +116,15 @@ inspectit:
             entry: entry_val
             exit: exit_val
           attribute-conditions:
-            only-if-true: should_capture_attribs
+            only-if-true: _arg0
         entry:
-          should_capture_attribs:
-            action: get_arg0
           entry_val:
             action: set
             constant-input: {value: "const"}
         exit:
           exit_val:
-            action: get_return_value
+            action: set
+            data-input: {value: _returnValue}
 
       TraceSettingsTest-conditionalRoot:
         scopes:
@@ -132,20 +132,14 @@ inspectit:
         tracing:
           start-span: true
           start-span-conditions:
-            only-if-true: should_capture
-        entry:
-          should_capture:
-            action: get_arg0
+            only-if-true: _arg0
 
       TraceSettingsTest-named:
         scopes:
           TraceSettingsTest-named: true
         tracing:
           start-span: true
-          name: name_val
-        entry:
-          name_val:
-            action: get_arg0
+          name: _arg0
 
       TraceSettingsTest-asyncInterleaved:
         scopes:
@@ -154,12 +148,12 @@ inspectit:
           start-span: true
           continue-span: span_id
           end-span: true
-          end-span-conditions: {only-if-true: end_span_arg}
+          end-span-conditions: {only-if-true: _arg3}
           store-span: span_id
           attributes:
-            "1": att_1
-            "2": att_2
-            "3": att_3
+            "1": _arg0
+            "2": _arg1
+            "3": _arg2
 
         entry:
           span_id:
@@ -170,10 +164,6 @@ inspectit:
             action: replace_attachment_on_this
             constant-input: {key: "span_obj"}
             data-input: {value: span_id}
-          att_1: { action: get_arg0 }
-          att_2: { action: get_arg1 }
-          att_3: { action: get_arg2 }
-          end_span_arg: { action: get_arg3 }
 
 
       TraceSettingsTest-samplingTestEndMarker:
@@ -181,10 +171,7 @@ inspectit:
           TraceSettingsTest-samplingTestEndMarker: true
         tracing:
           start-span: true
-          name: name_val
-        entry:
-          name_val:
-            action: get_arg0
+          name: _arg0
 
 
       TraceSettingsTest-fixedSamplingRateTest:
@@ -192,11 +179,8 @@ inspectit:
           TraceSettingsTest-fixedSamplingRateTest: true
         tracing:
           start-span: true
-          name: name_val
+          name: _arg0
           sample-probability: 0.5
-        entry:
-          name_val:
-            action: get_arg0
 
 
       TraceSettingsTest-dynamicSamplingRateTest:
@@ -204,20 +188,12 @@ inspectit:
           TraceSettingsTest-dynamicSamplingRateTest: true
         tracing:
           start-span: true
-          name: name_val
-          sample-probability: sample_prob
-        entry:
-          name_val:
-            action: get_arg0
-          sample_prob:
-            action: get_arg1
+          name: _arg0
+          sample-probability: _arg1
 
       TraceSettingsTest-nestedSamplingTest:
         scopes:
           TraceSettingsTest-nestedSamplingTest: true
         tracing:
           start-span: true
-          sample-probability: sample_prob
-        entry:
-          sample_prob:
-            action: get_arg0
+          sample-probability: _arg0
