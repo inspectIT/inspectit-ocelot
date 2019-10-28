@@ -60,10 +60,12 @@ public class ModelAutoCompleterTest {
         void pastList() {
             List<String> input = Arrays.asList("inspectit", "");
             ArrayList<String> expected = new ArrayList<>(Arrays.asList("config",
+                    "env",
                     "exporters",
                     "instrumentation",
                     "logging",
                     "metrics",
+                    "plugins",
                     "publish-open-census-to-bootstrap",
                     "self-monitoring",
                     "service-name",
@@ -118,7 +120,7 @@ public class ModelAutoCompleterTest {
         @Test
         void startsLikeInspectit() {
             List<String> input = Arrays.asList("inspe");
-            List<String> expected = Arrays.asList("inspectit");
+            List<String> expected = Collections.emptyList();
 
             List<String> result = completer.getSuggestions(input);
 
@@ -149,16 +151,17 @@ public class ModelAutoCompleterTest {
         @Test
         void getPropertiesInspectit() {
             List<String> expected = Arrays.asList("config",
+                    "env",
                     "exporters",
                     "instrumentation",
                     "logging",
                     "metrics",
+                    "plugins",
                     "publish-open-census-to-bootstrap",
                     "self-monitoring",
                     "service-name",
                     "tags",
                     "thread-pool-size",
-
                     "tracing");
 
             List<String> result = completer.getProperties(InspectitConfig.class);
