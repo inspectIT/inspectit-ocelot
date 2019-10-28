@@ -7,7 +7,7 @@
  * If the path lies within a list, the list index is also correctly added to the path.
  * 
  * This function does fail for JSON-style Maps and lists within the yaml.
- * @param {} allLines the linex of the YAML document
+ * @param {} allLines the lines of the YAML document
  */
 export const getYamlPath = (allLines) => {
 
@@ -23,18 +23,18 @@ export const getYamlPath = (allLines) => {
     let listIndices = [];
 
     const lastLineIndentation = getIndentation(lines[lines.length - 1]);
-    let parentLineNumber = getNonListParent(lastLineIndentation-1, lines, lines.length - 1, listIndices);
+    let parentLineNumber = getNonListParent(lastLineIndentation - 1, lines, lines.length - 1, listIndices);
     path = listIndices.concat(path);
 
-    while(parentLineNumber != -1) {
-        let indent = getIndentation(lines[parentLineNumber]);
-        let statement = decodeStatment(lines[parentLineNumber].substring(indent));
-        if(statement.value) {
+    while (parentLineNumber != -1) {
+        const indentation = getIndentation(lines[parentLineNumber]);
+        const statement = decodeStatment(lines[parentLineNumber].substring(indentation));
+        if (statement.value) {
             return null;
         }
         path = [statement.key, ...path];
         listIndices = [];
-        parentLineNumber = getNonListParent(indent -1, lines, parentLineNumber, listIndices);
+        parentLineNumber = getNonListParent(indentation - 1, lines, parentLineNumber, listIndices);
         path = listIndices.concat(path);
     }
     return path;
@@ -42,7 +42,7 @@ export const getYamlPath = (allLines) => {
 
 /**
  * 
- * Begins to find the configuration path based on the line which contains the curor
+ * Begins to find the configuration path based on the line which contains the cursor
  * For example, if the line is `    "enabled" : tr`,
  * the returned path is [enabled,tr].
  * Leading indentation of the line is ignored.
@@ -50,9 +50,9 @@ export const getYamlPath = (allLines) => {
  * @param {*} cursorLine 
  */
 const beginPath = (cursorLine) => {
-    const ind = getIndentation(cursorLine)
-    let lastStatement = decodeStatment(cursorLine.substring(ind));
-    if(lastStatement.value != null) {
+    const indentation = getIndentation(cursorLine)
+    let lastStatement = decodeStatment(cursorLine.substring(indentation));
+    if (lastStatement.value != null) {
         return [lastStatement.key, lastStatement.value];
     } else {
         return [lastStatement.key];
@@ -87,8 +87,9 @@ const removeCommentsAndBlankLines = (lines) => {
  *        - - something
  *          - something else
  *          - last
- * If we invoke this method scanning for the parent, the result wil lbe the line number of "config:".
+ * If we invoke this method scanning for the parent pointing to the last line, the result will be the line number of "config:".
  * The indices array will be [1,2].
+ * The reason is, that in parsed form config[1][2] will refer to "last".
  * 
  * Returns the index of the found parent line or "-1" if no parent exists.
  * 
@@ -98,27 +99,27 @@ const removeCommentsAndBlankLines = (lines) => {
  * @param {*} indices the array to place found list-indices within.
  */
 const getNonListParent = (pos, lines, lineNumber, indices) => {
-    if(pos == -1) {
+    if (pos == -1) {
         return -1;
     }
     let line = lines[lineNumber];
     let firstDash = getFirstDash(line);
     let lastDash = getLastDash(line, pos);
-    if(firstDash != lastDash) {
+    if (firstDash != lastDash) {
         let result = getNonListParent(lastDash - 1, lines, lineNumber, indices);
         indices.push(0);
         return result;
     }
 
-    if(firstDash == -1) { //no more dashes
+    if (firstDash == -1) { //no more dashes
         let parentLine = lineNumber - 1;
         let leadingSpaces = pos + 1;
-        while(parentLine >= 0 && getLeadingSpaces(lines[parentLine]) >= leadingSpaces) {
+        while (parentLine >= 0 && getLeadingSpaces(lines[parentLine]) >= leadingSpaces) {
             parentLine--;
         }
-        if(parentLine != -1){
+        if (parentLine != -1) {
             let parentIndent = getIndentation(lines[parentLine]);
-            if(parentIndent >= leadingSpaces) {
+            if (parentIndent >= leadingSpaces) {
                 return getNonListParent(leadingSpaces - 1, lines, parentLine, indices);
             }
         }
@@ -127,29 +128,29 @@ const getNonListParent = (pos, lines, lineNumber, indices) => {
         let leadingSpaces = firstDash;
         let parentLine = lineNumber - 1;
         let listIndex = 0;
-        while(parentLine >= 0 && 
+        while (parentLine >= 0 &&
             ((getLeadingSpaces(lines[parentLine]) > leadingSpaces) ||
-            getFirstDash(lines[parentLine]) == firstDash)) {
-            if(lines[parentLine].length > firstDash && lines[parentLine][firstDash] == "-") {
+                getFirstDash(lines[parentLine]) == firstDash)) {
+            if (lines[parentLine].length > firstDash && lines[parentLine][firstDash] == "-") {
                 listIndex++;
             }
             parentLine--;
         }
-        if(parentLine >= 0 && lines[parentLine].length > firstDash && lines[parentLine][firstDash] == "-") {
+        if (parentLine >= 0 && lines[parentLine].length > firstDash && lines[parentLine][firstDash] == "-") {
             listIndex++;
         }
         let result = parentLine;
-        if(parentLine != -1){
-            let indent = firstDash+1;
+        if (parentLine != -1) {
+            let indent = firstDash + 1;
             let parentIndent = getIndentation(lines[parentLine]);
-            if(parentIndent >= indent) {
+            if (parentIndent >= indent) {
                 result = getNonListParent(firstDash - 1, lines, parentLine, indices);
             }
         }
         indices.push(listIndex);
         return result;
     }
-    
+
 }
 
 /**
@@ -161,7 +162,8 @@ const getNonListParent = (pos, lines, lineNumber, indices) => {
  *  ` "hello": "wor  ` -> (key = hello, value = wor)
  *  ` "hello":   ` -> (key = hello, value = <empty string>)
  *  ` "hello"   ` -> (key = hello, value = null)
- * @param {*} statement 
+ * 
+ * @param {*} statement the input statement as a string
  */
 const decodeStatment = (statement) => {
     let colonIndex = findNonQuotedChar(statement, ":");
@@ -244,22 +246,25 @@ const findNonQuotedChar = (str, char) => {
 
 /**
  * Returns the number of leading spaces or dashes for the given string.
+ * 
  * @param {*} line the string to get the indentation of
  */
 const getIndentation = (line) => {
     let pos = 0;
-    while(pos < line.length && (line[pos] == " " || line[pos] == "-")) {
+    while (pos < line.length && (line[pos] == " " || line[pos] == "-")) {
         pos++;
     }
     return pos;
 }
+
 /**
  * Returns the number of leading spaces for the given string.
+ * 
  * @param {*} line the string to get the number of leading spaces from
  */
 const getLeadingSpaces = (line) => {
     let pos = 0;
-    while(pos < line.length && line[pos] == " ") {
+    while (pos < line.length && line[pos] == " ") {
         pos++;
     }
     return pos;
@@ -268,14 +273,15 @@ const getLeadingSpaces = (line) => {
 /**
  * Returns the index of the first dash after spaces for the given string.
  * Returns -1 if there is no dash found.
+ * 
  * @param {*} line the string to find the first dash within
  */
 const getFirstDash = (line) => {
     let pos = 0;
-    while(pos < line.length && line[pos] == " ") {
+    while (pos < line.length && line[pos] == " ") {
         pos++;
     }
-    if(pos < line.length && line[pos] == "-") {
+    if (pos < line.length && line[pos] == "-") {
         return pos;
     } else {
         return -1;
@@ -292,7 +298,7 @@ const getFirstDash = (line) => {
  */
 const getLastDash = (line, posInclusive) => {
     let pos = posInclusive;
-    while(pos >= 0 && line[pos] != "-") {
+    while (pos >= 0 && line[pos] != "-") {
         pos--;
     }
     return pos;

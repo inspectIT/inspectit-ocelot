@@ -59,8 +59,8 @@ class AceEditor extends React.Component {
         ace.config.loadModule("ace/ext/keybinding_menu", function (module) {
             module.init(editorRef);
         })
-        if(this.props.onEditorCreate) {
-            this.props.onEditorCreate(this.editor);
+        if(this.props.onCreate) {
+            this.props.onCreate(this.editor);
         }
 
         this.configureEditor();

@@ -8,7 +8,7 @@ import FileToolbar from './FileToolbar';
 import EditorView from '../../editor/EditorView';
 import yaml from 'js-yaml';
 
-import {enableConfigAutoCompletion} from './ConfigYamlAutocompleter'
+import {enableOcelotAutocompletion} from './OcelotAutocompleter'
 
 /**
  * The header component of the editor view.
@@ -124,7 +124,7 @@ class ConfigurationView extends React.Component {
                     hint={"Select a file to start editing."}
                     onSave={this.onSave}
                     enableButtons={showEditor && !loading}
-                    onEditorCreate={enableConfigAutoCompletion}
+                    onCreate={enableOcelotAutocompletion}
                     onChange={this.onChange}
                     onRefresh={this.onRefresh}
                     canSave={isContentModified && !yamlError}
