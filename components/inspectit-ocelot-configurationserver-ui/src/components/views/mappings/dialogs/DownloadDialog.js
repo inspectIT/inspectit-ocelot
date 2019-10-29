@@ -2,12 +2,11 @@ import React from 'react';
 
 import { connect } from 'react-redux';
 import { agentConfigActions } from '../../../../redux/ducks/agent-config';
+import { notificationActions } from '../../../../redux/ducks/notification';
 
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
-import EditAttributes from '../editComponents/EditAttributes';
-
-import {cloneDeep, isNull} from 'lodash';
+import KeyValueEditor from '../editComponents/KeyValueEditor';
 
 /**
  * Dialog for downloading a configuration file.
@@ -17,36 +16,12 @@ class DownloadDialog extends React.Component {
     downloadButton = React.createRef();
 
     state = {
-        attributes : {}
+        attributes : []
     }
 
-	handleDeleteAttribute = (attribute) => {
-        let newAttributes = cloneDeep(this.state.attributes);
-        delete newAttributes[Object.keys(attribute)[0]];
+    handleChangeAttribute = (newAttributes) => {
         this.setState({attributes: newAttributes});
     }
-
-    handleAttributeChange = (oldKey, newKey, newValue) => {
-        const {attributes} = this.state;
-        let newAttributes = cloneDeep(attributes);
-    
-        if(oldKey == null && ( newKey || newValue )) {
-            if(newKey) {
-                newAttributes[newKey] = '';
-            } else {
-                newAttributes[''] = newValue;
-            }
-        } else if(!isNull(oldKey)) {
-            if(!isNull(newKey)) {
-                delete newAttributes[oldKey];
-                newAttributes[newKey] = attributes[oldKey];
-            } else {
-                newAttributes[oldKey] = newValue;
-            }
-        }
-    
-        this.setState({attributes: newAttributes});
-      }
 
     render() {
         return (
@@ -67,10 +42,9 @@ class DownloadDialog extends React.Component {
                     Enter key/value pairs to download the correlating agent configuration. 
                     <br/> You will get a different result depending on the mapping that fits your input.
                 </p>
-                <EditAttributes 
-                    onAttributeChange={this.handleAttributeChange}
-                    onDeleteAttribute={this.handleDeleteAttribute}
-                    attributes={this.state.attributes}
+                <KeyValueEditor 
+                    onChange={this.handleChangeAttribute}
+                    keyValueArray={this.state.attributes}
                     maxHeight={`300px`}
                 />
             </Dialog>
@@ -78,8 +52,17 @@ class DownloadDialog extends React.Component {
     }
 
     handleDownload = () => {
+        const objForDownload = {};
+        this.state.attributes.forEach(pair => {
+            objForDownload[pair.key || ''] = pair.value || '';
+        })
+
+        if(Object.keys(objForDownload).length !== this.state.attributes.length){
+            this.props.showWarningMessage('Invalid Input', 'Certein attribute keys were duplicates and have been omitted.')
+        }
+
         this.props.onHide();
-        this.props.downloadConfiguration(this.state.attributes);
+        this.props.downloadConfiguration(objForDownload);
     }
 
     componentDidUpdate(prevProps) {
@@ -91,7 +74,8 @@ class DownloadDialog extends React.Component {
 }
 
 const mapDispatchToProps = {
-    downloadConfiguration: agentConfigActions.fetchConfigurationFile
+    downloadConfiguration: agentConfigActions.fetchConfigurationFile,
+    showWarningMessage: notificationActions.showWarningMessage,
 }
 
 export default connect(null, mapDispatchToProps)(DownloadDialog);
