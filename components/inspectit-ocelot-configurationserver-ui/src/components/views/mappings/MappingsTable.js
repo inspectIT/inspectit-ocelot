@@ -11,9 +11,8 @@ import {TieredMenu} from 'primereact/tieredmenu';
 import {OverlayPanel} from 'primereact/overlaypanel';
 import DeleteDialog from './dialogs/DeleteDialog';
 
-const ButtonCell = ({mapping, onEdit, onDelete, onDownload}) => {
+const ButtonCell = ({mapping, onEdit, onDelete, onDownload, apenndRef}) => {
   const thisCell = {};
-  const mappingsTable = document.getElementById('mappingsTable');
   const menuItems = [
     {
       label: 'Edit',
@@ -42,19 +41,17 @@ const ButtonCell = ({mapping, onEdit, onDelete, onDownload}) => {
   ]
   return(
     <div ref={el => thisCell.div = el}> 
-    <TieredMenu model={menuItems} popup={true} appendTo={mappingsTable} ref={el => thisCell.menu = el} />
+    <TieredMenu model={menuItems} popup={true} appendTo={apenndRef} ref={el => thisCell.menu = el} />
     <Button icon="pi pi-bars" onClick={(event) => thisCell.menu.toggle(event)} style={{'margin-right': '5.25m'}}/>
   </div>
   )
 }
 
-const SourceCell = ({sources}) => {
+const SourceCell = ({sources, apenndRef}) => {
   if(!sources) {
     return null;
   }
-
   const thisCell = {};
-  const mappingsTable = document.getElementById('mappingsTable');
 
   return (
     <div>
@@ -69,7 +66,7 @@ const SourceCell = ({sources}) => {
           <p>{sources[0]}</p><p>{sources[1]}</p>
           <p>{sources[2]}</p><p>{sources[3]}</p>
           <p>{sources[4]}</p><p>...</p>
-          <OverlayPanel appendTo={mappingsTable} ref={(el) => thisCell.op = el}>
+          <OverlayPanel appendTo={apenndRef} ref={(el) => thisCell.op = el}>
             {sources.map(source => ( <p>{source}</p> ))}
           </OverlayPanel>
         </div>
@@ -78,13 +75,11 @@ const SourceCell = ({sources}) => {
   )
 }
 
-const AttributesCell = ({attributes}) => {
+const AttributesCell = ({attributes, apenndRef}) => {
 if(!attributes) {
   return null;
 }
-
 const thisCell = {};
-const mappingsTable = document.getElementById('mappingsTable');
 
 const keys = Object.keys(attributes);
   return (
@@ -103,7 +98,7 @@ const keys = Object.keys(attributes);
           <p>{`${keys[3]}: ${attributes[keys[3]]}`}</p>
           <p>{`${keys[4]}: ${attributes[keys[4]]}`}</p>
           <p>...</p>
-          <OverlayPanel appendTo={mappingsTable} ref={(el) => thisCell.op = el}>
+          <OverlayPanel appendTo={apenndRef} ref={(el) => thisCell.op = el}>
             {keys.map(key => ( <p>{`${key}: ${attributes[key]}`}</p> ))}
           </OverlayPanel>
         </div>
@@ -119,20 +114,21 @@ class MappingsTable extends React.Component{
   }
 
   render() {
-    const filteredMappings = this.filterMappings(this.props.mappings);
+    const filteredMappings = this.props.mappings.filter(mapping => !this.isMappingHidden(mapping));
+
     return(
-      <div id='mappingsTable'>
-        <DataTable value={filteredMappings} reorderableRows={true} scrollable={true} scrollHeight={this.props.maxHeight ? this.props.maxHeight : '100%'} onRowReorder={(e) => {this.props.putMappings(e.value)}}  >
-          <Column rowReorder={true} style={{width: '3em'}} />
+      <div ref={el => this.mappingsTable = el}>
+        <DataTable value={filteredMappings} reorderableRows={true} scrollable={true} scrollHeight={this.props.maxHeight ? this.props.maxHeight : '100%'} onRowReorder={(e) => {this.props.putMappings(e.value)}} globalFilter={this.state.globalFilter} >
+          <Column rowReorder={!this.props.filterValue} style={{width: '3em'}} />
           <Column columnKey="name" field="name" header="Mapping Name"/>
-          <Column columnKey="sources" field="sources" body={(data) => (<SourceCell sources={data.sources}/>)} header="Sources" />
-          <Column columnKey="attributes" field="attributes" body={(data) => (<AttributesCell attributes={data.attributes} />)} header="Attributes" />
-          <Column columnKey="buttons" field="" body={(data) => (<ButtonCell mapping={data} onEdit={this.props.onEditMapping} onDelete={this.showDeleteMappingDialog} onDownload={this.props.downloadConfigFile} />)} style={{width: '4em'}} />
+          <Column columnKey="sources" field="sources" body={(data) => (<SourceCell sources={data.sources} apenndRef={this.mappingsTable}/>)} header="Sources" />
+          <Column columnKey="attributes" field="attributes" body={(data) => (<AttributesCell attributes={data.attributes} apenndRef={this.mappingsTable}/>)} header="Attributes" />
+          <Column columnKey="buttons" field="" body={(data) => (<ButtonCell mapping={data} onEdit={this.props.onEditMapping} onDelete={this.showDeleteMappingDialog} onDownload={this.props.downloadConfigFile} apenndRef={this.mappingsTable}/>)} style={{width: '4em'}} />
         </DataTable>
         <DeleteDialog 
           visible={this.state.isDeleteDialogShown} 
           onHide={this.hideDeleteMappingDialog} 
-          mapping={this.state.mapping} 
+          mapping={this.state.selectedMapping} 
         />
       </div>
     )
@@ -142,30 +138,15 @@ class MappingsTable extends React.Component{
     this.props.fetchMappings();
   };
 
-  showDeleteMappingDialog = (mapping) => this.setState({isDeleteDialogShown: true, mapping: mapping});
-  hideDeleteMappingDialog = () => this.setState({isDeleteDialogShown: false, mapping: {}});
-
-  /**
-   * compares mappings by their name/source/attribute value to props.filterValue and
-   * returns all mappings that include filterValue somewhere
-   */
-  filterMappings = (mappings) => {
-    let res = [];
-
-    mappings.forEach(mapping => {
-      if(!this.isMappingFiltered(mapping)) {
-        res.push(mapping);
-      }
-    })
-    return res;
-  }
+  showDeleteMappingDialog = (selectedMapping) => this.setState({isDeleteDialogShown: true, selectedMapping: selectedMapping});
+  hideDeleteMappingDialog = () => this.setState({isDeleteDialogShown: false, selectedMapping: {}});
 
   /**
    * returns true when mapping is no longer included due to filterValue
    * 
    * @param {*} mapping 
    */
-  isMappingFiltered(mapping){
+  isMappingHidden(mapping){
     let {filterValue} = this.props;
     filterValue = filterValue.toLowerCase();
 
@@ -181,10 +162,9 @@ class MappingsTable extends React.Component{
       }
 
       if(mapping.attributes){
-        const keys = Object.keys(mapping.attributes);
-        for (let i = 0; i < keys.length; i++){
-          const attribute = `${keys[i]}: ${mapping.attributes[keys[i]]}`;
-          if(attribute.toLowerCase().includes(filterValue)) {
+        for (let key in mapping.attributes) {
+          const attributeString = `${key}: ${mapping.attributes[key]}`;
+          if(attributeString.toLowerCase().includes(filterValue)) {
             return false;
           }
         }

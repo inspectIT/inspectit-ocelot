@@ -5,9 +5,10 @@ import {Toolbar} from 'primereact/toolbar';
 import {InputText} from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 
-class MappingToolbar extends React.Component {
-  searchFieldTooltipText = 'Enter a mapping name, a source or an attribute key/value pair to filter matching mappings. The filter is not case sensitive.';
+const searchFieldTooltipText = 'Enter a mapping name, a source or an attribute key/value pair to filter matching mappings. The filter is not case sensitive.';
 
+class MappingToolbar extends React.Component {
+  
   render(){
     return (
       <Toolbar style={{'border': '0', 'background-color': '#eee'}} >
@@ -27,7 +28,7 @@ class MappingToolbar extends React.Component {
           <div className='searchbox'>
             <i className="pi pi-sitemap"></i>
             <h4 style={{'font-weight': 'normal', 'margin-right': '1rem'}}>Agent Mappings</h4>
-            <InputText placeholder='Search' value={this.props.filterValue}  onChange={this.props.onChangeFilter} tooltip={this.searchFieldTooltipText}/>
+            <InputText placeholder='Search' value={this.props.filterValue}  onChange={this.props.onChangeFilter} tooltip={searchFieldTooltipText}/>
           </div>
           </div>
           <div className='p-toolbar-group-right'>

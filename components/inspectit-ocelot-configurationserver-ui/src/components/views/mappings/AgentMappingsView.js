@@ -13,20 +13,20 @@ class AgentMappingView extends React.Component {
     super(props);
     this.state = {
       filter: '',
-      mapping: {}
+      selectedMapping: {}
     }
   }
 
   handleFilterChange = (e) => this.setState({filter: e.target.value});
 
-  showEditMappingDialog = (mapping = {}) => this.setState({isEditDialogShown: true, mapping: mapping} );
-  hideEditMappingDialog = () => this.setState({isEditDialogShown: false, mapping: {} });
+  showEditMappingDialog = (selectedMapping = {}) => this.setState({isEditDialogShown: true, selectedMapping: selectedMapping} );
+  hideEditMappingDialog = () => this.setState({isEditDialogShown: false, selectedMapping: {} });
 
   showDownloadDialog = () => this.setState({isDownloadDialogShown: true});
   hideDownloadDialog = () => this.setState({isDownloadDialogShown: false});
 
   render(){
-    const contentHeight = 'calc(100vh - 7rem)';
+    const contentHeight = 'calc(100vh - 7rem - 2.5em)';
     return (
       <div className='this'>
         <style jsx>{`
@@ -37,7 +37,7 @@ class AgentMappingView extends React.Component {
           }
           .content{
             margin-top: 3rem;
-            height: ${contentHeight};
+            height: calc(100vh - 7rem);
             overflow: hidden;
           }
         `}</style>
@@ -59,7 +59,7 @@ class AgentMappingView extends React.Component {
         <EditDialog 
           visible={this.state.isEditDialogShown}
           onHide={this.hideEditMappingDialog}
-          mapping={this.state.mapping}
+          mapping={this.state.selectedMapping}
         />
         <DownloadDialog 
           visible={this.state.isDownloadDialogShown}

@@ -14,6 +14,8 @@ class DeleteDialog extends React.Component {
     deleteButton = React.createRef();
 
     render() {
+        const { name } = this.props.mapping || '';
+
         return (
             <Dialog
                 header={"Delete Mapping"}
@@ -27,7 +29,7 @@ class DeleteDialog extends React.Component {
                     </div>
                 )}
             >
-                Are you sure you want to delete this mapping? Your changes will be lost. This cannot be undone!
+                Are you sure you want to delete <b>"{name}"</b> ? This cannot be undone!
             </Dialog>
         )
     }

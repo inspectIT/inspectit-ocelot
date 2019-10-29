@@ -115,16 +115,14 @@ class EditMappingDialog extends React.Component {
 							maxHeight={`calc(${maxHeightFieldset}px - 10em)`}
 						/> 
 					</Fieldset>
-					<div style={{'margin-top': '1em'}}>
-					{/* <Fieldset legend='Attributes' style={{'padding-top': 0, 'max-height': maxHeightFieldset, overflow: 'hidden'}}> */}
+					<Fieldset legend='Attributes' style={{'padding-top': 0, 'max-height': maxHeightFieldset, overflow: 'hidden'}}>
 					<EditAttributes 
 						attributes={mapping.attributes}
 						onAttributeChange={this.handleAttributeChange}
 						onDeleteAttribute={this.handleDeleteAttribute}
 						maxHeight={`calc(${maxHeightFieldset}px - 10em)`}
 					/>
-					{/* </Fieldset> */}
-					</div>
+					</Fieldset>
 
 				</Dialog>
 			</div>
