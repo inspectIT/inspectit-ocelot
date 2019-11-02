@@ -68,6 +68,11 @@ public class HttpPropertySourceState {
     private PropertySource currentPropertySource;
 
     /**
+     * Number of unsuccessful connection attempts.
+     */
+    private int errorCounter;
+
+    /**
      * Constructor.
      *
      * @param name            the name used for the property source
@@ -76,6 +81,7 @@ public class HttpPropertySourceState {
     public HttpPropertySourceState(String name, HttpConfigSettings currentSettings) {
         this.name = name;
         this.currentSettings = currentSettings;
+        this.errorCounter = 0;
         //ensure that currentPropertySource is never null, even if the initial fetching fails
         currentPropertySource = new PropertiesPropertySource(name, new Properties());
     }
@@ -175,11 +181,20 @@ public class HttpPropertySourceState {
             configuration = processHttpResponse(response);
             isError = false;
         } catch (ClientProtocolException e) {
-            log.error("HTTP protocol error occurred while fetching configuration.", e);
+            errorCounter++;
+            if (errorCounter > 0 && ((errorCounter & (errorCounter - 1)) == 0)) {
+                log.error("HTTP protocol error occurred while fetching configuration.", e);
+            }
         } catch (IOException e) {
-            log.error("A IO problem occurred while fetching configuration.", e);
+            errorCounter++;
+            if (errorCounter > 0 && ((errorCounter & (errorCounter - 1)) == 0)) {
+                log.error("A IO problem occurred while fetching configuration.", e);
+            }
         } catch (Exception e) {
-            log.error("Exception occurred while fetching configuration.", e);
+            errorCounter++;
+            if (errorCounter > 0 && ((errorCounter & (errorCounter - 1)) == 0)) {
+                log.error("Exception occurred while fetching configuration.", e);
+            }
         } finally {
             httpGet.releaseConnection();
         }
