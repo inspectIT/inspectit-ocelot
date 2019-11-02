@@ -180,6 +180,10 @@ public class HttpPropertySourceState {
             HttpResponse response = createHttpClient().execute(httpGet);
             configuration = processHttpResponse(response);
             isError = false;
+            if (errorCounter != 0) {
+                log.info("Fetch has been successful after {} unsuccessful attempts.", errorCounter);
+                errorCounter = 0;
+            }
         } catch (ClientProtocolException e) {
             errorCounter++;
             if (errorCounter > 0 && ((errorCounter & (errorCounter - 1)) == 0)) {
