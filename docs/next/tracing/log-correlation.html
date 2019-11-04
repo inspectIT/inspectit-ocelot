@@ -73,9 +73,9 @@ The MDC acts like a storage of environment variables which can be accessed by th
 </ul>
 <p>Log correlation is disabled by default. You can enable it using the following configuration snippet:</p>
 <pre><code class="hljs css language-yaml"><span class="hljs-attr">inspectit:</span>
-<span class="hljs-attr">  tracing:</span>
-<span class="hljs-attr">    log-correlation:</span>
-<span class="hljs-attr">      enabled:</span> <span class="hljs-literal">true</span>
+  <span class="hljs-attr">tracing:</span>
+    <span class="hljs-attr">log-correlation:</span>
+      <span class="hljs-attr">enabled:</span> <span class="hljs-literal">true</span>
 </code></pre>
 <p>When enabled, the trace-id is automatically added to all MDCs.
 In order to make use of this information the log patterns have to be adapted.

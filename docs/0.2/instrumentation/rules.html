@@ -69,24 +69,24 @@ in which it was collected: Data can be configured to be propagated up or down wi
 which is explained in the section <a href="#data-propagation">Data Propagation</a>.</p>
 <p>The overall concept of rules is best explained with a simple example which is part of the inspectIT Ocelot default configuration:</p>
 <pre><code class="hljs css language-yaml"><span class="hljs-attr">inspectit:</span>
-<span class="hljs-attr">  instrumentation:</span>
-<span class="hljs-attr">    rules:</span>
+  <span class="hljs-attr">instrumentation:</span>
+    <span class="hljs-attr">rules:</span>
 
-<span class="hljs-attr">      record_method_duration:</span>
+      <span class="hljs-attr">record_method_duration:</span>
 
-<span class="hljs-attr">        entry:</span>
-<span class="hljs-attr">          method_entry_time:</span>
-<span class="hljs-attr">            action:</span> <span class="hljs-string">timestamp_nanos</span>
-<span class="hljs-attr">          method_name:</span>
-<span class="hljs-attr">            action:</span> <span class="hljs-string">get_method_fqn</span>
+        <span class="hljs-attr">entry:</span>
+          <span class="hljs-attr">method_entry_time:</span>
+            <span class="hljs-attr">action:</span> <span class="hljs-string">timestamp_nanos</span>
+          <span class="hljs-attr">method_name:</span>
+            <span class="hljs-attr">action:</span> <span class="hljs-string">get_method_fqn</span>
 
-<span class="hljs-attr">        exit:</span>
-<span class="hljs-attr">          method_duration:</span>
-<span class="hljs-attr">            action:</span> <span class="hljs-string">elapsed_millis</span>
-<span class="hljs-attr">            data-input:</span>
-<span class="hljs-attr">              sinceNanos:</span> <span class="hljs-string">method_entry_time</span>
+        <span class="hljs-attr">exit:</span>
+          <span class="hljs-attr">method_duration:</span>
+            <span class="hljs-attr">action:</span> <span class="hljs-string">elapsed_millis</span>
+            <span class="hljs-attr">data-input:</span>
+              <span class="hljs-attr">sinceNanos:</span> <span class="hljs-string">method_entry_time</span>
 
-<span class="hljs-attr">        metrics:</span>
+        <span class="hljs-attr">metrics:</span>
           <span class="hljs-string">'[method/duration]'</span> <span class="hljs-string">:</span> <span class="hljs-string">method_duration</span>
 </code></pre>
 <p>This example rule named <code>record_method_duration</code> measures the duration of the instrumented method and outputs the value using the <code>method/duration</code> metric.</p>
@@ -114,18 +114,18 @@ Consider the following example: you instrument the entry method of your HTTP ser
 <p>The propagation behaviour is not defined on rule level but instead globally based on the data keys under the configuration
 property <code>inspectit.instrumentation.data</code>. Here are some examples extracted from the default configurations of inspectIT:</p>
 <pre><code class="hljs css language-yaml"><span class="hljs-attr">inspectit:</span>
-<span class="hljs-attr">  instrumentation:</span>
-<span class="hljs-attr">    data:</span>
+  <span class="hljs-attr">instrumentation:</span>
+    <span class="hljs-attr">data:</span>
       <span class="hljs-comment"># for correlating calls across JVM boarders</span>
-<span class="hljs-attr">      prop_origin_service:</span> <span class="hljs-string">{down-propagation:</span> <span class="hljs-string">GLOBAL,</span> <span class="hljs-attr">is-tag:</span> <span class="hljs-literal">false</span><span class="hljs-string">}</span>
-<span class="hljs-attr">      prop_target_service:</span> <span class="hljs-string">{up-propagation:</span> <span class="hljs-string">GLOBAL,</span> <span class="hljs-attr">down-propagation:</span> <span class="hljs-string">JVM_LOCAL,</span> <span class="hljs-attr">is-tag:</span> <span class="hljs-literal">false</span><span class="hljs-string">}</span>
+      <span class="hljs-attr">prop_origin_service:</span> <span class="hljs-string">{down-propagation:</span> <span class="hljs-string">GLOBAL,</span> <span class="hljs-attr">is-tag:</span> <span class="hljs-literal">false</span><span class="hljs-string">}</span>
+      <span class="hljs-attr">prop_target_service:</span> <span class="hljs-string">{up-propagation:</span> <span class="hljs-string">GLOBAL,</span> <span class="hljs-attr">down-propagation:</span> <span class="hljs-string">JVM_LOCAL,</span> <span class="hljs-attr">is-tag:</span> <span class="hljs-literal">false</span><span class="hljs-string">}</span>
 
       <span class="hljs-comment">#we allow the application to be defined at the beginning and to be down propagated from there</span>
-<span class="hljs-attr">      application:</span> <span class="hljs-string">{down-propagation:</span> <span class="hljs-string">GLOBAL,</span> <span class="hljs-attr">is-tag:</span> <span class="hljs-literal">true</span><span class="hljs-string">}</span>
+      <span class="hljs-attr">application:</span> <span class="hljs-string">{down-propagation:</span> <span class="hljs-string">GLOBAL,</span> <span class="hljs-attr">is-tag:</span> <span class="hljs-literal">true</span><span class="hljs-string">}</span>
 
       <span class="hljs-comment">#this data will only be visible locally in the method where it is collected</span>
-<span class="hljs-attr">      http_method:</span> <span class="hljs-string">{down-propagation:</span> <span class="hljs-string">NONE}</span>
-<span class="hljs-attr">      http_status:</span> <span class="hljs-string">{down-propagation:</span> <span class="hljs-string">NONE}</span>
+      <span class="hljs-attr">http_method:</span> <span class="hljs-string">{down-propagation:</span> <span class="hljs-string">NONE}</span>
+      <span class="hljs-attr">http_status:</span> <span class="hljs-string">{down-propagation:</span> <span class="hljs-string">NONE}</span>
 </code></pre>
 <p>Under <code>inspectit.instrumentation.data</code>, the data keys are mapped to their desired behaviour.
 The configuration options are the following:</p>
@@ -153,32 +153,32 @@ these application tags will also be visible in the inspectIT context. Secondly, 
 They are effectively Lambda-like functions you can invoke from the entry and the exit phase of rules. They are defined by (a) specifying their input parameters and (b) giving a Java code snippet which defines how the result value is computed from these.</p>
 <p>Again, this is best explained by giving some simple examples extracted from inspectIT Ocelot default configuration:</p>
 <pre><code class="hljs css language-yaml"><span class="hljs-attr">inspectit:</span>
-<span class="hljs-attr">  instrumentation:</span>
-<span class="hljs-attr">    actions:</span>
+  <span class="hljs-attr">instrumentation:</span>
+    <span class="hljs-attr">actions:</span>
 
       <span class="hljs-comment">#computes a nanosecond-timestamp as a long for the current point in time</span>
-<span class="hljs-attr">      timestamp_nanos:</span>
-<span class="hljs-attr">        value:</span> <span class="hljs-string">"new Long(System.nanoTime())"</span>
+      <span class="hljs-attr">timestamp_nanos:</span>
+        <span class="hljs-attr">value:</span> <span class="hljs-string">"new Long(System.nanoTime())"</span>
 
       <span class="hljs-comment">#computes the elapsed milliseconds as double since a given nanosecond-timestamp</span>
-<span class="hljs-attr">      elapsed_millis:</span>
-<span class="hljs-attr">        input:</span>
+      <span class="hljs-attr">elapsed_millis:</span>
+        <span class="hljs-attr">input:</span>
           <span class="hljs-comment">#the timestamp captured via System.nanoTime() to compare against</span>
-<span class="hljs-attr">          sinceNanos:</span> <span class="hljs-string">long</span>
-<span class="hljs-attr">        value:</span> <span class="hljs-string">"new Double( (System.nanoTime() - sinceNanos) * 1E-6)"</span>
+          <span class="hljs-attr">sinceNanos:</span> <span class="hljs-string">long</span>
+        <span class="hljs-attr">value:</span> <span class="hljs-string">"new Double( (System.nanoTime() - sinceNanos) * 1E-6)"</span>
 
-<span class="hljs-attr">      string_replace_all:</span>
-<span class="hljs-attr">        input:</span>
-<span class="hljs-attr">          regex:</span> <span class="hljs-string">String</span>
-<span class="hljs-attr">          replacement:</span> <span class="hljs-string">String</span>
-<span class="hljs-attr">          string:</span> <span class="hljs-string">String</span>
-<span class="hljs-attr">        value:</span> <span class="hljs-string">string.replaceAll(regex,replacement)</span>
+      <span class="hljs-attr">string_replace_all:</span>
+        <span class="hljs-attr">input:</span>
+          <span class="hljs-attr">regex:</span> <span class="hljs-string">String</span>
+          <span class="hljs-attr">replacement:</span> <span class="hljs-string">String</span>
+          <span class="hljs-attr">string:</span> <span class="hljs-string">String</span>
+        <span class="hljs-attr">value:</span> <span class="hljs-string">string.replaceAll(regex,replacement)</span>
 
-<span class="hljs-attr">      get_method_fqn:</span>
-<span class="hljs-attr">        input:</span>
-<span class="hljs-attr">          _methodName:</span> <span class="hljs-string">String</span>
-<span class="hljs-attr">          _class:</span> <span class="hljs-string">Class</span>
-<span class="hljs-attr">        value:</span> <span class="hljs-string">new</span> <span class="hljs-string">StringBuilder(_class.getName()).append('.').append(_methodName).toString()</span>
+      <span class="hljs-attr">get_method_fqn:</span>
+        <span class="hljs-attr">input:</span>
+          <span class="hljs-attr">_methodName:</span> <span class="hljs-string">String</span>
+          <span class="hljs-attr">_class:</span> <span class="hljs-string">Class</span>
+        <span class="hljs-attr">value:</span> <span class="hljs-string">new</span> <span class="hljs-string">StringBuilder(_class.getName()).append('.').append(_methodName).toString()</span>
 </code></pre>
 <p>The names of the first two actions, <code>timestamp_nanos</code> and <code>elapsed_millis</code> should be familiar for you from the initial example in the <a href="/inspectit-ocelot/docs/0.2/instrumentation/rules">rules section</a>.</p>
 <p>The code executed when a action is invoked is defined through the <code>value</code> configuration property. In YAML, this is simply a string. InspectIT however will interpret this string as a Java expression to evaluate. The result value of this expression will be used as result for the action invocation.</p>
@@ -216,15 +216,15 @@ For example, the <code>elapsed_millis</code> action declares a single input vari
 For this purpose we introduced the <code>value-body</code> configuration property for actions as an alternative to <code>value</code>.
 <code>value-body</code> allows you to specify a Java method body which returns the result of the action. The body is given without surrounding curly braces. One example action from the default configuration making use of this is given below:</p>
 <pre><code class="hljs css language-yaml"><span class="hljs-attr">inspectit:</span>
-<span class="hljs-attr">  instrumentation:</span>
-<span class="hljs-attr">    actions:</span>
-<span class="hljs-attr">      get_servlet_request_path:</span>
-<span class="hljs-attr">        imports:</span>
-<span class="hljs-bullet">          -</span> <span class="hljs-string">javax.servlet</span>
-<span class="hljs-bullet">          -</span> <span class="hljs-string">javax.servlet.http</span>
-<span class="hljs-attr">        input:</span>
-<span class="hljs-attr">          _arg0:</span> <span class="hljs-string">ServletRequest</span>
-<span class="hljs-attr">        value-body:</span> <span class="hljs-string">|
+  <span class="hljs-attr">instrumentation:</span>
+    <span class="hljs-attr">actions:</span>
+      <span class="hljs-attr">get_servlet_request_path:</span>
+        <span class="hljs-attr">imports:</span>
+          <span class="hljs-bullet">-</span> <span class="hljs-string">javax.servlet</span>
+          <span class="hljs-bullet">-</span> <span class="hljs-string">javax.servlet.http</span>
+        <span class="hljs-attr">input:</span>
+          <span class="hljs-attr">_arg0:</span> <span class="hljs-string">ServletRequest</span>
+        <span class="hljs-attr">value-body:</span> <span class="hljs-string">|
           if(_arg0 instanceof HttpServletRequest) {
             return java.net.URI.create(((HttpServletRequest)_arg0).getRequestURI()).getPath();
           }
@@ -239,13 +239,13 @@ For this reason the action performs an instance-of check only returning the HTTP
 <p>Rules glue together <a href="/inspectit-ocelot/docs/0.2/instrumentation/scopes">scopes</a> and <a href="/inspectit-ocelot/docs/0.2/instrumentation/rules#actions">actions</a> to define which actions you want to perform on which application methods.</p>
 <p>As you might have noticed, the initial example rule shown in the <a href="/inspectit-ocelot/docs/0.2/instrumentation/rules">rules section</a> did not define any reference to a scope. This is because this rule originates form the default configuration of inspectIT Ocelot, where we don't know yet of which methods you want to collect the response time. Therefore this rule is defined without scopes, but you can easily add some in your own configuration files:</p>
 <pre><code class="hljs css language-yaml"><span class="hljs-attr">inspectit:</span>
-<span class="hljs-attr">  instrumentation:</span>
-<span class="hljs-attr">    rules:</span>
+  <span class="hljs-attr">instrumentation:</span>
+    <span class="hljs-attr">rules:</span>
 
-<span class="hljs-attr">      record_method_duration:</span>
-<span class="hljs-attr">        scopes:</span>
-<span class="hljs-attr">          my_first_scope:</span> <span class="hljs-literal">true</span>
-<span class="hljs-attr">          my_second_scope:</span> <span class="hljs-literal">true</span>
+      <span class="hljs-attr">record_method_duration:</span>
+        <span class="hljs-attr">scopes:</span>
+          <span class="hljs-attr">my_first_scope:</span> <span class="hljs-literal">true</span>
+          <span class="hljs-attr">my_second_scope:</span> <span class="hljs-literal">true</span>
 </code></pre>
 <p>With this snippet we defined that the existing rule <code>record_method_duration</code> gets applied on the two scopes named <code>my_first_scope</code> and <code>my_second_scope</code>. The <code>scopes</code> configuration option maps scope names to <code>true</code> or <code>false</code>. The rule will be applied on all methods matching any scope where the value is <code>true</code>.</p>
 <p>Rules define their action within three <em>phases</em>:</p>
@@ -262,11 +262,11 @@ Here, only values for metrics are recorded. No actions will be executed here.</p
 <p>Let's take a look again at the entry phase definitions of the <code>record_method_duration</code> rule:</p>
 <pre><code class="hljs css language-yaml"><span class="hljs-comment">#inspectit.instrumentation.rules is omitted here</span>
 <span class="hljs-attr">record_method_duration:</span>
-<span class="hljs-attr">  entry:</span>
-<span class="hljs-attr">    method_entry_time:</span>
-<span class="hljs-attr">      action:</span> <span class="hljs-string">timestamp_nanos</span>
-<span class="hljs-attr">    method_name:</span>
-<span class="hljs-attr">      action:</span> <span class="hljs-string">get_method_fqn</span>
+  <span class="hljs-attr">entry:</span>
+    <span class="hljs-attr">method_entry_time:</span>
+      <span class="hljs-attr">action:</span> <span class="hljs-string">timestamp_nanos</span>
+    <span class="hljs-attr">method_name:</span>
+      <span class="hljs-attr">action:</span> <span class="hljs-string">get_method_fqn</span>
 </code></pre>
 <p>The <code>entry</code> and <code>exit</code> configuration options are YAML dictionaries mapping data keys to <em>action invocations</em>.
 This means the keys used in the dictionaries define the data key for which a value is being defined. Correspondingly, the assigned value defines which action is invoked to define the value of the data key.</p>
@@ -281,22 +281,22 @@ There are currently two possible ways of doing this:</p>
 <p>We have already seen how the assignment of data values to parameters is done in the exit phase of the <code>record_method_duration</code> rule:</p>
 <pre><code class="hljs css language-yaml"><span class="hljs-comment">#inspectit.instrumentation.rules is omitted here</span>
 <span class="hljs-attr">record_method_duration:</span>
-<span class="hljs-attr">  exit:</span>
-<span class="hljs-attr">    method_duration:</span>
-<span class="hljs-attr">      action:</span> <span class="hljs-string">elapsed_millis</span>
-<span class="hljs-attr">      data-input:</span>
-<span class="hljs-attr">        sinceNanos:</span> <span class="hljs-string">method_entry_time</span>
+  <span class="hljs-attr">exit:</span>
+    <span class="hljs-attr">method_duration:</span>
+      <span class="hljs-attr">action:</span> <span class="hljs-string">elapsed_millis</span>
+      <span class="hljs-attr">data-input:</span>
+        <span class="hljs-attr">sinceNanos:</span> <span class="hljs-string">method_entry_time</span>
 </code></pre>
 <p>The <code>elapsed_millis</code> action requires a value for the input parameter <code>sinceNanos</code>.
 In this example we defined that the value for the data key <code>method_entry_time</code> is used for <code>sinceNanos</code>.</p>
 <p>The assignment of constant values works very similar:</p>
 <pre><code class="hljs css language-yaml"><span class="hljs-comment">#inspectit.instrumentation.rules is omitted here</span>
 <span class="hljs-attr">example_rule:</span>
-<span class="hljs-attr">  entry:</span>
-<span class="hljs-attr">    hello_world_text:</span>
-<span class="hljs-attr">      action:</span> <span class="hljs-string">set</span>
-<span class="hljs-attr">      constant-input:</span>
-<span class="hljs-attr">        value:</span> <span class="hljs-string">"Hello World!"</span>
+  <span class="hljs-attr">entry:</span>
+    <span class="hljs-attr">hello_world_text:</span>
+      <span class="hljs-attr">action:</span> <span class="hljs-string">set</span>
+      <span class="hljs-attr">constant-input:</span>
+        <span class="hljs-attr">value:</span> <span class="hljs-string">"Hello World!"</span>
 </code></pre>
 <p>Note that when assigning a constant value, inspectIT Ocelot automatically converts the given value to the type expected by the action. This is done using the <a href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/core/convert/ConversionService.html">Spring Conversion Service</a>. For example, if your action expects a parameter of type <code>java.time.Duration</code>, you can simply pass in <code>&quot;42s&quot;</code> as constant.</p>
 <p>As you might have noticed, <code>data-input</code> and <code>constant-input</code> are again YAML dictionaries.
@@ -304,14 +304,14 @@ This allows you to assign values for actions which expect multiple input paramet
 You can also mix which parameters you assign from data and which from constants:</p>
 <pre><code class="hljs css language-yaml"><span class="hljs-comment">#inspectit.instrumentation.rules is omitted here</span>
 <span class="hljs-attr">example_rule:</span>
-<span class="hljs-attr">  entry:</span>
-<span class="hljs-attr">    bye_world_text:</span>
-<span class="hljs-attr">      action:</span> <span class="hljs-string">string_replace_all</span>
-<span class="hljs-attr">      data-input:</span>
-<span class="hljs-attr">        string:</span> <span class="hljs-string">hello_world_text</span>
-<span class="hljs-attr">      constant-input:</span>
-<span class="hljs-attr">        regex:</span> <span class="hljs-string">"Hello"</span>
-<span class="hljs-attr">        replacement:</span> <span class="hljs-string">"Bye"</span>
+  <span class="hljs-attr">entry:</span>
+    <span class="hljs-attr">bye_world_text:</span>
+      <span class="hljs-attr">action:</span> <span class="hljs-string">string_replace_all</span>
+      <span class="hljs-attr">data-input:</span>
+        <span class="hljs-attr">string:</span> <span class="hljs-string">hello_world_text</span>
+      <span class="hljs-attr">constant-input:</span>
+        <span class="hljs-attr">regex:</span> <span class="hljs-string">"Hello"</span>
+        <span class="hljs-attr">replacement:</span> <span class="hljs-string">"Bye"</span>
 </code></pre>
 <p>As expected given the <a href="#actions">definition</a> of the <code>string_replace_all</code> action, the value of <code>bye_world_text</code> will be <code>&quot;Bye World!&quot;</code></p>
 <h4><a class="anchor" aria-hidden="true" id="adding-conditions"></a><a href="#adding-conditions" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Adding Conditions</h4>
@@ -330,12 +330,12 @@ You can also mix which parameters you assign from data and which from constants:
 <p>An example for the usage of a condition is given below:</p>
 <pre><code class="hljs css language-yaml"><span class="hljs-comment">#inspectit.instrumentation.rules is omitted here</span>
 <span class="hljs-attr">example_rule:</span>
-<span class="hljs-attr">  entry:</span>
-<span class="hljs-attr">    application_name:</span>
-<span class="hljs-attr">      action:</span> <span class="hljs-string">set</span>
-<span class="hljs-attr">      constant-input:</span>
-<span class="hljs-attr">        value:</span> <span class="hljs-string">"My-Application"</span>
-<span class="hljs-attr">    only-if-null:</span> <span class="hljs-string">application_name</span>
+  <span class="hljs-attr">entry:</span>
+    <span class="hljs-attr">application_name:</span>
+      <span class="hljs-attr">action:</span> <span class="hljs-string">set</span>
+      <span class="hljs-attr">constant-input:</span>
+        <span class="hljs-attr">value:</span> <span class="hljs-string">"My-Application"</span>
+    <span class="hljs-attr">only-if-null:</span> <span class="hljs-string">application_name</span>
 </code></pre>
 <p>In this example we define an invocation to set the value of the data key <code>application_name</code>
 to <code>&quot;My-Application&quot;</code>. However, this assignment is only performed if <code>application_name</code> previously was null, meaning that no value has been assigned yet. This mechanism is in particular useful when <code>application_name</code> is <a href="#data-propagation">down propagated</a>.</p>
@@ -349,24 +349,24 @@ For each instrumented method the agent first finds all rules which have scopes m
 <p>In some rare cases you might want to change this behaviour. E.g. in tracing context you want to store the <a href="#data-propagation">down propagated</a> <code>span_id</code> in <code>parent_span</code>, before the current method assigns a new <code>span_id</code>. This can easily be realized using the <code>before</code> config option for action invocations:</p>
 <pre><code class="hljs css language-yaml"><span class="hljs-comment">#inspectit.instrumentation.rules is omitted here</span>
 <span class="hljs-attr">example_rule:</span>
-<span class="hljs-attr">  entry:</span>
-<span class="hljs-attr">    parent_span:</span>
-<span class="hljs-attr">      action:</span> <span class="hljs-string">set</span>
-<span class="hljs-attr">      data-input:</span>
-<span class="hljs-attr">        value:</span> <span class="hljs-string">span_id</span>
-<span class="hljs-attr">    before:</span>
-<span class="hljs-attr">      span_id:</span> <span class="hljs-literal">true</span>
+  <span class="hljs-attr">entry:</span>
+    <span class="hljs-attr">parent_span:</span>
+      <span class="hljs-attr">action:</span> <span class="hljs-string">set</span>
+      <span class="hljs-attr">data-input:</span>
+        <span class="hljs-attr">value:</span> <span class="hljs-string">span_id</span>
+    <span class="hljs-attr">before:</span>
+      <span class="hljs-attr">span_id:</span> <span class="hljs-literal">true</span>
 </code></pre>
 <h3><a class="anchor" aria-hidden="true" id="collecting-metrics"></a><a href="#collecting-metrics" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Collecting Metrics</h3>
 <p>Metrics collection is done in the metrics phase of a rule, which can be configured using the <code>metrics</code> option:</p>
 <pre><code class="hljs css language-yaml"><span class="hljs-comment">#inspectit.instrumentation.rules is omitted here</span>
 <span class="hljs-attr">example_rule:</span>
   <span class="hljs-comment">#...</span>
-<span class="hljs-attr">  exit:</span>
-<span class="hljs-attr">    method_duration:</span>
+  <span class="hljs-attr">exit:</span>
+    <span class="hljs-attr">method_duration:</span>
       <span class="hljs-comment">#action invocation here....</span>
 
-<span class="hljs-attr">  metrics:</span>
+  <span class="hljs-attr">metrics:</span>
     <span class="hljs-string">'[method/duration]'</span> <span class="hljs-string">:</span> <span class="hljs-string">method_duration</span>
     <span class="hljs-string">'[some/other/metric]'</span> <span class="hljs-string">:</span> <span class="hljs-number">42</span>
 </code></pre>
@@ -380,11 +380,11 @@ Alternatively you can just specify a constant which will be used, like it was do
 In order to make your collected spans visible, you must first set up a <a href="/inspectit-ocelot/docs/0.2/tracing/trace-exporters">trace exporter</a>.</p>
 <p>Afterwards you can define that all methods matching a certain rule will be traced:</p>
 <pre><code class="hljs css language-yaml"><span class="hljs-attr">inspectit:</span>
-<span class="hljs-attr">  instrumentation:</span>
-<span class="hljs-attr">    rules:</span>
-<span class="hljs-attr">      example_rule:</span>
-<span class="hljs-attr">        tracing:</span>
-<span class="hljs-attr">          start-span:</span> <span class="hljs-literal">true</span>
+  <span class="hljs-attr">instrumentation:</span>
+    <span class="hljs-attr">rules:</span>
+      <span class="hljs-attr">example_rule:</span>
+        <span class="hljs-attr">tracing:</span>
+          <span class="hljs-attr">start-span:</span> <span class="hljs-literal">true</span>
 </code></pre>
 <p>For example, using the previous configuration snippet, each method that matches the scope definition of the <code>example_rule</code> rule will appear within a trace. Its appearance can be customized using the following properties which can be set in the rule's <code>tracing</code> section.</p>
 <table>
@@ -400,14 +400,14 @@ In order to make your collected spans visible, you must first set up a <a href="
 </table>
 <p>Commonly, you do not want to have the full qualified name of the instrumented method as span name. For example, for HTTP requests you typically want the HTTP path as span name. This behaviour can be customized using the <code>name</code> property:</p>
 <pre><code class="hljs css language-yaml"><span class="hljs-attr">inspectit:</span>
-<span class="hljs-attr">  instrumentation:</span>
-<span class="hljs-attr">    rules:</span>
-<span class="hljs-attr">      servlet_api_service:</span>
-<span class="hljs-attr">        tracing:</span>
-<span class="hljs-attr">          start-span:</span> <span class="hljs-literal">true</span>
-<span class="hljs-attr">          name:</span> <span class="hljs-string">http_path</span>
-<span class="hljs-attr">        entry:</span>
-<span class="hljs-attr">          http_path:</span>
+  <span class="hljs-attr">instrumentation:</span>
+    <span class="hljs-attr">rules:</span>
+      <span class="hljs-attr">servlet_api_service:</span>
+        <span class="hljs-attr">tracing:</span>
+          <span class="hljs-attr">start-span:</span> <span class="hljs-literal">true</span>
+          <span class="hljs-attr">name:</span> <span class="hljs-string">http_path</span>
+        <span class="hljs-attr">entry:</span>
+          <span class="hljs-attr">http_path:</span>
            <span class="hljs-comment">#... action call to fetch the http path here</span>
 </code></pre>
 <blockquote>
@@ -433,14 +433,14 @@ This allows you for example to vary the sample probability based on the HTTP url
 In most tracing backends such as ZipKin and Jaeger, you can search your traces based on attributes.
 The example below shows how you can define attributes:</p>
 <pre><code class="hljs css language-yaml"><span class="hljs-attr">inspectit:</span>
-<span class="hljs-attr">  instrumentation:</span>
-<span class="hljs-attr">    rules:</span>
-<span class="hljs-attr">      servlet_api_service:</span>
-<span class="hljs-attr">        tracing:</span>
-<span class="hljs-attr">          attributes:</span>
-<span class="hljs-attr">            http_host:</span> <span class="hljs-string">host_name</span>
-<span class="hljs-attr">        entry:</span>
-<span class="hljs-attr">          host_name:</span>
+  <span class="hljs-attr">instrumentation:</span>
+    <span class="hljs-attr">rules:</span>
+      <span class="hljs-attr">servlet_api_service:</span>
+        <span class="hljs-attr">tracing:</span>
+          <span class="hljs-attr">attributes:</span>
+            <span class="hljs-attr">http_host:</span> <span class="hljs-string">host_name</span>
+        <span class="hljs-attr">entry:</span>
+          <span class="hljs-attr">host_name:</span>
            <span class="hljs-comment">#... action call to fetch the http host here</span>
 </code></pre>
 <p>The attributes property maps the names of attributes to data keys.
@@ -449,21 +449,21 @@ After the rule's exit phase, the corresponding data keys are read and attached a
 If a rule does not start a span, the attributes will be written to the first span opened by any method on the current call stack.</p>
 <p>It is also possible to conditionalize the span starting as well as the attribute writing:</p>
 <pre><code class="hljs css language-yaml"><span class="hljs-attr">inspectit:</span>
-<span class="hljs-attr">  instrumentation:</span>
-<span class="hljs-attr">    rules:</span>
-<span class="hljs-attr">      span_starting_rule:</span>
-<span class="hljs-attr">        tracing:</span>
-<span class="hljs-attr">          start-span:</span> <span class="hljs-literal">true</span>
-<span class="hljs-attr">          start-span-conditions:</span>
-<span class="hljs-attr">            only-if-true:</span> <span class="hljs-string">my_condition_data</span>
+  <span class="hljs-attr">instrumentation:</span>
+    <span class="hljs-attr">rules:</span>
+      <span class="hljs-attr">span_starting_rule:</span>
+        <span class="hljs-attr">tracing:</span>
+          <span class="hljs-attr">start-span:</span> <span class="hljs-literal">true</span>
+          <span class="hljs-attr">start-span-conditions:</span>
+            <span class="hljs-attr">only-if-true:</span> <span class="hljs-string">my_condition_data</span>
 <span class="hljs-comment">#....</span>
-<span class="hljs-attr">      attribute_writing_rule:</span>
-<span class="hljs-attr">        tracing:</span>
-<span class="hljs-attr">          attributes:</span>
-<span class="hljs-attr">            attrA:</span> <span class="hljs-string">data_a</span>
-<span class="hljs-attr">            attrB:</span> <span class="hljs-string">data_b</span>
-<span class="hljs-attr">          attribute-conditions:</span>
-<span class="hljs-attr">            only-if-true:</span> <span class="hljs-string">my_condition_data</span>
+      <span class="hljs-attr">attribute_writing_rule:</span>
+        <span class="hljs-attr">tracing:</span>
+          <span class="hljs-attr">attributes:</span>
+            <span class="hljs-attr">attrA:</span> <span class="hljs-string">data_a</span>
+            <span class="hljs-attr">attrB:</span> <span class="hljs-string">data_b</span>
+          <span class="hljs-attr">attribute-conditions:</span>
+            <span class="hljs-attr">only-if-true:</span> <span class="hljs-string">my_condition_data</span>
 </code></pre>
 <p>If any <code>start-span-conditions</code> are defined, a span will only be created when all conditions are met.
 Analogous to this, attributes will only be written if each condition defined in <code>attribute-conditions</code> is fulfilled.
@@ -478,21 +478,21 @@ The resulting span then has the following properties:</p>
 </ul>
 <p>This can be configured by defining for rules that they (a) can continue existing spans and (b) can optionally end the span they started or continued.</p>
 <p>Firstly, it is possible to &quot;remember&quot; the span created or continued using the <code>store-span</code> option:</p>
-<pre><code class="hljs css language-yaml"><span class="hljs-attr">    rules:</span>
-<span class="hljs-attr">      span_starting_rule:</span>
-<span class="hljs-attr">        tracing:</span>
-<span class="hljs-attr">          start-span:</span> <span class="hljs-literal">true</span>
-<span class="hljs-attr">          store-span:</span> <span class="hljs-string">my_span_data</span>
-<span class="hljs-attr">          end-span:</span> <span class="hljs-literal">false</span>
+<pre><code class="hljs css language-yaml">    <span class="hljs-attr">rules:</span>
+      <span class="hljs-attr">span_starting_rule:</span>
+        <span class="hljs-attr">tracing:</span>
+          <span class="hljs-attr">start-span:</span> <span class="hljs-literal">true</span>
+          <span class="hljs-attr">store-span:</span> <span class="hljs-string">my_span_data</span>
+          <span class="hljs-attr">end-span:</span> <span class="hljs-literal">false</span>
 </code></pre>
 <p>With this option, the span created at the end of the entry phase will be stored in the context with the data key <code>my_span_data</code>. Usually this span reference is then extracted from the context and attached ot an object via the <a href="#input-parameters">_attachments</a>.</p>
 <p>Without the <code>end-span: false</code> definition above, the span would be ended as soon as the instrumented method returns.
 By setting <code>end-span</code> to false, the span is kept open instead. It can then be continued when another method is executed as follows:</p>
-<pre><code class="hljs css language-yaml"><span class="hljs-attr">    rules:</span>
-<span class="hljs-attr">      span_finishing_rule:</span>
-<span class="hljs-attr">        tracing:</span>
-<span class="hljs-attr">          continue-span:</span> <span class="hljs-string">my_span_data</span>
-<span class="hljs-attr">          end-span:</span> <span class="hljs-literal">true</span> <span class="hljs-comment"># actually not necessary as it is the default value</span>
+<pre><code class="hljs css language-yaml">    <span class="hljs-attr">rules:</span>
+      <span class="hljs-attr">span_finishing_rule:</span>
+        <span class="hljs-attr">tracing:</span>
+          <span class="hljs-attr">continue-span:</span> <span class="hljs-string">my_span_data</span>
+          <span class="hljs-attr">end-span:</span> <span class="hljs-literal">true</span> <span class="hljs-comment"># actually not necessary as it is the default value</span>
 </code></pre>
 <p>Methods instrumented with this rule will not create a new span. Instead at the end of the entry phase the data for the key <code>my_span_data</code> is read from the context. If it contains a valid span written via <code>store-span</code>, this span is continued in this method. This implies that all spans started by callees of this method will appear as children of the span stored in <code>my_span_data</code>. In addition, this rule also then causes the continued span to end with the execution of the method due to the <code>end-span</code> option. This is not required to happen: a span can be continued by any number of rules before it is finally ended.</p>
 <p>It also is possible to define rules for which both <code>start-span</code> and <code>continue-span</code> is configured.

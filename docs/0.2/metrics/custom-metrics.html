@@ -70,20 +70,20 @@ not how the data is collected. For details on the data collection please see the
 This is best explained by giving a simple example which comes from the default
 configuration of inspectIT Ocelot:</p>
 <pre><code class="hljs css language-YAML"><span class="hljs-attr">inspectit:</span>
-<span class="hljs-attr">  metrics:</span>
-<span class="hljs-attr">    definitions:</span>
+  <span class="hljs-attr">metrics:</span>
+    <span class="hljs-attr">definitions:</span>
       <span class="hljs-string">'[method/duration]'</span><span class="hljs-string">:</span>
-<span class="hljs-attr">        unit:</span> <span class="hljs-string">ms</span>
-<span class="hljs-attr">        description:</span> <span class="hljs-string">"the duration from method entry to method exit"</span>
-<span class="hljs-attr">        views:</span>
+        <span class="hljs-attr">unit:</span> <span class="hljs-string">ms</span>
+        <span class="hljs-attr">description:</span> <span class="hljs-string">"the duration from method entry to method exit"</span>
+        <span class="hljs-attr">views:</span>
           <span class="hljs-string">'[method/duration/sum]'</span><span class="hljs-string">:</span>
-<span class="hljs-attr">            aggregation:</span> <span class="hljs-string">SUM</span>
-<span class="hljs-attr">            tags:</span>
-              <span class="hljs-string">method_name</span> <span class="hljs-string">:</span> <span class="hljs-literal">true</span>
+            <span class="hljs-attr">aggregation:</span> <span class="hljs-string">SUM</span>
+            <span class="hljs-attr">tags:</span>
+              <span class="hljs-attr">method_name :</span> <span class="hljs-literal">true</span>
           <span class="hljs-string">'[method/duration/count]'</span><span class="hljs-string">:</span>
-<span class="hljs-attr">            aggregation:</span> <span class="hljs-string">COUNT</span>
-<span class="hljs-attr">            tags:</span>
-<span class="hljs-attr">              method_name:</span> <span class="hljs-literal">true</span>
+            <span class="hljs-attr">aggregation:</span> <span class="hljs-string">COUNT</span>
+            <span class="hljs-attr">tags:</span>
+              <span class="hljs-attr">method_name:</span> <span class="hljs-literal">true</span>
 </code></pre>
 <p>This snippet defines a metric with the name <code>method/duration</code> and the two views <code>method/duration/sum</code>
 and <code>method/duration/count</code>. Note that the special quoting syntax <code>'[...]'</code> is required because of
