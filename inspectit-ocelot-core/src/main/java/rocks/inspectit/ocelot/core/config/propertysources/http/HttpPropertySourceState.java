@@ -181,24 +181,15 @@ public class HttpPropertySourceState {
             configuration = processHttpResponse(response);
             isError = false;
             if (errorCounter != 0) {
-                log.info("Fetch has been successful after {} unsuccessful attempts.", errorCounter);
+                log.info("Configuration fetch has been successful after {} unsuccessful attempts.", errorCounter);
                 errorCounter = 0;
             }
         } catch (ClientProtocolException e) {
-            errorCounter++;
-            if (errorCounter > 0 && ((errorCounter & (errorCounter - 1)) == 0)) {
-                log.error("HTTP protocol error occurred while fetching configuration.", e);
-            }
+            logFetchError("HTTP protocol error occurred while fetching configuration.", e);
         } catch (IOException e) {
-            errorCounter++;
-            if (errorCounter > 0 && ((errorCounter & (errorCounter - 1)) == 0)) {
-                log.error("A IO problem occurred while fetching configuration.", e);
-            }
+            logFetchError("A IO problem occurred while fetching configuration.", e);
         } catch (Exception e) {
-            errorCounter++;
-            if (errorCounter > 0 && ((errorCounter & (errorCounter - 1)) == 0)) {
-                log.error("Exception occurred while fetching configuration.", e);
-            }
+            logFetchError("Exception occurred while fetching configuration.", e);
         } finally {
             httpGet.releaseConnection();
         }
@@ -210,6 +201,20 @@ public class HttpPropertySourceState {
         }
 
         return configuration;
+    }
+
+    /**
+     * Increments the errorCounter and prints ERROR log if the errorCounter is power of two
+     *
+     * @param message error message to log
+     * @param exception exception that occurred when trying to fetch a configuration
+     */
+    private void logFetchError(String message, Exception exception) {
+        errorCounter++;
+        //check if errorCounter is a power of 2
+        if (((errorCounter & (errorCounter - 1)) == 0)) {
+            log.error(message, exception);
+        }
     }
 
     /**
