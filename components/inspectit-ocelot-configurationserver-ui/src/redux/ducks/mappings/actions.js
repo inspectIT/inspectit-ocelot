@@ -2,25 +2,25 @@ import * as types from "./types";
 import axios from '../../../lib/axios-api';
 import { notificationActions } from '../notification';
 
-import {cloneDeep} from 'lodash';
+import { cloneDeep } from 'lodash';
 
 /**
  * Fetches the agent mappings from the server.
  */
 export const fetchMappings = () => {
-    return dispatch => {
-        dispatch({ type: types.FETCH_MAPPINGS_STARTED });
+  return dispatch => {
+    dispatch({ type: types.FETCH_MAPPINGS_STARTED });
 
-        axios
-            .get("/mappings")
-            .then(response => {
-                const mappings = response.data;
-                dispatch({ type: types.FETCH_MAPPINGS_SUCCESS, payload: { mappings } })
-            })
-            .catch(error => {
-                dispatch({ type: types.FETCH_MAPPINGS_FAILURE })
-            });
-    };
+    axios
+      .get("/mappings")
+      .then(response => {
+        const mappings = response.data;
+        dispatch({ type: types.FETCH_MAPPINGS_SUCCESS, payload: { mappings } })
+      })
+      .catch(error => {
+        dispatch({ type: types.FETCH_MAPPINGS_FAILURE })
+      });
+  };
 };
 
 /**
@@ -29,25 +29,25 @@ export const fetchMappings = () => {
  * 
  * @param {*} mappings - the agent mappings to store
  */
-export const putMappings = (mappings, callback=()=>{}) => {
-    return dispatch => {
-        dispatch({ type: types.PUT_MAPPINGS_STARTED });
+export const putMappings = (mappings, onComplete = () => { }) => {
+  return dispatch => {
+    dispatch({ type: types.PUT_MAPPINGS_STARTED });
 
-        axios
-            .put("/mappings", mappings, {
-                headers: { "content-type": "application/json" }
-            })
-            .then(response => {
-                dispatch({ type: types.PUT_MAPPINGS_SUCCESS, payload: { mappings } });
-                dispatch(notificationActions.showSuccessMessage("Agent Mappings Saved", "The agent mappings have been successfully saved."));
-                dispatch(fetchMappings());
-                callback(true)
-            })
-            .catch(error => {
-                dispatch({ type: types.PUT_MAPPINGS_FAILURE });
-                callback(false)
-            });
-    };
+    axios
+      .put("/mappings", mappings, {
+        headers: { "content-type": "application/json" }
+      })
+      .then(response => {
+        dispatch({ type: types.PUT_MAPPINGS_SUCCESS, payload: { mappings } });
+        dispatch(notificationActions.showSuccessMessage("Agent Mappings Saved", "The agent mappings have been successfully saved."));
+        dispatch(fetchMappings());
+        onComplete(true)
+      })
+      .catch(error => {
+        dispatch({ type: types.PUT_MAPPINGS_FAILURE });
+        onComplete(false)
+      });
+  };
 };
 
 /**
@@ -57,27 +57,25 @@ export const putMappings = (mappings, callback=()=>{}) => {
  * 
  * @param {*} mappings - the agent mapping to store
  */
-export const putMapping = (mapping, callback=()=>{}) => {
-  return (dispatch, getState) => {
-      dispatch({ type: types.PUT_MAPPING_STARTED });
+export const putMapping = (mapping, onComplete = () => { }) => {
+  return dispatch => {
+    dispatch({ type: types.PUT_MAPPING_STARTED });
 
-      axios
-          .put(`/mappings/${mapping.name}`, mapping, {
-              headers: { "content-type": "application/json" }
-          })
-          .then(response => {
-            const state = getState();
-            const mappings = cloneDeep(state.mappings.mappings)
-            mappings.unshift(mapping)
+    axios
+      .put(`/mappings/${mapping.name}`, mapping, {
+        headers: { "content-type": "application/json" }
+      })
+      .then(response => {
+        dispatch({ type: types.PUT_MAPPING_SUCCESS });
+        dispatch(notificationActions.showSuccessMessage("Agent Mappings Saved", "The agent mappings have been successfully saved."));
+        onComplete(true)
 
-            dispatch({ type: types.PUT_MAPPING_SUCCESS, payload: { mappings } });
-            dispatch(notificationActions.showSuccessMessage("Agent Mappings Saved", "The agent mappings have been successfully saved."));
-            callback(true)
-          })
-          .catch(error => {
-              dispatch({ type: types.PUT_MAPPING_FAILURE });
-              callback(false)
-          });
+        dispatch(fetchMappings())
+      })
+      .catch(error => {
+        dispatch({ type: types.PUT_MAPPING_FAILURE });
+        onComplete(false)
+      });
   };
 };
 
@@ -94,15 +92,15 @@ export const deleteMapping = (mapping) => {
     dispatch({ type: types.DELETE_MAPPING_STARTED });
 
     axios
-        .delete(`/mappings/${nameToDelete}`)
-        .then(response => {
-          dispatch({ type: types.DELETE_MAPPING_SUCCESS });
-          dispatch(notificationActions.showSuccessMessage("Mapping Deleted", "The mappings has been successfully deleted."));
-          dispatch(fetchMappings());
-        })
-        .catch(error => {
-            dispatch({ type: types.DELETE_MAPPING_FAILURE });
-        });
-    };
+      .delete(`/mappings/${nameToDelete}`)
+      .then(response => {
+        dispatch({ type: types.DELETE_MAPPING_SUCCESS });
+        dispatch(notificationActions.showSuccessMessage("Mapping Deleted", "The mapping has been successfully deleted."));
+        dispatch(fetchMappings());
+      })
+      .catch(error => {
+        dispatch({ type: types.DELETE_MAPPING_FAILURE });
+      });
+  };
 }
 

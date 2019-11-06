@@ -10,175 +10,245 @@ import { Fieldset } from 'primereact/fieldset';
 
 import EditSources from '../editComponents/EditSources'
 import KeyValueEditor from '../editComponents/KeyValueEditor';
-import {cloneDeep, isEqual} from 'lodash';
-
-/**
- * Dialog for editing the given mapping.
- */
+import { isEqual, findIndex, cloneDeep, isEqualWith } from 'lodash';
 
 const defaultState = {
-	// includes mapping.name, mapping.sources, mapping.attributes
-	name: '',
-	sources: [],
-	attributes: [],
-	isNewMapping: null,
+  // state includes mapping.name, mapping.sources, mapping.attributes
+  name: '',
+  sources: [],
+  attributes: [],
+  isNewMapping: null,
 }
 
+/**
+ * Dialog for editing the given mapping/creating a new mapping.
+ */
 class EditMappingDialog extends React.Component {
 
-	constructor(props){
-		super(props);
-		this.state = defaultState;
-	}
+  state = defaultState;
 
-	handleAddSource = (newSource) => {
-		let sourceCopy = cloneDeep(this.state.sources) || [];
-		sourceCopy.unshift(newSource);
-		this.setState({ sources: sourceCopy });
+  handleChangeSources = (newSources) => {
+    this.setState({ sources: newSources });
   }
 
-	handleUpdateSources = (newSources) => this.setState({ sources: newSources });
-
-	handleChangeAttribute = (newAttributes) => {
-		this.setState({attributes: newAttributes});
-	}
+  handleChangeAttribute = (newAttributes) => {
+    this.setState({ attributes: newAttributes });
+  }
 
   render() {
-		const {name, sources, attributes, isNewMapping} = this.state;
-		const maxHeightFieldset = window.innerHeight * 0.45;
+    const { name, sources, attributes, isNewMapping } = this.state;
+    const heightFieldset = window.innerHeight * 0.35;
 
     return (
-			<div className='this'>
-				<style jsx>{`
+      <div className='this'>
+        <style jsx>{`
 					.this :global(.p-dialog-content){
-						// padding: 0.25em 0em 0em 0em;
 						border-left: 1px solid #ddd;
 						border-right: 1px solid #ddd;
 					}
 				`}</style>
-				<Dialog
-					header={isNewMapping ? 'Add Mapping' : 'Edit Mapping'}
-					modal={true}
-					visible={this.props.visible}
-					onHide={this.handleClose}
-					style={{'max-width': '1100px', 'min-width': '650px'}}
-					footer={(
-						<div>
-							<Button label={isNewMapping ? 'Add' : 'Update'} className="p-button-primary" onClick={this.handleClick} />
-							<Button label="Cancel" className="p-button-secondary" onClick={this.handleClose} />
-						</div>
-					)}
-				>
-					<span style={{display: 'flex', alignItems: 'center'}}>
-						<p style={{width: '9rem'}}>Mapping Name: </p>
-						<div className="p-inputgroup" style = {{display: "inline-flex", verticalAlign: "middle", width: '100%' }}>
-								<InputText 
-									placeholder='Enter new name'
-									value={name ? name : ''} 
-									onChange={e => this.setState({name: e.target.value}) }
-									style={{width: '100%'}} 
-								/>
-								<span className="pi p-inputgroup-addon pi-pencil" style={{background: 'inherit', 'border-color': '#656565'}}/>
-						</div>
-					</span>
-					<Fieldset legend='Sources' style={{'padding-top': 0, 'max-height': maxHeightFieldset, overflow: 'hidden'}}>
-						<EditSources
-							visible={this.props.visible}
-							sources={sources} 
-							onUpdateAllSources={this.handleUpdateSources}
-							onAddSource={this.handleAddSource}
-							maxHeight={`calc(${maxHeightFieldset}px - 10em)`}
-						/> 
-					</Fieldset>
-					<Fieldset legend='Attributes' style={{'padding-top': 0, 'max-height': maxHeightFieldset, overflow: 'hidden'}}>
-					<KeyValueEditor 
-						keyValueArray={attributes}
-						onChange={this.handleChangeAttribute}
-						maxHeight={`calc(${maxHeightFieldset}px - 10em)`}
-					/>
-					</Fieldset>
-				</Dialog>
-			</div>
+        <Dialog
+          header={isNewMapping ? 'Add Mapping' : 'Edit Mapping'}
+          modal={true}
+          visible={this.props.visible}
+          onHide={this.handleClose}
+          style={{ 'max-width': '1100px', 'min-width': '650px' }}
+          footer={(
+            <div>
+              <Button label={isNewMapping ? 'Add' : 'Update'} className="p-button-primary" onClick={this.handleClick} />
+              <Button label="Cancel" className="p-button-secondary" onClick={this.handleClose} />
+            </div>
+          )}
+        >
+          <span style={{ display: 'flex', alignItems: 'center' }}>
+            <p style={{ width: '9rem' }}>Mapping Name: </p>
+            <div className="p-inputgroup" style={{ display: "inline-flex", verticalAlign: "middle", width: '100%' }}>
+              <InputText
+                placeholder='Enter new name'
+                value={name ? name : ''}
+                onChange={e => this.setState({ name: e.target.value })}
+                style={{ width: '100%' }}
+              />
+              <span className="pi p-inputgroup-addon pi-pencil" style={{ background: 'inherit', 'border-color': '#656565' }} />
+            </div>
+          </span>
+          <Fieldset legend='Sources' style={{ 'padding-top': 0, 'height': heightFieldset, overflow: 'hidden' }}>
+            <EditSources
+              visible={this.props.visible}
+              sources={sources}
+              onChange={this.handleChangeSources}
+              maxHeight={`calc(${heightFieldset}px - 3.5em)`}
+            />
+          </Fieldset>
+          <Fieldset legend='Attributes' style={{ 'padding-top': 0, 'height': heightFieldset, overflow: 'hidden' }}>
+            <KeyValueEditor
+              keyValueArray={attributes}
+              onChange={this.handleChangeAttribute}
+              maxHeight={`calc(${heightFieldset}px - 6em)`}
+            />
+          </Fieldset>
+        </Dialog>
+      </div>
     )
-	}
-	
-	componentWillReceiveProps(nextProps){
-		if(!nextProps.mapping.name){
-			this.setState({ isNewMapping: true})
-		}
-		else {
-			const newAttributeArray = []
-			for (let attKey in nextProps.mapping.attributes) {
-				newAttributeArray.push({
-					key: attKey,
-					value: nextProps.mapping.attributes[attKey]
-				})
-			}
-			this.setState({name: nextProps.mapping.name, sources: cloneDeep(nextProps.mapping.sources), attributes: newAttributeArray, isNewMapping: false});
-		}
-	}
+  }
 
+	/**
+	 * declares whether a new or old mapping is edited
+	 * and converts mapping.attributes into a format used by KeyValueEditor
+	 * 
+	 * @param {*} nextProps 
+	 */
+  componentWillReceiveProps(nextProps) {
+    if (!nextProps.mapping) {
+      this.setState({ isNewMapping: true });
+    }
+    else {
+      this.setState({ ...buildEditObject(nextProps.mapping) });
+    }
+  }
+
+  // called on saving
   handleClick = () => {
-		const {name, sources, attributes, isNewMapping} = this.state;
+    const newMapping = buildMappingObject(this.state);
 
-		if(!name  || (this.props.mapping.name !== name && checkIfNameAlreadyExists(this.props.mappings, name)) ){
-			const msg = !name ? 'Enter a name for your mapping' : 'A Mapping with this name already exists';
-			this.props.showWarningMessage('Mappings Could not be Updated', msg);
-			return	
-		} 
+    // not saving in case of empty name or empty/double attribute keys
+    if (!this.canTrySave(newMapping)) {
+      return
+    }
 
-		const attributesObjToSave = {};
-    attributes.forEach(pair => {
-			attributesObjToSave[pair.key || ''] = pair.value || '';
-		})
-		if(Object.keys(attributesObjToSave).length !== attributes.length){
-			this.props.showWarningMessage('Invalid Input', 'Certein attribute keys were duplicates and have been omitted for saving.')
-		}
-		
-		if(isNewMapping){
-			this.props.addMapping({name: name, sources: sources, attributes: attributesObjToSave}, this.handleClose)
-		} else{
-			let newMappings = cloneDeep(this.props.mappings);
-    	let indexToUpdate;
-    	newMappings.forEach((element, index) => {
-      	if(isEqual(element, this.props.mapping)) { 
-					indexToUpdate = index; 
-				}
-    	});
-			newMappings.splice(indexToUpdate, 1, {name: name, sources: sources, attributes: attributesObjToSave });
-			this.props.putMappings(newMappings, this.handleClose)
-		}
-	}
-	
-	handleClose = (success = true) => {
-		if(success){
-			this.props.onHide();
-			this.setState({...defaultState});
-		}
-	}
-}
+    if (this.state.isNewMapping) {
+      this.props.addMapping(newMapping, this.handleClose);
+    } else {
+      let newMappings = this.props.mappings.map(mapping => {
+        if (isEqualWith(mapping, this.props.mapping, areMappingsEqual)) {
+          return newMapping;
+        } else {
+          return mapping;
+        }
+      })
+      this.props.putMappings(newMappings, this.handleClose);
+    }
+  }
 
-const checkIfNameAlreadyExists = (allMappings, newName) => {
-	let res
-	allMappings.forEach(mapping => {
-		if(mapping.name === newName){
-			res = true
-		}
-	})
-	return res
+  /**
+   * callback on saving action or closing dialog without saving
+   */
+  handleClose = (success = true) => {
+    if (success) {
+      this.props.onHide();
+      this.setState({ ...defaultState });
+    }
+  }
+
+  /**
+   * shows a warning and returns false when the given mapping should not be saved/ dialog not closed
+   */
+  canTrySave = (newMapping) => {
+    const { name, attributes } = this.state;
+    const { showWarningMessage } = this.props;
+
+    if (!name) {
+      showWarningMessage('Mappings Could not be Updated', 'Please enter a name for this mapping');
+      return false;
+    }
+
+    if (this.props.mapping && this.props.mapping.name !== name && findIndex(this.props.mappings, (mapping) => mapping.name === name) !== -1) {
+      showWarningMessage('Mappings Could not be Updated', 'A Mapping with this name already exists');
+      return false;
+    }
+
+    if (Object.keys(newMapping.attributes).length !== attributes.length) {
+      showWarningMessage('Invalid Attributes', 'Attribute keys cannot be double or empty');
+      return false;
+    }
+
+    for (let key in newMapping.attributes) {
+      if (!key) {
+        showWarningMessage('Invalid Attributes', 'Attribute keys cannot be empty');
+        return false;
+      }
+    }
+
+    return true;
+  }
 }
 
 function mapStateToProps(state) {
-  const {mappings} = state.mappings;
+  const { mappings } = state.mappings;
   return {
     mappings
   }
 }
 
 const mapDispatchToProps = {
-	addMapping: mappingsActions.putMapping,
-	putMappings: mappingsActions.putMappings,
-	showWarningMessage: notificationActions.showWarningMessage,
+  addMapping: mappingsActions.putMapping,
+  putMappings: mappingsActions.putMappings,
+  showWarningMessage: notificationActions.showWarningMessage,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(EditMappingDialog);
+
+/**
+ * expects two mappings to compare name, sources and attributes of both
+ * returns true/false depending on equality
+ * ~ needed since this.props.mappings will be retrieved from mappingsView/mappingsTable
+ * and mappingsTable modifies the mapping (to enable global filtering of primereact/table) before sending it
+ * 
+ * @param {mapping} mapping1 
+ * @param {mapping} mapping2 
+ */
+const areMappingsEqual = (mapping1, mapping2) => {
+  return (
+    isEqual(mapping1.name, mapping2.name)
+    && isEqual(mapping1.sources, mapping2.sources)
+    && isEqual(mapping1.attributes, mapping2.attributes)
+  )
+}
+
+/**
+ * expects a mapping object and returns an object usable by this component
+ * only attributes are beeing changed - to fit for Key/ValueComponent
+ * 
+ * @param {object} mapping
+ */
+export const buildEditObject = (mapping) => {
+  const attributeArray = [];
+  for (let attKey in mapping.attributes) {
+    attributeArray.push(
+      {
+        key: attKey,
+        value: mapping.attributes[attKey]
+      }
+    )
+  }
+  return {
+    name: mapping.name,
+    sources: cloneDeep(mapping.sources),
+    attributes: attributeArray,
+    isNewMapping: false
+  }
+}
+
+/**
+ * undo funktion to buildEditObject - 
+ * expects an object with name,sources & attributes and returns a mapping
+ * 
+ * @param {object} obj - edit dialog state with name, sources, attributes
+ */
+export const buildMappingObject = (obj) => {
+  if (!obj.name || !obj.attributes || !Array.isArray(obj.attributes)) {
+    return;
+  }
+  let res = {
+    name: obj.name,
+    sources: cloneDeep(obj.sources) || [],
+    attributes: {}
+  }
+  try {
+    obj.attributes.forEach(pair => {
+      res.attributes[pair.key || ''] = pair.value || '';
+    })
+  } finally {
+    return res;
+  }
+}

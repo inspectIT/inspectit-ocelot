@@ -4,11 +4,11 @@ import { Button } from 'primereact/button';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 
-import { cloneDeep } from 'lodash';
+import { cloneDeep, isEqual, assign } from 'lodash';
 
-class KeyValueEditor extends React.Component{
+class KeyValueEditor extends React.Component {
 
-  constructor(props){
+  constructor(props) {
     super(props)
     this.state = {
       editValue: null,
@@ -16,68 +16,60 @@ class KeyValueEditor extends React.Component{
   }
 
   editor = (columnProps) => {
-    const { editValue } = this.state;
-    return ( 
-      <InputText 
-        value={editValue === null ? columnProps.rowData[columnProps.field] : editValue}
-        onChange={e => this.setState({editValue: e.target.value})}
-        onBlur={e => this.handleBlur(e.target.value, columnProps)}
-        onKeyDown={e => this.handleKeyDown(e.key, e.target.value, columnProps)}
-      /> 
+    return (
+      <InputText
+        value={columnProps.rowData[columnProps.field]}
+        onChange={e => this.valueChanged(columnProps.rowIndex, columnProps.field, e.target.value)}
+      />
     )
   }
 
-  handleKeyDown = (key, targetValue, columnProps) => {
-    if(key === 'Enter' || key === 'Tab'){
-      this.handleBlur(targetValue, columnProps)
-    }
-    if(key === 'Tab'){
-      this.setState({editValue: ''})
+  valueChanged = (row, field, newValue) => {
+    const dataCopy = cloneDeep(this.props.keyValueArray || []);
+    dataCopy.push({});
+    dataCopy[row][field] = newValue;
+
+    const newData = dataCopy.filter(obj => obj.key || obj.value);
+    if (!isEqual(this.props.keyValueArray, newData)) {
+      this.props.onChange(newData);
     }
   }
 
-  handleBlur = (newValue, columnProps) => {
-    const dataCopy = cloneDeep(columnProps.value)
-    dataCopy[columnProps.rowIndex][columnProps.field] = newValue
-
-    this.props.onChange(dataCopy.filter(obj => obj.key || obj.value))
-    this.setState({editValue: null});
-  }
-
-  handleDelete = (rowData) => {
-    this.props.onChange(this.props.keyValueArray.filter(obj => obj.key !== rowData.key || obj.value !== rowData.value))
+  handleDelete = (rowIndex) => {
+    this.props.onChange(this.props.keyValueArray.filter((obj, idx) => idx != rowIndex));
   }
 
   render() {
-    const dataArray = cloneDeep(this.props.keyValueArray) || [];
+    let dataArray = cloneDeep(this.props.keyValueArray) || [];
     dataArray.push({});
+    dataArray.map((data, index) => assign(data, { index }));
 
-    return(
-      <DataTable 
-        value={dataArray} 
-        scrollable={true} 
+    return (
+      <DataTable
+        value={dataArray}
+        scrollable={true}
         scrollHeight={this.props.maxHeight ? this.props.maxHeight : '100%'}
       >
-        <Column 
-          columnKey='key' 
-          field='key' 
+        <Column
+          columnKey='key'
+          field='key'
           header='Key'
-          headerStyle={{'font-weight': 'normal'}}
-          body={rowData => rowData.key || <p style={{color: 'grey'}}>click here to add new key</p>} 
-          editor={this.editor} 
-          />
-        <Column 
-          columnKey='value' 
-          field='value' 
+          headerStyle={{ 'font-weight': 'normal' }}
+          body={rowData => rowData.key || <p style={{ color: 'grey' }}>click here to add new key</p>}
+          editor={this.editor}
+        />
+        <Column
+          columnKey='value'
+          field='value'
           header='Value'
-          headerStyle={{'font-weight': 'normal'}}
-          body={rowData => rowData.value || <p style={{color: 'grey'}}>click here to add new value</p>} 
-          editor={this.editor} 
-          />
-        <Column 
+          headerStyle={{ 'font-weight': 'normal' }}
+          body={rowData => rowData.value || <p style={{ color: 'grey' }}>click here to add new value</p>}
+          editor={this.editor}
+        />
+        <Column
           columnKey='buttonRow'
-          body={rowData => (rowData.key || rowData.value) != null ? <Button icon='pi pi-trash' onClick={() => this.handleDelete(rowData)}/> : ''}
-          style={{width: '4em'}}
+          body={rowData => (rowData.key || rowData.value) ? <Button icon='pi pi-trash' onClick={() => this.handleDelete(rowData.index)} /> : ''}
+          style={{ width: '4em' }}
         />
       </DataTable>
     )

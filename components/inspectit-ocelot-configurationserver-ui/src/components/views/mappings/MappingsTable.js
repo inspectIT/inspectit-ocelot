@@ -1,17 +1,17 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { mappingsActions } from '../../../redux/ducks/mappings';
-import { agentConfigActions } from '../../../redux/ducks/agent-config';
-import { configurationActions } from '../../../redux/ducks/configuration';
 
-import {DataTable} from 'primereact/datatable';
-import {Column} from 'primereact/column';
-import {Button} from 'primereact/button';
-import {TieredMenu} from 'primereact/tieredmenu';
-import {OverlayPanel} from 'primereact/overlaypanel';
+import { DataTable } from 'primereact/datatable';
+import { Column } from 'primereact/column';
+import { Button } from 'primereact/button';
+import { TieredMenu } from 'primereact/tieredmenu';
+import { OverlayPanel } from 'primereact/overlaypanel';
 import DeleteDialog from './dialogs/DeleteDialog';
+import DownloadLink from './DownloadLink';
 
-const ButtonCell = ({mapping, onEdit, onDelete, onDownload, apenndRef}) => {
+/** Component including the menu button for each mapping */
+const ButtonCell = ({ mapping, onEdit, onDelete, onDownload, appendRef }) => {
   const thisCell = {};
   const menuItems = [
     {
@@ -27,7 +27,7 @@ const ButtonCell = ({mapping, onEdit, onDelete, onDownload, apenndRef}) => {
       icon: 'pi pi-fw pi-trash',
       command: (e) => {
         thisCell.menu.toggle(e)
-        onDelete(mapping)
+        onDelete(mapping.name)
       },
     },
     {
@@ -39,98 +39,131 @@ const ButtonCell = ({mapping, onEdit, onDelete, onDownload, apenndRef}) => {
       }
     }
   ]
-  return(
-    <div ref={el => thisCell.div = el}> 
-    <TieredMenu model={menuItems} popup={true} appendTo={apenndRef} ref={el => thisCell.menu = el} />
-    <Button icon="pi pi-bars" onClick={(event) => thisCell.menu.toggle(event)} style={{'margin-right': '5.25m'}}/>
-  </div>
+  return (
+    <div ref={el => thisCell.div = el}>
+      <TieredMenu model={menuItems} popup={true} appendTo={appendRef} ref={el => thisCell.menu = el} />
+      <Button icon="pi pi-bars" onClick={(e) => thisCell.menu.toggle(e)} />
+    </div>
   )
 }
 
-const SourceCell = ({sources, apenndRef}) => {
-  if(!sources) {
-    return null;
-  }
+/** Component to display sources & it's OverlayPanel */
+const SourceCell = ({ sources = [], appendRef }) => {
   const thisCell = {};
-
   return (
     <div>
       <style>{` p{ margin: 0.2em; } `}</style>
       {
-        sources.length <= 5 ? 
-        sources.map(source => ( <p>{source}</p> )) :
-        <div 
-          onMouseEnter={e => thisCell.op.show(e)} 
-          onMouseLeave={e => thisCell.op.hide(e)}
-        >
-          <p>{sources[0]}</p><p>{sources[1]}</p>
-          <p>{sources[2]}</p><p>{sources[3]}</p>
-          <p>{sources[4]}</p><p>...</p>
-          <OverlayPanel appendTo={apenndRef} ref={(el) => thisCell.op = el}>
-            {sources.map(source => ( <p>{source}</p> ))}
-          </OverlayPanel>
-        </div>
+        sources.length <= 5 ?
+          sources.map(source => (<p>{source}</p>)) :
+          <div
+            onMouseEnter={e => thisCell.op.show(e)}
+            onMouseLeave={e => thisCell.op.hide(e)}
+          >
+            <p>{sources[0]}</p><p>{sources[1]}</p>
+            <p>{sources[2]}</p><p>{sources[3]}</p>
+            <p>{sources[4]}</p><p>...</p>
+            <OverlayPanel appendTo={appendRef} ref={(el) => thisCell.op = el}>
+              {sources.map(source => (<p>{source}</p>))}
+            </OverlayPanel>
+          </div>
       }
     </div>
   )
 }
 
-const AttributesCell = ({attributes, apenndRef}) => {
-if(!attributes) {
-  return null;
-}
-const thisCell = {};
-
-const keys = Object.keys(attributes);
+/** Component to display attributes & it's OverlayPanel */
+const AttributesCell = ({ attributes = {}, appendRef }) => {
+  const thisCell = {};
+  const keys = Object.keys(attributes);
   return (
     <div>
       <style>{` p{ margin: 0.2em; } `}</style>
       {
         keys && keys.length <= 5 ?
-        keys.map(key => ( <p>{`${key}: ${attributes[key]}`}</p> )) :
-        <div 
-          onMouseEnter={e => thisCell.op.show(e)} 
-          onMouseLeave={e => thisCell.op.hide(e)}
-        >
-          <p>{`${keys[0]}: ${attributes[keys[0]]}`}</p>
-          <p>{`${keys[1]}: ${attributes[keys[1]]}`}</p>
-          <p>{`${keys[2]}: ${attributes[keys[2]]}`}</p>
-          <p>{`${keys[3]}: ${attributes[keys[3]]}`}</p>
-          <p>{`${keys[4]}: ${attributes[keys[4]]}`}</p>
-          <p>...</p>
-          <OverlayPanel appendTo={apenndRef} ref={(el) => thisCell.op = el}>
-            {keys.map(key => ( <p>{`${key}: ${attributes[key]}`}</p> ))}
-          </OverlayPanel>
-        </div>
+          keys.map(key => (<p>{`${key}: ${attributes[key]}`}</p>)) :
+          <div
+            onMouseEnter={e => thisCell.op.show(e)}
+            onMouseLeave={e => thisCell.op.hide(e)}
+          >
+            <p>{`${keys[0]}: ${attributes[keys[0]]}`}</p>
+            <p>{`${keys[1]}: ${attributes[keys[1]]}`}</p>
+            <p>{`${keys[2]}: ${attributes[keys[2]]}`}</p>
+            <p>{`${keys[3]}: ${attributes[keys[3]]}`}</p>
+            <p>{`${keys[4]}: ${attributes[keys[4]]}`}</p>
+            <p>...</p>
+            <OverlayPanel appendTo={appendRef} ref={(el) => thisCell.op = el}>
+              {keys.map(key => (<p>{`${key}: ${attributes[key]}`}</p>))}
+            </OverlayPanel>
+          </div>
       }
     </div>
   )
 }
 
-class MappingsTable extends React.Component{
-  constructor(props){
-    super(props);
-    this.state = {};
-  }
+class MappingsTable extends React.Component {
+  downloadLink = React.createRef();
+  state = {};
 
   render() {
-    const filteredMappings = this.props.mappings.filter(mapping => !this.isMappingHidden(mapping));
+    const { filterValue, maxHeight, mappings, putMappings } = this.props;
 
-    return(
-      <div ref={el => this.mappingsTable = el}>
-        <DataTable value={filteredMappings} reorderableRows={true} scrollable={true} scrollHeight={this.props.maxHeight ? this.props.maxHeight : '100%'} onRowReorder={(e) => {this.props.putMappings(e.value)}} globalFilter={this.state.globalFilter} >
-          <Column rowReorder={!this.props.filterValue} style={{width: '3em'}} />
-          <Column columnKey="name" field="name" header="Mapping Name"/>
-          <Column columnKey="sources" field="sources" body={(data) => (<SourceCell sources={data.sources} apenndRef={this.mappingsTable}/>)} header="Sources" />
-          <Column columnKey="attributes" field="attributes" body={(data) => (<AttributesCell attributes={data.attributes} apenndRef={this.mappingsTable}/>)} header="Attributes" />
-          <Column columnKey="buttons" field="" body={(data) => (<ButtonCell mapping={data} onEdit={this.props.onEditMapping} onDelete={this.showDeleteMappingDialog} onDownload={this.props.downloadConfigFile} apenndRef={this.mappingsTable}/>)} style={{width: '4em'}} />
+    const mappingValues = mappings.map((mapping) => {
+      //build a dummy string to allow filtering
+      const attributesSearchString =
+        Object.keys(mapping.attributes).sort().map((key) => {
+          return key + ": " + mapping.attributes[key] + "\n"
+        });
+      return {
+        ...mapping,
+        attributesSearchString
+      }
+    })
+
+    return (
+      /** primereact/overlaypanel && primereact/tieredMenu must be appended to s.th. 'higher' than the cells components to avoid strange behavoir */
+      < div ref={el => this.mappingsTable = el} >
+        <DataTable
+          value={mappingValues}
+          reorderableRows={true} scrollable={true}
+          scrollHeight={maxHeight ? maxHeight : '100%'}
+          onRowReorder={(e) => { putMappings(e.value) }}
+          globalFilter={filterValue}
+        >
+          <Column rowReorder={!filterValue} style={{ width: '3em' }} />
+          <Column columnKey="name" field="name" header="Mapping Name" />
+          <Column
+            columnKey="sources"
+            field="sources"
+            body={(data) => (<SourceCell sources={data.sources} appendRef={this.mappingsTable} />)}
+            header="Sources"
+          />
+          <Column
+            columnKey="attributes"
+            field="attributesSearchString"
+            body={(data) => (<AttributesCell attributes={data.attributes} appendRef={this.mappingsTable} />)}
+            header="Attributes" />
+          <Column
+            columnKey="buttons"
+            body={(data) => (
+              <ButtonCell
+                mapping={data}
+                onEdit={this.props.onEditMapping}
+                onDelete={this.showDeleteMappingDialog}
+                onDownload={this.downloadLink.onDownload}
+                appendRef={this.mappingsTable}
+              />)}
+            style={{ width: '4em' }}
+          />
         </DataTable>
-        <DeleteDialog 
-          visible={this.state.isDeleteDialogShown} 
-          onHide={this.hideDeleteMappingDialog} 
-          mapping={this.state.selectedMapping} 
+        <DeleteDialog
+          visible={this.state.isDeleteDialogShown}
+          onHide={this.hideDeleteMappingDialog}
+          mappingName={this.state.selectedMappingName}
         />
-      </div>
+        {/** reference is used for calling onDownload within ButtonCell component */}
+        <DownloadLink onRef={ref => this.downloadLink = ref} />
+      </div >
     )
   }
 
@@ -138,45 +171,12 @@ class MappingsTable extends React.Component{
     this.props.fetchMappings();
   };
 
-  showDeleteMappingDialog = (selectedMapping) => this.setState({isDeleteDialogShown: true, selectedMapping: selectedMapping});
-  hideDeleteMappingDialog = () => this.setState({isDeleteDialogShown: false, selectedMapping: {}});
-
-  /**
-   * returns true when mapping is no longer included due to filterValue
-   * 
-   * @param {*} mapping 
-   */
-  isMappingHidden(mapping){
-    let {filterValue} = this.props;
-    filterValue = filterValue.toLowerCase();
-
-    if(mapping.name && mapping.name.toLowerCase().includes(filterValue)){
-      return false;
-    } else {
-      if(mapping.sources){
-        for(let i = 0; i < mapping.sources.length; i++){
-          if(mapping.sources[i].toLowerCase().includes(filterValue)){
-            return false;
-          }
-        }
-      }
-
-      if(mapping.attributes){
-        for (let key in mapping.attributes) {
-          const attributeString = `${key}: ${mapping.attributes[key]}`;
-          if(attributeString.toLowerCase().includes(filterValue)) {
-            return false;
-          }
-        }
-      }
-
-    }
-    return true;
-  }
+  showDeleteMappingDialog = (selectedMappingName) => this.setState({ isDeleteDialogShown: true, selectedMappingName: selectedMappingName });
+  hideDeleteMappingDialog = () => this.setState({ isDeleteDialogShown: false, selectedMappingName: null });
 }
 
 function mapStateToProps(state) {
-  const {mappings} = state.mappings;
+  const { mappings } = state.mappings;
   return {
     mappings
   }
@@ -185,8 +185,6 @@ function mapStateToProps(state) {
 const mapDispatchToProps = {
   fetchMappings: mappingsActions.fetchMappings,
   putMappings: mappingsActions.putMappings,
-  downloadConfigFile: agentConfigActions.fetchConfigurationFile,
-  fetchFiles: configurationActions.fetchFiles,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(MappingsTable)
