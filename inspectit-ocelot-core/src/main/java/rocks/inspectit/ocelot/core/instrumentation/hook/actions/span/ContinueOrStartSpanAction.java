@@ -5,8 +5,11 @@ import io.opencensus.trace.*;
 import io.opencensus.trace.samplers.Samplers;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.extern.slf4j.Slf4j;
+import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.bootstrap.exposed.InspectitContext;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.RuleTracingSettings;
+import rocks.inspectit.ocelot.core.instrumentation.autotracing.StackTraceSampler;
 import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
 import rocks.inspectit.ocelot.core.instrumentation.hook.MethodReflectionInformation;
 import rocks.inspectit.ocelot.core.instrumentation.hook.VariableAccessor;
@@ -16,11 +19,14 @@ import rocks.inspectit.ocelot.core.instrumentation.hook.tags.CommonTagsToAttribu
 import java.util.function.Predicate;
 
 /**
- * Invokes {@link InspectitContextImpl#enterSpan(Span)} on the currently active context.
+ * Invokes {@link InspectitContextImpl#setSpanScope(AutoCloseable)} on the currently active context.
  */
 @AllArgsConstructor
 @Builder
+@Slf4j
 public class ContinueOrStartSpanAction implements IHookAction {
+
+    private StackTraceSampler stackTraceSampler;
 
     /**
      * The variable accessor used to fetch the name for a newly began span.
@@ -66,6 +72,8 @@ public class ContinueOrStartSpanAction implements IHookAction {
      */
     private Predicate<ExecutionContext> startSpanCondition;
 
+    private final StackTraceSampler.Mode autoTrace;
+
     /**
      * Action that optionally adds common tags to the newly started span.
      */
@@ -83,13 +91,16 @@ public class ContinueOrStartSpanAction implements IHookAction {
         }
     }
 
-
     private boolean continueSpan(ExecutionContext context) {
         if (continueSpanDataKey != null && continueSpanCondition.test(context)) {
             InspectitContextImpl ctx = context.getInspectitContext();
             Object spanObj = ctx.getData(continueSpanDataKey);
             if (spanObj instanceof Span) {
-                ctx.enterSpan((Span) spanObj);
+                MethodReflectionInformation methodInfo = context.getHook().getMethodInformation();
+                AutoCloseable spanCtx = Instances.logTraceCorrelator.startCorrelatedSpanScope(() ->
+                        stackTraceSampler.continueSpan((Span) spanObj, methodInfo, autoTrace)
+                );
+                ctx.setSpanScope(spanCtx);
                 return true;
             }
         }
@@ -100,35 +111,26 @@ public class ContinueOrStartSpanAction implements IHookAction {
         if (startSpanCondition.test(context)) {
             // resolve span name
             InspectitContextImpl ctx = context.getInspectitContext();
-            String spanName = getSpanName(context, context.getHook().getMethodInformation());
+
+            MethodReflectionInformation methodInfo = context.getHook().getMethodInformation();
+            String spanName = getSpanName(context, methodInfo);
 
             // load remote parent if it exist
             SpanContext remoteParent = ctx.getAndClearCurrentRemoteSpanContext();
             boolean hasLocalParent = false;
-
-            // create builder based on the remote parent availability
-            SpanBuilder builder;
-            if (remoteParent != null) {
-                builder = Tracing.getTracer().spanBuilderWithRemoteParent(spanName, remoteParent);
-            } else {
-                final Span currentSpan = Tracing.getTracer().getCurrentSpan();
+            if (remoteParent == null) {
+                Span currentSpan = Tracing.getTracer().getCurrentSpan();
                 hasLocalParent = currentSpan != BlankSpan.INSTANCE;
-                builder = Tracing.getTracer().spanBuilder(spanName);
             }
 
-            // resolve kind and sampler
-            builder.setSpanKind(spanKind);
             Sampler sampler = getSampler(context);
-            if (sampler != null) {
-                builder.setSampler(sampler);
-            }
+            AutoCloseable spanCtx = Instances.logTraceCorrelator.startCorrelatedSpanScope(() ->
+                    stackTraceSampler.createAndEnterSpan(spanName, remoteParent, sampler, spanKind, methodInfo, autoTrace)
+            );
+            ctx.setSpanScope(spanCtx);
+            commonTagsToAttributesManager.writeCommonTags(Tracing.getTracer()
+                    .getCurrentSpan(), remoteParent != null, hasLocalParent);
 
-            // start span and add common tags
-            final Span span = builder.startSpan();
-            commonTagsToAttributesManager.writeCommonTags(span, remoteParent != null, hasLocalParent);
-
-            // enter in the our context
-            ctx.enterSpan(span);
         }
     }
 

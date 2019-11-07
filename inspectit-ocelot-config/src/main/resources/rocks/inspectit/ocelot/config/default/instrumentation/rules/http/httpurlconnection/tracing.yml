@@ -13,6 +13,7 @@ inspectit:
           's_httpurlconnection_getOutputStream': true
         tracing:
           start-span: true
+          auto-tracing: false
           start-span-conditions:
             only-if-true: 'httpurlconnection_is_start'
           end-span: false
@@ -42,6 +43,7 @@ inspectit:
           's_httpurlconnection_requestInitiators': true
         tracing:
           start-span: true
+          auto-tracing: false
           continue-span: 'httpurlconnection_span'
           continue-span-conditions:
             only-if-true: 'httpurlconnection_is_end'

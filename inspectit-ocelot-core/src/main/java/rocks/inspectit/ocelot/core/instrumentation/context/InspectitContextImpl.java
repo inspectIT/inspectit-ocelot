@@ -1,6 +1,7 @@
 package rocks.inspectit.ocelot.core.instrumentation.context;
 
 import io.grpc.Context;
+import io.opencensus.common.Function;
 import io.opencensus.common.Scope;
 import io.opencensus.tags.*;
 import io.opencensus.trace.Span;
@@ -8,7 +9,6 @@ import io.opencensus.trace.SpanContext;
 import io.opencensus.trace.Tracing;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 import rocks.inspectit.ocelot.config.model.instrumentation.data.PropagationMode;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;
@@ -226,28 +226,12 @@ public class InspectitContextImpl implements InternalInspectitContext {
     }
 
 
-    /**
-     * If called, the given span is marked as active on the GRPC context until {@link #close()} is called.
-     * Note that the span will not be ended when {@link #close()} is called, it still has to be ended manually.
-     * MUST BE CALLED BEFORE {@link #makeActive()}!
-     * Must only be called at most once per {@link InspectitContextImpl} instance!
-     * <p>
-     * This method also performs log-trace correlation using the {@link rocks.inspectit.ocelot.bootstrap.correlation.LogTraceCorrelator}.
-     *
-     * @param span the span to enter
-     */
-    public void enterSpan(Span span) {
-        if (currentSpanScope == null) {
-            try {
-                currentSpanScope = Instances.logTraceCorrelator.startCorrelatedSpanScope(() -> Tracing.getTracer().withSpan(span));
-            } catch (Throwable t) {
-                log.error("Error activating span", t);
-            }
-        }
+    public void setSpanScope(AutoCloseable spanScope) {
+        currentSpanScope = spanScope;
     }
 
     /**
-     * @return true, if {@link #enterSpan(Span)} was called
+     * @return true, if {@link #enterSpan(Span, Function)} was called
      */
     public boolean hasEnteredSpan() {
         return currentSpanScope != null;
