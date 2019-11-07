@@ -18,6 +18,7 @@ dependencies {
     compileOnly(
             project(':inspectit-ocelot-bootstrap'),
             "io.opencensus:opencensus-api:${openCensusVersion}",
+            "io.opencensus:opencensus-impl:${openCensusVersion}",
             'org.projectlombok:lombok:1.18.4'
     )
     buildTools(

@@ -42,7 +42,7 @@ public class TraceTestBase extends InstrumentationSysTestBase {
 
     void assertTraceExported(Consumer<? super List<? extends SpanData>> assertions) {
 
-        await().atMost(15, TimeUnit.SECONDS).untilAsserted(() -> {
+        await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
             Map<TraceId, List<SpanData>> traces = exportedSpans.stream()
                     .collect(Collectors.groupingBy(s -> s.getContext().getTraceId(), Collectors.toList()));
             assertThat(traces.values()).anySatisfy(assertions);
@@ -52,7 +52,7 @@ public class TraceTestBase extends InstrumentationSysTestBase {
 
     void assertSpansExported(Consumer<? super Collection<? extends SpanData>> assertions) {
 
-        await().atMost(15, TimeUnit.SECONDS).untilAsserted(() -> {
+        await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
             assertions.accept(exportedSpans);
         });
     }

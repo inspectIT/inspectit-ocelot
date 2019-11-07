@@ -46,6 +46,8 @@ public class RuleTracingSettings {
      */
     private String continueSpan;
 
+    private Boolean autoTrace;
+
     /**
      * If not null, the span started or continued by this rule will be stored under the given data key.
      */
