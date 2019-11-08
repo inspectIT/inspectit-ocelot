@@ -13,7 +13,6 @@ import KeyValueEditor from '../editComponents/KeyValueEditor';
 import { isEqual, findIndex, cloneDeep, isEqualWith } from 'lodash';
 
 const defaultState = {
-  // state includes mapping.name, mapping.sources, mapping.attributes
   name: '',
   sources: [],
   attributes: [],
@@ -55,7 +54,7 @@ class EditMappingDialog extends React.Component {
           style={{ 'max-width': '1100px', 'min-width': '650px' }}
           footer={(
             <div>
-              <Button label={isNewMapping ? 'Add' : 'Update'} className="p-button-primary" onClick={this.handleClick} />
+              <Button label={isNewMapping ? 'Add' : 'Update'} className="p-button-primary" onClick={this.handleSave} />
               <Button label="Cancel" className="p-button-secondary" onClick={this.handleClose} />
             </div>
           )}
@@ -103,18 +102,15 @@ class EditMappingDialog extends React.Component {
       this.setState({ isNewMapping: true });
     }
     else {
-      this.setState({ ...buildEditObject(nextProps.mapping) });
+      this.setState(buildStateObject(nextProps.mapping));
     }
   }
 
-  // called on saving
-  handleClick = () => {
-    const newMapping = buildMappingObject(this.state);
-
-    // not saving in case of empty name or empty/double attribute keys
-    if (!this.canTrySave(newMapping)) {
+  handleSave = () => {
+    if (!this.validateUserInput()) {
       return
     }
+    const newMapping = buildMappingObject(this.state);
 
     if (this.state.isNewMapping) {
       this.props.addMapping(newMapping, this.handleClose);
@@ -141,9 +137,9 @@ class EditMappingDialog extends React.Component {
   }
 
   /**
-   * shows a warning and returns false when the given mapping should not be saved/ dialog not closed
+   * shows a warning and returns false when the user input should not be saved/ dialog not closed
    */
-  canTrySave = (newMapping) => {
+  validateUserInput = () => {
     const { name, attributes } = this.state;
     const { showWarningMessage } = this.props;
 
@@ -157,14 +153,14 @@ class EditMappingDialog extends React.Component {
       return false;
     }
 
-    if (Object.keys(newMapping.attributes).length !== attributes.length) {
-      showWarningMessage('Invalid Attributes', 'Attribute keys cannot be double or empty');
-      return false;
-    }
-
-    for (let key in newMapping.attributes) {
-      if (!key) {
-        showWarningMessage('Invalid Attributes', 'Attribute keys cannot be empty');
+    const keys = attributes.map(pair => pair.key || null).sort()
+    for (let i = 0; i < keys.length; i++) {
+      if (!keys[i]) {
+        showWarningMessage('Mappings Could not be Updated', 'Attribute keys should not be empty');
+        return false;
+      }
+      if (keys[i - 1] === keys[i]) {
+        showWarningMessage('Mappings Could not be Updated', 'Attribute keys should be unique');
         return false;
       }
     }
@@ -189,7 +185,7 @@ const mapDispatchToProps = {
 export default connect(mapStateToProps, mapDispatchToProps)(EditMappingDialog);
 
 /**
- * expects two mappings to compare name, sources and attributes of both
+ * expects two mappings to compare name
  * returns true/false depending on equality
  * ~ needed since this.props.mappings will be retrieved from mappingsView/mappingsTable
  * and mappingsTable modifies the mapping (to enable global filtering of primereact/table) before sending it
@@ -198,11 +194,7 @@ export default connect(mapStateToProps, mapDispatchToProps)(EditMappingDialog);
  * @param {mapping} mapping2 
  */
 const areMappingsEqual = (mapping1, mapping2) => {
-  return (
-    isEqual(mapping1.name, mapping2.name)
-    && isEqual(mapping1.sources, mapping2.sources)
-    && isEqual(mapping1.attributes, mapping2.attributes)
-  )
+  return isEqual(mapping1.name, mapping2.name)
 }
 
 /**
@@ -211,7 +203,7 @@ const areMappingsEqual = (mapping1, mapping2) => {
  * 
  * @param {object} mapping
  */
-export const buildEditObject = (mapping) => {
+export const buildStateObject = (mapping) => {
   const attributeArray = [];
   for (let attKey in mapping.attributes) {
     attributeArray.push(
@@ -230,7 +222,7 @@ export const buildEditObject = (mapping) => {
 }
 
 /**
- * undo funktion to buildEditObject - 
+ * revers funktion to buildStateObject - 
  * expects an object with name,sources & attributes and returns a mapping
  * 
  * @param {object} obj - edit dialog state with name, sources, attributes

@@ -1,13 +1,12 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { agentConfigActions } from '../../../redux/ducks/agent-config';
 
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
 
 import TimeAgo from 'react-timeago';
-import DownloadLink from '../mappings/DownloadLink';
+import ConfigurationDownload from '../mappings/ConfigurationDownload';
 
 const timeFormatter = (time, unit, suffix) => {
   if (unit == "second") {
@@ -54,7 +53,7 @@ const buildDownloadButton = (attributes, onDownload) => {
  * The table listing all agent statuses
  */
 class StatusTable extends React.Component {
-  downloadLink = React.createRef();
+  configDownload = React.createRef();
 
   render() {
     const { agents } = this.props;
@@ -75,14 +74,14 @@ class StatusTable extends React.Component {
       <div>
         <DataTable value={agentValues} globalFilter={this.props.filter}>
           <Column header="Attributes" field="attributesSearchString"
-            body={(data) => (<AttributesCell attributes={data.attributes} onDownload={data.mappingName !== '<no mapping>' ? this.downloadLink.onDownload : null} />)}
+            body={(data) => (<AttributesCell attributes={data.attributes} onDownload={data.mappingName !== '<no mapping>' ? this.configDownload.download : null} />)}
           />
           <Column field="mappingName" sortable={true} header="Mapping" />
           <Column field="lastConfigFetch" sortable={true} header="Last Connected" excludeGlobalFilter={true}
             body={(data) => (<TimeAgo date={data.lastConfigFetch} formatter={timeFormatter} />)}
           />
         </DataTable>
-        <DownloadLink onRef={ref => this.downloadLink = ref} />
+        <ConfigurationDownload onRef={ref => this.configDownload = ref} />
       </div>
 
     );
@@ -96,8 +95,4 @@ function mapStateToProps(state) {
   }
 }
 
-const mapDispatchToProps = {
-  downloadConfiguration: agentConfigActions.fetchConfigurationFile
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(StatusTable);
+export default connect(mapStateToProps, null)(StatusTable);

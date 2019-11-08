@@ -13,7 +13,7 @@ class DeleteDialog extends React.Component {
   deleteButton = React.createRef();
 
   render() {
-    const { mappingName } = this.props || '';
+    const mappingName = this.props.mappingName || '';
 
     return (
       <Dialog

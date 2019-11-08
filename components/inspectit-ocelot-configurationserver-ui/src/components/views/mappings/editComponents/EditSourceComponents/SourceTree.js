@@ -1,4 +1,6 @@
 import React from 'react';
+import { connect } from 'react-redux';
+import { configurationSelectors } from '../../../../../redux/ducks/configuration';
 import { Tree } from 'primereact/tree';
 
 import { isEqual, cloneDeep } from 'lodash';
@@ -10,33 +12,51 @@ import * as treeUtils from './treeUtils';
  */
 class SourceTree extends React.Component {
   state = {
+    tree: [treeUtils.rootNode],
     selectedSources: {},
   }
 
   render() {
     return (
       <Tree
-        value={this.props.tree}
+        value={this.state.tree}
         selectionMode='checkbox'
         selectionKeys={this.state.selectedSources}
         onSelectionChange={e => this.handleSelectionChange(e.value)}
-        expandedKeys={this.props.expandedKeys}
+        expandedKeys={{ '/': true }}
       />
     )
   }
 
-  componentDidUpdate = () => {
+  componentDidUpdate = (prevProps) => {
+    /**
+     * initializing tree when the component becomes visible 
+     * makes it more likely for the files already beeing fetched 
+     * and this.props.files to not be empty
+     */
+    if (!prevProps.visible && this.props.visible) {
+      const newTree = [
+        {
+          ...treeUtils.rootNode,
+          children: cloneDeep(this.props.files)
+        }
+      ]
+      this.setState({ tree: newTree });
+      return
+    }
+
     // new tree needed whenever an unknown source is added by user
-    const newTree = getUpdatedTree(this.props.sourcePaths, this.props.tree);
-    if (!isEqual(newTree, this.props.tree)) {
-      this.props.onTreeChange(newTree);
+    const newTree = getUpdatedTree(this.props.sourcePaths, this.state.tree);
+    if (!isEqual(newTree, this.state.tree)) {
+      this.setState({ tree: newTree })
     }
 
     // new selection needed when user adds sources without clicking within tree checkboxes
-    const newSelection = getUpdatedTreeSelection(this.props.sourcePaths, this.props.tree);
+    const newSelection = getUpdatedTreeSelection(this.props.sourcePaths, this.state.tree);
     if (!isEqual(newSelection, this.state.selectedSources)) {
       this.setState({ selectedSources: newSelection });
     }
+
   }
 
 	/**
@@ -58,7 +78,13 @@ class SourceTree extends React.Component {
   }
 }
 
-export default SourceTree
+function mapStateToProps(state) {
+  return {
+    files: configurationSelectors.getFileTree(state),
+  }
+}
+
+export default connect(mapStateToProps, null)(SourceTree)
 
 /**
  * for every path (source), which is not yet in the tree object,
@@ -67,7 +93,7 @@ export default SourceTree
  * @param {array of strings} sources 
  * @param {array of tree nodes} oldTree 
  */
-const getUpdatedTree = (sources = [], oldTree = [rootNode]) => {
+const getUpdatedTree = (sources = [], oldTree = [treeUtils.rootNode]) => {
   let res = cloneDeep(oldTree);
 
   sources.forEach(path => {
@@ -94,7 +120,7 @@ const getUpdatedTree = (sources = [], oldTree = [rootNode]) => {
  * @param {array} sources - array of string/ source paths
  * @param {array} tree - array of tree nodes used in primereact/tree
  */
-const getUpdatedTreeSelection = (sources = [], tree = [rootNode]) => {
+const getUpdatedTreeSelection = (sources = [], tree = [treeUtils.rootNode]) => {
   let res = {};
   sources.forEach(path => {
     // add a checkObj for each path/source

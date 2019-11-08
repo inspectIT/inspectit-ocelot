@@ -8,7 +8,7 @@ import { Button } from 'primereact/button';
 import { TieredMenu } from 'primereact/tieredmenu';
 import { OverlayPanel } from 'primereact/overlaypanel';
 import DeleteDialog from './dialogs/DeleteDialog';
-import DownloadLink from './DownloadLink';
+import ConfigurationDownload from './ConfigurationDownload';
 
 /** Component including the menu button for each mapping */
 const ButtonCell = ({ mapping, onEdit, onDelete, onDownload, appendRef }) => {
@@ -102,7 +102,7 @@ const AttributesCell = ({ attributes = {}, appendRef }) => {
 }
 
 class MappingsTable extends React.Component {
-  downloadLink = React.createRef();
+  configDownload = React.createRef();
   state = {};
 
   render() {
@@ -150,7 +150,7 @@ class MappingsTable extends React.Component {
                 mapping={data}
                 onEdit={this.props.onEditMapping}
                 onDelete={this.showDeleteMappingDialog}
-                onDownload={this.downloadLink.onDownload}
+                onDownload={this.configDownload.download}
                 appendRef={this.mappingsTable}
               />)}
             style={{ width: '4em' }}
@@ -162,7 +162,7 @@ class MappingsTable extends React.Component {
           mappingName={this.state.selectedMappingName}
         />
         {/** reference is used for calling onDownload within ButtonCell component */}
-        <DownloadLink onRef={ref => this.downloadLink = ref} />
+        <ConfigurationDownload onRef={ref => this.configDownload = ref} />
       </div >
     )
   }

@@ -5,14 +5,14 @@ import { notificationActions } from '../../../../redux/ducks/notification';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import KeyValueEditor from '../editComponents/KeyValueEditor';
-import DownloadLink from '../DownloadLink';
+import ConfigurationDownload from '../ConfigurationDownload';
 
 /**
  * Dialog for entering key/value pairs and downloading a configuration file.
  */
 class DownloadDialog extends React.Component {
   downloadButton = React.createRef();
-  downloadLink = React.createRef();
+  configDownload = React.createRef();
 
   state = {
     attributes: [],
@@ -46,8 +46,8 @@ class DownloadDialog extends React.Component {
           keyValueArray={this.state.attributes}
           maxHeight={`300px`}
         />
-        {/** creating reference of DownloadLink, to be able to call onDownload within this.handleDownload */}
-        <DownloadLink onRef={ref => this.downloadLink = ref} />
+        {/** creating reference of DownloadLink, to be able to call download within this.handleDownload */}
+        <ConfigurationDownload onRef={ref => this.configDownload = ref} />
       </Dialog>
     )
   }
@@ -56,29 +56,22 @@ class DownloadDialog extends React.Component {
    * triggers download of config file and onHide
    */
   handleDownload = () => {
-    const objForDownload = {};
-    let hasEmptyKey;
+    const sanitizedAttributes = {};
+
     this.state.attributes.forEach(pair => {
-      objForDownload[pair.key || ''] = pair.value || '';
-      if (!pair.key) {
-        hasEmptyKey = true;
+      if (sanitizedAttributes[pair.key]) {
+        this.props.showWarningMessage('Invalid Input', 'Some attribute keys were double and have been discarded');
+      }
+
+      if (pair.key) {
+        sanitizedAttributes[pair.key] = pair.value || '';
+      } else {
+        this.props.showWarningMessage('Invalid Input', 'Some attribute keys were empty and have been discarded');
       }
     })
 
-    this.showWarningMsg(hasEmptyKey, objForDownload);
-
     this.props.onHide();
-    this.downloadLink.onDownload(objForDownload);
-  }
-
-  // shows a warning msg in case of duplicate or empty keys
-  showWarningMsg = (showEmptyKeyMsg, attributeObj) => {
-    if (Object.keys(attributeObj).length !== this.state.attributes.length) {
-      this.props.showWarningMessage('Invalid Input', 'Some attribute keys were double and have been discarded');
-    }
-    if (showEmptyKeyMsg) {
-      this.props.showWarningMessage('Invalid Input', 'Some attribute keys were double and have been discarded');
-    }
+    this.configDownload.download(sanitizedAttributes);
   }
 
   componentDidUpdate(prevProps) {

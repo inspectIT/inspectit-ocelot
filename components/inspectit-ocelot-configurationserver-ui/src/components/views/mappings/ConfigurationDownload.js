@@ -9,13 +9,13 @@ import RandExp from 'randexp';
  * component for downloading configuration files 
  * ~ functions can be invoked via reference by parents
 */
-class DownloadLink extends React.Component {
+class ConfigurationDownload extends React.Component {
   linkRef = React.createRef();
 
   /**
    * parent component should pass down a function to create a reference
-   * [onRef={ref => downloadLinkRef = ref}]
-   * to be able to call onDownload via downloadLinkRef.onDownload()
+   * [onRef={ref => configDownloadRef = ref}]
+   * to be able to call download via configDownloadRef.download()
    */
   componentDidMount() {
     this.props.onRef(this);
@@ -24,9 +24,9 @@ class DownloadLink extends React.Component {
     this.props.onRef(undefined);
   }
 
-  onDownload = (attributes) => {
+  download = (attributes) => {
     const requestParams = this.solveRegexValues(attributes);
-    if (requestParams === undefined) {
+    if (!requestParams) {
       return
     }
 
@@ -58,11 +58,12 @@ class DownloadLink extends React.Component {
     }
     catch{
       this.props.showInfoMessage("Downloading Config File Failed", "The given attribute values are no regular expression");
+      return null
     }
   }
 
   render() {
-    return <a ref={this.linkRef} download='agent-config.yml' />
+    return <a ref={this.linkRef} download='agent-config.yml' style={{ visibility: 'hidden' }} />
   }
 }
 
@@ -70,4 +71,4 @@ const mapDispatchToProps = {
   showInfoMessage: notificationActions.showInfoMessage,
 }
 
-export default connect(null, mapDispatchToProps)(DownloadLink);
+export default connect(null, mapDispatchToProps)(ConfigurationDownload);

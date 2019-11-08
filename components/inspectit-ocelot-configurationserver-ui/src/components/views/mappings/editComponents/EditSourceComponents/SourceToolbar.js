@@ -1,8 +1,9 @@
 import React from 'react';
-import { InputText } from 'primereact/inputtext';
-import { Button } from 'primereact/button';
 import { connect } from 'react-redux';
 import { notificationActions } from '../../../../../redux/ducks/notification';
+import { configurationSelectors } from '../../../../../redux/ducks/configuration';
+import { InputText } from 'primereact/inputtext';
+import { Button } from 'primereact/button';
 
 import { cloneDeep } from 'lodash';
 import * as treeUtils from './treeUtils';
@@ -77,7 +78,7 @@ class SourceToolbar extends React.Component {
     // check if the the new source can't exist - since it includes a file as parent node
     const substrings = treeUtils.getParentKeys(newSource);
     for (let i = 0; res && i < substrings.length; i++) {
-      const isNode = treeUtils.findNode(this.props.tree, substrings[i]);
+      const isNode = treeUtils.findNode(this.props.fileTree, substrings[i]);
       if (isNode && !isNode.children && treeUtils.isSubfile(newSource, isNode.key)) {
         res = false;
       }
@@ -87,8 +88,14 @@ class SourceToolbar extends React.Component {
   }
 }
 
+function mapStateToProps(state) {
+  return {
+    fileTree: configurationSelectors.getFileTree(state),
+  }
+}
+
 const mapDispatchToProps = {
   showInfoMessage: notificationActions.showInfoMessage,
 }
 
-export default connect(null, mapDispatchToProps)(SourceToolbar)
+export default connect(mapStateToProps, mapDispatchToProps)(SourceToolbar)

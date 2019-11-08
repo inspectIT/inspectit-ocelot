@@ -4,16 +4,12 @@ import { configurationActions, configurationSelectors } from '../../../../redux/
 
 import SourceTree from './EditSourceComponents/SourceTree';
 import SourceTable from './EditSourceComponents/SourceTable';
-import EditSourceToolbar from './EditSourceComponents/SourceToolbar';
+import SourceToolbar from './EditSourceComponents/SourceToolbar';
 
-import { isEqual, cloneDeep, uniqWith } from 'lodash';
+import { isEqual, uniqWith } from 'lodash';
 import * as treeUtils from './EditSourceComponents/treeUtils';
 
 class EditSources extends React.Component {
-
-  state = {
-    tree: [treeUtils.rootNode]
-  }
 
   render() {
     return (
@@ -37,10 +33,9 @@ class EditSources extends React.Component {
           }
         `}</style>
         <div className='left'>
-          <EditSourceToolbar
+          <SourceToolbar
             sourcePaths={this.props.sources}
             onChange={this.handleChangeSources}
-            tree={this.state.tree}
           />
           <SourceTable
             sourcePaths={this.props.sources}
@@ -51,33 +46,15 @@ class EditSources extends React.Component {
         <div className='right'>
           <SourceTree
             sourcePaths={this.props.sources}
-            tree={this.state.tree}
-            onTreeChange={this.handleTreeChange}
             onSelectionChange={this.handleChangeSources}
-            expandedKeys={{ '/': true }} // initial expansion
+            visible={this.props.visible}
           />
         </div>
       </div>
     )
   }
-  componentDidMount = () => {
+  componentWillMount = () => {
     this.props.fetchFiles();
-  }
-
-  componentDidUpdate(prevProps) {
-    if (!prevProps.visible && this.props.visible) {
-      const newTree = [
-        {
-          ...treeUtils.rootNode,
-          children: cloneDeep(this.props.files)
-        }
-      ]
-      this.setState({ tree: newTree });
-    }
-  }
-
-  handleTreeChange = (newTree) => {
-    this.setState({ tree: newTree });
   }
 
   handleChangeSources = (sources = []) => {
