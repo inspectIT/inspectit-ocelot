@@ -19,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.file.FileInfo;
-import rocks.inspectit.ocelot.file.FileInfo.Type;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
@@ -186,17 +185,17 @@ public class VersionController {
         ArrayList<FileInfo> filesFromLastCommit = new ArrayList<>();
         TreeWalk treeWalk = getTreeWalk(recursive);
         while (treeWalk.next()) {
-            if (treeWalk.isSubtree() && recursive) {
-                treeWalk.enterSubtree();
-            } else {
-                if (isInPath(treeWalk, path)) {
-                    String fileName = treeWalk.getPathString();
-                    if (fileName.startsWith(path)) {
-                        FileInfo.FileInfoBuilder builder = FileInfo.builder()
-                                .name(fileName)
-                                .type(getFileType(treeWalk));
-                        filesFromLastCommit.add(builder.build());
+            if (isInPath(treeWalk, path)) {
+                String fileName = treeWalk.getPathString();
+                if (fileName.startsWith(path)) {
+                    boolean isDirectory = isDirectory(treeWalk);
+                    FileInfo.FileInfoBuilder builder = FileInfo.builder()
+                            .name(fileName)
+                            .type(isDirectory ? FileInfo.Type.DIRECTORY : FileInfo.Type.FILE);
+                    if (isDirectory && recursive) {
+                        builder.children(listFiles(fileName, true));
                     }
+                    filesFromLastCommit.add(builder.build());
                 }
             }
         }
@@ -204,19 +203,14 @@ public class VersionController {
     }
 
     /**
-     * Returns the type of a file of a TreeWalk object
+     * Returns true if the given TreeWalks FileMode is a tree.
      *
      * @param treeWalk the TreeWalk object to get the file from.
      * @return The Type of the file. Either File or Directory
      */
     @VisibleForTesting
-    Type getFileType(TreeWalk treeWalk) {
-        Type fileType = FileInfo.Type.DIRECTORY;
-        FileMode fileMode = treeWalk.getFileMode();
-        if (fileMode == FileMode.REGULAR_FILE || fileMode == FileMode.EXECUTABLE_FILE) {
-            fileType = FileInfo.Type.FILE;
-        }
-        return fileType;
+    boolean isDirectory(TreeWalk treeWalk) {
+        return treeWalk.getFileMode() == FileMode.TREE;
     }
 
     /**

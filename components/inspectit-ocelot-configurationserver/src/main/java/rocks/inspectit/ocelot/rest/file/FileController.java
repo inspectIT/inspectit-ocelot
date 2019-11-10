@@ -109,7 +109,7 @@ public class FileController extends FileBaseController {
     @ApiOperation(value = "Delete a file", notes = "Deletes the given file")
     @ApiImplicitParam(name = "Path", type = "string", value = "The part of the url after /files/ defines the path to the file to delete.")
     @DeleteMapping(value = "files/**")
-    public void deleteFile(HttpServletRequest request) throws IOException {
+    public void deleteFile(HttpServletRequest request) throws IOException, GitAPIException {
         String path = RequestUtil.getRequestSubPath(request);
         fileManager.deleteFile(path);
     }

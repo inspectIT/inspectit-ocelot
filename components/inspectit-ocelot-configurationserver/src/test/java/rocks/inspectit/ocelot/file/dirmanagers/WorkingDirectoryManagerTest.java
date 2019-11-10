@@ -7,6 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.util.StringUtils;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.file.FileInfo;
 
@@ -16,14 +17,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.AccessDeniedException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -148,6 +147,32 @@ public class WorkingDirectoryManagerTest {
         Path file = fmRoot.resolve(FILES_SUBFOLDER).resolve(path);
         return new String(Files.readAllBytes(file), ENCODING);
     }
+
+    public synchronized List<FileInfo> getFilesInDirectory(String path, boolean recursive) throws IOException {
+        Path dir;
+        if (StringUtils.isEmpty(path)) {
+            dir = fmRoot;
+        } else {
+            dir = fmRoot.resolve(path);
+        }
+        try (Stream<Path> files = Files.list(dir)) {
+            List<FileInfo> result = new ArrayList<>();
+            for (Path child : files.collect(Collectors.toList())) {
+                boolean isDirectory = Files.isDirectory(child);
+                FileInfo.FileInfoBuilder builder = FileInfo.builder()
+                        .name(child.getFileName().toString())
+                        .type(isDirectory ? FileInfo.Type.DIRECTORY : FileInfo.Type.FILE);
+                if (isDirectory && recursive) {
+                    builder.children(getFilesInDirectory(fmRoot.relativize(child.normalize())
+                            .toString()
+                            .replace(child.getFileSystem().getSeparator(), "/"), true));
+                }
+                result.add(builder.build());
+            }
+            return result;
+        }
+    }
+
 
     @Nested
     public class ReadFile {
@@ -357,6 +382,293 @@ public class WorkingDirectoryManagerTest {
             assertThatThrownBy(() -> wdm.move("top", "top/../../myfile"))
                     .isInstanceOf(AccessDeniedException.class);
             assertThatThrownBy(() -> wdm.move("top", "../../myfile"))
+                    .isInstanceOf(AccessDeniedException.class);
+        }
+    }
+
+
+    @Nested
+    class DeleteFile {
+
+        @Test
+        void deleteFileInRootDirect() throws Exception {
+            setupTestFiles("topA=foo", "topB");
+
+            wdm.deleteFile("topA");
+
+            assertThat(getFilesInDirectory("", true))
+                    .noneSatisfy((f) ->
+                            assertThat(f.getName()).isEqualTo("topA")
+                    );
+        }
+
+        @Test
+        void deleteFileInRootIndirect() throws Exception {
+            setupTestFiles("topA=foo", "topB");
+
+            wdm.deleteFile("topB/.././topA");
+
+            assertThat(getFilesInDirectory("", true))
+                    .noneSatisfy((f) ->
+                            assertThat(f.getName()).isEqualTo("topA")
+                    );
+        }
+
+        @Test
+        void deleteEmptyFile() throws Exception {
+            setupTestFiles("topA/subA/myFile=", "topA/subB");
+
+            wdm.deleteFile("topA/subA/myFile");
+
+            List<FileInfo> helpMe = getFilesInDirectory("", true);
+            assertThat(getFilesInDirectory("files/", true))
+                    .hasSize(1)
+                    .anySatisfy((f) -> {
+                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+                        assertThat(f.getName()).isEqualTo("topA");
+                        assertThat(f.getChildren())
+                                .hasSize(2)
+                                .anySatisfy((f2) -> {
+                                    assertThat(f2.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+                                    assertThat(f2.getName()).isEqualTo("subA");
+                                    assertThat(f2.getChildren()).isEmpty();
+                                })
+                                .anySatisfy((f2) -> {
+                                    assertThat(f2.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+                                    assertThat(f2.getName()).isEqualTo("subB");
+                                    assertThat(f2.getChildren()).isEmpty();
+                                });
+                    });
+        }
+
+        @Test
+        void deleteNonExistingFile() {
+            setupTestFiles("topA/subA", "topB");
+
+            assertThatThrownBy(() -> wdm.deleteFile("topC"))
+                    .isInstanceOf(AccessDeniedException.class);
+        }
+
+        @Test
+        void deleteDirectory() {
+            setupTestFiles("topA", "topB");
+
+            assertThatThrownBy(() -> wdm.deleteFile("topA"))
+                    .isInstanceOf(AccessDeniedException.class);
+        }
+
+        @Test
+        void verifyDirOutsideWorkdirNotDeletable() {
+            setupTestFiles("top");
+
+            assertThatThrownBy(() -> wdm.deleteFile(null))
+                    .isInstanceOf(AccessDeniedException.class);
+            assertThatThrownBy(() -> wdm.deleteFile(""))
+                    .isInstanceOf(AccessDeniedException.class);
+            assertThatThrownBy(() -> wdm.deleteFile("./"))
+                    .isInstanceOf(AccessDeniedException.class);
+            assertThatThrownBy(() -> wdm.deleteFile("../myfile"))
+                    .isInstanceOf(AccessDeniedException.class);
+            assertThatThrownBy(() -> wdm.deleteFile("top/../../myfile"))
+                    .isInstanceOf(AccessDeniedException.class);
+            assertThatThrownBy(() -> wdm.deleteFile("../../myfile"))
+                    .isInstanceOf(AccessDeniedException.class);
+        }
+    }
+
+    @Nested
+    class CreateDirectory {
+
+        @Test
+        void createDirInRootDirect() throws Exception {
+            setupTestFiles("topA", "topB");
+
+            wdm.createDirectory("myDir");
+
+            assertThat(getFilesInDirectory("files/", true))
+                    .hasSize(3)
+                    .anySatisfy((f) -> {
+                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+                        assertThat(f.getName()).isEqualTo("topA");
+                    })
+                    .anySatisfy((f) -> {
+                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+                        assertThat(f.getName()).isEqualTo("topB");
+                    })
+                    .anySatisfy((f) -> {
+                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+                        assertThat(f.getName()).isEqualTo("myDir");
+                    });
+        }
+
+        @Test
+        void createDirInRootIndirect() throws Exception {
+            setupTestFiles("topA", "topB");
+
+            wdm.createDirectory("topB/.././myDir");
+
+            assertThat(getFilesInDirectory("files/", true))
+                    .hasSize(3)
+                    .anySatisfy((f) -> {
+                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+                        assertThat(f.getName()).isEqualTo("topA");
+                    })
+                    .anySatisfy((f) -> {
+                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+                        assertThat(f.getName()).isEqualTo("topB");
+                    })
+                    .anySatisfy((f) -> {
+                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+                        assertThat(f.getName()).isEqualTo("myDir");
+                    });
+        }
+
+        @Test
+        void createDirInSubFolder() throws Exception {
+            setupTestFiles("topA", "topB");
+
+            wdm.createDirectory("topA/subA/subB");
+
+            assertThat(getFilesInDirectory("files/", true))
+                    .hasSize(2)
+                    .anySatisfy((f) -> {
+                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+                        assertThat(f.getName()).isEqualTo("topA");
+                        assertThat(f.getChildren())
+                                .hasSize(1)
+                                .anySatisfy((f2) -> {
+                                    assertThat(f2.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+                                    assertThat(f2.getName()).isEqualTo("subA");
+                                    assertThat(f2.getChildren())
+                                            .hasSize(1)
+                                            .anySatisfy((f3) -> {
+                                                assertThat(f3.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+                                                assertThat(f3.getName()).isEqualTo("subB");
+                                                assertThat(f3.getChildren()).isEmpty();
+                                            });
+                                });
+                    })
+                    .anySatisfy((f) -> {
+                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+                        assertThat(f.getName()).isEqualTo("topB");
+                    });
+        }
+
+        @Test
+        void createDirOnExistingFile() {
+            setupTestFiles("topA=content");
+
+            assertThatThrownBy(() -> wdm.createDirectory("topA"))
+                    .isInstanceOf(IOException.class);
+        }
+
+        @Test
+        void createDirBeneathExistingFile() {
+            setupTestFiles("topA=content");
+
+            assertThatThrownBy(() -> wdm.createDirectory("topA/subDir"))
+                    .isInstanceOf(IOException.class);
+        }
+
+        @Test
+        void verifyDirOutsideWorkdirNotCreateable() {
+            setupTestFiles("top");
+
+            assertThatThrownBy(() -> wdm.createDirectory(null))
+                    .isInstanceOf(AccessDeniedException.class);
+            assertThatThrownBy(() -> wdm.createDirectory(""))
+                    .isInstanceOf(AccessDeniedException.class);
+            assertThatThrownBy(() -> wdm.createDirectory("./"))
+                    .isInstanceOf(AccessDeniedException.class);
+            assertThatThrownBy(() -> wdm.createDirectory("../mydir"))
+                    .isInstanceOf(AccessDeniedException.class);
+            assertThatThrownBy(() -> wdm.createDirectory("top/../../mydir"))
+                    .isInstanceOf(AccessDeniedException.class);
+            assertThatThrownBy(() -> wdm.createDirectory("../../mydir"))
+                    .isInstanceOf(AccessDeniedException.class);
+        }
+    }
+
+    @Nested
+    class DeleteDirectory {
+
+        @Test
+        void deleteDirInRootDirect() throws Exception {
+            setupTestFiles("topA", "topB");
+
+            wdm.deleteDirectory("topA");
+
+            assertThat(getFilesInDirectory("files/", true))
+                    .hasSize(1)
+                    .anySatisfy((f) -> {
+                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+                        assertThat(f.getName()).isEqualTo("topB");
+                    });
+        }
+
+        @Test
+        void deleteDirInRootIndirect() throws Exception {
+            setupTestFiles("topA", "topB");
+
+            wdm.deleteDirectory("topB/../topA");
+
+            assertThat(getFilesInDirectory("files/", true))
+                    .hasSize(1)
+                    .anySatisfy((f) -> {
+                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+                        assertThat(f.getName()).isEqualTo("topB");
+                    });
+        }
+
+        @Test
+        void deleteDirInSubFolderWithContents() throws Exception {
+            setupTestFiles("topA/subA/subB/somedir", "topA/subA/somefile=foo", "topB");
+
+            wdm.deleteDirectory("topA/subA");
+
+            assertThat(getFilesInDirectory("files/", true))
+                    .hasSize(2)
+                    .anySatisfy((f) -> {
+                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+                        assertThat(f.getName()).isEqualTo("topA");
+                    })
+                    .anySatisfy((f) -> {
+                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+                        assertThat(f.getName()).isEqualTo("topB");
+                    });
+        }
+
+        @Test
+        void deleteNonExistingDir() {
+            setupTestFiles("topA/subA", "topB");
+
+            assertThatThrownBy(() -> wdm.deleteDirectory("topC"))
+                    .isInstanceOf(NotDirectoryException.class);
+        }
+
+        @Test
+        void deleteFile() {
+            setupTestFiles("topA=i_am_a_file", "topB");
+
+            assertThatThrownBy(() -> wdm.deleteDirectory("topA"))
+                    .isInstanceOf(NotDirectoryException.class);
+        }
+
+        @Test
+        void verifyDirOutsideWorkdirNotDeleteable() {
+            setupTestFiles("top");
+
+            assertThatThrownBy(() -> wdm.deleteDirectory(null))
+                    .isInstanceOf(AccessDeniedException.class);
+            assertThatThrownBy(() -> wdm.deleteDirectory(""))
+                    .isInstanceOf(AccessDeniedException.class);
+            assertThatThrownBy(() -> wdm.deleteDirectory("./"))
+                    .isInstanceOf(AccessDeniedException.class);
+            assertThatThrownBy(() -> wdm.deleteDirectory("../mydir"))
+                    .isInstanceOf(AccessDeniedException.class);
+            assertThatThrownBy(() -> wdm.deleteDirectory("top/../../mydir"))
+                    .isInstanceOf(AccessDeniedException.class);
+            assertThatThrownBy(() -> wdm.deleteDirectory("../../mydir"))
                     .isInstanceOf(AccessDeniedException.class);
         }
     }

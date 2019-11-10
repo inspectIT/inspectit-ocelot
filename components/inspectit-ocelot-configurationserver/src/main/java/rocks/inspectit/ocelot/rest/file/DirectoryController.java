@@ -25,7 +25,7 @@ public class DirectoryController extends FileBaseController {
     public Collection<FileInfo> listContents(HttpServletRequest request,
 
                                              @ApiParam("If false, only direct children of this directory are returned. Otherwise the entire file tree is returned.")
-                                             @RequestParam(defaultValue = "true") boolean recursive) throws IOException {
+                                             @RequestParam(defaultValue = "true") boolean recursive) throws IOException, GitAPIException {
         String path = RequestUtil.getRequestSubPath(request);
         return fileManager.listSpecialFiles(path, recursive, true);
     }

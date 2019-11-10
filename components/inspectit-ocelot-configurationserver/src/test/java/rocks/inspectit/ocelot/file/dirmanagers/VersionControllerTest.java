@@ -153,9 +153,8 @@ public class VersionControllerTest {
 
             verify(repo).resolve(Constants.HEAD);
             verify(spyVersionController).getTreeWalk(true);
-            verify(spyVersionController).getFileType(any());
+            verify(spyVersionController).isDirectory(any());
             verify(mockTreeWalk, times(2)).next();
-            verify(mockTreeWalk).isSubtree();
             verify(mockTreeWalk).getFileMode();
             verifyNoMoreInteractions(mockTreeWalk, repo, git);
         }
