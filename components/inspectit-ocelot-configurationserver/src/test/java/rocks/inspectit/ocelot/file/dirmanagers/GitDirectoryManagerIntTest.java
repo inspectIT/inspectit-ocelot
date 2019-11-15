@@ -117,7 +117,7 @@ public class GitDirectoryManagerIntTest {
     private static void createFileWithContent(String path, String content) throws IOException {
         File f;
         if (path.contains("/")) {
-            String paths[] = path.split("/");
+            String[] paths = path.split("/");
             Files.createDirectories(rootWorkDir.resolve("files/configuration").resolve(paths[0]));
             String finalPath = "files/configuration/" + paths[0];
             f = new File(String.valueOf(rootWorkDir.resolve(finalPath).resolve(paths[1])));

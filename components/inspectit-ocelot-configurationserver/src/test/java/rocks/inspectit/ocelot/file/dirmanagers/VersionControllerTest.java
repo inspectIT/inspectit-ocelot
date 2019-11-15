@@ -25,10 +25,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import rocks.inspectit.ocelot.file.FileInfo;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -136,7 +138,7 @@ public class VersionControllerTest {
     }
 
     @Nested
-    public class listFiles {
+    public class ListFiles {
         @Test
         void testListConfigOnly() throws IOException {
             TreeWalk mockTreeWalk = mock(TreeWalk.class);
@@ -168,6 +170,98 @@ public class VersionControllerTest {
             assertThat(output).isEqualTo(Collections.emptyList());
             verify(repo).resolve(Constants.HEAD);
             verifyNoMoreInteractions(repo);
+        }
+
+        @Test
+        void listDirRecursive() throws IOException {
+            TreeWalk mockWalk = mock(TreeWalk.class);
+            when(mockWalk.getPathString()).thenReturn("testFolder/testFile", "testFolder", "anotherTestFile");
+            when(mockWalk.next()).thenReturn(true, true, true, false);
+            ObjectId mockId = mock(ObjectId.class);
+            when(repo.resolve(any())).thenReturn(mockId);
+            VersionController spyController = spy(versionController);
+            doReturn(mockWalk).when(spyController).getTreeWalk(true);
+            doReturn(false, true, false).when(spyController).isDirectory(any());
+
+            List<FileInfo> output = spyController.listFiles("", true);
+
+            FileInfo testFileInfo = FileInfo.builder().name("testFile").type(FileInfo.Type.FILE).build();
+            List<FileInfo> children = new ArrayList<>();
+            children.add(testFileInfo);
+            FileInfo testFolderInfo = FileInfo.builder()
+                    .name("testFolder")
+                    .type(FileInfo.Type.DIRECTORY)
+                    .children(children)
+                    .build();
+            FileInfo anotherTestFileInfo = FileInfo.builder().name("anotherTestFile").type(FileInfo.Type.FILE).build();
+            List<FileInfo> expected = new ArrayList<>();
+            expected.add(testFolderInfo);
+            expected.add(anotherTestFileInfo);
+            assertThat(expected).isEqualTo(output);
+        }
+
+        @Test
+        void listDirNonRecursive() throws IOException {
+            TreeWalk mockWalk = mock(TreeWalk.class);
+            when(mockWalk.getPathString()).thenReturn("testFile", "testFolder", "anotherTestFile");
+            when(mockWalk.next()).thenReturn(true, true, true, false);
+            ObjectId mockId = mock(ObjectId.class);
+            when(repo.resolve(any())).thenReturn(mockId);
+            VersionController spyController = spy(versionController);
+            doReturn(mockWalk).when(spyController).getTreeWalk(true);
+            doReturn(false, true, false).when(spyController).isDirectory(any());
+
+            List<FileInfo> output = spyController.listFiles("", true);
+
+            FileInfo testFileInfo = FileInfo.builder().name("testFile").type(FileInfo.Type.FILE).build();
+            FileInfo testFolderInfo = FileInfo.builder()
+                    .name("testFolder")
+                    .type(FileInfo.Type.DIRECTORY)
+                    .build();
+            FileInfo anotherTestFileInfo = FileInfo.builder().name("anotherTestFile").type(FileInfo.Type.FILE).build();
+            List<FileInfo> expected = new ArrayList<>();
+            expected.add(testFileInfo);
+            expected.add(testFolderInfo);
+            expected.add(anotherTestFileInfo);
+            assertThat(expected).isEqualTo(output);
+        }
+
+        @Test
+        void listDirRecursiveWithPath() throws IOException {
+            TreeWalk mockWalk = mock(TreeWalk.class);
+            when(mockWalk.getPathString()).thenReturn("testFolder/testFile", "testFolder", "anotherTestFile");
+            when(mockWalk.next()).thenReturn(true, true, true, false);
+            ObjectId mockId = mock(ObjectId.class);
+            when(repo.resolve(any())).thenReturn(mockId);
+            VersionController spyController = spy(versionController);
+            doReturn(mockWalk).when(spyController).getTreeWalk(true);
+            doReturn(false, true, false).when(spyController).isDirectory(any());
+
+            List<FileInfo> output = spyController.listFiles("testFolder", true);
+
+            FileInfo testFileInfo = FileInfo.builder().name("testFile").type(FileInfo.Type.FILE).build();
+            List<FileInfo> expected = new ArrayList<>();
+            expected.add(testFileInfo);
+            assertThat(expected).isEqualTo(output);
+        }
+
+        @Test
+        void listDirNonRecursiveWithPath() throws IOException {
+            TreeWalk mockWalk = mock(TreeWalk.class);
+            when(mockWalk.getPathString()).thenReturn("test/testFile", "testFile", "anotherTestFile");
+            when(mockWalk.next()).thenReturn(true, true, true, false);
+            ObjectId mockId = mock(ObjectId.class);
+            when(repo.resolve(any())).thenReturn(mockId);
+            VersionController spyController = spy(versionController);
+            doReturn(mockWalk).when(spyController).getTreeWalk(true);
+            doReturn(false, true, false).when(spyController).isDirectory(any());
+
+            List<FileInfo> output = spyController.listFiles("test", true);
+
+            FileInfo testFileInfo = FileInfo.builder().name("testFile").type(FileInfo.Type.FILE).build();
+            List<FileInfo> expected = new ArrayList<>();
+            expected.add(testFileInfo);
+            assertThat(expected).isEqualTo(output);
         }
     }
 
@@ -516,7 +610,6 @@ public class VersionControllerTest {
 
         @Test
         void hasNoPaths() throws IOException {
-
             RevCommit parentCommit = mock(RevCommit.class);
             RevCommit[] parentCommits = {parentCommit};
             RevCommit mockRevCommit = mock(RevCommit.class);
@@ -552,6 +645,39 @@ public class VersionControllerTest {
             verify(spyController).getPathsOfCommit(mockObjectId);
             verify(repo).resolve(Constants.HEAD);
             verifyNoMoreInteractions(mockRevWalk, mockDiffFormatter, spyController, repo);
+        }
+    }
+
+    @Nested
+    public class KaiUwe {
+        @Test
+        void listDirRecursive() throws IOException {
+            assertThat(true).isEqualTo(true);
+
+    /*@Nested
+    public class ListFiles {
+        @Test
+        void listDirRecursive() throws IOException {
+            assertThat(true).isEqualTo(true);
+           /* TreeWalk mockWalk = mock(TreeWalk.class);
+            when(mockWalk.getPathString()).thenReturn("testFolder/testFile", "testFolder");
+            when(mockWalk.next()).thenReturn(true, true, false);
+            VersionController spyController = spy(versionController);
+            when(spyController.getTreeWalk(any())).thenReturn(mockWalk);
+            when(spyController.isDirectory(any())).thenReturn(true, false);
+
+            List<FileInfo> output = spyController.listFiles("", true);
+
+            FileInfo testFileInfo = FileInfo.builder().name("testFile").type(FileInfo.Type.FILE).build();
+            List<FileInfo> children = new ArrayList<>();
+            children.add(testFileInfo);
+            FileInfo testFolderInfo = FileInfo.builder()
+                    .name("testFolder")
+                    .type(FileInfo.Type.DIRECTORY)
+                    .children(children).build();
+            List<FileInfo> expected = new ArrayList<>();
+            expected.add(testFolderInfo);
+            assertThat(expected).isEqualTo(output);*/
         }
     }
 }

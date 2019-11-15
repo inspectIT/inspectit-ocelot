@@ -146,7 +146,7 @@ public class WorkingDirectoryManager extends DirectoryManager {
             assertPathWithinFilesRoot(path);
             dir = workingDirRoot.resolve(path);
         }
-        try (Stream<Path> files = Files.list(dir)) {
+        try (Stream<Path> files = Files.list(dir).filter(file -> !file.getFileName().toString().contains(".git"))) {
             List<FileInfo> result = new ArrayList<>();
             for (Path child : files.collect(Collectors.toList())) {
                 boolean isDirectory = Files.isDirectory(child);
