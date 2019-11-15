@@ -170,7 +170,10 @@ public class VersionController {
      * @Return returns true if the commit was successful.
      */
     public void commitFile(String filePath) throws GitAPIException {
-        CommitCommand commitCommand = git.commit().setOnly(filePath);
+        CommitCommand commitCommand = git.commit();
+        if (!filePath.equals("")) {
+            commitCommand.setOnly(filePath);
+        }
         commit(commitCommand);
     }
 

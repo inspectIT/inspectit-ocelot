@@ -153,10 +153,13 @@ public class GitDirectoryManagerIntTest {
         void testCommit() throws IOException, GitAPIException {
             List<FileInfo> beforeCommit = gitDirectoryManager.listFiles("", true);
             setupTestFiles(false, "a", "b", "c");
-            FileInfo file1 = buildFileInfo("configuration/a", "file");
-            FileInfo file2 = buildFileInfo("configuration/b", "file");
-            FileInfo file3 = buildFileInfo("configuration/c", "file");
-            List<FileInfo> afterCommit = Arrays.asList(file1, file2, file3);
+            FileInfo file1 = buildFileInfo("a", "file");
+            FileInfo file2 = buildFileInfo("b", "file");
+            FileInfo file3 = buildFileInfo("c", "file");
+            List<FileInfo> children = Arrays.asList(file1, file2, file3);
+            FileInfo folder = buildFileInfo("configuration", "directory");
+            folder.setChildren(children);
+            List<FileInfo> afterCommit = Arrays.asList(folder);
 
             gitDirectoryManager.commitAllChanges();
 
@@ -180,12 +183,12 @@ public class GitDirectoryManagerIntTest {
         void listRepoTest() throws GitAPIException, IOException {
             setupTestFiles(false, "a", "b", "c");
             commitAll();
-            FileInfo file1 = buildFileInfo("configuration/a", "file");
-            FileInfo file2 = buildFileInfo("configuration/b", "file");
-            FileInfo file3 = buildFileInfo("configuration/c", "file");
+            FileInfo file1 = buildFileInfo("a", "file");
+            FileInfo file2 = buildFileInfo("b", "file");
+            FileInfo file3 = buildFileInfo("c", "file");
             List<FileInfo> expected = Arrays.asList(file1, file2, file3);
 
-            List<FileInfo> output = gitDirectoryManager.listFiles("", true);
+            List<FileInfo> output = gitDirectoryManager.listFiles("configuration", true);
 
             assertThat(output).isEqualTo(expected);
         }
@@ -218,9 +221,9 @@ public class GitDirectoryManagerIntTest {
 
             String agentMappingContent = gitDirectoryManager.readFile("agent_mappings.yaml");
             String dummyFileContent = gitDirectoryManager.readFile("configuration/dummyFile");
-            boolean agentMappingChanged = "Hello World!".equals(agentMappingContent);
-            boolean dummyFileNotChanged = "But this is one =)".equals(dummyFileContent);
-            assertThat(agentMappingChanged && dummyFileNotChanged).isEqualTo(true);
+            boolean agentMappingChanged = "This is not an easter egg!".equals(agentMappingContent);
+            boolean dummyFileChanged = "But this is one =)".equals(dummyFileContent);
+            assertThat(agentMappingChanged && dummyFileChanged).isEqualTo(true);
         }
     }
 
