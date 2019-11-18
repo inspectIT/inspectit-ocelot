@@ -12,8 +12,8 @@ services:
     container_name: ocelot-config-server
     mem_limit: 128M
     environment:
-      - INSPECTIT_WORKING_DIRECTORY=/configuration-server
-      - INSPECTIT_DEFAULT_USER_PASSWORD=demo
+      - INSPECTIT_CONFIG_SERVER_WORKING_DIRECTORY=/configuration-server
+      - INSPECTIT_CONFIG_SERVER_DEFAULT_USER_PASSWORD=demo
     volumes:
       - ./configuration-server:/configuration-server
     ports:
