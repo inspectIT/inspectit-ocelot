@@ -1,15 +1,18 @@
 package rocks.inspectit.ocelot.core.instrumentation.context;
 
+import com.google.common.annotations.VisibleForTesting;
 import io.opencensus.trace.SpanContext;
 import io.opencensus.trace.Tracing;
 import io.opencensus.trace.propagation.TextFormat;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.CollectionUtils;
 
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -34,6 +37,7 @@ public class ContextPropagationUtil {
 
     public static final String CORRELATION_CONTEXT_HEADER = "Correlation-Context";
 
+    private static final String B3_HEADER_PREFIX = "X-B3-";
 
     private static final Pattern COMMA_WITH_WHITESPACES = Pattern.compile(" *, *");
     private static final Pattern SEMICOLON_WITH_WHITESPACES = Pattern.compile(" *; *");
@@ -166,10 +170,35 @@ public class ContextPropagationUtil {
             try {
                 return Tracing.getPropagationComponent().getB3Format().extract(propagationMap, MAP_EXTRACTOR);
             } catch (Throwable t) {
-                log.error("Error reading trace correlation data", t);
+                String headerString = getB3HeadersAsString(propagationMap);
+                log.error("Error reading trace correlation data from B3 headers: " + headerString, t);
             }
         }
         return null;
+    }
+
+    /**
+     * Returns a string representation of all B3 headers (headers which key is starting with {@link #B3_HEADER_PREFIX})
+     * in the given map.
+     *
+     * @param headers the map containing the headers
+     * @return string representation of the headers (["key", "value"]).
+     */
+    @VisibleForTesting
+    static String getB3HeadersAsString(Map<String, String> headers) {
+        StringBuilder builder = new StringBuilder("[");
+
+        if (!CollectionUtils.isEmpty(headers)) {
+            String headerString = headers.entrySet().stream()
+                    .filter(entry -> entry.getKey().startsWith(B3_HEADER_PREFIX))
+                    .map(entry -> "\"" + entry.getKey() + "\": \"" + entry.getValue() + "\"")
+                    .collect(Collectors.joining(", "));
+
+            builder.append(headerString);
+        }
+
+        builder.append("]");
+        return builder.toString();
     }
 
     /**
