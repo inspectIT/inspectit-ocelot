@@ -5,8 +5,8 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.bootstrap.correlation.noop.NoopTraceIdInjector;
-import rocks.inspectit.ocelot.config.model.instrumentation.experimental.ExperimentalSettings;
-import rocks.inspectit.ocelot.config.model.instrumentation.experimental.TraceIdAutoInjectionSettings;
+import rocks.inspectit.ocelot.config.model.tracing.TraceIdAutoInjectionSettings;
+import rocks.inspectit.ocelot.config.model.tracing.TracingSettings;
 import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 
@@ -29,8 +29,8 @@ public class TraceIdInjectorActivator {
     @PostConstruct
     @EventListener(InspectitConfigChangedEvent.class)
     public void activateInjector() {
-        ExperimentalSettings experimentalSettings = environment.getCurrentConfig().getInstrumentation().getExperimental();
-        TraceIdAutoInjectionSettings injectionSettings = experimentalSettings.getTraceIdAutoInjectionSettings();
+        TracingSettings tracingSettings = environment.getCurrentConfig().getTracing();
+        TraceIdAutoInjectionSettings injectionSettings = tracingSettings.getLogCorrelation().getTraceIdAutoInjection();
 
         if (injectionSettings.isEnabled()) {
             String prefix = injectionSettings.getPrefix();

@@ -5,7 +5,6 @@ import lombok.NoArgsConstructor;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.instrumentation.actions.GenericActionSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.data.DataSettings;
-import rocks.inspectit.ocelot.config.model.instrumentation.experimental.ExperimentalSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.InstrumentationRuleSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.scope.InstrumentationScopeSettings;
 import rocks.inspectit.ocelot.config.validation.ViolationBuilder;
@@ -83,12 +82,6 @@ public class InstrumentationSettings {
      * Defines whether lambda classes should be excluded from the declared scope.
      */
     private boolean excludeLambdas = true;
-
-    /**
-     * The settings of experimental features.
-     */
-    @Valid
-    private ExperimentalSettings experimental = new ExperimentalSettings();
 
     /**
      * Allows all nested configs to evaluate context sensitive config properties regarding their correctness.

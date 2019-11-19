@@ -1,8 +1,15 @@
 
 inspectit:
   tracing:
-      log-correlation:
+    log-correlation:
+      trace-id-mdc-injection:
         enabled: true
+
+      trace-id-auto-injection:
+        enabled: true
+        prefix: "[TraceID: "
+        suffix: "] "
+
   instrumentation:
     scopes:
       LogCorrelationTest-methods:

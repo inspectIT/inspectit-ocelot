@@ -27,7 +27,7 @@ public class Log4J2TraceIdAutoInjector implements SpecialSensor {
     @Override
     public boolean shouldInstrument(Class<?> clazz, InstrumentationConfiguration settings) {
         TypeDescription type = TypeDescription.ForLoadedType.of(clazz);
-        return settings.getSource().getExperimental().getTraceIdAutoInjectionSettings().isEnabled() && CLASSES_MATCHER.matches(type);
+        return settings.getTracingSettings().getLogCorrelation().getTraceIdAutoInjection().isEnabled() && CLASSES_MATCHER.matches(type);
     }
 
     @Override
