@@ -12,12 +12,20 @@ import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 
 import javax.annotation.PostConstruct;
 
+/**
+ * This component handles the injection of the {@link rocks.inspectit.ocelot.bootstrap.correlation.TraceIdInjector} instance
+ * into the {@link Instances} class of the bootstrap classloader.
+ */
 @Component
 public class TraceIdInjectorActivator {
 
     @Autowired
     private InspectitEnvironment environment;
 
+    /**
+     * Adds a new instance of the {@link rocks.inspectit.ocelot.bootstrap.correlation.TraceIdInjector} into {@link Instances}
+     * if auto injection is enabled. Otherwise it will use the noop instance.
+     */
     @PostConstruct
     @EventListener(InspectitConfigChangedEvent.class)
     public void activateInjector() {

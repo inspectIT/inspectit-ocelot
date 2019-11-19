@@ -42,7 +42,6 @@ public class Log4JTraceIdAutoInjectorTest extends InstrumentationSysTestBase {
 
         LOGGER.error(message);
 
-
         assertThat(Log4JLoggingRecorder.loggingEvents)
                 .hasSize(1);
 

@@ -4,12 +4,26 @@ import io.opencensus.trace.SpanContext;
 import io.opencensus.trace.Tracing;
 import rocks.inspectit.ocelot.bootstrap.correlation.TraceIdInjector;
 
+/**
+ * Implementation of {@link TraceIdInjector} for injecting trace ids into log messages.
+ * The resulting object will be in the following format if a trace id has been injected:
+ * [PREFIX]_trace_id_[SUFFIX]_message_
+ */
 public class TraceIdInjectorImpl implements TraceIdInjector {
 
+    /**
+     * The prefix to use.
+     */
     private String prefix;
 
+    /**
+     * The suffix to use.
+     */
     private String suffix;
 
+    /**
+     * Constructor.
+     */
     public TraceIdInjectorImpl(String prefix, String suffix) {
         this.prefix = prefix;
         this.suffix = suffix;
@@ -26,6 +40,9 @@ public class TraceIdInjectorImpl implements TraceIdInjector {
         }
     }
 
+    /**
+     * Returns the current trace id or `null` if non exists.
+     */
     private String getTraceId() {
         SpanContext context = Tracing.getTracer().getCurrentSpan().getContext();
         if (context != null && context.isValid()) {

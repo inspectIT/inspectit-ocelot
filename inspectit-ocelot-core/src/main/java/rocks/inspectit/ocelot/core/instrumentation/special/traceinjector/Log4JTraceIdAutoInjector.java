@@ -12,9 +12,15 @@ import rocks.inspectit.ocelot.core.instrumentation.special.SpecialSensor;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
+/**
+ * Special sensor for automatically injecting the trace id into log messages done using the Log4J framework.
+ */
 @Component
 public class Log4JTraceIdAutoInjector implements SpecialSensor {
 
+    /**
+     * Targeted classes to instrument.
+     */
     private static final ElementMatcher<TypeDescription> CLASSES_MATCHER = is(named("org.apache.log4j.Category")).or(hasSuperType(named("org.apache.log4j.Category")));
 
     @Override
