@@ -10,7 +10,6 @@ import rocks.inspectit.ocelot.logging.Log4JLoggingRecorder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
 public class Log4JTraceIdAutoInjectorTest extends InstrumentationSysTestBase {
 
     private static final Logger LOGGER = Logger.getLogger(Log4JTraceIdAutoInjectorTest.class.getName());
