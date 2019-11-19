@@ -32,7 +32,7 @@ public class Log4JTraceIdAutoInjectorTest extends InstrumentationSysTestBase {
 
         assertThat(Log4JLoggingRecorder.loggingEvents.get(0))
                 .extracting(LoggingEvent::getMessage)
-                .isEqualTo("[TraceID: " + traceId + "]" + message);
+                .isEqualTo("[TraceID: " + traceId + "] " + message);
     }
 
     @Test
@@ -41,6 +41,7 @@ public class Log4JTraceIdAutoInjectorTest extends InstrumentationSysTestBase {
         String message = "This is a test.";
 
         LOGGER.error(message);
+
 
         assertThat(Log4JLoggingRecorder.loggingEvents)
                 .hasSize(1);

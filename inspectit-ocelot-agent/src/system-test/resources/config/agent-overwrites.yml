@@ -12,3 +12,9 @@ inspectit:
       new-class-discovery-interval: 100ms
       # defines how often after the last invocation of a ClassFileTransformer the agent scans for new classes
       num-class-discovery-trials: 5
+
+    experimental:
+      trace-id-auto-injection-settings:
+        enabled: true
+        prefix: "[TraceID: "
+        suffix: "] "

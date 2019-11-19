@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import rocks.inspectit.ocelot.config.model.config.ConfigSettings;
 import rocks.inspectit.ocelot.config.model.env.EnvironmentSettings;
+import rocks.inspectit.ocelot.config.model.instrumentation.experimental.ExperimentalSettings;
 import rocks.inspectit.ocelot.config.model.exporters.ExportersSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.ocelot.config.model.logging.LoggingSettings;

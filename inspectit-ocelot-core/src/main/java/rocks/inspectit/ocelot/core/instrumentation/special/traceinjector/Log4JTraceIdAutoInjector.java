@@ -1,7 +1,5 @@
 package rocks.inspectit.ocelot.core.instrumentation.special.traceinjector;
 
-import io.opencensus.trace.SpanContext;
-import io.opencensus.trace.Tracing;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.asm.AsmVisitorWrapper;
 import net.bytebuddy.description.type.TypeDescription;
@@ -9,11 +7,8 @@ import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.matcher.ElementMatcher;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.bootstrap.Instances;
-import rocks.inspectit.ocelot.bootstrap.correlation.TraceIdAccessor;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.InstrumentationConfiguration;
 import rocks.inspectit.ocelot.core.instrumentation.special.SpecialSensor;
-
-import javax.annotation.PostConstruct;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
@@ -25,7 +20,7 @@ public class Log4JTraceIdAutoInjector implements SpecialSensor {
     @Override
     public boolean shouldInstrument(Class<?> clazz, InstrumentationConfiguration settings) {
         TypeDescription type = TypeDescription.ForLoadedType.of(clazz);
-        return true && CLASSES_MATCHER.matches(type);
+        return settings.getSource().getExperimental().getTraceIdAutoInjectionSettings().isEnabled() && CLASSES_MATCHER.matches(type);
     }
 
     @Override
@@ -49,13 +44,7 @@ public class Log4JTraceIdAutoInjector implements SpecialSensor {
 
         @Advice.OnMethodEnter
         public static void onMethodEnter(@Advice.Argument(value = 2, readOnly = false) Object message) {
-            String format = "[TraceID: <TRACEID>]";
-
-            String traceId = Instances.traceIdAccessor.getTraceId();
-            if (traceId != null) {
-                format = format.replace("<TRACEID>", traceId);
-                message = format + message;
-            }
+            message = Instances.traceIdInjector.injectTraceId(message);
         }
     }
 }
