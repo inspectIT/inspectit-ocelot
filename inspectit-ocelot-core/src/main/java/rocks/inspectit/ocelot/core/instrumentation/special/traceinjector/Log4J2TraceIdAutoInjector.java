@@ -22,7 +22,7 @@ public class Log4J2TraceIdAutoInjector implements SpecialSensor {
     /**
      * Targeted classes to instrument.
      */
-    private static final ElementMatcher<TypeDescription> CLASSES_MATCHER = hasSuperType(named("org.apache.logging.log4j.message.AbstractMessageFactory"));
+    private static final ElementMatcher<TypeDescription> CLASSES_MATCHER = hasSuperType(named("org.apache.logging.log4j.message.MessageFactory"));
 
     @Override
     public boolean shouldInstrument(Class<?> clazz, InstrumentationConfiguration settings) {

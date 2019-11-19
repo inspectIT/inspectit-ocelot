@@ -87,3 +87,12 @@ The previous configuration would lead to the following log statement:
 ```text
 [TraceID: 612772355048a0b21662ed3bc07a6326]This is my log statement.
 ```
+
+:::note
+Please note that the trace ID will be injected at **the beginning of the log message and not at the beginning of the log pattern**.
+The following output shows an example when the message is logged using a certain log pattern:
+
+```text
+18:19:43.474 [main] INFO  org.Example - [TraceID: e32ce6197f774d229460b2fd14448cf6]This is a test.
+```
+:::
