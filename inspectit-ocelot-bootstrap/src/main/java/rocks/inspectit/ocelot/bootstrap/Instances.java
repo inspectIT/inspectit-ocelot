@@ -3,7 +3,9 @@ package rocks.inspectit.ocelot.bootstrap;
 import rocks.inspectit.ocelot.bootstrap.context.IContextManager;
 import rocks.inspectit.ocelot.bootstrap.context.noop.NoopContextManager;
 import rocks.inspectit.ocelot.bootstrap.correlation.LogTraceCorrelator;
+import rocks.inspectit.ocelot.bootstrap.correlation.TraceIdInjector;
 import rocks.inspectit.ocelot.bootstrap.correlation.noop.NoopLogTraceCorrelator;
+import rocks.inspectit.ocelot.bootstrap.correlation.noop.NoopTraceIdInjector;
 import rocks.inspectit.ocelot.bootstrap.exposed.ObjectAttachments;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.IHookManager;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.noop.NoopHookManager;
@@ -37,4 +39,6 @@ public class Instances {
     public static ObjectAttachments attachments = NoopObjectAttachments.INSTANCE;
 
     public static LogTraceCorrelator logTraceCorrelator = NoopLogTraceCorrelator.INSTANCE;
+
+    public static TraceIdInjector traceIdInjector = NoopTraceIdInjector.INSTANCE;
 }

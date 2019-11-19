@@ -184,7 +184,7 @@ task systemTest {
             doFirst {
                 jvmArgs "-Dinspectit.config.file-based.path=$projectDir/src/system-test/resources/config"  // make inspectIT scan the workdir for configs
                 jvmArgs "-Dinspectit.publishOpenCensusToBootstrap=true"  // make inspectIT push OC to the bootstrap
-                jvmArgs jacoco.asJvmArg + ",inclbootstrapclasses=true"  // JaCoCo agent first + bootstrap instrumentaiton
+                jvmArgs jacoco.asJvmArg + ",inclbootstrapclasses=true"  // JaCoCo agent first + bootstrap instrumentation
                 jvmArgs "-javaagent:${agentJarPath}"  // Our agent second.
                 jacoco.enabled = false  // Don't add the JaCoCo agent again.
             }

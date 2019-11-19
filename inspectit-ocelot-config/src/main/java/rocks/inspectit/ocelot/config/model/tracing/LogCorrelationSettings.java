@@ -3,21 +3,21 @@ package rocks.inspectit.ocelot.config.model.tracing;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotBlank;
+import javax.validation.Valid;
 
 @Data
 @NoArgsConstructor
 public class LogCorrelationSettings {
 
     /**
-     * Specifies whether log correlation shall be performed or not.
-     * If enabled, the currently active traceID will be published to the MDC of all log libraries.
+     * Settings for the injection of trace ids into logging MDCs.
      */
-    private boolean enabled;
+    @Valid
+    private TraceIdMDCInjectionSettings traceIdMdcInjection = new TraceIdMDCInjectionSettings();
 
     /**
-     * The key under which the traceid is placed in the MDCs.
+     * Settings for the auto injection of trace ids into log messages.
      */
-    @NotBlank
-    private String key;
+    @Valid
+    private TraceIdAutoInjectionSettings traceIdAutoInjection = new TraceIdAutoInjectionSettings();
 }

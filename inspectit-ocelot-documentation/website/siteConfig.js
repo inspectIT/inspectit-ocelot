@@ -103,9 +103,14 @@ const siteConfig = {
     apiKey: 'ce332dcee733a92cefacc3195edd83dd',
     indexName: 'inspectit-ocelot',
     algoliaOptions: {
-      facetFilters: [ "version:VERSION" ]
+      facetFilters: ["version:VERSION"]
     }
-  }
+  },
+
+  markdownPlugins: [
+    // Highlight admonitions.
+    require('remarkable-admonitions')({ icon: 'svg-inline' })
+  ]
 };
 
 module.exports = siteConfig;
