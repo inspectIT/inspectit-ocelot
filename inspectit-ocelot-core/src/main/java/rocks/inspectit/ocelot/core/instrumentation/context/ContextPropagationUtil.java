@@ -171,7 +171,7 @@ public class ContextPropagationUtil {
                 return Tracing.getPropagationComponent().getB3Format().extract(propagationMap, MAP_EXTRACTOR);
             } catch (Throwable t) {
                 String headerString = getB3HeadersAsString(propagationMap);
-                log.error("Error reading trace correlation data from B3 headers: " + headerString, t);
+                log.error("Error reading trace correlation data from B3 headers: {}", headerString, t);
             }
         }
         return null;
@@ -182,7 +182,7 @@ public class ContextPropagationUtil {
      * in the given map.
      *
      * @param headers the map containing the headers
-     * @return string representation of the headers (["key", "value"]).
+     * @return string representation of the headers (["key": "value"]).
      */
     @VisibleForTesting
     static String getB3HeadersAsString(Map<String, String> headers) {
