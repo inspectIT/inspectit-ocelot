@@ -47,6 +47,8 @@ public class InstrumentationConfiguration {
 
     private DataProperties dataProperties;
 
+    private TracingSettings tracingSettings;
+
     /**
      * The currently active instrumentation rules.
      */

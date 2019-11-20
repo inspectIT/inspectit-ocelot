@@ -198,12 +198,13 @@ public class InstrumentationConfigurationResolver {
         }
     }
 
-    private InstrumentationConfiguration resolveConfiguration(InstrumentationSettings source, MetricsSettings metrics, TracingSettings tracing) {
+    private InstrumentationConfiguration resolveConfiguration(InstrumentationSettings source, MetricsSettings metricsSettings, TracingSettings tracingSettings) {
         val genericActions = genericActionConfigurationResolver.resolveActions(source);
         return InstrumentationConfiguration.builder()
-                .metricsEnabled(metrics.isEnabled())
-                .tracingEnabled(tracing.isEnabled())
-                .defaultTraceSampleProbability(tracing.getSampleProbability())
+                .metricsEnabled(metricsSettings.isEnabled())
+                .tracingEnabled(tracingSettings.isEnabled())
+                .tracingSettings(tracingSettings)
+                .defaultTraceSampleProbability(tracingSettings.getSampleProbability())
                 .source(source)
                 .rules(ruleResolver.resolve(source, genericActions))
                 .dataProperties(resolveDataProperties(source))

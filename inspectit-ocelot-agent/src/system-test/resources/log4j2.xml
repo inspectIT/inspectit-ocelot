@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="DEBUG" packages="rocks.inspectit.ocelot.logging">
+    <Appenders>
+        <Console name="LogToConsole" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+        </Console>
+        <Log4J2LoggingRecorder name="Log4J2LoggingRecorder"/>
+    </Appenders>
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="LogToConsole"/>
+            <AppenderRef ref="Log4J2LoggingRecorder"/>
+        </Root>
+    </Loggers>
+</Configuration>
