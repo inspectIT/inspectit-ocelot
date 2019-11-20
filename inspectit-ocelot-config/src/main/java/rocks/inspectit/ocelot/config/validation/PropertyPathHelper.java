@@ -159,6 +159,7 @@ public class PropertyPathHelper {
      * E.g. inspectit.test.rest -> "inspectit" is added to the list, "test.rest" is returned.
      * E.g. [inspectit.literal].test.rest -> "inspectit.literal" is added to the list, "test.rest" is returned.
      * E.g. [inspectit.literal][test].rest -> "inspectit.literal" is added to the list, "[test].rest" is returned.
+     * E.g. inspectict. -> "inspectit" and "" is added to the list. "" is returned.
      *
      * @param propertyName A String with the path of a property
      * @param result       Reference to the list in which the extracted expressions should be saved in
@@ -179,7 +180,12 @@ public class PropertyPathHelper {
                 return "";
             } else {
                 result.add(propertyName.substring(0, end));
-                return removeLeadingDot(propertyName.substring(end));
+                if (end == propertyName.length() - 1) {
+                    result.add("");
+                    return "";
+                } else {
+                    return removeLeadingDot(propertyName.substring(end));
+                }
             }
         }
     }
