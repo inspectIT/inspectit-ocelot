@@ -5,9 +5,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,13 +19,17 @@ public class ModelAutoCompleterTest {
         completer = new ModelAutoCompleter();
     }
 
-
     @Nested
     public class CheckPropertyExists {
+
         @Test
         void checkFirstLevel() {
             List<String> input = Arrays.asList("inspectit", "instrumentation");
-            List<String> expected = Arrays.asList("actions",
+
+            List<String> result = completer.getSuggestions(input);
+
+            assertThat(result).containsExactlyInAnyOrder(
+                    "actions",
                     "data",
                     "exclude-lambdas",
                     "ignored-bootstrap-packages",
@@ -36,121 +38,30 @@ public class ModelAutoCompleterTest {
                     "rules",
                     "scopes",
                     "special");
-
-            List<String> result = completer.getSuggestions(input);
-
-            assertThat(result).isEqualTo(expected);
         }
 
         @Test
         void pastMap() {
             List<String> input = Arrays.asList("inspectit", "instrumentation", "scopes", "my-key");
-            List<String> expected = Arrays.asList("advanced",
+
+            List<String> result = completer.getSuggestions(input);
+
+            assertThat(result).containsExactlyInAnyOrder(
+                    "advanced",
                     "interfaces",
                     "methods",
                     "superclass",
                     "type");
-
-            List<String> result = completer.getSuggestions(input);
-
-            assertThat(result).isEqualTo(expected);
         }
 
         @Test
         void pastList() {
             List<String> input = Arrays.asList("inspectit", "");
-            ArrayList<String> expected = new ArrayList<>(Arrays.asList("config",
-                    "env",
-                    "exporters",
-                    "instrumentation",
-                    "logging",
-                    "metrics",
-                    "plugins",
-                    "publish-open-census-to-bootstrap",
-                    "self-monitoring",
-                    "service-name",
-                    "tags",
-                    "thread-pool-size",
-                    "tracing"));
 
             List<String> result = completer.getSuggestions(input);
 
-            assertThat(result).isEqualTo(expected);
-        }
-
-        @Test
-        void endsInWildcard() {
-            List<String> input = Arrays.asList("inspectit", "instrumentation", "actions", "string_replace_all", "input", "regex");
-            ArrayList<String> expected = new ArrayList<>();
-
-            List<String> result = completer.getSuggestions(input);
-
-            assertThat(result).isEqualTo(expected);
-        }
-
-        @Test
-        void propertyIsPresentAndReadMethodIsNull() {
-            List<String> input = Arrays.asList("inspectit", "instrumentation", "data", "method_duration", "is-tag");
-            ArrayList<String> expected = new ArrayList<>();
-
-            List<String> result = completer.getSuggestions(input);
-
-            assertThat(result).isEqualTo(expected);
-        }
-
-        @Test
-        void classPropertyNotAdded() {
-            List<String> input = Arrays.asList("inspectit.");
-
-            List<String> result = completer.getSuggestions(input);
-
-            assertThat(result).doesNotContainSequence("class");
-        }
-
-        @Test
-        void emptyString() {
-            List<String> input = Arrays.asList("");
-            List<String> expected = Arrays.asList("inspectit");
-
-            List<String> result = completer.getSuggestions(input);
-
-            assertThat(result).isEqualTo(expected);
-        }
-
-        @Test
-        void startsLikeInspectit() {
-            List<String> input = Arrays.asList("inspe");
-            List<String> expected = Collections.emptyList();
-
-            List<String> result = completer.getSuggestions(input);
-
-            assertThat(result).isEqualTo(expected);
-        }
-
-        @Test
-        void startsNotLikeInspectit() {
-            List<String> input = Arrays.asList("test");
-
-            List<String> result = completer.getSuggestions(input);
-
-            assertThat(result).isEqualTo(Collections.emptyList());
-        }
-
-        @Test
-        void startsNotWithInspectit() {
-            List<String> input = Arrays.asList("test", "antotherTest");
-
-            List<String> result = completer.getSuggestions(input);
-
-            assertThat(result).isEqualTo(Collections.emptyList());
-        }
-    }
-
-    @Nested
-    public class GetProperties {
-        @Test
-        void getPropertiesInspectit() {
-            List<String> expected = Arrays.asList("config",
+            assertThat(result).containsExactlyInAnyOrder(
+                    "config",
                     "env",
                     "exporters",
                     "instrumentation",
@@ -163,10 +74,93 @@ public class ModelAutoCompleterTest {
                     "tags",
                     "thread-pool-size",
                     "tracing");
+        }
 
+        @Test
+        void endsInWildcard() {
+            List<String> input = Arrays.asList("inspectit", "instrumentation", "actions", "string_replace_all", "input", "regex");
+
+            List<String> result = completer.getSuggestions(input);
+
+            assertThat(result).isEmpty();
+        }
+
+        @Test
+        void propertyIsPresentAndReadMethodIsNull() {
+            List<String> input = Arrays.asList("inspectit", "instrumentation", "data", "method_duration", "is-tag");
+
+            List<String> result = completer.getSuggestions(input);
+
+            assertThat(result).isEmpty();
+        }
+
+        @Test
+        void classPropertyNotAdded() {
+            List<String> input = Arrays.asList("inspectit.");
+
+            List<String> result = completer.getSuggestions(input);
+
+            assertThat(result).isEmpty();
+        }
+
+        @Test
+        void emptyString() {
+            List<String> input = Arrays.asList("");
+
+            List<String> result = completer.getSuggestions(input);
+
+            assertThat(result).containsExactlyInAnyOrder("inspectit");
+        }
+
+        @Test
+        void startsLikeInspectit() {
+            List<String> input = Arrays.asList("inspe");
+
+            List<String> result = completer.getSuggestions(input);
+
+            assertThat(result).isEmpty();
+        }
+
+        @Test
+        void startsNotLikeInspectit() {
+            List<String> input = Arrays.asList("test");
+
+            List<String> result = completer.getSuggestions(input);
+
+            assertThat(result).isEmpty();
+        }
+
+        @Test
+        void startsNotWithInspectit() {
+            List<String> input = Arrays.asList("test", "antotherTest");
+
+            List<String> result = completer.getSuggestions(input);
+
+            assertThat(result).isEmpty();
+        }
+    }
+
+    @Nested
+    public class GetProperties {
+
+        @Test
+        void getPropertiesInspectit() {
             List<String> result = completer.getProperties(InspectitConfig.class);
 
-            assertThat(result).isEqualTo(expected);
+            assertThat(result).containsExactlyInAnyOrder(
+                    "config",
+                    "env",
+                    "exporters",
+                    "instrumentation",
+                    "logging",
+                    "metrics",
+                    "plugins",
+                    "publish-open-census-to-bootstrap",
+                    "self-monitoring",
+                    "service-name",
+                    "tags",
+                    "thread-pool-size",
+                    "tracing");
         }
     }
 }
