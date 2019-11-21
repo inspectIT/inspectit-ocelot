@@ -33,5 +33,10 @@ module.exports = withCSS({
             }
         })
         return config
+    },
+
+    env: {
+        VERSION: process.env.CIRCLE_TAG || "SNAPSHOT",
+        BUILD_DATE: new Date().toUTCString()
     }
 })
