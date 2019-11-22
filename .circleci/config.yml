@@ -119,6 +119,10 @@ jobs:
       - run: cp ~/inspectit/repo/inspectit-ocelot-demo/build/inspectit-ocelot-demo-${CIRCLE_TAG}.zip ~/inspectit/artifacts
       - run: cp ~/inspectit/repo/components/inspectit-ocelot-configurationserver/build/libs/inspectit-ocelot-configurationserver-${CIRCLE_TAG}.jar ~/inspectit/artifacts
       - run: cp ~/inspectit/repo/components/inspectit-ocelot-eum-server/build/libs/inspectit-ocelot-eum-server-${CIRCLE_TAG}.jar ~/inspectit/artifacts
+      - run:
+          name: Calculate checksums of release artifacts
+          working_directory: ~/inspectit/artifacts
+          command: for f in *; do sha256sum "$f" >> inspectit-ocelot-sha256-checksums.txt; done
       - persist_to_workspace:
           root: ~/inspectit
           paths:
