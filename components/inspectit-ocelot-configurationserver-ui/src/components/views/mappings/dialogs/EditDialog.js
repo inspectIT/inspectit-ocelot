@@ -116,7 +116,8 @@ class EditMappingDialog extends React.Component {
       this.props.addMapping(newMapping, this.handleClose);
     } else {
       let newMappings = this.props.mappings.map(mapping => {
-        if (isEqualWith(mapping, this.props.mapping, areMappingsEqual)) {
+        // if (isEqualWith(mapping, this.props.mapping, areMappingsEqual)) {
+        if (mapping.name === this.props.mapping.name) {
           return newMapping;
         } else {
           return mapping;
@@ -148,7 +149,7 @@ class EditMappingDialog extends React.Component {
       return false;
     }
 
-    if (this.props.mapping && this.props.mapping.name !== name && findIndex(this.props.mappings, (mapping) => mapping.name === name) !== -1) {
+    if (((this.props.mapping && this.props.mapping.name !== name) || !this.props.mapping) && findIndex(this.props.mappings, (mapping) => mapping.name === name) !== -1) {
       showWarningMessage('Mappings Could not be Updated', 'A Mapping with this name already exists');
       return false;
     }
@@ -183,19 +184,6 @@ const mapDispatchToProps = {
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(EditMappingDialog);
-
-/**
- * expects two mappings to compare name
- * returns true/false depending on equality
- * ~ needed since this.props.mappings will be retrieved from mappingsView/mappingsTable
- * and mappingsTable modifies the mapping (to enable global filtering of primereact/table) before sending it
- * 
- * @param {mapping} mapping1 
- * @param {mapping} mapping2 
- */
-const areMappingsEqual = (mapping1, mapping2) => {
-  return isEqual(mapping1.name, mapping2.name)
-}
 
 /**
  * expects a mapping object and returns an object usable by this component

@@ -7,14 +7,6 @@ import { Column } from 'primereact/column';
 import { cloneDeep, isEqual, assign } from 'lodash';
 
 class KeyValueEditor extends React.Component {
-
-  constructor(props) {
-    super(props)
-    this.state = {
-      editValue: null,
-    }
-  }
-
   editor = (columnProps) => {
     return (
       <InputText

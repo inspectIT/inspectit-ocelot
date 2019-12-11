@@ -122,16 +122,16 @@ const getUpdatedTree = (sources = [], oldTree = [treeUtils.rootNode]) => {
  */
 const getUpdatedTreeSelection = (sources = [], tree = [treeUtils.rootNode]) => {
   let res = {};
-  sources.forEach(path => {
-    // add a checkObj for each path/source
-    res = Object.assign(res, _getCheckedPathObj(path));
+  for (let path of sources) {
+    Object.assign(res, _getCheckedPathObj(path));
 
     // it it's a folder, add a checkObj for all children as well
     const node = treeUtils.findNode(tree, path);
     if (node && node.children) {
       _checkPathOfChildren(res, node.children);
     }
-  })
+  }
+
   /**
    * after all sources have been added, 
    * try to find parent nodes where all children have been checked and 

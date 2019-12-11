@@ -57,7 +57,7 @@ class ConfigurationDownload extends React.Component {
       return res;
     }
     catch{
-      this.props.showInfoMessage("Downloading Config File Failed", "The given attribute values are no regular expression");
+      this.props.showInfoMessage("Downloading Config File Failed", "The given attribute values are not a regular expression");
       return null
     }
   }

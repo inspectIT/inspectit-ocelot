@@ -65,26 +65,25 @@ class SourceToolbar extends React.Component {
    * @param {string} newSource - the source to be added
    */
   canAddSource = (newSource) => {
-    let res = true;
-    if (!this.props.sourcePaths) { return res; }
-
+    if (!this.props.sourcePaths) {
+      return true;
+    }
     // check if the new source is already included or a subfile
-    this.props.sourcePaths.forEach(source => {
+    for (const source of this.props.sourcePaths) {
       if (source === newSource || treeUtils.isSubfile(newSource, source)) {
-        res = false;
-      }
-    });
-
-    // check if the the new source can't exist - since it includes a file as parent node
-    const substrings = treeUtils.getParentKeys(newSource);
-    for (let i = 0; res && i < substrings.length; i++) {
-      const isNode = treeUtils.findNode(this.props.fileTree, substrings[i]);
-      if (isNode && !isNode.children && treeUtils.isSubfile(newSource, isNode.key)) {
-        res = false;
+        return false;
       }
     }
 
-    return res;
+    // check if the the new source can't exist - since it includes a file as parent node
+    const parentKeys = treeUtils.getParentKeys(newSource);
+    for (const parentKey of parentKeys) {
+      const isNode = treeUtils.findNode(this.props.fileTree, parentKey);
+      if (isNode && !isNode.children && treeUtils.isSubfile(newSource, isNode.key)) {
+        return false;
+      }
+    }
+    return true;
   }
 }
 

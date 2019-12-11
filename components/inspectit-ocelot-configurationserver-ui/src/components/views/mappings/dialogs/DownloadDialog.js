@@ -58,17 +58,20 @@ class DownloadDialog extends React.Component {
   handleDownload = () => {
     const sanitizedAttributes = {};
 
+    let showWarning;
     this.state.attributes.forEach(pair => {
       if (sanitizedAttributes[pair.key]) {
-        this.props.showWarningMessage('Invalid Input', 'Some attribute keys were double and have been discarded');
-      }
-
-      if (pair.key) {
+        showWarning = true;
+      } else if (pair.key) {
         sanitizedAttributes[pair.key] = pair.value || '';
       } else {
-        this.props.showWarningMessage('Invalid Input', 'Some attribute keys were empty and have been discarded');
+        showWarning = true;
       }
     })
+
+    if (showWarning) {
+      this.props.showWarningMessage('Invalid Input', 'Some attribute keys were double or empty and have been discarded');
+    }
 
     this.props.onHide();
     this.configDownload.download(sanitizedAttributes);

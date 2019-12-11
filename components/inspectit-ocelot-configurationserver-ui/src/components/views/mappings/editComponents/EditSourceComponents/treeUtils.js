@@ -114,29 +114,20 @@ export const findParentNode = (rootNodes, nodeKey) => {
  * @param {*} path - the node key path from the current tree level onwards
  */
 export const addNode = (rootNode, path) => {
-  // splitting path, since only the next key for the current tree level is needed -> next key for the next call of addNode etc.
-  let keys = path.split('/').filter(str => str !== '');
-  let children = rootNode.children;
+  // splitting path, since only the next key for the respective tree level is needed.
+  let names = path.split('/').filter(str => str !== '');
 
-  if (_stopRecursion(keys, children)) {
-    return
-  }
-
-  // the node key to find for the current tree level -> needs to be added in case it does not yet exist
-  const newNodeKey = `${rootNode.key !== '/' ? rootNode.key : ''}/${keys[0]}`;
-  let foundNode;
-
-  children.forEach(node => {
-    if (node.key === newNodeKey) {
-      foundNode = true;
-      _continueRecursion(node, keys);
+  let parent = rootNode;
+  for (const name of names) {
+    const childKey = `${parent.key !== '/' ? parent.key : ''}/${name}`;
+    const matchingChild = find(parent.children, { key: childKey });
+    if (matchingChild) {
+      parent = matchingChild;
+    } else {
+      const newChild = _createNewNode(childKey, name)
+      parent.children.push(newChild)
+      parent = newChild;
     }
-  })
-
-  if (!foundNode) {
-    let newNode = _createNewNode(newNodeKey, keys[0]);
-    children.push(newNode);
-    _continueRecursion(newNode, keys);
   }
 }
 
