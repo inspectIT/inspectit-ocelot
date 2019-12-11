@@ -206,11 +206,11 @@ const _checkPathOfParent = (selection, node, tree) => {
     return;
   }
   let allChildsChecked = true;
-  node.children.forEach(child => {
+  for (const child of node.children) {
     if (!selection[child.key] || !selection[child.key].checked) {
       allChildsChecked = false;
     }
-  })
+  }
 
   if (allChildsChecked) {
     selection[node.key] = { checked: true, partialChecked: false };

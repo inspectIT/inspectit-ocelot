@@ -59,7 +59,7 @@ class DownloadDialog extends React.Component {
     const sanitizedAttributes = {};
 
     let showWarning;
-    this.state.attributes.forEach(pair => {
+    for (const pair of this.state.attributes) {
       if (sanitizedAttributes[pair.key]) {
         showWarning = true;
       } else if (pair.key) {
@@ -67,7 +67,7 @@ class DownloadDialog extends React.Component {
       } else {
         showWarning = true;
       }
-    })
+    }
 
     if (showWarning) {
       this.props.showWarningMessage('Invalid Input', 'Some attribute keys were double or empty and have been discarded');

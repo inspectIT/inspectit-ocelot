@@ -132,35 +132,6 @@ export const addNode = (rootNode, path) => {
 }
 
 /**
- * if the given node can't have children or the path is empty
- * recusion at this point can be stopped
- * 
- * @param {obj} node - tree object
- * @param {string} path - the nodekey which should be added
- */
-const _stopRecursion = (keys, children) => {
-  if (keys.length <= 0) {
-    return true;
-  }
-
-  if (!children) { // a node without children is a file
-    return true;
-  }
-}
-
-/**
- * removes the first entry of keys, since the corresponding 'parentNode' has been found
- * and continues to try adding nodes
- * 
- * @param {obj} node - tree object
- * @param {array} keys - array of keys -- each entry equals a layer withing the tree
- */
-const _continueRecursion = (node, keys) => {
-  keys.shift();
-  addNode(node, keys.join('/'));
-}
-
-/**
  * creates and returns a new node object
  * 
  * @param {string} key - key of the new node

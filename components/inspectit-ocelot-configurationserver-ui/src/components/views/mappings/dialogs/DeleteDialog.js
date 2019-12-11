@@ -29,7 +29,7 @@ class DeleteDialog extends React.Component {
         )}
       >
         Are you sure you want to delete <b>"{mappingName}"</b> ? This cannot be undone!
-            </Dialog>
+      </Dialog>
     )
   }
 

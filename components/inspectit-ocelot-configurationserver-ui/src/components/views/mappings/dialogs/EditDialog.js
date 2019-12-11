@@ -10,7 +10,7 @@ import { Fieldset } from 'primereact/fieldset';
 
 import EditSources from '../editComponents/EditSources'
 import KeyValueEditor from '../editComponents/KeyValueEditor';
-import { isEqual, findIndex, cloneDeep, isEqualWith } from 'lodash';
+import { findIndex, cloneDeep } from 'lodash';
 
 const defaultState = {
   name: '',
@@ -149,7 +149,7 @@ class EditMappingDialog extends React.Component {
       return false;
     }
 
-    if (((this.props.mapping && this.props.mapping.name !== name) || !this.props.mapping) && findIndex(this.props.mappings, (mapping) => mapping.name === name) !== -1) {
+    if (this.doesMappingNameExist()) {
       showWarningMessage('Mappings Could not be Updated', 'A Mapping with this name already exists');
       return false;
     }
@@ -167,6 +167,21 @@ class EditMappingDialog extends React.Component {
     }
 
     return true;
+  }
+
+  doesMappingNameExist = () => {
+    const { name } = this.state;
+
+    // check if a mapping with the given name exists
+    const idx = findIndex(this.props.mappings, (mapping) => mapping.name === name)
+    if (idx !== -1) {
+      // check if the mapping is not me
+      if (!this.props.mapping || this.props.mapping.name !== name) {
+        return true
+      }
+    }
+
+    return false
   }
 }
 
@@ -191,7 +206,7 @@ export default connect(mapStateToProps, mapDispatchToProps)(EditMappingDialog);
  * 
  * @param {object} mapping
  */
-export const buildStateObject = (mapping) => {
+const buildStateObject = (mapping) => {
   const attributeArray = [];
   for (let attKey in mapping.attributes) {
     attributeArray.push(
@@ -215,7 +230,7 @@ export const buildStateObject = (mapping) => {
  * 
  * @param {object} obj - edit dialog state with name, sources, attributes
  */
-export const buildMappingObject = (obj) => {
+const buildMappingObject = (obj) => {
   if (!obj.name || !obj.attributes || !Array.isArray(obj.attributes)) {
     return;
   }
