@@ -132,7 +132,6 @@ dependencies {
 
     )
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
-    compile 'org.flywaydb:flyway-core'
 }
 
 task copyServerJar(type: Copy) {

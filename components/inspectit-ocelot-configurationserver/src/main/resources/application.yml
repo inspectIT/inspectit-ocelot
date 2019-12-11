@@ -17,6 +17,7 @@ spring:
     user: ${spring.datasource.username}
     password: ${spring.datasource.password}
     baselineOnMigrate: true
+    baselineVersion: 1
 
 server:
   port: 8090
