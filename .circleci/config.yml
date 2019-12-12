@@ -97,7 +97,7 @@ jobs:
       - image: adoptopenjdk/openjdk8:latest
 
   # Ensure inspectit Agent can attach itself on Alpine Linux
-  sys-alpine-attach-test-jdk8:
+  attach-alpine-jdk8:
     docker:
       - image: openjdk:8-jdk-alpine
     working_directory: ~/inspectit
@@ -273,7 +273,7 @@ workflows:
           <<: *requires_checkout
       - jmh-compile:
           <<: *requires_checkout
-      - sys-alpine-attach-test-jdk8:
+      - attach-alpine-jdk8:
           <<: *requires_checkout
 
       - deploy-master-documentation:
