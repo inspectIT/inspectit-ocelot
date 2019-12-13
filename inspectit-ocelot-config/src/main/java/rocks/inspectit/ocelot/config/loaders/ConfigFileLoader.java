@@ -2,14 +2,17 @@ package rocks.inspectit.ocelot.config.loaders;
 
 import lombok.experimental.UtilityClass;
 import org.apache.commons.io.IOUtils;
-import org.springframework.core.io.ClassPathResource;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -31,6 +34,8 @@ public class ConfigFileLoader {
      * This String resembles the classpaths that are searched to get the fallback config files.
      */
     static final String FALLBACK_CLASSPATH = "classpath:rocks/inspectit/ocelot/config/fallback/**/*.yml";
+
+    private String commonPrefix = null;
 
     /**
      * Returns all files found in the default config path as a key value pair consisting of the path to the file and
@@ -79,8 +84,9 @@ public class ConfigFileLoader {
      */
     private HashMap<String, String> loadConfig(String path) throws IOException {
         HashMap<String, String> configMap = new HashMap<>();
-        for (Resource resource : getRessources(path)) {
-            configMap.put(getPathOfResource(resource), readResourceContent(resource));
+        Resource[] resources = getRessources(path);
+        for (Resource resource : resources) {
+            configMap.put(getPathOfResource(resource, resources), readResourceContent(resource));
         }
         return configMap;
     }
@@ -107,17 +113,31 @@ public class ConfigFileLoader {
     }
 
     /**
-     * Returns the path of a given resource instance. Invokes .getPath if the given attribute is an instance of
-     * ClassPathResource otherwise the method invokes .getDescription.
+     * Returns the path of a given resource instance.
      *
      * @param resource The resource the path should be returned of.
      * @return The path of the given resource.
      */
-    private String getPathOfResource(Resource resource) {
-        if (resource instanceof ClassPathResource) {
-            return ((ClassPathResource) resource).getPath();
-        } else {
-            return resource.getDescription();
+    private String getPathOfResource(Resource resource, Resource[] resources) {
+        String description = resource.getDescription();
+        description.replace(File.separator, "/");
+        if (commonPrefix == null || !resource.getDescription().startsWith(commonPrefix)) {
+            setCommonPrefix(resources);
         }
+        description = description.replace(commonPrefix, "");
+        return description.substring(0, description.length() - 1);
+    }
+
+    /**
+     * Sets the current common prefix of all resource files.
+     *
+     * @param resources
+     */
+    private void setCommonPrefix(Resource[] resources) {
+        List<String> descriptors = new ArrayList<>();
+        for (Resource resource : resources) {
+            descriptors.add(resource.getDescription());
+        }
+        commonPrefix = StringUtils.getCommonPrefix(descriptors.stream().toArray(String[]::new));
     }
 }

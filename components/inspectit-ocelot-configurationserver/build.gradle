@@ -119,7 +119,7 @@ dependencies {
             "io.springfox:springfox-swagger2:2.9.2",
             "io.springfox:springfox-swagger-ui:2.9.2",
             "commons-io:commons-io:2.6",
-            "org.apache.commons:commons-lang3:3.+",
+            "org.apache.commons:commons-lang3:3.9",
             
             "io.opencensus:opencensus-impl:${openCensusVersion}"
     )
@@ -132,6 +132,7 @@ dependencies {
     )
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
 }
+
 
 task copyServerJar(type: Copy) {
     dependsOn bootJarWithFrontend

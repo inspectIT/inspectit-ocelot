@@ -57,8 +57,20 @@ public class InspectitEnvironment extends StandardEnvironment {
      */
     private static final String INSPECTIT_CONFIG_SETTINGS_PREFIX = "inspectit.config";
 
+    /**
+     * The name to use for the property source holding the {@link rocks.inspectit.ocelot.config.model.env.EnvironmentSettings},
+     * Used for the {@link EnvironmentInformationPropertySource}.
+     */
+    private static final String INSPECTIT_ENV_PROPERTYSOURCE_NAME = "inspectitEnvironment";
+
+    /**
+     * The name to use for the proeprty source containing the default configuration overrides.
+     */
     public static final String DEFAULT_CONFIG_PROPERTYSOURCE_NAME = "inspectitDefaults";
 
+    /**
+     * The name to use for the proeprty source containing the fallback configuration overrides.
+     */
     private static final String FALLBACK_CONFIG_PROPERTYSOURCE_NAME = "inspectitFallbackOverwrites";
 
     /**
@@ -110,7 +122,7 @@ public class InspectitEnvironment extends StandardEnvironment {
      * @param ctx         the context to apply this environment onto
      * @param cmdLineArgs the command line arguments, which gets interpreted as JSON configuration
      */
-    public InspectitEnvironment(ConfigurableApplicationContext ctx, Optional<String> cmdLineArgs) {
+    public InspectitEnvironment(ConfigurableApplicationContext ctx, Optional<String> cmdLineArgs) throws IOException {
         configurePropertySources(cmdLineArgs);
         eventDrain = ctx;
         ctx.setEnvironment(this);
@@ -153,12 +165,12 @@ public class InspectitEnvironment extends StandardEnvironment {
      * Initialization of all configuration sources
      * We do not use {@link #customizePropertySources(MutablePropertySources)}, because there it is not possible to access the command line arguments
      */
-    protected void configurePropertySources(Optional<String> cmdLineArgs) {
+    protected void configurePropertySources(Optional<String> cmdLineArgs) throws IOException {
         val propsList = getPropertySources();
 
         loadCmdLineArgumentsPropertySource(cmdLineArgs, propsList);
 
-        PropertySource defaultSettings = loadAgentResourceYaml(DEFAULT_CONFIG_PROPERTYSOURCE_NAME);
+        PropertySource defaultSettings = loadAgentResourceYaml(DEFAULT_CONFIG_PROPERTYSOURCE_NAME, ConfigFileLoader.getDefaultResources());
         propsList.addLast(defaultSettings);
         propsList.addLast(new EnvironmentInformationPropertySource(INSPECTIT_ENV_PROPERTYSOURCE_NAME));
 
@@ -172,7 +184,7 @@ public class InspectitEnvironment extends StandardEnvironment {
             currentConfig = initialConfig.get();
         } else {
             log.error("Startup configuration is not valid! Using fallback configuration but listening for configuration updates...");
-            PropertySource fallbackSettings = loadAgentResourceYaml(FALLBACK_CONFIG_PROPERTYSOURCE_NAME);
+            PropertySource fallbackSettings = loadAgentResourceYaml(FALLBACK_CONFIG_PROPERTYSOURCE_NAME, ConfigFileLoader.getFallBackResources());
             val currentSources = propsList.stream().collect(Collectors.toList());
             val fallbackSources = Arrays.<PropertySource<?>>asList(fallbackSettings, defaultSettings);
 
@@ -258,22 +270,11 @@ public class InspectitEnvironment extends StandardEnvironment {
         return config.isPresent() ? config : lastConfig;
     }
 
-    private static PropertiesPropertySource loadAgentResourceYaml(String propertySourceName) {
+    private static PropertiesPropertySource loadAgentResourceYaml(String propertySourceName, Resource[] resources) {
         Properties result = new Properties();
-
-        try {
-            Resource[] resources;
-            if (propertySourceName.equals(DEFAULT_CONFIG_PROPERTYSOURCE_NAME)) {
-                resources = ConfigFileLoader.getDefaultResources();
-            } else {
-                resources = ConfigFileLoader.getFallBackResources();
-            }
-            for (val res : resources) {
-                Properties properties = PropertyUtils.readYamlFiles(res);
-                result.putAll(properties);
-            }
-        } catch (IOException e) {
-            log.error("ERROR reading config", e);
+        for (val res : resources) {
+            Properties properties = PropertyUtils.readYamlFiles(res);
+            result.putAll(properties);
         }
         return new PropertiesPropertySource(propertySourceName, result);
     }
