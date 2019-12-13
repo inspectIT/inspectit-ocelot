@@ -29,8 +29,18 @@ inspectit:
 
       httpurlconnection_get_response_status:
         input:
+          _thrown: Throwable
           _this: java.net.HttpURLConnection
-        value: String.valueOf(_this.getResponseCode())
+        value-body: |
+          if(_thrown != null) {
+            return _thrown.getClass().getSimpleName();
+          } else {
+            try {
+              return String.valueOf(_this.getResponseCode());
+            } catch(Throwable t) {
+              return t.getClass().getSimpleName();
+            }
+          }
 
     scopes:
       httpurlconnection_getOutputStream:

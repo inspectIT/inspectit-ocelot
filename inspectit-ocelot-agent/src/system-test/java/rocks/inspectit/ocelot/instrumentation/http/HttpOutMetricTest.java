@@ -138,6 +138,38 @@ public class HttpOutMetricTest {
             assertThat(respSum).isGreaterThan(0);
         }
 
+
+        @Test
+        void testExceptionStatus() throws Exception {
+            InternalInspectitContext ctx = Instances.contextManager.enterNewContext();
+            ctx.setData("service", "apache_client_test");
+            ctx.makeActive();
+            Exception caughtException = null;
+            try {
+                HttpGet request = new HttpGet("http://idontexist");
+                request.setConfig(RequestConfig.custom().setConnectTimeout(1000).build());
+                client.execute(request);
+            } catch (Exception e) {
+                caughtException = e;
+            }
+            ctx.close();
+
+            TestUtils.waitForOpenCensusQueueToBeProcessed();
+
+            Map<String, String> tags = new HashMap<>();
+            tags.put("service", "apache_client_test");
+            tags.put("http_host", "idontexist");
+            tags.put("http_path", "");
+            tags.put("http_status", caughtException.getClass().getSimpleName());
+            tags.put("http_method", "GET");
+
+            long cnt = ((AggregationData.CountData) TestUtils.getDataForView("http/out/count", tags)).getCount();
+            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/out/responsetime/sum", tags)).getSum();
+
+            assertThat(cnt).isEqualTo(1);
+            assertThat(respSum).isGreaterThan(0);
+        }
+
     }
 
 
@@ -195,6 +227,39 @@ public class HttpOutMetricTest {
             tags.put("http_host", HOST);
             tags.put("http_path", PATH_404);
             tags.put("http_status", "404");
+            tags.put("http_method", "GET");
+
+            long cnt = ((AggregationData.CountData) TestUtils.getDataForView("http/out/count", tags)).getCount();
+            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/out/responsetime/sum", tags)).getSum();
+
+            assertThat(cnt).isEqualTo(1);
+            assertThat(respSum).isGreaterThan(0);
+        }
+
+        @Test
+        void testExceptionStatus() throws Exception {
+            InternalInspectitContext ctx = Instances.contextManager.enterNewContext();
+            ctx.setData("service", "urlconn_client_test");
+            ctx.makeActive();
+
+            Exception caughtException = null;
+            try {
+                HttpURLConnection urlConnection = (HttpURLConnection) new URL("http://idontexist").openConnection();
+                urlConnection.setConnectTimeout(1000);
+                urlConnection.getResponseCode();
+            } catch (Exception e) {
+                caughtException = e;
+            }
+
+            ctx.close();
+
+            TestUtils.waitForOpenCensusQueueToBeProcessed();
+
+            Map<String, String> tags = new HashMap<>();
+            tags.put("service", "urlconn_client_test");
+            tags.put("http_host", "idontexist");
+            tags.put("http_path", "");
+            tags.put("http_status", caughtException.getClass().getSimpleName());
             tags.put("http_method", "GET");
 
             long cnt = ((AggregationData.CountData) TestUtils.getDataForView("http/out/count", tags)).getCount();
