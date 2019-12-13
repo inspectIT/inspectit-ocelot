@@ -122,8 +122,13 @@ public class InspectitEnvironment extends StandardEnvironment {
      * @param ctx         the context to apply this environment onto
      * @param cmdLineArgs the command line arguments, which gets interpreted as JSON configuration
      */
-    public InspectitEnvironment(ConfigurableApplicationContext ctx, Optional<String> cmdLineArgs) throws IOException {
-        configurePropertySources(cmdLineArgs);
+    public InspectitEnvironment(ConfigurableApplicationContext ctx, Optional<String> cmdLineArgs) {
+        try {
+            configurePropertySources(cmdLineArgs);
+        } catch (IOException e) {
+            log.error("Error during setup of inspectit environment: " + e.getMessage());
+        }
+
         eventDrain = ctx;
         ctx.setEnvironment(this);
         ctx.addBeanFactoryPostProcessor(fac -> fac.setBeanExpressionResolver(getBeanExpressionResolver()));
