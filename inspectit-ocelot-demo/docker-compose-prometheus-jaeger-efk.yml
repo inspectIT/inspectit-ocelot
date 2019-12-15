@@ -1,3 +1,5 @@
+---
+# yamllint disable rule:line-length
 version: '2'
 services:
   agent:
@@ -6,7 +8,7 @@ services:
     mem_limit: 128M
     volumes:
       - agent-vol:/agent
-      
+
   ocelot-config-server:
     image: inspectit/inspectit-ocelot-configurationserver:${INSPECTIT_OCELOT_VERSION}
     container_name: ocelot-config-server
@@ -31,7 +33,7 @@ services:
       - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_PORT=9096
       - INSPECTIT_EXPORTERS_TRACING_JAEGER_URL=http://jaeger:14268/api/traces
     mem_limit: 512M
-    entrypoint: ["sh", "-c","
+    entrypoint: ["sh", "-c", "
       java -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Djava.security.egd=file:/dev/./urandom
       -javaagent:/agent/inspectit-ocelot-agent.jar
       -jar /app.jar"]
@@ -54,7 +56,7 @@ services:
       - ocelot-config-server
       - agent
       - config-server
-    entrypoint: ["sh", "-c","
+    entrypoint: ["sh", "-c", "
       ./dockerize -wait=tcp://config-server:8888 -timeout=120s -- &&
       java -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Djava.security.egd=file:/dev/./urandom
       -javaagent:/agent/inspectit-ocelot-agent.jar
@@ -79,7 +81,7 @@ services:
       - agent
       - config-server
       - discovery-server
-    entrypoint: ["sh", "-c","
+    entrypoint: ["sh", "-c", "
       ./dockerize -wait=tcp://discovery-server:8761 -timeout=120s -- &&
       java -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Djava.security.egd=file:/dev/./urandom
       -javaagent:/agent/inspectit-ocelot-agent.jar
@@ -104,7 +106,7 @@ services:
       - agent
       - config-server
       - discovery-server
-    entrypoint: ["sh", "-c","
+    entrypoint: ["sh", "-c", "
       ./dockerize -wait=tcp://discovery-server:8761 -timeout=120s -- &&
       java -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Djava.security.egd=file:/dev/./urandom
       -javaagent:/agent/inspectit-ocelot-agent.jar
@@ -129,7 +131,7 @@ services:
       - agent
       - config-server
       - discovery-server
-    entrypoint: ["sh", "-c","
+    entrypoint: ["sh", "-c", "
       ./dockerize -wait=tcp://discovery-server:8761 -timeout=120s -- &&
       java -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Djava.security.egd=file:/dev/./urandom
       -javaagent:/agent/inspectit-ocelot-agent.jar
@@ -154,7 +156,7 @@ services:
       - agent
       - config-server
       - discovery-server
-    entrypoint: ["sh", "-c","
+    entrypoint: ["sh", "-c", "
       ./dockerize -wait=tcp://discovery-server:8761 -timeout=120s -- &&
       java -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Djava.security.egd=file:/dev/./urandom
       -javaagent:/agent/inspectit-ocelot-agent.jar
@@ -168,12 +170,26 @@ services:
   load:
     image: inspectit/spring-petclinic-load:1.0
     container_name: load-generator
+    mem_limit: 128M
+    depends_on:
+      - ocelot-config-server
+      - agent
+      - config-server
+      - discovery-server
+      - api-gateway
+      - vets-service
+      - visits-service
+      - customers-service
+      - jaeger
+      - prometheus
 
   jaeger:
     image: jaegertracing/all-in-one:1.6
     container_name: jaeger
     ports:
       - 16686:16686
+    mem_limit: 128M
+
   prometheus:
     image: prom/prometheus:v2.7.1
     container_name: prometheus
@@ -181,6 +197,7 @@ services:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
       - 9090:9090
+    mem_limit: 128M
 
   grafana:
     image: inspectit/grafana:servicegraph-v0.2
@@ -192,5 +209,31 @@ services:
       - ./grafana/provisioning/prometheus:/usr/share/grafana/custom/
     ports:
       - 3001:3000
+    mem_limit: 128M
+    depends_on:
+      - prometheus
+
+  elasticsearch:
+    image: blacktop/elasticsearch
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms256m -Xmx256m
+    expose:
+      - 9200
+    ports:
+      - "9200:9200"
+    mem_limit: 512M
+
+  kibana:
+    image: blacktop/kibana
+#   links:
+#     - "elasticsearch"
+    ports:
+      - "5601:5601"
+    mem_limit: 128M
+    depends_on:
+      - elasticsearch
+
 volumes:
   agent-vol:
