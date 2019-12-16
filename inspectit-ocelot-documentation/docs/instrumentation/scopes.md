@@ -32,7 +32,7 @@ The definition of a scope contains the following five attributes:
 |`advanced`| Advanced settings.
 
 In order to determine which methods should be instrumented all classes are checked against the defined `interface`, `superclass` and `type` matchers.
-If and only if a class matches on *all* matchers, each of their methods are checked against the defined method matchers in order to determine the target methods.
+If and only if a class matches on *all* matchers, each of their methods is checked against the defined method matchers in order to determine the target methods.
 Thus, the process of determine whether the methods of a class `X` should be instrumented can be represented as:
 
 1. Check if all interface matcher matches the interface of class `X` (if any is defined)
@@ -69,7 +69,7 @@ A type matcher consists of the following attributes:
 
 |Attribute|Default|Description
 |---|---|---|
-|`name`| -| The name or pattern which is used to match against the full qualified class or interface name.
+|`name`| -| The name or pattern which is used to match against the fully qualified class or interface name.
 |`matcher-mode`| `EQUALS_FULLY`| The matching mode. Possible values: `EQUALS_FULLY`, `MATCHES` (see [String.match](https://docs.oracle.com/javase/8/docs/api/java/lang/String.html#matches-java.lang.String)), `STARTS_WITH`, `STARTS_WITH_IGNORE_CASE`, `CONTAINS`, `CONTAINS_IGNORE_CASE`, `ENDS_WITH`, `ENDS_WITH_IGNORE_CASE`
 |`annotations`|-| A list of matchers used for matching annotations. Each annotation matcher consists of a `name` and `matcher-mode` which are equivalent to the ones above.
 
@@ -92,7 +92,7 @@ Besides `name`, `matcher-mode` and `annotations`, the method matcher contains th
 |Attribute|Default|Description
 |---|---|---|
 |`visibility`| [PUBLIC, PROTECTED, PACKAGE, PRIVATE]| A list of visibility modifiers. The target method has to use one of the specified modifiers. Possible values: `PUBLIC`, `PROTECTED`, `PACKAGE`, `PRIVATE`
-|`arguments`|-| A list of full qualified class names representing the method's arguments.
+|`arguments`|-| A list of fully qualified class names representing the method's arguments.
 |`is-synchronized`|-| Specifies whether the target method is synchronized.
 |`is-constructor`|`false`| Specifies whether the target method is a constructor. If this value is `true`, the `name` and `is-synchronized` attribute will *not* be used!
 
@@ -116,7 +116,7 @@ The scope definition's advanced settings contains currently the following two at
 
 |Attribute|Default|Description
 |---|---|---|
-|`instrument-only-inherited-methods`| false | If this value is `true`, only methods will be instrumented which are inherited of a superclass or interface which where specified in the `interfaces` or `superclass` configuration.
+|`instrument-only-inherited-methods`| false | If this value is `true`, only methods will be instrumented which are inherited of a superclass or interface which were specified in the `interfaces` or `superclass` configuration.
 |`disable-safety-mechanisms`| false | By default, the agent will not allow scopes containing only "any-matcher" like `MATCHES(*)`. If required, this safety feature can be disabled by setting this value to `true`.
 
 ## Example Scope Definition
