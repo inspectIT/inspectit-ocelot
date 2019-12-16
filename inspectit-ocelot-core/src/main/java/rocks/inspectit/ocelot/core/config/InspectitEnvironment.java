@@ -123,12 +123,7 @@ public class InspectitEnvironment extends StandardEnvironment {
      * @param cmdLineArgs the command line arguments, which gets interpreted as JSON configuration
      */
     public InspectitEnvironment(ConfigurableApplicationContext ctx, Optional<String> cmdLineArgs) {
-        try {
-            configurePropertySources(cmdLineArgs);
-        } catch (IOException e) {
-            log.error("Error during setup of inspectit environment: " + e.getMessage());
-        }
-
+        configurePropertySources(cmdLineArgs);
         eventDrain = ctx;
         ctx.setEnvironment(this);
         ctx.addBeanFactoryPostProcessor(fac -> fac.setBeanExpressionResolver(getBeanExpressionResolver()));
@@ -170,36 +165,44 @@ public class InspectitEnvironment extends StandardEnvironment {
      * Initialization of all configuration sources
      * We do not use {@link #customizePropertySources(MutablePropertySources)}, because there it is not possible to access the command line arguments
      */
-    protected void configurePropertySources(Optional<String> cmdLineArgs) throws IOException {
+    protected void configurePropertySources(Optional<String> cmdLineArgs) {
         val propsList = getPropertySources();
 
         loadCmdLineArgumentsPropertySource(cmdLineArgs, propsList);
+        PropertySource defaultSettings = null;
+        Optional<ConfigSettings> appliedConfigSettings = null;
+        try {
+            defaultSettings = loadAgentResourceYaml(DEFAULT_CONFIG_PROPERTYSOURCE_NAME, ConfigFileLoader.getDefaultResources());
+            propsList.addLast(defaultSettings);
+            propsList.addLast(new EnvironmentInformationPropertySource(INSPECTIT_ENV_PROPERTYSOURCE_NAME));
 
-        PropertySource defaultSettings = loadAgentResourceYaml(DEFAULT_CONFIG_PROPERTYSOURCE_NAME, ConfigFileLoader.getDefaultResources());
-        propsList.addLast(defaultSettings);
-        propsList.addLast(new EnvironmentInformationPropertySource(INSPECTIT_ENV_PROPERTYSOURCE_NAME));
+            appliedConfigSettings = initializeConfigurationSources(propsList);
 
-        Optional<ConfigSettings> appliedConfigSettings = initializeConfigurationSources(propsList);
-
-        log.info("Registered Configuration Sources:");
-        getPropertySources().stream().forEach(ps -> log.info("  {}", ps.getName()));
-
+            log.info("Registered Configuration Sources:");
+            getPropertySources().stream().forEach(ps -> log.info("  {}", ps.getName()));
+        } catch (IOException e) {
+            log.error("An Error occurred while loading the default config!");
+        }
         Optional<InspectitConfig> initialConfig = loadAndValidateFromProperties(INSPECTIT_ROOT_PREFIX, InspectitConfig.class);
         if (initialConfig.isPresent()) {
             currentConfig = initialConfig.get();
         } else {
             log.error("Startup configuration is not valid! Using fallback configuration but listening for configuration updates...");
-            PropertySource fallbackSettings = loadAgentResourceYaml(FALLBACK_CONFIG_PROPERTYSOURCE_NAME, ConfigFileLoader.getFallBackResources());
-            val currentSources = propsList.stream().collect(Collectors.toList());
-            val fallbackSources = Arrays.<PropertySource<?>>asList(fallbackSettings, defaultSettings);
+            try {
+                PropertySource fallbackSettings = loadAgentResourceYaml(FALLBACK_CONFIG_PROPERTYSOURCE_NAME, ConfigFileLoader.getFallBackResources());
+                val currentSources = propsList.stream().collect(Collectors.toList());
+                val fallbackSources = Arrays.<PropertySource<?>>asList(fallbackSettings, defaultSettings);
 
-            currentSources.forEach(ps -> propsList.remove(ps.getName()));
-            fallbackSources.forEach(ps -> propsList.addLast(ps));
+                currentSources.forEach(ps -> propsList.remove(ps.getName()));
+                fallbackSources.forEach(ps -> propsList.addLast(ps));
 
-            currentConfig = loadAndValidateFromProperties(INSPECTIT_ROOT_PREFIX, InspectitConfig.class).get();
+                currentConfig = loadAndValidateFromProperties(INSPECTIT_ROOT_PREFIX, InspectitConfig.class).get();
 
-            fallbackSources.forEach(ps -> propsList.remove(ps.getName()));
-            currentSources.forEach(ps -> propsList.addLast(ps));
+                fallbackSources.forEach(ps -> propsList.remove(ps.getName()));
+                currentSources.forEach(ps -> propsList.addLast(ps));
+            } catch (IOException e) {
+                log.error("An Error occurred while loading the fallback config!");
+            }
 
             appliedConfigSettings.ifPresent(currentConfig::setConfig);
         }
