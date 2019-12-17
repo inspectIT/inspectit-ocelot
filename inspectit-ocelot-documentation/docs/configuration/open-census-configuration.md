@@ -25,7 +25,7 @@ Furthermore, a correct configuration will make it possible to combine metrics an
    -Dinspectit.publishOpenCensusToBootstrap=true
    ```
 
-   Setting the above property to `true` tells inspectIT Ocelot that you plan to use the OpenCensus library in combination with the agent. Note that this property must be specified with this exact name. The flexibility offered for all other config options does not apply here. The inspectIT Ocelot agent will make sure that all OpenCensus classes are then loaded by the bootstrap class loader. This ensures that OpenCensus implementation is shared between your manual instrumentation and the agent instrumentation, making the combing of data possible.
+   Setting the above property to `true` tells inspectIT Ocelot that you plan to use the OpenCensus library in combination with the agent. Note that this property must be specified with this exact name. The flexibility offered for all other config options does not apply here. The inspectIT Ocelot agent will make sure that all OpenCensus classes are then loaded by the bootstrap class loader. This ensures that OpenCensus implementation is shared between your manual instrumentation and the agent instrumentation, making the combination of data possible.
 
 3. Add the agent to the start of a JVM
 

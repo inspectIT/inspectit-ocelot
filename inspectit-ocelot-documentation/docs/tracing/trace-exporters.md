@@ -46,7 +46,7 @@ To make inspectIT Ocelot push the spans to a Jaeger server running on the same m
 ## OpenCensus Agent Trace Exporter
 
 Spans can be additionally exported to the [OpenCensus Agent](https://opencensus.io/service/components/agent/).
-When enabled, all Spans are send via gRCP to the OpenCensus Agent. By default, the exporter is enabled, but the agent address is set to `null`.
+When enabled, all Spans are sent via gRCP to the OpenCensus Agent. By default, the exporter is enabled, but the agent address is set to `null`.
 
 |Property |Default| Description
 |---|---|---|
