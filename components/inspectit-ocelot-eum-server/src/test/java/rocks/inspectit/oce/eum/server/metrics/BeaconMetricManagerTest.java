@@ -95,50 +95,5 @@ public class BeaconMetricManagerTest {
 
             verifyZeroInteractions(viewManager, statsRecorder);
         }
-
-        @Test
-        void verifyViewsAreGeneratedGlobalTagIsSet() {
-            Map<String, String> extraTags = new HashMap<>();
-            extraTags.put("TAG_1", "tag_value_1");
-            extraTags.put("TAG_2", "tag_value_2");
-
-            Map<String, String> beaconTags = new HashMap<>();
-            beaconTags.put("URL", "http://localhost");
-
-            Set<String> globalTags = new HashSet<>();
-            globalTags.add("URL");
-
-            when(tagSettings.getExtra()).thenReturn(extraTags);
-            when(tagSettings.getBeacon()).thenReturn(beaconTags);
-            when(tagSettings.getDefineAsGlobal()).thenReturn(globalTags);
-
-            when(configuration.getDefinitions()).thenReturn(definitionMap);
-            when(configuration.getTags()).thenReturn(tagSettings);
-            HashMap<String, String> beaconMap = new HashMap<>();
-            beaconMap.put("dummy_beacon_field", "12d");
-
-            when(statsRecorder.newMeasureMap()).thenReturn(measureMap);
-            doReturn(measureMap).when(measureMap).put(any(), anyDouble());
-
-            beaconMetricManager.processBeacon(Beacon.of(beaconMap));
-
-            ArgumentCaptor<View> viewCaptor = ArgumentCaptor.forClass(View.class);
-            ArgumentCaptor<Measure.MeasureDouble> measureCaptor = ArgumentCaptor.forClass(Measure.MeasureDouble.class);
-            ArgumentCaptor<Double> doubleCaptor = ArgumentCaptor.forClass(Double.class);
-            verify(viewManager).getAllExportedViews();
-            verify(viewManager).registerView(viewCaptor.capture());
-            verify(statsRecorder).newMeasureMap();
-            verify(measureMap).put(measureCaptor.capture(), doubleCaptor.capture());
-            verify(measureMap).record();
-            verifyNoMoreInteractions(viewManager, statsRecorder, measureMap);
-
-            assertThat(viewCaptor.getValue().getName().asString()).isEqualTo("Dummy metric name/HISTOGRAM");
-            assertThat(viewCaptor.getValue().getColumns()).extracting(TagKey::getName).containsExactly("TAG_1", "TAG_2", "URL");
-            assertThat(viewCaptor.getValue().getDescription()).isEqualTo("Dummy description");
-            assertThat(measureCaptor.getValue().getName()).isEqualTo("Dummy metric name");
-            assertThat(measureCaptor.getValue().getUnit()).isEqualTo("ms");
-            assertThat(measureCaptor.getValue().getDescription()).isEqualTo("Dummy description");
-            assertThat(doubleCaptor.getValue()).isEqualTo(12D);
-        }
     }
 }

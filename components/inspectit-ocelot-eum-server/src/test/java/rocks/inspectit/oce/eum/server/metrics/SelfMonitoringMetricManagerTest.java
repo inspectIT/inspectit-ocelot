@@ -36,7 +36,7 @@ public class SelfMonitoringMetricManagerTest {
     EumServerConfiguration configuration;
 
     @Mock
-    EumTagsSettings tagSettings;
+    MeasuresAndViewsManager measuresAndViewsManager;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     StatsRecorder statsRecorder;
@@ -73,8 +73,7 @@ public class SelfMonitoringMetricManagerTest {
             definitionMap.put("beacons_received", dummyMetricDefinition);
             eumSelfMonitoringSettings.setEnabled(true);
             eumSelfMonitoringSettings.setMetrics(definitionMap);
-
-
+            eumSelfMonitoringSettings.setMetricPrefix("inspectit-eum/self/");
         }
 
         @Test
@@ -97,39 +96,16 @@ public class SelfMonitoringMetricManagerTest {
         }
 
         @Test
-        void verifyViewsAreGeneratedExtraTagIsSet() {
-            Map<String, String> extraTags = new HashMap<>();
-            extraTags.put("TAG_1", "tag_value_1");
-            extraTags.put("TAG_2", "tag_value_2");
-
-            when(tagSettings.getExtra()).thenReturn(extraTags);
-
+        void verifySelfMonitoringMetricManagerIsCalled() {
             when(configuration.getSelfMonitoring()).thenReturn(eumSelfMonitoringSettings);
-            when(configuration.getTags()).thenReturn(tagSettings);
-            HashMap<String, String> beaconMap = new HashMap<>();
 
-            when(statsRecorder.newMeasureMap()).thenReturn(measureMap);
-            doReturn(measureMap).when(measureMap).put(any(), anyDouble());
+            selfMonitoringMetricManager.initMetrics();
 
-            selfMonitoringMetricManager.record("beacons_received", 1);
+            ArgumentCaptor<MetricDefinitionSettings> mdsCaptor = ArgumentCaptor.forClass(MetricDefinitionSettings.class);
+            verify(measuresAndViewsManager).updateMetrics(eq("inspectit-eum/self/beacons_received"), mdsCaptor.capture());
+            verifyZeroInteractions(viewManager, statsRecorder, measureMap);
 
-            ArgumentCaptor<View> viewCaptor = ArgumentCaptor.forClass(View.class);
-            ArgumentCaptor<Measure.MeasureDouble> measureCaptor = ArgumentCaptor.forClass(Measure.MeasureDouble.class);
-            ArgumentCaptor<Double> doubleCaptor = ArgumentCaptor.forClass(Double.class);
-            verify(viewManager).getAllExportedViews();
-            verify(viewManager).registerView(viewCaptor.capture());
-            verify(statsRecorder).newMeasureMap();
-            verify(measureMap).put(measureCaptor.capture(), doubleCaptor.capture());
-            verify(measureMap).record();
-            verifyNoMoreInteractions(viewManager, statsRecorder, measureMap);
-
-            assertThat(viewCaptor.getValue().getName().asString()).isEqualTo("inspectit-eum/self/beacons_received/COUNT");
-            assertThat(viewCaptor.getValue().getColumns()).extracting(TagKey::getName).containsExactly("TAG_1");
-            assertThat(viewCaptor.getValue().getDescription()).isEqualTo("Dummy description");
-            assertThat(measureCaptor.getValue().getName()).isEqualTo("inspectit-eum/self/beacons_received");
-            assertThat(measureCaptor.getValue().getUnit()).isEqualTo("number");
-            assertThat(measureCaptor.getValue().getDescription()).isEqualTo("Dummy description");
-            assertThat(doubleCaptor.getValue()).isEqualTo(1);
+            assertThat(mdsCaptor.getValue().getViews().keySet()).containsExactly("inspectit-eum/self/beacons_received/COUNT");
         }
     }
 }

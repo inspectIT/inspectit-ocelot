@@ -7,6 +7,7 @@ import io.opencensus.tags.TagValue;
 import io.opencensus.tags.Tags;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
 import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings;
 import rocks.inspectit.ocelot.config.model.metrics.definition.ViewDefinitionSettings;
@@ -17,23 +18,23 @@ import java.util.stream.Collectors;
 /**
  * Central component, which is responsible for writing communication with the OpenCensus.
  */
+@Component
 @Slf4j
-public abstract class AbstractMeasuresAndViewsManager {
+public class MeasuresAndViewsManager {
 
     /**
      * Measures, which are created.
      */
-    protected HashMap<String, Measure> metrics = new HashMap<>();
+    private HashMap<String, Measure> metrics = new HashMap<>();
 
     @Autowired
-    protected EumServerConfiguration configuration;
+    private EumServerConfiguration configuration;
 
     @Autowired
     private StatsRecorder recorder;
 
     @Autowired
     private ViewManager viewManager;
-
 
     /**
      * Records the measure,
@@ -42,7 +43,7 @@ public abstract class AbstractMeasuresAndViewsManager {
      * @param metricDefinition The configuration of the metric, which is activated
      * @param value            The value, which is going to be written.
      */
-    protected void recordMeasure(String measureName, MetricDefinitionSettings metricDefinition, Number value) {
+    public void recordMeasure(String measureName, MetricDefinitionSettings metricDefinition, Number value) {
         if (log.isDebugEnabled()) {
             log.debug("Recording measure '{}' with value '{}'.", measureName, value);
         }
@@ -60,7 +61,7 @@ public abstract class AbstractMeasuresAndViewsManager {
     /**
      * Updates the metrics
      */
-    protected void updateMetrics(String name, MetricDefinitionSettings metricDefinition) {
+    public void updateMetrics(String name, MetricDefinitionSettings metricDefinition) {
         if (!metrics.containsKey(name)) {
             MetricDefinitionSettings populatedMetricDefinition = metricDefinition.getCopyWithDefaultsPopulated(name);
             Measure measure = createMeasure(name, populatedMetricDefinition);
@@ -69,7 +70,7 @@ public abstract class AbstractMeasuresAndViewsManager {
         }
     }
 
-    protected Measure createMeasure(String name, MetricDefinitionSettings metricDefinition) {
+    private Measure createMeasure(String name, MetricDefinitionSettings metricDefinition) {
         switch (metricDefinition.getType()) {
             case LONG:
                 return Measure.MeasureLong.create(name,
@@ -85,16 +86,16 @@ public abstract class AbstractMeasuresAndViewsManager {
     /**
      * Creates a new {@link View}, if a view for the given metricDefinition was not created, yet.
      *
-     * @param metricDefinition
+     * @param metricDefinition the settings of the metric definition
      */
-    protected void updateViews(String metricName, MetricDefinitionSettings metricDefinition) {
+    private void updateViews(String metricName, MetricDefinitionSettings metricDefinition) {
         for (Map.Entry<String, ViewDefinitionSettings> viewDefinitionSettingsEntry : metricDefinition.getViews().entrySet()) {
             String viewName = viewDefinitionSettingsEntry.getKey();
             ViewDefinitionSettings viewDefinitionSettings = viewDefinitionSettingsEntry.getValue();
             if (viewManager.getAllExportedViews().stream().noneMatch(v -> v.getName().asString().equals(viewName))) {
                 Aggregation aggregation = createAggregation(viewDefinitionSettings);
                 List<TagKey> tagKeys = getTagsForView(viewDefinitionSettings).stream()
-                        .map(tag -> TagKey.create(tag))
+                        .map(TagKey::create)
                         .collect(Collectors.toList());
                 View view = View.create(View.Name.create(viewName), metricDefinition.getDescription(), metrics.get(metricName), aggregation, tagKeys);
                 viewManager.registerView(view);
@@ -105,37 +106,50 @@ public abstract class AbstractMeasuresAndViewsManager {
     /**
      * Returns all tags, which are exposed for the given metricDefinition
      *
-     * @param viewDefinitionSettings
-     * @return Map of tags
      */
-    protected Set<String> getTagsForView(ViewDefinitionSettings viewDefinitionSettings) {
+    private Set<String> getTagsForView(ViewDefinitionSettings viewDefinitionSettings) {
         Set<String> tags = new HashSet<>(configuration.getTags().getDefineAsGlobal());
         tags.addAll(viewDefinitionSettings.getTags().entrySet().stream()
-                .filter(entry -> entry.getValue())
-                .map(entry -> entry.getKey())
+                .filter(Map.Entry::getValue)
+                .map(Map.Entry::getKey)
                 .collect(Collectors.toList()));
         return tags;
     }
 
     /**
-     * Builds TagContext
+     * Builds TagContext.
      */
-    protected TagContextBuilder getTagContext() {
+    public TagContextBuilder getTagContext() {
         TagContextBuilder tagContextBuilder = Tags.getTagger().currentBuilder();
 
         for (Map.Entry<String, String> extraTag : configuration.getTags().getExtra().entrySet()) {
             tagContextBuilder.putLocal(TagKey.create(extraTag.getKey()), TagValue.create(extraTag.getValue()));
         }
+
+        return tagContextBuilder;
+    }
+
+    /**
+     * Builds TagContext with custom tags.
+     *
+     * @param customTags Map containing the custom tags.
+     * @return {@link TagContextBuilder} which contains the custom and global (extra) tags
+     */
+    public TagContextBuilder getTagContext(Map<String, String> customTags) {
+        TagContextBuilder tagContextBuilder = getTagContext();
+
+        for (Map.Entry<String, String> customTag : customTags.entrySet()) {
+            tagContextBuilder.putLocal(TagKey.create(customTag.getKey()), TagValue.create(customTag.getValue()));
+        }
+
         return tagContextBuilder;
     }
 
     /**
      * Creates an aggregation depending on the given {@link Aggregation}
      *
-     * @param viewDefinitionSettings
-     * @return the aggregation
      */
-    protected static Aggregation createAggregation(ViewDefinitionSettings viewDefinitionSettings) {
+    private static Aggregation createAggregation(ViewDefinitionSettings viewDefinitionSettings) {
         switch (viewDefinitionSettings.getAggregation()) {
             case COUNT:
                 return Aggregation.Count.create();

@@ -5,11 +5,13 @@ import io.opencensus.tags.TagContextBuilder;
 import io.opencensus.tags.TagKey;
 import io.opencensus.tags.TagValue;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.oce.eum.server.arithmetic.RawExpression;
 import rocks.inspectit.oce.eum.server.beacon.Beacon;
 import rocks.inspectit.oce.eum.server.configuration.model.BeaconMetricDefinitionSettings;
 import rocks.inspectit.oce.eum.server.configuration.model.BeaconRequirement;
+import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
 import rocks.inspectit.oce.eum.server.utils.DefaultTags;
 
 import java.util.HashMap;
@@ -20,7 +22,13 @@ import java.util.Map;
  */
 @Component
 @Slf4j
-public class BeaconMetricManager extends AbstractMeasuresAndViewsManager {
+public class BeaconMetricManager {
+
+    @Autowired
+    protected EumServerConfiguration configuration;
+
+    @Autowired
+    private MeasuresAndViewsManager measuresAndViewsManager;
 
     /**
      * Maps metric definitions to expressions.
@@ -31,18 +39,21 @@ public class BeaconMetricManager extends AbstractMeasuresAndViewsManager {
      * Processes boomerang beacon
      *
      * @param beacon The beacon containing arbitrary key-value pairs.
+     * @return whether the beacon has been successfully parsed
      */
-    public void processBeacon(Beacon beacon) {
+    public boolean processBeacon(Beacon beacon) {
         for (Map.Entry<String, BeaconMetricDefinitionSettings> metricDefinitionEntry : configuration.getDefinitions().entrySet()) {
             String metricName = metricDefinitionEntry.getKey();
             BeaconMetricDefinitionSettings metricDefinition = metricDefinitionEntry.getValue();
 
             if (BeaconRequirement.validate(beacon, metricDefinition.getBeaconRequirements())) {
                 recordMetric(metricName, metricDefinition, beacon);
+                return true;
             } else {
                 log.debug("Skipping beacon because requirements are not fulfilled.");
             }
         }
+        return false;
     }
 
     /**
@@ -61,23 +72,23 @@ public class BeaconMetricManager extends AbstractMeasuresAndViewsManager {
             Number value = expression.solve(beacon);
 
             if (value != null) {
-                updateMetrics(metricName, metricDefinition);
-                try (Scope scope = getTagContext(beacon).buildScoped()) {
-                    recordMeasure(metricName, metricDefinition, value);
+                measuresAndViewsManager.updateMetrics(metricName, metricDefinition);
+                try (Scope scope = getTagContextForBeacon(beacon).buildScoped()) {
+                    measuresAndViewsManager.recordMeasure(metricName, metricDefinition, value);
                 }
             }
         }
     }
 
     /**
-     * Builds TagContext
+     * Builds TagContext for a given beacon.
      *
      * @param beacon Used to resolve tag values, which refer to a beacon entry
      */
-    private TagContextBuilder getTagContext(Beacon beacon) {
-        TagContextBuilder tagContextBuilder = super.getTagContext();
+    private TagContextBuilder getTagContextForBeacon(Beacon beacon) {
+        TagContextBuilder tagContextBuilder = measuresAndViewsManager.getTagContext();
 
-        for (Map.Entry<String, String> beaconTag : super.configuration.getTags().getBeacon().entrySet()) {
+        for (Map.Entry<String, String> beaconTag : configuration.getTags().getBeacon().entrySet()) {
             if (beacon.contains(beaconTag.getValue())) {
                 tagContextBuilder.putLocal(TagKey.create(beaconTag.getKey()), TagValue.create(beacon.get(beaconTag.getValue())));
             }
