@@ -21,6 +21,6 @@ public class TagsSettings {
     /**
      * Map of arbitrary user defined tags.
      */
-    private final Map<String, String> extra = new HashMap<>();
+    private Map<String, String> extra = new HashMap<>();
 
 }

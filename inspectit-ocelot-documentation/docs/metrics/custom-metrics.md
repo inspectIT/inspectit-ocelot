@@ -3,7 +3,7 @@ id: custom-metrics
 title: Custom Metrics
 ---
 
-One of the main benefits of inspectIT Ocelot is that it givers you complete
+One of the main benefits of inspectIT Ocelot is that it gives you complete
 freedom in what data you want to capture and how you want to capture it.
 You can easily define custom performance and business metrics depending on your needs.
 

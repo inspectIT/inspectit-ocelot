@@ -6,10 +6,7 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 import rocks.inspectit.ocelot.utils.TestUtils;
@@ -30,26 +27,27 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class HttpOutMetricTest {
 
+    private static final String PATH_200 = "/test";
 
-    public static final int PORT = 9999;
-    public static final String PATH_200 = "/test";
-    public static final String PATH_404 = "/error";
-    public static final String HOST = "localhost:" + PORT; //configured in agent-overwrites.yml
-    public static final String URL_START = "http://" + HOST; //configured in agent-overwrites.yml
+    private static final String PATH_404 = "/error";
 
-    private WireMockServer wireMockServer;
+    private static String WIREMOCK_HOST_PORT;
 
-    public static String targetName;
+    private static String WIREMOCK_URL;
 
-    @BeforeEach
-    void setupWiremock() throws Exception {
-        wireMockServer = new WireMockServer(options().port(PORT));
+    private static WireMockServer wireMockServer;
+
+    @BeforeAll
+    public static void setupWiremock() {
+        wireMockServer = new WireMockServer(options().dynamicPort());
+
         wireMockServer.addMockServiceRequestListener((req, resp) -> {
             InternalInspectitContext ctx = Instances.contextManager.enterNewContext();
-            ctx.setData("prop_target_service", targetName);
+            ctx.setData("prop_target_service", "wiremock_service");
             ctx.makeActive();
             ctx.close();
         });
+
         wireMockServer.start();
         configureFor(wireMockServer.port());
 
@@ -60,10 +58,12 @@ public class HttpOutMetricTest {
                 .willReturn(aResponse()
                         .withStatus(200)));
 
+        WIREMOCK_HOST_PORT = "localhost:" + wireMockServer.port();
+        WIREMOCK_URL = "http://" + WIREMOCK_HOST_PORT;
     }
 
-    @AfterEach
-    void cleanup() {
+    @AfterAll
+    public static void cleanup() {
         wireMockServer.stop();
     }
 
@@ -95,14 +95,14 @@ public class HttpOutMetricTest {
             InternalInspectitContext ctx = Instances.contextManager.enterNewContext();
             ctx.setData("service", "apache_client_test");
             ctx.makeActive();
-            client.execute(new HttpGet(URL_START + PATH_200 + "?x=32423"));
+            client.execute(new HttpGet(WIREMOCK_URL + PATH_200 + "?x=32423"));
             ctx.close();
 
             TestUtils.waitForOpenCensusQueueToBeProcessed();
 
             Map<String, String> tags = new HashMap<>();
             tags.put("service", "apache_client_test");
-            tags.put("http_host", HOST);
+            tags.put("http_host", WIREMOCK_HOST_PORT);
             tags.put("http_path", PATH_200);
             tags.put("http_status", "200");
             tags.put("http_method", "GET");
@@ -119,14 +119,14 @@ public class HttpOutMetricTest {
             InternalInspectitContext ctx = Instances.contextManager.enterNewContext();
             ctx.setData("service", "apache_client_test");
             ctx.makeActive();
-            client.execute(new HttpGet(URL_START + PATH_404 + "?x=32423"));
+            client.execute(new HttpGet(WIREMOCK_URL + PATH_404 + "?x=32423"));
             ctx.close();
 
             TestUtils.waitForOpenCensusQueueToBeProcessed();
 
             Map<String, String> tags = new HashMap<>();
             tags.put("service", "apache_client_test");
-            tags.put("http_host", HOST);
+            tags.put("http_host", WIREMOCK_HOST_PORT);
             tags.put("http_path", PATH_404);
             tags.put("http_status", "404");
             tags.put("http_method", "GET");
@@ -138,12 +138,41 @@ public class HttpOutMetricTest {
             assertThat(respSum).isGreaterThan(0);
         }
 
-    }
 
+        @Test
+        void testExceptionStatus() throws Exception {
+            InternalInspectitContext ctx = Instances.contextManager.enterNewContext();
+            ctx.setData("service", "apache_client_test");
+            ctx.makeActive();
+            Exception caughtException = null;
+            try {
+                HttpGet request = new HttpGet("http://idontexist");
+                request.setConfig(RequestConfig.custom().setConnectTimeout(1000).build());
+                client.execute(request);
+            } catch (Exception e) {
+                caughtException = e;
+            }
+            ctx.close();
+
+            TestUtils.waitForOpenCensusQueueToBeProcessed();
+
+            Map<String, String> tags = new HashMap<>();
+            tags.put("service", "apache_client_test");
+            tags.put("http_host", "idontexist");
+            tags.put("http_path", "");
+            tags.put("http_status", caughtException.getClass().getSimpleName());
+            tags.put("http_method", "GET");
+
+            long cnt = ((AggregationData.CountData) TestUtils.getDataForView("http/out/count", tags)).getCount();
+            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/out/responsetime/sum", tags)).getSum();
+
+            assertThat(cnt).isEqualTo(1);
+            assertThat(respSum).isGreaterThan(0);
+        }
+    }
 
     @Nested
     class HttpUrlConnection {
-
 
         @BeforeEach
         void setupClient() throws Exception {
@@ -156,7 +185,7 @@ public class HttpOutMetricTest {
             ctx.setData("service", "urlconn_client_test");
             ctx.makeActive();
 
-            HttpURLConnection urlConnection = (HttpURLConnection) new URL(URL_START + PATH_200 + "?x=32423").openConnection();
+            HttpURLConnection urlConnection = (HttpURLConnection) new URL(WIREMOCK_URL + PATH_200 + "?x=32423").openConnection();
             urlConnection.getResponseCode();
 
             ctx.close();
@@ -165,7 +194,7 @@ public class HttpOutMetricTest {
 
             Map<String, String> tags = new HashMap<>();
             tags.put("service", "urlconn_client_test");
-            tags.put("http_host", HOST);
+            tags.put("http_host", WIREMOCK_HOST_PORT);
             tags.put("http_path", PATH_200);
             tags.put("http_status", "200");
             tags.put("http_method", "GET");
@@ -183,7 +212,7 @@ public class HttpOutMetricTest {
             ctx.setData("service", "urlconn_client_test");
             ctx.makeActive();
 
-            HttpURLConnection urlConnection = (HttpURLConnection) new URL(URL_START + PATH_404 + "?x=32423").openConnection();
+            HttpURLConnection urlConnection = (HttpURLConnection) new URL(WIREMOCK_URL + PATH_404 + "?x=32423").openConnection();
             urlConnection.getResponseCode();
 
             ctx.close();
@@ -192,7 +221,7 @@ public class HttpOutMetricTest {
 
             Map<String, String> tags = new HashMap<>();
             tags.put("service", "urlconn_client_test");
-            tags.put("http_host", HOST);
+            tags.put("http_host", WIREMOCK_HOST_PORT);
             tags.put("http_path", PATH_404);
             tags.put("http_status", "404");
             tags.put("http_method", "GET");
@@ -204,7 +233,37 @@ public class HttpOutMetricTest {
             assertThat(respSum).isGreaterThan(0);
         }
 
+        @Test
+        void testExceptionStatus() {
+            InternalInspectitContext ctx = Instances.contextManager.enterNewContext();
+            ctx.setData("service", "urlconn_client_test");
+            ctx.makeActive();
+
+            Exception caughtException = null;
+            try {
+                HttpURLConnection urlConnection = (HttpURLConnection) new URL("http://idontexist").openConnection();
+                urlConnection.setConnectTimeout(1000);
+                urlConnection.getResponseCode();
+            } catch (Exception e) {
+                caughtException = e;
+            }
+
+            ctx.close();
+
+            TestUtils.waitForOpenCensusQueueToBeProcessed();
+
+            Map<String, String> tags = new HashMap<>();
+            tags.put("service", "urlconn_client_test");
+            tags.put("http_host", "idontexist");
+            tags.put("http_path", "");
+            tags.put("http_status", caughtException.getClass().getSimpleName());
+            tags.put("http_method", "GET");
+
+            long cnt = ((AggregationData.CountData) TestUtils.getDataForView("http/out/count", tags)).getCount();
+            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/out/responsetime/sum", tags)).getSum();
+
+            assertThat(cnt).isEqualTo(1);
+            assertThat(respSum).isGreaterThan(0);
+        }
     }
-
-
 }

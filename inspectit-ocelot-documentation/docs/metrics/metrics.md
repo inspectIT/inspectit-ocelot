@@ -5,8 +5,8 @@ title: Metrics
 
 This section provides all the information on metrics collection with inspectIT Ocelot.
 
-The inspectIT Ocelot configuration has a master switch for metrics, which can be used to completly disable anything that has to do with metrics collection and exporting.
-Disabling of metrics completly in the agent can be done by setting the `inspectit.metrics.enabled` property to `false`.
+The inspectIT Ocelot configuration has a master switch for metrics, which can be used to completely disable anything that has to do with metrics collection and exporting.
+Disabling of metrics completely in the agent can be done by setting the `inspectit.metrics.enabled` property to `false`.
 This way any default inspectIT setting or anything else defined for metrics collection will be overruled.
 
 If used, the switch makes sure that the inspectIT Ocelot agent:
