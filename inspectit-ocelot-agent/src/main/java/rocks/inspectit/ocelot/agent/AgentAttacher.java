@@ -105,6 +105,8 @@ public class AgentAttacher {
             return "jattach.exe";
         } else if (isMacOS()) {
             return "jattach-macos";
+        } else if (isAlpineLinux()) {
+            return "jattach-alpine";
         } else if (isUnix()) {
             return "jattach";
         } else {
@@ -131,6 +133,13 @@ public class AgentAttacher {
      */
     private static boolean isUnix() {
         return OS.contains("nix") || OS.contains("nux") || OS.indexOf("aix") > 0;
+    }
+
+    /**
+     * Returns whether the underlying operating system is Alpine Linux.
+     */
+    private static boolean isAlpineLinux() {
+        return isUnix() && new File("/etc/alpine-release").exists();
     }
 
     /**

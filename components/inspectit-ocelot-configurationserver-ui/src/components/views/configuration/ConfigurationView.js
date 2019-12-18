@@ -8,10 +8,12 @@ import FileToolbar from './FileToolbar';
 import EditorView from '../../editor/EditorView';
 import yaml from 'js-yaml';
 
+import {enableOcelotAutocompletion} from './OcelotAutocompleter'
+
 /**
  * The header component of the editor view.
  */
-const EditorHeader = ({ icon, path, name }) => (
+const EditorHeader = ({ icon, path, name, isContentModified }) => (
     <>
         <style jsx>{`
         .header {
@@ -28,11 +30,16 @@ const EditorHeader = ({ icon, path, name }) => (
         .path {
             color: #999;
         }
+        .dirtyStateMarker {
+            margin-left: .25rem;
+            color: #999;
+        }
         `}</style>
         <div className="header">
             <i className={"pi " + icon}></i>
             <div className="path">{path}</div>
             <div className="name">{name}</div>
+            {isContentModified && <div className="dirtyStateMarker">*</div>}
         </div>
     </>
 );
@@ -41,27 +48,6 @@ const EditorHeader = ({ icon, path, name }) => (
  * The configuration view component used for managing the agent configurations.
  */
 class ConfigurationView extends React.Component {
-
-    static getDerivedStateFromProps(props, state) {
-        const { selection, fileContent } = props;
-        const { currentSelection, initialValue } = state;
-
-        if (selection != currentSelection || initialValue !== fileContent) {
-            return {
-                currentSelection: selection,
-                initialValue: fileContent,
-                currentValue: fileContent
-            }
-        }
-        return null;
-    }
-
-    state = {
-        initialValue: null,
-        currentValue: null,
-        currentSelection: null,
-        yamlError: null
-    }
 
     parsePath = (fullPath) => {
         if (fullPath) {
@@ -76,34 +62,23 @@ class ConfigurationView extends React.Component {
     }
 
     onSave = () => {
-        const { currentSelection, currentValue } = this.state;
-        this.props.writeFile(currentSelection, currentValue, false);
+        const { selection, fileContent } = this.props;
+        this.props.writeFile(selection, fileContent, false);
     }
 
     onChange = (value) => {
-        this.setState({
-            currentValue: value
-        });
-
-        let errorMessage = null;
-        try {
-            yaml.safeLoad(value);
-        } catch (error) {
-            errorMessage = "YAML cannot be parsed.";
-            if (error.message) {
-                errorMessage = "YAML Syntax Error: " + error.message;
-            }
+        if (!this.props.loading) {
+            this.props.selectedFileContentsChanged(value);
         }
-        this.setState({
-            yamlError: errorMessage
-        });
+    }
+
+    onRefresh = () => {
+        this.props.selectedFileContentsChanged(null);
     }
 
     render() {
-        const { selection, isDirectory, loading } = this.props;
-        const { initialValue, currentValue, yamlError } = this.state;
+        const { selection, isDirectory, loading, isContentModified, fileContent, yamlError } = this.props;
         const showEditor = selection && !isDirectory;
-        const isContentModified = initialValue != currentValue;
 
         const { path, name } = this.parsePath(selection);
         const icon = "pi-" + (isDirectory ? "folder" : "file");
@@ -141,42 +116,62 @@ class ConfigurationView extends React.Component {
                 <div className="treeContainer">
                     <FileToolbar />
                     <FileTree className="fileTree" />
-                    <div className="details">Last update: {this.props.updateDate ? new Date(this.props.updateDate).toLocaleString() : "-"}</div>
+                    <div className="details">Last refresh: {this.props.updateDate ? new Date(this.props.updateDate).toLocaleString() : "-"}</div>
                 </div>
                 <EditorView
                     showEditor={showEditor}
-                    value={currentValue}
+                    value={fileContent}
                     hint={"Select a file to start editing."}
                     onSave={this.onSave}
                     enableButtons={showEditor && !loading}
+                    onCreate={enableOcelotAutocompletion}
                     onChange={this.onChange}
+                    onRefresh={this.onRefresh}
                     canSave={isContentModified && !yamlError}
                     isErrorNotification={true}
                     notificationIcon="pi-exclamation-triangle"
                     notificationText={yamlError}
                     loading={loading}>
-                    {showHeader ? <EditorHeader icon={icon} path={path} name={name} /> : null}
+                    {showHeader ? <EditorHeader icon={icon} path={path} name={name} isContentModified={isContentModified} /> : null}
                 </EditorView>
             </div>
         );
     }
 }
 
+const getYamlError = (content) => {
+    try {
+        yaml.safeLoad(content);
+        return null;
+    } catch (error) {
+        if (error.message) {
+            return "YAML Syntax Error: " + error.message;
+        } else {
+            return "YAML cannot be parsed.";
+        }
+    }
+}
+
 function mapStateToProps(state) {
     const { updateDate, selection, selectedFileContent, pendingRequests } = state.configuration;
+    const unsavedFileContent = selection ? configurationSelectors.getSelectedFileUnsavedContents(state) : null;
+    const fileContent = unsavedFileContent != null ? unsavedFileContent : selectedFileContent;
 
     return {
         updateDate,
         selection,
         isDirectory: configurationSelectors.isSelectionDirectory(state),
-        fileContent: selectedFileContent,
+        isContentModified: unsavedFileContent != null,
+        fileContent,
+        yamlError: getYamlError(fileContent),
         loading: pendingRequests > 0
     }
 }
 
 const mapDispatchToProps = {
     showWarning: notificationActions.showWarningMessage,
-    writeFile: configurationActions.writeFile
+    writeFile: configurationActions.writeFile,
+    selectedFileContentsChanged: configurationActions.selectedFileContentsChanged
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(ConfigurationView);

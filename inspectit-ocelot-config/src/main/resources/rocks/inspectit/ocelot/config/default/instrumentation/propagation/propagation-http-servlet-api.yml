@@ -72,12 +72,9 @@ inspectit:
           servletapi_servlet_service: true
           servletapi_filter_doFilter: true
         post-exit:
-          responseObj:
-            action: get_argument
-            constant-input: {index: 1}
           do_up_propagation:
             action: servlet_api_up_propagation
-            data-input: {response: responseObj}
+            data-input: {response: _arg1}
 
 
       servlet_api_up_propagation_on_servletresponse:
@@ -85,8 +82,6 @@ inspectit:
           servletapi_servletresponse_getWriter: true
           servletapi_servletresponse_getOutputStream: true
         post-entry:
-          responseObj:
-            action: get_this
           do_up_propagation:
             action: servlet_api_up_propagation
-            data-input: {response: responseObj}
+            data-input: {response: _this}

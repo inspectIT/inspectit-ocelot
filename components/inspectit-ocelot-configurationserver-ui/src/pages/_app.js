@@ -7,6 +7,7 @@ import { PersistGate } from 'redux-persist/integration/react'
 import { Provider } from 'react-redux'
 import AuthenticationRouter from '../components/common/AuthenticationRouter';
 import NotificationHandler from '../components/common/NotificationHandler';
+import UnsavedChangesGate from '../components/common/UnsavedChangesGate';
 
 import { BASE_PAGE_TITLE } from '../data/constants'
 import { linkPrefix } from '../lib/configuration';
@@ -37,14 +38,16 @@ class OcelotConfigurationUI extends App {
         <Head>
           <meta charSet="utf-8" />
           <title>{BASE_PAGE_TITLE}</title>
-          <link rel="shortcut icon" type="image/x-icon" href={linkPrefix + "/static/favicon.ico"} />
+          <link rel="shortcut icon" type="image/x-icon" href={linkPrefix + "/favicon.ico"} />
         </Head>
         <Provider store={reduxStore}>
           <PersistGate loading={null} persistor={this.persistor}>
             <NotificationHandler>
-              <AuthenticationRouter>
-                <Component {...pageProps} />
-              </AuthenticationRouter>
+              <UnsavedChangesGate>
+                <AuthenticationRouter>
+                  <Component {...pageProps} />
+                </AuthenticationRouter>
+              </UnsavedChangesGate>
             </NotificationHandler>
           </PersistGate>
         </Provider>

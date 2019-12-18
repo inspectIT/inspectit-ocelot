@@ -1,0 +1,28 @@
+
+inspectit:
+  tracing:
+    log-correlation:
+      trace-id-mdc-injection:
+        enabled: true
+
+      trace-id-auto-injection:
+        enabled: true
+        prefix: "[TraceID: "
+        suffix: "] "
+
+  instrumentation:
+    scopes:
+      LogCorrelationTest-methods:
+        type:
+          name: LogCorrelationTest
+          matcher-mode: ENDS_WITH
+        methods:
+          - name: traced
+
+    rules:
+      LogCorrelationTest-methods:
+        scopes:
+          LogCorrelationTest-methods: true
+        tracing:
+          start-span: true
+          sample-probability: _arg1

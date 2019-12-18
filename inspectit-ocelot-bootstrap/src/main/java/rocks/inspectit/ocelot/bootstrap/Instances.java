@@ -2,6 +2,10 @@ package rocks.inspectit.ocelot.bootstrap;
 
 import rocks.inspectit.ocelot.bootstrap.context.IContextManager;
 import rocks.inspectit.ocelot.bootstrap.context.noop.NoopContextManager;
+import rocks.inspectit.ocelot.bootstrap.correlation.LogTraceCorrelator;
+import rocks.inspectit.ocelot.bootstrap.correlation.TraceIdInjector;
+import rocks.inspectit.ocelot.bootstrap.correlation.noop.NoopLogTraceCorrelator;
+import rocks.inspectit.ocelot.bootstrap.correlation.noop.NoopTraceIdInjector;
 import rocks.inspectit.ocelot.bootstrap.exposed.ObjectAttachments;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.IHookManager;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.noop.NoopHookManager;
@@ -22,9 +26,19 @@ public class Instances {
      */
     public static URL BOOTSTRAP_JAR_URL;
 
+    /**
+     * Contains the URL pointing to the agent-jar file containing with which the target application was started.
+     * The AgentMain class is responsible for setting the value correctly.
+     */
+    public static URL AGENT_JAR_URL;
+
     public static IContextManager contextManager = NoopContextManager.INSTANCE;
 
     public static IHookManager hookManager = NoopHookManager.INSTANCE;
 
     public static ObjectAttachments attachments = NoopObjectAttachments.INSTANCE;
+
+    public static LogTraceCorrelator logTraceCorrelator = NoopLogTraceCorrelator.INSTANCE;
+
+    public static TraceIdInjector traceIdInjector = NoopTraceIdInjector.INSTANCE;
 }

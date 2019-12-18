@@ -27,7 +27,12 @@ const configuration = {
     /** The (abosolute) path of the currently selected file in the configuration file tree. */
     selection: null,
     /** The content of the currently selected file. */
-    selectedFileContent: null
+    selectedFileContent: null,
+    /**
+     * A map of unsaved file changes.
+     * Maps the absolute file path to the files contents.
+     */
+    unsavedFileContents: {/* fileName: fileContents*/ }
 };
 
 const notification = {
@@ -39,7 +44,7 @@ const mappings = {
     /** Specifies how many requests are currently loading in the background */
     pendingRequests: 0,
     /** The current agent mappings. */
-    mappings: null,
+    mappings: [],
     /** The date when the agent mappings have been fetched. */
     updateDate: null
 }

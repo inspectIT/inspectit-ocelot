@@ -198,12 +198,13 @@ public class InstrumentationConfigurationResolver {
         }
     }
 
-    private InstrumentationConfiguration resolveConfiguration(InstrumentationSettings source, MetricsSettings metrics, TracingSettings tracing) {
+    private InstrumentationConfiguration resolveConfiguration(InstrumentationSettings source, MetricsSettings metricsSettings, TracingSettings tracingSettings) {
         val genericActions = genericActionConfigurationResolver.resolveActions(source);
         return InstrumentationConfiguration.builder()
-                .metricsEnabled(metrics.isEnabled())
-                .tracingEnabled(tracing.isEnabled())
-                .defaultTraceSampleProbability(tracing.getSampleProbability())
+                .metricsEnabled(metricsSettings.isEnabled())
+                .tracingEnabled(tracingSettings.isEnabled())
+                .tracingSettings(tracingSettings)
+                .defaultTraceSampleProbability(tracingSettings.getSampleProbability())
                 .source(source)
                 .rules(ruleResolver.resolve(source, genericActions))
                 .dataProperties(resolveDataProperties(source))
@@ -228,6 +229,8 @@ public class InstrumentationConfigurationResolver {
     @VisibleForTesting
     boolean isIgnoredClass(Class<?> clazz, InstrumentationConfiguration config) {
 
+        ClassLoader loader = clazz.getClassLoader();
+
         if (!instrumentation.isModifiableClass(clazz)) {
             return true;
         }
@@ -236,7 +239,11 @@ public class InstrumentationConfigurationResolver {
             return true;
         }
 
-        if (clazz.getClassLoader() == INSPECTIT_CLASSLOADER) {
+        if (loader != null && DoNotInstrumentMarker.class.isAssignableFrom(loader.getClass())) {
+            return true;
+        }
+
+        if (loader == INSPECTIT_CLASSLOADER) {
             return true;
         }
 

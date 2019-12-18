@@ -31,6 +31,23 @@ inspectit:
     # this value can be overridden by the tracing settings of individual instrumentation rules.
     sample-probability: 1.0
 
+    # settings regarding log correlation
+    log-correlation:
+
+      trace-id-mdc-injection:
+        # whether existing trace ids should be injected into the logging framework's MDC
+        enabled: false
+        # the key which is used to store the trace id in the MDC
+        key: "traceid"
+
+      trace-id-auto-injection:
+        # whether the trace id should automatically injected into log statements
+        enabled: false
+        # the prefix to use when injecting a trace id
+        prefix: "[TraceID: "
+        # the suffix to use when injecting a trace id
+        suffix: "]"
+
   # general settings regarding metrics capturing
   metrics:
     # master switch for metrics capturing. When set to false the following happens:

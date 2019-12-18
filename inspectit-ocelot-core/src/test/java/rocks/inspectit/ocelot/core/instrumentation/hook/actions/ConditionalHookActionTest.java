@@ -3,10 +3,11 @@ package rocks.inspectit.ocelot.core.instrumentation.hook.actions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.config.model.instrumentation.actions.ConditionalActionSettings;
+import rocks.inspectit.ocelot.core.instrumentation.hook.VariableAccessor;
+import rocks.inspectit.ocelot.core.instrumentation.hook.VariableAccessorFactory;
 
 import static org.mockito.Mockito.*;
 
@@ -16,8 +17,11 @@ public class ConditionalHookActionTest {
     @Mock
     IHookAction actualAction;
 
-    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    @Mock
     IHookAction.ExecutionContext ctx;
+
+    @Mock
+    VariableAccessorFactory variableAccessorFactory;
 
     @Nested
     class OnlyIfNotNull {
@@ -26,8 +30,8 @@ public class ConditionalHookActionTest {
         void conditionMet() {
             ConditionalActionSettings settings = new ConditionalActionSettings();
             settings.setOnlyIfNotNull("my_data");
-            when(ctx.getInspectitContext().getData(eq("my_data"))).thenReturn("something");
-            IHookAction conditional = ConditionalHookAction.wrapWithConditionChecks(settings, actualAction);
+            when(variableAccessorFactory.getVariableAccessor("my_data")).thenReturn((ctx) -> "something");
+            IHookAction conditional = ConditionalHookAction.wrapWithConditionChecks(settings, actualAction, variableAccessorFactory);
 
             conditional.execute(ctx);
 
@@ -38,8 +42,8 @@ public class ConditionalHookActionTest {
         void conditionNotMet() {
             ConditionalActionSettings settings = new ConditionalActionSettings();
             settings.setOnlyIfNotNull("my_data");
-            when(ctx.getInspectitContext().getData(eq("my_data"))).thenReturn(null);
-            IHookAction conditional = ConditionalHookAction.wrapWithConditionChecks(settings, actualAction);
+            when(variableAccessorFactory.getVariableAccessor("my_data")).thenReturn((ctx) -> null);
+            IHookAction conditional = ConditionalHookAction.wrapWithConditionChecks(settings, actualAction, variableAccessorFactory);
 
             conditional.execute(ctx);
 
@@ -54,8 +58,8 @@ public class ConditionalHookActionTest {
         void conditionMet() {
             ConditionalActionSettings settings = new ConditionalActionSettings();
             settings.setOnlyIfNull("my_data");
-            when(ctx.getInspectitContext().getData(eq("my_data"))).thenReturn(null);
-            IHookAction conditional = ConditionalHookAction.wrapWithConditionChecks(settings, actualAction);
+            when(variableAccessorFactory.getVariableAccessor("my_data")).thenReturn((ctx) -> null);
+            IHookAction conditional = ConditionalHookAction.wrapWithConditionChecks(settings, actualAction, variableAccessorFactory);
 
             conditional.execute(ctx);
 
@@ -66,8 +70,8 @@ public class ConditionalHookActionTest {
         void conditionNotMet() {
             ConditionalActionSettings settings = new ConditionalActionSettings();
             settings.setOnlyIfNull("my_data");
-            when(ctx.getInspectitContext().getData(eq("my_data"))).thenReturn("something");
-            IHookAction conditional = ConditionalHookAction.wrapWithConditionChecks(settings, actualAction);
+            when(variableAccessorFactory.getVariableAccessor("my_data")).thenReturn((ctx) -> "something");
+            IHookAction conditional = ConditionalHookAction.wrapWithConditionChecks(settings, actualAction, variableAccessorFactory);
 
             conditional.execute(ctx);
 
@@ -82,8 +86,8 @@ public class ConditionalHookActionTest {
         void conditionValueIsTrue() {
             ConditionalActionSettings settings = new ConditionalActionSettings();
             settings.setOnlyIfTrue("my_data");
-            when(ctx.getInspectitContext().getData(eq("my_data"))).thenReturn(true);
-            IHookAction conditional = ConditionalHookAction.wrapWithConditionChecks(settings, actualAction);
+            when(variableAccessorFactory.getVariableAccessor("my_data")).thenReturn((ctx) -> true);
+            IHookAction conditional = ConditionalHookAction.wrapWithConditionChecks(settings, actualAction, variableAccessorFactory);
 
             conditional.execute(ctx);
 
@@ -94,8 +98,8 @@ public class ConditionalHookActionTest {
         void conditionValueIsFalse() {
             ConditionalActionSettings settings = new ConditionalActionSettings();
             settings.setOnlyIfTrue("my_data");
-            when(ctx.getInspectitContext().getData(eq("my_data"))).thenReturn(false);
-            IHookAction conditional = ConditionalHookAction.wrapWithConditionChecks(settings, actualAction);
+            when(variableAccessorFactory.getVariableAccessor("my_data")).thenReturn((ctx) -> false);
+            IHookAction conditional = ConditionalHookAction.wrapWithConditionChecks(settings, actualAction, variableAccessorFactory);
 
             conditional.execute(ctx);
 
@@ -106,8 +110,8 @@ public class ConditionalHookActionTest {
         void conditionValueIsNull() {
             ConditionalActionSettings settings = new ConditionalActionSettings();
             settings.setOnlyIfTrue("my_data");
-            when(ctx.getInspectitContext().getData(eq("my_data"))).thenReturn(null);
-            IHookAction conditional = ConditionalHookAction.wrapWithConditionChecks(settings, actualAction);
+            when(variableAccessorFactory.getVariableAccessor("my_data")).thenReturn((ctx) -> null);
+            IHookAction conditional = ConditionalHookAction.wrapWithConditionChecks(settings, actualAction, variableAccessorFactory);
 
             conditional.execute(ctx);
 
@@ -123,8 +127,8 @@ public class ConditionalHookActionTest {
         void conditionValueIsFalse() {
             ConditionalActionSettings settings = new ConditionalActionSettings();
             settings.setOnlyIfFalse("my_data");
-            when(ctx.getInspectitContext().getData(eq("my_data"))).thenReturn(false);
-            IHookAction conditional = ConditionalHookAction.wrapWithConditionChecks(settings, actualAction);
+            when(variableAccessorFactory.getVariableAccessor("my_data")).thenReturn((ctx) -> false);
+            IHookAction conditional = ConditionalHookAction.wrapWithConditionChecks(settings, actualAction, variableAccessorFactory);
 
             conditional.execute(ctx);
 
@@ -135,8 +139,8 @@ public class ConditionalHookActionTest {
         void conditionValueIsTrue() {
             ConditionalActionSettings settings = new ConditionalActionSettings();
             settings.setOnlyIfFalse("my_data");
-            when(ctx.getInspectitContext().getData(eq("my_data"))).thenReturn(true);
-            IHookAction conditional = ConditionalHookAction.wrapWithConditionChecks(settings, actualAction);
+            when(variableAccessorFactory.getVariableAccessor("my_data")).thenReturn((ctx) -> true);
+            IHookAction conditional = ConditionalHookAction.wrapWithConditionChecks(settings, actualAction, variableAccessorFactory);
 
             conditional.execute(ctx);
 
@@ -147,8 +151,8 @@ public class ConditionalHookActionTest {
         void conditionValueIsNull() {
             ConditionalActionSettings settings = new ConditionalActionSettings();
             settings.setOnlyIfFalse("my_data");
-            when(ctx.getInspectitContext().getData(eq("my_data"))).thenReturn(null);
-            IHookAction conditional = ConditionalHookAction.wrapWithConditionChecks(settings, actualAction);
+            when(variableAccessorFactory.getVariableAccessor("my_data")).thenReturn((ctx) -> null);
+            IHookAction conditional = ConditionalHookAction.wrapWithConditionChecks(settings, actualAction, variableAccessorFactory);
 
             conditional.execute(ctx);
 
@@ -165,9 +169,9 @@ public class ConditionalHookActionTest {
             ConditionalActionSettings settings = new ConditionalActionSettings();
             settings.setOnlyIfTrue("true_check");
             settings.setOnlyIfNotNull("not_null_check");
-            lenient().when(ctx.getInspectitContext().getData(eq("true_check"))).thenReturn(true);
-            lenient().when(ctx.getInspectitContext().getData(eq("not_null_check"))).thenReturn("something");
-            IHookAction conditional = ConditionalHookAction.wrapWithConditionChecks(settings, actualAction);
+            doReturn((VariableAccessor) (ctx) -> true).when(variableAccessorFactory).getVariableAccessor("true_check");
+            doReturn((VariableAccessor) (ctx) -> "something").when(variableAccessorFactory).getVariableAccessor("not_null_check");
+            IHookAction conditional = ConditionalHookAction.wrapWithConditionChecks(settings, actualAction, variableAccessorFactory);
 
             conditional.execute(ctx);
 
@@ -180,9 +184,9 @@ public class ConditionalHookActionTest {
             ConditionalActionSettings settings = new ConditionalActionSettings();
             settings.setOnlyIfTrue("true_check");
             settings.setOnlyIfNotNull("not_null_check");
-            lenient().when(ctx.getInspectitContext().getData(eq("true_check"))).thenReturn(false);
-            lenient().when(ctx.getInspectitContext().getData(eq("not_null_check"))).thenReturn("something");
-            IHookAction conditional = ConditionalHookAction.wrapWithConditionChecks(settings, actualAction);
+            doReturn((VariableAccessor) (ctx) -> false).when(variableAccessorFactory).getVariableAccessor("true_check");
+            doReturn((VariableAccessor) (ctx) -> "something").when(variableAccessorFactory).getVariableAccessor("not_null_check");
+            IHookAction conditional = ConditionalHookAction.wrapWithConditionChecks(settings, actualAction, variableAccessorFactory);
 
             conditional.execute(ctx);
 
@@ -195,9 +199,9 @@ public class ConditionalHookActionTest {
             ConditionalActionSettings settings = new ConditionalActionSettings();
             settings.setOnlyIfTrue("true_check");
             settings.setOnlyIfNotNull("not_null_check");
-            lenient().when(ctx.getInspectitContext().getData(eq("true_check"))).thenReturn(false);
-            lenient().when(ctx.getInspectitContext().getData(eq("not_null_check"))).thenReturn(null);
-            IHookAction conditional = ConditionalHookAction.wrapWithConditionChecks(settings, actualAction);
+            doReturn((VariableAccessor) (ctx) -> false).when(variableAccessorFactory).getVariableAccessor("true_check");
+            doReturn((VariableAccessor) (ctx) -> null).when(variableAccessorFactory).getVariableAccessor("not_null_check");
+            IHookAction conditional = ConditionalHookAction.wrapWithConditionChecks(settings, actualAction, variableAccessorFactory);
 
             conditional.execute(ctx);
 

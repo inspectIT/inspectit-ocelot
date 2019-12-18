@@ -60,6 +60,7 @@ public class ScheduledExecutorContextPropagationSensor implements SpecialSensor 
 
         @Advice.OnMethodEnter
         public static void onMethodEnter(@Advice.Argument(value = 0, readOnly = false) Runnable runnable) {
+            runnable = Instances.logTraceCorrelator.wrap(runnable);
             runnable = Instances.contextManager.wrap(runnable);
         }
     }
@@ -75,6 +76,7 @@ public class ScheduledExecutorContextPropagationSensor implements SpecialSensor 
 
         @Advice.OnMethodEnter
         public static void onMethodEnter(@Advice.Argument(value = 0, readOnly = false) Callable callable) {
+            callable = Instances.logTraceCorrelator.wrap(callable);
             callable = Instances.contextManager.wrap(callable);
         }
     }

@@ -13,10 +13,10 @@ When using this authentication mode, users and their credentials will be managed
 
 Administrators can add and modify users via the provided web UI.
 
-In order to use the local user authentication the `inspectit.security.ldap-authentication` property must be set to `false`.
+In order to use the local user authentication the `inspectit-config-server.security.ldap-authentication` property must be set to `false`.
 
 ```YAML
-inspectit:
+inspectit-config-server:
     security:
         ldap-authentication: false
 ```
@@ -27,13 +27,13 @@ The configuration server also supports user authentication via LDAP.
 When using LDAP, users which are added using the *local user authentication* mode will not be available.
 Furthermore, the HTTP APIs which are related to the user management (`/api/v1/users`, `/api/v1/account/password`) cannot be used.
 
-In order to use LDAP for user authentication the `inspectit.security.ldap-authentication` property must be set to `true`.
+In order to use LDAP for user authentication the `inspectit-config-server.security.ldap-authentication` property must be set to `true`.
 
-The LDAP related configuration properties have to be specified using the property `inspectit.security.ldap`.
+The LDAP related configuration properties have to be specified using the property `inspectit-config-server.security.ldap`.
 The following configuration snippet shows an example LDAP configuration (this configuration was created for [this](https://github.com/rroemhild/docker-test-openldap) LDAP server).
 
 ```YAML
-inspectit:
+inspectit-config-server:
     security:
         ldap-authentication: true
         ldap:
@@ -51,7 +51,7 @@ inspectit:
 ### LDAP Configuration Properties
 
 The following tables contains the required LDAP configuration properties including a description for each property.
-Each property is located below the property `inspectit.security.ldap`.
+Each property is located below the property `inspectit-config-server.security.ldap`.
 
 | Property | Note |
 | --- | --- |
@@ -71,7 +71,7 @@ By default, the server will log all authorized and unauthorized access attempts 
 Access logging can be disabled using the following property:
 
 ```YAML
-inspectit:
+inspectit-config-server:
     security:
         access-log: false
 ```

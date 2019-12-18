@@ -27,7 +27,8 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok:1.18.4'
     testImplementation (
             'org.junit.jupiter:junit-jupiter-api:5.3.1',
-            'org.mockito:mockito-junit-jupiter:2.23.0'
+            'org.mockito:mockito-junit-jupiter:2.23.0',
+            'ch.qos.logback:logback-classic:1.1.3',
     )
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
 }
@@ -102,7 +103,13 @@ dependencies {
             'org.eclipse.jetty:jetty-server:9.4.3.v20170317',
             'org.eclipse.jetty:jetty-servlet:9.4.3.v20170317',
             
-            'com.h2database:h2:1.4.199'
+            'com.h2database:h2:1.4.199',
+
+            // for log-correlation tests
+            'org.apache.logging.log4j:log4j-api:2.12.1',
+            'org.apache.logging.log4j:log4j-core:2.12.1',
+            'log4j:log4j:1.2.16'
+
     )
 
     jmh(
@@ -177,7 +184,7 @@ task systemTest {
             doFirst {
                 jvmArgs "-Dinspectit.config.file-based.path=$projectDir/src/system-test/resources/config"  // make inspectIT scan the workdir for configs
                 jvmArgs "-Dinspectit.publishOpenCensusToBootstrap=true"  // make inspectIT push OC to the bootstrap
-                jvmArgs jacoco.asJvmArg + ",inclbootstrapclasses=true"  // JaCoCo agent first + bootstrap instrumentaiton
+                jvmArgs jacoco.asJvmArg + ",inclbootstrapclasses=true"  // JaCoCo agent first + bootstrap instrumentation
                 jvmArgs "-javaagent:${agentJarPath}"  // Our agent second.
                 jacoco.enabled = false  // Don't add the JaCoCo agent again.
             }

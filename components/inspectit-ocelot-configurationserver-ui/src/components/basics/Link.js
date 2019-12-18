@@ -10,7 +10,7 @@
  * 
  * This component is based on the work of dmitriyaa (https://github.com/zeit/next.js/issues/3335#issuecomment-489354854).
  */
-import getConfig from 'next-server/config';
+import getConfig from 'next/config';
 import Link from 'next/link';
 
 const { publicRuntimeConfig } = getConfig();

@@ -13,9 +13,9 @@ commands:
           at: ~/inspectit
   build_and_test_agent:
     steps:
-      - run: cd repo && ./gradlew assemble
-      - run: cd repo && ./gradlew test
-      - run: cd repo && ./gradlew systemTest
+      - run: cd repo && ./gradlew assemble --max-workers=2 --no-daemon
+      - run: cd repo && ./gradlew test --max-workers=2 --no-daemon
+      - run: cd repo && ./gradlew systemTest --max-workers=2 --no-daemon
       - store_test_results:
           path: ~/inspectit/repo/inspectit-ocelot-agent/build/test-results
       - store_test_results:
@@ -26,6 +26,8 @@ commands:
           path: ~/inspectit/repo/components/inspectit-ocelot-configurationserver/build/test-results
       - store_test_results:
           path: ~/inspectit/repo/components/inspectit-ocelot-eum-server/build/test-results
+      - store_artifacts:
+          path: /home/circleci/inspectit/repo/heapdump.bin
 
 # ###############################################################
 # Jobs
@@ -94,6 +96,25 @@ jobs:
     docker:
       - image: adoptopenjdk/openjdk8:latest
 
+  # Ensure inspectit Agent can attach itself on Alpine Linux
+  attach-alpine-jdk8:
+    docker:
+      - image: openjdk:8-jdk-alpine
+    working_directory: ~/inspectit
+    steps:
+      - attach_repo
+      - run: cd repo && ./gradlew assemble --max-workers=2 --no-daemon && cd ..
+      - run:
+          command: |
+            apk update && apk add curl
+            echo "class Dummy{public static void main(String[] args)throws InterruptedException{while (true){Thread.sleep(1000);}}}" > Dummy.java
+            javac Dummy.java
+            $(nohup java Dummy > out.txt &)
+            sleep 2
+            processId=$( ps -e -o pid,comm | grep java | awk {'print $1'} )
+            java -jar ~/inspectit/repo/inspectit-ocelot-agent/build/inspectit-ocelot-agent-SNAPSHOT.jar $processId
+            curl -4 -o /dev/null -s -w "%{http_code}" --connect-timeout 2 --max-time 2  --retry 3 --retry-delay 3 --retry-max-time 10 --retry-connrefuse http://localhost:8888
+
   # Testing the compilation of JMH tests
   jmh-compile:
     docker:
@@ -103,6 +124,7 @@ jobs:
       - attach_workspace:
           at: ~/inspectit
       - run: cd repo && ./gradlew jmhCompile
+
 
   # Building the release artifacts (agent and demo)
   build_release_artifacts:
@@ -117,6 +139,10 @@ jobs:
       - run: cp ~/inspectit/repo/inspectit-ocelot-demo/build/inspectit-ocelot-demo-${CIRCLE_TAG}.zip ~/inspectit/artifacts
       - run: cp ~/inspectit/repo/components/inspectit-ocelot-configurationserver/build/libs/inspectit-ocelot-configurationserver-${CIRCLE_TAG}.jar ~/inspectit/artifacts
       - run: cp ~/inspectit/repo/components/inspectit-ocelot-eum-server/build/libs/inspectit-ocelot-eum-server-${CIRCLE_TAG}.jar ~/inspectit/artifacts
+      - run:
+          name: Calculate checksums of release artifacts
+          working_directory: ~/inspectit/artifacts
+          command: for f in *; do sha256sum "$f" >> inspectit-ocelot-sha256-checksums.txt; done
       - persist_to_workspace:
           root: ~/inspectit
           paths:
@@ -234,7 +260,7 @@ workflows:
       - checkout
       - sys-oracle8-codecov: &requires_checkout
           requires:
-            - checkout
+           - checkout
       - sys-oracle11:
           <<: *requires_checkout
       - sys-openjdk8:
@@ -248,6 +274,8 @@ workflows:
       - sys-adoptjdk8:
           <<: *requires_checkout
       - jmh-compile:
+          <<: *requires_checkout
+      - attach-alpine-jdk8:
           <<: *requires_checkout
 
       - deploy-master-documentation:

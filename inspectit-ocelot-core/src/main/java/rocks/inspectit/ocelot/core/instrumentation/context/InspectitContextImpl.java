@@ -8,6 +8,7 @@ import io.opencensus.trace.SpanContext;
 import io.opencensus.trace.Tracing;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.DataProperties;
 
@@ -63,7 +64,7 @@ import java.util.stream.Stream;
  * previous parent will be registered back in GRPC as active context.
  * <p>
  * In addition, an {@link InspectitContextImpl} instance can be used for tracing. Hereby, one instance can record exactly one span.
- * To do this {@link #enterSpan(String, Span.Kind)} must be called BEFORE {@link #makeActive()}.
+ * To do this {@link #enterSpan(Span)} must be called BEFORE {@link #makeActive()}.
  * The span is automatically finished when {@link #close()} is called.
  */
 @Slf4j
@@ -112,7 +113,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
     /**
      * The span which was (potentially) opened by invoking {@link #enterSpan(Span)}
      */
-    private Scope currentSpanScope;
+    private AutoCloseable currentSpanScope;
 
     /**
      * Holds the tag context which was opened by this context with the call to {@link #makeActive()}.
@@ -228,13 +229,15 @@ public class InspectitContextImpl implements InternalInspectitContext {
      * Note that the span will not be ended when {@link #close()} is called, it still has to be ended manually.
      * MUST BE CALLED BEFORE {@link #makeActive()}!
      * Must only be called at most once per {@link InspectitContextImpl} instance!
+     * <p>
+     * This method also performs log-trace correlation using the {@link rocks.inspectit.ocelot.bootstrap.correlation.LogTraceCorrelator}.
      *
      * @param span the span to enter
      */
     public void enterSpan(Span span) {
         if (currentSpanScope == null) {
             try {
-                currentSpanScope = Tracing.getTracer().withSpan(span);
+                currentSpanScope = Instances.logTraceCorrelator.startCorrelatedSpanScope(() -> Tracing.getTracer().withSpan(span));
             } catch (Throwable t) {
                 log.error("Error activating span", t);
             }
@@ -388,7 +391,11 @@ public class InspectitContextImpl implements InternalInspectitContext {
         Context.current().detach(overriddenGrpcContext);
 
         if (currentSpanScope != null) {
-            currentSpanScope.close();
+            try {
+                currentSpanScope.close();
+            } catch (Throwable e) {
+                log.error("Error closing span scope", e);
+            }
         }
 
         if (parent != null && !isInDifferentThreadThanParentOrIsParentClosed()) {

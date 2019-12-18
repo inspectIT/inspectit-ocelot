@@ -34,7 +34,7 @@ class OnLdapConditionTest {
         @Test
         public void ldapEnabled() {
             when(context.getEnvironment()).thenReturn(environment);
-            when(environment.getProperty("inspectit.security.ldap-authentication", "false")).thenReturn("true");
+            when(environment.getProperty("inspectit-config-server.security.ldap-authentication", "false")).thenReturn("true");
 
             boolean result = condition.matches(context, metadata);
 
@@ -44,7 +44,7 @@ class OnLdapConditionTest {
         @Test
         public void ldapDisabled() {
             when(context.getEnvironment()).thenReturn(environment);
-            when(environment.getProperty("inspectit.security.ldap-authentication", "false")).thenReturn("false");
+            when(environment.getProperty("inspectit-config-server.security.ldap-authentication", "false")).thenReturn("false");
 
             boolean result = condition.matches(context, metadata);
 
@@ -54,7 +54,7 @@ class OnLdapConditionTest {
         @Test
         public void ldapPropertyMissing() {
             when(context.getEnvironment()).thenReturn(environment);
-            when(environment.getProperty("inspectit.security.ldap-authentication", "false")).thenReturn(null);
+            when(environment.getProperty("inspectit-config-server.security.ldap-authentication", "false")).thenReturn(null);
 
             boolean result = condition.matches(context, metadata);
 
