@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.autocomplete;
+package rocks.inspectit.ocelot.autocomplete.autocompleterimpl;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
