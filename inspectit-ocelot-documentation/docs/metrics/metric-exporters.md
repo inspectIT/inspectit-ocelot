@@ -34,7 +34,7 @@ The server is by default started on the port `8888` and metrics can then be acce
 ## OpenCensus Agent Metrics Exporter
 
 Metrics can be additionally exported to the [OpenCensus Agent](https://opencensus.io/service/components/agent/).
-When enabled, all metrics are send via gRCP to the OpenCensus Agent. By default, the exporter is enabled, but the agent address is set to `null`.
+When enabled, all metrics are sent via gRCP to the OpenCensus Agent. By default, the exporter is enabled, but the agent address is set to `null`.
 
 |Property |Default| Description
 |---|---|---|

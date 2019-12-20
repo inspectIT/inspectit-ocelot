@@ -121,7 +121,7 @@ dependencies {
             "commons-io:commons-io:2.6",
             "org.apache.commons:commons-lang3:3.+",
             "org.eclipse.jgit:org.eclipse.jgit:5.4.3.201909031940-r",
-
+            "org.flywaydb:flyway-core",
             "io.opencensus:opencensus-impl:${openCensusVersion}"
     )
     testImplementation(

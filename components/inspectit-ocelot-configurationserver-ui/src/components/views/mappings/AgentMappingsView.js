@@ -1,115 +1,70 @@
 import React from 'react';
-import { connect } from 'react-redux'
-import { mappingsActions, mappingsSelectors } from '../../../redux/ducks/mappings';
-import { notificationActions } from '../../../redux/ducks/notification';
-import yaml from 'js-yaml';
 
-import EditorView from "../../editor/EditorView";
+import MappingsToolbar from './MappingToolbar';
+import MappingsTable from './MappingsTable';
 
-/**
- * The view for managing the agent mappings.
- */
-class AgentMappingsView extends React.Component {
+import EditDialog from './dialogs/EditDialog';
+import DownloadDialog from './dialogs/DownloadDialog';
 
-    componentDidMount() {
-        this.props.fetchMappings();
-    }
+/** View to display and change mappings */
 
-    onSave = (content) => {
-        try {
-            const mappings = yaml.safeLoad(content);
-            this.props.putMappings(mappings, true);
-        } catch (error) {
-            if (error.name && error.name === "YAMLException") {
-                const { message } = error;
-                this.props.showWarning("YAML Syntax Error", "Error: " + message);
-            }
-        }
-    }
+class AgentMappingView extends React.Component {
+  state = {
+    mappingsFilter: '',
+    selectedMapping: null
+  }
 
-    onRefresh = () => {
-        this.props.fetchMappings();
-        this.props.editorContentChanged(null);
-    }
+  handleFilterChange = (newFilter) => this.setState({ mappingsFilter: newFilter });
 
-    render = () => {
-        const { loading, content, yamlError, hasUnsavedChanges } = this.props;
-        return (
-            <>
-                <style jsx>{`
-                .this {
-                    height: 100%;
-                    display: flex;
-                }
-                .header {
-                    font-size: 1rem;
-                    display: flex;
-                    align-items: center;
-                    height: 2rem;
-                }
-                .header :global(.pi) {
-                    font-size: 1.75rem;
-                    color: #aaa;
-                    margin-right: 1rem;
-                }
-                .dirtyStateMarker {
-                    margin-left: .25rem;
-                    color: #999;
-                }
-                `}</style>
-                <div className="this">
-                    <EditorView
-                        value={content}
-                        onSave={this.onSave}
-                        onRefresh={this.onRefresh}
-                        enableButtons={!loading}
-                        onChange={this.props.editorContentChanged}
-                        isErrorNotification={true}
-                        canSave={!yamlError && hasUnsavedChanges}
-                        notificationIcon="pi-exclamation-triangle"
-                        notificationText={yamlError}>
-                        <div className="header">
-                            <i className="pi pi-sitemap"></i>
-                            <div>Agent Mappings</div>
-                            {hasUnsavedChanges && <div className="dirtyStateMarker">*</div>}
-                        </div>
-                    </EditorView>
-                </div>
-            </>
-        );
-    }
-};
+  showEditMappingDialog = (selectedMapping = null) => this.setState({ isEditDialogShown: true, selectedMapping: selectedMapping });
+  hideEditMappingDialog = () => this.setState({ isEditDialogShown: false, selectedMapping: null });
 
-const getYamlError = (content) => {
-    try {
-        yaml.safeLoad(content);
-        return null;
-    } catch (error) {
-        if (error.message) {
-            return "YAML Syntax Error: " + error.message;
-        } else {
-            return "YAML cannot be parsed.";
-        }
-    }
+  showDownloadDialog = () => this.setState({ isDownloadDialogShown: true });
+  hideDownloadDialog = () => this.setState({ isDownloadDialogShown: false });
+
+  render() {
+    const contentHeight = 'calc(100vh - 7rem)';
+    return (
+      <div className='this'>
+        <style jsx>{`
+          .fixed-toolbar{
+            position: fixed;
+            top: 4rem;
+            width: calc(100vw - 4rem);
+          }
+          .content{
+            margin-top: 3rem;
+            height: ${contentHeight};
+            overflow: hidden;
+          }
+        `}</style>
+        <div className='fixed-toolbar'>
+          <MappingsToolbar
+            filterValue={this.state.mappingsFilter}
+            onChangeFilter={this.handleFilterChange}
+            onAddNewMapping={this.showEditMappingDialog}
+            onDownload={this.showDownloadDialog}
+          />
+        </div>
+        <div className='content'>
+          <MappingsTable
+            filterValue={this.state.mappingsFilter}
+            onEditMapping={this.showEditMappingDialog}
+            maxHeight={`calc(${contentHeight} - 2.5em)`}
+          />
+        </div>
+        <EditDialog
+          visible={this.state.isEditDialogShown}
+          onHide={this.hideEditMappingDialog}
+          mapping={this.state.selectedMapping}
+        />
+        <DownloadDialog
+          visible={this.state.isDownloadDialogShown}
+          onHide={this.hideDownloadDialog}
+        />
+      </div>
+    )
+  }
 }
 
-function mapStateToProps(state) {
-    const { pendingRequests, updateDate, editorContent } = state.mappings;
-    let content = editorContent == null ? mappingsSelectors.getMappingsAsYaml(state) : editorContent
-    return {
-        loading: pendingRequests > 0,
-        content,
-        hasUnsavedChanges: editorContent != null,
-        yamlError: getYamlError(content),
-        updateDate
-    }
-}
-
-const mapDispatchToProps = {
-    fetchMappings: mappingsActions.fetchMappings,
-    putMappings: mappingsActions.putMappings,
-    showWarning: notificationActions.showWarningMessage,
-    editorContentChanged: mappingsActions.editorContentChanged
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(AgentMappingsView);
+export default AgentMappingView
