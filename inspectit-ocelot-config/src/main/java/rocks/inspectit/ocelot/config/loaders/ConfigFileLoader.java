@@ -72,7 +72,7 @@ public class ConfigFileLoader {
      * @return An array containing all fallback config files as resource objects.
      */
     public Resource[] getFallBackResources() throws IOException {
-        return getRessources(DEFAULT_CLASSPATH);
+        return getRessources(FALLBACK_CLASSPATH);
     }
 
     /**
