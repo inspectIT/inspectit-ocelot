@@ -2,7 +2,9 @@ package rocks.inspectit.ocelot.config.loaders;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.io.Resource;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
@@ -60,6 +62,40 @@ public class ConfigFileLoaderTest {
             assertThat(output).containsKey(testPath2);
             assertThat(output.get(testPath1)).isEqualTo(testContent1);
             assertThat(output.get(testPath2)).isEqualTo(testContent2);
+        }
+    }
+
+    @Nested
+    public class GetDefaultResources {
+        @Test
+        void getDefaultResource() throws IOException {
+            String filePath1 = "config/default/basics.yml]";
+            filePath1 = filePath1.replace("/", File.separator);
+            String filePath2 = "config/default/subfolder/anotherSubFolder/defaultSubfolder.yml]";
+            filePath2 = filePath2.replace("/", File.separator);
+
+            Resource[] output = ConfigFileLoader.getDefaultResources();
+
+            assertThat(output.length).isEqualTo(2);
+            assertThat(output[0].getDescription()).endsWith(filePath1);
+            assertThat(output[1].getDescription()).endsWith(filePath2);
+        }
+    }
+
+    @Nested
+    public class GetFallbackResources {
+        @Test
+        void getFallbackResource() throws IOException {
+            String filePath1 = "config/fallback/fallback.yml]";
+            filePath1 = filePath1.replace("/", File.separator);
+            String filePath2 = "config/fallback/subfolder/anotherSubFolder/fallbackSubfolder.yml]";
+            filePath2 = filePath2.replace("/", File.separator);
+
+            Resource[] output = ConfigFileLoader.getFallBackResources();
+
+            assertThat(output.length).isEqualTo(2);
+            assertThat(output[0].getDescription()).endsWith(filePath1);
+            assertThat(output[1].getDescription()).endsWith(filePath2);
         }
     }
 }
