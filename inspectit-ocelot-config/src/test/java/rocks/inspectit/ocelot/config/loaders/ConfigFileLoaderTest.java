@@ -18,7 +18,7 @@ public class ConfigFileLoaderTest {
                     "  am:\n" +
                     "    a:\n" +
                     "      basic: test.yml";
-            String testPath2 = "subfolder\\anotherSubFolder\\defaultSubfolder.yml";
+            String testPath2 = "subfolder/anotherSubFolder/defaultSubfolder.yml";
             String testContent2 = "i:\n" +
                     "  am:\n" +
                     "    a:\n" +
@@ -45,7 +45,7 @@ public class ConfigFileLoaderTest {
                     "  am:\n" +
                     "    a:\n" +
                     "      fallback: test.yml";
-            String testPath2 = "subfolder\\anotherSubFolder\\fallbackSubfolder.yml";
+            String testPath2 = "subfolder/anotherSubFolder/fallbackSubfolder.yml";
             String testContent2 = "i:\n" +
                     "  am:\n" +
                     "    a:\n" +
