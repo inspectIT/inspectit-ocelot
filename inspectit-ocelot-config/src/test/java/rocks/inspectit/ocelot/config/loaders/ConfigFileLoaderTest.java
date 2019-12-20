@@ -29,8 +29,8 @@ public class ConfigFileLoaderTest {
             Map<String, String> output = ConfigFileLoader.getDefaultConfigFiles();
 
             assertThat(output.size()).isEqualTo(2);
-            assertThat(output.containsKey(testPath1)).isEqualTo(true);
-            assertThat(output.containsKey(testPath2)).isEqualTo(true);
+            assertThat(output).containsKey(testPath1);
+            assertThat(output).containsKey(testPath2);
             assertThat(output.get(testPath1)).isEqualTo(testContent1);
             assertThat(output.get(testPath2)).isEqualTo(testContent2);
         }
@@ -56,8 +56,8 @@ public class ConfigFileLoaderTest {
             Map<String, String> output = ConfigFileLoader.getFallbackConfigFiles();
 
             assertThat(output.size()).isEqualTo(2);
-            assertThat(output.containsKey(testPath1)).isEqualTo(true);
-            assertThat(output.containsKey(testPath2)).isEqualTo(true);
+            assertThat(output).containsKey(testPath1);
+            assertThat(output).containsKey(testPath2);
             assertThat(output.get(testPath1)).isEqualTo(testContent1);
             assertThat(output.get(testPath2)).isEqualTo(testContent2);
         }
