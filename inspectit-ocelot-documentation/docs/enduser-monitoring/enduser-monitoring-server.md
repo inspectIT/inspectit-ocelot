@@ -277,3 +277,13 @@ inspectit-eum-server:
 
 ## Exporters
 By now, the prometheus exporter is available. If `enabled` is set to true, the exporter is exposes the metrics under the following HTTP endpoint: `http://[host]:[port]/metrics`
+
+## Self-Monitoring
+
+For the purpose of self-monitoring, the EUM server offers a set of metrics that reflect its state.
+These metrics are exposed using its Prometheus endpoint which also is used for the EUM beacon data.
+Currently, the following self monitoring metrics are available.
+
+| Metric name | Description |
+| --- | --- |
+| `beacons_received` | Counts the number of received beacons | 

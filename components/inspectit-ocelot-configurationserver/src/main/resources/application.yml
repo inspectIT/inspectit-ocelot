@@ -10,7 +10,14 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.SQLiteDialect
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
+
+  flyway:
+    url: ${spring.datasource.url}
+    user: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+    baselineOnMigrate: true
+    baselineVersion: 1
 
 server:
   port: 8090

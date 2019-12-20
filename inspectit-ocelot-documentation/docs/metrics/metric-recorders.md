@@ -4,7 +4,7 @@ title: Metrics Recorders
 ---
 
 Metrics recorders are responsible for capturing system metrics, such as processor or memory usage. All metrics recorders provided by inspectIT Ocelot publish the recorded data through the OpenCensus API.
-Therefore all recorded metrics can be exported via any of the  exported via any of the [supported metrics exporters](metrics/metric-exporters).
+Therefore all recorded metrics can be exported via any of the [supported metrics exporters](metrics/metric-exporters).
 Currently the inspectIT Ocelot agent is capable of recording the following metrics:
 
 * [CPU](#cpu-metrics) (usage and number of cores)

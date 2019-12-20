@@ -116,7 +116,7 @@ class ConfigurationView extends React.Component {
                 <div className="treeContainer">
                     <FileToolbar />
                     <FileTree className="fileTree" />
-                    <div className="details">Last update: {this.props.updateDate ? new Date(this.props.updateDate).toLocaleString() : "-"}</div>
+                    <div className="details">Last refresh: {this.props.updateDate ? new Date(this.props.updateDate).toLocaleString() : "-"}</div>
                 </div>
                 <EditorView
                     showEditor={showEditor}

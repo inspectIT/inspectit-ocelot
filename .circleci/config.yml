@@ -107,9 +107,11 @@ jobs:
       - run:
           command: |
             apk update && apk add curl
-            wget -O app.jar https://inspectit.github.io/inspectit-ocelot/resources/ci-test-application-1.0.0.jar
-            $(nohup java -jar app.jar > out.txt &)
-            processId=$(curl -4 --connect-timeout 5 --max-time 10  --retry 5 --retry-delay 3 --retry-max-time 50 --retry-connrefuse http://localhost:7070 2>/dev/null)
+            echo "class Dummy{public static void main(String[] args)throws InterruptedException{while (true){Thread.sleep(1000);}}}" > Dummy.java
+            javac Dummy.java
+            $(nohup java Dummy > out.txt &)
+            sleep 2
+            processId=$( ps -e -o pid,comm | grep java | awk {'print $1'} )
             java -jar ~/inspectit/repo/inspectit-ocelot-agent/build/inspectit-ocelot-agent-SNAPSHOT.jar $processId
             curl -4 -o /dev/null -s -w "%{http_code}" --connect-timeout 2 --max-time 2  --retry 3 --retry-delay 3 --retry-max-time 10 --retry-connrefuse http://localhost:8888
 
@@ -188,7 +190,10 @@ jobs:
       - image: circleci/openjdk:8-jdk
     working_directory: ~/inspectit/repo/inspectit-ocelot-demo/grafana/marketplace
     steps:
-      - run: ~/inspectit/repo/resources/upload-all-dashboards.sh
+      - run:
+          command: |
+            chmod +x ~/inspectit/repo/resources/upload-all-dashboards.sh
+            ~/inspectit/repo/resources/upload-all-dashboards.sh
   # Deploy pre-release documentation
   deploy-master-documentation:
     docker:
