@@ -120,11 +120,11 @@ public class ConfigFileLoader {
      */
     private String getPathOfResource(Resource resource, Resource[] resources) {
         String description = resource.getDescription();
-        description.replace(File.separator, "/");
         if (commonPrefix == null || !resource.getDescription().startsWith(commonPrefix)) {
             setCommonPrefix(resources);
         }
         description = description.replace(commonPrefix, "");
+        description = description.replace(File.separator, "/");
         return description.substring(0, description.length() - 1);
     }
 
