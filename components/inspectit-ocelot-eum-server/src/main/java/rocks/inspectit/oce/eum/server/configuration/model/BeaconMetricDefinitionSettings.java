@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class BeaconMetricDefinition extends MetricDefinitionSettings {
+public class BeaconMetricDefinitionSettings extends MetricDefinitionSettings {
 
     /**
      * The expression to extract a value from a beacon.
@@ -41,16 +41,16 @@ public class BeaconMetricDefinition extends MetricDefinitionSettings {
 
 
     @Builder(builderMethodName = "beaconMetricBuilder")
-    public BeaconMetricDefinition(boolean enabled, @NotBlank String unit, @NotNull MeasureType type, String description,
-                                  Map<@NotBlank String, @Valid @NotNull ViewDefinitionSettings> views, @NotEmpty List<BeaconRequirement> beaconRequirements,
-                                  String valueExpression) {
+    public BeaconMetricDefinitionSettings(boolean enabled, @NotBlank String unit, @NotNull MeasureType type, String description,
+                                          Map<@NotBlank String, @Valid @NotNull ViewDefinitionSettings> views, @NotEmpty List<BeaconRequirement> beaconRequirements,
+                                          String valueExpression) {
         super(enabled, unit, type, description, views);
         this.beaconRequirements = beaconRequirements;
         this.valueExpression = valueExpression;
     }
 
     @Override
-    public BeaconMetricDefinition getCopyWithDefaultsPopulated(String metricName) {
+    public BeaconMetricDefinitionSettings getCopyWithDefaultsPopulated(String metricName) {
         MetricDefinitionSettings metricDefinition = super.getCopyWithDefaultsPopulated(metricName);
 
         return beaconMetricBuilder()

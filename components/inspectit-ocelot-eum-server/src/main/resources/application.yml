@@ -61,12 +61,31 @@ inspectit-eum-server:
       - OS
       - COUNTRY_CODE
 
+  # metrics exporter settings
   exporters:
     metrics:
       prometheus:
         enabled: true
         host: localhost
         port: 8888
+
+  # settings for the EUM server's self-monitoring
+  self-monitoring:
+    # whether self-monitoring is enabled
+    enabled: true
+    # the prefix used for the self-monitoring metrics
+    metricPrefix: "inspectit-eum/self/"
+    # definitions of the self-monitoring metrics
+    metrics:
+      # counts the amount of received EUM beacons
+      beacons_received:
+        measure-type: LONG
+        unit: amount
+        views:
+          '[inspectit-eum/self/beacons_received/COUNT]':
+            aggregation: COUNT
+            tags:
+              is_error: true
 
 # ACTUATOR PROPERTIES
 management:

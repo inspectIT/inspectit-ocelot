@@ -1,7 +1,8 @@
 ---
-id: enduser-monitoring-server
+id: version-0.6-enduser-monitoring-server
 title: End User Monitoring Server
 sidebar_label: EUM Server
+original_id: enduser-monitoring-server
 ---
 This server provides Enduser Monitoring data by using the [OpenCensus](https://github.com/census-instrumentation/opencensus-java) toolkit.
 

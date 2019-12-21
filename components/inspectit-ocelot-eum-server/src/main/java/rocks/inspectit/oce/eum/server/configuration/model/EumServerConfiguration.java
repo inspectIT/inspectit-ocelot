@@ -26,13 +26,19 @@ public class EumServerConfiguration {
      */
     @Valid
     @NotNull
-    private Map<@NotBlank String, @NotNull @Valid BeaconMetricDefinition> definitions = Collections.emptyMap();
+    private Map<@NotBlank String, @NotNull @Valid BeaconMetricDefinitionSettings> definitions = Collections.emptyMap();
 
     /**
      * Map of tags
      */
     @Valid
     private EumTagsSettings tags;
+
+    /**
+     * Self Monitoring
+     */
+    @Valid
+    private EumSelfMonitoringSettings selfMonitoring;
 
     /**
      * The exporters settings
