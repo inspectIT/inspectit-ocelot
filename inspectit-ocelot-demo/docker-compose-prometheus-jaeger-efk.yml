@@ -1,6 +1,6 @@
 ---
 # yamllint disable rule:line-length
-version: '2'
+version: '3'
 services:
   agent:
     image: inspectit/inspectit-ocelot-agent:${INSPECTIT_OCELOT_VERSION}
@@ -184,7 +184,7 @@ services:
       - prometheus
 
   jaeger:
-    image: jaegertracing/all-in-one:1.6
+    image: jaegertracing/all-in-one:1.7
     container_name: jaeger
     ports:
       - 16686:16686
@@ -222,15 +222,15 @@ services:
     expose:
       - 9200
     ports:
-      - "9200:9200"
+      - 9200:9200
     mem_limit: 512M
 
   kibana:
     image: blacktop/kibana
-#   links:
-#     - "elasticsearch"
     ports:
-      - "5601:5601"
+      - 5601:5601
+#   expose:
+#     - 5601
     mem_limit: 128M
     depends_on:
       - elasticsearch
