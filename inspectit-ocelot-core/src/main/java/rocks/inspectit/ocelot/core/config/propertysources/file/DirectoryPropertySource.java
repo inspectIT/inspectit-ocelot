@@ -15,11 +15,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 /**
- * Special Properties source which adds all .properties and .yml/.yaml files form a directory as property sources.
- * No subdirectories are parsed!
+ * Special Properties source which adds all .properties, .json and .yml/.yaml files from a directory and its subdirectories as property sources.
  * The files are parsed in alphabetical order where the configuration from the first found file wins.
  * This is done by adding the DirectoryPropertySource as marker which is followed by all contained files as PropertySources.
  * {@link org.springframework.core.env.CompositePropertySource} was not used as this causes issues with the overwriting of Lists.
@@ -84,7 +84,7 @@ public class DirectoryPropertySource extends EnumerablePropertySource<Void> {
     private List<ChildFilePropertySource> loadContentsToPropertySources() {
         Stream<Path> files;
         try {
-            files = Files.list(rootDir).filter(p -> !p.toFile().isDirectory());
+            files = Files.walk(rootDir).filter(p -> !p.toFile().isDirectory());
         } catch (IOException e) {
             logger.error("Unable to access config dir", e);
             return Collections.emptyList();
@@ -109,7 +109,7 @@ public class DirectoryPropertySource extends EnumerablePropertySource<Void> {
             String name = getCombinedName(file);
             return Optional.of(new ChildFilePropertySource(name, loader.load(new FileSystemResource(file))));
         } catch (Exception e) {
-            logger.error("Unable to load config file " + file.getFileName() + "!", e);
+            logger.error("Unable to load config file " + getRelativePath(file) + "!", e);
             return Optional.empty();
         }
     }
@@ -120,8 +120,14 @@ public class DirectoryPropertySource extends EnumerablePropertySource<Void> {
         return allowedEndings.stream().anyMatch(ending -> filename.endsWith(ending));
     }
 
+    private String getRelativePath(Path file) {
+        return rootDir.relativize(file)
+                .toString()
+                .replaceAll(Pattern.quote("\\"), "/");
+    }
+
     private String getCombinedName(Path file) {
-        return getName() + "/" + file.getFileName();
+        return getName() + "/" + getRelativePath(file);
     }
 
 

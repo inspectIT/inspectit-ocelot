@@ -113,7 +113,7 @@ public class ConfigurationDirectoriesPoller extends DynamicallyActivatableServic
         public void init(DirectoryPropertySource dirToWatch) throws Exception {
             this.dirToWatch = dirToWatch;
             File path = dirToWatch.getRootDir().toFile();
-            observer = new FileAlterationObserver(path, f -> !f.isDirectory());
+            observer = new FileAlterationObserver(path);
             observer.addListener(new FileAlterationListenerAdaptor() {
                 @Override
                 public void onFileCreate(File file) {
