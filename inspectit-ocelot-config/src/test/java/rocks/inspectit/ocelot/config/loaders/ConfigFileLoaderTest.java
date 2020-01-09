@@ -30,7 +30,7 @@ public class ConfigFileLoaderTest {
 
             Map<String, String> output = ConfigFileLoader.getDefaultConfigFiles();
 
-            assertThat(output.size()).isEqualTo(2);
+            assertThat(output).hasSize(2);
             assertThat(output).containsKey(testPath1);
             assertThat(output).containsKey(testPath2);
             assertThat(output.get(testPath1)).isEqualTo(testContent1);
@@ -57,7 +57,7 @@ public class ConfigFileLoaderTest {
 
             Map<String, String> output = ConfigFileLoader.getFallbackConfigFiles();
 
-            assertThat(output.size()).isEqualTo(2);
+            assertThat(output).hasSize(2);
             assertThat(output).containsKey(testPath1);
             assertThat(output).containsKey(testPath2);
             assertThat(output.get(testPath1)).isEqualTo(testContent1);
@@ -76,7 +76,7 @@ public class ConfigFileLoaderTest {
 
             Resource[] output = ConfigFileLoader.getDefaultResources();
 
-            assertThat(output.length).isEqualTo(2);
+            assertThat(output).hasSize(2);
             assertThat(output[0].getDescription()).endsWith(filePath1);
             assertThat(output[1].getDescription()).endsWith(filePath2);
         }
@@ -93,7 +93,7 @@ public class ConfigFileLoaderTest {
 
             Resource[] output = ConfigFileLoader.getFallBackResources();
 
-            assertThat(output.length).isEqualTo(2);
+            assertThat(output).hasSize(2);
             assertThat(output[0].getDescription()).endsWith(filePath1);
             assertThat(output[1].getDescription()).endsWith(filePath2);
         }

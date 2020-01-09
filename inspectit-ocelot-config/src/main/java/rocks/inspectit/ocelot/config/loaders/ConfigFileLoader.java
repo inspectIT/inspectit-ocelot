@@ -10,9 +10,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -35,26 +34,24 @@ public class ConfigFileLoader {
      */
     static final String FALLBACK_CLASSPATH = "classpath:rocks/inspectit/ocelot/config/fallback/**/*.yml";
 
-    private String commonPrefix = null;
-
     /**
      * Returns all files found in the default config path as a key value pair consisting of the path to the file and
-     * it's content.
+     * its content.
      *
      * @return A Map consisting of the paths and the values of all files.
      */
     public Map<String, String> getDefaultConfigFiles() throws IOException {
-        return loadConfig(DEFAULT_CLASSPATH);
+        return loadConfig(getDefaultResources());
     }
 
     /**
      * Returns all files found in the fallback config path as a key value pair consisting of the path to the file and
-     * it's content.
+     * its content.
      *
      * @return A Map consisting of the paths and the values of all files.
      */
     public Map<String, String> getFallbackConfigFiles() throws IOException {
-        return loadConfig(FALLBACK_CLASSPATH);
+        return loadConfig(getFallBackResources());
     }
 
     /**
@@ -76,17 +73,20 @@ public class ConfigFileLoader {
     }
 
     /**
-     * This method loads all default config files present in the resource directory of the config project.
+     * This method loads all config files present in the resource directory of the config project.
      * The files are returned in a map. The keys are the path of the file, and the values are the the file's content.
-     * The path to the file is cleaned. The whole section leading to the /default folder is removed.
+     * The path to the file is cleaned by removing the substring leading to the /default folder.
      *
      * @return A Map containing pairs of file paths and contents, both as String.
      */
-    private HashMap<String, String> loadConfig(String path) throws IOException {
+    private HashMap<String, String> loadConfig(Resource[] resources) throws IOException {
         HashMap<String, String> configMap = new HashMap<>();
-        Resource[] resources = getRessources(path);
+        String commonPrefix = StringUtils.getCommonPrefix(Arrays.stream(resources).map(Resource::getDescription).toArray(String[]::new));
         for (Resource resource : resources) {
-            configMap.put(getPathOfResource(resource, resources), readResourceContent(resource));
+            String resourceDescription = resource.getDescription().substring(commonPrefix.length());
+            resourceDescription = resourceDescription.replace(File.separator, "/")
+                    .substring(0, resourceDescription.length() - 1);
+            configMap.put(resourceDescription, readResourceContent(resource));
         }
         return configMap;
     }
@@ -110,34 +110,5 @@ public class ConfigFileLoader {
     private Resource[] getRessources(String path) throws IOException {
         return new PathMatchingResourcePatternResolver(ConfigFileLoader.class.getClassLoader()).getResources(path);
 
-    }
-
-    /**
-     * Returns the path of a given resource instance.
-     *
-     * @param resource The resource the path should be returned of.
-     * @return The path of the given resource.
-     */
-    private String getPathOfResource(Resource resource, Resource[] resources) {
-        String description = resource.getDescription();
-        if (commonPrefix == null || !resource.getDescription().startsWith(commonPrefix)) {
-            setCommonPrefix(resources);
-        }
-        description = description.replace(commonPrefix, "");
-        description = description.replace(File.separator, "/");
-        return description.substring(0, description.length() - 1);
-    }
-
-    /**
-     * Sets the current common prefix of all resource files.
-     *
-     * @param resources
-     */
-    private void setCommonPrefix(Resource[] resources) {
-        List<String> descriptors = new ArrayList<>();
-        for (Resource resource : resources) {
-            descriptors.add(resource.getDescription());
-        }
-        commonPrefix = StringUtils.getCommonPrefix(descriptors.stream().toArray(String[]::new));
     }
 }
