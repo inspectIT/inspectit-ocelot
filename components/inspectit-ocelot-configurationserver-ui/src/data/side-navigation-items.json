@@ -1,17 +1,26 @@
 [
-    {
-        "name": "Configuration",
-        "icon": "pi-cog",
-        "href": "/configuration"
-    },
-    {
-        "name": "Agent Mappings",
-        "icon": "pi-sitemap",
-        "href": "/mappings"
-    },
-    {
-        "name": "Agent Status",
-        "icon": "pi-list",
-        "href": "/status"
-    }
+  {
+    "name": "Configuration",
+    "icon": "pi-cog",
+    "href": "/configuration",
+    "align": "top"
+  },
+  {
+    "name": "Agent Mappings",
+    "icon": "pi-sitemap",
+    "href": "/mappings",
+    "align": "top"
+  },
+  {
+    "name": "Agent Status",
+    "icon": "pi-list",
+    "href": "/status",
+    "align": "top"
+  },
+  {
+    "name": "User Settings",
+    "icon": "pi-user",
+    "href": "/usersettings",
+    "align": "bottom"
+  }
 ]

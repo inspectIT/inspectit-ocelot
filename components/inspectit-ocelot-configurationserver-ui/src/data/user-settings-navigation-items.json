@@ -1,0 +1,12 @@
+[
+  {
+    "name": "Placeholder",
+    "icon": "pi-user",
+    "href": "/usersettings/placeholder"
+  },
+  {
+    "name": "Placeholder2",
+    "icon": "pi-user",
+    "href": "/usersettings/placeholder2"
+  }
+]
