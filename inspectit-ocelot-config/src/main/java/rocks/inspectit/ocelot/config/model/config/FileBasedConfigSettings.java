@@ -3,6 +3,7 @@ package rocks.inspectit.ocelot.config.model.config;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import org.hibernate.validator.constraints.time.DurationMin;
 
 import java.time.Duration;
 
@@ -34,5 +35,6 @@ public class FileBasedConfigSettings {
      * The frequency at which the target folder should be polled for changes if {@link #watch} is true.
      */
     @NonNull
+    @DurationMin(millis = 1)
     private Duration frequency;
 }

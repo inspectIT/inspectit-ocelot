@@ -11,6 +11,7 @@ import org.springframework.core.io.AbstractResource;
 import org.springframework.core.io.FileSystemResource;
 import rocks.inspectit.ocelot.core.config.util.PropertyUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -123,7 +124,7 @@ public class DirectoryPropertySource extends EnumerablePropertySource<Void> {
     private String getRelativePath(Path file) {
         return rootDir.relativize(file)
                 .toString()
-                .replaceAll(Pattern.quote("\\"), "/");
+                .replace(File.separator, "/");
     }
 
     private String getCombinedName(Path file) {

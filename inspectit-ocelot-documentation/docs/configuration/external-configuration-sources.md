@@ -38,7 +38,7 @@ This is done by specifying the duration `inspectit.config.file-based.frequency`.
 |`inspectit.config.file-based.path`|-|The path to the directory to scan for configuration files. An existing directory must be specified for the file-based configuration to be enabled.|
 |`inspectit.config.file-based.enabled`|`true`|Can be used to disable the file-based configuration while the path is still specified.|
 |`inspectit.config.file-based.watch`|`true`|If `true` the directory will be watched for changes. When changes occur, the configuration is dynamically updated.|
-|`inspectit.config.file-based.frequency`|`5s`|Specifies the frequency at which the configuration directory will be checked for changes. When setting the frequency to zero, no polling is performed.|
+|`inspectit.config.file-based.frequency`|`5s`|Specifies the frequency at which the configuration directory will be checked for changes.|
 
 > You must make sure that the access to your configuration directory is restricted in the same way you would restrict access to your application code or startup script. Otherwise the concept of [actions](instrumentation/rules#actions) of inspectIT Ocelot could make your application prone to code injection!
 

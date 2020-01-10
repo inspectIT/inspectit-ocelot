@@ -44,7 +44,7 @@ public class ConfigurationDirectoriesPoller extends DynamicallyActivatableServic
     @Override
     protected boolean checkEnabledForConfig(InspectitConfig conf) {
         FileBasedConfigSettings fileBased = conf.getConfig().getFileBased();
-        return fileBased.isWatch() && fileBased.getFrequency().toMillis() > 0;
+        return fileBased.isWatch();
     }
 
     @Override
