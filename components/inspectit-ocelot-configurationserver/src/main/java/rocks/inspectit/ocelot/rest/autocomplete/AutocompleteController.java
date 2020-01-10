@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import rocks.inspectit.ocelot.autocomplete.AutoCompleteRequest;
 import rocks.inspectit.ocelot.autocomplete.AutoCompleter;
-import rocks.inspectit.ocelot.autocomplete.util.YamlLoader;
 import rocks.inspectit.ocelot.config.validation.PropertyPathHelper;
 import rocks.inspectit.ocelot.rest.AbstractBaseController;
 
@@ -26,9 +25,6 @@ public class AutocompleteController extends AbstractBaseController {
     @Autowired
     private List<AutoCompleter> completers;
 
-    @Autowired
-    private YamlLoader yamlLoader;
-
     @ApiOperation(value = "String which should be autocompleted")
     @ApiResponse(code = 200, message = "The options which you can enter into the string", examples =
     @Example(value = @ExampleProperty(value = "[\"interfaces\",\n" +
@@ -42,18 +38,6 @@ public class AutocompleteController extends AbstractBaseController {
                 .flatMap(autoCompleter -> autoCompleter.getSuggestions(PropertyPathHelper.parse(request.getPath()))
                         .stream())
                 .collect(Collectors.toList());
-    }
-
-    @ApiOperation(value = "String which should be autocompleted")
-    @ApiResponse(code = 200, message = "The options which you can enter into the string", examples =
-    @Example(value = @ExampleProperty(value = "[\"interfaces\",\n" +
-            "    \"superclass\",\n" +
-            "    \"type\",\n" +
-            "    \"methods\",\n" +
-            "    \"advanced\"]", mediaType = "text/plain")))
-    @PostMapping("/test1")
-    public Object test1() {
-        return yamlLoader.loadDefaultConfig();
     }
 }
 
