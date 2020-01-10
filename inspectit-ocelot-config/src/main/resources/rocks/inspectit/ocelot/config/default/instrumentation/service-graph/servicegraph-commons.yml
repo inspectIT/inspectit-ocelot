@@ -23,20 +23,5 @@ inspectit:
             
   instrumentation:  
     data:
-      #entry marker used in techonlogy specific implementations
-      servicegraph_is_entry: {down-propagation: NONE, is-tag: false}
-      
-      prop_origin_service: {down-propagation: GLOBAL, is-tag: false}
-      prop_target_service: {up-propagation: GLOBAL, down-propagation: JVM_LOCAL, is-tag: false}
-      
-      #we allow the application to be defined at the beginning and to be down propagated from there
-      application: {down-propagation: GLOBAL, is-tag: true}
-
-      protocol: {down-propagation: NONE}
-      target_external: {down-propagation: NONE}
-      target_service: {down-propagation: NONE}
-      origin_external: {down-propagation: NONE}
-      origin_service: {down-propagation: NONE}
-      
-      servicegraph_call_entry: {down-propagation: NONE, is-tag: false}
-      servicegraph_call_duration: {down-propagation: NONE, is-tag: false}
+      prop_origin_service: {down-propagation: GLOBAL}
+      prop_target_service: {up-propagation: GLOBAL, down-propagation: JVM_LOCAL}

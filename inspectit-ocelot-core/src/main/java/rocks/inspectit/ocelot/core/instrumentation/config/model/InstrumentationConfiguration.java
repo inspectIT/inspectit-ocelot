@@ -8,6 +8,7 @@ import rocks.inspectit.ocelot.config.model.instrumentation.InstrumentationSettin
 import rocks.inspectit.ocelot.config.model.metrics.MetricsSettings;
 import rocks.inspectit.ocelot.config.model.tracing.TracingSettings;
 import rocks.inspectit.ocelot.core.instrumentation.config.InstrumentationConfigurationResolver;
+import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;
 
 import java.util.Set;
 
@@ -45,7 +46,7 @@ public class InstrumentationConfiguration {
      */
     private InstrumentationSettings source;
 
-    private DataProperties dataProperties;
+    private PropagationMetaData propagationMetaData;
 
     private TracingSettings tracingSettings;
 

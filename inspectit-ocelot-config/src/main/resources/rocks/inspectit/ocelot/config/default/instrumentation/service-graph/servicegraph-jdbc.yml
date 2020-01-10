@@ -3,7 +3,7 @@ inspectit:
   instrumentation:  
 
     data:
-      servicegraph_jdbc_entry_found: {is-tag: false}
+      servicegraph_jdbc_entry_found: {down-propagation: JVM_LOCAL}
 
     rules:
       servicegraph_record_jdbc_calls:

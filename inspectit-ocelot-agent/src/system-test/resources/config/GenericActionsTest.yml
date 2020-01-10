@@ -1,6 +1,26 @@
 
 inspectit:
   instrumentation:
+
+
+    data:
+      name_via_arg0: {down-propagation: JVM_LOCAL, is-tag: true}
+      name_via_args: {down-propagation: JVM_LOCAL, is-tag: true}
+      name_reversed: {down-propagation: JVM_LOCAL, is-tag: true}
+      name_reversed_upper: {down-propagation: JVM_LOCAL, is-tag: true}
+      name: {down-propagation: JVM_LOCAL, is-tag: true}
+      result: {down-propagation: JVM_LOCAL, is-tag: true}
+      only_if_true_executed: {down-propagation: JVM_LOCAL, is-tag: true}
+      only_if_true_skipped: {down-propagation: JVM_LOCAL, is-tag: true}
+      only_if_true_also_skipped: {down-propagation: JVM_LOCAL, is-tag: true}
+      only_if_false_executed: {down-propagation: JVM_LOCAL, is-tag: true}
+      only_if_false_skipped: {down-propagation: JVM_LOCAL, is-tag: true}
+      only_if_false_also_skipped: {down-propagation: JVM_LOCAL, is-tag: true}
+      only_if_null_executed: {down-propagation: JVM_LOCAL, is-tag: true}
+      only_if_null_skipped: {down-propagation: JVM_LOCAL, is-tag: true}
+      only_if_not_null_executed: {down-propagation: JVM_LOCAL, is-tag: true}
+      only_if_not_null_skipped: {down-propagation: JVM_LOCAL, is-tag: true}
+
     actions:
       #-----------------------GenericActionsTest.verifyArgumentsAccessible ------------------------
       readNameViaArg0:
