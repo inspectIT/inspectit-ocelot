@@ -1,3 +1,4 @@
+---
 version: '2'
 services:
   agent:
@@ -18,7 +19,7 @@ services:
       - ./configuration-server:/configuration-server
     ports:
       - 8090:8090
-      
+
   config-server:
     image: openapm/spring-petclinic-config-server:inspectit-oce-demo
     container_name: config-server
@@ -32,7 +33,7 @@ services:
       - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_PORT=9096
       - INSPECTIT_EXPORTERS_TRACING_ZIPKIN_URL=http://wfproxy:9411/api/v2/spans
     mem_limit: 512M
-    entrypoint: ["sh", "-c","
+    entrypoint: ["sh", "-c", "
       java -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Djava.security.egd=file:/dev/./urandom
       -javaagent:/agent/inspectit-ocelot-agent.jar
       -jar /app.jar"]
@@ -56,7 +57,7 @@ services:
       - agent
       - wfproxy
       - config-server
-    entrypoint: ["sh", "-c","
+    entrypoint: ["sh", "-c", "
       ./dockerize -wait=tcp://config-server:8888 -timeout=120s -- &&
       java -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Djava.security.egd=file:/dev/./urandom
       -javaagent:/agent/inspectit-ocelot-agent.jar
@@ -82,7 +83,7 @@ services:
       - wfproxy
       - config-server
       - discovery-server
-    entrypoint: ["sh", "-c","
+    entrypoint: ["sh", "-c", "
       ./dockerize -wait=tcp://discovery-server:8761 -timeout=120s -- &&
       java -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Djava.security.egd=file:/dev/./urandom
       -javaagent:/agent/inspectit-ocelot-agent.jar
@@ -108,7 +109,7 @@ services:
       - wfproxy
       - config-server
       - discovery-server
-    entrypoint: ["sh", "-c","
+    entrypoint: ["sh", "-c", "
       ./dockerize -wait=tcp://discovery-server:8761 -timeout=120s -- &&
       java -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Djava.security.egd=file:/dev/./urandom
       -javaagent:/agent/inspectit-ocelot-agent.jar
@@ -134,7 +135,7 @@ services:
       - wfproxy
       - config-server
       - discovery-server
-    entrypoint: ["sh", "-c","
+    entrypoint: ["sh", "-c", "
       ./dockerize -wait=tcp://discovery-server:8761 -timeout=120s -- &&
       java -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Djava.security.egd=file:/dev/./urandom
       -javaagent:/agent/inspectit-ocelot-agent.jar
@@ -160,7 +161,7 @@ services:
       - wfproxy
       - config-server
       - discovery-server
-    entrypoint: ["sh", "-c","
+    entrypoint: ["sh", "-c", "
       ./dockerize -wait=tcp://discovery-server:8761 -timeout=120s -- &&
       java -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Djava.security.egd=file:/dev/./urandom
       -javaagent:/agent/inspectit-ocelot-agent.jar
@@ -176,9 +177,9 @@ services:
     container_name: load-generator
 
   wfproxy:
-    image: wavefronthq/proxy:latest 
+    image: wavefronthq/proxy:latest
     container_name: wfproxy
-    environment: 
+    environment:
       - WAVEFRONT_URL=${WAVEFRONT_URL}
       - WAVEFRONT_TOKEN=${WAVEFRONT_TOKEN}
       - "WAVEFRONT_PROXY_ARGS=--traceZipkinListenerPorts 9411"

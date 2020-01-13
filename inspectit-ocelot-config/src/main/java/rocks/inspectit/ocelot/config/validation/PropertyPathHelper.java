@@ -21,7 +21,7 @@ public class PropertyPathHelper {
      * A HashSet of classes which are used as wildcards in the search for properties. If a found class matches one of these
      * classes, the end of the property path is reached. Mainly used in the search of maps
      */
-    private static final HashSet<Class<?>> TERMINAL_TYPES = new HashSet(Arrays.asList(Object.class, String.class, Integer.class, Long.class,
+    private static final HashSet<Class<?>> TERMINAL_TYPES = new HashSet<>(Arrays.asList(Object.class, String.class, Integer.class, Long.class,
             Float.class, Double.class, Character.class, Void.class,
             Boolean.class, Byte.class, Short.class, Duration.class, Path.class, URL.class, FileSystemResource.class));
 

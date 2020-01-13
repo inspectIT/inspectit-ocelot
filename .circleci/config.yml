@@ -190,7 +190,10 @@ jobs:
       - image: circleci/openjdk:8-jdk
     working_directory: ~/inspectit/repo/inspectit-ocelot-demo/grafana/marketplace
     steps:
-      - run: ~/inspectit/repo/resources/upload-all-dashboards.sh
+      - run:
+          command: |
+            chmod +x ~/inspectit/repo/resources/upload-all-dashboards.sh
+            ~/inspectit/repo/resources/upload-all-dashboards.sh
   # Deploy pre-release documentation
   deploy-master-documentation:
     docker:

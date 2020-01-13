@@ -1,3 +1,4 @@
+---
 version: '2'
 services:
   agent:
@@ -6,7 +7,7 @@ services:
     mem_limit: 128M
     volumes:
       - agent-vol:/agent
-      
+
   ocelot-config-server:
     image: inspectit/inspectit-ocelot-configurationserver:${INSPECTIT_OCELOT_VERSION}
     container_name: ocelot-config-server
