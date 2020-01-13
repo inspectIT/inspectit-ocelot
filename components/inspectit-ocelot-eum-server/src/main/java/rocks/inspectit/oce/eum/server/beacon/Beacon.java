@@ -3,6 +3,7 @@ package rocks.inspectit.oce.eum.server.beacon;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * Container for beacons send by the EUM agent.
@@ -22,6 +23,19 @@ public class Beacon {
     }
 
     /**
+     * Merges two {@link Beacon}s. Existing values of beacon1 will be overwritten by values of beacon2.
+     *
+     * @param beacon1 The first Beacon
+     * @param beacon2 The second Beacon
+     * @return A new Beacon instance.
+     */
+    public static Beacon merge(Beacon beacon1, Beacon beacon2) {
+        return Beacon.of(Stream.of(beacon1.map, beacon2.map)
+                .collect(HashMap::new, Map::putAll, Map::putAll)
+        );
+    }
+
+    /**
      * The beacon's property map.
      */
     private Map<String, String> map;
@@ -32,6 +46,27 @@ public class Beacon {
     private Beacon(Map<String, String> map) {
         this.map = Collections.unmodifiableMap(map);
     }
+
+    /**
+     * Merges this beacon with the given map.
+     *
+     * @param beaconMap The map to be added as beacon properties
+     * @return A new {@link Beacon} instance
+     */
+    public Beacon merge(Map<String, String> beaconMap) {
+        return merge(Beacon.of(beaconMap));
+    }
+
+    /**
+     * Merges this beacon with the given one.
+     *
+     * @param beacon The {@link Beacon} to be merged with this one.
+     * @return A new {@link Beacon} instance
+     */
+    public Beacon merge(Beacon beacon) {
+        return Beacon.merge(this, beacon);
+    }
+
 
     /**
      * Checks whether the beacon contains all of the given fields.
@@ -65,4 +100,5 @@ public class Beacon {
     public String get(String fieldKey) {
         return map.get(fieldKey);
     }
+
 }
