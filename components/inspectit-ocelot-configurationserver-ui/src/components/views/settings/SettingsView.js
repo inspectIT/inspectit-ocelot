@@ -1,10 +1,10 @@
 import React from 'react';
-import UserSettingsMenu from './UserSettingsMenu';
+import SettingsMenu from './SettingsMenu';
 
 /**
- * The User Settings View Wrapper, includes the Tab Menu.
+ * The Settings View Wrapper, includes the Tab Menu.
  */
-const UserSettingsView = (props) => {
+const SettingsView = (props) => {
     return (
         <div>
             <style jsx>{`
@@ -14,7 +14,7 @@ const UserSettingsView = (props) => {
                 }
             `}</style>
 
-            <UserSettingsMenu />
+            <SettingsMenu />
 
             <div className='content'>
                 {props.children}
@@ -23,4 +23,4 @@ const UserSettingsView = (props) => {
     )
 }
 
-export default UserSettingsView;
+export default SettingsView;

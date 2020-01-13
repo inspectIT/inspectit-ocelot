@@ -20,7 +20,7 @@
         {
             "name": "Settings",
             "icon": "pi-user",
-            "href": "/usersettings"
+            "href": "/settings"
         }
     ]
 }

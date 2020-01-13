@@ -2,12 +2,12 @@ import React from 'react';
 import { withRouter } from 'next/router';
 import { TabMenu } from 'primereact/tabmenu';
 
-import tabMenuItems from '../../../data/user-settings-navigation-items.json';
+import tabMenuItems from '../../../data/settings-navigation-items.json';
 
 /**
- * The tab menu to switch between different user settings.
+ * The tab menu to switch between different settings.
  */
-class UserSettingsMenu extends React.Component {
+class SettingsMenu extends React.Component {
 
     constructor(props) {
         super(props);
@@ -60,4 +60,4 @@ class UserSettingsMenu extends React.Component {
     }
 }
 
-export default withRouter(UserSettingsMenu);
+export default withRouter(SettingsMenu);
