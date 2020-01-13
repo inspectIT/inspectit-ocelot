@@ -12,6 +12,9 @@ import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
 
 import java.util.Map;
 
+/**
+ * Constructs a {@link PropagationMetaData} instance based on the configuration ({@link InspectitConfig}).
+ */
 @Component
 public class PropagationMetaDataResolver {
 
