@@ -1,16 +1,16 @@
 import { withRouter } from 'next/router';
-import Link from '../basics/Link'
+import Link from '../basics/Link';
 
 /**
  * Component used by the side navigation as items.
  */
 const SideNavigationItem = ({ href, icon, name, router }) => {
-  const isActive = router.pathname.endsWith(href) || router.pathname.includes(href + '/');
+    const isActive = router.pathname.endsWith(href) || router.pathname.includes(href + '/');
 
-  return (
-    <Link className="this" href={href}>
-      <a className={"anchor" + (isActive ? " active" : "")} title={name}>
-        <style jsx>{`
+    return (
+        <Link className="this" href={href}>
+            <a className={"anchor" + (isActive ? " active" : "")} title={name}>
+                <style jsx>{`
           .pi {
               font-size: 2rem;
               color: #bbb;
@@ -28,10 +28,10 @@ const SideNavigationItem = ({ href, icon, name, router }) => {
               border-left: 0.25rem solid #e8a034;
           }
         `}</style>
-        <i className={"pi " + icon} />
-      </a>
-    </Link>
-  )
+                <i className={"pi " + icon} />
+            </a>
+        </Link>
+    )
 }
 
 export default withRouter(SideNavigationItem);
