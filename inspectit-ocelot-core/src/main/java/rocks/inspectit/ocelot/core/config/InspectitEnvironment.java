@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.beans.factory.config.BeanExpressionResolver;
 import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.boot.context.properties.bind.PropertySourcesPlaceholdersResolver;
+import org.springframework.boot.context.properties.source.ConfigurationPropertySources;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.expression.StandardBeanExpressionResolver;
@@ -12,6 +14,7 @@ import org.springframework.core.env.*;
 import org.springframework.core.io.Resource;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import rocks.inspectit.ocelot.config.loaders.ConfigFileLoader;
+import rocks.inspectit.ocelot.config.conversion.InspectitConfigConversionService;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.config.ConfigSettings;
 import rocks.inspectit.ocelot.config.utils.CaseUtils;
@@ -206,7 +209,6 @@ public class InspectitEnvironment extends StandardEnvironment {
             fallbackSources.forEach(ps -> propsList.remove(ps.getName()));
             currentSources.forEach(ps -> propsList.addLast(ps));
 
-
             appliedConfigSettings.ifPresent(currentConfig::setConfig);
         }
     }
@@ -234,7 +236,10 @@ public class InspectitEnvironment extends StandardEnvironment {
     public synchronized <T> Optional<T> loadAndValidateFromProperties(String prefix, Class<T> configClazz) {
         T newConfig;
         try {
-            newConfig = Binder.get(this).bind(prefix, configClazz).get();
+            Binder binder = new Binder(ConfigurationPropertySources.get(this),
+                    new PropertySourcesPlaceholdersResolver(this),
+                    InspectitConfigConversionService.getInstance());
+            newConfig = binder.bind(prefix, configClazz).get();
         } catch (Exception e) {
             log.error("Error loading the configuration '{}'.", prefix, e);
             return Optional.empty();

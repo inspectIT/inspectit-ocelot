@@ -68,7 +68,7 @@ public class PropertyPathHelperTest {
     @Nested
     public class CheckPropertyExists {
         @Test
-        void termminalTest() {
+        void terminalTest() {
             List<String> list = Arrays.asList("config", "file-based", "path");
             Type output = String.class;
 
@@ -76,7 +76,7 @@ public class PropertyPathHelperTest {
         }
 
         @Test
-        void nonTermminalTest() {
+        void nonTerminalTest() {
             List<String> list = Arrays.asList("exporters", "metrics", "prometheus");
             Type output = PrometheusExporterSettings.class;
 

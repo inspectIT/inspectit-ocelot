@@ -2,7 +2,7 @@ package rocks.inspectit.ocelot.core.instrumentation.hook.actions;
 
 import io.opencensus.stats.MeasureMap;
 import io.opencensus.stats.StatsRecorder;
-import org.assertj.core.util.Maps;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -14,8 +14,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.core.instrumentation.hook.VariableAccessor;
 import rocks.inspectit.ocelot.core.metrics.MeasuresAndViewsManager;
 
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -49,7 +50,7 @@ public class MetricsRecorderTest {
 
             when(variableAccess.get(any())).thenReturn(null);
 
-            MetricsRecorder rec = new MetricsRecorder(Collections.emptyMap(), Maps.newHashMap("my_metric", variableAccess), metricsManager, statsRecorder);
+            MetricsRecorder rec = new MetricsRecorder(Collections.singletonList(Pair.of("my_metric", variableAccess)), metricsManager, statsRecorder);
 
             rec.execute(executionContext);
 
@@ -74,11 +75,12 @@ public class MetricsRecorderTest {
             when(dataA.get(any())).thenReturn(100.0);
             when(dataB.get(any())).thenReturn("notanumber");
 
-            HashMap<String, VariableAccessor> metricsToData = new HashMap<>();
-            metricsToData.put("my_metric1", dataA);
-            metricsToData.put("my_metric2", dataB);
+            List<Pair<String, VariableAccessor>> metricsToData = Arrays.asList(
+                    Pair.of("my_metric1", dataA),
+                    Pair.of("my_metric2", dataB)
+            );
 
-            MetricsRecorder rec = new MetricsRecorder(Collections.emptyMap(), metricsToData, metricsManager, statsRecorder);
+            MetricsRecorder rec = new MetricsRecorder(metricsToData, metricsManager, statsRecorder);
 
             rec.execute(executionContext);
 
@@ -89,7 +91,7 @@ public class MetricsRecorderTest {
 
             rec.execute(executionContext);
 
-            verify(dataB).get(any());
+            verify(dataB, times(2)).get(any());
             verify(measureMap, times(2)).record();
             verify(metricsManager, times(2)).tryRecordingMeasurement(any(String.class), same(measureMap), any(Number.class));
             verify(metricsManager, times(2)).tryRecordingMeasurement(eq("my_metric1"), same(measureMap), eq((Number) 100.0d));

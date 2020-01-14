@@ -7,8 +7,10 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import net.bytebuddy.description.method.MethodDescription;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import rocks.inspectit.ocelot.config.model.instrumentation.rules.MetricRecordingSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.RuleTracingSettings;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.ActionCallConfig;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.MethodHookConfiguration;
@@ -24,6 +26,7 @@ import rocks.inspectit.ocelot.core.metrics.MeasuresAndViewsManager;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 /**
  * This class is responsible for translating {@link MethodHookConfiguration}s
@@ -162,10 +165,21 @@ public class MethodHookGenerator {
     }
 
     private Optional<IHookAction> buildMetricsRecorder(MethodHookConfiguration config) {
-        if (!config.getConstantMetrics().isEmpty() || !config.getDataMetrics().isEmpty()) {
-            Map<String, VariableAccessor> dataMetrics = new HashMap<>();
-            config.getDataMetrics().forEach((metric, data) -> dataMetrics.put(metric, variableAccessorFactory.getVariableAccessor(data)));
-            MetricsRecorder recorder = new MetricsRecorder(config.getConstantMetrics(), dataMetrics, metricsManager, statsRecorder);
+        Collection<MetricRecordingSettings> metrics = config.getMetrics();
+        if (!metrics.isEmpty()) {
+            List<Pair<String, VariableAccessor>> metricRecordings = metrics.stream()
+                    .map(metricConfig -> {
+                        String value = metricConfig.getValue();
+                        VariableAccessor valueAccessor;
+                        try {
+                            valueAccessor = variableAccessorFactory.getConstantAccessor(Double.parseDouble(value));
+                        } catch (NumberFormatException e) {
+                            valueAccessor = variableAccessorFactory.getVariableAccessor(value);
+                        }
+                        return Pair.of(metricConfig.getMetric(), valueAccessor);
+                    })
+                    .collect(Collectors.toList());
+            MetricsRecorder recorder = new MetricsRecorder(metricRecordings, metricsManager, statsRecorder);
             return Optional.of(recorder);
         } else {
             return Optional.empty();

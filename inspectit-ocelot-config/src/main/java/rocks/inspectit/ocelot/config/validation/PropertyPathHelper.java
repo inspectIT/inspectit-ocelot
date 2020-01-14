@@ -3,6 +3,7 @@ package rocks.inspectit.ocelot.config.validation;
 import lombok.experimental.UtilityClass;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.io.FileSystemResource;
+import rocks.inspectit.ocelot.config.conversion.InspectitConfigConversionService;
 import rocks.inspectit.ocelot.config.utils.CaseUtils;
 
 import java.beans.PropertyDescriptor;
@@ -113,7 +114,10 @@ public class PropertyPathHelper {
         if (TERMINAL_TYPES.contains(type)) {
             return true;
         } else if (type instanceof Class) {
-            return ((Class<?>) type).isEnum() || ((Class<?>) type).isPrimitive();
+            return ((Class<?>) type).isEnum()
+                    || ((Class<?>) type).isPrimitive()
+                    || InspectitConfigConversionService.getInstance().canConvert(String.class, (Class<?>) type)
+                    || InspectitConfigConversionService.getInstance().canConvert(Number.class, (Class<?>) type);
         }
         return false;
     }
