@@ -73,6 +73,20 @@ public class HttpPropertySourceState {
     private int errorCounter;
 
     /**
+     * Flag indicates that it is the first attempt to write the configuration to file.
+     * See {@link #writePersistenceFile(String)}
+     */
+    private boolean firstFileWriteAttempt = true;
+
+    /**
+     * Flag indicates if first attempt to write configuration to file was successful.
+     * If this resolves to false no further attempts are performed.
+     * See {@link #writePersistenceFile(String)}
+     */
+    @Getter
+    private boolean firstFileWriteAttemptSuccessful = true;
+
+    /**
      * Constructor.
      *
      * @param name            the name used for the property source
@@ -206,7 +220,7 @@ public class HttpPropertySourceState {
     /**
      * Increments the errorCounter and prints ERROR log if the errorCounter is power of two
      *
-     * @param message error message to log
+     * @param message   error message to log
      * @param exception exception that occurred when trying to fetch a configuration
      */
     private void logFetchError(String message, Exception exception) {
@@ -275,17 +289,23 @@ public class HttpPropertySourceState {
      *
      * @param content the content to write to the file (normally the most recent configuration)
      */
-    private void writePersistenceFile(String content) {
-        try {
-            String file = currentSettings.getPersistenceFile();
-            if (!StringUtils.isBlank(file)) {
-                log.debug("Writing HTTP Configuration persistence file '{}'", file);
-                Path path = Paths.get(file);
-                Files.createDirectories(path.getParent());
-                Files.write(path, content.getBytes(StandardCharsets.UTF_8));
+    void writePersistenceFile(String content) {
+        if (firstFileWriteAttemptSuccessful) {
+            try {
+                String file = currentSettings.getPersistenceFile();
+                if (!StringUtils.isBlank(file)) {
+                    log.debug("Writing HTTP Configuration persistence file '{}'", file);
+                    Path path = Paths.get(file);
+                    Files.createDirectories(path.getParent());
+                    Files.write(path, content.getBytes(StandardCharsets.UTF_8));
+                }
+            } catch (Exception e) {
+                if (firstFileWriteAttempt) {
+                    firstFileWriteAttemptSuccessful = false;
+                }
+                log.error("Could not write persistence file for HTTP-configuration.", e);
             }
-        } catch (Exception e) {
-            log.error("Could not write persistence file for HTTP-configuration", e);
+            firstFileWriteAttempt = false;
         }
     }
 
