@@ -25,9 +25,9 @@ public class DirectoryController extends FileBaseController {
     public Collection<FileInfo> listContents(HttpServletRequest request,
 
                                              @ApiParam("If false, only direct children of this directory are returned. Otherwise the entire file tree is returned.")
-                                             @RequestParam(defaultValue = "true") boolean recursive) throws IOException, GitAPIException {
+                                             @RequestParam(defaultValue = "true") boolean recursive) throws IOException {
         String path = RequestUtil.getRequestSubPath(request);
-        return fileManager.listSpecialFiles(path, recursive, true);
+        return configurationFileManager.listFiles(path, recursive, false);
     }
 
 
@@ -36,7 +36,7 @@ public class DirectoryController extends FileBaseController {
     @PutMapping(value = "directories/**")
     public void createNewDirectory(HttpServletRequest request) throws IOException, GitAPIException {
         String path = RequestUtil.getRequestSubPath(request);
-        fileManager.createDirectory(path);
+        configurationFileManager.createDirectory(path);
     }
 
     @ApiOperation(value = "Delete a directory", notes = "Deletes a directory including its contents.")
@@ -44,7 +44,7 @@ public class DirectoryController extends FileBaseController {
     @DeleteMapping(value = "directories/**")
     public void deleteDirectory(HttpServletRequest request) throws IOException, GitAPIException {
         String path = RequestUtil.getRequestSubPath(request);
-        fileManager.deleteDirectory(path);
+        configurationFileManager.deleteDirectory(path);
     }
 
 }

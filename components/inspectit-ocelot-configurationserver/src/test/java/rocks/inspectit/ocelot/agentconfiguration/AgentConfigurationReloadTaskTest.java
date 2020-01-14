@@ -7,7 +7,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.file.FileInfo;
-import rocks.inspectit.ocelot.file.FileManager;
+import rocks.inspectit.ocelot.file.manager.AbstractFileManager;
+import rocks.inspectit.ocelot.file.manager.ConfigurationFileManager;
+import rocks.inspectit.ocelot.file.manager.FileManager;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 
 import java.io.IOException;
@@ -24,7 +26,7 @@ public class AgentConfigurationReloadTaskTest {
     AgentConfigurationReloadTask reloadTask;
 
     @Mock
-    FileManager fileManager;
+    ConfigurationFileManager fileManager;
 
     @Nested
     class LoadConfigForMapping {
@@ -58,7 +60,7 @@ public class AgentConfigurationReloadTaskTest {
         void nonYamlIgnored() throws IOException {
             doReturn(true).when(fileManager).exists(any());
             doReturn(false).when(fileManager).isDirectory(any());
-            doReturn("").when(fileManager).readSpecialFile(any(), anyBoolean());
+            doReturn("").when(fileManager).readFile(any(), anyBoolean());
 
             String result = reloadTask.loadConfigForMapping(
                     AgentMapping.builder()
@@ -69,11 +71,11 @@ public class AgentConfigurationReloadTaskTest {
                             .build());
 
             assertThat(result).isEmpty();
-            verify(fileManager).readSpecialFile("a.yml", true);
-            verify(fileManager).readSpecialFile("b.YmL", true);
-            verify(fileManager).readSpecialFile("c.yaml", true);
+            verify(fileManager).readFile("a.yml", true);
+            verify(fileManager).readFile("b.YmL", true);
+            verify(fileManager).readFile("c.yaml", true);
 
-            verify(fileManager, never()).readSpecialFile("d.txt", true);
+            verify(fileManager, never()).readFile("d.txt", true);
         }
 
 
@@ -114,11 +116,11 @@ public class AgentConfigurationReloadTaskTest {
                             .name("somethingelse")
                             .build()
 
-            )).when(fileManager).listSpecialFiles("folder", true, true);
+            )).when(fileManager).listFiles("folder", true, true);
 
-            doReturn("{ val1: z}").when(fileManager).readSpecialFile("z.yml", true);
-            doReturn("{ val1: a, val2: a}").when(fileManager).readSpecialFile("folder/a.yml", true);
-            doReturn("{ val1: b, val2: b, val3: b}").when(fileManager).readSpecialFile("folder/b.yml", true);
+            doReturn("{ val1: z}").when(fileManager).readFile("z.yml", true);
+            doReturn("{ val1: a, val2: a}").when(fileManager).readFile("folder/a.yml", true);
+            doReturn("{ val1: b, val2: b, val3: b}").when(fileManager).readFile("folder/b.yml", true);
 
 
             String result = reloadTask.loadConfigForMapping(
@@ -129,7 +131,7 @@ public class AgentConfigurationReloadTaskTest {
 
 
             assertThat(result).isEqualTo("{val1: z, val2: a, val3: b}\n");
-            verify(fileManager, never()).readSpecialFile("folder/somethingelse", false);
+            verify(fileManager, never()).readFile("folder/somethingelse", false);
         }
     }
 }

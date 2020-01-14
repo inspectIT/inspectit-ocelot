@@ -8,7 +8,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
-import rocks.inspectit.ocelot.file.FileManager;
+import rocks.inspectit.ocelot.file.manager.AbstractFileManager;
+import rocks.inspectit.ocelot.file.manager.ConfigurationFileManager;
+import rocks.inspectit.ocelot.file.manager.FileManager;
 import rocks.inspectit.ocelot.mappings.AgentMappingManager;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 
@@ -24,7 +26,7 @@ import static org.mockito.Mockito.*;
 public class AgentConfigurationManagerTest {
 
     @Mock
-    FileManager fileManager;
+    ConfigurationFileManager fileManager;
 
     @Mock
     AgentMappingManager mappingManager;
@@ -82,8 +84,8 @@ public class AgentConfigurationManagerTest {
 
             doReturn(true).when(fileManager).exists(any());
             doReturn(false).when(fileManager).isDirectory(any());
-            doReturn("a: test").when(fileManager).readConfigurationFile("test.yml", false);
-            doReturn("a: default").when(fileManager).readConfigurationFile("default.yml", false);
+            doReturn("a: test").when(fileManager).readFile("test.yml", false);
+            doReturn("a: default").when(fileManager).readFile("default.yml", false);
 
             init();
 
@@ -107,7 +109,7 @@ public class AgentConfigurationManagerTest {
 
             doReturn(true).when(fileManager).exists(any());
             doReturn(false).when(fileManager).isDirectory(any());
-            doReturn("a: test").when(fileManager).readConfigurationFile("test.yml", false);
+            doReturn("a: test").when(fileManager).readFile("test.yml", false);
 
             init();
 

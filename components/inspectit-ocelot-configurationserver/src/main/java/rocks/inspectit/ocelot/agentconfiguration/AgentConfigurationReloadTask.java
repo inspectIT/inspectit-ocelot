@@ -3,7 +3,7 @@ package rocks.inspectit.ocelot.agentconfiguration;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
 import org.yaml.snakeyaml.Yaml;
-import rocks.inspectit.ocelot.file.FileManager;
+import rocks.inspectit.ocelot.file.manager.ConfigurationFileManager;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 
 import java.io.IOException;
@@ -37,7 +37,7 @@ class AgentConfigurationReloadTask implements Runnable {
      */
     private Consumer<List<AgentConfiguration>> onLoadCallback;
 
-    private FileManager fileManager;
+    private ConfigurationFileManager configurationFileManager;
 
     private List<AgentMapping> mappingsToLoad;
 
@@ -45,13 +45,13 @@ class AgentConfigurationReloadTask implements Runnable {
      * Creates a new reload task, but does NOT start it.
      * The loading process is done in {@link #run()}.
      *
-     * @param mappingsToLoad the mappings to load the configurations for
-     * @param fileManager    the FileManager used to read the configuration files
-     * @param onLoadCallback invoked when the loading has finished successfully. Will not be invoked if the loading failed or was canceled.
+     * @param mappingsToLoad           the mappings to load the configurations for
+     * @param configurationFileManager the FileManager used to read the configuration files
+     * @param onLoadCallback           invoked when the loading has finished successfully. Will not be invoked if the loading failed or was canceled.
      */
-    public AgentConfigurationReloadTask(List<AgentMapping> mappingsToLoad, FileManager fileManager, Consumer<List<AgentConfiguration>> onLoadCallback) {
+    public AgentConfigurationReloadTask(List<AgentMapping> mappingsToLoad, ConfigurationFileManager configurationFileManager, Consumer<List<AgentConfiguration>> onLoadCallback) {
         this.mappingsToLoad = mappingsToLoad;
-        this.fileManager = fileManager;
+        this.configurationFileManager = configurationFileManager;
         this.onLoadCallback = onLoadCallback;
     }
 
@@ -136,9 +136,9 @@ class AgentConfigurationReloadTask implements Runnable {
         } else {
             cleanedPath = path;
         }
-        if (fileManager.exists(cleanedPath)) {
-            if (fileManager.isDirectory(cleanedPath)) {
-                return fileManager.listSpecialFiles(cleanedPath, true, true).stream()
+        if (configurationFileManager.exists(cleanedPath)) {
+            if (configurationFileManager.isDirectory(cleanedPath)) {
+                return configurationFileManager.listFiles(cleanedPath, true, true).stream()
                         .flatMap(f -> f.getAbsoluteFilePaths(cleanedPath))
                         .filter(HAS_YAML_ENDING)
                         .sorted()
@@ -160,7 +160,7 @@ class AgentConfigurationReloadTask implements Runnable {
      */
     private Object loadAndMergeYaml(Object toMerge, String path) throws IOException {
         Yaml yaml = new Yaml();
-        String src = fileManager.readSpecialFile(path, true);
+        String src = configurationFileManager.readFile(path, true);
         Object loadedYaml = yaml.load(src);
         if (toMerge == null) {
             return loadedYaml;

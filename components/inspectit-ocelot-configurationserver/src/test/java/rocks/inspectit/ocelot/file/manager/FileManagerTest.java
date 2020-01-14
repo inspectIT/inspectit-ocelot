@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.file;
+package rocks.inspectit.ocelot.file.manager;
 
 
 import org.junit.jupiter.api.*;
@@ -34,10 +34,10 @@ public class FileManagerTest {
     private static final Path filesRoot = fmRoot.resolve("files");
 
     private static final Charset ENCODING = StandardCharsets.UTF_8;
-    static final String FILES_SUBFOLDER = "files/configuration";
+    static final String FILES_DIRECTORY = "files/configuration";
 
     @InjectMocks
-    private FileManager fm;
+    private ConfigurationFileManager fm;
 
     @Mock
     private GitDirectoryManager gdm;
@@ -76,13 +76,13 @@ public class FileManagerTest {
         try {
             for (String path : paths) {
                 if (!path.contains("=")) {
-                    Files.createDirectories(fmRoot.resolve(FileManager.FILES_SUBFOLDER).resolve(path));
+                    Files.createDirectories(fmRoot.resolve(AbstractFileManager.FILES_DIRECTORY).resolve(path));
                 } else {
                     String[] splitted = path.split("=");
-                    Path file = fmRoot.resolve(FileManager.FILES_SUBFOLDER).resolve(splitted[0]);
+                    Path file = fmRoot.resolve(AbstractFileManager.FILES_DIRECTORY).resolve(splitted[0]);
                     Files.createDirectories(file.getParent());
                     String content = splitted.length > 1 ? splitted[1] : "";
-                    Files.write(file, content.getBytes(FileManager.ENCODING));
+                    Files.write(file, content.getBytes(AbstractFileManager.ENCODING));
                 }
             }
         } catch (Exception e) {
@@ -111,8 +111,8 @@ public class FileManagerTest {
             setupTestFiles("fileA=", "fileB=something");
             when(gdm.readFile(any())).thenReturn("");
 
-            assertThat(fm.readSpecialFile("fileA", true)).isEqualTo("");
-            assertThat(fm.readSpecialFile("./fileA", true)).isEqualTo("");
+            assertThat(fm.readFile("fileA", true)).isEqualTo("");
+            assertThat(fm.readFile("./fileA", true)).isEqualTo("");
         }
 
         @Test
@@ -120,8 +120,8 @@ public class FileManagerTest {
             setupTestFiles("fileA=", "sub/fileB=something\nsomething else");
             when(gdm.readFile(any())).thenReturn("something\nsomething else");
 
-            assertThat(fm.readSpecialFile("sub/fileB", true)).isEqualTo("something\nsomething else");
-            assertThat(fm.readSpecialFile("./sub/../sub/fileB", true)).isEqualTo("something\nsomething else");
+            assertThat(fm.readFile("sub/fileB", true)).isEqualTo("something\nsomething else");
+            assertThat(fm.readFile("./sub/../sub/fileB", true)).isEqualTo("something\nsomething else");
         }
 
         @Test
@@ -129,8 +129,8 @@ public class FileManagerTest {
             setupTestFiles("fileA=", "fileB=something");
             when(wdm.readFile(any())).thenReturn("");
 
-            assertThat(fm.readSpecialFile("fileA", false)).isEqualTo("");
-            assertThat(fm.readSpecialFile("./fileA", false)).isEqualTo("");
+            assertThat(fm.readFile("fileA", false)).isEqualTo("");
+            assertThat(fm.readFile("./fileA", false)).isEqualTo("");
         }
 
         @Test
@@ -138,8 +138,8 @@ public class FileManagerTest {
             setupTestFiles("fileA=", "sub/fileB=something\nsomething else");
             when(wdm.readFile(any())).thenReturn("something\nsomething else");
 
-            assertThat(fm.readSpecialFile("sub/fileB", false)).isEqualTo("something\nsomething else");
-            assertThat(fm.readSpecialFile("./sub/../sub/fileB", false)).isEqualTo("something\nsomething else");
+            assertThat(fm.readFile("sub/fileB", false)).isEqualTo("something\nsomething else");
+            assertThat(fm.readFile("./sub/../sub/fileB", false)).isEqualTo("something\nsomething else");
         }
     }
 }

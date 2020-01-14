@@ -60,6 +60,9 @@ public class VersionController {
      */
     private Path filesRoot;
 
+    /**
+     * The author used for commits.
+     */
     private GitAuthor author;
 
     @VisibleForTesting
@@ -69,12 +72,13 @@ public class VersionController {
     /**
      * An instance of the local git provided by JGit.
      */
+    @VisibleForTesting
     Git git;
 
     /**
      * An instance of the local repo provided by the instance of the local git.
      */
-    Repository repo;
+    private Repository repo;
 
     /**
      * Sets up the Git repo for usage.
@@ -95,10 +99,10 @@ public class VersionController {
             //Initialise git
             git = Git.init().setDirectory(localPath).call();
             repo = git.getRepository();
-            setAuthor("System", "maintainer@test.de");
+            setAuthor("System", "maintainer@inspectit.rocks");
 
             //If there is no .git folder present, commit all files found in the directory to the local repo.
-            if (isGitRepository()) {
+            if (!isGitRepository()) {
                 log.info("Initially committing files in the directory...");
                 commitAll();
             }
@@ -114,7 +118,7 @@ public class VersionController {
      * @return True: the .git folder was found and thus git has been setup on the file system.
      */
     private boolean isGitRepository() {
-        return Files.exists(getNormalizedPath("git/.git"));
+        return Files.exists(getNormalizedPath(FILES_SUBFOLDER + "/.git"));
     }
 
     /**
@@ -177,104 +181,157 @@ public class VersionController {
         commit(commitCommand);
     }
 
-    /**
-     * Lists all file paths in the last commit which do not start with the given prefix.
-     *
-     * @param path      A path the files should be listed from. Use "" to list all files.
-     * @param recursive If true, the algorithm returns all files recursively.
-     * @return A list of paths which have been updated in the last commit.
-     */
+//    /**
+//     * Lists all file paths in the last commit which do not start with the given prefix.
+//     *
+//     * @param path      A path the files should be listed from. Use "" to list all files.
+//     * @param recursive If true, the algorithm returns all files recursively.
+//     * @return A list of paths which have been updated in the last commit.
+//     */
+//    public List<FileInfo> listFiles(String path, boolean recursive) throws IOException {
+//        if (repo.resolve(Constants.HEAD) == null) {
+//            return Collections.emptyList();
+//        }
+//
+//        listFiles2(path, recursive);
+//
+//        if (!path.endsWith("/")) {
+//            path += "/";
+//        }
+//
+//
+//        TreeWalk treeWalk = getTreeWalk(true);
+//        return createFileInfoList(treeWalk, path, recursive);
+//    }
+//
+//    /**
+//     * Takes a TreeWalk object and creates a list of FileInfo objects.
+//     * If the files should be returned recursively, the TreeWalk object needs to have both recursive and
+//     * postOrderTraversal set to 'true' in order for the function to work as intended.
+//     * For a non-recursive list creation recursive and postOrderTraversal need to be 'false'.
+//     *
+//     * @param treeWalk A treeWalk instance.
+//     * @param path     A path the files should be listed from. Use "" to list all files.
+//     * @return A list of FileInfo Objects.
+//     */
+//    private List<FileInfo> createFileInfoList(TreeWalk treeWalk, String path, boolean recursive) throws IOException {
+//        FileInfo.FileInfoBuilder builder;
+//        List<FileInfo> currentLevelFiles = new ArrayList<>();
+//        List<FileInfo> topLevelFiles = new ArrayList<>();
+//        String[] currentPath;
+//        String currentFolder = "";
+//        while (treeWalk.next()) {
+//            String pathString = treeWalk.getPathString();
+//            if (pathString.startsWith(path)) {
+//                pathString = pathString.replace(path, "");
+//                boolean isDirectory = isDirectory(treeWalk);
+//                currentPath = pathString.split("/");
+//                builder = FileInfo.builder()
+//                        .name(currentPath[currentPath.length - 1])
+//                        .type(isDirectory ? FileInfo.Type.DIRECTORY : FileInfo.Type.FILE);
+//
+//                if ((!currentFolder.equals(getCurrentFolder(currentPath)) || currentPath.length == 1)
+//                        && isDirectory
+//                        && !currentLevelFiles.isEmpty()
+//                        && recursive) {
+//                    builder.children(currentLevelFiles);
+//                    currentLevelFiles = new ArrayList<>();
+//                    currentFolder = getCurrentFolder(currentPath);
+//                }
+//
+//                if (currentPath.length == 1) {
+//                    topLevelFiles.add(builder.build());
+//                    currentFolder = "";
+//                } else {
+//                    currentLevelFiles.add(builder.build());
+//                }
+//            }
+//        }
+//        return topLevelFiles;
+//    }
+
     public List<FileInfo> listFiles(String path, boolean recursive) throws IOException {
         if (repo.resolve(Constants.HEAD) == null) {
             return Collections.emptyList();
         }
-        TreeWalk treeWalk = getTreeWalk(true);
-        StringBuilder builder = new StringBuilder().append(path);
-        if (!path.equals("")) {
-            builder.append("/");
+
+        boolean skipNext = false;
+
+        TreeWalk treeWalk;
+        if (path.length() == 0) {
+            treeWalk = new TreeWalk(repo);
+            treeWalk.addTree(getTree());
+            treeWalk.setRecursive(false);
+        } else {
+            treeWalk = TreeWalk.forPath(repo, path, getTree());
+            skipNext = true;
         }
-        return createFileInfoList(treeWalk, builder.toString(), recursive);
+
+        if (treeWalk == null) {
+            return Collections.emptyList();
+        } else {
+            return collectFiles(treeWalk, recursive, skipNext);
+        }
     }
 
-    /**
-     * Takes a TreeWalk object and creates a list of FileInfo objects.
-     * If the files should be returned recursively, the TreeWalk object needs to have both recursive and
-     * postOrderTraversal set to 'true' in order for the function to work as intendet.
-     * For a non-recursive list creation recursive and postOrderTraversal need to be 'false'.
-     *
-     * @param treeWalk A treeWalk instance.
-     * @param path     A path the files should be listed from. Use "" to list all files.
-     * @return A list of FileInfo Objects.
-     */
-    private List<FileInfo> createFileInfoList(TreeWalk treeWalk, String path, boolean recursive) throws IOException {
-        FileInfo.FileInfoBuilder builder;
-        List<FileInfo> currentLevelFiles = new ArrayList<>();
-        List<FileInfo> topLevelFiles = new ArrayList<>();
-        String[] currentPath;
-        String currentFolder = "";
-        while (treeWalk.next()) {
-            String pathString = treeWalk.getPathString();
-            if (pathString.startsWith(path)) {
-                pathString = pathString.replace(path, "");
-                boolean isDirectory = isDirectory(treeWalk);
-                currentPath = pathString.split("/");
-                builder = FileInfo.builder()
-                        .name(currentPath[currentPath.length - 1])
-                        .type(isDirectory ? FileInfo.Type.DIRECTORY : FileInfo.Type.FILE);
+    private List<FileInfo> collectFiles(TreeWalk treeWalk, boolean recursive, boolean skipNext) throws IOException {
+        List<FileInfo> resultList = new ArrayList<>();
 
-                if ((!currentFolder.equals(getCurrentFolder(currentPath)) || currentPath.length == 1)
-                        && isDirectory
-                        && !currentLevelFiles.isEmpty()
-                        && recursive) {
-                    builder.children(currentLevelFiles);
-                    currentLevelFiles = new ArrayList<>();
-                    currentFolder = getCurrentFolder(currentPath);
-                }
+        while (skipNext || treeWalk.next()) {
+            String name = treeWalk.getNameString();
 
-                if (currentPath.length == 1) {
-                    topLevelFiles.add(builder.build());
-                    currentFolder = "";
-                } else {
-                    currentLevelFiles.add(builder.build());
-                }
+            FileInfo.FileInfoBuilder fileBuilder = FileInfo.builder().name(name);
+
+            if (recursive && treeWalk.isSubtree()) {
+                treeWalk.enterSubtree();
+                List<FileInfo> nestedFiles = collectFiles(treeWalk, true, false);
+
+                fileBuilder
+                        .type(FileInfo.Type.DIRECTORY)
+                        .children(nestedFiles);
+            } else {
+                fileBuilder.type(FileInfo.Type.FILE);
             }
+
+            FileInfo fileInfo = fileBuilder.build();
+            resultList.add(fileInfo);
         }
-        return topLevelFiles;
+
+        return resultList;
     }
 
-    /**
-     * Returns the folder of the last entry of a given String array.
-     * If the array only consists of one element, this element is returned.
-     *
-     * @param currentPath A String array resembling a path.
-     * @return The folder the last element of the path is contained in or if the path contains only one element this very
-     * element.
-     */
-    private String getCurrentFolder(String[] currentPath) {
-        if (currentPath.length == 1) {
-            return currentPath[0];
-        }
-        return currentPath[currentPath.length - 2];
-    }
-
-    /**
-     * Returns true if the given TreeWalks FileMode is a tree.
-     *
-     * @param treeWalk the TreeWalk object to get the file from.
-     * @return The Type of the file. Either File or Directory
-     */
-    @VisibleForTesting
-    boolean isDirectory(TreeWalk treeWalk) {
-        return treeWalk.getFileMode() == FileMode.TREE;
-    }
+//    /**
+//     * Returns the folder of the last entry of a given String array.
+//     * If the array only consists of one element, this element is returned.
+//     *
+//     * @param currentPath A String array resembling a path.
+//     * @return The folder the last element of the path is contained in or if the path contains only one element this very
+//     * element.
+//     */
+//    private String getCurrentFolder(String[] currentPath) {
+//        if (currentPath.length == 1) {
+//            return currentPath[0];
+//        }
+//        return currentPath[currentPath.length - 2];
+//    }
+//
+//    /**
+//     * Returns true if the given TreeWalks FileMode is a tree.
+//     *
+//     * @param treeWalk the TreeWalk object to get the file from.
+//     * @return The Type of the file. Either File or Directory
+//     */
+//    @VisibleForTesting
+//    boolean isDirectory(TreeWalk treeWalk) {
+//        return treeWalk.getFileMode() == FileMode.TREE;
+//    }
 
     /**
      * Returns the TreeWalk Object from the last commit.
      *
      * @return The TreeWalk Object from the current repo.
      */
-    @VisibleForTesting
-    TreeWalk getTreeWalk() throws IOException {
+    private TreeWalk getTreeWalk() throws IOException {
         RevTree tree = getTree();
         TreeWalk treeWalk = new TreeWalk(repo);
         treeWalk.addTree(tree);
@@ -282,23 +339,23 @@ public class VersionController {
         return treeWalk;
     }
 
-    /**
-     * Returns the TreeWalk Object from the last commit.
-     *
-     * @param recursive if true, TreeWalk iterates the RevTree recursively.
-     * @return The TreeWalk Object from the current repo.
-     */
-    @VisibleForTesting
-    TreeWalk getTreeWalk(boolean recursive) throws IOException {
-        RevTree tree = getTree();
-        TreeWalk treeWalk = new TreeWalk(repo);
-        treeWalk.addTree(tree);
-        treeWalk.setRecursive(recursive);
-        if (recursive) {
-            treeWalk.setPostOrderTraversal(true);
-        }
-        return treeWalk;
-    }
+//    /**
+//     * Returns the TreeWalk Object from the last commit.
+//     *
+//     * @param recursive if true, TreeWalk iterates the RevTree recursively.
+//     * @return The TreeWalk Object from the current repo.
+//     */
+//    @VisibleForTesting
+//    TreeWalk getTreeWalk(boolean recursive) throws IOException {
+//        RevTree tree = getTree();
+//        TreeWalk treeWalk = new TreeWalk(repo);
+//        treeWalk.addTree(tree);
+//        treeWalk.setRecursive(recursive);
+//        if (recursive) {
+//            treeWalk.setPostOrderTraversal(true);
+//        }
+//        return treeWalk;
+//    }
 
     /**
      * Returns the TreeWalk Object from the commit with the given id.
@@ -411,8 +468,6 @@ public class VersionController {
             objectId = ObjectId.fromString((String) id);
         } else if (id instanceof ObjectId) {
             objectId = (ObjectId) id;
-        } else {
-            return null;
         }
         return objectId;
     }

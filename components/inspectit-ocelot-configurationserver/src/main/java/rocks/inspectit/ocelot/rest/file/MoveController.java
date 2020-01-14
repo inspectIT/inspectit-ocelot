@@ -21,7 +21,7 @@ public class MoveController extends FileBaseController {
     public void moveFileOrDirectory(@RequestBody FileMoveDescription moveDescription) throws IOException, GitAPIException {
         String source = removeLeadingSlash(moveDescription.getSource());
         String target = removeLeadingSlash(moveDescription.getTarget());
-        fileManager.move(source, target);
+        configurationFileManager.move(source, target);
     }
 
     private String removeLeadingSlash(String path) {

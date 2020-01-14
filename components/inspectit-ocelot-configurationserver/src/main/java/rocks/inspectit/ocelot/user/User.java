@@ -7,6 +7,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import rocks.inspectit.ocelot.security.audit.AuditDetail;
+import rocks.inspectit.ocelot.security.audit.AuditEventListener;
+import rocks.inspectit.ocelot.security.audit.Auditable;
 
 import javax.persistence.*;
 
@@ -18,8 +21,9 @@ import javax.persistence.*;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "users", indexes = @Index(columnList = "username", unique = true))
-public class User {
+@Table(indexes = @Index(columnList = "username", unique = true))
+@EntityListeners(AuditEventListener.class)
+public class User implements Auditable {
 
     @Id
     @GeneratedValue
@@ -51,4 +55,11 @@ public class User {
      */
     @Column(nullable = false)
     private boolean isLdapUser;
+
+    @Override
+    @JsonIgnore
+    public AuditDetail getAuditDetail() {
+        String identifier = "Username:" + getUsername();
+        return new AuditDetail("User", identifier);
+    }
 }

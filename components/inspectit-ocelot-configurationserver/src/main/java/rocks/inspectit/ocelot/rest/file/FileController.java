@@ -35,10 +35,10 @@ public class FileController extends FileBaseController {
                                        @RequestBody(required = false) String content) throws IOException, GitAPIException {
         String path = RequestUtil.getRequestSubPath(request);
         if (raw || content == null) {
-            fileManager.writeConfigurationFile(path, content == null ? "" : content);
+            configurationFileManager.writeFile(path, content == null ? "" : content);
         } else {
             FileData data = objectMapper.readValue(content, FileData.class);
-            fileManager.writeConfigurationFile(path, data.getContent());
+            configurationFileManager.writeFile(path, data.getContent());
         }
     }
 
@@ -57,10 +57,10 @@ public class FileController extends FileBaseController {
                                  @RequestBody(required = false) String content) throws IOException, GitAPIException {
         String path = RequestUtil.getRequestSubPath(request);
         if (raw || content == null) {
-            fileManager.writeSpecialFile(path, content == null ? "" : content);
+            configurationFileManager.writeFile(path, content == null ? "" : content);
         } else {
             FileData data = objectMapper.readValue(content, FileData.class);
-            fileManager.writeSpecialFile(path, data.getContent());
+            configurationFileManager.writeFile(path, data.getContent());
         }
     }
 
@@ -77,7 +77,7 @@ public class FileController extends FileBaseController {
                                         @ApiParam("If true, the response body is not formatted as json and is instead the plain text content of the file.")
                                         @RequestParam(defaultValue = "false") boolean raw) throws IOException {
         String path = RequestUtil.getRequestSubPath(request);
-        String content = fileManager.readConfigurationFile(path, true);
+        String content = configurationFileManager.readFile(path, false);
         if (raw) {
             return content;
         } else {
@@ -98,7 +98,7 @@ public class FileController extends FileBaseController {
                                   @ApiParam("If true, the response body is not formatted as json and is instead the plain text content of the file.")
                                   @RequestParam(defaultValue = "false") boolean raw) throws IOException {
         String path = RequestUtil.getRequestSubPath(request);
-        String content = fileManager.readSpecialFile(path, true);
+        String content = configurationFileManager.readFile(path, true);
         if (raw) {
             return content;
         } else {
@@ -111,6 +111,6 @@ public class FileController extends FileBaseController {
     @DeleteMapping(value = "files/**")
     public void deleteFile(HttpServletRequest request) throws IOException, GitAPIException {
         String path = RequestUtil.getRequestSubPath(request);
-        fileManager.deleteFile(path);
+        configurationFileManager.deleteFile(path);
     }
 }

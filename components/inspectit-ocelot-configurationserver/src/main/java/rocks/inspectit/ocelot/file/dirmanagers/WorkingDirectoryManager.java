@@ -22,11 +22,6 @@ import java.util.stream.Stream;
 public class WorkingDirectoryManager extends DirectoryManager {
 
     /**
-     * The subfolder of the working directory in which all files managed by this class are stored.
-     */
-    private static final String FILES_SUBFOLDER = "files";
-
-    /**
      * The agent mapping subfolder resolved as a path object.
      */
     @VisibleForTesting
@@ -34,7 +29,7 @@ public class WorkingDirectoryManager extends DirectoryManager {
 
     @PostConstruct
     public void init() {
-        workingDirRoot = Paths.get(config.getWorkingDirectory()).resolve(FILES_SUBFOLDER).toAbsolutePath().normalize();
+        workingDirRoot = Paths.get(config.getWorkingDirectory()).toAbsolutePath().normalize();
     }
 
     /**
