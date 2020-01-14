@@ -11,26 +11,19 @@ import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.diff.RawTextComparator;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
-import org.eclipse.jgit.treewalk.TreeWalk;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import rocks.inspectit.ocelot.file.FileInfo;
-import rocks.inspectit.ocelot.file.manager.directory.GitAuthor;
-import rocks.inspectit.ocelot.file.manager.directory.VersioningManager;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -55,7 +48,8 @@ public class VersioningManagerTest {
     private GitAuthor author;
 
     @Nested
-    public class CommitAllChanges {
+    public class Commit {
+
         @Test
         void testCommit() throws GitAPIException {
             AddCommand mockAddCommand = mock(AddCommand.class, Answers.RETURNS_SELF);
@@ -65,7 +59,7 @@ public class VersioningManagerTest {
             when(author.getName()).thenReturn("test");
             when(author.getMail()).thenReturn("test");
 
-            versionController.commitAll();
+            versionController.commit();
 
             verify(git).add();
             verify(mockAddCommand).addFilepattern(".");
@@ -91,7 +85,7 @@ public class VersioningManagerTest {
             when(author.getMail()).thenReturn("test");
 
             assertThatExceptionOfType(GitAPIException.class)
-                    .isThrownBy(() -> versionController.commitAll());
+                    .isThrownBy(() -> versionController.commit());
 
             verify(git).add();
             verify(mockAddCommand).addFilepattern(".");
@@ -109,8 +103,9 @@ public class VersioningManagerTest {
 
     @Nested
     public class CommitFile {
+
         @Test
-        void singleFileCommit() throws GitAPIException, IOException {
+        void singleFileCommit() throws GitAPIException {
             AddCommand mockAddCommand = mock(AddCommand.class, Answers.RETURNS_SELF);
             when(git.add()).thenReturn(mockAddCommand);
             CommitCommand mockCommitCommand = mock(CommitCommand.class, Answers.RETURNS_SELF);
@@ -121,7 +116,6 @@ public class VersioningManagerTest {
             when(author.getMail()).thenReturn("test");
 
             mockedController.commitFile("configuration/a");
-            versionController.listFiles("", true);
 
             verify(mockAddCommand).addFilepattern(".");
             verify(mockAddCommand).call();
@@ -136,216 +130,8 @@ public class VersioningManagerTest {
     }
 
     @Nested
-    public class ListFiles {
-        @Test
-        void testListConfigOnly() throws IOException {
-            TreeWalk mockTreeWalk = mock(TreeWalk.class);
-            when(mockTreeWalk.next()).thenReturn(true, false);
-            when(mockTreeWalk.getPathString()).thenReturn("testFile");
-            VersioningManager spyVersionController = Mockito.spy(versionController);
-            doReturn(mockTreeWalk)
-                    .when(spyVersionController)
-                    .getTreeWalk();
-            ObjectId mockId = mock(ObjectId.class);
-            when(repo.resolve(Constants.HEAD)).thenReturn(mockId);
-
-            spyVersionController.listFiles("", true);
-
-            verify(repo).resolve(Constants.HEAD);
-            verify(spyVersionController).getTreeWalk();
-            verify(mockTreeWalk, times(2)).next();
-            verify(mockTreeWalk).getFileMode();
-            verifyNoMoreInteractions(mockTreeWalk, repo, git);
-        }
-
-        @Test
-        void emptyHead() throws IOException {
-            when(repo.resolve(Constants.HEAD)).thenReturn(null);
-
-            Object output = versionController.listFiles("", true);
-
-            assertThat(output).isEqualTo(Collections.emptyList());
-            verify(repo).resolve(Constants.HEAD);
-            verifyNoMoreInteractions(repo);
-        }
-
-        @Test
-        void listDirRecursive() throws IOException {
-            TreeWalk mockWalk = mock(TreeWalk.class);
-            when(mockWalk.getPathString()).thenReturn("testFolder/testFile", "testFolder", "anotherTestFile");
-            when(mockWalk.next()).thenReturn(true, true, true, false);
-            ObjectId mockId = mock(ObjectId.class);
-            when(repo.resolve(any())).thenReturn(mockId);
-            VersioningManager spyController = spy(versionController);
-            doReturn(mockWalk).when(spyController).getTreeWalk();
-
-            List<FileInfo> output = spyController.listFiles("", true);
-
-            FileInfo testFileInfo = FileInfo.builder().name("testFile").type(FileInfo.Type.FILE).build();
-            List<FileInfo> children = new ArrayList<>();
-            children.add(testFileInfo);
-            FileInfo testFolderInfo = FileInfo.builder()
-                    .name("testFolder")
-                    .type(FileInfo.Type.DIRECTORY)
-                    .children(children)
-                    .build();
-            FileInfo anotherTestFileInfo = FileInfo.builder().name("anotherTestFile").type(FileInfo.Type.FILE).build();
-            List<FileInfo> expected = new ArrayList<>();
-            expected.add(testFolderInfo);
-            expected.add(anotherTestFileInfo);
-            assertThat(expected).isEqualTo(output);
-        }
-
-        @Test
-        void listDirNonRecursive() throws IOException {
-            TreeWalk mockWalk = mock(TreeWalk.class);
-            when(mockWalk.getPathString()).thenReturn("testFile", "testFolder", "anotherTestFile");
-            when(mockWalk.next()).thenReturn(true, true, true, false);
-            ObjectId mockId = mock(ObjectId.class);
-            when(repo.resolve(any())).thenReturn(mockId);
-            VersioningManager spyController = spy(versionController);
-            doReturn(mockWalk).when(spyController).getTreeWalk();
-
-            List<FileInfo> output = spyController.listFiles("", true);
-
-            FileInfo testFileInfo = FileInfo.builder().name("testFile").type(FileInfo.Type.FILE).build();
-            FileInfo testFolderInfo = FileInfo.builder()
-                    .name("testFolder")
-                    .type(FileInfo.Type.DIRECTORY)
-                    .build();
-            FileInfo anotherTestFileInfo = FileInfo.builder().name("anotherTestFile").type(FileInfo.Type.FILE).build();
-            List<FileInfo> expected = new ArrayList<>();
-            expected.add(testFileInfo);
-            expected.add(testFolderInfo);
-            expected.add(anotherTestFileInfo);
-            assertThat(expected).isEqualTo(output);
-        }
-
-        @Test
-        void listDirRecursiveWithPath() throws IOException {
-            TreeWalk mockWalk = mock(TreeWalk.class);
-            when(mockWalk.getPathString()).thenReturn("testFolder/testFile", "testFolder", "anotherTestFile");
-            when(mockWalk.next()).thenReturn(true, true, true, false);
-            ObjectId mockId = mock(ObjectId.class);
-            when(repo.resolve(any())).thenReturn(mockId);
-            VersioningManager spyController = spy(versionController);
-            doReturn(mockWalk).when(spyController).getTreeWalk();
-
-            List<FileInfo> output = spyController.listFiles("testFolder", true);
-
-            FileInfo testFileInfo = FileInfo.builder().name("testFile").type(FileInfo.Type.FILE).build();
-            List<FileInfo> expected = new ArrayList<>();
-            expected.add(testFileInfo);
-            assertThat(expected).isEqualTo(output);
-        }
-
-        @Test
-        void listDirNonRecursiveWithPath() throws IOException {
-            TreeWalk mockWalk = mock(TreeWalk.class);
-            when(mockWalk.getPathString()).thenReturn("test/testFile", "testFile", "anotherTestFile");
-            when(mockWalk.next()).thenReturn(true, true, true, false);
-            ObjectId mockId = mock(ObjectId.class);
-            when(repo.resolve(any())).thenReturn(mockId);
-            VersioningManager spyController = spy(versionController);
-            doReturn(mockWalk).when(spyController).getTreeWalk();
-
-            List<FileInfo> output = spyController.listFiles("test", true);
-
-            FileInfo testFileInfo = FileInfo.builder().name("testFile").type(FileInfo.Type.FILE).build();
-            List<FileInfo> expected = new ArrayList<>();
-            expected.add(testFileInfo);
-            assertThat(expected).isEqualTo(output);
-        }
-    }
-
-    @Nested
-    public class ReadFile {
-        @Test
-        void readExistingFile() throws IOException {
-            ObjectId mockId = mock(ObjectId.class);
-            when(repo.resolve(Constants.HEAD)).thenReturn(mockId);
-            VersioningManager spyVersionController = spy(versionController);
-            doReturn(mockId)
-                    .when(spyVersionController)
-                    .resolveCommitId(any());
-            TreeWalk mockTreeWalk = mock(TreeWalk.class);
-            when(mockTreeWalk.next()).thenReturn(true);
-            doReturn(mockTreeWalk)
-                    .when(spyVersionController)
-                    .getTreeWalk(any());
-            ObjectLoader mockLoader = mock(ObjectLoader.class);
-            when(repo.open(any())).thenReturn(mockLoader);
-            doReturn("test")
-                    .when(spyVersionController)
-                    .getStringFromLoader(any());
-
-            String fileContent = spyVersionController.readFile("configuration/a");
-
-            assertThat(fileContent).isEqualTo("test");
-            verify(repo).resolve(Constants.HEAD);
-            verify(spyVersionController).readFile("configuration/a");
-            verify(spyVersionController).getTreeWalk(any());
-            verify(mockTreeWalk).setFilter(any());
-            verify(mockTreeWalk).next();
-            verify(mockTreeWalk).getObjectId(0);
-            verify(repo).open(any());
-            verify(spyVersionController).getStringFromLoader(any());
-            verifyNoMoreInteractions(git, repo, mockTreeWalk, spyVersionController);
-        }
-
-        @Test
-        void readNonExistingFile() throws IOException, GitAPIException {
-            ObjectId mockId = mock(ObjectId.class);
-            when(repo.resolve(Constants.HEAD)).thenReturn(mockId);
-            VersioningManager spyVersionController = spy(versionController);
-            doReturn(mockId)
-                    .when(spyVersionController)
-                    .resolveCommitId(any());
-            TreeWalk mockTreeWalk = mock(TreeWalk.class);
-            when(mockTreeWalk.next()).thenReturn(false);
-            doReturn(mockTreeWalk)
-                    .when(spyVersionController)
-                    .getTreeWalk(any());
-
-            String fileContent = spyVersionController.readFile("configuration/b");
-
-            assertThat(fileContent).isEqualTo(null);
-            verify(repo).resolve(Constants.HEAD);
-            verify(spyVersionController).readFile("configuration/b");
-            verify(spyVersionController).getTreeWalk(any());
-            verify(mockTreeWalk).setFilter(any());
-            verify(mockTreeWalk).next();
-            verifyNoMoreInteractions(git, repo, mockTreeWalk, spyVersionController);
-        }
-    }
-
-    @Nested
-    public class ResolveCommitId {
-        @Test
-        void testString() {
-            String input = "f03171d4bd5f6813d0647f225f29dd680885ac82";
-            ObjectId expectedOutput = ObjectId.fromString("f03171d4bd5f6813d0647f225f29dd680885ac82");
-
-            assertThat(versionController.resolveCommitId(input)).isEqualTo(expectedOutput);
-        }
-
-        @Test
-        void testObjectId() {
-            ObjectId input = ObjectId.fromString("f03171d4bd5f6813d0647f225f29dd680885ac82");
-
-            assertThat(versionController.resolveCommitId(input)).isEqualTo(input);
-        }
-
-        @Test
-        void testNeitherObjectIdNorString() {
-            Object input = 1;
-
-            assertThat(versionController.resolveCommitId(input)).isEqualTo(null);
-        }
-    }
-
-    @Nested
     public class GetAllCommits {
+
         @Test
         void containsCommits() throws IOException, GitAPIException {
             ObjectId mockObjectId = mock(ObjectId.class);
@@ -456,7 +242,6 @@ public class VersioningManagerTest {
             verify(mockLogCommand).addPath(any());
             verify(mockLogCommand).call();
             verify(spyController).commitContainsPath(any(), any());
-            verify(spyController).resolveCommitId(any());
             verifyNoMoreInteractions(git, repo, mockLogCommand, spyController);
         }
 
@@ -485,7 +270,6 @@ public class VersioningManagerTest {
             verify(mockLogCommand).addPath(any());
             verify(mockLogCommand).call();
             verify(spyController).commitContainsPath(any(), any());
-            verify(spyController).resolveCommitId(any());
             verifyNoMoreInteractions(git, repo, mockLogCommand, spyController);
         }
 
@@ -512,7 +296,6 @@ public class VersioningManagerTest {
             verify(mockLogCommand).addPath(any());
             verify(mockLogCommand).call();
             verify(spyController).commitContainsPath(any(), any());
-            verify(spyController).resolveCommitId(any());
             verifyNoMoreInteractions(git, repo, mockLogCommand, spyController);
         }
     }
@@ -638,39 +421,6 @@ public class VersioningManagerTest {
             verify(spyController).getPathsOfCommit(mockObjectId);
             verify(repo).resolve(Constants.HEAD);
             verifyNoMoreInteractions(mockRevWalk, mockDiffFormatter, spyController, repo);
-        }
-    }
-
-    @Nested
-    public class KaiUwe {
-        @Test
-        void listDirRecursive() throws IOException {
-            assertThat(true).isEqualTo(true);
-
-    /*@Nested
-    public class ListFiles {
-        @Test
-        void listDirRecursive() throws IOException {
-            assertThat(true).isEqualTo(true);
-           /* TreeWalk mockWalk = mock(TreeWalk.class);
-            when(mockWalk.getPathString()).thenReturn("testFolder/testFile", "testFolder");
-            when(mockWalk.next()).thenReturn(true, true, false);
-            VersionController spyController = spy(versionController);
-            when(spyController.getTreeWalk(any())).thenReturn(mockWalk);
-            when(spyController.isDirectory(any())).thenReturn(true, false);
-
-            List<FileInfo> output = spyController.listFiles("", true);
-
-            FileInfo testFileInfo = FileInfo.builder().name("testFile").type(FileInfo.Type.FILE).build();
-            List<FileInfo> children = new ArrayList<>();
-            children.add(testFileInfo);
-            FileInfo testFolderInfo = FileInfo.builder()
-                    .name("testFolder")
-                    .type(FileInfo.Type.DIRECTORY)
-                    .children(children).build();
-            List<FileInfo> expected = new ArrayList<>();
-            expected.add(testFolderInfo);
-            assertThat(expected).isEqualTo(output);*/
         }
     }
 }

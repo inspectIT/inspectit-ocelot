@@ -5,63 +5,39 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
-import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.file.FileInfo;
 import rocks.inspectit.ocelot.file.FileVersionResponse;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 
-public class GitDirectoryManagerIntTest {
 
-    private static Path tempDirectory;
+public class GitDirectoryManagerIntTest extends AbstractRepositoryTest {
 
-    @Autowired
     private GitDirectoryManager gitDirectoryManager;
-
-    @Autowired
-    private VersioningManager versionController;
 
     private Git git;
 
-    @Mock
-    ApplicationEventPublisher eventPublisher;
-
     @BeforeEach
-    private void setupFileManager() throws Exception {
-        tempDirectory = Files.createTempDirectory("inspectit-versioning");
-        InspectitServerSettings conf = new InspectitServerSettings();
-        conf.setWorkingDirectory(GitDirectoryManagerIntTest.tempDirectory.toString());
-        versionController = new VersioningManager();
-        versionController.config = conf;
-        versionController.init();
-        git = versionController.git;
-        gitDirectoryManager = new GitDirectoryManager();
-        gitDirectoryManager.versionController = versionController;
-        gitDirectoryManager.config = conf;
-        Files.createDirectory(GitDirectoryManagerIntTest.tempDirectory.resolve("files/configuration"));
-    }
+    private void setupFileManager() {
+        VersioningManager versioningManager = new VersioningManager();
+        versioningManager.config = serverSettings;
+        versioningManager.init();
 
-    @AfterEach
-    private void cleanDirectory() throws Exception {
-        deleteDirectory(tempDirectory);
+        git = versioningManager.git;
+
+        gitDirectoryManager = new GitDirectoryManager();
+        gitDirectoryManager.config = serverSettings;
+        gitDirectoryManager.versioningManager = versioningManager;
     }
 
     private ObjectId commitAll() throws GitAPIException {
@@ -75,59 +51,6 @@ public class GitDirectoryManagerIntTest {
                 .call();
         git.reset();
         return commit.getId();
-    }
-
-    private static void setupTestFiles(boolean specialFiles, String... paths) {
-        try {
-            for (String path : paths) {
-                if (!specialFiles) {
-                    if (path.contains("/")) {
-                        String[] pathArray = path.split("/");
-                        Files.createDirectories(tempDirectory.resolve("files/configuration").resolve(pathArray[0]));
-                        String newPaths = "files/configuration/" + pathArray[0];
-                        Files.createFile(tempDirectory.resolve(newPaths).resolve(pathArray[1]));
-                    } else {
-                        Files.createFile(tempDirectory.resolve("files/configuration").resolve(path));
-                    }
-                } else {
-                    if (path.contains("/")) {
-                        String[] pathArray = path.split("/");
-                        Files.createDirectories(tempDirectory.resolve(pathArray[0]));
-                        String newPaths = pathArray[0];
-                        Files.createFile(tempDirectory.resolve(newPaths).resolve(pathArray[1]));
-                    } else {
-                        Files.createFile(tempDirectory.resolve(path));
-                    }
-                }
-            }
-        } catch (Exception e) {
-        }
-    }
-
-    private static void deleteDirectory(Path path) throws IOException {
-        List<Path> files = Files.walk(path).collect(Collectors.toCollection(ArrayList::new));
-        Collections.reverse(files);
-        for (Path f : files) {
-            File file = new File(f.toString());
-            file.delete();
-        }
-    }
-
-    private static void createFileWithContent(String path, String content) throws IOException {
-        File f;
-        if (path.contains("/")) {
-            String[] paths = path.split("/");
-            Files.createDirectories(tempDirectory.resolve("files/configuration").resolve(paths[0]));
-            String finalPath = "files/configuration/" + paths[0];
-            f = new File(String.valueOf(tempDirectory.resolve(finalPath).resolve(paths[1])));
-
-        } else {
-            f = new File(String.valueOf(tempDirectory.resolve("files/configuration").resolve(path)));
-        }
-        FileWriter fw = new FileWriter(f);
-        fw.write(content);
-        fw.flush();
-        fw.close();
     }
 
     private static String readFile(String path) throws IOException {
@@ -148,30 +71,33 @@ public class GitDirectoryManagerIntTest {
 
     @Nested
     public class CommitAllChanges {
+
         @Test
         void testCommit() throws IOException, GitAPIException {
+            createTestFiles("configuration/a", "configuration/b", "configuration/c");
+
             List<FileInfo> beforeCommit = gitDirectoryManager.listFiles("", true);
-            setupTestFiles(false, "a", "b", "c");
-            FileInfo file1 = buildFileInfo("a", "file");
-            FileInfo file2 = buildFileInfo("b", "file");
-            FileInfo file3 = buildFileInfo("c", "file");
-            List<FileInfo> children = Arrays.asList(file1, file2, file3);
-            FileInfo folder = buildFileInfo("configuration", "directory");
-            folder.setChildren(children);
-            List<FileInfo> afterCommit = Arrays.asList(folder);
+            assertThat(beforeCommit).isEmpty();
 
-            gitDirectoryManager.commitAllChanges();
+            gitDirectoryManager.commit();
 
-            assertThat(beforeCommit).isNotEqualTo(afterCommit);
-            assertThat(gitDirectoryManager.listFiles("", true)).isEqualTo(afterCommit);
+            List<FileInfo> afterCommit = gitDirectoryManager.listFiles("", true);
+            assertThat(afterCommit).hasSize(1);
+            FileInfo fileInfo = afterCommit.get(0);
+            assertThat(fileInfo).extracting(FileInfo::getName).isEqualTo("configuration");
+            assertThat(fileInfo).extracting(FileInfo::getType).isEqualTo(FileInfo.Type.DIRECTORY);
+            List<FileInfo> children = fileInfo.getChildren();
+            assertThat(children).extracting(FileInfo::getName).containsExactly("a", "b", "c");
+            assertThat(children).extracting(FileInfo::getType).containsOnly(FileInfo.Type.FILE);
         }
     }
 
     @Nested
     public class ListFiles {
+
         @Test
         void listEmptyRepo() throws IOException {
-            List<String> emptyList = Arrays.asList();
+            List<String> emptyList = Collections.emptyList();
 
             List<FileInfo> output = gitDirectoryManager.listFiles("", true);
 
@@ -180,27 +106,30 @@ public class GitDirectoryManagerIntTest {
 
         @Test
         void listRepoTest() throws GitAPIException, IOException {
-            setupTestFiles(false, "a", "b", "c");
+            createTestFiles("configuration/a", "configuration/b", "configuration/c");
             commitAll();
-            FileInfo file1 = buildFileInfo("a", "file");
-            FileInfo file2 = buildFileInfo("b", "file");
-            FileInfo file3 = buildFileInfo("c", "file");
-            List<FileInfo> expected = Arrays.asList(file1, file2, file3);
 
             List<FileInfo> output = gitDirectoryManager.listFiles("configuration", true);
 
-            assertThat(output).isEqualTo(expected);
+            assertThat(output).hasSize(3)
+                    .extracting(FileInfo::getName, FileInfo::getType)
+                    .containsExactly(
+                            tuple("a", FileInfo.Type.FILE),
+                            tuple("b", FileInfo.Type.FILE),
+                            tuple("c", FileInfo.Type.FILE)
+                    );
         }
     }
 
     @Nested
     public class ReadFile {
+
         @Test
         void readFile() throws IOException, GitAPIException {
-            createFileWithContent("hello", "world");
+            createTestFile("hello", "world");
             commitAll();
 
-            String output = gitDirectoryManager.readFile("configuration/hello");
+            String output = gitDirectoryManager.readFile("hello");
 
             assertThat(output).isEqualTo("world");
         }
@@ -208,102 +137,106 @@ public class GitDirectoryManagerIntTest {
 
     @Nested
     public class CommitFiles {
+
         @Test
-        void commitOnlyFiles() throws IOException, GitAPIException {
-            createFileWithContent("../agent_mappings.yaml", "Hello World!");
-            createFileWithContent("dummyFile", "Hello User!");
+        void commitFiles() throws IOException, GitAPIException {
+            createTestFile("testFile", "This is not an easter egg!");
             commitAll();
-            createFileWithContent("../agent_mappings.yaml", "This is not an easter egg!");
-            createFileWithContent("dummyFile", "But this is one =)");
 
-            gitDirectoryManager.commitFiles();
+            String beforeCommit = gitDirectoryManager.readFile("testFile");
+            assertThat(beforeCommit).isEqualTo("This is not an easter egg!");
 
-            String agentMappingContent = gitDirectoryManager.readFile("agent_mappings.yaml");
-            String dummyFileContent = gitDirectoryManager.readFile("configuration/dummyFile");
-            boolean agentMappingChanged = "This is not an easter egg!".equals(agentMappingContent);
-            boolean dummyFileChanged = "But this is one =)".equals(dummyFileContent);
-            assertThat(agentMappingChanged && dummyFileChanged).isEqualTo(true);
+            createTestFile("testFile", "But this is one =)");
+
+            gitDirectoryManager.commit();
+
+            String afterCommit = gitDirectoryManager.readFile("testFile");
+            assertThat(afterCommit).isEqualTo("But this is one =)");
         }
     }
 
     @Nested
     public class GetAllCommits {
+
         @Test
         void onlyInitialCommitPresent() throws IOException, GitAPIException {
-            List<FileVersionResponse> output = gitDirectoryManager.getAllCommits();
+            List<FileVersionResponse> output = gitDirectoryManager.getCommits();
 
             assertThat(output.size()).isEqualTo(0);
         }
 
         @Test
         void multipleCommits() throws GitAPIException, IOException {
-            createFileWithContent("../agent_mappings.yaml", "Hello World!");
-            createFileWithContent("test", "Hello User!");
+            createTestFile("testFile", "Hello User!");
             commitAll();
 
-            List<FileVersionResponse> output = gitDirectoryManager.getAllCommits();
+            List<FileVersionResponse> output = gitDirectoryManager.getCommits();
 
-            assertThat(output.size()).isEqualTo(1);
-            FileVersionResponse testResponse = output.get(0);
-            assertThat(((List) testResponse.getCommitContent()).contains("agent_mappings.yaml")).isEqualTo(true);
-            assertThat(((List) testResponse.getCommitContent()).contains("configuration/test")).isEqualTo(true);
+            assertThat(output).hasSize(1);
 
+            assertThat(output).extracting(FileVersionResponse::getCommitContent)
+                    .flatExtracting(list -> ((List<String>) list))
+                    .containsExactly("testFile");
         }
     }
 
     @Nested
     public class GetFileFromVersion {
+
         @Test
         void commitExistsWithFile() throws IOException, GitAPIException {
-            List<FileVersionResponse> hilfe = gitDirectoryManager.getAllCommits();
-            createFileWithContent("dummyFile", "Hello User!");
+            createTestFile("testFile", "Hello User!");
             String commitId = commitAll().getName();
+            createTestFile("testFile", "Hello World!");
+            commitAll();
 
-            String output = gitDirectoryManager.getFileFromVersion("configuration/dummyFile", commitId);
+            String result = gitDirectoryManager.getFileContent("testFile", commitId);
+            String resultLatest = gitDirectoryManager.readFile("testFile");
 
-            assertThat(output).isEqualTo("Hello User!");
+            assertThat(result).isEqualTo("Hello User!");
+            assertThat(resultLatest).isEqualTo("Hello World!");
         }
 
         @Test
         void commitDoesNotContainFile() throws IOException, GitAPIException {
-            createFileWithContent("dummyFile", "test");
+            createTestFile("testFile", "Hello User!");
             String commitId = commitAll().getName();
 
-            String output = gitDirectoryManager.getFileFromVersion("configuration/aDifferentFile", commitId);
+            String result = gitDirectoryManager.getFileContent("not-existing-file", commitId);
 
-            assertThat(output).isEqualTo(null);
+            assertThat(result).isEqualTo(null);
         }
     }
 
     @Nested
-    public class GetCommitsOfFile {
+    public class GetCommitsByFile {
+
         @Test
         void noFileCommits() throws IOException, GitAPIException {
             String filePath = "test";
 
-            List<FileVersionResponse> output = gitDirectoryManager.getCommitsOfFile(filePath);
+            List<FileVersionResponse> output = gitDirectoryManager.getCommitsByFile(filePath);
 
             assertThat(output).isEqualTo(Collections.emptyList());
         }
 
         @Test
         void fileCommitsForOtherFiles() throws IOException, GitAPIException {
-            createFileWithContent("dummyFile", "test");
+            createTestFile("dummyFile", "test");
             commitAll();
             String filePath = "test";
 
-            List<FileVersionResponse> output = gitDirectoryManager.getCommitsOfFile(filePath);
+            List<FileVersionResponse> output = gitDirectoryManager.getCommitsByFile(filePath);
 
             assertThat(output).isEqualTo(Collections.emptyList());
         }
 
         @Test
         void commitsForFile() throws GitAPIException, IOException {
-            String filePath = "configuration/dummyFile";
-            createFileWithContent("dummyFile", "test");
+            createTestFile("testFile");
             commitAll();
 
-            List<FileVersionResponse> output = gitDirectoryManager.getCommitsOfFile(filePath);
+            List<FileVersionResponse> output = gitDirectoryManager.getCommitsByFile("testFile");
 
             assertThat(output.size()).isEqualTo(1);
         }
@@ -311,31 +244,22 @@ public class GitDirectoryManagerIntTest {
 
     @Nested
     public class CommitFile {
+
         @Test
         void commitSingleFile() throws IOException, GitAPIException {
-            createFileWithContent("dummyFile", "test");
-            createFileWithContent("anotherDummyFile", "another test");
-
-            gitDirectoryManager.commitFile("configuration/dummyFile");
-
-            assertThat(gitDirectoryManager.getCommitsOfFile("configuration/dummyFile").size()).isEqualTo(1);
-            assertThat(gitDirectoryManager.getCommitsOfFile("configuration/anotherDummyFile").size()).isEqualTo(0);
-        }
-
-        @Test
-        void multipleCommits() throws IOException, GitAPIException {
-            createFileWithContent("testFile", "test");
-            createFileWithContent("anotherTestFile", "another test");
+            createTestFile("testFile_a", "content_a");
+            createTestFile("testFile_b", "content_b");
             commitAll();
-            createFileWithContent("testFile", "more tests");
 
-            gitDirectoryManager.commitFile("configuration/testFile");
+            createTestFile("testFile_a", "content_c");
 
-            List<FileVersionResponse> a = gitDirectoryManager.getCommitsOfFile("configuration/testFile");
-            List<FileVersionResponse> b = gitDirectoryManager.getCommitsOfFile("configuration/anotherTestFile");
+            gitDirectoryManager.commitFile("testFile_a");
 
-            assertThat(gitDirectoryManager.getCommitsOfFile("configuration/testFile").size()).isEqualTo(2);
-            assertThat(gitDirectoryManager.getCommitsOfFile("configuration/anotherTestFile").size()).isEqualTo(1);
+            List<FileVersionResponse> testFileACommits = gitDirectoryManager.getCommitsByFile("testFile_a");
+            List<FileVersionResponse> testFileBCommits = gitDirectoryManager.getCommitsByFile("testFile_b");
+
+            assertThat(testFileACommits).hasSize(2);
+            assertThat(testFileBCommits).hasSize(1);
         }
     }
 }

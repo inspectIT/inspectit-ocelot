@@ -21,22 +21,26 @@ import java.util.TreeSet;
 @Slf4j
 @Component
 public class GitDirectoryManager extends DirectoryManager {
-    @VisibleForTesting
+
     @Autowired
-    VersioningManager versionController;
+    @VisibleForTesting
+    VersioningManager versioningManager;
 
     /**
      * Adds and commits all current changes to the master branch of the local repo.
      */
-    public void commitAllChanges() throws GitAPIException {
-        versionController.commitAll();
+    public void commit() throws GitAPIException {
+        versioningManager.commit();
     }
 
     /**
-     * Adds and commits all changes in the files subfolder.
+     * If the given path points to a directory the whole directory is committed. If it points to a single file the
+     * single file is committed.
+     *
+     * @param path the path to the file or directory one wants to commit
      */
-    public void commitFiles() throws GitAPIException {
-        versionController.commitFile("");
+    public void commitFile(String path) throws GitAPIException {
+        versioningManager.commitFile(path);
     }
 
     /**
@@ -45,7 +49,7 @@ public class GitDirectoryManager extends DirectoryManager {
      * @return A list of all file paths found in the latest commit.
      */
     public List<FileInfo> listFiles(String path, boolean recursive) throws IOException {
-        return versionController.listFiles(path, recursive);
+        return versioningManager.listFiles(path, recursive);
     }
 
     /**
@@ -55,7 +59,7 @@ public class GitDirectoryManager extends DirectoryManager {
      * @return The content of the file as String.
      */
     public String readFile(String fileName) throws IOException {
-        return versionController.readFile(fileName);
+        return versioningManager.readFile(fileName);
     }
 
     /**
@@ -63,9 +67,9 @@ public class GitDirectoryManager extends DirectoryManager {
      *
      * @return A List of FileVersionResponse instances containing the data of all commits.
      */
-    public List<FileVersionResponse> getAllCommits() throws IOException, GitAPIException {
+    public List<FileVersionResponse> getCommits() throws IOException, GitAPIException {
         TreeSet<FileVersionResponse> responseList = new TreeSet<>(new CommitComparator());
-        for (ObjectId commitId : versionController.getAllCommits()) {
+        for (ObjectId commitId : versioningManager.getAllCommits()) {
             responseList.add(buildResponseFromCommit(commitId));
         }
         return new ArrayList<>(responseList);
@@ -78,8 +82,8 @@ public class GitDirectoryManager extends DirectoryManager {
      * @param commit The commit one wants the version of the file from.
      * @return The content of the file from the given commit.
      */
-    public String getFileFromVersion(String path, String commit) throws IOException {
-        return versionController.getFileFromVersion(path, commit);
+    public String getFileContent(String path, String commit) throws IOException {
+        return versioningManager.readFile(path, commit);
     }
 
     /**
@@ -88,22 +92,12 @@ public class GitDirectoryManager extends DirectoryManager {
      * @param filePath the path to the file the commits should be returned of.
      * @return A List of FileVersionResponse Objects which contain the data of each commit.
      */
-    public List<FileVersionResponse> getCommitsOfFile(String filePath) throws IOException, GitAPIException {
+    public List<FileVersionResponse> getCommitsByFile(String filePath) throws IOException, GitAPIException {
         TreeSet<FileVersionResponse> responseList = new TreeSet<>(new CommitComparator());
-        for (ObjectId commitId : versionController.getCommitsOfFile(filePath)) {
+        for (ObjectId commitId : versioningManager.getCommitsOfFile(filePath)) {
             responseList.add(buildResponseFromCommit(commitId));
         }
         return new ArrayList<>(responseList);
-    }
-
-    /**
-     * If the given path points to a directory the whole directory is committed. If it points to a single file the
-     * single file is committed.
-     *
-     * @param path the path to the file or directory one wants to commit
-     */
-    public void commitFile(String path) throws GitAPIException {
-        versionController.commitFile(path);
     }
 
     /**
@@ -113,7 +107,7 @@ public class GitDirectoryManager extends DirectoryManager {
      * @param mail the authors mail adress.
      */
     public void setAuthor(String name, String mail) {
-        versionController.setAuthor(name, mail);
+        versioningManager.setAuthor(name, mail);
     }
 
     /**
@@ -135,11 +129,11 @@ public class GitDirectoryManager extends DirectoryManager {
      * the time of the commit and the author.
      */
     private FileVersionResponse buildResponseFromCommit(ObjectId commitId) throws IOException {
-        return new FileVersionResponse(versionController.getFullMessageOfCommit(commitId),
+        return new FileVersionResponse(versioningManager.getFullMessageOfCommit(commitId),
                 getNameOfObjectId(commitId),
-                versionController.getPathsOfCommit(commitId),
-                versionController.getTimeOfCommit(commitId),
-                versionController.getAuthorOfCommit(commitId));
+                versioningManager.getPathsOfCommit(commitId),
+                versioningManager.getTimeOfCommit(commitId),
+                versioningManager.getAuthorOfCommit(commitId));
     }
 
     /**

@@ -194,6 +194,6 @@ public abstract class AbstractFileManager {
      * @return Returns true if the commit was successful, returns false if any errors occurred during the process
      */
     public void commitAllChanges() throws GitAPIException {
-        gitDirectoryManager.commitAllChanges();
+        gitDirectoryManager.commit();
     }
 }

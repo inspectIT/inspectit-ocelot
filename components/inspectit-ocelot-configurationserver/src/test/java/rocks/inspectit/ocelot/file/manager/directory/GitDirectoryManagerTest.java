@@ -9,8 +9,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.file.FileVersionResponse;
-import rocks.inspectit.ocelot.file.manager.directory.GitDirectoryManager;
-import rocks.inspectit.ocelot.file.manager.directory.VersioningManager;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -35,7 +33,7 @@ public class GitDirectoryManagerTest {
         void noCommits() throws IOException, GitAPIException {
             when(versionController.getAllCommits()).thenReturn(Collections.emptyList());
 
-            List<FileVersionResponse> output = gitDirectoryManager.getAllCommits();
+            List<FileVersionResponse> output = gitDirectoryManager.getCommits();
 
             assertThat(output).isEqualTo(Collections.emptyList());
         }
@@ -52,7 +50,7 @@ public class GitDirectoryManagerTest {
             GitDirectoryManager spyGitDirectoryManager = spy(gitDirectoryManager);
             doReturn("testName").when(spyGitDirectoryManager).getNameOfObjectId(any());
 
-            List<FileVersionResponse> output = spyGitDirectoryManager.getAllCommits();
+            List<FileVersionResponse> output = spyGitDirectoryManager.getCommits();
 
             assertThat(output.size()).isEqualTo(1);
             FileVersionResponse response = output.get(0);
@@ -70,7 +68,7 @@ public class GitDirectoryManagerTest {
         void noCommits() throws IOException, GitAPIException {
             when(versionController.getAllCommits()).thenReturn(Collections.emptyList());
 
-            List<FileVersionResponse> output = gitDirectoryManager.getAllCommits();
+            List<FileVersionResponse> output = gitDirectoryManager.getCommits();
 
             assertThat(output).isEqualTo(Collections.emptyList());
         }
@@ -87,7 +85,7 @@ public class GitDirectoryManagerTest {
             GitDirectoryManager spyGitDirectoryManager = spy(gitDirectoryManager);
             doReturn("testName").when(spyGitDirectoryManager).getNameOfObjectId(any());
 
-            List<FileVersionResponse> output = spyGitDirectoryManager.getCommitsOfFile("testPath");
+            List<FileVersionResponse> output = spyGitDirectoryManager.getCommitsByFile("testPath");
 
             assertThat(output.size()).isEqualTo(1);
             FileVersionResponse response = output.get(0);

@@ -61,6 +61,16 @@ public class VersioningManager {
     private static final String DATETIME_FORMAT = "dd/MM/yyyy HH:mm:ss";
 
     /**
+     * The default username used for Git commits.
+     */
+    private static final String DEFAULT_GIT_NAME = "System";
+
+    /**
+     * The default email address used for Git commits.
+     */
+    private static final String DEFAULT_GIT_EMAIL = "inspectit@inspectit.rocks";
+
+    /**
      * The author used for commits.
      */
     private GitAuthor author;
@@ -88,23 +98,20 @@ public class VersioningManager {
     void init() {
         try {
             //Setup the files folder in the working directory
-            Path filesRoot = getNormalizedPath("files");
-            Files.createDirectories(filesRoot);
-
             //Setup the configuration folder in the files folder
-            File localPath = new File(String.valueOf(filesRoot));
             Path configurationRoot = getNormalizedPath(FILES_SUBFOLDER);
             Files.createDirectories(configurationRoot);
+            File localPath = configurationRoot.toFile();
 
             //Initialise git
             git = Git.init().setDirectory(localPath).call();
             repo = git.getRepository();
-            setAuthor("System", "maintainer@inspectit.rocks");
+            setAuthor(DEFAULT_GIT_NAME, DEFAULT_GIT_EMAIL);
 
             //If there is no .git folder present, commit all files found in the directory to the local repo.
             if (!isGitRepository()) {
                 log.info("Initially committing files in the directory...");
-                commitAll();
+                commit();
             }
             log.info("Git directory set up successfully at {} !", localPath.toString());
         } catch (GitAPIException | IOException e) {
@@ -135,7 +142,7 @@ public class VersioningManager {
     /**
      * Commits all changes to the master branch of the local repo.
      */
-    public void commitAll() throws GitAPIException {
+    public void commit() throws GitAPIException {
         commit(git.commit().setAll(true));
     }
 
@@ -255,26 +262,11 @@ public class VersioningManager {
     }
 
     /**
-     * Returns the TreeWalk Object from the last commit.
-     *
-     * @return The TreeWalk Object from the current repo.
-     */
-    @VisibleForTesting
-    TreeWalk getTreeWalk() throws IOException {
-        RevTree tree = getTree();
-        TreeWalk treeWalk = new TreeWalk(repo);
-        treeWalk.addTree(tree);
-        treeWalk.setRecursive(true);
-        return treeWalk;
-    }
-
-    /**
      * Returns the TreeWalk Object from the commit with the given id.
      *
      * @return The TreeWalk Object from the current repo.
      */
-    @VisibleForTesting
-    TreeWalk getTreeWalk(ObjectId commitId) throws IOException {
+    private TreeWalk getTreeWalk(ObjectId commitId) throws IOException {
         RevCommit commit = getCommitById(commitId);
         RevTree tree = commit.getTree();
         TreeWalk treeWalk = new TreeWalk(repo);
@@ -308,45 +300,33 @@ public class VersioningManager {
     }
 
     /**
-     * Reads the content of a file from the latest commit.
+     * Returns the content of the specified file from the latest commit.
      *
      * @param filePath the path to the file.
      * @return The file's content as it is found in the latest commit.
      */
     public String readFile(String filePath) throws IOException {
         ObjectId lastCommitId = repo.resolve(Constants.HEAD);
-        return readFileFromCommit(filePath, lastCommitId);
+        return readFile(filePath, lastCommitId);
+    }
+
+    public String readFile(String filePath, String commitId) throws IOException {
+        ObjectId commitIdObject = ObjectId.fromString(commitId);
+        return readFile(filePath, commitIdObject);
     }
 
     /**
-     * Returns the content of a given path as it was in the given commit.
-     *
-     * @param path   The path to the file one wants the content of.
-     * @param commit The commit id one wants to get the files content from.
-     * @return The file's content as it is found in the given commit.
-     */
-    public String getFileFromVersion(String path, Object commit) throws IOException {
-        return readFileFromCommit(path, commit);
-    }
-
-    /**
-     * Searches for a commit with the given ID. Then searches within this commit for a file with a given path at returns
-     * the files content as it is present in the given commit.
-     * Returns null if the file is not found in the given commit.
+     * Returns the content of the specified file from the specified commit. The method returns null in case
+     * the commit or file does not exist.
      *
      * @param filePath The path to the file.
      * @param commitId The ID of the commit the file's content needs to be retrieved from.
      * @return The file's content as it is found in the given commit.
      */
-    private String readFileFromCommit(String filePath, Object commitId) throws IOException {
-        ObjectId resolvedId = resolveCommitId(commitId);
-        if (resolvedId == null) {
-            log.error("Could not find commit with id {} from git repo", commitId);
-            return null;
-        }
-
-        TreeWalk treeWalk = getTreeWalk(resolvedId);
-        treeWalk.setFilter(PathFilter.create(filePath));
+    public String readFile(String filePath, ObjectId commitId) throws IOException {
+        TreeWalk treeWalk = getTreeWalk(commitId);
+        PathFilter filter = PathFilter.create(filePath);
+        treeWalk.setFilter(filter);
         if (!treeWalk.next()) {
             log.error("Could not read file {} from git repo", filePath);
             return null;
@@ -355,32 +335,9 @@ public class VersioningManager {
         ObjectId objectId = treeWalk.getObjectId(0);
         ObjectLoader loader = repo.open(objectId);
         if (loader != null) {
-            return getStringFromLoader(loader);
+            return new String(loader.getBytes(), ENCODING);
         }
         return null;
-    }
-
-    String getStringFromLoader(ObjectLoader loader) {
-        return new String(loader.getBytes(), ENCODING);
-    }
-
-    /**
-     * If a String is passed as an argument to this method it returns an ObjectId instance based on this string.
-     * If an ObjectId instance is passed, this instance is returned.
-     * If neither a String nor an ObjectId is passed null is returned.
-     *
-     * @param id The Id which should be turned into an ObjectId.
-     * @return An ObjectId instance based on the given parameter.
-     */
-    @VisibleForTesting
-    ObjectId resolveCommitId(Object id) {
-        ObjectId objectId = null;
-        if (id instanceof String) {
-            objectId = ObjectId.fromString((String) id);
-        } else if (id instanceof ObjectId) {
-            objectId = (ObjectId) id;
-        }
-        return objectId;
     }
 
     /**
@@ -423,19 +380,18 @@ public class VersioningManager {
      * @return Returns true if the given file was edited in the given commit.
      */
     @VisibleForTesting
-    boolean commitContainsPath(String filePath, Object commitId) {
-        ObjectId resolvedCommitId = resolveCommitId(commitId);
+    boolean commitContainsPath(String filePath, ObjectId commitId) {
         LogCommand logCommand = null;
         try {
             logCommand = git.log()
                     .add(git.getRepository().resolve(Constants.HEAD))
                     .addPath(filePath);
         } catch (IOException e) {
-            log.error("Error while perfoming Git operation git.log(): " + e.getMessage());
+            log.error("Error while performing Git operation git.log(): " + e.getMessage());
         }
         try {
             for (RevCommit revCommit : logCommand.call()) {
-                if (revCommit.getId().equals(resolvedCommitId)) {
+                if (revCommit.getId().equals(commitId)) {
                     return true;
                 }
             }
@@ -461,7 +417,7 @@ public class VersioningManager {
      * @param commitId The id of the commit one wants the time of.
      * @return The time when the commit was committed in milliseconds.
      */
-    public int getTimeOfCommit(Object commitId) throws IOException {
+    public int getTimeOfCommit(ObjectId commitId) throws IOException {
         RevCommit commit = getCommitById(commitId);
         return commit.getCommitTime() * 100;
 
@@ -473,7 +429,7 @@ public class VersioningManager {
      * @param commitId the id of the commit of which one wants to get the author's name from.
      * @return The author's name.
      */
-    public String getAuthorOfCommit(Object commitId) throws IOException {
+    public String getAuthorOfCommit(ObjectId commitId) throws IOException {
         RevCommit commit = getCommitById(commitId);
         return commit.getAuthorIdent().getName();
     }
@@ -484,7 +440,7 @@ public class VersioningManager {
      * @param commitId the id of the commit of which one wants to get the full message from.
      * @return the full message.
      */
-    public String getFullMessageOfCommit(Object commitId) throws IOException {
+    public String getFullMessageOfCommit(ObjectId commitId) throws IOException {
         RevCommit commit = getCommitById(commitId);
         return commit.getFullMessage();
     }
@@ -492,41 +448,13 @@ public class VersioningManager {
     /**
      * Returns a commit which can be found under a specific id as RevCommit object.
      *
-     * @param id The id of the commit one wants to get.
+     * @param commitId The id of the commit one wants to get.
      * @return the commit as RevCommit object.
      */
-    public RevCommit getCommitById(Object id) throws IOException {
-        RevCommit commit;
-        ObjectId lastCommitId = resolveCommitId(resolveCommitId(id));
+    public RevCommit getCommitById(ObjectId commitId) throws IOException {
         try (RevWalk revWalk = getRevWalk()) {
-            commit = revWalk.parseCommit(lastCommitId);
+            return revWalk.parseCommit(commitId);
         }
-        return commit;
-    }
-
-    /**
-     * Returns all file paths present in a commit.
-     *
-     * @param id The id of the commit one wants to get the paths of.
-     * @return A List of paths found in the commit.
-     */
-    public List<String> getPathsOfCommit(Object id) throws IOException {
-        RevWalk revWalk = getRevWalk();
-        ObjectId head = repo.resolve(Constants.HEAD);
-        RevCommit commit = revWalk.parseCommit(head);
-        RevCommit[] parentList = getParentsOfRevCommit(commit);
-        if (parentList.length == 0) {
-            return getAllFiles(id);
-        }
-        RevCommit parent = revWalk.parseCommit(getParentOfRevCommit(commit, 0).getId());
-        DiffFormatter df = getDiffFormatter();
-        df.setRepository(repo);
-        df.setDiffComparator(RawTextComparator.DEFAULT);
-        df.setDetectRenames(true);
-        return df.scan(getRevtreeOfRevCommit(parent), getRevtreeOfRevCommit(commit))
-                .stream()
-                .map(diff -> diff.getNewPath())
-                .collect(Collectors.toList());
     }
 
     /**
@@ -575,15 +503,40 @@ public class VersioningManager {
     }
 
     /**
+     * Returns all file paths present in a commit.
+     *
+     * @param commitId The id of the commit one wants to get the paths of.
+     * @return A List of paths found in the commit.
+     */
+    public List<String> getPathsOfCommit(ObjectId commitId) throws IOException {
+        RevWalk revWalk = getRevWalk();
+        ObjectId head = repo.resolve(Constants.HEAD);
+        RevCommit commit = revWalk.parseCommit(head);
+        RevCommit[] parentList = getParentsOfRevCommit(commit);
+        if (parentList.length == 0) {
+            return getAllFiles(commitId);
+        }
+        RevCommit parent = revWalk.parseCommit(getParentOfRevCommit(commit, 0).getId());
+        DiffFormatter df = getDiffFormatter();
+        df.setRepository(repo);
+        df.setDiffComparator(RawTextComparator.DEFAULT);
+        df.setDetectRenames(true);
+        return df.scan(getRevtreeOfRevCommit(parent), getRevtreeOfRevCommit(commit))
+                .stream()
+                .map(diff -> diff.getNewPath())
+                .collect(Collectors.toList());
+    }
+
+    /**
      * Returns a List of files which have been edited in the given commit.
      *
-     * @param id the id of the commit the files should be retrieved from.
+     * @param commitId the id of the commit the files should be retrieved from.
      * @return The List of files changed in the given commit.
      */
-    private List<String> getAllFiles(Object id) throws IOException {
+    private List<String> getAllFiles(ObjectId commitId) throws IOException {
         List<String> filePaths = new ArrayList<>();
-        try (TreeWalk treeWalk = getTreeWalk()) {
-            treeWalk.reset(getCommitById(id).getTree());
+        try (TreeWalk treeWalk = getTreeWalk(commitId)) {
+            treeWalk.reset(getCommitById(commitId).getTree());
             while (treeWalk.next()) {
                 filePaths.add(treeWalk.getPathString());
             }

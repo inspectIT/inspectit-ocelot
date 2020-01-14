@@ -8,6 +8,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 public abstract class DirectoryManager {
+
     /**
      * The encoding used for the loaded strings.
      */
