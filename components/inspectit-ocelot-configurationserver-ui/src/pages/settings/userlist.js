@@ -4,25 +4,26 @@ import Head from 'next/head';
 
 import { BASE_PAGE_TITLE } from '../../data/constants';
 import SettingsView from '../../components/views/settings/SettingsView';
+import UserListView from '../../components/views/settings/userlist/UserListView';
 
 /** 
- * Placeholder example page for possible settings.
+ * Page containing the user list.
  */
-class PlaceholderPage extends React.Component {
+class UserListPage extends React.Component {
 
     render() {
         return (
             <MainLayout>
                 <Head>
-                    <title>{BASE_PAGE_TITLE} | Placeholder</title>
+                    <title>{BASE_PAGE_TITLE} | User View</title>
                 </Head>
 
                 <SettingsView>
-                    <p style={{ margin: "0", padding: "0" }}>placeholder</p>
+                    <UserListView></UserListView>
                 </SettingsView>
             </MainLayout>
         )
     }
 }
 
-export default PlaceholderPage;
+export default UserListPage;

@@ -61,10 +61,18 @@ const agentStatus = {
     pendingClearRequests: 0,
 }
 
+const settings = {
+    /** The list of users */
+    users: [],
+    /** Specifies how many requests are currently loading the data in the background */
+    pendingRequests: 0,
+}
+
 export {
     authentication,
     configuration,
     notification,
     mappings,
-    agentStatus
+    agentStatus,
+    settings
 }

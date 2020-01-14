@@ -1,12 +1,7 @@
 [
     {
-        "name": "Placeholder",
-        "icon": "pi-user",
-        "href": "/settings/placeholder"
-    },
-    {
-        "name": "Placeholder2",
-        "icon": "pi-user",
-        "href": "/settings/placeholder2"
+        "name": "User List",
+        "icon": "pi-users",
+        "href": "/settings/userlist"
     }
 ]
