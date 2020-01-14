@@ -3,7 +3,7 @@ package rocks.inspectit.ocelot.agentconfiguration;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
 import org.yaml.snakeyaml.Yaml;
-import rocks.inspectit.ocelot.file.manager.ConfigurationFileManager;
+import rocks.inspectit.ocelot.file.manager.file.ConfigurationFileManager;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 
 import java.io.IOException;

@@ -5,8 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import rocks.inspectit.ocelot.file.manager.AbstractFileManager;
-import rocks.inspectit.ocelot.file.manager.ConfigurationFileManager;
+import rocks.inspectit.ocelot.file.manager.file.ConfigurationFileManager;
 import rocks.inspectit.ocelot.rest.AbstractBaseController;
 
 import java.io.FileNotFoundException;

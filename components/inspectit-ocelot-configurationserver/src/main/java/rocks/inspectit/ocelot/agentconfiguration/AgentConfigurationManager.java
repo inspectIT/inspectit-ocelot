@@ -10,7 +10,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.file.FileChangedEvent;
-import rocks.inspectit.ocelot.file.manager.ConfigurationFileManager;
+import rocks.inspectit.ocelot.file.manager.file.ConfigurationFileManager;
 import rocks.inspectit.ocelot.mappings.AgentMappingManager;
 import rocks.inspectit.ocelot.mappings.AgentMappingsChangedEvent;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;

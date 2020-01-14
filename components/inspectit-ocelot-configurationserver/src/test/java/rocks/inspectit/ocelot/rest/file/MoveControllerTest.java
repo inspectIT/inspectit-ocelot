@@ -6,9 +6,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import rocks.inspectit.ocelot.file.manager.AbstractFileManager;
 import rocks.inspectit.ocelot.file.FileMoveDescription;
-import rocks.inspectit.ocelot.file.manager.ConfigurationFileManager;
+import rocks.inspectit.ocelot.file.manager.file.ConfigurationFileManager;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;

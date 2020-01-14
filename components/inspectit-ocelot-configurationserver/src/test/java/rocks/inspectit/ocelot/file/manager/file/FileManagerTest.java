@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.file.manager;
+package rocks.inspectit.ocelot.file.manager.file;
 
 
 import org.junit.jupiter.api.*;
@@ -8,8 +8,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
-import rocks.inspectit.ocelot.file.dirmanagers.GitDirectoryManager;
-import rocks.inspectit.ocelot.file.dirmanagers.WorkingDirectoryManager;
+import rocks.inspectit.ocelot.file.manager.directory.GitDirectoryManager;
+import rocks.inspectit.ocelot.file.manager.directory.WorkingDirectoryManager;
+import rocks.inspectit.ocelot.file.manager.file.AbstractFileManager;
+import rocks.inspectit.ocelot.file.manager.file.ConfigurationFileManager;
 
 import java.io.IOException;
 import java.nio.charset.Charset;

@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.file.manager;
+package rocks.inspectit.ocelot.file.manager.file;
 
 import org.springframework.stereotype.Component;
 

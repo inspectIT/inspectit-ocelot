@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.file.dirmanagers;
+package rocks.inspectit.ocelot.file.manager.directory;
 
 import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
@@ -23,12 +23,10 @@ import java.util.TreeSet;
 public class GitDirectoryManager extends DirectoryManager {
     @VisibleForTesting
     @Autowired
-    VersionController versionController;
+    VersioningManager versionController;
 
     /**
      * Adds and commits all current changes to the master branch of the local repo.
-     *
-     * @return True when the commit was successful.
      */
     public void commitAllChanges() throws GitAPIException {
         versionController.commitAll();
@@ -36,8 +34,6 @@ public class GitDirectoryManager extends DirectoryManager {
 
     /**
      * Adds and commits all changes in the files subfolder.
-     *
-     * @return Returns true when the commit was successful.
      */
     public void commitFiles() throws GitAPIException {
         versionController.commitFile("");
@@ -105,7 +101,6 @@ public class GitDirectoryManager extends DirectoryManager {
      * single file is committed.
      *
      * @param path the path to the file or directory one wants to commit
-     * @return Returns true if the commit was successful
      */
     public void commitFile(String path) throws GitAPIException {
         versionController.commitFile(path);

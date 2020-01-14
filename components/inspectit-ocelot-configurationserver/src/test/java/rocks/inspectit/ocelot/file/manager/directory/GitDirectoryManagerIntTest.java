@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.file.dirmanagers;
+package rocks.inspectit.ocelot.file.manager.directory;
 
 
 import org.eclipse.jgit.api.Git;
@@ -21,7 +21,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,13 +31,13 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public class GitDirectoryManagerIntTest {
 
-    private static final Path rootWorkDir = Paths.get("temp_test_workdir");
+    private static Path tempDirectory;
 
     @Autowired
     private GitDirectoryManager gitDirectoryManager;
 
     @Autowired
-    private VersionController versionController;
+    private VersioningManager versionController;
 
     private Git git;
 
@@ -47,22 +46,22 @@ public class GitDirectoryManagerIntTest {
 
     @BeforeEach
     private void setupFileManager() throws Exception {
-        Files.createDirectories(rootWorkDir);
+        tempDirectory = Files.createTempDirectory("inspectit-versioning");
         InspectitServerSettings conf = new InspectitServerSettings();
-        conf.setWorkingDirectory(rootWorkDir.toString());
-        versionController = new VersionController();
+        conf.setWorkingDirectory(GitDirectoryManagerIntTest.tempDirectory.toString());
+        versionController = new VersioningManager();
         versionController.config = conf;
         versionController.init();
         git = versionController.git;
         gitDirectoryManager = new GitDirectoryManager();
         gitDirectoryManager.versionController = versionController;
         gitDirectoryManager.config = conf;
-        Files.createDirectory(rootWorkDir.resolve("files/configuration"));
+        Files.createDirectory(GitDirectoryManagerIntTest.tempDirectory.resolve("files/configuration"));
     }
 
     @AfterEach
     private void cleanDirectory() throws Exception {
-        deleteDirectory(rootWorkDir);
+        deleteDirectory(tempDirectory);
     }
 
     private ObjectId commitAll() throws GitAPIException {
@@ -84,20 +83,20 @@ public class GitDirectoryManagerIntTest {
                 if (!specialFiles) {
                     if (path.contains("/")) {
                         String[] pathArray = path.split("/");
-                        Files.createDirectories(rootWorkDir.resolve("files/configuration").resolve(pathArray[0]));
+                        Files.createDirectories(tempDirectory.resolve("files/configuration").resolve(pathArray[0]));
                         String newPaths = "files/configuration/" + pathArray[0];
-                        Files.createFile(rootWorkDir.resolve(newPaths).resolve(pathArray[1]));
+                        Files.createFile(tempDirectory.resolve(newPaths).resolve(pathArray[1]));
                     } else {
-                        Files.createFile(rootWorkDir.resolve("files/configuration").resolve(path));
+                        Files.createFile(tempDirectory.resolve("files/configuration").resolve(path));
                     }
                 } else {
                     if (path.contains("/")) {
                         String[] pathArray = path.split("/");
-                        Files.createDirectories(rootWorkDir.resolve(pathArray[0]));
+                        Files.createDirectories(tempDirectory.resolve(pathArray[0]));
                         String newPaths = pathArray[0];
-                        Files.createFile(rootWorkDir.resolve(newPaths).resolve(pathArray[1]));
+                        Files.createFile(tempDirectory.resolve(newPaths).resolve(pathArray[1]));
                     } else {
-                        Files.createFile(rootWorkDir.resolve(path));
+                        Files.createFile(tempDirectory.resolve(path));
                     }
                 }
             }
@@ -118,12 +117,12 @@ public class GitDirectoryManagerIntTest {
         File f;
         if (path.contains("/")) {
             String[] paths = path.split("/");
-            Files.createDirectories(rootWorkDir.resolve("files/configuration").resolve(paths[0]));
+            Files.createDirectories(tempDirectory.resolve("files/configuration").resolve(paths[0]));
             String finalPath = "files/configuration/" + paths[0];
-            f = new File(String.valueOf(rootWorkDir.resolve(finalPath).resolve(paths[1])));
+            f = new File(String.valueOf(tempDirectory.resolve(finalPath).resolve(paths[1])));
 
         } else {
-            f = new File(String.valueOf(rootWorkDir.resolve("files/configuration").resolve(path)));
+            f = new File(String.valueOf(tempDirectory.resolve("files/configuration").resolve(path)));
         }
         FileWriter fw = new FileWriter(f);
         fw.write(content);
@@ -132,7 +131,7 @@ public class GitDirectoryManagerIntTest {
     }
 
     private static String readFile(String path) throws IOException {
-        Path file = rootWorkDir.resolve("files/configuration").resolve(path);
+        Path file = tempDirectory.resolve("files/configuration").resolve(path);
         return new String(Files.readAllBytes(file), WorkingDirectoryManager.ENCODING);
     }
 

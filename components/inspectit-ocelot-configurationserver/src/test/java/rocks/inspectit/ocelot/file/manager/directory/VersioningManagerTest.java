@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.file.dirmanagers;
+package rocks.inspectit.ocelot.file.manager.directory;
 
 import org.eclipse.jgit.api.AddCommand;
 import org.eclipse.jgit.api.CommitCommand;
@@ -26,10 +26,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.file.FileInfo;
+import rocks.inspectit.ocelot.file.manager.directory.GitAuthor;
+import rocks.inspectit.ocelot.file.manager.directory.VersioningManager;
 
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -40,12 +40,10 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOf
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class VersionControllerTest {
-
-    private static final Path rootWorkDir = Paths.get("temp_test_workdir");
+public class VersioningManagerTest {
 
     @InjectMocks
-    VersionController versionController;
+    VersioningManager versionController;
 
     @Mock
     private Git git;
@@ -118,7 +116,7 @@ public class VersionControllerTest {
             CommitCommand mockCommitCommand = mock(CommitCommand.class, Answers.RETURNS_SELF);
             when(git.commit()).thenReturn(mockCommitCommand);
             when(mockCommitCommand.setOnly(any())).thenReturn(mockCommitCommand);
-            VersionController mockedController = spy(versionController);
+            VersioningManager mockedController = spy(versionController);
             when(author.getName()).thenReturn("test");
             when(author.getMail()).thenReturn("test");
 
@@ -144,18 +142,17 @@ public class VersionControllerTest {
             TreeWalk mockTreeWalk = mock(TreeWalk.class);
             when(mockTreeWalk.next()).thenReturn(true, false);
             when(mockTreeWalk.getPathString()).thenReturn("testFile");
-            VersionController spyVersionController = Mockito.spy(versionController);
+            VersioningManager spyVersionController = Mockito.spy(versionController);
             doReturn(mockTreeWalk)
                     .when(spyVersionController)
-                    .getTreeWalk(true);
+                    .getTreeWalk();
             ObjectId mockId = mock(ObjectId.class);
             when(repo.resolve(Constants.HEAD)).thenReturn(mockId);
 
             spyVersionController.listFiles("", true);
 
             verify(repo).resolve(Constants.HEAD);
-            verify(spyVersionController).getTreeWalk(true);
-            verify(spyVersionController).isDirectory(any());
+            verify(spyVersionController).getTreeWalk();
             verify(mockTreeWalk, times(2)).next();
             verify(mockTreeWalk).getFileMode();
             verifyNoMoreInteractions(mockTreeWalk, repo, git);
@@ -179,9 +176,8 @@ public class VersionControllerTest {
             when(mockWalk.next()).thenReturn(true, true, true, false);
             ObjectId mockId = mock(ObjectId.class);
             when(repo.resolve(any())).thenReturn(mockId);
-            VersionController spyController = spy(versionController);
-            doReturn(mockWalk).when(spyController).getTreeWalk(true);
-            doReturn(false, true, false).when(spyController).isDirectory(any());
+            VersioningManager spyController = spy(versionController);
+            doReturn(mockWalk).when(spyController).getTreeWalk();
 
             List<FileInfo> output = spyController.listFiles("", true);
 
@@ -207,9 +203,8 @@ public class VersionControllerTest {
             when(mockWalk.next()).thenReturn(true, true, true, false);
             ObjectId mockId = mock(ObjectId.class);
             when(repo.resolve(any())).thenReturn(mockId);
-            VersionController spyController = spy(versionController);
-            doReturn(mockWalk).when(spyController).getTreeWalk(true);
-            doReturn(false, true, false).when(spyController).isDirectory(any());
+            VersioningManager spyController = spy(versionController);
+            doReturn(mockWalk).when(spyController).getTreeWalk();
 
             List<FileInfo> output = spyController.listFiles("", true);
 
@@ -233,9 +228,8 @@ public class VersionControllerTest {
             when(mockWalk.next()).thenReturn(true, true, true, false);
             ObjectId mockId = mock(ObjectId.class);
             when(repo.resolve(any())).thenReturn(mockId);
-            VersionController spyController = spy(versionController);
-            doReturn(mockWalk).when(spyController).getTreeWalk(true);
-            doReturn(false, true, false).when(spyController).isDirectory(any());
+            VersioningManager spyController = spy(versionController);
+            doReturn(mockWalk).when(spyController).getTreeWalk();
 
             List<FileInfo> output = spyController.listFiles("testFolder", true);
 
@@ -252,9 +246,8 @@ public class VersionControllerTest {
             when(mockWalk.next()).thenReturn(true, true, true, false);
             ObjectId mockId = mock(ObjectId.class);
             when(repo.resolve(any())).thenReturn(mockId);
-            VersionController spyController = spy(versionController);
-            doReturn(mockWalk).when(spyController).getTreeWalk(true);
-            doReturn(false, true, false).when(spyController).isDirectory(any());
+            VersioningManager spyController = spy(versionController);
+            doReturn(mockWalk).when(spyController).getTreeWalk();
 
             List<FileInfo> output = spyController.listFiles("test", true);
 
@@ -271,7 +264,7 @@ public class VersionControllerTest {
         void readExistingFile() throws IOException {
             ObjectId mockId = mock(ObjectId.class);
             when(repo.resolve(Constants.HEAD)).thenReturn(mockId);
-            VersionController spyVersionController = spy(versionController);
+            VersioningManager spyVersionController = spy(versionController);
             doReturn(mockId)
                     .when(spyVersionController)
                     .resolveCommitId(any());
@@ -304,7 +297,7 @@ public class VersionControllerTest {
         void readNonExistingFile() throws IOException, GitAPIException {
             ObjectId mockId = mock(ObjectId.class);
             when(repo.resolve(Constants.HEAD)).thenReturn(mockId);
-            VersionController spyVersionController = spy(versionController);
+            VersioningManager spyVersionController = spy(versionController);
             doReturn(mockId)
                     .when(spyVersionController)
                     .resolveCommitId(any());
@@ -391,7 +384,7 @@ public class VersionControllerTest {
     public class GetCommitsOfFile {
         @Test
         void fileExists() throws IOException, GitAPIException {
-            VersionController spyController = spy(versionController);
+            VersioningManager spyController = spy(versionController);
             ObjectId objectId = mock(ObjectId.class);
             List<ObjectId> objectIds = Arrays.asList(objectId);
             doReturn(objectIds).when(spyController).getAllCommits();
@@ -407,7 +400,7 @@ public class VersionControllerTest {
 
         @Test
         void fileExistsNot() throws IOException, GitAPIException {
-            VersionController spyController = spy(versionController);
+            VersioningManager spyController = spy(versionController);
             ObjectId mockObjectId = mock(ObjectId.class);
             List<ObjectId> objectIds = Arrays.asList(mockObjectId);
             doReturn(objectIds).when(spyController).getAllCommits();
@@ -424,7 +417,7 @@ public class VersionControllerTest {
 
         @Test
         void noCommits() throws IOException, GitAPIException {
-            VersionController spyController = spy(versionController);
+            VersioningManager spyController = spy(versionController);
             List<ObjectId> objectIds = Collections.emptyList();
             doReturn(objectIds).when(spyController).getAllCommits();
 
@@ -451,7 +444,7 @@ public class VersionControllerTest {
             RevCommit mockRevCommit = mock(RevCommit.class);
             List<RevCommit> logCommandCommits = Arrays.asList(mockRevCommit);
             doReturn(logCommandCommits).when(mockLogCommand).call();
-            VersionController spyController = spy(versionController);
+            VersioningManager spyController = spy(versionController);
 
             boolean output = spyController.commitContainsPath("test", mockObjectId);
 
@@ -480,7 +473,7 @@ public class VersionControllerTest {
             RevCommit mockRevCommit = mock(RevCommit.class);
             List<RevCommit> logCommandCommits = Arrays.asList(mockRevCommit);
             doReturn(logCommandCommits).when(mockLogCommand).call();
-            VersionController spyController = spy(versionController);
+            VersioningManager spyController = spy(versionController);
 
             boolean output = spyController.commitContainsPath("test", mockObjectId2);
 
@@ -507,7 +500,7 @@ public class VersionControllerTest {
             when(mockLogCommand.addPath(any())).thenReturn(mockLogCommand);
             RevCommit mockRevCommit = mock(RevCommit.class);
             doReturn(Collections.emptyList()).when(mockLogCommand).call();
-            VersionController spyController = spy(versionController);
+            VersioningManager spyController = spy(versionController);
 
             boolean output = spyController.commitContainsPath("test", mockObjectId);
 
@@ -531,7 +524,7 @@ public class VersionControllerTest {
             ObjectId mockId = mock(ObjectId.class);
             RevWalk mockRevWalk = mock(RevWalk.class);
             RevCommit mockCommit = mock(RevCommit.class);
-            VersionController spyController = spy(versionController);
+            VersioningManager spyController = spy(versionController);
             doReturn(mockRevWalk).when(spyController).getRevWalk();
             when(mockRevWalk.parseCommit(any())).thenReturn(mockCommit);
 
@@ -549,7 +542,7 @@ public class VersionControllerTest {
         void hasNoCommit() throws IOException {
             ObjectId mockId = mock(ObjectId.class);
             RevWalk mockRevWalk = mock(RevWalk.class);
-            VersionController spyController = spy(versionController);
+            VersioningManager spyController = spy(versionController);
             doReturn(mockRevWalk).when(spyController).getRevWalk();
             when(mockRevWalk.parseCommit(any())).thenReturn(null);
 
@@ -579,7 +572,7 @@ public class VersionControllerTest {
             when(mockDiffEntry.getNewPath()).thenReturn("test");
             List<DiffEntry> scanOutput = Arrays.asList(mockDiffEntry);
             doReturn(scanOutput).when(mockDiffFormatter).scan(any(RevTree.class), any(RevTree.class));
-            VersionController spyController = spy(versionController);
+            VersioningManager spyController = spy(versionController);
             doReturn(mockRevWalk).when(spyController).getRevWalk();
             doReturn(parentCommit).when(spyController).getParentOfRevCommit(any(), eq(0));
             doReturn(parentCommits).when(spyController).getParentsOfRevCommit(any());
@@ -619,7 +612,7 @@ public class VersionControllerTest {
             DiffFormatter mockDiffFormatter = mock(DiffFormatter.class);
             List<DiffEntry> scanOutput = Collections.emptyList();
             doReturn(scanOutput).when(mockDiffFormatter).scan(any(RevTree.class), any(RevTree.class));
-            VersionController spyController = spy(versionController);
+            VersioningManager spyController = spy(versionController);
             doReturn(mockRevWalk).when(spyController).getRevWalk();
             doReturn(parentCommit).when(spyController).getParentOfRevCommit(any(), eq(0));
             doReturn(parentCommits).when(spyController).getParentsOfRevCommit(any());

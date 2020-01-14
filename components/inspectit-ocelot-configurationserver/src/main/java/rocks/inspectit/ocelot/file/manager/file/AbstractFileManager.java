@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.file.manager;
+package rocks.inspectit.ocelot.file.manager.file;
 
 import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
@@ -8,8 +8,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.file.FileChangedEvent;
 import rocks.inspectit.ocelot.file.FileInfo;
-import rocks.inspectit.ocelot.file.dirmanagers.GitDirectoryManager;
-import rocks.inspectit.ocelot.file.dirmanagers.WorkingDirectoryManager;
+import rocks.inspectit.ocelot.file.manager.directory.GitDirectoryManager;
+import rocks.inspectit.ocelot.file.manager.directory.WorkingDirectoryManager;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;

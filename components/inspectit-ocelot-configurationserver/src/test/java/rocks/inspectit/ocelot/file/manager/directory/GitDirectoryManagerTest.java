@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.file.dirmanagers;
+package rocks.inspectit.ocelot.file.manager.directory;
 
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.ObjectId;
@@ -9,6 +9,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.file.FileVersionResponse;
+import rocks.inspectit.ocelot.file.manager.directory.GitDirectoryManager;
+import rocks.inspectit.ocelot.file.manager.directory.VersioningManager;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -25,7 +27,7 @@ public class GitDirectoryManagerTest {
     private GitDirectoryManager gitDirectoryManager;
 
     @Mock
-    private VersionController versionController;
+    private VersioningManager versionController;
 
     @Nested
     public class GetAllCommits {

@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.file.dirmanagers;
+package rocks.inspectit.ocelot.file.manager.directory;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

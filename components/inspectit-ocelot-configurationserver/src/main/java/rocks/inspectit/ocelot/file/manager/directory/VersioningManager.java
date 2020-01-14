@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.file.dirmanagers;
+package rocks.inspectit.ocelot.file.manager.directory;
 
 import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
@@ -8,7 +8,10 @@ import org.eclipse.jgit.api.LogCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.diff.RawTextComparator;
-import org.eclipse.jgit.lib.*;
+import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.ObjectLoader;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
@@ -35,10 +38,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
+/**
+ * This manager handles the versioning of the working directory's Git repository.
+ */
 @Component
 @Slf4j
-public class VersionController {
+public class VersioningManager {
 
     /**
      * The encoding used for the loaded strings.
@@ -56,17 +61,12 @@ public class VersionController {
     private static final String DATETIME_FORMAT = "dd/MM/yyyy HH:mm:ss";
 
     /**
-     * The root path of the files managed by this class.
-     */
-    private Path filesRoot;
-
-    /**
      * The author used for commits.
      */
     private GitAuthor author;
 
-    @VisibleForTesting
     @Autowired
+    @VisibleForTesting
     InspectitServerSettings config;
 
     /**
@@ -134,8 +134,6 @@ public class VersionController {
 
     /**
      * Commits all changes to the master branch of the local repo.
-     *
-     * @return Returns true of the commits was successful.
      */
     public void commitAll() throws GitAPIException {
         commit(git.commit().setAll(true));
@@ -145,7 +143,6 @@ public class VersionController {
      * Commits all currently added changes to the master branch of the local repo.
      *
      * @param commitCommand A CommitCommand to which all files are added one wants to commit.
-     * @return returns true if the commit was successful.
      */
     private void commit(CommitCommand commitCommand) throws GitAPIException {
         addAllFiles();
@@ -171,7 +168,6 @@ public class VersionController {
      * Commits all files found in the given path.
      *
      * @param filePath the path to the file one wants to commit.
-     * @Return returns true if the commit was successful.
      */
     public void commitFile(String filePath) throws GitAPIException {
         CommitCommand commitCommand = git.commit();
@@ -181,78 +177,21 @@ public class VersionController {
         commit(commitCommand);
     }
 
-//    /**
-//     * Lists all file paths in the last commit which do not start with the given prefix.
-//     *
-//     * @param path      A path the files should be listed from. Use "" to list all files.
-//     * @param recursive If true, the algorithm returns all files recursively.
-//     * @return A list of paths which have been updated in the last commit.
-//     */
-//    public List<FileInfo> listFiles(String path, boolean recursive) throws IOException {
-//        if (repo.resolve(Constants.HEAD) == null) {
-//            return Collections.emptyList();
-//        }
-//
-//        listFiles2(path, recursive);
-//
-//        if (!path.endsWith("/")) {
-//            path += "/";
-//        }
-//
-//
-//        TreeWalk treeWalk = getTreeWalk(true);
-//        return createFileInfoList(treeWalk, path, recursive);
-//    }
-//
-//    /**
-//     * Takes a TreeWalk object and creates a list of FileInfo objects.
-//     * If the files should be returned recursively, the TreeWalk object needs to have both recursive and
-//     * postOrderTraversal set to 'true' in order for the function to work as intended.
-//     * For a non-recursive list creation recursive and postOrderTraversal need to be 'false'.
-//     *
-//     * @param treeWalk A treeWalk instance.
-//     * @param path     A path the files should be listed from. Use "" to list all files.
-//     * @return A list of FileInfo Objects.
-//     */
-//    private List<FileInfo> createFileInfoList(TreeWalk treeWalk, String path, boolean recursive) throws IOException {
-//        FileInfo.FileInfoBuilder builder;
-//        List<FileInfo> currentLevelFiles = new ArrayList<>();
-//        List<FileInfo> topLevelFiles = new ArrayList<>();
-//        String[] currentPath;
-//        String currentFolder = "";
-//        while (treeWalk.next()) {
-//            String pathString = treeWalk.getPathString();
-//            if (pathString.startsWith(path)) {
-//                pathString = pathString.replace(path, "");
-//                boolean isDirectory = isDirectory(treeWalk);
-//                currentPath = pathString.split("/");
-//                builder = FileInfo.builder()
-//                        .name(currentPath[currentPath.length - 1])
-//                        .type(isDirectory ? FileInfo.Type.DIRECTORY : FileInfo.Type.FILE);
-//
-//                if ((!currentFolder.equals(getCurrentFolder(currentPath)) || currentPath.length == 1)
-//                        && isDirectory
-//                        && !currentLevelFiles.isEmpty()
-//                        && recursive) {
-//                    builder.children(currentLevelFiles);
-//                    currentLevelFiles = new ArrayList<>();
-//                    currentFolder = getCurrentFolder(currentPath);
-//                }
-//
-//                if (currentPath.length == 1) {
-//                    topLevelFiles.add(builder.build());
-//                    currentFolder = "";
-//                } else {
-//                    currentLevelFiles.add(builder.build());
-//                }
-//            }
-//        }
-//        return topLevelFiles;
-//    }
-
+    /**
+     * Lists all files in the given path.
+     *
+     * @param path      The path which should be considered as root.
+     * @param recursive Whether the tree should be resolved recursively.
+     * @return List of{@link FileInfo} representing the content of the repository.
+     * @throws IOException in case the repository cannot be read
+     */
     public List<FileInfo> listFiles(String path, boolean recursive) throws IOException {
         if (repo.resolve(Constants.HEAD) == null) {
             return Collections.emptyList();
+        }
+
+        if (path.startsWith("/")) {
+            path = path.substring(1);
         }
 
         boolean skipNext = false;
@@ -264,20 +203,35 @@ public class VersionController {
             treeWalk.setRecursive(false);
         } else {
             treeWalk = TreeWalk.forPath(repo, path, getTree());
-            skipNext = true;
+            if (treeWalk == null) {
+                return Collections.emptyList();
+            } else if (treeWalk.isSubtree()) {
+                treeWalk.enterSubtree();
+            } else {
+                skipNext = true;
+            }
         }
 
-        if (treeWalk == null) {
-            return Collections.emptyList();
-        } else {
-            return collectFiles(treeWalk, recursive, skipNext);
-        }
+        return collectFiles(treeWalk, recursive, skipNext);
     }
 
+    /**
+     * Collects the files within the current path of the given {@link TreeWalk}.
+     *
+     * @param treeWalk  The {@link TreeWalk} to traverse.
+     * @param recursive Whether sub trees should be resolved.
+     * @param skipNext  Flag indicating whether {@link TreeWalk#next()} should be invoked at the beginning.
+     *                  For example, this may be the case if the tree is created using {@link TreeWalk#forPath(Repository, String, RevTree)}.
+     * @return The files within the current tree.
+     * @throws IOException in case the repository cannot be read
+     */
     private List<FileInfo> collectFiles(TreeWalk treeWalk, boolean recursive, boolean skipNext) throws IOException {
         List<FileInfo> resultList = new ArrayList<>();
 
+
         while (skipNext || treeWalk.next()) {
+            skipNext = false;
+
             String name = treeWalk.getNameString();
 
             FileInfo.FileInfoBuilder fileBuilder = FileInfo.builder().name(name);
@@ -300,62 +254,19 @@ public class VersionController {
         return resultList;
     }
 
-//    /**
-//     * Returns the folder of the last entry of a given String array.
-//     * If the array only consists of one element, this element is returned.
-//     *
-//     * @param currentPath A String array resembling a path.
-//     * @return The folder the last element of the path is contained in or if the path contains only one element this very
-//     * element.
-//     */
-//    private String getCurrentFolder(String[] currentPath) {
-//        if (currentPath.length == 1) {
-//            return currentPath[0];
-//        }
-//        return currentPath[currentPath.length - 2];
-//    }
-//
-//    /**
-//     * Returns true if the given TreeWalks FileMode is a tree.
-//     *
-//     * @param treeWalk the TreeWalk object to get the file from.
-//     * @return The Type of the file. Either File or Directory
-//     */
-//    @VisibleForTesting
-//    boolean isDirectory(TreeWalk treeWalk) {
-//        return treeWalk.getFileMode() == FileMode.TREE;
-//    }
-
     /**
      * Returns the TreeWalk Object from the last commit.
      *
      * @return The TreeWalk Object from the current repo.
      */
-    private TreeWalk getTreeWalk() throws IOException {
+    @VisibleForTesting
+    TreeWalk getTreeWalk() throws IOException {
         RevTree tree = getTree();
         TreeWalk treeWalk = new TreeWalk(repo);
         treeWalk.addTree(tree);
         treeWalk.setRecursive(true);
         return treeWalk;
     }
-
-//    /**
-//     * Returns the TreeWalk Object from the last commit.
-//     *
-//     * @param recursive if true, TreeWalk iterates the RevTree recursively.
-//     * @return The TreeWalk Object from the current repo.
-//     */
-//    @VisibleForTesting
-//    TreeWalk getTreeWalk(boolean recursive) throws IOException {
-//        RevTree tree = getTree();
-//        TreeWalk treeWalk = new TreeWalk(repo);
-//        treeWalk.addTree(tree);
-//        treeWalk.setRecursive(recursive);
-//        if (recursive) {
-//            treeWalk.setPostOrderTraversal(true);
-//        }
-//        return treeWalk;
-//    }
 
     /**
      * Returns the TreeWalk Object from the commit with the given id.
