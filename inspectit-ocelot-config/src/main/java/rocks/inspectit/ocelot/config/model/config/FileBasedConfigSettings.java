@@ -3,6 +3,7 @@ package rocks.inspectit.ocelot.config.model.config;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import org.hibernate.validator.constraints.time.DurationMin;
 
 import java.time.Duration;
 
@@ -26,14 +27,14 @@ public class FileBasedConfigSettings {
     private boolean enabled;
 
     /**
-     * If true, a {@link rocks.inspectit.ocelot.core.config.propertysources.file.ConfigurationDirectoriesWatcher} will be started to reload the configuration from the directory on changes.
+     * If true, a {@link rocks.inspectit.ocelot.core.config.propertysources.file.ConfigurationDirectoriesPoller} will be started to reload the configuration from the directory on changes.
      */
     private boolean watch;
 
     /**
      * The frequency at which the target folder should be polled for changes if {@link #watch} is true.
-     * If the frequency is set to zero, the java {@link java.nio.file.WatchService} is used instead of polling.
      */
     @NonNull
+    @DurationMin(millis = 1)
     private Duration frequency;
 }
