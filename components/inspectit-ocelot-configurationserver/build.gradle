@@ -133,7 +133,6 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
 }
 
-
 task copyServerJar(type: Copy) {
     dependsOn bootJarWithFrontend
     from("${buildDir}/libs/inspectit-ocelot-configurationserver-${version}.jar")
