@@ -3,6 +3,7 @@ package rocks.inspectit.ocelot.config.loaders;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
@@ -81,11 +82,15 @@ public class ConfigFileLoader {
      */
     private HashMap<String, String> loadConfig(Resource[] resources) throws IOException {
         HashMap<String, String> configMap = new HashMap<>();
-        String commonPrefix = StringUtils.getCommonPrefix(Arrays.stream(resources).map(Resource::getDescription).toArray(String[]::new));
+        String commonPrefix = StringUtils.getCommonPrefix(
+                Arrays.stream(resources)
+                        .map(ConfigFileLoader::getResourcePath)
+                        .toArray(String[]::new)
+        );
         for (Resource resource : resources) {
-            String resourceDescription = resource.getDescription().substring(commonPrefix.length());
-            resourceDescription = resourceDescription.replace(File.separator, "/")
-                    .substring(0, resourceDescription.length() - 1);
+            String resourceDescription = getResourcePath(resource)
+                    .substring(commonPrefix.length())
+                    .replace(File.separator, "/");
             configMap.put(resourceDescription, readResourceContent(resource));
         }
         return configMap;
@@ -109,6 +114,23 @@ public class ConfigFileLoader {
      */
     private Resource[] getRessources(String path) throws IOException {
         return new PathMatchingResourcePatternResolver(ConfigFileLoader.class.getClassLoader()).getResources(path);
+    }
 
+    /**
+     * Return the full path of a given resource object.
+     *
+     * @param resource The resource object the path should be returned of.
+     * @return The full path of the resource. e.g. "C:/path/to/my/resource/file"
+     */
+    private static String getResourcePath(Resource resource) {
+        if (resource instanceof ClassPathResource) {
+            return ((ClassPathResource) resource).getPath();
+        } else {
+            try {
+                return resource.getFile().getPath();
+            } catch (IOException e) {
+                throw new RuntimeException("Cannot resolve resource path because it is neither a file nor a class path resource", e);
+            }
+        }
     }
 }
