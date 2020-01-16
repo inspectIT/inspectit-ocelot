@@ -12,7 +12,6 @@ import rocks.inspectit.oce.eum.server.beacon.Beacon;
 import rocks.inspectit.oce.eum.server.configuration.model.BeaconMetricDefinitionSettings;
 import rocks.inspectit.oce.eum.server.configuration.model.BeaconRequirement;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
-import rocks.inspectit.oce.eum.server.utils.DefaultTags;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -91,12 +90,6 @@ public class BeaconMetricManager {
         for (Map.Entry<String, String> beaconTag : configuration.getTags().getBeacon().entrySet()) {
             if (beacon.contains(beaconTag.getValue())) {
                 tagContextBuilder.putLocal(TagKey.create(beaconTag.getKey()), TagValue.create(beacon.get(beaconTag.getValue())));
-            }
-        }
-
-        for (DefaultTags defaultTag : DefaultTags.values()) {
-            if (beacon.contains(defaultTag.name())) {
-                tagContextBuilder.putLocal(TagKey.create(defaultTag.name()), TagValue.create(beacon.get(defaultTag.name())));
             }
         }
         return tagContextBuilder;

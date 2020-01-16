@@ -1,4 +1,4 @@
-package rocks.inspectit.oce.eum.server.metrics;
+package rocks.inspectit.oce.eum.server.utils;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -18,7 +18,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import rocks.inspectit.oce.eum.server.utils.DefaultTags;
+import rocks.inspectit.oce.eum.server.beacon.processor.CountryCodeBeaconProcessor;
 
 import java.util.HashMap;
 import java.util.List;
@@ -87,7 +87,7 @@ public class GeolocationResolverIntTest {
 
         HttpResponse response = testClient.execute(new HttpGet("http://localhost:8888/metrics)"));
         ResponseHandler responseHandler = new BasicResponseHandler();
-        assertThat(responseHandler.handleResponse(response).toString()).contains(DefaultTags.COUNTRY_CODE.name() + "=" + "\"DE\"");
+        assertThat(responseHandler.handleResponse(response).toString()).contains(CountryCodeBeaconProcessor.TAG_COUNTRY_CODE + "=" + "\"DE\"");
     }
 
     /**
@@ -104,7 +104,7 @@ public class GeolocationResolverIntTest {
 
         HttpResponse response = testClient.execute(new HttpGet("http://localhost:8888/metrics)"));
         ResponseHandler responseHandler = new BasicResponseHandler();
-        assertThat(responseHandler.handleResponse(response).toString()).contains(DefaultTags.COUNTRY_CODE.name() + "=" + "\"\"");
+        assertThat(responseHandler.handleResponse(response).toString()).contains(CountryCodeBeaconProcessor.TAG_COUNTRY_CODE + "=" + "\"\"");
     }
 
     /**
@@ -121,6 +121,6 @@ public class GeolocationResolverIntTest {
 
         HttpResponse response = testClient.execute(new HttpGet("http://localhost:8888/metrics)"));
         ResponseHandler responseHandler = new BasicResponseHandler();
-        assertThat(responseHandler.handleResponse(response).toString()).contains(DefaultTags.COUNTRY_CODE.name() + "=" + "\"\"");
+        assertThat(responseHandler.handleResponse(response).toString()).contains(CountryCodeBeaconProcessor.TAG_COUNTRY_CODE + "=" + "\"\"");
     }
 }

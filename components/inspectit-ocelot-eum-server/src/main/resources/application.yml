@@ -54,6 +54,7 @@ inspectit-eum-server:
     extra:
       APPLICATION: my-application
     beacon:
+      COUNTRY_CODE: COUNTRY_CODE
       URL: u
       OS: ua.plt
     define-as-global:
