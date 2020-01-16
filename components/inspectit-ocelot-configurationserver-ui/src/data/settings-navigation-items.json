@@ -1,0 +1,7 @@
+[
+    {
+        "name": "User List",
+        "icon": "pi-users",
+        "href": "/settings/userlist"
+    }
+]

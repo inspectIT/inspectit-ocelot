@@ -44,7 +44,7 @@ As the name states, we define under the `entry` property of the rule which actio
 On entry, we collect the current timestamp in a variable named `method_entry_time` and the name of the currently executed method in `method_name`.
 These variables are _data_, their names are referred to as _data keys_. Note that we also define how the data is collected: For `method_entry_time` we invoke the [action](#actions) named `timestamp_nanos` and for `method_name` the one named `get_method_fqn`.
 
-This data is then used on method exit: using the action `elapsed_millis` we compute the time which has passed since `method_entry_time`. Finally, the duration computed this way is used as value for the `method/duration` metric. As shown in the [definition](metrics/custom-metrics.md) of this metric, the collected `method_name` is used as tag for all of its views.
+This data is then used on method exit: using the action `elapsed_millis` we compute the time which has passed since `method_entry_time`. Finally, the duration computed this way is used as a value for the `method/duration` metric. As shown in the [definition](metrics/custom-metrics.md) of this metric, the collected `method_name` is used as a tag for all of its views.
 
 ## Data Propagation
 
@@ -149,7 +149,7 @@ inspectit:
 
 The names of the first two actions, `timestamp_nanos` and `elapsed_millis` should be familiar for you from the initial example in the [rules section](instrumentation/rules.md).
 
-The code executed when a action is invoked is defined through the `value` configuration property. In YAML, this is simply a string. InspectIT however will interpret this string as a Java expression to evaluate. The result value of this expression will be used as result for the action invocation.
+The code executed when an action is invoked is defined through the `value` configuration property. In YAML, this is simply a string. InspectIT however will interpret this string as a Java expression to evaluate. The result value of this expression will be used as result for the action invocation.
 
 Note that the code will not be interpreted at runtime, but instead inspectIT Ocelot will compile the expression to bytecode to ensure maximum efficiency. As indicated by the manual primitive boxing performed for `timestamp_nanos` the compiler has some restrictions. For example Autoboxing is not supported. However, actions are expected to return Objects, therefore manual boxing has to be performed. Under the hood, inspectIT uses the [javassist](http://www.javassist.org/) library, where all imposed restrictions can be found.
 The most important ones are that neither Autoboxing, Generics, Anonymous Classes or Lambda Expressions are supported.
@@ -216,7 +216,7 @@ Normally, all non `java.lang.*` types have to be referred to using their fully q
 
 Rules glue together [scopes](instrumentation/scopes.md) and [actions](instrumentation/rules.md#actions) to define which actions you want to perform on which application methods.
 
-As you might have noticed, the initial example rule shown in the [rules section](instrumentation/rules.md) did not define any reference to a scope. This is because this rule originates form the default configuration of inspectIT Ocelot, where we don't know yet of which methods you want to collect the response time. Therefore this rule is defined without scopes, but you can easily add some in your own configuration files:
+As you might have noticed, the initial example rule shown in the [rules section](instrumentation/rules.md) did not define any reference to a scope. This is because this rule originates from the default configuration of inspectIT Ocelot, where we don't know yet of which methods you want to collect the response time. Therefore this rule is defined without scopes, but you can easily add some in your own configuration files:
 
 ```yaml
 inspectit:
@@ -424,11 +424,11 @@ For example, using the previous configuration snippet, each method that matches 
 |Property |Default| Description
 |---|---|---|
 |`start-span`|`false`|If true, all method invocations of methods matching any scope of this rule will be collected as spans.
-|`name`|`null`|Defines a data key whose value will be used as name for the span. If it is `null` or the value for the data key is `null`, the full qualified name of the method will be used. Note that the value for the data key must be written in the entry section of the rule at latest!
+|`name`|`null`|Defines a data key whose value will be used as name for the span. If it is `null` or the value for the data key is `null`, the fully qualified name of the method will be used. Note that the value for the data key must be written in the entry section of the rule at latest!
 |`kind`|`null`|Can be `null`, `CLIENT` or `SERVER` corresponding to the [OpenCensus values](https://opencensus.io/tracing/span/kind/).
 |`attributes`|`{}` (empty dictionary) |Maps names of attributes to data keys whose values will be used on exit to populate the given attributes.
 
-Commonly, you do not want to have the full qualified name of the instrumented method as span name. For example, for HTTP requests you typically want the HTTP path as span name. This behaviour can be customized using the `name` property:
+Commonly, you do not want to have the fully qualified name of the instrumented method as span name. For example, for HTTP requests you typically want the HTTP path as span name. This behaviour can be customized using the `name` property:
 
 ```yaml
 inspectit:
@@ -534,7 +534,7 @@ Firstly, it is possible to "remember" the span created or continued using the `s
           end-span: false
 ```
 
-With this option, the span created at the end of the entry phase will be stored in the context with the data key `my_span_data`. Usually this span reference is then extracted from the context and attached ot an object via the [_attachments](#input-parameters).
+With this option, the span created at the end of the entry phase will be stored in the context with the data key `my_span_data`. Usually this span reference is then extracted from the context and attached to an object via the [_attachments](#input-parameters).
 
 Without the `end-span: false` definition above, the span would be ended as soon as the instrumented method returns.
 By setting `end-span` to false, the span is kept open instead. It can then be continued when another method is executed as follows:

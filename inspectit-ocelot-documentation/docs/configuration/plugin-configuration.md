@@ -21,7 +21,7 @@ inspectit:
 
 The directory will be scanned on startup of the agent and all found plugins will be loaded.
 
-> The scanning for plugins only takes places on agent startup. Adding plugins at runtime is currently not supported.
+> The scanning for plugins only takes place on agent startup. Adding plugins at runtime is currently not supported.
 
 For configuring the loaded plugins, the same [configuration sources](#configuration-sources) are used as for the agent's configuration.
 The settings for each plugin can be defined under the plugins section based on its name:

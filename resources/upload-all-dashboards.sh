@@ -1,3 +1,5 @@
+#!/bin/bash
+
 while IFS='=' read -r ID FILE || [ -n "$FILE" ]
 do
   DASHBOARD_JSON=$(cat "$FILE") || exit 1

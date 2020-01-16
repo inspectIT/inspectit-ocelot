@@ -232,13 +232,15 @@ inspectit-eum-server:
       URL: u
 ```
 
-#### Default Tags
+#### Additional Tags
 
-The EUM server provides a set of default tags which don't have to be specified and always exist. Currently, the following default tags exist:
+The EUM server provides a set of additional tags which can be used like all other tags. Currently, the following tags exist:
 
 | Tag | Description |
 | --- | --- |
 | `COUNTRY_CODE` | Contains the geolocation of the beacon's origin. It is resolved by using the client IP and the [GeoLite2 database](https://www.maxmind.com). If the IP cannot be resolved, the tag value will be empty. |
+| `U_NO_QUERY` | The Boomerang *u* property but without query parameters. Check out [Boomerang](https://developer.akamai.com/tools/boomerang/docs/BOOMR.html).|
+| `U_NO_QUERY` | The Boomerang *pgu* property but without query parameters. Check out [Boomerang](https://developer.akamai.com/tools/boomerang/docs/BOOMR.html).|
 
 ##### Custom COUNTRY_CODE Mapping
 
@@ -277,3 +279,13 @@ inspectit-eum-server:
 
 ## Exporters
 By now, the prometheus exporter is available. If `enabled` is set to true, the exporter is exposes the metrics under the following HTTP endpoint: `http://[host]:[port]/metrics`
+
+## Self-Monitoring
+
+For the purpose of self-monitoring, the EUM server offers a set of metrics that reflect its state.
+These metrics are exposed using its Prometheus endpoint which also is used for the EUM beacon data.
+Currently, the following self monitoring metrics are available.
+
+| Metric name | Description |
+| --- | --- |
+| `beacons_received` | Counts the number of received beacons | 

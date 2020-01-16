@@ -44,9 +44,7 @@ const mappings = {
     /** Specifies how many requests are currently loading in the background */
     pendingRequests: 0,
     /** The current agent mappings. */
-    mappings: null,
-    /** The YAML content of the editor. Null if no changes have been made to the mappings. */
-    editorContent: null,
+    mappings: [],
     /** The date when the agent mappings have been fetched. */
     updateDate: null
 }
@@ -63,10 +61,18 @@ const agentStatus = {
     pendingClearRequests: 0,
 }
 
+const settings = {
+    /** The list of users */
+    users: [],
+    /** Specifies how many requests are currently loading the data in the background */
+    pendingRequests: 0,
+}
+
 export {
     authentication,
     configuration,
     notification,
     mappings,
-    agentStatus
+    agentStatus,
+    settings
 }

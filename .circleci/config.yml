@@ -96,6 +96,25 @@ jobs:
     docker:
       - image: adoptopenjdk/openjdk8:latest
 
+  # Ensure inspectit Agent can attach itself on Alpine Linux
+  attach-alpine-jdk8:
+    docker:
+      - image: openjdk:8-jdk-alpine
+    working_directory: ~/inspectit
+    steps:
+      - attach_repo
+      - run: cd repo && ./gradlew assemble --max-workers=2 --no-daemon && cd ..
+      - run:
+          command: |
+            apk update && apk add curl
+            echo "class Dummy{public static void main(String[] args)throws InterruptedException{while (true){Thread.sleep(1000);}}}" > Dummy.java
+            javac Dummy.java
+            $(nohup java Dummy > out.txt &)
+            sleep 2
+            processId=$( ps -e -o pid,comm | grep java | awk {'print $1'} )
+            java -jar ~/inspectit/repo/inspectit-ocelot-agent/build/inspectit-ocelot-agent-SNAPSHOT.jar $processId
+            curl -4 -o /dev/null -s -w "%{http_code}" --connect-timeout 2 --max-time 2  --retry 3 --retry-delay 3 --retry-max-time 10 --retry-connrefuse http://localhost:8888
+
   # Testing the compilation of JMH tests
   jmh-compile:
     docker:
@@ -105,6 +124,7 @@ jobs:
       - attach_workspace:
           at: ~/inspectit
       - run: cd repo && ./gradlew jmhCompile
+
 
   # Building the release artifacts (agent and demo)
   build_release_artifacts:
@@ -170,7 +190,10 @@ jobs:
       - image: circleci/openjdk:8-jdk
     working_directory: ~/inspectit/repo/inspectit-ocelot-demo/grafana/marketplace
     steps:
-      - run: ~/inspectit/repo/resources/upload-all-dashboards.sh
+      - run:
+          command: |
+            chmod +x ~/inspectit/repo/resources/upload-all-dashboards.sh
+            ~/inspectit/repo/resources/upload-all-dashboards.sh
   # Deploy pre-release documentation
   deploy-master-documentation:
     docker:
@@ -240,7 +263,7 @@ workflows:
       - checkout
       - sys-oracle8-codecov: &requires_checkout
           requires:
-            - checkout
+           - checkout
       - sys-oracle11:
           <<: *requires_checkout
       - sys-openjdk8:
@@ -254,6 +277,8 @@ workflows:
       - sys-adoptjdk8:
           <<: *requires_checkout
       - jmh-compile:
+          <<: *requires_checkout
+      - attach-alpine-jdk8:
           <<: *requires_checkout
 
       - deploy-master-documentation:
