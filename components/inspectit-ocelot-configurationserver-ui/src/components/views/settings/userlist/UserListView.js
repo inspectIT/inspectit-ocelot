@@ -2,6 +2,7 @@ import React from 'react';
 
 import UserToolbar from './UserToolbar';
 import UserDataTable from './UserDataTable';
+import CreateDialog from '../dialogs/CreateDialog';
 
 /**
  * Contains toolbar and list component.
@@ -11,6 +12,9 @@ class UserListView extends React.Component {
     state = {
         filter: ''
     };
+
+    showCreateUserDialog = () => this.setState({ isCreateUserDialogShown: true });
+    hideCreateUserDialog = () => this.setState({ isCreateUserDialogShown: false });
 
     render() {
         const contentHeight = 'calc(100vh - 10rem)';
@@ -33,6 +37,7 @@ class UserListView extends React.Component {
                     <UserToolbar
                         filterValue={this.state.filter}
                         onFilterChange={this.handleFilterChange}
+                        onCreateUser={this.showCreateUserDialog}
                     />
                 </div>
                 <div className='content'>
@@ -41,6 +46,10 @@ class UserListView extends React.Component {
                         maxHeight={`calc(${contentHeight} - 2.5em)`}
                     />
                 </div>
+                <CreateDialog
+                    visible={this.state.isCreateUserDialogShown}
+                    onHide={this.hideCreateUserDialog}
+                />
             </div>
         )
     }

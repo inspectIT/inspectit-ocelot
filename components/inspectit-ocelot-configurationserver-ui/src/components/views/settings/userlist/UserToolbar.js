@@ -38,6 +38,7 @@ class UserToolbar extends React.Component {
                         </div>
                     </div>
                     <div className='p-toolbar-group-right'>
+                        <Button icon='pi pi-plus' onClick={this.props.onCreateUser} />
                         <Button icon='pi pi-refresh' onClick={(e) => this.props.fetchUsers()} />
                     </div>
                 </Toolbar>
