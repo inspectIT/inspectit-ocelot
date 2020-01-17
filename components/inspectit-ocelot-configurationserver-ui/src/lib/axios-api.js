@@ -46,6 +46,9 @@ axiosBearer.interceptors.response.use(function (response) {
     if (error.response && error.response.status == 401) {
         reduxStore.dispatch(notificationActions.showWarningMessage("Unauthorized", "Your access token is no longer valid. Please login again."));
         reduxStore.dispatch(authenticationActions.logout());
+    } else if (error.response && error.response.data && error.response.data.message) {
+        const { message } = error.response.data;
+        reduxStore.dispatch(notificationActions.showErrorMessage("Request failed", message));
     } else {
         const { message } = error;
         reduxStore.dispatch(notificationActions.showErrorMessage("Request failed", message));

@@ -24,6 +24,24 @@ const settingsReducer = createReducer(initialState)({
 
         };
     },
+    [types.ADD_USER_STARTED]: (state, action) => {
+        return {
+            ...state,
+            pendingRequests: state.pendingRequests + 1
+        };
+    },
+    [types.ADD_USER_FAILURE]: (state, action) => {
+        return {
+            ...state,
+            pendingRequests: state.pendingRequests - 1
+        };
+    },
+    [types.ADD_USER_SUCCESS]: (state, action) => {
+        return {
+            ...state,
+            pendingRequests: state.pendingRequests - 1
+        };
+    },
 })
 
 export default settingsReducer; 
