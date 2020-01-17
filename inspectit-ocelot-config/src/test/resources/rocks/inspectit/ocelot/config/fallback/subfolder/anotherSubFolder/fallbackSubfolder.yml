@@ -1,0 +1,6 @@
+i:
+  am:
+    a:
+      fallback: test-yml
+      in-a: subfolfder
+      in: another subfolder
