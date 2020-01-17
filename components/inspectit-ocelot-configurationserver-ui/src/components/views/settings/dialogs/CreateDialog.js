@@ -18,7 +18,7 @@ const initialState = {
 /**
  * Dialog for creating a new user.
  */
-class DownloadDialog extends React.Component {
+class CreateDialog extends React.Component {
 
     input = React.createRef();
 
@@ -121,4 +121,4 @@ const mapDispatchToProps = {
     addUser: settingsActions.addUser
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(DownloadDialog); 
+export default connect(mapStateToProps, mapDispatchToProps)(CreateDialog); 
