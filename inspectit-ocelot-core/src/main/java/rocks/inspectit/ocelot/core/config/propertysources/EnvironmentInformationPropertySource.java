@@ -22,6 +22,9 @@ public class EnvironmentInformationPropertySource extends PropertiesPropertySour
     private static Properties getEnvironmentProperties() {
         Properties result = new Properties();
         result.put("inspectit.env.agent-dir", getAgentJarDirectory());
+        // Ari-TODO -- create a inspectit.env.host and inspectit.env.id (unique ID) and the coressponding functions to generate the values
+//        result.put("inspectit.env.host", getAgentHost());
+//        result.put("inspectit.env.agent-id", createAgentId());
         return result;
     }
 

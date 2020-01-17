@@ -27,3 +27,4 @@ inspectit:
       # the following attributes will be sent as http query parameters when fetching the configuration
       attributes:
         service: ${inspectit.service-name}
+        # Ari-TODO -- Add a host and id default attribute with values from inspectit.env.host and inspectit.env.id
