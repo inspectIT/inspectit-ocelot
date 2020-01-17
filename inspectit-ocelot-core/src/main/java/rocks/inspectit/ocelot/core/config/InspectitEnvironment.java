@@ -10,8 +10,8 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.expression.StandardBeanExpressionResolver;
 import org.springframework.core.env.*;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
+import rocks.inspectit.ocelot.config.loaders.ConfigFileLoader;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.config.ConfigSettings;
 import rocks.inspectit.ocelot.config.utils.CaseUtils;
@@ -58,29 +58,18 @@ public class InspectitEnvironment extends StandardEnvironment {
     private static final String INSPECTIT_CONFIG_SETTINGS_PREFIX = "inspectit.config";
 
     /**
-     * The folder under which the default configuration files can be found in the inspectit-ocelot-config project.
-     */
-    private static final String DEFAULT_CONFIG_PATH = "default";
-
-    /**
-     * The name to use for the property source holding the default configuration.
-     */
-    public static final String DEFAULT_CONFIG_PROPERTYSOURCE_NAME = "inspectitDefaults";
-
-    /**
      * The name to use for the property source holding the {@link rocks.inspectit.ocelot.config.model.env.EnvironmentSettings},
      * Used for the {@link EnvironmentInformationPropertySource}.
      */
     private static final String INSPECTIT_ENV_PROPERTYSOURCE_NAME = "inspectitEnvironment";
 
     /**
-     * The folder under which the fallback configuration override files can be found in the inspectit-ocelot-config project.
-     * These are loaded in case the initial configuration is not valid.
+     * The name to use for the property source containing the default configuration overrides.
      */
-    private static final String FALLBACK_CONFIG_PATH = "fallback";
+    public static final String DEFAULT_CONFIG_PROPERTYSOURCE_NAME = "inspectitDefaults";
 
     /**
-     * The name to use for the proeprty source containing the fallback configuration overrides.
+     * The name to use for the property source containing the fallback configuration overrides.
      */
     private static final String FALLBACK_CONFIG_PROPERTYSOURCE_NAME = "inspectitFallbackOverwrites";
 
@@ -180,12 +169,17 @@ public class InspectitEnvironment extends StandardEnvironment {
         val propsList = getPropertySources();
 
         loadCmdLineArgumentsPropertySource(cmdLineArgs, propsList);
-
-        PropertySource defaultSettings = loadAgentResourceYaml(DEFAULT_CONFIG_PATH, DEFAULT_CONFIG_PROPERTYSOURCE_NAME);
+        PropertySource defaultSettings;
+        Optional<ConfigSettings> appliedConfigSettings = null;
+        try {
+            defaultSettings = loadAgentResourceYaml(DEFAULT_CONFIG_PROPERTYSOURCE_NAME, ConfigFileLoader.getDefaultResources());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         propsList.addLast(defaultSettings);
         propsList.addLast(new EnvironmentInformationPropertySource(INSPECTIT_ENV_PROPERTYSOURCE_NAME));
 
-        Optional<ConfigSettings> appliedConfigSettings = initializeConfigurationSources(propsList);
+        appliedConfigSettings = initializeConfigurationSources(propsList);
 
         log.info("Registered Configuration Sources:");
         getPropertySources().stream().forEach(ps -> log.info("  {}", ps.getName()));
@@ -195,7 +189,12 @@ public class InspectitEnvironment extends StandardEnvironment {
             currentConfig = initialConfig.get();
         } else {
             log.error("Startup configuration is not valid! Using fallback configuration but listening for configuration updates...");
-            PropertySource fallbackSettings = loadAgentResourceYaml(FALLBACK_CONFIG_PATH, FALLBACK_CONFIG_PROPERTYSOURCE_NAME);
+            PropertySource fallbackSettings;
+            try {
+                fallbackSettings = loadAgentResourceYaml(FALLBACK_CONFIG_PROPERTYSOURCE_NAME, ConfigFileLoader.getFallBackResources());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
             val currentSources = propsList.stream().collect(Collectors.toList());
             val fallbackSources = Arrays.<PropertySource<?>>asList(fallbackSettings, defaultSettings);
 
@@ -206,6 +205,7 @@ public class InspectitEnvironment extends StandardEnvironment {
 
             fallbackSources.forEach(ps -> propsList.remove(ps.getName()));
             currentSources.forEach(ps -> propsList.addLast(ps));
+
 
             appliedConfigSettings.ifPresent(currentConfig::setConfig);
         }
@@ -281,18 +281,11 @@ public class InspectitEnvironment extends StandardEnvironment {
         return config.isPresent() ? config : lastConfig;
     }
 
-    private static PropertiesPropertySource loadAgentResourceYaml(String resourcePath, String propertySourceName) {
+    private static PropertiesPropertySource loadAgentResourceYaml(String propertySourceName, Resource[] resources) {
         Properties result = new Properties();
-
-        try {
-            Resource[] resources = new PathMatchingResourcePatternResolver(InspectitEnvironment.class.getClassLoader())
-                    .getResources("classpath:rocks/inspectit/ocelot/config/" + resourcePath + "/**/*.yml");
-            for (val res : resources) {
-                Properties properties = PropertyUtils.readYamlFiles(res);
-                result.putAll(properties);
-            }
-        } catch (IOException e) {
-            log.error("ERROR reading config", e);
+        for (val res : resources) {
+            Properties properties = PropertyUtils.readYamlFiles(res);
+            result.putAll(properties);
         }
         return new PropertiesPropertySource(propertySourceName, result);
     }
