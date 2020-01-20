@@ -19,4 +19,14 @@ public class EnvironmentSettings {
      * Does not contain a trailing slash.
      */
     private String agentDir;
+
+    /**
+     * The hostname where the agent is running.
+     */
+    private String host;
+
+    /**
+     * The process id of the JVM process.
+     */
+    private String pid;
 }

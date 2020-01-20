@@ -6,7 +6,9 @@ import org.springframework.core.env.PropertiesPropertySource;
 import rocks.inspectit.ocelot.bootstrap.Instances;
 
 import java.io.File;
+import java.lang.management.ManagementFactory;
 import java.net.URL;
+import java.net.InetAddress;
 import java.util.Properties;
 
 /**
@@ -22,9 +24,8 @@ public class EnvironmentInformationPropertySource extends PropertiesPropertySour
     private static Properties getEnvironmentProperties() {
         Properties result = new Properties();
         result.put("inspectit.env.agent-dir", getAgentJarDirectory());
-        // Ari-TODO -- create a inspectit.env.host and inspectit.env.id (unique ID) and the coressponding functions to generate the values
-//        result.put("inspectit.env.host", getAgentHost());
-//        result.put("inspectit.env.agent-id", createAgentId());
+        result.put("inspectit.env.host", getHostName());
+        result.put("inspectit.env.pid", getPid());
         return result;
     }
 
@@ -59,6 +60,30 @@ public class EnvironmentInformationPropertySource extends PropertiesPropertySour
             return tempdir.substring(0, tempdir.length() - 1);
         } else {
             return tempdir;
+        }
+    }
+
+    /**
+     * @return The hostname where the ocelot agent is running.
+     */
+    private static String getHostName() {
+        try {
+            return InetAddress.getLocalHost().getHostName();
+        } catch (Exception e) {
+            log.debug("Failed to resolve hostname {}", e);
+            return "unknown";
+        }
+    }
+
+    /**
+     * @return The process id of the running JVM.
+     */
+    private static String getPid() {
+        try{
+            return ManagementFactory.getRuntimeMXBean().getName().split("@")[0];
+        } catch (Exception e) {
+            log.debug("Failed to resolve process id {}", e);
+            return "unknown";
         }
     }
 }
