@@ -1,8 +1,8 @@
 <configuration>
 
-    <property name="logDir" value="${LOG_TEMP:-${java.io.tmpdir:-/tmp}/inspectit-ocelot-config-server}" />
-    <property name="consoleLogPattern" value="%d{ISO8601} %-5p %-6r --- [inspectITConfigServer] [%15.15t] %-40.40logger{39} : %m%n%rEx}"/>
-    <property name="fileLogPattern" value="%d{ISO8601} %-5p %-6r --- [%15.15t] %-40.40logger{39} : %m%n%rEx}"/>
+    <property name="logDir" value="${LOG_DIR:-${java.io.tmpdir:-/tmp}/inspectit-ocelot-config-server}" />
+    <property name="consoleLogPattern" value="${LOG_CONSOLE_PATTERN:-%d{HH:mm:ss.SSS} [%+16thread] %-5level %logger{36} - %msg%n}"/>
+    <property name="fileLogPattern" value="${LOG_FILE_PATTERN:-%d{HH:mm:ss.SSS} [%+16thread] %-5level %logger{36} - %msg%n}"/>
 
     <!-- Console output  -->
     <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
@@ -56,7 +56,7 @@
     </logger>
 
     <!-- User access logger -->
-    <logger name="rocks.inspectit.ocelot.filters">
+    <logger name="rocks.inspectit.ocelot.filters.AccessLogFilter">
         <appender-ref ref="auditFile"/>
     </logger>
     <logger name="rocks.inspectit.ocelot.security.audit">
