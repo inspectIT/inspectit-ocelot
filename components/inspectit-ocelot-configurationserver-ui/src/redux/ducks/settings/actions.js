@@ -38,3 +38,21 @@ export const addUser = (userObj) => {
             })
     }
 }
+
+export const deleteUser = (id) => {
+    return dispatch => {
+        dispatch({ type: types.DELETE_USER_STARTED });
+
+        axiosBearer
+            .delete(`/users/${id}`)
+            .then(() => {
+                dispatch({ type: types.DELETE_USER_SUCCESS });
+
+                dispatch(notificationActions.showSuccessMessage('Request success', `User with ID: ${id} has been deleted`));
+                dispatch(fetchUsers());
+            })
+            .catch(() => {
+                dispatch({ type: types.DELETE_USER_FAILURE });
+            })
+    }
+}
