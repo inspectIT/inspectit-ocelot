@@ -42,6 +42,25 @@ const settingsReducer = createReducer(initialState)({
             pendingRequests: state.pendingRequests - 1
         };
     },
+    [types.DELETE_USER_STARTED]: (state, action) => {
+        return {
+            ...state,
+            pendingRequests: state.pendingRequests + 1
+        };
+    },
+    [types.DELETE_USER_FAILURE]: (state, action) => {
+        return {
+            ...state,
+            pendingRequests: state.pendingRequests - 1
+        };
+    },
+    [types.DELETE_USER_SUCCESS]: (state, action) => {
+        return {
+            ...state,
+            pendingRequests: state.pendingRequests - 1
+
+        };
+    },
 })
 
 export default settingsReducer; 
