@@ -43,7 +43,7 @@ class UserDataTable extends React.Component {
                     />
                 </DataTable>
                 <DeleteDialog
-                    visible={this.state.userToDelete}
+                    visible={this.state.userToDelete != null}
                     onHide={this.hideDeleteUserDialog}
                     user={this.state.userToDelete || {}}
                 />
