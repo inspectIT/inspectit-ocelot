@@ -14,7 +14,7 @@ The default configuration will log into the console and create three files:
 * `access.log` - includes only agent request messages
 * `audit.log` - includes only user interaction messages
 
-The fille appenders use the rolling policy with a max file size of 20MB and a history of 30 files.
+The file appenders use the rolling policy with a max file size of 20MB and a history of 30 files.
 
 The following variables can be set to manipulate the default configuration:
 
