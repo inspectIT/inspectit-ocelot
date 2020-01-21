@@ -24,5 +24,4 @@ The following variables can be set to manipulate the default configuration:
 |`LOG_CONSOLE_PATTERN`|Sets a custom logback pattern for the console output.|
 |`LOG_FILE_PATTERN`|Sets a custom logback pattern for the file output.|
 
-Additionally, you can change the default configuration by changing logback.xml of the configuration server before building. The file can be found in:
-`components\inspectit-ocelot-configurationserver\src\main\resources\logback.xml`.
+Additionally, you can provide your own configuration file through a system property as shown in the [Logback Documentation](http://logback.qos.ch/manual/configuration.html#configFileProperty)
