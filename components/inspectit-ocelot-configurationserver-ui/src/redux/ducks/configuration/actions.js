@@ -58,12 +58,14 @@ export const fetchSelectedFile = () => {
  * @param {string} selection - absolute path of the selected file (e.g. /configs/prod/interfaces.yml)
  */
 export const selectFile = (selection) => {
-    return dispatch => {
+    return (dispatch, getState) => {
         if (selection && selection.startsWith(DEFAULT_CONFIG_TREE_KEY)) {
+            const content = configurationUtils.getDefaultFileContent(getState().configuration.defaultConfig, selection);
             dispatch({
                 type: types.SELECT_DEFAULT_CONFIG_FILE,
                 payload: {
-                    selection
+                    selection,
+                    content
                 }
             });
         } else {

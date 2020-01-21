@@ -1,6 +1,6 @@
 import React from 'react';
-import { connect } from 'react-redux'
-import { configurationActions, configurationSelectors } from '../../../redux/ducks/configuration'
+import { connect } from 'react-redux';
+import { configurationActions, configurationSelectors } from '../../../redux/ducks/configuration';
 import { notificationActions } from '../../../redux/ducks/notification';
 
 import FileTree from './FileTree';
@@ -8,7 +8,8 @@ import FileToolbar from './FileToolbar';
 import EditorView from '../../editor/EditorView';
 import yaml from 'js-yaml';
 
-import {enableOcelotAutocompletion} from './OcelotAutocompleter'
+import { enableOcelotAutocompletion } from './OcelotAutocompleter';
+import { DEFAULT_CONFIG_TREE_KEY } from '../../../data/constants';
 
 /**
  * The header component of the editor view.
@@ -49,15 +50,31 @@ const EditorHeader = ({ icon, path, name, isContentModified }) => (
  */
 class ConfigurationView extends React.Component {
 
-    parsePath = (fullPath) => {
-        if (fullPath) {
-            const lastIndex = fullPath.lastIndexOf("/") + 1;
+    parsePath = (filePath, defaultConfigFilePath) => {
+        if (filePath) {
+            const lastIndex = filePath.lastIndexOf("/") + 1;
             return {
-                path: fullPath.slice(0, lastIndex),
-                name: fullPath.slice(lastIndex)
-            }
+                path: filePath.slice(0, lastIndex),
+                name: filePath.slice(lastIndex)
+            };
+        } else if (defaultConfigFilePath) {
+            const path = defaultConfigFilePath.replace(DEFAULT_CONFIG_TREE_KEY, '/Ocelot defaults');
+            const lastIndex = path.lastIndexOf("/") + 1;
+            return {
+                path: path.slice(0, lastIndex),
+                name: path.slice(lastIndex)
+            };
         } else {
             return {};
+        }
+    }
+
+    decideIcon = () => {
+        const { isDirectory, selectedDefaultConfigFile, isDefaultConfigFile } = this.props;
+        if (selectedDefaultConfigFile) {
+            return (!isDefaultConfigFile ? 'folder' : 'file');
+        } else {
+            return (isDirectory ? 'folder' : 'file');
         }
     }
 
@@ -77,11 +94,11 @@ class ConfigurationView extends React.Component {
     }
 
     render() {
-        const { selection, isDirectory, loading, isContentModified, fileContent, yamlError } = this.props;
-        const showEditor = selection && !isDirectory;
+        const { selection, isDirectory, loading, isContentModified, fileContent, yamlError, selectedDefaultConfigFile, isDefaultConfigFile } = this.props;
+        const showEditor = selection && !isDirectory || isDefaultConfigFile;
 
-        const { path, name } = this.parsePath(selection);
-        const icon = "pi-" + (isDirectory ? "folder" : "file");
+        const { path, name } = this.parsePath(selection, selectedDefaultConfigFile);
+        const icon = "pi-" + this.decideIcon();
         const showHeader = !!name;
 
         return (
@@ -131,7 +148,8 @@ class ConfigurationView extends React.Component {
                     isErrorNotification={true}
                     notificationIcon="pi-exclamation-triangle"
                     notificationText={yamlError}
-                    loading={loading}>
+                    loading={loading}
+                    readOnly={isDefaultConfigFile}>
                     {showHeader ? <EditorHeader icon={icon} path={path} name={name} isContentModified={isContentModified} /> : null}
                 </EditorView>
             </div>
@@ -153,7 +171,7 @@ const getYamlError = (content) => {
 }
 
 function mapStateToProps(state) {
-    const { updateDate, selection, selectedFileContent, pendingRequests } = state.configuration;
+    const { updateDate, selection, selectedFileContent, pendingRequests, selectedDefaultConfigFile } = state.configuration;
     const unsavedFileContent = selection ? configurationSelectors.getSelectedFileUnsavedContents(state) : null;
     const fileContent = unsavedFileContent != null ? unsavedFileContent : selectedFileContent;
 
@@ -164,7 +182,9 @@ function mapStateToProps(state) {
         isContentModified: unsavedFileContent != null,
         fileContent,
         yamlError: getYamlError(fileContent),
-        loading: pendingRequests > 0
+        loading: pendingRequests > 0,
+        selectedDefaultConfigFile,
+        isDefaultConfigFile: !!(selectedDefaultConfigFile && fileContent)
     }
 }
 
