@@ -25,6 +25,7 @@ import rocks.inspectit.ocelot.core.instrumentation.event.ClassInstrumentedEvent;
 import rocks.inspectit.ocelot.core.instrumentation.event.IClassDefinitionListener;
 import rocks.inspectit.ocelot.core.instrumentation.event.TransformerShutdownEvent;
 import rocks.inspectit.ocelot.core.instrumentation.hook.DispatchHookAdvices;
+import rocks.inspectit.ocelot.core.instrumentation.injection.JigsawModuleInstrumenter;
 import rocks.inspectit.ocelot.core.instrumentation.special.ClassLoaderDelegation;
 import rocks.inspectit.ocelot.core.instrumentation.special.SpecialSensor;
 import rocks.inspectit.ocelot.core.selfmonitoring.SelfMonitoringService;
@@ -63,6 +64,9 @@ public class AsyncClassTransformer implements ClassFileTransformer {
 
     @Autowired
     List<IClassDefinitionListener> classDefinitionListeners;
+
+    @Autowired
+    JigsawModuleInstrumenter moduleManager;
 
     @Autowired
     ClassLoaderDelegation classLoaderDelegation;
@@ -194,6 +198,8 @@ public class AsyncClassTransformer implements ClassFileTransformer {
                 if (log.isDebugEnabled()) {
                     log.debug("Redefining class: {}", type.getName());
                 }
+                moduleManager.openModule(classBeingRedefined);
+
                 //Make a ByteBuddy builder based on the input bytecode
                 ClassFileLocator byteCodeClassFileLocator = ClassFileLocator.Simple.of(type.getName(), originalByteCode);
                 DynamicType.Builder<?> builder = new ByteBuddy().redefine(classBeingRedefined, byteCodeClassFileLocator);

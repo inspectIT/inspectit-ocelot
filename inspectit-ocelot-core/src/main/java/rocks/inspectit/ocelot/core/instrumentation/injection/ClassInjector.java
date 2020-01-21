@@ -28,6 +28,9 @@ public class ClassInjector {
     @Autowired
     Instrumentation instrumentation;
 
+    @Autowired
+    JigsawModuleInstrumenter moduleManager;
+
     private InjectionClassLoader bootstrapChildLoader = new InjectionClassLoader();
 
 
@@ -94,6 +97,7 @@ public class ClassInjector {
                 result = new InjectedClass<>(resultClass);
             } else {
                 log.debug("Injecting new class {}", className);
+                moduleManager.openModule(neighborClass);
                 resultClass = injectClass(neighborClass, className, byteCode);
                 result = new InjectedClass<Object>(resultClass);
             }
