@@ -61,6 +61,24 @@ const settingsReducer = createReducer(initialState)({
 
         };
     },
+    [types.CHANGE_PASSWORD_STARTED]: (state, action) => {
+        return {
+            ...state,
+            pendingRequests: state.pendingRequests + 1
+        };
+    },
+    [types.CHANGE_PASSWORD_FAILURE]: (state, action) => {
+        return {
+            ...state,
+            pendingRequests: state.pendingRequests - 1
+        };
+    },
+    [types.CHANGE_PASSWORD_SUCCESS]: (state, action) => {
+        return {
+            ...state,
+            pendingRequests: state.pendingRequests - 1,
+        };
+    },
 })
 
 export default settingsReducer; 

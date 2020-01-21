@@ -3,5 +3,10 @@
         "name": "User List",
         "icon": "pi-users",
         "href": "/settings/userlist"
+    },
+    {
+        "name": "Account",
+        "icon": "pi-user",
+        "href": "/settings/account"
     }
 ]

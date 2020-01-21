@@ -1,5 +1,6 @@
 import * as types from './types';
 import axiosBearer from '../../../lib/axios-api';
+import { axiosPlain } from '../../../lib/axios-api';
 import { notificationActions } from '../notification';
 
 export const fetchUsers = () => {
@@ -30,7 +31,7 @@ export const addUser = (userObj) => {
                 dispatch({ type: types.ADD_USER_SUCCESS });
 
                 const { id, username } = res.data;
-                dispatch(notificationActions.showSuccessMessage('Request success', `User "${username}" been added. ID: ${id}`));
+                dispatch(notificationActions.showSuccessMessage('Request Success', `User "${username}" has been added. ID: ${id}`));
                 dispatch(fetchUsers());
             })
             .catch(() => {
@@ -48,11 +49,42 @@ export const deleteUser = (id) => {
             .then(() => {
                 dispatch({ type: types.DELETE_USER_SUCCESS });
 
-                dispatch(notificationActions.showSuccessMessage('Request success', `User with ID: ${id} has been deleted`));
+                dispatch(notificationActions.showSuccessMessage('Request Success', `User with ID: ${id} has been deleted`));
                 dispatch(fetchUsers());
             })
             .catch(() => {
                 dispatch({ type: types.DELETE_USER_FAILURE });
             })
     }
+}
+
+export const changePassword = (username, oldPassword, newPassword) => {
+    return dispatch => {
+        dispatch({ type: types.CHANGE_PASSWORD_STARTED });
+
+        axiosPlain
+            .put('/account/password', {
+                password: newPassword
+            }, {
+                auth: {
+                    username: username,
+                    password: oldPassword
+                }
+            })
+            .then(() => {
+                dispatch({ type: types.CHANGE_PASSWORD_SUCCESS });
+                dispatch(notificationActions.showSuccessMessage('Request Success', 'Your password has been changed'));
+            })
+            .catch(e => {
+                const { response } = e;
+                if (response && response.status === 401) {
+                    dispatch(notificationActions.showErrorMessage('Request Failed', 'The given password was wrong'));
+                } else if (response && response.data && response.data.message) {
+                    dispatch(notificationActions.showErrorMessage('Request Failed', response.data.message));
+                } else {
+                    dispatch(notificationActions.showErrorMessage('Request Failed', e.message));
+                }
+                dispatch({ type: types.CHANGE_PASSWORD_FAILURE });
+            })
+    };
 }
