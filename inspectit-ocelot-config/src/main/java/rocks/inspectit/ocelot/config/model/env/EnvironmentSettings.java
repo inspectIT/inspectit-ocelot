@@ -23,7 +23,7 @@ public class EnvironmentSettings {
     /**
      * The hostname where the agent is running.
      */
-    private String host;
+    private String hostname;
 
     /**
      * The process id of the JVM process.

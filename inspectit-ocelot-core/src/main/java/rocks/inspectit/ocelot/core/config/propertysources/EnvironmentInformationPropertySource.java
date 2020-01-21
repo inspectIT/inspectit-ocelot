@@ -24,7 +24,7 @@ public class EnvironmentInformationPropertySource extends PropertiesPropertySour
     private static Properties getEnvironmentProperties() {
         Properties result = new Properties();
         result.put("inspectit.env.agent-dir", getAgentJarDirectory());
-        result.put("inspectit.env.host", getHostName());
+        result.put("inspectit.env.hostname", getHostName());
         result.put("inspectit.env.pid", getPid());
         return result;
     }
@@ -70,7 +70,7 @@ public class EnvironmentInformationPropertySource extends PropertiesPropertySour
         try {
             return InetAddress.getLocalHost().getHostName();
         } catch (Exception e) {
-            log.debug("Failed to resolve hostname {}", e);
+            log.error("Failed to resolve hostname {}", e);
             return "unknown";
         }
     }
@@ -82,7 +82,7 @@ public class EnvironmentInformationPropertySource extends PropertiesPropertySour
         try{
             return ManagementFactory.getRuntimeMXBean().getName().split("@")[0];
         } catch (Exception e) {
-            log.debug("Failed to resolve process id {}", e);
+            log.error("Failed to resolve process id {}", e);
             return "unknown";
         }
     }
