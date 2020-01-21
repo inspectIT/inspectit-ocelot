@@ -8,7 +8,7 @@ Unlike the logging configuration of the agent, which can be configured using eve
 [Configuration Sources](configuration/configuration-sources.md),
 the default logging configuration of the inspectIT Ocelot Configuration Server can *only* be manipulated through JVM system properties or environment variables.
 
-The configuration server will log into the console and create three files:
+The default configuration will log into the console and create three files:
 
 * `full.log` - includes the complete log
 * `access.log` - includes only agent request messages
