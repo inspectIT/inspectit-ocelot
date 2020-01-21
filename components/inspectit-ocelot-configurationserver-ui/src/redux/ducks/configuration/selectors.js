@@ -1,6 +1,7 @@
 import { createSelector } from 'reselect'
 import { map, find } from 'lodash';
 import { getFile, isDirectory } from './utils';
+import { DEFAULT_CONFIG_TREE_KEY } from '../../../data/constants';
 
 const configurationSelector = state => state.configuration;
 
@@ -91,3 +92,73 @@ export const hasUnsavedChanges = createSelector(
         return Object.keys(unsavedFileContents).length > 0;
     }
 );
+
+/**
+ * Returns the default configuration key/value ~ path/content pairs in a tree structure used by the FileTree component.
+ */
+export const getDefaultConfigTree = createSelector(
+    configurationSelector,
+    configuration => {
+        const { defaultConfig, defaultSelection } = configuration;
+
+        const paths = Object.keys(defaultConfig);
+        let res = [];
+
+        if (paths.length !== 0) {
+            res.push(_getDefaultRoot(defaultSelection));
+
+            for (const path of paths) {
+                _addNode(res[0], path);
+            }
+        }
+
+        return res;
+    }
+);
+
+/**
+ * Takes the given path to create a new node for every unknown subpath starting from the given root.
+ * 
+ * @param {object} rootNode - New Nodes will be added to the children property of this node.
+ * @param {*} path - The File path to be added.
+ */
+const _addNode = (rootNode, path) => {
+    let names = path.split('/').filter(str => str !== '');
+
+    let parent = rootNode;
+
+    for (let i = 0; i < names.length; i++) {
+        const childKey = `${parent.key}/${names[i]}`;
+        const matchingChild = find(parent.children, { key: childKey });
+
+        if (matchingChild) {
+            parent = matchingChild;
+        } else {
+            const newChild = {
+                key: childKey,
+                label: names[i],
+                icon: `pi pi-fw ${names[i + 1] ? 'pi-folder' : 'pi-file'}`,
+                children: [],
+            };
+
+            parent.children.push(newChild);
+            parent = newChild;
+        }
+    }
+};
+
+/**
+ * Returns a root tree object for the default configuration tree.
+ * 
+ * @param {String} selection the current user selection
+ */
+const _getDefaultRoot = (selection) => {
+    return {
+        key: DEFAULT_CONFIG_TREE_KEY,
+        label: 'default',
+        icon: `cm-tree-icon ocelot-tree-head-${selection === DEFAULT_CONFIG_TREE_KEY ? 'white' : 'orange'}`,
+        children: [],
+        className: 'cm-tree-label'
+    };
+};
+

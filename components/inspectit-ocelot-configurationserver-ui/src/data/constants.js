@@ -18,3 +18,7 @@ export const RENEW_TOKEN_TIME_INTERVAL = 60000;
  */
 export const MIN_TOKEN_EXPIRATION_TIME = 300000;
 
+/**
+ * Default configuration tree key.
+ */
+export const DEFAULT_CONFIG_TREE_KEY = '/$%$%$%$%Ocelot-default-key';

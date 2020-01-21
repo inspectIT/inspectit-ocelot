@@ -75,6 +75,7 @@ const configurationReducer = createReducer(initialState)({
         return {
             ...state,
             selection,
+            defaultSelection: null,
             selectedFileContent: null
         };
     },
@@ -160,6 +161,15 @@ const configurationReducer = createReducer(initialState)({
         }
     },
     [types.FETCH_DEFAULT_CONFIG_FAILURE]: decrementPendingRequests,
+    [types.SELECT_DEFAULT_CONFIG_FILE]: (state, action) => {
+        const { selection } = action.payload;
+        return {
+            ...state,
+            selection: null,
+            defaultSelection: selection,
+            selectedFileContent: null
+        };
+    },
 });
 
 export default configurationReducer;

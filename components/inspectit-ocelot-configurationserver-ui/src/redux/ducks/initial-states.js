@@ -34,7 +34,9 @@ const configuration = {
      */
     unsavedFileContents: {/* fileName: fileContents*/ },
     /** The default configuration of the Ocelot agents. Will be retrieved as key/value pairs each representing path/content of a file. */
-    defaultConfig: {}
+    defaultConfig: {},
+    /** The path of the currently selected default configuration file in the file tree. */
+    defaultSelection: null,
 };
 
 const notification = {
