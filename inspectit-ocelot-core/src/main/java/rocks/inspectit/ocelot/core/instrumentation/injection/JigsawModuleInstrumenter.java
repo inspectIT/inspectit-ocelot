@@ -14,16 +14,34 @@ import java.util.*;
 @Slf4j
 public class JigsawModuleInstrumenter {
 
+    /**
+     * Reference to Class.getModule() (introduced in Java 9)
+     */
     private Method classGetModule;
+
+    /**
+     * Reference to Instrumentation.redefineModule (introduced in Java 9)
+     */
     private Method instrumentationRedefineModule;
 
+    /**
+     * The (unnamed) module containing all Ocelot bootstrap classes.
+     */
     private Object bootstrapModule;
+
+    /**
+     * The (unnamed) module containing all Ocelot core classes.
+     */
     private Object coreModule;
 
+    /**
+     * Maps modules to the set of packages which have already been opened to the {@link #coreModule}.
+     * Prevents unnecessary duplicate invocations of {@link #instrumentationRedefineModule}
+     */
     private WeakHashMap<Object, Set<String>> enhancedModules = new WeakHashMap<>();
 
     @Autowired
-    Instrumentation instrumentation;
+    private Instrumentation instrumentation;
 
     @PostConstruct
     void init() throws NoSuchMethodException {
@@ -44,7 +62,6 @@ public class JigsawModuleInstrumenter {
 
     public synchronized void openModule(Class<?> containedClass) {
         if (isModuleSystemAvailable()) {
-
             String packageName = containedClass.getPackage().getName();
             Object module = getModuleOfClass(containedClass);
             Set<String> openedPackages = enhancedModules.computeIfAbsent(module, (m) -> new HashSet<>());
@@ -55,10 +72,21 @@ public class JigsawModuleInstrumenter {
                 redefineModule(module, extraReads, Collections.emptyMap(), extraOpens, Collections.emptySet(), Collections.emptyMap());
                 openedPackages.add(packageName);
             }
-
         }
     }
 
+    /**
+     * Invokes Instrumentation.redefineModule, which has been introduced in Java 9.
+     * <p>
+     * Any kind of thrown exceptions are caught, logged and ignored.
+     *
+     * @param module        The module to redefine
+     * @param extraReads    The set of Module to add as readable
+     * @param extraExports  Maps packages to modules to which these packages shall be compile-time visible
+     * @param extraOpens    Maps packages to modules to which these packages shall be run-time visible (E.g. via deep reflection)
+     * @param extraUses     The additional services to use by this module
+     * @param extraProvides The additional services to expose by this module
+     */
     private void redefineModule(Object module,
                                 Set<Object> extraReads,
                                 Map<String, Set<Object>> extraExports,
@@ -75,10 +103,16 @@ public class JigsawModuleInstrumenter {
                     extraProvides
             );
         } catch (Exception e) {
-            throw new IllegalArgumentException(e);
+            log.error("Error redefining module {}", module, e);
         }
     }
 
+    /**
+     * Invokes the java 9 Class.getModule() function (never returns null)
+     *
+     * @param clazz the class to query the module of
+     * @return the module of the given class, never null
+     */
     private Object getModuleOfClass(Class<?> clazz) {
         try {
             return classGetModule.invoke(clazz);
@@ -87,7 +121,7 @@ public class JigsawModuleInstrumenter {
         }
     }
 
-    public boolean isModuleSystemAvailable() {
+    private boolean isModuleSystemAvailable() {
         return classGetModule != null;
     }
 

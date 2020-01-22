@@ -51,6 +51,7 @@ public class TraceTestBase extends InstrumentationSysTestBase {
     }
 
     void assertSpansExported(Consumer<? super Collection<? extends SpanData>> assertions) {
+
         await().atMost(15, TimeUnit.SECONDS).untilAsserted(() -> {
             assertions.accept(exportedSpans);
         });

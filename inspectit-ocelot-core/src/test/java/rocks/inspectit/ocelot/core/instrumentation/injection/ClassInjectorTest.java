@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -28,6 +29,9 @@ public class ClassInjectorTest {
 
     @Mock
     Instrumentation instrumentation;
+
+    @Mock
+    JigsawModuleInstrumenter moduleManager;
 
     @InjectMocks
     ClassInjector injector;
@@ -55,7 +59,6 @@ public class ClassInjectorTest {
         public void testBootstrapInjection() throws Exception {
             InjectedClass<?> clazz42 = injector.inject("id", java.lang.String.class, (name) -> getByteCodeAndRename(ClassToInject42.class, name));
             InjectedClass<?> clazz7 = injector.inject("id", java.lang.String.class, (name) -> getByteCodeAndRename(ClassToInject7.class, name));
-
 
             assertThat(clazz42.getInjectedClassObject().get().getMethod("getValue").invoke(null)).isEqualTo(42);
             assertThat(clazz7.getInjectedClassObject().get().getMethod("getValue").invoke(null)).isEqualTo(7);
@@ -90,7 +93,7 @@ public class ClassInjectorTest {
             InjectedClass<?> clazz42 = injector.inject("id", neighbor, (name) -> getByteCodeAndRename(ClassToInject42.class, name));
             InjectedClass<?> clazz7 = injector.inject("id", neighbor, (name) -> getByteCodeAndRename(ClassToInject7.class, name));
 
-
+            verify(moduleManager, times(2)).openModule(same(neighbor));
             assertThat(clazz42.getInjectedClassObject().get().getMethod("getValue").invoke(null)).isEqualTo(42);
             assertThat(clazz42.getInjectedClassObject().get().getClassLoader()).isSameAs(dummy);
             assertThat(clazz7.getInjectedClassObject().get().getMethod("getValue").invoke(null)).isEqualTo(7);
