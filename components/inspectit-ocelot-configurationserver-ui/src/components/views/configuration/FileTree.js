@@ -12,9 +12,13 @@ class FileTree extends React.Component {
      * Fetch the files initially.
      */
     componentDidMount = () => {
-        const { loading } = this.props;
+        const { loading, defaultConfig } = this.props;
         if (!loading) {
             this.props.fetchFiles();
+        }
+
+        if (Object.entries(defaultConfig).length === 0) {
+            this.props.fetchDefaultConfig();
         }
     }
 
@@ -45,15 +49,17 @@ class FileTree extends React.Component {
 }
 
 function mapStateToProps(state) {
-    const { pendingRequests, selection, files } = state.configuration;
+    const { pendingRequests, selection, files, defaultConfig } = state.configuration;
     return {
         files: configurationSelectors.getFileTree(state),
         loading: pendingRequests > 0,
-        selection
+        selection,
+        defaultConfig
     }
 }
 
 const mapDispatchToProps = {
+    fetchDefaultConfig: configurationActions.fetchDefaultConfig,
     fetchFiles: configurationActions.fetchFiles,
     selectFile: configurationActions.selectFile
 }

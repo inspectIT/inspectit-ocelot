@@ -149,8 +149,17 @@ const configurationReducer = createReducer(initialState)({
         } else {
             return state;
         }
-    }
-
+    },
+    [types.FETCH_DEFAULT_CONFIG_STARTED]: incrementPendingRequests,
+    [types.FETCH_DEFAULT_CONFIG_SUCCESS]: (state, action) => {
+        const { defaultConfig } = action.payload;
+        return {
+            ...state,
+            pendingRequests: state.pendingRequests - 1,
+            defaultConfig
+        }
+    },
+    [types.FETCH_DEFAULT_CONFIG_FAILURE]: decrementPendingRequests,
 });
 
 export default configurationReducer;
