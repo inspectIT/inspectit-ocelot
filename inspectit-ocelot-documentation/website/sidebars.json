@@ -40,7 +40,8 @@
       "config-server/overview",
       "config-server/cs-configuration",
       "config-server/agent-mappings",
-      "config-server/user-authentication"
+      "config-server/user-authentication",
+      "config-server/log-config"
     ],
     "Breaking Changes": [
       "breaking-changes/0-6",
