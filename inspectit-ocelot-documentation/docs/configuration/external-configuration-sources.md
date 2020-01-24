@@ -53,7 +53,7 @@ This configuration source can be used when using the [inspectIT Ocelot Configura
 |`inspectit.config.http.url`|-| The url of the http endpoint to query the configuration.|
 |`inspectit.config.http.enabled`|`true`| Whether the http property source should be used.|
 |`inspectit.config.http.frequency`|`30s`| The frequency of polling the http endpoint to check for configuration changes. |
-|`inspectit.config.http.attributes`|`service: ${inspectit.service-name},` <br/> `hostname: ${inspectit.env.hostname},` <br/> `pid: ${inspectit.env.pid}`| The following attributes will be sent as http query parameters when fetching the configuration. These are used to map agents to certain configurations. See the section on [Agent Mappings](config-server/agent-mappings.md). |
+|`inspectit.config.http.attributes`|`service: ${inspectit.service-name},` <br/> `id: ${inspectit.env.pid}@${inspectit.env.hostname}` | The following attributes will be sent as http query parameters when fetching the configuration. These are used to map agents to certain configurations. See the section on [Agent Mappings](config-server/agent-mappings.md). |
 |`inspectit.config.http.persistence-file`|`${inspectit.env.jar-dir}/${inspectit.service-name}/last-http-config.yml`| The agent will save the last fetched configuration in this file. |
 
 > Due to security reasons, the HTTP-based configuration has the lowest priority, thus, cannot override configuration properties set by different configuration sources.

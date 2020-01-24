@@ -27,5 +27,4 @@ inspectit:
       # the following attributes will be sent as http query parameters when fetching the configuration
       attributes:
         service: ${inspectit.service-name}
-        hostname: ${inspectit.env.hostname}
-        pid: ${inspectit.env.pid}
+        id: ${inspectit.env.pid}@${inspectit.env.hostname}
