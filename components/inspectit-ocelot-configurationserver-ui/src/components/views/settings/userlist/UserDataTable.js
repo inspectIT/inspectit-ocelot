@@ -35,7 +35,7 @@ class UserDataTable extends React.Component {
                     <Column
                         field='ldapUser'
                         header='LDAP User'
-                        body={(data) => (<i class={data.ldapUser ? 'pi pi-check' : 'pi pi-times'}></i>)}
+                        body={(data) => (<i className={data.ldapUser ? 'pi pi-check' : 'pi pi-times'}></i>)}
                     />
                     <Column
                         style={{ width: '3.5rem' }}
