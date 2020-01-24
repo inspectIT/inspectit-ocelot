@@ -84,7 +84,8 @@ Each agent stores the following information about its runtime environment:
 | Property | Note |
 | --- | --- |
 | `inspectit.env.agent-dir` | Resolves to the path where the agent-jar is stored. |
-| `inspectit.env.id` | Resolves to processId@hostname. |
+| `inspectit.env.hostname` | The hostname where the agent is running. |
+| `inspectit.env.pid` | The process id of the JVM process. |
 
 They are used to define the default behavior when writing the configuration persistence file and will be sent
 as attributes to the configuration server when fetching the configuration.
