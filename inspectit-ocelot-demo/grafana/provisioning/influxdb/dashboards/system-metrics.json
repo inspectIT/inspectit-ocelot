@@ -15,8 +15,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 3,
-  "iteration": 1556110499281,
+  "id": 1,
+  "iteration": 1580139786945,
   "links": [],
   "panels": [
     {
@@ -33,8 +33,8 @@
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "4044e3e7fca5",
-          "value": "4044e3e7fca5"
+          "text": "0ea77b86eba2",
+          "value": "0ea77b86eba2"
         }
       },
       "title": "$host",
@@ -96,8 +96,8 @@
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "4044e3e7fca5",
-          "value": "4044e3e7fca5"
+          "text": "0ea77b86eba2",
+          "value": "0ea77b86eba2"
         }
       },
       "sparkline": {
@@ -121,7 +121,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -191,8 +191,8 @@
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "4044e3e7fca5",
-          "value": "4044e3e7fca5"
+          "text": "0ea77b86eba2",
+          "value": "0ea77b86eba2"
         }
       },
       "seriesOverrides": [
@@ -212,7 +212,7 @@
           "groupBy": [
             {
               "params": [
-                "15s"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -233,7 +233,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -256,7 +256,7 @@
           "groupBy": [
             {
               "params": [
-                "15s"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -276,7 +276,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -394,8 +394,8 @@
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "4044e3e7fca5",
-          "value": "4044e3e7fca5"
+          "text": "0ea77b86eba2",
+          "value": "0ea77b86eba2"
         }
       },
       "sparkline": {
@@ -501,8 +501,8 @@
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "4044e3e7fca5",
-          "value": "4044e3e7fca5"
+          "text": "0ea77b86eba2",
+          "value": "0ea77b86eba2"
         }
       },
       "seriesOverrides": [],
@@ -536,7 +536,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -697,8 +697,8 @@
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "4044e3e7fca5",
-          "value": "4044e3e7fca5"
+          "text": "0ea77b86eba2",
+          "value": "0ea77b86eba2"
         }
       },
       "sparkline": {
@@ -721,7 +721,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -810,8 +810,8 @@
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "4044e3e7fca5",
-          "value": "4044e3e7fca5"
+          "text": "0ea77b86eba2",
+          "value": "0ea77b86eba2"
         }
       },
       "sparkline": {
@@ -834,7 +834,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -878,13 +878,13 @@
       "id": 14,
       "panels": [],
       "repeat": null,
-      "repeatIteration": 1556110499281,
+      "repeatIteration": 1580139786945,
       "repeatPanelId": 7,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "78addbc0261f",
-          "value": "78addbc0261f"
+          "text": "435c538f5dbb",
+          "value": "435c538f5dbb"
         }
       },
       "title": "$host",
@@ -943,14 +943,14 @@
         }
       ],
       "repeatDirection": "h",
-      "repeatIteration": 1556110499281,
+      "repeatIteration": 1580139786945,
       "repeatPanelId": 5,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "78addbc0261f",
-          "value": "78addbc0261f"
+          "text": "435c538f5dbb",
+          "value": "435c538f5dbb"
         }
       },
       "sparkline": {
@@ -974,7 +974,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -1041,14 +1041,14 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1556110499281,
+      "repeatIteration": 1580139786945,
       "repeatPanelId": 11,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "78addbc0261f",
-          "value": "78addbc0261f"
+          "text": "435c538f5dbb",
+          "value": "435c538f5dbb"
         }
       },
       "seriesOverrides": [
@@ -1068,7 +1068,7 @@
           "groupBy": [
             {
               "params": [
-                "15s"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -1089,7 +1089,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -1112,7 +1112,7 @@
           "groupBy": [
             {
               "params": [
-                "15s"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -1132,7 +1132,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -1247,14 +1247,14 @@
       ],
       "repeat": null,
       "repeatDirection": "h",
-      "repeatIteration": 1556110499281,
+      "repeatIteration": 1580139786945,
       "repeatPanelId": 4,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "78addbc0261f",
-          "value": "78addbc0261f"
+          "text": "435c538f5dbb",
+          "value": "435c538f5dbb"
         }
       },
       "sparkline": {
@@ -1357,14 +1357,14 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1556110499281,
+      "repeatIteration": 1580139786945,
       "repeatPanelId": 13,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "78addbc0261f",
-          "value": "78addbc0261f"
+          "text": "435c538f5dbb",
+          "value": "435c538f5dbb"
         }
       },
       "seriesOverrides": [],
@@ -1398,7 +1398,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -1556,14 +1556,14 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1556110499281,
+      "repeatIteration": 1580139786945,
       "repeatPanelId": 9,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "78addbc0261f",
-          "value": "78addbc0261f"
+          "text": "435c538f5dbb",
+          "value": "435c538f5dbb"
         }
       },
       "sparkline": {
@@ -1586,7 +1586,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -1672,14 +1672,14 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1556110499281,
+      "repeatIteration": 1580139786945,
       "repeatPanelId": 12,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "78addbc0261f",
-          "value": "78addbc0261f"
+          "text": "435c538f5dbb",
+          "value": "435c538f5dbb"
         }
       },
       "sparkline": {
@@ -1702,7 +1702,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -1746,13 +1746,13 @@
       "id": 21,
       "panels": [],
       "repeat": null,
-      "repeatIteration": 1556110499281,
+      "repeatIteration": 1580139786945,
       "repeatPanelId": 7,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "8c7d80fbc14a",
-          "value": "8c7d80fbc14a"
+          "text": "53dc5501e471",
+          "value": "53dc5501e471"
         }
       },
       "title": "$host",
@@ -1811,14 +1811,14 @@
         }
       ],
       "repeatDirection": "h",
-      "repeatIteration": 1556110499281,
+      "repeatIteration": 1580139786945,
       "repeatPanelId": 5,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "8c7d80fbc14a",
-          "value": "8c7d80fbc14a"
+          "text": "53dc5501e471",
+          "value": "53dc5501e471"
         }
       },
       "sparkline": {
@@ -1842,7 +1842,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -1909,14 +1909,14 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1556110499281,
+      "repeatIteration": 1580139786945,
       "repeatPanelId": 11,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "8c7d80fbc14a",
-          "value": "8c7d80fbc14a"
+          "text": "53dc5501e471",
+          "value": "53dc5501e471"
         }
       },
       "seriesOverrides": [
@@ -1936,7 +1936,7 @@
           "groupBy": [
             {
               "params": [
-                "15s"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -1957,7 +1957,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -1980,7 +1980,7 @@
           "groupBy": [
             {
               "params": [
-                "15s"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -2000,7 +2000,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -2115,14 +2115,14 @@
       ],
       "repeat": null,
       "repeatDirection": "h",
-      "repeatIteration": 1556110499281,
+      "repeatIteration": 1580139786945,
       "repeatPanelId": 4,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "8c7d80fbc14a",
-          "value": "8c7d80fbc14a"
+          "text": "53dc5501e471",
+          "value": "53dc5501e471"
         }
       },
       "sparkline": {
@@ -2225,14 +2225,14 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1556110499281,
+      "repeatIteration": 1580139786945,
       "repeatPanelId": 13,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "8c7d80fbc14a",
-          "value": "8c7d80fbc14a"
+          "text": "53dc5501e471",
+          "value": "53dc5501e471"
         }
       },
       "seriesOverrides": [],
@@ -2266,7 +2266,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -2424,14 +2424,14 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1556110499281,
+      "repeatIteration": 1580139786945,
       "repeatPanelId": 9,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "8c7d80fbc14a",
-          "value": "8c7d80fbc14a"
+          "text": "53dc5501e471",
+          "value": "53dc5501e471"
         }
       },
       "sparkline": {
@@ -2454,7 +2454,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -2540,14 +2540,14 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1556110499281,
+      "repeatIteration": 1580139786945,
       "repeatPanelId": 12,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "8c7d80fbc14a",
-          "value": "8c7d80fbc14a"
+          "text": "53dc5501e471",
+          "value": "53dc5501e471"
         }
       },
       "sparkline": {
@@ -2570,7 +2570,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -2614,13 +2614,13 @@
       "id": 28,
       "panels": [],
       "repeat": null,
-      "repeatIteration": 1556110499281,
+      "repeatIteration": 1580139786945,
       "repeatPanelId": 7,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "ae3d6ae24353",
-          "value": "ae3d6ae24353"
+          "text": "5ad686f87737",
+          "value": "5ad686f87737"
         }
       },
       "title": "$host",
@@ -2679,14 +2679,14 @@
         }
       ],
       "repeatDirection": "h",
-      "repeatIteration": 1556110499281,
+      "repeatIteration": 1580139786945,
       "repeatPanelId": 5,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "ae3d6ae24353",
-          "value": "ae3d6ae24353"
+          "text": "5ad686f87737",
+          "value": "5ad686f87737"
         }
       },
       "sparkline": {
@@ -2710,7 +2710,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -2777,14 +2777,14 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1556110499281,
+      "repeatIteration": 1580139786945,
       "repeatPanelId": 11,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "ae3d6ae24353",
-          "value": "ae3d6ae24353"
+          "text": "5ad686f87737",
+          "value": "5ad686f87737"
         }
       },
       "seriesOverrides": [
@@ -2804,7 +2804,7 @@
           "groupBy": [
             {
               "params": [
-                "15s"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -2825,7 +2825,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -2848,7 +2848,7 @@
           "groupBy": [
             {
               "params": [
-                "15s"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -2868,7 +2868,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -2983,14 +2983,14 @@
       ],
       "repeat": null,
       "repeatDirection": "h",
-      "repeatIteration": 1556110499281,
+      "repeatIteration": 1580139786945,
       "repeatPanelId": 4,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "ae3d6ae24353",
-          "value": "ae3d6ae24353"
+          "text": "5ad686f87737",
+          "value": "5ad686f87737"
         }
       },
       "sparkline": {
@@ -3093,14 +3093,14 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1556110499281,
+      "repeatIteration": 1580139786945,
       "repeatPanelId": 13,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "ae3d6ae24353",
-          "value": "ae3d6ae24353"
+          "text": "5ad686f87737",
+          "value": "5ad686f87737"
         }
       },
       "seriesOverrides": [],
@@ -3134,7 +3134,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -3292,14 +3292,14 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1556110499281,
+      "repeatIteration": 1580139786945,
       "repeatPanelId": 9,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "ae3d6ae24353",
-          "value": "ae3d6ae24353"
+          "text": "5ad686f87737",
+          "value": "5ad686f87737"
         }
       },
       "sparkline": {
@@ -3322,7 +3322,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -3408,14 +3408,14 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1556110499281,
+      "repeatIteration": 1580139786945,
       "repeatPanelId": 12,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "ae3d6ae24353",
-          "value": "ae3d6ae24353"
+          "text": "5ad686f87737",
+          "value": "5ad686f87737"
         }
       },
       "sparkline": {
@@ -3438,7 +3438,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -3482,13 +3482,13 @@
       "id": 35,
       "panels": [],
       "repeat": null,
-      "repeatIteration": 1556110499281,
+      "repeatIteration": 1580139786945,
       "repeatPanelId": 7,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "ce9859de83e8",
-          "value": "ce9859de83e8"
+          "text": "bcfb6ed6dabf",
+          "value": "bcfb6ed6dabf"
         }
       },
       "title": "$host",
@@ -3547,14 +3547,14 @@
         }
       ],
       "repeatDirection": "h",
-      "repeatIteration": 1556110499281,
+      "repeatIteration": 1580139786945,
       "repeatPanelId": 5,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "ce9859de83e8",
-          "value": "ce9859de83e8"
+          "text": "bcfb6ed6dabf",
+          "value": "bcfb6ed6dabf"
         }
       },
       "sparkline": {
@@ -3578,7 +3578,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -3645,14 +3645,14 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1556110499281,
+      "repeatIteration": 1580139786945,
       "repeatPanelId": 11,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "ce9859de83e8",
-          "value": "ce9859de83e8"
+          "text": "bcfb6ed6dabf",
+          "value": "bcfb6ed6dabf"
         }
       },
       "seriesOverrides": [
@@ -3672,7 +3672,7 @@
           "groupBy": [
             {
               "params": [
-                "15s"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -3693,7 +3693,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -3716,7 +3716,7 @@
           "groupBy": [
             {
               "params": [
-                "15s"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -3736,7 +3736,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -3851,14 +3851,14 @@
       ],
       "repeat": null,
       "repeatDirection": "h",
-      "repeatIteration": 1556110499281,
+      "repeatIteration": 1580139786945,
       "repeatPanelId": 4,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "ce9859de83e8",
-          "value": "ce9859de83e8"
+          "text": "bcfb6ed6dabf",
+          "value": "bcfb6ed6dabf"
         }
       },
       "sparkline": {
@@ -3961,14 +3961,14 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1556110499281,
+      "repeatIteration": 1580139786945,
       "repeatPanelId": 13,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "ce9859de83e8",
-          "value": "ce9859de83e8"
+          "text": "bcfb6ed6dabf",
+          "value": "bcfb6ed6dabf"
         }
       },
       "seriesOverrides": [],
@@ -4002,7 +4002,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -4160,14 +4160,14 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1556110499281,
+      "repeatIteration": 1580139786945,
       "repeatPanelId": 9,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "ce9859de83e8",
-          "value": "ce9859de83e8"
+          "text": "bcfb6ed6dabf",
+          "value": "bcfb6ed6dabf"
         }
       },
       "sparkline": {
@@ -4190,7 +4190,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -4276,14 +4276,14 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1556110499281,
+      "repeatIteration": 1580139786945,
       "repeatPanelId": 12,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "ce9859de83e8",
-          "value": "ce9859de83e8"
+          "text": "bcfb6ed6dabf",
+          "value": "bcfb6ed6dabf"
         }
       },
       "sparkline": {
@@ -4306,7 +4306,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -4350,13 +4350,13 @@
       "id": 42,
       "panels": [],
       "repeat": null,
-      "repeatIteration": 1556110499281,
+      "repeatIteration": 1580139786945,
       "repeatPanelId": 7,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "d2816ef65636",
-          "value": "d2816ef65636"
+          "text": "f7198daf0aa6",
+          "value": "f7198daf0aa6"
         }
       },
       "title": "$host",
@@ -4415,14 +4415,14 @@
         }
       ],
       "repeatDirection": "h",
-      "repeatIteration": 1556110499281,
+      "repeatIteration": 1580139786945,
       "repeatPanelId": 5,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "d2816ef65636",
-          "value": "d2816ef65636"
+          "text": "f7198daf0aa6",
+          "value": "f7198daf0aa6"
         }
       },
       "sparkline": {
@@ -4446,7 +4446,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -4513,14 +4513,14 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1556110499281,
+      "repeatIteration": 1580139786945,
       "repeatPanelId": 11,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "d2816ef65636",
-          "value": "d2816ef65636"
+          "text": "f7198daf0aa6",
+          "value": "f7198daf0aa6"
         }
       },
       "seriesOverrides": [
@@ -4540,7 +4540,7 @@
           "groupBy": [
             {
               "params": [
-                "15s"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -4561,7 +4561,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -4584,7 +4584,7 @@
           "groupBy": [
             {
               "params": [
-                "15s"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -4604,7 +4604,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -4719,14 +4719,14 @@
       ],
       "repeat": null,
       "repeatDirection": "h",
-      "repeatIteration": 1556110499281,
+      "repeatIteration": 1580139786945,
       "repeatPanelId": 4,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "d2816ef65636",
-          "value": "d2816ef65636"
+          "text": "f7198daf0aa6",
+          "value": "f7198daf0aa6"
         }
       },
       "sparkline": {
@@ -4829,14 +4829,14 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1556110499281,
+      "repeatIteration": 1580139786945,
       "repeatPanelId": 13,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "d2816ef65636",
-          "value": "d2816ef65636"
+          "text": "f7198daf0aa6",
+          "value": "f7198daf0aa6"
         }
       },
       "seriesOverrides": [],
@@ -4870,7 +4870,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -5028,14 +5028,14 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1556110499281,
+      "repeatIteration": 1580139786945,
       "repeatPanelId": 9,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "d2816ef65636",
-          "value": "d2816ef65636"
+          "text": "f7198daf0aa6",
+          "value": "f7198daf0aa6"
         }
       },
       "sparkline": {
@@ -5058,7 +5058,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -5144,14 +5144,14 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1556110499281,
+      "repeatIteration": 1580139786945,
       "repeatPanelId": 12,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "d2816ef65636",
-          "value": "d2816ef65636"
+          "text": "f7198daf0aa6",
+          "value": "f7198daf0aa6"
         }
       },
       "sparkline": {
@@ -5174,7 +5174,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },

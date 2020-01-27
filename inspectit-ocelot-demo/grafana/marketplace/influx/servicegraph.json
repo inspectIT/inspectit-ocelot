@@ -46,7 +46,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1567608962222,
+  "iteration": 1580133689920,
   "links": [],
   "panels": [
     {
@@ -120,10 +120,11 @@
               "type": "fill"
             }
           ],
+          "hide": false,
           "measurement": "service_in_count",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SUM(\"cnt\") AS \"in_count\" FROM (\n              SELECT spread(\"counter\") AS \"cnt\" FROM \"autogen\".\"service_in_count\" \n              WHERE ((\"service\" =~ /^$service$/ OR \"origin_service\" =~ /^$service$/) AND \"application\" =~ /^$application$/) AND $timeFilter\n              GROUP BY *) \nGROUP BY \"service\", \"origin_service\", \"target_external\", \"protocol\"",
+          "query": "SELECT SUM(\"cnt\") AS \"in_count\" FROM (\n              SELECT spread(\"count\") AS \"cnt\" FROM \"autogen\".\"service_in_responsetime\" \n              WHERE ((\"service\" =~ /^$service$/ OR \"origin_service\" =~ /^$service$/) AND \"application\" =~ /^$application$/) AND $timeFilter\n              GROUP BY *) \nGROUP BY \"service\", \"origin_service\", \"target_external\", \"protocol\"",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -158,9 +159,10 @@
               "type": "fill"
             }
           ],
+          "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SUM(\"cnt\") AS \"out_count\" FROM (\n              SELECT spread(\"counter\") AS \"cnt\" FROM \"autogen\".\"service_out_count\" \n              WHERE ((\"service\" =~ /^$service$/ OR \"target_service\" =~ /^$service$/) AND \"application\" =~ /^$application$/) AND $timeFilter\n              GROUP BY *) \nGROUP BY \"service\", \"target_service\", \"target_external\", \"protocol\"",
+          "query": "SELECT SUM(\"cnt\") AS \"out_count\" FROM (\n              SELECT spread(\"count\") AS \"cnt\" FROM \"autogen\".\"service_out_responsetime\" \n              WHERE ((\"service\" =~ /^$service$/ OR \"target_service\" =~ /^$service$/) AND \"application\" =~ /^$application$/) AND $timeFilter\n              GROUP BY *) \nGROUP BY \"service\", \"target_service\", \"target_external\", \"protocol\"",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "table",
@@ -195,9 +197,10 @@
               "type": "fill"
             }
           ],
+          "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SUM(\"cnt\") AS \"in_timesum\" FROM (\n              SELECT spread(\"counter\") AS \"cnt\" FROM \"autogen\".\"service_in_responsetime_sum\" \n              WHERE ((\"service\" =~ /^$service$/ OR \"origin_service\" =~ /^$service$/) AND \"application\" =~ /^$application$/) AND $timeFilter\n              GROUP BY *) \nGROUP BY \"service\", \"origin_service\", \"target_external\", \"protocol\"",
+          "query": "SELECT SUM(\"cnt\") AS \"in_timesum\" FROM (\n              SELECT spread(\"sum\") AS \"cnt\" FROM \"autogen\".\"service_in_responsetime\" \n              WHERE ((\"service\" =~ /^$service$/ OR \"origin_service\" =~ /^$service$/) AND \"application\" =~ /^$application$/) AND $timeFilter\n              GROUP BY *) \nGROUP BY \"service\", \"origin_service\", \"target_external\", \"protocol\"",
           "rawQuery": true,
           "refId": "C",
           "resultFormat": "table",
@@ -232,9 +235,10 @@
               "type": "fill"
             }
           ],
+          "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SUM(\"cnt\") AS \"out_timesum\" FROM (\n              SELECT spread(\"counter\") AS \"cnt\" FROM \"autogen\".\"service_out_responsetime_sum\" \n              WHERE ((\"service\" =~ /^$service$/ OR \"target_service\" =~ /^$service$/) AND \"application\" =~ /^$application$/) AND $timeFilter\n              GROUP BY *) \nGROUP BY \"service\", \"target_service\", \"target_external\", \"protocol\"",
+          "query": "SELECT SUM(\"cnt\") AS \"out_timesum\" FROM (\n              SELECT spread(\"sum\") AS \"cnt\" FROM \"autogen\".\"service_out_responsetime\" \n              WHERE ((\"service\" =~ /^$service$/ OR \"target_service\" =~ /^$service$/) AND \"application\" =~ /^$application$/) AND $timeFilter\n              GROUP BY *) \nGROUP BY \"service\", \"target_service\", \"target_external\", \"protocol\"",
           "rawQuery": true,
           "refId": "D",
           "resultFormat": "table",

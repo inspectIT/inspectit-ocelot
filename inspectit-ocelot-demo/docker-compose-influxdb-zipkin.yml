@@ -29,7 +29,8 @@ services:
     environment:
       - INSPECTIT_SERVICE_NAME=config-server
       - INSPECTIT_CONFIG_HTTP_URL=http://ocelot-config-server:8090/api/v1/agent/configuration
-      - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_PORT=9096
+      - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_ENABLED=false
+      - INSPECTIT_EXPORTERS_METRICS_INFLUX_URL=http://influxdb:8086
       - INSPECTIT_EXPORTERS_TRACING_ZIPKIN_URL=http://zipkin:9411/api/v2/spans
     mem_limit: 512M
     entrypoint: ["sh", "-c","
@@ -40,7 +41,6 @@ services:
       - agent-vol:/agent
     ports:
       - 8888:8888
-      - 9096:9096
 
   discovery-server:
     image: openapm/spring-petclinic-discovery-server:inspectit-oce-demo
@@ -48,7 +48,8 @@ services:
     environment:
       - INSPECTIT_SERVICE_NAME=discovery-server
       - INSPECTIT_CONFIG_HTTP_URL=http://ocelot-config-server:8090/api/v1/agent/configuration
-      - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_PORT=9095
+      - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_ENABLED=false
+      - INSPECTIT_EXPORTERS_METRICS_INFLUX_URL=http://influxdb:8086
       - INSPECTIT_EXPORTERS_TRACING_ZIPKIN_URL=http://zipkin:9411/api/v2/spans
     mem_limit: 512M
     depends_on:
@@ -64,7 +65,6 @@ services:
       - agent-vol:/agent
     ports:
       - 8761:8761
-      - 9095:9095
 
   customers-service:
     image: openapm/spring-petclinic-customers-service:inspectit-oce-demo
@@ -72,7 +72,8 @@ services:
     environment:
       - INSPECTIT_SERVICE_NAME=customers-service
       - INSPECTIT_CONFIG_HTTP_URL=http://ocelot-config-server:8090/api/v1/agent/configuration
-      - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_PORT=9091
+      - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_ENABLED=false
+      - INSPECTIT_EXPORTERS_METRICS_INFLUX_URL=http://influxdb:8086
       - INSPECTIT_EXPORTERS_TRACING_ZIPKIN_URL=http://zipkin:9411/api/v2/spans
     mem_limit: 512M
     depends_on:
@@ -89,7 +90,6 @@ services:
       - agent-vol:/agent
     ports:
       - 8081:8081
-      - 9091:9091
 
   visits-service:
     image: openapm/spring-petclinic-visits-service:inspectit-oce-demo
@@ -97,7 +97,8 @@ services:
     environment:
       - INSPECTIT_SERVICE_NAME=visits-service
       - INSPECTIT_CONFIG_HTTP_URL=http://ocelot-config-server:8090/api/v1/agent/configuration
-      - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_PORT=9092
+      - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_ENABLED=false
+      - INSPECTIT_EXPORTERS_METRICS_INFLUX_URL=http://influxdb:8086
       - INSPECTIT_EXPORTERS_TRACING_ZIPKIN_URL=http://zipkin:9411/api/v2/spans
     mem_limit: 512M
     depends_on:
@@ -114,7 +115,6 @@ services:
       - agent-vol:/agent
     ports:
       - 8082:8082
-      - 9092:9092
 
   vets-service:
     image: openapm/spring-petclinic-vets-service:inspectit-oce-demo
@@ -122,7 +122,8 @@ services:
     environment:
       - INSPECTIT_SERVICE_NAME=vets-service
       - INSPECTIT_CONFIG_HTTP_URL=http://ocelot-config-server:8090/api/v1/agent/configuration
-      - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_PORT=9093
+      - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_ENABLED=false
+      - INSPECTIT_EXPORTERS_METRICS_INFLUX_URL=http://influxdb:8086
       - INSPECTIT_EXPORTERS_TRACING_ZIPKIN_URL=http://zipkin:9411/api/v2/spans
     mem_limit: 512M
     depends_on:
@@ -139,7 +140,6 @@ services:
       - agent-vol:/agent
     ports:
       - 8083:8083
-      - 9093:9093
 
   api-gateway:
     image: openapm/spring-petclinic-api-gateway:inspectit-oce-demo
@@ -147,7 +147,8 @@ services:
     environment:
       - INSPECTIT_SERVICE_NAME=api-gateway
       - INSPECTIT_CONFIG_HTTP_URL=http://ocelot-config-server:8090/api/v1/agent/configuration
-      - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_PORT=9094
+      - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_ENABLED=false
+      - INSPECTIT_EXPORTERS_METRICS_INFLUX_URL=http://influxdb:8086
       - INSPECTIT_EXPORTERS_TRACING_ZIPKIN_URL=http://zipkin:9411/api/v2/spans
     mem_limit: 512M
     depends_on:
@@ -164,7 +165,6 @@ services:
       - agent-vol:/agent
     ports:
       - 8080:8080
-      - 9094:9094
 
   load:
     image: inspectit/spring-petclinic-load:1.0
@@ -182,13 +182,6 @@ services:
       - ./influx:/docker-entrypoint-initdb.d
     ports:
       - 8086:8086
-
-  telegraf:
-    image: telegraf:1.9.4
-    container_name: telegraf
-    volumes:
-      - ./telegraf/telegraf-influx.conf:/etc/telegraf/telegraf.conf:ro
-    mem_limit: 512M
     
   zipkin:
     image: openzipkin/zipkin
