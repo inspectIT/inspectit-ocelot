@@ -32,7 +32,9 @@ const configuration = {
      * A map of unsaved file changes.
      * Maps the absolute file path to the files contents.
      */
-    unsavedFileContents: {/* fileName: fileContents*/ }
+    unsavedFileContents: {/* fileName: fileContents*/ },
+    /** The default configuration of the Ocelot agents. Will be retrieved as key/value pairs each representing path/content of a file. */
+    defaultConfig: {}
 };
 
 const notification = {

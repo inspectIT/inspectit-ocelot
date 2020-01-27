@@ -204,3 +204,22 @@ export const selectedFileContentsChanged = (content) => ({
         content
     }
 });
+
+/**
+ * Fetches the default configuration of the Ocelot agents.
+ */
+export const fetchDefaultConfig = () => {
+    return dispatch => {
+        dispatch({ type: types.FETCH_DEFAULT_CONFIG_STARTED });
+
+        axios
+            .get("defaultconfig")
+            .then(res => {
+                const defaultConfig = res.data;
+                dispatch({ type: types.FETCH_DEFAULT_CONFIG_SUCCESS, payload: { defaultConfig } });
+            })
+            .catch(() => {
+                dispatch({ type: types.FETCH_DEFAULT_CONFIG_FAILURE });
+            })
+    }
+}
