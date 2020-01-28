@@ -20,5 +20,7 @@ export const MIN_TOKEN_EXPIRATION_TIME = 300000;
 
 /**
  * Default configuration tree key.
+ * Used by the configuration selector to create a unique tree node key
+ * and by the configuration action to decide which type of tree node (normal vs. default) is selected.
  */
 export const DEFAULT_CONFIG_TREE_KEY = '/$%$%$%$%Ocelot-default-key';

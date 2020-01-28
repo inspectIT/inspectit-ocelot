@@ -59,7 +59,7 @@ export const fetchSelectedFile = () => {
  */
 export const selectFile = (selection) => {
     return dispatch => {
-        if (selection.startsWith(DEFAULT_CONFIG_TREE_KEY)) {
+        if (selection && selection.startsWith(DEFAULT_CONFIG_TREE_KEY)) {
             dispatch({
                 type: types.SELECT_DEFAULT_CONFIG_FILE,
                 payload: {

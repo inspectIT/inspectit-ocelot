@@ -75,7 +75,7 @@ const configurationReducer = createReducer(initialState)({
         return {
             ...state,
             selection,
-            defaultSelection: null,
+            selectedDefaultConfigFile: null,
             selectedFileContent: null
         };
     },
@@ -166,7 +166,7 @@ const configurationReducer = createReducer(initialState)({
         return {
             ...state,
             selection: null,
-            defaultSelection: selection,
+            selectedDefaultConfigFile: selection,
             selectedFileContent: null
         };
     },

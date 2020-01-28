@@ -99,13 +99,13 @@ export const hasUnsavedChanges = createSelector(
 export const getDefaultConfigTree = createSelector(
     configurationSelector,
     configuration => {
-        const { defaultConfig, defaultSelection } = configuration;
+        const { defaultConfig, selectedDefaultConfigFile } = configuration;
 
         const paths = Object.keys(defaultConfig);
         let res = [];
 
         if (paths.length !== 0) {
-            res.push(_getDefaultRoot(defaultSelection));
+            res.push(_getDefaultRoot(selectedDefaultConfigFile));
 
             for (const path of paths) {
                 _addNode(res[0], path);
@@ -155,7 +155,7 @@ const _addNode = (rootNode, path) => {
 const _getDefaultRoot = (selection) => {
     return {
         key: DEFAULT_CONFIG_TREE_KEY,
-        label: 'default',
+        label: 'ocelot-defaults',
         icon: `cm-tree-icon ocelot-tree-head-${selection === DEFAULT_CONFIG_TREE_KEY ? 'white' : 'orange'}`,
         children: [],
         className: 'cm-tree-label'

@@ -39,7 +39,8 @@ class FileTree extends React.Component {
             <div className='this'>
                 <style jsx>{`
                     .this {
-                        height: 100%;
+                        overflow: auto;
+                        flex-grow: 1;
                     }
                     .this :global(.cm-tree-icon) {
                         width: 1.3rem;
@@ -61,9 +62,9 @@ class FileTree extends React.Component {
                     className={this.props.className}
                     filter={true}
                     filterBy="label"
-                    value={this.props.files.concat(this.props.defaultTree)}
+                    value={this.props.defaultTree.concat(this.props.files)}
                     selectionMode="single"
-                    selectionKeys={this.props.selection || this.props.defaultSelection}
+                    selectionKeys={this.props.selection || this.props.selectedDefaultConfigFile}
                     onSelectionChange={this.onSelectionChange}
                 />
             </div>
@@ -73,14 +74,14 @@ class FileTree extends React.Component {
 }
 
 function mapStateToProps(state) {
-    const { pendingRequests, selection, files, defaultConfig, defaultSelection } = state.configuration;
+    const { pendingRequests, selection, files, defaultConfig, selectedDefaultConfigFile } = state.configuration;
     return {
         files: configurationSelectors.getFileTree(state),
         loading: pendingRequests > 0,
         selection,
         defaultConfig: defaultConfig,
         defaultTree: configurationSelectors.getDefaultConfigTree(state),
-        defaultSelection
+        selectedDefaultConfigFile
     }
 }
 
