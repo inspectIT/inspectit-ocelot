@@ -27,11 +27,17 @@ class FileTree extends React.Component {
      * Handle tree selection changes.
      */
     onSelectionChange = (event) => {
-        const { selection, rawFiles } = this.props;
-
-        if (event.value !== selection) {
-            this.props.selectFile(event.value);
-        }
+        const { selection,selectedDefaultConfigFile, rawFiles } = this.props;
+        const newSelection = event.value;
+        if(newSelection) {
+            if (newSelection !== selection && newSelection !== selectedDefaultConfigFile) {
+                this.props.selectFile(newSelection);
+            }
+        } else {
+            if (selection || selectedDefaultConfigFile) {
+                this.props.selectFile(null);
+            }
+        }        
     }
 
     render() {
