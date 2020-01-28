@@ -12,7 +12,7 @@ class MappingToolbar extends React.Component {
   render() {
     const { filterValue, onChangeFilter, onAddNewMapping, onDownload, fetchMappings } = this.props;
     return (
-      <Toolbar style={{ 'border': '0', 'background-color': '#eee' }} >
+      <Toolbar style={{ 'border': '0', 'backgroundColor': '#eee' }} >
         <style jsx>{`
           .searchbox{
             display: flex;
@@ -28,7 +28,7 @@ class MappingToolbar extends React.Component {
         <div className='p-toolbar-group-left'>
           <div className='searchbox'>
             <i className="pi pi-sitemap"></i>
-            <h4 style={{ 'font-weight': 'normal', 'margin-right': '1rem' }}>Agent Mappings</h4>
+            <h4 style={{ 'fontWeight': 'normal', 'marginRight': '1rem' }}>Agent Mappings</h4>
             <InputText placeholder='Search' value={filterValue} onChange={(e) => onChangeFilter(e.target.value)} tooltip={searchFieldTooltipText} />
           </div>
         </div>

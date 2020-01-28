@@ -39,7 +39,7 @@ class CreateDialog extends React.Component {
                     </div>
                 )}
             >
-                <div style={{ width: '100%', paddingBottom: '0.5em', 'border-bottom': 'solid #bbb 1px' }}>
+                <div style={{ width: '100%', paddingBottom: '0.5em', 'borderBottom': 'solid #bbb 1px' }}>
                     Users created here will not be registered in LDAP
                 </div>
                 <div style={{ width: '100%', paddingBottom: '0.5em', paddingTop: '0.5em' }}>

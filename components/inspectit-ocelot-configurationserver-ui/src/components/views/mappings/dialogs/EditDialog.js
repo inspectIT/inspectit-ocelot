@@ -51,7 +51,7 @@ class EditMappingDialog extends React.Component {
           modal={true}
           visible={this.props.visible}
           onHide={this.handleClose}
-          style={{ 'max-width': '1100px', 'min-width': '650px' }}
+          style={{ 'maxWidth': '1100px', 'minWidth': '650px' }}
           footer={(
             <div>
               <Button label={isNewMapping ? 'Add' : 'Update'} className="p-button-primary" onClick={this.handleSave} />
@@ -68,10 +68,10 @@ class EditMappingDialog extends React.Component {
                 onChange={e => this.setState({ name: e.target.value })}
                 style={{ width: '100%' }}
               />
-              <span className="pi p-inputgroup-addon pi-pencil" style={{ background: 'inherit', 'border-color': '#656565' }} />
+              <span className="pi p-inputgroup-addon pi-pencil" style={{ background: 'inherit', 'borderColor': '#656565' }} />
             </div>
           </span>
-          <Fieldset legend='Sources' style={{ 'padding-top': 0, 'height': heightFieldset, overflow: 'hidden' }}>
+          <Fieldset legend='Sources' style={{ 'paddingTop': 0, 'height': heightFieldset, overflow: 'hidden' }}>
             <EditSources
               visible={this.props.visible}
               sources={sources}
@@ -79,7 +79,7 @@ class EditMappingDialog extends React.Component {
               maxHeight={`calc(${heightFieldset}px - 3.5em)`}
             />
           </Fieldset>
-          <Fieldset legend='Attributes' style={{ 'padding-top': 0, 'height': heightFieldset, overflow: 'hidden' }}>
+          <Fieldset legend='Attributes' style={{ 'paddingTop': 0, 'height': heightFieldset, overflow: 'hidden' }}>
             <KeyValueEditor
               keyValueArray={attributes}
               onChange={this.handleChangeAttribute}

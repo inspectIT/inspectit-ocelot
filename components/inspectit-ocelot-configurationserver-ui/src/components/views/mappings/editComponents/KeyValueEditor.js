@@ -46,7 +46,7 @@ class KeyValueEditor extends React.Component {
           columnKey='key'
           field='key'
           header='Key'
-          headerStyle={{ 'font-weight': 'normal' }}
+          headerStyle={{ 'fontWeight': 'normal' }}
           body={rowData => rowData.key || <p style={{ color: 'grey' }}>click here to add new key</p>}
           editor={this.editor}
         />
@@ -54,7 +54,7 @@ class KeyValueEditor extends React.Component {
           columnKey='value'
           field='value'
           header='Value'
-          headerStyle={{ 'font-weight': 'normal' }}
+          headerStyle={{ 'fontWeight': 'normal' }}
           body={rowData => rowData.value || <p style={{ color: 'grey' }}>click here to add new value</p>}
           editor={this.editor}
         />

@@ -29,7 +29,7 @@ class DownloadDialog extends React.Component {
         modal={true}
         visible={this.props.visible}
         onHide={this.props.onHide}
-        style={{ 'max-width': '900px' }}
+        style={{ 'maxWidth': '900px' }}
         footer={(
           <div>
             <Button label="Download" ref={this.downloadButton} className="p-button-primary" onClick={this.handleDownload} />
@@ -37,7 +37,7 @@ class DownloadDialog extends React.Component {
           </div>
         )}
       >
-        <p style={{ 'margin-bottom': '1em' }}>
+        <p style={{ 'marginBottom': '1em' }}>
           Enter key/value pairs to download the correlating agent configuration.
           <br /> You will get a different result depending on the mapping that fits your input.
         </p>
