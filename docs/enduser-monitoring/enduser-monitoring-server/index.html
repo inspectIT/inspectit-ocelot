@@ -67,15 +67,15 @@ Boomerang is a Javascript metrics agent, which is able to capture arbitrary cust
 <p>For testing purposes, you can inject the following snipped in your webpage.
 This snippet loads the boomerang version shipped with the Ocelot server and sends
 all measured metrics back to it:</p>
-<pre><code class="hljs css language-javascript"> &lt;script src=<span class="hljs-string">"http://[inspectit-eum-server-url]/boomerang/boomerang.js"</span>&gt;<span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span></span>
- <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"http://[inspectit-eum-server-url]/boomerang/plugins/rt.js"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span></span>
- <span class="xml"><span class="hljs-comment">&lt;!-- any other plugins you want to include --&gt;</span>
- <span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="actionscript">
+<pre><code class="hljs css language-javascript"> &lt;script src="http://[inspectit-eum-server-url]/boomerang/boomerang.js"&gt;&lt;/script&gt;
+ &lt;script src="http://[inspectit-eum-server-url]/boomerang/plugins/rt.js"&gt;&lt;/script&gt;
+ &lt;!-- any other plugins you want to include --&gt;
+ &lt;script&gt;
    BOOMR.init({
-     beacon_url: <span class="hljs-string">"http://[inspectit-eum-server-url]:8080/beacon/"</span>
+     beacon_url: "http://[inspectit-eum-server-url]:8080/beacon/"
    });
- </span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
-</span></code></pre>
+ &lt;/script&gt;
+</code></pre>
 <p>All boomerang-specific scripts are exposed by the eum server under <code>http://{eum-server}/boomerang/**</code>.</p>
 <p>You can access the boomerang main script under: <code>http://[inspectit-eum-server-url]/boomerang/boomerang.js</code>.
 All boomerang plugins can be downloaded under <code>http://[inspectit-eum-server-url]/boomerang/plugins/{plugin_name}.js</code>.

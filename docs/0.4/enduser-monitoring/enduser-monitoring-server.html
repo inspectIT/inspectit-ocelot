@@ -65,15 +65,15 @@
 <p>The inspectit-ocelot server offers a backend for Javascript monitoring with <a href="https://developer.akamai.com/tools/boomerang/docs/index.html">Boomerang</a>.
 Boomerang is a Javascript metrics agent, which is able to capture arbitrary customizable metrics.
 By injecting the following snipped in your webpage, all measured metrics are sent to the inspectit-ocelot-eum-server:</p>
-<pre><code class="hljs css language-javascript">&lt;script src=<span class="hljs-string">"boomerang-1.0.0.min.js"</span>&gt;<span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span></span>
- <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"plugins/rt.js"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span></span>
- <span class="xml"><span class="hljs-comment">&lt;!-- any other plugins you want to include --&gt;</span>
- <span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="actionscript">
+<pre><code class="hljs css language-javascript">&lt;script src="boomerang-1.0.0.min.js"&gt;&lt;/script&gt;
+ &lt;script src="plugins/rt.js"&gt;&lt;/script&gt;
+ &lt;!-- any other plugins you want to include --&gt;
+ &lt;script&gt;
    BOOMR.init({
-     beacon_url: <span class="hljs-string">"http://[inspectit-eum-server-url]:8080/beacon/"</span>
+     beacon_url: "http://[inspectit-eum-server-url]:8080/beacon/"
    });
- </span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
-</span></code></pre>
+ &lt;/script&gt;
+</code></pre>
 <p>Boomerang recommends to use an advanced injection, where the boomerang agent is loaded in an asynchronous way.
 For further information, please visit the <a href="https://developer.akamai.com/tools/boomerang/docs/index.html">Boomerang documentation</a>.</p>
 <p>If enabled, the server exposes the metrics by using the <a href="https://github.com/census-instrumentation/opencensus-java/tree/master/exporters/stats/prometheus">Prometheus exporter</a>.
