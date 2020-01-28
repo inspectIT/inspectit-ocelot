@@ -61,7 +61,7 @@ class FileTree extends React.Component {
                     className={this.props.className}
                     filter={true}
                     filterBy="label"
-                    value={this.props.defaultTree.concat(this.props.files)}
+                    value={this.props.files.concat(this.props.defaultTree)}
                     selectionMode="single"
                     selectionKeys={this.props.selection || this.props.defaultSelection}
                     onSelectionChange={this.onSelectionChange}
