@@ -162,12 +162,12 @@ const configurationReducer = createReducer(initialState)({
     },
     [types.FETCH_DEFAULT_CONFIG_FAILURE]: decrementPendingRequests,
     [types.SELECT_DEFAULT_CONFIG_FILE]: (state, action) => {
-        const { selection } = action.payload;
+        const { selection, content } = action.payload;
         return {
             ...state,
             selection: null,
             selectedDefaultConfigFile: selection,
-            selectedFileContent: null
+            selectedFileContent: content
         };
     },
 });

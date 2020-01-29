@@ -1,4 +1,5 @@
 import { find } from 'lodash';
+import { DEFAULT_CONFIG_TREE_KEY } from '../../../data/constants';
 
 /**
  * Returns the file object for the given path.
@@ -36,7 +37,7 @@ export function getFile(rootFiles, path) {
  */
 export function getParentDirectoryPath(path) {
     const lastSlash = path.lastIndexOf("/");
-    return lastSlash == -1 ? "" : path.substring(0,lastSlash);
+    return lastSlash == -1 ? "" : path.substring(0, lastSlash);
 }
 
 /**
@@ -44,4 +45,9 @@ export function getParentDirectoryPath(path) {
  */
 export function isDirectory(file) {
     return file && file.type === "directory";
+}
+
+export function getDefaultFileContent(defaultConfig, path) {
+    const filePath = path.replace(DEFAULT_CONFIG_TREE_KEY + '/', '');
+    return defaultConfig[filePath] || null;
 }
