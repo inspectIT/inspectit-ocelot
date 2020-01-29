@@ -14,7 +14,7 @@ import { DEFAULT_CONFIG_TREE_KEY } from '../../../data/constants';
 /**
  * The header component of the editor view.
  */
-const EditorHeader = ({ icon, path, name, isContentModified }) => (
+const EditorHeader = ({ icon, path, name, isContentModified, readOnly }) => (
     <>
         <style jsx>{`
         .header {
@@ -41,6 +41,7 @@ const EditorHeader = ({ icon, path, name, isContentModified }) => (
             <div className="path">{path}</div>
             <div className="name">{name}</div>
             {isContentModified && <div className="dirtyStateMarker">*</div>}
+            {readOnly && <div className="dirtyStateMarker">(read only)</div>}
         </div>
     </>
 );
@@ -52,30 +53,21 @@ class ConfigurationView extends React.Component {
 
     parsePath = (filePath, defaultConfigFilePath) => {
         if (filePath) {
-            const lastIndex = filePath.lastIndexOf("/") + 1;
-            return {
-                path: filePath.slice(0, lastIndex),
-                name: filePath.slice(lastIndex)
-            };
+            return this.splitIntoPathAndName(filePath);
         } else if (defaultConfigFilePath) {
             const path = defaultConfigFilePath.replace(DEFAULT_CONFIG_TREE_KEY, '/Ocelot defaults');
-            const lastIndex = path.lastIndexOf("/") + 1;
-            return {
-                path: path.slice(0, lastIndex),
-                name: path.slice(lastIndex)
-            };
+            return this.splitIntoPathAndName(path);
         } else {
             return {};
         }
     }
 
-    decideIcon = () => {
-        const { isDirectory, selectedDefaultConfigFile, isDefaultConfigFile } = this.props;
-        if (selectedDefaultConfigFile) {
-            return (!isDefaultConfigFile ? 'folder' : 'file');
-        } else {
-            return (isDirectory ? 'folder' : 'file');
-        }
+    splitIntoPathAndName = (path) => {
+        const lastIndex = path.lastIndexOf("/") + 1;
+        return {
+            path: path.slice(0, lastIndex),
+            name: path.slice(lastIndex)
+        };
     }
 
     onSave = () => {
@@ -94,11 +86,11 @@ class ConfigurationView extends React.Component {
     }
 
     render() {
-        const { selection, isDirectory, loading, isContentModified, fileContent, yamlError, selectedDefaultConfigFile, isDefaultConfigFile } = this.props;
-        const showEditor = selection && !isDirectory || isDefaultConfigFile;
+        const { selection, isDirectory, loading, isContentModified, fileContent, yamlError, selectedDefaultConfigFile } = this.props;
+        const showEditor = (selection || selectedDefaultConfigFile) && !isDirectory;
 
         const { path, name } = this.parsePath(selection, selectedDefaultConfigFile);
-        const icon = "pi-" + this.decideIcon();
+        const icon = "pi-" + (isDirectory ? "folder" : "file");
         const showHeader = !!name;
 
         return (
@@ -149,8 +141,8 @@ class ConfigurationView extends React.Component {
                     notificationIcon="pi-exclamation-triangle"
                     notificationText={yamlError}
                     loading={loading}
-                    readOnly={isDefaultConfigFile}>
-                    {showHeader ? <EditorHeader icon={icon} path={path} name={name} isContentModified={isContentModified} /> : null}
+                    readOnly={!!selectedDefaultConfigFile}>
+                    {showHeader ? <EditorHeader icon={icon} path={path} name={name} isContentModified={isContentModified} readOnly={!!selectedDefaultConfigFile} /> : null}
                 </EditorView>
             </div>
         );
@@ -178,13 +170,12 @@ function mapStateToProps(state) {
     return {
         updateDate,
         selection,
-        isDirectory: configurationSelectors.isSelectionDirectory(state),
+        isDirectory: configurationSelectors.isSelectionDirectory(state) || !!(selectedDefaultConfigFile && !fileContent),
         isContentModified: unsavedFileContent != null,
         fileContent,
         yamlError: getYamlError(fileContent),
         loading: pendingRequests > 0,
         selectedDefaultConfigFile,
-        isDefaultConfigFile: !!(selectedDefaultConfigFile && fileContent)
     }
 }
 
