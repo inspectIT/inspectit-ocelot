@@ -1,26 +1,20 @@
-import React from 'react'
+import React from 'react';
 import { Tree } from 'primereact/tree';
 import { ContextMenu } from 'primereact/contextmenu';
-import { connect } from 'react-redux'
-import { configurationActions, configurationSelectors, configurationUtils } from '../../../redux/ducks/configuration'
+import { connect } from 'react-redux';
+import { configurationActions, configurationSelectors, configurationUtils } from '../../../redux/ducks/configuration';
 import { linkPrefix } from '../../../lib/configuration';
 
 import { DEFAULT_CONFIG_TREE_KEY } from '../../../data/constants';
-import DeleteDialog from './dialogs/DeleteDialog'
-import CreateDialog from './dialogs/CreateDialog'
-import MoveDialog from './dialogs/MoveDialog'
 
 /**
  * The file tree used in the configuration view.
  */
 class FileTree extends React.Component {
 
-    constructor() {
-        super();
-        this.state = {
-            menu: this.getMenu(false)
-        };
-    }
+    state = {
+        menu: []
+    };
 
     /**
      * Fetch the files initially.
@@ -72,22 +66,6 @@ class FileTree extends React.Component {
         this.cm.show(event.originalEvent || event);
     }
 
-    showDeleteFileDialog = () => this.setState({ isDeleteFileDialogShown: true })
-
-    hideDeleteFileDialog = () => this.setState({ isDeleteFileDialogShown: false })
-
-    showCreateFileDialog = () => this.setState({ isCreateFileDialogShown: true })
-
-    hideCreateFileDialog = () => this.setState({ isCreateFileDialogShown: false })
-
-    showCreateDirectoryDialog = () => this.setState({ isCreateDirectoryDialogShown: true })
-
-    hideCreateDirectoryDialog = () => this.setState({ isCreateDirectoryDialogShown: false })
-
-    showMoveDialog = () => this.setState({ isMoveDialogShown: true })
-
-    hideMoveDialog = () => this.setState({ isMoveDialogShown: false })
-
     render() {
         return (
             <div className='this' onContextMenu={this.onContextMenuSelectionChange}>
@@ -123,38 +101,35 @@ class FileTree extends React.Component {
                     onSelectionChange={this.onSelectionChange}
                     onContextMenuSelectionChange={this.onContextMenuSelectionChange} />
                 />
-                <DeleteDialog visible={this.state.isDeleteFileDialogShown} onHide={this.hideDeleteFileDialog} />
-                <CreateDialog directoryMode={false} visible={this.state.isCreateFileDialogShown} onHide={this.hideCreateFileDialog} />
-                <CreateDialog directoryMode={true} visible={this.state.isCreateDirectoryDialogShown} onHide={this.hideCreateDirectoryDialog} />
-                <MoveDialog visible={this.state.isMoveDialogShown} onHide={this.hideMoveDialog} />
             </div>
 
         );
     }
 
     getMenu = (isForFile) => {
+        const { showCreateDirectoryDialog, showCreateFileDialog, showMoveDialog, showDeleteFileDialog } = this.props;
         return [
             {
                 label: 'Add Folder',
                 icon: 'pi pi-folder',
-                command: this.showCreateDirectoryDialog
+                command: showCreateDirectoryDialog
             },
             {
                 label: 'Add File',
                 icon: 'pi pi-file',
-                command: this.showCreateFileDialog
+                command: showCreateFileDialog
             },
             {
                 label: 'Rename',
                 icon: 'pi pi-pencil',
                 disabled: !isForFile,
-                command: this.showMoveDialog
+                command: showMoveDialog
             },
             {
                 label: 'Delete',
                 icon: 'pi pi-trash',
                 disabled: !isForFile,
-                command: this.showDeleteFileDialog
+                command: showDeleteFileDialog
             }
         ];
     }
