@@ -6,42 +6,21 @@ import { configurationActions, configurationSelectors, configurationUtils } from
 import { linkPrefix } from '../../../lib/configuration';
 
 import { DEFAULT_CONFIG_TREE_KEY } from '../../../data/constants';
-
-const menu = [
-    {
-        label: 'Add Folder',
-        icon: 'pi pi-folder',
-        command: () => {
-            console.log('add folder');
-        }
-    },
-    {
-        label: 'Add File',
-        icon: 'pi pi-file',
-        command: () => {
-            console.log('add file')
-        }
-    },
-    {
-        label: 'Rename',
-        icon: 'pi pi-pencil',
-        command: () => {
-            console.log('rename')
-        }
-    },
-    {
-        label: 'Delete',
-        icon: 'pi pi-trash',
-        command: () => {
-            console.log('delete')
-        }
-    }
-]
+import DeleteDialog from './dialogs/DeleteDialog'
+import CreateDialog from './dialogs/CreateDialog'
+import MoveDialog from './dialogs/MoveDialog'
 
 /**
  * The file tree used in the configuration view.
  */
 class FileTree extends React.Component {
+
+    constructor() {
+        super();
+        this.state = {
+            menu: this.getMenu(false)
+        };
+    }
 
     /**
      * Fetch the files initially.
@@ -55,6 +34,7 @@ class FileTree extends React.Component {
         if (Object.entries(defaultConfig).length === 0) {
             this.props.fetchDefaultConfig();
         }
+
     }
 
     /**
@@ -75,30 +55,42 @@ class FileTree extends React.Component {
     }
 
     /**
-     * might be better to introduce a new prop for contextMenuSelection which will be changed as an action along with the state (with state in case it is too slow otherwise)
-     * that way the file won't be fetched and loaded and there is no need to select
-     * dialogs need to favour the contextmenuselection over selection in this case
+     * Handle Contextmenu selection.
+     * Switch between a contextmenu for filenodes and a general menu.
      */
-    // onContextMenuSelectionChange = (event) => {
-    //     const { selection } = this.props;
-    //     const newSelection = event.value;
-    //     if (!selectedNodeKey.startsWith(DEFAULT_CONFIG_TREE_KEY) && selection !== event.value) {
-    //         this.props.selectFile(event.value);
-    //     }
-    // }
+    onContextMenuSelectionChange = (event) => {
+        const newSelection = event.value;
 
-    onContextMenu = (event) => {
-        console.log(event)
-        // event contains the node! I don't need onContextMenuSelectionChange where the event will give me nothing but the key
-        const { selection, loading } = this.props;
-        if (selection && !loading) {
-            this.cm.show(event.originalEvent)
+        if (newSelection && newSelection.startsWith(DEFAULT_CONFIG_TREE_KEY)) {
+            // Show no contextmenu when clicked on a ocelot default configuration node.
+            event.originalEvent.stopPropagation();
+            return;
         }
+        this.onSelectionChange(event);
+
+        this.setState({ menu: this.getMenu(!!newSelection) });
+        this.cm.show(event.originalEvent || event);
     }
+
+    showDeleteFileDialog = () => this.setState({ isDeleteFileDialogShown: true })
+
+    hideDeleteFileDialog = () => this.setState({ isDeleteFileDialogShown: false })
+
+    showCreateFileDialog = () => this.setState({ isCreateFileDialogShown: true })
+
+    hideCreateFileDialog = () => this.setState({ isCreateFileDialogShown: false })
+
+    showCreateDirectoryDialog = () => this.setState({ isCreateDirectoryDialogShown: true })
+
+    hideCreateDirectoryDialog = () => this.setState({ isCreateDirectoryDialogShown: false })
+
+    showMoveDialog = () => this.setState({ isMoveDialogShown: true })
+
+    hideMoveDialog = () => this.setState({ isMoveDialogShown: false })
 
     render() {
         return (
-            <div className='this'>
+            <div className='this' onContextMenu={this.onContextMenuSelectionChange}>
                 <style jsx>{`
                     .this {
                         overflow: auto;
@@ -120,7 +112,7 @@ class FileTree extends React.Component {
                         background-size: 1rem 1rem;
                     }
 				`}</style>
-                <ContextMenu model={menu} ref={el => this.cm = el} />
+                <ContextMenu model={this.state.menu} ref={el => this.cm = el} />
                 <Tree
                     className={this.props.className}
                     filter={true}
@@ -129,12 +121,42 @@ class FileTree extends React.Component {
                     selectionMode="single"
                     selectionKeys={this.props.selection || this.props.selectedDefaultConfigFile}
                     onSelectionChange={this.onSelectionChange}
-                    onContextMenuSelectionChange={this.onSelectionChange}
-                    onContextMenu={this.onContextMenu} />
+                    onContextMenuSelectionChange={this.onContextMenuSelectionChange} />
                 />
+                <DeleteDialog visible={this.state.isDeleteFileDialogShown} onHide={this.hideDeleteFileDialog} />
+                <CreateDialog directoryMode={false} visible={this.state.isCreateFileDialogShown} onHide={this.hideCreateFileDialog} />
+                <CreateDialog directoryMode={true} visible={this.state.isCreateDirectoryDialogShown} onHide={this.hideCreateDirectoryDialog} />
+                <MoveDialog visible={this.state.isMoveDialogShown} onHide={this.hideMoveDialog} />
             </div>
 
         );
+    }
+
+    getMenu = (isForFile) => {
+        return [
+            {
+                label: 'Add Folder',
+                icon: 'pi pi-folder',
+                command: this.showCreateDirectoryDialog
+            },
+            {
+                label: 'Add File',
+                icon: 'pi pi-file',
+                command: this.showCreateFileDialog
+            },
+            {
+                label: 'Rename',
+                icon: 'pi pi-pencil',
+                disabled: !isForFile,
+                command: this.showMoveDialog
+            },
+            {
+                label: 'Delete',
+                icon: 'pi pi-trash',
+                disabled: !isForFile,
+                command: this.showDeleteFileDialog
+            }
+        ];
     }
 }
 
