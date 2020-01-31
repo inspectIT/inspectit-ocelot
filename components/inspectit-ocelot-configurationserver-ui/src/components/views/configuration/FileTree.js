@@ -56,7 +56,7 @@ class FileTree extends React.Component {
         const newSelection = event.value;
 
         if (newSelection && newSelection.startsWith(DEFAULT_CONFIG_TREE_KEY)) {
-            // Show no contextmenu when clicked on a ocelot default configuration node.
+            // Show no contextmenu when clicked on an ocelot default configuration node.
             event.originalEvent.stopPropagation();
             return;
         }
