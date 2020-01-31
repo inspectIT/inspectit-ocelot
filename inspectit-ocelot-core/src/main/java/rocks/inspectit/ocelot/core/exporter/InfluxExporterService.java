@@ -45,7 +45,7 @@ public class InfluxExporterService extends DynamicallyActivatableService {
     @Override
     protected boolean doEnable(InspectitConfig configuration) {
         InfluxExporterSettings influx = configuration.getExporters().getMetrics().getInflux();
-        log.info("Starting Influx  to '{}:{}' on '{}'", influx.getDatabase(), influx.getRetentionPolicy(), influx.getUrl());
+        log.info("Starting InfluxDB Exporter to '{}:{}' on '{}'", influx.getDatabase(), influx.getRetentionPolicy(), influx.getUrl());
         activeExporter = InfluxExporter.builder()
                 .url(influx.getUrl())
                 .database(influx.getDatabase())
@@ -61,7 +61,7 @@ public class InfluxExporterService extends DynamicallyActivatableService {
     @Override
     protected boolean doDisable() {
         if (exporterTask != null) {
-            log.info("Stopping Influx Exporter");
+            log.info("Stopping InfluxDB Exporter");
             exporterTask.cancel(false);
         }
         if (activeExporter != null) {
