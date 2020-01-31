@@ -1,7 +1,8 @@
 package rocks.inspectit.ocelot.core.exporter;
 
-import com.bendb.influx.InfluxServer;
-import com.bendb.influx.InfluxServerExtension;
+import de.flapdoodle.embed.process.runtime.Network;
+import io.apisense.embed.influx.InfluxServer;
+import io.apisense.embed.influx.configuration.InfluxConfigurationWriter;
 import io.opencensus.common.Scope;
 import io.opencensus.stats.*;
 import io.opencensus.tags.TagKey;
@@ -10,11 +11,9 @@ import io.opencensus.tags.Tags;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Query;
 import org.influxdb.dto.QueryResult;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
-import org.junit.jupiter.api.condition.EnabledOnJre;
-import org.junit.jupiter.api.condition.JRE;
-import org.junit.jupiter.api.extension.ExtendWith;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 
 import java.util.Arrays;
@@ -24,20 +23,38 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-@EnabledOnJre(JRE.JAVA_8) //because embedded influx uses some kotlin Oracle JRE8 classes which break otherwise
-@EnabledIfSystemProperty(named = "java.vendor", matches = ".*(o|O)racle.*")
-@ExtendWith(InfluxServerExtension.class)
 public class InfluxExporterServiceIntTest extends SpringTestBase {
 
-    InfluxServer influx;
+    private InfluxServer influx;
+
+    private String url;
 
     private static final String DATABASE = "ocelot_test";
+
+    @BeforeEach
+    void startInfluxDB() throws Exception {
+        InfluxServer.Builder builder = new InfluxServer.Builder();
+        int freeHttpPort = Network.getFreeServerPort();
+        InfluxConfigurationWriter influxConfig = new InfluxConfigurationWriter.Builder()
+                .setHttp(freeHttpPort) // by default auth is disabled
+                .build();
+        builder.setInfluxConfiguration(influxConfig);
+
+        influx = builder.build();
+        influx.start();
+        url = "http://localhost:" + freeHttpPort;
+    }
+
+    @AfterEach
+    void shutdownInfluxDB() throws Exception {
+        influx.cleanup();
+    }
 
     @Test
     void verifyInfluxDataWritten() {
         updateProperties(props -> {
             props.setProperty("inspectit.exporters.metrics.influx.export-interval", "1s");
-            props.setProperty("inspectit.exporters.metrics.influx.url", influx.getUrl());
+            props.setProperty("inspectit.exporters.metrics.influx.url", url);
             props.setProperty("inspectit.exporters.metrics.influx.database", DATABASE);
         });
 
@@ -57,7 +74,7 @@ public class InfluxExporterServiceIntTest extends SpringTestBase {
         }
 
         await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
-            QueryResult result = InfluxDBFactory.connect(influx.getUrl()).query(new Query("SELECT LAST(cool_data) FROM " + DATABASE + ".autogen.my_test_measure GROUP BY *"));
+            QueryResult result = InfluxDBFactory.connect(url).query(new Query("SELECT LAST(cool_data) FROM " + DATABASE + ".autogen.my_test_measure GROUP BY *"));
 
             List<QueryResult.Result> results = result.getResults();
             assertThat(results).hasSize(1);

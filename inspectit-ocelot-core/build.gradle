@@ -82,7 +82,7 @@ dependencies {
             "io.grpc:grpc-netty-shaded:1.20.0",
             "io.grpc:grpc-stub:1.20.0",
             'org.influxdb:influxdb-java:2.15',
-            'com.bendb.influx:embedded-influx-junit5:0.2.0'
+            'io.apisense.embed.influx:embed-influxDB:1.2.1'
     )
 
     jmh(
