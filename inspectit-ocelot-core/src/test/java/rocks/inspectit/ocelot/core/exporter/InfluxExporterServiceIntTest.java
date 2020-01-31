@@ -11,6 +11,7 @@ import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Query;
 import org.influxdb.dto.QueryResult;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.junit.jupiter.api.condition.EnabledOnJre;
 import org.junit.jupiter.api.condition.JRE;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,7 +24,8 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-@EnabledOnJre(JRE.JAVA_8) //because embedded influx uses some kotlin JRE8 classes which break otherwise
+@EnabledOnJre(JRE.JAVA_8) //because embedded influx uses some kotlin Oracle JRE8 classes which break otherwise
+@EnabledIfSystemProperty(named = "java.vendor", matches = ".*(o|O)racle.*")
 @ExtendWith(InfluxServerExtension.class)
 public class InfluxExporterServiceIntTest extends SpringTestBase {
 
