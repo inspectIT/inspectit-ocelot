@@ -58,7 +58,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1567689181674,
+  "iteration": 1580134615470,
   "links": [],
   "panels": [
     {
@@ -273,7 +273,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -303,7 +303,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -333,7 +333,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -756,7 +756,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -799,7 +799,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -842,7 +842,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -885,7 +885,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },

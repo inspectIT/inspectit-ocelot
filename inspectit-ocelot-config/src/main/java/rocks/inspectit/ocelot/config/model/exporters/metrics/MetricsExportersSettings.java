@@ -17,4 +17,7 @@ public class MetricsExportersSettings {
 
     @Valid
     private OpenCensusAgentMetricsExporterSettings openCensusAgent;
+
+    @Valid
+    private InfluxExporterSettings influx;
 }
