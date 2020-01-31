@@ -33,7 +33,7 @@ inspectit:
         database: "inspectit"
         # the retention policy to write to
         retention-policy: "autogen"
-        # If true, the specified database will be created iwth the autogen retention policy
+        # If true, the specified database will be created with the autogen retention policy
         create-database: true
 
     # settings for trace exporters

@@ -14,7 +14,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Uses the {@link InfluxExporter} to directly push metrics into a given InfluxDB version 1.x
+ * Uses the {@link InfluxExporter} to directly push metrics into a given InfluxDB version 1.x .
  */
 @Slf4j
 @Component
@@ -23,8 +23,14 @@ public class InfluxExporterService extends DynamicallyActivatableService {
     @Autowired
     private ScheduledExecutorService executor;
 
+    /**
+     * The currently active influx exporter, null if none is active.
+     */
     private InfluxExporter activeExporter;
 
+    /**
+     * A task regularly invoking activeExporter.export() at the configured interval.
+     */
     private Future exporterTask;
 
 
