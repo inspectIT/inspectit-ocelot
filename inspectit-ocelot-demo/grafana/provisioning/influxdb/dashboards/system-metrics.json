@@ -15,8 +15,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 1,
-  "iteration": 1580139786945,
+  "id": 2,
+  "iteration": 1580729039212,
   "links": [],
   "panels": [
     {
@@ -33,8 +33,8 @@
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "0ea77b86eba2",
-          "value": "0ea77b86eba2"
+          "text": "1bfe532f5646",
+          "value": "1bfe532f5646"
         }
       },
       "title": "$host",
@@ -96,8 +96,8 @@
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "0ea77b86eba2",
-          "value": "0ea77b86eba2"
+          "text": "1bfe532f5646",
+          "value": "1bfe532f5646"
         }
       },
       "sparkline": {
@@ -191,8 +191,8 @@
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "0ea77b86eba2",
-          "value": "0ea77b86eba2"
+          "text": "1bfe532f5646",
+          "value": "1bfe532f5646"
         }
       },
       "seriesOverrides": [
@@ -394,8 +394,8 @@
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "0ea77b86eba2",
-          "value": "0ea77b86eba2"
+          "text": "1bfe532f5646",
+          "value": "1bfe532f5646"
         }
       },
       "sparkline": {
@@ -501,8 +501,8 @@
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "0ea77b86eba2",
-          "value": "0ea77b86eba2"
+          "text": "1bfe532f5646",
+          "value": "1bfe532f5646"
         }
       },
       "seriesOverrides": [],
@@ -521,7 +521,7 @@
             },
             {
               "params": [
-                "null"
+                "linear"
               ],
               "type": "fill"
             }
@@ -573,7 +573,7 @@
           "measurement": "disk_usage",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"total\")- mean(free) FROM \"disk_usage\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter GROUP BY time($__interval) fill(null)",
+          "query": "SELECT mean(\"total\")- mean(free) FROM \"disk_usage\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter GROUP BY time($__interval) fill(linear)",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "time_series",
@@ -697,8 +697,8 @@
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "0ea77b86eba2",
-          "value": "0ea77b86eba2"
+          "text": "1bfe532f5646",
+          "value": "1bfe532f5646"
         }
       },
       "sparkline": {
@@ -810,8 +810,8 @@
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "0ea77b86eba2",
-          "value": "0ea77b86eba2"
+          "text": "1bfe532f5646",
+          "value": "1bfe532f5646"
         }
       },
       "sparkline": {
@@ -878,13 +878,13 @@
       "id": 14,
       "panels": [],
       "repeat": null,
-      "repeatIteration": 1580139786945,
+      "repeatIteration": 1580729039212,
       "repeatPanelId": 7,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "435c538f5dbb",
-          "value": "435c538f5dbb"
+          "text": "5c848976289b",
+          "value": "5c848976289b"
         }
       },
       "title": "$host",
@@ -943,14 +943,14 @@
         }
       ],
       "repeatDirection": "h",
-      "repeatIteration": 1580139786945,
+      "repeatIteration": 1580729039212,
       "repeatPanelId": 5,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "435c538f5dbb",
-          "value": "435c538f5dbb"
+          "text": "5c848976289b",
+          "value": "5c848976289b"
         }
       },
       "sparkline": {
@@ -1041,14 +1041,14 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1580139786945,
+      "repeatIteration": 1580729039212,
       "repeatPanelId": 11,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "435c538f5dbb",
-          "value": "435c538f5dbb"
+          "text": "5c848976289b",
+          "value": "5c848976289b"
         }
       },
       "seriesOverrides": [
@@ -1247,14 +1247,14 @@
       ],
       "repeat": null,
       "repeatDirection": "h",
-      "repeatIteration": 1580139786945,
+      "repeatIteration": 1580729039212,
       "repeatPanelId": 4,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "435c538f5dbb",
-          "value": "435c538f5dbb"
+          "text": "5c848976289b",
+          "value": "5c848976289b"
         }
       },
       "sparkline": {
@@ -1357,14 +1357,14 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1580139786945,
+      "repeatIteration": 1580729039212,
       "repeatPanelId": 13,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "435c538f5dbb",
-          "value": "435c538f5dbb"
+          "text": "5c848976289b",
+          "value": "5c848976289b"
         }
       },
       "seriesOverrides": [],
@@ -1383,7 +1383,7 @@
             },
             {
               "params": [
-                "null"
+                "linear"
               ],
               "type": "fill"
             }
@@ -1435,7 +1435,7 @@
           "measurement": "disk_usage",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"total\")- mean(free) FROM \"disk_usage\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter GROUP BY time($__interval) fill(null)",
+          "query": "SELECT mean(\"total\")- mean(free) FROM \"disk_usage\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter GROUP BY time($__interval) fill(linear)",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "time_series",
@@ -1556,14 +1556,14 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1580139786945,
+      "repeatIteration": 1580729039212,
       "repeatPanelId": 9,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "435c538f5dbb",
-          "value": "435c538f5dbb"
+          "text": "5c848976289b",
+          "value": "5c848976289b"
         }
       },
       "sparkline": {
@@ -1672,14 +1672,14 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1580139786945,
+      "repeatIteration": 1580729039212,
       "repeatPanelId": 12,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "435c538f5dbb",
-          "value": "435c538f5dbb"
+          "text": "5c848976289b",
+          "value": "5c848976289b"
         }
       },
       "sparkline": {
@@ -1746,13 +1746,13 @@
       "id": 21,
       "panels": [],
       "repeat": null,
-      "repeatIteration": 1580139786945,
+      "repeatIteration": 1580729039212,
       "repeatPanelId": 7,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "53dc5501e471",
-          "value": "53dc5501e471"
+          "text": "843e55a2f995",
+          "value": "843e55a2f995"
         }
       },
       "title": "$host",
@@ -1811,14 +1811,14 @@
         }
       ],
       "repeatDirection": "h",
-      "repeatIteration": 1580139786945,
+      "repeatIteration": 1580729039212,
       "repeatPanelId": 5,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "53dc5501e471",
-          "value": "53dc5501e471"
+          "text": "843e55a2f995",
+          "value": "843e55a2f995"
         }
       },
       "sparkline": {
@@ -1909,14 +1909,14 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1580139786945,
+      "repeatIteration": 1580729039212,
       "repeatPanelId": 11,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "53dc5501e471",
-          "value": "53dc5501e471"
+          "text": "843e55a2f995",
+          "value": "843e55a2f995"
         }
       },
       "seriesOverrides": [
@@ -2115,14 +2115,14 @@
       ],
       "repeat": null,
       "repeatDirection": "h",
-      "repeatIteration": 1580139786945,
+      "repeatIteration": 1580729039212,
       "repeatPanelId": 4,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "53dc5501e471",
-          "value": "53dc5501e471"
+          "text": "843e55a2f995",
+          "value": "843e55a2f995"
         }
       },
       "sparkline": {
@@ -2225,14 +2225,14 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1580139786945,
+      "repeatIteration": 1580729039212,
       "repeatPanelId": 13,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "53dc5501e471",
-          "value": "53dc5501e471"
+          "text": "843e55a2f995",
+          "value": "843e55a2f995"
         }
       },
       "seriesOverrides": [],
@@ -2251,7 +2251,7 @@
             },
             {
               "params": [
-                "null"
+                "linear"
               ],
               "type": "fill"
             }
@@ -2303,7 +2303,7 @@
           "measurement": "disk_usage",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"total\")- mean(free) FROM \"disk_usage\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter GROUP BY time($__interval) fill(null)",
+          "query": "SELECT mean(\"total\")- mean(free) FROM \"disk_usage\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter GROUP BY time($__interval) fill(linear)",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "time_series",
@@ -2424,14 +2424,14 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1580139786945,
+      "repeatIteration": 1580729039212,
       "repeatPanelId": 9,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "53dc5501e471",
-          "value": "53dc5501e471"
+          "text": "843e55a2f995",
+          "value": "843e55a2f995"
         }
       },
       "sparkline": {
@@ -2540,14 +2540,14 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1580139786945,
+      "repeatIteration": 1580729039212,
       "repeatPanelId": 12,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "53dc5501e471",
-          "value": "53dc5501e471"
+          "text": "843e55a2f995",
+          "value": "843e55a2f995"
         }
       },
       "sparkline": {
@@ -2614,13 +2614,13 @@
       "id": 28,
       "panels": [],
       "repeat": null,
-      "repeatIteration": 1580139786945,
+      "repeatIteration": 1580729039212,
       "repeatPanelId": 7,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "5ad686f87737",
-          "value": "5ad686f87737"
+          "text": "891bdc889c77",
+          "value": "891bdc889c77"
         }
       },
       "title": "$host",
@@ -2679,14 +2679,14 @@
         }
       ],
       "repeatDirection": "h",
-      "repeatIteration": 1580139786945,
+      "repeatIteration": 1580729039212,
       "repeatPanelId": 5,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "5ad686f87737",
-          "value": "5ad686f87737"
+          "text": "891bdc889c77",
+          "value": "891bdc889c77"
         }
       },
       "sparkline": {
@@ -2777,14 +2777,14 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1580139786945,
+      "repeatIteration": 1580729039212,
       "repeatPanelId": 11,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "5ad686f87737",
-          "value": "5ad686f87737"
+          "text": "891bdc889c77",
+          "value": "891bdc889c77"
         }
       },
       "seriesOverrides": [
@@ -2983,14 +2983,14 @@
       ],
       "repeat": null,
       "repeatDirection": "h",
-      "repeatIteration": 1580139786945,
+      "repeatIteration": 1580729039212,
       "repeatPanelId": 4,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "5ad686f87737",
-          "value": "5ad686f87737"
+          "text": "891bdc889c77",
+          "value": "891bdc889c77"
         }
       },
       "sparkline": {
@@ -3093,14 +3093,14 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1580139786945,
+      "repeatIteration": 1580729039212,
       "repeatPanelId": 13,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "5ad686f87737",
-          "value": "5ad686f87737"
+          "text": "891bdc889c77",
+          "value": "891bdc889c77"
         }
       },
       "seriesOverrides": [],
@@ -3119,7 +3119,7 @@
             },
             {
               "params": [
-                "null"
+                "linear"
               ],
               "type": "fill"
             }
@@ -3171,7 +3171,7 @@
           "measurement": "disk_usage",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"total\")- mean(free) FROM \"disk_usage\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter GROUP BY time($__interval) fill(null)",
+          "query": "SELECT mean(\"total\")- mean(free) FROM \"disk_usage\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter GROUP BY time($__interval) fill(linear)",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "time_series",
@@ -3292,14 +3292,14 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1580139786945,
+      "repeatIteration": 1580729039212,
       "repeatPanelId": 9,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "5ad686f87737",
-          "value": "5ad686f87737"
+          "text": "891bdc889c77",
+          "value": "891bdc889c77"
         }
       },
       "sparkline": {
@@ -3408,14 +3408,14 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1580139786945,
+      "repeatIteration": 1580729039212,
       "repeatPanelId": 12,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "5ad686f87737",
-          "value": "5ad686f87737"
+          "text": "891bdc889c77",
+          "value": "891bdc889c77"
         }
       },
       "sparkline": {
@@ -3482,13 +3482,13 @@
       "id": 35,
       "panels": [],
       "repeat": null,
-      "repeatIteration": 1580139786945,
+      "repeatIteration": 1580729039212,
       "repeatPanelId": 7,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "bcfb6ed6dabf",
-          "value": "bcfb6ed6dabf"
+          "text": "a54468c29b5f",
+          "value": "a54468c29b5f"
         }
       },
       "title": "$host",
@@ -3547,14 +3547,14 @@
         }
       ],
       "repeatDirection": "h",
-      "repeatIteration": 1580139786945,
+      "repeatIteration": 1580729039212,
       "repeatPanelId": 5,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "bcfb6ed6dabf",
-          "value": "bcfb6ed6dabf"
+          "text": "a54468c29b5f",
+          "value": "a54468c29b5f"
         }
       },
       "sparkline": {
@@ -3645,14 +3645,14 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1580139786945,
+      "repeatIteration": 1580729039212,
       "repeatPanelId": 11,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "bcfb6ed6dabf",
-          "value": "bcfb6ed6dabf"
+          "text": "a54468c29b5f",
+          "value": "a54468c29b5f"
         }
       },
       "seriesOverrides": [
@@ -3851,14 +3851,14 @@
       ],
       "repeat": null,
       "repeatDirection": "h",
-      "repeatIteration": 1580139786945,
+      "repeatIteration": 1580729039212,
       "repeatPanelId": 4,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "bcfb6ed6dabf",
-          "value": "bcfb6ed6dabf"
+          "text": "a54468c29b5f",
+          "value": "a54468c29b5f"
         }
       },
       "sparkline": {
@@ -3961,14 +3961,14 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1580139786945,
+      "repeatIteration": 1580729039212,
       "repeatPanelId": 13,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "bcfb6ed6dabf",
-          "value": "bcfb6ed6dabf"
+          "text": "a54468c29b5f",
+          "value": "a54468c29b5f"
         }
       },
       "seriesOverrides": [],
@@ -3987,7 +3987,7 @@
             },
             {
               "params": [
-                "null"
+                "linear"
               ],
               "type": "fill"
             }
@@ -4039,7 +4039,7 @@
           "measurement": "disk_usage",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"total\")- mean(free) FROM \"disk_usage\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter GROUP BY time($__interval) fill(null)",
+          "query": "SELECT mean(\"total\")- mean(free) FROM \"disk_usage\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter GROUP BY time($__interval) fill(linear)",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "time_series",
@@ -4160,14 +4160,14 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1580139786945,
+      "repeatIteration": 1580729039212,
       "repeatPanelId": 9,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "bcfb6ed6dabf",
-          "value": "bcfb6ed6dabf"
+          "text": "a54468c29b5f",
+          "value": "a54468c29b5f"
         }
       },
       "sparkline": {
@@ -4276,14 +4276,14 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1580139786945,
+      "repeatIteration": 1580729039212,
       "repeatPanelId": 12,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "bcfb6ed6dabf",
-          "value": "bcfb6ed6dabf"
+          "text": "a54468c29b5f",
+          "value": "a54468c29b5f"
         }
       },
       "sparkline": {
@@ -4350,13 +4350,13 @@
       "id": 42,
       "panels": [],
       "repeat": null,
-      "repeatIteration": 1580139786945,
+      "repeatIteration": 1580729039212,
       "repeatPanelId": 7,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "f7198daf0aa6",
-          "value": "f7198daf0aa6"
+          "text": "f009585a9a12",
+          "value": "f009585a9a12"
         }
       },
       "title": "$host",
@@ -4415,14 +4415,14 @@
         }
       ],
       "repeatDirection": "h",
-      "repeatIteration": 1580139786945,
+      "repeatIteration": 1580729039212,
       "repeatPanelId": 5,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "f7198daf0aa6",
-          "value": "f7198daf0aa6"
+          "text": "f009585a9a12",
+          "value": "f009585a9a12"
         }
       },
       "sparkline": {
@@ -4513,14 +4513,14 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1580139786945,
+      "repeatIteration": 1580729039212,
       "repeatPanelId": 11,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "f7198daf0aa6",
-          "value": "f7198daf0aa6"
+          "text": "f009585a9a12",
+          "value": "f009585a9a12"
         }
       },
       "seriesOverrides": [
@@ -4719,14 +4719,14 @@
       ],
       "repeat": null,
       "repeatDirection": "h",
-      "repeatIteration": 1580139786945,
+      "repeatIteration": 1580729039212,
       "repeatPanelId": 4,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "f7198daf0aa6",
-          "value": "f7198daf0aa6"
+          "text": "f009585a9a12",
+          "value": "f009585a9a12"
         }
       },
       "sparkline": {
@@ -4829,14 +4829,14 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1580139786945,
+      "repeatIteration": 1580729039212,
       "repeatPanelId": 13,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "f7198daf0aa6",
-          "value": "f7198daf0aa6"
+          "text": "f009585a9a12",
+          "value": "f009585a9a12"
         }
       },
       "seriesOverrides": [],
@@ -4855,7 +4855,7 @@
             },
             {
               "params": [
-                "null"
+                "linear"
               ],
               "type": "fill"
             }
@@ -4907,7 +4907,7 @@
           "measurement": "disk_usage",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"total\")- mean(free) FROM \"disk_usage\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter GROUP BY time($__interval) fill(null)",
+          "query": "SELECT mean(\"total\")- mean(free) FROM \"disk_usage\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter GROUP BY time($__interval) fill(linear)",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "time_series",
@@ -5028,14 +5028,14 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1580139786945,
+      "repeatIteration": 1580729039212,
       "repeatPanelId": 9,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "f7198daf0aa6",
-          "value": "f7198daf0aa6"
+          "text": "f009585a9a12",
+          "value": "f009585a9a12"
         }
       },
       "sparkline": {
@@ -5144,14 +5144,14 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1580139786945,
+      "repeatIteration": 1580729039212,
       "repeatPanelId": 12,
       "repeatedByRow": true,
       "scopedVars": {
         "host": {
           "selected": false,
-          "text": "f7198daf0aa6",
-          "value": "f7198daf0aa6"
+          "text": "f009585a9a12",
+          "value": "f009585a9a12"
         }
       },
       "sparkline": {
