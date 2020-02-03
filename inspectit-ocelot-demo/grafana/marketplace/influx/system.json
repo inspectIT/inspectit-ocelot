@@ -52,7 +52,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1580139786943,
+  "iteration": 1580729039210,
   "links": [],
   "panels": [
     {
@@ -522,7 +522,7 @@
             },
             {
               "params": [
-                "null"
+                "linear"
               ],
               "type": "fill"
             }
@@ -574,7 +574,7 @@
           "measurement": "disk_usage",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"total\")- mean(free) FROM \"disk_usage\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter GROUP BY time($__interval) fill(null)",
+          "query": "SELECT mean(\"total\")- mean(free) FROM \"disk_usage\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter GROUP BY time($__interval) fill(linear)",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "time_series",

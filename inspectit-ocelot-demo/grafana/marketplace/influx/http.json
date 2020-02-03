@@ -58,7 +58,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1580137226954,
+  "iteration": 1580728981189,
   "links": [],
   "panels": [
     {
@@ -239,7 +239,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT zc_error_rate FROM (\nSELECT  SUM(errors) / SUM(total) AS zc_error_rate, SUM(total) as total FROM (\n      SELECT spread(\"count\") AS total, spread(\"errorcount\")AS errors FROM \"http_in_error\" \n      WHERE $timeFilter AND service =~ /^$service$/ AND application =~ /^$application$/ AND http_path =~ /^$path$/  GROUP BY *) \nGROUP BY http_path fill(0)\n) WHERE total > 0",
+          "query": "SELECT zc_error_rate FROM (\nSELECT  SUM(errors) / SUM(total) AS zc_error_rate, SUM(total) as total FROM (\n      SELECT spread(\"count\") AS total, spread(\"errorcount\")AS errors FROM \"http_in_error\" \n      WHERE $timeFilter AND service =~ /^$service$/ AND application =~ /^$application$/ AND http_path =~ /^$path$/  GROUP BY *) \nGROUP BY http_path fill(0)\n) WHERE total > 0 GROUP BY http_path fill(0)",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "table",
@@ -811,7 +811,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT zc_error_rate FROM (\nSELECT  SUM(errors) / SUM(total) AS zc_error_rate, SUM(total) as total FROM (\n      SELECT spread(\"count\") AS total, spread(\"errorcount\")AS errors FROM \"http_out_error\" \n      WHERE $timeFilter AND service =~ /^$service$/ AND application =~ /^$application$/ AND http_path =~ /^$path$/  GROUP BY *) \nGROUP BY http_host,http_path fill(0)\n) WHERE total > 0",
+          "query": "SELECT zc_error_rate FROM (\nSELECT  SUM(errors) / SUM(total) AS zc_error_rate, SUM(total) as total FROM (\n      SELECT spread(\"count\") AS total, spread(\"errorcount\")AS errors FROM \"http_out_error\" \n      WHERE $timeFilter AND service =~ /^$service$/ AND application =~ /^$application$/ AND http_path =~ /^$path$/  GROUP BY *) \nGROUP BY http_host,http_path fill(0)\n) WHERE total > 0 GROUP BY http_host, http_path fill(0)",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "table",
@@ -1301,5 +1301,5 @@
   "timezone": "",
   "title": "HTTP Overview",
   "uid": "523wqxqmz",
-  "version": 1
+  "version": 2
 }
