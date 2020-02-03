@@ -47,7 +47,7 @@ class FileTree extends React.Component {
      * Handle drag and drop movement.
      */
     onDragDrop = (event) => {
-        const newTree = event.value[0].key === DEFAULT_CONFIG_TREE_KEY ? event.value.slice(1) : event.value;
+        const newTree = event.value.filter(node => node.key !== DEFAULT_CONFIG_TREE_KEY)
         const paths = this.comparePaths('', newTree);
 
         if (paths) {
@@ -69,13 +69,16 @@ class FileTree extends React.Component {
             };
         }
 
-        let res;
-        for (let i = 0; !res && i < nodes.length; i++) {
-            if (nodes[i].children) {
-                res = this.comparePaths(nodes[i].key, nodes[i].children);
+        for (const child of nodes) {
+            if (child.children) {
+                const res = this.comparePaths(child.key, child.children);
+                if (res) {
+                    return res;
+                }
             }
         }
-        return res;
+
+        return null;
     }
 
     render() {
