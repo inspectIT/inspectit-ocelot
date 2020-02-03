@@ -98,7 +98,7 @@ export const deleteSelection = (fetchFilesOnSuccess) => {
         const { selection } = state.configuration;
         const isDirectory = selectors.isSelectionDirectory(state);
 
-        let filePath = selection.startsWith("/") ? selection.substring(1) : selection;
+        let filePath = selection && selection.startsWith("/") ? selection.substring(1) : selection;
 
         dispatch({ type: types.DELETE_SELECTION_STARTED });
 

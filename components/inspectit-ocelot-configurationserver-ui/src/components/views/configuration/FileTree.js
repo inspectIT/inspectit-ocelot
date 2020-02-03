@@ -53,7 +53,7 @@ class FileTree extends React.Component {
      * Switch between a contextmenu for filenodes and a general menu.
      */
     onContextMenuSelectionChange = (event) => {
-        const newSelection = event.value;
+        const newSelection = event.value || '';
 
         if (newSelection && newSelection.startsWith(DEFAULT_CONFIG_TREE_KEY)) {
             // Show no contextmenu when clicked on an ocelot default configuration node.
