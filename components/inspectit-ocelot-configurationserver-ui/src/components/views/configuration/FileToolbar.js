@@ -42,10 +42,10 @@ class FileToolbar extends React.Component {
                 `}</style>
                 <Toolbar>
                     <div className="p-toolbar-group-left">
-                        <Button disabled={loading} tooltip="New file" icon="pi pi-file" tooltipOptions={tooltipOptions} onClick={this.props.showCreateFileDialog} />
-                        <Button disabled={loading} tooltip="New directory" icon="pi pi-folder-open" tooltipOptions={tooltipOptions} onClick={this.props.showCreateDirectoryDialog} />
-                        <Button disabled={loading || !selection} tooltip="Move/Rename file or directory" icon="pi pi-pencil" tooltipOptions={tooltipOptions} onClick={this.props.showMoveDialog} />
-                        <Button disabled={loading || !selection} tooltip="Delete file or directory" icon="pi pi-trash" tooltipOptions={tooltipOptions} onClick={this.props.showDeleteFileDialog} />
+                        <Button disabled={loading} tooltip="New file" icon="pi pi-file" tooltipOptions={tooltipOptions} onClick={() => this.props.showCreateFileDialog()} />
+                        <Button disabled={loading} tooltip="New directory" icon="pi pi-folder-open" tooltipOptions={tooltipOptions} onClick={() => this.props.showCreateDirectoryDialog()} />
+                        <Button disabled={loading || !selection} tooltip="Move/Rename file or directory" icon="pi pi-pencil" tooltipOptions={tooltipOptions} onClick={() => this.props.showMoveDialog()} />
+                        <Button disabled={loading || !selection} tooltip="Delete file or directory" icon="pi pi-trash" tooltipOptions={tooltipOptions} onClick={() => this.props.showDeleteFileDialog()} />
                     </div>
                     <div className="p-toolbar-group-right">
                         <Button disabled={loading} onClick={this.fetchFiles} tooltip="Reload" icon={"pi pi-refresh" + (loading ? " pi-spin" : "")} tooltipOptions={tooltipOptions} />

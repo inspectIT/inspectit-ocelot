@@ -90,21 +90,21 @@ class ConfigurationView extends React.Component {
         this.props.selectedFileContentsChanged(null);
     }
 
-    showDeleteFileDialog = () => this.setState({ isDeleteFileDialogShown: true });
+    showDeleteFileDialog = (stateSelection) => this.setState({ isDeleteFileDialogShown: true, stateSelection });
 
-    hideDeleteFileDialog = () => this.setState({ isDeleteFileDialogShown: false });
+    hideDeleteFileDialog = () => this.setState({ isDeleteFileDialogShown: false, stateSelection: null });
 
-    showCreateFileDialog = () => this.setState({ isCreateFileDialogShown: true });
+    showCreateFileDialog = (stateSelection) => this.setState({ isCreateFileDialogShown: true, stateSelection });
 
-    hideCreateFileDialog = () => this.setState({ isCreateFileDialogShown: false });
+    hideCreateFileDialog = () => this.setState({ isCreateFileDialogShown: false, stateSelection: null });
 
-    showCreateDirectoryDialog = () => this.setState({ isCreateDirectoryDialogShown: true });
+    showCreateDirectoryDialog = (stateSelection) => this.setState({ isCreateDirectoryDialogShown: true, stateSelection });
 
-    hideCreateDirectoryDialog = () => this.setState({ isCreateDirectoryDialogShown: false });
+    hideCreateDirectoryDialog = () => this.setState({ isCreateDirectoryDialogShown: false, stateSelection: null });
 
-    showMoveDialog = () => this.setState({ isMoveDialogShown: true });
+    showMoveDialog = (stateSelection) => this.setState({ isMoveDialogShown: true, stateSelection });
 
-    hideMoveDialog = () => this.setState({ isMoveDialogShown: false });
+    hideMoveDialog = () => this.setState({ isMoveDialogShown: false, stateSelection: null });
 
     render() {
         const { selection, isDirectory, loading, isContentModified, fileContent, yamlError, selectedDefaultConfigFile } = this.props;
@@ -176,10 +176,10 @@ class ConfigurationView extends React.Component {
                     readOnly={!!selectedDefaultConfigFile}>
                     {showHeader ? <EditorHeader icon={icon} path={path} name={name} isContentModified={isContentModified} readOnly={!!selectedDefaultConfigFile} /> : null}
                 </EditorView>
-                <DeleteDialog visible={this.state.isDeleteFileDialogShown} onHide={this.hideDeleteFileDialog} />
-                <CreateDialog directoryMode={false} visible={this.state.isCreateFileDialogShown} onHide={this.hideCreateFileDialog} />
-                <CreateDialog directoryMode={true} visible={this.state.isCreateDirectoryDialogShown} onHide={this.hideCreateDirectoryDialog} />
-                <MoveDialog visible={this.state.isMoveDialogShown} onHide={this.hideMoveDialog} />
+                <DeleteDialog visible={this.state.isDeleteFileDialogShown} onHide={this.hideDeleteFileDialog} stateSelection={this.state.stateSelection} />
+                <CreateDialog directoryMode={false} visible={this.state.isCreateFileDialogShown} onHide={this.hideCreateFileDialog} stateSelection={this.state.stateSelection} />
+                <CreateDialog directoryMode={true} visible={this.state.isCreateDirectoryDialogShown} onHide={this.hideCreateDirectoryDialog} stateSelection={this.state.stateSelection} />
+                <MoveDialog visible={this.state.isMoveDialogShown} onHide={this.hideMoveDialog} stateSelection={this.state.stateSelection} />
             </div>
         );
     }

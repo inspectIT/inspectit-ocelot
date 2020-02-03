@@ -49,7 +49,7 @@ class FileTree extends React.Component {
     }
 
     /**
-     * Handle Contextmenu selection.
+     * Handle ContextMenu selection.
      * Switch between a contextmenu for filenodes and a general menu.
      */
     onContextMenuSelectionChange = (event) => {
@@ -60,9 +60,8 @@ class FileTree extends React.Component {
             event.originalEvent.stopPropagation();
             return;
         }
-        this.onSelectionChange(event);
 
-        this.setState({ menu: this.getMenu(!!newSelection) });
+        this.setState({ menu: this.getMenu(newSelection) });
         this.cm.show(event.originalEvent || event);
     }
 
@@ -106,30 +105,31 @@ class FileTree extends React.Component {
         );
     }
 
-    getMenu = (isForFile) => {
+    getMenu = (file) => {
         const { showCreateDirectoryDialog, showCreateFileDialog, showMoveDialog, showDeleteFileDialog } = this.props;
+
         return [
             {
                 label: 'Add Folder',
                 icon: 'pi pi-folder',
-                command: showCreateDirectoryDialog
+                command: () => showCreateDirectoryDialog(file)
             },
             {
                 label: 'Add File',
                 icon: 'pi pi-file',
-                command: showCreateFileDialog
+                command: () => showCreateFileDialog(file)
             },
             {
                 label: 'Rename',
                 icon: 'pi pi-pencil',
-                disabled: !isForFile,
-                command: showMoveDialog
+                disabled: !file,
+                command: () => showMoveDialog(file)
             },
             {
                 label: 'Delete',
                 icon: 'pi pi-trash',
-                disabled: !isForFile,
-                command: showDeleteFileDialog
+                disabled: !file,
+                command: () => showDeleteFileDialog(file)
             }
         ];
     }

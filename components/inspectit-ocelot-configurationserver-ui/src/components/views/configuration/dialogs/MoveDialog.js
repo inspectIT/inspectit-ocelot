@@ -1,10 +1,8 @@
-import React from 'react'
-import { connect } from 'react-redux'
-import { uniqueId } from 'lodash';
+import React from 'react';
+import { connect } from 'react-redux';
 
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
-import { Message } from 'primereact/message';
 import { InputText } from 'primereact/inputtext';
 import { configurationUtils, configurationActions, configurationSelectors } from '../../../../redux/ducks/configuration';
 
@@ -21,16 +19,16 @@ class MoveDialog extends React.Component {
         targetPath: "",
         /** The ending of the file, e.g. ".yml" or empty in case of a folder */
         targetPathEnding: "",
-    }
+    };
 
     input = React.createRef();
 
     render() {
-        const { selection, isDirectory, selectedName, onHide } = this.props;
-        const { targetPath, targetPathEnding } = this.state;
+        const { onHide } = this.props;
+        const { targetPath, targetPathEnding, selectedFile, selectionName, isDir } = this.state;
 
-        const type = isDirectory ? "Directory" : "File";
-        const originalParent = selection && configurationUtils.getParentDirectoryPath(selection);
+        const type = isDir ? "Directory" : "File";
+        const originalParent = selectedFile && configurationUtils.getParentDirectoryPath(selectedFile);
         const newParent = configurationUtils.getParentDirectoryPath(this.getAbsoluteTargetPath());
         const isRename = originalParent == newParent;
 
@@ -41,7 +39,7 @@ class MoveDialog extends React.Component {
                 modal={true}
                 visible={this.props.visible}
                 onHide={onHide}
-                onShow={this.setTargetPathFromSelection}
+                onShow={this.onShow}
                 footer={(
                     <div>
                         <Button label={isRename ? "Rename" : "Move"} onClick={this.performMove} />
@@ -50,7 +48,7 @@ class MoveDialog extends React.Component {
                 )}
             >
                 <div>
-                    Move / Rename <b>"{selectedName}"</b> to the following path:
+                    Move / Rename <b>"{selectionName}"</b> to the following path:
                 </div>
                 <div className="p-inputgroup" style={{ width: '100%', marginTop: "0.5em" }}>
                     <span className="p-inputgroup-addon">/</span>
@@ -89,20 +87,37 @@ class MoveDialog extends React.Component {
     }
 
     performMove = () => {
-        const source = this.props.selection;
+        const source = this.state.selectedFile;
         const target = this.getAbsoluteTargetPath();
         if (source != target) {
             this.props.move(source, target, true);
         }
         this.props.onHide();
     }
-    
-    setTargetPathFromSelection = () => {
-        const { isDirectory, selection } = this.props;
+
+    onShow = () => {
+        /** Pick selection between redux state selection and incoming property selection. */
+        const { selection, stateSelection, selectedName, isDirectory } = this.props;
+
+        let selectedFile;
+        let selectionName;
+        let isDir;
+        if (stateSelection) {
+            selectedFile = stateSelection;
+            selectionName = stateSelection ? stateSelection.split("/").slice(-1)[0] : "";
+            const fileObj = configurationUtils.getFile(this.props.file, stateSelection);
+            isDir = configurationUtils.isDirectory(fileObj);
+        } else {
+            selectedFile = selection;
+            selectionName = selectedName;
+            isDir = isDirectory;
+        }
+
+        /** Set target path from selection. */
         //remove leading slash
-        let targetPath = selection ? selection.substring(1) : "";
+        let targetPath = selectedFile ? selectedFile.substring(1) : "";
         let targetPathEnding = "";
-        if (!isDirectory) {
+        if (!isDir) {
             const lastDot = targetPath.lastIndexOf(".");
             const lastSlash = targetPath.lastIndexOf("/");
             if (lastDot != -1 && lastDot > lastSlash) {
@@ -110,7 +125,15 @@ class MoveDialog extends React.Component {
                 targetPath = targetPath.substring(0, lastDot);
             }
         }
-        this.setState({ targetPathEnding, targetPath, resetSelection: true });
+
+        this.setState({
+            targetPathEnding,
+            targetPath,
+            resetSelection: true,
+            selectedFile,
+            selectionName,
+            isDir
+        });
     }
 
     getAbsoluteTargetPath = () => {
