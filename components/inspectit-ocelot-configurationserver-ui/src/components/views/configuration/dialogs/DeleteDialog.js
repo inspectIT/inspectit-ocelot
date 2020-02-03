@@ -1,6 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { configurationActions, configurationSelectors } from '../../../../redux/ducks/configuration'
+import { configurationActions, configurationSelectors, configurationUtils } from '../../../../redux/ducks/configuration'
 
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
@@ -11,14 +11,16 @@ import { Dialog } from 'primereact/dialog';
  */
 class DeleteDialog extends React.Component {
 
+    state = {};
+
     deleteButton = React.createRef();
 
     render() {
-        const { selectionName } = this.props;
+        const { selectionName, isDir } = this.state;
 
         return (
             <Dialog
-                header={"Delete " + this.props.type}
+                header={"Delete " + isDir}
                 modal={true}
                 visible={this.props.visible}
                 onHide={this.props.onHide}
@@ -42,16 +44,34 @@ class DeleteDialog extends React.Component {
     componentDidUpdate(prevProps) {
         if (!prevProps.visible && this.props.visible) {
             this.deleteButton.current.element.focus();
+
+            /** Pick selection between redux state selection and incoming property selection. */
+            const { selection, stateSelection, type } = this.props;
+
+            let selectionName;
+            let isDir;
+            if (stateSelection) {
+                selectionName = stateSelection.split("/").slice(-1)[0];
+                const file = configurationUtils.getFile(this.props.files, stateSelection);
+                isDir = configurationUtils.isDirectory(file) ? "Directory" : "File";
+            } else {
+                selectionName = selection ? selection.split("/").slice(-1)[0] : "";
+                isDir = type;
+            }
+
+            this.setState({ selectionName, isDir });
         }
     }
 
 }
 
 function mapStateToProps(state) {
-    const { selection } = state.configuration;
+    const { selection, files } = state.configuration;
     return {
         type: configurationSelectors.isSelectionDirectory(state) ? "Directory" : "File",
-        selectionName: selection ? selection.split("/").slice(-1)[0] : ""
+        selectionName: selection ? selection.split("/").slice(-1)[0] : "",
+        selection,
+        files
     }
 }
 
