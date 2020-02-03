@@ -16,11 +16,11 @@ class DeleteDialog extends React.Component {
     deleteButton = React.createRef();
 
     render() {
-        const { selectionName, isDir } = this.state;
+        const { selectionName, type } = this.state;
 
         return (
             <Dialog
-                header={"Delete " + isDir}
+                header={"Delete " + type}
                 modal={true}
                 visible={this.props.visible}
                 onHide={this.props.onHide}
@@ -46,20 +46,14 @@ class DeleteDialog extends React.Component {
             this.deleteButton.current.element.focus();
 
             /** Pick selection between redux state selection and incoming property selection. */
-            const { selection, stateSelection, type } = this.props;
+            const { selection, stateSelection } = this.props;
 
-            let selectionName;
-            let isDir;
-            if (stateSelection) {
-                selectionName = stateSelection.split("/").slice(-1)[0];
-                const file = configurationUtils.getFile(this.props.files, stateSelection);
-                isDir = configurationUtils.isDirectory(file) ? "Directory" : "File";
-            } else {
-                selectionName = selection ? selection.split("/").slice(-1)[0] : "";
-                isDir = type;
-            }
+            const selectedFile = stateSelection || selection;
+            const selectionName = selectedFile ? selectedFile.split("/").slice(-1)[0] : "";
+            const fileObj = configurationUtils.getFile(this.props.files, selectedFile);
+            const type = configurationUtils.isDirectory(fileObj) ? "Directory" : "File";
 
-            this.setState({ selectionName, isDir });
+            this.setState({ selectionName, type });
         }
     }
 
@@ -68,8 +62,6 @@ class DeleteDialog extends React.Component {
 function mapStateToProps(state) {
     const { selection, files } = state.configuration;
     return {
-        type: configurationSelectors.isSelectionDirectory(state) ? "Directory" : "File",
-        selectionName: selection ? selection.split("/").slice(-1)[0] : "",
         selection,
         files
     }
