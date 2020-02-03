@@ -6,7 +6,6 @@ import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { configurationUtils, configurationActions, configurationSelectors } from '../../../../redux/ducks/configuration';
 
-
 /**
  * Dialog for moving/renaming the selected file or directory.
  */
@@ -97,21 +96,12 @@ class MoveDialog extends React.Component {
 
     onShow = () => {
         /** Pick selection between redux state selection and incoming property selection. */
-        const { selection, stateSelection, selectedName, isDirectory } = this.props;
+        const { selection, stateSelection } = this.props;
 
-        let selectedFile;
-        let selectionName;
-        let isDir;
-        if (stateSelection) {
-            selectedFile = stateSelection;
-            selectionName = stateSelection ? stateSelection.split("/").slice(-1)[0] : "";
-            const fileObj = configurationUtils.getFile(this.props.file, stateSelection);
-            isDir = configurationUtils.isDirectory(fileObj);
-        } else {
-            selectedFile = selection;
-            selectionName = selectedName;
-            isDir = isDirectory;
-        }
+        const selectedFile = stateSelection || selection;
+        const selectionName = selectedFile ? selectedFile.split("/").slice(-1)[0] : "";
+        const fileObj = configurationUtils.getFile(this.props.file, selectedFile);
+        const isDir = configurationUtils.isDirectory(fileObj);
 
         /** Set target path from selection. */
         //remove leading slash
@@ -151,8 +141,6 @@ function mapStateToProps(state) {
     const { selection } = state.configuration;
     return {
         selection,
-        selectedName: selection ? selection.split("/").slice(-1)[0] : "",
-        isDirectory: configurationSelectors.isSelectionDirectory(state)
     }
 }
 
