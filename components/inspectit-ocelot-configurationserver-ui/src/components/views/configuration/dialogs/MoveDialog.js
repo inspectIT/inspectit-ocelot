@@ -100,7 +100,7 @@ class MoveDialog extends React.Component {
 
         const selectedFile = stateSelection || selection;
         const selectionName = selectedFile ? selectedFile.split("/").slice(-1)[0] : "";
-        const fileObj = configurationUtils.getFile(this.props.file, selectedFile);
+        const fileObj = configurationUtils.getFile(this.props.files, selectedFile);
         const isDir = configurationUtils.isDirectory(fileObj);
 
         /** Set target path from selection. */
