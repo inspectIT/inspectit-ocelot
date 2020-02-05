@@ -140,7 +140,6 @@ const _addNode = (rootNode, path) => {
                 icon: `pi pi-fw ${names[i + 1] ? 'pi-folder' : 'pi-file'}`,
                 children: [],
                 draggable: false,
-                droppable: false
             };
 
             parent.children.push(newChild);
@@ -162,7 +161,6 @@ const _getDefaultRoot = (selection) => {
         children: [],
         className: 'cm-tree-label',
         draggable: false,
-        droppable: false
     };
 };
 
