@@ -37,7 +37,7 @@ class DeleteDialog extends React.Component {
     }
 
     deleteSelectedFile = () => {
-        this.props.deleteSelection(true);
+        this.props.deleteSelection(true, this.props.stateSelection);
         this.props.onHide();
     }
 
