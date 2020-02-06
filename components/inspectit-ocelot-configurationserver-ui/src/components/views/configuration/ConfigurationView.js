@@ -60,7 +60,7 @@ class ConfigurationView extends React.Component {
         if (filePath) {
             return this.splitIntoPathAndName(filePath);
         } else if (defaultConfigFilePath) {
-            const path = defaultConfigFilePath.replace(DEFAULT_CONFIG_TREE_KEY, '/Ocelot defaults');
+            const path = defaultConfigFilePath.replace(DEFAULT_CONFIG_TREE_KEY, '/Ocelot Defaults');
             return this.splitIntoPathAndName(path);
         } else {
             return {};

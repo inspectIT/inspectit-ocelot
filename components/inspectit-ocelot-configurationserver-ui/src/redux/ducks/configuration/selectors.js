@@ -155,7 +155,7 @@ const _addNode = (rootNode, path) => {
 const _getDefaultRoot = (selection) => {
     return {
         key: DEFAULT_CONFIG_TREE_KEY,
-        label: 'Ocelot defaults',
+        label: 'Ocelot Defaults',
         icon: `cm-tree-icon ocelot-tree-head-${selection === DEFAULT_CONFIG_TREE_KEY ? 'white' : 'orange'}`,
         children: [],
         className: 'cm-tree-label'
