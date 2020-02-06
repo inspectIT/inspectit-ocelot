@@ -58,7 +58,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1567608922533,
+  "iteration": 1580138904831,
   "links": [],
   "panels": [
     {
@@ -150,7 +150,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -194,7 +194,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -326,7 +326,7 @@
           "measurement": "jvm_memory_max",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SUM(val) FROM (SELECT mean(gauge) AS val FROM jvm_memory_max WHERE $timeFilter AND area = 'heap' AND service =~ /^$service/ GROUP BY time($__interval),*) GROUP BY time($__interval) fill(linear)",
+          "query": "SELECT SUM(val) FROM (SELECT mean(value) AS val FROM jvm_memory_max WHERE $timeFilter AND area = 'heap' AND service =~ /^$service/ GROUP BY time($__interval),*) GROUP BY time($__interval) fill(linear)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -377,7 +377,7 @@
           "measurement": "jvm_memory_committed",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SUM(val) FROM (SELECT mean(gauge) AS val FROM jvm_memory_committed WHERE $timeFilter AND area = 'heap' AND service =~ /^$service/ GROUP BY time($__interval),*) GROUP BY time($__interval) fill(linear)",
+          "query": "SELECT SUM(val) FROM (SELECT mean(value) AS val FROM jvm_memory_committed WHERE $timeFilter AND area = 'heap' AND service =~ /^$service/ GROUP BY time($__interval),*) GROUP BY time($__interval) fill(linear)",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "time_series",
@@ -428,7 +428,7 @@
           "measurement": "jvm_memory_used",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SUM(val) FROM (SELECT mean(gauge) AS val FROM jvm_memory_used WHERE $timeFilter AND area = 'heap' AND service =~ /^$service/ GROUP BY time($__interval),*) GROUP BY time($__interval) fill(linear)",
+          "query": "SELECT SUM(val) FROM (SELECT mean(value) AS val FROM jvm_memory_used WHERE $timeFilter AND area = 'heap' AND service =~ /^$service/ GROUP BY time($__interval),*) GROUP BY time($__interval) fill(linear)",
           "rawQuery": true,
           "refId": "C",
           "resultFormat": "time_series",
@@ -579,7 +579,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -623,7 +623,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -667,7 +667,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -812,7 +812,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -858,7 +858,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -886,11 +886,12 @@
               "type": "time"
             }
           ],
+          "hide": false,
           "measurement": "jvm_gc_memory_allocated",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT difference(sum(\"counter\")) FROM \"jvm_gc_memory_allocated\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(15s)",
-          "rawQuery": false,
+          "query": "SELECT SUM(val) FROM (SELECT NON_NEGATIVE_DIFFERENCE(\"counter\") AS val FROM \"jvm_gc_memory_allocated\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY *) GROUP BY time($__interval)",
+          "rawQuery": true,
           "refId": "D",
           "resultFormat": "time_series",
           "select": [
@@ -929,11 +930,12 @@
               "type": "time"
             }
           ],
+          "hide": false,
           "measurement": "jvm_gc_memory_promoted",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT difference(sum(\"counter\")) FROM \"jvm_gc_memory_allocated\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time(15s)",
-          "rawQuery": false,
+          "query": "SELECT SUM(val) FROM (SELECT NON_NEGATIVE_DIFFERENCE(\"counter\") AS val FROM \"jvm_gc_memory_promoted\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY *) GROUP BY time($__interval)",
+          "rawQuery": true,
           "refId": "F",
           "resultFormat": "time_series",
           "select": [
@@ -1075,7 +1077,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -1181,7 +1183,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -1284,7 +1286,7 @@
           "measurement": "jvm_memory_max",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SUM(val) FROM (SELECT mean(gauge) AS val FROM jvm_memory_max WHERE $timeFilter AND area = 'nonheap' AND service =~ /^$service/ GROUP BY time($__interval),*) GROUP BY time($__interval) fill(previous)",
+          "query": "SELECT SUM(val) FROM (SELECT mean(value) AS val FROM jvm_memory_max WHERE $timeFilter AND area = 'nonheap' AND service =~ /^$service/ GROUP BY time($__interval),*) GROUP BY time($__interval) fill(previous)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1335,7 +1337,7 @@
           "measurement": "jvm_memory_committed",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SUM(val) FROM (SELECT mean(gauge) AS val FROM jvm_memory_committed WHERE $timeFilter AND area = 'nonheap' AND service =~ /^$service/ GROUP BY time($__interval),*) GROUP BY time($__interval) fill(previous)",
+          "query": "SELECT SUM(val) FROM (SELECT mean(value) AS val FROM jvm_memory_committed WHERE $timeFilter AND area = 'nonheap' AND service =~ /^$service/ GROUP BY time($__interval),*) GROUP BY time($__interval) fill(previous)",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "time_series",
@@ -1386,7 +1388,7 @@
           "measurement": "jvm_memory_used",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SUM(val) FROM (SELECT mean(gauge) AS val FROM jvm_memory_used WHERE $timeFilter AND area = 'nonheap' AND service =~ /^$service/ GROUP BY time($__interval),*) GROUP BY time($__interval) fill(previous)",
+          "query": "SELECT SUM(val) FROM (SELECT mean(value) AS val FROM jvm_memory_used WHERE $timeFilter AND area = 'nonheap' AND service =~ /^$service/ GROUP BY time($__interval),*) GROUP BY time($__interval) fill(previous)",
           "rawQuery": true,
           "refId": "C",
           "resultFormat": "time_series",
@@ -1529,7 +1531,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -1642,9 +1644,12 @@
               "type": "time"
             }
           ],
+          "hide": false,
           "measurement": "jvm_gc_pause",
           "orderByTime": "ASC",
           "policy": "default",
+          "query": "SELECT SUM(times) FROM (SELECT non_negative_difference(\"counter\") AS times FROM \"jvm_gc_pause\" WHERE (\"service\" =~ /^$service$/ AND \"action\" = 'end of minor GC') AND $timeFilter GROUP BY *) WHERE times > 0 GROUP BY time($__interval) fill(none)",
+          "rawQuery": true,
           "refId": "C",
           "resultFormat": "time_series",
           "select": [
@@ -1689,9 +1694,12 @@
               "type": "time"
             }
           ],
+          "hide": false,
           "measurement": "jvm_gc_pause",
           "orderByTime": "ASC",
           "policy": "default",
+          "query": "SELECT SUM(times) FROM (SELECT non_negative_difference(\"counter\") AS times FROM \"jvm_gc_pause\" WHERE (\"service\" =~ /^$service$/ AND \"action\" = 'end of major GC') AND $timeFilter GROUP BY *) WHERE times > 0 GROUP BY time($__interval) fill(none)",
+          "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -1841,7 +1849,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -1920,7 +1928,7 @@
     ]
   },
   "time": {
-    "from": "now-5m",
+    "from": "now-1h",
     "to": "now"
   },
   "timepicker": {

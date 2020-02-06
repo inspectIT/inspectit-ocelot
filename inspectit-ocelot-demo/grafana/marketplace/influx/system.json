@@ -52,7 +52,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1567609020357,
+  "iteration": 1580729039210,
   "links": [],
   "panels": [
     {
@@ -143,7 +143,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -227,7 +227,7 @@
           "groupBy": [
             {
               "params": [
-                "15s"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -248,7 +248,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -271,7 +271,7 @@
           "groupBy": [
             {
               "params": [
-                "15s"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -291,7 +291,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -522,7 +522,7 @@
             },
             {
               "params": [
-                "null"
+                "linear"
               ],
               "type": "fill"
             }
@@ -537,7 +537,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -574,7 +574,7 @@
           "measurement": "disk_usage",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"total\")- mean(free) FROM \"disk_usage\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter GROUP BY time($__interval) fill(null)",
+          "query": "SELECT mean(\"total\")- mean(free) FROM \"disk_usage\" WHERE (\"host\" =~ /^$host$/) AND $timeFilter GROUP BY time($__interval) fill(linear)",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "time_series",
@@ -715,7 +715,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -821,7 +821,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },

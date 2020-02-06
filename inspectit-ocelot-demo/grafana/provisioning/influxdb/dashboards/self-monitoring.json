@@ -15,8 +15,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 1,
-  "iteration": 1567689181673,
+  "id": 4,
+  "iteration": 1580134615472,
   "links": [],
   "panels": [
     {
@@ -252,7 +252,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -282,7 +282,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -312,7 +312,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -756,7 +756,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -799,7 +799,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -842,7 +842,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -885,7 +885,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -1226,7 +1226,7 @@
       "id": 109,
       "panels": [],
       "repeat": null,
-      "repeatIteration": 1567689181673,
+      "repeatIteration": 1580134615472,
       "repeatPanelId": 2,
       "scopedVars": {
         "service": {
@@ -1291,7 +1291,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1567689181673,
+      "repeatIteration": 1580134615472,
       "repeatPanelId": 4,
       "repeatedByRow": true,
       "scopedVars": {
@@ -1373,7 +1373,7 @@
       "id": 111,
       "links": [],
       "pageSize": null,
-      "repeatIteration": 1567689181673,
+      "repeatIteration": 1580134615472,
       "repeatPanelId": 47,
       "repeatedByRow": true,
       "scopedVars": {
@@ -1456,7 +1456,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -1486,7 +1486,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -1516,7 +1516,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -1663,7 +1663,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1567689181673,
+      "repeatIteration": 1580134615472,
       "repeatPanelId": 23,
       "repeatedByRow": true,
       "scopedVars": {
@@ -1785,7 +1785,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1567689181673,
+      "repeatIteration": 1580134615472,
       "repeatPanelId": 76,
       "repeatedByRow": true,
       "scopedVars": {
@@ -1904,7 +1904,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1567689181673,
+      "repeatIteration": 1580134615472,
       "repeatPanelId": 49,
       "repeatedByRow": true,
       "scopedVars": {
@@ -1969,7 +1969,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -2012,7 +2012,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -2055,7 +2055,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -2098,7 +2098,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -2210,7 +2210,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1567689181673,
+      "repeatIteration": 1580134615472,
       "repeatPanelId": 107,
       "repeatedByRow": true,
       "scopedVars": {
@@ -2348,7 +2348,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1567689181673,
+      "repeatIteration": 1580134615472,
       "repeatPanelId": 108,
       "repeatedByRow": true,
       "scopedVars": {
@@ -2445,7 +2445,7 @@
       "id": 117,
       "panels": [],
       "repeat": null,
-      "repeatIteration": 1567689181673,
+      "repeatIteration": 1580134615472,
       "repeatPanelId": 2,
       "scopedVars": {
         "service": {
@@ -2510,7 +2510,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1567689181673,
+      "repeatIteration": 1580134615472,
       "repeatPanelId": 4,
       "repeatedByRow": true,
       "scopedVars": {
@@ -2592,7 +2592,7 @@
       "id": 119,
       "links": [],
       "pageSize": null,
-      "repeatIteration": 1567689181673,
+      "repeatIteration": 1580134615472,
       "repeatPanelId": 47,
       "repeatedByRow": true,
       "scopedVars": {
@@ -2675,7 +2675,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -2705,7 +2705,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -2735,7 +2735,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -2882,7 +2882,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1567689181673,
+      "repeatIteration": 1580134615472,
       "repeatPanelId": 23,
       "repeatedByRow": true,
       "scopedVars": {
@@ -3004,7 +3004,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1567689181673,
+      "repeatIteration": 1580134615472,
       "repeatPanelId": 76,
       "repeatedByRow": true,
       "scopedVars": {
@@ -3123,7 +3123,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1567689181673,
+      "repeatIteration": 1580134615472,
       "repeatPanelId": 49,
       "repeatedByRow": true,
       "scopedVars": {
@@ -3188,7 +3188,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -3231,7 +3231,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -3274,7 +3274,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -3317,7 +3317,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -3429,7 +3429,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1567689181673,
+      "repeatIteration": 1580134615472,
       "repeatPanelId": 107,
       "repeatedByRow": true,
       "scopedVars": {
@@ -3567,7 +3567,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1567689181673,
+      "repeatIteration": 1580134615472,
       "repeatPanelId": 108,
       "repeatedByRow": true,
       "scopedVars": {
@@ -3664,7 +3664,7 @@
       "id": 125,
       "panels": [],
       "repeat": null,
-      "repeatIteration": 1567689181673,
+      "repeatIteration": 1580134615472,
       "repeatPanelId": 2,
       "scopedVars": {
         "service": {
@@ -3729,7 +3729,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1567689181673,
+      "repeatIteration": 1580134615472,
       "repeatPanelId": 4,
       "repeatedByRow": true,
       "scopedVars": {
@@ -3811,7 +3811,7 @@
       "id": 127,
       "links": [],
       "pageSize": null,
-      "repeatIteration": 1567689181673,
+      "repeatIteration": 1580134615472,
       "repeatPanelId": 47,
       "repeatedByRow": true,
       "scopedVars": {
@@ -3894,7 +3894,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -3924,7 +3924,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -3954,7 +3954,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -4101,7 +4101,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1567689181673,
+      "repeatIteration": 1580134615472,
       "repeatPanelId": 23,
       "repeatedByRow": true,
       "scopedVars": {
@@ -4223,7 +4223,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1567689181673,
+      "repeatIteration": 1580134615472,
       "repeatPanelId": 76,
       "repeatedByRow": true,
       "scopedVars": {
@@ -4342,7 +4342,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1567689181673,
+      "repeatIteration": 1580134615472,
       "repeatPanelId": 49,
       "repeatedByRow": true,
       "scopedVars": {
@@ -4407,7 +4407,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -4450,7 +4450,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -4493,7 +4493,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -4536,7 +4536,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -4648,7 +4648,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1567689181673,
+      "repeatIteration": 1580134615472,
       "repeatPanelId": 107,
       "repeatedByRow": true,
       "scopedVars": {
@@ -4786,7 +4786,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1567689181673,
+      "repeatIteration": 1580134615472,
       "repeatPanelId": 108,
       "repeatedByRow": true,
       "scopedVars": {
@@ -4883,7 +4883,7 @@
       "id": 133,
       "panels": [],
       "repeat": null,
-      "repeatIteration": 1567689181673,
+      "repeatIteration": 1580134615472,
       "repeatPanelId": 2,
       "scopedVars": {
         "service": {
@@ -4948,7 +4948,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1567689181673,
+      "repeatIteration": 1580134615472,
       "repeatPanelId": 4,
       "repeatedByRow": true,
       "scopedVars": {
@@ -5030,7 +5030,7 @@
       "id": 135,
       "links": [],
       "pageSize": null,
-      "repeatIteration": 1567689181673,
+      "repeatIteration": 1580134615472,
       "repeatPanelId": 47,
       "repeatedByRow": true,
       "scopedVars": {
@@ -5113,7 +5113,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -5143,7 +5143,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -5173,7 +5173,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -5320,7 +5320,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1567689181673,
+      "repeatIteration": 1580134615472,
       "repeatPanelId": 23,
       "repeatedByRow": true,
       "scopedVars": {
@@ -5442,7 +5442,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1567689181673,
+      "repeatIteration": 1580134615472,
       "repeatPanelId": 76,
       "repeatedByRow": true,
       "scopedVars": {
@@ -5561,7 +5561,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1567689181673,
+      "repeatIteration": 1580134615472,
       "repeatPanelId": 49,
       "repeatedByRow": true,
       "scopedVars": {
@@ -5626,7 +5626,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -5669,7 +5669,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -5712,7 +5712,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -5755,7 +5755,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -5867,7 +5867,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1567689181673,
+      "repeatIteration": 1580134615472,
       "repeatPanelId": 107,
       "repeatedByRow": true,
       "scopedVars": {
@@ -6005,7 +6005,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1567689181673,
+      "repeatIteration": 1580134615472,
       "repeatPanelId": 108,
       "repeatedByRow": true,
       "scopedVars": {
@@ -6102,7 +6102,7 @@
       "id": 141,
       "panels": [],
       "repeat": null,
-      "repeatIteration": 1567689181673,
+      "repeatIteration": 1580134615472,
       "repeatPanelId": 2,
       "scopedVars": {
         "service": {
@@ -6167,7 +6167,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1567689181673,
+      "repeatIteration": 1580134615472,
       "repeatPanelId": 4,
       "repeatedByRow": true,
       "scopedVars": {
@@ -6249,7 +6249,7 @@
       "id": 143,
       "links": [],
       "pageSize": null,
-      "repeatIteration": 1567689181673,
+      "repeatIteration": 1580134615472,
       "repeatPanelId": 47,
       "repeatedByRow": true,
       "scopedVars": {
@@ -6332,7 +6332,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -6362,7 +6362,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -6392,7 +6392,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -6539,7 +6539,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1567689181673,
+      "repeatIteration": 1580134615472,
       "repeatPanelId": 23,
       "repeatedByRow": true,
       "scopedVars": {
@@ -6661,7 +6661,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1567689181673,
+      "repeatIteration": 1580134615472,
       "repeatPanelId": 76,
       "repeatedByRow": true,
       "scopedVars": {
@@ -6780,7 +6780,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1567689181673,
+      "repeatIteration": 1580134615472,
       "repeatPanelId": 49,
       "repeatedByRow": true,
       "scopedVars": {
@@ -6845,7 +6845,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -6888,7 +6888,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -6931,7 +6931,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -6974,7 +6974,7 @@
             [
               {
                 "params": [
-                  "gauge"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -7086,7 +7086,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1567689181673,
+      "repeatIteration": 1580134615472,
       "repeatPanelId": 107,
       "repeatedByRow": true,
       "scopedVars": {
@@ -7224,7 +7224,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1567689181673,
+      "repeatIteration": 1580134615472,
       "repeatPanelId": 108,
       "repeatedByRow": true,
       "scopedVars": {

@@ -139,6 +139,7 @@ const _addNode = (rootNode, path) => {
                 label: names[i],
                 icon: `pi pi-fw ${names[i + 1] ? 'pi-folder' : 'pi-file'}`,
                 children: [],
+                draggable: false,
             };
 
             parent.children.push(newChild);
@@ -158,7 +159,8 @@ const _getDefaultRoot = (selection) => {
         label: 'Ocelot Defaults',
         icon: `cm-tree-icon ocelot-tree-head-${selection === DEFAULT_CONFIG_TREE_KEY ? 'white' : 'orange'}`,
         children: [],
-        className: 'cm-tree-label'
+        className: 'cm-tree-label',
+        draggable: false,
     };
 };
 
