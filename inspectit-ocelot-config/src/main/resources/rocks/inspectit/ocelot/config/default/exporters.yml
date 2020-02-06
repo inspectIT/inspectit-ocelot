@@ -25,6 +25,17 @@ inspectit:
         reconnection-period: 5s
         # the export interval of the metrics
         export-interval: ${inspectit.metrics.frequency}
+      influx:
+        enabled: true
+        # the export interval of the metrics
+        export-interval: ${inspectit.metrics.frequency}
+        # the database to write to
+        database: "inspectit"
+        # the retention policy to write to
+        retention-policy: "autogen"
+        # If true, the specified database will be created with the autogen retention policy
+        create-database: true
+
     # settings for trace exporters
     tracing:
       # settings for the zipkin exporter (https://github.com/census-instrumentation/opencensus-java/tree/master/exporters/trace/zipkin)

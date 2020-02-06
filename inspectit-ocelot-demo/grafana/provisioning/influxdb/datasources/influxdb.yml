@@ -19,7 +19,7 @@ datasources:
   # <string> database user, if used
   user:
   # <string> database name, if used
-  database: telegraf
+  database: inspectit
   # <bool> enable/disable basic auth
   basicAuth:
   # <string> basic auth username
