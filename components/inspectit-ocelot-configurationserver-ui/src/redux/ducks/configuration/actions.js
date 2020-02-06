@@ -89,7 +89,7 @@ export const resetState = () => ({
 });
 
 /**
- * Attempts to delete the currently selected file or folder.
+ * Attempts to delete the currently selected or handed in file or folder.
  * In case of success, fetchFiles() is automatically triggered.
  */
 export const deleteSelection = (fetchFilesOnSuccess, selectedFile = null) => {
