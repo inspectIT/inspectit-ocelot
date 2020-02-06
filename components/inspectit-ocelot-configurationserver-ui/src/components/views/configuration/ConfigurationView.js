@@ -54,7 +54,12 @@ const EditorHeader = ({ icon, path, name, isContentModified, readOnly }) => (
  */
 class ConfigurationView extends React.Component {
 
-    state = {};
+    state = {
+        isDeleteFileDialogShown: false,
+        isCreateFileDialogShown: false,
+        isCreateDirectoryDialogShown: false,
+        isMoveDialogShown: false
+    };
 
     parsePath = (filePath, defaultConfigFilePath) => {
         if (filePath) {

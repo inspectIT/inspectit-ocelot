@@ -10,14 +10,7 @@ import { Button } from 'primereact/button';
  */
 class FileToolbar extends React.Component {
 
-    state = {
-        isDeleteFileDialogShown: false,
-        isCreateFileDialogShown: false,
-        isCreateDirectoryDialogShown: false,
-        isMoveDialogShown: false
-    }
-
-    fetchFiles = () => this.props.fetchFiles()
+    fetchFiles = () => this.props.fetchFiles();
 
     render() {
         const { loading, selection } = this.props;
