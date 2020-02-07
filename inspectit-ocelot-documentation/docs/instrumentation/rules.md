@@ -394,14 +394,47 @@ example_rule:
     '[some/other/metric]' : 42
 ```
 
-The metrics phase is executed after the exit phase of the rule. As shown above, you can simply assign values to metrics based on their name. You must however have [defined the metric](metrics/custom-metrics.md) to use them.
+The metrics phase is executed after the exit phase of the rule.
+As shown above, you can simply assign values to metrics based on their name.
+You must however have [defined the metric](metrics/custom-metrics.md) to use them.
 
-The measurement value written to the metric can be specified by giving a data key. This was done in the example above for `method/duration`: Here, the value for the data key `method_duration` is taken, which we previously wrote in the exit phase.
-Alternatively you can just specify a constant which will be used, like it was done for `some/other/metric`.
+The measurement value written to the metric can be specified by giving a data key.
+This was done in the example above for `method/duration`:
+Here, the value for the data key `method_duration` is taken, which we previously wrote in the exit phase.
+Alternatively you can just specify a constant which will be used, like shown for `some/other/metric`.
 
-If the value assigned with the data key you specified is `null` (e.g. no data was collected), no value for the metric will be written out.
+If the value assigned with the data key you specified is `null` (e.g. no data was collected),
+no value for the metric will be written out.
 
-In addition, all configured tags for the metrics will also be taken from the inspectIT context, if they have been [configured to be used as tags](#defining-the-behaviour).
+In addition, all configured tags for the metrics will also be taken from the inspectIT context,
+if they have been [configured to be used as tags](#defining-the-behaviour).
+
+Note that the notation above is actually a short notation for the following equivalent configuration:
+```yaml
+#inspectit.instrumentation.rules is omitted here
+example_rule:
+  #...
+  exit:
+    method_duration:
+      #action invocation here....
+
+  metrics:
+    '[method/duration]':
+      value: method_duration
+    write_my_other_metric:
+      metric: "some/other/metric"
+      value: 42
+```
+
+This configuration has exactly the same behaviour as the one shown above.
+However, as illustrated via `write_my_other_metric` it is possible to explicitly specify the name of the metric to output
+using the `metric` property. If `metric` is specified, then the key within the `metrics` map has no other purpose than documentation.
+However, if `metric` is empty, then the key within the `metrics` map is assumed to be the name of the metric to write.
+
+The explicit notation allows to write multiple values for the same metric from within the same rule.
+
+> Due to the way configuration loading works, the short notation will always take precedence over the explicit notation.
+This means that you cannot override settings made with the short-notation by using the explicit notation.
 
 ### Collecting Traces
 
