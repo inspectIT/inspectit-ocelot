@@ -158,5 +158,36 @@ public class YamlFileHelperTest {
             assertThat(autoCompleter1.extractKeysFromYamlFiles(propertyPath)).isEqualTo(output);
         }
 
+        @Test
+        public void indexTooSmall() {
+            List<String> propertyPath = Arrays.asList("inspectit", "exampleList", "-5");
+            List<String> output = new ArrayList<>();
+            YamlFileHelper autoCompleter1 = Mockito.spy(autoCompleter);
+            HashMap<String, Object> topLevelMap = new HashMap<>();
+            HashMap<String, Object> inspectit = new HashMap<>();
+            List<String> list = Arrays.asList("Hello", "there!");
+            inspectit.put("exampleList", list);
+            topLevelMap.put("inspectit", inspectit);
+            Collection<Object> mockData = Arrays.asList(topLevelMap);
+            when(yamlLoader.getYamlContents()).thenReturn(mockData);
+
+            assertThat(autoCompleter1.extractKeysFromYamlFiles(propertyPath)).isEqualTo(output);
+        }
+
+        @Test
+        public void indexTooBig() {
+            List<String> propertyPath = Arrays.asList("inspectit", "exampleList", "50000");
+            List<String> output = new ArrayList<>();
+            YamlFileHelper autoCompleter1 = Mockito.spy(autoCompleter);
+            HashMap<String, Object> topLevelMap = new HashMap<>();
+            HashMap<String, Object> inspectit = new HashMap<>();
+            List<String> list = Arrays.asList("Hello", "there!");
+            inspectit.put("exampleList", list);
+            topLevelMap.put("inspectit", inspectit);
+            Collection<Object> mockData = Arrays.asList(topLevelMap);
+            when(yamlLoader.getYamlContents()).thenReturn(mockData);
+
+            assertThat(autoCompleter1.extractKeysFromYamlFiles(propertyPath)).isEqualTo(output);
+        }
     }
 }

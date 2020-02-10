@@ -1,22 +1,18 @@
 package rocks.inspectit.ocelot.autocomplete.util;
 
+import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
 import org.yaml.snakeyaml.Yaml;
+import rocks.inspectit.ocelot.config.loaders.ConfigFileLoader;
 import rocks.inspectit.ocelot.file.FileChangedEvent;
 import rocks.inspectit.ocelot.file.FileManager;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -25,10 +21,9 @@ import java.util.stream.Collectors;
 public class YamlLoader {
 
     /**
-     * Predicate to check if a given file path ends with .yml or .yaml
+     * Predicate to check if a given file path ends with .yml or .yaml.
      */
     private static final Predicate<String> HAS_YAML_ENDING = filePath -> filePath.toLowerCase().endsWith(".yml") || filePath.toLowerCase().endsWith(".yaml");
-    private static final String DEFAULT_CONFIG_PATH = "classpath:rocks/inspectit/ocelot/config/default/**/*.yml";
 
     @Autowired
     private FileManager fileManager;
@@ -41,24 +36,24 @@ public class YamlLoader {
 
     @PostConstruct
     @EventListener(FileChangedEvent.class)
-    public void loadFiles() {
+    public void loadFiles() throws IOException {
         yamlContents = getAllPaths().stream()
-                .map(path -> loadYaml(path))
+                .map(this::loadYaml)
                 .filter(o -> o instanceof Map || o instanceof List)
+                .flatMap(a -> toCollection(a).stream())
                 .collect(Collectors.toList());
-        yamlContents.addAll(loadDefaultConfig().stream()
-                .filter(o -> o instanceof Map || o instanceof List)
-                .collect(Collectors.toList()));
+        yamlContents.addAll(ConfigFileLoader.getDefaultConfigFiles().values());
     }
 
     /**
-     * This method lodas a yaml or .yml file in any given path
+     * This method loads a yaml or .yml file in any given path.
      *
-     * @param path path of the yaml to load
-     * @return the file as Object
+     * @param path path of the yaml to load.
+     * @return the file as Object.
      */
+    @VisibleForTesting
     Object loadYaml(String path) {
-        Yaml yaml = new Yaml();
+        Yaml yaml = getYaml();
         String src;
         try {
             src = fileManager.readFile(path);
@@ -72,39 +67,18 @@ public class YamlLoader {
         return null;
     }
 
-    /**
-     * Loads the default config provided in the Project and returns it as a List of objects.
-     *
-     * @return
-     */
-    public List<Object> loadDefaultConfig() {
-        Yaml yaml = new Yaml();
-        ArrayList<Object> yamls = new ArrayList<>();
-        try {
-            Resource[] resources = new PathMatchingResourcePatternResolver(YamlLoader.class.getClassLoader())
-                    .getResources(DEFAULT_CONFIG_PATH);
-            for (val res : resources) {
-                try {
-                    yamls.add(yaml.load(res.getInputStream()));
-                } catch (IOException e) {
-                    log.error("Error trying to read a HashMap from default settings");
-                }
-            }
-        } catch (IOException e) {
-            log.error("Error trying to read default settings");
-        }
-
-        return yamls;
-
+    Yaml getYaml() {
+        return new Yaml();
     }
 
     /**
      * Searches in the current directory for files with .yml or .yaml ending. Returns all paths to those files as
-     * List of the type string
+     * List of the type string.
      *
-     * @return A list of all found paths to .yml or .yaml files
+     * @return A list of all found paths to .yml or .yaml files.
      */
-    private List<String> getAllPaths() {
+    @VisibleForTesting
+    List<String> getAllPaths() {
         try {
             return fileManager.getFilesInDirectory(null, true).stream()
                     .flatMap(f -> f.getAbsoluteFilePaths(""))
@@ -114,5 +88,24 @@ public class YamlLoader {
         } catch (Exception e) {
             return new ArrayList<>();
         }
+    }
+
+    /**
+     * Returns an object as collection.
+     * If the object is an instance of List, the List itself is returned.
+     * If the object is an instance of Map, the values of the map are returned as a collection.
+     * If the object is neither an instance of Map nor an instance of list, an empty list is returned.
+     *
+     * @param o The object the collection should be returned of.
+     * @return A collection containing the objects contents.
+     */
+    private Collection<?> toCollection(Object o) {
+        if (o instanceof List) {
+            return (List) o;
+        }
+        if (o instanceof Map) {
+            return ((Map) o).values();
+        }
+        return Collections.emptyList();
     }
 }
