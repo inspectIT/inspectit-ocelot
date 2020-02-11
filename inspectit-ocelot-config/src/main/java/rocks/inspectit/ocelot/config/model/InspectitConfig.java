@@ -12,6 +12,7 @@ import rocks.inspectit.ocelot.config.model.plugins.PluginSettings;
 import rocks.inspectit.ocelot.config.model.selfmonitoring.SelfMonitoringSettings;
 import rocks.inspectit.ocelot.config.model.tags.TagsSettings;
 import rocks.inspectit.ocelot.config.model.tracing.TracingSettings;
+import rocks.inspectit.ocelot.config.ui.UISettings;
 import rocks.inspectit.ocelot.config.validation.AdditionalValidation;
 import rocks.inspectit.ocelot.config.validation.AdditionalValidations;
 import rocks.inspectit.ocelot.config.validation.ViolationBuilder;
@@ -101,12 +102,14 @@ public class InspectitConfig {
      * Can only be specified as JVM-property.
      * If true, OpenCensus will be loaded to the bootstrap and accessible by the target application.
      */
+    @UISettings(exclude = true)
     private boolean publishOpenCensusToBootstrap;
 
     /**
      * Environment information.
      * Usually not specified by the user, instead the values are populated by inspectIT on startup.
      */
+    @UISettings(exclude = true)
     private EnvironmentSettings env;
 
     /**

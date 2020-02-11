@@ -119,6 +119,29 @@ public class PropertyPathHelper {
     }
 
     /**
+     * Checks if the given Class is a POJO.
+     * Every class which is no Collection, Map or terminal (see {@link #isTerminal(Type)} is classified as POJO.
+     *
+     * @param type the type to check
+     * @return true if the given type is a pojo.
+     */
+    public boolean isBean(Type type) {
+        if (type instanceof Class<?>) {
+            Class<?> clazz = (Class<?>) type;
+            if (Collection.class.isAssignableFrom(clazz)) {
+                return false;
+            } else if (Map.class.isAssignableFrom(clazz)) {
+                return false;
+            } else if (isTerminal(clazz)) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Checks if a given type is a list of terminal types
      *
      * @param type
