@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Singular;
 import lombok.Value;
+import rocks.inspectit.ocelot.config.ui.UISettings;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,7 +32,7 @@ public class ConfigurationPropertyDescription implements Comparable<Configuratio
     private final ConfigurationPropertyType type;
 
     /**
-     * The human readable name of the property. Can be specified by the {@link rocks.inspectit.ocelot.config.ui.UIName} annotation.
+     * The human readable name of the property. Can be specified by the {@link UISettings} annotation.
      * If the annotation is not present, the name is generated from the name of the property field.
      */
     private final String readableName;
@@ -52,12 +53,12 @@ public class ConfigurationPropertyDescription implements Comparable<Configuratio
      * <p>
      * In addition the list is guaranteed to be sorted.
      */
-    private List<ConfigurationPropertyDescription> children;
+    private final List<ConfigurationPropertyDescription> children;
 
     /**
      * The possible values in case the {@link #type} is {@link ConfigurationPropertyType#ENUM}.
      */
-    private List<String> enumValues;
+    private final List<String> enumValues;
 
     @Builder
     private ConfigurationPropertyDescription(ConfigurationPropertyType type, String propertyName, String readableName, boolean nullable, @Singular List<ConfigurationPropertyDescription> children, @Singular List<String> enumValues) {

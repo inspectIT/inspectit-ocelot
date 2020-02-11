@@ -3,8 +3,7 @@ package rocks.inspectit.ocelot.configschema;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.BeanUtils;
-import rocks.inspectit.ocelot.config.ui.ExcludeFromUi;
-import rocks.inspectit.ocelot.config.ui.UIName;
+import rocks.inspectit.ocelot.config.ui.UISettings;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
@@ -82,7 +81,7 @@ public class ConfigurationSchemaProviderTest {
             @Test
             void customNameOnField() {
                 PropertyDescriptor prop = getFirstProperty(new Object() {
-                    @UIName("custom NAME")
+                    @UISettings(name = "custom NAME")
                     private int simple;
 
                     public void setSimple(int i) {
@@ -102,7 +101,7 @@ public class ConfigurationSchemaProviderTest {
                 PropertyDescriptor prop = getFirstProperty(new Object() {
                     private int simple;
 
-                    @UIName("custom NAME")
+                    @UISettings(name = "custom NAME")
                     public void setSimple(int i) {
                     }
                 });
@@ -122,7 +121,7 @@ public class ConfigurationSchemaProviderTest {
             @Test
             void excludeOnField() {
                 PropertyDescriptor prop = getFirstProperty(new Object() {
-                    @ExcludeFromUi
+                    @UISettings(exclude = true)
                     private int simple;
 
                     public void setSimple(int i) {
@@ -138,7 +137,7 @@ public class ConfigurationSchemaProviderTest {
                 PropertyDescriptor prop = getFirstProperty(new Object() {
                     private int simple;
 
-                    @ExcludeFromUi
+                    @UISettings(exclude = true)
                     public void setSimple(int i) {
                     }
                 });

@@ -4,8 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
-import rocks.inspectit.ocelot.config.ui.ExcludeFromUi;
-import rocks.inspectit.ocelot.config.ui.UIName;
+import rocks.inspectit.ocelot.config.ui.UISettings;
 import rocks.inspectit.ocelot.config.utils.CaseUtils;
 import rocks.inspectit.ocelot.config.validation.PropertyPathHelper;
 
@@ -40,15 +39,15 @@ public class ConfigurationSchemaProvider {
             Boolean.class, boolean.class
     ));
 
+
+    private ConfigurationPropertyDescription rootProperty;
+
     /**
      * @return the description of the "inspectit" root configuration proeprty which corresponds to the {@link InspectitConfig} class.
      */
     public ConfigurationPropertyDescription getSchema() {
         return rootProperty;
     }
-
-
-    private ConfigurationPropertyDescription rootProperty;
 
     @PostConstruct
     void deriveSchema() {
@@ -67,7 +66,7 @@ public class ConfigurationSchemaProvider {
     }
 
     private boolean isExcluded(PropertyDescriptor property) {
-        return getPropertyAnnotation(property, ExcludeFromUi.class).isPresent();
+        return getPropertyAnnotation(property, UISettings.class).map(UISettings::exclude).orElse(false);
     }
 
     @VisibleForTesting
@@ -97,8 +96,8 @@ public class ConfigurationSchemaProvider {
     }
 
     private String getReadableName(PropertyDescriptor property) {
-        return getPropertyAnnotation(property, UIName.class)
-                .map(UIName::value)
+        return getPropertyAnnotation(property, UISettings.class)
+                .map(UISettings::name)
                 .orElse(camelCaseToReadableName(property.getName()));
     }
 
