@@ -75,6 +75,30 @@ public class PropagationMetaDataResolverTest {
             verify(mockBuilder).setTag(eq("my_key"), eq(true));
             verifyNoMoreInteractions(mockBuilder);
         }
+
+
+        @Test
+        void nullView() {
+            MetricDefinitionSettings def = new MetricDefinitionSettings();
+            def.setViews(null);
+
+            resolver.collectTagsFromMetricDefinitions(Collections.singletonMap("metric", def), mockBuilder);
+
+            verifyZeroInteractions(mockBuilder);
+        }
+
+
+        @Test
+        void nullTags() {
+            MetricDefinitionSettings def = new MetricDefinitionSettings();
+            ViewDefinitionSettings defView = new ViewDefinitionSettings();
+            defView.setTags(null);
+            def.setViews(Collections.singletonMap("view", defView));
+
+            resolver.collectTagsFromMetricDefinitions(Collections.singletonMap("metric", def), mockBuilder);
+
+            verifyZeroInteractions(mockBuilder);
+        }
     }
 
 

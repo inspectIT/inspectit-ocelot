@@ -14,14 +14,8 @@ public class RootPropagationMetaDataTest {
         @Test
         void testDefaultSettings() {
             PropagationMetaData result = RootPropagationMetaData.builder()
-                    .setTag("root", true)
-                    .setDownPropagation("root", PropagationMode.JVM_LOCAL)
-                    .setUpPropagation("root", PropagationMode.JVM_LOCAL)
                     .build()
                     .copy()
-                    .setTag("child", true)
-                    .setDownPropagation("child", PropagationMode.GLOBAL)
-                    .setUpPropagation("child", PropagationMode.GLOBAL)
                     .build();
 
             assertThat(result.isTag("not_present")).isFalse();
