@@ -3,8 +3,7 @@ inspectit:
       
     data:
 
-      apache_http_client_propagation_performed: {is-tag: false}
-      apache_http_client_propagation_is_entry: {is-tag: false, down-propagation: NONE}
+      apache_http_client_propagation_performed: {down-propagation: JVM_LOCAL}
 
     actions:
       apache_http_client_down_propagation:

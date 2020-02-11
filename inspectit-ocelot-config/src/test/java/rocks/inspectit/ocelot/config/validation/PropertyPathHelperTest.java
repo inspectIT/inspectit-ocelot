@@ -110,7 +110,7 @@ public class PropertyPathHelperTest {
         @Test
         void readMethodIsNull() {
             List<String> list = Arrays.asList("instrumentation", "data", "method_duration", "is-tag");
-            Type output = boolean.class;
+            Type output = Boolean.class;
 
             assertThat(PropertyPathHelper.getPathEndType(list, InspectitConfig.class)).isEqualTo(output);
         }

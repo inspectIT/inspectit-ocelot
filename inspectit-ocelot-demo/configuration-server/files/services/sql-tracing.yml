@@ -8,10 +8,6 @@ inspectit:
         methods:
           - name: execute
             matcher-mode: STARTS_WITH
-            
-    data:
-      db_name: {down-propagation: NONE, is-tag: false}
-      sql: {down-propagation: NONE, is-tag: false}
     
     actions:
       # Extracts the SQL from a PreparedStatement for HSQLDB
