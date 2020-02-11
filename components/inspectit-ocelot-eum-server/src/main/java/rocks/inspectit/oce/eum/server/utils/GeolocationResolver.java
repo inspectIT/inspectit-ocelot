@@ -1,4 +1,4 @@
-package rocks.inspectit.oce.eum.server.metrics;
+package rocks.inspectit.oce.eum.server.utils;
 
 import com.maxmind.geoip2.DatabaseReader;
 import com.maxmind.geoip2.exception.GeoIp2Exception;

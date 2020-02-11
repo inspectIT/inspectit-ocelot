@@ -75,6 +75,7 @@ const configurationReducer = createReducer(initialState)({
         return {
             ...state,
             selection,
+            selectedDefaultConfigFile: null,
             selectedFileContent: null
         };
     },
@@ -149,8 +150,26 @@ const configurationReducer = createReducer(initialState)({
         } else {
             return state;
         }
-    }
-
+    },
+    [types.FETCH_DEFAULT_CONFIG_STARTED]: incrementPendingRequests,
+    [types.FETCH_DEFAULT_CONFIG_SUCCESS]: (state, action) => {
+        const { defaultConfig } = action.payload;
+        return {
+            ...state,
+            pendingRequests: state.pendingRequests - 1,
+            defaultConfig
+        }
+    },
+    [types.FETCH_DEFAULT_CONFIG_FAILURE]: decrementPendingRequests,
+    [types.SELECT_DEFAULT_CONFIG_FILE]: (state, action) => {
+        const { selection, content } = action.payload;
+        return {
+            ...state,
+            selection: null,
+            selectedDefaultConfigFile: selection,
+            selectedFileContent: content
+        };
+    },
 });
 
 export default configurationReducer;

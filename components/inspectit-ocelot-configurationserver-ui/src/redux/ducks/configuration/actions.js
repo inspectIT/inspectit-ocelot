@@ -3,6 +3,7 @@ import * as selectors from "./selectors";
 import axios from '../../../lib/axios-api';
 import { configurationUtils } from '../configuration';
 import { notificationActions } from '../notification';
+import { DEFAULT_CONFIG_TREE_KEY } from '../../../data/constants';
 
 /**
  * Fetches all existing configuration files and directories.
@@ -57,15 +58,26 @@ export const fetchSelectedFile = () => {
  * @param {string} selection - absolute path of the selected file (e.g. /configs/prod/interfaces.yml)
  */
 export const selectFile = (selection) => {
-    return dispatch => {
-        dispatch({
-            type: types.SELECT_FILE,
-            payload: {
-                selection
-            }
-        });
+    return (dispatch, getState) => {
+        if (selection && selection.startsWith(DEFAULT_CONFIG_TREE_KEY)) {
+            const content = configurationUtils.getDefaultFileContent(getState().configuration.defaultConfig, selection);
+            dispatch({
+                type: types.SELECT_DEFAULT_CONFIG_FILE,
+                payload: {
+                    selection,
+                    content
+                }
+            });
+        } else {
+            dispatch({
+                type: types.SELECT_FILE,
+                payload: {
+                    selection
+                }
+            });
 
-        dispatch(fetchSelectedFile(selection));
+            dispatch(fetchSelectedFile(selection));
+        }
     };
 };
 
@@ -204,3 +216,22 @@ export const selectedFileContentsChanged = (content) => ({
         content
     }
 });
+
+/**
+ * Fetches the default configuration of the Ocelot agents.
+ */
+export const fetchDefaultConfig = () => {
+    return dispatch => {
+        dispatch({ type: types.FETCH_DEFAULT_CONFIG_STARTED });
+
+        axios
+            .get("/defaultconfig")
+            .then(res => {
+                const defaultConfig = res.data;
+                dispatch({ type: types.FETCH_DEFAULT_CONFIG_SUCCESS, payload: { defaultConfig } });
+            })
+            .catch(() => {
+                dispatch({ type: types.FETCH_DEFAULT_CONFIG_FAILURE });
+            })
+    }
+}

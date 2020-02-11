@@ -10,7 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
-import rocks.inspectit.ocelot.core.instrumentation.config.model.DataProperties;
+import rocks.inspectit.ocelot.config.model.instrumentation.data.PropagationMode;
+import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -89,7 +90,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
     /**
      * Defines for each data key its propagation behaviour as well as if it is a tag.
      */
-    private final DataProperties propagation;
+    private PropagationMetaData propagation;
 
     /**
      * Defines whether the context should interact with TagContexts opened by the instrumented application.
@@ -180,9 +181,9 @@ public class InspectitContextImpl implements InternalInspectitContext {
      */
     private Map<String, Object> cachedActivePhaseDownPropagatedData = null;
 
-    private InspectitContextImpl(InspectitContextImpl parent, DataProperties propagation, boolean interactWithApplicationTagContexts) {
+    private InspectitContextImpl(InspectitContextImpl parent, PropagationMetaData defaultPropagation, boolean interactWithApplicationTagContexts) {
         this.parent = parent;
-        this.propagation = propagation;
+        propagation = parent == null ? defaultPropagation : parent.propagation;
         this.interactWithApplicationTagContexts = interactWithApplicationTagContexts;
         dataOverwrites = new HashMap<>();
         openingThread = Thread.currentThread();
@@ -204,13 +205,13 @@ public class InspectitContextImpl implements InternalInspectitContext {
      * The created context will be a synchronous or asynchronous child of the currently active context.
      *
      * @param commonTags                         the common tags used to populate the data if this is a root context
-     * @param propagation                        the data propagation settings
+     * @param defaultPropagation                 the data propagation settings to use if this is a root context. Otherwise the parent context's settings will be inherited.
      * @param interactWithApplicationTagContexts if true, data from the currently active {@link TagContext} will be inherited and makeActive will publish the data as a TagContext
      * @return the newly created context
      */
-    public static InspectitContextImpl createFromCurrent(Map<String, String> commonTags, DataProperties propagation, boolean interactWithApplicationTagContexts) {
+    public static InspectitContextImpl createFromCurrent(Map<String, String> commonTags, PropagationMetaData defaultPropagation, boolean interactWithApplicationTagContexts) {
         InspectitContextImpl parent = INSPECTIT_KEY.get();
-        InspectitContextImpl result = new InspectitContextImpl(parent, propagation, interactWithApplicationTagContexts);
+        InspectitContextImpl result = new InspectitContextImpl(parent, defaultPropagation, interactWithApplicationTagContexts);
 
         if (parent == null) {
             commonTags.forEach(result::setData);
@@ -469,7 +470,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
     }
 
     /**
-     * Only invoked by {@link #createFromCurrent(Map, DataProperties, boolean)}
+     * Only invoked by {@link #createFromCurrent(Map, PropagationMetaData, boolean)}
      * <p>
      * Reads the currently active tag context and makes this context inherit all values which
      * have changed in comparison to the values published by the parent context.
@@ -477,11 +478,13 @@ public class InspectitContextImpl implements InternalInspectitContext {
     private void readOverridesFromCurrentTagContext() {
         TagContext currentTags = Tags.getTagger().getCurrentTagContext();
         if (currentTags != null) {
+            PropagationMetaData.Builder alteredPropagation = null;
             if (parent == null) {
                 //we are the first inspectit context, therefore we inherit all values
                 for (Iterator<Tag> it = InternalUtils.getTags(currentTags); it.hasNext(); ) {
                     Tag tag = it.next();
                     setData(tag.getKey().getName(), tag.getValue().asString());
+                    alteredPropagation = configureTagPropagation(tag.getKey().getName(), alteredPropagation);
                 }
             } else {
                 // a new context was opened between our parent and ourselves
@@ -496,10 +499,40 @@ public class InspectitContextImpl implements InternalInspectitContext {
                         if (parentValueForTag == null || !parentValueForTag.toString().equals(tagValue)) {
                             setData(tagKey, tagValue);
                         }
+                        alteredPropagation = configureTagPropagation(tagKey, alteredPropagation);
                     }
                 }
             }
+            if (alteredPropagation != null) {
+                propagation = alteredPropagation.build();
+            }
         }
+    }
+
+    /**
+     * Checks if the given key is already configured in {@link #propagation} for down-propagation and as a tag.
+     * If it is the case, the passed in builder is returned without changes.
+     * <p>
+     * Otherwise the key is configured in the given builder to be down-propagated JVM-locally and to be a tag.
+     *
+     * @param tagKey          the key of the found tag
+     * @param existingBuilder an existing builder to which the settings shall be added. If it is null, a builder is created using copy() on {@link #propagation}.
+     * @return exisitingBuilder or the newly created builder if it was null.
+     */
+    private PropagationMetaData.Builder configureTagPropagation(String tagKey, PropagationMetaData.Builder existingBuilder) {
+        PropagationMetaData.Builder result = existingBuilder;
+        boolean isTag = propagation.isTag(tagKey);
+        boolean isPropagatedDown = propagation.isPropagatedDownWithinJVM(tagKey);
+        if (!isTag || !isPropagatedDown) {
+            if (result == null) {
+                result = propagation.copy();
+            }
+            result.setTag(tagKey, true);
+            if (!isPropagatedDown) {
+                result.setDownPropagation(tagKey, PropagationMode.JVM_LOCAL);
+            }
+        }
+        return result;
     }
 
     private Stream<Map.Entry<String, Object>> getDataAsStream() {

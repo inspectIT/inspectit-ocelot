@@ -1,6 +1,6 @@
 import React from 'react';
-import { connect } from 'react-redux'
-import { configurationActions, configurationSelectors } from '../../../redux/ducks/configuration'
+import { connect } from 'react-redux';
+import { configurationActions, configurationSelectors } from '../../../redux/ducks/configuration';
 import { notificationActions } from '../../../redux/ducks/notification';
 
 import FileTree from './FileTree';
@@ -8,12 +8,13 @@ import FileToolbar from './FileToolbar';
 import EditorView from '../../editor/EditorView';
 import yaml from 'js-yaml';
 
-import {enableOcelotAutocompletion} from './OcelotAutocompleter'
+import { enableOcelotAutocompletion } from './OcelotAutocompleter';
+import { DEFAULT_CONFIG_TREE_KEY } from '../../../data/constants';
 
 /**
  * The header component of the editor view.
  */
-const EditorHeader = ({ icon, path, name, isContentModified }) => (
+const EditorHeader = ({ icon, path, name, isContentModified, readOnly }) => (
     <>
         <style jsx>{`
         .header {
@@ -40,6 +41,7 @@ const EditorHeader = ({ icon, path, name, isContentModified }) => (
             <div className="path">{path}</div>
             <div className="name">{name}</div>
             {isContentModified && <div className="dirtyStateMarker">*</div>}
+            {readOnly && <div className="dirtyStateMarker">(read only)</div>}
         </div>
     </>
 );
@@ -49,16 +51,23 @@ const EditorHeader = ({ icon, path, name, isContentModified }) => (
  */
 class ConfigurationView extends React.Component {
 
-    parsePath = (fullPath) => {
-        if (fullPath) {
-            const lastIndex = fullPath.lastIndexOf("/") + 1;
-            return {
-                path: fullPath.slice(0, lastIndex),
-                name: fullPath.slice(lastIndex)
-            }
+    parsePath = (filePath, defaultConfigFilePath) => {
+        if (filePath) {
+            return this.splitIntoPathAndName(filePath);
+        } else if (defaultConfigFilePath) {
+            const path = defaultConfigFilePath.replace(DEFAULT_CONFIG_TREE_KEY, '/Ocelot defaults');
+            return this.splitIntoPathAndName(path);
         } else {
             return {};
         }
+    }
+
+    splitIntoPathAndName = (path) => {
+        const lastIndex = path.lastIndexOf("/") + 1;
+        return {
+            path: path.slice(0, lastIndex),
+            name: path.slice(lastIndex)
+        };
     }
 
     onSave = () => {
@@ -77,10 +86,10 @@ class ConfigurationView extends React.Component {
     }
 
     render() {
-        const { selection, isDirectory, loading, isContentModified, fileContent, yamlError } = this.props;
-        const showEditor = selection && !isDirectory;
+        const { selection, isDirectory, loading, isContentModified, fileContent, yamlError, selectedDefaultConfigFile } = this.props;
+        const showEditor = (selection || selectedDefaultConfigFile) && !isDirectory;
 
-        const { path, name } = this.parsePath(selection);
+        const { path, name } = this.parsePath(selection, selectedDefaultConfigFile);
         const icon = "pi-" + (isDirectory ? "folder" : "file");
         const showHeader = !!name;
 
@@ -131,8 +140,9 @@ class ConfigurationView extends React.Component {
                     isErrorNotification={true}
                     notificationIcon="pi-exclamation-triangle"
                     notificationText={yamlError}
-                    loading={loading}>
-                    {showHeader ? <EditorHeader icon={icon} path={path} name={name} isContentModified={isContentModified} /> : null}
+                    loading={loading}
+                    readOnly={!!selectedDefaultConfigFile}>
+                    {showHeader ? <EditorHeader icon={icon} path={path} name={name} isContentModified={isContentModified} readOnly={!!selectedDefaultConfigFile} /> : null}
                 </EditorView>
             </div>
         );
@@ -153,18 +163,19 @@ const getYamlError = (content) => {
 }
 
 function mapStateToProps(state) {
-    const { updateDate, selection, selectedFileContent, pendingRequests } = state.configuration;
+    const { updateDate, selection, selectedFileContent, pendingRequests, selectedDefaultConfigFile } = state.configuration;
     const unsavedFileContent = selection ? configurationSelectors.getSelectedFileUnsavedContents(state) : null;
     const fileContent = unsavedFileContent != null ? unsavedFileContent : selectedFileContent;
 
     return {
         updateDate,
         selection,
-        isDirectory: configurationSelectors.isSelectionDirectory(state),
+        isDirectory: configurationSelectors.isSelectionDirectory(state) || !!(selectedDefaultConfigFile && !fileContent),
         isContentModified: unsavedFileContent != null,
         fileContent,
         yamlError: getYamlError(fileContent),
-        loading: pendingRequests > 0
+        loading: pendingRequests > 0,
+        selectedDefaultConfigFile,
     }
 }
 

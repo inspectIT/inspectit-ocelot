@@ -19,8 +19,8 @@ class SourceToolbar extends React.Component {
 
   render() {
     return (
-      <div className="p-inputgroup" style={{ display: "inline-flex", verticalAlign: "middle", width: '100%', 'margin-bottom': '0.5em' }}>
-        <span className="pi p-inputgroup-addon" style={{ background: 'inherit', 'border-color': '#656565' }}>/</span>
+      <div className="p-inputgroup" style={{ display: "inline-flex", verticalAlign: "middle", width: '100%', 'marginBottom': '0.5em' }}>
+        <span className="pi p-inputgroup-addon" style={{ background: 'inherit', 'borderColor': '#656565' }}>/</span>
         <InputText
           value={this.state.newSource}
           placeholder='New Source'

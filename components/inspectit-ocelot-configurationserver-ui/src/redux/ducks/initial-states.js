@@ -32,7 +32,11 @@ const configuration = {
      * A map of unsaved file changes.
      * Maps the absolute file path to the files contents.
      */
-    unsavedFileContents: {/* fileName: fileContents*/ }
+    unsavedFileContents: {/* fileName: fileContents*/ },
+    /** The default configuration of the Ocelot agents. Will be retrieved as key/value pairs each representing path/content of a file. */
+    defaultConfig: {},
+    /** The path of the currently selected default configuration file in the file tree. */
+    selectedDefaultConfigFile: null,
 };
 
 const notification = {
@@ -61,10 +65,18 @@ const agentStatus = {
     pendingClearRequests: 0,
 }
 
+const settings = {
+    /** The list of users */
+    users: [],
+    /** Specifies how many requests are currently loading the data in the background */
+    pendingRequests: 0,
+}
+
 export {
     authentication,
     configuration,
     notification,
     mappings,
-    agentStatus
+    agentStatus,
+    settings
 }

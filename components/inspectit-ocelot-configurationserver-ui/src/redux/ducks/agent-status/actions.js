@@ -20,7 +20,7 @@ export const fetchStatus = () => {
             .catch(() => {
                 dispatch({ type: types.FETCH_STATUS_FAILURE });
             });
-    };S
+    };
 };
 
 /**
@@ -32,13 +32,13 @@ export const clearStatus = (fetchStatusOnSuccess) => {
         axios
             .delete("/agentstatus")
             .then(res => {
-                dispatch({type: types.CLEAR_STATUS_SUCCESS});
-                if(fetchStatusOnSuccess) {
+                dispatch({ type: types.CLEAR_STATUS_SUCCESS });
+                if (fetchStatusOnSuccess) {
                     dispatch(fetchStatus());
                 }
             })
             .catch(() => {
                 dispatch({ type: types.CLEAR_STATUS_FAILURE });
             });
-    };S
+    };
 };

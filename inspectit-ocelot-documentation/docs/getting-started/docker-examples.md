@@ -14,12 +14,12 @@ All of the demo scenarios are fully configured with predefined dashboards, *so y
 
 ### Demo #1 - InfluxDB and Zipkin
 
-Uses InfluxData Telegraf for metrics gathering, InfluxDB for metrics storage and Grafana for Dashboards. 
+Uses InfluxDB for metrics storage and Grafana for Dashboards. 
 Traces are exported to Zipkin.
 [See section below for detailed information](#influxdb-and-zipkin-scenario).
 
 * File: `docker-compose-influxdb-zipkin.yml`
-* [OpenAPM Landscape](https://openapm.io/landscape?agent=inspectit-ocelot-agent&instrumentation-lib=opencensus&collector=influx-telegraf%2Czipkin-server&storage=influx-db&dashboarding=grafana)
+* [OpenAPM Landscape](https://openapm.io/landscape?agent=inspectit-ocelot-agent&instrumentation-lib=opencensus&storage=influx-db&dashboarding=grafana&alerting=grafana&collector=zipkin-server&visualization=zipkin-server)
 
 ![Demo scenario using InfluxDB and Zipkin](assets/demo-landscape-influxdb-zipkin.png)
 
@@ -86,11 +86,10 @@ For more information, check out the following blog post: [Setting Up Docker for 
 ### InfluxDB and Zipkin Scenario
 In this scenario the following components are preconfigured and used for monitoring:
 
-[![Demo scenario using InfluxDB and Zipkin](assets/demo-landscape-influxdb-zipkin.png)](https://openapm.io/landscape?agent=inspectit-ocelot-agent&instrumentation-lib=opencensus&collector=influx-telegraf%2Czipkin-server&storage=influx-db&dashboarding=grafana)
+[![Demo scenario using InfluxDB and Zipkin](assets/demo-landscape-influxdb-zipkin.png)](https://openapm.io/landscape?agent=inspectit-ocelot-agent&instrumentation-lib=opencensus&storage=influx-db&dashboarding=grafana&alerting=grafana&collector=zipkin-server&visualization=zipkin-server)
 
 - *inspectIT Ocelot agent:* Instruments all the target demo application components.
-- *InfluxData Telegraf:* Gathers metrics exposed by the agent.
-- *InfluxDB:* Stores metric data collected by Telegraf as time series.
+- *InfluxDB:* Stores metric data exported by OpenCensus as time series.
 - *Grafana:* Provides predefined example Dashboards visualizing the metrics collected by the inspectIT Ocelot agent. The query language [Flux](https://docs.influxdata.com/flux) is used to query the data from InfluxDB.
 - *Zipkin:* Zipkin is used to store and query all recorded traces.
 
