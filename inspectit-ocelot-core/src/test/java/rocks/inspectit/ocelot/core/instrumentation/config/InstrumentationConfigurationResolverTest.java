@@ -4,7 +4,6 @@ import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.matcher.ElementMatchers;
 import org.apache.commons.lang3.reflect.FieldUtils;
-import org.assertj.core.util.Maps;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -15,8 +14,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.DoNotInstrumentMarker;
 import rocks.inspectit.ocelot.config.model.instrumentation.InstrumentationSettings;
-import rocks.inspectit.ocelot.config.model.instrumentation.data.DataSettings;
-import rocks.inspectit.ocelot.config.model.instrumentation.data.PropagationMode;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.instrumentation.FakeExecutor;
 import rocks.inspectit.ocelot.core.instrumentation.config.dummy.LambdaTestProvider;
@@ -310,97 +307,6 @@ class InstrumentationConfigurationResolverTest {
         }
     }
 
-
-    @Nested
-    class ResolveDataProperties {
-
-        InstrumentationSettings testSettings = new InstrumentationSettings();
-
-        @Test
-        void defaultSettingsForUnmentionedKeyCorrect() {
-            DataProperties dataProps = resolver.resolveDataProperties(testSettings);
-            assertThat(dataProps.isPropagatedDownWithinJVM("my_key")).isTrue();
-            assertThat(dataProps.isPropagatedDownGlobally("my_key")).isFalse();
-
-            assertThat(dataProps.isPropagatedUpWithinJVM("my_key")).isFalse();
-            assertThat(dataProps.isPropagatedUpGlobally("my_key")).isFalse();
-
-            assertThat(dataProps.isTag("my_key")).isTrue();
-        }
-
-        @Test
-        void noneDownPropagationConvertedCorrectly() {
-            DataSettings ds = new DataSettings();
-            ds.setDownPropagation(PropagationMode.NONE);
-            testSettings.setData(Maps.newHashMap("my_key", ds));
-
-            DataProperties dataProps = resolver.resolveDataProperties(testSettings);
-
-            assertThat(dataProps.isPropagatedDownWithinJVM("my_key")).isFalse();
-            assertThat(dataProps.isPropagatedDownGlobally("my_key")).isFalse();
-        }
-
-        @Test
-        void jvmLocalDownPropagationConvertedCorrectly() {
-            DataSettings ds = new DataSettings();
-            ds.setDownPropagation(PropagationMode.JVM_LOCAL);
-            testSettings.setData(Maps.newHashMap("my_key", ds));
-
-            DataProperties dataProps = resolver.resolveDataProperties(testSettings);
-
-            assertThat(dataProps.isPropagatedDownWithinJVM("my_key")).isTrue();
-            assertThat(dataProps.isPropagatedDownGlobally("my_key")).isFalse();
-        }
-
-        @Test
-        void globalDownPropagationConvertedCorrectly() {
-            DataSettings ds = new DataSettings();
-            ds.setDownPropagation(PropagationMode.GLOBAL);
-            testSettings.setData(Maps.newHashMap("my_key", ds));
-
-            DataProperties dataProps = resolver.resolveDataProperties(testSettings);
-
-            assertThat(dataProps.isPropagatedDownWithinJVM("my_key")).isTrue();
-            assertThat(dataProps.isPropagatedDownGlobally("my_key")).isTrue();
-        }
-
-        @Test
-        void noneUpPropagationConvertedCorrectly() {
-            DataSettings ds = new DataSettings();
-            ds.setUpPropagation(PropagationMode.NONE);
-            testSettings.setData(Maps.newHashMap("my_key", ds));
-
-            DataProperties dataProps = resolver.resolveDataProperties(testSettings);
-
-            assertThat(dataProps.isPropagatedUpWithinJVM("my_key")).isFalse();
-            assertThat(dataProps.isPropagatedUpGlobally("my_key")).isFalse();
-        }
-
-        @Test
-        void jvmLocalUpPropagationConvertedCorrectly() {
-            DataSettings ds = new DataSettings();
-            ds.setUpPropagation(PropagationMode.JVM_LOCAL);
-            testSettings.setData(Maps.newHashMap("my_key", ds));
-
-            DataProperties dataProps = resolver.resolveDataProperties(testSettings);
-
-            assertThat(dataProps.isPropagatedUpWithinJVM("my_key")).isTrue();
-            assertThat(dataProps.isPropagatedUpGlobally("my_key")).isFalse();
-        }
-
-        @Test
-        void globalUpPropagationConvertedCorrectly() {
-            DataSettings ds = new DataSettings();
-            ds.setUpPropagation(PropagationMode.GLOBAL);
-            testSettings.setData(Maps.newHashMap("my_key", ds));
-
-            DataProperties dataProps = resolver.resolveDataProperties(testSettings);
-
-            assertThat(dataProps.isPropagatedUpWithinJVM("my_key")).isTrue();
-            assertThat(dataProps.isPropagatedUpGlobally("my_key")).isTrue();
-        }
-
-    }
 }
 
 class IgnoredDummyClassLoader extends DummyClassLoader implements DoNotInstrumentMarker {

@@ -3,7 +3,7 @@ inspectit:
       
     data:
 
-      http_apache_client_entry_found: {is-tag: false}
+      http_apache_client_entry_found: {down-propagation: JVM_LOCAL}
 
     rules:
       http_client_apache_client:

@@ -14,8 +14,6 @@ import org.springframework.stereotype.Service;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.DoNotInstrumentMarker;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.instrumentation.InstrumentationSettings;
-import rocks.inspectit.ocelot.config.model.metrics.MetricsSettings;
-import rocks.inspectit.ocelot.config.model.tracing.TracingSettings;
 import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.instrumentation.AsyncClassTransformer;
@@ -60,6 +58,9 @@ public class InstrumentationConfigurationResolver {
     @Autowired
     private MethodHookConfigurationResolver hookResolver;
 
+    @Autowired
+    private PropagationMetaDataResolver propagationMetaDataResolver;
+
 
     /**
      * Holds the currently active instrumentation configuration.
@@ -70,7 +71,7 @@ public class InstrumentationConfigurationResolver {
     @PostConstruct
     private void init() {
         InspectitConfig conf = env.getCurrentConfig();
-        currentConfig = resolveConfiguration(conf.getInstrumentation(), conf.getMetrics(), conf.getTracing());
+        currentConfig = resolveConfiguration(conf);
     }
 
     /**
@@ -176,48 +177,27 @@ public class InstrumentationConfigurationResolver {
     @EventListener
     private void inspectitConfigChanged(InspectitConfigChangedEvent ev) {
 
-        val oldSettings = ev.getOldConfig().getInstrumentation();
-        val newSettings = ev.getNewConfig().getInstrumentation();
-
-        val oldMetricsSettings = ev.getOldConfig().getMetrics();
-        val newMetricsSettings = ev.getNewConfig().getMetrics();
-
-        val oldTracingSettings = ev.getOldConfig().getTracing();
-        val newTracingSettings = ev.getNewConfig().getTracing();
-
-        if (!Objects.equals(oldSettings, newSettings) ||
-                !Objects.equals(oldMetricsSettings, newMetricsSettings) ||
-                !Objects.equals(oldTracingSettings, newTracingSettings)) {
-            val oldConfig = currentConfig;
-            val newConfig = resolveConfiguration(newSettings, newMetricsSettings, newTracingSettings);
-            if (!Objects.equals(oldConfig, newConfig)) {
-                currentConfig = newConfig;
-                val event = new InstrumentationConfigurationChangedEvent(this, oldConfig, currentConfig);
-                ctx.publishEvent(event);
-            }
+        InstrumentationConfiguration oldConfig = currentConfig;
+        InstrumentationConfiguration newConfig = resolveConfiguration(ev.getNewConfig());
+        if (!Objects.equals(oldConfig, newConfig)) {
+            currentConfig = newConfig;
+            val event = new InstrumentationConfigurationChangedEvent(this, oldConfig, currentConfig);
+            ctx.publishEvent(event);
         }
     }
 
-    private InstrumentationConfiguration resolveConfiguration(InstrumentationSettings source, MetricsSettings metricsSettings, TracingSettings tracingSettings) {
-        val genericActions = genericActionConfigurationResolver.resolveActions(source);
+    private InstrumentationConfiguration resolveConfiguration(InspectitConfig config) {
+        val genericActions = genericActionConfigurationResolver.resolveActions(config.getInstrumentation());
         return InstrumentationConfiguration.builder()
-                .metricsEnabled(metricsSettings.isEnabled())
-                .tracingEnabled(tracingSettings.isEnabled())
-                .tracingSettings(tracingSettings)
-                .defaultTraceSampleProbability(tracingSettings.getSampleProbability())
-                .source(source)
-                .rules(ruleResolver.resolve(source, genericActions))
-                .dataProperties(resolveDataProperties(source))
+                .metricsEnabled(config.getMetrics().isEnabled())
+                .tracingEnabled(config.getTracing().isEnabled())
+                .tracingSettings(config.getTracing())
+                .defaultTraceSampleProbability(config.getTracing().getSampleProbability())
+                .source(config.getInstrumentation())
+                .rules(ruleResolver.resolve(config.getInstrumentation(), genericActions))
+                .propagationMetaData(propagationMetaDataResolver.resolve(config))
                 .build();
     }
-
-    @VisibleForTesting
-    DataProperties resolveDataProperties(InstrumentationSettings source) {
-        val builder = DataProperties.builder();
-        source.getData().forEach(builder::data);
-        return builder.build();
-    }
-
 
     /**
      * Checks if the given class should not be instrumented based on the given configuration.

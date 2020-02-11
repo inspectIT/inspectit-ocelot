@@ -3,7 +3,7 @@ inspectit:
   instrumentation:  
   
     data:      
-      servicegraph_servlet_entry_found: {down-propagation: JVM_LOCAL, is-tag: false}
+      servicegraph_servlet_entry_found: {down-propagation: JVM_LOCAL}
            
     rules:
       servicegraph_record_servletapi_entry:

@@ -2,7 +2,7 @@ inspectit:
   instrumentation:
 
     data:
-      responseObj: {is-tag: false, down-propagation: NONE}
+      servletapi_down_prop_performed: {down-propagation: JVM_LOCAL}
 
     actions:
 

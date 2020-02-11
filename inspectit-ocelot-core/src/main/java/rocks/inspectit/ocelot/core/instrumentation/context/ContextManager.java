@@ -65,7 +65,7 @@ public class ContextManager implements IContextManager {
 
     @Override
     public InspectitContextImpl enterNewContext() {
-        return InspectitContextImpl.createFromCurrent(commonTagsManager.getCommonTagValueMap(), configProvider.getCurrentConfig().getDataProperties(), IS_OPEN_CENSUS_ON_BOOTSTRAP);
+        return InspectitContextImpl.createFromCurrent(commonTagsManager.getCommonTagValueMap(), configProvider.getCurrentConfig().getPropagationMetaData(), IS_OPEN_CENSUS_ON_BOOTSTRAP);
     }
 
 }

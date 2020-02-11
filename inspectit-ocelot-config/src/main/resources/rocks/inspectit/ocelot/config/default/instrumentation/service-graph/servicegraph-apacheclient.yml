@@ -3,7 +3,7 @@ inspectit:
   instrumentation:  
 
     data:
-      servicegraph_apache_client_entry_found: {is-tag: false}
+      servicegraph_apache_client_entry_found: {down-propagation: JVM_LOCAL}
 
     rules:
     

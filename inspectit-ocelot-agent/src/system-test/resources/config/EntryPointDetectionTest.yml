@@ -13,12 +13,7 @@ inspectit:
   instrumentation:
     data:
       entry_point_found:
-        is-tag: false
-      is_entry_point:
-        down-propagation: NONE
-        is-tag: false
-      method_name:
-        down-propagation: NONE
+        down-propagation: JVM_LOCAL
 
     scopes:
       EntryPointDetectionTest-methods:
