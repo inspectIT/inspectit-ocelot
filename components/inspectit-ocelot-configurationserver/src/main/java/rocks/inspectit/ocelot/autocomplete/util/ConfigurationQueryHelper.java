@@ -9,30 +9,28 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component
-public class YamlFileHelper {
+public class ConfigurationQueryHelper {
 
     @Autowired
-    YamlLoader yamlLoader;
+    ConfigurationFilesCache configurationFilesCache;
 
     /**
-     * This Method takes a path parsed to a List and searches this path in all .yml or .yaml files in the servers
+     * This method takes a list that resembles a path and searches this path in all .yml or .yaml files in the servers
      * directory.
      * The returned list contains all elements to which the path could be extended.
-     * e.g.: The file a.yaml contains the path inspectit.path.to.my.attribute.
+     * e.g.: The file a.yaml contains the path inspectit: path: to: my: attribute.
      * The list {"inspectit","path"} is given as attribute to this method.
-     * The method returns the list {"to"}
+     * The method returns a list containing "to".
      *
      * @param path A path parsed to a List.
      * @return The attributes which could be found in the given path.
      */
     public List<String> extractKeysFromYamlFiles(List<String> path) {
         ArrayList<String> toReturn = new ArrayList<>();
-        Collection objects = yamlLoader.getYamlContents();
-        for (Object o : objects) {
-            List<String> extractedKeys = extractKeys(o, new ArrayList<>(path));
-            if (extractedKeys != null) {
-                toReturn.addAll(extractedKeys);
-            }
+        Collection objects = configurationFilesCache.getParsedConfigurationFiles();
+        for (Object root : objects) {
+            List<String> extractedKeys = extractKeys(root, path);
+            toReturn.addAll(extractedKeys);
         }
         return toReturn;
     }
@@ -40,10 +38,10 @@ public class YamlFileHelper {
     /**
      * Extracts all keys from a given object that can be found at the end of a given path.
      * If the path is not empty, this method iterates further through the given path.
-     * If the path is empty, the current objects attributes is returned.
-     * In case the current object is a List, the List itself is returned.
-     * In case the current object is a Map, the keyset of the map is returned.
-     * In case the current object is a String, a List containing only this String is returned.
+     * If the path is empty, the current objects attributes is returned:
+     * In case this current object is a List, the List itself is returned.
+     * In case this current object is a Map, the keyset of the map is returned.
+     * In case this current object is a String, a List containing only this String is returned.
      *
      * @param o       The object the keys should be returned from.
      * @param mapPath The path leading to the keys that should be retrieved.
@@ -51,15 +49,9 @@ public class YamlFileHelper {
      */
     private List<String> extractKeys(Object o, List<String> mapPath) {
         if (o instanceof List) {
-            if (mapPath.size() == 0) {
-                return toStringList((List) o);
-            }
             return extractKeysFromList((List) o, mapPath);
         }
         if (o instanceof Map) {
-            if (mapPath.size() == 0) {
-                return toStringList(((Map) o).keySet());
-            }
             return extractKeysFromMap((Map) o, mapPath);
         }
         if (o instanceof String) {
@@ -71,27 +63,40 @@ public class YamlFileHelper {
         return new ArrayList<>();
     }
 
+    /**
+     * Takes a Collection and adds each object within it that is an instance of String to a List.
+     * Then the list is returned.
+     *
+     * @param collection The collection which should be parsed.
+     * @return A List containing all Strings found in the given Collection.
+     */
     private List<String> toStringList(Collection<?> collection) {
         return collection.stream()
                 .filter(content -> content instanceof String)
-                .map(String::valueOf)
+                .map(content -> (String) content)
                 .collect(Collectors.toList());
     }
 
     /**
      * Returns the list's contents if the mapPath only contains one element.
-     * Iterates further through all elements of the list if mapPath contains more than one element.
+     * if "mapPath" = {"*"} -> all list values are returned.
+     * if "mapPath"= {*NUMBER*} -> the list element at the given index is returned.
+     * if "mapPath" is longer than one element, the search descends down into one or all list elements respectively.
      *
      * @param list    The list which contents should be searched.
      * @param mapPath The path which should be checked.
      * @return a list of strings containing the attributes that could found in the mapPath.
      */
     private List<String> extractKeysFromList(List<?> list, List<String> mapPath) {
-        String currentLiteral = mapPath.remove(0);
+        if (mapPath.size() == 0) {
+            return toStringList(list);
+        }
+        String currentLiteral = mapPath.get(0);
+        List<String> subList = mapPath.subList(1, mapPath.size());
         if (currentLiteral.equals("*")) {
             ArrayList<String> toReturn = new ArrayList<>();
             for (Object key : list) {
-                toReturn.addAll(extractKeys(key, new ArrayList<>(mapPath)));
+                toReturn.addAll(extractKeys(key, new ArrayList<>(subList)));
             }
             return toReturn;
         } else {
@@ -100,10 +105,10 @@ public class YamlFileHelper {
                 i = Integer.parseInt(currentLiteral);
             } catch (NumberFormatException e) {
                 log.error("Invalid List-Index {}", currentLiteral);
-                return null;
+                return Collections.emptyList();
             }
             if (i >= 0 && i < list.size()) {
-                return extractKeys(list.get(i), mapPath);
+                return extractKeys(list.get(i), subList);
             }
             return Collections.emptyList();
         }
@@ -112,24 +117,28 @@ public class YamlFileHelper {
 
     /**
      * Returns the map's keys if the mapPath only contains one element.
-     * Iterates further through all elements of the map if mapPath contains more than one element.
+     * if "mapPath" = {"*"} -> all list values are returned.
+     * if "mapPath" contains only one element, the value which is referenced by this key is returned.
+     * if "mapPath" is longer than one element, the search descends down into one or all list elements respectively.
      *
      * @param map     The list which contents should be searched.
      * @param mapPath The path which should be checked.
      * @return a list of strings containing the attributes that could found in the mapPath.
      */
     private List<String> extractKeysFromMap(Map<?, ?> map, List<String> mapPath) {
-        String currentLiteral = mapPath.remove(0);
+        if (mapPath.size() == 0) {
+            return toStringList(((Map) map).keySet());
+        }
+        String currentLiteral = mapPath.get(0);
+        List<String> subList = mapPath.subList(1, mapPath.size());
         if (currentLiteral.equals("*")) {
             ArrayList<String> toReturn = new ArrayList<>();
-            for (Object key : map.keySet()) {
-                if (key instanceof String) {
-                    toReturn.addAll(extractKeys(map.get(key), new ArrayList<>(mapPath)));
-                }
+            for (Object value : map.values()) {
+                toReturn.addAll(extractKeys(value, new ArrayList<>(subList)));
             }
             return toReturn;
         } else {
-            return extractKeys(map.get(currentLiteral), mapPath);
+            return extractKeys(map.get(currentLiteral), subList);
         }
     }
 }

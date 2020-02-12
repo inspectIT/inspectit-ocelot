@@ -14,21 +14,21 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class YamlFileHelperTest {
+public class ConfigurationQueryHelperTest {
     @Mock
-    private YamlLoader yamlLoader;
+    private ConfigurationFilesCache configurationFilesCache;
 
     @InjectMocks
-    private YamlFileHelper autoCompleter;
+    private ConfigurationQueryHelper autoCompleter;
 
     @Nested
     public class GetSuggestions {
 
         @Test
         public void getScopeSuggestion() {
-            ArrayList<String> propertyPath = new ArrayList<>(Arrays.asList("inspectit", "instrumentation", "scopes"));
-            ArrayList<String> output = new ArrayList<>(Arrays.asList("my_scope1", "another_scope1"));
-            YamlFileHelper autoCompleter1 = Mockito.spy(autoCompleter);
+            List<String> propertyPath = Arrays.asList("inspectit", "instrumentation", "scopes");
+            List<String> expected = Arrays.asList("my_scope1", "another_scope1");
+            ConfigurationQueryHelper spyAutoCompleter = Mockito.spy(autoCompleter);
             HashMap<String, Object> topLevelMap = new HashMap<>();
             HashMap<String, Object> inspectit = new HashMap<>();
             HashMap<String, Object> instrumentation = new HashMap<>();
@@ -39,16 +39,18 @@ public class YamlFileHelperTest {
             inspectit.put("instrumentation", instrumentation);
             topLevelMap.put("inspectit", inspectit);
             Collection<Object> mockData = Arrays.asList(topLevelMap);
-            when(yamlLoader.getYamlContents()).thenReturn(mockData);
+            when(configurationFilesCache.getParsedConfigurationFiles()).thenReturn(mockData);
 
-            assertThat(autoCompleter1.extractKeysFromYamlFiles(propertyPath)).isEqualTo(output);
+            List output = spyAutoCompleter.extractKeysFromYamlFiles(propertyPath);
+
+            assertThat(output).isEqualTo(expected);
         }
 
         @Test
         public void getNonScopeSuggestion() {
             List<String> propertyPath = Arrays.asList("inspectit", "metrics");
-            List<String> output = Arrays.asList("definitions");
-            YamlFileHelper autoCompleter1 = Mockito.spy(autoCompleter);
+            List<String> expected = Arrays.asList("definitions");
+            ConfigurationQueryHelper spyAutoCompleter = Mockito.spy(autoCompleter);
             HashMap<String, Object> topLevelMap = new HashMap<>();
             HashMap<String, Object> inspectit = new HashMap<>();
             HashMap<String, Object> metrics = new HashMap<>();
@@ -59,16 +61,18 @@ public class YamlFileHelperTest {
             inspectit.put("metrics", metrics);
             topLevelMap.put("inspectit", inspectit);
             Collection<Object> mockData = Arrays.asList(topLevelMap);
-            when(yamlLoader.getYamlContents()).thenReturn(mockData);
+            when(configurationFilesCache.getParsedConfigurationFiles()).thenReturn(mockData);
 
-            assertThat(autoCompleter1.extractKeysFromYamlFiles(propertyPath)).isEqualTo(output);
+            List output = spyAutoCompleter.extractKeysFromYamlFiles(propertyPath);
+
+            assertThat(output).isEqualTo(expected);
         }
 
         @Test
         public void noScopeDefined() {
-            ArrayList<String> propertyPath = new ArrayList<>(Arrays.asList("inspectit", "instrumentation", "scopes"));
-            ArrayList<String> output = new ArrayList<>();
-            YamlFileHelper autoCompleter1 = Mockito.spy(autoCompleter);
+            List<String> propertyPath = Arrays.asList("inspectit", "instrumentation", "scopes");
+            List<String> expected = Collections.emptyList();
+            ConfigurationQueryHelper spyAutoCompleter = Mockito.spy(autoCompleter);
             HashMap<String, Object> topLevelMap = new HashMap<>();
             HashMap<String, Object> inspectit = new HashMap<>();
             HashMap<String, Object> metrics = new HashMap<>();
@@ -79,16 +83,18 @@ public class YamlFileHelperTest {
             inspectit.put("metrics", metrics);
             topLevelMap.put("inspectit", inspectit);
             Collection<Object> mockData = Arrays.asList(topLevelMap);
-            when(yamlLoader.getYamlContents()).thenReturn(mockData);
+            when(configurationFilesCache.getParsedConfigurationFiles()).thenReturn(mockData);
 
-            assertThat(autoCompleter1.extractKeysFromYamlFiles(propertyPath)).isEqualTo(output);
+            List output = spyAutoCompleter.extractKeysFromYamlFiles(propertyPath);
+
+            assertThat(output).isEqualTo(expected);
         }
 
         @Test
         public void withWildCard() {
             List<String> propertyPath = Arrays.asList("inspectit", "*");
-            List<String> output = Arrays.asList("definitions", "rules", "somethingElse", "listContent1", "listContent2");
-            YamlFileHelper autoCompleter1 = Mockito.spy(autoCompleter);
+            List<String> expected = Arrays.asList("definitions", "rules", "somethingElse", "listContent1", "listContent2");
+            ConfigurationQueryHelper spyAutoCompleter = Mockito.spy(autoCompleter);
             HashMap<String, Object> topLevelMap = new HashMap<>();
             HashMap<String, Object> inspectit = new HashMap<>();
             HashMap<String, Object> instrumentation = new HashMap<>();
@@ -105,89 +111,101 @@ public class YamlFileHelperTest {
             inspectit.put("list", list);
             topLevelMap.put("inspectit", inspectit);
             Collection<Object> mockData = Arrays.asList(topLevelMap);
-            when(yamlLoader.getYamlContents()).thenReturn(mockData);
+            when(configurationFilesCache.getParsedConfigurationFiles()).thenReturn(mockData);
 
-            assertThat(autoCompleter1.extractKeysFromYamlFiles(propertyPath)).isEqualTo(output);
+            List output = spyAutoCompleter.extractKeysFromYamlFiles(propertyPath);
+
+            assertThat(output).isEqualTo(expected);
         }
 
         @Test
         public void throughList() {
             List<String> propertyPath = Arrays.asList("inspectit", "exampleList", "0");
-            List<String> output = Arrays.asList("Hello!");
-            YamlFileHelper autoCompleter1 = Mockito.spy(autoCompleter);
+            List<String> expected = Arrays.asList("Hello!");
+            ConfigurationQueryHelper spyAutoCompleter = Mockito.spy(autoCompleter);
             HashMap<String, Object> topLevelMap = new HashMap<>();
             HashMap<String, Object> inspectit = new HashMap<>();
             List<String> list = Arrays.asList("Hello!");
             inspectit.put("exampleList", list);
             topLevelMap.put("inspectit", inspectit);
             Collection<Object> mockData = Arrays.asList(topLevelMap);
-            when(yamlLoader.getYamlContents()).thenReturn(mockData);
+            when(configurationFilesCache.getParsedConfigurationFiles()).thenReturn(mockData);
 
-            assertThat(autoCompleter1.extractKeysFromYamlFiles(propertyPath)).isEqualTo(output);
+            List output = spyAutoCompleter.extractKeysFromYamlFiles(propertyPath);
+
+            assertThat(output).isEqualTo(expected);
         }
 
         @Test
         public void wildcardThroughList() {
             List<String> propertyPath = Arrays.asList("inspectit", "exampleList", "*");
-            List<String> output = Arrays.asList("Hello", "there!");
-            YamlFileHelper autoCompleter1 = Mockito.spy(autoCompleter);
+            List<String> expected = Arrays.asList("Hello", "there!");
+            ConfigurationQueryHelper spyAutoCompleter = Mockito.spy(autoCompleter);
             HashMap<String, Object> topLevelMap = new HashMap<>();
             HashMap<String, Object> inspectit = new HashMap<>();
             List<String> list = Arrays.asList("Hello", "there!");
             inspectit.put("exampleList", list);
             topLevelMap.put("inspectit", inspectit);
             Collection<Object> mockData = Arrays.asList(topLevelMap);
-            when(yamlLoader.getYamlContents()).thenReturn(mockData);
+            when(configurationFilesCache.getParsedConfigurationFiles()).thenReturn(mockData);
 
-            assertThat(autoCompleter1.extractKeysFromYamlFiles(propertyPath)).isEqualTo(output);
+            List output = spyAutoCompleter.extractKeysFromYamlFiles(propertyPath);
+
+            assertThat(output).isEqualTo(expected);
         }
 
         @Test
         public void nonNumberListIndex() {
             List<String> propertyPath = Arrays.asList("inspectit", "exampleList", "iShouldNotBeHere");
-            List<String> output = new ArrayList<>();
-            YamlFileHelper autoCompleter1 = Mockito.spy(autoCompleter);
+            List<String> expected = Collections.emptyList();
+            ConfigurationQueryHelper spyAutoCompleter = Mockito.spy(autoCompleter);
             HashMap<String, Object> topLevelMap = new HashMap<>();
             HashMap<String, Object> inspectit = new HashMap<>();
             List<String> list = Arrays.asList("Hello", "there!");
             inspectit.put("exampleList", list);
             topLevelMap.put("inspectit", inspectit);
             Collection<Object> mockData = Arrays.asList(topLevelMap);
-            when(yamlLoader.getYamlContents()).thenReturn(mockData);
+            when(configurationFilesCache.getParsedConfigurationFiles()).thenReturn(mockData);
 
-            assertThat(autoCompleter1.extractKeysFromYamlFiles(propertyPath)).isEqualTo(output);
+            List output = spyAutoCompleter.extractKeysFromYamlFiles(propertyPath);
+
+            assertThat(output).isEqualTo(expected);
         }
 
         @Test
         public void indexTooSmall() {
             List<String> propertyPath = Arrays.asList("inspectit", "exampleList", "-5");
-            List<String> output = new ArrayList<>();
-            YamlFileHelper autoCompleter1 = Mockito.spy(autoCompleter);
+            List<String> expected = Collections.emptyList();
+            ConfigurationQueryHelper spyAutoCompleter = Mockito.spy(autoCompleter);
             HashMap<String, Object> topLevelMap = new HashMap<>();
             HashMap<String, Object> inspectit = new HashMap<>();
             List<String> list = Arrays.asList("Hello", "there!");
             inspectit.put("exampleList", list);
             topLevelMap.put("inspectit", inspectit);
             Collection<Object> mockData = Arrays.asList(topLevelMap);
-            when(yamlLoader.getYamlContents()).thenReturn(mockData);
+            when(configurationFilesCache.getParsedConfigurationFiles()).thenReturn(mockData);
 
-            assertThat(autoCompleter1.extractKeysFromYamlFiles(propertyPath)).isEqualTo(output);
+            List output = spyAutoCompleter.extractKeysFromYamlFiles(propertyPath);
+
+            assertThat(output).isEqualTo(expected);
         }
 
         @Test
         public void indexTooBig() {
             List<String> propertyPath = Arrays.asList("inspectit", "exampleList", "50000");
-            List<String> output = new ArrayList<>();
-            YamlFileHelper autoCompleter1 = Mockito.spy(autoCompleter);
+            List<String> expected = Collections.emptyList();
+            ConfigurationQueryHelper spyAutoCompleter = Mockito.spy(autoCompleter);
             HashMap<String, Object> topLevelMap = new HashMap<>();
             HashMap<String, Object> inspectit = new HashMap<>();
             List<String> list = Arrays.asList("Hello", "there!");
             inspectit.put("exampleList", list);
             topLevelMap.put("inspectit", inspectit);
             Collection<Object> mockData = Arrays.asList(topLevelMap);
-            when(yamlLoader.getYamlContents()).thenReturn(mockData);
+            when(configurationFilesCache.getParsedConfigurationFiles()).thenReturn(mockData);
 
-            assertThat(autoCompleter1.extractKeysFromYamlFiles(propertyPath)).isEqualTo(output);
+            List output = spyAutoCompleter.extractKeysFromYamlFiles(propertyPath);
+
+            assertThat(output).isEqualTo(expected);
         }
     }
 }

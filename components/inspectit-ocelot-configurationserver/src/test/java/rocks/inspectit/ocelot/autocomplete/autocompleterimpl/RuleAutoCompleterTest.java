@@ -6,7 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import rocks.inspectit.ocelot.autocomplete.util.YamlFileHelper;
+import rocks.inspectit.ocelot.autocomplete.util.ConfigurationQueryHelper;
 
 import java.util.Arrays;
 import java.util.List;
@@ -22,7 +22,7 @@ public class RuleAutoCompleterTest {
     RuleAutoCompleter ruleAutoCompleter;
 
     @Mock
-    YamlFileHelper yamlFileHelper;
+    ConfigurationQueryHelper configurationQueryHelper;
 
 
     @Nested
@@ -40,7 +40,7 @@ public class RuleAutoCompleterTest {
             List<String> path = Arrays.asList("inspectit", "instrumentation", "rules");
             List<String> output = Arrays.asList("my_rule", "another_rule");
             List<String> mockOutput = Arrays.asList("my_rule", "another_rule");
-            when(yamlFileHelper.extractKeysFromYamlFiles(any())).thenReturn(mockOutput);
+            when(configurationQueryHelper.extractKeysFromYamlFiles(any())).thenReturn(mockOutput);
 
             assertThat(ruleAutoCompleter.getSuggestions(path)).isEqualTo(output);
         }
