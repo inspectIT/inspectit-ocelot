@@ -12,7 +12,9 @@ import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.sdk.ConfigurablePlugin;
 import rocks.inspectit.ocelot.sdk.OcelotPlugin;
 
+import java.io.File;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -106,6 +108,56 @@ public class PluginLoaderTest {
         }
     }
 
+    @Nested
+    class GetAnnotatedClasses {
+
+        @Test
+        void multipleAnnotations() throws Exception {
+            File testFile = loadTestJarByName("MultipleAnnotations.jar");
+
+            List<Class> output = loader.getAnnotatedClasses(testFile);
+
+            assertThat(output).hasSize(3);
+            assertThat(output.get(0).getName()).isEqualTo("hasPlugin1");
+            assertThat(output.get(1).getName()).isEqualTo("HasPlugin2$HasPlugin3");
+            assertThat(output.get(2).getName()).isEqualTo("HasPlugin2");
+        }
+
+        @Test
+        void noAnnotations() throws Exception {
+            File testFile = loadTestJarByName("NoAnnotation.jar");
+
+            List<Class> output = loader.getAnnotatedClasses(testFile);
+
+            assertThat(output).hasSize(0);
+        }
+
+        @Test
+        void annotationOnMethod() throws Exception {
+            File testFile = loadTestJarByName("OnMethod.jar");
+
+            List<Class> output = loader.getAnnotatedClasses(testFile);
+
+            assertThat(output).hasSize(0);
+        }
+
+        @Test
+        void inPackage() throws Exception {
+            File testFile = loadTestJarByName("InPackage.jar");
+
+            List<Class> output = loader.getAnnotatedClasses(testFile);
+
+            assertThat(output).hasSize(1);
+            assertThat(output.get(0).getName()).isEqualTo("test.ClassInPackage");
+        }
+    }
+
+    private File loadTestJarByName(String testJar) {
+        StringBuilder pathBuilder = new StringBuilder("./src/test/resources/rocks/inspectit/ocelot/core/plugins")
+                .append("/")
+                .append(testJar);
+        return new File(pathBuilder.toString());
+    }
 
     @OcelotPlugin("pla")
     public static class PluginWithoutPublicDefaultConstructor implements ConfigurablePlugin {
@@ -163,6 +215,24 @@ public class PluginLoaderTest {
         public PluginThrowingException() {
             throw new RuntimeException();
         }
+
+        @Override
+        public void start(InspectitConfig inspectitConfig, Object pluginConfig) {
+
+        }
+
+        @Override
+        public void update(InspectitConfig inspectitConfig, Object pluginConfig) {
+
+        }
+
+        @Override
+        public Class getConfigurationClass() {
+            return null;
+        }
+    }
+
+    public static class NoAnnotation implements ConfigurablePlugin {
 
         @Override
         public void start(InspectitConfig inspectitConfig, Object pluginConfig) {

@@ -136,7 +136,8 @@ public class PluginLoader {
      * @param pluginFile The file in which the classes should be searched in.
      * @return A list containing all classes annotated with {@link OcelotPlugin} in the given file.
      */
-    private List<Class> getAnnotatedClasses(File pluginFile) throws IOException, ClassNotFoundException {
+    @VisibleForTesting
+    List<Class> getAnnotatedClasses(File pluginFile) throws IOException, ClassNotFoundException {
         ArrayList<Class> list = new ArrayList<>();
         JarFile pluginJar = new JarFile(pluginFile);
 
