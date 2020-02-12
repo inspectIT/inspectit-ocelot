@@ -4,7 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.reflections.Reflections;
+import org.springframework.asm.ClassReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.env.PropertiesPropertySource;
@@ -22,10 +22,14 @@ import rocks.inspectit.ocelot.sdk.OcelotPlugin;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 /**
  * This component scans the path specified by inspectit.plugins.path for Jar-files.
@@ -115,19 +119,78 @@ public class PluginLoader {
      * All classes with the {@link OcelotPlugin} annotation are found
      * and {@link #initializePlugin(Class, Properties)} is invoked for each.
      *
-     * @param pluginJar             the jar file to load
+     * @param pluginFile            the jar file to load
      * @param defaultConfigurations the Properties to place the default configurations in
-     * @throws MalformedURLException
      */
-    private void loadPluginJar(File pluginJar, Properties defaultConfigurations) throws MalformedURLException {
-        ClassLoader pluginLoader = new PluginClassLoader(pluginJar.toURI().toURL());
-        //TODO: replace Reflections library with a faster solution which simply scans the given Jar for the annotation
-        //this can be done by enumerating all .class files using JarFile and then inspecting them with ASM.
-        Set<Class<?>> list = new Reflections(pluginLoader)
-                .getTypesAnnotatedWith(OcelotPlugin.class);
+    private void loadPluginJar(File pluginFile, Properties defaultConfigurations) throws Exception {
+        ClassLoader pluginLoader = new PluginClassLoader(pluginFile.toURI().toURL());
+        List<Class> list = getAnnotatedClasses(pluginFile);
         list.stream()
                 .filter(cl -> cl.getClassLoader() == pluginLoader)
                 .forEach(cl -> initializePlugin(cl, defaultConfigurations));
+    }
+
+    /**
+     * Returns all classes in a File with {@link OcelotPlugin} annotations.
+     *
+     * @param pluginFile The file in which the classes should be searched in.
+     * @return A list containing all classes annotated with {@link OcelotPlugin} in the given file.
+     */
+    private List<Class> getAnnotatedClasses(File pluginFile) throws IOException, ClassNotFoundException {
+        ArrayList<Class> list = new ArrayList<>();
+        JarFile pluginJar = new JarFile(pluginFile);
+
+        String pathToJar = pluginFile.getAbsolutePath();
+        Enumeration<JarEntry> entries = pluginJar.entries();
+
+        while (entries.hasMoreElements()) {
+            JarEntry entry = entries.nextElement();
+            if (isClass(entry)) {
+                if (isOcelotPlugin(pluginJar.getInputStream(entry))) {
+                    list.add(loadClassFromJarEntry(entry, pathToJar));
+                }
+            }
+        }
+        return list;
+    }
+
+    /**
+     * Checks if a given InputStream contains an {@link OcelotPlugin} annotation.
+     *
+     * @param inputStream The InputStream which should be checked.
+     * @return True if the InputStream is annotated an OcelotPlugin.
+     */
+    private boolean isOcelotPlugin(InputStream inputStream) throws IOException {
+        OcelotPluginAnnotationVisitor annotationVisitor = new OcelotPluginAnnotationVisitor();
+        new ClassReader(inputStream).accept(annotationVisitor, 0);
+        return annotationVisitor.hasOcelotPluginAnnotation;
+    }
+
+    /**
+     * Loads a class from a JarEntry Object.
+     *
+     * @param entry     The entry which should be loaded.
+     * @param pathToJar The path to the jar the entry is contained in.
+     * @return The class object of the given JarEntry. Returns null if the given entry is not a class.
+     */
+    private Class<?> loadClassFromJarEntry(JarEntry entry, String pathToJar) throws MalformedURLException, ClassNotFoundException {
+        if (isClass(entry)) {
+            String className = entry.getName().substring(0, entry.getName().length() - 6);
+            className = className.replace('/', '.');
+            URLClassLoader classLoader = new PluginClassLoader(new URL("jar:file:" + pathToJar + "!/"));
+            return classLoader.loadClass(className);
+        }
+        return null;
+    }
+
+    /**
+     * Checks if a given entry is a class file.
+     *
+     * @param entry The entry to check.
+     * @return Returns true if the given entry is a class file.
+     */
+    private boolean isClass(JarEntry entry) {
+        return !entry.isDirectory() && entry.getName().endsWith(".class");
     }
 
     /**
@@ -165,7 +228,7 @@ public class PluginLoader {
                 log.error("The plugin {} does not implement {}!", pluginClass.getName(), ConfigurablePlugin.class.getName());
             }
         } catch (Throwable t) {
-            log.error("Error initializing plugin {]", pluginClass.getName());
+            log.error("Error initializing plugin {}", pluginClass.getName());
         }
     }
 
