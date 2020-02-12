@@ -231,23 +231,4 @@ public class PluginLoaderTest {
             return null;
         }
     }
-
-    public static class NoAnnotation implements ConfigurablePlugin {
-
-        @Override
-        public void start(InspectitConfig inspectitConfig, Object pluginConfig) {
-
-        }
-
-        @Override
-        public void update(InspectitConfig inspectitConfig, Object pluginConfig) {
-
-        }
-
-        @Override
-        public Class getConfigurationClass() {
-            return null;
-        }
-    }
-
 }
