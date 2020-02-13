@@ -267,7 +267,7 @@ public class PropertyPathHelper {
         if (a.size() != b.size()) {
             return false;
         }
-        for (int i = 0; i <= a.size(); i++) {
+        for (int i = 0; i < a.size(); i++) {
             if (!CaseUtils.kebabCaseToCamelCase(a.get(i)).equals(CaseUtils.kebabCaseToCamelCase(b.get(i)))) {
                 return false;
             }
