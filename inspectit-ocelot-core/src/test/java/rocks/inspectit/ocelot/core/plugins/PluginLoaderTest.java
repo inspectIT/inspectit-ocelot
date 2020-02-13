@@ -12,16 +12,18 @@ import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.sdk.ConfigurablePlugin;
 import rocks.inspectit.ocelot.sdk.OcelotPlugin;
 
-import java.io.File;
+import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.same;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class PluginLoaderTest {
@@ -112,51 +114,76 @@ public class PluginLoaderTest {
     class GetAnnotatedClasses {
 
         @Test
-        void multipleAnnotations() throws Exception {
-            File testFile = loadTestJarByName("MultipleAnnotations.jar");
+        void hasAnnotations() throws Exception {
+            JarFile mockJar = mock(JarFile.class);
+            Enumeration mockEnumeration = mock(Enumeration.class);
+            when(mockJar.entries()).thenReturn(mockEnumeration);
+            when(mockEnumeration.hasMoreElements()).thenReturn(true, false);
+            JarEntry entry = mock(JarEntry.class);
+            when(entry.isDirectory()).thenReturn(false);
+            when(entry.getName()).thenReturn("HasAnnotation.class");
+            when(mockEnumeration.nextElement()).thenReturn(entry);
+            when(mockJar.getInputStream(any())).thenReturn(loadTestClass("HasAnnotation.class"));
 
-            List<Class> output = loader.getAnnotatedClasses(testFile);
+            List<String> output = loader.getAnnotatedClasses(mockJar);
 
-            assertThat(output).hasSize(3);
-            assertThat(output.get(0).getName()).isEqualTo("hasPlugin1");
-            assertThat(output.get(1).getName()).isEqualTo("HasPlugin2$HasPlugin3");
-            assertThat(output.get(2).getName()).isEqualTo("HasPlugin2");
+            assertThat(output).hasSize(1);
+            assertThat(output).contains("HasAnnotation");
         }
 
         @Test
         void noAnnotations() throws Exception {
-            File testFile = loadTestJarByName("NoAnnotation.jar");
+            JarFile mockJar = mock(JarFile.class);
+            Enumeration mockEnumeration = mock(Enumeration.class);
+            when(mockJar.entries()).thenReturn(mockEnumeration);
+            when(mockEnumeration.hasMoreElements()).thenReturn(true, false);
+            JarEntry entry = mock(JarEntry.class);
+            when(entry.isDirectory()).thenReturn(false);
+            when(entry.getName()).thenReturn("NoAnnotation.class");
+            when(mockEnumeration.nextElement()).thenReturn(entry);
+            when(mockJar.getInputStream(any())).thenReturn(loadTestClass("NoAnnotation.class"));
 
-            List<Class> output = loader.getAnnotatedClasses(testFile);
+            List<String> output = loader.getAnnotatedClasses(mockJar);
 
             assertThat(output).hasSize(0);
         }
 
         @Test
         void annotationOnMethod() throws Exception {
-            File testFile = loadTestJarByName("OnMethod.jar");
+            JarFile mockJar = mock(JarFile.class);
+            Enumeration mockEnumeration = mock(Enumeration.class);
+            when(mockJar.entries()).thenReturn(mockEnumeration);
+            when(mockEnumeration.hasMoreElements()).thenReturn(true, false);
+            JarEntry entry = mock(JarEntry.class);
+            when(entry.isDirectory()).thenReturn(false);
+            when(entry.getName()).thenReturn("AnnotationOnMethod.class");
+            when(mockEnumeration.nextElement()).thenReturn(entry);
+            when(mockJar.getInputStream(any())).thenReturn(loadTestClass("AnnotationOnMethod.class"));
 
-            List<Class> output = loader.getAnnotatedClasses(testFile);
+            List<String> output = loader.getAnnotatedClasses(mockJar);
 
             assertThat(output).hasSize(0);
         }
-
-        @Test
-        void inPackage() throws Exception {
-            File testFile = loadTestJarByName("InPackage.jar");
-
-            List<Class> output = loader.getAnnotatedClasses(testFile);
-
-            assertThat(output).hasSize(1);
-            assertThat(output.get(0).getName()).isEqualTo("test.ClassInPackage");
-        }
     }
 
-    private File loadTestJarByName(String testJar) {
-        StringBuilder pathBuilder = new StringBuilder("./src/test/resources/rocks/inspectit/ocelot/core/plugins")
-                .append("/")
-                .append(testJar);
-        return new File(pathBuilder.toString());
+    private InputStream loadTestClass(String testClass) {
+        StringBuilder pathBuilder = new StringBuilder("/rocks/inspectit/ocelot/core/plugins/PluginLoaderTest$");
+        pathBuilder.append(testClass);
+        return getClass().getResourceAsStream(pathBuilder.toString());
+    }
+
+    @OcelotPlugin("")
+    public class HasAnnotation {
+    }
+
+    public class NoAnnotation {
+    }
+
+    public class AnnotationOnMethod {
+        @OcelotPlugin("")
+        public String test() {
+            return "test!";
+        }
     }
 
     @OcelotPlugin("pla")
