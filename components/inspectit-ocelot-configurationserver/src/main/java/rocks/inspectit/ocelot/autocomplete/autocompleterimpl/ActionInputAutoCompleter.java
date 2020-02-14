@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.autocomplete.autocompleterimpl;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.autocomplete.AutoCompleter;
@@ -34,6 +35,7 @@ public class ActionInputAutoCompleter implements AutoCompleter {
         return toReturn;
     }
 
+    @VisibleForTesting
     List<String> getInput() {
         ArrayList<String> toReturn = new ArrayList<>();
         for (String option : ACTION_OPTIONS) {
