@@ -1,5 +1,12 @@
 inspectit:
 
+  privacy:
+    obfuscation:
+      patterns:
+        - pattern: toObfuscate
+        - pattern: toObfuscateValue
+          checkData: true
+
   instrumentation:
 
     scopes:
@@ -98,10 +105,15 @@ inspectit:
           attributes:
             entry: entry_val
             exit: exit_val
+            toObfuscate: exit_val
+            anything: toObfuscate_val
         entry:
           entry_val:
             action: set
             constant-input: {value: "const"}
+          toObfuscate_val:
+            action: set
+            constant-input: {value: "toObfuscateValue"}
         exit:
           exit_val:
             action: set

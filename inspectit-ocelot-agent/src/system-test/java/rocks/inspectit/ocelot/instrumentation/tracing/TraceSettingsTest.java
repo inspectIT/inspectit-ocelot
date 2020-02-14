@@ -34,16 +34,16 @@ public class TraceSettingsTest extends TraceTestBase {
                         .anySatisfy((sp) -> {
                             assertThat(sp.getName()).endsWith("TraceSettingsTest.rootA");
                             assertThat(sp.getAttributes().getAttributeMap())
-                                    .hasSize(2)
+                                    .hasSize(4)
                                     .containsEntry("entry", AttributeValue.stringAttributeValue("const"))
-                                    .containsEntry("exit", AttributeValue.stringAttributeValue("Hello A!"));
-
+                                    .containsEntry("exit", AttributeValue.stringAttributeValue("Hello A!"))
+                                    .containsEntry("toObfuscate", AttributeValue.stringAttributeValue("***"))
+                                    .containsEntry("anything", AttributeValue.stringAttributeValue("***"));
                         })
 
         );
 
     }
-
 
     void rootB(boolean captureAttributes) {
         attributesSetterWithoutSpanWithConditions(captureAttributes);

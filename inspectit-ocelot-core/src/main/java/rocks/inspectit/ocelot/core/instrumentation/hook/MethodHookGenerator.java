@@ -23,6 +23,7 @@ import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.EndSpanActi
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.StoreSpanAction;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.WriteSpanAttributesAction;
 import rocks.inspectit.ocelot.core.metrics.MeasuresAndViewsManager;
+import rocks.inspectit.ocelot.core.privacy.obfuscation.ObfuscationManager;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -50,6 +51,9 @@ public class MethodHookGenerator {
 
     @Autowired
     private VariableAccessorFactory variableAccessorFactory;
+
+    @Autowired
+    private ObfuscationManager obfuscationManager;
 
     /**
      * Builds a executable method hook based on the given configuration.
@@ -152,7 +156,7 @@ public class MethodHookGenerator {
         if (!attributes.isEmpty()) {
             Map<String, VariableAccessor> attributeAccessors = new HashMap<>();
             attributes.forEach((attribute, variable) -> attributeAccessors.put(attribute, variableAccessorFactory.getVariableAccessor(variable)));
-            IHookAction endTraceAction = new WriteSpanAttributesAction(attributeAccessors);
+            IHookAction endTraceAction = new WriteSpanAttributesAction(attributeAccessors, obfuscationManager.obfuscatorySupplier());
             IHookAction actionWithConditions = ConditionalHookAction.wrapWithConditionChecks(tracing.getAttributeConditions(), endTraceAction, variableAccessorFactory);
             result.add(actionWithConditions);
         }

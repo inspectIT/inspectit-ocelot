@@ -119,7 +119,7 @@ dependencies {
 }
 
 if (!project.hasProperty("systemTestJavaHomes")) {
-    ext.systemTestJavaHomes = "$System.env.JAVA_HOME"
+    ext.systemTestJavaHomes = System.properties['java.home']
 }
 def agentJarPath = jar.archivePath.toString()
 
