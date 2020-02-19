@@ -14,8 +14,10 @@ import { filter } from 'lodash';
 class FileTree extends React.Component {
 
     state = {
-        menu: []
+        contextMenuModel: []
     };
+
+    contextMenuRef = React.createRef();
 
     /**
      * Fetch the files initially.
@@ -53,7 +55,7 @@ class FileTree extends React.Component {
      * Handle ContextMenu selection.
      * Switch between a contextmenu for filenodes and a general menu.
      */
-    onContextMenuSelectionChange = (event) => {
+    showContextMenu = (event) => {
         const newSelection = event.value || '';
 
         if (newSelection && newSelection.startsWith(DEFAULT_CONFIG_TREE_KEY)) {
@@ -62,8 +64,8 @@ class FileTree extends React.Component {
             return;
         }
 
-        this.setState({ menu: this.getMenu(newSelection) });
-        this.cm.show(event.originalEvent || event);
+        this.setState({ contextMenuModel: this.getcontextMenuModel(newSelection) });
+        this.contextMenuRef.current.show(event.originalEvent || event);
     }
 
     /**
@@ -106,7 +108,7 @@ class FileTree extends React.Component {
 
     render() {
         return (
-            <div className='this' onContextMenu={this.onContextMenuSelectionChange}>
+            <div className='this' onContextMenu={this.showContextMenu}>
                 <style jsx>{`
                     .this {
                         overflow: auto;
@@ -128,7 +130,7 @@ class FileTree extends React.Component {
                         background-size: 1rem 1rem;
                     }
 				`}</style>
-                <ContextMenu model={this.state.menu} ref={el => this.cm = el} />
+                <ContextMenu model={this.state.contextMenuModel} ref={this.contextMenuRef} />
                 <Tree
                     className={this.props.className}
                     filter={true}
@@ -137,7 +139,7 @@ class FileTree extends React.Component {
                     selectionMode="single"
                     selectionKeys={this.props.selection || this.props.selectedDefaultConfigFile}
                     onSelectionChange={this.onSelectionChange}
-                    onContextMenuSelectionChange={this.onContextMenuSelectionChange}
+                    onContextMenuSelectionChange={this.showContextMenu}
                     dragdropScope="config-file-tree"
                     onDragDrop={this.onDragDrop}
                 />
@@ -146,7 +148,7 @@ class FileTree extends React.Component {
         );
     }
 
-    getMenu = (file) => {
+    getcontextMenuModel = (file) => {
         const { showCreateDirectoryDialog, showCreateFileDialog, showMoveDialog, showDeleteFileDialog } = this.props;
 
         return [
