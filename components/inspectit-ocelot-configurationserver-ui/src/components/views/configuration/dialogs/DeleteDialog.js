@@ -37,7 +37,7 @@ class DeleteDialog extends React.Component {
     }
 
     deleteSelectedFile = () => {
-        this.props.deleteSelection(true, this.props.stateSelection);
+        this.props.deleteSelection(true, this.props.filePath);
         this.props.onHide();
     }
 
@@ -46,9 +46,9 @@ class DeleteDialog extends React.Component {
             this.deleteButton.current.element.focus();
 
             /** Pick selection between redux state selection and incoming property selection. */
-            const { selection, stateSelection } = this.props;
+            const { selection, filePath } = this.props;
 
-            const selectedFile = stateSelection || selection;
+            const selectedFile = filePath || selection;
             const selectionName = selectedFile ? selectedFile.split("/").slice(-1)[0] : "";
             const fileObj = configurationUtils.getFile(this.props.files, selectedFile);
             const type = configurationUtils.isDirectory(fileObj) ? "Directory" : "File";

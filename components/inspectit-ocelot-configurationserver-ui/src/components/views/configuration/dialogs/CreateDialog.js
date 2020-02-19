@@ -74,9 +74,9 @@ class CreateDialog extends React.Component {
         if (!prevProps.visible && this.props.visible) {
             this.input.current.element.focus();
 
-            const { selection, stateSelection } = this.props;
+            const { selection, filePath } = this.props;
 
-            const selectedFile = typeof stateSelection === 'string' ? stateSelection : selection;
+            const selectedFile = typeof filePath === 'string' ? filePath : selection;
             const fileObj = configurationUtils.getFile(this.props.files, selectedFile);
             const isDir = configurationUtils.isDirectory(fileObj);
             let parentDir;
