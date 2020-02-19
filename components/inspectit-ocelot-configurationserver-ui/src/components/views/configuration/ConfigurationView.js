@@ -58,7 +58,8 @@ class ConfigurationView extends React.Component {
         isDeleteFileDialogShown: false,
         isCreateFileDialogShown: false,
         isCreateDirectoryDialogShown: false,
-        isMoveDialogShown: false
+        isMoveDialogShown: false,
+        filePath: null
     };
 
     parsePath = (filePath, defaultConfigFilePath) => {

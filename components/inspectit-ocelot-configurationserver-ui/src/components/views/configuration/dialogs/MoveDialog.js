@@ -12,12 +12,16 @@ import { configurationUtils, configurationActions, configurationSelectors } from
 class MoveDialog extends React.Component {
 
     state = {
-        /** In case the input name is invalid, a meaningful error message is placed here*/
+        /** In case the input name is invalid, a meaningful error message is placed here. */
         error: "",
-        /** The name of the target file / folder without leading slash and ending */
+        /** The name of the target file / folder without leading slash and ending. */
         targetPath: "",
-        /** The ending of the file, e.g. ".yml" or empty in case of a folder */
+        /** The ending of the file, e.g. ".yml" or empty in case of a folder. */
         targetPathEnding: "",
+        /** The (current) file name / folder without leading slash but with ending. */
+        fileName: "",
+        /** Wheter or not the selected file is a directory. */
+        isDirectory: false,
     };
 
     input = React.createRef();
@@ -99,6 +103,7 @@ class MoveDialog extends React.Component {
         const { filePath } = this.props;
 
         const fileName = filePath ? filePath.split("/").slice(-1)[0] : "";
+
         const fileObj = configurationUtils.getFile(this.props.files, filePath);
         const isDirectory = configurationUtils.isDirectory(fileObj);
 

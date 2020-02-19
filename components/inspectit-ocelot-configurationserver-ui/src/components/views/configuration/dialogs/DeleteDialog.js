@@ -16,7 +16,7 @@ class DeleteDialog extends React.Component {
     deleteButton = React.createRef();
 
     render() {
-        const { selectionName, type } = this.state;
+        const { fileName, type } = this.state;
 
         return (
             <Dialog
@@ -31,7 +31,7 @@ class DeleteDialog extends React.Component {
                     </div>
                 )}
             >
-                Are you sure you want to delete <b>"{selectionName}"</b> ? This cannot be undone!
+                Are you sure you want to delete <b>"{fileName}"</b> ? This cannot be undone!
             </Dialog>
         )
     }
@@ -47,11 +47,12 @@ class DeleteDialog extends React.Component {
 
             const { filePath } = this.props;
 
-            const selectionName = filePath ? filePath.split("/").slice(-1)[0] : "";
+            const fileName = filePath ? filePath.split("/").slice(-1)[0] : "";
+
             const fileObj = configurationUtils.getFile(this.props.files, filePath);
             const type = configurationUtils.isDirectory(fileObj) ? "Directory" : "File";
 
-            this.setState({ selectionName, type });
+            this.setState({ fileName, type });
         }
     }
 

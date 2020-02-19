@@ -46,7 +46,7 @@ class CreateDialog extends React.Component {
                 )}
             >
                 <div style={{ width: '100%', paddingBottom: "0.5em" }}>
-                    Create a {type.toLowerCase()} in <b>{this.state.parentDir}</b>:
+                    Create a {type.toLowerCase()} in <b>{this.state.parentDirectoryName}</b>:
                 </div>
                 <div className="p-inputgroup" style={{ width: '100%' }}>
                     <InputText
@@ -73,22 +73,23 @@ class CreateDialog extends React.Component {
     componentDidUpdate(prevProps) {
         if (!prevProps.visible && this.props.visible) {
             this.input.current.element.focus();
+
             const { filePath } = this.props;
 
             const fileObj = configurationUtils.getFile(this.props.files, filePath);
             const isDirectory = configurationUtils.isDirectory(fileObj);
 
-            let parentDir;
-            if (isDirectory) {
-                parentDir = '"' + filePath.split("/").slice(-1)[0] + '"';
-            } else {
+            let parentDirectoryName = "root";
+            if (filePath && isDirectory) {
+                parentDirectoryName = '"' + filePath.split("/").slice(-1)[0] + '"';
+            } else if (filePath) {
                 let parent = filePath.split("/").slice(-2)[0];
-                parentDir = parent ? '"' + parent + '"' : "root";
+                parentDirectoryName = parent ? '"' + parent + '"' : "root";
             }
 
             this.setState({
                 isDirectory,
-                parentDir
+                parentDirectoryName
             });
         }
     }

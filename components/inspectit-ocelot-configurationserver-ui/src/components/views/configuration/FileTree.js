@@ -31,14 +31,13 @@ class FileTree extends React.Component {
         if (Object.entries(defaultConfig).length === 0) {
             this.props.fetchDefaultConfig();
         }
-
     }
 
     /**
      * Handle tree selection changes.
      */
     onSelectionChange = (event) => {
-        const { selection, selectedDefaultConfigFile, rawFiles } = this.props;
+        const { selection, selectedDefaultConfigFile } = this.props;
         const newSelection = event.value;
         if (newSelection) {
             if (newSelection !== selection && newSelection !== selectedDefaultConfigFile) {
@@ -64,7 +63,7 @@ class FileTree extends React.Component {
             return;
         }
 
-        this.setState({ contextMenuModel: this.getcontextMenuModel(newSelection) });
+        this.setState({ contextMenuModel: this.getContextMenuModel(newSelection) });
         this.contextMenuRef.current.show(event.originalEvent || event);
     }
 
@@ -148,7 +147,7 @@ class FileTree extends React.Component {
         );
     }
 
-    getcontextMenuModel = (filePath) => {
+    getContextMenuModel = (filePath) => {
         const { showCreateDirectoryDialog, showCreateFileDialog, showMoveDialog, showDeleteFileDialog } = this.props;
 
         return [
