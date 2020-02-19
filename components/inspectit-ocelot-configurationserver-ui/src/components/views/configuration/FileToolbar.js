@@ -38,7 +38,7 @@ class FileToolbar extends React.Component {
                         <Button disabled={loading} tooltip="New file" icon="pi pi-file" tooltipOptions={tooltipOptions} onClick={() => this.props.showCreateFileDialog()} />
                         <Button disabled={loading} tooltip="New directory" icon="pi pi-folder-open" tooltipOptions={tooltipOptions} onClick={() => this.props.showCreateDirectoryDialog()} />
                         <Button disabled={loading || !selection} tooltip="Move/Rename file or directory" icon="pi pi-pencil" tooltipOptions={tooltipOptions} onClick={() => this.props.showMoveDialog(selection)} />
-                        <Button disabled={loading || !selection} tooltip="Delete file or directory" icon="pi pi-trash" tooltipOptions={tooltipOptions} onClick={() => this.props.showDeleteFileDialog()} />
+                        <Button disabled={loading || !selection} tooltip="Delete file or directory" icon="pi pi-trash" tooltipOptions={tooltipOptions} onClick={() => this.props.showDeleteFileDialog(selection)} />
                     </div>
                     <div className="p-toolbar-group-right">
                         <Button disabled={loading} onClick={this.fetchFiles} tooltip="Reload" icon={"pi pi-refresh" + (loading ? " pi-spin" : "")} tooltipOptions={tooltipOptions} />
