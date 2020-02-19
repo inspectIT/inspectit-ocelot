@@ -26,6 +26,13 @@ public class ActionInputAutoCompleter implements AutoCompleter {
     private static List<String> actionPathsToRetrieve = Arrays.asList("inspectit", "instrumentation", "rules", "*", "*", "*", "action");
     private final static List<String> INPUT_OPTIONS = Arrays.asList("data-input", "constant-input");
 
+    /**
+     * Checks if the given path leads to an action Attribute, e.g. "inspectit.instrumentation.actions.entry" and returns
+     * all declared actions that could be used in this path as  List of Strings.
+     *
+     * @param path A given path as List. Each String should act as a literal of the path.
+     * @return A List of Strings containing all declared rules that could be used with the given path.
+     */
     @Override
     public List<String> getSuggestions(List<String> path) {
         ArrayList<String> toReturn = new ArrayList<>();
@@ -35,6 +42,11 @@ public class ActionInputAutoCompleter implements AutoCompleter {
         return toReturn;
     }
 
+    /**
+     * Searches all "action" attributes set in the yaml files present. And returns all declared rules.
+     *
+     * @return A List of Strings containing all declared rules.
+     */
     @VisibleForTesting
     List<String> getInput() {
         ArrayList<String> toReturn = new ArrayList<>();
