@@ -148,31 +148,31 @@ class FileTree extends React.Component {
         );
     }
 
-    getcontextMenuModel = (file) => {
+    getcontextMenuModel = (filePath) => {
         const { showCreateDirectoryDialog, showCreateFileDialog, showMoveDialog, showDeleteFileDialog } = this.props;
 
         return [
             {
                 label: 'Add Folder',
                 icon: 'pi pi-folder',
-                command: () => showCreateDirectoryDialog(file)
+                command: () => showCreateDirectoryDialog(filePath)
             },
             {
                 label: 'Add File',
                 icon: 'pi pi-file',
-                command: () => showCreateFileDialog(file)
+                command: () => showCreateFileDialog(filePath)
             },
             {
                 label: 'Rename',
                 icon: 'pi pi-pencil',
-                disabled: !file,
-                command: () => showMoveDialog(file)
+                disabled: !filePath,
+                command: () => showMoveDialog(filePath)
             },
             {
                 label: 'Delete',
                 icon: 'pi pi-trash',
-                disabled: !file,
-                command: () => showDeleteFileDialog(file)
+                disabled: !filePath,
+                command: () => showDeleteFileDialog(filePath)
             }
         ];
     }

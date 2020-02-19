@@ -23,11 +23,11 @@ class MoveDialog extends React.Component {
     input = React.createRef();
 
     render() {
-        const { onHide } = this.props;
-        const { targetPath, targetPathEnding, selectedFile, selectionName, isDir } = this.state;
+        const { onHide, filePath } = this.props;
+        const { targetPath, targetPathEnding, fileName, isDirectory } = this.state;
 
-        const type = isDir ? "Directory" : "File";
-        const originalParent = selectedFile && configurationUtils.getParentDirectoryPath(selectedFile);
+        const type = isDirectory ? "Directory" : "File";
+        const originalParent = filePath && configurationUtils.getParentDirectoryPath(filePath);
         const newParent = configurationUtils.getParentDirectoryPath(this.getAbsoluteTargetPath());
         const isRename = originalParent == newParent;
 
@@ -47,7 +47,7 @@ class MoveDialog extends React.Component {
                 )}
             >
                 <div>
-                    Move / Rename <b>"{selectionName}"</b> to the following path:
+                    Move / Rename <b>"{fileName}"</b> to the following path:
                 </div>
                 <div className="p-inputgroup" style={{ width: '100%', marginTop: "0.5em" }}>
                     <span className="p-inputgroup-addon">/</span>
@@ -86,7 +86,7 @@ class MoveDialog extends React.Component {
     }
 
     performMove = () => {
-        const source = this.state.selectedFile;
+        const source = this.props.filePath;
         const target = this.getAbsoluteTargetPath();
         if (source != target) {
             this.props.move(source, target, true);
@@ -96,18 +96,17 @@ class MoveDialog extends React.Component {
 
     onShow = () => {
         /** Pick selection between redux state selection and incoming property selection. */
-        const { selection, filePath } = this.props;
+        const { filePath } = this.props;
 
-        const selectedFile = filePath || selection;
-        const selectionName = selectedFile ? selectedFile.split("/").slice(-1)[0] : "";
-        const fileObj = configurationUtils.getFile(this.props.files, selectedFile);
-        const isDir = configurationUtils.isDirectory(fileObj);
+        const fileName = filePath ? filePath.split("/").slice(-1)[0] : "";
+        const fileObj = configurationUtils.getFile(this.props.files, filePath);
+        const isDirectory = configurationUtils.isDirectory(fileObj);
 
         /** Set target path from selection. */
         //remove leading slash
-        let targetPath = selectedFile ? selectedFile.substring(1) : "";
+        let targetPath = filePath ? filePath.substring(1) : "";
         let targetPathEnding = "";
-        if (!isDir) {
+        if (!isDirectory) {
             const lastDot = targetPath.lastIndexOf(".");
             const lastSlash = targetPath.lastIndexOf("/");
             if (lastDot != -1 && lastDot > lastSlash) {
@@ -120,9 +119,8 @@ class MoveDialog extends React.Component {
             targetPathEnding,
             targetPath,
             resetSelection: true,
-            selectedFile,
-            selectionName,
-            isDir
+            fileName,
+            isDirectory
         });
     }
 
@@ -138,9 +136,10 @@ class MoveDialog extends React.Component {
 }
 
 function mapStateToProps(state) {
-    const { selection } = state.configuration;
+    const { selection, files } = state.configuration;
     return {
         selection,
+        files
     }
 }
 
