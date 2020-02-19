@@ -73,23 +73,21 @@ class CreateDialog extends React.Component {
     componentDidUpdate(prevProps) {
         if (!prevProps.visible && this.props.visible) {
             this.input.current.element.focus();
+            const { filePath } = this.props;
 
-            const { selection, filePath } = this.props;
+            const fileObj = configurationUtils.getFile(this.props.files, filePath);
+            const isDirectory = configurationUtils.isDirectory(fileObj);
 
-            const selectedFile = typeof filePath === 'string' ? filePath : selection;
-            const fileObj = configurationUtils.getFile(this.props.files, selectedFile);
-            const isDir = configurationUtils.isDirectory(fileObj);
             let parentDir;
-            if (isDir) {
-                parentDir = '"' + selectedFile.split("/").slice(-1)[0] + '"';
+            if (isDirectory) {
+                parentDir = '"' + filePath.split("/").slice(-1)[0] + '"';
             } else {
-                let parent = selectedFile.split("/").slice(-2)[0];
+                let parent = filePath.split("/").slice(-2)[0];
                 parentDir = parent ? '"' + parent + '"' : "root";
             }
 
             this.setState({
-                selectedFile,
-                isDir,
+                isDirectory,
                 parentDir
             });
         }
@@ -135,17 +133,17 @@ class CreateDialog extends React.Component {
      * Returns the absolute path of the current filename relative to the selection
      */
     getAbsolutePath = (filename) => {
-        const { directoryMode } = this.props;
-        const { isDir, selectedFile } = this.state;
+        const { directoryMode, filePath } = this.props;
+        const { isDirectory } = this.state;
 
         const suffix = directoryMode ? "" : ".yml";
-        if (!selectedFile) {
+        if (!filePath) {
             return "/" + filename + suffix;
-        } else if (isDir) {
-            return selectedFile + "/" + filename + suffix;
+        } else if (isDirectory) {
+            return filePath + "/" + filename + suffix;
         } else {
-            const lastSlash = selectedFile.lastIndexOf("/");
-            return selectedFile.substring(0, lastSlash + 1) + filename + suffix;
+            const lastSlash = filePath.lastIndexOf("/");
+            return filePath.substring(0, lastSlash + 1) + filename + suffix;
         }
     }
 
