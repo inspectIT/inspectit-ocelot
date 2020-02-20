@@ -4,9 +4,11 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.exporters.metrics.PrometheusExporterSettings;
+import rocks.inspectit.ocelot.config.model.instrumentation.rules.MetricRecordingSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.scope.MatcherMode;
 
 import java.lang.reflect.Type;
+import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -61,6 +63,46 @@ public class PropertyPathHelperTest {
             } catch (IllegalArgumentException e) {
                 assertThat(e.getMessage()).isEqualTo("invalid property path");
             }
+        }
+
+    }
+
+    @Nested
+    public class IsTerminal {
+
+        @Test
+        public void terminalType() {
+            boolean result = PropertyPathHelper.isTerminal(Boolean.class);
+
+            assertThat(result).isTrue();
+        }
+
+        @Test
+        public void primitive() {
+            boolean result = PropertyPathHelper.isTerminal(boolean.class);
+
+            assertThat(result).isTrue();
+        }
+
+        @Test
+        public void enumType() {
+            boolean result = PropertyPathHelper.isTerminal(DayOfWeek.class);
+
+            assertThat(result).isTrue();
+        }
+
+        @Test
+        public void convertibles() {
+            boolean result = PropertyPathHelper.isTerminal(MetricRecordingSettings.class);
+
+            assertThat(result).isTrue();
+        }
+
+        @Test
+        public void any() {
+            boolean result = PropertyPathHelper.isTerminal(this.getClass());
+
+            assertThat(result).isFalse();
         }
 
     }

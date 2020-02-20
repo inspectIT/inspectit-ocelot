@@ -30,14 +30,13 @@ public class MetricRecordingSettings {
      * In this case the value in the context for the data key is used as value for the given measure.
      * For this reason the value present in the inspectit context for the given data key has to be an instance of {@link Number}.
      * <p>
-     * The value in this map can also be null or an empty string, in this case simply no measurement is recorded.
-     * In addition the data-key can be null. This can be used to disable the recording of a metric for a rule.
+     * This value in this map can also be null or an empty string, in this case simply no measurement is recorded.
      */
     private String value;
 
 
     public MetricRecordingSettings copyWithDefaultMetricName(String defaultMetricName) {
-        String metricName = StringUtils.isEmpty(metric) ? defaultMetricName : metric;
+        String metricName = getMetricNameOrDefault(defaultMetricName);
         return toBuilder().metric(metricName).build();
     }
 
@@ -49,12 +48,16 @@ public class MetricRecordingSettings {
      * @param vios              the violation builder to output errors
      */
     public void performValidation(String defaultMetricName, Set<String> definedMetrics, ViolationBuilder vios) {
-        String name = StringUtils.isEmpty(metric) ? defaultMetricName : metric;
+        String name = getMetricNameOrDefault(defaultMetricName);
         if (!definedMetrics.contains(name)) {
             vios.message("Metric '{metric}' is not defined in inspectit.metrics.definitions!")
                     .parameter("metric", name)
                     .buildAndPublish();
         }
+    }
+
+    private String getMetricNameOrDefault(String defaultMetricName) {
+        return StringUtils.isEmpty(metric) ? defaultMetricName : metric;
     }
 
 }
