@@ -9,10 +9,9 @@ import rocks.inspectit.ocelot.config.model.instrumentation.scope.MatcherMode;
 
 import java.lang.reflect.Type;
 import java.time.DayOfWeek;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.time.Duration;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -65,6 +64,60 @@ public class PropertyPathHelperTest {
             }
         }
 
+    }
+
+    @Nested
+    public class IsBean {
+
+        @Test
+        public void genericTypeIsNotABean() throws NoSuchFieldException {
+            Type type = new Object() {
+                AtomicReference<Boolean> genericMember;
+            }.getClass().getDeclaredField("genericMember").getGenericType();
+
+            boolean result = PropertyPathHelper.isBean(type);
+            assertThat(result).isFalse();
+        }
+
+        @Test
+        public void mapIsNotABean() {
+            boolean result = PropertyPathHelper.isBean(Map.class);
+            assertThat(result).isFalse();
+        }
+
+        @Test
+        public void setIsNotABean() {
+            boolean result = PropertyPathHelper.isBean(Set.class);
+            assertThat(result).isFalse();
+        }
+
+        @Test
+        public void listIsNotABean() {
+            boolean result = PropertyPathHelper.isBean(List.class);
+            assertThat(result).isFalse();
+        }
+
+        @Test
+        public void durationIsNotABean() {
+            boolean result = PropertyPathHelper.isBean(Duration.class);
+            assertThat(result).isFalse();
+        }
+
+        @Test
+        public void integerIsNotABean() {
+            boolean result = PropertyPathHelper.isBean(Integer.class);
+            assertThat(result).isFalse();
+        }
+
+        @Test
+        public void pojoIsABean() {
+            Class<?> pojo = new Object() {
+                String member;
+            }.getClass();
+
+            boolean result = PropertyPathHelper.isBean(pojo);
+            assertThat(result).isTrue();
+        }
     }
 
     @Nested
