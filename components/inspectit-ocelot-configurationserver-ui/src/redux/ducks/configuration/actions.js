@@ -239,3 +239,22 @@ export const fetchDefaultConfig = () => {
             })
     }
 }
+
+/**
+ * Fetches the configuration schema.
+ */
+export const fetchConfigurationSchema= () => {
+    return dispatch => {
+        dispatch({ type: types.FETCH_SCHEMA_STARTED });
+
+        axios
+            .get("/schema/plain")
+            .then(res => {
+                const schema = res.data;
+                dispatch({ type: types.FETCH_SCHEMA_SUCCESS, payload: { schema } });
+            })
+            .catch(() => {
+                dispatch({ type: types.FETCH_SCHEMA_FAILURE });
+            });
+    };
+};

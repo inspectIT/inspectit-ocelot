@@ -170,6 +170,15 @@ const configurationReducer = createReducer(initialState)({
             selectedFileContent: content
         };
     },
+    [types.FETCH_SCHEMA_STARTED]: incrementPendingRequests,
+    [types.FETCH_SCHEMA_SUCCESS]: (state, action) => {
+        const { schema } = action.payload;
+        return {
+            ...decrementPendingRequests(state),
+            schema
+        }
+    },
+    [types.FETCH_SCHEMA_FAILURE]: decrementPendingRequests,
 });
 
 export default configurationReducer;

@@ -32,3 +32,7 @@ export const FETCH_DEFAULT_CONFIG_FAILURE = 'configuration/FETCH_DEFAULT_CONFIG_
 export const FETCH_DEFAULT_CONFIG_SUCCESS = 'configuration/FETCH_DEFAULT_CONFIG_SUCCESS';
 
 export const SELECT_DEFAULT_CONFIG_FILE = 'configuration/SELECT_DEFAULT_CONFIG_FILE';
+
+export const FETCH_SCHEMA_STARTED = 'configuration/FETCH_SCHEMA_STARTED';
+export const FETCH_SCHEMA_FAILURE = 'configuration/FETCH_SCHEMA_FAILURE';
+export const FETCH_SCHEMA_SUCCESS = 'configuration/FETCH_SCHEMA_SUCCESS';

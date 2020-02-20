@@ -37,6 +37,8 @@ const configuration = {
     defaultConfig: {},
     /** The path of the currently selected default configuration file in the file tree. */
     selectedDefaultConfigFile: null,
+    /** The configuration schema */
+    schema: null,
 };
 
 const notification = {
