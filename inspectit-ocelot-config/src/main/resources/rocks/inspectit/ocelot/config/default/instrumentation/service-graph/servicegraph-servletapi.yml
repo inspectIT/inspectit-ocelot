@@ -46,6 +46,6 @@ inspectit:
             data-input: {sinceNanos: servicegraph_call_entry }
             only-if-true: servicegraph_is_entry
         metrics:
-          '[service/in/responsetime]': servicegraph_call_duration
-          
-          
+          '[service/in/responsetime]':
+            value: servicegraph_call_duration
+            data-tags: {origin_external: origin_external, origin_service: origin_service, protocol: protocol, application: application}

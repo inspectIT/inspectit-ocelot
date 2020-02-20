@@ -1,4 +1,3 @@
-
 inspectit:
   metrics:
     definitions:
@@ -43,7 +42,9 @@ inspectit:
             constant-input: {key: "second"}
             data-input: {target: _arg0, value: _arg2}
         metrics:
-          writeAttachment: 1
+          writeAttachment:
+            value: 1
+            data-tags: {target: target, firstVal: firstVal, secondVal: secondVal}
 
 
       ObjectAttachmentsTest-readAttachments:
@@ -62,4 +63,6 @@ inspectit:
             constant-input: {key: "second"}
             data-input: {target: _arg0}
         metrics:
-          readAttachment: 1
+          readAttachment:
+            value: 1
+            data-tags: {target: target, firstVal: firstVal, secondVal: secondVal}

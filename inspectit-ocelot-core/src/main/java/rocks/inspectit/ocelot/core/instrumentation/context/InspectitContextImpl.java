@@ -14,6 +14,7 @@ import rocks.inspectit.ocelot.config.model.instrumentation.data.PropagationMode;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -341,14 +342,29 @@ public class InspectitContextImpl implements InternalInspectitContext {
      * In addition, this tag scopes contains all tags for which down-propagation is set to false.
      *
      * @return the newly opened tag scope.
+     * // TODO Remove? This becomes obsolete now
      */
     public Scope enterFullTagScope() {
         TagContextBuilder builder = Tags.getTagger().emptyBuilder();
-        getDataAsStream()
-                .filter(e -> propagation.isTag(e.getKey()))
-                .filter(e -> ALLOWED_TAG_TYPES.contains(e.getValue().getClass()))
+        dataTagsStream()
                 .forEach(e -> builder.put(TagKey.create(e.getKey()), TagValue.create(e.getValue().toString())));
         return builder.buildScoped();
+    }
+
+    /**
+     * Returns map of tags currently present in {@link #getData()}.
+     *
+     * @return the tag stream
+     * @see #enterFullTagScope()
+     */
+    public Map<String, Object> getFullTagMap() {
+        return dataTagsStream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    private Stream<Map.Entry<String, Object>> dataTagsStream() {
+        return getDataAsStream()
+                .filter(e -> propagation.isTag(e.getKey()))
+                .filter(e -> ALLOWED_TAG_TYPES.contains(e.getValue().getClass()));
     }
 
     /**
