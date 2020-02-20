@@ -41,18 +41,21 @@ public class BeaconMetricManager {
      * @return whether the beacon has been successfully parsed
      */
     public boolean processBeacon(Beacon beacon) {
+        boolean successful = false;
+
         for (Map.Entry<String, BeaconMetricDefinitionSettings> metricDefinitionEntry : configuration.getDefinitions().entrySet()) {
             String metricName = metricDefinitionEntry.getKey();
             BeaconMetricDefinitionSettings metricDefinition = metricDefinitionEntry.getValue();
 
             if (BeaconRequirement.validate(beacon, metricDefinition.getBeaconRequirements())) {
                 recordMetric(metricName, metricDefinition, beacon);
-                return true;
+                successful = true;
             } else {
                 log.debug("Skipping beacon because requirements are not fulfilled.");
             }
         }
-        return false;
+
+        return successful;
     }
 
     /**
