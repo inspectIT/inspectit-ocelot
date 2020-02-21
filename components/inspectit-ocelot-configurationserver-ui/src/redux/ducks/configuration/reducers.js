@@ -179,6 +179,13 @@ const configurationReducer = createReducer(initialState)({
         }
     },
     [types.FETCH_SCHEMA_FAILURE]: decrementPendingRequests,
+    [types.TOGGLE_CONFIGURATION_PROPERTIES_SPLIT_VIEW]: (state, action) => {
+        const { visible } = action.payload;
+        return {
+            ...state,
+            propsSplitConfigurationView: visible
+        }
+    },
 });
 
 export default configurationReducer;

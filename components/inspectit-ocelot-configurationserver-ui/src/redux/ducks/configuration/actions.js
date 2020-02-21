@@ -258,3 +258,13 @@ export const fetchConfigurationSchema= () => {
             });
     };
 };
+
+/**
+ * Shows or hides the split view for the configuration properties.
+ */
+export const togglePropsSplitView = (visible) => ({
+    type: types.TOGGLE_CONFIGURATION_PROPERTIES_SPLIT_VIEW,
+    payload: {
+        visible
+    }
+});

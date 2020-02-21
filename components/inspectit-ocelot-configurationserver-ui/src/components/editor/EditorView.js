@@ -4,6 +4,7 @@ import EditorToolbar from './EditorToolbar';
 
 import dynamic from 'next/dynamic'
 const AceEditor = dynamic(() => import('./AceEditor'), { ssr: false });
+const TreeTableEditor = dynamic(() => import('./TreeTableEditor'), { ssr: false });
 
 import editorConfig from '../../data/yaml-editor-config.json'
 import Notificationbar from './Notificationbar';
@@ -19,7 +20,7 @@ class EditorView extends React.Component {
     }
 
     render() {
-        const { value, showEditor, hint, onRefresh, onChange, onCreate, isRefreshing, enableButtons, isErrorNotification, notificationIcon, notificationText, canSave, loading, children, readOnly } = this.props;
+        const { value, schema, showEditor, hint, onRefresh, onChange, onCreate, isRefreshing, enableButtons, isErrorNotification, notificationIcon, notificationText, canSave, loading, children, readOnly, propsSplit, onPropsSplit } = this.props;
 
         return (
             <div className="this p-grid p-dir-col p-nogutter">
@@ -59,14 +60,18 @@ class EditorView extends React.Component {
                         isRefreshing={isRefreshing}
                         onSave={this.handleSave}
                         onSearch={() => this.editor.executeCommand("find")}
-                        onHelp={() => this.editor.showShortcuts()}>
+                        onHelp={() => this.editor.showShortcuts()}
+                        propsSplit={propsSplit}
+                        onPropsSplit={onPropsSplit}
+                    >
                         {children}
                     </EditorToolbar>
                 </div>
                 <div className="p-col editor-container">
-                    {showEditor ?
+                    {showEditor &&
                         <AceEditor editorRef={(editor) => this.editor = editor} onCreate={onCreate} mode="yaml" theme="cobalt" options={editorConfig} value={value} onChange={onChange} canSave={canSave} onSave={this.handleSave} readOnly={readOnly} />
-                        :
+                    }
+                    {!showEditor &&
                         <div className="selection-information">
                             <div>{hint}</div>
                         </div>
@@ -77,6 +82,12 @@ class EditorView extends React.Component {
                         </div>
                     }
                 </div>
+                {
+                    showEditor && propsSplit && 
+                    <div className="p-col">
+                        <TreeTableEditor value={value} schema={schema} loading={loading}/>
+                    </div>
+                }
                 <div className="p-col-fixed">
                     {notificationText ? <Notificationbar text={notificationText} isError={isErrorNotification} icon={notificationIcon} /> : null}
                 </div>
@@ -88,6 +99,8 @@ class EditorView extends React.Component {
 EditorView.propTypes = {
     /** The value of the editor */
     value: PropTypes.string,
+    /** The configuration schema */
+    schema: PropTypes.object,
     /** Whether the editor should be shown or hidden. */
     showEditor: PropTypes.bool,
     /** The hint which will be shown if the editor is hidden. */
@@ -113,14 +126,19 @@ EditorView.propTypes = {
     /** Whether the editor should show an loading indicator */
     loading: PropTypes.bool,
     /** Wheter the editor should be in read-only mode */
-    readOnly: PropTypes.bool
+    readOnly: PropTypes.bool,
+    /** Weather a split view is active showing config properties in a tree */
+    propsSplit: PropTypes.bool,
+    /** Function to react on the change of the properties split view */
+    onPropsSplit: PropTypes.func,
 }
 
 EditorView.defaultProps = {
     showEditor: true,
     enableButtons: true,
     canSave: true,
-    loading: false
+    loading: false,
+    propsSplit: true,
 };
 
 export default EditorView;
