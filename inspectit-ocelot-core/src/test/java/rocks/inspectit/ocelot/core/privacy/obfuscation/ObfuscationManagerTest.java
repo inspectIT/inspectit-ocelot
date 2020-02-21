@@ -97,6 +97,7 @@ class ObfuscationManagerTest {
             ObfuscationPattern obfuscationPattern1 = new ObfuscationPattern();
             obfuscationPattern1.setPattern("[a-z]+");
             obfuscationPattern1.setCheckKey(true);
+            obfuscationPattern1.setCaseInsensitive(false);
             ObfuscationPattern obfuscationPattern2 = new ObfuscationPattern();
             obfuscationPattern2.setPattern("[0-9]+");
             obfuscationPattern2.setCheckData(true);
@@ -120,11 +121,42 @@ class ObfuscationManagerTest {
             obfuscatory.putSpanAttribute(span, "ABC", "abc");
             obfuscatory.putSpanAttribute(span, "DEF", "123");
 
-            verify(span, never()).putAttribute("abc", AttributeValue.stringAttributeValue("abc"));
-            verify(span, never()).putAttribute("DEF", AttributeValue.stringAttributeValue("123"));
+            verify(span).putAttribute("abc", AttributeValue.stringAttributeValue("***"));
             verify(span).putAttribute("ABC", AttributeValue.stringAttributeValue("abc"));
-            verify(span).putAttribute(eq("abc"), any());
-            verify(span).putAttribute(eq("ABC"), any());
+            verify(span).putAttribute("DEF", AttributeValue.stringAttributeValue("***"));
+            verifyNoMoreInteractions(span);
+        }
+
+        @Test
+        public void happyPathWithReplacementRegex() {
+            ObfuscationPattern obfuscationPattern = new ObfuscationPattern();
+            obfuscationPattern.setPattern("[a-z]+");
+            obfuscationPattern.setCheckKey(true);
+            obfuscationPattern.setCaseInsensitive(false);
+            obfuscationPattern.setReplaceRegex("[b-z]+");
+
+            when(obfuscationSettings.isEnabled()).thenReturn(true);
+            when(obfuscationSettings.getPatterns()).thenReturn(Collections.singletonList(obfuscationPattern));
+
+            obfuscationManager.update();
+
+            Supplier<IObfuscatory> obfuscatorySupplier = obfuscationManager.obfuscatorySupplier();
+            IObfuscatory obfuscatory = obfuscatorySupplier.get();
+            assertThat(obfuscatory)
+                    .isNotNull()
+                    .isInstanceOf(PatternObfuscatory.class);
+
+            // there is no way for me to test the correct patterns passed to the obfuscatory
+            // then to actually invoke the obfuscatory
+            Span span = mock(Span.class);
+
+            obfuscatory.putSpanAttribute(span, "abc", "abc");
+            obfuscatory.putSpanAttribute(span, "ABC", "abc");
+            obfuscatory.putSpanAttribute(span, "DEF", "123");
+
+            verify(span).putAttribute("abc", AttributeValue.stringAttributeValue("a***"));
+            verify(span).putAttribute("ABC", AttributeValue.stringAttributeValue("abc"));
+            verify(span).putAttribute("DEF", AttributeValue.stringAttributeValue("123"));
         }
 
         @Test
@@ -132,9 +164,9 @@ class ObfuscationManagerTest {
             ObfuscationPattern obfuscationPattern1 = new ObfuscationPattern();
             obfuscationPattern1.setPattern("[a-z]+");
             obfuscationPattern1.setCheckKey(true);
+            obfuscationPattern1.setCaseInsensitive(true);
 
             when(obfuscationSettings.isEnabled()).thenReturn(true);
-            when(obfuscationSettings.isCaseInsensitive()).thenReturn(true);
             when(obfuscationSettings.getPatterns()).thenReturn(Collections.singletonList(obfuscationPattern1));
 
             obfuscationManager.update();

@@ -6,6 +6,7 @@ inspectit:
         - pattern: toObfuscate
         - pattern: toObfuscateValue
           checkData: true
+          replace-regex: Obfuscate
 
   instrumentation:
 

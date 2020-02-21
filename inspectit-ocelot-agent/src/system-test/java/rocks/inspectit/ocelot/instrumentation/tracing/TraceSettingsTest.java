@@ -38,7 +38,7 @@ public class TraceSettingsTest extends TraceTestBase {
                                     .containsEntry("entry", AttributeValue.stringAttributeValue("const"))
                                     .containsEntry("exit", AttributeValue.stringAttributeValue("Hello A!"))
                                     .containsEntry("toObfuscate", AttributeValue.stringAttributeValue("***"))
-                                    .containsEntry("anything", AttributeValue.stringAttributeValue("***"));
+                                    .containsEntry("anything", AttributeValue.stringAttributeValue("to***Value"));
                         })
 
         );

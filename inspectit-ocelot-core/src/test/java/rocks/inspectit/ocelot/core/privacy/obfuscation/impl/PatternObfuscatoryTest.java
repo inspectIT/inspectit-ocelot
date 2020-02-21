@@ -71,6 +71,20 @@ class PatternObfuscatoryTest {
         }
 
         @Test
+        public void keyOnlyObfuscationWithReplaceRegex() {
+            PatternObfuscatory.PatternEntry.PatternEntryBuilder entryBuilder = PatternObfuscatory.PatternEntry.builder();
+            entryBuilder.pattern(p1);
+            entryBuilder.checkKey(true);
+            entryBuilder.replaceRegex("grad");
+            PatternObfuscatory patternObfuscatory = new PatternObfuscatory(Collections.singleton(entryBuilder.build()));
+
+            patternObfuscatory.putSpanAttribute(span, "abc", "belgrade");
+
+            verify(span).putAttribute("abc", AttributeValue.stringAttributeValue("bel***e"));
+            verifyNoMoreInteractions(span);
+        }
+
+        @Test
         public void dataOnlyNoObfuscation() {
             PatternObfuscatory.PatternEntry.PatternEntryBuilder entryBuilder = PatternObfuscatory.PatternEntry.builder();
             entryBuilder.pattern(p1);
@@ -97,6 +111,20 @@ class PatternObfuscatoryTest {
         }
 
         @Test
+        public void dataOnlyObfuscationWithReplaceRegex() {
+            PatternObfuscatory.PatternEntry.PatternEntryBuilder entryBuilder = PatternObfuscatory.PatternEntry.builder();
+            entryBuilder.pattern(p1);
+            entryBuilder.checkData(true);
+            entryBuilder.replaceRegex("[ac]");
+            PatternObfuscatory patternObfuscatory = new PatternObfuscatory(Collections.singleton(entryBuilder.build()));
+
+            patternObfuscatory.putSpanAttribute(span, "belgrade", "abc");
+
+            verify(span).putAttribute("belgrade", AttributeValue.stringAttributeValue("***b***"));
+            verifyNoMoreInteractions(span);
+        }
+
+        @Test
         public void mixed() {
             // numbers everywhere, lower-case letters only in key
             PatternObfuscatory.PatternEntry.PatternEntryBuilder entryBuilder1 = PatternObfuscatory.PatternEntry.builder();
@@ -106,6 +134,7 @@ class PatternObfuscatoryTest {
             entryBuilder2.pattern(p2);
             entryBuilder2.checkKey(true);
             entryBuilder2.checkData(true);
+            entryBuilder2.replaceRegex("[47]");
 
             PatternObfuscatory patternObfuscatory = new PatternObfuscatory(Arrays.asList(entryBuilder1.build(), entryBuilder2.build()));
 
@@ -121,9 +150,9 @@ class PatternObfuscatoryTest {
             verify(span).putAttribute("efg", AttributeValue.stringAttributeValue("***"));
             verify(span).putAttribute("ABC", AttributeValue.stringAttributeValue("abc"));
             verify(span).putAttribute("ABC", AttributeValue.stringAttributeValue("ABC"));
-            verify(span).putAttribute("012", AttributeValue.stringAttributeValue("***"));
-            verify(span).putAttribute("345", AttributeValue.stringAttributeValue("***"));
-            verify(span).putAttribute("ABC", AttributeValue.stringAttributeValue("***"));
+            verify(span).putAttribute("012", AttributeValue.stringAttributeValue("abc"));
+            verify(span).putAttribute("345", AttributeValue.stringAttributeValue("6***8"));
+            verify(span).putAttribute("ABC", AttributeValue.stringAttributeValue("23***"));
             verifyNoMoreInteractions(span);
         }
 

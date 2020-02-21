@@ -1,15 +1,9 @@
 package rocks.inspectit.ocelot.core.privacy.obfuscation;
 
 import com.google.common.annotations.VisibleForTesting;
-import io.opencensus.tags.TagContextBuilder;
-import io.opencensus.tags.TagKey;
-import io.opencensus.tags.TagValue;
-import io.opencensus.tags.Tags;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
-import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.privacy.obfuscation.ObfuscationPattern;
@@ -20,8 +14,9 @@ import rocks.inspectit.ocelot.core.privacy.obfuscation.impl.NoopObfuscatory;
 import rocks.inspectit.ocelot.core.privacy.obfuscation.impl.PatternObfuscatory;
 
 import javax.annotation.PostConstruct;
-import javax.validation.Valid;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -48,16 +43,13 @@ public class ObfuscationManager {
     @VisibleForTesting
     void update() {
         InspectitConfig configuration = env.getCurrentConfig();
-
-        IObfuscatory obfuscatory = NoopObfuscatory.INSTANCE;
-        @Valid ObfuscationSettings obfuscationSettings = configuration.getPrivacy().getObfuscation();
+        ObfuscationSettings obfuscationSettings = configuration.getPrivacy().getObfuscation();
         boolean enabled = obfuscationSettings.isEnabled();
         if (enabled) {
-            obfuscatory = this.getPatternObfuscatory(obfuscationSettings.getPatterns(), obfuscationSettings.isCaseInsensitive());
+            this.obfuscatory = this.getPatternObfuscatory(obfuscationSettings.getPatterns());
+        } else {
+            this.obfuscatory = NoopObfuscatory.INSTANCE;
         }
-
-        // TODO is this OK concurrency wise?
-        this.obfuscatory = obfuscatory;
     }
 
     /**
@@ -67,25 +59,25 @@ public class ObfuscationManager {
      * Otherwise, the {@link PatternObfuscatory} instance will be created and return.
      *
      * @param obfuscationPatterns Collection of configured {@link ObfuscationPattern}s.
-     * @param caseInsensitive     If pattern compilation is case insensitive.
      * @return IObfuscatory
      */
-    private IObfuscatory getPatternObfuscatory(Collection<ObfuscationPattern> obfuscationPatterns, boolean caseInsensitive) {
+    private IObfuscatory getPatternObfuscatory(Collection<ObfuscationPattern> obfuscationPatterns) {
         List<PatternObfuscatory.PatternEntry> patternEntries = Optional.ofNullable(obfuscationPatterns)
                 .map(Collection::stream)
                 .orElse(Stream.empty())
                 .flatMap(p -> {
                     try {
-                        Pattern compiledPattern = caseInsensitive ? Pattern.compile(p.getPattern(), Pattern.CASE_INSENSITIVE) : Pattern.compile(p.getPattern());
+                        int compileFlag = p.isCaseInsensitive() ? Pattern.CASE_INSENSITIVE : 0;
+                        Pattern compiledPattern = Pattern.compile(p.getPattern(), compileFlag);
                         PatternObfuscatory.PatternEntry patternEntry = PatternObfuscatory.PatternEntry.builder()
                                 .pattern(compiledPattern)
                                 .checkKey(p.isCheckKey())
                                 .checkData(p.isCheckData())
+                                .replaceRegex(p.getReplaceRegex())
                                 .build();
                         return Stream.of(patternEntry);
                     } catch (Exception e) {
-                        log.warn("Failed to compile pattern {} for the data obfuscation. Skipping..", p.getPattern());
-                        log.debug("Error compiling pattern for the data obfuscation.", e);
+                        log.warn("Failed to compile pattern {} for the data obfuscation. Skipping..", p.getPattern(), e);
                         return Stream.empty();
                     }
                 })

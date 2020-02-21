@@ -28,12 +28,23 @@ public class ObfuscationPattern {
     private String pattern;
 
     /**
-     * If key of the data should be checked for obfuscation by this pattern.
+     * Regular expression to use when replacing the value to be obfuscated. Matched regex will be replaced with <code>***</code>.
+     * If not specified, the whole value to obfuscate will be replaced with <code>***</code>.
+     */
+    private String replaceRegex;
+
+    /**
+     * If the patterns should be considered as case insensitive. Defaults to <code>true</code>.
+     */
+    private boolean caseInsensitive = true;
+
+    /**
+     * If key of the data should be checked for obfuscation by this pattern. Defaults to <code>true</code>.
      */
     private boolean checkKey = true;
 
     /**
-     * If data itself should be checked for obfuscation by this pattern.
+     * If data itself should be checked for obfuscation by this pattern. Defaults to <code>false</code>.
      */
     private boolean checkData = false;
 
