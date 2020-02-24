@@ -28,6 +28,8 @@ public class ObfuscationPattern {
     private String pattern;
 
     /**
+     * <b>Note: This is reserved for future use and has no impact at the moment.</b>
+     * <p>
      * Regular expression to use when replacing the value to be obfuscated. Matched regex will be replaced with <code>***</code>.
      * If not specified, the whole value to obfuscate will be replaced with <code>***</code>.
      */

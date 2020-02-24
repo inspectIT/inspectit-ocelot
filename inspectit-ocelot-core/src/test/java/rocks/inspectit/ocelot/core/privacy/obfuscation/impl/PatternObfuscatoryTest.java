@@ -80,7 +80,7 @@ class PatternObfuscatoryTest {
 
             patternObfuscatory.putSpanAttribute(span, "abc", "belgrade");
 
-            verify(span).putAttribute("abc", AttributeValue.stringAttributeValue("bel***e"));
+            verify(span).putAttribute("abc", AttributeValue.stringAttributeValue("***"));
             verifyNoMoreInteractions(span);
         }
 
@@ -120,7 +120,7 @@ class PatternObfuscatoryTest {
 
             patternObfuscatory.putSpanAttribute(span, "belgrade", "abc");
 
-            verify(span).putAttribute("belgrade", AttributeValue.stringAttributeValue("***b***"));
+            verify(span).putAttribute("belgrade", AttributeValue.stringAttributeValue("***"));
             verifyNoMoreInteractions(span);
         }
 
@@ -150,9 +150,9 @@ class PatternObfuscatoryTest {
             verify(span).putAttribute("efg", AttributeValue.stringAttributeValue("***"));
             verify(span).putAttribute("ABC", AttributeValue.stringAttributeValue("abc"));
             verify(span).putAttribute("ABC", AttributeValue.stringAttributeValue("ABC"));
-            verify(span).putAttribute("012", AttributeValue.stringAttributeValue("abc"));
-            verify(span).putAttribute("345", AttributeValue.stringAttributeValue("6***8"));
-            verify(span).putAttribute("ABC", AttributeValue.stringAttributeValue("23***"));
+            verify(span).putAttribute("012", AttributeValue.stringAttributeValue("***"));
+            verify(span).putAttribute("345", AttributeValue.stringAttributeValue("***"));
+            verify(span).putAttribute("ABC", AttributeValue.stringAttributeValue("***"));
             verifyNoMoreInteractions(span);
         }
 

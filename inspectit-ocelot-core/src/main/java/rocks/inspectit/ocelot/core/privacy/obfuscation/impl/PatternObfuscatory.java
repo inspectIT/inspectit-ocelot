@@ -114,6 +114,8 @@ public class PatternObfuscatory implements IObfuscatory {
 
         /**
          * Replace regex to use when obfuscating value. Can be <code>null</code>.
+         * <p>
+         * <b>This is reserved for future use and has no impact at the moment.</b>
          */
         private final String replaceRegex;
 
@@ -140,9 +142,7 @@ public class PatternObfuscatory implements IObfuscatory {
         }
 
         Function<String, String> getObfuscationFunction() {
-            return Optional.ofNullable(replaceRegex)
-                    .map(regex -> (Function<String, String>) v -> v.replaceAll(regex, "***"))
-                    .orElse(DEFAULT_OBFUSCATION_FUNCTION);
+            return DEFAULT_OBFUSCATION_FUNCTION;
         }
 
     }

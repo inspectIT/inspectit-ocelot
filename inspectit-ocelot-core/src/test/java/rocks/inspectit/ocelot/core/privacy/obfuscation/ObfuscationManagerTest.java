@@ -154,7 +154,7 @@ class ObfuscationManagerTest {
             obfuscatory.putSpanAttribute(span, "ABC", "abc");
             obfuscatory.putSpanAttribute(span, "DEF", "123");
 
-            verify(span).putAttribute("abc", AttributeValue.stringAttributeValue("a***"));
+            verify(span).putAttribute("abc", AttributeValue.stringAttributeValue("***"));
             verify(span).putAttribute("ABC", AttributeValue.stringAttributeValue("abc"));
             verify(span).putAttribute("DEF", AttributeValue.stringAttributeValue("123"));
         }
