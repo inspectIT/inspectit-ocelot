@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.guava.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -246,10 +245,10 @@ class InstrumentationRuleResolverTest {
 
             Multiset<MetricRecordingSettings> result = ruleResolver.resolveMetricRecordings(irs);
 
-            assertThat(result).contains(1, MetricRecordingSettings.builder()
-                    .value("42")
-                    .metric("default_metric")
-                    .build());
+            assertThat(result).hasOnlyOneElementSatisfying(element -> {
+                assertThat(element.getValue()).isEqualTo("42");
+                assertThat(element.getMetric()).isEqualTo("default_metric");
+            });
         }
 
 
@@ -264,10 +263,10 @@ class InstrumentationRuleResolverTest {
 
             Multiset<MetricRecordingSettings> result = ruleResolver.resolveMetricRecordings(irs);
 
-            assertThat(result).contains(1, MetricRecordingSettings.builder()
-                    .value("42")
-                    .metric("my_metric")
-                    .build());
+            assertThat(result).hasOnlyOneElementSatisfying(element -> {
+                assertThat(element.getValue()).isEqualTo("42");
+                assertThat(element.getMetric()).isEqualTo("my_metric");
+            });
         }
 
 

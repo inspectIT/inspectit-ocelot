@@ -9,6 +9,7 @@ import rocks.inspectit.ocelot.config.model.instrumentation.InstrumentationSettin
 import rocks.inspectit.ocelot.config.model.logging.LoggingSettings;
 import rocks.inspectit.ocelot.config.model.metrics.MetricsSettings;
 import rocks.inspectit.ocelot.config.model.plugins.PluginSettings;
+import rocks.inspectit.ocelot.config.model.privacy.PrivacySettings;
 import rocks.inspectit.ocelot.config.model.selfmonitoring.SelfMonitoringSettings;
 import rocks.inspectit.ocelot.config.model.tags.TagsSettings;
 import rocks.inspectit.ocelot.config.model.tracing.TracingSettings;
@@ -73,6 +74,12 @@ public class InspectitConfig {
      */
     @Valid
     private TracingSettings tracing = new TracingSettings();
+
+    /**
+     * Data protection and privacy settings.
+     */
+    @Valid
+    private PrivacySettings privacy = new PrivacySettings();
 
     /**
      * General logging settings.
