@@ -39,4 +39,6 @@ inspectit:
             action: set
             constant-input: {value: 1}
         metrics:
-          '[entrypoint/invocations]': is_entry_point
+          '[entrypoint/invocations]':
+            value: is_entry_point
+            data-tags: {method_name : method_name}
