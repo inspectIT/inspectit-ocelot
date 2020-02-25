@@ -43,13 +43,18 @@ public class MetricsRecorder implements IHookAction {
     @Override
     public void execute(ExecutionContext context) {
         // get all available data from the context and collect in a map
-        Map<String, Object> contextTags = context.getInspectitContext().getFullTagMap();
+        Map<String, Object> contextTags = null;
 
         // then iterate all metrics and enter new scope for metric collection
         for (MetricAccessor metricAccessor : metrics) {
             Object value = metricAccessor.getVariableAccessor().get(context);
             if (value != null) {
                 if (value instanceof Number) {
+                    // resolve context tags on the first need for it
+                    if (contextTags == null) {
+                        contextTags = context.getInspectitContext().getFullTagMap();
+                    }
+
                     // only record metrics where a value is present
                     // this allows to disable the recording of a metric depending on the results of action executions
                     MeasureMap measureMap = statsRecorder.newMeasureMap();
