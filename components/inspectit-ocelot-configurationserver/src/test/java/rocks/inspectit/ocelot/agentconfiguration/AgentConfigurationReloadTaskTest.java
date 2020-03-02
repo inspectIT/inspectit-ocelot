@@ -14,7 +14,6 @@ import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -49,17 +48,11 @@ public class AgentConfigurationReloadTaskTest {
             AgentMapping mapping2 = AgentMapping.builder().name("test2").source("/test2").build();
 
             final MutableObject<List<AgentConfiguration>> configurations = new MutableObject<>();
-            final CountDownLatch latch = new CountDownLatch(1);
-            Consumer<List<AgentConfiguration>> consumer = (newConfigurations) -> {
-                configurations.setValue(newConfigurations);
-                latch.countDown();
-            };
+            Consumer<List<AgentConfiguration>> consumer = configurations::setValue;
 
             AgentConfigurationReloadTask task = new AgentConfigurationReloadTask(Arrays.asList(mapping, mapping2), fileManager, consumer);
 
             task.run();
-
-            latch.await();
 
             List<AgentConfiguration> configurationList = configurations.getValue();
             assertThat(configurationList).hasSize(1);

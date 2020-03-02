@@ -79,8 +79,7 @@ class AgentConfigurationReloadTask implements Runnable {
                 }
                 newConfigurations.add(new AgentConfiguration(mapping, configYaml));
             } catch (Exception e) {
-                String messsage = String.format("Could not load agent mapping '%s'.", mapping.getName());
-                log.error(messsage, e);
+                log.error("Could not load agent mapping '{}'.", mapping.getName(), e);
             }
         }
         synchronized (this) {
