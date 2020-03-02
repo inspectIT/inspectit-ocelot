@@ -14,7 +14,9 @@ inspectit:
             data-input:
               sinceNanos: method_entry_time
         metrics:
-          '[method/duration]' : method_duration
+          '[method/duration]':
+            value: method_duration
+            data-tags: {method_name: method_name}
 
   metrics:
     definitions:

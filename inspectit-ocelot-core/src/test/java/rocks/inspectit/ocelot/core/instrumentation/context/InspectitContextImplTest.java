@@ -845,10 +845,15 @@ public class InspectitContextImplTest {
             assertThat(getCurrentTagsAsMap()).containsEntry("global", "globalValue");
 
             try (Scope scope = ctx.enterFullTagScope()) {
-                assertThat(getCurrentTagsAsMap()).hasSize(2);
-                assertThat(getCurrentTagsAsMap()).containsEntry("local", "localValue");
-                assertThat(getCurrentTagsAsMap()).containsEntry("global", "globalValue");
+                assertThat(getCurrentTagsAsMap()).hasSize(2)
+                        .containsEntry("local", "localValue")
+                        .containsEntry("global", "globalValue");
             }
+
+            Map<String, Object> fullTagMap = ctx.getFullTagMap();
+            assertThat(fullTagMap).hasSize(2)
+                    .containsEntry("local", "localValue")
+                    .containsEntry("global", "globalValue");
 
             ctx.close();
             assertThat(InspectitContextImpl.INSPECTIT_KEY.get()).isNull();
@@ -882,12 +887,17 @@ public class InspectitContextImplTest {
             assertThat(getCurrentTagsAsMap()).containsEntry("rootKey2", "rootValue2");
 
             try (Scope sc = ctx.enterFullTagScope()) {
-
-                assertThat(getCurrentTagsAsMap()).hasSize(3);
-                assertThat(getCurrentTagsAsMap()).containsEntry("rootKey1", "nestedValue1");
-                assertThat(getCurrentTagsAsMap()).containsEntry("rootKey2", "rootValue2");
-                assertThat(getCurrentTagsAsMap()).containsEntry("nestedKey2", "nestedValue2");
+                assertThat(getCurrentTagsAsMap()).hasSize(3)
+                        .containsEntry("rootKey1", "nestedValue1")
+                        .containsEntry("rootKey2", "rootValue2")
+                        .containsEntry("nestedKey2", "nestedValue2");
             }
+
+            Map<String, Object> fullTagMap = ctx.getFullTagMap();
+            assertThat(fullTagMap).hasSize(3)
+                    .containsEntry("rootKey1", "nestedValue1")
+                    .containsEntry("rootKey2", "rootValue2")
+                    .containsEntry("nestedKey2", "nestedValue2");
 
             ctx.close();
             assertThat(InspectitContextImpl.INSPECTIT_KEY.get()).isNull();
@@ -914,13 +924,20 @@ public class InspectitContextImplTest {
             assertThat(getCurrentTagsAsMap()).containsEntry("d4", "2.0");
 
             try (Scope scope = ctx.enterFullTagScope()) {
-
-                assertThat(getCurrentTagsAsMap()).hasSize(4);
-                assertThat(getCurrentTagsAsMap()).containsEntry("d1", "string");
-                assertThat(getCurrentTagsAsMap()).containsEntry("d2", "1");
-                assertThat(getCurrentTagsAsMap()).containsEntry("d3", "2");
-                assertThat(getCurrentTagsAsMap()).containsEntry("d4", "2.0");
+                assertThat(getCurrentTagsAsMap()).hasSize(4)
+                        .containsEntry("d1", "string")
+                        .containsEntry("d2", "1")
+                        .containsEntry("d3", "2")
+                        .containsEntry("d4", "2.0");
             }
+
+            Map<String, Object> fullTagMap = ctx.getFullTagMap();
+            assertThat(fullTagMap).hasSize(4)
+                    .containsEntry("d1", "string")
+                    .containsEntry("d2", 1)
+                    .containsEntry("d3", 2L)
+                    .containsEntry("d4", 2.0d);
+
             ctx.close();
         }
     }

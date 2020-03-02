@@ -63,4 +63,6 @@ inspectit:
             only-if-true: servicegraph_is_entry
           
         metrics:
-          '[service/out/responsetime]': servicegraph_call_duration
+          '[service/out/responsetime]':
+            value: servicegraph_call_duration
+            data-tags: {target_external: target_external, target_service: target_service, protocol: protocol, application: application}
