@@ -363,23 +363,44 @@ For each instrumented method the agent first finds all rules which have scopes m
   <span class="hljs-attr">exit:</span>
     <span class="hljs-attr">method_duration:</span>
       <span class="hljs-comment">#action invocation here....</span>
+    <span class="hljs-attr">method_name:</span>
+      <span class="hljs-comment">#action invocation here....</span>
 
   <span class="hljs-attr">metrics:</span>
-    <span class="hljs-string">'[method/duration]'</span> <span class="hljs-string">:</span> <span class="hljs-string">method_duration</span>
-    <span class="hljs-string">'[some/other/metric]'</span> <span class="hljs-string">:</span> <span class="hljs-number">42</span>
+    <span class="hljs-string">'[method/duration]'</span><span class="hljs-string">:</span>
+      <span class="hljs-attr">value:</span> <span class="hljs-string">method_duration</span>
+      <span class="hljs-attr">constant-tags:</span>
+        <span class="hljs-attr">action:</span> <span class="hljs-string">checkout</span>
+      <span class="hljs-attr">data-tags:</span>
+        <span class="hljs-attr">method_name:</span> <span class="hljs-string">method_name</span>
+    <span class="hljs-attr">write_my_other_metric:</span>
+      <span class="hljs-attr">metric:</span> <span class="hljs-string">"some/other/metric"</span>
+      <span class="hljs-attr">value:</span> <span class="hljs-number">42</span>
 </code></pre>
 <p>The metrics phase is executed after the exit phase of the rule.
-As shown above, you can simply assign values to metrics based on their name.
+As shown above, you can assign values to metrics based on their name or explicitly define the metric name in <code>metric</code> property.
+This allows to write multiple values for the same metric from within the same rule.
 You must however have <a href="/inspectit-ocelot/docs/next/metrics/custom-metrics">defined the metric</a> to use them.</p>
-<p>The measurement value written to the metric can be specified by giving a data key.
+<p>The measurement value written to the metric can be specified by giving a data key in the <code>value</code> property.
 This was done in the example above for <code>method/duration</code>:
-Here, the value for the data key <code>method_duration</code> is taken, which we previously wrote in the exit phase.
+Here, the <code>value</code> for the data key <code>method_duration</code> is taken, which we previously wrote in the exit phase.
 Alternatively you can just specify a constant which will be used, like shown for <code>some/other/metric</code>.</p>
-<p>If the value assigned with the data key you specified is <code>null</code> (e.g. no data was collected),
-no value for the metric will be written out.</p>
-<p>In addition, all configured tags for the metrics will also be taken from the inspectIT context,
-if they have been <a href="#defining-the-behaviour">configured to be used as tags</a>.</p>
-<p>Note that the notation above is actually a short notation for the following equivalent configuration:</p>
+<p>In addition, you should define tags that are be recorded alongside the metric value.
+The prerequisite for this is that tags have been declared in the <a href="/inspectit-ocelot/docs/next/metrics/custom-metrics">metric definition</a> and <a href="#defining-the-behaviour">configured to be used as tags</a>.
+Constant tags always have same values as defined in the configuration.
+The data tags try to resolve value from the data key, which is previously wrote in the exit phase.
+If data key for the data tag can not be found, then corresponding tag is omitted.
+Note that <code>data-tags</code> have higher priority than the <code>constant-tags</code>, thus if both section define a tag with same key, the data tag will overwrite the constant one if it can be resolved.</p>
+<blockquote>
+<p>All <a href="/inspectit-ocelot/docs/next/metrics/common-tags">common tags</a> are always included in the metric recording and do not need explicit specification.</p>
+</blockquote>
+
+    <div class="admonition admonition-warning">
+      <div class="admonition-heading">
+        <h5><div class="admonition-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8.893 1.5c-.183-.31-.52-.5-.887-.5s-.703.19-.886.5L.138 13.499a.98.98 0 0 0 0 1.001c.193.31.53.501.886.501h13.964c.367 0 .704-.19.877-.5a1.03 1.03 0 0 0 .01-1.002L8.893 1.5zm.133 11.497H6.987v-2.003h2.039v2.003zm0-3.004H6.987V5.987h2.039v4.006z"/></svg></div>  Short notation is deprecated</h5>
+      </div>
+      <div class="admonition-content">
+    <p>The default way to specify metric collection in Ocelot versions up to and including v1.0 was a so called short notation, which is now deprecated and will be invalid in future Ocelot releases:</p>
 <pre><code class="hljs css language-yaml"><span class="hljs-comment">#inspectit.instrumentation.rules is omitted here</span>
 <span class="hljs-attr">example_rule:</span>
   <span class="hljs-comment">#...</span>
@@ -388,22 +409,13 @@ if they have been <a href="#defining-the-behaviour">configured to be used as tag
       <span class="hljs-comment">#action invocation here....</span>
 
   <span class="hljs-attr">metrics:</span>
-    <span class="hljs-string">'[method/duration]'</span><span class="hljs-string">:</span>
-      <span class="hljs-attr">value:</span> <span class="hljs-string">method_duration</span>
-    <span class="hljs-attr">write_my_other_metric:</span>
-      <span class="hljs-attr">metric:</span> <span class="hljs-string">"some/other/metric"</span>
-      <span class="hljs-attr">value:</span> <span class="hljs-number">42</span>
+    <span class="hljs-string">'[method/duration]'</span> <span class="hljs-string">:</span> <span class="hljs-string">method_duration</span>
+    <span class="hljs-string">'[some/other/metric]'</span> <span class="hljs-string">:</span> <span class="hljs-number">42</span>
 </code></pre>
-<p>This configuration has exactly the same behaviour as the one shown above.
-However, as illustrated via <code>write_my_other_metric</code> it is possible to explicitly specify the name of the metric to output
-using the <code>metric</code> property. If <code>metric</code> is specified, then the key within the <code>metrics</code> map has no other purpose than documentation.
-However, if <code>metric</code> is empty, then the key within the <code>metrics</code> map is assumed to be the name of the metric to write.</p>
-<p>The explicit notation allows to write multiple values for the same metric from within the same rule.</p>
-<blockquote>
-<p>Due to the way configuration loading works, the short notation will always take precedence over the explicit notation.
-This means that you cannot override settings made with the short-notation by using the explicit notation.</p>
-</blockquote>
-<h3><a class="anchor" aria-hidden="true" id="collecting-traces"></a><a href="#collecting-traces" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Collecting Traces</h3>
+<p>As short notation does not allow specification of tags to be recorded, using the short notation means that only common tags will be collected.
+We advise to migrate to the new configuration style immediately.</p>
+<p>Due to the way configuration loading works, the short notation will always take precedence over the explicit notation. This means that you cannot override settings made with the short-notation by using the explicit notation.</p>
+</div></div><h3><a class="anchor" aria-hidden="true" id="collecting-traces"></a><a href="#collecting-traces" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Collecting Traces</h3>
 <p>The inspectIT Ocelot agent allows you to record method invocations as <a href="https://opencensus.io/tracing/span/">OpenCensus spans</a>.
 In order to make your collected spans visible, you must first set up a <a href="/inspectit-ocelot/docs/next/tracing/trace-exporters">trace exporter</a>.</p>
 <p>Afterwards you can define that all methods matching a certain rule will be traced:</p>
@@ -526,7 +538,7 @@ By setting <code>end-span</code> to false, the span is kept open instead. It can
 In this case, the rule will first attempt to continue the existing span. Only if this fails (e.g. because the specified span does not exist yet or the conditions are not met) a new span is started.</p>
 <p>Again, conditions for the span continuing and span ending can be specified just like for the span starting.
 The properties <code>continue-span-conditions</code> and <code>end-span-conditions</code> work just like <code>start-span-conditions</code>.</p>
-</span></div></article></div><div class="docLastUpdate"><em>Last updated on 2020-2-21 by Jonas Kunz</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/next/instrumentation/scopes"><span class="arrow-prev">← </span><span>Scopes</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/next/instrumentation/special-sensors"><span>Special Sensors</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#data-propagation">Data Propagation</a><ul class="toc-headings"><li><a href="#defining-the-behaviour">Defining the Behaviour</a></li><li><a href="#interaction-with-opencensus-tags">Interaction with OpenCensus Tags</a></li></ul></li><li><a href="#actions">Actions</a><ul class="toc-headings"><li><a href="#input-parameters">Input Parameters</a></li><li><a href="#multiple-statements-and-imports">Multiple statements and Imports</a></li></ul></li><li><a href="#defining-rules">Defining Rules</a><ul class="toc-headings"><li><a href="#invoking-actions">Invoking Actions</a></li><li><a href="#collecting-metrics">Collecting Metrics</a></li><li><a href="#collecting-traces">Collecting Traces</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2020 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</span></div></article></div><div class="docLastUpdate"><em>Last updated on 2020-2-25 by Ivan Senic</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/next/instrumentation/scopes"><span class="arrow-prev">← </span><span>Scopes</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/next/instrumentation/special-sensors"><span>Special Sensors</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#data-propagation">Data Propagation</a><ul class="toc-headings"><li><a href="#defining-the-behaviour">Defining the Behaviour</a></li><li><a href="#interaction-with-opencensus-tags">Interaction with OpenCensus Tags</a></li></ul></li><li><a href="#actions">Actions</a><ul class="toc-headings"><li><a href="#input-parameters">Input Parameters</a></li><li><a href="#multiple-statements-and-imports">Multiple statements and Imports</a></li></ul></li><li><a href="#defining-rules">Defining Rules</a><ul class="toc-headings"><li><a href="#invoking-actions">Invoking Actions</a></li><li><a href="#collecting-metrics">Collecting Metrics</a></li><li><a href="#collecting-traces">Collecting Traces</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2020 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
