@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import net.bytebuddy.description.method.MethodDescription;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.MetricRecordingSettings;
@@ -18,12 +17,14 @@ import rocks.inspectit.ocelot.core.instrumentation.context.ContextManager;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.ConditionalHookAction;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.MetricsRecorder;
+import rocks.inspectit.ocelot.core.instrumentation.hook.actions.model.MetricAccessor;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.ContinueOrStartSpanAction;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.EndSpanAction;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.StoreSpanAction;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.WriteSpanAttributesAction;
 import rocks.inspectit.ocelot.core.metrics.MeasuresAndViewsManager;
 import rocks.inspectit.ocelot.core.privacy.obfuscation.ObfuscationManager;
+import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -39,6 +40,9 @@ public class MethodHookGenerator {
 
     @Autowired
     private ContextManager contextManager;
+
+    @Autowired
+    private CommonTagsManager commonTagsManager;
 
     @Autowired
     private MeasuresAndViewsManager metricsManager;
@@ -171,7 +175,7 @@ public class MethodHookGenerator {
     private Optional<IHookAction> buildMetricsRecorder(MethodHookConfiguration config) {
         Collection<MetricRecordingSettings> metrics = config.getMetrics();
         if (!metrics.isEmpty()) {
-            List<Pair<String, VariableAccessor>> metricRecordings = metrics.stream()
+            List<MetricAccessor> metricAccessors = metrics.stream()
                     .map(metricConfig -> {
                         String value = metricConfig.getValue();
                         VariableAccessor valueAccessor;
@@ -180,10 +184,10 @@ public class MethodHookGenerator {
                         } catch (NumberFormatException e) {
                             valueAccessor = variableAccessorFactory.getVariableAccessor(value);
                         }
-                        return Pair.of(metricConfig.getMetric(), valueAccessor);
+                        return new MetricAccessor(metricConfig.getMetric(), valueAccessor, metricConfig.getConstantTags(), metricConfig.getDataTags());
                     })
                     .collect(Collectors.toList());
-            MetricsRecorder recorder = new MetricsRecorder(metricRecordings, metricsManager, statsRecorder);
+            MetricsRecorder recorder = new MetricsRecorder(metricAccessors, commonTagsManager, metricsManager, statsRecorder);
             return Optional.of(recorder);
         } else {
             return Optional.empty();

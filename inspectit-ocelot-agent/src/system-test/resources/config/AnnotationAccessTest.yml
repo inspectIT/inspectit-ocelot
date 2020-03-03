@@ -52,7 +52,9 @@ inspectit:
         entry:
           anno_value: {action: read_MyMethodAnnotation_value}
         metrics:
-          '[annotation/test]' : 42
+          '[annotation/test]':
+            value: 42
+            data-tags: {anno_value : anno_value}
 
 
 

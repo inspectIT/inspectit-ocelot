@@ -38,7 +38,9 @@ inspectit:
         entry:
           method_name:  {action: get_method_fqn}
         metrics:
-          '[my/invocation]': 42
+          '[my/invocation]':
+            value: 42
+            data-tags: {method_name: method_name, user_tag: user_tag}
 
       record_method_duration:
         scopes:

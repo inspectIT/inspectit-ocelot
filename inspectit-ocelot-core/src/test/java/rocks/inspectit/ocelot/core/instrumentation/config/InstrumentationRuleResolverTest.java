@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -294,6 +295,30 @@ class InstrumentationRuleResolverTest {
             Multiset<MetricRecordingSettings> result = ruleResolver.resolveMetricRecordings(irs);
 
             assertThat(result).isEmpty();
+        }
+
+        @Test
+        void tagsCopied() {
+            MetricRecordingSettings rec = MetricRecordingSettings.builder()
+                    .value("42")
+                    .metric("")
+                    .constantTags(Collections.singletonMap("constant", "true"))
+                    .dataTags(Collections.singletonMap("constant", "false"))
+                    .build();
+            InstrumentationRuleSettings irs = new InstrumentationRuleSettings();
+            irs.setMetrics(ImmutableMap.of("default_metric", rec));
+
+            Multiset<MetricRecordingSettings> result = ruleResolver.resolveMetricRecordings(irs);
+
+            assertThat(result).hasOnlyOneElementSatisfying(settings -> {
+                assertThat(settings.getConstantTags()).hasSize(1).containsEntry("constant", "true");
+                assertThat(settings.getDataTags()).hasSize(1).containsEntry("constant", "false");
+
+                // no modification allowed
+                assertThat(catchThrowable(() -> settings.getConstantTags().clear())).isNotNull();
+                assertThat(catchThrowable(() -> settings.getDataTags().clear())).isNotNull();
+            });
+
         }
 
     }

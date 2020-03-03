@@ -7,6 +7,9 @@ import lombok.NoArgsConstructor;
 import org.springframework.util.StringUtils;
 import rocks.inspectit.ocelot.config.validation.ViolationBuilder;
 
+import javax.validation.constraints.NotNull;
+import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 
 @Data
@@ -34,10 +37,29 @@ public class MetricRecordingSettings {
      */
     private String value;
 
+    /**
+     * Constant tag key and values to add to the this metric when recorded. Constant tags will be overwritten by the
+     * {@link #dataTags} if they share same key and data tag can be resolved.
+     */
+    @Builder.Default
+    @NotNull
+    private Map<String, String> constantTags = Collections.emptyMap();
+
+    /**
+     * Data tag key and values to add to the this metric when recorded. Actual data value is resolved from the active
+     * inspectIT context.
+     */
+    @Builder.Default
+    @NotNull
+    private Map<String, String> dataTags = Collections.emptyMap();
+
 
     public MetricRecordingSettings copyWithDefaultMetricName(String defaultMetricName) {
         String metricName = getMetricNameOrDefault(defaultMetricName);
-        return toBuilder().metric(metricName).build();
+        return toBuilder().metric(metricName)
+                .constantTags(Collections.unmodifiableMap(constantTags))
+                .dataTags(Collections.unmodifiableMap(dataTags))
+                .build();
     }
 
     /**

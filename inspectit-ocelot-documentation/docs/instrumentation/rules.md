@@ -386,28 +386,43 @@ example_rule:
   exit:
     method_duration:
       #action invocation here....
+    method_name:
+      #action invocation here....
 
   metrics:
-    '[method/duration]' : method_duration
-    '[some/other/metric]' : 42
+    '[method/duration]':
+      value: method_duration
+      constant-tags:
+        action: checkout
+      data-tags:
+        method_name: method_name
+    write_my_other_metric:
+      metric: "some/other/metric"
+      value: 42
 ```
 
 The metrics phase is executed after the exit phase of the rule.
-As shown above, you can simply assign values to metrics based on their name.
+As shown above, you can assign values to metrics based on their name or explicitly define the metric name in `metric` property.
+This allows to write multiple values for the same metric from within the same rule.
 You must however have [defined the metric](metrics/custom-metrics.md) to use them.
 
-The measurement value written to the metric can be specified by giving a data key.
+The measurement value written to the metric can be specified by giving a data key in the `value` property.
 This was done in the example above for `method/duration`:
-Here, the value for the data key `method_duration` is taken, which we previously wrote in the exit phase.
+Here, the `value` for the data key `method_duration` is taken, which we previously wrote in the exit phase.
 Alternatively you can just specify a constant which will be used, like shown for `some/other/metric`.
 
-If the value assigned with the data key you specified is `null` (e.g. no data was collected),
-no value for the metric will be written out.
+In addition, you should define tags that are be recorded alongside the metric value.
+The prerequisite for this is that tags have been declared in the [metric definition](metrics/custom-metrics.md) and [configured to be used as tags](#defining-the-behaviour).
+Constant tags always have same values as defined in the configuration.
+The data tags try to resolve value from the data key, which is previously wrote in the exit phase.
+If data key for the data tag can not be found, then corresponding tag is omitted.
+Note that `data-tags` have higher priority than the `constant-tags`, thus if both section define a tag with same key, the data tag will overwrite the constant one if it can be resolved.
 
-In addition, all configured tags for the metrics will also be taken from the inspectIT context,
-if they have been [configured to be used as tags](#defining-the-behaviour).
+> All [common tags](metrics/common-tags.md) are always included in the metric recording and do not need explicit specification.
 
-Note that the notation above is actually a short notation for the following equivalent configuration:
+:::warning Short notation is deprecated
+The default way to specify metric collection in Ocelot versions up to and including v1.0 was a so called short notation, which is now deprecated and will be invalid in future Ocelot releases:
+
 ```yaml
 #inspectit.instrumentation.rules is omitted here
 example_rule:
@@ -417,22 +432,14 @@ example_rule:
       #action invocation here....
 
   metrics:
-    '[method/duration]':
-      value: method_duration
-    write_my_other_metric:
-      metric: "some/other/metric"
-      value: 42
+    '[method/duration]' : method_duration
+    '[some/other/metric]' : 42
 ```
 
-This configuration has exactly the same behaviour as the one shown above.
-However, as illustrated via `write_my_other_metric` it is possible to explicitly specify the name of the metric to output
-using the `metric` property. If `metric` is specified, then the key within the `metrics` map has no other purpose than documentation.
-However, if `metric` is empty, then the key within the `metrics` map is assumed to be the name of the metric to write.
-
-The explicit notation allows to write multiple values for the same metric from within the same rule.
-
-> Due to the way configuration loading works, the short notation will always take precedence over the explicit notation.
-This means that you cannot override settings made with the short-notation by using the explicit notation.
+As short notation does not allow specification of tags to be recorded, using the short notation means that only common tags will be collected.
+We advise to migrate to the new configuration style immediately.
+Due to the way configuration loading works, the short notation will always take precedence over the explicit notation. This means that you cannot override settings made with the short-notation by using the explicit notation.
+:::
 
 ### Collecting Traces
 
