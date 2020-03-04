@@ -54,7 +54,6 @@ public class MetricsRecorderTest {
         when(commonTagsManager.getCommonTagKeys()).thenReturn(Collections.emptyList());
         when(statsRecorder.newMeasureMap()).thenReturn(measureMap);
         when(executionContext.getInspectitContext()).thenReturn(inspectitContext);
-        when(inspectitContext.getFullTagMap()).thenReturn(Collections.emptyMap());
     }
 
     @Nested
@@ -110,7 +109,7 @@ public class MetricsRecorderTest {
         @Test
         void commonTagsIncluded() {
             when(commonTagsManager.getCommonTagKeys()).thenReturn(Collections.singletonList(TagKey.create("common")));
-            when(inspectitContext.getFullTagMap()).thenReturn(Collections.singletonMap("common", "overwrite"));
+            when(inspectitContext.getData("common")).thenReturn("overwrite");
 
             VariableAccessor variableAccess = Mockito.mock(VariableAccessor.class);
             when(variableAccess.get(any())).thenReturn(100L);
@@ -123,6 +122,7 @@ public class MetricsRecorderTest {
             TagContext expected = Tags.getTagger().emptyBuilder().putLocal(TagKey.create("common"), TagValue.create("overwrite")).build();
             verify(measureMap, times(1)).record(eq(expected));
             verify(metricsManager, times(1)).tryRecordingMeasurement(eq("my_metric"), same(measureMap), eq((Number) 100L));
+            verifyNoMoreInteractions(inspectitContext);
         }
 
         @Test
@@ -159,7 +159,7 @@ public class MetricsRecorderTest {
 
         @Test
         void dataTags() {
-            when(inspectitContext.getFullTagMap()).thenReturn(Collections.singletonMap("tag", "value"));
+            when(inspectitContext.getData("tag")).thenReturn("value");
 
             VariableAccessor variableAccess = Mockito.mock(VariableAccessor.class);
             when(variableAccess.get(any())).thenReturn(100L);
@@ -177,11 +177,8 @@ public class MetricsRecorderTest {
 
         @Test
         void multipleAccessorsMixedTags() {
-            HashMap<String, Object> contextTags = new HashMap<>();
-            contextTags.put("t1", "data1");
-            contextTags.put("t2", 12L);
-            contextTags.put("t3", Boolean.FALSE);
-            when(inspectitContext.getFullTagMap()).thenReturn(contextTags);
+            // existing -> not_existing -> existing1 -> existing2
+            when(inspectitContext.getData(anyString())).thenReturn("data1", null, 12L, Boolean.FALSE);
 
             VariableAccessor dataA = Mockito.mock(VariableAccessor.class);
             VariableAccessor dataB = Mockito.mock(VariableAccessor.class);
@@ -202,12 +199,12 @@ public class MetricsRecorderTest {
 
             InOrder inOrder = inOrder(measureMap, metricsManager);
             // first recording
-            inOrder.verify(metricsManager, times(1)).tryRecordingMeasurement(eq("my_metric1"), same(measureMap), eq((Number) 100.0d));
+            inOrder.verify(metricsManager).tryRecordingMeasurement(eq("my_metric1"), same(measureMap), eq((Number) 100.0d));
             TagContext expected1 = Tags.getTagger().emptyBuilder()
                     .putLocal(TagKey.create("cA"), TagValue.create("100"))
                     .putLocal(TagKey.create("existing"), TagValue.create("data1"))
                     .build();
-            inOrder.verify(measureMap, times(1)).record(eq(expected1));
+            inOrder.verify(measureMap).record(eq(expected1));
             // second recording
             inOrder.verify(metricsManager, times(1)).tryRecordingMeasurement(eq("my_metric2"), same(measureMap), eq((Number) 200.0d));
             TagContext expected2 = Tags.getTagger().emptyBuilder()
@@ -215,14 +212,14 @@ public class MetricsRecorderTest {
                     .putLocal(TagKey.create("existing1"), TagValue.create("12"))
                     .putLocal(TagKey.create("existing2"), TagValue.create("false"))
                     .build();
-            inOrder.verify(measureMap, times(1)).record(eq(expected2));
+            inOrder.verify(measureMap).record(eq(expected2));
             // and no more
             inOrder.verifyNoMoreInteractions();
         }
 
         @Test
         void dataOverwritesConstant() {
-            when(inspectitContext.getFullTagMap()).thenReturn(Collections.singletonMap("tag", "value"));
+            when(inspectitContext.getData("tag")).thenReturn("value");
 
             VariableAccessor variableAccess = Mockito.mock(VariableAccessor.class);
             when(variableAccess.get(any())).thenReturn(100L);
@@ -237,6 +234,5 @@ public class MetricsRecorderTest {
             verify(metricsManager, times(1)).tryRecordingMeasurement(eq("my_metric"), same(measureMap), any(Number.class));
             verify(metricsManager, times(1)).tryRecordingMeasurement(eq("my_metric"), same(measureMap), eq((Number) 100L));
         }
-
     }
 }

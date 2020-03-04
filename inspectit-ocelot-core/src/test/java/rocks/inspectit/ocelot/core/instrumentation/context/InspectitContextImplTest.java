@@ -850,12 +850,11 @@ public class InspectitContextImplTest {
                         .containsEntry("global", "globalValue");
             }
 
-            Map<String, Object> fullTagMap = ctx.getFullTagMap();
-            assertThat(fullTagMap).hasSize(2)
-                    .containsEntry("local", "localValue")
-                    .containsEntry("global", "globalValue");
+            assertThat(ctx.getData("local")).isEqualTo("localValue");
+            assertThat(ctx.getData("global")).isEqualTo("globalValue");
 
             ctx.close();
+
             assertThat(InspectitContextImpl.INSPECTIT_KEY.get()).isNull();
         }
 
@@ -893,13 +892,12 @@ public class InspectitContextImplTest {
                         .containsEntry("nestedKey2", "nestedValue2");
             }
 
-            Map<String, Object> fullTagMap = ctx.getFullTagMap();
-            assertThat(fullTagMap).hasSize(3)
-                    .containsEntry("rootKey1", "nestedValue1")
-                    .containsEntry("rootKey2", "rootValue2")
-                    .containsEntry("nestedKey2", "nestedValue2");
+            assertThat(ctx.getData("rootKey1")).isEqualTo("nestedValue1");
+            assertThat(ctx.getData("rootKey2")).isEqualTo("rootValue2");
+            assertThat(ctx.getData("nestedKey2")).isEqualTo("nestedValue2");
 
             ctx.close();
+
             assertThat(InspectitContextImpl.INSPECTIT_KEY.get()).isNull();
         }
 
@@ -931,12 +929,10 @@ public class InspectitContextImplTest {
                         .containsEntry("d4", "2.0");
             }
 
-            Map<String, Object> fullTagMap = ctx.getFullTagMap();
-            assertThat(fullTagMap).hasSize(4)
-                    .containsEntry("d1", "string")
-                    .containsEntry("d2", 1)
-                    .containsEntry("d3", 2L)
-                    .containsEntry("d4", 2.0d);
+            assertThat(ctx.getData("d1")).isEqualTo("string");
+            assertThat(ctx.getData("d2")).isEqualTo(1);
+            assertThat(ctx.getData("d3")).isEqualTo(2L);
+            assertThat(ctx.getData("d4")).isEqualTo(2.0D);
 
             ctx.close();
         }

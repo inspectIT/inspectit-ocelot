@@ -347,18 +347,8 @@ public class InspectitContextImpl implements InternalInspectitContext {
     public Scope enterFullTagScope() {
         TagContextBuilder builder = Tags.getTagger().emptyBuilder();
         dataTagsStream()
-                .forEach(e -> builder.put(TagKey.create(e.getKey()), TagValue.create(e.getValue().toString())));
+                .forEach(e -> builder.putLocal(TagKey.create(e.getKey()), TagValue.create(e.getValue().toString())));
         return builder.buildScoped();
-    }
-
-    /**
-     * Returns map of tags currently present in {@link #getData()}.
-     *
-     * @return the tag stream
-     * @see #enterFullTagScope()
-     */
-    public Map<String, Object> getFullTagMap() {
-        return dataTagsStream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     private Stream<Map.Entry<String, Object>> dataTagsStream() {
@@ -368,8 +358,11 @@ public class InspectitContextImpl implements InternalInspectitContext {
     }
 
     /**
+     * Returns the most recent value for data, which either was inherited form the parent context,
+     * set via {@link #setData(String, Object)} or changed due to an up-propagation.
+     *
      * @param key the name of the data to query
-     * @return the most recent value for data, which either was inherited form the parent context, set via {@link #setData(String, Object)} or changed due to an up-propagation.
+     * @return the data element which is related to the given key or `null` if it doesn't exist
      */
     @Override
     public Object getData(String key) {
