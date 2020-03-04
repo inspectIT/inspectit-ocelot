@@ -69,6 +69,16 @@ inspectit-eum-server:
         enabled: true
         host: localhost
         port: 8888
+      influx:
+        enabled: true
+        # the export interval of the metrics
+        export-interval: 15s
+        # the database to write to
+        database: "inspectit"
+        # the retention policy to write to
+        retention-policy: "autogen"
+        # If true, the specified database will be created with the autogen retention policy
+        create-database: true
 
   # settings for the EUM server's self-monitoring
   self-monitoring:

@@ -278,7 +278,13 @@ inspectit-eum-server:
 ```
 
 ## Exporters
-By now, the prometheus exporter is available. If `enabled` is set to true, the exporter is exposes the metrics under the following HTTP endpoint: `http://[host]:[port]/metrics`
+
+The EUM server comes with the same Prometheus and InfluxDB exporter as the Ocelot agent.
+The exporter's configurations options are the same as for the [agent](../metrics/metric-exporters).
+However, they are located under the `inspectit-eum-server.exporters.metrics` configuration path.
+
+By now, the prometheus exporter is available. 
+If `enabled` is set to true, the exporter is exposes the metrics under the following HTTP endpoint: `http://[host]:[port]/metrics`
 
 ## Self-Monitoring
 
