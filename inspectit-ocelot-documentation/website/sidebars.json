@@ -24,7 +24,8 @@
     "Tracing": [
       "tracing/tracing",
       "tracing/trace-exporters",
-      "tracing/log-correlation"
+      "tracing/log-correlation",
+      "tracing/privacy"
     ],
     "Instrumentation": [
       "instrumentation/instrumentation",
