@@ -5,7 +5,9 @@ import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import rocks.inspectit.oce.eum.server.beacon.Beacon;
+import rocks.inspectit.oce.eum.server.configuration.model.BeaconTagSettings;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
 
 import java.util.*;
@@ -25,16 +27,8 @@ public class RegexReplacementBeaconProcessor implements BeaconProcessor {
 
     @Autowired
     public RegexReplacementBeaconProcessor(EumServerConfiguration config) {
-        Map<String, RegexDerivedTag> unorderedTags = config.getTags().getRegex().entrySet().stream()
-                .map(e ->
-                        RegexDerivedTag.builder()
-                                .tagName(e.getKey())
-                                .inputBeaconField(e.getValue().getInput())
-                                .regex(Pattern.compile(e.getValue().getRegex()))
-                                .replacement(e.getValue().getReplacement())
-                                .keepIfNoMatch(e.getValue().isKeepOriginalIfNoMatch())
-                                .build()
-                )
+        Map<String, RegexDerivedTag> unorderedTags = config.getTags().getBeacon().entrySet().stream()
+                .map(e -> RegexDerivedTag.fromSettings(e.getKey(), e.getValue()))
                 .collect(Collectors.toMap(RegexDerivedTag::getTagName, t -> t));
         derivedTags = getInTopologicalOrder(unorderedTags.values(), tag -> {
             String input = tag.getInputBeaconField();
@@ -49,20 +43,34 @@ public class RegexReplacementBeaconProcessor implements BeaconProcessor {
     @Override
     public Beacon process(Beacon beacon) {
         Map<String, String> newTags = new HashMap<>();
-        for (RegexDerivedTag derived : derivedTags) {
-            String input = newTags.get(derived.getInputBeaconField());
+        for (RegexDerivedTag derivedTag : derivedTags) {
+            String input = newTags.get(derivedTag.getInputBeaconField());
             if (input == null) {
-                input = beacon.get(derived.getInputBeaconField());
+                input = beacon.get(derivedTag.getInputBeaconField());
             }
             if (input != null) {
-                if (derived.getRegex().matcher(input).find()) {
-                    newTags.put(derived.getTagName(), derived.getRegex().matcher(input).replaceAll(derived.getReplacement()));
-                } else if (derived.isKeepIfNoMatch()) {
-                    newTags.put(derived.getTagName(), input);
+                Pattern regex = derivedTag.getRegex();
+                if (regex != null) {
+                    String result = regexReplaceAll(input, regex, derivedTag.getReplacement(), derivedTag.isKeepIfNoMatch());
+                    if (result != null) {
+                        newTags.put(derivedTag.getTagName(), result);
+                    }
+                } else {
+                    newTags.put(derivedTag.getTagName(), input);
                 }
             }
         }
         return beacon.merge(newTags);
+    }
+
+    private String regexReplaceAll(String input, Pattern regex, String replacement, boolean keepIfNoMatch) {
+        boolean anyRegexMatch = regex.matcher(input).find();
+        if (anyRegexMatch) {
+            return regex.matcher(input).replaceAll(replacement);
+        } else if (keepIfNoMatch) {
+            return input;
+        }
+        return null;
     }
 
     /**
@@ -74,7 +82,7 @@ public class RegexReplacementBeaconProcessor implements BeaconProcessor {
      * @param <T>             the element types, should have proper hashcode /equals implementation
      * @return the sorted list of all elements
      */
-    public <T> List<T> getInTopologicalOrder(Collection<T> elements, Function<T, Collection<T>> getDependencies) {
+    private <T> List<T> getInTopologicalOrder(Collection<T> elements, Function<T, Collection<T>> getDependencies) {
         LinkedHashSet<T> result = new LinkedHashSet<>();
         LinkedHashSet<T> visited = new LinkedHashSet<>();
 
@@ -89,7 +97,7 @@ public class RegexReplacementBeaconProcessor implements BeaconProcessor {
         }
         currentPath.add(current);
         for (T dependency : getDependencies.apply(current)) {
-            if (!result.contains(dependency)) {
+            if (!result.contains(dependency) && !dependency.equals(current)) {
                 addInTopologicalOrder(dependency, getDependencies, currentPath, result);
             }
         }
@@ -112,6 +120,7 @@ public class RegexReplacementBeaconProcessor implements BeaconProcessor {
 
         /**
          * The regular expression to use for the "replace-all" operation.
+         * Can be null in case the value should simply be copied.
          */
         Pattern regex;
 
@@ -125,5 +134,20 @@ public class RegexReplacementBeaconProcessor implements BeaconProcessor {
          * Otherwise no value for {@link #tagName} will be set in the beacon.
          */
         boolean keepIfNoMatch;
+
+        public static RegexDerivedTag fromSettings(String tagName, BeaconTagSettings settings) {
+            Pattern pattern = null;
+            String regex = settings.getRegex();
+            if (!StringUtils.isEmpty(regex)) {
+                pattern = Pattern.compile(regex);
+            }
+            return RegexDerivedTag.builder()
+                    .tagName(tagName)
+                    .inputBeaconField(settings.getInput())
+                    .regex(pattern)
+                    .replacement(settings.getReplacement())
+                    .keepIfNoMatch(settings.isKeepNoMatch())
+                    .build();
+        }
     }
 }

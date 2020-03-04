@@ -89,13 +89,7 @@ public class BeaconMetricManager {
      */
     private TagContextBuilder getTagContextForBeacon(Beacon beacon) {
         TagContextBuilder tagContextBuilder = measuresAndViewsManager.getTagContext();
-
-        for (Map.Entry<String, String> beaconTag : configuration.getTags().getBeacon().entrySet()) {
-            if (beacon.contains(beaconTag.getValue())) {
-                tagContextBuilder.putLocal(TagKey.create(beaconTag.getKey()), TagValue.create(beacon.get(beaconTag.getValue())));
-            }
-        }
-        for (String key : configuration.getTags().getRegex().keySet()) {
+        for (String key : configuration.getTags().getBeacon().keySet()) {
             if (beacon.contains(key)) {
                 tagContextBuilder.putLocal(TagKey.create(key), TagValue.create(beacon.get(key)));
             }

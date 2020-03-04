@@ -54,13 +54,15 @@ inspectit-eum-server:
     extra:
       APPLICATION: my-application
     beacon:
-      COUNTRY_CODE: COUNTRY_CODE
-      URL: u
-      OS: ua.plt
-    regex:
+      COUNTRY_CODE:
+        input: COUNTRY_CODE
+      URL:
+        input: u
+      OS:
+        input: ua.plt
       U_NO_QUERY:
         input: u
-        regex: "^([^?]*)(\\?.*)+$"
+        regex: "^([^?]*)(\\?.*)?$"
         replacement: "$1"
       U_HOST:
         input: u

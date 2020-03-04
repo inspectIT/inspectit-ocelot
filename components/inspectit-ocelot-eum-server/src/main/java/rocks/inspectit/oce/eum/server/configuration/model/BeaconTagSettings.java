@@ -14,8 +14,9 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 /**
  * Defines how a custom beacon field is derived using a RegEx replaceAll operation from an existing beacon field.
+ * If no regex is specified, the provided input field will simply be copied.
  */
-public class RegexTagSettings {
+public class BeaconTagSettings {
 
     /**
      * Decides what to do in case no match for the given Regex is found.
@@ -24,7 +25,7 @@ public class RegexTagSettings {
      * If this value is false(default), then no output will be generated if no match is found.
      */
     @Builder.Default
-    private boolean keepOriginalIfNoMatch = false;
+    private boolean keepNoMatch = false;
 
     /**
      * The name of the input field to use, e.g. "u" for the request URL.
@@ -34,14 +35,16 @@ public class RegexTagSettings {
 
     /**
      * The regex pattern to use, capture groups are supported!
+     * <p>
+     * If this regex is null or empty, the input value will be copied unchanged.
      */
-    @NotBlank
     private String regex;
 
     /**
      * The replacement to apply on each match, $1,§2,$2 can be used to refer to capture groups.
      */
     @NotNull
-    private String replacement;
+    @Builder.Default
+    private String replacement = "";
 
 }

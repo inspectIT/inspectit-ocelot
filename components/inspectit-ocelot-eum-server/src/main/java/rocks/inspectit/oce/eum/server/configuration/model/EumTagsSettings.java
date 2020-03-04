@@ -22,11 +22,6 @@ public class EumTagsSettings extends TagsSettings {
     private static final String IP_PATTERN = "^(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])($|(\\/[1-9]$|\\/[1-2][0-9]$|\\/3[0-2]$))";
 
     /**
-     * Maps tag name to beacon key.
-     */
-    private final Map<String, String> beacon = new HashMap<>();
-
-    /**
      * List of tags, which are defined as global
      */
     private final Set<String> defineAsGlobal = new HashSet<>();
@@ -41,7 +36,7 @@ public class EumTagsSettings extends TagsSettings {
      * The keys are the names of the beacon fields under which the results of the given replacement operation will be stored.
      * Tags via regexes can depend on each other, as long as no cyclic dependency is involved.
      */
-    private Map<String, RegexTagSettings> regex = new HashMap<>();
+    private Map<String, BeaconTagSettings> beacon = new HashMap<>();
 
     /**
      * IPUtils
@@ -54,7 +49,6 @@ public class EumTagsSettings extends TagsSettings {
                 .anyMatch(globalTag ->
                         !(getExtra().containsKey(globalTag)
                                 || getBeacon().containsKey(globalTag)
-                                || getRegex().containsKey(globalTag)
                         )
                 );
     }

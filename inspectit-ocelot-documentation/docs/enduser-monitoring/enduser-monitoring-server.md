@@ -229,8 +229,41 @@ inspectit-eum-server:
     extra:
       APP: my-application
     beacon:
-      URL: u
+      URL: 
+        input: u
 ```
+
+Tags configured via `beacon` offer some additional flexibility: In addition to simply copying the input value, it is possible to perform a RegEx replacement.
+For example the following configuration erases the path segment after `/user/` because it contains a numeric ID:
+
+```YAML
+inspectit-eum-server:
+  tags:
+    beacon:
+      URL_USER_ERASED: 
+        input: u
+        regex: "\\/user\\/\d+"
+        replacement: "\\/user\\/{id}"
+        keep-no-match: true
+```
+
+The `regex` property defines the regex to use for the replacement.
+All matches of the input value are replaced with the string defined by `replacement`.
+The `keep-no-match` options defines what to do if the given input does not match the given regex at any place.
+If it is set to `true`, the original value will be kept. If it is set to `false`, the given tag won't be created if not match is found.
+
+Note that capture groups are supported and can be referenced in the replacement string using `$1`, `$2`, etc.
+Using this mechanism, the eum server provides the following tags out of the box:
+
+| `U_NO_QUERY` | The Boomerang *u* property but without query parameters. Check out [Boomerang](https://developer.akamai.com/tools/boomerang/docs/BOOMR.html).|
+| `U_HOST` | The host specified in the *u* property. Check out [Boomerang](https://developer.akamai.com/tools/boomerang/docs/BOOMR.html).|
+| `U_PORT` | The port specified in the *u* property. Check out [Boomerang](https://developer.akamai.com/tools/boomerang/docs/BOOMR.html).|
+| `U_PATH` | The http path specified in the *u* property. Check out [Boomerang](https://developer.akamai.com/tools/boomerang/docs/BOOMR.html).|
+| `PGU_NO_QUERY` | The Boomerang *pgu* property but without query parameters. Check out [Boomerang](https://developer.akamai.com/tools/boomerang/docs/BOOMR.html).|
+| `PGU_HOST` | The host specified in the *pgu* property. Check out [Boomerang](https://developer.akamai.com/tools/boomerang/docs/BOOMR.html).|
+| `PGU_PORT` | The port specified in the *pgu* property. Check out [Boomerang](https://developer.akamai.com/tools/boomerang/docs/BOOMR.html).|
+| `PGU_PATH` | The http path specified in the *pgu* property. Check out [Boomerang](https://developer.akamai.com/tools/boomerang/docs/BOOMR.html).|
+
 
 #### Additional Tags
 
@@ -239,8 +272,6 @@ The EUM server provides a set of additional tags which can be used like all othe
 | Tag | Description |
 | --- | --- |
 | `COUNTRY_CODE` | Contains the geolocation of the beacon's origin. It is resolved by using the client IP and the [GeoLite2 database](https://www.maxmind.com). If the IP cannot be resolved, the tag value will be empty. |
-| `U_NO_QUERY` | The Boomerang *u* property but without query parameters. Check out [Boomerang](https://developer.akamai.com/tools/boomerang/docs/BOOMR.html).|
-| `PGU_NO_QUERY` | The Boomerang *pgu* property but without query parameters. Check out [Boomerang](https://developer.akamai.com/tools/boomerang/docs/BOOMR.html).|
 
 ##### Custom COUNTRY_CODE Mapping
 
