@@ -37,6 +37,13 @@ public class EumTagsSettings extends TagsSettings {
     private final Map<String, List<@Pattern(regexp = IP_PATTERN) String>> customIPMapping = new HashMap<>();
 
     /**
+     * Tags which are derived using regex-replace operations.
+     * The keys are the names of the beacon fields under which the results of the given replacement operation will be stored.
+     * Tags via regexes can depend on each other, as long as no cyclic dependency is involved.
+     */
+    private Map<String, RegexTagSettings> regex = new HashMap<>();
+
+    /**
      * IPUtils
      */
     private IPUtils ipUtils = new IPUtils();
@@ -47,6 +54,7 @@ public class EumTagsSettings extends TagsSettings {
                 .anyMatch(globalTag ->
                         !(getExtra().containsKey(globalTag)
                                 || getBeacon().containsKey(globalTag)
+                                || getRegex().containsKey(globalTag)
                         )
                 );
     }

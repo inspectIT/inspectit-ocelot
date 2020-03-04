@@ -95,6 +95,11 @@ public class BeaconMetricManager {
                 tagContextBuilder.putLocal(TagKey.create(beaconTag.getKey()), TagValue.create(beacon.get(beaconTag.getValue())));
             }
         }
+        for (String key : configuration.getTags().getRegex().keySet()) {
+            if (beacon.contains(key)) {
+                tagContextBuilder.putLocal(TagKey.create(key), TagValue.create(beacon.get(key)));
+            }
+        }
         return tagContextBuilder;
     }
 }
