@@ -4,8 +4,6 @@ import org.springframework.stereotype.Component;
 import rocks.inspectit.oce.eum.server.beacon.Beacon;
 
 import java.util.Collections;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Processor to expand comma separated values. The expanded values will be available at a new attribute
@@ -22,27 +20,30 @@ public class CsvExpanderBeaconProcessor implements BeaconProcessor {
     private static final String ATTRIBUTE_KEY = "t_other";
 
     /**
-     * The pattern used to extract the key and value of the separated value.
+     * The regex (character) used to separate individual value groups.
      */
-    private static final Pattern KEY_VALUE_PATTERN = Pattern.compile("(.*)\\|(\\d+)");
+    private static final String GROUP_SEPARATOR = ",";
+
+    /**
+     * The regex (character) used to separate key and value.
+     */
+    private static final String KEY_VALUE_SEPARATOR = "\\|";
 
     @Override
     public Beacon process(Beacon beacon) {
         String targetAttribute = beacon.get(ATTRIBUTE_KEY);
 
         if (targetAttribute != null) {
-            String[] attributes = targetAttribute.split(",");
+            String[] attributes = targetAttribute.split(GROUP_SEPARATOR);
 
             for (String attribute : attributes) {
-                Matcher matcher = KEY_VALUE_PATTERN.matcher(attribute);
+                String[] splitAttributes = attribute.split(KEY_VALUE_SEPARATOR);
 
-                if (matcher.find()) {
-                    String attributeKey = matcher.group(1);
-                    String attributeValue = matcher.group(2);
+                if (splitAttributes.length == 2) {
+                    String resultKey = ATTRIBUTE_KEY + "." + splitAttributes[0];
+                    String resultValue = splitAttributes[1];
 
-                    String resultKey = ATTRIBUTE_KEY + "." + attributeKey;
-
-                    beacon = beacon.merge(Collections.singletonMap(resultKey, attributeValue));
+                    beacon = beacon.merge(Collections.singletonMap(resultKey, resultValue));
                 }
             }
         }
