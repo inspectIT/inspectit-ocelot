@@ -98,6 +98,20 @@ inspectit:
         methods:
           - name: nestedSamplingTestNestedDefault
 
+      TraceSettingsTest-withErrorStatus:
+        type:
+          name: TraceSettingsTest
+          matcher-mode: ENDS_WITH
+        methods:
+          - name: withErrorStatus
+
+      TraceSettingsTest-withoutErrorStatus:
+        type:
+          name: TraceSettingsTest
+          matcher-mode: ENDS_WITH
+        methods:
+          - name: withoutErrorStatus
+
 
     rules:
       TraceSettingsTest-startspan:
@@ -105,6 +119,7 @@ inspectit:
           TraceSettingsTest-root: true
           TraceSettingsTest-nested: true
           TraceSettingsTest-nestedSamplingTest-Default: true
+          TraceSettingsTest-withoutErrorStatus: true
         tracing:
           start-span: true
 
@@ -219,3 +234,10 @@ inspectit:
         tracing:
           start-span: true
           sample-probability: _arg0
+
+      TraceSettingsTest-withErrorStatus:
+        scopes:
+          TraceSettingsTest-withErrorStatus: true
+        tracing:
+          start-span: true
+          error-status: _arg0

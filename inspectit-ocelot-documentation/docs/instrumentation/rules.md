@@ -444,6 +444,9 @@ Due to the way configuration loading works, the short notation will always take 
 ### Collecting Traces
 
 The inspectIT Ocelot agent allows you to record method invocations as [OpenCensus spans](https://opencensus.io/tracing/span/).
+
+#### Tracing Methods
+
 In order to make your collected spans visible, you must first set up a [trace exporter](tracing/trace-exporters.md).
 
 Afterwards you can define that all methods matching a certain rule will be traced:
@@ -457,7 +460,8 @@ inspectit:
           start-span: true
 ```
 
-For example, using the previous configuration snippet, each method that matches the scope definition of the `example_rule` rule will appear within a trace. Its appearance can be customized using the following properties which can be set in the rule's `tracing` section.
+For example, using the previous configuration snippet, each method that matches the scope definition of the `example_rule` rule will appear within a trace.
+Its appearance can be customized using the following properties which can be set in the rule's `tracing` section.
 
 |Property |Default| Description
 |---|---|---|
@@ -483,6 +487,8 @@ inspectit:
 
 > The name must exist at the end of the entry section and cannot be set in the exit section.
 
+#### Trace Sampling
+
 It is often desirable to not capture every trace, but instead [sample](https://opencensus.io/tracing/sampling/) only a subset.
 This can be configured using the `sample-probability` setting under the `tracing` section:
 
@@ -502,6 +508,8 @@ In this case, the value from the given data key is read and used as sampling pro
 This allows you for example to vary the sample probability based on the HTTP url.
 
 If no sample probability is defined for a rule, the [default probability](tracing/tracing.md) is used.
+
+#### Adding Attributes
 
 Another useful property of spans is that you can attach any additional information in form of attributes.
 In most tracing backends such as ZipKin and Jaeger, you can search your traces based on attributes.
@@ -523,10 +531,36 @@ inspectit:
 The attributes property maps the names of attributes to data keys.
 After the rule's exit phase, the corresponding data keys are read and attached as attributes to the current span.
 
-Note that a rule does not have to start a span for attatching attributes.
+Note that a rule does not have to start a span for attaching attributes.
 If a rule does not start a span, the attributes will be written to the first span opened by any method on the current call stack.
 
-It is also possible to conditionalize the span starting as well as the attribute writing:
+#### Visualizing Span Errors
+
+Most tracing backends support highlighting of spans which are marked as errors.
+InspectIT Ocelot allows you to configure exactly under which circumstances your spans are interpreted as errors or successes.
+This is done via the `error-status` configuration property:
+
+```yaml
+inspectit:
+  instrumentation:
+    rules:
+      example_rule:
+        tracing:
+          start-span: true
+          error-status: _thrown
+```
+
+The value of `error-status` can be any value from the context or any [special variable](#input-parameters).
+
+When the instrumented method finishes, Ocelot will read the value of the given variable.
+If the value is neither `null` nor `false`, the span will be marked as an error.
+
+In the example above, the special variable `_thrown` is used to define the error status.
+This means if `_thrown` is not null (which means the method threw an exception), the span will be marked as error.
+
+#### Adding Span Conditions
+
+It is possible to conditionalize the span starting as well as the attribute writing:
 
 ```yaml
 inspectit:
@@ -551,7 +585,10 @@ If any `start-span-conditions` are defined, a span will only be created when all
 Analogous to this, attributes will only be written if each condition defined in `attribute-conditions` is fulfilled.
 The conditions that can be defined are equal to the ones of actions, thus, please see the [action conditions description](#adding-conditions) for detailed information.
 
-With the previous shown settings, it is possible to add an instrumentation which creates exactly one span per invocation of an instrumented method. Especially in asynchronous scenarios, this might not be the desired behaviour:
+#### Tracing Asynchronous Invocations
+
+With the previous shown settings, it is possible to add an instrumentation which creates exactly one span per invocation of an instrumented method.
+Especially in asynchronous scenarios, this might not be the desired behaviour:
 For these cases inspectIT Ocelot offers the possibility to record multiple method invocations into a single span.
 The resulting span then has the following properties:
 

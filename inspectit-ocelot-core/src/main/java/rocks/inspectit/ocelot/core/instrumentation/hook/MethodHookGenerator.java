@@ -19,10 +19,7 @@ import rocks.inspectit.ocelot.core.instrumentation.hook.actions.ConditionalHookA
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.MetricsRecorder;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.model.MetricAccessor;
-import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.ContinueOrStartSpanAction;
-import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.EndSpanAction;
-import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.StoreSpanAction;
-import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.WriteSpanAttributesAction;
+import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.*;
 import rocks.inspectit.ocelot.core.metrics.MeasuresAndViewsManager;
 import rocks.inspectit.ocelot.core.privacy.obfuscation.ObfuscationManager;
 import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
@@ -151,6 +148,13 @@ public class MethodHookGenerator {
     private List<IHookAction> buildTracingExitActions(RuleTracingSettings tracing) {
         val result = new ArrayList<IHookAction>();
 
+        boolean isSpanStartedOrContinued = tracing.getStartSpan() || !StringUtils.isBlank(tracing.getContinueSpan());
+
+        if (!StringUtils.isBlank(tracing.getErrorStatus()) && isSpanStartedOrContinued) {
+            VariableAccessor accessor = variableAccessorFactory.getVariableAccessor(tracing.getErrorStatus());
+            result.add(new SetSpanStatusAction(accessor));
+        }
+
         val attributes = tracing.getAttributes();
         if (!attributes.isEmpty()) {
             Map<String, VariableAccessor> attributeAccessors = new HashMap<>();
@@ -160,10 +164,11 @@ public class MethodHookGenerator {
             result.add(actionWithConditions);
         }
 
-        if (tracing.getEndSpan() && (tracing.getStartSpan() || tracing.getContinueSpan() != null)) {
+        if (tracing.getEndSpan() && isSpanStartedOrContinued) {
             val endSpanAction = new EndSpanAction(ConditionalHookAction.getAsPredicate(tracing.getEndSpanConditions(), variableAccessorFactory));
             result.add(endSpanAction);
         }
+
         return result;
     }
 
