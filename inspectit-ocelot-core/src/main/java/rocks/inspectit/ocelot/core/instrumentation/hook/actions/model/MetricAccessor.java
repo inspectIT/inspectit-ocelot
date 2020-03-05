@@ -30,8 +30,8 @@ public class MetricAccessor {
     private final Map<String, String> constantTags;
 
     /**
-     * Data tags keys and values.
+     * VariableAccessors for the data tags.
      */
-    private final Map<String, String> dataTags;
+    private final Map<String, VariableAccessor> dataTagAccessors;
 
 }
