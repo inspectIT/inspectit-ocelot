@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.core.instrumentation.hook;
 
+import com.google.common.annotations.VisibleForTesting;
 import io.opencensus.stats.StatsRecorder;
 import io.opencensus.trace.Sampler;
 import io.opencensus.trace.samplers.Samplers;
@@ -186,7 +187,8 @@ public class MethodHookGenerator {
         }
     }
 
-    private MetricAccessor buildMetricAccessor(MetricRecordingSettings metricSettings) {
+    @VisibleForTesting
+    MetricAccessor buildMetricAccessor(MetricRecordingSettings metricSettings) {
         String value = metricSettings.getValue();
         VariableAccessor valueAccessor;
         try {
@@ -195,9 +197,8 @@ public class MethodHookGenerator {
             valueAccessor = variableAccessorFactory.getVariableAccessor(value);
         }
 
-        Map<String, VariableAccessor> tagAccessors = metricSettings.getDataTags().values().stream()
-                .distinct()
-                .collect(Collectors.toMap(tag -> tag, tag -> variableAccessorFactory.getVariableAccessor(tag)));
+        Map<String, VariableAccessor> tagAccessors = metricSettings.getDataTags().entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> variableAccessorFactory.getVariableAccessor(entry.getValue())));
 
         return new MetricAccessor(metricSettings.getMetric(), valueAccessor, metricSettings.getConstantTags(), tagAccessors);
     }
