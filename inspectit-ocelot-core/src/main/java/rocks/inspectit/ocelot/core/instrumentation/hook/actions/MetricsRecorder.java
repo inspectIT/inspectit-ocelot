@@ -6,13 +6,11 @@ import io.opencensus.tags.*;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
-import rocks.inspectit.ocelot.core.instrumentation.hook.VariableAccessor;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.model.MetricAccessor;
 import rocks.inspectit.ocelot.core.metrics.MeasuresAndViewsManager;
 import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -26,12 +24,6 @@ public class MetricsRecorder implements IHookAction {
      * A list of metric accessors which will be used to find the value and tags for the metric.
      */
     private final List<MetricAccessor> metrics;
-
-    /**
-     * A map of variable accessors which are used to resolve tag values. The key represents the name of the data key
-     * used by the variable accessor.
-     */
-    private Map<String, VariableAccessor> tagAccessors;
 
     /**
      * Common tags manager needed for gathering common tags when recording metrics.
@@ -83,18 +75,12 @@ public class MetricsRecorder implements IHookAction {
                 .forEach((key, value) -> builder.putLocal(TagKey.create(key), TagValue.create(value)));
 
         // go over data tags and match the value to the key from the contextTags (if available)
-        metricAccessor.getDataTags().entrySet().stream()
-                .filter(entry -> tagAccessors.containsKey(entry.getValue()))
-                .forEach(entry -> getTagValue(context, entry.getValue())
-                        .ifPresent(value -> builder.putLocal(TagKey.create(entry.getKey()), TagValue.create(value.toString())))
-                );
+        metricAccessor.getDataTagAccessors()
+                .forEach((key, accessor) -> Optional.ofNullable(accessor.get(context))
+                        .ifPresent(tagValue -> builder.putLocal(TagKey.create(key), TagValue.create(tagValue.toString()))));
 
         // build and return
         return builder.build();
-    }
-
-    private Optional<Object> getTagValue(ExecutionContext context, String dataKey) {
-        return Optional.ofNullable(tagAccessors.get(dataKey).get(context));
     }
 
     @Override

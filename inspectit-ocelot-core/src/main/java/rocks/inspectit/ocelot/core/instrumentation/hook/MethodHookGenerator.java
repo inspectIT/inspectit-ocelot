@@ -29,7 +29,6 @@ import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * This class is responsible for translating {@link MethodHookConfiguration}s
@@ -174,33 +173,33 @@ public class MethodHookGenerator {
     }
 
     private Optional<IHookAction> buildMetricsRecorder(MethodHookConfiguration config) {
-        Collection<MetricRecordingSettings> metrics = config.getMetrics();
-        if (!metrics.isEmpty()) {
-            List<MetricAccessor> metricAccessors = metrics.stream()
-                    .map(metricConfig -> {
-                        String value = metricConfig.getValue();
-                        VariableAccessor valueAccessor;
-                        try {
-                            valueAccessor = variableAccessorFactory.getConstantAccessor(Double.parseDouble(value));
-                        } catch (NumberFormatException e) {
-                            valueAccessor = variableAccessorFactory.getVariableAccessor(value);
-                        }
-                        return new MetricAccessor(metricConfig.getMetric(), valueAccessor, metricConfig.getConstantTags(), metricConfig.getDataTags());
-                    })
+        Collection<MetricRecordingSettings> metricRecordingSettings = config.getMetrics();
+        if (!metricRecordingSettings.isEmpty()) {
+            List<MetricAccessor> metricAccessors = metricRecordingSettings.stream()
+                    .map(this::buildMetricAccessor)
                     .collect(Collectors.toList());
 
-            Map<String, VariableAccessor> tagAccessors = metrics.stream()
-                    .map(MetricRecordingSettings::getDataTags)
-                    .map(Map::values)
-                    .flatMap(Collection::stream)
-                    .distinct()
-                    .collect(Collectors.toMap(tag -> tag, tag -> variableAccessorFactory.getVariableAccessor(tag)));
-
-            MetricsRecorder recorder = new MetricsRecorder(metricAccessors, tagAccessors, commonTagsManager, metricsManager, statsRecorder);
+            MetricsRecorder recorder = new MetricsRecorder(metricAccessors, commonTagsManager, metricsManager, statsRecorder);
             return Optional.of(recorder);
         } else {
             return Optional.empty();
         }
+    }
+
+    private MetricAccessor buildMetricAccessor(MetricRecordingSettings metricSettings) {
+        String value = metricSettings.getValue();
+        VariableAccessor valueAccessor;
+        try {
+            valueAccessor = variableAccessorFactory.getConstantAccessor(Double.parseDouble(value));
+        } catch (NumberFormatException e) {
+            valueAccessor = variableAccessorFactory.getVariableAccessor(value);
+        }
+
+        Map<String, VariableAccessor> tagAccessors = metricSettings.getDataTags().values().stream()
+                .distinct()
+                .collect(Collectors.toMap(tag -> tag, tag -> variableAccessorFactory.getVariableAccessor(tag)));
+
+        return new MetricAccessor(metricSettings.getMetric(), valueAccessor, metricSettings.getConstantTags(), tagAccessors);
     }
 
     private List<IHookAction> buildActionCalls(List<ActionCallConfig> calls, MethodReflectionInformation methodInfo) {
