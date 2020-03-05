@@ -135,7 +135,7 @@ public class RegexReplacementBeaconProcessor implements BeaconProcessor {
          */
         boolean keepIfNoMatch;
 
-        public static RegexDerivedTag fromSettings(String tagName, BeaconTagSettings settings) {
+        private static RegexDerivedTag fromSettings(String tagName, BeaconTagSettings settings) {
             Pattern pattern = null;
             String regex = settings.getRegex();
             if (!StringUtils.isEmpty(regex)) {

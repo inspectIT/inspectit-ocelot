@@ -234,7 +234,9 @@ inspectit-eum-server:
 ```
 
 Tags configured via `beacon` offer some additional flexibility: In addition to simply copying the input value, it is possible to perform a RegEx replacement.
-For example the following configuration erases the path segment after `/user/` because it contains a numeric ID:
+
+**Example:** in case the `u` attribute contains a URL which is: `http://server/user/100`.
+The following configuration can be used to erases the path segment after `/user/` which represents a user ID and replaces it with the constant text `{id}`.
 
 ```YAML
 inspectit-eum-server:
@@ -248,13 +250,15 @@ inspectit-eum-server:
 ```
 
 The `regex` property defines the regex to use for the replacement.
-All matches of the input value are replaced with the string defined by `replacement`.
+All matches of the `regex` in the input value are replaced with the string defined by `replacement`.
 The `keep-no-match` options defines what to do if the given input does not match the given regex at any place.
-If it is set to `true`, the original value will be kept. If it is set to `false`, the given tag won't be created if not match is found.
+If it is set to `true`, the original value will be kept. If it is set to `false`, the given tag won't be created in case no match is found.
 
 Note that capture groups are supported and can be referenced in the replacement string using `$1`, `$2`, etc.
 Using this mechanism, the eum server provides the following tags out of the box:
 
+| Tag | Description |
+| --- | --- |
 | `U_NO_QUERY` | The Boomerang *u* property but without query parameters. Check out [Boomerang](https://developer.akamai.com/tools/boomerang/docs/BOOMR.html).|
 | `U_HOST` | The host specified in the *u* property. Check out [Boomerang](https://developer.akamai.com/tools/boomerang/docs/BOOMR.html).|
 | `U_PORT` | The port specified in the *u* property. Check out [Boomerang](https://developer.akamai.com/tools/boomerang/docs/BOOMR.html).|
