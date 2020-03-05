@@ -223,11 +223,18 @@ public class TraceSettingsTest extends TraceTestBase {
     void dynamicSamplingRateTest(String id, Object rate) {
     }
 
-    void nestedSamplingTestRoot(double rootProbability, double nestedProbability) {
+    void nestedSamplingTestRoot(Double rootProbability, Double nestedProbability) {
         nestedSamplingTestNested(nestedProbability);
+        nestedSamplingTestNestedDefault();
     }
 
-    void nestedSamplingTestNested(double nestedProbability) {
+    void nestedSamplingTestNested(Double nestedProbability) {
+    }
+
+    /**
+     * Runs with the default sample probability
+     */
+    void nestedSamplingTestNestedDefault() {
     }
 
     @Test
@@ -356,13 +363,17 @@ public class TraceSettingsTest extends TraceTestBase {
 
         assertTraceExported((spans) ->
                 assertThat(spans)
-                        .hasSize(2)
+                        .hasSize(3)
                         .anySatisfy((sp) -> {
                             assertThat(sp.getName()).isEqualTo("TraceSettingsTest.nestedSamplingTestRoot");
                             assertThat(sp.getParentSpanId()).isNull();
                         })
                         .anySatisfy((sp) -> {
                             assertThat(sp.getName()).isEqualTo("TraceSettingsTest.nestedSamplingTestNested");
+                            assertThat(sp.getParentSpanId()).isNotNull();
+                        })
+                        .anySatisfy((sp) -> {
+                            assertThat(sp.getName()).isEqualTo("TraceSettingsTest.nestedSamplingTestNestedDefault");
                             assertThat(sp.getParentSpanId()).isNotNull();
                         })
 
@@ -375,19 +386,43 @@ public class TraceSettingsTest extends TraceTestBase {
 
         nestedSamplingTestRoot(0.0, 1.0);
 
-        samplingTestEndMarker("nested_zero_end");
+        samplingTestEndMarker("nested_one_end");
 
         //wait for the end marker, this ensures that all sampled spans are also exported
         assertTraceExported((spans) ->
                 assertThat(spans)
                         .anySatisfy((sp) -> {
-                            assertThat(sp.getName()).isEqualTo("nested_zero_end");
+                            assertThat(sp.getName()).isEqualTo("nested_one_end");
                         })
         );
 
         assertThat(exportedSpans)
                 .noneSatisfy(sp -> assertThat(sp.getName()).isEqualTo("TraceSettingsTest.nestedSamplingTestRoot"))
+                .noneSatisfy(sp -> assertThat(sp.getName()).isEqualTo("TraceSettingsTest.nestedSamplingTestNestedDefault"))
                 .anySatisfy(sp -> assertThat(sp.getName()).isEqualTo("TraceSettingsTest.nestedSamplingTestNested"));
+    }
+
+
+    @Test
+    void testNestedNullSamplingProbability() {
+        TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, 15, TimeUnit.SECONDS);
+
+        nestedSamplingTestRoot(0.0, null);
+
+        samplingTestEndMarker("nested_null_end");
+
+        //wait for the end marker, this ensures that all sampled spans are also exported
+        assertTraceExported((spans) ->
+                assertThat(spans)
+                        .anySatisfy((sp) -> {
+                            assertThat(sp.getName()).isEqualTo("nested_null_end");
+                        })
+        );
+
+        assertThat(exportedSpans)
+                .noneSatisfy(sp -> assertThat(sp.getName()).isEqualTo("TraceSettingsTest.nestedSamplingTestRoot"))
+                .noneSatisfy(sp -> assertThat(sp.getName()).isEqualTo("TraceSettingsTest.nestedSamplingTestNestedDefault"))
+                .noneSatisfy(sp -> assertThat(sp.getName()).isEqualTo("TraceSettingsTest.nestedSamplingTestNested"));
     }
 
 

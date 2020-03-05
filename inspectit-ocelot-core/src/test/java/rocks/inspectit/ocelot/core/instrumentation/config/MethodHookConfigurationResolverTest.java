@@ -127,7 +127,6 @@ public class MethodHookConfigurationResolverTest {
             InstrumentationRule r1 = InstrumentationRule.builder()
                     .tracing(RuleTracingSettings.builder()
                             .startSpan(true)
-                            .kind(Span.Kind.SERVER)
                             .storeSpan("store_span")
                             .continueSpan("my_span")
                             .attributes(Maps.newHashMap("attr", "dataX"))
@@ -136,14 +135,19 @@ public class MethodHookConfigurationResolverTest {
             InstrumentationRule r2 = InstrumentationRule.builder()
                     .tracing(RuleTracingSettings.builder()
                             .startSpan(true)
-                            .name("data_name")
                             .endSpan(false)
                             .attributes(Maps.newHashMap("attr2", "dataY"))
                             .build())
                     .build();
+            InstrumentationRule r3 = InstrumentationRule.builder()
+                    .tracing(RuleTracingSettings.builder()
+                            .kind(Span.Kind.SERVER)
+                            .name("data_name")
+                            .build())
+                    .build();
 
             RuleTracingSettings result = resolver.buildHookConfiguration(
-                    config, Sets.newHashSet(r1, r2)).getTracing();
+                    config, Sets.newHashSet(r1, r2, r3)).getTracing();
 
             assertThat(result.getStartSpan()).isTrue();
             assertThat(result.getStoreSpan()).isEqualTo("store_span");
@@ -164,18 +168,22 @@ public class MethodHookConfigurationResolverTest {
             InstrumentationRule r1 = InstrumentationRule.builder()
                     .tracing(RuleTracingSettings.builder()
                             .startSpan(true)
+                            .build())
+                    .build();
+            InstrumentationRule r2 = InstrumentationRule.builder()
+                    .tracing(RuleTracingSettings.builder()
                             .sampleProbability("foo")
                             .build())
                     .build();
 
             RuleTracingSettings result = resolver.buildHookConfiguration(
-                    config, Sets.newHashSet(r1)).getTracing();
+                    config, Sets.newHashSet(r1, r2)).getTracing();
 
             assertThat(result.getSampleProbability()).isEqualTo("foo");
         }
 
         @Test
-        void verifyTracingDefaultSamplingProbabilityAvailable() throws Exception {
+        void verifyNullSamplingProbabilityRespected() throws Exception {
             config = InstrumentationConfiguration.builder().defaultTraceSampleProbability(0.5).build();
 
             InstrumentationRule r1 = InstrumentationRule.builder()
@@ -188,7 +196,7 @@ public class MethodHookConfigurationResolverTest {
             RuleTracingSettings result = resolver.buildHookConfiguration(
                     config, Sets.newHashSet(r1)).getTracing();
 
-            assertThat(result.getSampleProbability()).isEqualTo("0.5");
+            assertThat(result.getSampleProbability()).isNull();
         }
 
 

@@ -64,7 +64,7 @@ public class RuleTracingSettings {
      * Alternatively, if this value is a string it is interpreted as a data key. The value of the given data key is extracted and used as probability.
      * This for example allows to define different probabilities, e.g. based on the HTTP path.
      * <p>
-     * If this is null, it defaults to {@link rocks.inspectit.ocelot.config.model.tracing.TracingSettings#sampleProbability}
+     * If this is null, this means that no per-span sampler will be used. Instead, the globally configured sample probability will take effect.
      */
     private String sampleProbability;
 
