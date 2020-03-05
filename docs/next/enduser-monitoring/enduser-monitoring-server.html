@@ -263,8 +263,42 @@ The tag <code>APP</code> will always be resolved to the value <code>my-applicati
     <span class="hljs-attr">extra:</span>
       <span class="hljs-attr">APP:</span> <span class="hljs-string">my-application</span>
     <span class="hljs-attr">beacon:</span>
-      <span class="hljs-attr">URL:</span> <span class="hljs-string">u</span>
+      <span class="hljs-attr">URL:</span> 
+        <span class="hljs-attr">input:</span> <span class="hljs-string">u</span>
 </code></pre>
+<p>Tags configured via <code>beacon</code> offer some additional flexibility: In addition to simply copying the input value, it is possible to perform a RegEx replacement.</p>
+<p><strong>Example:</strong> in case the <code>u</code> attribute contains a URL which is: <code>http://server/user/100</code>.
+The following configuration can be used to erases the path segment after <code>/user/</code> which represents a user ID and replaces it with the constant text <code>{id}</code>.</p>
+<pre><code class="hljs css language-YAML"><span class="hljs-attr">inspectit-eum-server:</span>
+  <span class="hljs-attr">tags:</span>
+    <span class="hljs-attr">beacon:</span>
+      <span class="hljs-attr">URL_USER_ERASED:</span> 
+        <span class="hljs-attr">input:</span> <span class="hljs-string">u</span>
+        <span class="hljs-attr">regex:</span> <span class="hljs-string">"\\/user\\/\d+"</span>
+        <span class="hljs-attr">replacement:</span> <span class="hljs-string">"\\/user\\/{id}"</span>
+        <span class="hljs-attr">keep-no-match:</span> <span class="hljs-literal">true</span>
+</code></pre>
+<p>The <code>regex</code> property defines the regex to use for the replacement.
+All matches of the <code>regex</code> in the input value are replaced with the string defined by <code>replacement</code>.
+The <code>keep-no-match</code> options defines what to do if the given input does not match the given regex at any place.
+If it is set to <code>true</code>, the original value will be kept. If it is set to <code>false</code>, the given tag won't be created in case no match is found.</p>
+<p>Note that capture groups are supported and can be referenced in the replacement string using <code>$1</code>, <code>$2</code>, etc.
+Using this mechanism, the eum server provides the following tags out of the box:</p>
+<table>
+<thead>
+<tr><th>Tag</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><code>U_NO_QUERY</code></td><td>The Boomerang <em>u</em> property but without query parameters. Check out <a href="https://developer.akamai.com/tools/boomerang/docs/BOOMR.html">Boomerang</a>.</td></tr>
+<tr><td><code>U_HOST</code></td><td>The host specified in the <em>u</em> property. Check out <a href="https://developer.akamai.com/tools/boomerang/docs/BOOMR.html">Boomerang</a>.</td></tr>
+<tr><td><code>U_PORT</code></td><td>The port specified in the <em>u</em> property. Check out <a href="https://developer.akamai.com/tools/boomerang/docs/BOOMR.html">Boomerang</a>.</td></tr>
+<tr><td><code>U_PATH</code></td><td>The http path specified in the <em>u</em> property. Check out <a href="https://developer.akamai.com/tools/boomerang/docs/BOOMR.html">Boomerang</a>.</td></tr>
+<tr><td><code>PGU_NO_QUERY</code></td><td>The Boomerang <em>pgu</em> property but without query parameters. Check out <a href="https://developer.akamai.com/tools/boomerang/docs/BOOMR.html">Boomerang</a>.</td></tr>
+<tr><td><code>PGU_HOST</code></td><td>The host specified in the <em>pgu</em> property. Check out <a href="https://developer.akamai.com/tools/boomerang/docs/BOOMR.html">Boomerang</a>.</td></tr>
+<tr><td><code>PGU_PORT</code></td><td>The port specified in the <em>pgu</em> property. Check out <a href="https://developer.akamai.com/tools/boomerang/docs/BOOMR.html">Boomerang</a>.</td></tr>
+<tr><td><code>PGU_PATH</code></td><td>The http path specified in the <em>pgu</em> property. Check out <a href="https://developer.akamai.com/tools/boomerang/docs/BOOMR.html">Boomerang</a>.</td></tr>
+</tbody>
+</table>
 <h4><a class="anchor" aria-hidden="true" id="additional-tags"></a><a href="#additional-tags" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Additional Tags</h4>
 <p>The EUM server provides a set of additional tags which can be used like all other tags. Currently, the following tags exist:</p>
 <table>
@@ -273,8 +307,6 @@ The tag <code>APP</code> will always be resolved to the value <code>my-applicati
 </thead>
 <tbody>
 <tr><td><code>COUNTRY_CODE</code></td><td>Contains the geolocation of the beacon's origin. It is resolved by using the client IP and the <a href="https://www.maxmind.com">GeoLite2 database</a>. If the IP cannot be resolved, the tag value will be empty.</td></tr>
-<tr><td><code>U_NO_QUERY</code></td><td>The Boomerang <em>u</em> property but without query parameters. Check out <a href="https://developer.akamai.com/tools/boomerang/docs/BOOMR.html">Boomerang</a>.</td></tr>
-<tr><td><code>PGU_NO_QUERY</code></td><td>The Boomerang <em>pgu</em> property but without query parameters. Check out <a href="https://developer.akamai.com/tools/boomerang/docs/BOOMR.html">Boomerang</a>.</td></tr>
 </tbody>
 </table>
 <h5><a class="anchor" aria-hidden="true" id="custom-country_code-mapping"></a><a href="#custom-country_code-mapping" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Custom COUNTRY_CODE Mapping</h5>
