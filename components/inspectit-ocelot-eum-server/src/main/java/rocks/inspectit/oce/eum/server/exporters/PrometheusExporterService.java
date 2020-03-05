@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 import static io.prometheus.client.CollectorRegistry.defaultRegistry;
 
@@ -32,7 +33,7 @@ public class PrometheusExporterService {
     @PostConstruct
     private void doEnable() {
         val config = configuration.getExporters().getMetrics().getPrometheus();
-        if(config.isEnabled() && config.getHost()!= null && config.getPort() != 0) {
+        if (config.isEnabled() && config.getHost() != null && config.getPort() != 0) {
             try {
                 String host = config.getHost();
                 int port = config.getPort();
@@ -44,5 +45,16 @@ public class PrometheusExporterService {
                 defaultRegistry.clear();
             }
         }
+    }
+
+
+    @PreDestroy
+    protected boolean doDisable() {
+        log.info("Stopping Prometheus Exporter");
+        if (prometheusClient != null) {
+            prometheusClient.stop();
+            defaultRegistry.clear();
+        }
+        return true;
     }
 }

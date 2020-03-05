@@ -38,7 +38,7 @@ class EumTagsSettingsTest {
         public void hasBeaconTag() {
             EumTagsSettings settings = new EumTagsSettings();
             settings.getDefineAsGlobal().add("beacon-tag");
-            settings.getBeacon().put("beacon-tag", "beacon-field");
+            settings.getBeacon().put("beacon-tag", BeaconTagSettings.builder().input("beacon-field").build());
 
             boolean result = settings.isGlobalTagMissing();
 
@@ -73,7 +73,7 @@ class EumTagsSettingsTest {
         public void noDuplicateTags() {
             EumTagsSettings settings = new EumTagsSettings();
             settings.getExtra().put("tag_a", "");
-            settings.getBeacon().put("tag_b", "");
+            settings.getBeacon().put("tag_b", BeaconTagSettings.builder().build());
 
             boolean result = settings.isCheckUniquenessOfTags();
 
@@ -84,7 +84,7 @@ class EumTagsSettingsTest {
         public void hasDuplicateTags() {
             EumTagsSettings settings = new EumTagsSettings();
             settings.getExtra().put("tag_a", "");
-            settings.getBeacon().put("tag_a", "");
+            settings.getBeacon().put("tag_a", BeaconTagSettings.builder().build());
 
             boolean result = settings.isCheckUniquenessOfTags();
 
