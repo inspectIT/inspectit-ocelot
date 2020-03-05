@@ -29,6 +29,7 @@ import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * This class is responsible for translating {@link MethodHookConfiguration}s
@@ -190,7 +191,7 @@ public class MethodHookGenerator {
 
             Map<String, VariableAccessor> tagAccessors = metrics.stream()
                     .map(MetricRecordingSettings::getDataTags)
-                    .map(map -> map.values())
+                    .map(Map::values)
                     .flatMap(Collection::stream)
                     .distinct()
                     .collect(Collectors.toMap(tag -> tag, tag -> variableAccessorFactory.getVariableAccessor(tag)));

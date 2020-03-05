@@ -109,16 +109,14 @@ public class MetricsRecorderTest {
 
         @Test
         void commonTagsIncluded() {
-            VariableAccessor mockAccessor = mock(VariableAccessor.class);
-            when(mockAccessor.get(any())).thenReturn("overwrite");
-            Map<String, VariableAccessor> tagAccessors = Collections.singletonMap("common", mockAccessor);
+            when(inspectitContext.getData("common")).thenReturn("overwrite");
             when(commonTagsManager.getCommonTagKeys()).thenReturn(Collections.singletonList(TagKey.create("common")));
 
             VariableAccessor variableAccess = Mockito.mock(VariableAccessor.class);
             when(variableAccess.get(any())).thenReturn(100L);
 
             MetricAccessor metricAccessor = new MetricAccessor("my_metric", variableAccess, Collections.emptyMap(), Collections.emptyMap());
-            MetricsRecorder rec = new MetricsRecorder(Collections.singletonList(metricAccessor), tagAccessors, commonTagsManager, metricsManager, statsRecorder);
+            MetricsRecorder rec = new MetricsRecorder(Collections.singletonList(metricAccessor), Collections.emptyMap(), commonTagsManager, metricsManager, statsRecorder);
 
             rec.execute(executionContext);
 
