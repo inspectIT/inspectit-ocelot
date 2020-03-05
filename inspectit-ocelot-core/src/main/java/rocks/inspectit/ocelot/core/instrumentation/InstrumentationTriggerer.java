@@ -9,10 +9,10 @@ import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
-import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
-import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.instrumentation.InternalSettings;
+import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
+import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.instrumentation.config.InstrumentationConfigurationResolver;
 import rocks.inspectit.ocelot.core.instrumentation.config.event.InstrumentationConfigurationChangedEvent;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.ClassInstrumentationConfiguration;
@@ -63,6 +63,11 @@ public class InstrumentationTriggerer implements IClassDiscoveryListener {
 
     @Autowired
     private HookManager hookManager;
+
+    /**
+     * The update of hooks which is currently in progress, null if none is in progress.
+     */
+    private HookManager.HookUpdate activeHookUpdate;
 
     @Autowired
     InstrumentationConfigurationResolver configResolver;
@@ -196,6 +201,11 @@ public class InstrumentationTriggerer implements IClassDiscoveryListener {
                         break;
                     }
                 }
+                if (pendingClasses.size() == 0 && activeHookUpdate != null) {
+                    activeHookUpdate.commitUpdate();
+                    log.info("Instrumentation has been updated!");
+                    activeHookUpdate = null;
+                }
                 if (checkedClassesCount > 0) {
                     log.debug("Checked configuration of {} classes in {} ms, {} classes left to check",
                             checkedClassesCount, watch.elapsed(TimeUnit.MILLISECONDS), pendingClasses.size());
@@ -224,7 +234,10 @@ public class InstrumentationTriggerer implements IClassDiscoveryListener {
         try {
             //this is guaranteed to be invoked after applyClassLoaderDelegation if any hooking occurs
             //this is due to the fact doesClassRequireRetransformation return true when the first hook is added
-            hookManager.updateHooksForClass(clazz);
+            if (activeHookUpdate == null) {
+                activeHookUpdate = hookManager.startUpdate();
+            }
+            activeHookUpdate.updateHooksForClass(clazz);
         } catch (Throwable t) {
             log.error("Error adding hooks to clazz {}", clazz.getName(), t);
         }

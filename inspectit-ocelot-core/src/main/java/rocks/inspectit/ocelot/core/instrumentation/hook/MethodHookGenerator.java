@@ -27,7 +27,6 @@ import rocks.inspectit.ocelot.core.privacy.obfuscation.ObfuscationManager;
 import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
 
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 /**
@@ -68,34 +67,29 @@ public class MethodHookGenerator {
      * @return the generated method hook
      */
     public MethodHook buildHook(Class<?> declaringClass, MethodDescription method, MethodHookConfiguration config) {
-        val builder = MethodHook.builder()
+        MethodHook.MethodHookBuilder builder = MethodHook.builder()
                 .inspectitContextManager(contextManager)
                 .sourceConfiguration(config);
 
-        val methodInfo = MethodReflectionInformation.createFor(declaringClass, method);
+        MethodReflectionInformation methodInfo = MethodReflectionInformation.createFor(declaringClass, method);
         builder.methodInformation(methodInfo);
 
         RuleTracingSettings tracingSettings = config.getTracing();
 
-        val entryActions = new CopyOnWriteArrayList<IHookAction>();
-        entryActions.addAll(buildActionCalls(config.getPreEntryActions(), methodInfo));
-        entryActions.addAll(buildActionCalls(config.getEntryActions(), methodInfo));
+        builder.entryActions(buildActionCalls(config.getPreEntryActions(), methodInfo));
+        builder.entryActions(buildActionCalls(config.getEntryActions(), methodInfo));
         if (tracingSettings != null) {
-            entryActions.addAll(buildTracingEntryActions(tracingSettings));
+            builder.entryActions(buildTracingEntryActions(tracingSettings));
         }
-        entryActions.addAll(buildActionCalls(config.getPostEntryActions(), methodInfo));
-        builder.entryActions(entryActions);
+        builder.entryActions(buildActionCalls(config.getPostEntryActions(), methodInfo));
 
-        val exitActions = new CopyOnWriteArrayList<IHookAction>();
-        exitActions.addAll(buildActionCalls(config.getPreExitActions(), methodInfo));
-        exitActions.addAll(buildActionCalls(config.getExitActions(), methodInfo));
+        builder.exitActions(buildActionCalls(config.getPreExitActions(), methodInfo));
+        builder.exitActions(buildActionCalls(config.getExitActions(), methodInfo));
         if (tracingSettings != null) {
-            exitActions.addAll(buildTracingExitActions(tracingSettings));
+            builder.exitActions(buildTracingExitActions(tracingSettings));
         }
-        buildMetricsRecorder(config)
-                .ifPresent(exitActions::add);
-        exitActions.addAll(buildActionCalls(config.getPostExitActions(), methodInfo));
-        builder.exitActions(exitActions);
+        buildMetricsRecorder(config).ifPresent(builder::exitAction);
+        builder.exitActions(buildActionCalls(config.getPostExitActions(), methodInfo));
 
         return builder.build();
     }

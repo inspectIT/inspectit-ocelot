@@ -1,8 +1,5 @@
 package rocks.inspectit.ocelot.core.instrumentation.hook;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import net.bytebuddy.description.method.MethodDescription;
@@ -20,11 +17,7 @@ import rocks.inspectit.ocelot.core.utils.CoreUtils;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -45,14 +38,13 @@ public class HookManager {
     @Autowired
     private MethodHookGenerator hookGenerator;
 
-    private final LoadingCache<Class<?>, ConcurrentHashMap<String, MethodHook>> hooks = CacheBuilder.newBuilder().weakKeys().build(
-            new CacheLoader<Class<?>, ConcurrentHashMap<String, MethodHook>>() {
-                @Override
-                public ConcurrentHashMap<String, MethodHook> load(Class<?> key) throws Exception {
-                    return new ConcurrentHashMap<>();
-                }
-            });
-
+    /**
+     * Holds the currently active hooks.
+     * This map is not modifiable! Instead, the entire map is replaced when an update occurs.
+     * <p>
+     * The keys of this map (the instrumented classes) must be weakly referenced to prevent memory leaks.
+     */
+    private volatile Map<Class<?>, Map<String, MethodHook>> hooks = Collections.emptyMap();
 
     @PostConstruct
     void init() {
@@ -72,51 +64,132 @@ public class HookManager {
      * @return
      */
     private IMethodHook getHook(Class<?> clazz, String methodSignature) {
-        val hook = hooks.getUnchecked(clazz).get(methodSignature);
-        return hook == null ? NoopMethodHook.INSTANCE : hook;
-    }
-
-    public void updateHooksForClass(Class<?> clazz) {
-        try (val sm = selfMonitoring.withDurationSelfMonitoring("HookManager")) {
-            Map<MethodDescription, MethodHookConfiguration> hookConfigs = configResolver.getHookConfigurations(clazz);
-
-            val activeClassHooks = hooks.getUnchecked(clazz);
-
-            deactivateRemovedHooks(clazz, hookConfigs, activeClassHooks);
-            addOrReplaceHooks(clazz, hookConfigs, activeClassHooks);
+        Map<String, MethodHook> classHooks = hooks.get(clazz);
+        if (classHooks != null) {
+            MethodHook hook = classHooks.get(methodSignature);
+            if (hook != null) {
+                return hook;
+            }
         }
+        return NoopMethodHook.INSTANCE;
     }
 
-    private void addOrReplaceHooks(Class<?> clazz, Map<MethodDescription, MethodHookConfiguration> hookConfigs, ConcurrentHashMap<String, MethodHook> activeClassHooks) {
-        hookConfigs.forEach((method, config) -> {
-            String signature = CoreUtils.getSignature(method);
-            MethodHookConfiguration previous = Optional.ofNullable(activeClassHooks.get(signature))
-                    .map(MethodHook::getSourceConfiguration)
-                    .orElse(null);
-            if (!Objects.equals(config, previous)) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Adding/updating hook for {} of {}", signature, clazz.getName());
-                }
-                try {
-                    activeClassHooks.put(signature, hookGenerator.buildHook(clazz, method, config));
-                } catch (Throwable t) {
-                    log.error("Error generating hook for {} of {}. Method will not be hooked.", signature, clazz.getName(), t);
-                    activeClassHooks.remove(signature);
+    /**
+     * Starts an update of the hook configurations.
+     * The returned HookUpdate copies all currently active hooks and resets them.
+     * The configuration can be changed as needed and activated atomically using {@link HookUpdate#commitUpdate()}.
+     *
+     * @return the object for manipulating one or more hooks.
+     */
+    public HookUpdate startUpdate() {
+        return new HookUpdate();
+    }
+
+
+    public class HookUpdate {
+
+        private WeakHashMap<Class<?>, Map<String, MethodHook>> newHooks;
+
+        private boolean isCommitted = false;
+
+        /**
+         * Copies the currently active hooks into a mutable, local state.
+         * The hooks are reset when copied to reenable actions which have been deactivated due to runtime errors.
+         */
+        private HookUpdate() {
+            try (val sm = selfMonitoring.withDurationSelfMonitoring("HookManager")) {
+                newHooks = new WeakHashMap<>();
+                for (Map.Entry<Class<?>, Map<String, MethodHook>> existingClassHooks : hooks.entrySet()) {
+                    HashMap<String, MethodHook> newClassHooks = new HashMap<>();
+                    existingClassHooks.getValue().forEach((signature, hook) -> newClassHooks.put(signature, hook.getResettedCopy()));
+                    newHooks.put(existingClassHooks.getKey(), newClassHooks);
                 }
             }
-        });
-    }
-
-    private void deactivateRemovedHooks(Class<?> clazz, Map<MethodDescription, MethodHookConfiguration> hookConfigs, ConcurrentHashMap<String, MethodHook> activeClassHooks) {
-        Set<String> hookedMethodSignatures = hookConfigs.keySet().stream()
-                .map(CoreUtils::getSignature)
-                .collect(Collectors.toSet());
-        if (log.isDebugEnabled()) {
-            activeClassHooks.keySet().stream()
-                    .filter(signature -> !hookedMethodSignatures.contains(signature))
-                    .forEach(sig -> log.debug("Removing hook for {} of {}", sig, clazz.getName()));
         }
-        //remove hooks of methods which have been deinstrumented
-        activeClassHooks.keySet().removeIf(signature -> !hookedMethodSignatures.contains(signature));
+
+        /**
+         * Adds, removes or updates hooks for the given class based on the current instrumentation configuration.
+         *
+         * @param clazz the class to check
+         */
+        public void updateHooksForClass(Class<?> clazz) {
+            ensureNotCommitted();
+            try (val sm = selfMonitoring.withDurationSelfMonitoring("HookManager")) {
+                Map<MethodDescription, MethodHookConfiguration> hookConfigs = configResolver.getHookConfigurations(clazz);
+                deactivateRemovedHooks(clazz, hookConfigs);
+                addOrReplaceHooks(clazz, hookConfigs);
+            }
+        }
+
+        public void commitUpdate() {
+            ensureNotCommitted();
+            hooks = newHooks;
+            isCommitted = true;
+        }
+
+        private void ensureNotCommitted() {
+            if (isCommitted) {
+                throw new IllegalStateException("Update has already been committed!");
+            }
+        }
+
+        private Optional<MethodHook> getCurrentHook(Class<?> declaringClass, String methodSignature) {
+            Map<String, MethodHook> classHooks = newHooks.get(declaringClass);
+            if (classHooks != null) {
+                return Optional.ofNullable(classHooks.get(methodSignature));
+            } else {
+                return Optional.empty();
+            }
+        }
+
+        private void setHook(Class<?> declaringClass, String methodSignature, MethodHook newHook) {
+            newHooks.computeIfAbsent(declaringClass, (v) -> new HashMap<>())
+                    .put(methodSignature, newHook);
+        }
+
+        private void removeHook(Class<?> declaringClass, String methodSignature) {
+            Map<String, MethodHook> classHooks = newHooks.get(declaringClass);
+            if (classHooks != null) {
+                classHooks.remove(methodSignature);
+                if (classHooks.isEmpty()) {
+                    newHooks.remove(declaringClass);
+                }
+            }
+        }
+
+
+        private void addOrReplaceHooks(Class<?> clazz, Map<MethodDescription, MethodHookConfiguration> hookConfigs) {
+            hookConfigs.forEach((method, config) -> {
+                String signature = CoreUtils.getSignature(method);
+                MethodHookConfiguration previous = getCurrentHook(clazz, signature)
+                        .map(MethodHook::getSourceConfiguration)
+                        .orElse(null);
+                if (!Objects.equals(config, previous)) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Adding/updating hook for {} of {}", signature, clazz.getName());
+                    }
+                    try {
+                        setHook(clazz, signature, hookGenerator.buildHook(clazz, method, config));
+                    } catch (Throwable t) {
+                        log.error("Error generating hook for {} of {}. Method will not be hooked.", signature, clazz.getName(), t);
+                        removeHook(clazz, signature);
+                    }
+                }
+            });
+        }
+
+        private void deactivateRemovedHooks(Class<?> clazz, Map<MethodDescription, MethodHookConfiguration> hookConfigs) {
+            Set<String> methodsToHook = hookConfigs.keySet().stream()
+                    .map(CoreUtils::getSignature)
+                    .collect(Collectors.toSet());
+
+            Set<String> existingHooks = new HashSet<>(newHooks.getOrDefault(clazz, Collections.emptyMap()).keySet());
+            for (String method : existingHooks) {
+                if (!methodsToHook.contains(method)) {
+                    log.debug("Removing hook for {} of {}", method, clazz.getName());
+                    removeHook(clazz, method);
+                }
+            }
+        }
     }
 }
