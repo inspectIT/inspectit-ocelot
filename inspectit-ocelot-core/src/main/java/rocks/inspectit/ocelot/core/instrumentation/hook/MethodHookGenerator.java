@@ -187,7 +187,15 @@ public class MethodHookGenerator {
                         return new MetricAccessor(metricConfig.getMetric(), valueAccessor, metricConfig.getConstantTags(), metricConfig.getDataTags());
                     })
                     .collect(Collectors.toList());
-            MetricsRecorder recorder = new MetricsRecorder(metricAccessors, commonTagsManager, metricsManager, statsRecorder);
+
+            Map<String, VariableAccessor> tagAccessors = metrics.stream()
+                    .map(MetricRecordingSettings::getDataTags)
+                    .map(map -> map.values())
+                    .flatMap(Collection::stream)
+                    .distinct()
+                    .collect(Collectors.toMap(tag -> tag, tag -> variableAccessorFactory.getVariableAccessor(tag)));
+
+            MetricsRecorder recorder = new MetricsRecorder(metricAccessors, tagAccessors, commonTagsManager, metricsManager, statsRecorder);
             return Optional.of(recorder);
         } else {
             return Optional.empty();

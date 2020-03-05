@@ -6,11 +6,13 @@ import io.opencensus.tags.*;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
+import rocks.inspectit.ocelot.core.instrumentation.hook.VariableAccessor;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.model.MetricAccessor;
 import rocks.inspectit.ocelot.core.metrics.MeasuresAndViewsManager;
 import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -24,6 +26,12 @@ public class MetricsRecorder implements IHookAction {
      * A list of metric accessors which will be used to find the value and tags for the metric.
      */
     private final List<MetricAccessor> metrics;
+
+    /**
+     * A map of variable accessors which are used to resolve tag values. The key represents the name of the data key
+     * used by the variable accessor.
+     */
+    private Map<String, VariableAccessor> tagAccessors;
 
     /**
      * Common tags manager needed for gathering common tags when recording metrics.
@@ -65,10 +73,10 @@ public class MetricsRecorder implements IHookAction {
         TagContextBuilder builder = Tags.getTagger().emptyBuilder();
 
         // first common tags to allow overwrite by constant or data tags
-        commonTagsManager.getCommonTagKeys()
-                .forEach(commonTagKey -> Optional.ofNullable(inspectitContext.getData(commonTagKey.getName()))
-                                .ifPresent(value -> builder.putLocal(commonTagKey, TagValue.create(value.toString())))
-                        //TODO if not present in the context do we pull the value from the common tag map
+        commonTagsManager.getCommonTagKeys().stream()
+                .filter(tagKey -> tagAccessors.containsKey(tagKey.getName()))
+                .forEach(tagKey -> getTagValue(context, tagKey.getName())
+                        .ifPresent(tagValue -> builder.putLocal(tagKey, TagValue.create(tagValue.toString())))
                 );
 
         // then constant tags to allow overwrite by data
@@ -76,13 +84,18 @@ public class MetricsRecorder implements IHookAction {
                 .forEach((key, value) -> builder.putLocal(TagKey.create(key), TagValue.create(value)));
 
         // go over data tags and match the value to the key from the contextTags (if available)
-        metricAccessor.getDataTags()
-                .forEach((key, dataLink) -> Optional.ofNullable(inspectitContext.getData(dataLink))
-                        .ifPresent(value -> builder.putLocal(TagKey.create(key), TagValue.create(value.toString())))
+        metricAccessor.getDataTags().entrySet().stream()
+                .filter(entry -> tagAccessors.containsKey(entry.getValue()))
+                .forEach(entry -> getTagValue(context, entry.getValue())
+                        .ifPresent(value -> builder.putLocal(TagKey.create(entry.getKey()), TagValue.create(value.toString())))
                 );
 
         // build and return
         return builder.build();
+    }
+
+    private Optional<Object> getTagValue(ExecutionContext context, String dataKey) {
+        return Optional.ofNullable(tagAccessors.get(dataKey).get(context));
     }
 
     @Override

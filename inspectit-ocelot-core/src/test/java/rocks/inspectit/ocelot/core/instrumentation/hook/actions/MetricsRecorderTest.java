@@ -24,6 +24,7 @@ import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -64,7 +65,7 @@ public class MetricsRecorderTest {
             VariableAccessor variableAccess = Mockito.mock(VariableAccessor.class);
             when(variableAccess.get(any())).thenReturn(null);
             MetricAccessor metricAccessor = new MetricAccessor("my_metric", variableAccess, Collections.emptyMap(), Collections.emptyMap());
-            MetricsRecorder rec = new MetricsRecorder(Collections.singletonList(metricAccessor), commonTagsManager, metricsManager, statsRecorder);
+            MetricsRecorder rec = new MetricsRecorder(Collections.singletonList(metricAccessor), Collections.emptyMap(), commonTagsManager, metricsManager, statsRecorder);
 
             rec.execute(executionContext);
 
@@ -89,7 +90,7 @@ public class MetricsRecorderTest {
             MetricAccessor metricAccessorA = new MetricAccessor("my_metric1", dataA, Collections.emptyMap(), Collections.emptyMap());
             MetricAccessor metricAccessorB = new MetricAccessor("my_metric2", dataB, Collections.emptyMap(), Collections.emptyMap());
 
-            MetricsRecorder rec = new MetricsRecorder(Arrays.asList(metricAccessorA, metricAccessorB), commonTagsManager, metricsManager, statsRecorder);
+            MetricsRecorder rec = new MetricsRecorder(Arrays.asList(metricAccessorA, metricAccessorB), Collections.emptyMap(), commonTagsManager, metricsManager, statsRecorder);
 
             rec.execute(executionContext);
 
@@ -108,14 +109,16 @@ public class MetricsRecorderTest {
 
         @Test
         void commonTagsIncluded() {
+            VariableAccessor mockAccessor = mock(VariableAccessor.class);
+            when(mockAccessor.get(any())).thenReturn("overwrite");
+            Map<String, VariableAccessor> tagAccessors = Collections.singletonMap("common", mockAccessor);
             when(commonTagsManager.getCommonTagKeys()).thenReturn(Collections.singletonList(TagKey.create("common")));
-            when(inspectitContext.getData("common")).thenReturn("overwrite");
 
             VariableAccessor variableAccess = Mockito.mock(VariableAccessor.class);
             when(variableAccess.get(any())).thenReturn(100L);
 
             MetricAccessor metricAccessor = new MetricAccessor("my_metric", variableAccess, Collections.emptyMap(), Collections.emptyMap());
-            MetricsRecorder rec = new MetricsRecorder(Collections.singletonList(metricAccessor), commonTagsManager, metricsManager, statsRecorder);
+            MetricsRecorder rec = new MetricsRecorder(Collections.singletonList(metricAccessor), tagAccessors, commonTagsManager, metricsManager, statsRecorder);
 
             rec.execute(executionContext);
 
@@ -131,7 +134,7 @@ public class MetricsRecorderTest {
             when(variableAccess.get(any())).thenReturn(100L);
 
             MetricAccessor metricAccessor = new MetricAccessor("my_metric", variableAccess, Collections.singletonMap("constant", "tag"), Collections.emptyMap());
-            MetricsRecorder rec = new MetricsRecorder(Collections.singletonList(metricAccessor), commonTagsManager, metricsManager, statsRecorder);
+            MetricsRecorder rec = new MetricsRecorder(Collections.singletonList(metricAccessor), Collections.emptyMap(), commonTagsManager, metricsManager, statsRecorder);
 
             rec.execute(executionContext);
 
@@ -147,7 +150,7 @@ public class MetricsRecorderTest {
             when(variableAccess.get(any())).thenReturn(100L);
 
             MetricAccessor metricAccessor = new MetricAccessor("my_metric", variableAccess, Collections.emptyMap(), Collections.singletonMap("data", "tag"));
-            MetricsRecorder rec = new MetricsRecorder(Collections.singletonList(metricAccessor), commonTagsManager, metricsManager, statsRecorder);
+            MetricsRecorder rec = new MetricsRecorder(Collections.singletonList(metricAccessor), Collections.emptyMap(), commonTagsManager, metricsManager, statsRecorder);
 
             rec.execute(executionContext);
 
@@ -159,13 +162,15 @@ public class MetricsRecorderTest {
 
         @Test
         void dataTags() {
-            when(inspectitContext.getData("tag")).thenReturn("value");
+            VariableAccessor mockAccessor = mock(VariableAccessor.class);
+            when(mockAccessor.get(any())).thenReturn("value");
+            Map<String, VariableAccessor> tagAccessors = Collections.singletonMap("tag", mockAccessor);
 
             VariableAccessor variableAccess = Mockito.mock(VariableAccessor.class);
             when(variableAccess.get(any())).thenReturn(100L);
 
             MetricAccessor metricAccessor = new MetricAccessor("my_metric", variableAccess, Collections.emptyMap(), Collections.singletonMap("data", "tag"));
-            MetricsRecorder rec = new MetricsRecorder(Collections.singletonList(metricAccessor), commonTagsManager, metricsManager, statsRecorder);
+            MetricsRecorder rec = new MetricsRecorder(Collections.singletonList(metricAccessor), tagAccessors, commonTagsManager, metricsManager, statsRecorder);
 
             rec.execute(executionContext);
 
@@ -177,8 +182,19 @@ public class MetricsRecorderTest {
 
         @Test
         void multipleAccessorsMixedTags() {
-            // existing -> not_existing -> existing1 -> existing2
-            when(inspectitContext.getData(anyString())).thenReturn("data1", null, 12L, Boolean.FALSE);
+            VariableAccessor mockAccessorA = mock(VariableAccessor.class);
+            when(mockAccessorA.get(any())).thenReturn("data1");
+            VariableAccessor mockAccessorB = mock(VariableAccessor.class);
+            when(mockAccessorB.get(any())).thenReturn(12L);
+            VariableAccessor mockAccessorC = mock(VariableAccessor.class);
+            when(mockAccessorC.get(any())).thenReturn(Boolean.FALSE);
+            VariableAccessor mockAccessorD = mock(VariableAccessor.class);
+            when(mockAccessorD.get(any())).thenReturn(null);
+            Map<String, VariableAccessor> tagAccessors = new HashMap<>();
+            tagAccessors.put("t1", mockAccessorA);
+            tagAccessors.put("t2", mockAccessorB);
+            tagAccessors.put("t3", mockAccessorC);
+            tagAccessors.put("t4", mockAccessorD);
 
             VariableAccessor dataA = Mockito.mock(VariableAccessor.class);
             VariableAccessor dataB = Mockito.mock(VariableAccessor.class);
@@ -193,7 +209,7 @@ public class MetricsRecorderTest {
             dataTags2.put("existing2", "t3");
             MetricAccessor metricAccessorB = new MetricAccessor("my_metric2", dataB, Collections.singletonMap("cA", "200"), dataTags2);
 
-            MetricsRecorder rec = new MetricsRecorder(Arrays.asList(metricAccessorA, metricAccessorB), commonTagsManager, metricsManager, statsRecorder);
+            MetricsRecorder rec = new MetricsRecorder(Arrays.asList(metricAccessorA, metricAccessorB), tagAccessors, commonTagsManager, metricsManager, statsRecorder);
 
             rec.execute(executionContext);
 
@@ -219,13 +235,15 @@ public class MetricsRecorderTest {
 
         @Test
         void dataOverwritesConstant() {
-            when(inspectitContext.getData("tag")).thenReturn("value");
+            VariableAccessor mockAccessor = mock(VariableAccessor.class);
+            when(mockAccessor.get(any())).thenReturn("value");
+            Map<String, VariableAccessor> tagAccessors = Collections.singletonMap("tag", mockAccessor);
 
             VariableAccessor variableAccess = Mockito.mock(VariableAccessor.class);
             when(variableAccess.get(any())).thenReturn(100L);
 
             MetricAccessor metricAccessor = new MetricAccessor("my_metric", variableAccess, Collections.singletonMap("data", "constant"), Collections.singletonMap("data", "tag"));
-            MetricsRecorder rec = new MetricsRecorder(Collections.singletonList(metricAccessor), commonTagsManager, metricsManager, statsRecorder);
+            MetricsRecorder rec = new MetricsRecorder(Collections.singletonList(metricAccessor), tagAccessors, commonTagsManager, metricsManager, statsRecorder);
 
             rec.execute(executionContext);
 
