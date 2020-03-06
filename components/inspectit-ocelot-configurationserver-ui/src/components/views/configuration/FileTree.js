@@ -30,12 +30,11 @@ class FileTree extends React.Component {
     /**
      * Arranges first directories and then files. Within the directories or files it is an alphabetical sorting.
      */
-    sortFiles = () => {
+    sortFiles = (allFiles) => {
 
-        const allFiles = this.props.files;
         allFiles.sort(function (first, second) {
-            var labelFirst = first.label.toUpperCase();
-            var labelSecond = second.label.toUpperCase();
+            const labelFirst = first.label.toUpperCase();
+            const labelSecond = second.label.toUpperCase();
             if (labelFirst < labelSecond) {
                 return -1;
             }
@@ -51,15 +50,16 @@ class FileTree extends React.Component {
         allFiles.forEach(element => {
             if (element.children !== undefined) {
                 directories.push(element)
+                if (element.children.length > 0) {
+                    element.children = this.sortFiles(element.children);
+                }
             }
             else {
                 files.push(element);
             }
         })
-
         return directories.concat(files);
     }
-
 
     /**
      * Handle tree selection changes.
@@ -144,7 +144,7 @@ class FileTree extends React.Component {
                     className={this.props.className}
                     filter={true}
                     filterBy="label"
-                    value={this.props.defaultTree.concat(this.sortFiles())}
+                    value={this.props.defaultTree.concat(this.sortFiles(this.props.files))}
                     selectionMode="single"
                     selectionKeys={this.props.selection || this.props.selectedDefaultConfigFile}
                     onSelectionChange={this.onSelectionChange}
