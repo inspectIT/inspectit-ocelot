@@ -28,7 +28,7 @@ public class ConfigurationServer {
     private static final ApplicationContextInitializer<ConfigurableApplicationContext> WORKING_DIRECTORY_INITIALIZER = (ctx) -> {
         InspectitServerSettings settings = Binder
                 .get(ctx.getEnvironment())
-                .bind("inspectit", InspectitServerSettings.class).get();
+                .bind("inspectit-config-server", InspectitServerSettings.class).get();
         try {
             FileUtils.forceMkdir(new File(settings.getWorkingDirectory()));
         } catch (Exception e) {

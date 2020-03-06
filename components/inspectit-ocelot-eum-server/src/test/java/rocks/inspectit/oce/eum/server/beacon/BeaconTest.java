@@ -32,6 +32,17 @@ class BeaconTest {
         }
 
         @Test
+        public void merge() {
+            HashMap<String, String> map = new HashMap<>();
+            map.put("first", "3");
+            map.put("third", "4");
+            Beacon beacon1 = Beacon.of(map);
+            beacon = Beacon.merge(beacon, beacon1);
+            assertThat(beacon.contains(Arrays.asList("first", "second", "third"))).isTrue();
+            assertThat(beacon.get("first")).isEqualTo("3");
+        }
+
+        @Test
         public void containsFields() {
             boolean result = beacon.contains("first", "second");
 

@@ -11,6 +11,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -152,6 +153,51 @@ public class ContextPropagationUtilTest {
                     .hasSize(1)
                     .containsEntry(CORRELATION_CONTEXT_HEADER, "hello=world,is_something=true;type=b");
         }
+    }
 
+    @Nested
+    public class GetB3HeadersAsString {
+
+        @Test
+        public void nullMap() {
+            String result = ContextPropagationUtil.getB3HeadersAsString(null);
+
+            assertThat(result).isEqualTo("[]");
+        }
+        @Test
+        public void emptyMap() {
+            Map<String, String> data = Collections.emptyMap();
+
+            String result = ContextPropagationUtil.getB3HeadersAsString(data);
+
+            assertThat(result).isEqualTo("[]");
+        }
+
+        @Test
+        public void mapWithoutB3() {
+            Map<String, String> data = ImmutableMap.of("key-one", "value-one");
+
+            String result = ContextPropagationUtil.getB3HeadersAsString(data);
+
+            assertThat(result).isEqualTo("[]");
+        }
+
+        @Test
+        public void singleB3Header() {
+            Map<String, String> data = ImmutableMap.of("key-one", "value-one", "X-B3-TraceId", "traceId");
+
+            String result = ContextPropagationUtil.getB3HeadersAsString(data);
+
+            assertThat(result).isEqualTo("[\"X-B3-TraceId\": \"traceId\"]");
+        }
+
+        @Test
+        public void multipleB3Header() {
+            Map<String, String> data = ImmutableMap.of("key-one", "value-one", "X-B3-TraceId", "traceId", "X-B3-SpanId", "spanId");
+
+            String result = ContextPropagationUtil.getB3HeadersAsString(data);
+
+            assertThat(result).isEqualTo("[\"X-B3-TraceId\": \"traceId\", \"X-B3-SpanId\": \"spanId\"]");
+        }
     }
 }

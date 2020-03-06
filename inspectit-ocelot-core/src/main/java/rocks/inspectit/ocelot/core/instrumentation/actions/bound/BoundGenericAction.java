@@ -4,13 +4,13 @@ import lombok.experimental.NonFinal;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.IGenericAction;
 import rocks.inspectit.ocelot.core.instrumentation.actions.template.GenericActionTemplate;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.GenericActionConfig;
+import rocks.inspectit.ocelot.core.instrumentation.hook.VariableAccessor;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
 import rocks.inspectit.ocelot.core.instrumentation.injection.ClassInjector;
 import rocks.inspectit.ocelot.core.instrumentation.injection.InjectedClass;
 
 import java.lang.ref.WeakReference;
 import java.util.Map;
-import java.util.function.Function;
 
 /**
  * Represents a {@link IGenericAction} which has values bound to its input arguments.
@@ -75,7 +75,7 @@ public abstract class BoundGenericAction implements IHookAction {
                                           GenericActionConfig actionConfig,
                                           InjectedClass<?> action,
                                           Map<String, Object> constantAssignments,
-                                          Map<String, Function<ExecutionContext, Object>> dynamicAssignments) {
+                                          Map<String, VariableAccessor> dynamicAssignments) {
 
         if (dynamicAssignments.isEmpty()) {
             if (actionConfig.isVoid()) {

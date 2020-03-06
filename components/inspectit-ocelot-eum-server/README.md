@@ -46,7 +46,7 @@ $ java -Dserver.port=[port] -Dspring.config.location=file:[path-to-config] -jar 
 ## Configuration
 The configuration file defines the mapping between the concrete Boomerang metric and a OpenCensus metric, as the following sample configuration file shows:
 ```yaml
-inspectit-ocelot-eum-server:
+inspectit-eum-server:
   definitions:
     page_ready_time:
       measure-type: LONG

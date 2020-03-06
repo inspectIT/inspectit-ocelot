@@ -3,6 +3,7 @@ package rocks.inspectit.ocelot.config.validation;
 import lombok.experimental.UtilityClass;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.io.FileSystemResource;
+import rocks.inspectit.ocelot.config.conversion.InspectitConfigConversionService;
 import rocks.inspectit.ocelot.config.utils.CaseUtils;
 
 import java.beans.PropertyDescriptor;
@@ -21,7 +22,7 @@ public class PropertyPathHelper {
      * A HashSet of classes which are used as wildcards in the search for properties. If a found class matches one of these
      * classes, the end of the property path is reached. Mainly used in the search of maps
      */
-    private static final HashSet<Class<?>> TERMINAL_TYPES = new HashSet(Arrays.asList(Object.class, String.class, Integer.class, Long.class,
+    private static final HashSet<Class<?>> TERMINAL_TYPES = new HashSet<>(Arrays.asList(Object.class, String.class, Integer.class, Long.class,
             Float.class, Double.class, Character.class, Void.class,
             Boolean.class, Byte.class, Short.class, Duration.class, Path.class, URL.class, FileSystemResource.class));
 
@@ -113,7 +114,33 @@ public class PropertyPathHelper {
         if (TERMINAL_TYPES.contains(type)) {
             return true;
         } else if (type instanceof Class) {
-            return ((Class<?>) type).isEnum() || ((Class<?>) type).isPrimitive();
+            return ((Class<?>) type).isEnum()
+                    || ((Class<?>) type).isPrimitive()
+                    || InspectitConfigConversionService.getInstance().canConvert(String.class, (Class<?>) type)
+                    || InspectitConfigConversionService.getInstance().canConvert(Number.class, (Class<?>) type);
+        }
+        return false;
+    }
+
+    /**
+     * Checks if the given Class is a POJO.
+     * Every class which is no Collection, Map or terminal (see {@link #isTerminal(Type)} is classified as POJO.
+     *
+     * @param type the type to check
+     * @return true if the given type is a pojo.
+     */
+    public boolean isBean(Type type) {
+        if (type instanceof Class<?>) {
+            Class<?> clazz = (Class<?>) type;
+            if (Collection.class.isAssignableFrom(clazz)) {
+                return false;
+            } else if (Map.class.isAssignableFrom(clazz)) {
+                return false;
+            } else if (isTerminal(clazz)) {
+                return false;
+            } else {
+                return true;
+            }
         }
         return false;
     }
@@ -159,6 +186,7 @@ public class PropertyPathHelper {
      * E.g. inspectit.test.rest -> "inspectit" is added to the list, "test.rest" is returned.
      * E.g. [inspectit.literal].test.rest -> "inspectit.literal" is added to the list, "test.rest" is returned.
      * E.g. [inspectit.literal][test].rest -> "inspectit.literal" is added to the list, "[test].rest" is returned.
+     * E.g. inspectict. -> "inspectit" and "" is added to the list. "" is returned.
      *
      * @param propertyName A String with the path of a property
      * @param result       Reference to the list in which the extracted expressions should be saved in
@@ -179,7 +207,12 @@ public class PropertyPathHelper {
                 return "";
             } else {
                 result.add(propertyName.substring(0, end));
-                return removeLeadingDot(propertyName.substring(end));
+                if (end == propertyName.length() - 1) {
+                    result.add("");
+                    return "";
+                } else {
+                    return removeLeadingDot(propertyName.substring(end));
+                }
             }
         }
     }

@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.bootstrap.correlation.noop.NoopLogTraceCorrelator;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
-import rocks.inspectit.ocelot.config.model.tracing.LogCorrelationSettings;
+import rocks.inspectit.ocelot.config.model.tracing.TraceIdMDCInjectionSettings;
 import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 
@@ -29,7 +29,7 @@ public class LogTraceCorrelationActivator {
     @EventListener(InspectitConfigChangedEvent.class)
     void update() {
         InspectitConfig config = environment.getCurrentConfig();
-        LogCorrelationSettings logCorrelation = config.getTracing().getLogCorrelation();
+        TraceIdMDCInjectionSettings logCorrelation = config.getTracing().getLogCorrelation().getTraceIdMdcInjection();
         if (logCorrelation.isEnabled()) {
             correlatorImpl.setTraceIdKey(logCorrelation.getKey());
             Instances.logTraceCorrelator = correlatorImpl;

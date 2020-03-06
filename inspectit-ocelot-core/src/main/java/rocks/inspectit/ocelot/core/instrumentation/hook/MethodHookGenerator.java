@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.core.instrumentation.hook;
 
+import com.google.common.annotations.VisibleForTesting;
 import io.opencensus.stats.StatsRecorder;
 import io.opencensus.trace.Sampler;
 import io.opencensus.trace.samplers.Samplers;
@@ -9,6 +10,7 @@ import net.bytebuddy.description.method.MethodDescription;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import rocks.inspectit.ocelot.config.model.instrumentation.rules.MetricRecordingSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.RuleTracingSettings;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.ActionCallConfig;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.MethodHookConfiguration;
@@ -16,17 +18,18 @@ import rocks.inspectit.ocelot.core.instrumentation.context.ContextManager;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.ConditionalHookAction;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.MetricsRecorder;
+import rocks.inspectit.ocelot.core.instrumentation.hook.actions.model.MetricAccessor;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.ContinueOrStartSpanAction;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.EndSpanAction;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.StoreSpanAction;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.WriteSpanAttributesAction;
 import rocks.inspectit.ocelot.core.metrics.MeasuresAndViewsManager;
+import rocks.inspectit.ocelot.core.privacy.obfuscation.ObfuscationManager;
+import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 /**
  * This class is responsible for translating {@link MethodHookConfiguration}s
@@ -40,6 +43,9 @@ public class MethodHookGenerator {
     private ContextManager contextManager;
 
     @Autowired
+    private CommonTagsManager commonTagsManager;
+
+    @Autowired
     private MeasuresAndViewsManager metricsManager;
 
     @Autowired
@@ -47,6 +53,12 @@ public class MethodHookGenerator {
 
     @Autowired
     private ActionCallGenerator actionCallGenerator;
+
+    @Autowired
+    private VariableAccessorFactory variableAccessorFactory;
+
+    @Autowired
+    private ObfuscationManager obfuscationManager;
 
     /**
      * Builds a executable method hook based on the given configuration.
@@ -97,9 +109,11 @@ public class MethodHookGenerator {
 
 
             if (tracing.getStartSpan()) {
+                VariableAccessor name = Optional.ofNullable(tracing.getName())
+                        .map(variableAccessorFactory::getVariableAccessor).orElse(null);
                 actionBuilder
-                        .startSpanCondition(ConditionalHookAction.getAsPredicate(tracing.getStartSpanConditions()))
-                        .nameDataKey(tracing.getName())
+                        .startSpanCondition(ConditionalHookAction.getAsPredicate(tracing.getStartSpanConditions(), variableAccessorFactory))
+                        .nameAccessor(name)
                         .spanKind(tracing.getKind());
                 configureSampling(tracing, actionBuilder);
             } else {
@@ -108,7 +122,7 @@ public class MethodHookGenerator {
 
             if (tracing.getContinueSpan() != null) {
                 actionBuilder
-                        .continueSpanCondition(ConditionalHookAction.getAsPredicate(tracing.getContinueSpanConditions()))
+                        .continueSpanCondition(ConditionalHookAction.getAsPredicate(tracing.getContinueSpanConditions(), variableAccessorFactory))
                         .continueSpanDataKey(tracing.getContinueSpan());
             } else {
                 actionBuilder.continueSpanCondition(ctx -> false);
@@ -134,7 +148,8 @@ public class MethodHookGenerator {
                 Sampler sampler = Samplers.probabilitySampler(Math.max(0.0, Math.min(1.0, constantProbability)));
                 actionBuilder.staticSampler(sampler);
             } catch (NumberFormatException e) {
-                actionBuilder.dynamicSampleProbabilityKey(sampleProbability);
+                VariableAccessor probabilityAccessor = variableAccessorFactory.getVariableAccessor(sampleProbability);
+                actionBuilder.dynamicSampleProbabilityAccessor(probabilityAccessor);
             }
         }
     }
@@ -144,25 +159,48 @@ public class MethodHookGenerator {
 
         val attributes = tracing.getAttributes();
         if (!attributes.isEmpty()) {
-            IHookAction endTraceAction = new WriteSpanAttributesAction(attributes);
-            IHookAction actionWithConditions = ConditionalHookAction.wrapWithConditionChecks(tracing.getAttributeConditions(), endTraceAction);
+            Map<String, VariableAccessor> attributeAccessors = new HashMap<>();
+            attributes.forEach((attribute, variable) -> attributeAccessors.put(attribute, variableAccessorFactory.getVariableAccessor(variable)));
+            IHookAction endTraceAction = new WriteSpanAttributesAction(attributeAccessors, obfuscationManager.obfuscatorySupplier());
+            IHookAction actionWithConditions = ConditionalHookAction.wrapWithConditionChecks(tracing.getAttributeConditions(), endTraceAction, variableAccessorFactory);
             result.add(actionWithConditions);
         }
 
         if (tracing.getEndSpan() && (tracing.getStartSpan() || tracing.getContinueSpan() != null)) {
-            val endSpanAction = new EndSpanAction(ConditionalHookAction.getAsPredicate(tracing.getEndSpanConditions()));
+            val endSpanAction = new EndSpanAction(ConditionalHookAction.getAsPredicate(tracing.getEndSpanConditions(), variableAccessorFactory));
             result.add(endSpanAction);
         }
         return result;
     }
 
     private Optional<IHookAction> buildMetricsRecorder(MethodHookConfiguration config) {
-        if (!config.getConstantMetrics().isEmpty() || !config.getDataMetrics().isEmpty()) {
-            val recorder = new MetricsRecorder(config.getConstantMetrics(), config.getDataMetrics(), metricsManager, statsRecorder);
+        Collection<MetricRecordingSettings> metricRecordingSettings = config.getMetrics();
+        if (!metricRecordingSettings.isEmpty()) {
+            List<MetricAccessor> metricAccessors = metricRecordingSettings.stream()
+                    .map(this::buildMetricAccessor)
+                    .collect(Collectors.toList());
+
+            MetricsRecorder recorder = new MetricsRecorder(metricAccessors, commonTagsManager, metricsManager, statsRecorder);
             return Optional.of(recorder);
         } else {
             return Optional.empty();
         }
+    }
+
+    @VisibleForTesting
+    MetricAccessor buildMetricAccessor(MetricRecordingSettings metricSettings) {
+        String value = metricSettings.getValue();
+        VariableAccessor valueAccessor;
+        try {
+            valueAccessor = variableAccessorFactory.getConstantAccessor(Double.parseDouble(value));
+        } catch (NumberFormatException e) {
+            valueAccessor = variableAccessorFactory.getVariableAccessor(value);
+        }
+
+        Map<String, VariableAccessor> tagAccessors = metricSettings.getDataTags().entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> variableAccessorFactory.getVariableAccessor(entry.getValue())));
+
+        return new MetricAccessor(metricSettings.getMetric(), valueAccessor, metricSettings.getConstantTags(), tagAccessors);
     }
 
     private List<IHookAction> buildActionCalls(List<ActionCallConfig> calls, MethodReflectionInformation methodInfo) {

@@ -34,16 +34,16 @@ public class TraceSettingsTest extends TraceTestBase {
                         .anySatisfy((sp) -> {
                             assertThat(sp.getName()).endsWith("TraceSettingsTest.rootA");
                             assertThat(sp.getAttributes().getAttributeMap())
-                                    .hasSize(2)
+                                    .hasSize(4)
                                     .containsEntry("entry", AttributeValue.stringAttributeValue("const"))
-                                    .containsEntry("exit", AttributeValue.stringAttributeValue("Hello A!"));
-
+                                    .containsEntry("exit", AttributeValue.stringAttributeValue("Hello A!"))
+                                    .containsEntry("toObfuscate", AttributeValue.stringAttributeValue("***"))
+                                    .containsEntry("anything", AttributeValue.stringAttributeValue("***"));
                         })
 
         );
 
     }
-
 
     void rootB(boolean captureAttributes) {
         attributesSetterWithoutSpanWithConditions(captureAttributes);
@@ -253,12 +253,74 @@ public class TraceSettingsTest extends TraceTestBase {
 
 
     @Test
-    void testDynamicSpanSamplingRate() {
+    void dynamicSampleRate_low() {
         TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, 15, TimeUnit.SECONDS);
         for (int i = 0; i < 10000; i++) {
             dynamicSamplingRateTest("dynamic_0.2", 0.2);
+        }
+        samplingTestEndMarker("dynamic_end");
+
+        //wait for the end marker, this ensures that all sampled spans are also exported
+        assertTraceExported((spans) ->
+                assertThat(spans)
+                        .anySatisfy((sp) -> {
+                            assertThat(sp.getName()).isEqualTo("dynamic_end");
+                        })
+        );
+
+        //the number of spans lies with a probability greater than 99.999% +-300 around the mean of 0.2 * 10000
+        long numSpans02 = exportedSpans.stream().filter(sp -> sp.getName().equals("dynamic_0.2")).count();
+        assertThat(numSpans02).isGreaterThan(1700).isLessThan(2300);
+    }
+
+    @Test
+    void dynamicSampleRate_high() {
+        TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, 15, TimeUnit.SECONDS);
+        for (int i = 0; i < 10000; i++) {
             dynamicSamplingRateTest("dynamic_0.7", 0.7);
+        }
+        samplingTestEndMarker("dynamic_end");
+
+        //wait for the end marker, this ensures that all sampled spans are also exported
+        assertTraceExported((spans) ->
+                assertThat(spans)
+                        .anySatisfy((sp) -> {
+                            assertThat(sp.getName()).isEqualTo("dynamic_end");
+                        })
+        );
+
+        //the number of spans lies with a probability greater than 99.999% +-300 around the mean of 0.7 * 10000
+        long numSpans07 = exportedSpans.stream().filter(sp -> sp.getName().equals("dynamic_0.7")).count();
+        assertThat(numSpans07).isGreaterThan(6700).isLessThan(7300);
+    }
+
+
+    @Test
+    void dynamicSampleRate_invalidRate() {
+        TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, 15, TimeUnit.SECONDS);
+        for (int i = 0; i < 10000; i++) {
             dynamicSamplingRateTest("invalid", "not a number! haha!");
+        }
+        samplingTestEndMarker("dynamic_end");
+
+        //wait for the end marker, this ensures that all sampled spans are also exported
+        assertTraceExported((spans) ->
+                assertThat(spans)
+                        .anySatisfy((sp) -> {
+                            assertThat(sp.getName()).isEqualTo("dynamic_end");
+                        })
+        );
+
+        //ensure that an invalid probability is equal to "never sample"
+        long numSpansInvalid = exportedSpans.stream().filter(sp -> sp.getName().equals("invalid")).count();
+        assertThat(numSpansInvalid).isEqualTo(10000L);
+    }
+
+
+    @Test
+    void dynamicSampleRate_null() {
+        TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, 15, TimeUnit.SECONDS);
+        for (int i = 0; i < 10000; i++) {
             dynamicSamplingRateTest("null", null);
         }
         samplingTestEndMarker("dynamic_end");
@@ -271,21 +333,10 @@ public class TraceSettingsTest extends TraceTestBase {
                         })
         );
 
-        //the number of spans lies with a probability greater than 99.999% +-300 around the mean of 0.2 * 10000 and 0.7 * 10000
-        long numSpans02 = exportedSpans.stream().filter(sp -> sp.getName().equals("dynamic_0.2")).count();
-        assertThat(numSpans02).isGreaterThan(1700).isLessThan(2300);
-
-        long numSpans07 = exportedSpans.stream().filter(sp -> sp.getName().equals("dynamic_0.7")).count();
-        assertThat(numSpans07).isGreaterThan(6700).isLessThan(7300);
-
         //ensure that an invalid probability is equal to "never sample"
-        long numSpansInvalid = exportedSpans.stream().filter(sp -> sp.getName().equals("invalid")).count();
-        assertThat(numSpansInvalid).isEqualTo(10000L);
-
         long numSpansNull = exportedSpans.stream().filter(sp -> sp.getName().equals("null")).count();
         assertThat(numSpansNull).isEqualTo(10000L);
     }
-
 
     @Test
     void testNestedZeroSamplingProbability() {

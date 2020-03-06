@@ -1,3 +1,4 @@
+---
 version: '2'
 services:
   agent:
@@ -6,14 +7,14 @@ services:
     mem_limit: 128M
     volumes:
       - agent-vol:/agent
-      
+
   ocelot-config-server:
     image: inspectit/inspectit-ocelot-configurationserver:${INSPECTIT_OCELOT_VERSION}
     container_name: ocelot-config-server
-    mem_limit: 128M
+    mem_limit: 256M
     environment:
-      - INSPECTIT_WORKING_DIRECTORY=/configuration-server
-      - INSPECTIT_DEFAULT_USER_PASSWORD=demo
+      - INSPECTIT_CONFIG_SERVER_WORKING_DIRECTORY=/configuration-server
+      - INSPECTIT_CONFIG_SERVER_DEFAULT_USER_PASSWORD=demo
     volumes:
       - ./configuration-server:/configuration-server
     ports:

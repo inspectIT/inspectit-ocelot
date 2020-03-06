@@ -6,15 +6,13 @@ inspectit:
     # is active when path is not empty or null and enabled is set to true
     file-based:
       # the path to the directory to scan for configuration files
-      # scanning happens non-recursive meaning that no subdirectories will be parsed
+      # scanning happens recursive meaning that subdirectories will be parsed
       path:
       # can be used to disable the file based configuration while the path is still specified
       enabled: true
       # if true the directory will be watched for changes. When changes occur, the configuration is automatically reloaded
       watch: true
       # The frequency at which the target folder should be polled for changes if 'watch' is true.
-      # If the frequency is set to zero, a OS notification based approach is used instead of polling.
-      # However, depending on the filesystem OS notification might not work, e.g. for network filesystems.
       frequency: 5s
     # http property source configuration - has a lower priority than file-based configuration
     http:
@@ -29,3 +27,4 @@ inspectit:
       # the following attributes will be sent as http query parameters when fetching the configuration
       attributes:
         service: ${inspectit.service-name}
+        id: ${inspectit.env.pid}@${inspectit.env.hostname}

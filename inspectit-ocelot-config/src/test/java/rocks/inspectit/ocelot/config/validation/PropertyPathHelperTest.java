@@ -4,13 +4,14 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.exporters.metrics.PrometheusExporterSettings;
+import rocks.inspectit.ocelot.config.model.instrumentation.rules.MetricRecordingSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.scope.MatcherMode;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.time.DayOfWeek;
+import java.time.Duration;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -66,9 +67,103 @@ public class PropertyPathHelperTest {
     }
 
     @Nested
+    public class IsBean {
+
+        @Test
+        public void genericTypeIsNotABean() throws NoSuchFieldException {
+            Type type = new Object() {
+                AtomicReference<Boolean> genericMember;
+            }.getClass().getDeclaredField("genericMember").getGenericType();
+
+            boolean result = PropertyPathHelper.isBean(type);
+            assertThat(result).isFalse();
+        }
+
+        @Test
+        public void mapIsNotABean() {
+            boolean result = PropertyPathHelper.isBean(Map.class);
+            assertThat(result).isFalse();
+        }
+
+        @Test
+        public void setIsNotABean() {
+            boolean result = PropertyPathHelper.isBean(Set.class);
+            assertThat(result).isFalse();
+        }
+
+        @Test
+        public void listIsNotABean() {
+            boolean result = PropertyPathHelper.isBean(List.class);
+            assertThat(result).isFalse();
+        }
+
+        @Test
+        public void durationIsNotABean() {
+            boolean result = PropertyPathHelper.isBean(Duration.class);
+            assertThat(result).isFalse();
+        }
+
+        @Test
+        public void integerIsNotABean() {
+            boolean result = PropertyPathHelper.isBean(Integer.class);
+            assertThat(result).isFalse();
+        }
+
+        @Test
+        public void pojoIsABean() {
+            Class<?> pojo = new Object() {
+                String member;
+            }.getClass();
+
+            boolean result = PropertyPathHelper.isBean(pojo);
+            assertThat(result).isTrue();
+        }
+    }
+
+    @Nested
+    public class IsTerminal {
+
+        @Test
+        public void terminalType() {
+            boolean result = PropertyPathHelper.isTerminal(Boolean.class);
+
+            assertThat(result).isTrue();
+        }
+
+        @Test
+        public void primitive() {
+            boolean result = PropertyPathHelper.isTerminal(boolean.class);
+
+            assertThat(result).isTrue();
+        }
+
+        @Test
+        public void enumType() {
+            boolean result = PropertyPathHelper.isTerminal(DayOfWeek.class);
+
+            assertThat(result).isTrue();
+        }
+
+        @Test
+        public void convertibles() {
+            boolean result = PropertyPathHelper.isTerminal(MetricRecordingSettings.class);
+
+            assertThat(result).isTrue();
+        }
+
+        @Test
+        public void any() {
+            boolean result = PropertyPathHelper.isTerminal(this.getClass());
+
+            assertThat(result).isFalse();
+        }
+
+    }
+
+    @Nested
     public class CheckPropertyExists {
         @Test
-        void termminalTest() {
+        void terminalTest() {
             List<String> list = Arrays.asList("config", "file-based", "path");
             Type output = String.class;
 
@@ -76,7 +171,7 @@ public class PropertyPathHelperTest {
         }
 
         @Test
-        void nonTermminalTest() {
+        void nonTerminalTest() {
             List<String> list = Arrays.asList("exporters", "metrics", "prometheus");
             Type output = PrometheusExporterSettings.class;
 
@@ -110,7 +205,7 @@ public class PropertyPathHelperTest {
         @Test
         void readMethodIsNull() {
             List<String> list = Arrays.asList("instrumentation", "data", "method_duration", "is-tag");
-            Type output = boolean.class;
+            Type output = Boolean.class;
 
             assertThat(PropertyPathHelper.getPathEndType(list, InspectitConfig.class)).isEqualTo(output);
         }

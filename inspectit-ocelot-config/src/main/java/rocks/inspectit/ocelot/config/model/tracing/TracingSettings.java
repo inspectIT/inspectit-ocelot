@@ -27,7 +27,9 @@ public class TracingSettings {
     @Min(0)
     private double sampleProbability;
 
+    /**
+     * Settings for log correlation.
+     */
     @Valid
-    private LogCorrelationSettings logCorrelation;
-
+    private LogCorrelationSettings logCorrelation = new LogCorrelationSettings();
 }

@@ -54,19 +54,84 @@ inspectit-eum-server:
     extra:
       APPLICATION: my-application
     beacon:
-      URL: u
-      OS: ua.plt
+      COUNTRY_CODE:
+        input: COUNTRY_CODE
+      URL:
+        input: u
+      OS:
+        input: ua.plt
+      U_NO_QUERY:
+        input: u
+        regex: "^([^?]*)(\\?.*)?$"
+        replacement: "$1"
+      U_HOST:
+        input: u
+        regex: "^.*\\/\\/([^:\\/]*).*$"
+        replacement: "$1"
+      U_PORT:
+        input: u
+        regex: "^.*\\/\\/([^:\\/]*):(\\d+).*$"
+        replacement: "$2"
+      U_PATH:
+        input: u
+        regex: "^.*\\/\\/([^\\/]*)([^?]*).*$"
+        replacement: "$2"
+      PGU_NO_QUERY:
+        input: pgu
+        regex: "^([^?]*)(\\?.*)?$"
+        replacement: "$1"
+      PGU_HOST:
+        input: pgu
+        regex: "^.*\\/\\/([^:\\/]*).*$"
+        replacement: "$1"
+      PGU_PORT:
+        input: pgu
+        regex: "^.*\\/\\/([^:\\/]*):(\\d+).*$"
+        replacement: "$2"
+      PGU_PATH:
+        input: pgu
+        regex: "^.*\\/\\/([^\\/]*)([^?]*).*$"
+        replacement: "$2"
     define-as-global:
       - URL
       - OS
       - COUNTRY_CODE
 
+  # metrics exporter settings
   exporters:
     metrics:
       prometheus:
         enabled: true
         host: localhost
         port: 8888
+      influx:
+        enabled: true
+        # the export interval of the metrics
+        export-interval: 15s
+        # the database to write to
+        database: "inspectit"
+        # the retention policy to write to
+        retention-policy: "autogen"
+        # If true, the specified database will be created with the autogen retention policy
+        create-database: true
+
+  # settings for the EUM server's self-monitoring
+  self-monitoring:
+    # whether self-monitoring is enabled
+    enabled: true
+    # the prefix used for the self-monitoring metrics
+    metricPrefix: "inspectit-eum/self/"
+    # definitions of the self-monitoring metrics
+    metrics:
+      # counts the amount of received EUM beacons
+      beacons_received:
+        measure-type: LONG
+        unit: amount
+        views:
+          '[inspectit-eum/self/beacons_received/COUNT]':
+            aggregation: COUNT
+            tags:
+              is_error: true
 
 # ACTUATOR PROPERTIES
 management:

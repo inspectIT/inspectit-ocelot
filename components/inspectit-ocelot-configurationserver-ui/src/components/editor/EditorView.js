@@ -19,7 +19,7 @@ class EditorView extends React.Component {
     }
 
     render() {
-        const { value, showEditor, hint, onRefresh, onChange, isRefreshing, enableButtons, isErrorNotification, notificationIcon, notificationText, canSave, loading, children } = this.props;
+        const { value, showEditor, hint, onRefresh, onChange, onCreate, isRefreshing, enableButtons, isErrorNotification, notificationIcon, notificationText, canSave, loading, children, readOnly } = this.props;
 
         return (
             <div className="this p-grid p-dir-col p-nogutter">
@@ -65,7 +65,7 @@ class EditorView extends React.Component {
                 </div>
                 <div className="p-col editor-container">
                     {showEditor ?
-                        <AceEditor editorRef={(editor) => this.editor = editor} mode="yaml" theme="cobalt" options={editorConfig} value={value} onChange={onChange} canSave={canSave} onSave={this.handleSave}/>
+                        <AceEditor editorRef={(editor) => this.editor = editor} onCreate={onCreate} mode="yaml" theme="cobalt" options={editorConfig} value={value} onChange={onChange} canSave={canSave} onSave={this.handleSave} readOnly={readOnly} />
                         :
                         <div className="selection-information">
                             <div>{hint}</div>
@@ -111,7 +111,9 @@ EditorView.propTypes = {
     /** The text to show in the notification bar. */
     notificationText: PropTypes.string,
     /** Whether the editor should show an loading indicator */
-    loading: PropTypes.bool
+    loading: PropTypes.bool,
+    /** Wheter the editor should be in read-only mode */
+    readOnly: PropTypes.bool
 }
 
 EditorView.defaultProps = {

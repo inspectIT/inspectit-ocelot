@@ -40,13 +40,15 @@ class AceEditor extends React.Component {
     }
 
     configureEditor() {
-        const { theme, mode, options } = this.props;
+        const { theme, mode, options, readOnly } = this.props;
         this.editor.setTheme("ace/theme/" + theme)
         this.editor.getSession().setMode("ace/mode/" + mode);
 
         this.editor.session.off("change", this.onChange);
         this.editor.session.on("change", this.onChange);
         this.editor.commands.addCommand(saveCommand(this.doSave))
+        this.editor.setReadOnly(readOnly);
+
         if (options) {
             this.editor.setOptions(options);
         }
@@ -59,6 +61,9 @@ class AceEditor extends React.Component {
         ace.config.loadModule("ace/ext/keybinding_menu", function (module) {
             module.init(editorRef);
         })
+        if (this.props.onCreate) {
+            this.props.onCreate(this.editor);
+        }
 
         this.configureEditor();
         this.updateValue();
@@ -76,7 +81,7 @@ class AceEditor extends React.Component {
     }
 
     doSave = () => {
-        if(this.props.canSave){
+        if (this.props.canSave) {
             this.props.onSave()
         }
     }

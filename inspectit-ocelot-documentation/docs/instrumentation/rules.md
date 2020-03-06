@@ -44,7 +44,7 @@ As the name states, we define under the `entry` property of the rule which actio
 On entry, we collect the current timestamp in a variable named `method_entry_time` and the name of the currently executed method in `method_name`.
 These variables are _data_, their names are referred to as _data keys_. Note that we also define how the data is collected: For `method_entry_time` we invoke the [action](#actions) named `timestamp_nanos` and for `method_name` the one named `get_method_fqn`.
 
-This data is then used on method exit: using the action `elapsed_millis` we compute the time which has passed since `method_entry_time`. Finally, the duration computed this way is used as value for the `method/duration` metric. As shown in the [definition](metrics/custom-metrics.md) of this metric, the collected `method_name` is used as tag for all of its views.
+This data is then used on method exit: using the action `elapsed_millis` we compute the time which has passed since `method_entry_time`. Finally, the duration computed this way is used as a value for the `method/duration` metric. As shown in the [definition](metrics/custom-metrics.md) of this metric, the collected `method_name` is used as a tag for all of its views.
 
 ## Data Propagation
 
@@ -61,10 +61,10 @@ For this reason the inspectIT context implements _data propagation_. The propaga
 
 Up- and down propagation can also be combined: in this case then the data is attached to the control flow, meaning that it will appear as if its value will be passed around with every method call and return.
 
-The second aspect of propagation to consider is the _level_. Does the propagation happen within each Thread separately or is it propagated across threads? Also, what about propagation across JVM boarders, e.g. one micro service calling another one via HTTP? In inspectIT Ocelot we provide the following two settings for the propagation level.
+The second aspect of propagation to consider is the _level_. Does the propagation happen within each Thread separately or is it propagated across threads? Also, what about propagation across JVM borders, e.g. one micro service calling another one via HTTP? In inspectIT Ocelot we provide the following two settings for the propagation level.
 
-* **JVM local:** The data is propagated within the JVM, even across thread boarders. The behaviour when data moves from one thread to another is defined through [Special Sensors](instrumentation/special-sensors.md).
-* **Global:** Data is propagated within the JVM and even across JVM boarders. For example, when an application issues an HTTP request, the globally down propagated data is added to the headers of the request. When the response arrives, up propagated data is collected from the response headers. Again, this protocol specific behaviour is realized through [Special Sensors](instrumentation/special-sensors.md).
+* **JVM local:** The data is propagated within the JVM, even across thread borders. The behaviour when data moves from one thread to another is defined through [Special Sensors](instrumentation/special-sensors.md).
+* **Global:** Data is propagated within the JVM and even across JVM borders. For example, when an application issues an HTTP request, the globally down propagated data is added to the headers of the request. When the response arrives, up propagated data is collected from the response headers. This protocol specific behaviour is realized through default instrumentation rules provided with the agent, but can be extended as needed.
 
 ### Defining the Behaviour
 
@@ -75,7 +75,7 @@ property `inspectit.instrumentation.data`. Here are some examples extracted from
 inspectit:
   instrumentation:
     data:
-      # for correlating calls across JVM boarders
+      # for correlating calls across JVM borders
       prop_origin_service: {down-propagation: GLOBAL, is-tag: false}
       prop_target_service: {up-propagation: GLOBAL, down-propagation: JVM_LOCAL, is-tag: false}
 
@@ -92,19 +92,17 @@ The configuration options are the following:
 
 |Config Property|Default| Description
 |---|---|---|
-|`down-propagation`|`JVM_LOCAL`|Configures if values for this data key propagate down and the level of propagation.
-Possible values are `NONE`, `JVM_LOCAL` and `GLOBAL`. If `NONE` is configured, no down propagation will take place.
-|`up-propagation`|`NONE`| Configures if values for this data key propagate up and the level of propagation.
-Possible values are `NONE`, `JVM_LOCAL` and `GLOBAL`. If `NONE` is configured, no up propagation will take place.
-|`is-tag`|`true`|If true, this data will act as a tag when metrics are recorded. This does not influence propagation, e.g. typically you want tags to be down propagated JVM locally.
+| `down-propagation` | `JVM_LOCAL` if the data key is also a [common tag](metrics/common-tags.md), `NONE` otherwise | Configures if values for this data key propagate down and the level of propagation. Possible values are `NONE`, `JVM_LOCAL` and `GLOBAL`. If `NONE` is configured, no down propagation will take place. | 
+| `up-propagation` |  `NONE` |  Configures if values for this data key propagate up and the level of propagation. Possible values are `NONE`, `JVM_LOCAL` and `GLOBAL`. If `NONE` is configured, no up propagation will take place. | 
+| `is-tag` | `true` if the data key is also a [common tag](metrics/common-tags.md) or is used as tag in any [metric definition](metrics/custom-metrics.md), `false` otherwise | If true, this data will act as a tag when metrics are recorded. This does not influence propagation. | 
 
-Note that you are free to use data keys without explicitly defining them in the `inspectit.instrumentation.data` section. In this case simply all settings are assumed to be default, which corresponds to the behaviour of OpenCensus tags.
+Note that you are free to use data keys without explicitly defining them in the `inspectit.instrumentation.data` section. In this case simply all settings will have their default value.
 
 ### Interaction with OpenCensus Tags
 
 As explained previously, our inspectIT context can be seen as a more flexible variation of OpenCensus tags. In fact, we designed the inspectIT context so that it acts as a superset of the OpenCensus TagContext.
 
-Firstly, when an instrumented method is entered, a new inspectIT context is created. At this point, it imports any tag values published by OpenCensus directly as data. This also includes the [common tags](metrics/common-tags.md) created by inspectIT. This means, that you can simply read (and overwrite) values for common tags such as `service` or `host_address` at any rule.
+Firstly, when an instrumented method is entered, a new inspectIT context is created. At this point, it imports any tag values published by OpenCensus directly as data. This also includes the [common tags](metrics/common-tags.md) created by inspectIT. This means, that you can simply read (and override) values for common tags such as `service` or `host_address` at any rule.
 
 The integration is even deeper if you [configured the agent to also extract the metrics from manual instrumentation in your application](configuration/open-census-configuration.md).
 Firstly, if a method instrumented by inspectIT Ocelot is executed within a TagContext opened by your application,
@@ -149,7 +147,7 @@ inspectit:
 
 The names of the first two actions, `timestamp_nanos` and `elapsed_millis` should be familiar for you from the initial example in the [rules section](instrumentation/rules.md).
 
-The code executed when a action is invoked is defined through the `value` configuration property. In YAML, this is simply a string. InspectIT however will interpret this string as a Java expression to evaluate. The result value of this expression will be used as result for the action invocation.
+The code executed when an action is invoked is defined through the `value` configuration property. In YAML, this is simply a string. InspectIT however will interpret this string as a Java expression to evaluate. The result value of this expression will be used as result for the action invocation.
 
 Note that the code will not be interpreted at runtime, but instead inspectIT Ocelot will compile the expression to bytecode to ensure maximum efficiency. As indicated by the manual primitive boxing performed for `timestamp_nanos` the compiler has some restrictions. For example Autoboxing is not supported. However, actions are expected to return Objects, therefore manual boxing has to be performed. Under the hood, inspectIT uses the [javassist](http://www.javassist.org/) library, where all imposed restrictions can be found.
 The most important ones are that neither Autoboxing, Generics, Anonymous Classes or Lambda Expressions are supported.
@@ -216,7 +214,7 @@ Normally, all non `java.lang.*` types have to be referred to using their fully q
 
 Rules glue together [scopes](instrumentation/scopes.md) and [actions](instrumentation/rules.md#actions) to define which actions you want to perform on which application methods.
 
-As you might have noticed, the initial example rule shown in the [rules section](instrumentation/rules.md) did not define any reference to a scope. This is because this rule originates form the default configuration of inspectIT Ocelot, where we don't know yet of which methods you want to collect the response time. Therefore this rule is defined without scopes, but you can easily add some in your own configuration files:
+As you might have noticed, the initial example rule shown in the [rules section](instrumentation/rules.md) did not define any reference to a scope. This is because this rule originates from the default configuration of inspectIT Ocelot, where we don't know yet of which methods you want to collect the response time. Therefore this rule is defined without scopes, but you can easily add some in your own configuration files:
 
 ```yaml
 inspectit:
@@ -388,20 +386,60 @@ example_rule:
   exit:
     method_duration:
       #action invocation here....
+    method_name:
+      #action invocation here....
+
+  metrics:
+    '[method/duration]':
+      value: method_duration
+      constant-tags:
+        action: checkout
+      data-tags:
+        method_name: method_name
+    write_my_other_metric:
+      metric: "some/other/metric"
+      value: 42
+```
+
+The metrics phase is executed after the exit phase of the rule.
+As shown above, you can assign values to metrics based on their name or explicitly define the metric name in `metric` property.
+This allows to write multiple values for the same metric from within the same rule.
+You must however have [defined the metric](metrics/custom-metrics.md) to use them.
+
+The measurement value written to the metric can be specified by giving a data key in the `value` property.
+This was done in the example above for `method/duration`:
+Here, the `value` for the data key `method_duration` is taken, which we previously wrote in the exit phase.
+Alternatively you can just specify a constant which will be used, like shown for `some/other/metric`.
+
+In addition, you should define tags that are be recorded alongside the metric value.
+The prerequisite for this is that tags have been declared in the [metric definition](metrics/custom-metrics.md) and [configured to be used as tags](#defining-the-behaviour).
+Constant tags always have same values as defined in the configuration.
+The data tags try to resolve value from the data key, which is previously wrote in the exit phase.
+If data key for the data tag can not be found, then corresponding tag is omitted.
+Note that `data-tags` have higher priority than the `constant-tags`, thus if both section define a tag with same key, the data tag will overwrite the constant one if it can be resolved.
+
+> All [common tags](metrics/common-tags.md) are always included in the metric recording and do not need explicit specification.
+
+:::warning Short notation is deprecated
+The default way to specify metric collection in Ocelot versions up to and including v1.0 was a so called short notation, which is now deprecated and will be invalid in future Ocelot releases:
+
+```yaml
+#inspectit.instrumentation.rules is omitted here
+example_rule:
+  #...
+  exit:
+    method_duration:
+      #action invocation here....
 
   metrics:
     '[method/duration]' : method_duration
     '[some/other/metric]' : 42
 ```
 
-The metrics phase is executed after the exit phase of the rule. As shown above, you can simply assign values to metrics based on their name. You must however have [defined the metric](metrics/custom-metrics.md) to use them.
-
-The measurement value written to the metric can be specified by giving a data key. This was done in the example above for `method/duration`: Here, the value for the data key `method_duration` is taken, which we previously wrote in the exit phase.
-Alternatively you can just specify a constant which will be used, like it was done for `some/other/metric`.
-
-If the value assigned with the data key you specified is `null` (e.g. no data was collected), no value for the metric will be written out.
-
-In addition, all configured tags for the metrics will also be taken from the inspectIT context, if they have been [configured to be used as tags](#defining-the-behaviour).
+As short notation does not allow specification of tags to be recorded, using the short notation means that only common tags will be collected.
+We advise to migrate to the new configuration style immediately.
+Due to the way configuration loading works, the short notation will always take precedence over the explicit notation. This means that you cannot override settings made with the short-notation by using the explicit notation.
+:::
 
 ### Collecting Traces
 
@@ -424,11 +462,11 @@ For example, using the previous configuration snippet, each method that matches 
 |Property |Default| Description
 |---|---|---|
 |`start-span`|`false`|If true, all method invocations of methods matching any scope of this rule will be collected as spans.
-|`name`|`null`|Defines a data key whose value will be used as name for the span. If it is `null` or the value for the data key is `null`, the full qualified name of the method will be used. Note that the value for the data key must be written in the entry section of the rule at latest!
+|`name`|`null`|Defines a data key whose value will be used as name for the span. If it is `null` or the value for the data key is `null`, the fully qualified name of the method will be used. Note that the value for the data key must be written in the entry section of the rule at latest!
 |`kind`|`null`|Can be `null`, `CLIENT` or `SERVER` corresponding to the [OpenCensus values](https://opencensus.io/tracing/span/kind/).
 |`attributes`|`{}` (empty dictionary) |Maps names of attributes to data keys whose values will be used on exit to populate the given attributes.
 
-Commonly, you do not want to have the full qualified name of the instrumented method as span name. For example, for HTTP requests you typically want the HTTP path as span name. This behaviour can be customized using the `name` property:
+Commonly, you do not want to have the fully qualified name of the instrumented method as span name. For example, for HTTP requests you typically want the HTTP path as span name. This behaviour can be customized using the `name` property:
 
 ```yaml
 inspectit:
@@ -534,7 +572,7 @@ Firstly, it is possible to "remember" the span created or continued using the `s
           end-span: false
 ```
 
-With this option, the span created at the end of the entry phase will be stored in the context with the data key `my_span_data`. Usually this span reference is then extracted from the context and attached ot an object via the [_attachments](#input-parameters).
+With this option, the span created at the end of the entry phase will be stored in the context with the data key `my_span_data`. Usually this span reference is then extracted from the context and attached to an object via the [_attachments](#input-parameters).
 
 Without the `end-span: false` definition above, the span would be ended as soon as the instrumented method returns.
 By setting `end-span` to false, the span is kept open instead. It can then be continued when another method is executed as follows:

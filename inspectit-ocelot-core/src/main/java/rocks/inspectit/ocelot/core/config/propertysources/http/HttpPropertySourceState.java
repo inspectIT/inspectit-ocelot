@@ -68,6 +68,25 @@ public class HttpPropertySourceState {
     private PropertySource currentPropertySource;
 
     /**
+     * Number of unsuccessful connection attempts.
+     */
+    private int errorCounter;
+
+    /**
+     * Flag indicates that it is the first attempt to write the configuration to file.
+     * See {@link #writePersistenceFile(String)}
+     */
+    private boolean firstFileWriteAttempt = true;
+
+    /**
+     * Flag indicates if first attempt to write configuration to file was successful.
+     * If this resolves to false no further attempts are performed.
+     * See {@link #writePersistenceFile(String)}
+     */
+    @Getter
+    private boolean firstFileWriteAttemptSuccessful = true;
+
+    /**
      * Constructor.
      *
      * @param name            the name used for the property source
@@ -76,6 +95,7 @@ public class HttpPropertySourceState {
     public HttpPropertySourceState(String name, HttpConfigSettings currentSettings) {
         this.name = name;
         this.currentSettings = currentSettings;
+        this.errorCounter = 0;
         //ensure that currentPropertySource is never null, even if the initial fetching fails
         currentPropertySource = new PropertiesPropertySource(name, new Properties());
     }
@@ -174,12 +194,16 @@ public class HttpPropertySourceState {
             HttpResponse response = createHttpClient().execute(httpGet);
             configuration = processHttpResponse(response);
             isError = false;
+            if (errorCounter != 0) {
+                log.info("Configuration fetch has been successful after {} unsuccessful attempts.", errorCounter);
+                errorCounter = 0;
+            }
         } catch (ClientProtocolException e) {
-            log.error("HTTP protocol error occurred while fetching configuration.", e);
+            logFetchError("HTTP protocol error occurred while fetching configuration.", e);
         } catch (IOException e) {
-            log.error("A IO problem occurred while fetching configuration.", e);
+            logFetchError("A IO problem occurred while fetching configuration.", e);
         } catch (Exception e) {
-            log.error("Exception occurred while fetching configuration.", e);
+            logFetchError("Exception occurred while fetching configuration.", e);
         } finally {
             httpGet.releaseConnection();
         }
@@ -191,6 +215,20 @@ public class HttpPropertySourceState {
         }
 
         return configuration;
+    }
+
+    /**
+     * Increments the errorCounter and prints ERROR log if the errorCounter is power of two
+     *
+     * @param message   error message to log
+     * @param exception exception that occurred when trying to fetch a configuration
+     */
+    private void logFetchError(String message, Exception exception) {
+        errorCounter++;
+        //check if errorCounter is a power of 2
+        if (((errorCounter & (errorCounter - 1)) == 0)) {
+            log.error(message, exception);
+        }
     }
 
     /**
@@ -251,17 +289,23 @@ public class HttpPropertySourceState {
      *
      * @param content the content to write to the file (normally the most recent configuration)
      */
-    private void writePersistenceFile(String content) {
-        try {
-            String file = currentSettings.getPersistenceFile();
-            if (!StringUtils.isBlank(file)) {
-                log.debug("Writing HTTP Configuration persistence file '{}'", file);
-                Path path = Paths.get(file);
-                Files.createDirectories(path.getParent());
-                Files.write(path, content.getBytes(StandardCharsets.UTF_8));
+    void writePersistenceFile(String content) {
+        if (firstFileWriteAttemptSuccessful) {
+            try {
+                String file = currentSettings.getPersistenceFile();
+                if (!StringUtils.isBlank(file)) {
+                    log.debug("Writing HTTP Configuration persistence file '{}'", file);
+                    Path path = Paths.get(file);
+                    Files.createDirectories(path.getParent());
+                    Files.write(path, content.getBytes(StandardCharsets.UTF_8));
+                }
+            } catch (Exception e) {
+                if (firstFileWriteAttempt) {
+                    firstFileWriteAttemptSuccessful = false;
+                }
+                log.error("Could not write persistence file for HTTP-configuration.", e);
             }
-        } catch (Exception e) {
-            log.error("Could not write persistence file for HTTP-configuration", e);
+            firstFileWriteAttempt = false;
         }
     }
 
