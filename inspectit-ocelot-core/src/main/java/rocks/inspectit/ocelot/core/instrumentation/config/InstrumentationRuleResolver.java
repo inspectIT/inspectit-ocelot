@@ -1,5 +1,8 @@
 package rocks.inspectit.ocelot.core.instrumentation.config;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.HashMultiset;
+import com.google.common.collect.Multiset;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +12,7 @@ import org.springframework.util.StringUtils;
 import rocks.inspectit.ocelot.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.actions.ActionCallSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.InstrumentationRuleSettings;
+import rocks.inspectit.ocelot.config.model.instrumentation.rules.MetricRecordingSettings;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.ActionCallConfig;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.GenericActionConfig;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.InstrumentationRule;
@@ -93,13 +97,19 @@ public class InstrumentationRuleResolver {
                 result.postExitAction(resolveCall(data, call, actions))
         );
 
-        settings.getMetrics().entrySet().stream()
-                .filter(e -> !StringUtils.isEmpty(e.getValue()))
-                .forEach(e -> result.metric(e.getKey(), e.getValue()));
+        result.metrics(resolveMetricRecordings(settings));
 
         result.tracing(settings.getTracing());
 
         return result.build();
+    }
+
+    @VisibleForTesting
+    Multiset<MetricRecordingSettings> resolveMetricRecordings(InstrumentationRuleSettings settings) {
+        return settings.getMetrics().entrySet().stream()
+                .filter(e -> !StringUtils.isEmpty(e.getValue().getValue()))
+                .map(entry -> entry.getValue().copyWithDefaultMetricName(entry.getKey())) //use map key as default metric name
+                .collect(Collectors.toCollection(HashMultiset::create));
     }
 
     /**

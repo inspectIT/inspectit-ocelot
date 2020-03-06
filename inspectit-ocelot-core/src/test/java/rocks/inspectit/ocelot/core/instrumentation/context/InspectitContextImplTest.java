@@ -17,7 +17,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 import rocks.inspectit.ocelot.bootstrap.correlation.noop.NoopLogTraceCorrelator;
-import rocks.inspectit.ocelot.core.instrumentation.config.model.DataProperties;
+import rocks.inspectit.ocelot.config.model.instrumentation.data.PropagationMode;
+import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;
 import rocks.inspectit.ocelot.core.testutils.GcUtils;
 
 import java.lang.ref.WeakReference;
@@ -35,7 +36,7 @@ import static org.mockito.Mockito.*;
 public class InspectitContextImplTest {
 
     @Mock
-    DataProperties propagation;
+    PropagationMetaData propagation;
 
     Map<String, String> getCurrentTagsAsMap() {
         HashMap<String, String> result = new HashMap<>();
@@ -613,8 +614,7 @@ public class InspectitContextImplTest {
 
         @Test
         void verifyTagsExtractedOnRoot() {
-            doReturn(true).when(propagation).isPropagatedDownWithinJVM(any());
-            doReturn(true).when(propagation).isTag(any());
+            doAnswer((invocation) -> PropagationMetaData.builder()).when(propagation).copy();
 
             TagContextBuilder tcb = Tags.getTagger().emptyBuilder()
                     .put(TagKey.create("myTag"), TagValue.create("myValue"));
@@ -633,10 +633,37 @@ public class InspectitContextImplTest {
             assertThat(InspectitContextImpl.INSPECTIT_KEY.get()).isNull();
         }
 
+
+        @Test
+        void verifyTagPropagationPreservedOnRoot() {
+            doAnswer((invocation) -> PropagationMetaData.builder()).when(propagation).copy();
+
+            TagContextBuilder tcb = Tags.getTagger().emptyBuilder()
+                    .put(TagKey.create("myTag"), TagValue.create("myValue"));
+            try (Scope tc = tcb.buildScoped()) {
+                InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
+                ctxA.makeActive();
+
+                InspectitContextImpl ctxB = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
+                ctxB.makeActive();
+
+                assertThat(getCurrentTagsAsMap()).hasSize(1);
+                assertThat(getCurrentTagsAsMap()).containsEntry("myTag", "myValue");
+
+                ctxB.close();
+                ctxA.close();
+            }
+
+            assertThat(InspectitContextImpl.INSPECTIT_KEY.get()).isNull();
+        }
+
         @Test
         void verifyTagsExtractedWithinTrace() {
-            doReturn(true).when(propagation).isPropagatedDownWithinJVM(any());
-            doReturn(true).when(propagation).isTag(any());
+            doAnswer((invocation) -> PropagationMetaData.builder()
+                    .setTag("rootKey", true)
+                    .setDownPropagation("rootKey", PropagationMode.JVM_LOCAL)).when(propagation).copy();
+            doReturn(true).when(propagation).isTag(eq("rootKey"));
+            doReturn(true).when(propagation).isPropagatedDownWithinJVM(eq("rootKey"));
 
             InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
             root.setData("rootKey", "rootValue");
@@ -653,6 +680,74 @@ public class InspectitContextImplTest {
                 assertThat(getCurrentTagsAsMap()).hasSize(2);
                 assertThat(getCurrentTagsAsMap()).containsEntry("myTag", "myValue");
                 assertThat(getCurrentTagsAsMap()).containsEntry("rootKey", "rootValue");
+
+                ctxA.close();
+            }
+
+            root.close();
+            assertThat(InspectitContextImpl.INSPECTIT_KEY.get()).isNull();
+        }
+
+        @Test
+        void verifyTagPropagationPreservedWithinTrace() {
+            doAnswer((invocation) -> PropagationMetaData.builder()
+                    .setTag("rootKey", true)
+                    .setDownPropagation("rootKey", PropagationMode.JVM_LOCAL)).when(propagation).copy();
+            doReturn(true).when(propagation).isTag(eq("rootKey"));
+            doReturn(true).when(propagation).isPropagatedDownWithinJVM(eq("rootKey"));
+
+            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
+            root.setData("rootKey", "rootValue");
+
+            root.makeActive();
+
+            TagContextBuilder tcb = Tags.getTagger().emptyBuilder()
+                    .put(TagKey.create("myTag"), TagValue.create("myValue"));
+            try (Scope tc = tcb.buildScoped()) {
+                InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
+                ctxA.makeActive();
+
+                InspectitContextImpl ctxB = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
+                assertThat(ctxB.getData("myTag")).isEqualTo("myValue");
+                ctxB.makeActive();
+
+                assertThat(getCurrentTagsAsMap()).hasSize(2);
+                assertThat(getCurrentTagsAsMap()).containsEntry("myTag", "myValue");
+                assertThat(getCurrentTagsAsMap()).containsEntry("rootKey", "rootValue");
+
+                ctxB.close();
+                ctxA.close();
+            }
+
+            root.close();
+            assertThat(InspectitContextImpl.INSPECTIT_KEY.get()).isNull();
+        }
+
+
+        @Test
+        void verifyTagSettingWithoutPropagationPreservedWithinTrace() {
+            doAnswer((invocation) -> PropagationMetaData.builder()
+                    .setTag("rootKey", true)
+                    .setDownPropagation("rootKey", PropagationMode.NONE)).when(propagation).copy();
+            doReturn(true).when(propagation).isTag(eq("myTag"));
+
+            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
+            root.makeActive();
+
+            TagContextBuilder tcb = Tags.getTagger().emptyBuilder()
+                    .put(TagKey.create("myTag"), TagValue.create("myValue"));
+            try (Scope tc = tcb.buildScoped()) {
+                InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
+                ctxA.setData("rootKey", "childValue");
+                ctxA.makeActive();
+
+                try (Scope subScope = ctxA.enterFullTagScope()) {
+
+                    assertThat(getCurrentTagsAsMap()).hasSize(2);
+                    assertThat(getCurrentTagsAsMap()).containsEntry("myTag", "myValue");
+                    assertThat(getCurrentTagsAsMap()).containsEntry("rootKey", "childValue");
+
+                }
 
                 ctxA.close();
             }
@@ -750,12 +845,16 @@ public class InspectitContextImplTest {
             assertThat(getCurrentTagsAsMap()).containsEntry("global", "globalValue");
 
             try (Scope scope = ctx.enterFullTagScope()) {
-                assertThat(getCurrentTagsAsMap()).hasSize(2);
-                assertThat(getCurrentTagsAsMap()).containsEntry("local", "localValue");
-                assertThat(getCurrentTagsAsMap()).containsEntry("global", "globalValue");
+                assertThat(getCurrentTagsAsMap()).hasSize(2)
+                        .containsEntry("local", "localValue")
+                        .containsEntry("global", "globalValue");
             }
 
+            assertThat(ctx.getData("local")).isEqualTo("localValue");
+            assertThat(ctx.getData("global")).isEqualTo("globalValue");
+
             ctx.close();
+
             assertThat(InspectitContextImpl.INSPECTIT_KEY.get()).isNull();
         }
 
@@ -787,14 +886,18 @@ public class InspectitContextImplTest {
             assertThat(getCurrentTagsAsMap()).containsEntry("rootKey2", "rootValue2");
 
             try (Scope sc = ctx.enterFullTagScope()) {
-
-                assertThat(getCurrentTagsAsMap()).hasSize(3);
-                assertThat(getCurrentTagsAsMap()).containsEntry("rootKey1", "nestedValue1");
-                assertThat(getCurrentTagsAsMap()).containsEntry("rootKey2", "rootValue2");
-                assertThat(getCurrentTagsAsMap()).containsEntry("nestedKey2", "nestedValue2");
+                assertThat(getCurrentTagsAsMap()).hasSize(3)
+                        .containsEntry("rootKey1", "nestedValue1")
+                        .containsEntry("rootKey2", "rootValue2")
+                        .containsEntry("nestedKey2", "nestedValue2");
             }
 
+            assertThat(ctx.getData("rootKey1")).isEqualTo("nestedValue1");
+            assertThat(ctx.getData("rootKey2")).isEqualTo("rootValue2");
+            assertThat(ctx.getData("nestedKey2")).isEqualTo("nestedValue2");
+
             ctx.close();
+
             assertThat(InspectitContextImpl.INSPECTIT_KEY.get()).isNull();
         }
 
@@ -819,13 +922,18 @@ public class InspectitContextImplTest {
             assertThat(getCurrentTagsAsMap()).containsEntry("d4", "2.0");
 
             try (Scope scope = ctx.enterFullTagScope()) {
-
-                assertThat(getCurrentTagsAsMap()).hasSize(4);
-                assertThat(getCurrentTagsAsMap()).containsEntry("d1", "string");
-                assertThat(getCurrentTagsAsMap()).containsEntry("d2", "1");
-                assertThat(getCurrentTagsAsMap()).containsEntry("d3", "2");
-                assertThat(getCurrentTagsAsMap()).containsEntry("d4", "2.0");
+                assertThat(getCurrentTagsAsMap()).hasSize(4)
+                        .containsEntry("d1", "string")
+                        .containsEntry("d2", "1")
+                        .containsEntry("d3", "2")
+                        .containsEntry("d4", "2.0");
             }
+
+            assertThat(ctx.getData("d1")).isEqualTo("string");
+            assertThat(ctx.getData("d2")).isEqualTo(1);
+            assertThat(ctx.getData("d3")).isEqualTo(2L);
+            assertThat(ctx.getData("d4")).isEqualTo(2.0D);
+
             ctx.close();
         }
     }

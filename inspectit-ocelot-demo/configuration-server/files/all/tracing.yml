@@ -1,15 +1,8 @@
 inspectit:
   instrumentation:  
     data:
-      span_name:
-        down-propagation: NONE
-        is-tag: false
-      span_obj:
-        down-propagation: NONE
-        is-tag: false
-      httpurlconn_get_is_entry:
-        down-propagation: NONE
-        is-tag: false
+      get_input_stream_invoked:
+        down-propagation: JVM_LOCAL
     
     actions:
       string_concat_3:

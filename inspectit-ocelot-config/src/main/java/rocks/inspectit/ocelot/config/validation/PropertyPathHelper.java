@@ -3,6 +3,7 @@ package rocks.inspectit.ocelot.config.validation;
 import lombok.experimental.UtilityClass;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.io.FileSystemResource;
+import rocks.inspectit.ocelot.config.conversion.InspectitConfigConversionService;
 import rocks.inspectit.ocelot.config.utils.CaseUtils;
 
 import java.beans.PropertyDescriptor;
@@ -113,7 +114,33 @@ public class PropertyPathHelper {
         if (TERMINAL_TYPES.contains(type)) {
             return true;
         } else if (type instanceof Class) {
-            return ((Class<?>) type).isEnum() || ((Class<?>) type).isPrimitive();
+            return ((Class<?>) type).isEnum()
+                    || ((Class<?>) type).isPrimitive()
+                    || InspectitConfigConversionService.getInstance().canConvert(String.class, (Class<?>) type)
+                    || InspectitConfigConversionService.getInstance().canConvert(Number.class, (Class<?>) type);
+        }
+        return false;
+    }
+
+    /**
+     * Checks if the given Class is a POJO.
+     * Every class which is no Collection, Map or terminal (see {@link #isTerminal(Type)} is classified as POJO.
+     *
+     * @param type the type to check
+     * @return true if the given type is a pojo.
+     */
+    public boolean isBean(Type type) {
+        if (type instanceof Class<?>) {
+            Class<?> clazz = (Class<?>) type;
+            if (Collection.class.isAssignableFrom(clazz)) {
+                return false;
+            } else if (Map.class.isAssignableFrom(clazz)) {
+                return false;
+            } else if (isTerminal(clazz)) {
+                return false;
+            } else {
+                return true;
+            }
         }
         return false;
     }

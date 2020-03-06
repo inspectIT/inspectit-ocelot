@@ -37,7 +37,7 @@ public class MeasuresAndViewsManager {
     private ViewManager viewManager;
 
     /**
-     * Records the measure,
+     * Records the measure.
      *
      * @param measureName      the name of the measure
      * @param metricDefinition The configuration of the metric, which is activated

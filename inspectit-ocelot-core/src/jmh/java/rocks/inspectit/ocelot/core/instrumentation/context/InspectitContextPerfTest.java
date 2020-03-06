@@ -1,7 +1,8 @@
 package rocks.inspectit.ocelot.core.instrumentation.context;
 
 import org.openjdk.jmh.annotations.*;
-import rocks.inspectit.ocelot.core.instrumentation.config.model.DataProperties;
+import rocks.inspectit.ocelot.config.model.instrumentation.data.PropagationMode;
+import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -15,7 +16,7 @@ public class InspectitContextPerfTest {
 
     private Map<String, String> commonTags;
 
-    private DataProperties dataProperties;
+    private PropagationMetaData dataProperties;
 
     @Param(value = {"false", "true"})
     private boolean interactWithAppTagContext;
@@ -26,9 +27,9 @@ public class InspectitContextPerfTest {
         commonTags.put("common-tag-1", "common-tag-1");
         commonTags.put("common-tag-2", "common-tag-2");
 
-        dataProperties = DataProperties.builder()
-                .upPropagatedWithinJVM("propagate-1")
-                .upPropagatedWithinJVM("propagate-2")
+        dataProperties = PropagationMetaData.builder()
+                .setUpPropagation("propagate-1", PropagationMode.JVM_LOCAL)
+                .setUpPropagation("propagate-2", PropagationMode.JVM_LOCAL)
                 .build();
     }
 

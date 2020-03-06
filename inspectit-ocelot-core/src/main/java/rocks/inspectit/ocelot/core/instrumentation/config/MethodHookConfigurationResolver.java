@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.core.instrumentation.config;
 
+import com.google.common.collect.HashMultiset;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import lombok.val;
@@ -187,29 +188,11 @@ public class MethodHookConfigurationResolver {
      *
      * @param result       the hook configuration to which the measurement definitions are added
      * @param matchedRules the rules to combine
-     * @throws ConflictingDefinitionsException of two rules define different values for the same metric
      */
-    private void resolveMetrics(MethodHookConfiguration.MethodHookConfigurationBuilder result, Set<InstrumentationRule> matchedRules) throws ConflictingDefinitionsException {
-
-        Map<String, InstrumentationRule> metricDefinitions = new HashMap<>();
-        for (val rule : matchedRules) {
-            //check for conflicts first
-            for (val metricName : rule.getMetrics().keySet()) {
-                if (metricDefinitions.containsKey(metricName)) {
-                    throw new ConflictingDefinitionsException(metricDefinitions.get(metricName), rule, "the metric '" + metricName + "'");
-                }
-                metricDefinitions.put(metricName, rule);
-            }
-            rule.getMetrics().forEach((name, value) -> {
-                try {
-                    double constantValue = Double.parseDouble(value);
-                    result.constantMetric(name, constantValue);
-                } catch (NumberFormatException e) {
-                    //the specified value is not a double value, we therefore assume it is a data key
-                    result.dataMetric(name, value);
-                }
-            });
-        }
+    private void resolveMetrics(MethodHookConfiguration.MethodHookConfigurationBuilder result, Set<InstrumentationRule> matchedRules) {
+        result.metrics(matchedRules.stream()
+                .flatMap(rule -> rule.getMetrics().stream())
+                .collect(Collectors.toCollection(HashMultiset::create)));
     }
 
     /**

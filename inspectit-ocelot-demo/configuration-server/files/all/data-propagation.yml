@@ -3,3 +3,4 @@ inspectit:
     data:
       # The application is defined in the API-Gateway, see "application-detection.yml"
       application: {down-propagation: GLOBAL}
+      

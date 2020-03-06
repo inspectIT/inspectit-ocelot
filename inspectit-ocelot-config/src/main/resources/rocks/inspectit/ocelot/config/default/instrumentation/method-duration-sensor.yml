@@ -2,16 +2,7 @@ inspectit:
 
   # settings regarding the instrumentation performed on the target application
   instrumentation:
-    data:
-      method_name:
-        down-propagation: NONE
-      method_entry_time:
-        down-propagation: NONE
-        is-tag: false
-      method_duration:
-        down-propagation: NONE
-        is-tag: false
-
+    
     rules:
       record_method_duration:
         entry:
@@ -23,7 +14,9 @@ inspectit:
             data-input:
               sinceNanos: method_entry_time
         metrics:
-          '[method/duration]' : method_duration
+          '[method/duration]':
+            value: method_duration
+            data-tags: {method_name: method_name}
 
   metrics:
     definitions:
