@@ -89,16 +89,20 @@ export const resetState = () => ({
 });
 
 /**
- * Attempts to delete the currently selected file or folder.
+ * Attempts to delete the currently selected or handed in file or folder.
  * In case of success, fetchFiles() is automatically triggered.
  */
-export const deleteSelection = (fetchFilesOnSuccess) => {
+export const deleteSelection = (fetchFilesOnSuccess, selectedFile = null) => {
     return (dispatch, getState) => {
         const state = getState();
-        const { selection } = state.configuration;
-        const isDirectory = selectors.isSelectionDirectory(state);
+        const { selection, files } = state.configuration;
 
-        let filePath = selection.startsWith("/") ? selection.substring(1) : selection;
+        const selectedName = selectedFile ? selectedFile : selection;
+
+        const file = configurationUtils.getFile(files, selectedName);
+        const isDirectory = configurationUtils.isDirectory(file);
+
+        let filePath = selectedName && selectedName.startsWith("/") ? selectedName.substring(1) : selectedName;
 
         dispatch({ type: types.DELETE_SELECTION_STARTED });
 
