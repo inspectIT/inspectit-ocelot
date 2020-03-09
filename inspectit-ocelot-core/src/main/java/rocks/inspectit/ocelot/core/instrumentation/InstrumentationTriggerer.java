@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.core.instrumentation;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -67,7 +68,7 @@ public class InstrumentationTriggerer implements IClassDiscoveryListener {
     /**
      * The update of hooks which is currently in progress, null if none is in progress.
      */
-    private HookManager.HookUpdate activeHookUpdate;
+    private HookManager.HookUpdate currentHookUpdate;
 
     @Autowired
     InstrumentationConfigurationResolver configResolver;
@@ -179,6 +180,7 @@ public class InstrumentationTriggerer implements IClassDiscoveryListener {
      * @param batchSize the configured batch sizes
      * @return the classes which need retransformation
      */
+    @VisibleForTesting
     Set<Class<?>> getBatchOfClassesToRetransform(BatchSize batchSize) {
         try (val sm = selfMonitoring.withDurationSelfMonitoring("instrumentation-analysis")) {
             Set<Class<?>> classesToRetransform = new HashSet<>();
@@ -201,14 +203,14 @@ public class InstrumentationTriggerer implements IClassDiscoveryListener {
                         break;
                     }
                 }
-                if (pendingClasses.size() == 0 && activeHookUpdate != null) {
-                    activeHookUpdate.commitUpdate();
-                    log.info("Instrumentation has been updated!");
-                    activeHookUpdate = null;
-                }
                 if (checkedClassesCount > 0) {
                     log.debug("Checked configuration of {} classes in {} ms, {} classes left to check",
                             checkedClassesCount, watch.elapsed(TimeUnit.MILLISECONDS), pendingClasses.size());
+                }
+                if (pendingClasses.size() == 0 && currentHookUpdate != null) {
+                    currentHookUpdate.commitUpdate();
+                    log.info("Instrumentation has been updated!");
+                    currentHookUpdate = null;
                 }
             } catch (Exception e) {
                 log.error("Error checking for class instrumentation configuration updates", e);
@@ -234,10 +236,10 @@ public class InstrumentationTriggerer implements IClassDiscoveryListener {
         try {
             //this is guaranteed to be invoked after applyClassLoaderDelegation if any hooking occurs
             //this is due to the fact doesClassRequireRetransformation return true when the first hook is added
-            if (activeHookUpdate == null) {
-                activeHookUpdate = hookManager.startUpdate();
+            if (currentHookUpdate == null) {
+                currentHookUpdate = hookManager.startUpdate();
             }
-            activeHookUpdate.updateHooksForClass(clazz);
+            currentHookUpdate.updateHooksForClass(clazz);
         } catch (Throwable t) {
             log.error("Error adding hooks to clazz {}", clazz.getName(), t);
         }
