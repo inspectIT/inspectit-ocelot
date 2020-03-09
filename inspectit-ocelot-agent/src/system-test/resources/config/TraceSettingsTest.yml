@@ -91,11 +91,20 @@ inspectit:
           - name: nestedSamplingTestNested
 
 
+      TraceSettingsTest-nestedSamplingTest-Default:
+        type:
+          name: TraceSettingsTest
+          matcher-mode: ENDS_WITH
+        methods:
+          - name: nestedSamplingTestNestedDefault
+
+
     rules:
       TraceSettingsTest-startspan:
         scopes:
           TraceSettingsTest-root: true
           TraceSettingsTest-nested: true
+          TraceSettingsTest-nestedSamplingTest-Default: true
         tracing:
           start-span: true
 
