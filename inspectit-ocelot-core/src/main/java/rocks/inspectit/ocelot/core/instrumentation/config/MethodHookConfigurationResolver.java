@@ -53,13 +53,13 @@ public class MethodHookConfigurationResolver {
         }
 
         if (allSettings.isTracingEnabled()) {
-            resolveTracing(allSettings, result, matchedRules);
+            resolveTracing(result, matchedRules);
         }
 
         return result.build();
     }
 
-    private void resolveTracing(InstrumentationConfiguration conf, MethodHookConfiguration.MethodHookConfigurationBuilder result, Set<InstrumentationRule> matchedRules) throws ConflictingDefinitionsException {
+    private void resolveTracing(MethodHookConfiguration.MethodHookConfigurationBuilder result, Set<InstrumentationRule> matchedRules) throws ConflictingDefinitionsException {
 
         val builder = RuleTracingSettings.builder();
 
@@ -69,7 +69,7 @@ public class MethodHookConfigurationResolver {
 
         if (!tracingRules.isEmpty()) {
 
-            resolveStartSpan(conf, tracingRules, builder);
+            resolveStartSpan(tracingRules, builder);
             resolveEndSpan(tracingRules, builder);
             resolveContinueSpan(tracingRules, builder);
             builder.storeSpan(getAndDetectConflicts(tracingRules, r -> r.getTracing().getStoreSpan(), s -> !StringUtils.isEmpty(s), "store span data key"));
@@ -128,7 +128,7 @@ public class MethodHookConfigurationResolver {
         }
     }
 
-    private void resolveStartSpan(InstrumentationConfiguration conf, Set<InstrumentationRule> matchedRules, RuleTracingSettings.RuleTracingSettingsBuilder builder) throws ConflictingDefinitionsException {
+    private void resolveStartSpan(Set<InstrumentationRule> matchedRules, RuleTracingSettings.RuleTracingSettingsBuilder builder) throws ConflictingDefinitionsException {
         Set<InstrumentationRule> rulesDefiningStartSpan = matchedRules.stream()
                 .filter(r -> r.getTracing().getStartSpan() != null)
                 .collect(Collectors.toSet());
@@ -136,14 +136,11 @@ public class MethodHookConfigurationResolver {
         boolean startSpan = Optional.ofNullable(startSpanSetting).orElse(false);
         builder.startSpan(startSpan);
         if (startSpan) {
-            builder.name(getAndDetectConflicts(rulesDefiningStartSpan, r -> r.getTracing().getName(), n -> !StringUtils.isEmpty(n), "the span name"));
-            builder.kind(getAndDetectConflicts(rulesDefiningStartSpan, r -> r.getTracing().getKind(), Objects::nonNull, "the span kind"));
             builder.startSpanConditions(getAndDetectConflicts(rulesDefiningStartSpan, r -> r.getTracing().getStartSpanConditions(), ALWAYS_TRUE, "start span conditions"));
-            String sampleProbability = getAndDetectConflicts(rulesDefiningStartSpan, r -> r.getTracing().getSampleProbability(), ALWAYS_TRUE, "the trace sample probability");
-            if (StringUtils.isEmpty(sampleProbability)) {
-                sampleProbability = String.valueOf(conf.getDefaultTraceSampleProbability());
-            }
-            builder.sampleProbability(sampleProbability);
+            //name, kind and sample probability can be defined by rules which do not start a span themselves
+            builder.name(getAndDetectConflicts(matchedRules, r -> r.getTracing().getName(), n -> !StringUtils.isEmpty(n), "the span name"));
+            builder.kind(getAndDetectConflicts(matchedRules, r -> r.getTracing().getKind(), Objects::nonNull, "the span kind"));
+            builder.sampleProbability(getAndDetectConflicts(matchedRules, r -> r.getTracing().getSampleProbability(), n -> !StringUtils.isEmpty(n), "the trace sample probability"));
         }
     }
 

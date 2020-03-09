@@ -12,6 +12,8 @@ import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.privacy.obfuscation.impl.NoopObfuscatory;
 import rocks.inspectit.ocelot.core.privacy.obfuscation.impl.PatternObfuscatory;
+import rocks.inspectit.ocelot.core.privacy.obfuscation.impl.SelfMonitoringDelegatingObfuscatory;
+import rocks.inspectit.ocelot.core.selfmonitoring.SelfMonitoringService;
 
 import javax.annotation.PostConstruct;
 import java.util.Collection;
@@ -28,6 +30,9 @@ public class ObfuscationManager {
 
     @Autowired
     private InspectitEnvironment env;
+
+    @Autowired
+    private SelfMonitoringService selfMonitoring;
 
     private IObfuscatory obfuscatory = NoopObfuscatory.INSTANCE;
 
@@ -86,7 +91,12 @@ public class ObfuscationManager {
         if (patternEntries.isEmpty()) {
             return NoopObfuscatory.INSTANCE;
         } else {
-            return new PatternObfuscatory(patternEntries);
+            PatternObfuscatory patternObfuscatory = new PatternObfuscatory(patternEntries);
+            if (selfMonitoring.isSelfMonitoringEnabled()) {
+                return new SelfMonitoringDelegatingObfuscatory(selfMonitoring, patternObfuscatory);
+            } else {
+                return patternObfuscatory;
+            }
         }
     }
 

@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.core.instrumentation.hook;
 
+import com.google.common.annotations.VisibleForTesting;
 import io.opencensus.stats.StatsRecorder;
 import io.opencensus.trace.Sampler;
 import io.opencensus.trace.samplers.Samplers;
@@ -167,25 +168,33 @@ public class MethodHookGenerator {
     }
 
     private Optional<IHookAction> buildMetricsRecorder(MethodHookConfiguration config) {
-        Collection<MetricRecordingSettings> metrics = config.getMetrics();
-        if (!metrics.isEmpty()) {
-            List<MetricAccessor> metricAccessors = metrics.stream()
-                    .map(metricConfig -> {
-                        String value = metricConfig.getValue();
-                        VariableAccessor valueAccessor;
-                        try {
-                            valueAccessor = variableAccessorFactory.getConstantAccessor(Double.parseDouble(value));
-                        } catch (NumberFormatException e) {
-                            valueAccessor = variableAccessorFactory.getVariableAccessor(value);
-                        }
-                        return new MetricAccessor(metricConfig.getMetric(), valueAccessor, metricConfig.getConstantTags(), metricConfig.getDataTags());
-                    })
+        Collection<MetricRecordingSettings> metricRecordingSettings = config.getMetrics();
+        if (!metricRecordingSettings.isEmpty()) {
+            List<MetricAccessor> metricAccessors = metricRecordingSettings.stream()
+                    .map(this::buildMetricAccessor)
                     .collect(Collectors.toList());
+
             MetricsRecorder recorder = new MetricsRecorder(metricAccessors, commonTagsManager, metricsManager, statsRecorder);
             return Optional.of(recorder);
         } else {
             return Optional.empty();
         }
+    }
+
+    @VisibleForTesting
+    MetricAccessor buildMetricAccessor(MetricRecordingSettings metricSettings) {
+        String value = metricSettings.getValue();
+        VariableAccessor valueAccessor;
+        try {
+            valueAccessor = variableAccessorFactory.getConstantAccessor(Double.parseDouble(value));
+        } catch (NumberFormatException e) {
+            valueAccessor = variableAccessorFactory.getVariableAccessor(value);
+        }
+
+        Map<String, VariableAccessor> tagAccessors = metricSettings.getDataTags().entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> variableAccessorFactory.getVariableAccessor(entry.getValue())));
+
+        return new MetricAccessor(metricSettings.getMetric(), valueAccessor, metricSettings.getConstantTags(), tagAccessors);
     }
 
     private List<IHookAction> buildActionCalls(List<ActionCallConfig> calls, MethodReflectionInformation methodInfo) {
