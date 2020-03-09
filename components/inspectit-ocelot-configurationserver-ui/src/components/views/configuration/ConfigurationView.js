@@ -10,6 +10,9 @@ import yaml from 'js-yaml';
 
 import { enableOcelotAutocompletion } from './OcelotAutocompleter';
 import { DEFAULT_CONFIG_TREE_KEY } from '../../../data/constants';
+import DeleteDialog from './dialogs/DeleteDialog';
+import CreateDialog from './dialogs/CreateDialog';
+import MoveDialog from './dialogs/MoveDialog';
 
 /**
  * The header component of the editor view.
@@ -51,11 +54,19 @@ const EditorHeader = ({ icon, path, name, isContentModified, readOnly }) => (
  */
 class ConfigurationView extends React.Component {
 
+    state = {
+        isDeleteFileDialogShown: false,
+        isCreateFileDialogShown: false,
+        isCreateDirectoryDialogShown: false,
+        isMoveDialogShown: false,
+        filePath: null
+    };
+
     parsePath = (filePath, defaultConfigFilePath) => {
         if (filePath) {
             return this.splitIntoPathAndName(filePath);
         } else if (defaultConfigFilePath) {
-            const path = defaultConfigFilePath.replace(DEFAULT_CONFIG_TREE_KEY, '/Ocelot defaults');
+            const path = defaultConfigFilePath.replace(DEFAULT_CONFIG_TREE_KEY, '/Ocelot Defaults');
             return this.splitIntoPathAndName(path);
         } else {
             return {};
@@ -84,6 +95,22 @@ class ConfigurationView extends React.Component {
     onRefresh = () => {
         this.props.selectedFileContentsChanged(null);
     }
+
+    showDeleteFileDialog = (filePath) => this.setState({ isDeleteFileDialogShown: true, filePath });
+
+    hideDeleteFileDialog = () => this.setState({ isDeleteFileDialogShown: false, filePath: null });
+
+    showCreateFileDialog = (filePath) => this.setState({ isCreateFileDialogShown: true, filePath });
+
+    hideCreateFileDialog = () => this.setState({ isCreateFileDialogShown: false, filePath: null });
+
+    showCreateDirectoryDialog = (filePath) => this.setState({ isCreateDirectoryDialogShown: true, filePath });
+
+    hideCreateDirectoryDialog = () => this.setState({ isCreateDirectoryDialogShown: false, filePath: null });
+
+    showMoveDialog = (filePath) => this.setState({ isMoveDialogShown: true, filePath });
+
+    hideMoveDialog = () => this.setState({ isMoveDialogShown: false, filePath: null });
 
     render() {
         const { selection, isDirectory, loading, isContentModified, fileContent, yamlError, selectedDefaultConfigFile } = this.props;
@@ -123,8 +150,19 @@ class ConfigurationView extends React.Component {
                 }
                 `}</style>
                 <div className="treeContainer">
-                    <FileToolbar />
-                    <FileTree className="fileTree" />
+                    <FileToolbar
+                        showDeleteFileDialog={this.showDeleteFileDialog}
+                        showCreateFileDialog={this.showCreateFileDialog}
+                        showCreateDirectoryDialog={this.showCreateDirectoryDialog}
+                        showMoveDialog={this.showMoveDialog}
+                    />
+                    <FileTree
+                        className="fileTree"
+                        showDeleteFileDialog={this.showDeleteFileDialog}
+                        showCreateFileDialog={this.showCreateFileDialog}
+                        showCreateDirectoryDialog={this.showCreateDirectoryDialog}
+                        showMoveDialog={this.showMoveDialog}
+                    />
                     <div className="details">Last refresh: {this.props.updateDate ? new Date(this.props.updateDate).toLocaleString() : "-"}</div>
                 </div>
                 <EditorView
@@ -144,6 +182,10 @@ class ConfigurationView extends React.Component {
                     readOnly={!!selectedDefaultConfigFile}>
                     {showHeader ? <EditorHeader icon={icon} path={path} name={name} isContentModified={isContentModified} readOnly={!!selectedDefaultConfigFile} /> : null}
                 </EditorView>
+                <DeleteDialog visible={this.state.isDeleteFileDialogShown} onHide={this.hideDeleteFileDialog} filePath={this.state.filePath} />
+                <CreateDialog directoryMode={false} visible={this.state.isCreateFileDialogShown} onHide={this.hideCreateFileDialog} filePath={this.state.filePath} />
+                <CreateDialog directoryMode={true} visible={this.state.isCreateDirectoryDialogShown} onHide={this.hideCreateDirectoryDialog} filePath={this.state.filePath} />
+                <MoveDialog visible={this.state.isMoveDialogShown} onHide={this.hideMoveDialog} filePath={this.state.filePath} />
             </div>
         );
     }
