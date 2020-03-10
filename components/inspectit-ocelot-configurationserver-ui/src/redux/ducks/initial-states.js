@@ -39,8 +39,8 @@ const configuration = {
     selectedDefaultConfigFile: null,
     /** The configuration schema */
     schema: null,
-    /** If the config view should be split for showing text context and props in the tree */
-    propsSplitConfigurationView: false,
+    /** If the config view should be in the visual mode */
+    showVisualConfigurationView: false,
 };
 
 const notification = {

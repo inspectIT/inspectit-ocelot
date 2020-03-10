@@ -13,6 +13,17 @@ import {Menubar} from 'primereact/menubar';
  */
 class TreeTableEditor extends React.Component {
 
+    headerGroup = (
+        <ColumnGroup>
+            <Row>
+                <Column header="Property name" />
+                <Column header="Value" />
+                <Column header="Nullable" />
+                <Column header="Type" />
+            </Row>
+        </ColumnGroup>
+    );
+
     constructor() {
         super();
 
@@ -28,7 +39,6 @@ class TreeTableEditor extends React.Component {
     }
 
     componentDidUpdate(prevProps) {
-        console.log(this.state.expandedKeys);
         if (prevProps.value !== this.props.value) {
             this.regenerateData();
         }
@@ -50,32 +60,39 @@ class TreeTableEditor extends React.Component {
         }
     }
 
-    processKey = (configKey, schemaObjects, parentKey) => {
+    /**
+     * Recursive method that returns the array of data to be supplied to the tree table for one config key.
+     * 
+     * @param config Currently processed configiguration part (from config YAML)
+     * @param schemaObjects Array of schema object that could correspond to the given config key
+     * @param parentKeyIdentifier String identifier of the parent key or undifined for root key
+     */
+    processKey = (config, schemaObjects, parentKeyIdentifier) => {
         const result = [];
 
         // continue if the schema object has elements only
         if (schemaObjects && schemaObjects.length > 0) {
 
             // go over all keys of a config object
-            Object.keys(configKey).forEach(k => {
+            Object.keys(config).forEach(congfigKey => {
                 // resolve value and the matching schema properties
-                const v = configKey[k];
-                const schemaProperties =  schemaObjects.find(s => s.propertyName === k);
+                const configValue = config[congfigKey];
+                const schemaProperty =  schemaObjects.find(s => s.propertyName === congfigKey);
 
                 // if we found schema properties create data and push to resulting array
-                if (schemaProperties) {
-                    const isComposite = schemaProperties.type === "COMPOSITE";
-                    const key = parentKey !== undefined ? parentKey + "." + schemaProperties.propertyName : schemaProperties.propertyName;
-                    const children = isComposite && this.processKey(v, schemaProperties.children, key) || undefined;
+                if (schemaProperty) {
+                    const isComposite = schemaProperty.type === "COMPOSITE";
+                    const keyIdentifier = parentKeyIdentifier !== undefined ? parentKeyIdentifier + "." + schemaProperty.propertyName : schemaProperty.propertyName;
+                    const children = isComposite && this.processKey(configValue, schemaProperty.children, keyIdentifier) || undefined;
 
                     const data = {
-                        key,
+                        key: keyIdentifier,
                         selectable: !isComposite,
                         data: {
-                            name: schemaProperties.readableName,
-                            type: this.getDataType(schemaProperties.type),
-                            value: this.getDataValue(v, schemaProperties.type),
-                            nullable: !isComposite && this.getBoolanRepresentation(schemaProperties.nullable) || ''
+                            name: schemaProperty.readableName,
+                            type: this.getDataType(schemaProperty.type),
+                            value: this.getDataValue(configValue, schemaProperty.type),
+                            nullable: !isComposite && this.getBoolanRepresentation(schemaProperty.nullable) || ''
                         },
                         children
                     }
@@ -114,17 +131,6 @@ class TreeTableEditor extends React.Component {
         }
     }
 
-    headerGroup = (
-        <ColumnGroup>
-            <Row>
-                <Column header="Property name" />
-                <Column header="Value" />
-                <Column header="Nullable?" />
-                <Column header="Type" />
-            </Row>
-        </ColumnGroup>
-    );
-
     menuItems = () => [
         {
             label:'Expand All',
@@ -140,6 +146,12 @@ class TreeTableEditor extends React.Component {
         }
     ]
 
+    rowClassName = (data) => {
+        return {
+            'composite-row': !data.selectable
+        }
+    } 
+
     render() {
         const { loading } = this.props;
 
@@ -147,6 +159,10 @@ class TreeTableEditor extends React.Component {
             <div className="this">
                 <style jsx>{`
                 .this {
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: space-between;
                 }
                 .this :global(.p-menubar)  {
                     background-color: #f4f4f4;
@@ -157,6 +173,16 @@ class TreeTableEditor extends React.Component {
                 .this :global(.p-menuitem-icon)  {
                     font-size: smaller;
                 }
+                .errorBox {
+                    align-self: center;
+                    justify-content: center;
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
+                }
+                .this :global(.composite-row) {
+                    color: grey;
+                }
                 `}</style>
                 {
                     !this.state.isError &&
@@ -164,12 +190,11 @@ class TreeTableEditor extends React.Component {
                         <TreeTable 
                             value={this.state.data} 
                             headerColumnGroup={this.headerGroup} 
-                            scrollable 
-                            scrollHeight="40vh" 
                             autoLayout
                             loading={loading}
                             expandedKeys={this.state.expandedKeys}
                             onToggle={e => this.setState({ expandedKeys: e.value })}
+                            rowClassName={this.rowClassName}
                         >
                             <Column field="name" expander />
                             <Column field="value" />
@@ -178,6 +203,12 @@ class TreeTableEditor extends React.Component {
                         </TreeTable>
                         <Menubar model={this.menuItems()} />
                     </>
+                }
+                {
+                    this.state.isError &&
+                    <div className="errorBox">
+                        <p>Properties could not be loaded from the YAML content.</p>
+                    </div>
                 }
             </div>
         );

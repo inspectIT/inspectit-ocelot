@@ -1,9 +1,8 @@
-import * as types from "./types";
-import * as selectors from "./selectors";
+import { DEFAULT_CONFIG_TREE_KEY } from '../../../data/constants';
 import axios from '../../../lib/axios-api';
 import { configurationUtils } from '../configuration';
 import { notificationActions } from '../notification';
-import { DEFAULT_CONFIG_TREE_KEY } from '../../../data/constants';
+import * as types from "./types";
 
 /**
  * Fetches all existing configuration files and directories.
@@ -262,9 +261,6 @@ export const fetchConfigurationSchema= () => {
 /**
  * Shows or hides the split view for the configuration properties.
  */
-export const togglePropsSplitView = (visible) => ({
-    type: types.TOGGLE_CONFIGURATION_PROPERTIES_SPLIT_VIEW,
-    payload: {
-        visible
-    }
+export const toggleVisualConfigurationView = () => ({
+    type: types.TOGGLE_VISUAL_CONFIGURATION_VIEW
 });

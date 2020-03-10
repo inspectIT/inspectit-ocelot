@@ -1,18 +1,18 @@
+import yaml from 'js-yaml';
 import React from 'react';
 import { connect } from 'react-redux';
+import { DEFAULT_CONFIG_TREE_KEY } from '../../../data/constants';
 import { configurationActions, configurationSelectors } from '../../../redux/ducks/configuration';
 import { notificationActions } from '../../../redux/ducks/notification';
-
-import FileTree from './FileTree';
-import FileToolbar from './FileToolbar';
 import EditorView from '../../editor/EditorView';
-import yaml from 'js-yaml';
-
-import { enableOcelotAutocompletion } from './OcelotAutocompleter';
-import { DEFAULT_CONFIG_TREE_KEY } from '../../../data/constants';
-import DeleteDialog from './dialogs/DeleteDialog';
 import CreateDialog from './dialogs/CreateDialog';
+import DeleteDialog from './dialogs/DeleteDialog';
 import MoveDialog from './dialogs/MoveDialog';
+import FileToolbar from './FileToolbar';
+import FileTree from './FileTree';
+import { enableOcelotAutocompletion } from './OcelotAutocompleter';
+
+
 
 /**
  * The header component of the editor view.
@@ -113,7 +113,7 @@ class ConfigurationView extends React.Component {
     hideMoveDialog = () => this.setState({ isMoveDialogShown: false, filePath: null });
 
     render() {
-        const { selection, isDirectory, loading, isContentModified, fileContent, yamlError, selectedDefaultConfigFile, schema, propsSplit, togglePropsSplitView } = this.props;
+        const { selection, isDirectory, loading, isContentModified, fileContent, yamlError, selectedDefaultConfigFile, schema, showVisualConfigurationView, toggleVisualConfigurationView } = this.props;
         const showEditor = (selection || selectedDefaultConfigFile) && !isDirectory;
 
         const { path, name } = this.parsePath(selection, selectedDefaultConfigFile);
@@ -181,8 +181,8 @@ class ConfigurationView extends React.Component {
                     notificationText={yamlError}
                     loading={loading}
                     readOnly={!!selectedDefaultConfigFile}
-                    propsSplit={propsSplit}
-                    onPropsSplit={togglePropsSplitView}
+                    showVisualConfigurationView={showVisualConfigurationView}
+                    onToggleVisualConfigurationView={toggleVisualConfigurationView}
                 >
                     {showHeader ? <EditorHeader icon={icon} path={path} name={name} isContentModified={isContentModified} readOnly={!!selectedDefaultConfigFile} /> : null}
                 </EditorView>
@@ -209,7 +209,7 @@ const getYamlError = (content) => {
 }
 
 function mapStateToProps(state) {
-    const { updateDate, selection, selectedFileContent, pendingRequests, selectedDefaultConfigFile, schema, propsSplitConfigurationView } = state.configuration;
+    const { updateDate, selection, selectedFileContent, pendingRequests, selectedDefaultConfigFile, schema, showVisualConfigurationView } = state.configuration;
     const unsavedFileContent = selection ? configurationSelectors.getSelectedFileUnsavedContents(state) : null;
     const fileContent = unsavedFileContent != null ? unsavedFileContent : selectedFileContent;
 
@@ -223,7 +223,7 @@ function mapStateToProps(state) {
         loading: pendingRequests > 0,
         selectedDefaultConfigFile,
         schema,
-        propsSplit: propsSplitConfigurationView
+        showVisualConfigurationView
     }
 }
 
@@ -231,7 +231,7 @@ const mapDispatchToProps = {
     showWarning: notificationActions.showWarningMessage,
     writeFile: configurationActions.writeFile,
     selectedFileContentsChanged: configurationActions.selectedFileContentsChanged,
-    togglePropsSplitView: configurationActions.togglePropsSplitView
+    toggleVisualConfigurationView: configurationActions.toggleVisualConfigurationView
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(ConfigurationView);

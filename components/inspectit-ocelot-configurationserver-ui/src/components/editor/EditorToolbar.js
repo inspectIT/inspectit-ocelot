@@ -1,12 +1,12 @@
-import { Toolbar } from 'primereact/toolbar';
 import { Button } from 'primereact/button';
+import { Toolbar } from 'primereact/toolbar';
 
 /**
  * The toolbar used within the editor view.
  * 
  * onPropsSplit = (propsSplit: boolean, propsSplitHotizontal: boolean)
  */
-const EditorToolbar = ({ enableButtons, onSave, onSearch, onHelp, onRefresh, isRefreshing, canSave, propsSplit, onPropsSplit, children }) => (
+const EditorToolbar = ({ enableButtons, onSave, onSearch, onHelp, onRefresh, isRefreshing, canSave, visualConfig, onVisualConfigChange, children }) => (
     <div className="this">
         <style jsx>{`
         .this :global(.p-toolbar) {
@@ -28,7 +28,7 @@ const EditorToolbar = ({ enableButtons, onSave, onSearch, onHelp, onRefresh, isR
                 {children}
             </div>
             <div className="p-toolbar-group-right button-not-active">
-                <Button disabled={!enableButtons} icon="pi pi-table" className={!propsSplit && "p-button-outlined"} onClick={() => onPropsSplit(!propsSplit)} />
+                <Button disabled={!enableButtons} icon="pi pi-table" className={!visualConfig && "p-button-outlined"} onClick={onVisualConfigChange} />
                 {onRefresh && <Button disabled={!enableButtons || isRefreshing} icon={"pi pi-refresh" + (isRefreshing ? " pi-spin" : "")} onClick={onRefresh} />}
                 <Button disabled={!enableButtons} icon="pi pi-question" onClick={onHelp} />
                 <Button disabled={!enableButtons} icon="pi pi-search" onClick={onSearch} />
