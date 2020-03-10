@@ -15,7 +15,7 @@ export const fetchFiles = () => {
         axios
             .get("/directories/")
             .then(res => {
-                const files = sortFiles(res.data);
+                const files = res.data;
                 dispatch({ type: types.FETCH_FILES_SUCCESS, payload: { files } });
             })
             .catch(() => {
@@ -23,40 +23,6 @@ export const fetchFiles = () => {
             });
     };
 };
-
-/**
- * Arranges first directories and then files. Within the directories or files it is an alphabetical sorting.
- */
-export const sortFiles = (allFiles) => {
-
-    allFiles.sort(function (first, second) {
-        const nameFirst = first.name.toUpperCase();
-        const nameSecond = second.name.toUpperCase();
-        if (nameFirst < nameSecond) {
-            return -1;
-        }
-        if (nameFirst > nameSecond) {
-            return 1;
-        }
-        return 0;
-    });
-
-    let directories = [];
-    let files = [];
-
-    allFiles.forEach(element => {
-        if (element.type === 'directory') {
-            directories.push(element)
-            if (element.children.length > 0) {
-                element.children = sortFiles(element.children);
-            }
-        }
-        else {
-            files.push(element);
-        }
-    })
-    return directories.concat(files);
-}
 
 /**
  * Fetches the content of the selected file.
