@@ -38,6 +38,18 @@ public class InstrumentationRuleSettings {
     private Map<@NotBlank String, Boolean> scopes = Collections.emptyMap();
 
     /**
+     * Rules can include other rules.
+     * If a rule is included it has the same effect as adding all the scopes of this rule to the included one.
+     * <p>
+     * This means that all actions, tracing settings and metrics recordings of the included rule are also included.
+     * <p>
+     * The keys of this map are the names of the rules to include, the value must be "true" for the include to be active.
+     * Note that a rule will only be included if it also is enabled!
+     */
+    @NotNull
+    private Map<@NotBlank String, Boolean> include = Collections.emptyMap();
+
+    /**
      * Defines the action to execute before {@link #entry}.
      */
     @NotNull
@@ -103,6 +115,7 @@ public class InstrumentationRuleSettings {
      */
     public void performValidation(InstrumentationSettings container, Set<String> definedMetrics, ViolationBuilder vios) {
         checkScopesExist(container, vios);
+        checkIncludedRulesExist(container, vios);
         checkMetricRecordingsValid(definedMetrics, vios);
         preEntry.forEach((data, call) -> call.performValidation(container,
                 vios.atProperty("preEntry").atProperty(data)));
@@ -133,6 +146,20 @@ public class InstrumentationRuleSettings {
                             .parameter("scope", name)
                             .buildAndPublish();
                 });
+    }
+
+
+    private void checkIncludedRulesExist(InstrumentationSettings container, ViolationBuilder vios) {
+        include.entrySet().stream()
+                .filter(Map.Entry::getValue)
+                .map(Map.Entry::getKey)
+                .filter(name -> !container.getRules().containsKey(name))
+                .forEach(name ->
+                        vios.message("The included rule '{rule}' does not exist!")
+                                .atProperty("include")
+                                .parameter("rule", name)
+                                .buildAndPublish()
+                );
     }
 
 }
