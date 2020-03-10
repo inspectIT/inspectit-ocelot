@@ -29,4 +29,14 @@ public class EnvironmentSettings {
      * The process id of the JVM process.
      */
     private String pid;
+
+    /**
+     * The Java version used by the JVM process.
+     */
+    private String javaVersion;
+
+    /**
+     * The version of the inspectIT Ocelot agent.
+     */
+    private String agentVersion;
 }
