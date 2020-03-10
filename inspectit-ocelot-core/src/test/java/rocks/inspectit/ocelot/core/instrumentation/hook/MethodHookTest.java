@@ -13,7 +13,6 @@ import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
 
 import java.util.Arrays;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -48,7 +47,7 @@ public class MethodHookTest {
             MethodHook hook = MethodHook.builder()
                     .inspectitContextManager(contextManager)
                     .methodInformation(methodInfo)
-                    .entryActions(new CopyOnWriteArrayList<>(Arrays.asList(first, second, third)))
+                    .entryActions(Arrays.asList(first, second, third))
                     .methodInformation(Mockito.mock(MethodReflectionInformation.class))
                     .build();
 
@@ -73,6 +72,35 @@ public class MethodHookTest {
             hook.onExit(null, null, null, null, ctx);
         }
 
+        @Test
+        void testReactivationOfActionsOnCopy() {
+            IHookAction action = Mockito.mock(IHookAction.class);
+            doThrow(Error.class).when(action).execute(any());
+            MethodHook hook = MethodHook.builder()
+                    .inspectitContextManager(contextManager)
+                    .methodInformation(methodInfo)
+                    .entryAction(action)
+                    .methodInformation(Mockito.mock(MethodReflectionInformation.class))
+                    .build();
+
+            InternalInspectitContext ctx = hook.onEnter(null, null);
+            hook.onExit(null, null, null, null, ctx);
+
+            verify(action, times(1)).execute(any());
+
+            ctx = hook.onEnter(null, null);
+            hook.onExit(null, null, null, null, ctx);
+
+            verify(action, times(1)).execute(any());
+
+            MethodHook copy = hook.getResettedCopy();
+
+            ctx = copy.onEnter(null, null);
+            copy.onExit(null, null, null, null, ctx);
+
+            verify(action, times(2)).execute(any());
+        }
+
     }
 
     @Nested
@@ -87,7 +115,7 @@ public class MethodHookTest {
             MethodHook hook = MethodHook.builder()
                     .inspectitContextManager(contextManager)
                     .methodInformation(methodInfo)
-                    .exitActions(new CopyOnWriteArrayList<>(Arrays.asList(first, second, third)))
+                    .exitActions(Arrays.asList(first, second, third))
                     .methodInformation(Mockito.mock(MethodReflectionInformation.class))
                     .build();
 
@@ -104,6 +132,35 @@ public class MethodHookTest {
             verify(first, times(2)).execute(any());
             verify(second, times(1)).execute(any());
             verify(third, times(2)).execute(any());
+        }
+
+        @Test
+        void testReactivationOfActionsOnCopy() {
+            IHookAction action = Mockito.mock(IHookAction.class);
+            doThrow(Error.class).when(action).execute(any());
+            MethodHook hook = MethodHook.builder()
+                    .inspectitContextManager(contextManager)
+                    .methodInformation(methodInfo)
+                    .exitAction(action)
+                    .methodInformation(Mockito.mock(MethodReflectionInformation.class))
+                    .build();
+
+            InternalInspectitContext ctx = hook.onEnter(null, null);
+            hook.onExit(null, null, null, null, ctx);
+
+            verify(action, times(1)).execute(any());
+
+            ctx = hook.onEnter(null, null);
+            hook.onExit(null, null, null, null, ctx);
+
+            verify(action, times(1)).execute(any());
+
+            MethodHook copy = hook.getResettedCopy();
+
+            ctx = copy.onEnter(null, null);
+            copy.onExit(null, null, null, null, ctx);
+
+            verify(action, times(2)).execute(any());
         }
 
     }
