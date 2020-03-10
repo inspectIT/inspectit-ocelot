@@ -16,7 +16,7 @@ Start the EUM server with the following command:
 $ java -jar inspectit-ocelot-eum-{version}.jar
 ```
 
-By default, the server is starting with the port `8080`. 
+By default, the server is starting on port `8080`. 
 You can simply configure the port by using the Java property `-Dserver.port=[PORT]`:
 
 ```bash
