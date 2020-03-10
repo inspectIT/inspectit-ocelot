@@ -78,6 +78,7 @@ class AceEditor extends React.Component {
         if (this.props.onChange) {
             this.props.onChange(this.getValue());
         }
+
     }
 
     doSave = () => {
@@ -106,10 +107,17 @@ class AceEditor extends React.Component {
     }
 
     getValue = () => {
-        return this.editor.getSession().getValue();
+        const actualSessionValue = this.editor.getSession().getValue();
+        let newSessionValue = "";
+        for (let i = 0; i < actualSessionValue.length; i++) {
+            if (actualSessionValue.charCodeAt(i) === 9) {
+                newSessionValue += String.fromCharCode(32);
+            } else {
+                newSessionValue += actualSessionValue[i];
+            }
+        }
+        return newSessionValue;
     }
-
-
 }
 
 export default AceEditor;
