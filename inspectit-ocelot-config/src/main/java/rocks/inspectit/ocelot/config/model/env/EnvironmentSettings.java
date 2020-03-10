@@ -29,4 +29,14 @@ public class EnvironmentSettings {
      * The process id of the JVM process.
      */
     private String pid;
+
+    /**
+     * The process id of the JVM process.
+     */
+    private String javaVersion;
+
+    /**
+     * The process id of the JVM process.
+     */
+    private String agentVersion;
 }

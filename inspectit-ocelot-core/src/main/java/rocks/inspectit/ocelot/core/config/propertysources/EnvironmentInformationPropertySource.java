@@ -19,6 +19,10 @@ import java.util.Properties;
 @Slf4j
 public class EnvironmentInformationPropertySource extends PropertiesPropertySource {
 
+    public EnvironmentInformationPropertySource(String name) {
+        super(name, getEnvironmentProperties());
+    }
+
     private static Properties getEnvironmentProperties() {
         Properties result = new Properties();
         result.put("inspectit.env.agent-dir", getAgentJarDirectory());
@@ -98,9 +102,5 @@ public class EnvironmentInformationPropertySource extends PropertiesPropertySour
             log.error("Failed to resolve process id {}", e);
             return "unknown";
         }
-    }
-
-    public EnvironmentInformationPropertySource(String name) {
-        super(name, getEnvironmentProperties());
     }
 }
