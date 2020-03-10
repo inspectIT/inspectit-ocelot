@@ -1,0 +1,25 @@
+inspectit:
+  metrics:
+    # settings regarding jmx metrics
+    jmx:
+      enabled: true
+      # specifies the frequency with which the disk metrics should be polled and recorded
+      frequency: ${inspectit.metrics.frequency}
+      # switch to enable / disable the creation of the platform server before scraping starts
+      force-platform-server: true
+      # optionally metric names can be in lower-case
+      lower-case-metric-name: false
+      # white-listed (true) and black-listed (false) object names
+      # by default we blacklist all the object names that provide metrics that are already supported in ocelot
+      # examples of ObjectName patterns are (https://docs.oracle.com/javase/8/docs/api/javax/management/ObjectName.html):
+      #   *:type=Foo,name=Bar to match names in any domain whose exact set of keys is type=Foo,name=Bar.
+      #   d:type=Foo,name=Bar,* to match names in the domain d that have the keys type=Foo,name=Bar plus zero or more other keys.
+      #   *:type=Foo,name=Bar,* to match names in any domain that has the keys type=Foo,name=Bar plus zero or more other keys.
+      #   d:type=F?o,name=Bar will match e.g. d:type=Foo,name=Bar and d:type=Fro,name=Bar.
+      #   d:type=F*o,name=Bar will match e.g. d:type=Fo,name=Bar and d:type=Frodo,name=Bar.
+      #   d:type=Foo,name="B*" will match e.g. d:type=Foo,name="Bling". Wildcards are recognized even inside quotes, and like other special characters can be escaped with \.
+      object-names:
+        '[java.lang:type=BufferPool]': false
+        '[java.lang:type=ClassLoading]': false
+        '[java.lang:type=GarbageCollector,*]': false
+        '[java.lang:type=Memory]': false
