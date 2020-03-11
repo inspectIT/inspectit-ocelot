@@ -1,0 +1,49 @@
+inspectit:
+  instrumentation:
+  
+    data:
+      # Used to detect nested JDBC nivocation (e.g. a Hikari Proxy)
+      'jdbc_entrypoint_marker': 
+        down-propagation: JVM_LOCAL
+        
+      # Stores the prepared sql captured via JDBC-driver specific instrumentations
+      # The value is up-propagated because the actua lrecording happens on the first encoutnered JDBC layer,
+      # which might not be a driver but a proxy
+      'prepared_sql':
+        up-propagation: JVM_LOCAL
+  
+    rules:
+    
+      # Can be included to detect the entry into the first JDBC layer
+      'r_jdbc_detect_entry':
+        entry:
+          'jdbc_is_entry':
+            action: 'a_entrypoint_check'
+            constant-input: 
+              marker: "jdbc_entrypoint_marker"
+              
+      # Can be included to extract the url of the JDBC url
+      # Extraction only happens for the first JDBC layer, which might be a JDBC proxy
+      r_jdbc_extract_url:
+        include:
+          'r_jdbc_detect_entry': true
+        entry:
+          'jdbc_url':
+            action: 'a_jdbc_getUrl'
+            only-if-true: 'jdbc_is_entry'
+            data-input: 
+              'statement': '_this'
+      
+      # This rule does not provide any functionality but a performance benefit
+      # Driver-specific instrumentations can write 'prepared_sql' which gets up-propagated
+      # This rule limits the up-propagation to the JDBC scope, because propagating it up further is not necessary.
+      r_jdbc_prepared_sql_stop_propagation:
+        scopes:
+          's_jdbc_preparedstatement_execute': true
+          's_jdbc_preparedstatement_executeBatch': true
+        include:
+          'r_jdbc_detect_entry': true
+        post-exit:
+          'prepared_sql':
+            action: 'a_assign_null'
+            only-if-true: 'jdbc_is_entry'

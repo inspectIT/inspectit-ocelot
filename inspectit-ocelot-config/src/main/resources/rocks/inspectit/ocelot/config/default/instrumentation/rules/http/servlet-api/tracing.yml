@@ -1,0 +1,21 @@
+inspectit:
+  instrumentation:
+    rules:
+      
+      #Enables tracing of HTTP calls received via the servlet API
+      'r_servletapi_tracing':
+        scopes:
+          's_servletapi_servlet_service': true
+          's_servletapi_filter_doFilter': true
+        include:
+          'r_servletapi_extract_details': true
+          'r_http_tracing_span_name_default': true
+          'r_http_server_tracing_default_attributes': true
+        tracing:
+          start-span: true
+          kind: SERVER
+          start-span-conditions:
+            only-if-true: 'http_is_entry'
+          error-status: 'http_is_error'
+            
+          

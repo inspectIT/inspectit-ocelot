@@ -1,0 +1,37 @@
+inspectit:
+  instrumentation:
+    scopes:
+      's_jdbc_statement_execute':
+        interfaces:
+          - name: java.sql.Statement
+        methods:
+          - name: execute
+          - name: executeQuery
+          - name: executeUpdate
+        advanced:
+          instrument-only-inherited-methods: true
+          
+      's_jdbc_preparedstatement_execute':
+        interfaces:
+          - name: java.sql.PreparedStatement
+        methods:
+          - name: execute
+          - name: executeQuery
+          - name: executeUpdate
+        advanced:
+          instrument-only-inherited-methods: true
+          
+      's_jdbc_statement_executeBatch':
+        interfaces:
+          - name: java.sql.PreparedStatement
+        methods:
+          - name: executeBatch
+        advanced:
+          instrument-only-inherited-methods: true
+          
+      's_jdbc_preparedstatement_executeBatch':
+        interfaces:
+          - name: java.sql.PreparedStatement
+        methods:
+          - name: executeBatch
+            arguments: []

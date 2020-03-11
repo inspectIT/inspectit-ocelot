@@ -1,0 +1,22 @@
+inspectit:
+  instrumentation:
+    actions:
+    
+      # Utility function to detect reentrant methods
+      # This functions checks if a given "marker" is present on the context.
+      # The marker should be configured for downpropagation.
+      # If the marker is not present, it is added to the context and "true" is returned.
+      # If it is present, false is returned.
+      # E.g. if methodA calls methodB and they both invoke a_entrypoint_check with the same marker,
+      # "true" will only be returned for methodA.
+      'a_entrypoint_check':
+        input:
+          '_context': InspectitContext
+          'marker': String
+        value-body: |
+          if(_context.getData(marker) == null) {
+            _context.setData(marker, Boolean.TRUE);
+            return Boolean.TRUE;
+          } else {
+            return Boolean.FALSE;
+          }

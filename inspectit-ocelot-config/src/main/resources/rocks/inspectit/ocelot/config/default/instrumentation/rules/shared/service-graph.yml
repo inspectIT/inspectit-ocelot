@@ -1,0 +1,171 @@
+# ------------------------------------------------------------------------------------------------------
+# Definition of the service graph metrics and includable rules containing the core logic
+# for doing the necessary propagations as well as the recording of the actual metric
+# ------------------------------------------------------------------------------------------------------
+
+inspectit:
+  metrics:
+    definitions:
+      '[service/in/responsetime]':
+        unit: ms
+        views:
+          '[service/in/count]':
+            aggregation: COUNT
+            tags: 
+              'origin_external' : true
+              'origin_service': true
+              'protocol': true
+              'error': true
+          '[service/in/responsetime/sum]':
+            aggregation: SUM
+            tags:
+              'origin_external' : true
+              'origin_service': true
+              'protocol': true
+              'error': true
+            
+      '[service/out/responsetime]':
+        unit: ms
+        views:
+          '[service/out/count]':
+            aggregation: COUNT
+            tags: 
+              'target_external' : true
+              'target_service': true
+              'protocol': true
+              'error': true
+          '[service/out/responsetime/sum]':
+            aggregation: SUM
+            tags: 
+              'target_external' : true
+              'target_service': true
+              'protocol': true
+              'error': true
+            
+  instrumentation:  
+    data:
+      # Markers used for entry-point checks via a_entrypoint_check
+      'servicegraph_inbound_marker':
+        down-propagation: JVM_LOCAL
+      'servicegraph_outbound_marker':
+        down-propagation: JVM_LOCAL
+      
+      # The propagation for target & origin service to know who this service communicates with
+      'servicegraph_origin_service':
+        down-propagation: GLOBAL
+      'servicegraph_target_service': 
+        up-propagation: GLOBAL
+        
+      # When receiving a call (e.g. as http_server), we clear servicegraph_origin_service
+      # in order to prevent it wrongly being down-propagated further.
+      # The actual origin of the call is remembered in this JVM_LOCAL variable
+      'servicegraph_origin_service_local':
+        down-propagation: JVM_LOCAL
+      
+    rules:
+    
+      # This rule prepares up-propagation to include service-graph related information
+      # Namely this ensures that the current service name is included as target service
+      # Because depending on the used communication up-propagation can happen on both exit or entry,
+      # this rule configures servicegraph_target_service in both entry and exit of the method.
+      'r_servicegraph_prepare_up_propagation':
+        entry:
+          'servicegraph_target_service':
+            action: 'a_assign_value'
+            data-input: 
+              'value': 'service'
+        exit:
+          'servicegraph_target_service':
+            action: 'a_assign_value'
+            data-input: 
+              'value': 'service'
+            
+      # This rule prepares down-propagation to include service-graph related information
+      # Namely this ensures that the current service name is included as origin service
+      'r_servicegraph_prepare_down_propagation':
+        entry:
+          'servicegraph_origin_service':
+            action: 'a_assign_value'
+            data-input: 
+              'value': 'service'
+              
+      # Can be included to record the current method invocation as an inbound service graph call.
+      # The includer should populate servicegraph_is_entry if this method is the correct entrypoint.
+      # In addition, servicegraph_origin_external can be populated if an external origin is present
+      'r_servicegraph_inbound_record_method':
+        include:
+          'r_servicegraph_capture_method_duration': true
+          'r_servicegraph_inbound_record_metric': true
+              
+      # Can be included to record the current method invocation as an outbound service graph call.
+      # The includer should populate servicegraph_is_entry if this method is the correct entrypoint.
+      # In addition, servicegraph_target_external can be populated if an external target is present
+      'r_servicegraph_outbound_record_method':
+        include:
+          'r_servicegraph_capture_method_duration': true
+          'r_servicegraph_outbound_record_metric': true
+            
+      # Records inbound traffic as service graph call
+      # When this rule is included, it is expected that servicegraph_duration,
+      # servicegraph_protocol and servicegraph_is_error are populated.
+      # If there was an external origin, servicegraph_origin_external should contain it's name.
+      # In addition this rule prevent invalid further down-propagation of servicegraph_origin_service
+      # by moving it into the JVM_LOCAL variable servicegraph_origin_service_local
+      'r_servicegraph_inbound_record_metric':
+        entry:
+          'servicegraph_origin_service_local':
+            only-if-null: 'servicegraph_origin_service_local'
+            action: 'a_assign_value'
+            data-input:
+              'value': 'servicegraph_origin_service'
+            order:
+              reads-before-written:
+                'servicegraph_origin_service': true
+          'servicegraph_origin_service':
+            only-if-not-null: 'servicegraph_origin_service'
+            action: 'a_assign_null'
+        metrics:
+          '[service/in/responsetime]':
+            value: 'servicegraph_duration'
+            data-tags:
+              'origin_service': 'servicegraph_origin_service_local'
+              'origin_external': 'servicegraph_origin_external'
+              'protocol': 'servicegraph_protocol'
+              'error': 'servicegraph_is_error'
+              
+      # Records outbound traffic as service graph call
+      # When this rule is included, it is expected that servicegraph_duration,
+      # servicegraph_protocol and servicegraph_is_error are populated.
+      # If there was an external target, servicegraph_target_external should contain it's name.
+      # In addition further invalid up-propagation of the target service is prevented.
+      'r_servicegraph_outbound_record_metric':
+        post-exit: # clear the target service AFTER the metric has been recorded but before propagation
+          'servicegraph_target_service':
+            only-if-not-null: 'servicegraph_duration'
+            action: 'a_assign_null'
+        metrics:
+          '[service/out/responsetime]':
+            value: 'servicegraph_duration'
+            data-tags:
+              'target_service': 'servicegraph_target_service'
+              'target_external': 'servicegraph_target_external'
+              'protocol': 'servicegraph_protocol'
+              'error': 'servicegraph_is_error'
+          
+      # Utility rule used for both inbound & outbout service graph traffic.
+      # Captures the duration of the current method as servicegraph_duration
+      # This capturing takes only place if servicegraph_is_entry is populated with "true"
+      'r_servicegraph_capture_method_duration':
+        include:
+          'r_capture_method_duration_conditional': true
+        entry:
+          'capture_time_condition':
+            action: 'a_assign_true'
+            only-if-true: 'servicegraph_is_entry'
+        exit:
+          'servicegraph_duration':
+            action: 'a_assign_value'
+            only-if-true: 'servicegraph_is_entry'
+            data-input: 
+              'value': 'method_duration'
+        

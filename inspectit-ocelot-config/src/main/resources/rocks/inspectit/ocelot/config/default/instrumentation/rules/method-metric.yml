@@ -1,0 +1,47 @@
+inspectit:
+  metrics:
+    definitions:
+      '[method/duration]':
+        type: DOUBLE
+        unit: ms
+        description: "the duration from method entry to method exit"
+        views:
+          '[method/duration/sum]':
+            aggregation: SUM
+            tags:
+              class: true
+              method: true
+              error: true
+          '[method/duration/count]':
+            aggregation: COUNT
+            tags:
+              class: true
+              method: true
+              error: true
+              
+  instrumentation:
+    rules:
+      # This rule captures the method's duration and invocation count as a method/duration metric
+      # The metric is tagged with the signature of the method as well as the name of the declaring class
+      # In addition an error tag is set dependening on wheter the method threw an exception or not
+      #
+      # The rule can either be included or scopes can be added directly to it.
+      'r_method_metric':
+        include:
+          'r_capture_method_duration': true
+        exit:
+          'class_name':
+            action: 'a_method_getClassFQN'
+          'method_name_with_params':
+            action: 'a_method_getNameWithParameters'
+          'method_is_error':
+            action: 'a_logic_isNotNull'
+            data-input:
+              'value': '_thrown'
+        metrics:
+          '[method/duration]':
+            value: 'method_duration'
+            data-tags:
+              'class': 'class_name'
+              'method': 'method_name_with_params'
+              'error': 'method_is_error'

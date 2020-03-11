@@ -1,0 +1,92 @@
+inspectit:
+  instrumentation:
+    rules:
+    
+      # Can be included to detect and exclude nested calls
+      # For example, an HTTPSurlConnection interally uses a normal HTTPUrlConnection
+      'r_httpurlconnection_detect_entry':
+        pre-entry:
+          'http_is_entry':
+            action: 'a_entrypoint_check'
+            constant-input: 
+              'marker': "http_client_entrypoint_marker"
+         
+            
+      
+      # Tests and sets an "start" marker on this HTTP Url Connection object
+      # The end marker will only be set exactly once
+      'r_httpurlconnection_detect_start':
+        include:
+          'r_httpurlconnection_detect_entry': true
+        entry:
+          'httpurlconnection_prev_start_marker':
+            action: 'a_attachment_put'
+            constant-input:
+              'key': "start_marker"
+              'value': true
+            data-input:
+              'target': '_this'
+          'httpurlconnection_is_start':
+            only-if-true: 'http_is_entry'
+            only-if-null: 'httpurlconnection_prev_start_marker'
+            action: 'a_assign_value'
+            constant-input:
+              'value': true
+      
+      # Tests and sets an "end" marker on this HTTP Url Connection object
+      # The end marker will only be set exactly once
+      # This functionality is usually used to distingiush between the first and all other getInputStream() calls
+      'r_httpurlconnection_detect_end':
+        include:
+          'r_httpurlconnection_detect_entry': true
+        entry:
+          'httpurlconnection_prev_end_marker':
+            action: a_attachment_put
+            constant-input:
+              key: "end_marker"
+              value: true
+            data-input:
+              target: _this
+          'httpurlconnection_is_end':
+            only-if-true: 'http_is_entry'
+            only-if-null: 'httpurlconnection_prev_end_marker'
+            action: 'a_assign_value'
+            constant-input:
+              'value': true
+      
+      # Extracts all http information such as http_status, http_path, etc.
+      'r_httpurlconnection_extract_details':
+        include:
+          'r_httpurlconnection_extract_request_details': true
+          'r_httpurlconnection_extract_response_details': true
+      
+      # Extracts all http request information such as http_path, http_raw_path, http_method etc.
+      'r_httpurlconnection_extract_request_details':
+        include:
+          'r_httpurlconnection_detect_entry': true
+          'r_http_parametrize_path': true # derives http_path from http_raw_path
+        entry:
+          'http_target_host': 
+            only-if-true: 'http_is_entry'
+            action: 'a_httpurlconnection_getTargetHost'
+          'http_raw_path': 
+            only-if-true: 'http_is_entry'
+            action: 'a_httpurlconnection_getPath'
+          'http_method': 
+            only-if-true: 'http_is_entry'
+            action: 'a_httpurlconnection_getMethod'
+      
+      # Extracts all http response information such as http_status, http_is_error
+      'r_httpurlconnection_extract_response_details':
+        include:
+          'r_httpurlconnection_detect_entry': true
+        exit:
+          'http_status':
+            only-if-true: 'http_is_entry'
+            action: 'a_httpurlconnection_getStatus'
+          'http_is_error':
+            only-if-true: 'http_is_entry'
+            action: 'a_http_isErrorStatus'
+            data-input:
+              status: 'http_status'
+            

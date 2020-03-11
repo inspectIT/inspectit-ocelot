@@ -1,0 +1,37 @@
+inspectit:
+  instrumentation:
+    rules:
+    
+      # When applied to a method, this rule will populate method_duration with the duration the method execution took
+      'r_capture_method_duration':
+        include:
+          'r_capture_method_duration_conditional': true
+        entry:
+          'capture_time_condition':
+            action: 'a_assign_true'
+            
+      # Conditionally captures the execution time of the current method into method_duration
+      # The capturing will only happen it capture_time_condition is defined as true.
+      # For example, http instrumentation define capture_time_condition based on http_is_entry
+      # The condition is there to prevent unnecessary invocations of System.nanoTime(), which can be expensive
+      'r_capture_method_duration_conditional':
+        include:
+          'r_capture_method_entry_timestamp_conditional': true
+        exit:
+          'method_duration':
+            only-if-true: 'capture_time_condition'
+            action: 'a_time_elapsedMillis'
+            data-input: 
+              since_nanos: 'method_entry_time'
+              
+      # Conditionally captures the entry timestamp of the current method into method_entry_time
+      # The capturing will only happen it capture_time_condition is defined as true.
+      # For example, http instrumentation define capture_time_condition based on http_is_entry
+      # The condition is there to prevent unnecessary invocations of System.nanoTime(), which can be expensive
+      'r_capture_method_entry_timestamp_conditional':
+        entry:
+          'method_entry_time':
+            only-if-true: 'capture_time_condition'
+            action: 'a_time_nanos'
+      
+        

@@ -1,0 +1,38 @@
+inspectit:
+  instrumentation:
+    rules:
+      
+      # Enables the propagation of the "origin_service" for the service graph
+      'r_servletapi_servicegraph_propagation':
+        scopes:
+          's_servletapi_servlet_service': true
+          's_servletapi_filter_doFilter': true
+          's_servletapi_servletresponse_getWriter': true
+          's_servletapi_servletresponse_getOutputStream': true
+        include:
+          'r_servicegraph_prepare_up_propagation': true
+          
+      # Records inbound HTTP calls via the Servlet API in the service graph 
+      'r_servletapi_servicegraph_record':
+        scopes:
+          's_servletapi_servlet_service': true
+          's_servletapi_filter_doFilter': true
+        include:
+          'r_servicegraph_inbound_record_method': true
+          'r_servletapi_detect_entry':
+        entry:
+          'servicegraph_is_entry':
+            action: 'a_entrypoint_check'
+            constant-input: 
+              'marker': "servicegraph_inbound_marker"
+            only-if-true: 'http_is_entry'
+          'servicegraph_protocol':
+            action: 'a_assign_value'
+            constant-input: 
+              'value': "http"
+        exit:
+          'servicegraph_is_error':
+            action: 'a_assign_value'
+            data-input:
+              'value': 'http_is_error'
+      

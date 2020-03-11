@@ -1,0 +1,17 @@
+inspectit:
+  instrumentation:
+    actions:
+      
+      'a_assign_value':
+        input:
+          'value': Object
+        value: "value"
+      'a_assign_null':
+        value-body: "return null;"
+        
+      'a_assign_true':
+        value: "Boolean.TRUE"
+        
+      'a_assign_false':
+        value: "Boolean.FALSE"
+        

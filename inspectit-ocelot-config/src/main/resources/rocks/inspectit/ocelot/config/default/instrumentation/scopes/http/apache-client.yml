@@ -1,0 +1,10 @@
+inspectit:
+  instrumentation:
+    scopes:
+      's_apacheclient_doExecute':
+        superclass:
+          name: org.apache.http.impl.client.CloseableHttpClient
+        methods:
+          - name: doExecute
+        advanced:
+          instrument-only-inherited-methods: true

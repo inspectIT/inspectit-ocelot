@@ -1,0 +1,23 @@
+inspectit:
+  instrumentation:
+    rules:
+    
+      # Records HTTP calls doen via HTTPUrlConnection via the http/out metric
+      'r_httpurlconnection_http_metric':
+        scopes:
+          's_httpurlconnection_getInputStream': true
+        include:
+          'r_httpurlconnection_extract_details': true
+          'r_httpurlconnection_detect_end': true
+          'r_http_client_record_metric': true
+          'r_capture_method_duration_conditional': true
+        entry:
+          'capture_time_condition': # Defined for r_capture_method_duration_conditional
+            action: 'a_assign_true'
+            only-if-true: 'httpurlconnection_is_end'
+        exit:
+          'http_duration':
+            action: 'a_assign_value'
+            only-if-true: 'httpurlconnection_is_end'
+            data-input: 
+              'value': 'method_duration' #method duration is populated via r_capture_method_duration_conditional

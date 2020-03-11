@@ -3,18 +3,30 @@ inspectit:
   instrumentation:
 
     rules:
-      servicegraph_record_apache_client: {enabled: false }
-      servicegraph_record_jdbc_calls: {enabled: false }
-      servicegraph_record_servletapi_entry: {enabled: false }
+      r_jdbc_servicegraph_record: {enabled: false }
+      r_jdbc_prepared_sql_stop_propagation: {enabled: false }
+      r_jdbc_tracing_statement_execute: {enabled: false }
+      r_jdbc_tracing_statement_executeBatch: {enabled: false }
+      r_jdbc_tracing_preparedstatement: {enabled: false }
 
-      http_client_apache_client: {enabled: false }
-      http_server_servlet_api: {enabled: false }
+      r_apacheclient_propagation: {enabled: false }
+      r_apacheclient_http_metric: {enabled: false }
+      r_apacheclient_servicegraph_propagation: {enabled: false }
+      r_apacheclient_servicegraph_record: {enabled: false }
+      r_apacheclient_tracing: {enabled: false }
 
-      http_propagation_apache_doExecute: {enabled: false}
-      httpurlconnection_down_propagation: {enabled: false}
-      httpurlconnection_up_propagation: {enabled: false}
+      r_httpurlconnection_down_propagation: {enabled: false }
+      r_httpurlconnection_up_propagation: {enabled: false }
+      r_httpurlconnection_http_metric: {enabled: false }
+      r_httpurlconnection_servicegraph_propagation: {enabled: false }
+      r_httpurlconnection_servicegraph_record: {enabled: false }
+      r_httpurlconnection_tracing_start: {enabled: false }
+      r_httpurlconnection_tracing_end: {enabled: false }
 
-      servlet_api_down_propagation: {enabled: false}
-      servlet_api_up_propagation_on_servlet_and_filter: {enabled: false}
-      servlet_api_up_propagation_on_servletresponse: {enabled: false}
-
+      r_servletapi_downPropagation: {enabled: false }
+      r_servletapi_servlet_filter_upPropagation: {enabled: false }
+      r_servletapi_servletresponse_upPropagation: {enabled: false }
+      r_servletapi_http_metric: {enabled: false }
+      r_servletapi_servicegraph_propagation: {enabled: false }
+      r_servletapi_servicegraph_record: {enabled: false }
+      r_servletapi_tracing: {enabled: false }

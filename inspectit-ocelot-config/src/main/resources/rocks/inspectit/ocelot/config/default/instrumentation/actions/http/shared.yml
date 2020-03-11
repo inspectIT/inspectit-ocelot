@@ -1,0 +1,25 @@
+inspectit:
+  instrumentation:
+   actions:
+    
+    # Utility action which checks if a provided HTTP status (either as string or number) is an error code
+    # Everything except "null", 2xx and 3xx is interpreted as error
+    'a_http_isErrorStatus':
+      input:
+        'status': Object
+      value-body: |
+        if(status instanceof Number) {
+          int statusInt = ((Number)status).intValue();
+          return Boolean.valueOf(statusInt < 200 || statusInt >= 400);
+        }
+        if (status instanceof String) {
+          String statusString = (String) status;
+          if (statusString.length() == 3) {
+            char firstChar = statusString.charAt(0);
+            return Boolean.valueOf(firstChar != '2' && firstChar != '3');
+          }
+        }
+        if(status == null) {
+          return Boolean.FALSE;
+        }
+        return Boolean.TRUE;

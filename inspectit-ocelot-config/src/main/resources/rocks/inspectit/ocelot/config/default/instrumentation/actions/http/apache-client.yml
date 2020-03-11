@@ -1,0 +1,47 @@
+inspectit:
+  instrumentation:
+    actions:
+      #--------------------------------------------------------------------------------------------------------------
+      # All actions are designed to be applied on CloseableHttpClient.doExecute(HttpHost, HttpRequest, HttpContext)
+      #--------------------------------------------------------------------------------------------------------------
+      
+      # Extracts the target of the request in the form host:port
+      'a_apacheclient_toHostString':
+        imports:
+          - java.net
+          - org.apache.http
+        input:
+          '_arg0': HttpHost
+        value: _arg0.toHostString()
+
+      # Extracts the target http path
+      'a_apacheclient_getPath':
+        imports:
+          - java.net
+          - org.apache.http
+        input:
+          '_arg1': HttpRequest
+        value: "URI.create(_arg1.getRequestLine().getUri()).getPath()"
+
+      # Extracts the HTTP Method of the request, e.g. GET or POST
+      'a_apacheclient_getMethod':
+        imports:
+          - org.apache.http
+        input:
+          '_arg1': HttpRequest
+        value: "_arg1.getRequestLine().getMethod()"
+
+      # Extracts the response status in case the request succeded-
+      # If an exception is thrown instead, it's name is returned (e.g. SocketTimeoutException)
+      'a_apacheclient_getStatus':
+        imports:
+          - org.apache.http
+        input:
+          '_returnValue': HttpResponse
+          '_thrown': Throwable
+        value-body: |
+          if(_thrown != null) {
+            return _thrown.getClass().getSimpleName();
+          } else {
+            return Integer.valueOf(_returnValue.getStatusLine().getStatusCode());
+          }

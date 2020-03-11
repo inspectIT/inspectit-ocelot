@@ -1,0 +1,72 @@
+# ----------------------------------------------------------------------------------
+# Defines Rules and Actions enabling down & up propagation on the Apache HTTP Client
+# ----------------------------------------------------------------------------------
+
+inspectit:
+  instrumentation:
+    actions:
+      'a_apacheclient_downPropagation':
+        is-void: true
+        imports:
+          - java.util
+          - org.apache.http
+        input:
+          '_arg1': 'HttpMessage'
+          '_context': 'InspectitContext'
+        value-body: |
+          Map headers = _context.getDownPropagationHeaders();
+          Iterator it = headers.entrySet().iterator();
+          while(it.hasNext()) {
+            Map$Entry e = (Map$Entry) it.next();
+            _arg1.setHeader((String) e.getKey(), (String) e.getValue());
+          }
+
+      'a_apacheclient_upPropagation':
+        is-void: true
+        imports:
+          - java.util
+          - org.apache.http
+        input:
+          '_returnValue': 'HttpMessage'
+          '_context': 'InspectitContext'
+        value-body: |
+          if(_returnValue != null) {
+            Collection headerKeys = _context.getPropagationHeaderNames();
+            Map presentHeaders = new HashMap();
+            Iterator it = headerKeys.iterator();
+            while(it.hasNext()) {
+              String name = (String) it.next();
+              Header[] headers = _returnValue.getHeaders(name);
+              if (headers != null && headers.length > 0) {
+                StringBuilder sb = new StringBuilder();
+                for(int i = 0; i< headers.length; i++) {
+                  String value = headers[i].getValue();
+                  if(value != null) {
+                    if(sb.length() > 0) {
+                      sb.append(',');
+                    }
+                    sb.append(value);
+                  }
+                }
+                presentHeaders.put(name, sb.toString());
+              }
+            }
+            _context.readUpPropagationHeaders(presentHeaders);
+          }
+
+    rules:
+      'r_apacheclient_propagation':
+        scopes:
+          's_apacheclient_doExecute': true
+        include:
+          'r_apacheclient_detect_entry': true # to make sure propagation happens only once
+
+        post-entry:
+          'do_down_propagation':
+            action: 'a_apacheclient_downPropagation'
+            only-if-true: 'http_is_entry'
+          
+        pre-exit:
+          'do_up_propagation':
+            action: 'a_apacheclient_upPropagation'
+            only-if-true: 'http_is_entry'

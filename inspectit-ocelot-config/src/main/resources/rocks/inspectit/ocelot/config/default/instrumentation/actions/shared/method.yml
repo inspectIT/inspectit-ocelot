@@ -1,0 +1,45 @@
+inspectit:
+  instrumentation:  
+    actions:
+    
+      # Returns the full qualified name of the current method, e.g. "my.package.MyClass.myMethod"
+      'a_method_getFQN':
+        input:
+          '_class': Class
+          '_methodName': String
+          '_parameterTypes': Class[]
+        value-body: |
+          StringBuilder sb = new StringBuilder();
+          sb.append(_class.getName()).append('.');
+          sb.append(_methodName).append('(');
+          for(int i=0; i< _parameterTypes.length; i++) {
+            if(i != 0) {
+              sb.append(", ");
+            }
+            sb.append(_parameterTypes[i].getSimpleName());
+          }
+          sb.append(')');
+          return sb.toString();
+    
+      # Returns the name of the method with the simple parameter list, e.g. "myMethod(int, String, MyClass)"
+      'a_method_getNameWithParameters':
+        input:
+          '_methodName': String
+          '_parameterTypes': Class[]
+        value-body: |
+          StringBuilder sb = new StringBuilder();
+          sb.append(_methodName).append('(');
+          for(int i=0; i< _parameterTypes.length; i++) {
+            if(i != 0) {
+              sb.append(", ");
+            }
+            sb.append(_parameterTypes[i].getSimpleName());
+          }
+          sb.append(')');
+          return sb.toString();
+          
+      # Returns the full qualified name of the class declaring the current method, e.g. "my.package.MyClass"
+      'a_method_getClassFQN':
+        input:
+          '_class': Class
+        value: _class.getName()

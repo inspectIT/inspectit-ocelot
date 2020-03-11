@@ -1,0 +1,108 @@
+# ------------------------------------------------------------------------------------------------------
+# Definition of the HTTP inbound and output metrics alongside with includable rules for recording them
+# ------------------------------------------------------------------------------------------------------
+inspectit:
+  metrics:
+    definitions:
+      '[http/in/responsetime]':
+        unit: ms
+        views:
+          '[http/in/count]':
+            aggregation: COUNT
+            tags: 
+              'http_path': true
+              'http_status': true
+              'http_method': true
+              'error': true
+          '[http/in/responsetime/sum]':
+            aggregation: SUM
+            tags: 
+              'http_path': true
+              'http_status': true
+              'http_method': true
+              'error': true
+            
+      '[http/out/responsetime]':
+        unit: ms
+        views:
+          '[http/out/count]':
+            aggregation: COUNT
+            tags:
+              'http_host': true
+              'http_path': true
+              'http_status': true
+              'http_method': true
+              'error': true
+          '[http/out/responsetime/sum]':
+            aggregation: SUM
+            tags:
+              'http_host': true
+              'http_path': true
+              'http_status': true
+              'http_method': true
+              'error': true
+            
+  instrumentation:    
+    rules:
+    
+      # Records the duration of the method on which this rule is applied as http/out metric value
+      # Recording only takes place if http_is_entry is true.
+      # It is expected that the http data (http_path, http_status, etc) has been populated in this case.
+      'r_http_client_record_metric_on_method':
+        include:
+          'r_http_capture_method_duration': true
+          'r_http_client_record_metric': true
+    
+      # Records the duration of the method on which this rule is applied as http/in metric value
+      # Recording only takes place if http_is_entry is true.
+      # It is expected that the http data (http_path, http_status, etc) has been populated in this case.
+      'r_http_server_record_metric_on_method':
+        include:
+          'r_http_capture_method_duration': true
+          'r_http_server_record_metric': true
+      
+      # Records the value provided via http_duration as http/out metric value
+      # It is expected that the http data (http_path, http_status, etc) has been populated.
+      'r_http_client_record_metric':
+        metrics:
+          '[http/out/responsetime]':
+            value: 'http_duration'
+            data-tags:
+              'http_host': 'http_target_host'
+              'http_path': 'http_path'
+              'http_status': 'http_status'
+              'http_method': 'http_method'
+              'error': 'http_is_error'
+              
+      # Records the value provided via http_duration as http/in metric value
+      # It is expected that the http data (http_path, http_status, etc) has been populated.
+      'r_http_server_record_metric':
+        metrics:
+          '[http/in/responsetime]':
+            value: 'http_duration'
+            data-tags:
+              'http_path': 'http_path'
+              'http_status': 'http_status'
+              'http_method': 'http_method'
+              'error': 'http_is_error'
+      
+      # Captures the duration of the method as http_duration
+      # Capturing only takes palce if http_is_entry is true for the method!
+      'r_http_capture_method_duration':
+        include:
+          'r_capture_method_duration_conditional': true
+        entry:
+          'capture_time_condition':
+            action: 'a_assign_true'
+            only-if-true: 'http_is_entry'
+        exit:
+          'http_duration':
+            action: 'a_assign_value'
+            only-if-true: 'http_is_entry'
+            data-input: 
+              'value': 'method_duration'
+        
+            
+            
+            
+        

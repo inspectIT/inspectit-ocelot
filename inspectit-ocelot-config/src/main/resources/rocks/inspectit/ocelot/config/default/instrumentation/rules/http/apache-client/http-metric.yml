@@ -1,0 +1,10 @@
+inspectit:
+  instrumentation:
+    rules:
+      # Records the http/out metrics for calls done via the Apache HTTP Client
+      'r_apacheclient_http_metric':
+        scopes:
+          's_apacheclient_doExecute': true
+        include:
+          'r_apacheclient_extract_details': true
+          'r_http_client_record_metric_on_method': true

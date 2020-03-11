@@ -1,0 +1,39 @@
+inspectit:
+  instrumentation:
+    rules:
+    
+      # This rule is included by all HTTP tracing rules in order to define the span name.
+      'r_http_tracing_span_name_default':
+        tracing:
+          name: 'http_span_name'
+        entry:
+          'http_span_name':
+            only-if-not-null: 'http_path'
+            action: 'a_string_concat_3'
+            data-input:
+              a: 'http_method'
+              c: 'http_path'
+            constant-input:
+              b: " "
+              
+      # This rule is included by all HTTP Client tracing rules to define which attributes should be added to the span
+      'r_http_client_tracing_default_attributes':
+        include:
+          'r_http_tracing_default_attributes': true
+        tracing:
+          attributes:
+            'http.host': 'http_target_host'
+            
+              
+      # This rule is included by all HTTP Server tracing rules to define which attributes should be added to the span
+      'r_http_server_tracing_default_attributes':
+        include:
+          'r_http_tracing_default_attributes': true
+              
+      # This rule is included by all HTTP Client AND Server tracing rules to define which attributes should be added to the span
+      'r_http_tracing_default_attributes':
+        tracing:
+          attributes:
+            'http.status_code': 'http_status'
+            'http.method': 'http_method'
+            'http.path': 'http_path'

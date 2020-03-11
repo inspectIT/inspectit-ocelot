@@ -1,0 +1,14 @@
+inspectit:
+  instrumentation:
+    actions:
+    
+      #computes a nanosecond-timestamp as a long for the current point in time
+      'a_time_nanos':
+        value: "new Long(System.nanoTime())"
+
+      #computes the elapsed milliseconds as double since a given nanosecond-timestamp
+      'a_time_elapsedMillis':
+        input:
+          #the timestamp captured via System.nanoTime() to compare against
+          'since_nanos': long
+        value: "new Double( (System.nanoTime() - since_nanos) * 1E-6)"

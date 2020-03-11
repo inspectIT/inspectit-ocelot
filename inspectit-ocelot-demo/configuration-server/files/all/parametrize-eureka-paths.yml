@@ -1,0 +1,22 @@
+inspectit:
+  instrumentation:
+    rules:
+    
+      # We extend the existing parametrization rules...
+      r_http_parametrize_path:
+        include:
+          r_parametrize_eureka_paths: true
+      
+      # .. with out own rule which parametrizes eureka paths
+      r_parametrize_eureka_paths:
+        entry:
+          http_path:
+            only-if-not-null: http_path
+            action: a_regex_replaceMatch
+            data-input:
+              string: http_path
+            constant-input:
+              pattern: '\/eureka\/apps\/.+\/.+'
+              replacement: "/eureka/apps/{service}/{location}"
+                
+          

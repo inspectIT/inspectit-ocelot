@@ -1,0 +1,37 @@
+inspectit:
+  instrumentation:
+    rules:
+    
+      # Can be included to detect and exclude nested calls
+      'r_apacheclient_detect_entry':
+        pre-entry:
+          'http_is_entry':
+            action: 'a_entrypoint_check'
+            constant-input: 
+              'marker': "http_client_entrypoint_marker" # propagation is defined in the shared http settings
+            
+      # Reads all HTTP related data, e.g. http_raw_path, http_path, http_method, etc
+      # Designed to be applied on the scope s_apacheclient_doExecute
+      'r_apacheclient_extract_details':
+        include:
+          'r_apacheclient_detect_entry': true
+          'r_http_parametrize_path': true # derives http_path form http_raw_path
+        entry:
+          'http_raw_path':
+            only-if-true: 'http_is_entry'
+            action: 'a_apacheclient_getPath'
+          'http_method':
+            only-if-true: 'http_is_entry'
+            action: 'a_apacheclient_getMethod'
+          'http_target_host':
+            only-if-true: 'http_is_entry'
+            action: 'a_apacheclient_toHostString'
+        exit:
+          'http_status':
+            only-if-true: 'http_is_entry'
+            action: 'a_apacheclient_getStatus'
+          'http_is_error':
+            only-if-true: 'http_is_entry'
+            action: 'a_http_isErrorStatus'
+            data-input:
+              'status': 'http_status'

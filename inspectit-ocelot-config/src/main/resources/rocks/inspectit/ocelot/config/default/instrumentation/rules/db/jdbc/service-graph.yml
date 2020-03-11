@@ -1,0 +1,38 @@
+inspectit:
+  instrumentation:
+    rules:
+          
+      # Records JDBC statement executions in the service graph
+      'r_jdbc_servicegraph_record':
+        scopes:
+          's_jdbc_preparedstatement_execute': true
+          's_jdbc_preparedstatement_executeBatch': true
+          's_jdbc_statement_execute': true
+          's_jdbc_statement_executeBatch': true
+        include:
+          'r_servicegraph_outbound_record_method': true
+          'r_jdbc_detect_entry': true
+          'r_jdbc_extract_url': true
+        entry:
+        
+          'servicegraph_is_entry':
+            action: 'a_entrypoint_check'
+            constant-input: 
+              marker: "servicegraph_outbound_marker"
+            only-if-true: 'jdbc_is_entry'
+            
+          'servicegraph_protocol':
+            action: 'a_assign_value'
+            constant-input: 
+              'value': "jdbc"
+              
+          'servicegraph_target_external':
+            action: 'a_assign_value'
+            data-input: 
+              'value': 'jdbc_url'
+        exit:
+          'servicegraph_is_error':
+            action: 'a_logic_isNotNull'
+            data-input:
+              'value': '_thrown'
+      

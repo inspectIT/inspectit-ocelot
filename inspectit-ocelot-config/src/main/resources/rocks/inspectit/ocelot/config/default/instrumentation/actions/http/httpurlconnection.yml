@@ -1,0 +1,46 @@
+inspectit:
+  instrumentation:
+    actions:
+    
+      # Extracts the target of the request in the form host:port
+      'a_httpurlconnection_getTargetHost':
+        imports:
+          - java.net
+        input:
+          '_this': HttpURLConnection
+        value-body: |
+          URL url = _this.getURL();
+          int port = url.getPort();
+          if(port == -1) {
+            return url.getHost();
+          } else {
+            return url.getHost() + ":" + port;
+          }
+
+      # Extracts the target path of the request
+      'a_httpurlconnection_getPath':
+        input:
+          '_this': java.net.HttpURLConnection
+        value: _this.getURL().getPath()
+
+      # Extracts the method of the request, e.g. GET or POST
+      'a_httpurlconnection_getMethod':
+        input:
+          '_this': java.net.HttpURLConnection
+        value: _this.getRequestMethod()
+
+      # Extracts the resposne status code if the request returned without an exception
+      # Otherwise returns the name of the exception, e.g. SocketTimeoutException.
+      'a_httpurlconnection_getStatus':
+        input:
+          '_thrown': Throwable
+          '_this': java.net.HttpURLConnection
+        value-body: |
+          if(_thrown != null) {
+            return _thrown.getClass().getSimpleName();
+          }
+          try {
+            return String.valueOf(_this.getResponseCode());
+          } catch(Throwable t) {
+            return t.getClass().getSimpleName();
+          }

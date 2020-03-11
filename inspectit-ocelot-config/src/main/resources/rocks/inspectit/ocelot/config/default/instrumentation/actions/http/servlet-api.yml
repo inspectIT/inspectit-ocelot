@@ -1,0 +1,36 @@
+inspectit:
+  instrumentation:
+    actions:
+    
+      # Checks if a given ServletRequest is an instanceof HttpServletRequest
+      'a_servletrequest_isHttp':
+        imports:
+          - javax.servlet
+          - javax.servlet.http
+        input:
+          'request': ServletRequest
+        value: "Boolean.valueOf(request instanceof HttpServletRequest)"
+      
+      # Extracts the request path from the HttpServletRequest
+      'a_httpservletrequest_getPath':
+        imports:
+          - javax.servlet.http
+        input:
+          'request': HttpServletRequest
+        value: "java.net.URI.create(request.getRequestURI()).getPath()"
+
+      # Extracts the method path from the HttpServletRequest
+      'a_httpservletrequest_getMethod':
+        imports:
+          - javax.servlet.http
+        input:
+          'request': HttpServletRequest
+        value: "request.getMethod()"
+
+      # Extracts the response statusfrom the HttpServletResponse
+      'a_httpservletresponse_getStatus':
+        imports:
+          - javax.servlet.http
+        input:
+          'response': HttpServletResponse
+        value: "Integer.valueOf(response.getStatus())"

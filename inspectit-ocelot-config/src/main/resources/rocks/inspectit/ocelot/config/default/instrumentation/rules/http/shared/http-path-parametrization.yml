@@ -1,0 +1,31 @@
+inspectit:
+  instrumentation:
+    rules:
+      
+      # This rule is included by all HTTP instrumentation to derive the parametrized http_path from http_raw_path
+      # It should therefore be extended via custom includes in order to perform application specific parametrizations.
+      'r_http_parametrize_path':
+        include:
+          'r_http_parametrize_path_remove_ids': true #By default, only IDs are removed
+        entry:
+          # We initialize the http path, so that parametrization rules can use it as input
+          'http_path':
+            action: 'a_assign_value'
+            data-input:
+              'value': 'http_raw_path'
+      
+      #The default parametrization inspectIT provides, which removes numeric ID path segments and UUIDs
+      'r_http_parametrize_path_remove_ids':
+        entry:
+          'http_path':
+            only-if-not-null: 'http_path'
+            action: 'a_regex_replaceAll_multi'
+            data-input:
+              string: 'http_path'
+            constant-input:
+              'patterns_and_replacements':
+                - pattern:      '\/\d+(?=\/|$)'
+                  replacement:  '/{id}'
+                - pattern:      '[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}'
+                  replacement:  '{uuid}'
+          

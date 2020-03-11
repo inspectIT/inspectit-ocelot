@@ -1,0 +1,31 @@
+inspectit:
+  instrumentation:
+    actions:
+    
+      # Extracts the name of the JDBC connection for a given statement
+      'a_jdbc_getUrl':
+        imports:
+          - java.sql
+        input:
+          'statement': Statement
+        value-body: |
+          try {
+            Connection con = statement.getConnection();
+            String url = con.getMetaData().getURL();
+
+            int semiColonIndex = url.indexOf(';');
+            if(semiColonIndex != -1) {
+              url = url.substring(0,semiColonIndex);
+            }
+
+            int questionIndex = url.indexOf('?');
+            if(questionIndex != -1) {
+              url = url.substring(0,questionIndex);
+            }
+            if(url.toLowerCase().startsWith("jdbc:")) {
+              url = url.substring(5);
+            }
+            return url;
+          }catch(Exception e) { // in case the connection is closed
+            return null;
+          }
