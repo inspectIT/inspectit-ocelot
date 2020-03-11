@@ -107,16 +107,9 @@ class AceEditor extends React.Component {
     }
 
     getValue = () => {
-        const actualSessionValue = this.editor.getSession().getValue();
-        let newSessionValue = "";
-        for (let i = 0; i < actualSessionValue.length; i++) {
-            if (actualSessionValue.charCodeAt(i) === 9) {
-                newSessionValue += String.fromCharCode(32);
-            } else {
-                newSessionValue += actualSessionValue[i];
-            }
-        }
-        return newSessionValue;
+       let sessionValue = this.editor.getSession().getValue();
+       sessionValue = sessionValue.replace(String.fromCharCode(9), String.fromCharCode(32));
+       return sessionValue;
     }
 }
 
