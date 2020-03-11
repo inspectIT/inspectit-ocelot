@@ -47,10 +47,13 @@ class TreeTableEditor extends React.Component {
     regenerateData = () => {
         try {
             const config = yaml.safeLoad(this.props.value);
-            const data = this.processKey(config, [this.props.schema]);
+            const allKeys = {};
+            const data = this.processKey(config, [this.props.schema], allKeys);
+            console.log(allKeys);
             this.setState({ 
                 isError: false,
-                data
+                data,
+                expandedKeys: allKeys
             })
         } catch (error) {
             this.setState({ 
@@ -65,9 +68,10 @@ class TreeTableEditor extends React.Component {
      * 
      * @param config Currently processed configiguration part (from config YAML)
      * @param schemaObjects Array of schema object that could correspond to the given config key
+     * @param keysCollector Map to add all keys of created data elements
      * @param parentKeyIdentifier String identifier of the parent key or undifined for root key
      */
-    processKey = (config, schemaObjects, parentKeyIdentifier) => {
+    processKey = (config, schemaObjects, keysCollector, parentKeyIdentifier) => {
         const result = [];
 
         // continue if the schema object has elements only
@@ -83,7 +87,7 @@ class TreeTableEditor extends React.Component {
                 if (schemaProperty) {
                     const isComposite = schemaProperty.type === "COMPOSITE";
                     const keyIdentifier = parentKeyIdentifier !== undefined ? parentKeyIdentifier + "." + schemaProperty.propertyName : schemaProperty.propertyName;
-                    const children = isComposite && this.processKey(configValue, schemaProperty.children, keyIdentifier) || undefined;
+                    const children = isComposite && this.processKey(configValue, schemaProperty.children, keysCollector, keyIdentifier) || undefined;
 
                     const data = {
                         key: keyIdentifier,
@@ -97,6 +101,21 @@ class TreeTableEditor extends React.Component {
                         children
                     }
                     result.push(data);
+                    keysCollector[keyIdentifier] = true;
+                } else {
+                    const keyIdentifier = parentKeyIdentifier !== undefined ? parentKeyIdentifier + "." + congfigKey : congfigKey;
+                    const data = {
+                        key: keyIdentifier,
+                        selectable: false,
+                        data: {
+                            name: this.capitalize(congfigKey),
+                            type: 'n/a',
+                            value: 'Not supported',
+                            nullable: 'n/a'
+                        },
+                        children: []
+                    }
+                    result.push(data);
                 }
             });
         }
@@ -104,7 +123,9 @@ class TreeTableEditor extends React.Component {
         return result;
     }
 
-    getDataType = (type) => type !== "COMPOSITE" ? type.charAt(0) + type.slice(1).toLowerCase() : "";
+    capitalize = (string) => string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+
+    getDataType = (type) => type !== "COMPOSITE" ? this.capitalize(type) : "";
 
     getDataValue = (value, type) => {
         switch(type){
@@ -191,6 +212,8 @@ class TreeTableEditor extends React.Component {
                             value={this.state.data} 
                             headerColumnGroup={this.headerGroup} 
                             autoLayout
+                            scrollable
+                            scrollHeight="75vh"
                             loading={loading}
                             expandedKeys={this.state.expandedKeys}
                             onToggle={e => this.setState({ expandedKeys: e.value })}
