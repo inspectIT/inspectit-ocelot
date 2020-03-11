@@ -26,10 +26,10 @@ public class ClassInjector {
      * The instrumentation is required to enable "reusing" of previously injected but unused class objects using redefine.
      */
     @Autowired
-    Instrumentation instrumentation;
+    private Instrumentation instrumentation;
 
     @Autowired
-    JigsawModuleInstrumenter moduleManager;
+    private JigsawModuleInstrumenter moduleManager;
 
     private InjectionClassLoader bootstrapChildLoader = new InjectionClassLoader();
 

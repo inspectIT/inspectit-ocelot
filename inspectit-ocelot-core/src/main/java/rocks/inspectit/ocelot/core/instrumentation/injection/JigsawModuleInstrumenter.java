@@ -10,6 +10,10 @@ import java.lang.instrument.Instrumentation;
 import java.lang.reflect.Method;
 import java.util.*;
 
+/**
+ * When using Java9+ classes are bundeld in modules with access restrictions.
+ * This class can be used to redefine the modules in order to make them accessible to inspectIT without illegal-access warnings.
+ */
 @Component
 @Slf4j
 public class JigsawModuleInstrumenter {
@@ -43,6 +47,11 @@ public class JigsawModuleInstrumenter {
     @Autowired
     private Instrumentation instrumentation;
 
+    /**
+     * Initialization.
+     *
+     * @throws NoSuchMethodException If the Java9 methods do not exists, but java.lang.Module does. Should therefore never happen.
+     */
     @PostConstruct
     void init() throws NoSuchMethodException {
         Class<?> moduleClass;
@@ -53,13 +62,24 @@ public class JigsawModuleInstrumenter {
             return;
         }
 
-        classGetModule = Class.class.getMethod("getModule");
-        instrumentationRedefineModule = Instrumentation.class.getMethod("redefineModule", moduleClass, Set.class, Map.class, Map.class, Set.class, Map.class);
+        try {
+            classGetModule = Class.class.getMethod("getModule");
+            instrumentationRedefineModule = Instrumentation.class.getMethod("redefineModule", moduleClass, Set.class, Map.class, Map.class, Set.class, Map.class);
+        } catch (NoSuchMethodException e) {
+            log.error("Your JRE contains java.lang.Module but not the required methods!", e);
+            throw e;
+        }
 
         bootstrapModule = getModuleOfClass(DoNotInstrumentMarker.class);
         coreModule = getModuleOfClass(JigsawModuleInstrumenter.class);
     }
 
+    /**
+     * Instruments the module containing the given class in order to gain the required access rights.
+     * Is a NOOP if the Java Version is 8.
+     *
+     * @param containedClass the class whose containing module should be instrumented
+     */
     public synchronized void openModule(Class<?> containedClass) {
         if (isModuleSystemAvailable()) {
             String packageName = containedClass.getPackage().getName();
@@ -69,7 +89,7 @@ public class JigsawModuleInstrumenter {
                 log.debug("Gaining access to package '{}' of module '{}'", packageName, module);
                 Set<Object> extraReads = Collections.singleton(bootstrapModule);
                 Map<String, Set<Object>> extraOpens = Collections.singletonMap(packageName, Collections.singleton(coreModule));
-                redefineModule(module, extraReads, Collections.emptyMap(), extraOpens, Collections.emptySet(), Collections.emptyMap());
+                redefineModule(module, extraReads, extraOpens);
                 openedPackages.add(packageName);
             }
         }
@@ -80,27 +100,21 @@ public class JigsawModuleInstrumenter {
      * <p>
      * Any kind of thrown exceptions are caught, logged and ignored.
      *
-     * @param module        The module to redefine
-     * @param extraReads    The set of Module to add as readable
-     * @param extraExports  Maps packages to modules to which these packages shall be compile-time visible
-     * @param extraOpens    Maps packages to modules to which these packages shall be run-time visible (E.g. via deep reflection)
-     * @param extraUses     The additional services to use by this module
-     * @param extraProvides The additional services to expose by this module
+     * @param module     The module to redefine
+     * @param extraReads The set of Module to add as readable
+     * @param extraOpens Maps packages to modules to which these packages shall be run-time visible (E.g. via deep reflection)
      */
     private void redefineModule(Object module,
                                 Set<Object> extraReads,
-                                Map<String, Set<Object>> extraExports,
-                                Map<String, Set<Object>> extraOpens,
-                                Set<Class<?>> extraUses,
-                                Map<Class<?>, List<Class<?>>> extraProvides) {
+                                Map<String, Set<Object>> extraOpens) {
         try {
             instrumentationRedefineModule.invoke(instrumentation,
                     module,
                     extraReads,
-                    extraExports,
+                    Collections.emptyMap(),
                     extraOpens,
-                    extraUses,
-                    extraProvides
+                    Collections.emptySet(),
+                    Collections.emptyMap()
             );
         } catch (Exception e) {
             log.error("Error redefining module {}", module, e);

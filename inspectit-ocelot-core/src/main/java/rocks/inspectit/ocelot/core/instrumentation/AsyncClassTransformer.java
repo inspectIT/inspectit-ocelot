@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.core.instrumentation;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import lombok.Getter;
@@ -63,13 +64,14 @@ public class AsyncClassTransformer implements ClassFileTransformer {
     private SelfMonitoringService selfMonitoring;
 
     @Autowired
+    @VisibleForTesting
     List<IClassDefinitionListener> classDefinitionListeners;
 
     @Autowired
-    JigsawModuleInstrumenter moduleManager;
+    private JigsawModuleInstrumenter moduleManager;
 
     @Autowired
-    ClassLoaderDelegation classLoaderDelegation;
+    private ClassLoaderDelegation classLoaderDelegation;
 
     /**
      * Detects if the instrumenter is in the process of shutting down.
