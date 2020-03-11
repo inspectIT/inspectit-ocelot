@@ -28,8 +28,20 @@ export const fetchFiles = () => {
  * Arranges first directories and then files. Within the directories or files it is an alphabetical sorting.
  */
 export const sortFiles = (allFiles) => {
-
     allFiles.sort(function (first, second) {
+        if(first.type !== second.type){
+            if(first.type === 'directory'){
+                if(first.children.length>0){
+                    first.children = sortFiles(first.children);
+                }
+                return -1
+            } else {
+                if(second.children.length>0){
+                    second.children = sortFiles(second.children);
+                }
+                return 1;
+            }
+        }
         const nameFirst = first.name.toUpperCase();
         const nameSecond = second.name.toUpperCase();
         if (nameFirst < nameSecond) {
@@ -40,22 +52,7 @@ export const sortFiles = (allFiles) => {
         }
         return 0;
     });
-
-    let directories = [];
-    let files = [];
-
-    allFiles.forEach(element => {
-        if (element.type === 'directory') {
-            directories.push(element)
-            if (element.children.length > 0) {
-                element.children = sortFiles(element.children);
-            }
-        }
-        else {
-            files.push(element);
-        }
-    })
-    return directories.concat(files);
+   return allFiles;
 }
 
 /**
