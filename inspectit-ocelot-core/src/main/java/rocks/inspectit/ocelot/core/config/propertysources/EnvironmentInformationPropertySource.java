@@ -26,7 +26,7 @@ public class EnvironmentInformationPropertySource extends PropertiesPropertySour
     private static Properties getEnvironmentProperties() {
         Properties result = new Properties();
         result.put("inspectit.env.agent-dir", getAgentJarDirectory());
-        result.put("inspectit.env.agent-version", getAgentVersion());
+        result.put("inspectit.env.agent-version", AgentManager.getAgentVersion());
         result.put("inspectit.env.hostname", getHostName());
         result.put("inspectit.env.java-version", getJavaVersion());
         result.put("inspectit.env.pid", getPid());
@@ -35,15 +35,6 @@ public class EnvironmentInformationPropertySource extends PropertiesPropertySour
 
     private static String getJavaVersion() {
         return System.getProperty("java.version");
-    }
-
-    private static String getAgentVersion() {
-        IAgent agent = AgentManager.getAgent();
-        if (agent == null) {
-            return "UNKNOWN";
-        } else {
-            return agent.getVersion();
-        }
     }
 
     /**
