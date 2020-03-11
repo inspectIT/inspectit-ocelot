@@ -237,20 +237,11 @@ public class HttpPropertySourceState {
     private void setAgentMetaHeaders(HttpGet httpGet) {
         RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
 
-        httpGet.setHeader(META_HEADER_PREFIX + "AGENT-VERSION", getAgentVersion());
+        httpGet.setHeader(META_HEADER_PREFIX + "AGENT-VERSION", AgentManager.getAgentVersion());
         httpGet.setHeader(META_HEADER_PREFIX + "JAVA-VERSION", System.getProperty("java.version"));
         httpGet.setHeader(META_HEADER_PREFIX + "VM-NAME", runtime.getVmName());
         httpGet.setHeader(META_HEADER_PREFIX + "VM-VERSION", runtime.getVmVendor());
         httpGet.setHeader(META_HEADER_PREFIX + "START-TIME", String.valueOf(runtime.getStartTime()));
-    }
-
-    private static String getAgentVersion() {
-        IAgent agent = AgentManager.getAgent();
-        if (agent == null) {
-            return "UNKNOWN";
-        } else {
-            return agent.getVersion();
-        }
     }
 
     /**
