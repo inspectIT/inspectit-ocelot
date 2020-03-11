@@ -58,4 +58,13 @@ public class AgentManager {
     public static boolean isInitialized() {
         return initialized;
     }
+
+    /**
+     * Returns the agent which is currently active.
+     *
+     * @return the active {@link IAgent} implementation instance
+     */
+    public static IAgent getAgent() {
+        return agentInstance;
+    }
 }
