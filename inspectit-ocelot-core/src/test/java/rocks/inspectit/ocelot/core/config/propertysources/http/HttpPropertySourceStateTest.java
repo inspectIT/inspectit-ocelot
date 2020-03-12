@@ -87,6 +87,7 @@ class HttpPropertySourceStateTest {
                     .collect(Collectors.toList());
 
             assertThat(headerKeys).containsOnly(
+                    "X-OCELOT-AGENT-ID",
                     "X-OCELOT-AGENT-VERSION",
                     "X-OCELOT-JAVA-VERSION",
                     "X-OCELOT-VM-NAME",

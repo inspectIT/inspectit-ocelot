@@ -29,7 +29,7 @@ public class AgentStatusManager {
      * Cache storing the most recent status for each agent based on its attributes.
      * This cache is limited in size and has an expiration based on {@link #config}
      */
-    private Cache<Map<String, String>, AgentStatus> attributesToAgentStatusCache;
+    private Cache<Object, AgentStatus> attributesToAgentStatusCache;
 
     /**
      * Clears the connection history.
@@ -47,15 +47,27 @@ public class AgentStatusManager {
      * Called to update the history when an agent just fetched a configuration.
      *
      * @param agentAttributes     the attributes sent by the agent when fetching the configuration
+     * @param headers             the headers sent by the client fetching the configuration
      * @param resultConfiguration the configuration sent to the agent, can be null if no matching mapping exists.
      */
-    public void notifyAgentConfigurationFetched(Map<String, String> agentAttributes, AgentConfiguration resultConfiguration) {
-        AgentStatus newStatus = AgentStatus.builder()
+    public void notifyAgentConfigurationFetched(Map<String, String> agentAttributes, Map<String, String> headers, AgentConfiguration resultConfiguration) {
+        AgentMetaInformation metaInformation = AgentMetaInformation.of(headers);
+
+        AgentStatus agentStatus = AgentStatus.builder()
+                .metaInformation(metaInformation)
                 .attributes(agentAttributes)
                 .lastConfigFetch(new Date())
                 .mappingName(resultConfiguration == null ? null : resultConfiguration.getMapping().getName())
                 .build();
-        attributesToAgentStatusCache.put(agentAttributes, newStatus);
+
+        Object statusKey;
+        if (metaInformation != null) {
+            statusKey = metaInformation.getAgentId();
+        } else {
+            statusKey = agentAttributes;
+        }
+
+        attributesToAgentStatusCache.put(statusKey, agentStatus);
     }
 
     /**

@@ -41,7 +41,7 @@ public class AgentControllerTest {
             ResponseEntity<String> result = controller.fetchConfiguration(attributes);
 
             assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-            verify(statusManager).notifyAgentConfigurationFetched(same(attributes), isNull());
+            verify(statusManager).notifyAgentConfigurationFetched(same(attributes), headers, isNull());
         }
 
         @Test
@@ -55,7 +55,7 @@ public class AgentControllerTest {
 
             assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(result.getBody()).isEqualTo("foo : bar");
-            verify(statusManager).notifyAgentConfigurationFetched(same(attributes), same(config));
+            verify(statusManager).notifyAgentConfigurationFetched(same(attributes), headers, same(config));
         }
 
 

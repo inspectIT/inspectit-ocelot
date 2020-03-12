@@ -38,7 +38,7 @@ public class AgentStatusManagerTest {
         @Test
         void testNoMappingFound() {
             Map<String, String> attributes = ImmutableMap.of("service", "test");
-            manager.notifyAgentConfigurationFetched(attributes, null);
+            manager.notifyAgentConfigurationFetched(attributes, headers, null);
 
             assertThat(manager.getAgentStatuses())
                     .hasSize(1)
@@ -58,7 +58,7 @@ public class AgentStatusManagerTest {
                             .name("test-conf")
                             .build(), "");
 
-            manager.notifyAgentConfigurationFetched(attributes, conf);
+            manager.notifyAgentConfigurationFetched(attributes, headers, conf);
 
             assertThat(manager.getAgentStatuses())
                     .hasSize(1)
@@ -77,7 +77,7 @@ public class AgentStatusManagerTest {
                             .name("test-conf")
                             .build(), "");
 
-            manager.notifyAgentConfigurationFetched(attributes, null);
+            manager.notifyAgentConfigurationFetched(attributes, headers, null);
 
             assertThat(manager.getAgentStatuses())
                     .hasSize(1)
@@ -91,7 +91,7 @@ public class AgentStatusManagerTest {
 
             Thread.sleep(1);
 
-            manager.notifyAgentConfigurationFetched(attributes, conf);
+            manager.notifyAgentConfigurationFetched(attributes, headers, conf);
 
             assertThat(manager.getAgentStatuses())
                     .hasSize(1)
