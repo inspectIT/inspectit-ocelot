@@ -6,7 +6,7 @@ import { TreeTable } from 'primereact/treetable';
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import {Menubar} from 'primereact/menubar';
+import { Menubar } from 'primereact/menubar';
 
 /**
  * Editor for showing the config file as the table tree.
@@ -18,8 +18,8 @@ class TreeTableEditor extends React.Component {
             <Row>
                 <Column header="Property name" />
                 <Column header="Value" />
-                <Column header="Nullable" />
-                <Column header="Type" />
+                <Column header="Nullable" style={{ width: '200px' }} />
+                <Column header="Type" style={{ width: '200px' }} />
             </Row>
         </ColumnGroup>
     );
@@ -49,14 +49,14 @@ class TreeTableEditor extends React.Component {
             const config = yaml.safeLoad(this.props.value);
             const allKeys = {};
             const data = this.processKey(config, [this.props.schema], allKeys);
-            console.log(allKeys);
-            this.setState({ 
+
+            this.setState({
                 isError: false,
                 data,
                 expandedKeys: allKeys
             })
         } catch (error) {
-            this.setState({ 
+            this.setState({
                 isError: true,
                 data: undefined
             })
@@ -81,7 +81,7 @@ class TreeTableEditor extends React.Component {
             Object.keys(config).forEach(congfigKey => {
                 // resolve value and the matching schema properties
                 const configValue = config[congfigKey];
-                const schemaProperty =  schemaObjects.find(s => s.propertyName === congfigKey);
+                const schemaProperty = schemaObjects.find(s => s.propertyName === congfigKey);
 
                 // if we found schema properties create data and push to resulting array
                 if (schemaProperty) {
@@ -128,7 +128,7 @@ class TreeTableEditor extends React.Component {
     getDataType = (type) => type !== "COMPOSITE" ? this.capitalize(type) : "";
 
     getDataValue = (value, type) => {
-        switch(type){
+        switch (type) {
             case "BOOLEAN": return this.getBoolanRepresentation(value);
             case "COMPOSITE": return ""
             default: return value ? value : 'null'
@@ -154,16 +154,16 @@ class TreeTableEditor extends React.Component {
 
     menuItems = () => [
         {
-            label:'Expand All',
-            icon:'pi pi-chevron-down',
+            label: 'Expand All',
+            icon: 'pi pi-chevron-down',
             disabled: this.state.isError,
             command: this.expandAll
         },
         {
-            label:'Collapse All',
-            icon:'pi pi-chevron-up',
+            label: 'Collapse All',
+            icon: 'pi pi-chevron-up',
             disabled: this.state.isError,
-            command: () => this.setState({ expandedKeys: {}})
+            command: () => this.setState({ expandedKeys: {} })
         }
     ]
 
@@ -171,7 +171,7 @@ class TreeTableEditor extends React.Component {
         return {
             'composite-row': !data.selectable
         }
-    } 
+    }
 
     render() {
         const { loading } = this.props;
@@ -200,29 +200,38 @@ class TreeTableEditor extends React.Component {
                     flex: 1;
                     display: flex;
                     flex-direction: column;
+                    color: #bbb;
                 }
-                .this :global(.composite-row) {
+                .this :global(.composite-row), .this :global(.composite-row) :global(.key-column) {
                     color: grey;
+                    font-weight: normal;
+                }
+                .this :global(.key-column) {
+                    color: black;
+                    font-weight: bold;
+                }
+                .this :global(.value-column) {
+                    font-family: monospace;
                 }
                 `}</style>
                 {
                     !this.state.isError &&
                     <>
-                        <TreeTable 
-                            value={this.state.data} 
-                            headerColumnGroup={this.headerGroup} 
+                        <TreeTable
+                            value={this.state.data}
+                            headerColumnGroup={this.headerGroup}
                             autoLayout
                             scrollable
-                            scrollHeight="75vh"
+                            scrollHeight="calc(100vh - 13rem)"
                             loading={loading}
                             expandedKeys={this.state.expandedKeys}
                             onToggle={e => this.setState({ expandedKeys: e.value })}
                             rowClassName={this.rowClassName}
                         >
-                            <Column field="name" expander />
-                            <Column field="value" />
-                            <Column field="nullable" />
-                            <Column field="type" />
+                            <Column field="name" className="key-column" expander />
+                            <Column field="value" className="value-column" />
+                            <Column field="nullable" style={{ width: '200px' }} />
+                            <Column field="type" style={{ width: '200px' }} />
                         </TreeTable>
                         <Menubar model={this.menuItems()} />
                     </>
