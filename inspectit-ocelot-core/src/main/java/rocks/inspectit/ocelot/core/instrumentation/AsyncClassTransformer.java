@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.core.instrumentation;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import lombok.Getter;
@@ -25,6 +26,7 @@ import rocks.inspectit.ocelot.core.instrumentation.event.ClassInstrumentedEvent;
 import rocks.inspectit.ocelot.core.instrumentation.event.IClassDefinitionListener;
 import rocks.inspectit.ocelot.core.instrumentation.event.TransformerShutdownEvent;
 import rocks.inspectit.ocelot.core.instrumentation.hook.DispatchHookAdvices;
+import rocks.inspectit.ocelot.core.instrumentation.injection.JigsawModuleInstrumenter;
 import rocks.inspectit.ocelot.core.instrumentation.special.ClassLoaderDelegation;
 import rocks.inspectit.ocelot.core.instrumentation.special.SpecialSensor;
 import rocks.inspectit.ocelot.core.selfmonitoring.SelfMonitoringService;
@@ -62,10 +64,14 @@ public class AsyncClassTransformer implements ClassFileTransformer {
     private SelfMonitoringService selfMonitoring;
 
     @Autowired
+    @VisibleForTesting
     List<IClassDefinitionListener> classDefinitionListeners;
 
     @Autowired
-    ClassLoaderDelegation classLoaderDelegation;
+    private JigsawModuleInstrumenter moduleManager;
+
+    @Autowired
+    private ClassLoaderDelegation classLoaderDelegation;
 
     /**
      * Detects if the instrumenter is in the process of shutting down.
@@ -194,6 +200,8 @@ public class AsyncClassTransformer implements ClassFileTransformer {
                 if (log.isDebugEnabled()) {
                     log.debug("Redefining class: {}", type.getName());
                 }
+                moduleManager.openModule(classBeingRedefined);
+
                 //Make a ByteBuddy builder based on the input bytecode
                 ClassFileLocator byteCodeClassFileLocator = ClassFileLocator.Simple.of(type.getName(), originalByteCode);
                 DynamicType.Builder<?> builder = new ByteBuddy().redefine(classBeingRedefined, byteCodeClassFileLocator);
