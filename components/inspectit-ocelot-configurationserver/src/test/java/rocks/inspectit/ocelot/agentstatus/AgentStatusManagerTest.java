@@ -12,6 +12,7 @@ import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 
 import java.time.Duration;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 
@@ -38,7 +39,7 @@ public class AgentStatusManagerTest {
         @Test
         void testNoMappingFound() {
             Map<String, String> attributes = ImmutableMap.of("service", "test");
-            manager.notifyAgentConfigurationFetched(attributes, headers, null);
+            manager.notifyAgentConfigurationFetched(attributes, Collections.emptyMap(), null);
 
             assertThat(manager.getAgentStatuses())
                     .hasSize(1)
@@ -58,7 +59,7 @@ public class AgentStatusManagerTest {
                             .name("test-conf")
                             .build(), "");
 
-            manager.notifyAgentConfigurationFetched(attributes, headers, conf);
+            manager.notifyAgentConfigurationFetched(attributes, Collections.emptyMap(), conf);
 
             assertThat(manager.getAgentStatuses())
                     .hasSize(1)
@@ -77,7 +78,7 @@ public class AgentStatusManagerTest {
                             .name("test-conf")
                             .build(), "");
 
-            manager.notifyAgentConfigurationFetched(attributes, headers, null);
+            manager.notifyAgentConfigurationFetched(attributes, Collections.emptyMap(), null);
 
             assertThat(manager.getAgentStatuses())
                     .hasSize(1)
@@ -91,7 +92,7 @@ public class AgentStatusManagerTest {
 
             Thread.sleep(1);
 
-            manager.notifyAgentConfigurationFetched(attributes, headers, conf);
+            manager.notifyAgentConfigurationFetched(attributes, Collections.emptyMap(), conf);
 
             assertThat(manager.getAgentStatuses())
                     .hasSize(1)
