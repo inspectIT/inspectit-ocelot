@@ -10,6 +10,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
+import rocks.inspectit.ocelot.bootstrap.instrumentation.DoNotInstrumentMarker;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.plugins.PluginSettings;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
@@ -23,6 +24,8 @@ import javax.annotation.PreDestroy;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -121,9 +124,10 @@ public class PluginLoader {
     private void loadPluginJar(File pluginFile, Properties defaultConfigurations) throws Exception {
         List<String> list = getAnnotatedClasses(new JarFile(pluginFile));
         if (!list.isEmpty()) {
+            PluginClassLoader pluginLoader = new PluginClassLoader(pluginFile.toURI().toURL());
             list.forEach(cl -> {
                 try {
-                    initializePlugin(Class.forName(cl), defaultConfigurations);
+                    initializePlugin(Class.forName(cl, true, pluginLoader), defaultConfigurations);
                 } catch (ClassNotFoundException e) {
                     log.error("Unable to load class: {}!", cl);
                 }
@@ -229,4 +233,15 @@ public class PluginLoader {
             log.error("Error initializing plugin {}", pluginClass.getName());
         }
     }
+
+    /**
+     * Simple classloader which just is marked with the {@link DoNotInstrumentMarker}.
+     */
+    private static class PluginClassLoader extends URLClassLoader implements DoNotInstrumentMarker {
+
+        public PluginClassLoader(URL jarFile) {
+            super(new URL[]{jarFile}, PluginLoader.class.getClassLoader());
+        }
+    }
+
 }

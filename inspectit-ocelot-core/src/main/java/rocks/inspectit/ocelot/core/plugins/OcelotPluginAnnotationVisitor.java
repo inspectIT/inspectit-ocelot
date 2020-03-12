@@ -3,9 +3,11 @@ package rocks.inspectit.ocelot.core.plugins;
 import org.springframework.asm.AnnotationVisitor;
 import org.springframework.asm.ClassVisitor;
 import org.springframework.asm.Opcodes;
+import org.springframework.asm.Type;
 import rocks.inspectit.ocelot.sdk.OcelotPlugin;
 
 class OcelotPluginAnnotationVisitor extends ClassVisitor {
+    public static final String OCELOT_PLUGIN_DESCRIPTOR = "L" + Type.getInternalName(OcelotPlugin.class) + ";";
     private boolean hasOcelotPluginAnnotation;
 
     /**
@@ -23,7 +25,7 @@ class OcelotPluginAnnotationVisitor extends ClassVisitor {
 
     @Override
     public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-        if (desc.endsWith("OcelotPlugin;")) {
+        if (desc.equals(OCELOT_PLUGIN_DESCRIPTOR)) {
             hasOcelotPluginAnnotation = true;
         }
         return null;
