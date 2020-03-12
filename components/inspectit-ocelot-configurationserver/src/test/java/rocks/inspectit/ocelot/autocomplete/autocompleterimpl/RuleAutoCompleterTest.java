@@ -12,7 +12,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -30,27 +31,33 @@ public class RuleAutoCompleterTest {
         @Test
         public void wrongPath() {
             List<String> path = Arrays.asList("inspectit", "metrics", "processor");
-            List<String> output = Arrays.asList();
 
-            assertThat(ruleAutoCompleter.getSuggestions(path)).isEqualTo(output);
+            List<String> output = ruleAutoCompleter.getSuggestions(path);
+
+            verifyZeroInteractions(configurationQueryHelper);
+            assertThat(output).hasSize(0);
         }
 
         @Test
         public void correctPath() {
             List<String> path = Arrays.asList("inspectit", "instrumentation", "rules");
-            List<String> output = Arrays.asList("my_rule", "another_rule");
             List<String> mockOutput = Arrays.asList("my_rule", "another_rule");
-            when(configurationQueryHelper.extractKeysFromYamlFiles(any())).thenReturn(mockOutput);
+            when(configurationQueryHelper.getKeysForPath(eq(path))).thenReturn(mockOutput);
 
-            assertThat(ruleAutoCompleter.getSuggestions(path)).isEqualTo(output);
+            List<String> output = ruleAutoCompleter.getSuggestions(path);
+
+            assertThat(output).hasSize(2);
+            assertThat(output).contains("my_rule");
+            assertThat(output).contains("another_rule");
         }
 
         @Test
         public void correctPathNothingDefined() {
             List<String> path = Arrays.asList("inspectit", "instrumentation", "rules");
-            List<String> output = Arrays.asList();
 
-            assertThat(ruleAutoCompleter.getSuggestions(path)).isEqualTo(output);
+            List<String> output = ruleAutoCompleter.getSuggestions(path);
+
+            assertThat(output).hasSize(0);
         }
     }
 }

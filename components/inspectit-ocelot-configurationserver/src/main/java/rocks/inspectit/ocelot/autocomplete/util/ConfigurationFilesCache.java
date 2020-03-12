@@ -15,9 +15,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 @Component
@@ -61,12 +62,15 @@ public class ConfigurationFilesCache {
     @PostConstruct
     @EventListener(FileChangedEvent.class)
     public void loadFiles() throws IOException {
-        List<String> a = getAllPaths();
-        yamlContents = a.stream()
-                .map(this::loadYaml)
-                .filter(o -> o instanceof Map || o instanceof List)
-                .collect(Collectors.toList());
-        ConfigFileLoader.getDefaultConfigFiles().values().forEach(value -> yamlContents.add(parseStringToYamlObject(value)));
+        List<String> filePaths = getAllPaths();
+        yamlContents = Stream.concat(
+                filePaths.stream()
+                        .map(this::loadYamlFile)
+                        .filter(Objects::nonNull),
+                ConfigFileLoader.getDefaultConfigFiles().values().stream()
+                        .map(this::parseYaml)
+        ).collect(Collectors.toList());
+        ConfigFileLoader.getDefaultConfigFiles().values().forEach(value -> yamlContents.add(parseYaml(value)));
 
     }
 
@@ -80,7 +84,7 @@ public class ConfigurationFilesCache {
      * @param content The String to be parsed.
      * @return The String parsed into a nested Lists or Map.
      */
-    private Object parseStringToYamlObject(String content) {
+    private Object parseYaml(String content) {
         Yaml yaml = new Yaml();
         return yaml.load(content);
     }
@@ -94,7 +98,7 @@ public class ConfigurationFilesCache {
      * @return the file as an Object parsed as described above.
      */
     @VisibleForTesting
-    Object loadYaml(String path) {
+    Object loadYamlFile(String path) {
         String src;
         try {
             src = fileManager.readFile(path);
@@ -103,7 +107,7 @@ public class ConfigurationFilesCache {
             return null;
         }
         if (src != null) {
-            return parseStringToYamlObject(src);
+            return parseYaml(src);
         }
         return null;
     }

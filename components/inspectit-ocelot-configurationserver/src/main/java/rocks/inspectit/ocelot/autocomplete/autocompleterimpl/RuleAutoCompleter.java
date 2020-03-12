@@ -33,7 +33,7 @@ public class RuleAutoCompleter implements AutoCompleter {
     @Override
     public List<String> getSuggestions(List<String> path) {
         if (PropertyPathHelper.comparePathsIgnoreCamelOrKebabCase(path, RULE_PATH)) {
-            return configurationQueryHelper.extractKeysFromYamlFiles(RULE_PATH);
+            return configurationQueryHelper.getKeysForPath(RULE_PATH);
         }
         return Collections.emptyList();
     }

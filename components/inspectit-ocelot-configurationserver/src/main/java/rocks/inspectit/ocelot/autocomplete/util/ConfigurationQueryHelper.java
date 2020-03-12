@@ -25,14 +25,11 @@ public class ConfigurationQueryHelper {
      * @param path A path parsed to a List.
      * @return The attributes which could be found in the given path.
      */
-    public List<String> extractKeysFromYamlFiles(List<String> path) {
-        ArrayList<String> toReturn = new ArrayList<>();
-        Collection objects = configurationFilesCache.getParsedConfigurationFiles();
-        for (Object root : objects) {
-            List<String> extractedKeys = extractKeys(root, path);
-            toReturn.addAll(extractedKeys);
-        }
-        return toReturn;
+    public List<String> getKeysForPath(List<String> path) {
+        return configurationFilesCache.getParsedConfigurationFiles()
+                .stream()
+                .flatMap(root -> extractKeys(root, path).stream())
+                .collect(Collectors.toList());
     }
 
     /**
@@ -92,11 +89,11 @@ public class ConfigurationQueryHelper {
             return toStringList(list);
         }
         String currentLiteral = mapPath.get(0);
-        List<String> subList = mapPath.subList(1, mapPath.size());
+        List<String> subPath = mapPath.subList(1, mapPath.size());
         if (currentLiteral.equals("*")) {
             ArrayList<String> toReturn = new ArrayList<>();
             for (Object key : list) {
-                toReturn.addAll(extractKeys(key, new ArrayList<>(subList)));
+                toReturn.addAll(extractKeys(key, subPath));
             }
             return toReturn;
         } else {
@@ -108,7 +105,7 @@ public class ConfigurationQueryHelper {
                 return Collections.emptyList();
             }
             if (i >= 0 && i < list.size()) {
-                return extractKeys(list.get(i), subList);
+                return extractKeys(list.get(i), subPath);
             }
             return Collections.emptyList();
         }
@@ -130,15 +127,13 @@ public class ConfigurationQueryHelper {
             return toStringList(((Map) map).keySet());
         }
         String currentLiteral = mapPath.get(0);
-        List<String> subList = mapPath.subList(1, mapPath.size());
+        List<String> subPath = mapPath.subList(1, mapPath.size());
         if (currentLiteral.equals("*")) {
-            ArrayList<String> toReturn = new ArrayList<>();
-            for (Object value : map.values()) {
-                toReturn.addAll(extractKeys(value, new ArrayList<>(subList)));
-            }
-            return toReturn;
+            return map.values().stream()
+                    .flatMap(value -> extractKeys(value, subPath).stream())
+                    .collect(Collectors.toList());
         } else {
-            return extractKeys(map.get(currentLiteral), subList);
+            return extractKeys(map.get(currentLiteral), subPath);
         }
     }
 }
