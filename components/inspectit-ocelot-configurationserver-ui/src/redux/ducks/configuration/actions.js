@@ -15,6 +15,7 @@ export const fetchFiles = () => {
             .get("/directories/")
             .then(res => {
                 const files = res.data;
+                sortFiles(files);
                 dispatch({ type: types.FETCH_FILES_SUCCESS, payload: { files } });
             })
             .catch(() => {
@@ -22,6 +23,35 @@ export const fetchFiles = () => {
             });
     };
 };
+
+/**
+ * Arranges first directories and then files. Within the directories or files it is an alphabetical sorting.
+ */
+const sortFiles = (allFiles) => {
+    allFiles.sort((first, second) => {
+        if (first.type !== second.type) {
+            if (first.type === 'directory') {
+                return -1;
+            } else {
+                return 1;
+            }
+        }
+        const nameFirst = first.name.toUpperCase();
+        const nameSecond = second.name.toUpperCase();
+        if (nameFirst < nameSecond) {
+            return -1;
+        }
+        if (nameFirst > nameSecond) {
+            return 1;
+        }
+        return 0;
+    });
+    allFiles.forEach(element => {
+        if (element.type === 'directory' && element.children.length > 0) {
+            sortFiles(element.children);
+        }
+    });
+}
 
 /**
  * Fetches the content of the selected file.

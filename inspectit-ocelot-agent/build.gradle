@@ -97,7 +97,7 @@ dependencies {
             
             'org.assertj:assertj-core:3.11.1',
             'org.awaitility:awaitility:3.1.5',
-            "com.github.tomakehurst:wiremock-jre8:2.21.0",
+            "com.github.tomakehurst:wiremock:2.25.1",
 
             'org.apache.httpcomponents:httpclient:4.5.6',
             'org.eclipse.jetty:jetty-server:9.4.3.v20170317',
@@ -178,15 +178,30 @@ task systemTest {
                 includes = ["rocks/inspectit/*"]
             }
 
+
             // The JaCoCo agent must be specified first so that it can instrument our agent.
             // This is a work around for the issue that the JaCoCo agent is added last, cf.
             // https://discuss.gradle.org/t/jacoco-gradle-adds-the-agent-last-to-jvm-args/7124.
             doFirst {
+
+                def os = new ByteArrayOutputStream();
+                exec {
+                    executable = javaExecutable
+                    args = ["-version"]
+                    standardOutput = os
+                    errorOutput = os
+                }
+                if(!os.toString().contains("\"1.8.")) {
+                    //Turns the jigsaw warnings into errors, making the system tests fail in case of illegal accesses
+                    jvmArgs "--illegal-access=deny"
+                }
+
                 jvmArgs "-Dinspectit.config.file-based.path=$projectDir/src/system-test/resources/config"  // make inspectIT scan the workdir for configs
                 jvmArgs "-Dinspectit.publishOpenCensusToBootstrap=true"  // make inspectIT push OC to the bootstrap
                 jvmArgs jacoco.asJvmArg + ",inclbootstrapclasses=true"  // JaCoCo agent first + bootstrap instrumentation
                 jvmArgs "-javaagent:${agentJarPath}"  // Our agent second.
                 jacoco.enabled = false  // Don't add the JaCoCo agent again.
+
             }
 
             doFirst { logger.lifecycle("Running system tests using ${javaExecutable}.") }
