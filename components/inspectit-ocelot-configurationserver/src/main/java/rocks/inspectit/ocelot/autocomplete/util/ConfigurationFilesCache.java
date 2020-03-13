@@ -70,8 +70,6 @@ public class ConfigurationFilesCache {
                 ConfigFileLoader.getDefaultConfigFiles().values().stream()
                         .map(this::parseYaml)
         ).collect(Collectors.toList());
-        ConfigFileLoader.getDefaultConfigFiles().values().forEach(value -> yamlContents.add(parseYaml(value)));
-
     }
 
     /**

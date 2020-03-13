@@ -85,7 +85,7 @@ public class ConfigurationQueryHelperTest {
             Collection<Object> mockData = Collections.singletonList(topLevelMap);
             when(configurationFilesCache.getParsedConfigurationFiles()).thenReturn(mockData);
 
-            List output = spyAutoCompleter.getKeysForPath(propertyPath);
+            List<?> output = spyAutoCompleter.getKeysForPath(propertyPath);
 
             assertThat(output).hasSize(0);
         }
@@ -171,7 +171,7 @@ public class ConfigurationQueryHelperTest {
             Collection<Object> mockData = Arrays.asList(topLevelMap);
             when(configurationFilesCache.getParsedConfigurationFiles()).thenReturn(mockData);
 
-            List output = spyAutoCompleter.getKeysForPath(propertyPath);
+            List<?> output = spyAutoCompleter.getKeysForPath(propertyPath);
 
             assertThat(output).hasSize(0);
         }
@@ -188,7 +188,7 @@ public class ConfigurationQueryHelperTest {
             Collection<Object> mockData = Arrays.asList(topLevelMap);
             when(configurationFilesCache.getParsedConfigurationFiles()).thenReturn(mockData);
 
-            List output = spyAutoCompleter.getKeysForPath(propertyPath);
+            List<?> output = spyAutoCompleter.getKeysForPath(propertyPath);
 
             assertThat(output).hasSize(0);
         }
@@ -205,7 +205,7 @@ public class ConfigurationQueryHelperTest {
             Collection<Object> mockData = Arrays.asList(topLevelMap);
             when(configurationFilesCache.getParsedConfigurationFiles()).thenReturn(mockData);
 
-            List output = spyAutoCompleter.getKeysForPath(propertyPath);
+            List<?> output = spyAutoCompleter.getKeysForPath(propertyPath);
 
             assertThat(output).hasSize(0);
         }
