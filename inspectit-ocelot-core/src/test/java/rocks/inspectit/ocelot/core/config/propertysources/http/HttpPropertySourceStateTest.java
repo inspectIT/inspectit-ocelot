@@ -91,7 +91,7 @@ class HttpPropertySourceStateTest {
                     "X-OCELOT-AGENT-VERSION",
                     "X-OCELOT-JAVA-VERSION",
                     "X-OCELOT-VM-NAME",
-                    "X-OCELOT-VM-VERSION",
+                    "X-OCELOT-VM-VENDOR",
                     "X-OCELOT-START-TIME"
             );
         }
