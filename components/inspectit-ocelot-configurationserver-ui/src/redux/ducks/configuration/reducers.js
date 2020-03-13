@@ -1,8 +1,8 @@
-import * as types from "./types";
-import * as utils from "./utils";
-import { mapKeys, omitBy } from "lodash"
+import { omitBy } from "lodash";
 import { createReducer } from "../../utils";
 import { configuration as initialState } from '../initial-states';
+import * as types from "./types";
+import * as utils from "./utils";
 
 
 const incrementPendingRequests = (state) => {
@@ -35,14 +35,12 @@ const movePathIfRequired = (path, moveHistory) => {
 const configurationReducer = createReducer(initialState)({
     [types.FETCH_FILES_STARTED]: (state, action) => {
         return {
-            ...state,
-            pendingRequests: state.pendingRequests + 1
+            ...incrementPendingRequests(state)
         };
     },
     [types.FETCH_FILES_FAILURE]: (state, action) => {
         return {
-            ...state,
-            pendingRequests: state.pendingRequests - 1,
+            ...decrementPendingRequests(state),
             files: []
         };
     },
@@ -61,8 +59,7 @@ const configurationReducer = createReducer(initialState)({
             }
         }
         return {
-            ...state,
-            pendingRequests: state.pendingRequests - 1,
+            ...decrementPendingRequests(state),
             files,
             moveHistory: [],
             selection,
@@ -84,23 +81,12 @@ const configurationReducer = createReducer(initialState)({
             ...initialState
         };
     },
-    [types.FETCH_FILE_STARTED]: (state, action) => {
-        return {
-            ...state,
-            pendingRequests: state.pendingRequests + 1
-        };
-    },
-    [types.FETCH_FILE_FAILURE]: (state, action) => {
-        return {
-            ...state,
-            pendingRequests: state.pendingRequests - 1
-        };
-    },
+    [types.FETCH_FILE_STARTED]: incrementPendingRequests,
+    [types.FETCH_FILE_FAILURE]: decrementPendingRequests,
     [types.FETCH_FILE_SUCCESS]: (state, action) => {
         const { fileContent } = action.payload;
         return {
-            ...state,
-            pendingRequests: state.pendingRequests - 1,
+            ...decrementPendingRequests(state),
             selectedFileContent: fileContent
         };
     },
@@ -111,8 +97,7 @@ const configurationReducer = createReducer(initialState)({
     [types.WRITE_FILE_SUCCESS]: (state, action) => {
         const { file, content } = action.payload;
         return {
-            ...state,
-            pendingRequests: state.pendingRequests - 1,
+            ...decrementPendingRequests(state),
             selectedFileContent: state.selection == file ? content : state.selectedFileContent,
             unsavedFileContents: omitBy(state.unsavedFileContents, (unsavedContent, path) => path == file && unsavedContent == content)
         };
@@ -124,8 +109,7 @@ const configurationReducer = createReducer(initialState)({
     [types.MOVE_STARTED]: incrementPendingRequests,
     [types.MOVE_SUCCESS]: (state, action) => {
         return {
-            ...state,
-            pendingRequests: state.pendingRequests - 1,
+            ...decrementPendingRequests(state),
             moveHistory: state.moveHistory.concat([action.payload])
         };
     },
@@ -155,8 +139,7 @@ const configurationReducer = createReducer(initialState)({
     [types.FETCH_DEFAULT_CONFIG_SUCCESS]: (state, action) => {
         const { defaultConfig } = action.payload;
         return {
-            ...state,
-            pendingRequests: state.pendingRequests - 1,
+            ...decrementPendingRequests(state),
             defaultConfig
         }
     },
@@ -169,6 +152,21 @@ const configurationReducer = createReducer(initialState)({
             selectedDefaultConfigFile: selection,
             selectedFileContent: content
         };
+    },
+    [types.FETCH_SCHEMA_STARTED]: incrementPendingRequests,
+    [types.FETCH_SCHEMA_SUCCESS]: (state, action) => {
+        const { schema } = action.payload;
+        return {
+            ...decrementPendingRequests(state),
+            schema
+        }
+    },
+    [types.FETCH_SCHEMA_FAILURE]: decrementPendingRequests,
+    [types.TOGGLE_VISUAL_CONFIGURATION_VIEW]: (state) => {
+        return {
+            ...state,
+            showVisualConfigurationView: !state.showVisualConfigurationView
+        }
     },
 });
 
