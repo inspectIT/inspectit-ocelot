@@ -59,8 +59,8 @@ public class InstrumentationRuleSettingsTest {
 
         @Test
         void testNonExistingMetric() {
-            Map<String, String> metricUsages = new HashMap<>();
-            metricUsages.put("m123456", "42");
+            Map<String, MetricRecordingSettings> metricUsages = new HashMap<>();
+            metricUsages.put("m123456", MetricRecordingSettings.builder().value("42").build());
 
             rule.setMetrics(metricUsages);
 

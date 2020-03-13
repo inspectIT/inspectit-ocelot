@@ -14,6 +14,7 @@ import rocks.inspectit.ocelot.config.model.instrumentation.data.PropagationMode;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -341,19 +342,27 @@ public class InspectitContextImpl implements InternalInspectitContext {
      * In addition, this tag scopes contains all tags for which down-propagation is set to false.
      *
      * @return the newly opened tag scope.
+     * // TODO Remove? This becomes obsolete now
      */
     public Scope enterFullTagScope() {
         TagContextBuilder builder = Tags.getTagger().emptyBuilder();
-        getDataAsStream()
-                .filter(e -> propagation.isTag(e.getKey()))
-                .filter(e -> ALLOWED_TAG_TYPES.contains(e.getValue().getClass()))
-                .forEach(e -> builder.put(TagKey.create(e.getKey()), TagValue.create(e.getValue().toString())));
+        dataTagsStream()
+                .forEach(e -> builder.putLocal(TagKey.create(e.getKey()), TagValue.create(e.getValue().toString())));
         return builder.buildScoped();
     }
 
+    private Stream<Map.Entry<String, Object>> dataTagsStream() {
+        return getDataAsStream()
+                .filter(e -> propagation.isTag(e.getKey()))
+                .filter(e -> ALLOWED_TAG_TYPES.contains(e.getValue().getClass()));
+    }
+
     /**
+     * Returns the most recent value for data, which either was inherited form the parent context,
+     * set via {@link #setData(String, Object)} or changed due to an up-propagation.
+     *
      * @param key the name of the data to query
-     * @return the most recent value for data, which either was inherited form the parent context, set via {@link #setData(String, Object)} or changed due to an up-propagation.
+     * @return the data element which is related to the given key or `null` if it doesn't exist
      */
     @Override
     public Object getData(String key) {

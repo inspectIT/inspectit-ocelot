@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
@@ -22,7 +23,7 @@ public class GeolocationResolver {
     /**
      * Location of the geoip database.
      */
-    private static final InputStream databaseStream = GeolocationResolver.class.getClassLoader().getResourceAsStream("geoip-db/GeoLite2-Country.mmdb");
+    private final InputStream databaseStream = getClass().getResourceAsStream("/geoip-db/GeoLite2-Country.mmdb");
 
     private DatabaseReader databaseReader;
 
@@ -48,7 +49,17 @@ public class GeolocationResolver {
         try {
             databaseReader = new DatabaseReader.Builder(databaseStream).build();
         } catch (IOException e) {
-            log.warn("The geoip database could not be found!");
+            log.warn("The geoip database could not be found!", e);
+        }
+    }
+
+    @PreDestroy
+    private void shutdown() {
+        try {
+            databaseReader.close();
+            databaseStream.close();
+        } catch (Exception e) {
+            log.warn("Error shutting down GEO-IP db", e);
         }
     }
 }

@@ -31,4 +31,6 @@ inspectit:
             only-if-true: http_is_entry
           
         metrics:
-          '[http/in/responsetime]': http_duration
+          '[http/in/responsetime]':
+            value: http_duration
+            data-tags: {http_path: http_path, http_status: http_status, http_method: http_method, origin_service: origin_service, application: application}

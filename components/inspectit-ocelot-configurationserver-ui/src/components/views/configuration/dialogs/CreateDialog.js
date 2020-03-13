@@ -1,5 +1,5 @@
-import React from 'react'
-import { connect } from 'react-redux'
+import React from 'react';
+import { connect } from 'react-redux';
 
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
@@ -18,7 +18,7 @@ import { configurationUtils, configurationActions, configurationSelectors } from
 class CreateDialog extends React.Component {
 
     constructor(props) {
-        super(props)
+        super(props);
         this.state = {
             /** In case the input name is invalid, a meaningful error message is placed here */
             error: null,
@@ -46,7 +46,7 @@ class CreateDialog extends React.Component {
                 )}
             >
                 <div style={{ width: '100%', paddingBottom: "0.5em" }}>
-                    Create a {type.toLowerCase()} in <b>{this.props.parentDirName}</b>:
+                    Create a {type.toLowerCase()} in <b>{this.state.parentDirectoryName}</b>:
                 </div>
                 <div className="p-inputgroup" style={{ width: '100%' }}>
                     <InputText
@@ -73,12 +73,30 @@ class CreateDialog extends React.Component {
     componentDidUpdate(prevProps) {
         if (!prevProps.visible && this.props.visible) {
             this.input.current.element.focus();
+
+            const { filePath } = this.props;
+
+            const fileObj = configurationUtils.getFile(this.props.files, filePath);
+            const isDirectory = configurationUtils.isDirectory(fileObj);
+
+            let parentDirectoryName = "root";
+            if (filePath && isDirectory) {
+                parentDirectoryName = '"' + filePath.split("/").slice(-1)[0] + '"';
+            } else if (filePath) {
+                let parent = filePath.split("/").slice(-2)[0];
+                parentDirectoryName = parent ? '"' + parent + '"' : "root";
+            }
+
+            this.setState({
+                isDirectory,
+                parentDirectoryName
+            });
         }
     }
 
     onKeyPress = (e) => {
         if (e.key === 'Enter' && this.canCreateFileOrFolder()) {
-            this.createFileOrFolder()
+            this.createFileOrFolder();
         }
     }
 
@@ -99,15 +117,15 @@ class CreateDialog extends React.Component {
     }
 
     canCreateFileOrFolder = () => {
-        return !this.state.error && !!this.state.filename
+        return !this.state.error && !!this.state.filename;
     }
 
     createFileOrFolder = () => {
         const fullPath = this.getAbsolutePath(this.state.filename);
         if (this.props.directoryMode) {
-            this.props.createDirectory(fullPath, true)
+            this.props.createDirectory(fullPath, true);
         } else {
-            this.props.writeFile(fullPath, "", true)
+            this.props.writeFile(fullPath, "", true);
         }
         this.props.onHide();
     }
@@ -116,15 +134,17 @@ class CreateDialog extends React.Component {
      * Returns the absolute path of the current filename relative to the selection
      */
     getAbsolutePath = (filename) => {
-        const { selection, isDirectorySelected, directoryMode } = this.props;
-        const suffix = directoryMode ? "" : ".yml"
-        if (!selection) {
+        const { directoryMode, filePath } = this.props;
+        const { isDirectory } = this.state;
+
+        const suffix = directoryMode ? "" : ".yml";
+        if (!filePath) {
             return "/" + filename + suffix;
-        } else if (isDirectorySelected) {
-            return selection + "/" + filename + suffix;
+        } else if (isDirectory) {
+            return filePath + "/" + filename + suffix;
         } else {
-            const lastSlash = selection.lastIndexOf("/");
-            return selection.substring(0, lastSlash + 1) + filename + suffix;
+            const lastSlash = filePath.lastIndexOf("/");
+            return filePath.substring(0, lastSlash + 1) + filename + suffix;
         }
     }
 
@@ -132,19 +152,9 @@ class CreateDialog extends React.Component {
 
 function mapStateToProps(state) {
     const { selection, files } = state.configuration;
-    const isDirectorySelected = configurationSelectors.isSelectionDirectory(state);
-    let parentDirName = "root";
-    if (selection && isDirectorySelected) {
-        parentDirName = '"' + selection.split("/").slice(-1)[0] + '"'
-    } else if(selection){
-        let parent = selection.split("/").slice(-2)[0];
-        parentDirName = parent ? '"' + parent + '"' : "root";
-    }
     return {
-        isDirectorySelected,
         files,
-        selection,
-        parentDirName
+        selection
     }
 }
 

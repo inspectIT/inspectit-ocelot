@@ -46,6 +46,16 @@ public class VariableAccessorFactory {
     }
 
     /**
+     * Creates a {@link VariableAccessor} which always returns the given value.
+     *
+     * @param value the value to return
+     * @return an accessor returning the given value.
+     */
+    public VariableAccessor getConstantAccessor(Object value) {
+        return (ctx) -> value;
+    }
+
+    /**
      * Creates a {@link VariableAccessor} for the given special variable.
      *
      * @param variable the name of the special variable

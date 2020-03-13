@@ -37,6 +37,10 @@ const configuration = {
     defaultConfig: {},
     /** The path of the currently selected default configuration file in the file tree. */
     selectedDefaultConfigFile: null,
+    /** The configuration schema */
+    schema: null,
+    /** If the config view should be in the visual mode */
+    showVisualConfigurationView: false,
 };
 
 const notification = {

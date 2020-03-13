@@ -62,6 +62,8 @@ public class InstrumentationTriggererTest {
             TESTING_CLASSES.stream().forEach(cl -> triggerer.pendingClasses.put(cl, true));
             List<Class<?>> classesToInstrument = Arrays.asList(String.class, Character.class);
             when(classLoaderDelegation.getClassLoaderClassesRequiringRetransformation(any(), any())).thenReturn(new LinkedHashSet<>());
+            HookManager.HookUpdate update = mock(HookManager.HookUpdate.class);
+            when(hookManager.startUpdate()).thenReturn(update);
 
             doAnswer((invoc) ->
                     classesToInstrument.contains(invoc.getArgument(0))
@@ -74,13 +76,17 @@ public class InstrumentationTriggererTest {
             ArgumentCaptor<Class> classes = ArgumentCaptor.forClass(Class.class);
             verify(instrumentation, times(1)).retransformClasses(classes.capture());
             assertThat(classesToInstrument).containsExactlyInAnyOrder(classes.getAllValues().toArray(new Class[]{}));
-            verify(hookManager, times(TESTING_CLASSES.size())).updateHooksForClass(any());
+            verify(hookManager).startUpdate();
+            verify(update, times(TESTING_CLASSES.size())).updateHooksForClass(any());
+            verify(update).commitUpdate();
         }
 
         @Test
         void ensureTransformationExceptionsHandled() throws Exception {
             TESTING_CLASSES.stream().forEach(cl -> triggerer.pendingClasses.put(cl, true));
             when(classLoaderDelegation.getClassLoaderClassesRequiringRetransformation(any(), any())).thenReturn(new LinkedHashSet<>());
+            HookManager.HookUpdate hookUpdate = mock(HookManager.HookUpdate.class);
+            when(hookManager.startUpdate()).thenReturn(hookUpdate);
 
             doReturn(true).when(instrumentationManager).doesClassRequireRetransformation(any());
 
@@ -95,11 +101,13 @@ public class InstrumentationTriggererTest {
             for (Class<?> clazz : TESTING_CLASSES) {
                 verify(instrumentation, times(1)).retransformClasses(same(clazz));
             }
-            verify(hookManager, times(TESTING_CLASSES.size())).updateHooksForClass(any());
+            verify(hookUpdate, times(TESTING_CLASSES.size())).updateHooksForClass(any());
         }
 
         @Test
         void ensureNoRetransformCallIfNotRequired() throws Exception {
+            HookManager.HookUpdate hookUpdate = mock(HookManager.HookUpdate.class);
+            when(hookManager.startUpdate()).thenReturn(hookUpdate);
             TESTING_CLASSES.stream().forEach(cl -> triggerer.pendingClasses.put(cl, true));
 
             doReturn(false).when(instrumentationManager).doesClassRequireRetransformation(any());
@@ -109,7 +117,7 @@ public class InstrumentationTriggererTest {
 
             assertThat(triggerer.pendingClasses.size()).isEqualTo(0);
             verify(instrumentation, never()).retransformClasses(any());
-            verify(hookManager, times(TESTING_CLASSES.size())).updateHooksForClass(any());
+            verify(hookUpdate, times(TESTING_CLASSES.size())).updateHooksForClass(any());
         }
 
         @Test
