@@ -1,9 +1,8 @@
-import * as types from "./types";
-import * as selectors from "./selectors";
+import { DEFAULT_CONFIG_TREE_KEY } from '../../../data/constants';
 import axios from '../../../lib/axios-api';
 import { configurationUtils } from '../configuration';
 import { notificationActions } from '../notification';
-import { DEFAULT_CONFIG_TREE_KEY } from '../../../data/constants';
+import * as types from "./types";
 
 /**
  * Fetches all existing configuration files and directories.
@@ -269,3 +268,29 @@ export const fetchDefaultConfig = () => {
             })
     }
 }
+
+/**
+ * Fetches the configuration schema.
+ */
+export const fetchConfigurationSchema= () => {
+    return dispatch => {
+        dispatch({ type: types.FETCH_SCHEMA_STARTED });
+
+        axios
+            .get("/schema/plain")
+            .then(res => {
+                const schema = res.data;
+                dispatch({ type: types.FETCH_SCHEMA_SUCCESS, payload: { schema } });
+            })
+            .catch(() => {
+                dispatch({ type: types.FETCH_SCHEMA_FAILURE });
+            });
+    };
+};
+
+/**
+ * Shows or hides the split view for the configuration properties.
+ */
+export const toggleVisualConfigurationView = () => ({
+    type: types.TOGGLE_VISUAL_CONFIGURATION_VIEW
+});

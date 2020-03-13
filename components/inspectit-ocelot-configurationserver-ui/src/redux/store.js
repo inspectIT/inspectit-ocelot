@@ -1,7 +1,7 @@
 import { createStore, applyMiddleware, combineReducers } from "redux";
 import { composeWithDevTools } from 'redux-devtools-extension'
 import * as reducers from "./ducks";
-import { createLogger } from "./middlewares";
+import { createLogger, schemaFetcher } from "./middlewares";
 import thunk from 'redux-thunk';
 import { persistReducer } from 'redux-persist'
 import storage from 'redux-persist/lib/storage'
@@ -24,6 +24,7 @@ export default function configureStore(initialState, isServer) {
         initialState,
         composeWithDevTools(applyMiddleware(
             createLogger(true),
+            schemaFetcher,
             thunk
         ))
     );
