@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
 @AllArgsConstructor
 public class PatternObfuscatory implements IObfuscatory {
 
-    private static final Function<String, String> DEFAULT_OBFUSCATION_FUNCTION = (v) -> "***";
+    private static final Function<String, Object> DEFAULT_OBFUSCATION_FUNCTION = (v) -> "***";
 
     /**
      * Patterns that need to be checked.
@@ -32,15 +32,16 @@ public class PatternObfuscatory implements IObfuscatory {
      * {@inheritDoc}
      */
     @Override
-    public void putSpanAttribute(Span span, String key, String value) {
-        String obfuscatedValue = shouldObfuscate(key, value)
-                .map(function -> function.apply(value))
+    public void putSpanAttribute(Span span, String key, Object value) {
+        final String strValue = value.toString();
+        Object obfuscatedValue = shouldObfuscate(key, strValue)
+                .map(function -> function.apply(strValue))
                 .orElse(value);
 
         IObfuscatory.super.putSpanAttribute(span, key, obfuscatedValue);
     }
 
-    private Optional<Function<String, String>> shouldObfuscate(String key, String value) {
+    private Optional<Function<String, Object>> shouldObfuscate(String key, String value) {
         // get info from the map
         CheckedKeyObfuscationValue keyObfuscationValue = checkedKeysMap.getIfPresent(key);
 
@@ -52,7 +53,7 @@ public class PatternObfuscatory implements IObfuscatory {
         // if we have no information about this key before
         if (null == keyObfuscationValue) {
             // first run the check of the key and store to map result
-            Optional<Function<String, String>> keyBasedObfuscation = shouldObfuscateKey(key);
+            Optional<Function<String, Object>> keyBasedObfuscation = shouldObfuscateKey(key);
             CheckedKeyObfuscationValue.CheckedKeyObfuscationValueBuilder checkedKeyObfuscationValueBuilder = CheckedKeyObfuscationValue.builder();
 
             // if function is present, then we know obfuscation is needed and we save both boolean and function to the map
@@ -70,14 +71,14 @@ public class PatternObfuscatory implements IObfuscatory {
         return shouldObfuscateData(value);
     }
 
-    private Optional<Function<String, String>> shouldObfuscateKey(String key) {
+    private Optional<Function<String, Object>> shouldObfuscateKey(String key) {
         return patternEntries.stream()
                 .filter(p -> p.matchesKey(key))
                 .findFirst()
                 .map(PatternEntry::getObfuscationFunction);
     }
 
-    private Optional<Function<String, String>> shouldObfuscateData(String data) {
+    private Optional<Function<String, Object>> shouldObfuscateData(String data) {
         return patternEntries.stream()
                 .filter(p -> p.matchesData(data))
                 .findFirst()
@@ -99,7 +100,7 @@ public class PatternObfuscatory implements IObfuscatory {
         /**
          * What's the obfuscation function.
          */
-        private final Function<String, String> obfuscationFunction;
+        private final Function<String, Object> obfuscationFunction;
 
     }
 
@@ -141,7 +142,7 @@ public class PatternObfuscatory implements IObfuscatory {
             return checkData && pattern.matcher(data).matches();
         }
 
-        Function<String, String> getObfuscationFunction() {
+        Function<String, Object> getObfuscationFunction() {
             return DEFAULT_OBFUSCATION_FUNCTION;
         }
 
