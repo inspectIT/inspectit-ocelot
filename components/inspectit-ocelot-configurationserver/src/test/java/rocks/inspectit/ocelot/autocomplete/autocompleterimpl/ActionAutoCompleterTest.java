@@ -6,13 +6,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import rocks.inspectit.ocelot.autocomplete.util.YamlFileHelper;
+import rocks.inspectit.ocelot.autocomplete.util.ConfigurationQueryHelper;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -22,37 +24,51 @@ public class ActionAutoCompleterTest {
     ActionAutoCompleter actionAutoCompleter;
 
     @Mock
-    YamlFileHelper yamlFileHelper;
-
-    @Nested
-    public class GetActions {
-        @Test
-        public void getActionsTest() {
-            List<String> output = Arrays.asList("Hello", "Hello", "Hello", "Hello", "Hello", "Hello");
-            when(yamlFileHelper.extractKeysFromYamlFiles(any())).thenReturn(Arrays.asList("Hello"));
-
-            assertThat(actionAutoCompleter.getActions()).isEqualTo(output);
-        }
-    }
+    ConfigurationQueryHelper configurationQueryHelper;
 
     @Nested
     public class GetSuggestions {
         @Test
-        public void getSuggestionsTest() {
-            List<String> output = Arrays.asList("test", "test", "test", "test", "test", "test");
+        public void hasActions() {
             List<String> path = Arrays.asList("inspectit", "instrumentation", "actions");
-            when(yamlFileHelper.extractKeysFromYamlFiles(any())).thenReturn(Arrays.asList("test"));
+            doReturn(Collections.singletonList("test"), Collections.singletonList("test2"), Collections.emptyList())
+                    .when(configurationQueryHelper).getKeysForPath(any());
 
-            assertThat(actionAutoCompleter.getSuggestions(path)).isEqualTo(output);
+            List<String> output = actionAutoCompleter.getSuggestions(path);
+
+            assertThat(output).hasSize(2);
+            assertThat(output).contains("test");
+            assertThat(output).contains("test2");
+        }
+
+        @Test
+        public void noPaths() {
+            List<String> path = Arrays.asList("inspectit", "instrumentation", "actions");
+            when(configurationQueryHelper.getKeysForPath(any())).thenReturn(Collections.emptyList());
+
+            List<String> output = actionAutoCompleter.getSuggestions(path);
+
+            assertThat(output).isEmpty();
         }
 
         @Test
         public void wrongPath() {
-            List<String> output = Arrays.asList();
             List<String> path = Arrays.asList("inspectit", "instrumentation", "rules");
 
-            assertThat(actionAutoCompleter.getSuggestions(path)).isEqualTo(output);
+            List<String> output = actionAutoCompleter.getSuggestions(path);
+
+            assertThat(output).isEmpty();
         }
 
+        @Test
+        public void allOptionsChecked() {
+            List<String> path = Arrays.asList("inspectit", "instrumentation", "actions");
+            doReturn(Collections.singletonList("test")).when(configurationQueryHelper).getKeysForPath(any());
+
+            List<String> output = actionAutoCompleter.getSuggestions(path);
+
+            assertThat(output).hasSize(6);
+            assertThat(output).containsOnly("test");
+        }
     }
 }
