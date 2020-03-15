@@ -6,7 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import rocks.inspectit.ocelot.autocomplete.util.YamlFileHelper;
+import rocks.inspectit.ocelot.autocomplete.util.ConfigurationQueryHelper;
 
 import java.util.Arrays;
 import java.util.List;
@@ -22,7 +22,7 @@ public class ScopeAutoCompleterTest {
     ScopeAutoCompleter scopeAutoCompleter;
 
     @Mock
-    YamlFileHelper yamlFileHelper;
+    ConfigurationQueryHelper configurationQueryHelper;
 
 
     @Nested
@@ -30,27 +30,32 @@ public class ScopeAutoCompleterTest {
         @Test
         public void wrongPath() {
             List<String> path = Arrays.asList("inspectit", "metrics", "processor");
-            List<String> output = Arrays.asList();
 
-            assertThat(scopeAutoCompleter.getSuggestions(path)).isEqualTo(output);
+            List<String> output = scopeAutoCompleter.getSuggestions(path);
+
+            assertThat(output).isEmpty();
         }
 
         @Test
         public void correctPath() {
             List<String> path = Arrays.asList("inspectit", "instrumentation", "scopes");
-            List<String> output = Arrays.asList("my_scope", "another_scope");
             List<String> mockOutput = Arrays.asList("my_scope", "another_scope");
-            when(yamlFileHelper.extractKeysFromYamlFiles(any())).thenReturn(mockOutput);
+            when(configurationQueryHelper.getKeysForPath(any())).thenReturn(mockOutput);
 
-            assertThat(scopeAutoCompleter.getSuggestions(path)).isEqualTo(output);
+            List<String> output = scopeAutoCompleter.getSuggestions(path);
+
+            assertThat(output).hasSize(2);
+            assertThat(output).contains("my_scope");
+            assertThat(output).contains("another_scope");
         }
 
         @Test
         public void correctPathNothingDefined() {
             List<String> path = Arrays.asList("inspectit", "instrumentation", "scopes");
-            List<String> output = Arrays.asList();
 
-            assertThat(scopeAutoCompleter.getSuggestions(path)).isEqualTo(output);
+            List<String> output = scopeAutoCompleter.getSuggestions(path);
+
+            assertThat(output).isEmpty();
         }
     }
 
