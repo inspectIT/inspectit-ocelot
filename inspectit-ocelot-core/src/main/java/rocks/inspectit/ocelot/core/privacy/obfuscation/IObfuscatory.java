@@ -14,8 +14,21 @@ public interface IObfuscatory {
      * @param key   attribute key
      * @param value attribute value
      */
-    default void putSpanAttribute(Span span, String key, String value) {
-        span.putAttribute(key, AttributeValue.stringAttributeValue(value));
+    default void putSpanAttribute(Span span, String key, Object value) {
+        AttributeValue attributeValue;
+        if(value instanceof String){
+            attributeValue = AttributeValue.stringAttributeValue((String)value);
+        } else if(value instanceof Double || value instanceof Float){
+            attributeValue = AttributeValue.doubleAttributeValue(((Number)value).doubleValue());
+        } else if (value instanceof Number){
+            attributeValue = AttributeValue.longAttributeValue(((Number)value).longValue());
+        } else if (value instanceof Boolean){
+            attributeValue = AttributeValue.booleanAttributeValue((Boolean)value);
+        } else {
+            attributeValue = AttributeValue.stringAttributeValue(value.toString());
+        }
+
+        span.putAttribute(key, attributeValue);
     }
 
 }
