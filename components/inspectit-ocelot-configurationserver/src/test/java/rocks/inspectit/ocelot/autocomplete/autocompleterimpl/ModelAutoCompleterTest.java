@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.autocomplete;
+package rocks.inspectit.ocelot.autocomplete.autocompleterimpl;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -68,6 +68,7 @@ public class ModelAutoCompleterTest {
                     "logging",
                     "metrics",
                     "plugins",
+                    "privacy",
                     "publish-open-census-to-bootstrap",
                     "self-monitoring",
                     "service-name",
@@ -155,6 +156,7 @@ public class ModelAutoCompleterTest {
                     "logging",
                     "metrics",
                     "plugins",
+                    "privacy",
                     "publish-open-census-to-bootstrap",
                     "self-monitoring",
                     "service-name",

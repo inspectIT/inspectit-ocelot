@@ -101,4 +101,12 @@ public class Beacon {
         return map.get(fieldKey);
     }
 
+    /**
+     * Returns the content of this beacon as map.
+     *
+     * @return a new Map representing the beacon
+     */
+    public Map<String, String> toMap() {
+        return new HashMap<>(map);
+    }
 }

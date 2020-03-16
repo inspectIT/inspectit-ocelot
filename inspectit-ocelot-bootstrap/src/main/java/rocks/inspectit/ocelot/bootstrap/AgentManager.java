@@ -3,7 +3,7 @@ package rocks.inspectit.ocelot.bootstrap;
 import java.lang.instrument.Instrumentation;
 
 /**
- * Manages the running Agent. This class is responsible for starting and stopping {@link rocks.inspectit.ocelot.core.AgentImpl}
+ * Manages the running Agent. This class is responsible for starting and stopping the active {@link IAgent} implementation.
  *
  * @author Jonas Kunz
  */
@@ -57,5 +57,27 @@ public class AgentManager {
      */
     public static boolean isInitialized() {
         return initialized;
+    }
+
+    /**
+     * Returns the agent which is currently active.
+     *
+     * @return the active {@link IAgent} implementation instance
+     */
+    public static IAgent getAgent() {
+        return agentInstance;
+    }
+
+    /**
+     * Returns the version of the current agent.
+     *
+     * @return the current agent version
+     */
+    public static String getAgentVersion() {
+        if (agentInstance == null) {
+            return "UNKNOWN";
+        } else {
+            return agentInstance.getVersion();
+        }
     }
 }

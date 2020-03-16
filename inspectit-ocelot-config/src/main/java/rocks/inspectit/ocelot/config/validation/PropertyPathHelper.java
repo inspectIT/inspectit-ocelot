@@ -3,6 +3,7 @@ package rocks.inspectit.ocelot.config.validation;
 import lombok.experimental.UtilityClass;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.io.FileSystemResource;
+import rocks.inspectit.ocelot.config.conversion.InspectitConfigConversionService;
 import rocks.inspectit.ocelot.config.utils.CaseUtils;
 
 import java.beans.PropertyDescriptor;
@@ -113,7 +114,10 @@ public class PropertyPathHelper {
         if (TERMINAL_TYPES.contains(type)) {
             return true;
         } else if (type instanceof Class) {
-            return ((Class<?>) type).isEnum() || ((Class<?>) type).isPrimitive();
+            return ((Class<?>) type).isEnum()
+                    || ((Class<?>) type).isPrimitive()
+                    || InspectitConfigConversionService.getInstance().canConvert(String.class, (Class<?>) type)
+                    || InspectitConfigConversionService.getInstance().canConvert(Number.class, (Class<?>) type);
         }
         return false;
     }
@@ -250,6 +254,25 @@ public class PropertyPathHelper {
             String pathALiteral = pathA.get(i);
             String pathBLiteral = pathB.get(i);
             if (!(pathALiteral.equals("*") || pathBLiteral.equals("*") || CaseUtils.compareIgnoreCamelOrKebabCase(pathBLiteral, pathALiteral))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Checks if two paths are the same. Ignores if the literals are formatted in camelCase or kebab-case.
+     *
+     * @param a the first path to be compared
+     * @param a the second path to be compared
+     * @return Returns true if each String in the two paths is equal.
+     */
+    public boolean comparePathsIgnoreCamelOrKebabCase(List<String> a, List<String> b) {
+        if (a.size() != b.size()) {
+            return false;
+        }
+        for (int i = 0; i < a.size(); i++) {
+            if (!CaseUtils.kebabCaseToCamelCase(a.get(i)).equals(CaseUtils.kebabCaseToCamelCase(b.get(i)))) {
                 return false;
             }
         }

@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 public class AutocompleteController extends AbstractBaseController {
 
     @Autowired
-    List<AutoCompleter> completers;
+    private List<AutoCompleter> completers;
 
     @ApiOperation(value = "String which should be autocompleted")
     @ApiResponse(code = 200, message = "The options which you can enter into the string", examples =
@@ -34,8 +34,9 @@ public class AutocompleteController extends AbstractBaseController {
             "    \"advanced\"]", mediaType = "text/plain")))
     @PostMapping("/autocomplete")
     public List<String> getPossibleProperties(@RequestBody AutoCompleteRequest request) {
-        return completers.stream().flatMap(autoCompleter -> autoCompleter.getSuggestions(PropertyPathHelper.parse(request.getPath()))
-                .stream())
+        return completers.stream()
+                .flatMap(autoCompleter -> autoCompleter.getSuggestions(PropertyPathHelper.parse(request.getPath()))
+                        .stream())
                 .collect(Collectors.toList());
     }
 }

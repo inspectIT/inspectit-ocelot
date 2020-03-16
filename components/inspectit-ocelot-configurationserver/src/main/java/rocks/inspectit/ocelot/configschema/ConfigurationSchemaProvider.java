@@ -54,6 +54,7 @@ public class ConfigurationSchemaProvider {
         rootProperty = ConfigurationPropertyDescription.builder()
                 .propertyName("inspectit")
                 .children(getCompositePropertyChildren(InspectitConfig.class))
+                .type(ConfigurationPropertyType.COMPOSITE)
                 .build();
     }
 

@@ -1,6 +1,8 @@
 package rocks.inspectit.ocelot.core.config.propertysources.http;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.http.MultiValue;
+import com.github.tomakehurst.wiremock.stubbing.ServeEvent;
 import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,7 +22,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
@@ -73,6 +77,22 @@ class HttpPropertySourceStateTest {
             assertTrue(updateResult);
             assertThat(new File(httpSettings.getPersistenceFile())).hasContent(config);
             assertThat(result.getProperty("inspectit.service-name")).isEqualTo("test-name");
+
+            List<ServeEvent> requests = mockServer.getServeEvents().getRequests();
+            assertThat(requests).hasSize(1);
+
+            List<String> headerKeys = requests.get(0).getRequest().getHeaders().all().stream()
+                    .map(MultiValue::key)
+                    .filter(key -> key.startsWith("X-OCELOT-"))
+                    .collect(Collectors.toList());
+
+            assertThat(headerKeys).containsOnly(
+                    "X-OCELOT-AGENT-VERSION",
+                    "X-OCELOT-JAVA-VERSION",
+                    "X-OCELOT-VM-NAME",
+                    "X-OCELOT-VM-VERSION",
+                    "X-OCELOT-START-TIME"
+            );
         }
 
         @Test

@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.core.instrumentation.config;
 
+import com.google.common.collect.HashMultiset;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import lombok.val;
@@ -52,13 +53,13 @@ public class MethodHookConfigurationResolver {
         }
 
         if (allSettings.isTracingEnabled()) {
-            resolveTracing(allSettings, result, matchedRules);
+            resolveTracing(result, matchedRules);
         }
 
         return result.build();
     }
 
-    private void resolveTracing(InstrumentationConfiguration conf, MethodHookConfiguration.MethodHookConfigurationBuilder result, Set<InstrumentationRule> matchedRules) throws ConflictingDefinitionsException {
+    private void resolveTracing(MethodHookConfiguration.MethodHookConfigurationBuilder result, Set<InstrumentationRule> matchedRules) throws ConflictingDefinitionsException {
 
         val builder = RuleTracingSettings.builder();
 
@@ -68,7 +69,7 @@ public class MethodHookConfigurationResolver {
 
         if (!tracingRules.isEmpty()) {
 
-            resolveStartSpan(conf, tracingRules, builder);
+            resolveStartSpan(tracingRules, builder);
             resolveEndSpan(tracingRules, builder);
             resolveContinueSpan(tracingRules, builder);
             builder.storeSpan(getAndDetectConflicts(tracingRules, r -> r.getTracing().getStoreSpan(), s -> !StringUtils.isEmpty(s), "store span data key"));
@@ -127,7 +128,7 @@ public class MethodHookConfigurationResolver {
         }
     }
 
-    private void resolveStartSpan(InstrumentationConfiguration conf, Set<InstrumentationRule> matchedRules, RuleTracingSettings.RuleTracingSettingsBuilder builder) throws ConflictingDefinitionsException {
+    private void resolveStartSpan(Set<InstrumentationRule> matchedRules, RuleTracingSettings.RuleTracingSettingsBuilder builder) throws ConflictingDefinitionsException {
         Set<InstrumentationRule> rulesDefiningStartSpan = matchedRules.stream()
                 .filter(r -> r.getTracing().getStartSpan() != null)
                 .collect(Collectors.toSet());
@@ -135,14 +136,11 @@ public class MethodHookConfigurationResolver {
         boolean startSpan = Optional.ofNullable(startSpanSetting).orElse(false);
         builder.startSpan(startSpan);
         if (startSpan) {
-            builder.name(getAndDetectConflicts(rulesDefiningStartSpan, r -> r.getTracing().getName(), n -> !StringUtils.isEmpty(n), "the span name"));
-            builder.kind(getAndDetectConflicts(rulesDefiningStartSpan, r -> r.getTracing().getKind(), Objects::nonNull, "the span kind"));
             builder.startSpanConditions(getAndDetectConflicts(rulesDefiningStartSpan, r -> r.getTracing().getStartSpanConditions(), ALWAYS_TRUE, "start span conditions"));
-            String sampleProbability = getAndDetectConflicts(rulesDefiningStartSpan, r -> r.getTracing().getSampleProbability(), ALWAYS_TRUE, "the trace sample probability");
-            if (StringUtils.isEmpty(sampleProbability)) {
-                sampleProbability = String.valueOf(conf.getDefaultTraceSampleProbability());
-            }
-            builder.sampleProbability(sampleProbability);
+            //name, kind and sample probability can be defined by rules which do not start a span themselves
+            builder.name(getAndDetectConflicts(matchedRules, r -> r.getTracing().getName(), n -> !StringUtils.isEmpty(n), "the span name"));
+            builder.kind(getAndDetectConflicts(matchedRules, r -> r.getTracing().getKind(), Objects::nonNull, "the span kind"));
+            builder.sampleProbability(getAndDetectConflicts(matchedRules, r -> r.getTracing().getSampleProbability(), n -> !StringUtils.isEmpty(n), "the trace sample probability"));
         }
     }
 
@@ -187,29 +185,11 @@ public class MethodHookConfigurationResolver {
      *
      * @param result       the hook configuration to which the measurement definitions are added
      * @param matchedRules the rules to combine
-     * @throws ConflictingDefinitionsException of two rules define different values for the same metric
      */
-    private void resolveMetrics(MethodHookConfiguration.MethodHookConfigurationBuilder result, Set<InstrumentationRule> matchedRules) throws ConflictingDefinitionsException {
-
-        Map<String, InstrumentationRule> metricDefinitions = new HashMap<>();
-        for (val rule : matchedRules) {
-            //check for conflicts first
-            for (val metricName : rule.getMetrics().keySet()) {
-                if (metricDefinitions.containsKey(metricName)) {
-                    throw new ConflictingDefinitionsException(metricDefinitions.get(metricName), rule, "the metric '" + metricName + "'");
-                }
-                metricDefinitions.put(metricName, rule);
-            }
-            rule.getMetrics().forEach((name, value) -> {
-                try {
-                    double constantValue = Double.parseDouble(value);
-                    result.constantMetric(name, constantValue);
-                } catch (NumberFormatException e) {
-                    //the specified value is not a double value, we therefore assume it is a data key
-                    result.dataMetric(name, value);
-                }
-            });
-        }
+    private void resolveMetrics(MethodHookConfiguration.MethodHookConfigurationBuilder result, Set<InstrumentationRule> matchedRules) {
+        result.metrics(matchedRules.stream()
+                .flatMap(rule -> rule.getMetrics().stream())
+                .collect(Collectors.toCollection(HashMultiset::create)));
     }
 
     /**

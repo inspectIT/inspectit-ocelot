@@ -41,18 +41,21 @@ public class BeaconMetricManager {
      * @return whether the beacon has been successfully parsed
      */
     public boolean processBeacon(Beacon beacon) {
+        boolean successful = false;
+
         for (Map.Entry<String, BeaconMetricDefinitionSettings> metricDefinitionEntry : configuration.getDefinitions().entrySet()) {
             String metricName = metricDefinitionEntry.getKey();
             BeaconMetricDefinitionSettings metricDefinition = metricDefinitionEntry.getValue();
 
             if (BeaconRequirement.validate(beacon, metricDefinition.getBeaconRequirements())) {
                 recordMetric(metricName, metricDefinition, beacon);
-                return true;
+                successful = true;
             } else {
                 log.debug("Skipping beacon because requirements are not fulfilled.");
             }
         }
-        return false;
+
+        return successful;
     }
 
     /**
@@ -86,10 +89,9 @@ public class BeaconMetricManager {
      */
     private TagContextBuilder getTagContextForBeacon(Beacon beacon) {
         TagContextBuilder tagContextBuilder = measuresAndViewsManager.getTagContext();
-
-        for (Map.Entry<String, String> beaconTag : configuration.getTags().getBeacon().entrySet()) {
-            if (beacon.contains(beaconTag.getValue())) {
-                tagContextBuilder.putLocal(TagKey.create(beaconTag.getKey()), TagValue.create(beacon.get(beaconTag.getValue())));
+        for (String key : configuration.getTags().getBeacon().keySet()) {
+            if (beacon.contains(key)) {
+                tagContextBuilder.putLocal(TagKey.create(key), TagValue.create(beacon.get(key)));
             }
         }
         return tagContextBuilder;

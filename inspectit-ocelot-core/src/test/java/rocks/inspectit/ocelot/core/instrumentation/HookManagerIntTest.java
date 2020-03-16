@@ -122,10 +122,10 @@ public class HookManagerIntTest extends SpringTestBase {
 
     @Test
     @DirtiesContext
-    void testNotAffectedHooksNotRebuild() {
+    void testNotAffectedHooksCopied() {
         waitForHookingToFinish();
 
-        IMethodHook hookB = Instances.hookManager.getHook(dummyClass, "methodB()");
+        IMethodHook hookA = Instances.hookManager.getHook(dummyClass, "methodA()");
 
         updateProperties(ps -> {
             ps.setProperty("inspectit.instrumentation.scopes.scC.type.name", "blub");
@@ -134,8 +134,9 @@ public class HookManagerIntTest extends SpringTestBase {
 
         waitForHookingToFinish();
 
-        IMethodHook newHookB = Instances.hookManager.getHook(dummyClass, "methodB()");
-        assertThat(newHookB).isSameAs(hookB);
+        assertThat(hookA).isNotSameAs(NoopMethodHook.INSTANCE);
+        IMethodHook newHookA = Instances.hookManager.getHook(dummyClass, "methodA()");
+        assertThat(newHookA).isNotSameAs(hookA);
     }
 
 }

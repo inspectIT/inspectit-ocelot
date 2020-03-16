@@ -15,10 +15,14 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.env.PropertySource;
+import rocks.inspectit.ocelot.bootstrap.AgentManager;
+import rocks.inspectit.ocelot.bootstrap.IAgent;
 import rocks.inspectit.ocelot.config.model.config.HttpConfigSettings;
 import rocks.inspectit.ocelot.core.config.util.PropertyUtils;
 
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -34,6 +38,11 @@ import java.util.Properties;
  */
 @Slf4j
 public class HttpPropertySourceState {
+
+    /**
+     * The prefix which is used for the meta information HTTP headers.
+     */
+    private static final String META_HEADER_PREFIX = "X-OCELOT-";
 
     /**
      * Used in case the properties fetched via HTTP are empty.
@@ -188,6 +197,8 @@ public class HttpPropertySourceState {
             httpGet.setHeader("If-None-Match", latestETag);
         }
 
+        setAgentMetaHeaders(httpGet);
+
         String configuration = null;
         boolean isError = true;
         try {
@@ -215,6 +226,22 @@ public class HttpPropertySourceState {
         }
 
         return configuration;
+    }
+
+    /**
+     * Injects all the agent's meta information headers, which should be send when fetching a new configuration,
+     * into the given request request.
+     *
+     * @param httpGet the request to inject the meat information headers
+     */
+    private void setAgentMetaHeaders(HttpGet httpGet) {
+        RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
+
+        httpGet.setHeader(META_HEADER_PREFIX + "AGENT-VERSION", AgentManager.getAgentVersion());
+        httpGet.setHeader(META_HEADER_PREFIX + "JAVA-VERSION", System.getProperty("java.version"));
+        httpGet.setHeader(META_HEADER_PREFIX + "VM-NAME", runtime.getVmName());
+        httpGet.setHeader(META_HEADER_PREFIX + "VM-VERSION", runtime.getVmVendor());
+        httpGet.setHeader(META_HEADER_PREFIX + "START-TIME", String.valueOf(runtime.getStartTime()));
     }
 
     /**

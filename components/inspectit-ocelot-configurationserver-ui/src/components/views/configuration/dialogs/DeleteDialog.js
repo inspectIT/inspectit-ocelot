@@ -1,6 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { configurationActions, configurationSelectors } from '../../../../redux/ducks/configuration'
+import { configurationActions, configurationSelectors, configurationUtils } from '../../../../redux/ducks/configuration'
 
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
@@ -11,14 +11,16 @@ import { Dialog } from 'primereact/dialog';
  */
 class DeleteDialog extends React.Component {
 
+    state = {};
+
     deleteButton = React.createRef();
 
     render() {
-        const { selectionName } = this.props;
+        const { fileName, type } = this.state;
 
         return (
             <Dialog
-                header={"Delete " + this.props.type}
+                header={"Delete " + type}
                 modal={true}
                 visible={this.props.visible}
                 onHide={this.props.onHide}
@@ -29,29 +31,38 @@ class DeleteDialog extends React.Component {
                     </div>
                 )}
             >
-                Are you sure you want to delete <b>"{selectionName}"</b> ? This cannot be undone!
+                Are you sure you want to delete <b>"{fileName}"</b> ? This cannot be undone!
             </Dialog>
         )
     }
 
     deleteSelectedFile = () => {
-        this.props.deleteSelection(true);
+        this.props.deleteSelection(true, this.props.filePath);
         this.props.onHide();
     }
 
     componentDidUpdate(prevProps) {
         if (!prevProps.visible && this.props.visible) {
             this.deleteButton.current.element.focus();
+
+            const { filePath } = this.props;
+
+            const fileName = filePath ? filePath.split("/").slice(-1)[0] : "";
+
+            const fileObj = configurationUtils.getFile(this.props.files, filePath);
+            const type = configurationUtils.isDirectory(fileObj) ? "Directory" : "File";
+
+            this.setState({ fileName, type });
         }
     }
 
 }
 
 function mapStateToProps(state) {
-    const { selection } = state.configuration;
+    const { selection, files } = state.configuration;
     return {
-        type: configurationSelectors.isSelectionDirectory(state) ? "Directory" : "File",
-        selectionName: selection ? selection.split("/").slice(-1)[0] : ""
+        selection,
+        files
     }
 }
 

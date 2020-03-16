@@ -1,0 +1,30 @@
+inspectit:
+
+  instrumentation:
+
+    scopes:
+      DriverManager_getDrivers:
+        type:
+          name: java.sql.DriverManager
+        methods:
+          - name: getDrivers
+
+    rules:
+      JigSawTest-isntrumetnSqlPackage:
+        scopes:
+          DriverManager_getDrivers: true
+        tracing:
+          start-span: true
+          attributes:
+            test: sql_test
+        entry:
+          sql_test:
+            action: instrument_sql_DriverManager
+
+    actions:
+      #This action is placed in the java.sql module
+      #if Jigsaw support does not work correctly, this action will not be created successfully
+      instrument_sql_DriverManager:
+        input:
+          _this: java.sql.DriverManager
+        value: '"success"'

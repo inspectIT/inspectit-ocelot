@@ -1,9 +1,8 @@
-import * as types from "./types";
-import * as selectors from "./selectors";
+import { DEFAULT_CONFIG_TREE_KEY } from '../../../data/constants';
 import axios from '../../../lib/axios-api';
 import { configurationUtils } from '../configuration';
 import { notificationActions } from '../notification';
-import { DEFAULT_CONFIG_TREE_KEY } from '../../../data/constants';
+import * as types from "./types";
 
 /**
  * Fetches all existing configuration files and directories.
@@ -16,6 +15,7 @@ export const fetchFiles = () => {
             .get("/directories/")
             .then(res => {
                 const files = res.data;
+                sortFiles(files);
                 dispatch({ type: types.FETCH_FILES_SUCCESS, payload: { files } });
             })
             .catch(() => {
@@ -23,6 +23,35 @@ export const fetchFiles = () => {
             });
     };
 };
+
+/**
+ * Arranges first directories and then files. Within the directories or files it is an alphabetical sorting.
+ */
+const sortFiles = (allFiles) => {
+    allFiles.sort((first, second) => {
+        if (first.type !== second.type) {
+            if (first.type === 'directory') {
+                return -1;
+            } else {
+                return 1;
+            }
+        }
+        const nameFirst = first.name.toUpperCase();
+        const nameSecond = second.name.toUpperCase();
+        if (nameFirst < nameSecond) {
+            return -1;
+        }
+        if (nameFirst > nameSecond) {
+            return 1;
+        }
+        return 0;
+    });
+    allFiles.forEach(element => {
+        if (element.type === 'directory' && element.children.length > 0) {
+            sortFiles(element.children);
+        }
+    });
+}
 
 /**
  * Fetches the content of the selected file.
@@ -89,16 +118,20 @@ export const resetState = () => ({
 });
 
 /**
- * Attempts to delete the currently selected file or folder.
+ * Attempts to delete the currently selected or handed in file or folder.
  * In case of success, fetchFiles() is automatically triggered.
  */
-export const deleteSelection = (fetchFilesOnSuccess) => {
+export const deleteSelection = (fetchFilesOnSuccess, selectedFile = null) => {
     return (dispatch, getState) => {
         const state = getState();
-        const { selection } = state.configuration;
-        const isDirectory = selectors.isSelectionDirectory(state);
+        const { selection, files } = state.configuration;
 
-        let filePath = selection.startsWith("/") ? selection.substring(1) : selection;
+        const selectedName = selectedFile ? selectedFile : selection;
+
+        const file = configurationUtils.getFile(files, selectedName);
+        const isDirectory = configurationUtils.isDirectory(file);
+
+        let filePath = selectedName && selectedName.startsWith("/") ? selectedName.substring(1) : selectedName;
 
         dispatch({ type: types.DELETE_SELECTION_STARTED });
 
@@ -235,3 +268,29 @@ export const fetchDefaultConfig = () => {
             })
     }
 }
+
+/**
+ * Fetches the configuration schema.
+ */
+export const fetchConfigurationSchema= () => {
+    return dispatch => {
+        dispatch({ type: types.FETCH_SCHEMA_STARTED });
+
+        axios
+            .get("/schema/plain")
+            .then(res => {
+                const schema = res.data;
+                dispatch({ type: types.FETCH_SCHEMA_SUCCESS, payload: { schema } });
+            })
+            .catch(() => {
+                dispatch({ type: types.FETCH_SCHEMA_FAILURE });
+            });
+    };
+};
+
+/**
+ * Shows or hides the split view for the configuration properties.
+ */
+export const toggleVisualConfigurationView = () => ({
+    type: types.TOGGLE_VISUAL_CONFIGURATION_VIEW
+});
