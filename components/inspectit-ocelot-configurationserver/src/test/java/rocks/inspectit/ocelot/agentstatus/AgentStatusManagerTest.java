@@ -17,6 +17,7 @@ import java.util.Date;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 @ExtendWith(MockitoExtension.class)
 public class AgentStatusManagerTest {
@@ -37,6 +38,26 @@ public class AgentStatusManagerTest {
     class NotifyAgentConfigurationFetched {
 
         @Test
+        void testWithAgentIdHeader() {
+            AgentConfiguration config = new AgentConfiguration(
+                    AgentMapping.builder()
+                            .name("test-conf")
+                            .build(), "");
+            Map<String, String> attributes = ImmutableMap.of("service", "test");
+
+            manager.notifyAgentConfigurationFetched(attributes, Collections.singletonMap("x-ocelot-agent-id", "aid"), config);
+
+            assertThat(manager.getAgentStatuses())
+                    .hasSize(1)
+                    .anySatisfy(status -> {
+                        assertThat(status.getAttributes()).isEqualTo(attributes);
+                        assertThat(status.getMappingName()).isEqualTo("test-conf");
+                        assertThat(status.getMetaInformation().getAgentId()).isEqualTo("aid");
+                        assertThat(status.getLastConfigFetch()).isNotNull();
+                    });
+        }
+
+        @Test
         void testNoMappingFound() {
             Map<String, String> attributes = ImmutableMap.of("service", "test");
             manager.notifyAgentConfigurationFetched(attributes, Collections.emptyMap(), null);
@@ -46,6 +67,7 @@ public class AgentStatusManagerTest {
                     .anySatisfy(status -> {
                         assertThat(status.getAttributes()).isEqualTo(attributes);
                         assertThat(status.getMappingName()).isNull();
+                        assertThat(status.getMetaInformation()).isNull();
                         assertThat(status.getLastConfigFetch()).isNotNull();
                     });
         }

@@ -26,8 +26,9 @@ public class AgentStatusManager {
     InspectitServerSettings config;
 
     /**
-     * Cache storing the most recent status for each agent based on its attributes.
-     * This cache is limited in size and has an expiration based on {@link #config}
+     * Cache storing the most recent status for each agent or client. The key represents the agent id or a set of attributes
+     * in case the configuration was not fetched by an agent (in case no agent id is specified).
+     * This cache is limited in size and has an expiration based on {@link #config}.
      */
     private Cache<Object, AgentStatus> attributesToAgentStatusCache;
 
