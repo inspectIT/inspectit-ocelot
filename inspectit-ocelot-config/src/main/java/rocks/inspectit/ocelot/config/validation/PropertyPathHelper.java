@@ -260,6 +260,25 @@ public class PropertyPathHelper {
         return true;
     }
 
+    /**
+     * Checks if two paths are the same. Ignores if the literals are formatted in camelCase or kebab-case.
+     *
+     * @param a the first path to be compared
+     * @param a the second path to be compared
+     * @return Returns true if each String in the two paths is equal.
+     */
+    public boolean comparePathsIgnoreCamelOrKebabCase(List<String> a, List<String> b) {
+        if (a.size() != b.size()) {
+            return false;
+        }
+        for (int i = 0; i < a.size(); i++) {
+            if (!CaseUtils.kebabCaseToCamelCase(a.get(i)).equals(CaseUtils.kebabCaseToCamelCase(b.get(i)))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 
     /**
      * Checks if the first given path starts with the second given full path
