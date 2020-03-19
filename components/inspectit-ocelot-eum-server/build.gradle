@@ -50,6 +50,7 @@ dependencies {
 			project(':inspectit-ocelot-config'),
 			"org.springframework.boot:spring-boot-starter-web",
 			"org.springframework.security:spring-security-web:5.1.5.RELEASE",
+			'org.springframework.boot:spring-boot-starter-actuator',
 			"io.opencensus:opencensus-api:${openCensusVersion}",
 			"io.opencensus:opencensus-impl:${openCensusVersion}",
 			"io.prometheus:simpleclient_httpserver:${prometheusClientVersion}",
