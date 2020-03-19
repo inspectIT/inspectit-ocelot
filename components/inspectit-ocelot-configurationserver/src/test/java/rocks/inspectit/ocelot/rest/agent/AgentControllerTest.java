@@ -47,9 +47,8 @@ public class AgentControllerTest {
 
         @Test
         public void mappingFound() throws Exception {
-            AgentConfiguration config = new AgentConfiguration(null, "foo : bar");
-            doReturn(config)
-                    .when(configManager).getConfiguration(anyMap());
+            AgentConfiguration config = AgentConfiguration.builder().configYaml("foo : bar").build();
+            doReturn(config).when(configManager).getConfiguration(anyMap());
 
             HashMap<String, String> attributes = new HashMap<>();
             ResponseEntity<String> result = controller.fetchConfiguration(attributes, Collections.emptyMap());
@@ -62,8 +61,8 @@ public class AgentControllerTest {
 
         @Test
         public void etagPresent() throws Exception {
-            doReturn(new AgentConfiguration(null, "foo : bar"))
-                    .when(configManager).getConfiguration(anyMap());
+            AgentConfiguration config = AgentConfiguration.builder().configYaml("foo : bar").build();
+            doReturn(config).when(configManager).getConfiguration(anyMap());
 
             ResponseEntity<String> firstResult = controller.fetchConfiguration(new HashMap<>(), Collections.emptyMap());
             ResponseEntity<String> secondResult = controller.fetchConfiguration(new HashMap<>(), Collections.emptyMap());

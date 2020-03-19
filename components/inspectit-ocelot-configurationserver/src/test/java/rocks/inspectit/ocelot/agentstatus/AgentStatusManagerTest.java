@@ -22,6 +22,8 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 @ExtendWith(MockitoExtension.class)
 public class AgentStatusManagerTest {
 
+    public static final String HEADER_AGENT_ID = "x-ocelot-agent-id";
+
     @InjectMocks
     AgentStatusManager manager;
 
@@ -39,13 +41,16 @@ public class AgentStatusManagerTest {
 
         @Test
         void testWithAgentIdHeader() {
-            AgentConfiguration config = new AgentConfiguration(
-                    AgentMapping.builder()
-                            .name("test-conf")
-                            .build(), "");
+            AgentMapping agentMapping = AgentMapping.builder()
+                    .name("test-conf")
+                    .build();
+            AgentConfiguration config = AgentConfiguration.builder()
+                    .mapping(agentMapping)
+                    .configYaml("")
+                    .build();
             Map<String, String> attributes = ImmutableMap.of("service", "test");
 
-            manager.notifyAgentConfigurationFetched(attributes, Collections.singletonMap("x-ocelot-agent-id", "aid"), config);
+            manager.notifyAgentConfigurationFetched(attributes, Collections.singletonMap(HEADER_AGENT_ID, "aid"), config);
 
             assertThat(manager.getAgentStatuses())
                     .hasSize(1)
@@ -75,11 +80,14 @@ public class AgentStatusManagerTest {
 
         @Test
         void testMappingFound() {
+            AgentMapping agentMapping = AgentMapping.builder()
+                    .name("test-conf")
+                    .build();
+            AgentConfiguration conf = AgentConfiguration.builder()
+                    .mapping(agentMapping)
+                    .configYaml("")
+                    .build();
             Map<String, String> attributes = ImmutableMap.of("service", "test");
-            AgentConfiguration conf = new AgentConfiguration(
-                    AgentMapping.builder()
-                            .name("test-conf")
-                            .build(), "");
 
             manager.notifyAgentConfigurationFetched(attributes, Collections.emptyMap(), conf);
 
@@ -94,11 +102,14 @@ public class AgentStatusManagerTest {
 
         @Test
         void testOverriding() throws Exception {
+            AgentMapping agentMapping = AgentMapping.builder()
+                    .name("test-conf")
+                    .build();
+            AgentConfiguration conf = AgentConfiguration.builder()
+                    .mapping(agentMapping)
+                    .configYaml("")
+                    .build();
             Map<String, String> attributes = ImmutableMap.of("service", "test");
-            AgentConfiguration conf = new AgentConfiguration(
-                    AgentMapping.builder()
-                            .name("test-conf")
-                            .build(), "");
 
             manager.notifyAgentConfigurationFetched(attributes, Collections.emptyMap(), null);
 

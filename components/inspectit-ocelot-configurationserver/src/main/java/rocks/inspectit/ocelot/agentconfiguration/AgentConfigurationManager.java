@@ -32,7 +32,7 @@ public class AgentConfigurationManager {
     /**
      * Used as maker in {@link #attributesToConfigurationCache} to mark attribute-maps for which no mapping matches.
      */
-    private static final AgentConfiguration NO_MATCHING_MAPPING = new AgentConfiguration(null, "");
+    private static final AgentConfiguration NO_MATCHING_MAPPING = AgentConfiguration.builder().configYaml("").build();
 
     @Autowired
     @VisibleForTesting

@@ -1,6 +1,7 @@
 package rocks.inspectit.ocelot.agentstatus;
 
 import com.google.common.base.Preconditions;
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import org.apache.commons.lang3.StringUtils;
@@ -61,7 +62,7 @@ public class AgentMetaInformation {
      * @return {@link AgentMetaInformation} instance or <code>null</code>
      */
     public static AgentMetaInformation of(Map<String, String> headers) {
-        if (headers != null && headers.containsKey("x-ocelot-agent-id")) {
+        if (headers != null && headers.containsKey(HEADER_AGENT_ID)) {
             return new AgentMetaInformation(headers);
         } else {
             return null;
@@ -100,7 +101,7 @@ public class AgentMetaInformation {
     private String vmVendor;
 
     private AgentMetaInformation(Map<String, String> headers) {
-        Preconditions.checkState(StringUtils.isNotBlank(headers.get(HEADER_AGENT_ID)), "It is required that the given map contains an agent header!");
+        Preconditions.checkArgument(StringUtils.isNotBlank(headers.get(HEADER_AGENT_ID)), "It is required that the given map contains an agent header!");
 
         agentId = headers.get(HEADER_AGENT_ID);
         agentVersion = headers.get(HEADER_AGENT_VERSION);
