@@ -18,6 +18,11 @@ import java.util.Map;
 public class AgentStatus {
 
     /**
+     * Meta information about the agent, in case the configuration was fetched by an agent.
+     */
+    private AgentMetaInformation metaInformation;
+
+    /**
      * The attributes with which the corresponding agent connected
      */
     private Map<String, String> attributes;

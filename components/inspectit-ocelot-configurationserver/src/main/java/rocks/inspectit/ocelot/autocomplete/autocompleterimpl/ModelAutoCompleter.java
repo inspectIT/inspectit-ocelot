@@ -1,9 +1,10 @@
-package rocks.inspectit.ocelot.autocomplete;
+package rocks.inspectit.ocelot.autocomplete.autocompleterimpl;
 
 import com.google.common.annotations.VisibleForTesting;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import rocks.inspectit.ocelot.autocomplete.AutoCompleter;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.utils.CaseUtils;
 import rocks.inspectit.ocelot.config.validation.PropertyPathHelper;
