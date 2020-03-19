@@ -75,10 +75,14 @@ class AceEditor extends React.Component {
     }
 
     onChange = (event) => {
-        if (this.props.onChange) {
+        const value = this.getValue();
+        const sanitizedValue = this.sanitizeValue(value);
+
+        if (value !== sanitizedValue) {
+            this.editor.setValue(sanitizedValue);
+        } else if (this.props.onChange) {
             this.props.onChange(this.getValue());
         }
-
     }
 
     doSave = () => {
@@ -107,9 +111,11 @@ class AceEditor extends React.Component {
     }
 
     getValue = () => {
-       let sessionValue = this.editor.getSession().getValue();
-       sessionValue = sessionValue.replace(String.fromCharCode(9), String.fromCharCode(32));
-       return sessionValue;
+        return this.editor.getSession().getValue();
+    }
+
+    sanitizeValue = (value) => {
+        return value.replace(/\t/g, "  ");
     }
 }
 
