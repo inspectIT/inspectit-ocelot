@@ -25,6 +25,17 @@ public class ActionAutoCompleter implements AutoCompleter {
     private final static List<String> ACTION_PATHS_B = Arrays.asList("inspectit", "instrumentation", "rules", "*", "*", "*", "action");
     private final static List<String> ACTION_OPTIONS = Arrays.asList("entry", "exit", "preEntry", "postEntry", "preExit", "postExit");
     private static List<String> actionPathsToRetrieve = Arrays.asList("inspectit", "instrumentation", "rules", "*", "*", "*", "action");
+    private static List<String> ACTION_DECLARATION_PATH = Arrays.asList("inspectit", "instrumentation", "actions");
+    private static List<List<String>> ACTION_USAGE_PATHS = Arrays.asList(
+            ACTION_DECLARATION_PATH,
+            Arrays.asList("inspectit", "instrumentation", "rules", "*", "preEntry", "*", "action"),
+            Arrays.asList("inspectit", "instrumentation", "rules", "*", "entry", "*", "action"),
+            Arrays.asList("inspectit", "instrumentation", "rules", "*", "exit", "*", "action"),
+            Arrays.asList("inspectit", "instrumentation", "rules", "*", "preEntry", "*", "action"),
+            Arrays.asList("inspectit", "instrumentation", "rules", "*", "postEntry", "*", "action"),
+            Arrays.asList("inspectit", "instrumentation", "rules", "*", "preExit", "*", "action"),
+            Arrays.asList("inspectit", "instrumentation", "rules", "*", "postExit", "*", "action")
+    );
 
 
     /**
