@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { mappingsActions } from '../../../redux/ducks/mappings';
 
@@ -218,6 +219,25 @@ class MappingsTable extends React.Component {
   showDeleteMappingDialog = (selectedMappingName) => this.setState({ isDeleteDialogShown: true, selectedMappingName: selectedMappingName });
   hideDeleteMappingDialog = () => this.setState({ isDeleteDialogShown: false, selectedMappingName: null });
 }
+
+MappingsTable.propTypes = {
+  /** The value used for fritlering of the mappings */
+  filterValue: PropTypes.string,
+  /** Callback when the user wants to edit an agent mapping */
+  onEditMapping: PropTypes.func.isRequired,
+  /** Callback when the user wants to duplicate an agent mapping */
+  onDuplicateMapping: PropTypes.func.isRequired,
+  /** The max height of the data table */
+  maxHeight: PropTypes.string,
+
+  /** Redux Props */
+  /** The mappings to show */
+  mappings: PropTypes.arrayOf(PropTypes.object).isRequired,
+  /** Function for fetching agent mappings */
+  fetchMappings: PropTypes.func.isRequired,
+  /** Function for adding or updating agent mappings */
+  putMappings: PropTypes.func.isRequired
+};
 
 function mapStateToProps(state) {
   const { mappings } = state.mappings;
