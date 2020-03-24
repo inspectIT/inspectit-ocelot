@@ -152,7 +152,8 @@ The available metrics are explained in the table below.
 
 ## JMX Metrics
 
-Metrics exposed by MBean objects are recorded by the `inspectit.metrics.jmx` recorder.
+Metrics exposed by MBean objects are recorded by the `inspectit.metrics.jmx` recorder which can be enabled by setting the `inspectit.metrics.jmx.enabled` property to `true`.
+
 This recorder polls all registered MBean servers with a frequency specified by `inspectit.metrics.classloader.frequency` which defaults to `inspectit.metrics.frequency`.
 The recorder exposes JMX attributes containing values that are non-negative numbers or booleans.
 All values are exposed as double metric representing the last value of the JMX MBean.
@@ -180,20 +181,6 @@ The behavior is as follows:
 3. If the map contains only blacklisted object name entries, then everything is collected except the blacklisted ones.
 4. If the map contains both the whitelisted and blacklisted entries, then only the whitelisted ones that are not blacklisted are collected.
 
-:::note Default blacklisted object names
-By default, inspectit Ocelot blacklists all the object names that provide metrics which are already collected using other existing metric recorders (e.g. memory metrics).
-```YAML
-inspectit:
-  metrics:
-    jmx:
-      object-names:
-        '[java.lang:type=BufferPool]': false
-        '[java.lang:type=ClassLoading]': false
-        '[java.lang:type=GarbageCollector,*]': false
-        '[java.lang:type=Memory]': false
-```
-:::
-
 All configuration properties related to the JMX recorder are located under the `inspectit.metrics.jmx` property.
 The available JMX configuration properties are:
 
@@ -201,7 +188,7 @@ The available JMX configuration properties are:
 
 |Property&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|Description|Default
 |---|---|---|
-|`enabled`|The switch for enabling/disabling JMX recorder.|`true`
+|`enabled`|The switch for enabling/disabling JMX recorder.|`false`
 |`frequency`|Specifies the frequency used by the JMX recorder to poll and record metrics.|`${inspectit.metrics.frequency}`
 |`force-platform-server`|The switch to enable or disable the creation of the platform MBean server before scraping starts.|`true`
 |`lower-case-metric-name`|If `true` records JMX metrics with the lowercase name format.|`true`
