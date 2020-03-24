@@ -1,0 +1,4 @@
+inspectit:
+  metrics:
+    jmx:
+      enabled: true
