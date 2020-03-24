@@ -65,7 +65,7 @@ dependencies {
             "io.opencensus:opencensus-exporter-metrics-ocagent:${openCensusVersion}",
             "io.opencensus:opencensus-exporter-trace-ocagent:${openCensusVersion}",
             
-            //bytecode manipulation
+            // bytecode manipulation
             "net.bytebuddy:byte-buddy:1.9.2"
     )
 
