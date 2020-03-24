@@ -32,7 +32,7 @@ public class JmxMetricsRecorderSettings {
     private boolean forcePlatformServer;
 
     /**
-     * If the metric names should be lower-case..
+     * If the metric names should be lower-case.
      */
     private boolean lowerCaseMetricName;
 
@@ -43,6 +43,16 @@ public class JmxMetricsRecorderSettings {
      * Blacklisted are keys with value value <code>false</code>.
      * <p>
      * Empty map means collect everything.
+     * <p>
+     * Examples of ObjectName patterns are:
+     * <ul>
+     *      <li>*:type=Foo,name=Bar to match names in any domain whose exact set of keys is type=Foo,name=Bar.</li>
+     *      <li>d:type=Foo,name=Bar,* to match names in the domain d that have the keys type=Foo,name=Bar plus zero or more other keys.</li>
+     *      <li>*:type=Foo,name=Bar,* to match names in any domain that has the keys type=Foo,name=Bar plus zero or more other keys.</li>
+     *      <li>d:type=F?o,name=Bar will match e.g. d:type=Foo,name=Bar and d:type=Fro,name=Bar.</li>
+     *      <li>d:type=F*o,name=Bar will match e.g. d:type=Fo,name=Bar and d:type=Frodo,name=Bar.</li>
+     *      <li>d:type=Foo,name="B*" will match e.g. d:type=Foo,name="Bling". Wildcards are recognized even inside quotes, and like other special characters can be escaped with \.</li>
+     * </ul>
      *
      * @see javax.management.ObjectName
      */

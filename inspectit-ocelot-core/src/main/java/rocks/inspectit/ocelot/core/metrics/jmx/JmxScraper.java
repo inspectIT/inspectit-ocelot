@@ -3,6 +3,7 @@ package rocks.inspectit.ocelot.core.metrics.jmx;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.CollectionUtils;
 
 import javax.management.*;
 import javax.management.openmbean.CompositeData;
@@ -17,7 +18,13 @@ import java.util.concurrent.ExecutionException;
 /**
  * <b>IMPORTANT:</b> This class was fully taken from https://github.com/prometheus/jmx_exporter v0.12 and modified.
  * <p>
- * Knows how to scrape the set of MBean servers represented by the {@link MBeanServerConnection} interface.
+ * Applied changes to original:true
+ * <p>
+ * <ul>
+ *     <li>Knows how to scrape the set of MBean servers.</li>
+ *     <li>Added cache for the JmxMBeanPropertyCache as now we need a cache per MBean server</li>
+ *     <li>Added force platform server option</li>
+ * </ul>
  */
 @Slf4j
 class JmxScraper {
@@ -71,16 +78,23 @@ class JmxScraper {
     /**
      * Default constructor.
      *
-     * @param whitelistObjectNames Whitelist object names. To include all mbeans this list need to include one <code>null</code> entry.
+     * @param whitelistObjectNames Whitelist object names. If empty or <code>null</code> it will be considered that everything is scraped.
      * @param blacklistObjectNames Blacklist object names.
      * @param receiver             Listener for the scraped values.
      * @param forcePlatformServer  Force the creation of the platform MBean server before first scrape.
      */
     public JmxScraper(List<ObjectName> whitelistObjectNames, List<ObjectName> blacklistObjectNames, MBeanReceiver receiver, boolean forcePlatformServer) {
         this.receiver = receiver;
-        this.whitelistObjectNames = whitelistObjectNames;
         this.blacklistObjectNames = blacklistObjectNames;
         this.forcePlatformServer = forcePlatformServer;
+
+        // handle whitelist empty situation
+        if (CollectionUtils.isEmpty(whitelistObjectNames)) {
+            this.whitelistObjectNames = new LinkedList<>();
+            this.whitelistObjectNames.add(null);
+        } else {
+            this.whitelistObjectNames = whitelistObjectNames;
+        }
     }
 
     /**
@@ -88,7 +102,7 @@ class JmxScraper {
      * <p>
      * Values are passed to the receiver in a single thread.
      */
-    public void doScrape() throws Exception {
+    public void doScrape() {
         // always start by forcing the platform server
         this.forcePlatformServerIfNeeded();
 
@@ -98,8 +112,7 @@ class JmxScraper {
                 JmxMBeanPropertyCache jmxMBeanPropertyCache = resolveJmxMBeanPropertyCache(server);
                 doScrape(server, jmxMBeanPropertyCache);
             } catch (Exception e) {
-                // TODO
-                log.error("error scraping single server", e);
+                log.warn("Error scraping the MBeanServer with registered domains: {}.", server.getDomains(), e);
             }
         }
     }

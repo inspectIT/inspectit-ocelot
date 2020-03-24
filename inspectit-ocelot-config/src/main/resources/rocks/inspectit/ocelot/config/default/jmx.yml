@@ -3,12 +3,12 @@ inspectit:
     # settings regarding jmx metrics
     jmx:
       enabled: true
-      # specifies the frequency with which the disk metrics should be polled and recorded
+      # specifies the frequency with which the JMX metrics should be polled and recorded
       frequency: ${inspectit.metrics.frequency}
       # switch to enable / disable the creation of the platform server before scraping starts
       force-platform-server: true
       # optionally metric names can be in lower-case
-      lower-case-metric-name: false
+      lower-case-metric-name: true
       # white-listed (true) and black-listed (false) object names
       # by default we blacklist all the object names that provide metrics that are already supported in ocelot
       # examples of ObjectName patterns are (https://docs.oracle.com/javase/8/docs/api/javax/management/ObjectName.html):

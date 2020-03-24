@@ -24,14 +24,27 @@ import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
 import javax.management.ObjectName;
 import java.time.Duration;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * Recorder for the values exposed by the JMX beans. Recorder is using a scarper based on the prometheus jmx_exporter,
+ * however this scraper supports multiple platforms servers as source.
+ */
 @Service
 @Slf4j
 public class JmxMetricsRecorder extends AbstractPollingMetricsRecorder implements JmxScraper.MBeanReceiver {
 
+    /**
+     * Prefix for all metrics exposed by this recorder.
+     */
     private static final String METRIC_NAME_PREFIX = "jvm/jmx/";
 
+    /**
+     * Separator used to construct metric names.
+     *
+     * @see #metricName(String, LinkedHashMap, LinkedList, String)
+     */
     private static final char METRIC_SEPARATOR = '/';
 
     /**
@@ -71,8 +84,7 @@ public class JmxMetricsRecorder extends AbstractPollingMetricsRecorder implement
      */
     @Override
     protected boolean doEnable(InspectitConfig configuration) {
-        // create a new scraper
-        // TODO is this called on every update of every jmx settings update?
+        // create a new scraper, called on every update of every jmx setting
         this.jmxScraper = createScraper(configuration.getMetrics().getJmx(), this);
         this.lowerCaseMetricName = configuration.getMetrics().getJmx().isLowerCaseMetricName();
 
@@ -84,12 +96,9 @@ public class JmxMetricsRecorder extends AbstractPollingMetricsRecorder implement
      * {@inheritDoc}
      */
     @Override
-    protected void takeMeasurement(MetricsSettings config) {
+    protected void takeMeasurement(MetricsSettings metricsSettings) {
         try (Scope commonTagScope = commonTags.withCommonTagScope()) {
             jmxScraper.doScrape();
-        } catch (Exception e) {
-            // TODO
-            log.error("error scraping", e);
         }
     }
 
@@ -97,16 +106,16 @@ public class JmxMetricsRecorder extends AbstractPollingMetricsRecorder implement
      * {@inheritDoc}
      */
     @Override
-    protected Duration getFrequency(MetricsSettings config) {
-        return config.getJmx().getFrequency();
+    protected Duration getFrequency(MetricsSettings metricsSettings) {
+        return metricsSettings.getJmx().getFrequency();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected boolean checkEnabledForConfig(MetricsSettings ms) {
-        return ms.getJmx().isEnabled();
+    protected boolean checkEnabledForConfig(MetricsSettings metricsSettings) {
+        return metricsSettings.getJmx().isEnabled();
     }
 
     /**
@@ -120,7 +129,7 @@ public class JmxMetricsRecorder extends AbstractPollingMetricsRecorder implement
             Measure.MeasureDouble measure = measureManager.getMeasureDouble(metricName).orElseGet(() -> {
                 Map<String, Boolean> tags = beanProperties.keySet().stream()
                         .skip(1)
-                        .collect(Collectors.toMap(k -> k, k -> true));
+                        .collect(Collectors.toMap(Function.identity(), k -> true));
 
                 return registerMeasure(metricName, attrDescription, tags);
             });
@@ -202,18 +211,11 @@ public class JmxMetricsRecorder extends AbstractPollingMetricsRecorder implement
     static JmxScraper createScraper(JmxMetricsRecorderSettings jmx, JmxScraper.MBeanReceiver receiver) {
         Map<String, Boolean> objectNames = jmx.getObjectNames();
 
-        // this is a way to whitelist all
-        List<ObjectName> whitelistAllObjectNames = new LinkedList<ObjectName>();
-        whitelistAllObjectNames.add(null);
+        List<ObjectName> whitelistedObjectNames = new ArrayList<>();
+        List<ObjectName> blacklistedObjectNames = new ArrayList<>();
 
-        if (null == objectNames || objectNames.size() == 0) {
-            // if there is no entries, then collect everything
-            // for this we need one null entry in the whitelist objects
-            return new JmxScraper(whitelistAllObjectNames, Collections.emptyList(), receiver, jmx.isForcePlatformServer());
-        } else {
+        if (null != objectNames) {
             // go through map and collect what should be in which list
-            List<ObjectName> whitelistedObjectNames = new ArrayList<>();
-            List<ObjectName> blacklistedObjectNames = new ArrayList<>();
             objectNames.forEach((objectNameRepresentation, whitelisted) -> {
                 try {
                     ObjectName objectName = new ObjectName(objectNameRepresentation);
@@ -226,11 +228,9 @@ public class JmxMetricsRecorder extends AbstractPollingMetricsRecorder implement
                     log.warn("Error creating the object name from the configuration entry {}.", objectNameRepresentation, e);
                 }
             });
-
-            // if we have no single whitelist object, then settings include only blacklisting
-            // include all then as the whitelist
-            return new JmxScraper(whitelistedObjectNames.size() > 0 ? whitelistedObjectNames : whitelistAllObjectNames, blacklistedObjectNames, receiver, jmx.isForcePlatformServer());
         }
+
+        return new JmxScraper(whitelistedObjectNames, blacklistedObjectNames, receiver, jmx.isForcePlatformServer());
     }
 
 }

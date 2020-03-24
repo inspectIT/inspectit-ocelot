@@ -19,7 +19,7 @@ public class JmxMetricsSysTest extends MetricsSysTestBase {
     @Test
     public void uptime() {
         await().atMost(60, TimeUnit.SECONDS).untilAsserted(() -> {
-            ViewData uptimeViewData = viewManager.getView(View.Name.create("jvm/jmx/java/lang/Runtime/Uptime"));
+            ViewData uptimeViewData = viewManager.getView(View.Name.create("jvm/jmx/java/lang/runtime/uptime"));
 
             assertThat(uptimeViewData).isNotNull();
             assertThat(uptimeViewData.getAggregationMap()).isNotEmpty();
