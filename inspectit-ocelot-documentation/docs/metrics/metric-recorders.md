@@ -13,6 +13,8 @@ Currently the inspectIT Ocelot agent is capable of recording the following metri
 * [Threads](#thread-metrics) (counts and states)
 * [Garbage Collection](#garbage-collection-metrics) (Pause times and collection statistics)
 * [Class Loading](#class-loading-metrics) (loaded and unloaded counts)
+* [JMX](#jmx) (all exposed JMX targets)
+
 
 > The metrics above and their capturing logic are based on the open-source [micrometer](https://micrometer.io/) project.
 
@@ -141,3 +143,54 @@ The available metrics are explained in the table below.
 |---|---|---|---|
 |`loaded`|The total number of currently loaded classes in the JVM|classes|`jvm/classes/loaded`
 |`unloaded`|The total number of unloaded classes since the start of the JVM|classes|`jvm/classes/unloaded`
+
+## JMX
+
+Metrics exposed by MBean objects are recorded by the `inspectit.metrics.jmx` recorder.
+This recorder polls all registered MBean servers with a frequency specified by `inspectit.metrics.classloader.frequency` which defaults to `inspectit.metrics.frequency`.
+The recorder exposes JMX attributes containing values that are non-negative numbers or booleans.
+All values are exposed as last value double metric irrelevant of the concrete number implementation.
+Booleans are converted to `0.0` or `1.0` and non-double numbers to double representations.
+
+Format of the metric name that's being exposed follows the pattern
+```text
+jvm/jmx/domain/bean_property_1_value/attrbute_key_1/../attribute_key_N/attribute_name
+```
+
+and stores additional bean properties as labels.
+All values that are used in constructing the metric name are lowercase by default, but this can be adapted in the settings.
+
+By default, if JMX recorder is enabled, it will force the creation of the default platform MBean server.
+You can change this behavior by setting the value of the property `inspectit.metrics.jmx.force-platform-server` to `false`. 
+
+You can control which MBean should be scraped and exposed as metrics.
+The configuration provides the `inspectit.metrics.jmx.object-names` property that defines a map of object names to be whitelisted or blacklisted.
+In this map the object name pattern is the key, while value is a boolean `true` (whitelisted) or `false` (blacklisted).
+The behavior is following:
+1. If map is empty everything is collected.
+2. If map contains only whitelisted object name entries, only these are scraped.
+3. If map contains only blacklisted object name entries, then everything is scraped except the blacklisted ones.
+4. If map contains both the whitelisted and blacklisted entries, then only the whitelisted ones that are not blacklisted are scraped.
+
+> **Default blacklisted object names**<br>
+> By default, inspectit-ocelot blacklists all the object names that provide metrics that are already collected using other existing metric recorders.:
+>```YAML
+>inspectit:
+>  metrics:
+>    jmx:
+>      object-names:
+>        '[java.lang:type=BufferPool]': false
+>        '[java.lang:type=ClassLoading]': false
+>        '[java.lang:type=GarbageCollector,*]': false
+>        '[java.lang:type=Memory]': false
+>```
+
+All available JMX configuration properties are:
+
+|Property|Description|Default
+|---|---|---|
+|`inspectit.metrics.jmx.enabled`|The switch for enabling/disabling JMX recorder.|`true`
+|`inspectit.metrics.jmx.frequency`|Specifies the frequency with which the JMX metrics should be polled and recorded.|`${inspectit.metrics.frequency}`
+|`inspectit.metrics.jmx.force-platform-server`|The switch to enable or disable the creation of the platform MBean server before scraping starts.|`true`
+|`inspectit.metrics.jmx.lower-case-metric-name`|If `true` records JMX metrics with the lowercase name format.|`true`
+|`inspectit.metrics.jmx.object-names`|Map for whitelisting and blacklisting object names to be scraped. The key should be an object name pattern and value should be `true` (whitelisting) or `false` (blacklisting). More info about the object name patterns can be found in [Java SE API docs](https://docs.oracle.com/javase/7/docs/api/javax/management/ObjectName.html). |see above
