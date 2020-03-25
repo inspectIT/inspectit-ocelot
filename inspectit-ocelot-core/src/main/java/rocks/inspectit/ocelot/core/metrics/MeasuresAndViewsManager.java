@@ -9,11 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
-import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
-import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.config.model.metrics.MetricsSettings;
 import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings;
 import rocks.inspectit.ocelot.config.model.metrics.definition.ViewDefinitionSettings;
+import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
+import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
 
 import javax.annotation.PostConstruct;
@@ -166,24 +166,38 @@ public class MeasuresAndViewsManager {
         if (metricsSettings.isEnabled()) {
             val newMetricDefinitions = metricsSettings.getDefinitions();
 
-            val registeredViews = viewManager.getAllExportedViews()
-                    .stream()
-                    .collect(Collectors.toMap(v -> v.getName().asString(), v -> v));
-            val registeredMeasures = registeredViews.values().stream()
-                    .map(View::getMeasure)
-                    .distinct()
-                    .collect(Collectors.toMap(Measure::getName, m -> m));
-
             newMetricDefinitions.forEach((name, def) -> {
                 val defWithDefaults = def.getCopyWithDefaultsPopulated(name);
                 val oldDef = currentMetricDefinitionSettings.get(name);
                 if (defWithDefaults.isEnabled() && !defWithDefaults.equals(oldDef)) {
-                    addOrUpdateAndCacheMeasureWithViews(name, defWithDefaults, registeredMeasures, registeredViews);
+                    addOrUpdateAndCacheMeasureWithViews(name, defWithDefaults);
                 }
             });
         }
         //TODO: delete removed measures and views as soon as this is possible in Open-Census
     }
+
+    /**
+     * Tries to create a measure based on on the given definition, with checking measures and views reported by {@link #viewManager}.
+     * <p>
+     * If the measure or a view already exists, info messages are printed out
+     *
+     * @param measureName the name of the measure
+     * @param definition  the definition of the measure and its views. The defaults must be already populated using {@link MetricDefinitionSettings#getCopyWithDefaultsPopulated(String)}!
+     * @see #addOrUpdateAndCacheMeasureWithViews(String, MetricDefinitionSettings, Map, Map)
+     */
+    public void addOrUpdateAndCacheMeasureWithViews(String measureName, MetricDefinitionSettings definition) {
+        val registeredViews = viewManager.getAllExportedViews()
+                .stream()
+                .collect(Collectors.toMap(v -> v.getName().asString(), v -> v));
+        val registeredMeasures = registeredViews.values().stream()
+                .map(View::getMeasure)
+                .distinct()
+                .collect(Collectors.toMap(Measure::getName, m -> m));
+
+        this.addOrUpdateAndCacheMeasureWithViews(measureName, definition, registeredMeasures, registeredViews);
+    }
+
 
     /**
      * Tries to create a measure based on the given definition as well as its views.
