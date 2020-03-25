@@ -4,12 +4,11 @@ import { connect } from 'react-redux';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
-import {OverlayPanel} from 'primereact/overlaypanel';
-
-import TimeAgo from 'react-timeago';
-import ConfigurationDownload from '../mappings/ConfigurationDownload';
 import dateformat from 'dateformat';
-import classnames from 'classnames';
+import TimeAgo from 'react-timeago';
+import { map } from 'lodash';
+
+import ConfigurationDownload from '../mappings/ConfigurationDownload';
 import { linkPrefix } from '../../../lib/configuration';
 
 const timeFormatter = (time, unit, suffix) => {
@@ -18,6 +17,74 @@ const timeFormatter = (time, unit, suffix) => {
     return "< " + tens + " seconds " + suffix;
   } else {
     return time + " " + unit + (time > 1 ? "s " : " ") + suffix;
+  }
+}
+
+/**
+ * Component for rendering the agent mapping cell of the data table.
+ */
+class AgentMappingCell extends React.Component {
+
+  state = {
+    showAttributes: false
+  }
+
+  toggleShowAttributes = () => {
+    this.setState({
+      showAttributes: !this.state.showAttributes
+    });
+  }
+
+  render() {
+    const { data: { mappingName, attributes } } = this.props;
+    const { showAttributes } = this.state;
+
+    let name;
+    let classname;
+    if (mappingName) {
+      name = mappingName;
+    } else {
+      name = "no mapping";
+      classname = "no-mapping";
+    }
+
+    return (
+      <div className="this">
+        <style jsx>{`
+        .mapping {
+          display: flex;
+          align-items: stretch;
+        }
+        .mapping-name {
+          flex: 1;
+        }
+        .no-mapping {
+          color: gray;
+          font-style: italic;
+        }
+        .show-attributes {
+          float: right;
+          cursor: pointer;
+        }
+        .attributes {
+          margin-top: 0.5rem;
+          border-left: .25rem solid #ddd;
+          padding-left: .5rem;
+        }
+        `}</style>
+        <div className="mapping">
+          <div className={"mapping-name " + classname}>{name}</div>
+          <a onClick={() => this.toggleShowAttributes()} className="show-attributes">{showAttributes ? "Hide" : "Show"} Attributes</a>
+        </div>
+        {showAttributes && (
+          <div className="attributes">
+            {map(attributes, (value, key) => (
+              <div key={key}><b>{key}:</b> {value}</div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
   }
 }
 
@@ -33,24 +100,21 @@ class StatusTable extends React.Component {
   }
 
   nameTemplate = (rowData) => {
-    const { metaInformation } = rowData;
+    const { metaInformation, attributes, attributes: { service } } = rowData;
 
+    let name = "-";
+    let agentIdElement;
     if (metaInformation) {
-      return this.agentNameTemplate(rowData);
-    } else {
-      return <span>-</span>;
+      if (service) {
+        name = service;
+      }
+      const agentId = metaInformation.agentId;
+      agentIdElement = <span style={{ color: "gray" }}>({agentId})</span>;
     }
-  }
-
-  agentNameTemplate = (rowData) => {
-    const { metaInformation: { agentId }, attributes: { service }, attributes } = rowData;
 
     return (
       <div className="this">
         <style jsx>{`
-        .agent-id {
-          color: gray;
-        }
         .this {
           position: relative;
         }
@@ -64,7 +128,7 @@ class StatusTable extends React.Component {
           border-color: #ddd;
         }
         `}</style>
-        {service} <span className="agent-id">({agentId})</span>
+        {name} {agentIdElement}
 
         <Button
           className="download-button"
@@ -80,10 +144,13 @@ class StatusTable extends React.Component {
     const { metaInformation } = rowData;
 
     let imgColor;
+    let tooltip;
     if (metaInformation) {
       imgColor = "orange";
+      tooltip = "inspectIT Ocelot Agent"
     } else {
       imgColor = "gray";
+      tooltip = "Generic Client"
     }
 
     const imgSrc = linkPrefix + "/static/images/inspectit-ocelot-head_" + imgColor + ".svg";
@@ -96,7 +163,7 @@ class StatusTable extends React.Component {
           margin-right: 0.5rem;
         }
         `}</style>
-        <img className="icon" src={imgSrc} />
+        <img className="icon" title={tooltip} src={imgSrc} />
       </>
     );
   }
@@ -130,37 +197,15 @@ class StatusTable extends React.Component {
     );
   }
 
-  agentMappingTemplate = ({ mappingName }) => {
-    let name;
-    let classname;
-    if (mappingName) {
-      name = mappingName;
-    } else {
-      name = "no mapping";
-      classname = "no-mapping";
-    }
-
+  agentMappingTemplate = (rowData) => {
     return (
-      <div className="this">
-        <style jsx>{`
-      .no-mapping {
-        color: gray;
-        font-style: italic;
-      }
-      .this :global(.attributes-button) {
-        width: 1.5rem;
-        height: 1.5rem;
-        vertical-align: sub;
-        margin-right: 0.5rem;
-      }
-      `}</style>
-        <Button className="attributes-button" icon='pi pi-tag' onClick={(e) => this.op.toggle(e)} />
-        <span className={classname}>{name}</span>
+      <AgentMappingCell data={rowData} />
+    );
+  }
 
-        <OverlayPanel ref={(el) => this.op = el} showCloseIcon={true} dismissable={true}>
-          asdads
-        </OverlayPanel>
-      </div>
+  lastFetchTemplate = ({ lastConfigFetch }) => {
+    return (
+      <TimeAgo date={lastConfigFetch} formatter={timeFormatter} />
     );
   }
 
@@ -202,23 +247,19 @@ class StatusTable extends React.Component {
         .this :global(.p-datatable-tbody) :global(td) {
           border: 0 none;
           cursor: auto;
+          vertical-align: top;
         }  
         `}</style>
-        <DataTable value={agentValues} globalFilter={this.props.filter}>
+        <DataTable value={agentValues} globalFilter={this.props.filter} rowHover>
           <Column body={this.iconTemplate} style={{ width: '34px' }} />
-          <Column field="name" header="Name" body={this.nameTemplate} sortable style={{ width: '350px' }} />
-          <Column field="metaInformation.agentVersion" header="Agent Version" body={this.agentVersionTemplate} sortable style={{ width: '150px' }} />
-          <Column field="metaInformation.javaVersion" header="Java Version" body={this.javaVersionTemplate} sortable style={{ width: '150px' }} />
-          <Column field="metaInformation.startTime" header="Last JVM Restart" body={this.jvmRestartTemplate} sortable style={{ width: '200px' }} />
-
-          {/*<Column header="Attributes" field="attributesSearchString"
-            body={(data) => (<AttributesCell attributes={data.attributes} onDownload={data.mappingName !== '<no mapping>' ? this.configDownload.download : null} />)}
-      />*/}
-          <Column field="mappingName" body={this.agentMappingTemplate} sortable={true} header="Agent Mapping" />
-          <Column field="lastConfigFetch" sortable={true} header="Last Fetch" excludeGlobalFilter={true}
-            body={(data) => (<TimeAgo date={data.lastConfigFetch} formatter={timeFormatter} />)}
-          />
+          <Column header="Name" field="name" body={this.nameTemplate} sortable style={{ width: '400px' }} />
+          <Column header="Agent Version" field="metaInformation.agentVersion" body={this.agentVersionTemplate} sortable style={{ width: '150px' }} />
+          <Column header="Java Version" field="metaInformation.javaVersion" body={this.javaVersionTemplate} sortable style={{ width: '150px' }} />
+          <Column header="Last JVM Restart" field="metaInformation.startTime" body={this.jvmRestartTemplate} sortable style={{ width: '200px' }} />
+          <Column header="Agent Mapping" field="mappingName" body={this.agentMappingTemplate} sortable />
+          <Column header="Last Fetch" field="lastConfigFetch" body={this.lastFetchTemplate} sortable excludeGlobalFilter={true} style={{ width: '200px' }} />
         </DataTable>
+
         <ConfigurationDownload onRef={ref => this.configDownload = ref} />
       </div>
 
