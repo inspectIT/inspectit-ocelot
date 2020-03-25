@@ -4643,10 +4643,10 @@ primeicons@^1.0.0:
   resolved "https://registry.yarnpkg.com/primeicons/-/primeicons-1.0.0.tgz#90061f168ef6227f21f0a7db8204ffa85cd27aec"
   integrity sha512-p/hzIjUVccW4eJPhuORHI3AUkDpqfvCQVrjxbFEejnTEdWY4C8fomVfjiaA9jCu83fSQnBHuRIGB96iAR8R6uA==
 
-primereact@^4.1.2:
-  version "4.1.2"
-  resolved "https://registry.yarnpkg.com/primereact/-/primereact-4.1.2.tgz#db9a78cb4742aee28dfc4c863c7af3ba5c08a565"
-  integrity sha512-NZ9DmsOWzek05RzS54DtsM9b2T65rRyTxNo/EllFyLW3qeKg96Eci5HRlyO1KHu7233IHX6gjJp5JrChS01p8g==
+primereact@^3.1.7:
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/primereact/-/primereact-3.4.0.tgz#cbc0534abd4917355975d0213b612df49f44d880"
+  integrity sha512-XsLkInlYsFSK5/FRAM0JMyJEc+9lyI6feKJLNbQIwpker6mk587T3uwfZd8RYhmUGpj/jKEnZ+3V9tl+PKniAg==
 
 private@^0.1.6:
   version "0.1.8"
