@@ -57,6 +57,7 @@ class AgentMappingCell extends React.Component {
         }
         .mapping-name {
           flex: 1;
+          margin-right: 0.5rem;
         }
         .no-mapping {
           color: gray;
@@ -235,6 +236,10 @@ class StatusTable extends React.Component {
     return (
       <div className="this">
         <style jsx>{`
+        .this :global(.p-datatable) {
+          min-width: 1280px;
+        }
+
         .this :global(.p-datatable) :global(th) {
           border: 0 none;
           text-align: left;
@@ -250,12 +255,12 @@ class StatusTable extends React.Component {
           vertical-align: top;
         }  
         `}</style>
-        <DataTable value={agentValues} globalFilter={this.props.filter} rowHover>
+        <DataTable value={agentValues} globalFilter={this.props.filter} rowHover reorderableColumns>
           <Column body={this.iconTemplate} style={{ width: '34px' }} />
           <Column header="Name" field="name" body={this.nameTemplate} sortable style={{ width: '400px' }} />
           <Column header="Agent Version" field="metaInformation.agentVersion" body={this.agentVersionTemplate} sortable style={{ width: '150px' }} />
           <Column header="Java Version" field="metaInformation.javaVersion" body={this.javaVersionTemplate} sortable style={{ width: '150px' }} />
-          <Column header="Last JVM Restart" field="metaInformation.startTime" body={this.jvmRestartTemplate} sortable style={{ width: '200px' }} />
+          <Column header="Last JVM Restart" field="metaInformation.startTime" body={this.jvmRestartTemplate} sortable style={{ width: '175px' }} />
           <Column header="Agent Mapping" field="mappingName" body={this.agentMappingTemplate} sortable />
           <Column header="Last Fetch" field="lastConfigFetch" body={this.lastFetchTemplate} sortable excludeGlobalFilter={true} style={{ width: '200px' }} />
         </DataTable>

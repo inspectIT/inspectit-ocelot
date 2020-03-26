@@ -48,6 +48,7 @@
       "config-server/log-config"
     ],
     "Breaking Changes": [
+      "breaking-changes/1-2",
       "breaking-changes/1-1",
       "breaking-changes/1-0",
       "breaking-changes/0-6",

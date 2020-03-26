@@ -15,18 +15,30 @@ class StatusView extends React.Component {
     }
 
     render() {
-        const {filter} = this.state; 
+        const { filter } = this.state;
         return (
-            <div className="p-grid p-dir-col p-nogutter" style={{ height: "100%", width: "100%" }}>
-                <div className="p-col-fixed" style={{ width: "100%" }}>
-                    <StatusToolbar filter={filter} onFilterChange={(filter) => this.setState({filter})}/>
+            <>
+                <style jsx>{`
+                .this {
+                    display: flex;
+                    flex-direction: column;
+                    height: 100%;
+                }
+                .data-table {
+                    width: 100%;
+                    overflow-x: auto;
+                    flex: 1;
+                }
+                `}</style>
+                <div className="this">
+                    <div>
+                        <StatusToolbar filter={filter} onFilterChange={(filter) => this.setState({ filter })} />
+                    </div>
+                    <div className="data-table">
+                        <StatusTable filter={filter} />
+                    </div>
                 </div>
-                <div className="p-col" style={{
-                    overflow: "auto"
-                }}>
-                    <StatusTable filter={filter}/>
-                </div>
-            </div>
+            </>
         );
     }
 
