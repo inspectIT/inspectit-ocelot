@@ -148,9 +148,9 @@ public class MethodHookGenerator {
     private List<IHookAction> buildTracingExitActions(RuleTracingSettings tracing) {
         val result = new ArrayList<IHookAction>();
 
-        boolean isSpanStartedOrContinued = tracing.getStartSpan() || !StringUtils.isBlank(tracing.getContinueSpan());
+        boolean isSpanStartedOrContinued = tracing.getStartSpan() || StringUtils.isNotBlank(tracing.getContinueSpan());
 
-        if (!StringUtils.isBlank(tracing.getErrorStatus()) && isSpanStartedOrContinued) {
+        if (StringUtils.isNotBlank(tracing.getErrorStatus()) && isSpanStartedOrContinued) {
             VariableAccessor accessor = variableAccessorFactory.getVariableAccessor(tracing.getErrorStatus());
             result.add(new SetSpanStatusAction(accessor));
         }

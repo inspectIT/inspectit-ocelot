@@ -25,7 +25,7 @@ public class SetSpanStatusAction implements IHookAction {
     @Override
     public void execute(ExecutionContext context) {
         InspectitContextImpl ctx = context.getInspectitContext();
-        if (ctx.enteredSpan()) {
+        if (ctx.hasEnteredSpan()) {
             Object statusValue = errorStatus.get(context);
             if (statusValue != null && !Boolean.FALSE.equals(statusValue)) {
                 Span current = Tracing.getTracer().getCurrentSpan();
@@ -40,6 +40,6 @@ public class SetSpanStatusAction implements IHookAction {
 
     @Override
     public String getName() {
-        return "Set Span Status";
+        return "Span status definition";
     }
 }

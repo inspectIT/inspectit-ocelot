@@ -1,6 +1,5 @@
 package rocks.inspectit.ocelot.core.instrumentation.hook.actions.span;
 
-import io.opencensus.trace.AttributeValue;
 import io.opencensus.trace.Tracing;
 import lombok.AllArgsConstructor;
 import lombok.val;
@@ -36,6 +35,6 @@ public class WriteSpanAttributesAction implements IHookAction {
 
     @Override
     public String getName() {
-        return "Span Attribute Writing";
+        return "Span attribute writing";
     }
 }

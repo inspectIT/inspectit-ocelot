@@ -537,8 +537,9 @@ If a rule does not start a span, the attributes will be written to the first spa
 #### Visualizing Span Errors
 
 Most tracing backends support highlighting of spans which are marked as errors.
-InspectIT Ocelot allows you to configure exactly under which circumstances your spans are interpreted as errors or successes.
-This is done via the `error-status` configuration property:
+InspectIT Ocelot allows you to configure exactly under which circumstances your spans are interpreted
+as errors or successes.
+This is done via the `error-status` configuration property of a rule's tracing section:
 
 ```yaml
 inspectit:
@@ -550,7 +551,7 @@ inspectit:
           error-status: _thrown
 ```
 
-The value of `error-status` can be any value from the context or any [special variable](#input-parameters).
+The value of the `error-status` property can be any value from the context or any [special variable](#input-parameters).
 
 When the instrumented method finishes, Ocelot will read the value of the given variable.
 If the value is neither `null` nor `false`, the span will be marked as an error.
