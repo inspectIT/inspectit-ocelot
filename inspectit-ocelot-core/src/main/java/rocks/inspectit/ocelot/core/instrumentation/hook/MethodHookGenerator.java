@@ -145,29 +145,33 @@ public class MethodHookGenerator {
         }
     }
 
-    private List<IHookAction> buildTracingExitActions(RuleTracingSettings tracing) {
+    @VisibleForTesting
+    List<IHookAction> buildTracingExitActions(RuleTracingSettings tracing) {
         val result = new ArrayList<IHookAction>();
 
         boolean isSpanStartedOrContinued = tracing.getStartSpan() || StringUtils.isNotBlank(tracing.getContinueSpan());
+        if (isSpanStartedOrContinued) {
 
-        if (StringUtils.isNotBlank(tracing.getErrorStatus()) && isSpanStartedOrContinued) {
-            VariableAccessor accessor = variableAccessorFactory.getVariableAccessor(tracing.getErrorStatus());
-            result.add(new SetSpanStatusAction(accessor));
+            if (StringUtils.isNotBlank(tracing.getErrorStatus())) {
+                VariableAccessor accessor = variableAccessorFactory.getVariableAccessor(tracing.getErrorStatus());
+                result.add(new SetSpanStatusAction(accessor));
+            }
+
+            val attributes = tracing.getAttributes();
+            if (!attributes.isEmpty()) {
+                Map<String, VariableAccessor> attributeAccessors = new HashMap<>();
+                attributes.forEach((attribute, variable) -> attributeAccessors.put(attribute, variableAccessorFactory.getVariableAccessor(variable)));
+                IHookAction endTraceAction = new WriteSpanAttributesAction(attributeAccessors, obfuscationManager.obfuscatorySupplier());
+                IHookAction actionWithConditions = ConditionalHookAction.wrapWithConditionChecks(tracing.getAttributeConditions(), endTraceAction, variableAccessorFactory);
+                result.add(actionWithConditions);
+            }
+
+            if (tracing.getEndSpan()) {
+                val endSpanAction = new EndSpanAction(ConditionalHookAction.getAsPredicate(tracing.getEndSpanConditions(), variableAccessorFactory));
+                result.add(endSpanAction);
+            }
         }
 
-        val attributes = tracing.getAttributes();
-        if (!attributes.isEmpty()) {
-            Map<String, VariableAccessor> attributeAccessors = new HashMap<>();
-            attributes.forEach((attribute, variable) -> attributeAccessors.put(attribute, variableAccessorFactory.getVariableAccessor(variable)));
-            IHookAction endTraceAction = new WriteSpanAttributesAction(attributeAccessors, obfuscationManager.obfuscatorySupplier());
-            IHookAction actionWithConditions = ConditionalHookAction.wrapWithConditionChecks(tracing.getAttributeConditions(), endTraceAction, variableAccessorFactory);
-            result.add(actionWithConditions);
-        }
-
-        if (tracing.getEndSpan() && isSpanStartedOrContinued) {
-            val endSpanAction = new EndSpanAction(ConditionalHookAction.getAsPredicate(tracing.getEndSpanConditions(), variableAccessorFactory));
-            result.add(endSpanAction);
-        }
 
         return result;
     }
