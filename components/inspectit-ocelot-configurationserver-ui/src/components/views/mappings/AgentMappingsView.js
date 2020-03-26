@@ -7,7 +7,6 @@ import EditDialog from './dialogs/EditDialog';
 import DownloadDialog from './dialogs/DownloadDialog';
 
 /** View to display and change mappings */
-
 class AgentMappingView extends React.Component {
   state = {
     mappingsFilter: '',
@@ -17,9 +16,11 @@ class AgentMappingView extends React.Component {
   handleFilterChange = (newFilter) => this.setState({ mappingsFilter: newFilter });
 
   showEditMappingDialog = (selectedMapping = null) => this.setState({ isEditDialogShown: true, selectedMapping: selectedMapping });
+
   hideEditMappingDialog = () => this.setState({ isEditDialogShown: false, selectedMapping: null });
 
   showDownloadDialog = () => this.setState({ isDownloadDialogShown: true });
+
   hideDownloadDialog = () => this.setState({ isDownloadDialogShown: false });
 
   render() {
@@ -50,6 +51,7 @@ class AgentMappingView extends React.Component {
           <MappingsTable
             filterValue={this.state.mappingsFilter}
             onEditMapping={this.showEditMappingDialog}
+            onDuplicateMapping={this.showEditMappingDialog}
             maxHeight={`calc(${contentHeight} - 2.5em)`}
           />
         </div>
