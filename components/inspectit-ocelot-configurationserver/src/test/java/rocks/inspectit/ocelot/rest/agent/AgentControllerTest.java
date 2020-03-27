@@ -12,6 +12,7 @@ import rocks.inspectit.ocelot.agentconfiguration.AgentConfiguration;
 import rocks.inspectit.ocelot.agentconfiguration.AgentConfigurationManager;
 import rocks.inspectit.ocelot.agentstatus.AgentStatusManager;
 
+import java.util.Collections;
 import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,34 +39,33 @@ public class AgentControllerTest {
                     .when(configManager).getConfiguration(anyMap());
 
             HashMap<String, String> attributes = new HashMap<>();
-            ResponseEntity<String> result = controller.fetchConfiguration(attributes);
+            ResponseEntity<String> result = controller.fetchConfiguration(attributes, Collections.emptyMap());
 
             assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-            verify(statusManager).notifyAgentConfigurationFetched(same(attributes), isNull());
+            verify(statusManager).notifyAgentConfigurationFetched(same(attributes), eq(Collections.emptyMap()), isNull());
         }
 
         @Test
         public void mappingFound() throws Exception {
-            AgentConfiguration config = new AgentConfiguration(null, "foo : bar");
-            doReturn(config)
-                    .when(configManager).getConfiguration(anyMap());
+            AgentConfiguration config = AgentConfiguration.builder().configYaml("foo : bar").build();
+            doReturn(config).when(configManager).getConfiguration(anyMap());
 
             HashMap<String, String> attributes = new HashMap<>();
-            ResponseEntity<String> result = controller.fetchConfiguration(attributes);
+            ResponseEntity<String> result = controller.fetchConfiguration(attributes, Collections.emptyMap());
 
             assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(result.getBody()).isEqualTo("foo : bar");
-            verify(statusManager).notifyAgentConfigurationFetched(same(attributes), same(config));
+            verify(statusManager).notifyAgentConfigurationFetched(same(attributes), eq(Collections.emptyMap()), same(config));
         }
 
 
         @Test
         public void etagPresent() throws Exception {
-            doReturn(new AgentConfiguration(null, "foo : bar"))
-                    .when(configManager).getConfiguration(anyMap());
+            AgentConfiguration config = AgentConfiguration.builder().configYaml("foo : bar").build();
+            doReturn(config).when(configManager).getConfiguration(anyMap());
 
-            ResponseEntity<String> firstResult = controller.fetchConfiguration(new HashMap<>());
-            ResponseEntity<String> secondResult = controller.fetchConfiguration(new HashMap<>());
+            ResponseEntity<String> firstResult = controller.fetchConfiguration(new HashMap<>(), Collections.emptyMap());
+            ResponseEntity<String> secondResult = controller.fetchConfiguration(new HashMap<>(), Collections.emptyMap());
 
             assertThat(firstResult.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(firstResult.getBody()).isEqualTo("foo : bar");

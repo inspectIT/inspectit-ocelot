@@ -9,16 +9,17 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationContext;
-import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.InternalSettings;
+import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.instrumentation.config.InstrumentationConfigurationResolver;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.ClassInstrumentationConfiguration;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.InstrumentationRule;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.InstrumentationScope;
 import rocks.inspectit.ocelot.core.instrumentation.event.ClassInstrumentedEvent;
 import rocks.inspectit.ocelot.core.instrumentation.event.IClassDefinitionListener;
+import rocks.inspectit.ocelot.core.instrumentation.injection.JigsawModuleInstrumenter;
 import rocks.inspectit.ocelot.core.instrumentation.special.ClassLoaderDelegation;
 import rocks.inspectit.ocelot.core.instrumentation.special.SpecialSensor;
 import rocks.inspectit.ocelot.core.selfmonitoring.SelfMonitoringService;
@@ -51,6 +52,9 @@ public class AsyncClassTransformerTest {
 
     @Mock
     ClassLoaderDelegation classLoaderDelegation;
+
+    @Mock
+    JigsawModuleInstrumenter moduleManager;
 
     @InjectMocks
     AsyncClassTransformer transformer = new AsyncClassTransformer();

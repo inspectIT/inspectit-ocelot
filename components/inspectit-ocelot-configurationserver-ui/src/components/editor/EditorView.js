@@ -1,12 +1,13 @@
-import React from 'react'
+import dynamic from 'next/dynamic';
 import PropTypes from 'prop-types';
+import React from 'react';
+import editorConfig from '../../data/yaml-editor-config.json';
 import EditorToolbar from './EditorToolbar';
-
-import dynamic from 'next/dynamic'
-const AceEditor = dynamic(() => import('./AceEditor'), { ssr: false });
-
-import editorConfig from '../../data/yaml-editor-config.json'
 import Notificationbar from './Notificationbar';
+
+const AceEditor = dynamic(() => import('./AceEditor'), { ssr: false });
+const TreeTableEditor = dynamic(() => import('./TreeTableEditor'), { ssr: false });
+
 
 /**
  * Editor view consisting of the AceEditor and a toolbar.
@@ -19,13 +20,14 @@ class EditorView extends React.Component {
     }
 
     render() {
-        const { value, showEditor, hint, onRefresh, onChange, onCreate, isRefreshing, enableButtons, isErrorNotification, notificationIcon, notificationText, canSave, loading, children, readOnly } = this.props;
+        const { value, schema, showEditor, hint, onRefresh, onChange, onCreate, isRefreshing, enableButtons, isErrorNotification, notificationIcon, notificationText, canSave, loading, children, readOnly, showVisualConfigurationView, onToggleVisualConfigurationView } = this.props;
 
         return (
             <div className="this p-grid p-dir-col p-nogutter">
                 <style jsx>{`
                 .this {
                     flex: 1;
+                    flex-wrap: nowrap;
                 }
                 .selection-information {
                     display: flex;
@@ -36,6 +38,9 @@ class EditorView extends React.Component {
                 }
                 .editor-container {
                     position: relative;
+                }
+                .visual-editor-container {
+                    display: flex;
                 }
                 .loading-overlay {
                     position: absolute;
@@ -59,24 +64,41 @@ class EditorView extends React.Component {
                         isRefreshing={isRefreshing}
                         onSave={this.handleSave}
                         onSearch={() => this.editor.executeCommand("find")}
-                        onHelp={() => this.editor.showShortcuts()}>
+                        onHelp={() => this.editor.showShortcuts()}
+                        visualConfig={showVisualConfigurationView}
+                        onVisualConfigChange={onToggleVisualConfigurationView}
+                    >
                         {children}
                     </EditorToolbar>
                 </div>
-                <div className="p-col editor-container">
-                    {showEditor ?
+                {
+                    showEditor && !showVisualConfigurationView &&
+                    <div className="p-col editor-container">
                         <AceEditor editorRef={(editor) => this.editor = editor} onCreate={onCreate} mode="yaml" theme="cobalt" options={editorConfig} value={value} onChange={onChange} canSave={canSave} onSave={this.handleSave} readOnly={readOnly} />
-                        :
+                    </div>
+                }
+                {
+                    showEditor && showVisualConfigurationView &&
+                    <div className="p-col visual-editor-container">
+                        <TreeTableEditor value={value} schema={schema} loading={loading}/>
+                    </div>
+                }
+                {
+                    !showEditor &&
+                    <div className="p-col">
                         <div className="selection-information">
                             <div>{hint}</div>
                         </div>
-                    }
-                    {loading &&
+                    </div>
+                }
+                {
+                    loading &&
+                    <div className="p-col">
                         <div className="loading-overlay">
                             <i className="pi pi-spin pi-spinner" style={{ 'fontSize': '2em' }}></i>
                         </div>
-                    }
-                </div>
+                    </div>
+                }
                 <div className="p-col-fixed">
                     {notificationText ? <Notificationbar text={notificationText} isError={isErrorNotification} icon={notificationIcon} /> : null}
                 </div>
@@ -88,6 +110,8 @@ class EditorView extends React.Component {
 EditorView.propTypes = {
     /** The value of the editor */
     value: PropTypes.string,
+    /** The configuration schema */
+    schema: PropTypes.object,
     /** Whether the editor should be shown or hidden. */
     showEditor: PropTypes.bool,
     /** The hint which will be shown if the editor is hidden. */
@@ -113,14 +137,19 @@ EditorView.propTypes = {
     /** Whether the editor should show an loading indicator */
     loading: PropTypes.bool,
     /** Wheter the editor should be in read-only mode */
-    readOnly: PropTypes.bool
+    readOnly: PropTypes.bool,
+    /** Weather a visual configuration view is active showing config properties in a tree */
+    showVisualConfigurationView: PropTypes.bool,
+    /** Function to react on the change of the enable disable visual configuration view */
+    onToggleVisualConfigurationView: PropTypes.func,
 }
 
 EditorView.defaultProps = {
     showEditor: true,
     enableButtons: true,
     canSave: true,
-    loading: false
+    loading: false,
+    showVisualConfigurationView: false,
 };
 
 export default EditorView;

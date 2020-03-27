@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.val;
 import org.springframework.util.CollectionUtils;
 import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings;
+import rocks.inspectit.ocelot.config.model.metrics.jmx.JmxMetricsRecorderSettings;
 import rocks.inspectit.ocelot.config.validation.AdditionalValidation;
 import rocks.inspectit.ocelot.config.validation.AdditionalValidations;
 import rocks.inspectit.ocelot.config.validation.ViolationBuilder;
@@ -75,6 +76,13 @@ public class MetricsSettings {
      */
     @Valid
     private StandardPollingMetricsRecorderSettings memory;
+
+    /**
+     * Settings for {@link rocks.inspectit.ocelot.core.metrics.system.JxmMetricsRecorder}
+     */
+    @Valid
+    @NotNull
+    private JmxMetricsRecorderSettings jmx;
 
     @AdditionalValidation
     public void noDuplicateViewNames(ViolationBuilder vios) {

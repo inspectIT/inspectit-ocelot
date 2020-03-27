@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.agentconfiguration;
 
+import lombok.Builder;
 import lombok.Value;
 import org.springframework.util.DigestUtils;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
@@ -28,7 +29,8 @@ public class AgentConfiguration {
      */
     private String hash;
 
-    public AgentConfiguration(AgentMapping mapping, String configYaml) {
+    @Builder
+    private AgentConfiguration(AgentMapping mapping, String configYaml) {
         this.mapping = mapping;
         this.configYaml = configYaml;
         hash = DigestUtils.md5DigestAsHex(configYaml.getBytes(Charset.defaultCharset()));

@@ -35,7 +35,10 @@
       "instrumentation/process"
     ],
     "End User Monitoring": [
-      "enduser-monitoring/enduser-monitoring-server"
+      "enduser-monitoring/enduser-monitoring-server",
+      "enduser-monitoring/eum-server-setup",
+      "enduser-monitoring/eum-server-configuration",
+      "enduser-monitoring/install-eum-agent"
     ],
     "Configuration Server": [
       "config-server/overview",
@@ -45,6 +48,7 @@
       "config-server/log-config"
     ],
     "Breaking Changes": [
+      "breaking-changes/1-2",
       "breaking-changes/1-1",
       "breaking-changes/1-0",
       "breaking-changes/0-6",

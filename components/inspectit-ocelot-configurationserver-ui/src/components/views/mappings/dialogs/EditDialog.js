@@ -100,8 +100,7 @@ class EditMappingDialog extends React.Component {
   componentWillReceiveProps(nextProps) {
     if (!nextProps.mapping) {
       this.setState({ isNewMapping: true });
-    }
-    else {
+    } else {
       this.setState(buildStateObject(nextProps.mapping));
     }
   }
@@ -216,11 +215,13 @@ const buildStateObject = (mapping) => {
       }
     )
   }
+
+  const isNew = Boolean(mapping.isNew);
+
   return {
-    name: mapping.name,
-    sources: cloneDeep(mapping.sources),
+    ...cloneDeep(mapping),
     attributes: attributeArray,
-    isNewMapping: false
+    isNewMapping: isNew
   }
 }
 

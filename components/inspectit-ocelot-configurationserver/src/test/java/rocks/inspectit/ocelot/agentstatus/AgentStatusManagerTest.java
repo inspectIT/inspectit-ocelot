@@ -12,13 +12,17 @@ import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 
 import java.time.Duration;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 @ExtendWith(MockitoExtension.class)
 public class AgentStatusManagerTest {
+
+    public static final String HEADER_AGENT_ID = "x-ocelot-agent-id";
 
     @InjectMocks
     AgentStatusManager manager;
@@ -36,15 +40,39 @@ public class AgentStatusManagerTest {
     class NotifyAgentConfigurationFetched {
 
         @Test
+        void testWithAgentIdHeader() {
+            AgentMapping agentMapping = AgentMapping.builder()
+                    .name("test-conf")
+                    .build();
+            AgentConfiguration config = AgentConfiguration.builder()
+                    .mapping(agentMapping)
+                    .configYaml("")
+                    .build();
+            Map<String, String> attributes = ImmutableMap.of("service", "test");
+
+            manager.notifyAgentConfigurationFetched(attributes, Collections.singletonMap(HEADER_AGENT_ID, "aid"), config);
+
+            assertThat(manager.getAgentStatuses())
+                    .hasSize(1)
+                    .anySatisfy(status -> {
+                        assertThat(status.getAttributes()).isEqualTo(attributes);
+                        assertThat(status.getMappingName()).isEqualTo("test-conf");
+                        assertThat(status.getMetaInformation().getAgentId()).isEqualTo("aid");
+                        assertThat(status.getLastConfigFetch()).isNotNull();
+                    });
+        }
+
+        @Test
         void testNoMappingFound() {
             Map<String, String> attributes = ImmutableMap.of("service", "test");
-            manager.notifyAgentConfigurationFetched(attributes, null);
+            manager.notifyAgentConfigurationFetched(attributes, Collections.emptyMap(), null);
 
             assertThat(manager.getAgentStatuses())
                     .hasSize(1)
                     .anySatisfy(status -> {
                         assertThat(status.getAttributes()).isEqualTo(attributes);
                         assertThat(status.getMappingName()).isNull();
+                        assertThat(status.getMetaInformation()).isNull();
                         assertThat(status.getLastConfigFetch()).isNotNull();
                     });
         }
@@ -52,13 +80,16 @@ public class AgentStatusManagerTest {
 
         @Test
         void testMappingFound() {
+            AgentMapping agentMapping = AgentMapping.builder()
+                    .name("test-conf")
+                    .build();
+            AgentConfiguration conf = AgentConfiguration.builder()
+                    .mapping(agentMapping)
+                    .configYaml("")
+                    .build();
             Map<String, String> attributes = ImmutableMap.of("service", "test");
-            AgentConfiguration conf = new AgentConfiguration(
-                    AgentMapping.builder()
-                            .name("test-conf")
-                            .build(), "");
 
-            manager.notifyAgentConfigurationFetched(attributes, conf);
+            manager.notifyAgentConfigurationFetched(attributes, Collections.emptyMap(), conf);
 
             assertThat(manager.getAgentStatuses())
                     .hasSize(1)
@@ -71,13 +102,16 @@ public class AgentStatusManagerTest {
 
         @Test
         void testOverriding() throws Exception {
+            AgentMapping agentMapping = AgentMapping.builder()
+                    .name("test-conf")
+                    .build();
+            AgentConfiguration conf = AgentConfiguration.builder()
+                    .mapping(agentMapping)
+                    .configYaml("")
+                    .build();
             Map<String, String> attributes = ImmutableMap.of("service", "test");
-            AgentConfiguration conf = new AgentConfiguration(
-                    AgentMapping.builder()
-                            .name("test-conf")
-                            .build(), "");
 
-            manager.notifyAgentConfigurationFetched(attributes, null);
+            manager.notifyAgentConfigurationFetched(attributes, Collections.emptyMap(), null);
 
             assertThat(manager.getAgentStatuses())
                     .hasSize(1)
@@ -91,7 +125,7 @@ public class AgentStatusManagerTest {
 
             Thread.sleep(1);
 
-            manager.notifyAgentConfigurationFetched(attributes, conf);
+            manager.notifyAgentConfigurationFetched(attributes, Collections.emptyMap(), conf);
 
             assertThat(manager.getAgentStatuses())
                     .hasSize(1)

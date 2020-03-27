@@ -27,7 +27,7 @@ public class WriteSpanAttributesAction implements IHookAction {
             for (val entry : attributeAccessors.entrySet()) {
                 Object value = entry.getValue().get(context);
                 if (value != null) {
-                    obfuscatorySupplier.get().putSpanAttribute(span, entry.getKey(), value.toString());
+                    obfuscatorySupplier.get().putSpanAttribute(span, entry.getKey(), value);
                 }
             }
         }

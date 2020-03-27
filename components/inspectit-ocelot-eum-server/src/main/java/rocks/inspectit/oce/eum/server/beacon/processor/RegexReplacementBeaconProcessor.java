@@ -43,24 +43,38 @@ public class RegexReplacementBeaconProcessor implements BeaconProcessor {
     @Override
     public Beacon process(Beacon beacon) {
         Map<String, String> newTags = new HashMap<>();
+
         for (RegexDerivedTag derivedTag : derivedTags) {
             String input = newTags.get(derivedTag.getInputBeaconField());
             if (input == null) {
                 input = beacon.get(derivedTag.getInputBeaconField());
             }
-            if (input != null) {
-                Pattern regex = derivedTag.getRegex();
-                if (regex != null) {
-                    String result = regexReplaceAll(input, regex, derivedTag.getReplacement(), derivedTag.isKeepIfNoMatch());
-                    if (result != null) {
-                        newTags.put(derivedTag.getTagName(), result);
-                    }
-                } else {
-                    newTags.put(derivedTag.getTagName(), input);
-                }
+
+            String tagValue = deriveTag(derivedTag, input);
+            if (tagValue != null) {
+                newTags.put(derivedTag.getTagName(), tagValue);
             }
         }
+
         return beacon.merge(newTags);
+    }
+
+    private String deriveTag(RegexDerivedTag tag, String input) {
+        if (input == null) {
+            return null;
+        }
+
+        Pattern regex = tag.getRegex();
+        if (regex != null) {
+            try {
+                return regexReplaceAll(input, regex, tag.getReplacement(), tag.isKeepIfNoMatch());
+            } catch (Exception ex) {
+                log.error("Could not derive beacon tag value <{}> of input string <{}>!", tag.getTagName(), input, tag.getReplacement(), ex);
+                return null;
+            }
+        } else {
+            return input;
+        }
     }
 
     private String regexReplaceAll(String input, Pattern regex, String replacement, boolean keepIfNoMatch) {
