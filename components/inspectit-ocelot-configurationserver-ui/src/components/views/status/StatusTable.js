@@ -1,5 +1,4 @@
 import React from 'react';
-import { connect } from 'react-redux';
 
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
@@ -219,7 +218,7 @@ class StatusTable extends React.Component {
   }
 
   render() {
-    const { agents } = this.props;
+    const { data: agents } = this.props;
     const agentValues = agents.map((agent) => {
       //build a dummy string to allow filtering
       const attributesSearchString =
@@ -272,11 +271,4 @@ class StatusTable extends React.Component {
   }
 }
 
-function mapStateToProps(state) {
-  const { agents } = state.agentStatus;
-  return {
-    agents
-  }
-}
-
-export default connect(mapStateToProps, null)(StatusTable);
+export default StatusTable;
