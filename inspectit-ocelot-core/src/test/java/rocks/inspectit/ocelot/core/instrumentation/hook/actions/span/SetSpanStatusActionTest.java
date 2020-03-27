@@ -75,5 +75,17 @@ public class SetSpanStatusActionTest {
             verifyNoMoreInteractions(span);
         }
 
+        @Test
+        void noSpanEntered() {
+            SetSpanStatusAction action = new SetSpanStatusAction((ctx) -> new Throwable());
+            doReturn(false).when(ctx).hasEnteredSpan();
+
+            try (Scope spanScope = Tracing.getTracer().withSpan(span)) {
+                action.execute(executionContext);
+            }
+
+            verifyZeroInteractions(span);
+        }
+
     }
 }
