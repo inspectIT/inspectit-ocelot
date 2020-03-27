@@ -91,7 +91,7 @@ public class InspectitContextImplTest {
             Span mySpan = Tracing.getTracer().spanBuilder("blub").startSpan();
 
             InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(new HashMap<>(), propagation, false);
-            assertThat(ctx.enteredSpan()).isFalse();
+            assertThat(ctx.hasEnteredSpan()).isFalse();
 
             ctx.enterSpan(mySpan);
 
@@ -99,7 +99,7 @@ public class InspectitContextImplTest {
 
             ctx.makeActive();
 
-            assertThat(ctx.enteredSpan()).isTrue();
+            assertThat(ctx.hasEnteredSpan()).isTrue();
             assertThat(Tracing.getTracer().getCurrentSpan()).isSameAs(mySpan);
 
             ctx.close();

@@ -73,6 +73,7 @@ public class MethodHookConfigurationResolver {
             resolveEndSpan(tracingRules, builder);
             resolveContinueSpan(tracingRules, builder);
             builder.storeSpan(getAndDetectConflicts(tracingRules, r -> r.getTracing().getStoreSpan(), s -> !StringUtils.isEmpty(s), "store span data key"));
+            builder.errorStatus(getAndDetectConflicts(tracingRules, r -> r.getTracing().getErrorStatus(), s -> !StringUtils.isEmpty(s), "error-status data key"));
             resolveSpanAttributeWriting(tracingRules, builder);
 
             result.tracing(builder.build());

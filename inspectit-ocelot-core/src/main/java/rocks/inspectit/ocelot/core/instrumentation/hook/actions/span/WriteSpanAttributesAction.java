@@ -35,6 +35,6 @@ public class WriteSpanAttributesAction implements IHookAction {
 
     @Override
     public String getName() {
-        return "Span Attribute Writing";
+        return "Span attribute writing";
     }
 }
