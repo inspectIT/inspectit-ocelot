@@ -416,8 +416,9 @@ Note that <code>data-tags</code> have higher priority than the <code>constant-ta
 We advise to migrate to the new configuration style immediately.</p>
 <p>Due to the way configuration loading works, the short notation will always take precedence over the explicit notation. This means that you cannot override settings made with the short-notation by using the explicit notation.</p>
 </div></div><h3><a class="anchor" aria-hidden="true" id="collecting-traces"></a><a href="#collecting-traces" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Collecting Traces</h3>
-<p>The inspectIT Ocelot agent allows you to record method invocations as <a href="https://opencensus.io/tracing/span/">OpenCensus spans</a>.
-In order to make your collected spans visible, you must first set up a <a href="/inspectit-ocelot/docs/next/tracing/trace-exporters">trace exporter</a>.</p>
+<p>The inspectIT Ocelot agent allows you to record method invocations as <a href="https://opencensus.io/tracing/span/">OpenCensus spans</a>.</p>
+<h4><a class="anchor" aria-hidden="true" id="tracing-methods"></a><a href="#tracing-methods" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Tracing Methods</h4>
+<p>In order to make your collected spans visible, you must first set up a <a href="/inspectit-ocelot/docs/next/tracing/trace-exporters">trace exporter</a>.</p>
 <p>Afterwards you can define that all methods matching a certain rule will be traced:</p>
 <pre><code class="hljs css language-yaml"><span class="hljs-attr">inspectit:</span>
   <span class="hljs-attr">instrumentation:</span>
@@ -426,7 +427,8 @@ In order to make your collected spans visible, you must first set up a <a href="
         <span class="hljs-attr">tracing:</span>
           <span class="hljs-attr">start-span:</span> <span class="hljs-literal">true</span>
 </code></pre>
-<p>For example, using the previous configuration snippet, each method that matches the scope definition of the <code>example_rule</code> rule will appear within a trace. Its appearance can be customized using the following properties which can be set in the rule's <code>tracing</code> section.</p>
+<p>For example, using the previous configuration snippet, each method that matches the scope definition of the <code>example_rule</code> rule will appear within a trace.
+Its appearance can be customized using the following properties which can be set in the rule's <code>tracing</code> section.</p>
 <table>
 <thead>
 <tr><th>Property</th><th>Default</th><th>Description</th></tr>
@@ -453,6 +455,7 @@ In order to make your collected spans visible, you must first set up a <a href="
 <blockquote>
 <p>The name must exist at the end of the entry section and cannot be set in the exit section.</p>
 </blockquote>
+<h4><a class="anchor" aria-hidden="true" id="trace-sampling"></a><a href="#trace-sampling" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Trace Sampling</h4>
 <p>It is often desirable to not capture every trace, but instead <a href="https://opencensus.io/tracing/sampling/">sample</a> only a subset.
 This can be configured using the <code>sample-probability</code> setting under the <code>tracing</code> section:</p>
 <pre><code class="hljs css language-yaml"><span class="hljs-attr">inspectit:</span>
@@ -468,6 +471,7 @@ Instead of specifying a fixed value, you can also specify a data key here, just 
 In this case, the value from the given data key is read and used as sampling probability.
 This allows you for example to vary the sample probability based on the HTTP url.</p>
 <p>If no sample probability is defined for a rule, the <a href="/inspectit-ocelot/docs/next/tracing/tracing">default probability</a> is used.</p>
+<h4><a class="anchor" aria-hidden="true" id="adding-attributes"></a><a href="#adding-attributes" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Adding Attributes</h4>
 <p>Another useful property of spans is that you can attach any additional information in form of attributes.
 In most tracing backends such as ZipKin and Jaeger, you can search your traces based on attributes.
 The example below shows how you can define attributes:</p>
@@ -484,9 +488,28 @@ The example below shows how you can define attributes:</p>
 </code></pre>
 <p>The attributes property maps the names of attributes to data keys.
 After the rule's exit phase, the corresponding data keys are read and attached as attributes to the current span.</p>
-<p>Note that a rule does not have to start a span for attatching attributes.
+<p>Note that a rule does not have to start a span for attaching attributes.
 If a rule does not start a span, the attributes will be written to the first span opened by any method on the current call stack.</p>
-<p>It is also possible to conditionalize the span starting as well as the attribute writing:</p>
+<h4><a class="anchor" aria-hidden="true" id="visualizing-span-errors"></a><a href="#visualizing-span-errors" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Visualizing Span Errors</h4>
+<p>Most tracing backends support highlighting of spans which are marked as errors.
+InspectIT Ocelot allows you to configure exactly under which circumstances your spans are interpreted
+as errors or successes.
+This is done via the <code>error-status</code> configuration property of a rule's tracing section:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">inspectit:</span>
+  <span class="hljs-attr">instrumentation:</span>
+    <span class="hljs-attr">rules:</span>
+      <span class="hljs-attr">example_rule:</span>
+        <span class="hljs-attr">tracing:</span>
+          <span class="hljs-attr">start-span:</span> <span class="hljs-literal">true</span>
+          <span class="hljs-attr">error-status:</span> <span class="hljs-string">_thrown</span>
+</code></pre>
+<p>The value of the <code>error-status</code> property can be any value from the context or any <a href="#input-parameters">special variable</a>.</p>
+<p>When the instrumented method finishes, Ocelot will read the value of the given variable.
+If the value is neither <code>null</code> nor <code>false</code>, the span will be marked as an error.</p>
+<p>In the example above, the special variable <code>_thrown</code> is used to define the error status.
+This means if <code>_thrown</code> is not null (which means the method threw an exception), the span will be marked as error.</p>
+<h4><a class="anchor" aria-hidden="true" id="adding-span-conditions"></a><a href="#adding-span-conditions" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Adding Span Conditions</h4>
+<p>It is possible to conditionalize the span starting as well as the attribute writing:</p>
 <pre><code class="hljs css language-yaml"><span class="hljs-attr">inspectit:</span>
   <span class="hljs-attr">instrumentation:</span>
     <span class="hljs-attr">rules:</span>
@@ -507,7 +530,9 @@ If a rule does not start a span, the attributes will be written to the first spa
 <p>If any <code>start-span-conditions</code> are defined, a span will only be created when all conditions are met.
 Analogous to this, attributes will only be written if each condition defined in <code>attribute-conditions</code> is fulfilled.
 The conditions that can be defined are equal to the ones of actions, thus, please see the <a href="#adding-conditions">action conditions description</a> for detailed information.</p>
-<p>With the previous shown settings, it is possible to add an instrumentation which creates exactly one span per invocation of an instrumented method. Especially in asynchronous scenarios, this might not be the desired behaviour:
+<h4><a class="anchor" aria-hidden="true" id="tracing-asynchronous-invocations"></a><a href="#tracing-asynchronous-invocations" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Tracing Asynchronous Invocations</h4>
+<p>With the previous shown settings, it is possible to add an instrumentation which creates exactly one span per invocation of an instrumented method.
+Especially in asynchronous scenarios, this might not be the desired behaviour:
 For these cases inspectIT Ocelot offers the possibility to record multiple method invocations into a single span.
 The resulting span then has the following properties:</p>
 <ul>
@@ -538,7 +563,7 @@ By setting <code>end-span</code> to false, the span is kept open instead. It can
 In this case, the rule will first attempt to continue the existing span. Only if this fails (e.g. because the specified span does not exist yet or the conditions are not met) a new span is started.</p>
 <p>Again, conditions for the span continuing and span ending can be specified just like for the span starting.
 The properties <code>continue-span-conditions</code> and <code>end-span-conditions</code> work just like <code>start-span-conditions</code>.</p>
-</span></div></article></div><div class="docLastUpdate"><em>Last updated on 2020-2-25 by Ivan Senic</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/next/instrumentation/scopes"><span class="arrow-prev">← </span><span>Scopes</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/next/instrumentation/special-sensors"><span>Special Sensors</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#data-propagation">Data Propagation</a><ul class="toc-headings"><li><a href="#defining-the-behaviour">Defining the Behaviour</a></li><li><a href="#interaction-with-opencensus-tags">Interaction with OpenCensus Tags</a></li></ul></li><li><a href="#actions">Actions</a><ul class="toc-headings"><li><a href="#input-parameters">Input Parameters</a></li><li><a href="#multiple-statements-and-imports">Multiple statements and Imports</a></li></ul></li><li><a href="#defining-rules">Defining Rules</a><ul class="toc-headings"><li><a href="#invoking-actions">Invoking Actions</a></li><li><a href="#collecting-metrics">Collecting Metrics</a></li><li><a href="#collecting-traces">Collecting Traces</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2020 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</span></div></article></div><div class="docLastUpdate"><em>Last updated on 2020-3-27 by Jonas Kunz</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/next/instrumentation/scopes"><span class="arrow-prev">← </span><span>Scopes</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/next/instrumentation/special-sensors"><span>Special Sensors</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#data-propagation">Data Propagation</a><ul class="toc-headings"><li><a href="#defining-the-behaviour">Defining the Behaviour</a></li><li><a href="#interaction-with-opencensus-tags">Interaction with OpenCensus Tags</a></li></ul></li><li><a href="#actions">Actions</a><ul class="toc-headings"><li><a href="#input-parameters">Input Parameters</a></li><li><a href="#multiple-statements-and-imports">Multiple statements and Imports</a></li></ul></li><li><a href="#defining-rules">Defining Rules</a><ul class="toc-headings"><li><a href="#invoking-actions">Invoking Actions</a></li><li><a href="#collecting-metrics">Collecting Metrics</a></li><li><a href="#collecting-traces">Collecting Traces</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2020 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
