@@ -521,6 +521,7 @@ inspectit:
     rules:
       servlet_api_service:
         tracing:
+          start-span: true
           attributes:
             http_host: host_name
         entry:
@@ -529,10 +530,9 @@ inspectit:
 ```
 
 The attributes property maps the names of attributes to data keys.
-After the rule's exit phase, the corresponding data keys are read and attached as attributes to the current span.
+After the rule's exit phase, the corresponding data keys are read and attached as attributes to the span started or continued by the method.
 
-Note that a rule does not have to start a span for attaching attributes.
-If a rule does not start a span, the attributes will be written to the first span opened by any method on the current call stack.
+Note that if a rule does not start or continue a span, no attributes will be written.
 
 #### Visualizing Span Errors
 
