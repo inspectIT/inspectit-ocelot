@@ -1,17 +1,21 @@
 package rocks.inspectit.oce.eum.server.metrics;
 
-import io.opencensus.stats.*;
-import io.opencensus.tags.TagKey;
+import com.google.common.collect.ImmutableList;
+import io.opencensus.stats.MeasureMap;
+import io.opencensus.stats.StatsRecorder;
+import io.opencensus.stats.ViewManager;
+import io.opencensus.tags.Tags;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.oce.eum.server.beacon.Beacon;
+import rocks.inspectit.oce.eum.server.beacon.recorder.BeaconRecorder;
 import rocks.inspectit.oce.eum.server.configuration.model.BeaconMetricDefinitionSettings;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
 import rocks.inspectit.oce.eum.server.configuration.model.EumTagsSettings;
@@ -35,6 +39,9 @@ public class BeaconMetricManagerTest {
     EumServerConfiguration configuration;
 
     @Mock
+    MeasuresAndViewsManager measuresAndViewsManager;
+
+    @Mock
     EumTagsSettings tagSettings;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
@@ -45,6 +52,11 @@ public class BeaconMetricManagerTest {
 
     @Mock
     MeasureMap measureMap;
+
+    @Spy
+    List<BeaconRecorder> beaconRecorders = ImmutableList.of(
+            mock(BeaconRecorder.class)
+    );
 
     @Nested
     class ProcessBeacon {
@@ -75,6 +87,13 @@ public class BeaconMetricManagerTest {
             definitionMap.put("Dummy metric name", dummyMetricDefinition);
         }
 
+        @BeforeEach
+        public void setupMocks() {
+            when(configuration.getTags()).thenReturn(tagSettings);
+            when(tagSettings.getBeacon()).thenReturn(Collections.emptyMap());
+            when(measuresAndViewsManager.getTagContext()).thenReturn(Tags.getTagger().emptyBuilder());
+        }
+
         @Test
         void verifyNoViewIsGeneratedWithEmptyBeacon() {
             when(configuration.getDefinitions()).thenReturn(definitionMap);
@@ -95,5 +114,22 @@ public class BeaconMetricManagerTest {
 
             verifyZeroInteractions(viewManager, statsRecorder);
         }
+
+        @Test
+        void beaconRecordersProcessed() {
+            when(configuration.getDefinitions()).thenReturn(definitionMap);
+            HashMap<String, String> beaconMap = new HashMap<>();
+            beaconMap.put("fake_beacon_field", "12d");
+            Beacon beacon = Beacon.of(beaconMap);
+
+            beaconMetricManager.processBeacon(beacon);
+
+            assertThat(beaconRecorders).allSatisfy(beaconRecorder -> {
+                verify(beaconRecorder).record(beacon);
+                verifyNoMoreInteractions(beaconRecorder);
+            });
+            verifyZeroInteractions(viewManager, statsRecorder);
+        }
+
     }
 }
