@@ -20,7 +20,14 @@ public class RuleAutoCompleter implements AutoCompleter {
     @Autowired
     private ConfigurationQueryHelper configurationQueryHelper;
 
+    /**
+     * The path under which rule names are defined.
+     */
     private static final List<String> RULE_DEFINITION_PATH = Arrays.asList("inspectit", "instrumentation", "rules");
+
+    /**
+     * All paths under which rule names are used.
+     */
     private static final List<List<String>> RULE_SUGGESTION_PATHS = Arrays.asList(
             RULE_DEFINITION_PATH,
             Arrays.asList("inspectit", "instrumentation", "rules", "*", "include")

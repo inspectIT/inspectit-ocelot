@@ -678,8 +678,8 @@ They both reference the `myhttp_extract_path` rule via their `include` property.
 While in the example exactly one rule is included, it is possible to include any amount of rules.
 Includes also work transitively.
 
-Rule includes have the same effect as adding all scopes of the rule to the included ones:
-Everything specified in the included rules will also be done on the methods matched by the scopes.
+If a rule is included, it has the same effect as adding all the scopes of this rule to the included one.
+This means that all actions, tracing settings and metrics recordings of the included rule are also applied.
 
 In this example this means that if either `myhttp_tracing` or `myhttp_record_metric` are enabled,
 `myhttp_extract_path` will also be applied to all methods matching the scope `myhttp_scope`.

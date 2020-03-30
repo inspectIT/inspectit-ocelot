@@ -150,6 +150,13 @@ public class InstrumentationConfigurationResolver {
 
     }
 
+    /**
+     * For a given collection of rules, a set containing these rules and all rules included (transitively) by them are returned.
+     *
+     * @param config the configuration which is used to resolve rule names to rules
+     * @param rules  the initial collection of rules
+     * @return the set of the initial rules plus their includes
+     */
     @VisibleForTesting
     Set<InstrumentationRule> resolveIncludes(InstrumentationConfiguration config, Collection<InstrumentationRule> rules) {
         Set<InstrumentationRule> result = new HashSet<>();
@@ -160,8 +167,7 @@ public class InstrumentationConfigurationResolver {
     }
 
     private void addWithIncludes(InstrumentationRule rule, InstrumentationConfiguration config, Set<InstrumentationRule> result) {
-        if (!result.contains(rule)) {
-            result.add(rule);
+        if (result.add(rule)) {
             for (String includedRuleName : rule.getIncludedRuleNames()) {
                 config.getRuleByName(includedRuleName)
                         .ifPresent(includedRule -> addWithIncludes(includedRule, config, result));
