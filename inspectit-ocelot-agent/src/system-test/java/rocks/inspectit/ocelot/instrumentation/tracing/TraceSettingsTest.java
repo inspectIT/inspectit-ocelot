@@ -17,11 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class TraceSettingsTest extends TraceTestBase {
 
 
-    void rootA() {
-        attributesSetterWithoutSpan();
-    }
-
-    String attributesSetterWithoutSpan() {
+    String attributesSetter() {
         return "Hello A!";
     }
 
@@ -29,13 +25,13 @@ public class TraceSettingsTest extends TraceTestBase {
     void testAttributeWritingToParentSpan() {
 
         TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, 15, TimeUnit.SECONDS);
-        rootA();
+        attributesSetter();
 
         assertTraceExported((spans) ->
                 assertThat(spans)
                         .hasSize(1)
                         .anySatisfy((sp) -> {
-                            assertThat(sp.getName()).endsWith("TraceSettingsTest.rootA");
+                            assertThat(sp.getName()).endsWith("TraceSettingsTest.attributesSetter");
                             assertThat(sp.getAttributes().getAttributeMap())
                                     .hasSize(4)
                                     .containsEntry("entry", AttributeValue.stringAttributeValue("const"))
@@ -48,11 +44,7 @@ public class TraceSettingsTest extends TraceTestBase {
 
     }
 
-    void rootB(boolean captureAttributes) {
-        attributesSetterWithoutSpanWithConditions(captureAttributes);
-    }
-
-    String attributesSetterWithoutSpanWithConditions(boolean captureAttributes) {
+    String attributesSetterWithConditions(boolean captureAttributes) {
         return "Hello B!";
     }
 
@@ -60,14 +52,14 @@ public class TraceSettingsTest extends TraceTestBase {
     void testConditionalAttributeWriting() {
 
         TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, 15, TimeUnit.SECONDS);
-        rootB(false);
-        rootB(true);
+        attributesSetterWithConditions(false);
+        attributesSetterWithConditions(true);
 
         assertTraceExported((spans) ->
                 assertThat(spans)
                         .hasSize(1)
                         .anySatisfy((sp) -> {
-                            assertThat(sp.getName()).endsWith("TraceSettingsTest.rootB");
+                            assertThat(sp.getName()).endsWith("TraceSettingsTest.attributesSetterWithConditions");
                             assertThat(sp.getAttributes().getAttributeMap())
                                     .hasSize(0);
                         })
@@ -78,7 +70,7 @@ public class TraceSettingsTest extends TraceTestBase {
                 assertThat(spans)
                         .hasSize(1)
                         .anySatisfy((sp) -> {
-                            assertThat(sp.getName()).endsWith("TraceSettingsTest.rootB");
+                            assertThat(sp.getName()).endsWith("TraceSettingsTest.attributesSetterWithConditions");
                             assertThat(sp.getAttributes().getAttributeMap())
                                     .hasSize(2)
                                     .containsEntry("entry", AttributeValue.stringAttributeValue("const"))
