@@ -36,7 +36,7 @@ public class UserInstrumentationWithMetricsTest extends InstrumentationSysTestBa
             }
         }
         TestUtils.waitForOpenCensusQueueToBeProcessed();
-        String methodName = UserInstrumentationWithMetricsTest.class.getName() + ".invocationCount";
+        String methodName = UserInstrumentationWithMetricsTest.class.getName() + ".invocationCount\\(\\)";
 
         Map<String, String> countTags = ImmutableMap.of("user_tag", "user_value", "method_name", methodName);
         long invocationCount = ((AggregationData.CountData) TestUtils.getDataForView("my/invocation/count", countTags)).getCount();
@@ -60,8 +60,8 @@ public class UserInstrumentationWithMetricsTest extends InstrumentationSysTestBa
         tags.put("host", ".*");
         tags.put("host_address", ".*");
         tags.put("service", ".*");
-        String methodName = UserInstrumentationWithMetricsTest.class.getName() + ".responseTimeMeasuring";
-        tags.put("method_name", methodName);
+        tags.put("method", "responseTimeMeasuring\\(\\)");
+        tags.put("class", UserInstrumentationWithMetricsTest.class.getName());
 
         long count = ((AggregationData.CountData) TestUtils.getDataForView("method/duration/count", tags)).getCount();
         double sum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("method/duration/sum", tags)).getSum();

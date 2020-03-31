@@ -33,12 +33,8 @@ inspectit:
       # Otherwise returns the name of the exception, e.g. SocketTimeoutException.
       'a_httpurlconnection_getStatus':
         input:
-          '_thrown': Throwable
           '_this': java.net.HttpURLConnection
         value-body: |
-          if(_thrown != null) {
-            return _thrown.getClass().getSimpleName();
-          }
           try {
             return String.valueOf(_this.getResponseCode());
           } catch(Throwable t) {
