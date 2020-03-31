@@ -1,7 +1,10 @@
 package rocks.inspectit.ocelot.core.instrumentation.hook.actions.span;
 
+import io.opencensus.trace.Span;
 import io.opencensus.trace.Tracing;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Singular;
 import lombok.val;
 import rocks.inspectit.ocelot.core.instrumentation.hook.VariableAccessor;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
@@ -14,16 +17,18 @@ import java.util.function.Supplier;
  * Reads specified data keys from the current context and attaches them to the current span as attributes.
  */
 @AllArgsConstructor
+@Builder
 public class WriteSpanAttributesAction implements IHookAction {
 
+    @Singular
     private final Map<String, VariableAccessor> attributeAccessors;
 
     private final Supplier<IObfuscatory> obfuscatorySupplier;
 
     @Override
     public void execute(ExecutionContext context) {
-        val span = Tracing.getTracer().getCurrentSpan();
-        if (span.getContext().isValid()) {
+        if (context.getInspectitContext().hasEnteredSpan()) {
+            Span span = Tracing.getTracer().getCurrentSpan();
             for (val entry : attributeAccessors.entrySet()) {
                 Object value = entry.getValue().get(context);
                 if (value != null) {

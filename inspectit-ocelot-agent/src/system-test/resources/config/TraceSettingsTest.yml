@@ -11,13 +11,6 @@ inspectit:
   instrumentation:
 
     scopes:
-      TraceSettingsTest-root:
-        type:
-          name: TraceSettingsTest
-          matcher-mode: ENDS_WITH
-        methods:
-          - name: root
-            matcher-mode: STARTS_WITH
       TraceSettingsTest-nested:
         type:
           name: TraceSettingsTest
@@ -25,18 +18,18 @@ inspectit:
         methods:
           - name: nestedC
 
-      TraceSettingsTest-attributesSetterWithoutSpan:
+      TraceSettingsTest-attributesSetter:
         type:
           name: TraceSettingsTest
           matcher-mode: ENDS_WITH
         methods:
-          - name: attributesSetterWithoutSpan
-      TraceSettingsTest-attributesSetterWithoutSpanWithConditions:
+          - name: attributesSetter
+      TraceSettingsTest-attributesSetterWithConditions:
         type:
           name: TraceSettingsTest
           matcher-mode: ENDS_WITH
         methods:
-          - name: attributesSetterWithoutSpanWithConditions
+          - name: attributesSetterWithConditions
 
       TraceSettingsTest-conditionalRoot:
         type:
@@ -116,16 +109,17 @@ inspectit:
     rules:
       TraceSettingsTest-startspan:
         scopes:
-          TraceSettingsTest-root: true
+          TraceSettingsTest-attributesSetter: true
+          TraceSettingsTest-attributesSetterWithConditions: true
           TraceSettingsTest-nested: true
           TraceSettingsTest-nestedSamplingTest-Default: true
           TraceSettingsTest-withoutErrorStatus: true
         tracing:
           start-span: true
 
-      TraceSettingsTest-attributesSetterWithoutSpan:
+      TraceSettingsTest-attributesSetter:
         scopes:
-          TraceSettingsTest-attributesSetterWithoutSpan: true
+          TraceSettingsTest-attributesSetter: true
         tracing:
           attributes:
             entry: entry_val
@@ -145,9 +139,9 @@ inspectit:
             data-input: {value: _returnValue}
 
 
-      TraceSettingsTest-attributesSetterWithoutSpanWithConditions:
+      TraceSettingsTest-attributesSetterWithConditions:
         scopes:
-          TraceSettingsTest-attributesSetterWithoutSpanWithConditions: true
+          TraceSettingsTest-attributesSetterWithConditions: true
         tracing:
           attributes:
             entry: entry_val
