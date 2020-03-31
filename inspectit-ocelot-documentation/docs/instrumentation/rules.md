@@ -631,3 +631,60 @@ In this case, the rule will first attempt to continue the existing span. Only if
 Again, conditions for the span continuing and span ending can be specified just like for the span starting.
 The properties `continue-span-conditions` and `end-span-conditions` work just like `start-span-conditions`.
 
+### Modularizing Rules
+
+When writing complex instrumentation, it can happen that you want to reuse parts of your instrumentation across different rules.
+For example when instrumenting a HTTP library, you typically extract the HTTP path using custom actions. This HTTP path is meant
+to be used for multiple concerns, e.g. for tracing and for metrics which are specified in separate rules.
+
+A simple solution would be to copy and paste the action invocation for extracting the path into both the metrics and the tracing rule.
+This has two main downsides:
+* The work is done twice: Your action for extracting the HTTP path is invoked twice, leading to unnecessary overhead
+* When altering how the HTTP path is extracted, you need to remember every rule where you copy-pasted your instrumentation
+
+To overcome these issues, Ocelot allows you to include rules from within other rules:
+
+```yaml
+    rules:
+      myhttp_extract_path:
+        entry:
+          my_http_path:
+            #logic to extract the http path and save it in the context here...
+          
+      myhttp_tracing:
+        include:
+          myhttp_extract_path: true
+        scopes:
+          myhttp_scope: true
+        tracing:
+          start-span: true
+          attributes:
+            path: my_http_path
+            
+      myhttp_record_metric:
+        include:
+          myhttp_extract_path: true
+        scopes:
+          myhttp_scope: true
+        metrics:
+          #record http metric here...
+```
+
+In the above example we defined a rule `myhttp_extract_path`, which contains the logic for extracting the HTTP path.
+Note that this rule does not have any scope attached and therefore does not result in any instrumentation by default.
+
+However, the example also contains the two rules `myhttp_tracing` and `myhttp_record_metric`.
+They both reference the `myhttp_extract_path` rule via their `include` property.
+While in the example exactly one rule is included, it is possible to include any amount of rules.
+Includes also work transitively.
+
+If a rule is included, it has the same effect as adding all the scopes of this rule to the included one.
+This means that all actions, tracing settings and metrics recordings of the included rule are also applied.
+
+In this example this means that if either `myhttp_tracing` or `myhttp_record_metric` are enabled,
+`myhttp_extract_path` will also be applied to all methods matching the scope `myhttp_scope`.
+As a result, the `my_http_path` data variable will be populated.
+
+The key point is now that even if the rule is included multiple times for a given method, it will only be applied exactly once.
+This means that if both `myhttp_tracing` and `myhttp_record_metric` are enabled, the `myhttp_extract_path` will still only be applied once.
+This therefore solves the problem of accidentally doing the same work twice.
