@@ -167,7 +167,7 @@ public class MethodHookConfigurationResolverTest {
 
         @Test
         void verifyTracingCustomSamplingProbabilityRespected() throws Exception {
-            config = InstrumentationConfiguration.builder().defaultTraceSampleProbability(0.5).build();
+            config = InstrumentationConfiguration.builder().build();
             InstrumentationRule r1 = InstrumentationRule.builder()
                     .tracing(RuleTracingSettings.builder()
                             .startSpan(true)
@@ -187,7 +187,7 @@ public class MethodHookConfigurationResolverTest {
 
         @Test
         void verifyNullSamplingProbabilityRespected() throws Exception {
-            config = InstrumentationConfiguration.builder().defaultTraceSampleProbability(0.5).build();
+            config = InstrumentationConfiguration.builder().build();
 
             InstrumentationRule r1 = InstrumentationRule.builder()
                     .tracing(RuleTracingSettings.builder()

@@ -80,8 +80,22 @@ public class InstrumentationRuleSettingsTest {
             instr.performValidation(root, new ViolationBuilder(violations));
 
             assertThat(violations).hasSize(1);
-            assertThat(violations.get(0).getMessage()).containsIgnoringCase("scope");
-            assertThat(violations.get(0).getMessage()).containsIgnoringCase("exist");
+            assertThat(violations.get(0).getMessage())
+                    .containsIgnoringCase("scope")
+                    .containsIgnoringCase("exist");
+        }
+
+        @Test
+        void testNonExistingInclude() {
+            rule.setInclude(Collections.singletonMap("non-existant-rule", true));
+
+            List<Violation> violations = new ArrayList<>();
+            instr.performValidation(root, new ViolationBuilder(violations));
+
+            assertThat(violations).hasSize(1);
+            assertThat(violations.get(0).getMessage())
+                    .containsIgnoringCase("include")
+                    .containsIgnoringCase("exist");
         }
 
         @Test
