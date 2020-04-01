@@ -14,7 +14,6 @@ import rocks.inspectit.ocelot.config.model.instrumentation.data.PropagationMode;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;
 
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -249,7 +248,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
     /**
      * @return true, if {@link #enterSpan(Span)} was called
      */
-    public boolean enteredSpan() {
+    public boolean hasEnteredSpan() {
         return currentSpanScope != null;
     }
 

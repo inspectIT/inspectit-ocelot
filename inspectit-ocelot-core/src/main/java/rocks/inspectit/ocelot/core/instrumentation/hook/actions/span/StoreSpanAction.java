@@ -23,7 +23,7 @@ public class StoreSpanAction implements IHookAction {
     @Override
     public void execute(ExecutionContext context) {
         InspectitContextImpl ctx = context.getInspectitContext();
-        if (ctx.enteredSpan()) {
+        if (ctx.hasEnteredSpan()) {
             ctx.setData(dataKey, Tracing.getTracer().getCurrentSpan());
         }
     }
