@@ -18,6 +18,15 @@ apply plugin: 'io.spring.dependency-management'
 apply plugin: 'java'
 
 node {
+    // Version of node to use.
+    version = '12.16.1'
+
+    // Version of npm to use.
+    npmVersion = '6.13.4'
+
+    // Version of Yarn to use.
+    yarnVersion = '1.16.0'
+
     // If true, it will download node using above parameters.
     // If false, it will try to use globally installed node.
     download = true
