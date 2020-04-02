@@ -80,5 +80,22 @@ public class ScopeAutoCompleterTest {
             assertThat(output).contains("rules_path_triggered");
             assertThat(output).contains("scopes_path_triggered");
         }
+
+        @Test
+        public void testScopesPath() {
+            List<String> scopesPath = Arrays.asList("inspectit", "instrumentation", "scopes");
+            when(configurationQueryHelper.getKeysForPath(any())).thenAnswer((Answer<List<String>>) invocation -> {
+                Object[] args = invocation.getArguments();
+                if (args[0].equals(scopesPath)) {
+                    return Collections.singletonList("scopes_path_triggered");
+                }
+                return Collections.singletonList("error!");
+            });
+
+            List<String> output = scopeAutoCompleter.getSuggestions(scopesPath);
+
+            assertThat(output).hasSize(1);
+            assertThat(output).contains("scopes_path_triggered");
+        }
     }
 }
