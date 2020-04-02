@@ -17,13 +17,21 @@ import java.util.List;
 @Component
 public class ActionInputAutoCompleter implements AutoCompleter {
 
+    private static List<String> ACTION_DECLARATION_PATH = Arrays.asList("inspectit", "instrumentation", "actions", "*");
+
+    private static List<List<String>> ACTION_USAGE_PATHS = Arrays.asList(
+            ACTION_DECLARATION_PATH,
+            Arrays.asList("inspectit", "instrumentation", "rules", "*", "preEntry", "*", "action"),
+            Arrays.asList("inspectit", "instrumentation", "rules", "*", "entry", "*", "action"),
+            Arrays.asList("inspectit", "instrumentation", "rules", "*", "exit", "*", "action"),
+            Arrays.asList("inspectit", "instrumentation", "rules", "*", "preEntry", "*", "action"),
+            Arrays.asList("inspectit", "instrumentation", "rules", "*", "postEntry", "*", "action"),
+            Arrays.asList("inspectit", "instrumentation", "rules", "*", "preExit", "*", "action"),
+            Arrays.asList("inspectit", "instrumentation", "rules", "*", "postExit", "*", "action")
+    );
+
     @Autowired
     private ConfigurationQueryHelper configurationQueryHelper;
-
-    private final static List<String> ACTION_PATH = Arrays.asList("inspectit", "instrumentation", "actions", "*");
-    private final static List<String> ACTION_OPTIONS = Arrays.asList("entry", "exit", "preEntry", "postEntry", "preExit", "postExit");
-    private static List<String> actionPathsToRetrieve = Arrays.asList("inspectit", "instrumentation", "rules", "*", "*", "*", "action");
-    private final static List<String> INPUT_OPTIONS = Arrays.asList("data-input", "constant-input");
 
     /**
      * Checks if the given path leads to an action Attribute, e.g. "inspectit.instrumentation.actions.entry" and returns
@@ -35,7 +43,8 @@ public class ActionInputAutoCompleter implements AutoCompleter {
     @Override
     public List<String> getSuggestions(List<String> path) {
         ArrayList<String> toReturn = new ArrayList<>();
-        if (PropertyPathHelper.comparePaths(path, ACTION_PATH)) {
+        if (ACTION_USAGE_PATHS.stream().
+                anyMatch(actionUsagePath -> PropertyPathHelper.comparePaths(path, actionUsagePath))) {
             toReturn.addAll(getInput());
         }
         return toReturn;
@@ -47,14 +56,6 @@ public class ActionInputAutoCompleter implements AutoCompleter {
      * @return A List of Strings resembling all declared rules.
      */
     private List<String> getInput() {
-        ArrayList<String> toReturn = new ArrayList<>();
-        for (String option : ACTION_OPTIONS) {
-            actionPathsToRetrieve.set(4, option);
-            for (String inputOption : INPUT_OPTIONS) {
-                actionPathsToRetrieve.set(6, inputOption);
-                toReturn.addAll(configurationQueryHelper.getKeysForPath(new ArrayList<>(actionPathsToRetrieve)));
-            }
-        }
-        return toReturn;
+        return configurationQueryHelper.getKeysForPath(ACTION_DECLARATION_PATH);
     }
 }

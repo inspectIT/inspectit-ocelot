@@ -9,7 +9,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.autocomplete.util.ConfigurationQueryHelper;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,30 +25,18 @@ public class ActionInputAutoCompleterTest {
     @Mock
     ConfigurationQueryHelper configurationQueryHelper;
 
-
     @Nested
     public class GetSuggestions {
         @Test
         public void getSuggestionsTest() {
             List<String> testPath = Arrays.asList("inspectit", "instrumentation", "actions", "*");
-            when(configurationQueryHelper.getKeysForPath(any())).thenReturn(Collections.singletonList("test"), Collections.singletonList("test2"), Collections.emptyList());
+            when(configurationQueryHelper.getKeysForPath(any())).thenReturn(Arrays.asList("test", "test2"));
 
             List<String> output = actionInputAutoCompleter.getSuggestions(testPath);
 
             assertThat(output).hasSize(2);
             assertThat(output).contains("test");
             assertThat(output).contains("test2");
-        }
-
-        @Test
-        public void allPathOptionsTriggered() {
-            List<String> testPath = Arrays.asList("inspectit", "instrumentation", "actions", "*");
-            when(configurationQueryHelper.getKeysForPath(any())).thenReturn(Collections.singletonList("test"));
-
-            List<String> output = actionInputAutoCompleter.getSuggestions(testPath);
-
-            assertThat(output).hasSize(12);
-            assertThat(output).allMatch(el -> el.equals("test"));
         }
 
         @Test
