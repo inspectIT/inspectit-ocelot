@@ -3,8 +3,8 @@ package rocks.inspectit.ocelot.config.model.metrics;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.springframework.lang.NonNull;
 
+import javax.validation.constraints.NotNull;
 import java.time.Duration;
 
 /**
@@ -19,7 +19,7 @@ public class StandardPollingMetricsRecorderSettings extends StandardMetricsSetti
      * Specifies the frequency in milliseconds with which the metrics should be polled and recorded.
      * Should default to ${inspectit.metrics.frequency}
      */
-    @NonNull
+    @NotNull
     private Duration frequency;
 
 }

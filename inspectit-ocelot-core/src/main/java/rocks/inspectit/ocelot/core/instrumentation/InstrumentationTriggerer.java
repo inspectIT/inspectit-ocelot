@@ -209,7 +209,7 @@ public class InstrumentationTriggerer implements IClassDiscoveryListener {
                 }
                 if (pendingClasses.size() == 0 && currentHookUpdate != null) {
                     currentHookUpdate.commitUpdate();
-                    log.info("Instrumentation has been updated!");
+                    log.debug("Instrumentation has been updated!");
                     currentHookUpdate = null;
                 }
             } catch (Exception e) {

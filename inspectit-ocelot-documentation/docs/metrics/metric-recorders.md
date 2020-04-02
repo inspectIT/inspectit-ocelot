@@ -13,8 +13,12 @@ Currently the inspectIT Ocelot agent is capable of recording the following metri
 * [Threads](#thread-metrics) (counts and states)
 * [Garbage Collection](#garbage-collection-metrics) (Pause times and collection statistics)
 * [Class Loading](#class-loading-metrics) (loaded and unloaded counts)
+* [JMX](#jmx-metrics) (all exposed JMX targets)
 
-> The metrics above and their capturing logic are based on the open-source [micrometer](https://micrometer.io/) project.
+
+:::note
+The metrics above and their capturing logic are based on the open-source [micrometer](https://micrometer.io/) project.
+:::
 
 In the following sections we provide detailed information on the collected metrics and how they can be configured.
 In general metrics are grouped together based on the recorder which provides them.
@@ -24,15 +28,16 @@ By default all polling based recorders use the duration specified by `inspectit.
 of this property is `15s`. Overwriting `inspectit.metrics.frequency` will cause all recorders to use the given
 frequency in case they do not have an explicit frequency in their own configuration.
 
-> **Default metrics settings**<br>
-> By default, all metrics are captured if they are available on the system. If you do not want certain metrics to be recorded, you need to disable them manually. For example, if you want to disable the `system.average` metric of the `processor` recorder, you need to use the following configuration:
->```YAML
->inspectit:
->  metrics:
->    processor:
->      enabled:
->        system.average: false
->```
+:::tip Default metrics settings
+ By default, all metrics are captured if they are available on the system. If you do not want certain metrics to be recorded, you need to disable them manually. For example, if you want to disable the `system.average` metric of the `processor` recorder, you need to use the following configuration:
+```YAML
+inspectit:
+  metrics:
+    processor:
+      enabled:
+        system.average: false
+```
+:::
 
 ## CPU Metrics
 
@@ -47,8 +52,9 @@ The available metrics are explained in the table below.
 |`system.usage`|The recent CPU usage for the whole system|percentage|`system/cpu/usage`
 |`process.usage`|The recent CPU usage for the JVM's process|percentage|`process/cpu/usage`
 
-> The availability of each processor metric depends on the capabilities of your JVM in combination with your OS.
-If a metric is not available, the inspectit Ocelot agent will print a corresponding info in its logs on startup.
+:::note
+The availability of each processor metric depends on the capabilities of your JVM in combination with your OS. If a metric is not available, the inspectit Ocelot agent will print a corresponding info in its logs on startup.
+:::
 
 ## Disk Space Metrics
 
@@ -109,7 +115,9 @@ For this purpose, an additional tag `state` is added whose values correspond to 
 The `inspectit.metrics.gc` recorder provides metrics about the time spent for garbage collection as well as about the collection effectiveness.
 This recorder is not polling based. Instead, it listens to garbage collection events published by the JVM and records metrics on occurrence.
 
-> The availability of all garbage collection metrics depends on the capabilities of your JVM. If the garbage collection metrics are unavailable, the inspectit Ocelot agent will print a corresponding info in its logs on startup.
+:::note
+The availability of all garbage collection metrics depends on the capabilities of your JVM. If the garbage collection metrics are unavailable, the inspectit Ocelot agent will print a corresponding info in its logs on startup.
+:::
 
 The recorder offers the following timing related metrics:
 
@@ -141,3 +149,47 @@ The available metrics are explained in the table below.
 |---|---|---|---|
 |`loaded`|The total number of currently loaded classes in the JVM|classes|`jvm/classes/loaded`
 |`unloaded`|The total number of unloaded classes since the start of the JVM|classes|`jvm/classes/unloaded`
+
+## JMX Metrics
+
+Metrics exposed by MBean objects are recorded by the `inspectit.metrics.jmx` recorder which can be enabled by setting the `inspectit.metrics.jmx.enabled` property to `true`.
+
+This recorder polls all registered MBean servers with a frequency specified by `inspectit.metrics.classloader.frequency` which defaults to `inspectit.metrics.frequency`.
+The recorder exposes JMX attributes containing values that are non-negative numbers or booleans.
+All values are exposed as double metric representing the last value of the JMX MBean.
+Booleans are converted to `0.0` or `1.0` and non-double numbers to double representations.
+
+Format of the metric name that's being exposed follows the pattern:
+```text
+jvm/jmx/domain/bean_property_1_value/attrbute_key_1/../attribute_key_N/attribute_name
+```
+
+**Example Metric Name**: `jvm/jmx/java/lang/runtime/uptime`
+
+The exposed metrics also contain additional bean properties as labels.
+All values that are used in constructing the metric's name are lowercase by default, but this can be adapted in the settings.
+
+By default, the JMX metrics recorder will force the creation of the default platform MBean server when enabled.
+You can change this behavior by setting the value of the property `inspectit.metrics.jmx.force-platform-server` to `false`. 
+
+You can precisely control which MBean should be scraped and exposed as metrics using the `inspectit.metrics.jmx.object-names` property.
+This property defines a map of object names to be whitelisted or blacklisted.
+In this map the key represents an object name pattern, while the value is a boolean representing whether a MBean is white- (`true`) or blacklisted (`false`).
+The behavior is as follows:
+1. If the map is empty everything is collected.
+2. If the map contains only whitelisted object name entries, only these are collected.
+3. If the map contains only blacklisted object name entries, then everything is collected except the blacklisted ones.
+4. If the map contains both the whitelisted and blacklisted entries, then only the whitelisted ones that are not blacklisted are collected.
+
+All configuration properties related to the JMX recorder are located under the `inspectit.metrics.jmx` property.
+The available JMX configuration properties are:
+
+<!--- spaces to force a wider property column to prevent a lot of line breaks in the long property names -->
+
+|Property&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|Description|Default
+|---|---|---|
+|`enabled`|The switch for enabling/disabling JMX recorder.|`false`
+|`frequency`|Specifies the frequency used by the JMX recorder to poll and record metrics.|`${inspectit.metrics.frequency}`
+|`force-platform-server`|The switch to enable or disable the creation of the platform MBean server before scraping starts.|`true`
+|`lower-case-metric-name`|If `true` records JMX metrics with the lowercase name format.|`true`
+|`object-names`|Map for whitelisting and blacklisting object names to be scraped. The key should be an object name pattern and value should be `true` (whitelisting) or `false` (blacklisting). More info about the object name patterns can be found in [Java SE API docs](https://docs.oracle.com/javase/7/docs/api/javax/management/ObjectName.html). |see above

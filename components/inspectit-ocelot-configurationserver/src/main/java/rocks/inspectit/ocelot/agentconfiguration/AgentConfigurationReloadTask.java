@@ -77,7 +77,8 @@ class AgentConfigurationReloadTask implements Runnable {
                     log.debug("Configuration reloading canceled");
                     return;
                 }
-                newConfigurations.add(new AgentConfiguration(mapping, configYaml));
+                AgentConfiguration agentConfiguration = AgentConfiguration.builder().mapping(mapping).configYaml(configYaml).build();
+                newConfigurations.add(agentConfiguration);
             } catch (Exception e) {
                 log.error("Could not load agent mapping '{}'.", mapping.getName(), e);
             }
