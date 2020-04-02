@@ -7,9 +7,10 @@ import rocks.inspectit.ocelot.autocomplete.AutoCompleter;
 import rocks.inspectit.ocelot.autocomplete.util.ConfigurationQueryHelper;
 import rocks.inspectit.ocelot.config.validation.PropertyPathHelper;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * This AutoCompleter retrieves all scopes which can be found in the present yaml-files. It is either triggered by
@@ -19,17 +20,22 @@ import java.util.List;
 @Component
 public class ScopeAutoCompleter implements AutoCompleter {
 
+    private final static List<List<String>> SCOPE_PATHS = Arrays.asList(
+            Arrays.asList("inspectit", "instrumentation", "scopes"),
+            Arrays.asList("inspectit", "instrumentation", "rules", "*", "scopes")
+    );
+
     @Autowired
     private ConfigurationQueryHelper configurationQueryHelper;
 
-    private final static List<String> SCOPE_PATHS_A = Arrays.asList("inspectit", "instrumentation", "scopes");
-    private final static List<String> SCOPE_PATHS_B = Arrays.asList("inspectit", "instrumentation", "rules", "*", "scopes");
-
     @Override
     public List<String> getSuggestions(List<String> path) {
-        if (PropertyPathHelper.hasPathPrefix(path, SCOPE_PATHS_A) || PropertyPathHelper.hasPathPrefix(path, SCOPE_PATHS_B)) {
-            return configurationQueryHelper.getKeysForPath(path);
+        if (SCOPE_PATHS.stream().anyMatch(scopePath -> PropertyPathHelper.hasPathPrefix(scopePath, path))) {
+            return SCOPE_PATHS.stream().
+                    filter(scopePath -> !PropertyPathHelper.hasPathPrefix(SCOPE_PATHS.get(0), path) || !PropertyPathHelper.hasPathPrefix(scopePath, SCOPE_PATHS.get(1))).
+                    flatMap(scopePath -> configurationQueryHelper.getKeysForPath(scopePath).stream())
+                    .collect(Collectors.toList());
         }
-        return new ArrayList<>();
+        return Collections.emptyList();
     }
 }
