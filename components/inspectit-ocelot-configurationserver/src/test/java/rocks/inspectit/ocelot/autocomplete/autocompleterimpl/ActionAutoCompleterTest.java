@@ -31,8 +31,7 @@ public class ActionAutoCompleterTest {
         @Test
         public void hasActions() {
             List<String> path = Arrays.asList("inspectit", "instrumentation", "actions");
-            doReturn(Collections.singletonList("test"), Collections.singletonList("test2"), Collections.emptyList())
-                    .when(configurationQueryHelper).getKeysForPath(any());
+            doReturn(Arrays.asList("test", "test2")).when(configurationQueryHelper).getKeysForPath(any());
 
             List<String> output = actionAutoCompleter.getSuggestions(path);
 
@@ -58,17 +57,6 @@ public class ActionAutoCompleterTest {
             List<String> output = actionAutoCompleter.getSuggestions(path);
 
             assertThat(output).isEmpty();
-        }
-
-        @Test
-        public void allOptionsChecked() {
-            List<String> path = Arrays.asList("inspectit", "instrumentation", "actions");
-            doReturn(Collections.singletonList("test")).when(configurationQueryHelper).getKeysForPath(any());
-
-            List<String> output = actionAutoCompleter.getSuggestions(path);
-
-            assertThat(output).hasSize(6);
-            assertThat(output).containsOnly("test");
         }
     }
 }

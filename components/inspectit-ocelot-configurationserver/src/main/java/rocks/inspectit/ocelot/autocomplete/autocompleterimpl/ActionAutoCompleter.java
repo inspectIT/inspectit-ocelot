@@ -9,7 +9,6 @@ import rocks.inspectit.ocelot.config.validation.PropertyPathHelper;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * This AutoCompleter retrieves all actions which can be found in the present yaml-files. It is either triggered by
@@ -18,14 +17,8 @@ import java.util.stream.Collectors;
 @Component
 public class ActionAutoCompleter implements AutoCompleter {
 
-    @Autowired
-    private ConfigurationQueryHelper configurationQueryHelper;
-
-    private final static List<String> ACTION_PATHS_A = Arrays.asList("inspectit", "instrumentation", "actions");
-    private final static List<String> ACTION_PATHS_B = Arrays.asList("inspectit", "instrumentation", "rules", "*", "*", "*", "action");
-    private final static List<String> ACTION_OPTIONS = Arrays.asList("entry", "exit", "preEntry", "postEntry", "preExit", "postExit");
-    private static List<String> actionPathsToRetrieve = Arrays.asList("inspectit", "instrumentation", "rules", "*", "*", "*", "action");
     private static List<String> ACTION_DECLARATION_PATH = Arrays.asList("inspectit", "instrumentation", "actions");
+
     private static List<List<String>> ACTION_USAGE_PATHS = Arrays.asList(
             ACTION_DECLARATION_PATH,
             Arrays.asList("inspectit", "instrumentation", "rules", "*", "preEntry", "*", "action"),
@@ -37,6 +30,8 @@ public class ActionAutoCompleter implements AutoCompleter {
             Arrays.asList("inspectit", "instrumentation", "rules", "*", "postExit", "*", "action")
     );
 
+    @Autowired
+    private ConfigurationQueryHelper configurationQueryHelper;
 
     /**
      * Takes a list of Strings resembling a path as an argument. If the given path is an action path, all yaml files are
@@ -51,7 +46,8 @@ public class ActionAutoCompleter implements AutoCompleter {
     @Override
     public List<String> getSuggestions(List<String> path) {
         ArrayList<String> toReturn = new ArrayList<>();
-        if (PropertyPathHelper.comparePaths(path, ACTION_PATHS_A) || PropertyPathHelper.comparePaths(path, ACTION_PATHS_B)) {
+        if (ACTION_USAGE_PATHS.stream().
+                anyMatch(actionUsagePath -> PropertyPathHelper.comparePaths(path, actionUsagePath))) {
             toReturn.addAll(getActions());
         }
         return toReturn;
@@ -63,10 +59,6 @@ public class ActionAutoCompleter implements AutoCompleter {
      * @return A list of Strings resembling actions defined in the yaml files.
      */
     private List<String> getActions() {
-        actionPathsToRetrieve.set(6, "action");
-        return ACTION_OPTIONS.stream()
-                .map(option -> actionPathsToRetrieve.set(4, option))
-                .flatMap(opt -> configurationQueryHelper.getKeysForPath(new ArrayList<>(actionPathsToRetrieve)).stream())
-                .collect(Collectors.toList());
+        return configurationQueryHelper.getKeysForPath(ACTION_DECLARATION_PATH);
     }
 }
