@@ -73,6 +73,11 @@ public class InstrumentationRuleResolver {
                 .filter(Objects::nonNull)
                 .forEach(result::scope);
 
+        result.includedRuleNames(settings.getInclude().entrySet().stream()
+                .filter(e -> Boolean.TRUE.equals(e.getValue()))
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet()));
+
         settings.getPreEntry().forEach((data, call) ->
                 result.preEntryAction(resolveCall(data, call, actions))
         );

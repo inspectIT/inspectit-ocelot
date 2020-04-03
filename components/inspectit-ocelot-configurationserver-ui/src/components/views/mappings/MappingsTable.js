@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { mappingsActions } from '../../../redux/ducks/mappings';
 
@@ -9,9 +10,10 @@ import { TieredMenu } from 'primereact/tieredmenu';
 import { OverlayPanel } from 'primereact/overlaypanel';
 import DeleteDialog from './dialogs/DeleteDialog';
 import ConfigurationDownload from './ConfigurationDownload';
+import { cloneDeep, find } from 'lodash';
 
 /** Component including the menu button for each mapping */
-const ButtonCell = ({ mapping, onEdit, onDelete, onDownload, appendRef }) => {
+const ButtonCell = ({ mapping, onEdit, onDelete, onDownload, onDuplicate, appendRef }) => {
   const thisCell = {};
   const menuItems = [
     {
@@ -23,25 +25,41 @@ const ButtonCell = ({ mapping, onEdit, onDelete, onDownload, appendRef }) => {
       },
     },
     {
+      label: 'Download Configuration',
+      icon: 'pi pi-fw pi-download',
+      command: (e) => {
+        thisCell.menu.toggle(e)
+        onDownload(mapping.attributes)
+      }
+    },
+    {
+      label: 'Duplicate',
+      icon: 'pi pi-fw pi-clone',
+      command: (e) => {
+        thisCell.menu.toggle(e)
+        onDuplicate(mapping)
+      }
+    },
+    {
+      separator: true
+    },
+    {
       label: 'Delete',
       icon: 'pi pi-fw pi-trash',
       command: (e) => {
         thisCell.menu.toggle(e)
         onDelete(mapping.name)
       },
-    },
-    {
-      label: 'Configuration',
-      icon: 'pi pi-fw pi-download',
-      command: (e) => {
-        thisCell.menu.toggle(e)
-        onDownload(mapping.attributes)
-      }
     }
   ]
   return (
-    <div ref={el => thisCell.div = el}>
-      <TieredMenu model={menuItems} popup={true} appendTo={appendRef} ref={el => thisCell.menu = el} />
+    <div ref={el => thisCell.div = el} className="this">
+      <style jsx>{`
+      :global(.mappings-table.p-tieredmenu) {
+        width: 16rem;
+      }
+      `}</style>
+      <TieredMenu className="mappings-table" model={menuItems} popup={true} appendTo={appendRef} ref={el => thisCell.menu = el} />
       <Button icon="pi pi-bars" onClick={(e) => thisCell.menu.toggle(e)} />
     </div>
   )
@@ -151,6 +169,7 @@ class MappingsTable extends React.Component {
                 onEdit={this.props.onEditMapping}
                 onDelete={this.showDeleteMappingDialog}
                 onDownload={this.configDownload.download}
+                onDuplicate={this.duplicateMapping}
                 appendRef={this.mappingsTable}
               />)}
             style={{ width: '4em' }}
@@ -171,9 +190,54 @@ class MappingsTable extends React.Component {
     this.props.fetchMappings();
   };
 
+  duplicateMapping = (mapping) => {
+    const newMapping = {
+      ...cloneDeep(mapping),
+      name: this.getUniqueName(mapping.name),
+      isNew: true
+    };
+
+    this.props.onDuplicateMapping(newMapping);
+  }
+
+  getUniqueName = (nameBase) => {
+    const { mappings } = this.props;
+
+    let i = 1;
+    while (true) {
+      const name = nameBase + " (" + i + ")";
+
+      const mappingExists = find(mappings, { "name": name });
+      if (!mappingExists) {
+        return name;
+      }
+
+      i++;
+    }
+  }
+
   showDeleteMappingDialog = (selectedMappingName) => this.setState({ isDeleteDialogShown: true, selectedMappingName: selectedMappingName });
   hideDeleteMappingDialog = () => this.setState({ isDeleteDialogShown: false, selectedMappingName: null });
 }
+
+MappingsTable.propTypes = {
+  /** The value used for fritlering of the mappings */
+  filterValue: PropTypes.string,
+  /** Callback when the user wants to edit an agent mapping */
+  onEditMapping: PropTypes.func.isRequired,
+  /** Callback when the user wants to duplicate an agent mapping */
+  onDuplicateMapping: PropTypes.func.isRequired,
+  /** The max height of the data table */
+  maxHeight: PropTypes.string,
+
+  /** Redux Props */
+  /** The mappings to show */
+  mappings: PropTypes.arrayOf(PropTypes.object).isRequired,
+  /** Function for fetching agent mappings */
+  fetchMappings: PropTypes.func.isRequired,
+  /** Function for adding or updating agent mappings */
+  putMappings: PropTypes.func.isRequired
+};
 
 function mapStateToProps(state) {
   const { mappings } = state.mappings;

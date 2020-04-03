@@ -31,6 +31,14 @@ public class InstrumentationRule {
     private Set<InstrumentationScope> scopes;
 
     /**
+     * The names of the included rules.
+     * This set stores the names of the included rules instead of references in order to avoid issues
+     * with hashCode() / equals() due to cyclic dependencies.
+     */
+    @Singular
+    private Set<String> includedRuleNames;
+
+    /**
      * Holds all actions executed directly before the ones in {@link #entryActions}.
      */
     @Singular
