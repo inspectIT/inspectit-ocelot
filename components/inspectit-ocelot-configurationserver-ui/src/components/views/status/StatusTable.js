@@ -217,20 +217,22 @@ class StatusTable extends React.Component {
     }
   }
 
+  getMappingFilter = ({ mappingName, attributes }) => {
+    const filterArray = map(attributes, (value, key) => key + ": " + value);
+    filterArray.push(mappingName);
+    return filterArray;
+  }
+
   render() {
     const { data: agents } = this.props;
-    const agentValues = agents.map((agent) => {
-      //build a dummy string to allow filtering
-      const attributesSearchString =
-        Object.keys(agent.attributes).sort().map((key) => {
-          return key + ": " + agent.attributes[key] + "\n"
-        });
+
+    const agentValues = map(agents, agent => {
       return {
         ...agent,
         name: this.getAgentName(agent),
-        attributesSearchString
-      }
-    })
+        mappingFilter: this.getMappingFilter(agent) // used for row filtering based on attribute values
+      };
+    });
 
     return (
       <div className="this">
@@ -260,7 +262,7 @@ class StatusTable extends React.Component {
           <Column header="Agent Version" field="metaInformation.agentVersion" body={this.agentVersionTemplate} sortable style={{ width: '150px' }} />
           <Column header="Java Version" field="metaInformation.javaVersion" body={this.javaVersionTemplate} sortable style={{ width: '150px' }} />
           <Column header="Last JVM Restart" field="metaInformation.startTime" body={this.jvmRestartTemplate} sortable style={{ width: '175px' }} />
-          <Column header="Agent Mapping" field="mappingName" body={this.agentMappingTemplate} sortable />
+          <Column header="Agent Mapping" field="mappingFilter" body={this.agentMappingTemplate} sortable />
           <Column header="Last Fetch" field="lastConfigFetch" body={this.lastFetchTemplate} sortable excludeGlobalFilter={true} style={{ width: '200px' }} />
         </DataTable>
 
