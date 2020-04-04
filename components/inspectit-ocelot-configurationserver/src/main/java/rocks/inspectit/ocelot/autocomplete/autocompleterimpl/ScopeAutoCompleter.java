@@ -19,10 +19,10 @@ import java.util.List;
 @Component
 public class ScopeAutoCompleter implements AutoCompleter {
 
-    private final static List<String> SCOPE_USAGE_PATH = Arrays.asList("inspectit", "instrumentation", "scopes");
+    private final static List<String> SCOPE_DECLARATION_PATH = Arrays.asList("inspectit", "instrumentation", "scopes");
 
-    private final static List<List<String>> SCOPE_DECLARATION_PATHS = Arrays.asList(
-            SCOPE_USAGE_PATH,
+    private final static List<List<String>> SCOPE_USAGE_PATHS = Arrays.asList(
+            SCOPE_DECLARATION_PATH,
             Arrays.asList("inspectit", "instrumentation", "rules", "*", "scopes")
     );
 
@@ -32,7 +32,7 @@ public class ScopeAutoCompleter implements AutoCompleter {
     @Override
     public List<String> getSuggestions(List<String> path) {
         ArrayList<String> toReturn = new ArrayList<>();
-        if (SCOPE_DECLARATION_PATHS.stream().
+        if (SCOPE_USAGE_PATHS.stream().
                 anyMatch(actionUsagePath -> PropertyPathHelper.comparePaths(path, actionUsagePath))) {
             toReturn.addAll(getActions());
         }
@@ -45,6 +45,6 @@ public class ScopeAutoCompleter implements AutoCompleter {
      * @return A list of Strings resembling scopes defined in the yaml files.
      */
     private List<String> getActions() {
-        return configurationQueryHelper.getKeysForPath(SCOPE_USAGE_PATH);
+        return configurationQueryHelper.getKeysForPath(SCOPE_DECLARATION_PATH);
     }
 }
