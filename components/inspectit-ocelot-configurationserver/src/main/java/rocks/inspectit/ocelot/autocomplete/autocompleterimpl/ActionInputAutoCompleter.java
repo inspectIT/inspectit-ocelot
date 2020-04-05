@@ -21,13 +21,20 @@ public class ActionInputAutoCompleter implements AutoCompleter {
 
     private static List<List<String>> ACTION_USAGE_PATHS = Arrays.asList(
             ACTION_DECLARATION_PATH,
-            Arrays.asList("inspectit", "instrumentation", "rules", "*", "preEntry", "*", "action"),
-            Arrays.asList("inspectit", "instrumentation", "rules", "*", "entry", "*", "action"),
-            Arrays.asList("inspectit", "instrumentation", "rules", "*", "exit", "*", "action"),
-            Arrays.asList("inspectit", "instrumentation", "rules", "*", "preEntry", "*", "action"),
-            Arrays.asList("inspectit", "instrumentation", "rules", "*", "postEntry", "*", "action"),
-            Arrays.asList("inspectit", "instrumentation", "rules", "*", "preExit", "*", "action"),
-            Arrays.asList("inspectit", "instrumentation", "rules", "*", "postExit", "*", "action")
+            Arrays.asList("inspectit", "instrumentation", "rules", "*", "preEntry", "constant-input", "action"),
+            Arrays.asList("inspectit", "instrumentation", "rules", "*", "preEntry", "data-input", "action"),
+            Arrays.asList("inspectit", "instrumentation", "rules", "*", "entry", "constant-input", "action"),
+            Arrays.asList("inspectit", "instrumentation", "rules", "*", "entry", "data-input", "action"),
+            Arrays.asList("inspectit", "instrumentation", "rules", "*", "exit", "constant-input", "action"),
+            Arrays.asList("inspectit", "instrumentation", "rules", "*", "exit", "data-input", "action"),
+            Arrays.asList("inspectit", "instrumentation", "rules", "*", "preEntry", "constant-input", "action"),
+            Arrays.asList("inspectit", "instrumentation", "rules", "*", "preEntry", "data-input", "action"),
+            Arrays.asList("inspectit", "instrumentation", "rules", "*", "postEntry", "constant-input", "action"),
+            Arrays.asList("inspectit", "instrumentation", "rules", "*", "postEntry", "data-input", "action"),
+            Arrays.asList("inspectit", "instrumentation", "rules", "*", "preExit", "constant-input", "action"),
+            Arrays.asList("inspectit", "instrumentation", "rules", "*", "preExit", "data-input", "action"),
+            Arrays.asList("inspectit", "instrumentation", "rules", "*", "postExit", "constant-input", "action"),
+            Arrays.asList("inspectit", "instrumentation", "rules", "*", "postExit", "data-input", "action")
     );
 
     @Autowired
