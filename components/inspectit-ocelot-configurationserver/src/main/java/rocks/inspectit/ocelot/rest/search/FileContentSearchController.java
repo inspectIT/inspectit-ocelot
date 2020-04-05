@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.rest.file;
+package rocks.inspectit.ocelot.rest.search;
 
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -13,7 +13,7 @@ import java.util.Map;
 
 
 @RestController
-public class FileContentSearchEngineController extends AbstractBaseController {
+public class FileContentSearchController extends AbstractBaseController {
 
     @Autowired
     private FileContentSearchEngine fileContentSearchEngine;

@@ -6,7 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import rocks.inspectit.ocelot.autocomplete.ConfigurationFilesCache;
+import rocks.inspectit.ocelot.autocomplete.util.ConfigurationFilesCache;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,9 +43,8 @@ public class FileContentSearchEngineTest {
             filesList.add(matchedSubstring1);
             filesList.add(matchedSubstring2);
 
-            Map output = fileContentSearchEngine.searchInFiles("test1");
+            Map<?, ?> output = fileContentSearchEngine.searchInFiles("test1");
 
-            assertThat(output).containsKeys("file");
             assertThat(output.get("file")).isEqualTo(filesList);
         }
 
@@ -68,10 +67,8 @@ public class FileContentSearchEngineTest {
             filesList.add(matchedSubstring2);
             filesList.add(matchedSubstring3);
 
+            Map<?, ?> output = fileContentSearchEngine.searchInFiles("test");
 
-            Map output = fileContentSearchEngine.searchInFiles("test");
-
-            assertThat(output).containsKeys("file");
             assertThat(output.get("file")).isEqualTo(filesList);
         }
 
@@ -86,10 +83,8 @@ public class FileContentSearchEngineTest {
             matchedSubstring.setEnd(1, 3);
             filesList.add(matchedSubstring);
 
+            Map<?, ?> output = fileContentSearchEngine.searchInFiles("foo\nbar");
 
-            Map output = fileContentSearchEngine.searchInFiles("foo\nbar");
-
-            assertThat(output).containsKeys("file");
             assertThat(output.get("file")).isEqualTo(filesList);
         }
 
@@ -102,14 +97,14 @@ public class FileContentSearchEngineTest {
             listFile.add(1);
             listFile.add(3);
 
-            Map output = fileContentSearchEngine.searchInFiles("foo");
+            Map<?, ?> output = fileContentSearchEngine.searchInFiles("foo");
 
             assertThat(output).isEmpty();
         }
 
         @Test
         void emptyQuery() {
-            Map output = fileContentSearchEngine.searchInFiles("");
+            Map<?, ?> output = fileContentSearchEngine.searchInFiles("");
 
             assertThat(output).hasSize(0);
         }

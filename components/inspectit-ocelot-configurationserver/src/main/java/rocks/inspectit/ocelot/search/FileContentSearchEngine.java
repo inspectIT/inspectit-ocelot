@@ -2,7 +2,7 @@ package rocks.inspectit.ocelot.search;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import rocks.inspectit.ocelot.autocomplete.ConfigurationFilesCache;
+import rocks.inspectit.ocelot.autocomplete.util.ConfigurationFilesCache;
 
 import java.util.*;
 
