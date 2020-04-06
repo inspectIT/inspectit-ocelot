@@ -89,7 +89,7 @@ class ResourceTimingBeaconRecorderTest {
             recorder.record(beacon);
 
             verify(measuresAndViewsManager, atLeastOnce()).getTagContext(tagsCaptor.capture());
-            verify(measuresAndViewsManager, times(4)).recordMeasure(eq("resource_timing_total"), any(), eq(1L));
+            verify(measuresAndViewsManager, times(4)).recordMeasure(eq("resource_time"), any(), eq(1L));
             verifyNoMoreInteractions(measuresAndViewsManager);
 
             assertThat(tagsCaptor.getAllValues()).hasSize(4)
@@ -133,7 +133,7 @@ class ResourceTimingBeaconRecorderTest {
             recorder.record(beacon);
 
             verify(measuresAndViewsManager, atLeastOnce()).getTagContext(tagsCaptor.capture());
-            verify(measuresAndViewsManager, times(2)).recordMeasure(eq("resource_timing_total"), any(), eq(1L));
+            verify(measuresAndViewsManager, times(2)).recordMeasure(eq("resource_time"), any(), eq(1L));
             verifyNoMoreInteractions(measuresAndViewsManager);
 
             assertThat(tagsCaptor.getAllValues()).hasSize(2)
@@ -179,7 +179,7 @@ class ResourceTimingBeaconRecorderTest {
             recorder.record(beacon);
 
             verify(measuresAndViewsManager, atLeastOnce()).getTagContext(tagsCaptor.capture());
-            verify(measuresAndViewsManager, times(1)).recordMeasure(eq("resource_timing_total"), any(), eq(1L));
+            verify(measuresAndViewsManager, times(1)).recordMeasure(eq("resource_time"), any(), eq(1L));
             verifyNoMoreInteractions(measuresAndViewsManager);
 
             assertThat(tagsCaptor.getAllValues()).hasSize(1)
