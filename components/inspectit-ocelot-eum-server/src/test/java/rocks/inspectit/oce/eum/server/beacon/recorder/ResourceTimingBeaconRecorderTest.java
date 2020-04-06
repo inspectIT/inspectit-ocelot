@@ -70,6 +70,7 @@ class ResourceTimingBeaconRecorderTest {
                     "{\n" +
                     "  \"http\": {\n" +
                     "    \"://myhost/\": {\n" +
+                    "      \"|\": \"6,2\",\n" +
                     "      \"boomerang/plugins/\": {\n" +
                     "        \"r\": {\n" +
                     "          \"t.js\": \"32o,2u,2q,25*1d67,9s,wdu*20\",\n" +
@@ -88,10 +89,16 @@ class ResourceTimingBeaconRecorderTest {
             recorder.record(beacon);
 
             verify(measuresAndViewsManager, atLeastOnce()).getTagContext(tagsCaptor.capture());
-            verify(measuresAndViewsManager, times(3)).recordMeasure(eq("resource_timing_total"), any(), eq(1L));
+            verify(measuresAndViewsManager, times(4)).recordMeasure(eq("resource_timing_total"), any(), eq(1L));
             verifyNoMoreInteractions(measuresAndViewsManager);
 
-            assertThat(tagsCaptor.getAllValues()).hasSize(3)
+            assertThat(tagsCaptor.getAllValues()).hasSize(4)
+                    // |
+                    .anySatisfy(map -> assertThat(map).hasSize(3)
+                            .containsEntry("initiatorType", "HTML")
+                            .containsEntry("crossOrigin", "false")
+                            .containsEntry("cached", "true")
+                    )
                     // t.js
                     .anySatisfy(map -> assertThat(map).hasSize(3)
                             .containsEntry("initiatorType", "SCRIPT")

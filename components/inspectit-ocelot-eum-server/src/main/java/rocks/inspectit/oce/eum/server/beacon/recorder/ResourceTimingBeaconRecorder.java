@@ -23,6 +23,7 @@ import rocks.inspectit.ocelot.config.model.metrics.definition.ViewDefinitionSett
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 /**
@@ -42,9 +43,14 @@ import java.util.stream.Stream;
 public class ResourceTimingBeaconRecorder implements BeaconRecorder {
 
     /**
-     * Metric definition for the resource timing total metric.
+     * Name of the metric
      */
-    private static final MetricDefinitionSettings RESOURCE_TIMING_TOTAL;
+    public static final String RESOURCE_TIME_METRIC_NAME = "resource_time";
+
+    /**
+     * Metric definition for the resource timing metric.
+     */
+    private static final MetricDefinitionSettings RESOURCE_TIME;
 
     static {
         Map<String, Boolean> tags = new HashMap<>();
@@ -52,10 +58,10 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
         tags.put("cached", true);
         tags.put("crossOrigin", true);
 
-        RESOURCE_TIMING_TOTAL = MetricDefinitionSettings.builder()
+        RESOURCE_TIME = MetricDefinitionSettings.builder()
                 .type(MetricDefinitionSettings.MeasureType.LONG)
                 .unit("ms")
-                .view("resource_timing_total/COUNT", ViewDefinitionSettings.builder()
+                .view(RESOURCE_TIME_METRIC_NAME + "/COUNT", ViewDefinitionSettings.builder()
                         .tags(tags)
                         .aggregation(ViewDefinitionSettings.Aggregation.COUNT)
                         .build()
@@ -80,7 +86,7 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
      */
     @PostConstruct
     public void initMetric() {
-        measuresAndViewsManager.updateMetrics("resource_timing_total", RESOURCE_TIMING_TOTAL);
+        measuresAndViewsManager.updateMetrics(RESOURCE_TIME_METRIC_NAME, RESOURCE_TIME);
     }
 
     /**
@@ -94,10 +100,10 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
         // this is the URL where the resources have been loaded
         String url = beacon.get("u");
 
-        Optional.ofNullable(beacon.get("restiming"))
-                .ifPresent(resourceTiming -> this.resourceTimingResults(resourceTiming)
-                        .forEach(rs -> this.record(rs, url))
-                );
+        String resourceTimings = beacon.get("restiming");
+        if (resourceTimings != null) {
+            decodeResourceTimings(resourceTimings).forEach(rs -> this.record(rs, url));
+        }
     }
 
     /**
@@ -120,7 +126,7 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
             // TODO I think we should already collect there the load time, thus we would have a COUNT and a SUM of time
             //  we would have most of the stuff needed then
             //  and it would make tests more reliable then now
-            measuresAndViewsManager.recordMeasure("resource_timing_total", RESOURCE_TIMING_TOTAL, 1L);
+            measuresAndViewsManager.recordMeasure("resource_time", RESOURCE_TIME, 1L);
         }
     }
 
@@ -130,7 +136,7 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
      * @param resourceTiming json
      * @return stream
      */
-    private Stream<ResourceTimingEntry> resourceTimingResults(String resourceTiming) {
+    private Stream<ResourceTimingEntry> decodeResourceTimings(String resourceTiming) {
         JsonNode rootNode;
         try {
             rootNode = objectMapper.readTree(resourceTiming);
@@ -139,7 +145,7 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
             return Stream.empty();
         }
 
-        return findAllTimingValuesAsText(rootNode).entrySet()
+        return flattenUrlTrie(rootNode).entrySet()
                 .stream()
                 .flatMap(entry -> this.resolveResourceTimingStringValue(entry.getKey(), entry.getValue()));
 
@@ -151,7 +157,7 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
      * @param node root node
      * @return Map where keys are resource URLs and values are the Boomerang compressed resource timing string.
      */
-    private Map<String, String> findAllTimingValuesAsText(JsonNode node) {
+    private Map<String, String> flattenUrlTrie(JsonNode node) {
         Map<String, String> map = new HashMap<>();
         this.findAllTimingValuesAsText(node, map, "");
         return map;
@@ -163,9 +169,11 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
                 foundSoFar.put(prefix, node.textValue());
             }
         } else {
-            node.fields().forEachRemaining(entry -> this.findAllTimingValuesAsText(entry.getValue(), foundSoFar, prefix + entry.getKey()));
+            // note the | (pipe) keys
+            // if a resource's URL is a prefix of another resource, then it terminates with a pipe symbol (|).
+            Function<String, String> pipeResolver = (s) -> "|".equals(s) ? "" : s;
+            node.fields().forEachRemaining(entry -> this.findAllTimingValuesAsText(entry.getValue(), foundSoFar, prefix + pipeResolver.apply(entry.getKey())));
         }
-
     }
 
     /**
@@ -261,37 +269,43 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
          * @return ResourceTimingEntry as optional
          */
         public static Optional<ResourceTimingEntry> from(String url, String value) {
-            // check if this string contains additional data
-            // if so cut it from processing
-            String toProcess = value;
-            int additionalDataIndex = value.indexOf('*');
-            if (additionalDataIndex > -1) {
-                toProcess = value.substring(0, additionalDataIndex);
-            }
+            try {
+                // check if this string contains additional data
+                // if so cut it from processing
+                String toProcess = value;
+                int additionalDataIndex = value.indexOf('*');
+                if (additionalDataIndex > -1) {
+                    toProcess = value.substring(0, additionalDataIndex);
+                }
 
-            if (StringUtils.isEmpty(toProcess)) {
+                if (StringUtils.isEmpty(toProcess)) {
+                    return Optional.empty();
+                }
+
+                // initiator is always first char
+                InitiatorType initiatorType = InitiatorType.from(toProcess.charAt(0));
+
+                // then split by comma to get all timings
+                String[] timingsAsBase36Strings = toProcess.substring(1).split(",");
+
+                // then convert timings in base36 to int values
+                // if empty then it's zero
+                Integer[] timings = Arrays.stream(timingsAsBase36Strings)
+                        .map(v -> StringUtils.isEmpty(v) ? 0 : Integer.parseInt(v, 36))
+                        .toArray(Integer[]::new);
+
+                // then build the entry
+                return Optional.of(ResourceTimingEntry.builder()
+                        .url(url)
+                        .initiatorType((initiatorType))
+                        .timings(timings)
+                        .build()
+                );
+            } catch (Exception e) {
+                // in case of any exception return the empty result here
+                log.warn("Unable to create a resource timing entry for the URL {} with the Boomerang value {}.", url, value);
                 return Optional.empty();
             }
-
-            // initiator is always first char
-            InitiatorType initiatorType = InitiatorType.from(toProcess.charAt(0));
-
-            // then split by comma to get all timings
-            String[] timingsAsBase36Strings = toProcess.substring(1).split(",");
-
-            // then convert timings in base36 to int values
-            // if empty then it's zero
-            Integer[] timings = Arrays.stream(timingsAsBase36Strings)
-                    .map(v -> StringUtils.isEmpty(v) ? 0 : Integer.parseInt(v, 36))
-                    .toArray(Integer[]::new);
-
-            // then build the entry
-            return Optional.of(ResourceTimingEntry.builder()
-                    .url(url)
-                    .initiatorType((initiatorType))
-                    .timings(timings)
-                    .build()
-            );
         }
 
     }

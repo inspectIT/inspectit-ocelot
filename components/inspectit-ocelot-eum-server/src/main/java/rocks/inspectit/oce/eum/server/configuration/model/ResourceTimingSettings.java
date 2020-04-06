@@ -13,6 +13,6 @@ public class ResourceTimingSettings {
     /**
      * If resource timing is enabled or not.
      */
-    private boolean enabled = true;
+    private boolean enabled;
 
 }

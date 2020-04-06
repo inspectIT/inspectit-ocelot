@@ -9,7 +9,8 @@ import rocks.inspectit.oce.eum.server.beacon.Beacon;
 public interface BeaconRecorder {
 
     /**
-     * Records arbitrary metrics from given {@link Beacon}
+     * Records arbitrary metrics from given the {@link Beacon}. This method will be invoked within the scope where
+     * global tags are already added.
      *
      * @param beacon Fully-processed beacon
      */
