@@ -59,8 +59,14 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
         tags.put("crossOrigin", true);
 
         RESOURCE_TIME = MetricDefinitionSettings.builder()
-                .type(MetricDefinitionSettings.MeasureType.LONG)
+                .type(MetricDefinitionSettings.MeasureType.DOUBLE)
+                .description("Response end time of the resource loading")
                 .unit("ms")
+                .view(RESOURCE_TIME_METRIC_NAME + "/SUM", ViewDefinitionSettings.builder()
+                        .tags(tags)
+                        .aggregation(ViewDefinitionSettings.Aggregation.SUM)
+                        .build()
+                )
                 .view(RESOURCE_TIME_METRIC_NAME + "/COUNT", ViewDefinitionSettings.builder()
                         .tags(tags)
                         .aggregation(ViewDefinitionSettings.Aggregation.COUNT)
@@ -117,16 +123,13 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
         boolean sameOrigin = isSameOrigin(url, resourceTimingEntry.url);
         extra.put("crossOrigin", String.valueOf(!sameOrigin));
         extra.put("initiatorType", resourceTimingEntry.getInitiatorType().toString());
-        // TODO is this OK, only setting cached if it's same origin, otherwise we can not know
         if (sameOrigin) {
             extra.put("cached", String.valueOf(resourceTimingEntry.isCached(true)));
         }
 
         try (Scope scope = measuresAndViewsManager.getTagContext(extra).buildScoped()) {
-            // TODO I think we should already collect there the load time, thus we would have a COUNT and a SUM of time
-            //  we would have most of the stuff needed then
-            //  and it would make tests more reliable then now
-            measuresAndViewsManager.recordMeasure("resource_time", RESOURCE_TIME, 1L);
+            Optional<Integer> responseEnd = resourceTimingEntry.getResponseEnd();
+            measuresAndViewsManager.recordMeasure("resource_time", RESOURCE_TIME, responseEnd.orElse(0));
         }
     }
 
@@ -247,6 +250,19 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
          * Note that array does not need to be fully populated if entries from the end are missing.
          */
         Integer[] timings;
+
+        /**
+         * @return Returns the complete response time in milliseconds if this timing data is available.
+         */
+        public Optional<Integer> getResponseEnd() {
+            return getTiming(1);
+        }
+
+        private Optional<Integer> getTiming(int index) {
+            return Optional.ofNullable(timings)
+                    .filter(t -> t.length - 1 >= index)
+                    .map(t -> t[index]);
+        }
 
         /**
          * Cached resources only have 2 timing values if considered as same-origin requests.
