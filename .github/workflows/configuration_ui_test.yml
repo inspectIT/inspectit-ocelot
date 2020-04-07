@@ -13,15 +13,20 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - uses: borales/actions-yarn@v2.0.0
-        working-directory: ${{env.working-directory}}
+
+      - name: Use Node.js
+        uses: actions/setup-node@v1
         with:
-          cmd: install
-      - uses: borales/actions-yarn@v2.0.0
+          node-version: '12.x'
+
+      - name: Install dependencies
         working-directory: ${{env.working-directory}}
-        with:
-          cmd: lint
-      - uses: borales/actions-yarn@v2.0.0
+        run: yarn install
+
+      - name: Run Eslint
         working-directory: ${{env.working-directory}}
-        with:
-          cmd: format
+        run: yarn lint
+
+      - name: Run Prettier
+        working-directory: ${{env.working-directory}}
+        run: yarn format
