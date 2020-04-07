@@ -277,7 +277,7 @@ inspectit-eum-server:
       - COUNTRY_CODE
 ```
 
-## Resource timings
+## Resource Timings
 
 The EUM server can extract information about the resources timings which are reported as part of the Boomerang beacon field `restiming`.
 The resource timing information is decompressed from the beacon and exposed as part of the `resource_time` metric.
