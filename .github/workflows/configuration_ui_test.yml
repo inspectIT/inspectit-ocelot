@@ -1,0 +1,27 @@
+name: Test Configuration UI
+
+on:
+  pull_request:
+    paths:
+      - 'components/inspectit-ocelot-configurationserver-ui/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      working-directory: ./components/inspectit-ocelot-configurationserver-ui
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: borales/actions-yarn@v2.0.0
+        working-directory: ${{env.working-directory}}
+        with:
+          cmd: install
+      - uses: borales/actions-yarn@v2.0.0
+        working-directory: ${{env.working-directory}}
+        with:
+          cmd: lint
+      - uses: borales/actions-yarn@v2.0.0
+        working-directory: ${{env.working-directory}}
+        with:
+          cmd: format
