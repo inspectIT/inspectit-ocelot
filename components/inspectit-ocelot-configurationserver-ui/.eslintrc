@@ -1,0 +1,34 @@
+{
+    "env": {
+        "browser": true,
+        "es6": true
+    },
+    "plugins": [
+        "import"
+    ],
+    "extends": [
+        "eslint:recommended",
+        "plugin:prettier/recommended"
+    ],
+    "parser": "babel-eslint",
+    "parserOptions": {
+        "sourceType": "module",
+        "ecmaVersion": 2018,
+        "ecmaFeatures": {
+            "jsx": true
+        }
+    },
+    "rules": {
+        "no-console": "warn",
+        "no-eval": "error",
+        "handle-callback-err": "warn",
+        "class-methods-use-this": "warn",
+        "curly": "error",
+        "default-param-last": "error",
+        "dot-location": ["error", "property"],
+        "eqeqeq": "warn",
+        "no-multi-spaces": "error",
+        "import/first": "error",
+        "import/no-useless-path-segments": "error"
+    }
+}
