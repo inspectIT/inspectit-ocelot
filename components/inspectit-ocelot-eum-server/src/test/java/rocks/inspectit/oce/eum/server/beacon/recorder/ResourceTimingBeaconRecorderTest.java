@@ -65,6 +65,23 @@ class ResourceTimingBeaconRecorderTest {
         }
 
         @Test
+        public void badCompression() {
+            // intentionally change the initiator
+            String json = "" +
+                    "{\n" +
+                    "  \"https://www.google.de/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png\": \"!!\"\n" +
+                    "}";
+            Map<String, String> fields = new HashMap<>();
+            fields.put("u", "http://myhost/somepage.html");
+            fields.put("restiming", json);
+            Beacon beacon = Beacon.of(fields);
+
+            recorder.record(beacon);
+
+            verifyNoMoreInteractions(measuresAndViewsManager);
+        }
+
+        @Test
         public void nestedResources() {
             String json = "" +
                     "{\n" +
@@ -89,7 +106,10 @@ class ResourceTimingBeaconRecorderTest {
             recorder.record(beacon);
 
             verify(measuresAndViewsManager, atLeastOnce()).getTagContext(tagsCaptor.capture());
-            verify(measuresAndViewsManager, times(4)).recordMeasure(eq("resource_time"), any(), eq(1L));
+            verify(measuresAndViewsManager).recordMeasure(eq("resource_time"), any(), eq(2));
+            verify(measuresAndViewsManager).recordMeasure(eq("resource_time"), any(), eq(102));
+            verify(measuresAndViewsManager).recordMeasure(eq("resource_time"), any(), eq(104));
+            verify(measuresAndViewsManager).recordMeasure(eq("resource_time"), any(), eq(129));
             verifyNoMoreInteractions(measuresAndViewsManager);
 
             assertThat(tagsCaptor.getAllValues()).hasSize(4)
@@ -124,16 +144,18 @@ class ResourceTimingBeaconRecorderTest {
             // intentionally change the initiator
             String json = "" +
                     "{\n" +
-                    "  \"https://www.google.de/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png\": \"*02k,7k,1y,a2|180,3l|280,3l\"\n" +
+                    "  \"https://www.google.de/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png\": \"*02k,7k,1y,a2|180,3l|280,4l\"\n" +
                     "}";
             Map<String, String> fields = new HashMap<>();
             fields.put("u", "http://myhost/somepage.html");
             fields.put("restiming", json);
             Beacon beacon = Beacon.of(fields);
+
             recorder.record(beacon);
 
             verify(measuresAndViewsManager, atLeastOnce()).getTagContext(tagsCaptor.capture());
-            verify(measuresAndViewsManager, times(2)).recordMeasure(eq("resource_time"), any(), eq(1L));
+            verify(measuresAndViewsManager).recordMeasure(eq("resource_time"), any(), eq(129));
+            verify(measuresAndViewsManager).recordMeasure(eq("resource_time"), any(), eq(165));
             verifyNoMoreInteractions(measuresAndViewsManager);
 
             assertThat(tagsCaptor.getAllValues()).hasSize(2)
@@ -160,6 +182,7 @@ class ResourceTimingBeaconRecorderTest {
             fields.put("u", "http://myhost/somepage.html");
             fields.put("restiming", json);
             Beacon beacon = Beacon.of(fields);
+
             recorder.record(beacon);
 
             verifyNoMoreInteractions(measuresAndViewsManager);
@@ -176,16 +199,43 @@ class ResourceTimingBeaconRecorderTest {
             fields.put("u", "http://myhost/somepage.html");
             fields.put("restiming", json);
             Beacon beacon = Beacon.of(fields);
+
             recorder.record(beacon);
 
             verify(measuresAndViewsManager, atLeastOnce()).getTagContext(tagsCaptor.capture());
-            verify(measuresAndViewsManager, times(1)).recordMeasure(eq("resource_time"), any(), eq(1L));
+            verify(measuresAndViewsManager).recordMeasure(eq("resource_time"), any(), eq(129));
             verifyNoMoreInteractions(measuresAndViewsManager);
 
             assertThat(tagsCaptor.getAllValues()).hasSize(1)
                     // first
                     .anySatisfy(map -> assertThat(map).hasSize(2)
                             .containsEntry("initiatorType", "OTHER")
+                            .containsEntry("crossOrigin", "true")
+                    );
+        }
+
+        @Test
+        public void noResponseEnd() {
+            // intentionally change the initiator
+            String json = "" +
+                    "{\n" +
+                    "  \"https://www.google.de/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png\": \"180\"\n" +
+                    "}";
+            Map<String, String> fields = new HashMap<>();
+            fields.put("u", "http://myhost/somepage.html");
+            fields.put("restiming", json);
+            Beacon beacon = Beacon.of(fields);
+
+            recorder.record(beacon);
+
+            verify(measuresAndViewsManager, atLeastOnce()).getTagContext(tagsCaptor.capture());
+            verify(measuresAndViewsManager).recordMeasure(eq("resource_time"), any(), eq(0));
+            verifyNoMoreInteractions(measuresAndViewsManager);
+
+            assertThat(tagsCaptor.getAllValues()).hasSize(1)
+                    // first
+                    .anySatisfy(map -> assertThat(map).hasSize(2)
+                            .containsEntry("initiatorType", "IMG")
                             .containsEntry("crossOrigin", "true")
                     );
         }
