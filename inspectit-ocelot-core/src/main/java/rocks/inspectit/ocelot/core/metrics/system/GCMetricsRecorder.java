@@ -203,8 +203,8 @@ public class GCMetricsRecorder extends AbstractMetricsRecorder {
         measureManager.getMeasureLong(CONCURRENT_PHASE_TIME_METRIC_FULL_NAME)
                 .ifPresent(measure -> {
                     TagContext tags = tagger.toBuilder(commonTags.getCommonTagContext())
-                            .put(actionTagKey, TagValue.create(notificationInfo.getGcAction()))
-                            .put(causeTagKey, TagValue.create(notificationInfo.getGcCause()))
+                            .putLocal(actionTagKey, TagValue.create(notificationInfo.getGcAction()))
+                            .putLocal(causeTagKey, TagValue.create(notificationInfo.getGcCause()))
                             .build();
 
                     recorder.newMeasureMap()
@@ -217,8 +217,8 @@ public class GCMetricsRecorder extends AbstractMetricsRecorder {
         measureManager.getMeasureLong(PAUSE_METRIC_FULL_NAME)
                 .ifPresent(measure -> {
                     TagContext tags = tagger.toBuilder(commonTags.getCommonTagContext())
-                            .put(actionTagKey, TagValue.create(notificationInfo.getGcAction()))
-                            .put(causeTagKey, TagValue.create(notificationInfo.getGcCause()))
+                            .putLocal(actionTagKey, TagValue.create(notificationInfo.getGcAction()))
+                            .putLocal(causeTagKey, TagValue.create(notificationInfo.getGcCause()))
                             .build();
 
                     recorder.newMeasureMap()

@@ -123,7 +123,7 @@ public class CommonTagsManager {
         newCommonTagValueMap.forEach((k, v) -> {
             TagKey key = TagKey.create(k);
             newCommonTagKeys.add(key);
-            tagContextBuilder.put(key, TagValue.create(v));
+            tagContextBuilder.putLocal(key, TagValue.create(v));
         });
         commonTagKeys = newCommonTagKeys;
         commonTagValueMap = newCommonTagValueMap;

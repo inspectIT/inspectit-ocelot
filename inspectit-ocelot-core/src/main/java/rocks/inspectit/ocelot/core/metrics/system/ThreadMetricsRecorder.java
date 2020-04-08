@@ -80,7 +80,7 @@ public class ThreadMetricsRecorder extends AbstractPollingMetricsRecorder {
         measureManager.getMeasureLong(METRIC_NAME_PREFIX + STATE_METRIC_NAME)
                 .ifPresent(measure -> {
                     for (val state : Thread.State.values()) {
-                        TagContextBuilder contextBuilder = tagger.currentBuilder().put(stateTag, TagValue.create(state.name()));
+                        TagContextBuilder contextBuilder = tagger.currentBuilder().putLocal(stateTag, TagValue.create(state.name()));
                         try (val scope = contextBuilder.buildScoped()) {
                             val mm = recorder.newMeasureMap();
                             val count = Arrays.stream(threadBean.getThreadInfo(threadBean.getAllThreadIds()))
