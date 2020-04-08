@@ -120,7 +120,7 @@ public class SelfMonitoringService {
      * @param value       the actual value
      */
     public void recordMeasurement(String measureName, long value) {
-       recordMeasurement(measureName, value, Collections.emptyMap());
+        recordMeasurement(measureName, value, Collections.emptyMap());
     }
 
     /**
@@ -161,7 +161,7 @@ public class SelfMonitoringService {
                     statsRecorder.newMeasureMap()
                             .put(m, durationInMicros)
                             .record(Tags.getTagger().toBuilder(commonTags.getCommonTagContext())
-                                    .put(COMPONENT_TAG_KEY, TagValue.create(componentName)).build())
+                                    .putLocal(COMPONENT_TAG_KEY, TagValue.create(componentName)).build())
             );
 
             if (log.isTraceEnabled()) {
