@@ -6,24 +6,23 @@ import { BASE_PAGE_TITLE } from '../../data/constants';
 import SettingsView from '../../components/views/settings/SettingsView';
 import UserListView from '../../components/views/settings/userlist/UserListView';
 
-/** 
+/**
  * Page containing the user list.
  */
 class UserListPage extends React.Component {
+  render() {
+    return (
+      <MainLayout>
+        <Head>
+          <title>{BASE_PAGE_TITLE} | User View</title>
+        </Head>
 
-    render() {
-        return (
-            <MainLayout>
-                <Head>
-                    <title>{BASE_PAGE_TITLE} | User View</title>
-                </Head>
-
-                <SettingsView>
-                    <UserListView></UserListView>
-                </SettingsView>
-            </MainLayout>
-        )
-    }
+        <SettingsView>
+          <UserListView />
+        </SettingsView>
+      </MainLayout>
+    );
+  }
 }
 
 export default UserListPage;

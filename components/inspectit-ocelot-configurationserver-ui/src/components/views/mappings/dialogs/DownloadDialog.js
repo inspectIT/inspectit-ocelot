@@ -16,11 +16,11 @@ class DownloadDialog extends React.Component {
 
   state = {
     attributes: [],
-  }
+  };
 
   handleChangeAttributes = (newAttributes) => {
     this.setState({ attributes: newAttributes });
-  }
+  };
 
   render() {
     return (
@@ -29,27 +29,23 @@ class DownloadDialog extends React.Component {
         modal={true}
         visible={this.props.visible}
         onHide={this.props.onHide}
-        style={{ 'maxWidth': '900px' }}
-        footer={(
+        style={{ maxWidth: '900px' }}
+        footer={
           <div>
             <Button label="Download" ref={this.downloadButton} className="p-button-primary" onClick={this.handleDownload} />
             <Button label="Cancel" className="p-button-secondary" onClick={this.props.onHide} />
           </div>
-        )}
+        }
       >
-        <p style={{ 'marginBottom': '1em' }}>
+        <p style={{ marginBottom: '1em' }}>
           Enter key/value pairs to download the correlating agent configuration.
           <br /> You will get a different result depending on the mapping that fits your input.
         </p>
-        <KeyValueEditor
-          onChange={this.handleChangeAttributes}
-          keyValueArray={this.state.attributes}
-          maxHeight={`300px`}
-        />
+        <KeyValueEditor onChange={this.handleChangeAttributes} keyValueArray={this.state.attributes} maxHeight={`300px`} />
         {/** creating reference of DownloadLink, to be able to call download within this.handleDownload */}
-        <ConfigurationDownload onRef={ref => this.configDownload = ref} />
+        <ConfigurationDownload onRef={(ref) => (this.configDownload = ref)} />
       </Dialog>
-    )
+    );
   }
 
   /**
@@ -75,7 +71,7 @@ class DownloadDialog extends React.Component {
 
     this.props.onHide();
     this.configDownload.download(sanitizedAttributes);
-  }
+  };
 
   componentDidUpdate(prevProps) {
     if (!prevProps.visible && this.props.visible) {
@@ -86,6 +82,6 @@ class DownloadDialog extends React.Component {
 
 const mapDispatchToProps = {
   showWarningMessage: notificationActions.showWarningMessage,
-}
+};
 
 export default connect(null, mapDispatchToProps)(DownloadDialog);

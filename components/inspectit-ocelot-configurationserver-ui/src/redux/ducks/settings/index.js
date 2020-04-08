@@ -1,9 +1,7 @@
-import reducer from "./reducers";
+import reducer from './reducers';
 
-import * as settingsActions from "./actions";
+import * as settingsActions from './actions';
 
-export {
-    settingsActions
-}
+export { settingsActions };
 
-export default reducer; 
+export default reducer;

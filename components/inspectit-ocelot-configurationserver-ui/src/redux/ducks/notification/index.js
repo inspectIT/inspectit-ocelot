@@ -1,9 +1,7 @@
-import reducer from "./reducers";
+import reducer from './reducers';
 
-import * as notificationActions from "./actions";
+import * as notificationActions from './actions';
 
-export {
-    notificationActions
-};
+export { notificationActions };
 
 export default reducer;

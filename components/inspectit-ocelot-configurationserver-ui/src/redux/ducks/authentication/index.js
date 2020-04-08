@@ -1,11 +1,8 @@
-import reducer from "./reducers";
+import reducer from './reducers';
 
-import * as authenticationActions from "./actions";
-import * as authenticationSelectors from "./selectors";
+import * as authenticationActions from './actions';
+import * as authenticationSelectors from './selectors';
 
-export {
-    authenticationActions,
-    authenticationSelectors,
-};
+export { authenticationActions, authenticationSelectors };
 
 export default reducer;
