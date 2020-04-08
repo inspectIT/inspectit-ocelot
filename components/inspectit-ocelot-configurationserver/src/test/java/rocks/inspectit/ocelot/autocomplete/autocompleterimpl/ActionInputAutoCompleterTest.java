@@ -29,7 +29,7 @@ public class ActionInputAutoCompleterTest {
     public class GetSuggestions {
         @Test
         public void getSuggestionsTest() {
-            List<String> testPath = Arrays.asList("inspectit", "instrumentation", "actions", "*");
+            List<String> testPath = Arrays.asList("inspectit", "instrumentation", "rules", "my_method", "entry", "span_name", "data-input");
             when(configurationQueryHelper.getKeysForPath(any())).thenReturn(Arrays.asList("test", "test2"));
 
             List<String> output = actionInputAutoCompleter.getSuggestions(testPath);
@@ -41,7 +41,7 @@ public class ActionInputAutoCompleterTest {
 
         @Test
         public void wrongPath() {
-            List<String> testPath = Arrays.asList("inspectit", "instrumentation", "rules");
+            List<String> testPath = Arrays.asList("inspectit", "instrumentation", "rules", "my_method", "entry", "span_name", "data-input");
 
             List<String> output = actionInputAutoCompleter.getSuggestions(testPath);
 
@@ -50,11 +50,22 @@ public class ActionInputAutoCompleterTest {
 
         @Test
         public void emptyLists() {
-            List<String> testPath = Arrays.asList("inspectit", "instrumentation", "rules");
+            List<String> testPath = Arrays.asList("inspectit", "instrumentation", "rules", "my_method", "entry", "span_name", "data-input");
 
             List<String> output = actionInputAutoCompleter.getSuggestions(testPath);
 
             assertThat(output).isEmpty();
+        }
+
+        @Test
+        public void ignoresUnderscoredValues() {
+            List<String> testPath = Arrays.asList("inspectit", "instrumentation", "rules", "my_method", "entry", "span_name", "data-input");
+            when(configurationQueryHelper.getKeysForPath(any())).thenReturn(Arrays.asList("test", "_test2"));
+
+            List<String> output = actionInputAutoCompleter.getSuggestions(testPath);
+
+            assertThat(output).hasSize(1);
+            assertThat(output).containsOnly("test");
         }
     }
 }

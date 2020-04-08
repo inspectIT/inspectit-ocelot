@@ -8,7 +8,9 @@ import rocks.inspectit.ocelot.config.validation.PropertyPathHelper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * This AutoCompleter retrieves all inputs for actions which can be found in the present yaml-files. It is triggered by
@@ -17,25 +19,36 @@ import java.util.List;
 @Component
 public class ActionInputAutoCompleter implements AutoCompleter {
 
-    private static List<String> ACTION_DECLARATION_PATH = Arrays.asList("inspectit", "instrumentation", "actions", "*");
+    private final static List<String> ACTION_OPTIONS = Arrays.asList("entry", "exit", "preEntry", "postEntry", "preExit", "postExit");
 
-    private static List<List<String>> ACTION_USAGE_PATHS = Arrays.asList(
-            ACTION_DECLARATION_PATH,
-            Arrays.asList("inspectit", "instrumentation", "rules", "*", "preEntry", "constant-input", "action"),
-            Arrays.asList("inspectit", "instrumentation", "rules", "*", "preEntry", "data-input", "action"),
-            Arrays.asList("inspectit", "instrumentation", "rules", "*", "entry", "constant-input", "action"),
-            Arrays.asList("inspectit", "instrumentation", "rules", "*", "entry", "data-input", "action"),
-            Arrays.asList("inspectit", "instrumentation", "rules", "*", "exit", "constant-input", "action"),
-            Arrays.asList("inspectit", "instrumentation", "rules", "*", "exit", "data-input", "action"),
-            Arrays.asList("inspectit", "instrumentation", "rules", "*", "preEntry", "constant-input", "action"),
-            Arrays.asList("inspectit", "instrumentation", "rules", "*", "preEntry", "data-input", "action"),
-            Arrays.asList("inspectit", "instrumentation", "rules", "*", "postEntry", "constant-input", "action"),
-            Arrays.asList("inspectit", "instrumentation", "rules", "*", "postEntry", "data-input", "action"),
-            Arrays.asList("inspectit", "instrumentation", "rules", "*", "preExit", "constant-input", "action"),
-            Arrays.asList("inspectit", "instrumentation", "rules", "*", "preExit", "data-input", "action"),
-            Arrays.asList("inspectit", "instrumentation", "rules", "*", "postExit", "constant-input", "action"),
-            Arrays.asList("inspectit", "instrumentation", "rules", "*", "postExit", "data-input", "action")
-    );
+    private final static List<String> INPUT_OPTIONS = Arrays.asList("data-input", "constant-input");
+
+    private final static List<String> ACTION_INPUT_DECLARATION_PATH = Arrays.asList("inspectit", "instrumentation", "actions", "*", "input");
+
+    private static List<String> actionInputDefaultUsagePath = Arrays.asList("inspectit", "instrumentation", "rules", "*", "*", "*", "*");
+
+    private static List<List<String>> actionInputUsagePaths;
+
+    static {
+        setupUsagePaths();
+    }
+
+    /**
+     * Sets up the actionInputUsagePaths variable. To do so, all valid path combinations of actionInputDefaultUsagePath,
+     * ACTION_OPTIONS and INPUT_OPTIONS are build and saved into this List.
+     */
+    private static void setupUsagePaths() {
+        actionInputUsagePaths = new ArrayList<>();
+
+        for (String option : ACTION_OPTIONS) {
+            actionInputDefaultUsagePath.set(4, option);
+
+            for (String inputOption : INPUT_OPTIONS) {
+                actionInputDefaultUsagePath.set(6, inputOption);
+                actionInputUsagePaths.add(new ArrayList<>(actionInputDefaultUsagePath));
+            }
+        }
+    }
 
     @Autowired
     private ConfigurationQueryHelper configurationQueryHelper;
@@ -49,12 +62,11 @@ public class ActionInputAutoCompleter implements AutoCompleter {
      */
     @Override
     public List<String> getSuggestions(List<String> path) {
-        ArrayList<String> toReturn = new ArrayList<>();
-        if (ACTION_USAGE_PATHS.stream().
+        if (actionInputUsagePaths.stream().
                 anyMatch(actionUsagePath -> PropertyPathHelper.comparePaths(path, actionUsagePath))) {
-            toReturn.addAll(getInput());
+            return getInput(path);
         }
-        return toReturn;
+        return Collections.emptyList();
     }
 
     /**
@@ -62,7 +74,22 @@ public class ActionInputAutoCompleter implements AutoCompleter {
      *
      * @return A List of Strings resembling all declared rules.
      */
-    private List<String> getInput() {
-        return configurationQueryHelper.getKeysForPath(ACTION_DECLARATION_PATH);
+    private List<String> getInput(List<String> path) {
+        return configurationQueryHelper.getKeysForPath(getInputDeclarationPath(path))
+                .stream()
+                .filter(value -> !value.startsWith("_"))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Puts the method name found in a given path into a copy of the ACTION_INPUT_DECLARATION_PATH variable.
+     *
+     * @param path the path initially put into the method.
+     * @return A List of Strings resembling a path leading to the methods input declarations.
+     */
+    private List<String> getInputDeclarationPath(List<String> path) {
+        List<String> currentDeclarationPath = new ArrayList<>(ACTION_INPUT_DECLARATION_PATH);
+        currentDeclarationPath.set(3, path.get(3));
+        return currentDeclarationPath;
     }
 }
