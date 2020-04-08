@@ -68,4 +68,6 @@ public class LdapSettings {
     @NotNull
     private String groupSearchFilter;
 
+    private RoleSettings roles;
+
 }

@@ -21,9 +21,11 @@ import rocks.inspectit.ocelot.security.jwt.JwtTokenManager;
 import rocks.inspectit.ocelot.security.userdetails.LocalUserDetailsService;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
-import static rocks.inspectit.ocelot.security.userdetails.LocalUserDetailsService.DEFAULT_ACCESS_USER_ROLE;
+import static rocks.inspectit.ocelot.security.userdetails.CustomLdapUserDetailsService.OCELOT_ACCESS_USER_ROLES;
 
 /**
  * Spring security configuration enabling authentication on all except excluded endpoints.
@@ -76,7 +78,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
                 .and()
                 .authorizeRequests()
-                .anyRequest().hasAnyRole(getAccessRole(), DEFAULT_ACCESS_USER_ROLE)
+                .anyRequest().hasAnyRole(getAccessRoles())
 
                 .and()
                 // Custom authentication endpoint to prevent sending the "WWW-Authenticate" which causes Browsers to open the basic authentication dialog.
@@ -93,18 +95,24 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     }
 
     /**
-     * Returns the role name which is required by users to get access to the secured API endpoints.
-     * In case LDAP is not used, a constant role name is used, otherwise the configured role name of the LDAP settings is used.
+     * Returns the role names which are required by users to get access to the secured API endpoints. A user needs to
+     * only have one of these roles in order to access the API endpoints.
+     * In case LDAP is not used, all ocelot access roles are used. If LDAP is enabled, the admin group defined in the
+     * application.yml is added to this list.
      *
-     * @return the role name to use
+     * @return the role names to use as an array of Strings.
      */
     //TODO Make getAccessRole return a List of access Roles. All default roles ->  ldapauthRole
-    private String getAccessRole() {
+    private String[] getAccessRoles() {
+        List<String> activeUserRoles = new ArrayList<>(OCELOT_ACCESS_USER_ROLES);
         if (serverSettings.getSecurity().isLdapAuthentication()) {
-            return serverSettings.getSecurity().getLdap().getAdminGroup();
-        } else {
-            return DEFAULT_ACCESS_USER_ROLE;
+            activeUserRoles.add(serverSettings.getSecurity().getLdap().getAdminGroup());
         }
+        String[] rolesToReturn = new String[activeUserRoles.size()];
+        for (int i = 0; i < activeUserRoles.size(); i++) {
+            rolesToReturn[i] = activeUserRoles.get(i);
+        }
+        return rolesToReturn;
     }
 
     @Override
