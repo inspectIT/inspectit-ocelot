@@ -7,8 +7,8 @@ import rocks.inspectit.ocelot.autocomplete.AutoCompleter;
 import rocks.inspectit.ocelot.autocomplete.util.ConfigurationQueryHelper;
 import rocks.inspectit.ocelot.config.validation.PropertyPathHelper;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -31,12 +31,11 @@ public class ScopeAutoCompleter implements AutoCompleter {
 
     @Override
     public List<String> getSuggestions(List<String> path) {
-        ArrayList<String> toReturn = new ArrayList<>();
         if (SCOPE_USAGE_PATHS.stream().
                 anyMatch(actionUsagePath -> PropertyPathHelper.comparePaths(path, actionUsagePath))) {
-            toReturn.addAll(getActions());
+            return getScopes();
         }
-        return toReturn;
+        return Collections.emptyList();
     }
 
     /**
@@ -44,7 +43,7 @@ public class ScopeAutoCompleter implements AutoCompleter {
      *
      * @return A list of Strings resembling scopes defined in the yaml files.
      */
-    private List<String> getActions() {
+    private List<String> getScopes() {
         return configurationQueryHelper.getKeysForPath(SCOPE_DECLARATION_PATH);
     }
 }
