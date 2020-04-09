@@ -99,4 +99,26 @@ class CommonTagsManagerIntTest {
         }
     }
 
+    @Nested
+    @DirtiesContext
+    @TestPropertySource(properties = {
+            "inspectit.tags.extra.service-name=this-value-is-over-255-characters-long ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"
+    })
+    class VeryLongTagValues extends SpringTestBase {
+
+        @Autowired
+        CommonTagsManager provider;
+
+        @Test
+        public void extraOverwritesProviders() {
+            TagContext commonTagContext = provider.getCommonTagContext();
+
+            assertThat(InternalUtils.getTags(commonTagContext))
+                    .anySatisfy(tag -> {
+                        assertThat(tag.getKey()).isEqualTo(TagKey.create("service-name"));
+                        assertThat(tag.getValue()).isEqualTo(TagValue.create("<invalid>"));
+                    });
+        }
+    }
+
 }

@@ -2,12 +2,12 @@ package rocks.inspectit.ocelot.core.metrics.system;
 
 import io.opencensus.tags.TagContext;
 import io.opencensus.tags.TagKey;
-import io.opencensus.tags.TagValue;
 import io.opencensus.tags.Tagger;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import rocks.inspectit.ocelot.config.model.metrics.MetricsSettings;
+import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
 
 import java.lang.management.BufferPoolMXBean;
 import java.lang.management.ManagementFactory;
@@ -73,8 +73,8 @@ public class MemoryMetricsRecorder extends AbstractPollingMetricsRecorder {
             for (MemoryPoolMXBean memoryPoolBean : ManagementFactory.getPlatformMXBeans(MemoryPoolMXBean.class)) {
                 String area = MemoryType.HEAP.equals(memoryPoolBean.getType()) ? "heap" : "nonheap";
                 TagContext tags = tagger.currentBuilder()
-                        .putLocal(idTagKey, TagValue.create(memoryPoolBean.getName()))
-                        .putLocal(areaTagKey, TagValue.create(area))
+                        .putLocal(idTagKey, CommonTagsManager.createTagValue(memoryPoolBean.getName()))
+                        .putLocal(areaTagKey, CommonTagsManager.createTagValue(area))
                         .build();
 
                 val mm = recorder.newMeasureMap();
@@ -104,7 +104,7 @@ public class MemoryMetricsRecorder extends AbstractPollingMetricsRecorder {
         if (bufferCountEnabled || bufferUsedEnabled || bufferCapacityEnabled) {
             for (BufferPoolMXBean bufferPoolBean : ManagementFactory.getPlatformMXBeans(BufferPoolMXBean.class)) {
                 TagContext tags = tagger.currentBuilder()
-                        .putLocal(idTagKey, TagValue.create(bufferPoolBean.getName()))
+                        .putLocal(idTagKey, CommonTagsManager.createTagValue(bufferPoolBean.getName()))
                         .build();
 
                 val mm = recorder.newMeasureMap();

@@ -3,7 +3,6 @@ package rocks.inspectit.ocelot.core.selfmonitoring;
 import io.opencensus.common.Scope;
 import io.opencensus.stats.StatsRecorder;
 import io.opencensus.tags.TagKey;
-import io.opencensus.tags.TagValue;
 import io.opencensus.tags.Tags;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -161,7 +160,7 @@ public class SelfMonitoringService {
                     statsRecorder.newMeasureMap()
                             .put(m, durationInMicros)
                             .record(Tags.getTagger().toBuilder(commonTags.getCommonTagContext())
-                                    .putLocal(COMPONENT_TAG_KEY, TagValue.create(componentName)).build())
+                                    .putLocal(COMPONENT_TAG_KEY, CommonTagsManager.createTagValue(componentName)).build())
             );
 
             if (log.isTraceEnabled()) {

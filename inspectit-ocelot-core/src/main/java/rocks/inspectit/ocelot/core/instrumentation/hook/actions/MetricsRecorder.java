@@ -2,7 +2,10 @@ package rocks.inspectit.ocelot.core.instrumentation.hook.actions;
 
 import io.opencensus.stats.MeasureMap;
 import io.opencensus.stats.StatsRecorder;
-import io.opencensus.tags.*;
+import io.opencensus.tags.TagContext;
+import io.opencensus.tags.TagContextBuilder;
+import io.opencensus.tags.TagKey;
+import io.opencensus.tags.Tags;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
@@ -67,17 +70,17 @@ public class MetricsRecorder implements IHookAction {
         // first common tags to allow overwrite by constant or data tags
         commonTagsManager.getCommonTagKeys()
                 .forEach(commonTagKey -> Optional.ofNullable(inspectitContext.getData(commonTagKey.getName()))
-                        .ifPresent(value -> builder.putLocal(commonTagKey, TagValue.create(value.toString())))
+                        .ifPresent(value -> builder.putLocal(commonTagKey, CommonTagsManager.createTagValue(value.toString())))
                 );
 
         // then constant tags to allow overwrite by data
         metricAccessor.getConstantTags()
-                .forEach((key, value) -> builder.putLocal(TagKey.create(key), TagValue.create(value)));
+                .forEach((key, value) -> builder.putLocal(TagKey.create(key), CommonTagsManager.createTagValue(value)));
 
         // go over data tags and match the value to the key from the contextTags (if available)
         metricAccessor.getDataTagAccessors()
                 .forEach((key, accessor) -> Optional.ofNullable(accessor.get(context))
-                        .ifPresent(tagValue -> builder.putLocal(TagKey.create(key), TagValue.create(tagValue.toString()))));
+                        .ifPresent(tagValue -> builder.putLocal(TagKey.create(key), CommonTagsManager.createTagValue(tagValue.toString()))));
 
         // build and return
         return builder.build();

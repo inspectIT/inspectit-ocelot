@@ -4,7 +4,6 @@ import com.sun.management.GarbageCollectionNotificationInfo;
 import com.sun.management.GcInfo;
 import io.opencensus.tags.TagContext;
 import io.opencensus.tags.TagKey;
-import io.opencensus.tags.TagValue;
 import io.opencensus.tags.Tagger;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -14,6 +13,7 @@ import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.metrics.MetricsSettings;
 import rocks.inspectit.ocelot.config.model.metrics.StandardMetricsSettings;
 import rocks.inspectit.ocelot.core.selfmonitoring.SelfMonitoringService;
+import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
 
 import javax.management.ListenerNotFoundException;
 import javax.management.Notification;
@@ -203,8 +203,8 @@ public class GCMetricsRecorder extends AbstractMetricsRecorder {
         measureManager.getMeasureLong(CONCURRENT_PHASE_TIME_METRIC_FULL_NAME)
                 .ifPresent(measure -> {
                     TagContext tags = tagger.toBuilder(commonTags.getCommonTagContext())
-                            .putLocal(actionTagKey, TagValue.create(notificationInfo.getGcAction()))
-                            .putLocal(causeTagKey, TagValue.create(notificationInfo.getGcCause()))
+                            .putLocal(actionTagKey, CommonTagsManager.createTagValue(notificationInfo.getGcAction()))
+                            .putLocal(causeTagKey, CommonTagsManager.createTagValue(notificationInfo.getGcCause()))
                             .build();
 
                     recorder.newMeasureMap()
@@ -217,8 +217,8 @@ public class GCMetricsRecorder extends AbstractMetricsRecorder {
         measureManager.getMeasureLong(PAUSE_METRIC_FULL_NAME)
                 .ifPresent(measure -> {
                     TagContext tags = tagger.toBuilder(commonTags.getCommonTagContext())
-                            .putLocal(actionTagKey, TagValue.create(notificationInfo.getGcAction()))
-                            .putLocal(causeTagKey, TagValue.create(notificationInfo.getGcCause()))
+                            .putLocal(actionTagKey, CommonTagsManager.createTagValue(notificationInfo.getGcAction()))
+                            .putLocal(causeTagKey, CommonTagsManager.createTagValue(notificationInfo.getGcCause()))
                             .build();
 
                     recorder.newMeasureMap()
