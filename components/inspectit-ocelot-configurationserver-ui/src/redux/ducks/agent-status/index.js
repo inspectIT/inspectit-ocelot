@@ -1,9 +1,7 @@
-import reducer from "./reducers";
+import reducer from './reducers';
 
-import * as agentStatusActions from "./actions";
+import * as agentStatusActions from './actions';
 
-export {
-    agentStatusActions
-};
+export { agentStatusActions };
 
 export default reducer;

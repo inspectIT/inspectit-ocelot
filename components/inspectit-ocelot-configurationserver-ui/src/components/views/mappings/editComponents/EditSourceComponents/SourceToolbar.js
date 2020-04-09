@@ -14,28 +14,34 @@ import * as treeUtils from './treeUtils';
  */
 class SourceToolbar extends React.Component {
   state = {
-    newSource: ''
-  }
+    newSource: '',
+  };
 
   render() {
     return (
-      <div className="p-inputgroup" style={{ display: "inline-flex", verticalAlign: "middle", width: '100%', 'marginBottom': '0.5em' }}>
-        <span className="pi p-inputgroup-addon" style={{ background: 'inherit', 'borderColor': '#656565' }}>/</span>
+      <div className="p-inputgroup" style={{ display: 'inline-flex', verticalAlign: 'middle', width: '100%', marginBottom: '0.5em' }}>
+        <span className="pi p-inputgroup-addon" style={{ background: 'inherit', borderColor: '#656565' }}>
+          /
+        </span>
         <InputText
           value={this.state.newSource}
-          placeholder='New Source'
+          placeholder="New Source"
           onChange={this.handleChange}
-          onKeyPress={e => { if (e.key === 'Enter') { this.handleClick() } }}
+          onKeyPress={(e) => {
+            if (e.key === 'Enter') {
+              this.handleClick();
+            }
+          }}
           style={{ width: '100%' }}
         />
-        <Button icon='pi pi-plus' onClick={this.handleClick} style={{ width: '3rem' }} />
+        <Button icon="pi pi-plus" onClick={this.handleClick} style={{ width: '3rem' }} />
       </div>
-    )
+    );
   }
 
-	/**
-	 * Tries to add the source 
-	 */
+  /**
+   * Tries to add the source
+   */
   handleClick = () => {
     const newSource = '/' + this.state.newSource;
 
@@ -49,19 +55,19 @@ class SourceToolbar extends React.Component {
     this.props.onChange(newSourceArray);
 
     this.setState({ newSource: '' });
-  }
+  };
 
   handleChange = (e) => {
     const { value, style } = e.target;
     style.color = !this.canAddSource(`/${value}`) ? 'red' : 'black';
     this.setState({ newSource: value });
-  }
+  };
 
   /**
    * returns if the node can/should be added or not
    * ~ nodes can't be added if it's parent node (and therefore all childs) are already included
    * ~ nodes can't be added as children of files
-   * 
+   *
    * @param {string} newSource - the source to be added
    */
   canAddSource = (newSource) => {
@@ -84,17 +90,17 @@ class SourceToolbar extends React.Component {
       }
     }
     return true;
-  }
+  };
 }
 
 function mapStateToProps(state) {
   return {
     fileTree: configurationSelectors.getFileTree(state),
-  }
+  };
 }
 
 const mapDispatchToProps = {
   showInfoMessage: notificationActions.showInfoMessage,
-}
+};
 
-export default connect(mapStateToProps, mapDispatchToProps)(SourceToolbar)
+export default connect(mapStateToProps, mapDispatchToProps)(SourceToolbar);

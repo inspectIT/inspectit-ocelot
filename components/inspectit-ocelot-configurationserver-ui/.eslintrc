@@ -1,0 +1,46 @@
+{
+    "env": {
+        "browser": true,
+        "es6": true,
+        "node": true
+    },
+    "plugins": [
+        "import",
+        "react"
+    ],
+    "extends": [
+        "eslint:recommended",
+        "plugin:react/recommended",
+        "plugin:prettier/recommended"
+    ],
+    "parser": "babel-eslint",
+    "parserOptions": {
+        "sourceType": "module",
+        "ecmaVersion": 2018,
+        "ecmaFeatures": {
+            "jsx": true
+        }
+    },
+    "settings": {
+        "react": {
+            "createClass": "createReactClass",
+            "version": "detect"
+        }
+    },
+    "rules": {
+        "no-console": "warn",
+        "no-eval": "error",
+        "handle-callback-err": "warn",
+        "curly": "error",
+        "default-param-last": "error",
+        "dot-location": [
+            "error",
+            "property"
+        ],
+        "eqeqeq": "warn",
+        "no-multi-spaces": "error",
+        "import/first": "error",
+        "import/no-useless-path-segments": "error",
+        "react/prop-types": "warn"
+    }
+}
