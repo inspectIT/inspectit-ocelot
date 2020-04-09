@@ -29,7 +29,7 @@ public class UserInstrumentationWithMetricsTest extends InstrumentationSysTestBa
     @Test
     void invocationCounterTest() {
         TagContextBuilder builder = Tags.getTagger().currentBuilder()
-                .put(TagKey.create("user_tag"), TagValue.create("user_value"));
+                .putLocal(TagKey.create("user_tag"), TagValue.create("user_value"));
         try (Scope tcs = builder.buildScoped()) {
             for (int i = 0; i < 7; i++) {
                 invocationCount();

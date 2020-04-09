@@ -93,7 +93,7 @@ public class ApacheHttpClientContextPropagationTest {
         @Test
         void propagationViaSimpleExecute() throws Exception {
             try (Scope s = Tags.getTagger().emptyBuilder()
-                    .put(TagKey.create("down_propagated"), TagValue.create("myvalue"))
+                    .putLocal(TagKey.create("down_propagated"), TagValue.create("myvalue"))
                     .buildScoped()) {
                 client.execute(URIUtils.extractHost(URI.create(TEST_URL)), new HttpGet(TEST_URL));
             }

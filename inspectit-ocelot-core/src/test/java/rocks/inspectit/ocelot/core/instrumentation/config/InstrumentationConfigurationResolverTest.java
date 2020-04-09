@@ -226,6 +226,108 @@ class InstrumentationConfigurationResolverTest {
             verifyNoMoreInteractions(hookResolver);
         }
 
+
+        @Test
+        void testRuleIncludes() throws Exception {
+            ElementMatcher.Junction<MethodDescription> method = ElementMatchers.is(testCase_methodA);
+            InstrumentationScope methodScope = new InstrumentationScope(ElementMatchers.any(), method);
+            InstrumentationRule r1 = InstrumentationRule.builder().name("r1").scope(methodScope).includedRuleName("r2").build();
+            InstrumentationRule r2 = InstrumentationRule.builder().name("r2").build();
+
+
+            config = InstrumentationConfiguration.builder().source(settings).rule(r1).rule(r2).build();
+            FieldUtils.writeDeclaredField(resolver, "currentConfig", config, true);
+
+            Map<MethodDescription, MethodHookConfiguration> result = resolver.getHookConfigurations(testCaseClass);
+
+            assertThat(result).hasSize(1);
+            verify(hookResolver).buildHookConfiguration(same(config), eq(new HashSet<>(Arrays.asList(r1, r2))));
+            verifyNoMoreInteractions(hookResolver);
+        }
+
+    }
+
+    @Nested
+    class ResolveIncludes {
+
+        @Test
+        void noIncludes() {
+            InstrumentationRule r1 = InstrumentationRule.builder().name("r1").build();
+            InstrumentationRule r2 = InstrumentationRule.builder().name("r2").build();
+            InstrumentationRule r3 = InstrumentationRule.builder().name("r3").build();
+
+            config = InstrumentationConfiguration.builder().source(settings)
+                    .rules(Arrays.asList(r1, r2, r3))
+                    .build();
+
+            Set<InstrumentationRule> result = resolver.resolveIncludes(config, Arrays.asList(r1, r2));
+
+            assertThat(result).containsExactlyInAnyOrder(r1, r2);
+        }
+
+        @Test
+        void singleIncludes() {
+            InstrumentationRule r1 = InstrumentationRule.builder().name("r1").build();
+            InstrumentationRule r2 = InstrumentationRule.builder().name("r2").includedRuleName("r3").build();
+            InstrumentationRule r3 = InstrumentationRule.builder().name("r3").build();
+            InstrumentationRule r4 = InstrumentationRule.builder().name("r4").build();
+
+            config = InstrumentationConfiguration.builder().source(settings)
+                    .rules(Arrays.asList(r1, r2, r3))
+                    .build();
+
+            Set<InstrumentationRule> result = resolver.resolveIncludes(config, Arrays.asList(r1, r2));
+
+            assertThat(result).containsExactlyInAnyOrder(r1, r2, r3);
+        }
+
+
+        @Test
+        void nonExistingInclude() {
+            InstrumentationRule r1 = InstrumentationRule.builder().name("r1").includedRuleName("r2").build();
+            InstrumentationRule r2 = InstrumentationRule.builder().name("r2").includedRuleName("I don't exist").build();
+            InstrumentationRule r3 = InstrumentationRule.builder().name("r3").build();
+
+            config = InstrumentationConfiguration.builder().source(settings)
+                    .rules(Arrays.asList(r1, r2, r3))
+                    .build();
+
+            Set<InstrumentationRule> result = resolver.resolveIncludes(config, Arrays.asList(r1));
+
+            assertThat(result).containsExactlyInAnyOrder(r1, r2);
+        }
+
+        @Test
+        void multipleIncludes() {
+            InstrumentationRule r1 = InstrumentationRule.builder().name("r1").includedRuleName("r2").includedRuleName("r3").build();
+            InstrumentationRule r2 = InstrumentationRule.builder().name("r2").build();
+            InstrumentationRule r3 = InstrumentationRule.builder().name("r3").build();
+            InstrumentationRule r4 = InstrumentationRule.builder().name("r4").build();
+
+            config = InstrumentationConfiguration.builder().source(settings)
+                    .rules(Arrays.asList(r1, r2, r3))
+                    .build();
+
+            Set<InstrumentationRule> result = resolver.resolveIncludes(config, Arrays.asList(r1));
+
+            assertThat(result).containsExactlyInAnyOrder(r1, r2, r3);
+        }
+
+        @Test
+        void cyclicDependency() {
+            InstrumentationRule r1 = InstrumentationRule.builder().name("r1").includedRuleName("r2").build();
+            InstrumentationRule r2 = InstrumentationRule.builder().name("r2").includedRuleName("r3").build();
+            InstrumentationRule r3 = InstrumentationRule.builder().name("r3").includedRuleName("r1").build();
+            InstrumentationRule r4 = InstrumentationRule.builder().name("r4").build();
+
+            config = InstrumentationConfiguration.builder().source(settings)
+                    .rules(Arrays.asList(r1, r2, r3))
+                    .build();
+
+            Set<InstrumentationRule> result = resolver.resolveIncludes(config, Arrays.asList(r1));
+
+            assertThat(result).containsExactlyInAnyOrder(r1, r2, r3);
+        }
     }
 
     @Nested

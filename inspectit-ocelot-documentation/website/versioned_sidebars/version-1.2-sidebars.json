@@ -1,0 +1,59 @@
+{
+  "version-1.2-docs": {
+    "Getting Started": [
+      "version-1.2-doc1",
+      "version-1.2-getting-started/quick-start",
+      "version-1.2-getting-started/docker-examples",
+      "version-1.2-getting-started/installation"
+    ],
+    "Configuration": [
+      "version-1.2-configuration/configuration-sources",
+      "version-1.2-configuration/external-configuration-sources",
+      "version-1.2-configuration/logging-configuration",
+      "version-1.2-configuration/open-census-configuration",
+      "version-1.2-configuration/plugin-configuration"
+    ],
+    "Metrics": [
+      "version-1.2-metrics/metrics",
+      "version-1.2-metrics/metric-recorders",
+      "version-1.2-metrics/metric-exporters",
+      "version-1.2-metrics/common-tags",
+      "version-1.2-metrics/custom-metrics",
+      "version-1.2-metrics/self-monitoring"
+    ],
+    "Tracing": [
+      "version-1.2-tracing/tracing",
+      "version-1.2-tracing/trace-exporters",
+      "version-1.2-tracing/log-correlation",
+      "version-1.2-tracing/privacy"
+    ],
+    "Instrumentation": [
+      "version-1.2-instrumentation/instrumentation",
+      "version-1.2-instrumentation/scopes",
+      "version-1.2-instrumentation/rules",
+      "version-1.2-instrumentation/special-sensors",
+      "version-1.2-instrumentation/process"
+    ],
+    "End User Monitoring": [
+      "version-1.2-enduser-monitoring/enduser-monitoring-server",
+      "version-1.2-enduser-monitoring/eum-server-setup",
+      "version-1.2-enduser-monitoring/eum-server-configuration",
+      "version-1.2-enduser-monitoring/install-eum-agent"
+    ],
+    "Configuration Server": [
+      "version-1.2-config-server/overview",
+      "version-1.2-config-server/cs-configuration",
+      "version-1.2-config-server/agent-mappings",
+      "version-1.2-config-server/user-authentication",
+      "version-1.2-config-server/log-config"
+    ],
+    "Breaking Changes": [
+      "version-1.2-breaking-changes/1-2",
+      "version-1.2-breaking-changes/1-1",
+      "version-1.2-breaking-changes/1-0",
+      "version-1.2-breaking-changes/0-6",
+      "version-1.2-breaking-changes/0-5",
+      "version-1.2-breaking-changes/0-4"
+    ]
+  }
+}

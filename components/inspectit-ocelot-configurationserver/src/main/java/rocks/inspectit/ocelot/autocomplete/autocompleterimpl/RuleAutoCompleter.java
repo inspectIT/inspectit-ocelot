@@ -20,7 +20,18 @@ public class RuleAutoCompleter implements AutoCompleter {
     @Autowired
     private ConfigurationQueryHelper configurationQueryHelper;
 
-    private final static List<String> RULE_PATH = Arrays.asList("inspectit", "instrumentation", "rules");
+    /**
+     * The path under which rule names are defined.
+     */
+    private static final List<String> RULE_DEFINITION_PATH = Arrays.asList("inspectit", "instrumentation", "rules");
+
+    /**
+     * All paths under which rule names are used.
+     */
+    private static final List<List<String>> RULE_SUGGESTION_PATHS = Arrays.asList(
+            RULE_DEFINITION_PATH,
+            Arrays.asList("inspectit", "instrumentation", "rules", "*", "include")
+    );
 
     /**
      * Checks if the given path leads to a rule Attribute, e.g. "inspectit.instrumentation.rules" and returns
@@ -32,8 +43,10 @@ public class RuleAutoCompleter implements AutoCompleter {
 
     @Override
     public List<String> getSuggestions(List<String> path) {
-        if (PropertyPathHelper.comparePathsIgnoreCamelOrKebabCase(path, RULE_PATH)) {
-            return configurationQueryHelper.getKeysForPath(RULE_PATH);
+        boolean matches = RULE_SUGGESTION_PATHS.stream()
+                .anyMatch(rulePath -> PropertyPathHelper.comparePaths(path, rulePath));
+        if (matches) {
+            return configurationQueryHelper.getKeysForPath(RULE_DEFINITION_PATH);
         }
         return Collections.emptyList();
     }

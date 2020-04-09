@@ -133,6 +133,10 @@ inspectit-eum-server:
             tags:
               is_error: true
 
+  # settings for exposing resource timing metrics
+  resource-timing:
+    enabled: true
+
 # ACTUATOR PROPERTIES
 management:
   # Whether to enable or disable all endpoints by default.
