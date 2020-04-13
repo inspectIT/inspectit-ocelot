@@ -41,6 +41,11 @@ inspectit-config-server:
     # Whether LDAP authentication should be used
     ldap-authentication: false
 
+    # Enables the auth-proxy mode where principal is set in a specified request header
+    auth-proxy:
+      enabled: false
+      principal-request-header: AUTH
+
 # ACTUATOR PROPERTIES
 management:
   # Whether to enable or disable all endpoints by default.

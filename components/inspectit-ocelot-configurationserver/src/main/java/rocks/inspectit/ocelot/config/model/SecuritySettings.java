@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.Valid;
 import javax.validation.constraints.AssertFalse;
+import javax.validation.constraints.NotNull;
 
 /**
  * Security settings of the configuration server.
@@ -28,6 +29,13 @@ public class SecuritySettings {
      */
     @Valid
     private LdapSettings ldap;
+
+    /**
+     * The settings for the authentication proxy.
+     */
+    @Valid
+    @NotNull
+    private AuthProxySettings authProxy;
 
     /**
      * If enabled, all authorized and unauthorized accesses attempts to secured endpoints will be logged.
