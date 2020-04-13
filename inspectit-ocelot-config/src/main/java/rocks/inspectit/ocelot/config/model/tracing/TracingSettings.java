@@ -19,7 +19,7 @@ public class TracingSettings {
         NEVER,
         ON_GLOBAL_ROOT,
         ON_LOCAL_ROOT,
-        ALWAYS;
+        ALWAYS
     }
 
     /**
@@ -49,6 +49,6 @@ public class TracingSettings {
      * Generically defines behavior of adding common tags to spans.
      */
     @NotNull
-    private AddCommonTags addTags;
+    private AddCommonTags addCommonTags;
 
 }

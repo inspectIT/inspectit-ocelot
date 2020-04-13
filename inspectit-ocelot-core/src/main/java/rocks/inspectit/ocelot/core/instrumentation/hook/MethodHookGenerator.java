@@ -101,7 +101,7 @@ public class MethodHookGenerator {
         if (tracing.getStartSpan() || tracing.getContinueSpan() != null) {
 
             val actionBuilder = ContinueOrStartSpanAction.builder();
-            actionBuilder.commonTagsToAttributesAction(commonTagsToAttributesManager.getAction());
+            actionBuilder.commonTagsToAttributesManager(commonTagsToAttributesManager);
 
             if (tracing.getStartSpan()) {
                 VariableAccessor name = Optional.ofNullable(tracing.getName())

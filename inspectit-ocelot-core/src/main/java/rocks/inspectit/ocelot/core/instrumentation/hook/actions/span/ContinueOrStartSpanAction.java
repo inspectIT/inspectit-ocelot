@@ -11,7 +11,7 @@ import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
 import rocks.inspectit.ocelot.core.instrumentation.hook.MethodReflectionInformation;
 import rocks.inspectit.ocelot.core.instrumentation.hook.VariableAccessor;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
-import rocks.inspectit.ocelot.core.instrumentation.hook.tags.CommonTagsToAttributesAction;
+import rocks.inspectit.ocelot.core.instrumentation.hook.tags.CommonTagsToAttributesManager;
 
 import java.util.function.Predicate;
 
@@ -69,7 +69,7 @@ public class ContinueOrStartSpanAction implements IHookAction {
     /**
      * Action that optionally adds common tags to the newly started span.
      */
-    private CommonTagsToAttributesAction commonTagsToAttributesAction;
+    private CommonTagsToAttributesManager commonTagsToAttributesManager;
 
     @Override
     public String getName() {
@@ -111,10 +111,8 @@ public class ContinueOrStartSpanAction implements IHookAction {
             if (remoteParent != null) {
                 builder = Tracing.getTracer().spanBuilderWithRemoteParent(spanName, remoteParent);
             } else {
-                // TODO is there better way of checking ctx.hasEnteredSpan();
-                //  to avoid this stupid BlankSpan impl
                 final Span currentSpan = Tracing.getTracer().getCurrentSpan();
-                hasLocalParent = currentSpan != null && !BlankSpan.INSTANCE.equals(currentSpan);
+                hasLocalParent = currentSpan != BlankSpan.INSTANCE;
                 builder = Tracing.getTracer().spanBuilder(spanName);
             }
 
@@ -127,7 +125,7 @@ public class ContinueOrStartSpanAction implements IHookAction {
 
             // start span and add common tags
             final Span span = builder.startSpan();
-            commonTagsToAttributesAction.writeCommonTags(span, remoteParent != null, hasLocalParent);
+            commonTagsToAttributesManager.writeCommonTags(span, remoteParent != null, hasLocalParent);
 
             // enter in the our context
             ctx.enterSpan(span);

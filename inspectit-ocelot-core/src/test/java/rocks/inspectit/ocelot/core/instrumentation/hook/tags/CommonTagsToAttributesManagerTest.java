@@ -6,9 +6,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.tracing.TracingSettings;
+import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
 
 import java.util.Collections;
@@ -16,9 +19,13 @@ import java.util.Collections;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class CommonTagsToAttributesActionTest {
+class CommonTagsToAttributesManagerTest {
 
-    CommonTagsToAttributesAction action;
+    @InjectMocks
+    CommonTagsToAttributesManager manager;
+
+    @Mock
+    InspectitEnvironment env;
 
     @Mock
     CommonTagsManager commonTagsManager;
@@ -26,31 +33,40 @@ class CommonTagsToAttributesActionTest {
     @Mock
     Span span;
 
+    @Mock
+    TracingSettings tracingSettings;
+
+    @Mock
+    InspectitConfig config;
+
+    @BeforeEach
+    void init() {
+        lenient().when(env.getCurrentConfig()).thenReturn(config);
+        lenient().when(config.getTracing()).thenReturn(tracingSettings);
+    }
+
     @Nested
     class Never {
 
-        @BeforeEach
-        void init() {
-            action = new CommonTagsToAttributesAction(commonTagsManager, TracingSettings.AddCommonTags.NEVER);
-        }
+        // never is default
 
         @Test
         void newSpan() {
-            action.writeCommonTags(span, false, false);
+            manager.writeCommonTags(span, false, false);
 
             verifyNoMoreInteractions(span, commonTagsManager);
         }
 
         @Test
         void remoteParent() {
-            action.writeCommonTags(span, true, false);
+            manager.writeCommonTags(span, true, false);
 
             verifyNoMoreInteractions(span, commonTagsManager);
         }
 
         @Test
         void localParent() {
-            action.writeCommonTags(span, false, true);
+            manager.writeCommonTags(span, false, true);
 
             verifyNoMoreInteractions(span, commonTagsManager);
         }
@@ -62,14 +78,15 @@ class CommonTagsToAttributesActionTest {
 
         @BeforeEach
         void init() {
-            action = new CommonTagsToAttributesAction(commonTagsManager, TracingSettings.AddCommonTags.ON_GLOBAL_ROOT);
+            when(tracingSettings.getAddCommonTags()).thenReturn(TracingSettings.AddCommonTags.ON_GLOBAL_ROOT);
+            manager.update();
         }
 
         @Test
         void newSpan() {
             when(commonTagsManager.getCommonTagValueMap()).thenReturn(Collections.singletonMap("key", "value"));
 
-            action.writeCommonTags(span, false, false);
+            manager.writeCommonTags(span, false, false);
 
             verify(span).putAttribute("key", AttributeValue.stringAttributeValue("value"));
             verify(commonTagsManager).getCommonTagValueMap();
@@ -78,14 +95,14 @@ class CommonTagsToAttributesActionTest {
 
         @Test
         void remoteParent() {
-            action.writeCommonTags(span, true, false);
+            manager.writeCommonTags(span, true, false);
 
             verifyNoMoreInteractions(span, commonTagsManager);
         }
 
         @Test
         void localParent() {
-            action.writeCommonTags(span, false, true);
+            manager.writeCommonTags(span, false, true);
 
             verifyNoMoreInteractions(span, commonTagsManager);
         }
@@ -97,14 +114,16 @@ class CommonTagsToAttributesActionTest {
 
         @BeforeEach
         void init() {
-            action = new CommonTagsToAttributesAction(commonTagsManager, TracingSettings.AddCommonTags.ON_LOCAL_ROOT);
+            when(tracingSettings.getAddCommonTags()).thenReturn(TracingSettings.AddCommonTags.ON_LOCAL_ROOT);
+            manager.update();
         }
+
 
         @Test
         void newSpan() {
             when(commonTagsManager.getCommonTagValueMap()).thenReturn(Collections.singletonMap("key", "value"));
 
-            action.writeCommonTags(span, false, false);
+            manager.writeCommonTags(span, false, false);
 
             verify(span).putAttribute("key", AttributeValue.stringAttributeValue("value"));
             verify(commonTagsManager).getCommonTagValueMap();
@@ -115,7 +134,7 @@ class CommonTagsToAttributesActionTest {
         void remoteParent() {
             when(commonTagsManager.getCommonTagValueMap()).thenReturn(Collections.singletonMap("key", "value"));
 
-            action.writeCommonTags(span, true, false);
+            manager.writeCommonTags(span, true, false);
 
             verify(span).putAttribute("key", AttributeValue.stringAttributeValue("value"));
             verify(commonTagsManager).getCommonTagValueMap();
@@ -124,7 +143,7 @@ class CommonTagsToAttributesActionTest {
 
         @Test
         void localParent() {
-            action.writeCommonTags(span, false, true);
+            manager.writeCommonTags(span, false, true);
 
             verifyNoMoreInteractions(span, commonTagsManager);
         }
@@ -136,13 +155,14 @@ class CommonTagsToAttributesActionTest {
 
         @BeforeEach
         void init() {
-            action = new CommonTagsToAttributesAction(commonTagsManager, TracingSettings.AddCommonTags.ALWAYS);
             when(commonTagsManager.getCommonTagValueMap()).thenReturn(Collections.singletonMap("key", "value"));
+            when(tracingSettings.getAddCommonTags()).thenReturn(TracingSettings.AddCommonTags.ALWAYS);
+            manager.update();
         }
 
         @Test
         void newSpan() {
-            action.writeCommonTags(span, false, false);
+            manager.writeCommonTags(span, false, false);
 
             verify(span).putAttribute("key", AttributeValue.stringAttributeValue("value"));
             verify(commonTagsManager).getCommonTagValueMap();
@@ -151,7 +171,7 @@ class CommonTagsToAttributesActionTest {
 
         @Test
         void remoteParent() {
-            action.writeCommonTags(span, true, false);
+            manager.writeCommonTags(span, true, false);
 
             verify(span).putAttribute("key", AttributeValue.stringAttributeValue("value"));
             verify(commonTagsManager).getCommonTagValueMap();
@@ -160,7 +180,7 @@ class CommonTagsToAttributesActionTest {
 
         @Test
         void localParent() {
-            action.writeCommonTags(span, false, true);
+            manager.writeCommonTags(span, false, true);
 
             verify(span).putAttribute("key", AttributeValue.stringAttributeValue("value"));
             verify(commonTagsManager).getCommonTagValueMap();
