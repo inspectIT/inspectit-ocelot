@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class WindowedDoubleQueueTest {
 
@@ -50,6 +51,7 @@ public class WindowedDoubleQueueTest {
                     .toArray();
             WindowedDoubleQueue.ValueCopy result = queue.copy(null);
             assertThat(result.getData()).isEqualTo(expectedResult);
+            assertThat(result.getSize()).isEqualTo(expectedResult.length);
 
         }
 
@@ -70,6 +72,7 @@ public class WindowedDoubleQueueTest {
                     .toArray();
             WindowedDoubleQueue.ValueCopy result = queue.copy(null);
             assertThat(result.getData()).isEqualTo(expectedResult);
+            assertThat(result.getSize()).isEqualTo(expectedResult.length);
 
         }
 
@@ -83,6 +86,14 @@ public class WindowedDoubleQueueTest {
 
             assertThat(queue.capacity()).isEqualTo(WindowedDoubleQueue.MIN_CAPACITY);
             assertThat(queue.size()).isEqualTo(WindowedDoubleQueue.MIN_CAPACITY);
+        }
+
+        @Test
+        void invalidTimestamp() {
+            WindowedDoubleQueue queue = new WindowedDoubleQueue(42);
+
+            queue.insert(1.0, 10);
+            assertThatThrownBy(() -> queue.insert(2.0, 9)).isInstanceOf(IllegalArgumentException.class);
         }
     }
 
@@ -134,6 +145,27 @@ public class WindowedDoubleQueueTest {
             assertThat(queue.copy(null).getData()).isEqualTo(expectedResult);
         }
 
+        @Test
+        void removeAllExceptFewWithOverflow() {
+            WindowedDoubleQueue queue = new WindowedDoubleQueue(WindowedDoubleQueue.MIN_CAPACITY * 2);
+
+            int keepCount = WindowedDoubleQueue.MIN_CAPACITY + 1;
+            int time = 0;
+
+            for (int i = 0; i < WindowedDoubleQueue.MIN_CAPACITY * 3; i++) {
+                queue.insert(-9999999, time);
+                time++;
+            }
+            for (int i = 0; i < keepCount; i++) {
+                queue.insert(42 + i, time + 1);
+            }
+            queue.removeStaleValues(time + WindowedDoubleQueue.MIN_CAPACITY * 2);
+
+            double[] expectedResult = IntStream.range(0, keepCount).mapToDouble(i -> 42 + i).toArray();
+            assertThat(queue.capacity()).isEqualTo(WindowedDoubleQueue.MIN_CAPACITY * 4);
+            assertThat(queue.copy(null).getData()).isEqualTo(expectedResult);
+        }
+
     }
 
     @Nested
@@ -143,7 +175,7 @@ public class WindowedDoubleQueueTest {
         void copyEmptyIntoNullBuffer() {
             WindowedDoubleQueue queue = new WindowedDoubleQueue(1);
 
-            WindowedDoubleQueue.ValueCopy copy = queue.copy(null);
+            WindowedDoubleQueue.ValueCopy copy = queue.copy();
 
             assertThat(copy.getData()).isEmpty();
             assertThat(copy.getSize()).isEqualTo(0);
@@ -167,7 +199,7 @@ public class WindowedDoubleQueueTest {
                 queue.insert(i, 0);
             }
 
-            WindowedDoubleQueue.ValueCopy copy = queue.copy(null);
+            WindowedDoubleQueue.ValueCopy copy = queue.copy();
 
             double[] expectedResult = IntStream.range(0, 100).mapToDouble(i -> i).toArray();
             assertThat(copy.getData()).isEqualTo(expectedResult);

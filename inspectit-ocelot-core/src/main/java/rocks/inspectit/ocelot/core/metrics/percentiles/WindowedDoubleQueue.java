@@ -12,6 +12,8 @@ import lombok.Value;
  * <p>
  * Similar to an ArrayList this queue is not bounded in size. It grows as needed.
  * However in contrast to an ArrayList, this queue also deallocates memory when less than 25% of it is occupied.
+ * <p>
+ * This data structure is not thread safe!
  */
 public class WindowedDoubleQueue {
 
@@ -72,12 +74,15 @@ public class WindowedDoubleQueue {
      * The queue expects that all inserts happen ordered in time!
      * You should never insert data which is older than the latest element in the queue.
      * <p>
-     * This method has an amortized O(1) runtime.
+     * This method has an amortized O(1) runtime, with a worst case of O(n).
      *
      * @param value     the value of the new observation to insert
      * @param timeStamp the timestamp of the point to insert
      */
-    public synchronized void insert(double value, long timeStamp) {
+    public void insert(double value, long timeStamp) {
+        if (size > 0 && timeStamps[normalizeIndex(startIndex + size - 1)] > timeStamp) {
+            throw new IllegalArgumentException("The provided timestamp is older than the most recent timestamp present in the queue");
+        }
         removeStaleValues(timeStamp);
         if (size == capacity()) {
             increaseCapacity();
@@ -94,7 +99,7 @@ public class WindowedDoubleQueue {
      * @param nowTimeStamp the time stamp which represents the current point in time.
      *                     E.g. if the timeRange for this queue is 10s this method is called t=72s, all points with a timestamp older than 62s will be erased.
      */
-    public synchronized void removeStaleValues(long nowTimeStamp) {
+    public void removeStaleValues(long nowTimeStamp) {
         long timeLimit = nowTimeStamp - timeRange;
         while (size > 0) {
             if (timeStamps[startIndex] <= timeLimit) {
@@ -110,8 +115,17 @@ public class WindowedDoubleQueue {
     /**
      * @return the number of points currently contained in this queue
      */
-    public synchronized int size() {
+    public int size() {
         return size;
+    }
+
+    /**
+     * Copies the values of all points in this queue into a newly allocated array.
+     *
+     * @return the newly allocated array populated with the contents of this queue
+     */
+    public ValueCopy copy() {
+        return copy(null);
     }
 
     /**
@@ -126,9 +140,9 @@ public class WindowedDoubleQueue {
      *
      * @param resultBuffer contains the values of this queue as well as the number of elements.
      *
-     * @return
+     * @return a pointer to the used destination array alongside withthe number of elements copied there.
      */
-    public synchronized ValueCopy copy(double[] resultBuffer) {
+    public ValueCopy copy(double[] resultBuffer) {
         double[] output;
         if (resultBuffer != null && resultBuffer.length >= size) {
             output = resultBuffer;
