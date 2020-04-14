@@ -27,7 +27,7 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
         Runnable runnable = () -> refTags.set(InternalUtils.getTags(tagger.getCurrentTagContext()));
 
         ScheduledFuture<?> schedule;
-        try (Scope s = tagger.currentBuilder().put(tagKey, tagValue).buildScoped()) {
+        try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
             schedule = executorService.schedule(runnable, 1, TimeUnit.MILLISECONDS);
         }
         schedule.get();
@@ -46,7 +46,7 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
         Callable<Iterator<Tag>> callable = () -> InternalUtils.getTags(tagger.getCurrentTagContext());
 
         ScheduledFuture<Iterator<Tag>> future;
-        try (Scope s = tagger.currentBuilder().put(tagKey, tagValue).buildScoped()) {
+        try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
             future = executorService.schedule(callable, 1, TimeUnit.MILLISECONDS);
         }
         Iterator<Tag> result = future.get();
@@ -73,7 +73,7 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
         };
 
         ScheduledFuture future;
-        try (Scope s = tagger.currentBuilder().put(tagKey, tagValue).buildScoped()) {
+        try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
             future = executorService.scheduleWithFixedDelay(runnable, 0, 1, TimeUnit.MILLISECONDS);
         }
 
@@ -106,7 +106,7 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
         };
 
         ScheduledFuture future;
-        try (Scope s = tagger.currentBuilder().put(tagKey, tagValue).buildScoped()) {
+        try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
             future = executorService.scheduleAtFixedRate(runnable, 0, 1, TimeUnit.MILLISECONDS);
         }
 

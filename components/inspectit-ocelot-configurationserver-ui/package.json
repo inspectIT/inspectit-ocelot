@@ -16,7 +16,11 @@
     "dev": "next ./src",
     "build": "next build ./src",
     "start": "next start ./src",
-    "export": "next build ./src && next export ./src -o ./out"
+    "export": "next build ./src && next export ./src -o ./out",
+    "lint": "eslint ./src",
+    "lint:fix": "eslint --fix ./src",
+    "format": "prettier --check \"./src/**/*.+(js|jsx|json|css|md)\"",
+    "format:write": "prettier --write \"./src/**/*.+(js|jsx|json|css|md)\""
   },
   "dependencies": {
     "@zeit/next-css": "^1.0.1",
@@ -46,7 +50,15 @@
   },
   "license": "apache-2.0",
   "devDependencies": {
+    "babel-eslint": "^10.1.0",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.10.1",
+    "eslint-import-resolver-webpack": "^0.12.1",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-prettier": "^3.1.2",
+    "eslint-plugin-react": "^7.19.0",
     "file-loader": "^4.0.0",
+    "prettier": "^2.0.4",
     "url-loader": "^2.0.1"
   }
 }

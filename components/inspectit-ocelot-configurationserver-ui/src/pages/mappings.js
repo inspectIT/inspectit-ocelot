@@ -1,12 +1,11 @@
-import React from 'react'
-import MainLayout from '../layout/MainLayout'
-import Head from 'next/head'
+import React from 'react';
+import MainLayout from '../layout/MainLayout';
+import Head from 'next/head';
 
-import { BASE_PAGE_TITLE } from '../data/constants'
+import { BASE_PAGE_TITLE } from '../data/constants';
 import AgentMappingsView from '../components/views/mappings/AgentMappingsView';
 
 class MappingsPage extends React.Component {
-
   render() {
     return (
       <MainLayout>
@@ -16,7 +15,7 @@ class MappingsPage extends React.Component {
 
         <AgentMappingsView />
       </MainLayout>
-    )
+    );
   }
 }
 

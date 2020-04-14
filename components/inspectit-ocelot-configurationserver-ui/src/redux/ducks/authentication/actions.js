@@ -1,7 +1,7 @@
-import * as types from "./types";
-import { axiosPlain } from "../../../lib/axios-api";
-import axiosBearer from "../../../lib/axios-api";
-import { configurationActions } from "../configuration";
+import * as types from './types';
+import axiosBearer, { axiosPlain } from '../../../lib/axios-api';
+
+import { configurationActions } from '../configuration';
 
 /**
  * Fetches an access token for the given credentials.
@@ -14,21 +14,21 @@ export const fetchToken = (username, password) => {
     dispatch({ type: types.FETCH_TOKEN_STARTED });
 
     axiosPlain
-      .get("/account/token", {
+      .get('/account/token', {
         auth: {
           username: username,
-          password: password
-        }
+          password: password,
+        },
       })
-      .then(res => {
+      .then((res) => {
         const token = res.data;
         dispatch({ type: types.FETCH_TOKEN_SUCCESS, payload: { token, username } });
       })
-      .catch(err => {
+      .catch((err) => {
         let message;
         const { response } = err;
-        if (response && response.status == 401) {
-          message = "The given credentials are not valid.";
+        if (response && response.status === 401) {
+          message = 'The given credentials are not valid.';
         } else {
           message = err.message;
         }
@@ -44,13 +44,12 @@ export const fetchToken = (username, password) => {
 export const renewToken = () => {
   return (dispatch) => {
     axiosBearer
-      .get("/account/token")
-      .then(res => {
+      .get('/account/token')
+      .then((res) => {
         const token = res.data;
         dispatch({ type: types.RENEW_TOKEN_SUCCESS, payload: { token } });
       })
-      .catch(err => {
-      });
+      .catch(() => {});
   };
 };
 
@@ -58,7 +57,7 @@ export const renewToken = () => {
  * Logout of the current user.
  */
 export const logout = () => {
-  return dispatch => {
+  return (dispatch) => {
     dispatch({ type: types.LOGOUT });
     dispatch(configurationActions.resetState());
   };

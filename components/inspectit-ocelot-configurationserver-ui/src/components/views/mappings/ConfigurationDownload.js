@@ -5,10 +5,10 @@ import { notificationActions } from '../../../redux/ducks/notification';
 import axios from '../../../lib/axios-api';
 import RandExp from 'randexp';
 
-/** 
- * component for downloading configuration files 
+/**
+ * component for downloading configuration files
  * ~ functions can be invoked via reference by parents
-*/
+ */
 class ConfigurationDownload extends React.Component {
   linkRef = React.createRef();
 
@@ -27,14 +27,14 @@ class ConfigurationDownload extends React.Component {
   download = (attributes) => {
     const requestParams = this.solveRegexValues(attributes);
     if (!requestParams) {
-      return
+      return;
     }
 
     axios
       .get('/agent/configuration', {
-        params: { ...requestParams }
+        params: { ...requestParams },
       })
-      .then(res => {
+      .then((res) => {
         var blob = new Blob([res.data], { type: 'text/x-yaml' });
         const url = window.URL.createObjectURL(blob);
 
@@ -42,33 +42,35 @@ class ConfigurationDownload extends React.Component {
         this.linkRef.current.click();
       })
       .catch(() => {
-        this.props.showInfoMessage("Downloading Config File Failed", "No file could have been retrieved. There might not be a configuration for the given attributes");
-      })
-  }
+        this.props.showInfoMessage(
+          'Downloading Config File Failed',
+          'No file could have been retrieved. There might not be a configuration for the given attributes'
+        );
+      });
+  };
 
   solveRegexValues = (obj = {}) => {
     try {
       let res = {};
-      Object.keys(obj).map(key => {
+      Object.keys(obj).map((key) => {
         const randexp = new RandExp(obj[key]);
         randexp.max = randexp.min || 0;
         res[key] = randexp.gen();
-      })
+      });
       return res;
+    } catch {
+      this.props.showInfoMessage('Downloading Config File Failed', 'The given attribute values are not a regular expression');
+      return null;
     }
-    catch{
-      this.props.showInfoMessage("Downloading Config File Failed", "The given attribute values are not a regular expression");
-      return null
-    }
-  }
+  };
 
   render() {
-    return <a ref={this.linkRef} download='agent-config.yml' style={{ visibility: 'hidden' }} />
+    return <a ref={this.linkRef} download="agent-config.yml" style={{ visibility: 'hidden' }} />;
   }
 }
 
 const mapDispatchToProps = {
   showInfoMessage: notificationActions.showInfoMessage,
-}
+};
 
 export default connect(null, mapDispatchToProps)(ConfigurationDownload);

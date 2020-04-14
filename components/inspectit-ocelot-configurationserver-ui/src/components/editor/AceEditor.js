@@ -11,112 +11,109 @@ import 'ace-builds/src-noconflict/mode-yaml';
 import 'ace-builds/src-noconflict/theme-cobalt';
 
 const saveCommand = (doSave) => {
-    return {
-        name: 'saveFile',
-        bindKey: {
-            win: 'Ctrl-S',
-            mac: 'Command-S',
-        },
-        exec: doSave
-    }
-}
+  return {
+    name: 'saveFile',
+    bindKey: {
+      win: 'Ctrl-S',
+      mac: 'Command-S',
+    },
+    exec: doSave,
+  };
+};
 
 /**
  * Component which wraps the AceEditor.
  */
 class AceEditor extends React.Component {
+  constructor(props) {
+    super(props);
 
-    constructor(props) {
-        super(props);
+    this.props.editorRef(this);
+    this.divRef = React.createRef();
+  }
 
-        this.props.editorRef(this);
-        this.divRef = React.createRef();
+  render() {
+    return <div ref={this.divRef} style={{ width: '100%', height: '100%' }} />;
+  }
+
+  configureEditor() {
+    const { theme, mode, options, readOnly } = this.props;
+    this.editor.setTheme('ace/theme/' + theme);
+    this.editor.getSession().setMode('ace/mode/' + mode);
+
+    this.editor.session.off('change', this.onChange);
+    this.editor.session.on('change', this.onChange);
+    this.editor.commands.addCommand(saveCommand(this.doSave));
+    this.editor.setReadOnly(readOnly);
+
+    if (options) {
+      this.editor.setOptions(options);
+    }
+  }
+
+  componentDidMount() {
+    this.editor = ace.edit(this.divRef.current);
+    const editorRef = this.editor;
+
+    ace.config.loadModule('ace/ext/keybinding_menu', function (module) {
+      module.init(editorRef);
+    });
+    if (this.props.onCreate) {
+      this.props.onCreate(this.editor);
     }
 
-    render() {
-        return (
-            <div ref={this.divRef} style={{ width: "100%", height: "100%" }} />
-        )
+    this.configureEditor();
+    this.updateValue();
+  }
+
+  componentDidUpdate() {
+    this.configureEditor();
+    this.updateValue();
+  }
+
+  onChange = () => {
+    const value = this.getValue();
+    const sanitizedValue = this.sanitizeValue(value);
+
+    if (value !== sanitizedValue) {
+      this.editor.setValue(sanitizedValue);
+    } else if (this.props.onChange) {
+      this.props.onChange(this.getValue());
     }
+  };
 
-    configureEditor() {
-        const { theme, mode, options, readOnly } = this.props;
-        this.editor.setTheme("ace/theme/" + theme)
-        this.editor.getSession().setMode("ace/mode/" + mode);
-
-        this.editor.session.off("change", this.onChange);
-        this.editor.session.on("change", this.onChange);
-        this.editor.commands.addCommand(saveCommand(this.doSave))
-        this.editor.setReadOnly(readOnly);
-
-        if (options) {
-            this.editor.setOptions(options);
-        }
+  doSave = () => {
+    if (this.props.canSave) {
+      this.props.onSave();
     }
+  };
 
-    componentDidMount() {
-        this.editor = ace.edit(this.divRef.current)
-        const editorRef = this.editor;
-
-        ace.config.loadModule("ace/ext/keybinding_menu", function (module) {
-            module.init(editorRef);
-        })
-        if (this.props.onCreate) {
-            this.props.onCreate(this.editor);
-        }
-
-        this.configureEditor();
-        this.updateValue();
+  /**
+   * Updates the editor content using the `value` props and sets the cursor to the beginning of the content.
+   */
+  updateValue = () => {
+    const { value } = this.props;
+    const currentValue = this.getValue();
+    if (value !== currentValue) {
+      this.editor.setValue(value ? value : '', -1);
     }
+  };
 
-    componentDidUpdate() {
-        this.configureEditor();
-        this.updateValue();
-    }
+  executeCommand = (command) => {
+    this.editor.execCommand(command);
+  };
 
-    onChange = (event) => {
-        const value = this.getValue();
-        const sanitizedValue = this.sanitizeValue(value);
+  showShortcuts = () => {
+    this.editor.showKeyboardShortcuts();
+  };
 
-        if (value !== sanitizedValue) {
-            this.editor.setValue(sanitizedValue);
-        } else if (this.props.onChange) {
-            this.props.onChange(this.getValue());
-        }
-    }
+  getValue = () => {
+    return this.editor.getSession().getValue();
+  };
 
-    doSave = () => {
-        if (this.props.canSave) {
-            this.props.onSave()
-        }
-    }
-
-    /**
-     * Updates the editor content using the `value` props and sets the cursor to the beginning of the content.
-     */
-    updateValue = () => {
-        const { value } = this.props;
-        const currentValue = this.getValue();
-        if (value !== currentValue) {
-            this.editor.setValue(value ? value : "", -1);
-        }
-    }
-
-    executeCommand = (command) => {
-        this.editor.execCommand(command);
-    }
-
-    showShortcuts = () => {
-        this.editor.showKeyboardShortcuts();
-    }
-
-    getValue = () => {
-        return this.editor.getSession().getValue();
-    }
-
-    sanitizeValue = (value) => {
-        return value.replace(/\t/g, "  ");
-    }
+  sanitizeValue = (value) => {
+    return value.replace(/\t/g, '  ');
+  };
 }
 
 export default AceEditor;
