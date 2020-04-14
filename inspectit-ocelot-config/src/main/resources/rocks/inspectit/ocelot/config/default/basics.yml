@@ -31,7 +31,7 @@ inspectit:
     # this value can be overridden by the tracing settings of individual instrumentation rules.
     sample-probability: 1.0
 
-    # defines to when to add common tags as attributes to spans
+    # defines when to add common tags as attributes to spans
     # options are: NEVER, ON_GLOBAL_ROOT, ON_LOCAL_ROOT, ALWAYS
     add-common-tags: ON_LOCAL_ROOT
 
