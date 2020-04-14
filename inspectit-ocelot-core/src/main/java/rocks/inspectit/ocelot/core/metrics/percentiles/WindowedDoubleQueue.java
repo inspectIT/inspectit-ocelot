@@ -1,7 +1,6 @@
 package rocks.inspectit.ocelot.core.metrics.percentiles;
 
 import com.google.common.annotations.VisibleForTesting;
-import lombok.Value;
 
 /**
  * A circular, array based FIFO-queue for remembering measurement values in a sliding window over time.
@@ -124,33 +123,21 @@ public class WindowedDoubleQueue {
      *
      * @return the newly allocated array populated with the contents of this queue
      */
-    public ValueCopy copy() {
-        return copy(null);
+    public double[] copy() {
+        double[] output = new double[size];
+        copy(output);
+        return output;
     }
 
     /**
-     * Copies the values of all points in this queue into a new array.
-     * <p>
-     * This method optionally takes an array as argument in which the values will be placed if it is big enough.
-     * <p>
-     * E.g. if the queue contains 10 elements and the given buffer has a capacity of 15, the values of this queue
-     * will be placed in the proved buffer on the indices 0 to 9.
-     * <p>
-     * If the buffer is not sufficient or is null, this method will allocate a new buffer and return it.
-     *
-     * @param resultBuffer contains the values of this queue as well as the number of elements.
-     *
-     * @return a pointer to the used destination array alongside withthe number of elements copied there.
+     * Copies the values of all points in this queue into a provided array.
+     * The provided array must have at least the size of this queue!
      */
-    public ValueCopy copy(double[] resultBuffer) {
-        double[] output;
-        if (resultBuffer != null && resultBuffer.length >= size) {
-            output = resultBuffer;
-        } else {
-            output = new double[size];
+    public void copy(double[] resultBuffer) {
+        if (resultBuffer.length < size) {
+            throw new IllegalArgumentException("The provided array is too small!");
         }
-        copyValues(output);
-        return new ValueCopy(output, size);
+        copyValues(resultBuffer);
     }
 
     @VisibleForTesting
@@ -213,14 +200,6 @@ public class WindowedDoubleQueue {
             return value;
         }
         return highestOneBit * 2;
-    }
-
-    @Value
-    public static class ValueCopy {
-
-        double[] data;
-
-        int size;
     }
 
 }

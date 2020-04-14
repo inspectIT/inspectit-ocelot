@@ -49,9 +49,8 @@ public class WindowedDoubleQueueTest {
             double[] expectedResult = IntStream.range(0, WindowedDoubleQueue.MIN_CAPACITY + 1)
                     .mapToDouble(i -> i * 100 + 1)
                     .toArray();
-            WindowedDoubleQueue.ValueCopy result = queue.copy(null);
-            assertThat(result.getData()).isEqualTo(expectedResult);
-            assertThat(result.getSize()).isEqualTo(expectedResult.length);
+            double[] result = queue.copy();
+            assertThat(result).isEqualTo(expectedResult);
 
         }
 
@@ -70,9 +69,8 @@ public class WindowedDoubleQueueTest {
             double[] expectedResult = IntStream.range(0, WindowedDoubleQueue.MIN_CAPACITY + 1)
                     .mapToDouble(i -> i * 100 + 1)
                     .toArray();
-            WindowedDoubleQueue.ValueCopy result = queue.copy(null);
-            assertThat(result.getData()).isEqualTo(expectedResult);
-            assertThat(result.getSize()).isEqualTo(expectedResult.length);
+            double[] result = queue.copy();
+            assertThat(result).isEqualTo(expectedResult);
 
         }
 
@@ -124,7 +122,7 @@ public class WindowedDoubleQueueTest {
             queue.removeStaleValues(1);
 
             assertThat(queue.capacity()).isEqualTo(WindowedDoubleQueue.MIN_CAPACITY);
-            assertThat(queue.copy(null).getData()).contains(42);
+            assertThat(queue.copy()).contains(42);
         }
 
         @Test
@@ -142,7 +140,7 @@ public class WindowedDoubleQueueTest {
 
             double[] expectedResult = IntStream.range(0, keepCount).mapToDouble(i -> 42 + i).toArray();
             assertThat(queue.capacity()).isEqualTo(WindowedDoubleQueue.MIN_CAPACITY * 4);
-            assertThat(queue.copy(null).getData()).isEqualTo(expectedResult);
+            assertThat(queue.copy()).isEqualTo(expectedResult);
         }
 
         @Test
@@ -163,7 +161,7 @@ public class WindowedDoubleQueueTest {
 
             double[] expectedResult = IntStream.range(0, keepCount).mapToDouble(i -> 42 + i).toArray();
             assertThat(queue.capacity()).isEqualTo(WindowedDoubleQueue.MIN_CAPACITY * 4);
-            assertThat(queue.copy(null).getData()).isEqualTo(expectedResult);
+            assertThat(queue.copy()).isEqualTo(expectedResult);
         }
 
     }
@@ -172,13 +170,12 @@ public class WindowedDoubleQueueTest {
     class Copy {
 
         @Test
-        void copyEmptyIntoNullBuffer() {
+        void copyEmptyIntoNewBuffer() {
             WindowedDoubleQueue queue = new WindowedDoubleQueue(1);
 
-            WindowedDoubleQueue.ValueCopy copy = queue.copy();
+            double[] copy = queue.copy();
 
-            assertThat(copy.getData()).isEmpty();
-            assertThat(copy.getSize()).isEqualTo(0);
+            assertThat(copy).isEmpty();
         }
 
         @Test
@@ -186,24 +183,22 @@ public class WindowedDoubleQueueTest {
             WindowedDoubleQueue queue = new WindowedDoubleQueue(1);
             double[] buffer = new double[42];
 
-            WindowedDoubleQueue.ValueCopy copy = queue.copy(buffer);
+            queue.copy(buffer);
 
-            assertThat(copy.getData()).isSameAs(buffer);
-            assertThat(copy.getSize()).isEqualTo(0);
+            assertThat(buffer).containsOnly(0);
         }
 
         @Test
-        void copyValuesIntoNullBuffer() {
+        void copyValuesIntoNewBuffer() {
             WindowedDoubleQueue queue = new WindowedDoubleQueue(1);
             for (int i = 0; i < 100; i++) {
                 queue.insert(i, 0);
             }
 
-            WindowedDoubleQueue.ValueCopy copy = queue.copy();
+            double[] result = queue.copy();
 
             double[] expectedResult = IntStream.range(0, 100).mapToDouble(i -> i).toArray();
-            assertThat(copy.getData()).isEqualTo(expectedResult);
-            assertThat(copy.getSize()).isEqualTo(100);
+            assertThat(result).isEqualTo(expectedResult);
         }
 
         @Test
@@ -214,12 +209,10 @@ public class WindowedDoubleQueueTest {
                 queue.insert(i, 0);
             }
 
-            WindowedDoubleQueue.ValueCopy copy = queue.copy(buffer);
+            queue.copy(buffer);
 
             double[] expectedResult = IntStream.range(0, 100).mapToDouble(i -> i).toArray();
-            assertThat(copy.getData()).isEqualTo(expectedResult);
-            assertThat(copy.getData()).isSameAs(buffer);
-            assertThat(copy.getSize()).isEqualTo(100);
+            assertThat(buffer).isEqualTo(expectedResult);
         }
 
         @Test
@@ -229,11 +222,7 @@ public class WindowedDoubleQueueTest {
                 queue.insert(i, 0);
             }
 
-            WindowedDoubleQueue.ValueCopy copy = queue.copy(new double[99]);
-
-            double[] expectedResult = IntStream.range(0, 100).mapToDouble(i -> i).toArray();
-            assertThat(copy.getData()).isEqualTo(expectedResult);
-            assertThat(copy.getSize()).isEqualTo(100);
+            assertThatThrownBy(() -> queue.copy(new double[99])).isInstanceOf(IllegalArgumentException.class);
         }
     }
 }
