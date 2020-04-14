@@ -102,7 +102,8 @@ class CommonTagsManagerIntTest {
     @Nested
     @DirtiesContext
     @TestPropertySource(properties = {
-            "inspectit.tags.extra.service-name=this-value-is-over-255-characters-long ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"
+            "inspectit.tags.extra.service-name=this-value-is-over-255-characters-long ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------",
+            "inspectit.tags.extra.service-name2=non-printable-character-\u007f"
     })
     class VeryLongTagValues extends SpringTestBase {
 

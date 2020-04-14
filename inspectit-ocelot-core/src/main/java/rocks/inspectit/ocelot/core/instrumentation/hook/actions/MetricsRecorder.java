@@ -12,6 +12,7 @@ import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.model.MetricAccessor;
 import rocks.inspectit.ocelot.core.metrics.MeasuresAndViewsManager;
 import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
+import rocks.inspectit.ocelot.core.tags.TagUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -70,17 +71,17 @@ public class MetricsRecorder implements IHookAction {
         // first common tags to allow overwrite by constant or data tags
         commonTagsManager.getCommonTagKeys()
                 .forEach(commonTagKey -> Optional.ofNullable(inspectitContext.getData(commonTagKey.getName()))
-                        .ifPresent(value -> builder.putLocal(commonTagKey, CommonTagsManager.createTagValue(value.toString())))
+                        .ifPresent(value -> builder.putLocal(commonTagKey, TagUtils.createTagValue(value.toString())))
                 );
 
         // then constant tags to allow overwrite by data
         metricAccessor.getConstantTags()
-                .forEach((key, value) -> builder.putLocal(TagKey.create(key), CommonTagsManager.createTagValue(value)));
+                .forEach((key, value) -> builder.putLocal(TagKey.create(key), TagUtils.createTagValue(value)));
 
         // go over data tags and match the value to the key from the contextTags (if available)
         metricAccessor.getDataTagAccessors()
                 .forEach((key, accessor) -> Optional.ofNullable(accessor.get(context))
-                        .ifPresent(tagValue -> builder.putLocal(TagKey.create(key), CommonTagsManager.createTagValue(tagValue.toString()))));
+                        .ifPresent(tagValue -> builder.putLocal(TagKey.create(key), TagUtils.createTagValue(tagValue.toString()))));
 
         // build and return
         return builder.build();

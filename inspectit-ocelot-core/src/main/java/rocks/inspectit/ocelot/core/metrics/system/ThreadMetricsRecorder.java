@@ -7,7 +7,7 @@ import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import rocks.inspectit.ocelot.config.model.metrics.MetricsSettings;
-import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
+import rocks.inspectit.ocelot.core.tags.TagUtils;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
@@ -80,7 +80,7 @@ public class ThreadMetricsRecorder extends AbstractPollingMetricsRecorder {
         measureManager.getMeasureLong(METRIC_NAME_PREFIX + STATE_METRIC_NAME)
                 .ifPresent(measure -> {
                     for (val state : Thread.State.values()) {
-                        TagContextBuilder contextBuilder = tagger.currentBuilder().putLocal(stateTag, CommonTagsManager.createTagValue(state.name()));
+                        TagContextBuilder contextBuilder = tagger.currentBuilder().putLocal(stateTag, TagUtils.createTagValue(state.name()));
                         try (val scope = contextBuilder.buildScoped()) {
                             val mm = recorder.newMeasureMap();
                             val count = Arrays.stream(threadBean.getThreadInfo(threadBean.getAllThreadIds()))

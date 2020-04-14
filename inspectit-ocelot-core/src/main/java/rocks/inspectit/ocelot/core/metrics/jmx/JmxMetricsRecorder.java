@@ -19,6 +19,7 @@ import rocks.inspectit.ocelot.config.model.metrics.jmx.JmxMetricsRecorderSetting
 import rocks.inspectit.ocelot.core.metrics.MeasuresAndViewsManager;
 import rocks.inspectit.ocelot.core.metrics.system.AbstractPollingMetricsRecorder;
 import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
+import rocks.inspectit.ocelot.core.tags.TagUtils;
 
 import javax.management.ObjectName;
 import java.time.Duration;
@@ -136,7 +137,7 @@ public class JmxMetricsRecorder extends AbstractPollingMetricsRecorder implement
             TagContextBuilder tagContextBuilder = tagger.currentBuilder();
             beanProperties.entrySet().stream()
                     .skip(1)
-                    .forEach(entry -> tagContextBuilder.putLocal(TagKey.create(entry.getKey()), CommonTagsManager.createTagValue(entry.getValue())));
+                    .forEach(entry -> tagContextBuilder.putLocal(TagKey.create(entry.getKey()), TagUtils.createTagValue(entry.getValue())));
 
             MeasureMap measureMap = recorder.newMeasureMap();
             measureMap.put(measure, metricValue);

@@ -16,6 +16,7 @@ import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.metrics.MeasuresAndViewsManager;
 import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
+import rocks.inspectit.ocelot.core.tags.TagUtils;
 
 import java.util.Collections;
 import java.util.Map;
@@ -160,7 +161,7 @@ public class SelfMonitoringService {
                     statsRecorder.newMeasureMap()
                             .put(m, durationInMicros)
                             .record(Tags.getTagger().toBuilder(commonTags.getCommonTagContext())
-                                    .putLocal(COMPONENT_TAG_KEY, CommonTagsManager.createTagValue(componentName)).build())
+                                    .putLocal(COMPONENT_TAG_KEY, TagUtils.createTagValue(componentName)).build())
             );
 
             if (log.isTraceEnabled()) {

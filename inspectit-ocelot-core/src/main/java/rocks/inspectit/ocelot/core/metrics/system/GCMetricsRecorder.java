@@ -13,7 +13,7 @@ import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.metrics.MetricsSettings;
 import rocks.inspectit.ocelot.config.model.metrics.StandardMetricsSettings;
 import rocks.inspectit.ocelot.core.selfmonitoring.SelfMonitoringService;
-import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
+import rocks.inspectit.ocelot.core.tags.TagUtils;
 
 import javax.management.ListenerNotFoundException;
 import javax.management.Notification;
@@ -203,8 +203,8 @@ public class GCMetricsRecorder extends AbstractMetricsRecorder {
         measureManager.getMeasureLong(CONCURRENT_PHASE_TIME_METRIC_FULL_NAME)
                 .ifPresent(measure -> {
                     TagContext tags = tagger.toBuilder(commonTags.getCommonTagContext())
-                            .putLocal(actionTagKey, CommonTagsManager.createTagValue(notificationInfo.getGcAction()))
-                            .putLocal(causeTagKey, CommonTagsManager.createTagValue(notificationInfo.getGcCause()))
+                            .putLocal(actionTagKey, TagUtils.createTagValue(notificationInfo.getGcAction()))
+                            .putLocal(causeTagKey, TagUtils.createTagValue(notificationInfo.getGcCause()))
                             .build();
 
                     recorder.newMeasureMap()
@@ -217,8 +217,8 @@ public class GCMetricsRecorder extends AbstractMetricsRecorder {
         measureManager.getMeasureLong(PAUSE_METRIC_FULL_NAME)
                 .ifPresent(measure -> {
                     TagContext tags = tagger.toBuilder(commonTags.getCommonTagContext())
-                            .putLocal(actionTagKey, CommonTagsManager.createTagValue(notificationInfo.getGcAction()))
-                            .putLocal(causeTagKey, CommonTagsManager.createTagValue(notificationInfo.getGcCause()))
+                            .putLocal(actionTagKey, TagUtils.createTagValue(notificationInfo.getGcAction()))
+                            .putLocal(causeTagKey, TagUtils.createTagValue(notificationInfo.getGcCause()))
                             .build();
 
                     recorder.newMeasureMap()

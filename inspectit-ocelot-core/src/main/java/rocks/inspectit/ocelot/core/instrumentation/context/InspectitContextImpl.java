@@ -12,7 +12,7 @@ import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 import rocks.inspectit.ocelot.config.model.instrumentation.data.PropagationMode;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;
-import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
+import rocks.inspectit.ocelot.core.tags.TagUtils;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -347,7 +347,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
     public Scope enterFullTagScope() {
         TagContextBuilder builder = Tags.getTagger().emptyBuilder();
         dataTagsStream()
-                .forEach(e -> builder.putLocal(TagKey.create(e.getKey()), CommonTagsManager.createTagValue(e.getValue().toString())));
+                .forEach(e -> builder.putLocal(TagKey.create(e.getKey()), TagUtils.createTagValue(e.getValue().toString())));
         return builder.buildScoped();
     }
 
@@ -580,7 +580,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
         return postEntryPhaseDownPropagatedData.entrySet().stream()
                 .filter(e -> propagation.isTag(e.getKey()))
                 .filter(e -> ALLOWED_TAG_TYPES.contains(e.getValue().getClass()))
-                .map(e -> Tag.create(TagKey.create(e.getKey()), CommonTagsManager.createTagValue(e.getValue().toString())))
+                .map(e -> Tag.create(TagKey.create(e.getKey()), TagUtils.createTagValue(e.getValue().toString())))
                 .iterator();
     }
 

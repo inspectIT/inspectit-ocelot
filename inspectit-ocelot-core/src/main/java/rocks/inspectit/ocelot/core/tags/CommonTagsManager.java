@@ -1,7 +1,10 @@
 package rocks.inspectit.ocelot.core.tags;
 
 import io.opencensus.common.Scope;
-import io.opencensus.tags.*;
+import io.opencensus.tags.TagContext;
+import io.opencensus.tags.TagContextBuilder;
+import io.opencensus.tags.TagKey;
+import io.opencensus.tags.Tags;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,7 +102,7 @@ public class CommonTagsManager {
         HashMap<String, String> tags = new HashMap<>(commonTagValueMap);
         tags.putAll(customTagMap);
         tags.entrySet().stream()
-                .forEach(entry -> tagContextBuilder.putLocal(TagKey.create(entry.getKey()), createTagValue(entry.getValue())));
+                .forEach(entry -> tagContextBuilder.putLocal(TagKey.create(entry.getKey()), TagUtils.createTagValue(entry.getValue())));
         return tagContextBuilder.buildScoped();
     }
 
@@ -125,27 +128,11 @@ public class CommonTagsManager {
         newCommonTagValueMap.forEach((k, v) -> {
             TagKey key = TagKey.create(k);
             newCommonTagKeys.add(key);
-            tagContextBuilder.putLocal(key, createTagValue(v));
+            tagContextBuilder.putLocal(key, TagUtils.createTagValue(v));
         });
         commonTagKeys = newCommonTagKeys;
         commonTagValueMap = newCommonTagValueMap;
         commonTagContext = tagContextBuilder.build();
-    }
-
-    /**
-     * Constructs a {@code io.opencensus.tags.TagValue} from the given string.
-     * If String is not valid it an <code>&lt;invalid&gt;</code> TagName is created.
-     *
-     * @param v the tag value
-     * @return the created TagValue with 'v' or '&lt;invalid&gt;'
-     */
-    public static TagValue createTagValue(String v) {
-        try {
-            return TagValue.create(v);
-        } catch (IllegalArgumentException e) {
-            log.warn("illegal tag value {} converted to <invalid>", v);
-            return TagValue.create("<invalid>");
-        }
     }
 
 }
