@@ -11,6 +11,7 @@ import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -39,7 +40,6 @@ public class BeaconMetricDefinitionSettings extends MetricDefinitionSettings {
     @Valid
     private List<BeaconRequirement> beaconRequirements;
 
-
     @Builder(builderMethodName = "beaconMetricBuilder")
     public BeaconMetricDefinitionSettings(boolean enabled, @NotBlank String unit, @NotNull MeasureType type, String description,
                                           Map<@NotBlank String, @Valid @NotNull ViewDefinitionSettings> views, @NotEmpty List<BeaconRequirement> beaconRequirements,
@@ -50,8 +50,8 @@ public class BeaconMetricDefinitionSettings extends MetricDefinitionSettings {
     }
 
     @Override
-    public BeaconMetricDefinitionSettings getCopyWithDefaultsPopulated(String metricName) {
-        MetricDefinitionSettings metricDefinition = super.getCopyWithDefaultsPopulated(metricName);
+    public BeaconMetricDefinitionSettings getCopyWithDefaultsPopulated(String metricName, Duration defaultTimeWindow) {
+        MetricDefinitionSettings metricDefinition = super.getCopyWithDefaultsPopulated(metricName, defaultTimeWindow);
 
         return beaconMetricBuilder()
                 .beaconRequirements(getBeaconRequirements())

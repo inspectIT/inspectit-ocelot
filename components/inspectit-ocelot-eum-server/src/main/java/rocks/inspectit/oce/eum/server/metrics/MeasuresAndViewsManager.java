@@ -12,6 +12,7 @@ import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration
 import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings;
 import rocks.inspectit.ocelot.config.model.metrics.definition.ViewDefinitionSettings;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -50,10 +51,14 @@ public class MeasuresAndViewsManager {
 
         switch (metricDefinition.getType()) {
             case LONG:
-                recorder.newMeasureMap().put((Measure.MeasureLong) metrics.get(measureName), value.longValue()).record();
+                recorder.newMeasureMap()
+                        .put((Measure.MeasureLong) metrics.get(measureName), value.longValue())
+                        .record();
                 break;
             case DOUBLE:
-                recorder.newMeasureMap().put((Measure.MeasureDouble) metrics.get(measureName), value.doubleValue()).record();
+                recorder.newMeasureMap()
+                        .put((Measure.MeasureDouble) metrics.get(measureName), value.doubleValue())
+                        .record();
                 break;
         }
     }
@@ -63,7 +68,8 @@ public class MeasuresAndViewsManager {
      */
     public void updateMetrics(String name, MetricDefinitionSettings metricDefinition) {
         if (!metrics.containsKey(name)) {
-            MetricDefinitionSettings populatedMetricDefinition = metricDefinition.getCopyWithDefaultsPopulated(name);
+            MetricDefinitionSettings populatedMetricDefinition = metricDefinition.getCopyWithDefaultsPopulated(name, Duration
+                    .ofSeconds(15));
             Measure measure = createMeasure(name, populatedMetricDefinition);
             metrics.put(name, measure);
             updateViews(name, populatedMetricDefinition);
@@ -89,7 +95,8 @@ public class MeasuresAndViewsManager {
      * @param metricDefinition the settings of the metric definition
      */
     private void updateViews(String metricName, MetricDefinitionSettings metricDefinition) {
-        for (Map.Entry<String, ViewDefinitionSettings> viewDefinitionSettingsEntry : metricDefinition.getViews().entrySet()) {
+        for (Map.Entry<String, ViewDefinitionSettings> viewDefinitionSettingsEntry : metricDefinition.getViews()
+                .entrySet()) {
             String viewName = viewDefinitionSettingsEntry.getKey();
             ViewDefinitionSettings viewDefinitionSettings = viewDefinitionSettingsEntry.getValue();
             if (viewManager.getAllExportedViews().stream().noneMatch(v -> v.getName().asString().equals(viewName))) {
@@ -105,7 +112,6 @@ public class MeasuresAndViewsManager {
 
     /**
      * Returns all tags, which are exposed for the given metricDefinition
-     *
      */
     private Set<String> getTagsForView(ViewDefinitionSettings viewDefinitionSettings) {
         Set<String> tags = new HashSet<>(configuration.getTags().getDefineAsGlobal());
@@ -133,6 +139,7 @@ public class MeasuresAndViewsManager {
      * Builds TagContext with custom tags.
      *
      * @param customTags Map containing the custom tags.
+     *
      * @return {@link TagContextBuilder} which contains the custom and global (extra) tags
      */
     public TagContextBuilder getTagContext(Map<String, String> customTags) {
@@ -147,7 +154,6 @@ public class MeasuresAndViewsManager {
 
     /**
      * Creates an aggregation depending on the given {@link Aggregation}
-     *
      */
     private static Aggregation createAggregation(ViewDefinitionSettings viewDefinitionSettings) {
         switch (viewDefinitionSettings.getAggregation()) {

@@ -1,6 +1,6 @@
 package rocks.inspectit.ocelot.core.metrics.system;
 
-import io.opencensus.tags.TagContextBuilder;
+import io.opencensus.tags.TagContext;
 import io.opencensus.tags.TagKey;
 import io.opencensus.tags.TagValue;
 import io.opencensus.tags.Tagger;
@@ -46,24 +46,22 @@ public class ThreadMetricsRecorder extends AbstractPollingMetricsRecorder {
 
     @Override
     protected void takeMeasurement(MetricsSettings config) {
-        val measurement = recorder.newMeasureMap();
         val enabled = config.getThreads().getEnabled();
         if (enabled.getOrDefault(PEAK_METRIC_NAME, false)) {
-            measureManager.tryRecordingMeasurement(METRIC_NAME_PREFIX + PEAK_METRIC_NAME, measurement,
+            measureManager.tryRecordingMeasurement(METRIC_NAME_PREFIX + PEAK_METRIC_NAME,
                     threadBean.getPeakThreadCount());
         }
         if (enabled.getOrDefault(DAEMON_METRIC_NAME, false)) {
-            measureManager.tryRecordingMeasurement(METRIC_NAME_PREFIX + DAEMON_METRIC_NAME, measurement,
+            measureManager.tryRecordingMeasurement(METRIC_NAME_PREFIX + DAEMON_METRIC_NAME,
                     threadBean.getDaemonThreadCount());
         }
         if (enabled.getOrDefault(LIVE_METRIC_NAME, false)) {
-            measureManager.tryRecordingMeasurement(METRIC_NAME_PREFIX + LIVE_METRIC_NAME, measurement,
+            measureManager.tryRecordingMeasurement(METRIC_NAME_PREFIX + LIVE_METRIC_NAME,
                     threadBean.getThreadCount());
         }
         if (enabled.getOrDefault(STATE_METRIC_NAME, false)) {
             recordStateMetric();
         }
-        measurement.record();
     }
 
     @Override
@@ -77,21 +75,16 @@ public class ThreadMetricsRecorder extends AbstractPollingMetricsRecorder {
     }
 
     private void recordStateMetric() {
-        measureManager.getMeasureLong(METRIC_NAME_PREFIX + STATE_METRIC_NAME)
-                .ifPresent(measure -> {
-                    for (val state : Thread.State.values()) {
-                        TagContextBuilder contextBuilder = tagger.currentBuilder().putLocal(stateTag, TagValue.create(state.name()));
-                        try (val scope = contextBuilder.buildScoped()) {
-                            val mm = recorder.newMeasureMap();
-                            val count = Arrays.stream(threadBean.getThreadInfo(threadBean.getAllThreadIds()))
-                                    .filter(Objects::nonNull)
-                                    .map(ThreadInfo::getThreadState)
-                                    .filter(s -> s == state)
-                                    .count();
-                            mm.put(measure, count);
-                            mm.record();
-                        }
-                    }
-                });
+        String stateMeasureName = METRIC_NAME_PREFIX + STATE_METRIC_NAME;
+        for (Thread.State state : Thread.State.values()) {
+            TagContext tags = tagger.currentBuilder().putLocal(stateTag, TagValue.create(state.name())).build();
+            long count = Arrays.stream(threadBean.getThreadInfo(threadBean.getAllThreadIds()))
+                    .filter(Objects::nonNull)
+                    .map(ThreadInfo::getThreadState)
+                    .filter(s -> s == state)
+                    .count();
+            measureManager.tryRecordingMeasurement(stateMeasureName, count, tags);
+
+        }
     }
 }

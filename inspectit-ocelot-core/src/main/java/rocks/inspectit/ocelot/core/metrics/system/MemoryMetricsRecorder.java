@@ -19,26 +19,32 @@ import java.util.Map;
 @Service
 public class MemoryMetricsRecorder extends AbstractPollingMetricsRecorder {
 
-
     private static final String USED_METRIC_NAME = "used";
+
     private static final String USED_METRIC_FULL_NAME = "jvm/memory/used";
 
     private static final String COMMITTED_METRIC_NAME = "committed";
+
     private static final String COMMITTED_METRIC_FULL_NAME = "jvm/memory/committed";
 
     private static final String MAX_METRIC_NAME = "max";
+
     private static final String MAX_METRIC_FULL_NAME = "jvm/memory/max";
 
     private static final String BUFFER_COUNT_METRIC_NAME = "buffer.count";
+
     private static final String BUFFER_COUNT_METRIC_FULL_NAME = "jvm/buffer/count";
 
     private static final String BUFFER_USED_METRIC_NAME = "buffer.used";
+
     private static final String BUFFER_USED_METRIC_FULL_NAME = "jvm/buffer/memory/used";
 
     private static final String BUFFER_CAPACITY_METRIC_NAME = "buffer.capacity";
+
     private static final String BUFFER_CAPACITY_METRIC_FULL_NAME = "jvm/buffer/total/capacity";
 
     private TagKey idTagKey = TagKey.create("id");
+
     private TagKey areaTagKey = TagKey.create("area");
 
     @Autowired
@@ -77,22 +83,22 @@ public class MemoryMetricsRecorder extends AbstractPollingMetricsRecorder {
                         .putLocal(areaTagKey, TagValue.create(area))
                         .build();
 
-                val mm = recorder.newMeasureMap();
                 if (usedEnabled) {
-                    measureManager.tryRecordingMeasurement(USED_METRIC_FULL_NAME, mm, memoryPoolBean.getUsage().getUsed());
+                    measureManager.tryRecordingMeasurement(USED_METRIC_FULL_NAME, memoryPoolBean.getUsage()
+                            .getUsed(), tags);
                 }
                 if (committedEnabled) {
-                    measureManager.tryRecordingMeasurement(COMMITTED_METRIC_FULL_NAME, mm, memoryPoolBean.getUsage().getCommitted());
+                    measureManager.tryRecordingMeasurement(COMMITTED_METRIC_FULL_NAME, memoryPoolBean.getUsage()
+                            .getCommitted(), tags);
                 }
                 if (maxEnabled) {
                     long max = memoryPoolBean.getUsage().getMax();
                     if (max == -1) { //max memory not set
                         max = 0L; //negative values are not supported by OpenCensus
                     }
-                    measureManager.tryRecordingMeasurement(MAX_METRIC_FULL_NAME, mm, max);
+                    measureManager.tryRecordingMeasurement(MAX_METRIC_FULL_NAME, max, tags);
 
                 }
-                mm.record(tags);
             }
         }
     }
@@ -107,17 +113,15 @@ public class MemoryMetricsRecorder extends AbstractPollingMetricsRecorder {
                         .putLocal(idTagKey, TagValue.create(bufferPoolBean.getName()))
                         .build();
 
-                val mm = recorder.newMeasureMap();
                 if (bufferCountEnabled) {
-                    measureManager.tryRecordingMeasurement(BUFFER_COUNT_METRIC_FULL_NAME, mm, bufferPoolBean.getCount());
+                    measureManager.tryRecordingMeasurement(BUFFER_COUNT_METRIC_FULL_NAME, bufferPoolBean.getCount(), tags);
                 }
                 if (bufferUsedEnabled) {
-                    measureManager.tryRecordingMeasurement(BUFFER_USED_METRIC_FULL_NAME, mm, bufferPoolBean.getMemoryUsed());
+                    measureManager.tryRecordingMeasurement(BUFFER_USED_METRIC_FULL_NAME, bufferPoolBean.getMemoryUsed(), tags);
                 }
                 if (bufferCapacityEnabled) {
-                    measureManager.tryRecordingMeasurement(BUFFER_CAPACITY_METRIC_FULL_NAME, mm, bufferPoolBean.getTotalCapacity());
+                    measureManager.tryRecordingMeasurement(BUFFER_CAPACITY_METRIC_FULL_NAME, bufferPoolBean.getTotalCapacity(), tags);
                 }
-                mm.record(tags);
             }
         }
     }
