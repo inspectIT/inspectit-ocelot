@@ -27,8 +27,6 @@ jobs:
       - uses: actions/checkout@v2
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
-      - name: version
-        run: ./gradlew --version
       - name: assemble
         run: ./gradlew assemble
       - name: test
