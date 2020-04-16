@@ -1,8 +1,12 @@
 name: pull request checks
 
 on:
-  pull_request
-
+  pull_request:
+    branches:
+      - master
+  push:
+    branches-ignore:
+      - master
 jobs:
   pr-check:
     name: ${{ matrix.dockerimage }}
