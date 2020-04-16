@@ -26,14 +26,13 @@ class UnsavedChangesGate extends React.Component {
   }
 
   hasUnsavedChanges = () => {
-    return this.props.unsavedConfigChanges || this.props.unsavedMappingChanges;
+    return this.props.unsavedConfigChanges;
   };
 }
 
 function mapStateToProps(state) {
   return {
-    unsavedConfigChanges: configurationSelectors.hasUnsavedChanges(state),
-    unsavedMappingChanges: state.mappings.editorContent !== null,
+    unsavedConfigChanges: configurationSelectors.hasUnsavedChanges(state)
   };
 }
 
