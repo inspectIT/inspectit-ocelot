@@ -20,6 +20,7 @@ import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.MetricsRecorder;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.model.MetricAccessor;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.*;
+import rocks.inspectit.ocelot.core.instrumentation.hook.tags.CommonTagsToAttributesManager;
 import rocks.inspectit.ocelot.core.metrics.MeasuresAndViewsManager;
 import rocks.inspectit.ocelot.core.privacy.obfuscation.ObfuscationManager;
 import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
@@ -55,6 +56,9 @@ public class MethodHookGenerator {
 
     @Autowired
     private ObfuscationManager obfuscationManager;
+
+    @Autowired
+    private CommonTagsToAttributesManager commonTagsToAttributesManager;
 
     /**
      * Builds a executable method hook based on the given configuration.
@@ -97,7 +101,7 @@ public class MethodHookGenerator {
         if (tracing.getStartSpan() || tracing.getContinueSpan() != null) {
 
             val actionBuilder = ContinueOrStartSpanAction.builder();
-
+            actionBuilder.commonTagsToAttributesManager(commonTagsToAttributesManager);
 
             if (tracing.getStartSpan()) {
                 VariableAccessor name = Optional.ofNullable(tracing.getName())

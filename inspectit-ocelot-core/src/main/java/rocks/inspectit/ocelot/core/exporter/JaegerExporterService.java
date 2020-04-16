@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.core.exporter;
 
+import io.opencensus.exporter.trace.jaeger.JaegerExporterConfiguration;
 import io.opencensus.exporter.trace.jaeger.JaegerTraceExporter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -35,7 +36,8 @@ public class JaegerExporterService extends DynamicallyActivatableService {
         try {
             JaegerExporterSettings settings = configuration.getExporters().getTracing().getJaeger();
             log.info("Starting Jaeger Exporter with url '{}'", settings.getUrl());
-            JaegerTraceExporter.createAndRegister(settings.getUrl(), settings.getServiceName());
+            JaegerTraceExporter.createAndRegister(
+                    JaegerExporterConfiguration.builder().setThriftEndpoint(settings.getUrl()).setServiceName(settings.getServiceName()).build());
             return true;
         } catch (Throwable t) {
             log.error("Error creating Jaeger exporter", t);

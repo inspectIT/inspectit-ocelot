@@ -534,6 +534,9 @@ After the rule's exit phase, the corresponding data keys are read and attached a
 
 Note that if a rule does not start or continue a span, no attributes will be written.
 
+The [common tags](metrics/common-tags.md) are added as attributes in all local span roots by default.
+This behavior can be configured in the global [tracing settings](tracing/tracing.md#common-tags-as-attributes).
+
 #### Visualizing Span Errors
 
 Most tracing backends support highlighting of spans which are marked as errors.

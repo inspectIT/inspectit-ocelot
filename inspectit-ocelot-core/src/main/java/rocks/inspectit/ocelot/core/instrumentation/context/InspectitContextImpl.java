@@ -580,7 +580,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
         return postEntryPhaseDownPropagatedData.entrySet().stream()
                 .filter(e -> propagation.isTag(e.getKey()))
                 .filter(e -> ALLOWED_TAG_TYPES.contains(e.getValue().getClass()))
-                .map(e -> Tag.create(TagKey.create(e.getKey()), TagUtils.createTagValue(e.getValue().toString())))
+                .map(e -> Tag.create(TagKey.create(e.getKey()), TagUtils.createTagValue(e.getValue().toString()), TagMetadata.create(TagMetadata.TagTtl.UNLIMITED_PROPAGATION)))
                 .iterator();
     }
 
