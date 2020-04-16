@@ -33,11 +33,14 @@ public class TraceSettingsTest extends TraceTestBase {
                         .anySatisfy((sp) -> {
                             assertThat(sp.getName()).endsWith("TraceSettingsTest.attributesSetter");
                             assertThat(sp.getAttributes().getAttributeMap())
-                                    .hasSize(4)
+                                    .hasSize(7)
                                     .containsEntry("entry", AttributeValue.stringAttributeValue("const"))
                                     .containsEntry("exit", AttributeValue.stringAttributeValue("Hello A!"))
                                     .containsEntry("toObfuscate", AttributeValue.stringAttributeValue("***"))
-                                    .containsEntry("anything", AttributeValue.stringAttributeValue("***"));
+                                    .containsEntry("anything", AttributeValue.stringAttributeValue("***"))
+                                    // plus include all common tags (service + key validation only)
+                                    .containsEntry("service", AttributeValue.stringAttributeValue("systemtest"))
+                                    .containsKeys("host", "host_address");
                         })
 
         );
@@ -61,7 +64,8 @@ public class TraceSettingsTest extends TraceTestBase {
                         .anySatisfy((sp) -> {
                             assertThat(sp.getName()).endsWith("TraceSettingsTest.attributesSetterWithConditions");
                             assertThat(sp.getAttributes().getAttributeMap())
-                                    .hasSize(0);
+                                    .hasSize(3)
+                                    .containsKeys("service", "host", "host_address");
                         })
 
         );
@@ -72,10 +76,10 @@ public class TraceSettingsTest extends TraceTestBase {
                         .anySatisfy((sp) -> {
                             assertThat(sp.getName()).endsWith("TraceSettingsTest.attributesSetterWithConditions");
                             assertThat(sp.getAttributes().getAttributeMap())
-                                    .hasSize(2)
+                                    .hasSize(5)
                                     .containsEntry("entry", AttributeValue.stringAttributeValue("const"))
-                                    .containsEntry("exit", AttributeValue.stringAttributeValue("Hello B!"));
-
+                                    .containsEntry("exit", AttributeValue.stringAttributeValue("Hello B!"))
+                                    .containsKeys("service", "host", "host_address");
                         })
 
         );
@@ -152,6 +156,28 @@ public class TraceSettingsTest extends TraceTestBase {
 
     }
 
+    @Test
+    void testNoCommonTagsOnChild() {
+        TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, 15, TimeUnit.SECONDS);
+
+        namedA("whatever");
+
+        assertTraceExported((spans) ->
+                assertThat(spans)
+                        .hasSize(2)
+                        .anySatisfy((sp) -> {
+                            assertThat(sp.getParentSpanId()).isNull();
+                            assertThat(sp.getAttributes().getAttributeMap()).hasSize(3);
+                        })
+                        .anySatisfy((sp) -> {
+                            assertThat(sp.getParentSpanId()).isNotNull();
+                            assertThat(sp.getAttributes().getAttributeMap()).hasSize(0);
+                        })
+
+        );
+
+    }
+
     static class AsyncTask {
         void doAsync(String att1, String att2, String att3, boolean isFinished) {
         }
@@ -194,14 +220,16 @@ public class TraceSettingsTest extends TraceTestBase {
 
             //ensure that all method invocations have been combined to single spans
             assertThat(firstSpan.getAttributes().getAttributeMap())
-                    .hasSize(2)
+                    .hasSize(5)
                     .containsEntry("1", AttributeValue.stringAttributeValue("a1"))
-                    .containsEntry("2", AttributeValue.stringAttributeValue("a2"));
+                    .containsEntry("2", AttributeValue.stringAttributeValue("a2"))
+                    .containsKeys("service", "host", "host_address");
             assertThat(secondSpan.getAttributes().getAttributeMap())
-                    .hasSize(3)
+                    .hasSize(6)
                     .containsEntry("1", AttributeValue.stringAttributeValue("b1"))
                     .containsEntry("2", AttributeValue.stringAttributeValue("b2"))
-                    .containsEntry("3", AttributeValue.stringAttributeValue("b3"));
+                    .containsEntry("3", AttributeValue.stringAttributeValue("b3"))
+                    .containsKeys("service", "host", "host_address");
 
             //ensure that the timings are valid
             assertThat(firstSpan.getEndTimestamp()).isLessThan(secondSpan.getEndTimestamp());

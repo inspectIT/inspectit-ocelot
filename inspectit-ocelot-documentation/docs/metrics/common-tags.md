@@ -7,6 +7,11 @@ inspectIT Ocelot provides a map of common tag keys and values that are used when
 This feature enables to "label" metrics collected with inspectIT Ocelot and to share common information about a process or an environment where the process runs.
 The map can be [extended or overwritten by the user](#user-defined-tags) when this is required.
 
+:::tip
+The common tags can also be added as attributes in tracing spans.
+This behavior can be configured in the global [tracing settings](tracing/tracing.md#common-tags-as-attributes).
+:::
+
 Tag providers are responsible for extracting information from a specific source and provides a map of key value pairs that are then combined into the common tag context.
 Each provider specifies a priority and if the same tag keys are supplied by two providers, then the tag value from the provider with higher priority will be used.
 
