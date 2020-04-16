@@ -15,16 +15,16 @@ inspectit:
           '_arg0': 'ServletRequest'
           '_context': 'InspectitContext'
         value-body: |
-          if(_arg0 instanceof HttpServletRequest) {
+          if (_arg0 instanceof HttpServletRequest) {
             HttpServletRequest req = (HttpServletRequest) _arg0;
             Collection headerKeys = _context.getPropagationHeaderNames();
             Map presentHeaders = new HashMap();
             Iterator it = headerKeys.iterator();
-            while(it.hasNext()) {
+            while (it.hasNext()) {
               String name = (String) it.next();
               java.util.Enumeration values = req.getHeaders(name);
               if (values != null && values.hasMoreElements()) {
-                  presentHeaders.put(name, String.join(",", Collections.list(values)));
+                presentHeaders.put(name, String.join(",", Collections.list(values)));
               }
             }
             _context.readDownPropagationHeaders(presentHeaders);
@@ -40,12 +40,12 @@ inspectit:
           'response': 'ServletResponse'
           '_context': 'InspectitContext'
         value-body: |
-          if(response instanceof HttpServletResponse) {
+          if (response instanceof HttpServletResponse) {
             HttpServletResponse res = (HttpServletResponse) response;
-            if(!res.isCommitted()) {
+            if (!res.isCommitted()) {
               Map headers = _context.getUpPropagationHeaders();
               Iterator it = headers.entrySet().iterator();
-              while(it.hasNext()) {
+              while (it.hasNext()) {
                 Map$Entry e = (Map$Entry) it.next();
                 res.setHeader((String) e.getKey(), (String) e.getValue());
               }

@@ -14,7 +14,7 @@ inspectit:
           '_context': InspectitContext
           'marker': String
         value-body: |
-          if(_context.getData(marker) == null) {
+          if (_context.getData(marker) == null) {
             _context.setData(marker, Boolean.TRUE);
             return Boolean.TRUE;
           } else {

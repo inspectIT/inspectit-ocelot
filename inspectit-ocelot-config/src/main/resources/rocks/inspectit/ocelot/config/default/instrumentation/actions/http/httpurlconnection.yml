@@ -11,7 +11,7 @@ inspectit:
         value-body: |
           URL url = _this.getURL();
           int port = url.getPort();
-          if(port == -1) {
+          if (port == -1) {
             return url.getHost();
           } else {
             return url.getHost() + ":" + port;
@@ -37,6 +37,6 @@ inspectit:
         value-body: |
           try {
             return String.valueOf(_this.getResponseCode());
-          } catch(Throwable t) {
+          } catch (Throwable t) {
             return t.getClass().getSimpleName();
           }

@@ -8,7 +8,7 @@ inspectit:
         is-void: true
         value-body: |
           System.out.println(value);
-        
+
       # Prints two given Objects to stdout
       'a_debug_println_2':
         input:

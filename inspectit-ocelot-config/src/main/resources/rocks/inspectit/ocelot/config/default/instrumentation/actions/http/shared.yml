@@ -8,8 +8,8 @@ inspectit:
       input:
         'status': Object
       value-body: |
-        if(status instanceof Number) {
-          int statusInt = ((Number)status).intValue();
+        if (status instanceof Number) {
+          int statusInt = ((Number) status).intValue();
           return Boolean.valueOf(statusInt < 200 || statusInt >= 400);
         }
         if (status instanceof String) {
@@ -19,7 +19,7 @@ inspectit:
             return Boolean.valueOf(firstChar != '2' && firstChar != '3');
           }
         }
-        if(status == null) {
+        if (status == null) {
           return Boolean.FALSE;
         }
         return Boolean.TRUE;

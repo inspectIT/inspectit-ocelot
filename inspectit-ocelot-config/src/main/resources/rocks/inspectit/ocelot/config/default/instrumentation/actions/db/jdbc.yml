@@ -12,20 +12,20 @@ inspectit:
           try {
             Connection con = statement.getConnection();
             String url = con.getMetaData().getURL();
-
+          
             int semiColonIndex = url.indexOf(';');
-            if(semiColonIndex != -1) {
-              url = url.substring(0,semiColonIndex);
+            if (semiColonIndex != -1) {
+              url = url.substring(0, semiColonIndex);
             }
-
+          
             int questionIndex = url.indexOf('?');
-            if(questionIndex != -1) {
-              url = url.substring(0,questionIndex);
+            if (questionIndex != -1) {
+              url = url.substring(0, questionIndex);
             }
-            if(url.toLowerCase().startsWith("jdbc:")) {
+            if (url.toLowerCase().startsWith("jdbc:")) {
               url = url.substring(5);
             }
             return url;
-          }catch(Exception e) { // in case the connection is closed
+          } catch (Exception e) { // in case the connection is closed
             return null;
           }

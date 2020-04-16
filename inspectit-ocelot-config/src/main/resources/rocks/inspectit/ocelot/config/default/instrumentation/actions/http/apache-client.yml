@@ -21,7 +21,7 @@ inspectit:
           - org.apache.http
         input:
           '_arg1': HttpRequest
-        value: "URI.create(_arg1.getRequestLine().getUri()).getPath()"
+        value: 'URI.create(_arg1.getRequestLine().getUri()).getPath()'
 
       # Extracts the HTTP Method of the request, e.g. GET or POST
       'a_apacheclient_getMethod':
@@ -29,7 +29,7 @@ inspectit:
           - org.apache.http
         input:
           '_arg1': HttpRequest
-        value: "_arg1.getRequestLine().getMethod()"
+        value: '_arg1.getRequestLine().getMethod()'
 
       # Extracts the response status in case the request succeded-
       # If an exception is thrown instead, it's name is returned (e.g. SocketTimeoutException)
@@ -40,7 +40,7 @@ inspectit:
           '_returnValue': HttpResponse
           '_thrown': Throwable
         value-body: |
-          if(_thrown != null) {
+          if (_thrown != null) {
             return _thrown.getClass().getSimpleName();
           } else {
             return Integer.valueOf(_returnValue.getStatusLine().getStatusCode());

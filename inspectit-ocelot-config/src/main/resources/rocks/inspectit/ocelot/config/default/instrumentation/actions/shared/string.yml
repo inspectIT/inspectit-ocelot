@@ -7,7 +7,7 @@ inspectit:
         input:
           'a': Object
           'b': Object
-        value: "new StringBuilder().append(a).append(b).toString();"
+        value: 'new StringBuilder().append(a).append(b).toString();'
         
       # Concatenates three provided inputs to a single string
       'a_string_concat_3':
@@ -15,4 +15,4 @@ inspectit:
           'a': Object
           'b': Object
           'c': Object
-        value: "new StringBuilder().append(a).append(b).append(c).toString();"
+        value: 'new StringBuilder().append(a).append(b).append(c).toString();'

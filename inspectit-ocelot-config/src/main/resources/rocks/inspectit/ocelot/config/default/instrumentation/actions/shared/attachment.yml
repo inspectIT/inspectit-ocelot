@@ -7,7 +7,7 @@ inspectit:
           '_attachments': ObjectAttachments
           'target': Object
           'key': String
-        value: "_attachments.getAttachment(target, key)"
+        value: '_attachments.getAttachment(target, key)'
 
       # Replaces a given attachment of a target object with a new one, returns the previous value
       'a_attachment_put':
@@ -16,7 +16,7 @@ inspectit:
           'target': Object
           'key': String
           'value': Object
-        value: "_attachments.attach(target, key, value)"
+        value: '_attachments.attach(target, key, value)'
 
       # Removes a given attachment from a target object, returning the previously attached value
       'a_attachment_remove':
@@ -24,4 +24,4 @@ inspectit:
           '_attachments': ObjectAttachments
           'target': Object
           'key': String
-        value: "_attachments.attach(target, key, null)"
+        value: '_attachments.attach(target, key, null)'
