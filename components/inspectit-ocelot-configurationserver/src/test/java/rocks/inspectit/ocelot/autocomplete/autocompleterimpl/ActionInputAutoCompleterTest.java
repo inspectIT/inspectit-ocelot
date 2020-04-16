@@ -12,8 +12,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -30,27 +30,25 @@ public class ActionInputAutoCompleterTest {
         @Test
         public void getSuggestionsTest() {
             List<String> testPath = Arrays.asList("inspectit", "instrumentation", "rules", "my_method", "entry", "span_name", "data-input");
-            when(configurationQueryHelper.getKeysForPath(any())).thenReturn(Arrays.asList("test", "test2"));
+            doReturn(Arrays.asList("action_A", "action_B"))
+                    .when(configurationQueryHelper).getKeysForPath(eq(Arrays.asList("inspectit", "instrumentation", "rules", "my_method", "entry", "span_name", "action")));
+            doReturn(Arrays.asList("first_input_of_A", "second_input_of_A"))
+                    .when(configurationQueryHelper).getKeysForPath(eq(Arrays.asList("inspectit", "instrumentation", "actions", "action_A", "input")));
+            doReturn(Arrays.asList("first_input_of_B", "second_input_of_B"))
+                    .when(configurationQueryHelper).getKeysForPath(eq(Arrays.asList("inspectit", "instrumentation", "actions", "action_B", "input")));
 
             List<String> output = actionInputAutoCompleter.getSuggestions(testPath);
 
-            assertThat(output).hasSize(2);
-            assertThat(output).contains("test");
-            assertThat(output).contains("test2");
+            assertThat(output).hasSize(4);
+            assertThat(output).contains("first_input_of_A");
+            assertThat(output).contains("second_input_of_A");
+            assertThat(output).contains("first_input_of_B");
+            assertThat(output).contains("second_input_of_B");
         }
 
         @Test
         public void wrongPath() {
-            List<String> testPath = Arrays.asList("inspectit", "instrumentation", "rules", "my_method", "entry", "span_name", "data-input");
-
-            List<String> output = actionInputAutoCompleter.getSuggestions(testPath);
-
-            assertThat(output).isEmpty();
-        }
-
-        @Test
-        public void emptyLists() {
-            List<String> testPath = Arrays.asList("inspectit", "instrumentation", "rules", "my_method", "entry", "span_name", "data-input");
+            List<String> testPath = Arrays.asList("inspectit", "instrumentation", "scopes", "my_scopes");
 
             List<String> output = actionInputAutoCompleter.getSuggestions(testPath);
 
@@ -60,12 +58,15 @@ public class ActionInputAutoCompleterTest {
         @Test
         public void ignoresUnderscoredValues() {
             List<String> testPath = Arrays.asList("inspectit", "instrumentation", "rules", "my_method", "entry", "span_name", "data-input");
-            when(configurationQueryHelper.getKeysForPath(any())).thenReturn(Arrays.asList("test", "_test2"));
+            doReturn(Arrays.asList("action_A", "action_B"))
+                    .when(configurationQueryHelper).getKeysForPath(eq(Arrays.asList("inspectit", "instrumentation", "rules", "my_method", "entry", "span_name", "action")));
+            doReturn(Arrays.asList("first_input_of_A", "_second_input_of_A"))
+                    .when(configurationQueryHelper).getKeysForPath(eq(Arrays.asList("inspectit", "instrumentation", "actions", "action_A", "input")));
 
             List<String> output = actionInputAutoCompleter.getSuggestions(testPath);
 
             assertThat(output).hasSize(1);
-            assertThat(output).containsOnly("test");
+            assertThat(output).containsOnly("first_input_of_A");
         }
     }
 }

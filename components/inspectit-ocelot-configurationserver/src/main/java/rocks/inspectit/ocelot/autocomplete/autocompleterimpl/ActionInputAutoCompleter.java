@@ -19,13 +19,43 @@ import java.util.stream.Collectors;
 @Component
 public class ActionInputAutoCompleter implements AutoCompleter {
 
-    private final static List<String> ACTION_OPTIONS = Arrays.asList("entry", "exit", "preEntry", "postEntry", "preExit", "postExit");
+    private final static String ACTION_LITERAL = "action";
+
+    private final static String INPUT_FILTER_ONSET = "_";
+
+    private final static String SECTION_PLACEHOLDER = "SECTION_PLACEHOLDER";
+
+    private final static String INPUT_PLACEHOLDER = "INPUT_PLACEHOLDER";
+
+    private final static String ACTION_PLACEHOLDER = "ACTION_PLACEHOLDER";
+
+    private final static List<String> ACTION_OPTIONS = Arrays.asList(
+            "entry",
+            "exit",
+            "preEntry",
+            "postEntry",
+            "preExit",
+            "postExit"
+    );
 
     private final static List<String> INPUT_OPTIONS = Arrays.asList("data-input", "constant-input");
 
-    private final static List<String> ACTION_INPUT_DECLARATION_PATH = Arrays.asList("inspectit", "instrumentation", "actions", "*", "input");
+    private final static List<String> ACTION_INPUT_DECLARATION_PATH = Arrays.asList(
+            "inspectit",
+            "instrumentation",
+            "actions",
+            ACTION_PLACEHOLDER,
+            "input"
+    );
 
-    private static List<String> actionInputDefaultUsagePath = Arrays.asList("inspectit", "instrumentation", "rules", "*", "*", "*", "*");
+    private final static List<String> ACTION_INPUT_DEFAULT_USAGE_PATH = Arrays.asList(
+            "inspectit",
+            "instrumentation",
+            "rules",
+            "*",
+            SECTION_PLACEHOLDER,
+            "*",
+            INPUT_PLACEHOLDER);
 
     private static List<List<String>> actionInputUsagePaths;
 
@@ -39,12 +69,13 @@ public class ActionInputAutoCompleter implements AutoCompleter {
      */
     private static void setupUsagePaths() {
         actionInputUsagePaths = new ArrayList<>();
+        List<String> actionInputDefaultUsagePath = new ArrayList<>(ACTION_INPUT_DEFAULT_USAGE_PATH);
 
         for (String option : ACTION_OPTIONS) {
-            actionInputDefaultUsagePath.set(4, option);
+            actionInputDefaultUsagePath.set(ACTION_INPUT_DEFAULT_USAGE_PATH.indexOf(SECTION_PLACEHOLDER), option);
 
             for (String inputOption : INPUT_OPTIONS) {
-                actionInputDefaultUsagePath.set(6, inputOption);
+                actionInputDefaultUsagePath.set(ACTION_INPUT_DEFAULT_USAGE_PATH.indexOf(INPUT_PLACEHOLDER), inputOption);
                 actionInputUsagePaths.add(new ArrayList<>(actionInputDefaultUsagePath));
             }
         }
@@ -54,8 +85,10 @@ public class ActionInputAutoCompleter implements AutoCompleter {
     private ConfigurationQueryHelper configurationQueryHelper;
 
     /**
-     * Checks if the given path leads to an action Attribute, e.g. "inspectit.instrumentation.actions.entry" and returns
-     * all declared actions that could be used in this path as  List of Strings.
+     * Checks if the given path leads to an action attribute, e.g.
+     * "inspectit.instrumentation.rules.my-rule.entry.my-entry-method.data-input" and returns
+     * all declared action inputs that could be used in this path as List of Strings.
+     * Ignores action inputs that start with the String defined in INPUT_FILTER_ONSET.
      *
      * @param path A given path as List. Each String should act as a literal of the path.
      * @return A List of Strings resembling the declared actions that could be used with the given path.
@@ -64,32 +97,60 @@ public class ActionInputAutoCompleter implements AutoCompleter {
     public List<String> getSuggestions(List<String> path) {
         if (actionInputUsagePaths.stream().
                 anyMatch(actionUsagePath -> PropertyPathHelper.comparePaths(path, actionUsagePath))) {
-            return getInput(path);
+            return getActionInputs(path);
         }
         return Collections.emptyList();
     }
 
     /**
-     * Searches all "action" attributes set in the yaml files present and returns all declared actions as Strings.
+     * Takes a List of Strings resembling a path and returns all declared action inputs that could be used in this
+     * path as List of Strings. Removes doubled entries. Filters out entries that start with the String defined in
+     * INPUT_FILTER_ONSET.
      *
-     * @return A List of Strings resembling all declared rules.
+     * @param path A given path as List. Each String should act as a literal of the path.
+     * @return A List of Strings resembling the declared actions that could be used with the given path.
      */
-    private List<String> getInput(List<String> path) {
-        return configurationQueryHelper.getKeysForPath(getInputDeclarationPath(path))
-                .stream()
-                .filter(value -> !value.startsWith("_"))
+    private List<String> getActionInputs(List<String> path) {
+        return buildActionPaths(path).stream()
+                .flatMap(actionPath -> configurationQueryHelper.getKeysForPath(actionPath).stream())
+                .distinct()
+                .filter(value -> !value.startsWith(INPUT_FILTER_ONSET))
                 .collect(Collectors.toList());
     }
 
     /**
-     * Puts the method name found in a given path into a copy of the ACTION_INPUT_DECLARATION_PATH variable.
+     * Takes a List of Strings resembling a path and returns a List containing Lists of Strings.
+     * Each of these Lists resemble an inspectit path which leads to an action the given path refers to.
+     * E.g. : "inspectit.instrumentation.rules.my_rule.entry.my_var.action" refers to "action_A" and "action_B"
+     * When this path is given as a parameter in this method, a List of Lists containing
+     * ["inspectit","instrumentation","actions","action_A","input"] and
+     * ["inspectit","instrumentation","actions","action_B","input"] is returned.
      *
-     * @param path the path initially put into the method.
-     * @return A List of Strings resembling a path leading to the methods input declarations.
+     * @param path A given path as List. Each String should act as a literal of the path.
+     * @return A List containing String Lists. Each of these Lists resemble one path as described.
      */
-    private List<String> getInputDeclarationPath(List<String> path) {
-        List<String> currentDeclarationPath = new ArrayList<>(ACTION_INPUT_DECLARATION_PATH);
-        currentDeclarationPath.set(3, path.get(3));
-        return currentDeclarationPath;
+    private List<List<String>> buildActionPaths(List<String> path) {
+        List<String> actions = getActions(path);
+        List<List<String>> actionPaths = new ArrayList<>();
+        for (String action : actions) {
+            List<String> actionPath = new ArrayList<>(ACTION_INPUT_DECLARATION_PATH);
+            actionPath.set(ACTION_INPUT_DECLARATION_PATH.indexOf(ACTION_PLACEHOLDER), action);
+            actionPaths.add(actionPath);
+        }
+        return actionPaths;
+    }
+
+    /**
+     * Takes a List of Strings resembling a path to a rule-input and returns the actions declared in this rule.
+     * E.g. if "inspectit.instrumentation.rules.my-rule.entry.my-entry-method.data-input" is given as a path, the values
+     * found under "inspectit.instrumentation.rules.my-rule.entry.my-entry-method.action" are returned.
+     *
+     * @param path A List of Strings resembling a path to a rule-input.
+     * @return The actions declared in this rule.
+     */
+    private List<String> getActions(List<String> path) {
+        List<String> actionDeclarationPath = new ArrayList<>(path);
+        actionDeclarationPath.set(ACTION_INPUT_DEFAULT_USAGE_PATH.indexOf(INPUT_PLACEHOLDER), ACTION_LITERAL);
+        return configurationQueryHelper.getKeysForPath(actionDeclarationPath);
     }
 }
