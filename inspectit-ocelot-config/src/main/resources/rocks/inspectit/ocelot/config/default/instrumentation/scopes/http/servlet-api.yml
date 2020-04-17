@@ -1,34 +1,35 @@
 inspectit:
   instrumentation:
     scopes:
+
       's_servletapi_servlet_service':
         interfaces:
-          - name: javax.servlet.Servlet
+          - name: 'javax.servlet.Servlet'
         methods:
-          - name: service
+          - name: 'service'
         advanced:
           instrument-only-inherited-methods: true
           
       's_servletapi_filter_doFilter':
         interfaces:
-          - name: javax.servlet.Filter
+          - name: 'javax.servlet.Filter'
         methods:
-          - name: doFilter
+          - name: 'doFilter'
         advanced:
           instrument-only-inherited-methods: true
           
       's_servletapi_servletresponse_getOutputStream':
         interfaces:
-            - name: javax.servlet.ServletResponse
+            - name: 'javax.servlet.ServletResponse'
         methods:
-          - name: getOutputStream
+          - name: 'getOutputStream'
         advanced:
           instrument-only-inherited-methods: true
           
       's_servletapi_servletresponse_getWriter':
         interfaces:
-          - name: javax.servlet.ServletResponse
+          - name: 'javax.servlet.ServletResponse'
         methods:
-          - name: getWriter
+          - name: 'getWriter'
         advanced:
           instrument-only-inherited-methods: true

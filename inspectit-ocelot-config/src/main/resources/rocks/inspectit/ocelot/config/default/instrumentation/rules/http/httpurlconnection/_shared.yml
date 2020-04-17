@@ -3,16 +3,14 @@ inspectit:
     rules:
     
       # Can be included to detect and exclude nested calls
-      # For example, an HTTPSurlConnection interally uses a normal HTTPUrlConnection
+      # For example, an HTTPSurlConnection literally uses a normal HTTPUrlConnection
       'r_httpurlconnection_detect_entry':
         pre-entry:
           'http_is_entry':
             action: 'a_entrypoint_check'
             constant-input: 
-              'marker': "http_client_entrypoint_marker"
+              'marker': 'http_client_entrypoint_marker'
          
-            
-      
       # Tests and sets an "start" marker on this HTTP Url Connection object
       # The end marker will only be set exactly once
       'r_httpurlconnection_detect_start':
@@ -22,7 +20,7 @@ inspectit:
           'httpurlconnection_prev_start_marker':
             action: 'a_attachment_put'
             constant-input:
-              'key': "start_marker"
+              'key': 'start_marker'
               'value': true
             data-input:
               'target': '_this'
@@ -41,12 +39,12 @@ inspectit:
           'r_httpurlconnection_detect_entry': true
         entry:
           'httpurlconnection_prev_end_marker':
-            action: a_attachment_put
+            action: 'a_attachment_put'
             constant-input:
-              key: "end_marker"
-              value: true
+              'key': 'end_marker'
+              'value': true
             data-input:
-              target: _this
+              'target': '_this'
           'httpurlconnection_is_end':
             only-if-true: 'http_is_entry'
             only-if-null: 'httpurlconnection_prev_end_marker'
@@ -88,5 +86,5 @@ inspectit:
             only-if-true: 'http_is_entry'
             action: 'a_http_isErrorStatus'
             data-input:
-              status: 'http_status'
+              'status': 'http_status'
             

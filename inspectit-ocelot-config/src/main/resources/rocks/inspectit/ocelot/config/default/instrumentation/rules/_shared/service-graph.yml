@@ -2,10 +2,13 @@
 # Definition of the service graph metrics and includable rules containing the core logic
 # for doing the necessary propagations as well as the recording of the actual metric
 # ------------------------------------------------------------------------------------------------------
-
 inspectit:
+
+  # # # # # # # # # # # # # # # # # # # # # #
+  # Metrics Configuration
   metrics:
     definitions:
+
       '[service/in/responsetime]':
         unit: ms
         views:
@@ -41,9 +44,15 @@ inspectit:
               'target_service': true
               'protocol': true
               'error': true
-            
-  instrumentation:  
+
+  # # # # # # # # # # # # # # # # # # # # # #
+  # Instrumentation Configuration
+  instrumentation:
+
+    # # # # # # # # # # # # # # # # # # # # # #
+    # Data Definition
     data:
+
       # Markers used for entry-point checks via a_entrypoint_check
       'servicegraph_inbound_marker':
         down-propagation: JVM_LOCAL
@@ -61,7 +70,9 @@ inspectit:
       # The actual origin of the call is remembered in this JVM_LOCAL variable
       'servicegraph_origin_service_local':
         down-propagation: JVM_LOCAL
-      
+
+    # # # # # # # # # # # # # # # # # # # # # #
+    # Rules Definition
     rules:
     
       # This rule prepares up-propagation to include service-graph related information
@@ -90,7 +101,7 @@ inspectit:
               'value': 'service'
               
       # Can be included to record the current method invocation as an inbound service graph call.
-      # The includer should populate servicegraph_is_entry if this method is the correct entrypoint.
+      # The includer should populate servicegraph_is_entry if this method is the correct entry point.
       # In addition, servicegraph_origin_external can be populated if an external origin is present
       'r_servicegraph_inbound_record_method':
         include:
@@ -98,7 +109,7 @@ inspectit:
           'r_servicegraph_inbound_record_metric': true
               
       # Can be included to record the current method invocation as an outbound service graph call.
-      # The includer should populate servicegraph_is_entry if this method is the correct entrypoint.
+      # The includer should populate servicegraph_is_entry if this method is the correct entry point.
       # In addition, servicegraph_target_external can be populated if an external target is present
       'r_servicegraph_outbound_record_method':
         include:

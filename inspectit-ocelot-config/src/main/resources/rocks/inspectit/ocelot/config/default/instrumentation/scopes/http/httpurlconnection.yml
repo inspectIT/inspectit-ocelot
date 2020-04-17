@@ -1,23 +1,24 @@
 inspectit:
   instrumentation:
     scopes:
+
       's_httpurlconnection_getOutputStream':
         superclass:
-          name: java.net.HttpURLConnection
+          name: 'java.net.HttpURLConnection'
         methods:
-          - name: getOutputStream
+          - name: 'getOutputStream'
             arguments: []
 
       's_httpurlconnection_getInputStream':
         superclass:
-          name: java.net.HttpURLConnection
+          name: 'java.net.HttpURLConnection'
         methods:
-          - name: getInputStream
+          - name: 'getInputStream'
             arguments: []
 
       's_httpurlconnection_connect':
         superclass:
-          name: java.net.HttpURLConnection
+          name: 'java.net.HttpURLConnection'
         methods:
-          - name: connect
+          - name: 'connect'
             arguments: []

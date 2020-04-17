@@ -2,7 +2,7 @@ inspectit:
   instrumentation:
     actions:
     
-      # Extracts the target of the request in the form host:port
+      # Extracts the target of the request in the format "host:port"
       'a_httpurlconnection_getTargetHost':
         imports:
           - java.net
@@ -21,15 +21,15 @@ inspectit:
       'a_httpurlconnection_getPath':
         input:
           '_this': java.net.HttpURLConnection
-        value: _this.getURL().getPath()
+        value: '_this.getURL().getPath()'
 
       # Extracts the method of the request, e.g. GET or POST
       'a_httpurlconnection_getMethod':
         input:
           '_this': java.net.HttpURLConnection
-        value: _this.getRequestMethod()
+        value: '_this.getRequestMethod()'
 
-      # Extracts the resposne status code if the request returned without an exception
+      # Extracts the response status code if the request returned without an exception
       # Otherwise returns the name of the exception, e.g. SocketTimeoutException.
       'a_httpurlconnection_getStatus':
         input:

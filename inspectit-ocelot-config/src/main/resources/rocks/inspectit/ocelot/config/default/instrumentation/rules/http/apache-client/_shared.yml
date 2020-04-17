@@ -8,7 +8,7 @@ inspectit:
           'http_is_entry':
             action: 'a_entrypoint_check'
             constant-input: 
-              'marker': "http_client_entrypoint_marker" # propagation is defined in the shared http settings
+              'marker': 'http_client_entrypoint_marker' # propagation is defined in the shared http settings
             
       # Reads all HTTP related data, e.g. http_raw_path, http_path, http_method, etc
       # Designed to be applied on the scope s_apacheclient_doExecute

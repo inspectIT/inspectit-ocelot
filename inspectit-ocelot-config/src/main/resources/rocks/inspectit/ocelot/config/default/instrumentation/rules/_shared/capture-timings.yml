@@ -20,9 +20,9 @@ inspectit:
         exit:
           'method_duration':
             only-if-true: 'capture_time_condition'
-            action: 'a_time_elapsedMillis'
+            action: 'a_timing_elapsedMillis'
             data-input: 
-              since_nanos: 'method_entry_time'
+              'since_nanos': 'method_entry_time'
               
       # Conditionally captures the entry timestamp of the current method into method_entry_time
       # The capturing will only happen it capture_time_condition is defined as true.
@@ -32,6 +32,6 @@ inspectit:
         entry:
           'method_entry_time':
             only-if-true: 'capture_time_condition'
-            action: 'a_time_nanos'
+            action: 'a_timing_nanos'
       
         

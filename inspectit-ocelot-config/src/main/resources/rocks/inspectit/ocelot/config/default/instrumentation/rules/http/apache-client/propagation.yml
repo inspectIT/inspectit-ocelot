@@ -1,10 +1,13 @@
 # ----------------------------------------------------------------------------------
 # Defines Rules and Actions enabling down & up propagation on the Apache HTTP Client
 # ----------------------------------------------------------------------------------
-
 inspectit:
   instrumentation:
+
+    # # # # # # # # # # # # # # # # # # # # # #
+    # Action Definition
     actions:
+
       'a_apacheclient_downPropagation':
         is-void: true
         imports:
@@ -54,18 +57,19 @@ inspectit:
             _context.readUpPropagationHeaders(presentHeaders);
           }
 
+    # # # # # # # # # # # # # # # # # # # # # #
+    # Rules Definition
     rules:
+
       'r_apacheclient_propagation':
-        scopes:
-          's_apacheclient_doExecute': true
         include:
           'r_apacheclient_detect_entry': true # to make sure propagation happens only once
-
+        scopes:
+          's_apacheclient_doExecute': true
         post-entry:
           'do_down_propagation':
             action: 'a_apacheclient_downPropagation'
             only-if-true: 'http_is_entry'
-          
         pre-exit:
           'do_up_propagation':
             action: 'a_apacheclient_upPropagation'

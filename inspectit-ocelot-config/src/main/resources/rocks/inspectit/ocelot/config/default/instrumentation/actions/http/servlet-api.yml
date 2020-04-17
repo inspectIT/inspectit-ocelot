@@ -2,7 +2,7 @@ inspectit:
   instrumentation:
     actions:
     
-      # Checks if a given ServletRequest is an instanceof HttpServletRequest
+      # Checks if a given ServletRequest is an instance of HttpServletRequest
       'a_servletrequest_isHttp':
         imports:
           - javax.servlet
@@ -27,7 +27,7 @@ inspectit:
           'request': HttpServletRequest
         value: 'request.getMethod()'
 
-      # Extracts the response statusfrom the HttpServletResponse
+      # Extracts the response status from the given HttpServletResponse
       'a_httpservletresponse_getStatus':
         imports:
           - javax.servlet.http

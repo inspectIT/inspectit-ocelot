@@ -1,6 +1,7 @@
 inspectit:
   instrumentation:
     actions:
+
       # Prints a given Object to stdout
       'a_debug_println':
         input:

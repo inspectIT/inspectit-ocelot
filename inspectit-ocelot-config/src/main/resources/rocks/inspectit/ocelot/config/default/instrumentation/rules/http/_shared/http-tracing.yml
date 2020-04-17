@@ -11,10 +11,10 @@ inspectit:
             only-if-not-null: 'http_path'
             action: 'a_string_concat_3'
             data-input:
-              a: 'http_method'
-              c: 'http_path'
+              'a': 'http_method'
+              'c': 'http_path'
             constant-input:
-              b: " "
+              'b': ' '
               
       # This rule is included by all HTTP Client tracing rules to define which attributes should be added to the span
       'r_http_client_tracing_default_attributes':
@@ -24,7 +24,6 @@ inspectit:
           attributes:
             'http.host': 'http_target_host'
             
-              
       # This rule is included by all HTTP Server tracing rules to define which attributes should be added to the span
       'r_http_server_tracing_default_attributes':
         include:

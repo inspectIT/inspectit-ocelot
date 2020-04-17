@@ -1,16 +1,17 @@
 inspectit:
   instrumentation:
+
     scopes:
-      s_hsqldb_prepared_statement_execute:
+      's_hsqldb_prepared_statement_execute':
         type:
-          name: org.hsqldb.jdbc.JDBCPreparedStatement
+          name: 'org.hsqldb.jdbc.JDBCPreparedStatement'
         methods:
-          - name: execute
+          - name: 'execute'
             matcher-mode: STARTS_WITH
     
     actions:
       # Extracts the SQL from a PreparedStatement for HSQLDB
-      a_hsqldb_prepared_statement_get_sql:
+      'a_hsqldb_prepared_statement_get_sql':
         imports:
           - org.hsqldb.jdbc
           - java.lang.reflect
@@ -23,10 +24,10 @@ inspectit:
           return sqlField.get(_this);
     
     rules:
-      r_hsqldb_get_prep_statement_sql:
+      'r_hsqldb_get_prep_statement_sql':
         scopes:
-          s_hsqldb_prepared_statement_execute: true
+          's_hsqldb_prepared_statement_execute': true
         exit:
-          prepared_sql:
-            action: a_hsqldb_prepared_statement_get_sql
-            only-if-null: prepared_sql
+          'prepared_sql':
+            action: 'a_hsqldb_prepared_statement_get_sql'
+            only-if-null: 'prepared_sql'

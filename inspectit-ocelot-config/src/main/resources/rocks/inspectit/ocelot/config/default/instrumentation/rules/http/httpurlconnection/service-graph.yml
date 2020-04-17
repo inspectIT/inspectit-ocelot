@@ -2,45 +2,40 @@ inspectit:
   instrumentation:
     rules:
     
-      # Reads and writes the servicegraph correlation information on the context
+      # Reads and writes the service graph correlation information on the context
       # (e.g. origin_service and target_service)
-      r_httpurlconnection_servicegraph_propagation:
-        'scopes':
+      'r_httpurlconnection_servicegraph_propagation':
+        include:
+          'r_servicegraph_prepare_down_propagation': true
+        scopes:
           's_httpurlconnection_connect': true
           's_httpurlconnection_getOutputStream': true
           's_httpurlconnection_getInputStream': true
-        'include':
-          'r_servicegraph_prepare_down_propagation': true
-          
-          
+
       # Records an HTTP call done via HTTPUrlConnection as service-call 
       'r_httpurlconnection_servicegraph_record':
-        'scopes':
-          's_httpurlconnection_getInputStream': true
-        'include':
+        include:
           'r_servicegraph_outbound_record_method': true
           'r_httpurlconnection_detect_end': true
           'r_httpurlconnection_extract_request_details': true
-          
-        'entry':
+        scopes:
+          's_httpurlconnection_getInputStream': true
+        entry:
           'servicegraph_is_entry':
             action: 'a_entrypoint_check'
             constant-input: 
-              marker: "servicegraph_outbound_marker"
+              'marker': 'servicegraph_outbound_marker'
             only-if-true: 'httpurlconnection_is_end'
-            
           'servicegraph_protocol':
             action: 'a_assign_value'
             constant-input: 
               'value': "http"
-              
-        'exit':
+        exit:
           'servicegraph_target_external':
             only-if-null: 'servicegraph_target_service'
             action: 'a_assign_value'
             data-input: 
               'value': 'http_target_host'
-              
           'servicegraph_is_error':
             action: 'a_assign_value'
             data-input:

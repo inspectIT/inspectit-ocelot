@@ -2,43 +2,38 @@ inspectit:
   instrumentation:
     rules:
     
-      # Reads and writes the servicegraph correlation information on the context
+      # Reads and writes the service graph correlation information on the context
       # (e.g. origin_service and target_service)
       'r_apacheclient_servicegraph_propagation':
-        scopes:
-          's_apacheclient_doExecute': true
         include:
           'r_servicegraph_prepare_down_propagation': true
-          
-          
-      # Records an HTTP call done via the Apache HTTP Client as service-call    
-      'r_apacheclient_servicegraph_record':
         scopes:
           's_apacheclient_doExecute': true
+
+      # Records an HTTP call done via the Apache HTTP Client as service-call
+      'r_apacheclient_servicegraph_record':
         include:
           'r_servicegraph_outbound_record_method': true
           'r_apacheclient_detect_entry': true
           'r_apacheclient_extract_details': true
-          
+        scopes:
+          's_apacheclient_doExecute': true
         entry:
           'servicegraph_is_entry':
             action: 'a_entrypoint_check'
             constant-input: 
-              'marker': "servicegraph_outbound_marker"
+              'marker': 'servicegraph_outbound_marker'
             only-if-true: 'http_is_entry'
-            
           'servicegraph_protocol':
             action: 'a_assign_value'
             constant-input: 
-              'value': "http"
-              
+              'value': 'http'
         exit:
           'servicegraph_target_external':
             only-if-null: 'servicegraph_target_service'
             action: 'a_assign_value'
             data-input: 
               'value': 'http_target_host'
-              
           'servicegraph_is_error':
             action: 'a_assign_value'
             data-input:

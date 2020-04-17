@@ -34,7 +34,9 @@ inspectit:
           'string': String
           'patterns_and_replacements': Map
         value-body: |
-          if (string == null) return null;
+          if (string == null) {
+            return null;
+          }
           String result = string;
           for (int i = 0; i < patterns_and_replacements.size(); i++) {
             Map patAndRepl = (Map) patterns_and_replacements.get(String.valueOf(i));
@@ -55,7 +57,9 @@ inspectit:
           'pattern': String
           'replacement': String
         value-body: |
-          if (string == null) return null;
+          if (string == null) {
+            return null;
+          }
           Pattern regex = Pattern.compile(pattern);
           Matcher m = regex.matcher(string);
           if (m.matches()) {
@@ -86,7 +90,9 @@ inspectit:
           'string': String
           'patterns_and_replacements': Map
         value-body: |
-          if (string == null) return null;
+          if (string == null) {
+            return null;
+          }
           String result = string;
           for (int i = 0; i < patterns_and_replacements.size(); i++) {
             Map patAndRepl = (Map) patterns_and_replacements.get(String.valueOf(i));
@@ -113,7 +119,9 @@ inspectit:
           'pattern': String
           'replacement': String
         value-body: |
-          if (string == null) return null;
+          if (string == null) {
+            return null;
+          }
           Pattern regex = Pattern.compile(pattern);
           Matcher m = regex.matcher(string);
           if (m.matches()) {
@@ -133,7 +141,9 @@ inspectit:
           'pattern': String
           'result': Object
         value-body: |
-          if (string == null) return null;
+          if (string == null) {
+            return null;
+          }
           Pattern regex = Pattern.compile(pattern);
           Matcher m = regex.matcher(string);
           if (m.matches()) {
@@ -167,7 +177,9 @@ inspectit:
           'string': String
           'patterns_and_results': Map
         value-body: |
-          if (string == null) return null;
+          if (string == null) {
+            return null;
+          }
           for (int i = 0; i < patterns_and_results.size(); i++) {
             Map patAndRepl = (Map) patterns_and_results.get(String.valueOf(i));
             String pattern = (String) patAndRepl.get("pattern");
@@ -198,7 +210,9 @@ inspectit:
           'pattern': String
           'result': Object
         value: |
-          if(string == null) return null;
+          if(string == null) {
+            return null;
+          }
           Pattern regex = Pattern.compile(pattern);
           Matcher m = regex.matcher(string);
           if (m.find()) {
@@ -232,7 +246,9 @@ inspectit:
           'string': String
           'patterns_and_results': Map
         value-body: |
-          if (string == null) return null;
+          if (string == null) {
+            return null;
+          }
           for (int i = 0; i < patterns_and_results.size(); i++) {
             Map patAndRepl = (Map) patterns_and_results.get(String.valueOf(i));
             String pattern = (String) patAndRepl.get("pattern");

@@ -5,7 +5,7 @@ inspectit:
       # This rule records the current method as a span
       # In addition, the FQN of the method is added as a tag and the error status is set based on if the method threw an exception
       #
-      # This rule can be either inclued or scopes can be directly added to it
+      # This rule can be either included or scopes can be directly added to it
       'r_trace_method':
         'tracing':
           start-span: true

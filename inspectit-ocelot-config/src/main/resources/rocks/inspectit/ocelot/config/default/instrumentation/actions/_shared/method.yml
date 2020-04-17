@@ -42,4 +42,4 @@ inspectit:
       'a_method_getClassFQN':
         input:
           '_class': Class
-        value: _class.getName()
+        value: '_class.getName()'

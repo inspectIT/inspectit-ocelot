@@ -1,6 +1,9 @@
 inspectit:
+  # # # # # # # # # # # # # # # # # # # # # #
+  # Metric Definitions
   metrics:
     definitions:
+
       '[method/duration]':
         type: DOUBLE
         unit: ms
@@ -18,12 +21,15 @@ inspectit:
               class: true
               method: true
               error: true
-              
+
+  # # # # # # # # # # # # # # # # # # # # # #
+  # Instrumentation Configuration
   instrumentation:
     rules:
+
       # This rule captures the method's duration and invocation count as a method/duration metric
       # The metric is tagged with the signature of the method as well as the name of the declaring class
-      # In addition an error tag is set dependening on wheter the method threw an exception or not
+      # In addition an error tag is set depending on whether the method threw an exception or not
       #
       # The rule can either be included or scopes can be added directly to it.
       'r_method_metric':

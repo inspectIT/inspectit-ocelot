@@ -1,10 +1,13 @@
 # ----------------------------------------------------------------------------------
 # Defines Rules and Actions enabling down & up propagation on HTTPUrlConnection
 # ----------------------------------------------------------------------------------
-
 inspectit:
   instrumentation:
+
+    # # # # # # # # # # # # # # # # # # # # # #
+    # Actions Definition
     actions:
+
       'a_httpurlconnection_downPropagation':
         is-void: true
         imports:
@@ -32,7 +35,7 @@ inspectit:
             }
           }
 
-      a_httpurlconnection_upPropagation:
+      'a_httpurlconnection_upPropagation':
         is-void: true
         imports:
           - java.util
@@ -58,25 +61,27 @@ inspectit:
             _context.readUpPropagationHeaders(presentHeaders);
           }
 
+    # # # # # # # # # # # # # # # # # # # # # #
+    # Rules Definition
     rules:
     
       'r_httpurlconnection_down_propagation':
+        include:
+          'r_httpurlconnection_detect_entry': true
         scopes:
           's_httpurlconnection_connect': true
           's_httpurlconnection_getOutputStream': true
           's_httpurlconnection_getInputStream': true
-        include:
-          'r_httpurlconnection_detect_entry': true
         post-entry:
           do_down_propagation:
-            only-if-true: http_is_entry
-            action: a_httpurlconnection_downPropagation
+            only-if-true: 'http_is_entry'
+            action: 'a_httpurlconnection_downPropagation'
 
       'r_httpurlconnection_up_propagation':
-        scopes:
-          's_httpurlconnection_getInputStream': true
         include:
           'r_httpurlconnection_detect_entry': true
+        scopes:
+          's_httpurlconnection_getInputStream': true
         pre-exit:
           'do_up_propagation':
             only-if-true: 'http_is_entry'

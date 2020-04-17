@@ -1,7 +1,6 @@
 # ----------------------------------------------------------------------------------------
 # All rules are designed to be applied on the Servlet.service or Filter.doFilter methods
 # ----------------------------------------------------------------------------------------
-
 inspectit:
   instrumentation:
     rules:
@@ -14,11 +13,10 @@ inspectit:
             action: 'a_servletrequest_isHttp'
             data-input:
               'request': '_arg0'
-              
           'http_is_entry':
             action: 'a_entrypoint_check'
             constant-input: 
-              'marker': "http_server_entrypoint_marker"
+              'marker': 'http_server_entrypoint_marker'
             only-if-true: 'is_http_servlet'
             
       # Extracts all http details, such as http_path, http_method, http_status, etc      
@@ -47,7 +45,7 @@ inspectit:
             only-if-true: 'http_is_entry'
             action: 'a_http_isErrorStatus'
             data-input:
-              status: 'http_status'
+              'status': 'http_status'
             
             
             

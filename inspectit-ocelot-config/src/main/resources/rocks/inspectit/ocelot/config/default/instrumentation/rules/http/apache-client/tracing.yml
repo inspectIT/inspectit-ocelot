@@ -4,12 +4,12 @@ inspectit:
       
       # Enables tracing of Apache HTTP Client calls
       'r_apacheclient_tracing':
-        scopes:
-          's_apacheclient_doExecute': true
         include:
           'r_apacheclient_extract_details': true
           'r_http_tracing_span_name_default': true
           'r_http_client_tracing_default_attributes': true
+        scopes:
+          's_apacheclient_doExecute': true
         tracing:
           start-span: true
           kind: CLIENT

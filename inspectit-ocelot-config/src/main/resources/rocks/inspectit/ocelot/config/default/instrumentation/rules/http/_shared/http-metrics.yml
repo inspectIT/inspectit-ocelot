@@ -2,8 +2,12 @@
 # Definition of the HTTP inbound and output metrics alongside with includable rules for recording them
 # ------------------------------------------------------------------------------------------------------
 inspectit:
+
+  # # # # # # # # # # # # # # # # # # # # # #
+  # Metrics Configuration
   metrics:
     definitions:
+
       '[http/in/responsetime]':
         unit: ms
         views:
@@ -41,7 +45,9 @@ inspectit:
               'http_status': true
               'http_method': true
               'error': true
-            
+
+  # # # # # # # # # # # # # # # # # # # # # #
+  # Instrumentation Configuration
   instrumentation:    
     rules:
     
@@ -101,8 +107,3 @@ inspectit:
             only-if-true: 'http_is_entry'
             data-input: 
               'value': 'method_duration'
-        
-            
-            
-            
-        

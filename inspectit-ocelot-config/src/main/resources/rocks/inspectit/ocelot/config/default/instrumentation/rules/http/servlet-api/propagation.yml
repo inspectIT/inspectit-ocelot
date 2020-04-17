@@ -1,10 +1,13 @@
 # ----------------------------------------------------------------------------------
 # Defines Rules and Actions enabling down & up propagation on the Servlet API
 # ----------------------------------------------------------------------------------
-
 inspectit:
   instrumentation:
+
+    # # # # # # # # # # # # # # # # # # # # # #
+    # Actions Definition
     actions:
+
       'a_servletapi_downPropagation':
         is-void: true
         imports:
@@ -52,7 +55,10 @@ inspectit:
             }
           }
 
+    # # # # # # # # # # # # # # # # # # # # # #
+    # Rules Definition
     rules:
+
       'r_servletapi_downPropagation':
         include:
           'r_servletapi_detect_entry': true
@@ -69,7 +75,7 @@ inspectit:
           's_servletapi_servlet_service': true
           's_servletapi_filter_doFilter': true
         post-exit:
-          do_up_propagation:
+          'do_up_propagation':
             action: 'a_servletapi_upPropagation'
             data-input: 
               'response': '_arg1'

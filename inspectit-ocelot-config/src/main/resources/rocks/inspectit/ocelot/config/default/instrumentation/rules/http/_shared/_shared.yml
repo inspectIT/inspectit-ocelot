@@ -1,6 +1,7 @@
 inspectit:
   instrumentation:
     data:
+
       # These markers are used with a_entrypoint_check to detect the http entry and exit points
       # and to make sure that they are recorded only once per request
       'http_server_entrypoint_marker':

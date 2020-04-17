@@ -1,6 +1,8 @@
 inspectit:
   instrumentation:
-  
+
+    # # # # # # # # # # # # # # # # # # # # # #
+    # Data Definition
     data:
       # Used to detect nested JDBC nivocation (e.g. a Hikari Proxy)
       'jdbc_entrypoint_marker': 
@@ -11,7 +13,9 @@ inspectit:
       # which might not be a driver but a proxy
       'prepared_sql':
         up-propagation: JVM_LOCAL
-  
+
+    # # # # # # # # # # # # # # # # # # # # # #
+    # Rules Definition
     rules:
     
       # Can be included to detect the entry into the first JDBC layer
@@ -20,7 +24,7 @@ inspectit:
           'jdbc_is_entry':
             action: 'a_entrypoint_check'
             constant-input: 
-              marker: "jdbc_entrypoint_marker"
+              'marker': 'jdbc_entrypoint_marker'
               
       # Can be included to extract the url of the JDBC url
       # Extraction only happens for the first JDBC layer, which might be a JDBC proxy
@@ -38,11 +42,11 @@ inspectit:
       # Driver-specific instrumentations can write 'prepared_sql' which gets up-propagated
       # This rule limits the up-propagation to the JDBC scope, because propagating it up further is not necessary.
       r_jdbc_prepared_sql_stop_propagation:
+        include:
+          'r_jdbc_detect_entry': true
         scopes:
           's_jdbc_preparedstatement_execute': true
           's_jdbc_preparedstatement_executeBatch': true
-        include:
-          'r_jdbc_detect_entry': true
         post-exit:
           'prepared_sql':
             action: 'a_assign_null'

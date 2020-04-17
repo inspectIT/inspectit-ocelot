@@ -4,13 +4,13 @@ inspectit:
     
       # Starts a span for an HTTPUrlConnection before down propagation happens.
       'r_httpurlconnection_tracing_start':
-        scopes:
-          's_httpurlconnection_connect': true
-          's_httpurlconnection_getOutputStream': true
         include:
           'r_httpurlconnection_detect_start': true
           'r_httpurlconnection_extract_request_details': true
           'r_http_tracing_span_name_default': true
+        scopes:
+          's_httpurlconnection_connect': true
+          's_httpurlconnection_getOutputStream': true
         tracing:
           start-span: true
           start-span-conditions:
@@ -19,25 +19,25 @@ inspectit:
           store-span: 'httpurlconnection_span'
           kind: CLIENT
         post-entry:
-          span_obj:
+          'span_obj':
             action: 'a_attachment_put'
             data-input: 
               'target': '_this'
               'value': 'httpurlconnection_span'
             constant-input: 
-              'key': "span"
+              'key': 'span'
               
       # Continues an already started span for this HTTPUrlConnection via r_httpurlconnection_tracing_start
       # If no span was started yet, a fresh one is started
       'r_httpurlconnection_tracing_end':
-        scopes:
-          's_httpurlconnection_getInputStream': true
         include:
           'r_http_tracing_span_name_default': true
           'r_http_client_tracing_default_attributes': true
           'r_httpurlconnection_detect_end': true
           'r_httpurlconnection_extract_request_details': true
           'r_httpurlconnection_extract_response_details': true
+        scopes:
+          's_httpurlconnection_getInputStream': true
         tracing:
           start-span: true
           continue-span: 'httpurlconnection_span'
@@ -51,7 +51,7 @@ inspectit:
           'httpurlconnection_span':
             action: 'a_attachment_get'
             data-input: 
-              target: '_this'
+              'target': '_this'
             constant-input: 
-              key: "span"
+              'key': 'span'
               

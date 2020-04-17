@@ -4,15 +4,17 @@
 # to make sure that runtime configuration updated are possible without a restart
 #------------------------
 inspectit:
+
   instrumentation:
-    # settings for special sensors
     special:
       executor-context-propagation: false
       scheduled-executor-context-propagation: false
       thread-start-context-propagation: false
       class-loader-delegation: false
+
   metrics:
     enabled: false
+
   tracing:
     enabled: false
 

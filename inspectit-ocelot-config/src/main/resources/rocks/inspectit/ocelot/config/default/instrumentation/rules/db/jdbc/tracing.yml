@@ -1,34 +1,34 @@
 inspectit:
   instrumentation:
-    
     rules:
+
       # Traces execute/executeUpdate calls with non-prepared SQL (the SQL is given as method argument)
       'r_jdbc_tracing_statement_execute':
-        scopes:
-          's_jdbc_statement_execute': true
         include:
           'r_jdbc_tracing_defaults': true
+        scopes:
+          's_jdbc_statement_execute': true
         tracing:
           attributes:
             'db.statement': '_arg0'
       
       # Traces executeBatch calls with non-prepared SQL 
       'r_jdbc_tracing_statement_executeBatch':
-        scopes:
-          's_jdbc_statement_executeBatch': true    
         include:
           'r_jdbc_tracing_defaults': true
-          
+        scopes:
+          's_jdbc_statement_executeBatch': true
+
       # Traces execute/executeUpdate/executeBatch calls with prepared SQL 
       'r_jdbc_tracing_preparedstatement':
+        include:
+          'r_jdbc_tracing_defaults': true
         scopes:
           's_jdbc_preparedstatement_execute': true
           's_jdbc_preparedstatement_executeBatch': true
-        include:
-          'r_jdbc_tracing_defaults': true
         tracing:
           attributes:
-            'db.statement': prepared_sql #prepared_sql is populated and up-propagated by driver isntrumentations
+            'db.statement': 'prepared_sql' # prepared_sql is populated and up-propagated by driver instrumentations
           
       # ---------------------------------------------------------------
       # Shared JDBC tracing rules below
@@ -48,9 +48,9 @@ inspectit:
             'exception': '_thrown'
           error-status: '_thrown'
         entry:
-          db_type_sql:
+          'db_type_sql':
             action: 'a_assign_value'
             constant-input: 
-              'value': "sql"
+              'value': 'sql'
       
       

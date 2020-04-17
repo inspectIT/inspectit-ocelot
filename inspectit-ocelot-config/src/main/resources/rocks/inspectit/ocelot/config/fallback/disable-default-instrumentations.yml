@@ -1,8 +1,7 @@
 inspectit:
-
   instrumentation:
-
     rules:
+
       r_jdbc_servicegraph_record: {enabled: false }
       r_jdbc_prepared_sql_stop_propagation: {enabled: false }
       r_jdbc_tracing_statement_execute: {enabled: false }

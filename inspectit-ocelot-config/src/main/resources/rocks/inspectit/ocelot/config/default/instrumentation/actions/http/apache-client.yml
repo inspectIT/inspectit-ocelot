@@ -3,6 +3,7 @@ inspectit:
     actions:
       #--------------------------------------------------------------------------------------------------------------
       # All actions are designed to be applied on CloseableHttpClient.doExecute(HttpHost, HttpRequest, HttpContext)
+      # of the Apache HttpClient (https://hc.apache.org/httpcomponents-client-ga/)
       #--------------------------------------------------------------------------------------------------------------
       
       # Extracts the target of the request in the form host:port
@@ -12,7 +13,7 @@ inspectit:
           - org.apache.http
         input:
           '_arg0': HttpHost
-        value: _arg0.toHostString()
+        value: '_arg0.toHostString()'
 
       # Extracts the target http path
       'a_apacheclient_getPath':
@@ -31,7 +32,7 @@ inspectit:
           '_arg1': HttpRequest
         value: '_arg1.getRequestLine().getMethod()'
 
-      # Extracts the response status in case the request succeded-
+      # Extracts the response status in case the request succeeded.
       # If an exception is thrown instead, it's name is returned (e.g. SocketTimeoutException)
       'a_apacheclient_getStatus':
         imports:

@@ -1,6 +1,7 @@
 inspectit:
   instrumentation:
     actions:
+
       # Reads a given attachment from a target object
       'a_attachment_get':
         input:

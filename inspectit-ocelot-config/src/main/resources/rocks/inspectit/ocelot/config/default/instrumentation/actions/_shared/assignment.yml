@@ -6,8 +6,9 @@ inspectit:
         input:
           'value': Object
         value: 'value'
+
       'a_assign_null':
-        value-body: "return null;"
+        value-body: 'return null;'
         
       'a_assign_true':
         value: 'Boolean.TRUE'
