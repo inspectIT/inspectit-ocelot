@@ -45,8 +45,7 @@ public class PercentileViewManager {
     /**
      * The clock used for timing metrics.
      */
-    @VisibleForTesting
-    Supplier<Long> clock = System::currentTimeMillis;
+    private final Supplier<Long> clock;
 
     /**
      * Recording observation takes amortized O(1) time.
@@ -54,7 +53,16 @@ public class PercentileViewManager {
      * This worker maintains a fixed-size queue of observations which are then added via {@link #recordSynchronous(String, double, Timestamp, TagContext)}.
      */
     @VisibleForTesting
-    AsyncPercentileRecorder worker = new AsyncPercentileRecorder(this);
+    final AsyncMetricRecorder worker = new AsyncMetricRecorder(this::recordSynchronous);
+
+    public PercentileViewManager() {
+        this(System::currentTimeMillis);
+    }
+
+    @VisibleForTesting
+    PercentileViewManager(Supplier<Long> clock) {
+        this.clock = clock;
+    }
 
     @PostConstruct
     void init() {
@@ -75,7 +83,9 @@ public class PercentileViewManager {
      * @param value       the observation to record
      */
     public void recordMeasurement(String measureName, double value) {
-        worker.recordWithCurrentTagContext(measureName, value);
+        if (areAnyViewsRegisteredForMeasure(measureName)) {
+            worker.recordWithCurrentTagContext(measureName, value, getCurrentTime());
+        }
     }
 
     /**
@@ -145,6 +155,7 @@ public class PercentileViewManager {
      *
      * @return true, if any percentile views exist
      */
+    @VisibleForTesting
     boolean areAnyViewsRegisteredForMeasure(String measureName) {
         return measuresToViewsMap.containsKey(measureName);
     }
@@ -157,7 +168,7 @@ public class PercentileViewManager {
      * @param time       the timestamp of the observation
      * @param tagContext the tag context of the observation
      */
-    void recordSynchronous(String measure, double value, Timestamp time, TagContext tagContext) {
+    private void recordSynchronous(String measure, double value, Timestamp time, TagContext tagContext) {
         List<PercentileView> views = measuresToViewsMap.get(measure);
         if (views != null) {
             views.forEach(view -> view.insertValue(value, time, tagContext));
@@ -167,7 +178,7 @@ public class PercentileViewManager {
     /**
      * @return the current time as OC timestamp.
      */
-    Timestamp getCurrentTime() {
+    private Timestamp getCurrentTime() {
         return Timestamp.fromMillis(clock.get());
     }
 

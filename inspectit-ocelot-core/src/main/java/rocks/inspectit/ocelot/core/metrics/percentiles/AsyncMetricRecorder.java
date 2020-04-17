@@ -13,38 +13,36 @@ import java.util.concurrent.ArrayBlockingQueue;
  * Consumer thread for asynchronously processing measurement observations.
  */
 @Slf4j
-class AsyncPercentileRecorder {
+class AsyncMetricRecorder {
 
     private static final int QUEUE_CAPACITY = 8096;
 
-    private PercentileViewManager viewManager;
+    private final MetricConsumer metricConsumer;
 
     private volatile boolean overflowLogged = false;
 
     private volatile boolean isDestroyed = false;
 
     @VisibleForTesting
-    ArrayBlockingQueue<MetricRecord> recordsQueue = new ArrayBlockingQueue<>(QUEUE_CAPACITY);
+    final ArrayBlockingQueue<MetricRecord> recordsQueue = new ArrayBlockingQueue<>(QUEUE_CAPACITY);
 
     @VisibleForTesting
-    Thread worker;
+    final Thread worker;
 
-    AsyncPercentileRecorder(PercentileViewManager owner) {
-        viewManager = owner;
+    AsyncMetricRecorder(MetricConsumer consumer) {
+        metricConsumer = consumer;
         worker = new Thread(this::doRecord);
         worker.setDaemon(true);
         worker.setName("InspectIT Ocelot percentile Recorder");
         worker.start();
     }
 
-    void recordWithCurrentTagContext(String measureName, double value) {
-        if (viewManager.areAnyViewsRegisteredForMeasure(measureName)) {
-            boolean success = recordsQueue.offer(new MetricRecord(value, measureName, viewManager.getCurrentTime(),
-                    Tags.getTagger().getCurrentTagContext()));
-            if (!success && !overflowLogged) {
-                overflowLogged = true;
-                log.warn("Measurement for percentiles has been dropped because queue is full. This message will not be shown for further drops!");
-            }
+    void recordWithCurrentTagContext(String measureName, double value, Timestamp time) {
+        boolean success = recordsQueue.offer(new MetricRecord(value, measureName, time,
+                Tags.getTagger().getCurrentTagContext()));
+        if (!success && !overflowLogged) {
+            overflowLogged = true;
+            log.warn("Measurement for percentiles has been dropped because queue is full. This message will not be shown for further drops!");
         }
     }
 
@@ -57,7 +55,7 @@ class AsyncPercentileRecorder {
         while (true) {
             try {
                 MetricRecord record = recordsQueue.take();
-                viewManager.recordSynchronous(record.measure, record.value, record.time, record.tagContext);
+                metricConsumer.record(record.measure, record.value, record.time, record.tagContext);
             } catch (InterruptedException e) {
                 if (isDestroyed) {
                     return;
@@ -68,6 +66,11 @@ class AsyncPercentileRecorder {
                 log.error("Error processing record: ", e);
             }
         }
+    }
+
+    public interface MetricConsumer {
+
+        void record(String measure, double value, Timestamp time, TagContext tags);
     }
 
     @Value

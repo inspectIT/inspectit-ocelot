@@ -15,7 +15,7 @@ public class CachingMetricProducer extends MetricProducer {
     /**
      * The function invoked to generate the metrics.
      */
-    private Supplier<Collection<Metric>> computeMetricsFunction;
+    private final Supplier<Collection<Metric>> computeMetricsFunction;
 
     /**
      * The duration for which cached metrics are kept.
@@ -41,7 +41,7 @@ public class CachingMetricProducer extends MetricProducer {
     }
 
     @Override
-    public Collection<Metric> getMetrics() {
+    public synchronized Collection<Metric> getMetrics() {
         long now = System.nanoTime();
         if (cachedMetrics == null || (now - cacheTimestamp) > cacheDurationNanos) {
             cachedMetrics = computeMetricsFunction.get();

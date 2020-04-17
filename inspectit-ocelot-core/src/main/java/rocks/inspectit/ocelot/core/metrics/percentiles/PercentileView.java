@@ -11,6 +11,7 @@ import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -271,22 +272,19 @@ public class PercentileView {
                 results.addMaximum(maxValue, time, labelValues);
             }
         }
-        Percentile percentileComputer = null;
-        for (int percentile : percentileMetrics.keySet()) {
-            if (percentileComputer == null) {
-                percentileComputer = new Percentile();
-                percentileComputer.setData(data);
+        if (!percentileMetrics.isEmpty()) {
+            Percentile percentileComputer = new Percentile();
+            percentileComputer.setData(data);
+            for (int percentile : percentileMetrics.keySet()) {
+                double percentileValue = percentileComputer.evaluate(percentile);
+                results.addPercentile(percentile, percentileValue, time, labelValues);
             }
-            double percentileValue = percentileComputer.evaluate(percentile);
-            results.addPercentile(percentile, percentileValue, time, labelValues);
         }
     }
 
     private List<String> getTagsList(TagContext tagContext) {
         String[] tagValues = new String[tagIndices.size()];
-        for (int i = 0; i < tagValues.length; i++) {
-            tagValues[i] = "";
-        }
+        Arrays.fill(tagValues, "");
         for (Iterator<Tag> it = InternalUtils.getTags(tagContext); it.hasNext(); ) {
             Tag tag = it.next();
             String tagKey = tag.getKey().getName();
@@ -309,7 +307,7 @@ public class PercentileView {
     }
 
     private long getInMillis(Timestamp time) {
-        return time.getSeconds() * 1000 + time.getNanos() / 1000L / 1000L;
+        return Duration.ofSeconds(time.getSeconds()).toMillis() + Duration.ofNanos(time.getNanos()).toMillis();
     }
 
     private class ResultSeriesCollector {
