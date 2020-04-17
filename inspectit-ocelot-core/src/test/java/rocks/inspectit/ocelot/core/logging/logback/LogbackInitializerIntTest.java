@@ -2,10 +2,7 @@ package rocks.inspectit.ocelot.core.logging.logback;
 
 import ch.qos.logback.classic.LoggerContext;
 import org.apache.commons.io.FileUtils;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -313,4 +310,122 @@ class LogbackInitializerIntTest {
 
     }
 
+    @Nested
+    @DirtiesContext()
+    class LogbackConfigurationFileOverrulesDefaultConfig extends SpringTestBase {
+
+        private final Path OUTPUT_FILE = Paths.get("test-agent-logback-configurationFile.log");
+
+        @Autowired
+        InspectitEnvironment environment;
+
+        @BeforeEach
+        public void setLogbackConfigurationProperty() {
+            System.setProperty("logback.configurationFile", "src/test/resources/test-logback-configurationFile.xml");
+        }
+
+        @Test
+        void logMessage() throws Exception {
+
+
+            LogbackInitializer.initLogging(environment.getCurrentConfig());
+
+            String testMessage = "test message with custom config file";
+            Logger logger = LoggerFactory.getLogger(CustomLogFile.class);
+            logger.info(testMessage);
+
+            assertThat(Files.lines(OUTPUT_FILE).anyMatch(l -> l.contains(testMessage))).isTrue();
+        }
+
+        @AfterEach
+        void clean() throws Exception {
+            ILoggerFactory loggerFactory = LoggerFactory.getILoggerFactory();
+
+            // Check for logback implementation of slf4j
+            if (loggerFactory instanceof LoggerContext) {
+                LoggerContext context = (LoggerContext) loggerFactory;
+                context.reset();
+                context.stop();
+            }
+
+            Files.deleteIfExists(OUTPUT_FILE);
+            System.clearProperty("logback.configurationFile");
+        }
+
+    }
+
+    @Nested
+    @DirtiesContext
+    class LogbackConfigurationFileNotFound extends SpringTestBase {
+
+        @Autowired
+        InspectitEnvironment environment;
+
+        @BeforeEach
+        public void setLogbackConfigurationProperty() {
+            System.setProperty("logback.configurationFile", "test-logback-does-not-exists.xml");
+        }
+
+        @Test()
+        void logMessage() throws Exception {
+            Assertions.assertThrows(LogbackConfigFileNotFoundException.class,
+                    () -> LogbackInitializer.initLogging(environment.getCurrentConfig()));
+        }
+
+        @AfterEach
+        void clean() throws Exception {
+            ILoggerFactory loggerFactory = LoggerFactory.getILoggerFactory();
+
+            // Check for logback implementation of slf4j
+            if (loggerFactory instanceof LoggerContext) {
+                LoggerContext context = (LoggerContext) loggerFactory;
+                context.reset();
+                context.stop();
+            }
+            System.clearProperty("logback.configurationFile");
+        }
+
+    }
+
+    @Nested
+    @DirtiesContext
+    class LoggingConfigOverrulesDefaultConfig extends SpringTestBase {
+
+        private final Path OUTPUT_FILE = Paths.get("test-agent-logging-config.log");
+
+        @Autowired
+        InspectitEnvironment environment;
+
+        @BeforeEach
+        public void setLogbackConfigurationProperty() {
+            System.setProperty("logging.config", "src/test/resources/test-logback-logging-config.xml");
+        }
+
+        @Test
+        void logMessage() throws Exception {
+            LogbackInitializer.initLogging(environment.getCurrentConfig());
+
+            String testMessage = "test message with custom config file";
+            Logger logger = LoggerFactory.getLogger(CustomLogFile.class);
+            logger.info(testMessage);
+
+            assertThat(Files.lines(OUTPUT_FILE).anyMatch(l -> l.contains(testMessage))).isTrue();
+        }
+
+        @AfterEach
+        void clean() throws Exception {
+            ILoggerFactory loggerFactory = LoggerFactory.getILoggerFactory();
+
+            // Check for logback implementation of slf4j
+            if (loggerFactory instanceof LoggerContext) {
+                LoggerContext context = (LoggerContext) loggerFactory;
+                context.reset();
+                context.stop();
+            }
+
+            Files.deleteIfExists(OUTPUT_FILE);
+            System.clearProperty("logging.config");
+        }
+
+    }
 }

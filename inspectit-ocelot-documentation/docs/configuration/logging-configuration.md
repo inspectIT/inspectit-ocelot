@@ -27,3 +27,7 @@ The available properties for manipulating the default logging configuration are 
 
 If you are not satisfied with default logback configuration options you can supply your own logback config file in the property `inspectit.logging.config-file`.
 This way the properties specified in the table above are not taken into account.
+
+of course you can overrule the default logging configuration by using systemProperty `-Dlogback.configurationFile=<PATH_TO_YOUR_LOGFILE>` or `-Dlogging.config=<PATH_TO_YOUR_LOGFILE>`. for more information see http://logback.qos.ch/manual/configuration.html#configFileProperty
+You can use complete path like `-Dlogback.configurationFile=/path/to/my/log-configuration.xml` or sub paths like `-Dlogback.configurationFile=my/log-configuration.xml`
+Note: URI Syntax like `file://` or `classpath://` is NOT supported.  

@@ -1,0 +1,12 @@
+<configuration>
+    <appender name="file" class="ch.qos.logback.core.FileAppender">
+        <file>test-agent-logback-configurationFile.log</file>
+        <immediateFlush>true</immediateFlush>
+        <encoder>
+            <pattern>%-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
+        </encoder>
+    </appender>
+    <root level="debug">
+        <appender-ref ref="file"/>
+    </root>
+</configuration>

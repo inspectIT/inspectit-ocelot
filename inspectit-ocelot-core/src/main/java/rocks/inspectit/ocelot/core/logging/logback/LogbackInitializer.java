@@ -14,6 +14,9 @@ import rocks.inspectit.ocelot.config.model.logging.LoggingSettings;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.FileSystemNotFoundException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Optional;
 
 /**
@@ -74,15 +77,24 @@ public class LogbackInitializer {
             JoranConfigurator configurator = new JoranConfigurator();
             configurator.setContext(context);
             context.reset();
-            recorder.recordEvents(getConfigFileInputStream(config));
+            try (InputStream is = getConfigFileInputStream(config)) {
+                recorder.recordEvents(is);
+            }
             configurator.doConfigure(recorder.getSaxEventList());
-        } catch (JoranException je) {
+        } catch (JoranException | IOException je) {
             // StatusPrinter will handle this
         }
         StatusPrinter.printInCaseOfErrorsOrWarnings(context);
     }
 
     private static InputStream getConfigFileInputStream(InspectitConfig config) {
+
+        return readExternalConfig("logback.configurationFile")
+                .orElseGet(() -> readExternalConfig("logging.config")
+                        .orElseGet(() -> readConfigFileOrDefaultConfig(config)));
+    }
+
+    private static InputStream readConfigFileOrDefaultConfig(InspectitConfig config) {
         return Optional.ofNullable(config)
                 .map(InspectitConfig::getLogging)
                 .map(LoggingSettings::getConfigFile)
@@ -97,6 +109,19 @@ public class LogbackInitializer {
                     }
                 })
                 .orElse(LogbackInitializer.class.getResourceAsStream("/inspectit-logback.xml"));
+    }
+
+    private static Optional<InputStream> readExternalConfig(String propertyKey) {
+        String logbackConfigFile = System.getProperty(propertyKey);
+        if (StringUtils.isNotBlank(logbackConfigFile)) {
+            try {
+                InputStream logbackConfigAsStream = Files.newInputStream(Paths.get(logbackConfigFile));
+                return Optional.of(logbackConfigAsStream);
+            } catch (IllegalArgumentException | FileSystemNotFoundException | IOException | UnsupportedOperationException e) {
+                throw new LogbackConfigFileNotFoundException(logbackConfigFile, e);
+            }
+        }
+        return Optional.empty();
     }
 
     private static void setPropertiesFromConfig(InspectitConfig config) {
