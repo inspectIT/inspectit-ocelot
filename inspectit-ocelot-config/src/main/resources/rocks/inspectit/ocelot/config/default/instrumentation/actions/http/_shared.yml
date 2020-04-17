@@ -10,13 +10,13 @@ inspectit:
       value-body: |
         if (status instanceof Number) {
           int statusInt = ((Number) status).intValue();
-          return Boolean.valueOf(statusInt < 200 || statusInt >= 400);
+          return Boolean.valueOf(statusInt >= 400);
         }
         if (status instanceof String) {
           String statusString = (String) status;
           if (statusString.length() == 3) {
             char firstChar = statusString.charAt(0);
-            return Boolean.valueOf(firstChar != '2' && firstChar != '3');
+            return Boolean.valueOf(firstChar < '1' || firstChar > '3');
           }
         }
         if (status == null) {
