@@ -32,7 +32,7 @@ class UnsavedChangesGate extends React.Component {
 
 function mapStateToProps(state) {
   return {
-    unsavedConfigChanges: configurationSelectors.hasUnsavedChanges(state)
+    unsavedConfigChanges: configurationSelectors.hasUnsavedChanges(state),
   };
 }
 
