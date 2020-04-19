@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.security.userdetails;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.core.GrantedAuthority;
@@ -50,7 +51,8 @@ public class CustomLdapUserDetailsService extends LdapUserDetailsService {
     public static final List<String> OCELOT_ACCESS_USER_ROLES = Arrays.asList(READ_ACCESS, WRITE_ACCESS, COMMIT_ACCESS, ADMIN_ACCESS);
 
     @Autowired
-    private InspectitServerSettings settings;
+    @VisibleForTesting
+    InspectitServerSettings settings;
 
     @Autowired
     public CustomLdapUserDetailsService(LdapUserSearch ldapUserSearch, DefaultLdapAuthoritiesPopulator ldapAuthoritiesPopulator) {
@@ -83,7 +85,8 @@ public class CustomLdapUserDetailsService extends LdapUserDetailsService {
      * @param user The LDAP-User object the roles should be resolved of.
      * @return The highest level of access role the user's authorities could be resolved to.
      */
-    private String resolveAccessRole(UserDetails user) {
+    @VisibleForTesting
+    String resolveAccessRole(UserDetails user) {
         RoleSettings role_settings = settings.getSecurity().getLdap().getRoles();
         Collection<? extends GrantedAuthority> authorities = user.getAuthorities();
         String resolvedRole = NO_ACCESS_ROLE;
