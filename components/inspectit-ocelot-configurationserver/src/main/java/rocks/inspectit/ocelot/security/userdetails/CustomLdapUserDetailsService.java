@@ -27,17 +27,27 @@ import java.util.stream.Collectors;
 @ConditionalOnLdap
 public class CustomLdapUserDetailsService extends LdapUserDetailsService {
 
+    private static final String ROLE_PREFIX = "ROLE_";
+
+    private static final String READ_ACCESS = "OCELOT_READ";
+
+    private static final String WRITE_ACCESS = "OCELOT_WRITE";
+
+    private static final String COMMIT_ACCESS = "OCELOT_COMMIT";
+
+    private static final String ADMIN_ACCESS = "OCELOT_ADMIN";
+
     private static final String NO_ACCESS_ROLE = "OCELOT_NONE";
 
-    public static final String READ_ACCESS_ROLE = "OCELOT_READ";
+    public static final String READ_ACCESS_ROLE = ROLE_PREFIX + READ_ACCESS;
 
-    public static final String WRITE_ACCESS_ROLE = "OCELOT_WRITE";
+    public static final String WRITE_ACCESS_ROLE = ROLE_PREFIX + WRITE_ACCESS;
 
-    public static final String COMMIT_ACCESS_ROLE = "OCELOT_COMMIT";
+    public static final String COMMIT_ACCESS_ROLE = ROLE_PREFIX + COMMIT_ACCESS;
 
-    public static final String ADMIN_ACCESS_ROLE = "OCELOT_ADMIN";
+    public static final String ADMIN_ACCESS_ROLE = ROLE_PREFIX + ADMIN_ACCESS;
 
-    public static final List<String> OCELOT_ACCESS_USER_ROLES = Arrays.asList(READ_ACCESS_ROLE, WRITE_ACCESS_ROLE, COMMIT_ACCESS_ROLE, ADMIN_ACCESS_ROLE);
+    public static final List<String> OCELOT_ACCESS_USER_ROLES = Arrays.asList(READ_ACCESS, WRITE_ACCESS, COMMIT_ACCESS, ADMIN_ACCESS);
 
     @Autowired
     private InspectitServerSettings settings;
@@ -78,16 +88,16 @@ public class CustomLdapUserDetailsService extends LdapUserDetailsService {
         Collection<? extends GrantedAuthority> authorities = user.getAuthorities();
         String resolvedRole = NO_ACCESS_ROLE;
         if (containsAuthority(authorities, role_settings.getRead())) {
-            resolvedRole = READ_ACCESS_ROLE;
+            resolvedRole = READ_ACCESS;
         }
         if (containsAuthority(authorities, role_settings.getWrite())) {
-            resolvedRole = WRITE_ACCESS_ROLE;
+            resolvedRole = WRITE_ACCESS;
         }
         if (containsAuthority(authorities, role_settings.getCommit())) {
-            resolvedRole = COMMIT_ACCESS_ROLE;
+            resolvedRole = COMMIT_ACCESS;
         }
         if (containsAuthority(authorities, role_settings.getAdmin())) {
-            resolvedRole = ADMIN_ACCESS_ROLE;
+            resolvedRole = ADMIN_ACCESS;
         }
         return resolvedRole;
     }

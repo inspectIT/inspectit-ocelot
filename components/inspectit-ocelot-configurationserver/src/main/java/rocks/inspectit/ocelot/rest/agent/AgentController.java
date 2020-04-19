@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -15,6 +16,7 @@ import rocks.inspectit.ocelot.agentconfiguration.AgentConfigurationManager;
 import rocks.inspectit.ocelot.agentstatus.AgentStatusManager;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.rest.AbstractBaseController;
+import rocks.inspectit.ocelot.security.userdetails.CustomLdapUserDetailsService;
 
 import java.io.IOException;
 import java.util.Map;
@@ -40,6 +42,14 @@ public class AgentController extends AbstractBaseController {
      * @param attributes the attributes of the agents used to select the mapping
      * @return The configuration mapped on the given agent name
      */
+    @Secured(
+            {
+                    CustomLdapUserDetailsService.READ_ACCESS_ROLE,
+                    CustomLdapUserDetailsService.WRITE_ACCESS_ROLE,
+                    CustomLdapUserDetailsService.COMMIT_ACCESS_ROLE,
+                    CustomLdapUserDetailsService.ADMIN_ACCESS_ROLE
+            }
+    )
     @ApiOperation(value = "Fetch the Agent Configuration", notes = "Reads the configuration for the given agent and returns it as a yaml string")
     @GetMapping(value = "agent/configuration", produces = "text/plain")
     public ResponseEntity<String> fetchConfiguration(@ApiParam("The agent attributes used to select the correct mapping") @RequestParam Map<String, String> attributes, @RequestHeader Map<String, String> headers) throws IOException {
