@@ -76,7 +76,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
                 .and()
                 .authorizeRequests()
-                .anyRequest().hasRole(getAccessRole())
+                .anyRequest().hasAnyRole(getAccessRole(), DEFAULT_ACCESS_USER_ROLE)
 
                 .and()
                 // Custom authentication endpoint to prevent sending the "WWW-Authenticate" which causes Browsers to open the basic authentication dialog.
@@ -98,6 +98,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
      *
      * @return the role name to use
      */
+    //TODO Make getAccessRole return a List of access Roles. All default roles ->  ldapauthRole
     private String getAccessRole() {
         if (serverSettings.getSecurity().isLdapAuthentication()) {
             return serverSettings.getSecurity().getLdap().getAdminGroup();

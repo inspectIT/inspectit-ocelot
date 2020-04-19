@@ -2,6 +2,7 @@ package rocks.inspectit.ocelot.security.userdetails;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -38,6 +39,21 @@ public class CustomLdapUserDetailsService extends LdapUserDetailsService {
         if (!settings.getSecurity().isLdapAuthentication()) {
             throw new UsernameNotFoundException(username);
         }
-        return super.loadUserByUsername(username);
+        UserDetails user = super.loadUserByUsername(username);
+        String resolvedRole = resolveAccessRole(user);
+
+        return org.springframework.security.core.userdetails.User.builder()
+                .username(user.getUsername())
+                .password(user.getPassword())
+                .roles(resolvedRole)
+                .build();
+    }
+
+    private String resolveAccessRole(UserDetails user) {
+        String ldapAdminGroup = settings.getSecurity().getLdap().getAdminGroup();
+        if (user.getAuthorities().stream().anyMatch(authority -> ((GrantedAuthority) authority).getAuthority().toLowerCase().equals("role_" + ldapAdminGroup.toLowerCase()))) {
+            return "OCELOT_ADMIN";
+        }
+        return "OCELOT_BASIC";
     }
 }
