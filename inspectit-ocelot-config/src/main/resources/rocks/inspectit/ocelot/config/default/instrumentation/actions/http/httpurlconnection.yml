@@ -52,8 +52,7 @@ inspectit:
           _attachments: 'ObjectAttachments'
           _context: 'InspectitContext'
         value-body: |
-          Object propagationAlreadyPerformed =
-              _attachments.attach(_this, "down_prop_performed", Boolean.TRUE);
+          Object propagationAlreadyPerformed = _attachments.attach(_this, "down_prop_performed", Boolean.TRUE);
           if (propagationAlreadyPerformed == null) {
             try {
               Map headers = _context.getDownPropagationHeaders();
@@ -80,8 +79,7 @@ inspectit:
           _attachments: 'ObjectAttachments'
           _context: 'InspectitContext'
         value-body: |
-          Object propagationAlreadyPerformed =
-              _attachments.attach(_this, "up_prop_performed", Boolean.TRUE);
+          Object propagationAlreadyPerformed = _attachments.attach(_this, "up_prop_performed", Boolean.TRUE);
           if (propagationAlreadyPerformed == null) {
             Collection headerKeys = _context.getPropagationHeaderNames();
             Map presentHeaders = new HashMap();

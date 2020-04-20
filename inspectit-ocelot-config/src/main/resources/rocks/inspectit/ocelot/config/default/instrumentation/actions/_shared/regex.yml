@@ -12,7 +12,9 @@ inspectit:
           'pattern': 'String'
           'replacement': 'String'
         value-body: |
-          if (string == null) return null;
+          if (string == null) {
+            return null;
+          }
           return string.replaceAll(pattern, replacement);
 
       # Replaces all matches for all of the provided regex patterns with the given replacement strings.
