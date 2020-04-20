@@ -50,6 +50,14 @@ public class PercentileViewManagerTest {
                         && viewManager.worker.worker.getState() == Thread.State.WAITING);
     }
 
+    private void assertTotalSeriesCount(Collection<Metric> metrics, long expectedSeriesCount) {
+        long count = metrics
+                .stream()
+                .flatMap(metric -> metric.getTimeSeriesList().stream())
+                .count();
+        assertThat(count).isEqualTo(expectedSeriesCount);
+    }
+
     private void assertContainsMetric(Collection<Metric> metrics, String name, double value, String... tagKeyValuePairs) {
         assertThat(metrics)
                 .anySatisfy(m -> assertThat(m.getMetricDescriptor().getName()).isEqualTo(name));
@@ -87,17 +95,18 @@ public class PercentileViewManagerTest {
         @Test
         void testNoData() {
             viewManager.createOrUpdateView("my/measure", "my/view", "ms", "foo",
-                    true, true, Arrays.asList(50, 99), 15000, Collections.emptyList());
+                    true, true, Arrays.asList(0.5, 0.95), 15000, Collections.emptyList());
 
             Collection<Metric> result = viewManager.computeMetrics();
 
-            assertThat(result).isEmpty();
+            assertThat(result).hasSize(1);
+            assertTotalSeriesCount(result, 0);
         }
 
         @Test
         void testWithData() {
             viewManager.createOrUpdateView("my/measure", "my/view", "ms", "foo",
-                    true, true, Arrays.asList(50, 95), 15000, Collections.emptyList());
+                    true, true, Arrays.asList(0.5, 0.95), 15000, Collections.emptyList());
 
             for (int i = 1; i < 100; i++) {
                 doReturn((long) i).when(clock).get();
@@ -108,20 +117,20 @@ public class PercentileViewManagerTest {
             doReturn(10000L).when(clock).get();
             Collection<Metric> result = viewManager.computeMetrics();
 
-            assertThat(result).hasSize(4);
-            assertContainsMetric(result, "my/view_min", 1);
-            assertContainsMetric(result, "my/view_max", 99);
-            assertContainsMetric(result, "my/view_p50", 50);
-            assertContainsMetric(result, "my/view_p95", 95);
+            assertThat(result).hasSize(1);
+            assertTotalSeriesCount(result, 4);
+            assertContainsMetric(result, "my/view", 1, "p", "min");
+            assertContainsMetric(result, "my/view", 99, "p", "max");
+            assertContainsMetric(result, "my/view", 50, "p", "0.5");
+            assertContainsMetric(result, "my/view", 95, "p", "0.95");
         }
 
         @Test
         void testMultiSeriesData() {
             viewManager.createOrUpdateView("my/measure", "my/view", "ms", "foo",
-                    true, true, Arrays.asList(50, 95), 15000, Arrays.asList("tag1", "tag2"));
+                    true, true, Arrays.asList(0.5, 0.95), 15000, Arrays.asList("tag1", "tag2"));
 
             for (int i = 1; i < 100; i++) {
-                long timestamp = i;
                 doReturn((long) i).when(clock).get();
                 viewManager.recordMeasurement("my/measure", i);
                 try (Scope s = Tags.getTagger().emptyBuilder()
@@ -135,15 +144,16 @@ public class PercentileViewManagerTest {
             doReturn(10000L).when(clock).get();
             Collection<Metric> result = viewManager.computeMetrics();
 
-            assertThat(result).hasSize(4);
-            assertContainsMetric(result, "my/view_min", 1, "tag1", "", "tag2", "");
-            assertContainsMetric(result, "my/view_max", 99, "tag1", "", "tag2", "");
-            assertContainsMetric(result, "my/view_p50", 50, "tag1", "", "tag2", "");
-            assertContainsMetric(result, "my/view_p95", 95, "tag1", "", "tag2", "");
-            assertContainsMetric(result, "my/view_min", 1001, "tag1", "foo", "tag2", "bar");
-            assertContainsMetric(result, "my/view_max", 1099, "tag1", "foo", "tag2", "bar");
-            assertContainsMetric(result, "my/view_p50", 1050, "tag1", "foo", "tag2", "bar");
-            assertContainsMetric(result, "my/view_p95", 1095, "tag1", "foo", "tag2", "bar");
+            assertThat(result).hasSize(1);
+            assertTotalSeriesCount(result, 8);
+            assertContainsMetric(result, "my/view", 1, "tag1", "", "tag2", "", "p", "min");
+            assertContainsMetric(result, "my/view", 99, "tag1", "", "tag2", "", "p", "max");
+            assertContainsMetric(result, "my/view", 50, "tag1", "", "tag2", "", "p", "0.5");
+            assertContainsMetric(result, "my/view", 95, "tag1", "", "tag2", "", "p", "0.95");
+            assertContainsMetric(result, "my/view", 1001, "tag1", "foo", "tag2", "bar", "p", "min");
+            assertContainsMetric(result, "my/view", 1099, "tag1", "foo", "tag2", "bar", "p", "max");
+            assertContainsMetric(result, "my/view", 1050, "tag1", "foo", "tag2", "bar", "p", "0.5");
+            assertContainsMetric(result, "my/view", 1095, "tag1", "foo", "tag2", "bar", "p", "0.95");
         }
 
         @Test
@@ -159,14 +169,15 @@ public class PercentileViewManagerTest {
             Collection<Metric> result = viewManager.computeMetrics();
 
             assertThat(result).hasSize(2);
-            assertContainsMetric(result, "viewA_min", 1);
-            assertContainsMetric(result, "viewB_min", 1, "tag1", "");
+            assertTotalSeriesCount(result, 2);
+            assertContainsMetric(result, "viewA", 1, "p", "min");
+            assertContainsMetric(result, "viewB", 1, "tag1", "", "p", "min");
         }
 
         @Test
         void testWithStaleData() {
             viewManager.createOrUpdateView("my/measure", "my/view", "ms", "foo",
-                    true, true, Arrays.asList(50, 95), 15000, Collections.emptyList());
+                    true, true, Arrays.asList(0.5, 0.95), 15000, Collections.emptyList());
 
             for (int i = 1; i < 100; i++) {
                 doReturn((long) i).when(clock).get();
@@ -177,7 +188,8 @@ public class PercentileViewManagerTest {
 
             Collection<Metric> result = viewManager.computeMetrics();
 
-            assertThat(result).isEmpty();
+            assertThat(result).hasSize(1);
+            assertTotalSeriesCount(result, 0);
         }
     }
 
@@ -198,7 +210,7 @@ public class PercentileViewManagerTest {
             assertThat(result).hasSize(1);
             MetricDescriptor md = result.iterator().next().getMetricDescriptor();
 
-            assertThat(md.getName()).isEqualTo("my/view_min");
+            assertThat(md.getName()).isEqualTo("my/view");
             assertThat(md.getUnit()).isEqualTo("s");
             assertThat(md.getDescription()).isEqualTo("bar");
         }
@@ -208,15 +220,15 @@ public class PercentileViewManagerTest {
             viewManager.createOrUpdateView("my/measure", "my/view", "ms", "foo",
                     true, false, Collections.emptyList(), 1, Collections.emptyList());
             viewManager.createOrUpdateView("my/measure", "my/view", "s", "bar",
-                    false, true, Arrays.asList(50), 1, Collections.emptyList());
+                    false, true, Arrays.asList(0.5), 1, Collections.emptyList());
 
             viewManager.recordMeasurement("my/measure", 42);
             awaitMetricsProcessing();
 
             Collection<Metric> result = viewManager.computeMetrics();
-            assertThat(result).hasSize(2);
-            assertContainsMetric(result, "my/view_max", 42);
-            assertContainsMetric(result, "my/view_p50", 42);
+            assertThat(result).hasSize(1);
+            assertContainsMetric(result, "my/view", 42, "p", "max");
+            assertContainsMetric(result, "my/view", 42, "p", "0.5");
         }
 
         @Test
@@ -233,7 +245,7 @@ public class PercentileViewManagerTest {
             doReturn(99L).when(clock).get();
             Collection<Metric> result = viewManager.computeMetrics();
             assertThat(result).hasSize(1);
-            assertContainsMetric(result, "my/view_min", 42);
+            assertContainsMetric(result, "my/view", 42, "p", "min");
         }
 
         @Test
@@ -252,7 +264,7 @@ public class PercentileViewManagerTest {
 
             Collection<Metric> result = viewManager.computeMetrics();
             assertThat(result).hasSize(1);
-            assertContainsMetric(result, "my/view_min", 42, "tag1", "foo", "tag2", "bar");
+            assertContainsMetric(result, "my/view", 42, "tag1", "foo", "tag2", "bar", "p", "min");
         }
     }
 

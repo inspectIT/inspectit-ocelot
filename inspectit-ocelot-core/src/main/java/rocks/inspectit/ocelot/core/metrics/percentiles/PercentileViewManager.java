@@ -99,17 +99,17 @@ public class PercentileViewManager {
      * @param description      the description for the view
      * @param minEnabled       true, if the minimum shall be exposed as metric
      * @param maxEnabled       true, if the minimum shall be exposed as metric
-     * @param percentiles      specified which percentiles shall be exposed as metric, values are in the range 1 to 99
+     * @param percentiles      specified which percentiles shall be exposed as metric, values are in the range (0,1)
      * @param timeWindowMillis the length of the sliding time window to use for computing min / max and the percentiles
      * @param tags             the tags to use for the view
      */
     public synchronized void createOrUpdateView(String measureName, String viewName, String unit, String description,
-                                                boolean minEnabled, boolean maxEnabled, Collection<Integer> percentiles,
+                                                boolean minEnabled, boolean maxEnabled, Collection<Double> percentiles,
                                                 long timeWindowMillis, Collection<String> tags) {
 
         List<PercentileView> views = measuresToViewsMap.computeIfAbsent(measureName, (name) -> new CopyOnWriteArrayList<>());
         Optional<PercentileView> existingView = views.stream()
-                .filter(view -> view.getBaseViewName().equalsIgnoreCase(viewName))
+                .filter(view -> view.getViewName().equalsIgnoreCase(viewName))
                 .findFirst();
         Optional<PercentileView> updatedView;
         if (existingView.isPresent()) {
@@ -135,7 +135,7 @@ public class PercentileViewManager {
         List<PercentileView> views = measuresToViewsMap.get(measureName);
         if (views != null) {
             Optional<PercentileView> existingView = views.stream()
-                    .filter(view -> view.getBaseViewName().equalsIgnoreCase(viewName))
+                    .filter(view -> view.getViewName().equalsIgnoreCase(viewName))
                     .findFirst();
             if (existingView.isPresent()) {
                 views.remove(existingView.get());
@@ -183,9 +183,9 @@ public class PercentileViewManager {
     }
 
     private Optional<PercentileView> updateView(PercentileView existingView, String unit, String description,
-                                                boolean minEnabled, boolean maxEnabled, Collection<Integer> percentiles,
+                                                boolean minEnabled, boolean maxEnabled, Collection<Double> percentiles,
                                                 long timeWindowMillis, Collection<String> tags) {
-        Supplier<PercentileView> creator = () -> createView(existingView.getBaseViewName(), unit, description,
+        Supplier<PercentileView> creator = () -> createView(existingView.getViewName(), unit, description,
                 minEnabled, maxEnabled, percentiles, timeWindowMillis, tags);
         if (!unit.equals(existingView.getUnit())) {
             return Optional.of(creator.get());
@@ -211,7 +211,7 @@ public class PercentileViewManager {
         return Optional.empty();
     }
 
-    private PercentileView createView(String viewName, String unit, String description, boolean minEnabled, boolean maxEnabled, Collection<Integer> percentiles, long timeWindowMillis, Collection<String> tags) {
+    private PercentileView createView(String viewName, String unit, String description, boolean minEnabled, boolean maxEnabled, Collection<Double> percentiles, long timeWindowMillis, Collection<String> tags) {
         return new PercentileView(minEnabled, maxEnabled, new HashSet<>(percentiles), new HashSet<>(tags), timeWindowMillis, viewName, unit, description);
     }
 
@@ -221,7 +221,7 @@ public class PercentileViewManager {
         return measuresToViewsMap.values()
                 .stream()
                 .flatMap(Collection::stream)
-                .flatMap(view -> view.computeMetrics(now).stream())
+                .map(view -> view.computeMetrics(now))
                 .collect(Collectors.toList());
     }
 
