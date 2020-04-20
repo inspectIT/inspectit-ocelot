@@ -13,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -43,7 +44,7 @@ public class PercentileView {
     /**
      * The formatter used to print percentiles to tags.
      */
-    private static final DecimalFormat PERCENTILE_TAG_FORMATTER = new DecimalFormat("#.#####");
+    private static final DecimalFormat PERCENTILE_TAG_FORMATTER = new DecimalFormat("#.#####", DecimalFormatSymbols.getInstance(Locale.ENGLISH));
 
     /**
      * The descriptor of the metric for this view.
