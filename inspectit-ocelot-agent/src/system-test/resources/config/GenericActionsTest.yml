@@ -108,20 +108,20 @@ inspectit:
         scopes:
           GenericActionsTest-conditionsTest : true
         entry:
-          something: {action: set, constant-input: { value: "hello world"}}
-          true_bool: {action: set, constant-input: { value: true}}
-          false_bool: {action: set, constant-input: { value: false}}
+          something: {action: a_assign_value, constant-input: { value: "hello world"}}
+          true_bool: {action: a_assign_value, constant-input: { value: true}}
+          false_bool: {action: a_assign_value, constant-input: { value: false}}
 
-          only_if_true_executed: {only-if-true: true_bool, action: set, constant-input: { value: "yes"}}
-          only_if_true_skipped: {only-if-true: false_bool, action: set, constant-input: { value: "yes"}}
-          only_if_true_also_skipped: {only-if-true: not_existing, action: set, constant-input: { value: "yes"}}
+          only_if_true_executed: {only-if-true: true_bool, action: a_assign_value, constant-input: { value: "yes"}}
+          only_if_true_skipped: {only-if-true: false_bool, action: a_assign_value, constant-input: { value: "yes"}}
+          only_if_true_also_skipped: {only-if-true: not_existing, action: a_assign_value, constant-input: { value: "yes"}}
 
-          only_if_false_executed: {only-if-false: false_bool, action: set, constant-input: { value: "yes"}}
-          only_if_false_skipped: {only-if-false: true_bool, action: set, constant-input: { value: "yes"}}
-          only_if_false_also_skipped: {only-if-false: not_existing, action: set, constant-input: { value: "yes"}}
+          only_if_false_executed: {only-if-false: false_bool, action: a_assign_value, constant-input: { value: "yes"}}
+          only_if_false_skipped: {only-if-false: true_bool, action: a_assign_value, constant-input: { value: "yes"}}
+          only_if_false_also_skipped: {only-if-false: not_existing, action: a_assign_value, constant-input: { value: "yes"}}
 
-          only_if_null_executed: {only-if-null: not_existing, action: set, constant-input: { value: "yes"}}
-          only_if_null_skipped: {only-if-null: something, action: set, constant-input: { value: "yes"}}
+          only_if_null_executed: {only-if-null: not_existing, action: a_assign_value, constant-input: { value: "yes"}}
+          only_if_null_skipped: {only-if-null: something, action: a_assign_value, constant-input: { value: "yes"}}
 
-          only_if_not_null_executed: {only-if-not-null: something, action: set, constant-input: { value: "yes"}}
-          only_if_not_null_skipped: {only-if-not-null: not_existing, action: set, constant-input: { value: "yes"}}
+          only_if_not_null_executed: {only-if-not-null: something, action: a_assign_value, constant-input: { value: "yes"}}
+          only_if_not_null_skipped: {only-if-not-null: not_existing, action: a_assign_value, constant-input: { value: "yes"}}

@@ -1,0 +1,39 @@
+# ----------------------------------------------------------------------------------
+# Defines Rules and Actions enabling down & up propagation on the Servlet API
+# ----------------------------------------------------------------------------------
+inspectit:
+  instrumentation:
+    rules:
+
+      # Reads down-propagated data from the request HTTP headers
+      'r_servletapi_downPropagation':
+        include:
+          'r_servletapi_detect_entry': true
+        scopes:
+          's_servletapi_servlet_service': true
+          's_servletapi_filter_doFilter': true
+        pre-entry:
+          'do_down_propagation':
+            only-if-true: 'http_is_entry'
+            action: 'a_servletapi_downPropagation'
+
+      # Writes up-propagated data to the response HTTP headers
+      'r_servletapi_servlet_filter_upPropagation':
+        scopes:
+          's_servletapi_servlet_service': true
+          's_servletapi_filter_doFilter': true
+        post-exit:
+          'do_up_propagation':
+            action: 'a_servletapi_upPropagation'
+            data-input: 
+              'response': _arg1
+
+      'r_servletapi_servletresponse_upPropagation':
+        scopes:
+          's_servletapi_servletresponse_getWriter': true
+          's_servletapi_servletresponse_getOutputStream': true
+        post-entry:
+          'do_up_propagation':
+            action: 'a_servletapi_upPropagation'
+            data-input:
+              'response': _this
