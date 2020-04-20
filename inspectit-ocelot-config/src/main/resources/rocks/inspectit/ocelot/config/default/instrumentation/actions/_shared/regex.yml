@@ -6,11 +6,11 @@ inspectit:
       # If the input string is null, null is returned.
       'a_regex_replaceAll':
         imports:
-         - java.util
+         - 'java.util'
         input:
-          'string': String
-          'pattern': String
-          'replacement': String
+          'string': 'String'
+          'pattern': 'String'
+          'replacement': 'String'
         value-body: |
           if (string == null) return null;
           return string.replaceAll(pattern, replacement);
@@ -29,10 +29,10 @@ inspectit:
       # The replacement is executed in the order of the inputs.
       'a_regex_replaceAll_multi':
         imports:
-         - java.util
+         - 'java.util'
         input:
-          'string': String
-          'patterns_and_replacements': Map
+          'string': 'String'
+          'patterns_and_replacements': 'Map'
         value-body: |
           if (string == null) {
             return null;
@@ -50,12 +50,12 @@ inspectit:
       # If the input string is null, null is returned.
       'a_regex_replaceMatch':
         imports:
-         - java.util
-         - java.util.regex
+         - 'java.util'
+         - 'java.util.regex'
         input:
-          'string': String
-          'pattern': String
-          'replacement': String
+          'string': 'String'
+          'pattern': 'String'
+          'replacement': 'String'
         value-body: |
           if (string == null) {
             return null;
@@ -84,11 +84,11 @@ inspectit:
       # The replacement is executed in the order of the inputs.    
       'a_regex_replaceMatch_multi':
         imports:
-         - java.util
-         - java.util.regex
+         - 'java.util'
+         - 'java.util.regex'
         input:
-          'string': String
-          'patterns_and_replacements': Map
+          'string': 'String'
+          'patterns_and_replacements': 'Map'
         value-body: |
           if (string == null) {
             return null;
@@ -112,12 +112,12 @@ inspectit:
       # If the input string is null, null is returned.    
       'a_regex_replaceFirst':
         imports:
-         - java.util
-         - java.util.regex
+         - 'java.util'
+         - 'java.util.regex'
         input:
-          'string': String
-          'pattern': String
-          'replacement': String
+          'string': 'String'
+          'pattern': 'String'
+          'replacement': 'String'
         value-body: |
           if (string == null) {
             return null;
@@ -134,12 +134,12 @@ inspectit:
       # If the input string is null or the input string does not match the regex, null is returned.
       'a_regex_extractMatch':
         imports:
-         - java.util
-         - java.util.regex
+         - 'java.util'
+         - 'java.util.regex'
         input:
-          'string': String
-          'pattern': String
-          'result': Object
+          'string': 'String'
+          'pattern': 'String'
+          'result': 'Object'
         value-body: |
           if (string == null) {
             return null;
@@ -171,11 +171,11 @@ inspectit:
       #      result: <resultA>
       'a_regex_extractMatch_multi':
         imports:
-         - java.util
-         - java.util.regex
+         - 'java.util'
+         - 'java.util.regex'
         input:
-          'string': String
-          'patterns_and_results': Map
+          'string': 'String'
+          'patterns_and_results': 'Map'
         value-body: |
           if (string == null) {
             return null;
@@ -203,12 +203,12 @@ inspectit:
       # If the input string is null or the input string does not match the regex, null is returned.    
       'a_regex_extractFirst':
         imports:
-         - java.util
-         - java.util.regex
+         - 'java.util'
+         - 'java.util.regex'
         input:
-          'string': String
-          'pattern': String
-          'result': Object
+          'string': 'String'
+          'pattern': 'String'
+          'result': 'Object'
         value: |
           if(string == null) {
             return null;
@@ -240,11 +240,11 @@ inspectit:
       #      result: <resultA> 
       'a_regex_extractFirst_multi':
         imports:
-         - java.util
-         - java.util.regex
+         - 'java.util'
+         - 'java.util.regex'
         input:
-          'string': String
-          'patterns_and_results': Map
+          'string': 'String'
+          'patterns_and_results': 'Map'
         value-body: |
           if (string == null) {
             return null;

@@ -5,9 +5,9 @@ inspectit:
       # Returns the full qualified name of the current method, e.g. "my.package.MyClass.myMethod"
       'a_method_getFQN':
         input:
-          '_class': Class
-          '_methodName': String
-          '_parameterTypes': Class[]
+          _class: 'Class'
+          _methodName: 'String'
+          '_parameterTypes': 'Class[]'
         value-body: |
           StringBuilder sb = new StringBuilder();
           sb.append(_class.getName()).append('.');
@@ -24,8 +24,8 @@ inspectit:
       # Returns the name of the method with the simple parameter list, e.g. "myMethod(int, String, MyClass)"
       'a_method_getNameWithParameters':
         input:
-          '_methodName': String
-          '_parameterTypes': Class[]
+          _methodName: 'String'
+          '_parameterTypes': 'Class[]'
         value-body: |
           StringBuilder sb = new StringBuilder();
           sb.append(_methodName).append('(');
@@ -41,5 +41,5 @@ inspectit:
       # Returns the full qualified name of the class declaring the current method, e.g. "my.package.MyClass"
       'a_method_getClassFQN':
         input:
-          '_class': Class
+          _class: 'Class'
         value: '_class.getName()'

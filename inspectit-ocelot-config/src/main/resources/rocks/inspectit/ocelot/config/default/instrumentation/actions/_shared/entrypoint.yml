@@ -11,8 +11,8 @@ inspectit:
       # "true" will only be returned for methodA.
       'a_entrypoint_check':
         input:
-          '_context': InspectitContext
-          'marker': String
+          _context: 'InspectitContext'
+          'marker': 'String'
         value-body: |
           if (_context.getData(marker) == null) {
             _context.setData(marker, Boolean.TRUE);

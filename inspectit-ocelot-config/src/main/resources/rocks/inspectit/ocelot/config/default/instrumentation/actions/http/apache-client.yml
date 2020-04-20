@@ -9,37 +9,37 @@ inspectit:
       # Extracts the target of the request in the form host:port
       'a_apacheclient_toHostString':
         imports:
-          - java.net
-          - org.apache.http
+          - 'java.net'
+          - 'org.apache.http'
         input:
-          '_arg0': HttpHost
+          _arg0: 'HttpHost'
         value: '_arg0.toHostString()'
 
       # Extracts the target http path
       'a_apacheclient_getPath':
         imports:
-          - java.net
-          - org.apache.http
+          - 'java.net'
+          - 'org.apache.http'
         input:
-          '_arg1': HttpRequest
+          _arg1: 'HttpRequest'
         value: 'URI.create(_arg1.getRequestLine().getUri()).getPath()'
 
       # Extracts the HTTP Method of the request, e.g. GET or POST
       'a_apacheclient_getMethod':
         imports:
-          - org.apache.http
+          - 'org.apache.http'
         input:
-          '_arg1': HttpRequest
+          _arg1: 'HttpRequest'
         value: '_arg1.getRequestLine().getMethod()'
 
       # Extracts the response status in case the request succeeded.
       # If an exception is thrown instead, it's name is returned (e.g. SocketTimeoutException)
       'a_apacheclient_getStatus':
         imports:
-          - org.apache.http
+          - 'org.apache.http'
         input:
-          '_returnValue': HttpResponse
-          '_thrown': Throwable
+          _returnValue: 'HttpResponse'
+          _thrown: 'Throwable'
         value-body: |
           if (_thrown != null) {
             return _thrown.getClass().getSimpleName();
@@ -51,11 +51,11 @@ inspectit:
       'a_apacheclient_downPropagation':
         is-void: true
         imports:
-          - java.util
-          - org.apache.http
+          - 'java.util'
+          - 'org.apache.http'
         input:
-          '_arg1': 'HttpMessage'
-          '_context': 'InspectitContext'
+          _arg1: 'HttpMessage'
+          _context: 'InspectitContext'
         value-body: |
           Map headers = _context.getDownPropagationHeaders();
           Iterator it = headers.entrySet().iterator();
@@ -68,11 +68,11 @@ inspectit:
       'a_apacheclient_upPropagation':
         is-void: true
         imports:
-          - java.util
-          - org.apache.http
+          - 'java.util'
+          - 'org.apache.http'
         input:
-          '_returnValue': 'HttpMessage'
-          '_context': 'InspectitContext'
+          _returnValue: 'HttpMessage'
+          _context: 'InspectitContext'
         value-body: |
           if (_returnValue != null) {
             Collection headerKeys = _context.getPropagationHeaderNames();

@@ -22,7 +22,7 @@ inspectit:
           'span_obj':
             action: 'a_attachment_put'
             data-input: 
-              'target': '_this'
+              'target': _this
               'value': 'httpurlconnection_span'
             constant-input: 
               'key': 'span'
@@ -51,7 +51,7 @@ inspectit:
           'httpurlconnection_span':
             action: 'a_attachment_get'
             data-input: 
-              'target': '_this'
+              'target': _this
             constant-input: 
               'key': 'span'
               

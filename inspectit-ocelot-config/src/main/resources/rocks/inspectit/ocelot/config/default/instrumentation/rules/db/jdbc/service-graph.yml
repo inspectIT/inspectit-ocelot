@@ -31,5 +31,5 @@ inspectit:
           'servicegraph_is_error':
             action: 'a_logic_isNotNull'
             data-input:
-              'value': '_thrown'
+              'value': _thrown
       

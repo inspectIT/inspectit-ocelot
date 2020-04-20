@@ -10,5 +10,5 @@ inspectit:
       'a_timing_elapsedMillis':
         input:
           #the timestamp captured via System.nanoTime() to compare against
-          'since_nanos': long
+          'since_nanos': 'long'
         value: 'new Double( (System.nanoTime() - since_nanos) * 1E-6)'

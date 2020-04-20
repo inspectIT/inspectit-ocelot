@@ -5,7 +5,7 @@ inspectit:
       # Prints a given Object to stdout
       'a_debug_println':
         input:
-          'value': Object
+          'value': 'Object'
         is-void: true
         value-body: |
           System.out.println(value);
@@ -13,8 +13,8 @@ inspectit:
       # Prints two given Objects to stdout
       'a_debug_println_2':
         input:
-          'a': Object
-          'b': Object
+          'a': 'Object'
+          'b': 'Object'
         is-void: true
         value-body: |
           System.out.println(a + "" + b);

@@ -12,7 +12,7 @@ inspectit:
           'is_http_servlet':
             action: 'a_servletrequest_isHttp'
             data-input:
-              'request': '_arg0'
+              'request': _arg0
           'http_is_entry':
             action: 'a_entrypoint_check'
             constant-input: 
@@ -29,18 +29,18 @@ inspectit:
             only-if-true: 'http_is_entry'
             action: 'a_httpservletrequest_getPath'
             data-input:
-              'request': '_arg0'
+              'request': _arg0
           'http_method':
             only-if-true: 'http_is_entry'
             action: 'a_httpservletrequest_getMethod'
             data-input:
-              'request': '_arg0'
+              'request': _arg0
         exit:
           'http_status':
             only-if-true: 'http_is_entry'
             action: 'a_httpservletresponse_getStatus'
             data-input:
-              'response': '_arg1'
+              'response': _arg1
           'http_is_error':
             only-if-true: 'http_is_entry'
             action: 'a_http_isErrorStatus'

@@ -5,25 +5,25 @@ inspectit:
       # Returns true, if the given Object is null, false otherwise
       'a_logic_isNull':
         input:
-          'value': Object
+          'value': 'Object'
         value: 'Boolean.valueOf(value == null)'
         
       # Returns true, if the given Object is not null, false otherwise
       'a_logic_isNotNull':
         input:
-          'value': Object
+          'value': 'Object'
         value: 'Boolean.valueOf(value != null)'
         
       # Returns true, if both provided arguments are not null and true
       'a_logic_and':
         input:
-          'a': Boolean
-          'b': Boolean
+          'a': 'Boolean'
+          'b': 'Boolean'
         value: '(Boolean.valueOf(a != null && a.booleanValue()) && (b != null && b.booleanValue()))'
         
       # Returns true, if one of the provided arguments is not null and true
       'a_logic_or':
         input:
-          'a': Boolean
-          'b': Boolean
+          'a': 'Boolean'
+          'b': 'Boolean'
         value: 'Boolean.valueOf((a != null && a.booleanValue()) || (b != null && b.booleanValue()))'

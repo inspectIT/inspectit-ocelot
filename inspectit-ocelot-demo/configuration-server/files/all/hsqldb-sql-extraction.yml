@@ -8,16 +8,16 @@ inspectit:
         methods:
           - name: 'execute'
             matcher-mode: STARTS_WITH
-    
+            
     actions:
       # Extracts the SQL from a PreparedStatement for HSQLDB
       'a_hsqldb_prepared_statement_get_sql':
         imports:
-          - org.hsqldb.jdbc
-          - java.lang.reflect
+          - 'org.hsqldb.jdbc'
+          - 'java.lang.reflect'
         input:
-          _this: JDBCPreparedStatement
-          _class: Class        
+          _this: 'JDBCPreparedStatement'
+          _class: 'Class'        
         value-body: |
           Field sqlField = _class.getDeclaredField("sql");
           sqlField.setAccessible(true);

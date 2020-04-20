@@ -6,7 +6,7 @@ inspectit:
     # Everything except "null", 2xx and 3xx is interpreted as error
     'a_http_isErrorStatus':
       input:
-        'status': Object
+        'status': 'Object'
       value-body: |
         if (status instanceof Number) {
           int statusInt = ((Number) status).intValue();

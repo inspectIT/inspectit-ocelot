@@ -5,9 +5,9 @@ inspectit:
       # Extracts the target of the request in the format "host:port"
       'a_httpurlconnection_getTargetHost':
         imports:
-          - java.net
+          - 'java.net'
         input:
-          '_this': HttpURLConnection
+          _this: 'HttpURLConnection'
         value-body: |
           URL url = _this.getURL();
           int port = url.getPort();
@@ -20,20 +20,20 @@ inspectit:
       # Extracts the target path of the request
       'a_httpurlconnection_getPath':
         input:
-          '_this': java.net.HttpURLConnection
+          _this: 'java.net.HttpURLConnection'
         value: '_this.getURL().getPath()'
 
       # Extracts the method of the request, e.g. GET or POST
       'a_httpurlconnection_getMethod':
         input:
-          '_this': java.net.HttpURLConnection
+          _this: 'java.net.HttpURLConnection'
         value: '_this.getRequestMethod()'
 
       # Extracts the response status code if the request returned without an exception
       # Otherwise returns the name of the exception, e.g. SocketTimeoutException.
       'a_httpurlconnection_getStatus':
         input:
-          '_this': java.net.HttpURLConnection
+          _this: 'java.net.HttpURLConnection'
         value-body: |
           try {
             return String.valueOf(_this.getResponseCode());
@@ -45,12 +45,12 @@ inspectit:
       'a_httpurlconnection_downPropagation':
         is-void: true
         imports:
-          - java.util
-          - java.net
+          - 'java.util'
+          - 'java.net'
         input:
-          '_this': 'HttpURLConnection'
-          '_attachments': 'ObjectAttachments'
-          '_context': 'InspectitContext'
+          _this: 'HttpURLConnection'
+          _attachments: 'ObjectAttachments'
+          _context: 'InspectitContext'
         value-body: |
           Object propagationAlreadyPerformed =
               _attachments.attach(_this, "down_prop_performed", Boolean.TRUE);
@@ -73,12 +73,12 @@ inspectit:
       'a_httpurlconnection_upPropagation':
         is-void: true
         imports:
-          - java.util
-          - java.net
+          - 'java.util'
+          - 'java.net'
         input:
-          '_this': 'HttpURLConnection'
-          '_attachments': 'ObjectAttachments'
-          '_context': 'InspectitContext'
+          _this: 'HttpURLConnection'
+          _attachments: 'ObjectAttachments'
+          _context: 'InspectitContext'
         value-body: |
           Object propagationAlreadyPerformed =
               _attachments.attach(_this, "up_prop_performed", Boolean.TRUE);

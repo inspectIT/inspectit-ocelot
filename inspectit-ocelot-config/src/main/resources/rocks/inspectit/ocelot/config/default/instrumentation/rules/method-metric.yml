@@ -43,7 +43,7 @@ inspectit:
           'method_is_error':
             action: 'a_logic_isNotNull'
             data-input:
-              'value': '_thrown'
+              'value': _thrown
         metrics:
           '[method/duration]':
             value: 'method_duration'

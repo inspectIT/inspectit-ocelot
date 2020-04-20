@@ -5,14 +5,14 @@ inspectit:
       # Concatenates two provided inputs to a single string
       'a_string_concat':
         input:
-          'a': Object
-          'b': Object
+          'a': 'Object'
+          'b': 'Object'
         value: 'new StringBuilder().append(a).append(b).toString();'
         
       # Concatenates three provided inputs to a single string
       'a_string_concat_3':
         input:
-          'a': Object
-          'b': Object
-          'c': Object
+          'a': 'Object'
+          'b': 'Object'
+          'c': 'Object'
         value: 'new StringBuilder().append(a).append(b).append(c).toString();'

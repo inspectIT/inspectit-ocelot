@@ -5,46 +5,46 @@ inspectit:
       # Checks if a given ServletRequest is an instance of HttpServletRequest
       'a_servletrequest_isHttp':
         imports:
-          - javax.servlet
-          - javax.servlet.http
+          - 'javax.servlet'
+          - 'javax.servlet.http'
         input:
-          'request': ServletRequest
+          'request': 'ServletRequest'
         value: 'Boolean.valueOf(request instanceof HttpServletRequest)'
       
       # Extracts the request path from the HttpServletRequest
       'a_httpservletrequest_getPath':
         imports:
-          - javax.servlet.http
+          - 'javax.servlet.http'
         input:
-          'request': HttpServletRequest
+          'request': 'HttpServletRequest'
         value: 'java.net.URI.create(request.getRequestURI()).getPath()'
 
       # Extracts the method path from the HttpServletRequest
       'a_httpservletrequest_getMethod':
         imports:
-          - javax.servlet.http
+          - 'javax.servlet.http'
         input:
-          'request': HttpServletRequest
+          'request': 'HttpServletRequest'
         value: 'request.getMethod()'
 
       # Extracts the response status from the given HttpServletResponse
       'a_httpservletresponse_getStatus':
         imports:
-          - javax.servlet.http
+          - 'javax.servlet.http'
         input:
-          'response': HttpServletResponse
+          'response': 'HttpServletResponse'
         value: 'Integer.valueOf(response.getStatus())'
 
       # Reads down-propagated data from the request HTTP Headers
       'a_servletapi_downPropagation':
         is-void: true
         imports:
-          - java.util
-          - javax.servlet
-          - javax.servlet.http
+          - 'java.util'
+          - 'javax.servlet'
+          - 'javax.servlet.http'
         input:
-          '_arg0': 'ServletRequest'
-          '_context': 'InspectitContext'
+          _arg0: 'ServletRequest'
+          _context: 'InspectitContext'
         value-body: |
           if (_arg0 instanceof HttpServletRequest) {
             HttpServletRequest req = (HttpServletRequest) _arg0;
@@ -65,12 +65,12 @@ inspectit:
       'a_servletapi_upPropagation':
         is-void: true
         imports:
-          - java.util
-          - javax.servlet
-          - javax.servlet.http
+          - 'java.util'
+          - 'javax.servlet'
+          - 'javax.servlet.http'
         input:
           'response': 'ServletResponse'
-          '_context': 'InspectitContext'
+          _context: 'InspectitContext'
         value-body: |
           if (response instanceof HttpServletResponse) {
             HttpServletResponse res = (HttpServletResponse) response;

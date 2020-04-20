@@ -23,7 +23,7 @@ inspectit:
               'key': 'start_marker'
               'value': true
             data-input:
-              'target': '_this'
+              'target': _this
           'httpurlconnection_is_start':
             only-if-true: 'http_is_entry'
             only-if-null: 'httpurlconnection_prev_start_marker'
@@ -44,7 +44,7 @@ inspectit:
               'key': 'end_marker'
               'value': true
             data-input:
-              'target': '_this'
+              'target': _this
           'httpurlconnection_is_end':
             only-if-true: 'http_is_entry'
             only-if-null: 'httpurlconnection_prev_end_marker'

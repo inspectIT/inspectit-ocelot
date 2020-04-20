@@ -5,9 +5,9 @@ inspectit:
       # Extracts the name of the JDBC connection for a given statement
       'a_jdbc_getUrl':
         imports:
-          - java.sql
+          - 'java.sql'
         input:
-          'statement': Statement
+          'statement': 'Statement'
         value-body: |
           try {
             Connection con = statement.getConnection();

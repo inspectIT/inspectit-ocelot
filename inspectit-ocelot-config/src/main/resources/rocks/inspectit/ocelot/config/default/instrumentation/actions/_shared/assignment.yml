@@ -4,7 +4,7 @@ inspectit:
       
       'a_assign_value':
         input:
-          'value': Object
+          'value': 'Object'
         value: 'value'
 
       'a_assign_null':

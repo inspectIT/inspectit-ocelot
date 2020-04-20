@@ -9,9 +9,9 @@ inspectit:
       'r_trace_method':
         'tracing':
           start-span: true
-          error-status: '_thrown'
+          error-status: _thrown
           attributes:
-            'java.exception': '_thrown'
+            'java.exception': _thrown
             'java.fqn': 'method_fqn'
         entry:
           'method_fqn':

@@ -36,7 +36,7 @@ inspectit:
             action: 'a_jdbc_getUrl'
             only-if-true: 'jdbc_is_entry'
             data-input: 
-              'statement': '_this'
+              'statement': _this
       
       # This rule does not provide any functionality but a performance benefit
       # Driver-specific instrumentations can write 'prepared_sql' which gets up-propagated
