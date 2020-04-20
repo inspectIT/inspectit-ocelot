@@ -45,7 +45,7 @@ inspectit:
           attributes:
             'db.type': 'db_type_sql'
             'db.url': 'jdbc_url'
-            'exception': '_thrown'
+            'java.exception': '_thrown'
           error-status: '_thrown'
         entry:
           'db_type_sql':

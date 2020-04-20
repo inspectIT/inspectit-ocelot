@@ -40,3 +40,58 @@ inspectit:
           } catch (Throwable t) {
             return t.getClass().getSimpleName();
           }
+
+      # Writes down-propagated data to the HTTP Headers
+      'a_httpurlconnection_downPropagation':
+        is-void: true
+        imports:
+          - java.util
+          - java.net
+        input:
+          '_this': 'HttpURLConnection'
+          '_attachments': 'ObjectAttachments'
+          '_context': 'InspectitContext'
+        value-body: |
+          Object propagationAlreadyPerformed =
+              _attachments.attach(_this, "down_prop_performed", Boolean.TRUE);
+          if (propagationAlreadyPerformed == null) {
+            try {
+              Map headers = _context.getDownPropagationHeaders();
+              Iterator it = headers.entrySet().iterator();
+              while (it.hasNext()) {
+                Map$Entry e = (Map$Entry) it.next();
+                _this.addRequestProperty((String) e.getKey(), (String) e.getValue());
+              }
+            } catch (Exception e) {
+              // silently ignore, this will occur if the url has already been connected
+              // normally does not happen, as we also instrument connect()
+              // it can still happen if connect() is instrumented last
+            }
+          }
+
+      # Reads up-propagated data from the HTTP Headers
+      'a_httpurlconnection_upPropagation':
+        is-void: true
+        imports:
+          - java.util
+          - java.net
+        input:
+          '_this': 'HttpURLConnection'
+          '_attachments': 'ObjectAttachments'
+          '_context': 'InspectitContext'
+        value-body: |
+          Object propagationAlreadyPerformed =
+              _attachments.attach(_this, "up_prop_performed", Boolean.TRUE);
+          if (propagationAlreadyPerformed == null) {
+            Collection headerKeys = _context.getPropagationHeaderNames();
+            Map presentHeaders = new HashMap();
+            Iterator it = headerKeys.iterator();
+            while (it.hasNext()) {
+              String name = (String) it.next();
+              List values = _this.getHeaderFields().get(name);
+              if (values != null) {
+                presentHeaders.put(name, String.join(",", values));
+              }
+            }
+            _context.readUpPropagationHeaders(presentHeaders);
+          }

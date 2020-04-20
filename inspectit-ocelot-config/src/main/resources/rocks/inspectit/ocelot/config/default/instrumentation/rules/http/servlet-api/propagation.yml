@@ -3,62 +3,9 @@
 # ----------------------------------------------------------------------------------
 inspectit:
   instrumentation:
-
-    # # # # # # # # # # # # # # # # # # # # # #
-    # Actions Definition
-    actions:
-
-      'a_servletapi_downPropagation':
-        is-void: true
-        imports:
-          - java.util
-          - javax.servlet
-          - javax.servlet.http
-        input:
-          '_arg0': 'ServletRequest'
-          '_context': 'InspectitContext'
-        value-body: |
-          if (_arg0 instanceof HttpServletRequest) {
-            HttpServletRequest req = (HttpServletRequest) _arg0;
-            Collection headerKeys = _context.getPropagationHeaderNames();
-            Map presentHeaders = new HashMap();
-            Iterator it = headerKeys.iterator();
-            while (it.hasNext()) {
-              String name = (String) it.next();
-              java.util.Enumeration values = req.getHeaders(name);
-              if (values != null && values.hasMoreElements()) {
-                presentHeaders.put(name, String.join(",", Collections.list(values)));
-              }
-            }
-            _context.readDownPropagationHeaders(presentHeaders);
-          }
-
-      'a_servletapi_upPropagation':
-        is-void: true
-        imports:
-          - java.util
-          - javax.servlet
-          - javax.servlet.http
-        input:
-          'response': 'ServletResponse'
-          '_context': 'InspectitContext'
-        value-body: |
-          if (response instanceof HttpServletResponse) {
-            HttpServletResponse res = (HttpServletResponse) response;
-            if (!res.isCommitted()) {
-              Map headers = _context.getUpPropagationHeaders();
-              Iterator it = headers.entrySet().iterator();
-              while (it.hasNext()) {
-                Map$Entry e = (Map$Entry) it.next();
-                res.setHeader((String) e.getKey(), (String) e.getValue());
-              }
-            }
-          }
-
-    # # # # # # # # # # # # # # # # # # # # # #
-    # Rules Definition
     rules:
 
+      # Reads down-propagated data from the request HTTP headers
       'r_servletapi_downPropagation':
         include:
           'r_servletapi_detect_entry': true
@@ -70,6 +17,7 @@ inspectit:
             only-if-true: 'http_is_entry'
             action: 'a_servletapi_downPropagation'
 
+      # Writes up-propagated data to the response HTTP headers
       'r_servletapi_servlet_filter_upPropagation':
         scopes:
           's_servletapi_servlet_service': true

@@ -11,8 +11,8 @@ inspectit:
           start-span: true
           error-status: '_thrown'
           attributes:
-            'exception': '_thrown'
-            'fqn': 'method_fqn'
+            'java.exception': '_thrown'
+            'java.fqn': 'method_fqn'
         entry:
           'method_fqn':
             action: 'a_method_getFQN'
