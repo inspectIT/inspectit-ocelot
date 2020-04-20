@@ -10,20 +10,19 @@ import AccountSettingsView from '../../components/views/settings/AccountSettings
  * The user account settings page.
  */
 class AccountSettingsPage extends React.Component {
+  render() {
+    return (
+      <MainLayout>
+        <Head>
+          <title>{BASE_PAGE_TITLE} | Account Settings</title>
+        </Head>
 
-    render() {
-        return (
-            <MainLayout>
-                <Head>
-                    <title>{BASE_PAGE_TITLE} | Account Settings</title>
-                </Head>
-
-                <SettingsView>
-                    <AccountSettingsView />
-                </SettingsView>
-            </MainLayout>
-        )
-    }
+        <SettingsView>
+          <AccountSettingsView />
+        </SettingsView>
+      </MainLayout>
+    );
+  }
 }
 
 export default AccountSettingsPage;

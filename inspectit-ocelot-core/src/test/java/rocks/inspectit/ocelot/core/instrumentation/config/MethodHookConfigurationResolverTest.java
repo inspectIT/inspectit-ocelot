@@ -136,6 +136,7 @@ public class MethodHookConfigurationResolverTest {
                     .tracing(RuleTracingSettings.builder()
                             .startSpan(true)
                             .endSpan(false)
+                            .errorStatus("my_error_var")
                             .attributes(Maps.newHashMap("attr2", "dataY"))
                             .build())
                     .build();
@@ -143,6 +144,7 @@ public class MethodHookConfigurationResolverTest {
                     .tracing(RuleTracingSettings.builder()
                             .kind(Span.Kind.SERVER)
                             .name("data_name")
+                            .errorStatus("my_error_var")
                             .build())
                     .build();
 
@@ -155,6 +157,7 @@ public class MethodHookConfigurationResolverTest {
             assertThat(result.getEndSpan()).isFalse();
             assertThat(result.getKind()).isEqualTo(Span.Kind.SERVER);
             assertThat(result.getName()).isEqualTo("data_name");
+            assertThat(result.getErrorStatus()).isEqualTo("my_error_var");
             assertThat(result.getAttributes())
                     .hasSize(2)
                     .containsEntry("attr", "dataX")
@@ -164,7 +167,7 @@ public class MethodHookConfigurationResolverTest {
 
         @Test
         void verifyTracingCustomSamplingProbabilityRespected() throws Exception {
-            config = InstrumentationConfiguration.builder().defaultTraceSampleProbability(0.5).build();
+            config = InstrumentationConfiguration.builder().build();
             InstrumentationRule r1 = InstrumentationRule.builder()
                     .tracing(RuleTracingSettings.builder()
                             .startSpan(true)
@@ -184,7 +187,7 @@ public class MethodHookConfigurationResolverTest {
 
         @Test
         void verifyNullSamplingProbabilityRespected() throws Exception {
-            config = InstrumentationConfiguration.builder().defaultTraceSampleProbability(0.5).build();
+            config = InstrumentationConfiguration.builder().build();
 
             InstrumentationRule r1 = InstrumentationRule.builder()
                     .tracing(RuleTracingSettings.builder()

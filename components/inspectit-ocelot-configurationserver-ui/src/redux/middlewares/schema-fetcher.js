@@ -1,9 +1,9 @@
-import { REHYDRATE } from "redux-persist";
-import { isAuthenticated } from "../ducks/authentication/selectors";
-import { FETCH_TOKEN_SUCCESS } from "../ducks/authentication/types";
-import { fetchConfigurationSchema } from "../ducks/configuration/actions";
+import { REHYDRATE } from 'redux-persist';
+import { isAuthenticated } from '../ducks/authentication/selectors';
+import { FETCH_TOKEN_SUCCESS } from '../ducks/authentication/types';
+import { fetchConfigurationSchema } from '../ducks/configuration/actions';
 
-const schemaFetcher = store => nextDispatch => action => {
+const schemaFetcher = (store) => (nextDispatch) => (action) => {
   // fire original action first
   const result = nextDispatch(action);
 
@@ -17,6 +17,6 @@ const schemaFetcher = store => nextDispatch => action => {
   }
 
   return result;
-}
+};
 
 export default schemaFetcher;

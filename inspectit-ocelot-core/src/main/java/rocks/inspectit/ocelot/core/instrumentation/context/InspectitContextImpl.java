@@ -14,7 +14,6 @@ import rocks.inspectit.ocelot.config.model.instrumentation.data.PropagationMode;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;
 
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -249,7 +248,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
     /**
      * @return true, if {@link #enterSpan(Span)} was called
      */
-    public boolean enteredSpan() {
+    public boolean hasEnteredSpan() {
         return currentSpanScope != null;
     }
 
@@ -580,7 +579,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
         return postEntryPhaseDownPropagatedData.entrySet().stream()
                 .filter(e -> propagation.isTag(e.getKey()))
                 .filter(e -> ALLOWED_TAG_TYPES.contains(e.getValue().getClass()))
-                .map(e -> Tag.create(TagKey.create(e.getKey()), TagValue.create(e.getValue().toString())))
+                .map(e -> Tag.create(TagKey.create(e.getKey()), TagValue.create(e.getValue().toString()), TagMetadata.create(TagMetadata.TagTtl.UNLIMITED_PROPAGATION)))
                 .iterator();
     }
 

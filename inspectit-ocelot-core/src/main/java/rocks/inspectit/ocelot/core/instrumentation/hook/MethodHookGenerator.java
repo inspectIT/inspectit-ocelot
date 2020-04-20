@@ -19,10 +19,8 @@ import rocks.inspectit.ocelot.core.instrumentation.hook.actions.ConditionalHookA
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.MetricsRecorder;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.model.MetricAccessor;
-import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.ContinueOrStartSpanAction;
-import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.EndSpanAction;
-import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.StoreSpanAction;
-import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.WriteSpanAttributesAction;
+import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.*;
+import rocks.inspectit.ocelot.core.instrumentation.hook.tags.CommonTagsToAttributesManager;
 import rocks.inspectit.ocelot.core.metrics.MeasuresAndViewsManager;
 import rocks.inspectit.ocelot.core.privacy.obfuscation.ObfuscationManager;
 import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
@@ -58,6 +56,9 @@ public class MethodHookGenerator {
 
     @Autowired
     private ObfuscationManager obfuscationManager;
+
+    @Autowired
+    private CommonTagsToAttributesManager commonTagsToAttributesManager;
 
     /**
      * Builds a executable method hook based on the given configuration.
@@ -100,7 +101,7 @@ public class MethodHookGenerator {
         if (tracing.getStartSpan() || tracing.getContinueSpan() != null) {
 
             val actionBuilder = ContinueOrStartSpanAction.builder();
-
+            actionBuilder.commonTagsToAttributesManager(commonTagsToAttributesManager);
 
             if (tracing.getStartSpan()) {
                 VariableAccessor name = Optional.ofNullable(tracing.getName())
@@ -148,22 +149,34 @@ public class MethodHookGenerator {
         }
     }
 
-    private List<IHookAction> buildTracingExitActions(RuleTracingSettings tracing) {
+    @VisibleForTesting
+    List<IHookAction> buildTracingExitActions(RuleTracingSettings tracing) {
         val result = new ArrayList<IHookAction>();
 
-        val attributes = tracing.getAttributes();
-        if (!attributes.isEmpty()) {
-            Map<String, VariableAccessor> attributeAccessors = new HashMap<>();
-            attributes.forEach((attribute, variable) -> attributeAccessors.put(attribute, variableAccessorFactory.getVariableAccessor(variable)));
-            IHookAction endTraceAction = new WriteSpanAttributesAction(attributeAccessors, obfuscationManager.obfuscatorySupplier());
-            IHookAction actionWithConditions = ConditionalHookAction.wrapWithConditionChecks(tracing.getAttributeConditions(), endTraceAction, variableAccessorFactory);
-            result.add(actionWithConditions);
+        boolean isSpanStartedOrContinued = tracing.getStartSpan() || StringUtils.isNotBlank(tracing.getContinueSpan());
+        if (isSpanStartedOrContinued) {
+
+            if (StringUtils.isNotBlank(tracing.getErrorStatus())) {
+                VariableAccessor accessor = variableAccessorFactory.getVariableAccessor(tracing.getErrorStatus());
+                result.add(new SetSpanStatusAction(accessor));
+            }
+
+            val attributes = tracing.getAttributes();
+            if (!attributes.isEmpty()) {
+                Map<String, VariableAccessor> attributeAccessors = new HashMap<>();
+                attributes.forEach((attribute, variable) -> attributeAccessors.put(attribute, variableAccessorFactory.getVariableAccessor(variable)));
+                IHookAction endTraceAction = new WriteSpanAttributesAction(attributeAccessors, obfuscationManager.obfuscatorySupplier());
+                IHookAction actionWithConditions = ConditionalHookAction.wrapWithConditionChecks(tracing.getAttributeConditions(), endTraceAction, variableAccessorFactory);
+                result.add(actionWithConditions);
+            }
+
+            if (tracing.getEndSpan()) {
+                val endSpanAction = new EndSpanAction(ConditionalHookAction.getAsPredicate(tracing.getEndSpanConditions(), variableAccessorFactory));
+                result.add(endSpanAction);
+            }
         }
 
-        if (tracing.getEndSpan() && (tracing.getStartSpan() || tracing.getContinueSpan() != null)) {
-            val endSpanAction = new EndSpanAction(ConditionalHookAction.getAsPredicate(tracing.getEndSpanConditions(), variableAccessorFactory));
-            result.add(endSpanAction);
-        }
+
         return result;
     }
 
