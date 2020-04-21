@@ -50,6 +50,7 @@ dependencies {
 
             // utils
             "org.apache.commons:commons-lang3:3.+",
+            'org.apache.commons:commons-math3:3.6.1',
             'org.apache.httpcomponents:httpclient:4.5.8',
             'commons-io:commons-io:2.6',
             'piccolo:piccolo:1.0.3',
