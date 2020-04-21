@@ -40,11 +40,11 @@ public class ContextPropagationUtilTest {
         @Test
         public void testSingleString() {
             Map<String, String> headers = ImmutableMap.of(CORRELATION_CONTEXT_HEADER,
-                    enc("my_valü") + " =  " + enc("straße=15") + ";someprop=42");
+                    enc("my_val\u00FC") + " =  " + enc("stra\u00DFe=15") + ";someprop=42");
 
             ContextPropagationUtil.readPropagatedDataFromHeaderMap(headers, inspectitContext);
 
-            verify(inspectitContext).setData(eq("my_valü"), eq("straße=15"));
+            verify(inspectitContext).setData(eq("my_val\u00FC"), eq("stra\u00DFe=15"));
             verifyNoMoreInteractions(inspectitContext);
         }
 
@@ -103,13 +103,13 @@ public class ContextPropagationUtilTest {
         @Test
         public void testSingleString() {
 
-            Map<String, Object> data = ImmutableMap.of("my_valü", "straße=15");
+            Map<String, Object> data = ImmutableMap.of("my_val\u00FC", "stra\u00DFe=15");
 
             Map<String, String> result = ContextPropagationUtil.buildPropagationHeaderMap(data.entrySet().stream(), null);
 
             assertThat(result)
                     .hasSize(1)
-                    .containsEntry(CORRELATION_CONTEXT_HEADER, enc("my_valü") + "=" + enc("straße=15"));
+                    .containsEntry(CORRELATION_CONTEXT_HEADER, enc("my_val\u00FC") + "=" + enc("stra\u00DFe=15"));
         }
 
         @Test
@@ -164,6 +164,7 @@ public class ContextPropagationUtilTest {
 
             assertThat(result).isEqualTo("[]");
         }
+
         @Test
         public void emptyMap() {
             Map<String, String> data = Collections.emptyMap();

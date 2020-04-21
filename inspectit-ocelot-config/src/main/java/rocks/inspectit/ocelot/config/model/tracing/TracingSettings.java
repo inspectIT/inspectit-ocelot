@@ -6,10 +6,21 @@ import lombok.NoArgsConstructor;
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 
 @Data
 @NoArgsConstructor
 public class TracingSettings {
+
+    /**
+     * Enum that defines when are common tags added to span attributes.
+     */
+    public enum AddCommonTags {
+        NEVER,
+        ON_GLOBAL_ROOT,
+        ON_LOCAL_ROOT,
+        ALWAYS
+    }
 
     /**
      * Master switch for disabling trace recording and exporting.
@@ -32,4 +43,12 @@ public class TracingSettings {
      */
     @Valid
     private LogCorrelationSettings logCorrelation = new LogCorrelationSettings();
+
+
+    /**
+     * Generically defines behavior of adding common tags to spans.
+     */
+    @NotNull
+    private AddCommonTags addCommonTags;
+
 }

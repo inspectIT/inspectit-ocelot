@@ -128,14 +128,14 @@ inspectit:
             anything: toObfuscate_val
         entry:
           entry_val:
-            action: set
+            action: a_assign_value
             constant-input: {value: "const"}
           toObfuscate_val:
-            action: set
+            action: a_assign_value
             constant-input: {value: "toObfuscateValue"}
         exit:
           exit_val:
-            action: set
+            action: a_assign_value
             data-input: {value: _returnValue}
 
 
@@ -150,11 +150,11 @@ inspectit:
             only-if-true: _arg0
         entry:
           entry_val:
-            action: set
+            action: a_assign_value
             constant-input: {value: "const"}
         exit:
           exit_val:
-            action: set
+            action: a_assign_value
             data-input: {value: _returnValue}
 
       TraceSettingsTest-conditionalRoot:
@@ -188,13 +188,14 @@ inspectit:
 
         entry:
           span_id:
-            action: read_attachment_on_this
+            action: a_attachment_get
             constant-input: {key: "span_obj"}
+            data-input: {target: _this}
         exit:
           do_write_span_obj:
-            action: replace_attachment_on_this
+            action: a_attachment_put
             constant-input: {key: "span_obj"}
-            data-input: {value: span_id}
+            data-input: {value: span_id, target: _this}
 
 
       TraceSettingsTest-samplingTestEndMarker:
