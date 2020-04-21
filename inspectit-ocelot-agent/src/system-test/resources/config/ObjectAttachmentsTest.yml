@@ -30,15 +30,15 @@ inspectit:
         scopes: { ObjectAttachmentsTest-writeAttachments: true }
         entry:
           target:
-            action: set
+            action: a_assign_value
             data-input: {value: _arg0}
           firstVal:
-            action: replace_attachment
+            action: a_attachment_put
             constant-input: {key: "first"}
             data-input: {target: _arg0, value: _arg1}
 
           secondVal:
-            action: replace_attachment
+            action: a_attachment_put
             constant-input: {key: "second"}
             data-input: {target: _arg0, value: _arg2}
         metrics:
@@ -51,15 +51,15 @@ inspectit:
         scopes: { ObjectAttachmentsTest-readAttachments: true }
         entry:
           target:
-            action: set
+            action: a_assign_value
             data-input: {value: _arg0}
           firstVal:
-            action: read_attachment
+            action: a_attachment_get
             constant-input: {key: "first"}
             data-input: {target: _arg0}
 
           secondVal:
-            action: read_attachment
+            action: a_attachment_get
             constant-input: {key: "second"}
             data-input: {target: _arg0}
         metrics:
