@@ -5,6 +5,7 @@ import org.apache.logging.log4j.core.Core;
 import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
+import org.apache.logging.log4j.core.config.Property;
 import org.apache.logging.log4j.core.config.plugins.Plugin;
 import org.apache.logging.log4j.core.config.plugins.PluginAttribute;
 import org.apache.logging.log4j.core.config.plugins.PluginElement;
@@ -21,7 +22,7 @@ public class Log4J2LoggingRecorder extends AbstractAppender {
     public static final List<LogEvent> loggingEvents = new ArrayList<>();
 
     protected Log4J2LoggingRecorder(String name, Filter filter) {
-        super(name, filter, null);
+        super(name, filter, null, true, Property.EMPTY_ARRAY);
     }
 
     @Override

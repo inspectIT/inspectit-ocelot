@@ -444,6 +444,9 @@ Due to the way configuration loading works, the short notation will always take 
 ### Collecting Traces
 
 The inspectIT Ocelot agent allows you to record method invocations as [OpenCensus spans](https://opencensus.io/tracing/span/).
+
+#### Tracing Methods
+
 In order to make your collected spans visible, you must first set up a [trace exporter](tracing/trace-exporters.md).
 
 Afterwards you can define that all methods matching a certain rule will be traced:
@@ -457,7 +460,8 @@ inspectit:
           start-span: true
 ```
 
-For example, using the previous configuration snippet, each method that matches the scope definition of the `example_rule` rule will appear within a trace. Its appearance can be customized using the following properties which can be set in the rule's `tracing` section.
+For example, using the previous configuration snippet, each method that matches the scope definition of the `example_rule` rule will appear within a trace.
+Its appearance can be customized using the following properties which can be set in the rule's `tracing` section.
 
 |Property |Default| Description
 |---|---|---|
@@ -483,6 +487,8 @@ inspectit:
 
 > The name must exist at the end of the entry section and cannot be set in the exit section.
 
+#### Trace Sampling
+
 It is often desirable to not capture every trace, but instead [sample](https://opencensus.io/tracing/sampling/) only a subset.
 This can be configured using the `sample-probability` setting under the `tracing` section:
 
@@ -503,6 +509,8 @@ This allows you for example to vary the sample probability based on the HTTP url
 
 If no sample probability is defined for a rule, the [default probability](tracing/tracing.md) is used.
 
+#### Adding Attributes
+
 Another useful property of spans is that you can attach any additional information in form of attributes.
 In most tracing backends such as ZipKin and Jaeger, you can search your traces based on attributes.
 The example below shows how you can define attributes:
@@ -513,6 +521,7 @@ inspectit:
     rules:
       servlet_api_service:
         tracing:
+          start-span: true
           attributes:
             http_host: host_name
         entry:
@@ -521,12 +530,41 @@ inspectit:
 ```
 
 The attributes property maps the names of attributes to data keys.
-After the rule's exit phase, the corresponding data keys are read and attached as attributes to the current span.
+After the rule's exit phase, the corresponding data keys are read and attached as attributes to the span started or continued by the method.
 
-Note that a rule does not have to start a span for attatching attributes.
-If a rule does not start a span, the attributes will be written to the first span opened by any method on the current call stack.
+Note that if a rule does not start or continue a span, no attributes will be written.
 
-It is also possible to conditionalize the span starting as well as the attribute writing:
+The [common tags](metrics/common-tags.md) are added as attributes in all local span roots by default.
+This behavior can be configured in the global [tracing settings](tracing/tracing.md#common-tags-as-attributes).
+
+#### Visualizing Span Errors
+
+Most tracing backends support highlighting of spans which are marked as errors.
+InspectIT Ocelot allows you to configure exactly under which circumstances your spans are interpreted
+as errors or successes.
+This is done via the `error-status` configuration property of a rule's tracing section:
+
+```yaml
+inspectit:
+  instrumentation:
+    rules:
+      example_rule:
+        tracing:
+          start-span: true
+          error-status: _thrown
+```
+
+The value of the `error-status` property can be any value from the context or any [special variable](#input-parameters).
+
+When the instrumented method finishes, Ocelot will read the value of the given variable.
+If the value is neither `null` nor `false`, the span will be marked as an error.
+
+In the example above, the special variable `_thrown` is used to define the error status.
+This means if `_thrown` is not null (which means the method threw an exception), the span will be marked as error.
+
+#### Adding Span Conditions
+
+It is possible to conditionalize the span starting as well as the attribute writing:
 
 ```yaml
 inspectit:
@@ -551,7 +589,10 @@ If any `start-span-conditions` are defined, a span will only be created when all
 Analogous to this, attributes will only be written if each condition defined in `attribute-conditions` is fulfilled.
 The conditions that can be defined are equal to the ones of actions, thus, please see the [action conditions description](#adding-conditions) for detailed information.
 
-With the previous shown settings, it is possible to add an instrumentation which creates exactly one span per invocation of an instrumented method. Especially in asynchronous scenarios, this might not be the desired behaviour:
+#### Tracing Asynchronous Invocations
+
+With the previous shown settings, it is possible to add an instrumentation which creates exactly one span per invocation of an instrumented method.
+Especially in asynchronous scenarios, this might not be the desired behaviour:
 For these cases inspectIT Ocelot offers the possibility to record multiple method invocations into a single span.
 The resulting span then has the following properties:
 
@@ -593,3 +634,60 @@ In this case, the rule will first attempt to continue the existing span. Only if
 Again, conditions for the span continuing and span ending can be specified just like for the span starting.
 The properties `continue-span-conditions` and `end-span-conditions` work just like `start-span-conditions`.
 
+### Modularizing Rules
+
+When writing complex instrumentation, it can happen that you want to reuse parts of your instrumentation across different rules.
+For example when instrumenting a HTTP library, you typically extract the HTTP path using custom actions. This HTTP path is meant
+to be used for multiple concerns, e.g. for tracing and for metrics which are specified in separate rules.
+
+A simple solution would be to copy and paste the action invocation for extracting the path into both the metrics and the tracing rule.
+This has two main downsides:
+* The work is done twice: Your action for extracting the HTTP path is invoked twice, leading to unnecessary overhead
+* When altering how the HTTP path is extracted, you need to remember every rule where you copy-pasted your instrumentation
+
+To overcome these issues, Ocelot allows you to include rules from within other rules:
+
+```yaml
+    rules:
+      myhttp_extract_path:
+        entry:
+          my_http_path:
+            #logic to extract the http path and save it in the context here...
+          
+      myhttp_tracing:
+        include:
+          myhttp_extract_path: true
+        scopes:
+          myhttp_scope: true
+        tracing:
+          start-span: true
+          attributes:
+            path: my_http_path
+            
+      myhttp_record_metric:
+        include:
+          myhttp_extract_path: true
+        scopes:
+          myhttp_scope: true
+        metrics:
+          #record http metric here...
+```
+
+In the above example we defined a rule `myhttp_extract_path`, which contains the logic for extracting the HTTP path.
+Note that this rule does not have any scope attached and therefore does not result in any instrumentation by default.
+
+However, the example also contains the two rules `myhttp_tracing` and `myhttp_record_metric`.
+They both reference the `myhttp_extract_path` rule via their `include` property.
+While in the example exactly one rule is included, it is possible to include any amount of rules.
+Includes also work transitively.
+
+If a rule is included, it has the same effect as adding all the scopes of this rule to the included one.
+This means that all actions, tracing settings and metrics recordings of the included rule are also applied.
+
+In this example this means that if either `myhttp_tracing` or `myhttp_record_metric` are enabled,
+`myhttp_extract_path` will also be applied to all methods matching the scope `myhttp_scope`.
+As a result, the `my_http_path` data variable will be populated.
+
+The key point is now that even if the rule is included multiple times for a given method, it will only be applied exactly once.
+This means that if both `myhttp_tracing` and `myhttp_record_metric` are enabled, the `myhttp_extract_path` will still only be applied once.
+This therefore solves the problem of accidentally doing the same work twice.

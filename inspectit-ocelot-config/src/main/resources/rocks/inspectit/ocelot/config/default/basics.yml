@@ -15,7 +15,6 @@ inspectit:
         resolve-host-name: true
         # should the host address be resolved using InetAddress.getLocalHost(), if false 'host-address' tag is not added by env provider
         resolve-host-address: true
-
     # specifies user defined tag keys and values as a map
     # these tag values would overwrite any value added by the providers, thus you can easily overwrite tags values by your own
     extra: {}
@@ -26,20 +25,19 @@ inspectit:
     #  - all trace exporters are disabled
     #  - tracing is disabled for all instrumentation rules
     enabled: true
-
     # global sample probability used to decide if a trace shall be sampled or not
     # this value can be overridden by the tracing settings of individual instrumentation rules.
     sample-probability: 1.0
-
+    # defines when to add common tags as attributes to spans
+    # options are: NEVER, ON_GLOBAL_ROOT, ON_LOCAL_ROOT, ALWAYS
+    add-common-tags: ON_LOCAL_ROOT
     # settings regarding log correlation
     log-correlation:
-
       trace-id-mdc-injection:
         # whether existing trace ids should be injected into the logging framework's MDC
         enabled: false
         # the key which is used to store the trace id in the MDC
         key: "traceid"
-
       trace-id-auto-injection:
         # whether the trace id should automatically injected into log statements
         enabled: false

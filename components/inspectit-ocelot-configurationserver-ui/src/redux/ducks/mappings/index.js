@@ -1,10 +1,8 @@
-import reducer from "./reducers";
+import reducer from './reducers';
 
-import * as mappingsActions from "./actions";
-import * as mappingsSelectors from "./selectors";
+import * as mappingsActions from './actions';
+import * as mappingsSelectors from './selectors';
 
-export {
-    mappingsActions, mappingsSelectors
-};
+export { mappingsActions, mappingsSelectors };
 
 export default reducer;

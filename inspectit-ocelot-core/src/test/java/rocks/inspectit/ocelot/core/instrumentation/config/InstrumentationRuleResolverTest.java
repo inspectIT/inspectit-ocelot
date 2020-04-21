@@ -108,6 +108,24 @@ class InstrumentationRuleResolverTest {
 
 
         @Test
+        public void verifyRuleIncludesPreserved() {
+            InstrumentationRuleSettings ruleSettings = new InstrumentationRuleSettings();
+            ruleSettings.setEnabled(true);
+            ruleSettings.setInclude(ImmutableMap.of("inc1", true, "inc2", true, "notinc", false));
+
+            InstrumentationSettings settings = new InstrumentationSettings();
+            settings.setRules(Collections.singletonMap("rule-key", ruleSettings));
+
+            Set<InstrumentationRule> result = ruleResolver.resolve(settings, Collections.emptyMap());
+
+            assertThat(result).hasSize(1);
+            assertThat(result)
+                    .flatExtracting(InstrumentationRule::getIncludedRuleNames)
+                    .containsExactlyInAnyOrder("inc1", "inc2");
+        }
+
+
+        @Test
         public void verifyPreEntryActionsPreserved() {
             ActionCallSettings first = Mockito.mock(ActionCallSettings.class);
             ActionCallSettings second = Mockito.mock(ActionCallSettings.class);

@@ -277,6 +277,20 @@ inspectit-eum-server:
       - COUNTRY_CODE
 ```
 
+## Resource Timings
+
+The EUM server can extract information about the resources timings which are reported as part of the Boomerang beacon field `restiming`.
+The resource timing information is decompressed from the beacon and exposed as part of the `resource_time` metric.
+This metric contains following tags:
+
+| Tag | Description |
+| --- | --- |
+| `initiatorType` | The type of the element initiating the loading of the resource. See [all initiator types](https://developer.akamai.com/tools/boomerang/docs/BOOMR.plugins.ResourceTiming.html#.INITIATOR_TYPES). |
+| `crossOrigin` | If a resource loading is considered as cross-origin request. See [more information about CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS). |
+| `cached` | If a resource was cached and loaded from the browser disk or memory storage. Note that cached tag will only be set for same-origin requests, as some resource timing  metrics are restricted and will not be provided cross-origin unless the Timing-Allow-Origin header permits. |
+
+The resource timing processing is enabled by default and can be disabled by setting the property `inspectit-eum-server.resource-timing.enabled` to `false.`
+
 ## Exporters
 
 The EUM server comes with the same Prometheus and InfluxDB exporter as the Ocelot agent.

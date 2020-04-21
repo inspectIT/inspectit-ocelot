@@ -91,7 +91,7 @@ public class InspectitContextImplTest {
             Span mySpan = Tracing.getTracer().spanBuilder("blub").startSpan();
 
             InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(new HashMap<>(), propagation, false);
-            assertThat(ctx.enteredSpan()).isFalse();
+            assertThat(ctx.hasEnteredSpan()).isFalse();
 
             ctx.enterSpan(mySpan);
 
@@ -99,7 +99,7 @@ public class InspectitContextImplTest {
 
             ctx.makeActive();
 
-            assertThat(ctx.enteredSpan()).isTrue();
+            assertThat(ctx.hasEnteredSpan()).isTrue();
             assertThat(Tracing.getTracer().getCurrentSpan()).isSameAs(mySpan);
 
             ctx.close();
@@ -617,7 +617,7 @@ public class InspectitContextImplTest {
             doAnswer((invocation) -> PropagationMetaData.builder()).when(propagation).copy();
 
             TagContextBuilder tcb = Tags.getTagger().emptyBuilder()
-                    .put(TagKey.create("myTag"), TagValue.create("myValue"));
+                    .putLocal(TagKey.create("myTag"), TagValue.create("myValue"));
             try (Scope tc = tcb.buildScoped()) {
                 InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
                 assertThat(ctxA.getData("myTag")).isEqualTo("myValue");
@@ -639,7 +639,7 @@ public class InspectitContextImplTest {
             doAnswer((invocation) -> PropagationMetaData.builder()).when(propagation).copy();
 
             TagContextBuilder tcb = Tags.getTagger().emptyBuilder()
-                    .put(TagKey.create("myTag"), TagValue.create("myValue"));
+                    .putLocal(TagKey.create("myTag"), TagValue.create("myValue"));
             try (Scope tc = tcb.buildScoped()) {
                 InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
                 ctxA.makeActive();
@@ -671,7 +671,7 @@ public class InspectitContextImplTest {
             root.makeActive();
 
             TagContextBuilder tcb = Tags.getTagger().emptyBuilder()
-                    .put(TagKey.create("myTag"), TagValue.create("myValue"));
+                    .putLocal(TagKey.create("myTag"), TagValue.create("myValue"));
             try (Scope tc = tcb.buildScoped()) {
                 InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
                 assertThat(ctxA.getData("myTag")).isEqualTo("myValue");
@@ -702,7 +702,7 @@ public class InspectitContextImplTest {
             root.makeActive();
 
             TagContextBuilder tcb = Tags.getTagger().emptyBuilder()
-                    .put(TagKey.create("myTag"), TagValue.create("myValue"));
+                    .putLocal(TagKey.create("myTag"), TagValue.create("myValue"));
             try (Scope tc = tcb.buildScoped()) {
                 InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
                 ctxA.makeActive();
@@ -735,7 +735,7 @@ public class InspectitContextImplTest {
             root.makeActive();
 
             TagContextBuilder tcb = Tags.getTagger().emptyBuilder()
-                    .put(TagKey.create("myTag"), TagValue.create("myValue"));
+                    .putLocal(TagKey.create("myTag"), TagValue.create("myValue"));
             try (Scope tc = tcb.buildScoped()) {
                 InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
                 ctxA.setData("rootKey", "childValue");
@@ -789,7 +789,7 @@ public class InspectitContextImplTest {
             root.makeActive();
 
             TagContextBuilder tcb = Tags.getTagger().currentBuilder()
-                    .put(TagKey.create("myTag"), TagValue.create("myValue"));
+                    .putLocal(TagKey.create("myTag"), TagValue.create("myValue"));
             try (Scope tc = tcb.buildScoped()) {
 
                 Map<String, String> currentTagsAsMap = getCurrentTagsAsMap();

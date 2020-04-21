@@ -26,7 +26,7 @@ public class ExecutorContextPropagationTest extends InstrumentationSysTestBase {
 
         Future<?> taskFuture;
 
-        try (Scope s = tagger.currentBuilder().put(keyToPropagate, TagValue.create("myval")).buildScoped()) {
+        try (Scope s = tagger.currentBuilder().putLocal(keyToPropagate, TagValue.create("myval")).buildScoped()) {
             taskFuture = es.submit(() -> {
                 Iterator<Tag> it = InternalUtils.getTags(tagger.getCurrentTagContext());
                 while (it.hasNext()) {
@@ -50,7 +50,7 @@ public class ExecutorContextPropagationTest extends InstrumentationSysTestBase {
 
 
         Future<String> taskFuture;
-        try (Scope s = tagger.currentBuilder().put(keyToPropagate, TagValue.create("myval")).buildScoped()) {
+        try (Scope s = tagger.currentBuilder().putLocal(keyToPropagate, TagValue.create("myval")).buildScoped()) {
             taskFuture = es.submit(() -> {
                 Iterator<Tag> it = InternalUtils.getTags(tagger.getCurrentTagContext());
                 while (it.hasNext()) {

@@ -132,7 +132,7 @@ public class ClassLoaderDelegationTest extends InstrumentationSysTestBase {
         TestUtils.waitForClassInstrumentation(execClass, 15, TimeUnit.SECONDS);
 
         try (Scope tcb = Tags.getTagger().emptyBuilder()
-                .put(TagKey.create("test_key"), TagValue.create("test_value"))
+                .putLocal(TagKey.create("test_key"), TagValue.create("test_value"))
                 .buildScoped()) {
             exec.execute(() -> {
                 Map<String, String> tags = TestUtils.getCurrentTagsAsMap();
@@ -157,7 +157,7 @@ public class ClassLoaderDelegationTest extends InstrumentationSysTestBase {
         TestUtils.waitForClassInstrumentation(execClass, 15, TimeUnit.SECONDS);
 
         try (Scope tcb = Tags.getTagger().emptyBuilder()
-                .put(TagKey.create("test_key"), TagValue.create("test_value"))
+                .putLocal(TagKey.create("test_key"), TagValue.create("test_value"))
                 .buildScoped()) {
             exec.execute(() -> {
                 Map<String, String> tags = TestUtils.getCurrentTagsAsMap();
@@ -182,7 +182,7 @@ public class ClassLoaderDelegationTest extends InstrumentationSysTestBase {
         TestUtils.waitForClassInstrumentation(execClass, 15, TimeUnit.SECONDS);
 
         try (Scope tcb = Tags.getTagger().emptyBuilder()
-                .put(TagKey.create("test_key"), TagValue.create("test_value"))
+                .putLocal(TagKey.create("test_key"), TagValue.create("test_value"))
                 .buildScoped()) {
             exec.execute(() -> {
                 Map<String, String> tags = TestUtils.getCurrentTagsAsMap();

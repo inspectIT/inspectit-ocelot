@@ -4,29 +4,31 @@ import React from 'react';
  * Notificationbar used in the editor view to show notifications.
  */
 const Notificationbar = ({ isError, icon, text }) => (
-    <>
-        <style jsx>{`
+  <>
+    <style jsx>
+      {`
         .this {
-            background-color: #abff87;
-            display: flex;
-            padding: .75rem;
-            align-items: center;
+          background-color: #abff87;
+          display: flex;
+          padding: 0.75rem;
+          align-items: center;
         }
         .this.error {
-            background-color: #ff8181;
+          background-color: #ff8181;
         }
         .this .pi {
-            margin-right: .5rem;
+          margin-right: 0.5rem;
         }
         .text {
-            font-size: .9rem;
+          font-size: 0.9rem;
         }
-        `}</style>
-        <div className={"this" + (isError ? " error" : "")}>
-            {icon && <i className={"pi " + icon} />}
-            <div className="text">{text}</div>
-        </div>
-    </>
+      `}
+    </style>
+    <div className={'this' + (isError ? ' error' : '')}>
+      {icon && <i className={'pi ' + icon} />}
+      <div className="text">{text}</div>
+    </div>
+  </>
 );
 
 export default Notificationbar;

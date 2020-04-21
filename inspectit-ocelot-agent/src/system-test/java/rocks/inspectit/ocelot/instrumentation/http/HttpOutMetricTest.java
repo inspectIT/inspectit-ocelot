@@ -29,7 +29,7 @@ public class HttpOutMetricTest {
 
     private static final String PATH_200 = "/test";
 
-    private static final String PATH_404 = "/error";
+    private static final String PATH_500 = "/error";
 
     private static String WIREMOCK_HOST_PORT;
 
@@ -41,19 +41,12 @@ public class HttpOutMetricTest {
     public static void setupWiremock() {
         wireMockServer = new WireMockServer(options().dynamicPort());
 
-        wireMockServer.addMockServiceRequestListener((req, resp) -> {
-            InternalInspectitContext ctx = Instances.contextManager.enterNewContext();
-            ctx.setData("prop_target_service", "wiremock_service");
-            ctx.makeActive();
-            ctx.close();
-        });
-
         wireMockServer.start();
         configureFor(wireMockServer.port());
 
-        stubFor(get(urlPathEqualTo(PATH_404))
+        stubFor(get(urlPathEqualTo(PATH_500))
                 .willReturn(aResponse()
-                        .withStatus(404)));
+                        .withStatus(500)));
         stubFor(get(urlPathEqualTo(PATH_200))
                 .willReturn(aResponse()
                         .withStatus(200)));
@@ -106,6 +99,7 @@ public class HttpOutMetricTest {
             tags.put("http_path", PATH_200);
             tags.put("http_status", "200");
             tags.put("http_method", "GET");
+            tags.put("error", "false");
 
             long cnt = ((AggregationData.CountData) TestUtils.getDataForView("http/out/count", tags)).getCount();
             double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/out/responsetime/sum", tags)).getSum();
@@ -119,7 +113,7 @@ public class HttpOutMetricTest {
             InternalInspectitContext ctx = Instances.contextManager.enterNewContext();
             ctx.setData("service", "apache_client_test");
             ctx.makeActive();
-            client.execute(new HttpGet(WIREMOCK_URL + PATH_404 + "?x=32423"));
+            client.execute(new HttpGet(WIREMOCK_URL + PATH_500 + "?x=32423"));
             ctx.close();
 
             TestUtils.waitForOpenCensusQueueToBeProcessed();
@@ -127,9 +121,10 @@ public class HttpOutMetricTest {
             Map<String, String> tags = new HashMap<>();
             tags.put("service", "apache_client_test");
             tags.put("http_host", WIREMOCK_HOST_PORT);
-            tags.put("http_path", PATH_404);
-            tags.put("http_status", "404");
+            tags.put("http_path", PATH_500);
+            tags.put("http_status", "500");
             tags.put("http_method", "GET");
+            tags.put("error", "true");
 
             long cnt = ((AggregationData.CountData) TestUtils.getDataForView("http/out/count", tags)).getCount();
             double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/out/responsetime/sum", tags)).getSum();
@@ -162,6 +157,7 @@ public class HttpOutMetricTest {
             tags.put("http_path", "");
             tags.put("http_status", caughtException.getClass().getSimpleName());
             tags.put("http_method", "GET");
+            tags.put("error", "true");
 
             long cnt = ((AggregationData.CountData) TestUtils.getDataForView("http/out/count", tags)).getCount();
             double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/out/responsetime/sum", tags)).getSum();
@@ -198,6 +194,7 @@ public class HttpOutMetricTest {
             tags.put("http_path", PATH_200);
             tags.put("http_status", "200");
             tags.put("http_method", "GET");
+            tags.put("error", "false");
 
             long cnt = ((AggregationData.CountData) TestUtils.getDataForView("http/out/count", tags)).getCount();
             double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/out/responsetime/sum", tags)).getSum();
@@ -212,7 +209,7 @@ public class HttpOutMetricTest {
             ctx.setData("service", "urlconn_client_test");
             ctx.makeActive();
 
-            HttpURLConnection urlConnection = (HttpURLConnection) new URL(WIREMOCK_URL + PATH_404 + "?x=32423").openConnection();
+            HttpURLConnection urlConnection = (HttpURLConnection) new URL(WIREMOCK_URL + PATH_500 + "?x=32423").openConnection();
             urlConnection.getResponseCode();
 
             ctx.close();
@@ -222,9 +219,10 @@ public class HttpOutMetricTest {
             Map<String, String> tags = new HashMap<>();
             tags.put("service", "urlconn_client_test");
             tags.put("http_host", WIREMOCK_HOST_PORT);
-            tags.put("http_path", PATH_404);
-            tags.put("http_status", "404");
+            tags.put("http_path", PATH_500);
+            tags.put("http_status", "500");
             tags.put("http_method", "GET");
+            tags.put("error", "true");
 
             long cnt = ((AggregationData.CountData) TestUtils.getDataForView("http/out/count", tags)).getCount();
             double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/out/responsetime/sum", tags)).getSum();
@@ -258,6 +256,7 @@ public class HttpOutMetricTest {
             tags.put("http_path", "");
             tags.put("http_status", caughtException.getClass().getSimpleName());
             tags.put("http_method", "GET");
+            tags.put("error", "true");
 
             long cnt = ((AggregationData.CountData) TestUtils.getDataForView("http/out/count", tags)).getCount();
             double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/out/responsetime/sum", tags)).getSum();

@@ -5,7 +5,7 @@
 /**
  * Default <title> content
  */
-export const BASE_PAGE_TITLE = "inspectIT Ocelot Configuration Server";
+export const BASE_PAGE_TITLE = 'inspectIT Ocelot Configuration Server';
 
 /**
  * Interval in which will be checked, whether the token will be expiring.
