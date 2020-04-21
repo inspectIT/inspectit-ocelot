@@ -22,15 +22,15 @@ const EditorToolbar = ({
   <div className="this">
     <style jsx>
       {`
-      .this :global(.p-toolbar) {
+        .this :global(.p-toolbar) {
           border: 0;
           border-radius: 0;
           background-color: #eee;
           border-bottom: 1px solid #ddd;
-      }
-      .p-toolbar-group-right > :global(*) {
+        }
+        .p-toolbar-group-right > :global(*) {
           margin-left: 0.25rem;
-      }
+        }
         .this :global(.p-button-outlined) {
           color: #005b9f;
           background-color: rgba(0, 0, 0, 0);

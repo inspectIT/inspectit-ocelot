@@ -21,11 +21,6 @@ const schemaType = {
   ENUM: 'ENUM',
 };
 
-const booleanDropdownOptions = [
-  { label: 'Yes', value: true },
-  { label: 'No', value: false },
-];
-
 /**
  * Editor for showing the config file as the table tree.
  *
@@ -115,7 +110,6 @@ class TreeTableEditor extends React.Component {
             const keyIdentifier = this.getKeyIdentifier(schemaProperty.propertyName, parentKeyIdentifier);
             const children =
               (isComposite && this.processKey(configValue, schemaProperty.children, keysCollector, keyIdentifier)) || undefined;
-            (isComposite && this.processKey(configValue, schemaProperty.children, keysCollector, keyIdentifier)) || undefined;
 
             const data = {
               key: keyIdentifier,
@@ -128,7 +122,7 @@ class TreeTableEditor extends React.Component {
                 type: this.getReadableDataType(schemaProperty.type),
                 value: this.getReabableDataValue(configValue, schemaProperty.type),
                 nullable: (!isComposite && this.getBoolanRepresentation(schemaProperty.nullable)) || '',
-            },
+              },
               children,
             };
             result.push(data);
@@ -177,7 +171,7 @@ class TreeTableEditor extends React.Component {
             result.push(data);
           });
       }
-
+    }
     return result.sort((r1, r2) => r1.data.name.localeCompare(r2.data.name));
   };
 
@@ -209,6 +203,7 @@ class TreeTableEditor extends React.Component {
           return 'null';
         } else {
           return value;
+        }
     }
   };
 
@@ -440,7 +435,7 @@ class TreeTableEditor extends React.Component {
 }
 
 /** Editor for string values */
-const StringEditor = ({ node, onPropValueChange, onPropValueRemove, wrapWithExtras }) => {
+var StringEditor = ({ node, onPropValueChange, onPropValueRemove, wrapWithExtras }) => {
   const defaultValue = node.value;
 
   // fire update on change
@@ -466,8 +461,9 @@ const StringEditor = ({ node, onPropValueChange, onPropValueRemove, wrapWithExtr
     });
   }
 };
+
 /** Editor for numbers */
-const NumberEditor = ({ node, integer, onPropValueChange, onPropValueRemove, wrapWithExtras }) => {
+var NumberEditor = ({ node, integer, onPropValueChange, onPropValueRemove, wrapWithExtras }) => {
   const defaultValue = node.value;
 
   // if we can not parse as int or float, fire the received value
@@ -486,7 +482,7 @@ const NumberEditor = ({ node, integer, onPropValueChange, onPropValueRemove, wra
 
   // component to render
   const component = () => (
-    <InputText keyfilter={/^[a-z0-9{}$\.-]+$/} defaultValue={defaultValue} onChange={onChange} className="value-column" />
+    <InputText keyfilter={/^[a-z0-9{}$.-]+$/} defaultValue={defaultValue} onChange={onChange} className="value-column" />
   );
 
   if (!wrapWithExtras) {
@@ -502,7 +498,7 @@ const NumberEditor = ({ node, integer, onPropValueChange, onPropValueRemove, wra
 };
 
 /** Editor for booleans */
-const BooleanEditor = ({ node, onPropValueChange, onPropValueRemove, wrapWithExtras }) => {
+var BooleanEditor = ({ node, onPropValueChange, onPropValueRemove, wrapWithExtras }) => {
   const defaultValue = node.value;
   const custom = defaultValue !== null && defaultValue !== undefined && typeof defaultValue !== 'boolean';
 
@@ -542,7 +538,7 @@ const BooleanEditor = ({ node, onPropValueChange, onPropValueRemove, wrapWithExt
 };
 
 /** No editor - show value only, if not readable then a small warn message is displayed that the data is not editable */
-const NoEditor = ({ node, readOnly }) => {
+var NoEditor = ({ node, readOnly }) => {
   const value = node.data['value'];
 
   return (
