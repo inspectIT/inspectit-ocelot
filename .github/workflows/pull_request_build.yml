@@ -33,6 +33,15 @@ jobs:
         run: ./gradlew test --max-workers=2
       - name: systemTest
         run: ./gradlew systemTest --max-workers=2
+      - name: codeCoverage if oracle-jdk8
+        if: matrix.dockerimage == 'sgrio/java:jdk_8_ubuntu' && github.event_name == 'pull_request'
+        run: |
+          ./gradlew codeCoverageReport
+      - name: upload to codecov.io
+        if: matrix.dockerimage == 'sgrio/java:jdk_8_ubuntu' && github.event_name == 'pull_request'
+        uses: codecov/codecov-action@v1
+        with:
+          file: ./build/reports/jacoco/report.xml
   jmh-compile:
     runs-on: ubuntu-latest
     container: openjdk:8-jdk
