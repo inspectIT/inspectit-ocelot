@@ -89,10 +89,7 @@ public class CustomLdapUserDetailsService extends LdapUserDetailsService {
     String resolveAccessRole(UserDetails user) {
         RoleSettings role_settings = settings.getSecurity().getLdap().getRoles();
         Collection<? extends GrantedAuthority> authorities = user.getAuthorities();
-        String resolvedRole = NO_ACCESS_ROLE;
-        if (containsAuthority(authorities, role_settings.getRead())) {
-            resolvedRole = READ_ACCESS;
-        }
+        String resolvedRole = READ_ACCESS;
         if (containsAuthority(authorities, role_settings.getWrite())) {
             resolvedRole = WRITE_ACCESS;
         }

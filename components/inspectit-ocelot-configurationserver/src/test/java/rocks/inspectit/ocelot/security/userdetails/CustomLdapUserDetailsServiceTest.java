@@ -34,7 +34,6 @@ public class CustomLdapUserDetailsServiceTest {
     }
 
     public InspectitServerSettings setupRoleSettings(
-            List<String> read,
             List<String> write,
             List<String> commit,
             List<String> admin
@@ -48,7 +47,6 @@ public class CustomLdapUserDetailsServiceTest {
         when(mockSecuritySettings.getLdap()).thenReturn(mockLdapSettings);
         when(mockLdapSettings.getRoles()).thenReturn(mockRoleSettings);
 
-        when(mockRoleSettings.getRead()).thenReturn(read);
         when(mockRoleSettings.getWrite()).thenReturn(write);
         when(mockRoleSettings.getCommit()).thenReturn(commit);
         when(mockRoleSettings.getAdmin()).thenReturn(admin);
@@ -63,10 +61,9 @@ public class CustomLdapUserDetailsServiceTest {
         @Test
         public void hasRead() {
             User mockUser = mock(User.class);
-            SimpleGrantedAuthority simpleGrantedAuthority = new SimpleGrantedAuthority("read");
+            SimpleGrantedAuthority simpleGrantedAuthority = new SimpleGrantedAuthority("DefaultAccessRole");
             when(mockUser.getAuthorities()).thenReturn(Collections.singletonList(simpleGrantedAuthority));
             customLdapUserDetailsServiceTest.settings = setupRoleSettings(
-                    Collections.singletonList("read"),
                     Collections.emptyList(),
                     Collections.emptyList(),
                     Collections.emptyList()
@@ -83,7 +80,6 @@ public class CustomLdapUserDetailsServiceTest {
             SimpleGrantedAuthority simpleGrantedAuthority = new SimpleGrantedAuthority("write");
             when(mockUser.getAuthorities()).thenReturn(Collections.singletonList(simpleGrantedAuthority));
             customLdapUserDetailsServiceTest.settings = setupRoleSettings(
-                    Collections.emptyList(),
                     Collections.singletonList("write"),
                     Collections.emptyList(),
                     Collections.emptyList()
@@ -100,7 +96,6 @@ public class CustomLdapUserDetailsServiceTest {
             SimpleGrantedAuthority simpleGrantedAuthority = new SimpleGrantedAuthority("commit");
             when(mockUser.getAuthorities()).thenReturn(Collections.singletonList(simpleGrantedAuthority));
             customLdapUserDetailsServiceTest.settings = setupRoleSettings(
-                    Collections.emptyList(),
                     Collections.emptyList(),
                     Collections.singletonList("commit"),
                     Collections.emptyList()
@@ -119,7 +114,6 @@ public class CustomLdapUserDetailsServiceTest {
             customLdapUserDetailsServiceTest.settings = setupRoleSettings(
                     Collections.emptyList(),
                     Collections.emptyList(),
-                    Collections.emptyList(),
                     Collections.singletonList("admin")
             );
 
@@ -129,29 +123,11 @@ public class CustomLdapUserDetailsServiceTest {
         }
 
         @Test
-        public void hasNoMatching() {
-            User mockUser = mock(User.class);
-            SimpleGrantedAuthority simpleGrantedAuthority = new SimpleGrantedAuthority("none");
-            when(mockUser.getAuthorities()).thenReturn(Collections.singletonList(simpleGrantedAuthority));
-            customLdapUserDetailsServiceTest.settings = setupRoleSettings(
-                    Collections.singletonList("read"),
-                    Collections.singletonList("write"),
-                    Collections.singletonList("commit"),
-                    Collections.singletonList("admin")
-            );
-
-            String output = customLdapUserDetailsServiceTest.resolveAccessRole(mockUser);
-
-            assertThat(output).isEqualTo("OCELOT_NONE");
-        }
-
-        @Test
         public void hasMultiple() {
             User mockUser = mock(User.class);
             SimpleGrantedAuthority simpleGrantedAuthority = new SimpleGrantedAuthority("admin");
             when(mockUser.getAuthorities()).thenReturn(Collections.singletonList(simpleGrantedAuthority));
             customLdapUserDetailsServiceTest.settings = setupRoleSettings(
-                    Collections.singletonList("read"),
                     Collections.singletonList("write"),
                     Collections.singletonList("commit"),
                     Collections.singletonList("admin")
