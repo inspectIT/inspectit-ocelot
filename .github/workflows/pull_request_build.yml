@@ -27,12 +27,6 @@ jobs:
       - uses: actions/checkout@v2
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
-      - name: assemble
-        run: ./gradlew assemble --max-workers=2
-      - name: test
-        run: ./gradlew test --max-workers=2
-      - name: systemTest
-        run: ./gradlew systemTest --max-workers=2
       - name: codeCoverage if oracle-jdk8
         if: job.container == 'sgrio/java:jdk_8_ubuntu'
         run: echo 'i would execute codecoverage'
@@ -53,7 +47,7 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: assemble
-        run: ./gradlew assemble --max-workers=2
+        run: ./gradlew assemble
       - name: attach
         run: |
           apk update && apk add curl
