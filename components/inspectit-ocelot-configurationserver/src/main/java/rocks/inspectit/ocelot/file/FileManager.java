@@ -8,6 +8,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
+import rocks.inspectit.ocelot.file.accessor.workingdirectory.AbstractWorkingDirectoryAccessor;
+import rocks.inspectit.ocelot.file.accessor.workingdirectory.WorkingDirectoryAccessor;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
@@ -43,6 +45,9 @@ public class FileManager {
     @Autowired
     private ApplicationEventPublisher eventPublisher;
 
+    @Autowired
+    private WorkingDirectoryAccessor workingDirectoryAccessor;
+
     /**
      * The path under which the file system accessible by this component lies.
      * This is the absolute, normalized path represented by {@link InspectitServerSettings#getWorkingDirectory()} with {@link #FILES_SUBFOLDER} appended.
@@ -54,6 +59,10 @@ public class FileManager {
     void init() throws IOException {
         filesRoot = Paths.get(config.getWorkingDirectory()).resolve(FILES_SUBFOLDER).toAbsolutePath().normalize();
         Files.createDirectories(filesRoot);
+    }
+
+    public AbstractWorkingDirectoryAccessor getWorkingDirectory() {
+        return workingDirectoryAccessor;
     }
 
     /**
@@ -156,65 +165,65 @@ public class FileManager {
         return new String(Files.readAllBytes(file), ENCODING);
     }
 
-    /**
-     * Creates or replaces the file under the given path with the given content.
-     * If required, parent directories are automatically created.
-     *
-     * @param path    the path of the file
-     * @param content the content of the file
-     * @throws IOException if the file could not be written
-     */
-    public synchronized void createOrReplaceFile(String path, String content) throws IOException {
-        assertValidSubPath(path);
-        Path file = filesRoot.resolve(path);
-        if (Files.exists(file) && !Files.isRegularFile(file)) {
-            throw new AccessDeniedException(path + " is a directory!");
-        }
-        FileUtils.forceMkdir(file.getParent().toFile());
-        Files.write(file, content.getBytes(ENCODING));
-        fireFileChangeEvent();
-    }
+//    /**
+//     * Creates or replaces the file under the given path with the given content.
+//     * If required, parent directories are automatically created.
+//     *
+//     * @param path    the path of the file
+//     * @param content the content of the file
+//     * @throws IOException if the file could not be written
+//     */
+//    public synchronized void createOrReplaceFile(String path, String content) throws IOException {
+//        assertValidSubPath(path);
+//        Path file = filesRoot.resolve(path);
+//        if (Files.exists(file) && !Files.isRegularFile(file)) {
+//            throw new AccessDeniedException(path + " is a directory!");
+//        }
+//        FileUtils.forceMkdir(file.getParent().toFile());
+//        Files.write(file, content.getBytes(ENCODING));
+//        fireFileChangeEvent();
+//    }
 
-    /**
-     * Deletes the given file. Does not delete directories.
-     *
-     * @param path the path of the file to delete
-     * @throws IOException if the file could not be deleted.
-     */
-    public synchronized void deleteFile(String path) throws IOException {
-        assertValidSubPath(path);
-        Path file = filesRoot.resolve(path);
-        if (Files.isRegularFile(file)) {
-            Files.delete(file);
-            fireFileChangeEvent();
-        } else {
-            throw new AccessDeniedException(path);
-        }
-    }
+//    /**
+//     * Deletes the given file. Does not delete directories.
+//     *
+//     * @param path the path of the file to delete
+//     * @throws IOException if the file could not be deleted.
+//     */
+//    public synchronized void deleteFile(String path) throws IOException {
+//        assertValidSubPath(path);
+//        Path file = filesRoot.resolve(path);
+//        if (Files.isRegularFile(file)) {
+//            Files.delete(file);
+//            fireFileChangeEvent();
+//        } else {
+//            throw new AccessDeniedException(path);
+//        }
+//    }
 
-    /**
-     * Moves and / or renames the given file or directories.
-     * Directories are moved including their contents.
-     *
-     * @param source      the source file or directory path
-     * @param destination the target file or directory path
-     * @throws IOException if the given file or directory could not be renamed / moved
-     */
-    public synchronized void move(String source, String destination) throws IOException {
-        assertValidSubPath(source);
-        assertValidSubPath(destination);
-        Path src = filesRoot.resolve(source);
-        Path dest = filesRoot.resolve(destination);
-
-        FileUtils.forceMkdir(dest.getParent().toFile());
-
-        if (Files.isDirectory(src)) {
-            FileUtils.moveDirectory(src.toFile(), dest.toFile());
-        } else {
-            FileUtils.moveFile(src.toFile(), dest.toFile());
-        }
-        fireFileChangeEvent();
-    }
+//    /**
+//     * Moves and / or renames the given file or directories.
+//     * Directories are moved including their contents.
+//     *
+//     * @param source      the source file or directory path
+//     * @param destination the target file or directory path
+//     * @throws IOException if the given file or directory could not be renamed / moved
+//     */
+//    public synchronized void move(String source, String destination) throws IOException {
+//        assertValidSubPath(source);
+//        assertValidSubPath(destination);
+//        Path src = filesRoot.resolve(source);
+//        Path dest = filesRoot.resolve(destination);
+//
+//        FileUtils.forceMkdir(dest.getParent().toFile());
+//
+//        if (Files.isDirectory(src)) {
+//            FileUtils.moveDirectory(src.toFile(), dest.toFile());
+//        } else {
+//            FileUtils.moveFile(src.toFile(), dest.toFile());
+//        }
+//        fireFileChangeEvent();
+//    }
 
     private void fireFileChangeEvent() {
         eventPublisher.publishEvent(new FileChangedEvent(this));

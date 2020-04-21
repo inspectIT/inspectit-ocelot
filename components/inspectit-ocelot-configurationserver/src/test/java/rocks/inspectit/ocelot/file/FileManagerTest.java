@@ -451,354 +451,354 @@ public class FileManagerTest {
     }
 
 
-    @Nested
-    class CreateOrReplaceFile {
-
-        @Test
-        void createNewFileInRootDirectory() throws Exception {
-            setupTestFiles("fileA=foo", "topB");
-
-            fm.createOrReplaceFile("myFile", "content");
-
-            assertThat(fm.readFile("myFile")).isEqualTo("content");
-            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
-        }
-
-        @Test
-        void createNewFileInSubDirectory() throws Exception {
-            setupTestFiles("fileA=foo", "topB");
-
-            fm.createOrReplaceFile("topB/../topB/./sub/myFile", "content");
-
-            assertThat(fm.readFile("topB/sub/myFile")).isEqualTo("content");
-            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
-        }
-
-
-        @Test
-        void removeFileContent() throws Exception {
-            setupTestFiles("fileA=foo", "topB");
-
-            fm.createOrReplaceFile("fileA", "");
-
-            assertThat(fm.readFile("fileA")).isEqualTo("");
-            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
-        }
-
-        @Test
-        void replaceFileContent() throws Exception {
-            setupTestFiles("topA/fileA=foo", "topB");
-
-            fm.createOrReplaceFile("topA/fileA", "bar");
-
-            assertThat(fm.readFile("topA/fileA")).isEqualTo("bar");
-            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
-        }
-
-        @Test
-        void writeToDirectory() {
-            setupTestFiles("topA/subA", "topB");
-
-            assertThatThrownBy(() -> fm.createOrReplaceFile("topA/subA", ""))
-                    .isInstanceOf(AccessDeniedException.class);
-        }
-
-        @Test
-        void verifyFilesOutsideWorkdirNotCreatable() {
-            setupTestFiles("top");
-
-            assertThatThrownBy(() -> fm.createOrReplaceFile(null, ""))
-                    .isInstanceOf(AccessDeniedException.class);
-            assertThatThrownBy(() -> fm.createOrReplaceFile("", ""))
-                    .isInstanceOf(AccessDeniedException.class);
-            assertThatThrownBy(() -> fm.createOrReplaceFile("./", ""))
-                    .isInstanceOf(AccessDeniedException.class);
-            assertThatThrownBy(() -> fm.createOrReplaceFile("../mydir", ""))
-                    .isInstanceOf(AccessDeniedException.class);
-            assertThatThrownBy(() -> fm.createOrReplaceFile("top/../../mydir", ""))
-                    .isInstanceOf(AccessDeniedException.class);
-            assertThatThrownBy(() -> fm.createOrReplaceFile("../../mydir", ""))
-                    .isInstanceOf(AccessDeniedException.class);
-        }
-    }
-
-
-    @Nested
-    class DeleteFile {
-
-        @Test
-        void deleteFileInRootDirect() throws Exception {
-            setupTestFiles("topA=foo", "topB");
-
-            fm.deleteFile("topA");
-
-            assertThat(fm.getFilesInDirectory("", true))
-                    .noneSatisfy((f) ->
-                            assertThat(f.getName()).isEqualTo("topA")
-                    );
-            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
-        }
+//    @Nested
+//    class CreateOrReplaceFile {
+//
+//        @Test
+//        void createNewFileInRootDirectory() throws Exception {
+//            setupTestFiles("fileA=foo", "topB");
+//
+//            fm.createOrReplaceFile("myFile", "content");
+//
+//            assertThat(fm.readFile("myFile")).isEqualTo("content");
+//            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
+//        }
+//
+//        @Test
+//        void createNewFileInSubDirectory() throws Exception {
+//            setupTestFiles("fileA=foo", "topB");
+//
+//            fm.createOrReplaceFile("topB/../topB/./sub/myFile", "content");
+//
+//            assertThat(fm.readFile("topB/sub/myFile")).isEqualTo("content");
+//            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
+//        }
+//
+//
+//        @Test
+//        void removeFileContent() throws Exception {
+//            setupTestFiles("fileA=foo", "topB");
+//
+//            fm.createOrReplaceFile("fileA", "");
+//
+//            assertThat(fm.readFile("fileA")).isEqualTo("");
+//            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
+//        }
+//
+//        @Test
+//        void replaceFileContent() throws Exception {
+//            setupTestFiles("topA/fileA=foo", "topB");
+//
+//            fm.createOrReplaceFile("topA/fileA", "bar");
+//
+//            assertThat(fm.readFile("topA/fileA")).isEqualTo("bar");
+//            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
+//        }
+//
+//        @Test
+//        void writeToDirectory() {
+//            setupTestFiles("topA/subA", "topB");
+//
+//            assertThatThrownBy(() -> fm.createOrReplaceFile("topA/subA", ""))
+//                    .isInstanceOf(AccessDeniedException.class);
+//        }
+//
+//        @Test
+//        void verifyFilesOutsideWorkdirNotCreatable() {
+//            setupTestFiles("top");
+//
+//            assertThatThrownBy(() -> fm.createOrReplaceFile(null, ""))
+//                    .isInstanceOf(AccessDeniedException.class);
+//            assertThatThrownBy(() -> fm.createOrReplaceFile("", ""))
+//                    .isInstanceOf(AccessDeniedException.class);
+//            assertThatThrownBy(() -> fm.createOrReplaceFile("./", ""))
+//                    .isInstanceOf(AccessDeniedException.class);
+//            assertThatThrownBy(() -> fm.createOrReplaceFile("../mydir", ""))
+//                    .isInstanceOf(AccessDeniedException.class);
+//            assertThatThrownBy(() -> fm.createOrReplaceFile("top/../../mydir", ""))
+//                    .isInstanceOf(AccessDeniedException.class);
+//            assertThatThrownBy(() -> fm.createOrReplaceFile("../../mydir", ""))
+//                    .isInstanceOf(AccessDeniedException.class);
+//        }
+//    }
 
 
-        @Test
-        void deleteFileInRootIndirect() throws Exception {
-            setupTestFiles("topA=foo", "topB");
-
-            fm.deleteFile("topB/.././topA");
-
-            assertThat(fm.getFilesInDirectory("", true))
-                    .noneSatisfy((f) ->
-                            assertThat(f.getName()).isEqualTo("topA")
-                    );
-            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
-        }
-
-
-        @Test
-        void deleteEmptyFile() throws Exception {
-            setupTestFiles("topA/subA/myFile=", "topA/subB");
-
-            fm.deleteFile("topA/subA/myFile");
-
-            assertThat(fm.getFilesInDirectory("", true))
-                    .hasSize(1)
-                    .anySatisfy((f) -> {
-                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getName()).isEqualTo("topA");
-                        assertThat(f.getChildren())
-                                .hasSize(2)
-                                .anySatisfy((f2) -> {
-                                    assertThat(f2.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                                    assertThat(f2.getName()).isEqualTo("subA");
-                                    assertThat(f2.getChildren()).isEmpty();
-                                })
-                                .anySatisfy((f2) -> {
-                                    assertThat(f2.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                                    assertThat(f2.getName()).isEqualTo("subB");
-                                    assertThat(f2.getChildren()).isEmpty();
-                                });
-                    });
-            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
-        }
-
-        @Test
-        void deleteNonExistingFile() {
-            setupTestFiles("topA/subA", "topB");
-
-            assertThatThrownBy(() -> fm.deleteFile("topC"))
-                    .isInstanceOf(AccessDeniedException.class);
-        }
-
-        @Test
-        void deleteDirectory() {
-            setupTestFiles("topA", "topB");
-
-            assertThatThrownBy(() -> fm.deleteFile("topA"))
-                    .isInstanceOf(AccessDeniedException.class);
-        }
-
-        @Test
-        void verifyDirOutsideWorkdirNotDeletable() {
-            setupTestFiles("top");
-
-            assertThatThrownBy(() -> fm.deleteFile(null))
-                    .isInstanceOf(AccessDeniedException.class);
-            assertThatThrownBy(() -> fm.deleteFile(""))
-                    .isInstanceOf(AccessDeniedException.class);
-            assertThatThrownBy(() -> fm.deleteFile("./"))
-                    .isInstanceOf(AccessDeniedException.class);
-            assertThatThrownBy(() -> fm.deleteFile("../myfile"))
-                    .isInstanceOf(AccessDeniedException.class);
-            assertThatThrownBy(() -> fm.deleteFile("top/../../myfile"))
-                    .isInstanceOf(AccessDeniedException.class);
-            assertThatThrownBy(() -> fm.deleteFile("../../myfile"))
-                    .isInstanceOf(AccessDeniedException.class);
-        }
-    }
-
-
-    @Nested
-    class Move {
-
-        @Test
-        void renameFile() throws Exception {
-            setupTestFiles("top", "foo=foo");
-
-            fm.move("foo", "bar");
-
-            assertThat(fm.getFilesInDirectory("", true))
-                    .hasSize(2)
-                    .anySatisfy((f) -> {
-                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getName()).isEqualTo("top");
-                    })
-                    .anySatisfy((f) -> {
-                        assertThat(f.getType()).isEqualTo(FileInfo.Type.FILE);
-                        assertThat(f.getName()).isEqualTo("bar");
-                    });
-            assertThat(fm.readFile("bar")).isEqualTo("foo");
-            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
-        }
+//    @Nested
+//    class DeleteFile {
+//
+//        @Test
+//        void deleteFileInRootDirect() throws Exception {
+//            setupTestFiles("topA=foo", "topB");
+//
+//            fm.deleteFile("topA");
+//
+//            assertThat(fm.getFilesInDirectory("", true))
+//                    .noneSatisfy((f) ->
+//                            assertThat(f.getName()).isEqualTo("topA")
+//                    );
+//            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
+//        }
+//
+//
+//        @Test
+//        void deleteFileInRootIndirect() throws Exception {
+//            setupTestFiles("topA=foo", "topB");
+//
+//            fm.deleteFile("topB/.././topA");
+//
+//            assertThat(fm.getFilesInDirectory("", true))
+//                    .noneSatisfy((f) ->
+//                            assertThat(f.getName()).isEqualTo("topA")
+//                    );
+//            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
+//        }
+//
+//
+//        @Test
+//        void deleteEmptyFile() throws Exception {
+//            setupTestFiles("topA/subA/myFile=", "topA/subB");
+//
+//            fm.deleteFile("topA/subA/myFile");
+//
+//            assertThat(fm.getFilesInDirectory("", true))
+//                    .hasSize(1)
+//                    .anySatisfy((f) -> {
+//                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+//                        assertThat(f.getName()).isEqualTo("topA");
+//                        assertThat(f.getChildren())
+//                                .hasSize(2)
+//                                .anySatisfy((f2) -> {
+//                                    assertThat(f2.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+//                                    assertThat(f2.getName()).isEqualTo("subA");
+//                                    assertThat(f2.getChildren()).isEmpty();
+//                                })
+//                                .anySatisfy((f2) -> {
+//                                    assertThat(f2.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+//                                    assertThat(f2.getName()).isEqualTo("subB");
+//                                    assertThat(f2.getChildren()).isEmpty();
+//                                });
+//                    });
+//            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
+//        }
+//
+//        @Test
+//        void deleteNonExistingFile() {
+//            setupTestFiles("topA/subA", "topB");
+//
+//            assertThatThrownBy(() -> fm.deleteFile("topC"))
+//                    .isInstanceOf(AccessDeniedException.class);
+//        }
+//
+//        @Test
+//        void deleteDirectory() {
+//            setupTestFiles("topA", "topB");
+//
+//            assertThatThrownBy(() -> fm.deleteFile("topA"))
+//                    .isInstanceOf(AccessDeniedException.class);
+//        }
+//
+//        @Test
+//        void verifyDirOutsideWorkdirNotDeletable() {
+//            setupTestFiles("top");
+//
+//            assertThatThrownBy(() -> fm.deleteFile(null))
+//                    .isInstanceOf(AccessDeniedException.class);
+//            assertThatThrownBy(() -> fm.deleteFile(""))
+//                    .isInstanceOf(AccessDeniedException.class);
+//            assertThatThrownBy(() -> fm.deleteFile("./"))
+//                    .isInstanceOf(AccessDeniedException.class);
+//            assertThatThrownBy(() -> fm.deleteFile("../myfile"))
+//                    .isInstanceOf(AccessDeniedException.class);
+//            assertThatThrownBy(() -> fm.deleteFile("top/../../myfile"))
+//                    .isInstanceOf(AccessDeniedException.class);
+//            assertThatThrownBy(() -> fm.deleteFile("../../myfile"))
+//                    .isInstanceOf(AccessDeniedException.class);
+//        }
+//    }
 
 
-        @Test
-        void renameFolder() throws Exception {
-            setupTestFiles("top", "foo/sub/something=text");
-
-            fm.move("foo/sub", "foo/bar");
-
-            assertThat(fm.getFilesInDirectory("", true))
-                    .hasSize(2)
-                    .anySatisfy((f) -> {
-                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getName()).isEqualTo("top");
-                        assertThat(f.getChildren()).isEmpty();
-                    })
-                    .anySatisfy((f) -> {
-                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getName()).isEqualTo("foo");
-                        assertThat(f.getChildren())
-                                .hasSize(1)
-                                .anySatisfy((f2) -> {
-                                    assertThat(f2.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                                    assertThat(f2.getName()).isEqualTo("bar");
-                                    assertThat(f2.getChildren())
-                                            .hasSize(1)
-                                            .anySatisfy((f3) -> {
-                                                assertThat(f3.getType()).isEqualTo(FileInfo.Type.FILE);
-                                                assertThat(f3.getName()).isEqualTo("something");
-                                            });
-                                });
-                    });
-            assertThat(fm.readFile("foo/bar/something")).isEqualTo("text");
-            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
-        }
-
-        @Test
-        void moveDirectoryWithContents() throws Exception {
-            setupTestFiles("top", "foo/sub/something=text", "foo/sub/a/b");
-
-            fm.move("foo/sub", "sub");
-
-            assertThat(fm.getFilesInDirectory("", true))
-                    .hasSize(3)
-                    .anySatisfy((f) -> {
-                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getName()).isEqualTo("top");
-                    })
-                    .anySatisfy((f) -> {
-                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getName()).isEqualTo("foo");
-                    })
-                    .anySatisfy((f) -> {
-                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getName()).isEqualTo("sub");
-                        assertThat(f.getChildren())
-                                .hasSize(2)
-                                .anySatisfy((f2) -> {
-                                    assertThat(f2.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                                    assertThat(f2.getName()).isEqualTo("a");
-                                    assertThat(f2.getChildren())
-                                            .hasSize(1)
-                                            .anySatisfy((f3) -> {
-                                                assertThat(f3.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                                                assertThat(f3.getName()).isEqualTo("b");
-                                                assertThat(f3.getChildren()).isEmpty();
-                                            });
-                                })
-                                .anySatisfy((f2) -> {
-                                    assertThat(f2.getType()).isEqualTo(FileInfo.Type.FILE);
-                                    assertThat(f2.getName()).isEqualTo("something");
-                                });
-                    });
-            assertThat(fm.readFile("sub/something")).isEqualTo("text");
-            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
-        }
-
-
-        @Test
-        void moveFile() throws Exception {
-            setupTestFiles("file=");
-
-            fm.move("file", "a/b/file");
-
-            assertThat(fm.getFilesInDirectory("", true))
-                    .hasSize(1)
-                    .anySatisfy((f) -> {
-                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getName()).isEqualTo("a");
-                        assertThat(f.getChildren())
-                                .hasSize(1)
-                                .anySatisfy((f2) -> {
-                                    assertThat(f2.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                                    assertThat(f2.getName()).isEqualTo("b");
-                                    assertThat(f2.getChildren())
-                                            .hasSize(1)
-                                            .anySatisfy((f3) -> {
-                                                assertThat(f3.getType()).isEqualTo(FileInfo.Type.FILE);
-                                                assertThat(f3.getName()).isEqualTo("file");
-                                            });
-                                });
-                    });
-            assertThat(fm.readFile("a/b/file")).isEqualTo("");
-            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
-        }
-
-
-        @Test
-        void moveNonExistingFile() throws Exception {
-            setupTestFiles("file=");
-
-            assertThatThrownBy(() -> fm.move("someFile", "anotherFile"))
-                    .isInstanceOf(FileNotFoundException.class);
-        }
-
-        @Test
-        void moveOntoExistingFile() throws Exception {
-            setupTestFiles("file=", "someFile=");
-
-            assertThatThrownBy(() -> fm.move("someFile", "file"))
-                    .isInstanceOf(FileExistsException.class);
-        }
-
-        @Test
-        void verifyDirOutsideWorkdirNotMoveable() {
-            setupTestFiles("top");
-
-            assertThatThrownBy(() -> fm.move(null, "sub"))
-                    .isInstanceOf(AccessDeniedException.class);
-            assertThatThrownBy(() -> fm.move("", "sub"))
-                    .isInstanceOf(AccessDeniedException.class);
-            assertThatThrownBy(() -> fm.move("/", "sub"))
-                    .isInstanceOf(AccessDeniedException.class);
-            assertThatThrownBy(() -> fm.move("./", "sub"))
-                    .isInstanceOf(AccessDeniedException.class);
-            assertThatThrownBy(() -> fm.move("../myfile", "sub"))
-                    .isInstanceOf(AccessDeniedException.class);
-            assertThatThrownBy(() -> fm.move("top/../../myfile", "sub"))
-                    .isInstanceOf(AccessDeniedException.class);
-            assertThatThrownBy(() -> fm.move("../../myfile", "sub"))
-                    .isInstanceOf(AccessDeniedException.class);
-        }
-
-        @Test
-        void verifyCannotMoveOutsideOfWorkDir() {
-            setupTestFiles("top");
-
-            assertThatThrownBy(() -> fm.move("top", null))
-                    .isInstanceOf(AccessDeniedException.class);
-            assertThatThrownBy(() -> fm.move("top", ""))
-                    .isInstanceOf(AccessDeniedException.class);
-            assertThatThrownBy(() -> fm.move("top", "/"))
-                    .isInstanceOf(AccessDeniedException.class);
-            assertThatThrownBy(() -> fm.move("top", "./"))
-                    .isInstanceOf(AccessDeniedException.class);
-            assertThatThrownBy(() -> fm.move("top", "../myfile"))
-                    .isInstanceOf(AccessDeniedException.class);
-            assertThatThrownBy(() -> fm.move("top", "top/../../myfile"))
-                    .isInstanceOf(AccessDeniedException.class);
-            assertThatThrownBy(() -> fm.move("top", "../../myfile"))
-                    .isInstanceOf(AccessDeniedException.class);
-        }
-    }
+//    @Nested
+//    class Move {
+//
+//        @Test
+//        void renameFile() throws Exception {
+//            setupTestFiles("top", "foo=foo");
+//
+//            fm.move("foo", "bar");
+//
+//            assertThat(fm.getFilesInDirectory("", true))
+//                    .hasSize(2)
+//                    .anySatisfy((f) -> {
+//                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+//                        assertThat(f.getName()).isEqualTo("top");
+//                    })
+//                    .anySatisfy((f) -> {
+//                        assertThat(f.getType()).isEqualTo(FileInfo.Type.FILE);
+//                        assertThat(f.getName()).isEqualTo("bar");
+//                    });
+//            assertThat(fm.readFile("bar")).isEqualTo("foo");
+//            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
+//        }
+//
+//
+//        @Test
+//        void renameFolder() throws Exception {
+//            setupTestFiles("top", "foo/sub/something=text");
+//
+//            fm.move("foo/sub", "foo/bar");
+//
+//            assertThat(fm.getFilesInDirectory("", true))
+//                    .hasSize(2)
+//                    .anySatisfy((f) -> {
+//                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+//                        assertThat(f.getName()).isEqualTo("top");
+//                        assertThat(f.getChildren()).isEmpty();
+//                    })
+//                    .anySatisfy((f) -> {
+//                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+//                        assertThat(f.getName()).isEqualTo("foo");
+//                        assertThat(f.getChildren())
+//                                .hasSize(1)
+//                                .anySatisfy((f2) -> {
+//                                    assertThat(f2.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+//                                    assertThat(f2.getName()).isEqualTo("bar");
+//                                    assertThat(f2.getChildren())
+//                                            .hasSize(1)
+//                                            .anySatisfy((f3) -> {
+//                                                assertThat(f3.getType()).isEqualTo(FileInfo.Type.FILE);
+//                                                assertThat(f3.getName()).isEqualTo("something");
+//                                            });
+//                                });
+//                    });
+//            assertThat(fm.readFile("foo/bar/something")).isEqualTo("text");
+//            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
+//        }
+//
+//        @Test
+//        void moveDirectoryWithContents() throws Exception {
+//            setupTestFiles("top", "foo/sub/something=text", "foo/sub/a/b");
+//
+//            fm.move("foo/sub", "sub");
+//
+//            assertThat(fm.getFilesInDirectory("", true))
+//                    .hasSize(3)
+//                    .anySatisfy((f) -> {
+//                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+//                        assertThat(f.getName()).isEqualTo("top");
+//                    })
+//                    .anySatisfy((f) -> {
+//                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+//                        assertThat(f.getName()).isEqualTo("foo");
+//                    })
+//                    .anySatisfy((f) -> {
+//                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+//                        assertThat(f.getName()).isEqualTo("sub");
+//                        assertThat(f.getChildren())
+//                                .hasSize(2)
+//                                .anySatisfy((f2) -> {
+//                                    assertThat(f2.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+//                                    assertThat(f2.getName()).isEqualTo("a");
+//                                    assertThat(f2.getChildren())
+//                                            .hasSize(1)
+//                                            .anySatisfy((f3) -> {
+//                                                assertThat(f3.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+//                                                assertThat(f3.getName()).isEqualTo("b");
+//                                                assertThat(f3.getChildren()).isEmpty();
+//                                            });
+//                                })
+//                                .anySatisfy((f2) -> {
+//                                    assertThat(f2.getType()).isEqualTo(FileInfo.Type.FILE);
+//                                    assertThat(f2.getName()).isEqualTo("something");
+//                                });
+//                    });
+//            assertThat(fm.readFile("sub/something")).isEqualTo("text");
+//            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
+//        }
+//
+//
+//        @Test
+//        void moveFile() throws Exception {
+//            setupTestFiles("file=");
+//
+//            fm.move("file", "a/b/file");
+//
+//            assertThat(fm.getFilesInDirectory("", true))
+//                    .hasSize(1)
+//                    .anySatisfy((f) -> {
+//                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+//                        assertThat(f.getName()).isEqualTo("a");
+//                        assertThat(f.getChildren())
+//                                .hasSize(1)
+//                                .anySatisfy((f2) -> {
+//                                    assertThat(f2.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+//                                    assertThat(f2.getName()).isEqualTo("b");
+//                                    assertThat(f2.getChildren())
+//                                            .hasSize(1)
+//                                            .anySatisfy((f3) -> {
+//                                                assertThat(f3.getType()).isEqualTo(FileInfo.Type.FILE);
+//                                                assertThat(f3.getName()).isEqualTo("file");
+//                                            });
+//                                });
+//                    });
+//            assertThat(fm.readFile("a/b/file")).isEqualTo("");
+//            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
+//        }
+//
+//
+//        @Test
+//        void moveNonExistingFile() throws Exception {
+//            setupTestFiles("file=");
+//
+//            assertThatThrownBy(() -> fm.move("someFile", "anotherFile"))
+//                    .isInstanceOf(FileNotFoundException.class);
+//        }
+//
+//        @Test
+//        void moveOntoExistingFile() throws Exception {
+//            setupTestFiles("file=", "someFile=");
+//
+//            assertThatThrownBy(() -> fm.move("someFile", "file"))
+//                    .isInstanceOf(FileExistsException.class);
+//        }
+//
+//        @Test
+//        void verifyDirOutsideWorkdirNotMoveable() {
+//            setupTestFiles("top");
+//
+//            assertThatThrownBy(() -> fm.move(null, "sub"))
+//                    .isInstanceOf(AccessDeniedException.class);
+//            assertThatThrownBy(() -> fm.move("", "sub"))
+//                    .isInstanceOf(AccessDeniedException.class);
+//            assertThatThrownBy(() -> fm.move("/", "sub"))
+//                    .isInstanceOf(AccessDeniedException.class);
+//            assertThatThrownBy(() -> fm.move("./", "sub"))
+//                    .isInstanceOf(AccessDeniedException.class);
+//            assertThatThrownBy(() -> fm.move("../myfile", "sub"))
+//                    .isInstanceOf(AccessDeniedException.class);
+//            assertThatThrownBy(() -> fm.move("top/../../myfile", "sub"))
+//                    .isInstanceOf(AccessDeniedException.class);
+//            assertThatThrownBy(() -> fm.move("../../myfile", "sub"))
+//                    .isInstanceOf(AccessDeniedException.class);
+//        }
+//
+//        @Test
+//        void verifyCannotMoveOutsideOfWorkDir() {
+//            setupTestFiles("top");
+//
+//            assertThatThrownBy(() -> fm.move("top", null))
+//                    .isInstanceOf(AccessDeniedException.class);
+//            assertThatThrownBy(() -> fm.move("top", ""))
+//                    .isInstanceOf(AccessDeniedException.class);
+//            assertThatThrownBy(() -> fm.move("top", "/"))
+//                    .isInstanceOf(AccessDeniedException.class);
+//            assertThatThrownBy(() -> fm.move("top", "./"))
+//                    .isInstanceOf(AccessDeniedException.class);
+//            assertThatThrownBy(() -> fm.move("top", "../myfile"))
+//                    .isInstanceOf(AccessDeniedException.class);
+//            assertThatThrownBy(() -> fm.move("top", "top/../../myfile"))
+//                    .isInstanceOf(AccessDeniedException.class);
+//            assertThatThrownBy(() -> fm.move("top", "../../myfile"))
+//                    .isInstanceOf(AccessDeniedException.class);
+//        }
+//    }
 }
