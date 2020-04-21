@@ -28,9 +28,9 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: used container
-        run: echo ${{ job.container }}
+        run: echo ${{ matrix.dockerimage }}
       - name: codeCoverage if oracle-jdk8
-        if: ${{ job.container }} == 'sgrio/java:jdk_8_ubuntu'
+        if: ${{ matrix.dockerimage }} == 'sgrio/java:jdk_8_ubuntu'
         run: echo 'i would execute codecoverage'
   jmh-compile:
     runs-on: ubuntu-latest
