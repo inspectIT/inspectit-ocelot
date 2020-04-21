@@ -7,7 +7,6 @@ import io.opencensus.stats.MeasureMap;
 import io.opencensus.stats.StatsRecorder;
 import io.opencensus.tags.TagContextBuilder;
 import io.opencensus.tags.TagKey;
-import io.opencensus.tags.TagValue;
 import io.opencensus.tags.Tagger;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +19,7 @@ import rocks.inspectit.ocelot.config.model.metrics.jmx.JmxMetricsRecorderSetting
 import rocks.inspectit.ocelot.core.metrics.MeasuresAndViewsManager;
 import rocks.inspectit.ocelot.core.metrics.system.AbstractPollingMetricsRecorder;
 import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
+import rocks.inspectit.ocelot.core.tags.TagUtils;
 
 import javax.management.ObjectName;
 import java.time.Duration;
@@ -72,9 +72,9 @@ public class JmxMetricsRecorder extends AbstractPollingMetricsRecorder implement
     JmxMetricsRecorder(Tagger tagger, MeasuresAndViewsManager measuresAndViewsManager, StatsRecorder statsRecorder, CommonTagsManager commonTagsManager) {
         super("metrics.jmx");
         this.tagger = tagger;
-        this.measureManager = measuresAndViewsManager;
-        this.recorder = statsRecorder;
-        this.commonTags = commonTagsManager;
+        measureManager = measuresAndViewsManager;
+        recorder = statsRecorder;
+        commonTags = commonTagsManager;
     }
 
     /**
@@ -85,8 +85,8 @@ public class JmxMetricsRecorder extends AbstractPollingMetricsRecorder implement
     @Override
     protected boolean doEnable(InspectitConfig configuration) {
         // create a new scraper, called on every update of every jmx setting
-        this.jmxScraper = createScraper(configuration.getMetrics().getJmx(), this);
-        this.lowerCaseMetricName = configuration.getMetrics().getJmx().isLowerCaseMetricName();
+        jmxScraper = createScraper(configuration.getMetrics().getJmx(), this);
+        lowerCaseMetricName = configuration.getMetrics().getJmx().isLowerCaseMetricName();
 
         // call super to handle scheduling
         return super.doEnable(configuration);
@@ -137,7 +137,7 @@ public class JmxMetricsRecorder extends AbstractPollingMetricsRecorder implement
             TagContextBuilder tagContextBuilder = tagger.currentBuilder();
             beanProperties.entrySet().stream()
                     .skip(1)
-                    .forEach(entry -> tagContextBuilder.putLocal(TagKey.create(entry.getKey()), TagValue.create(entry.getValue())));
+                    .forEach(entry -> tagContextBuilder.putLocal(TagKey.create(entry.getKey()), TagUtils.createTagValue(entry.getValue())));
 
             MeasureMap measureMap = recorder.newMeasureMap();
             measureMap.put(measure, metricValue);
