@@ -266,6 +266,28 @@ public class PercentileViewManagerTest {
             assertThat(result).hasSize(1);
             assertContainsMetric(result, "my/view_min", 42, "tag1", "foo", "tag2", "bar");
         }
+
+        @Test
+        void updateWithValueRecorded() {
+            viewManager.createOrUpdateView("my/measure", "my/view", "ms", "foo",
+                    true, false, Collections.emptyList(), 1, Collections.emptyList());
+            viewManager.recordMeasurement("my/measure", 42);
+            awaitMetricsProcessing();
+
+            viewManager.createOrUpdateView("my/measure", "my/view", "ms", "foo",
+                    true, false, Collections.emptyList(), 1, Arrays.asList("tag1", "tag2"));
+
+            try (Scope s = Tags.getTagger().emptyBuilder()
+                    .putLocal(TagKey.create("tag1"), TagValue.create("foo"))
+                    .putLocal(TagKey.create("tag2"), TagValue.create("bar")).buildScoped()) {
+                viewManager.recordMeasurement("my/measure", 42);
+            }
+            awaitMetricsProcessing();
+
+            Collection<Metric> result = viewManager.computeMetrics();
+            assertThat(result).hasSize(1);
+            assertContainsMetric(result, "my/view_min", 42, "tag1", "foo", "tag2", "bar");
+        }
     }
 
     @Nested
