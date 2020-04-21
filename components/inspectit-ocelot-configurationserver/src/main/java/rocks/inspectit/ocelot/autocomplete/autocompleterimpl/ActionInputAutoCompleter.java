@@ -19,10 +19,6 @@ import java.util.stream.Collectors;
 @Component
 public class ActionInputAutoCompleter implements AutoCompleter {
 
-    private final static String ACTION_LITERAL = "action";
-
-    private final static String INPUT_FILTER_ONSET = "_";
-
     private final static String SECTION_PLACEHOLDER = "SECTION_PLACEHOLDER";
 
     private final static String INPUT_PLACEHOLDER = "INPUT_PLACEHOLDER";
@@ -59,6 +55,9 @@ public class ActionInputAutoCompleter implements AutoCompleter {
 
     private static List<List<String>> actionInputUsagePaths;
 
+    @Autowired
+    private ConfigurationQueryHelper configurationQueryHelper;
+
     static {
         setupUsagePaths();
     }
@@ -81,9 +80,6 @@ public class ActionInputAutoCompleter implements AutoCompleter {
         }
     }
 
-    @Autowired
-    private ConfigurationQueryHelper configurationQueryHelper;
-
     /**
      * Checks if the given path leads to an action attribute, e.g.
      * "inspectit.instrumentation.rules.my-rule.entry.my-entry-method.data-input" and returns
@@ -91,6 +87,7 @@ public class ActionInputAutoCompleter implements AutoCompleter {
      * Ignores action inputs that start with the String defined in INPUT_FILTER_ONSET.
      *
      * @param path A given path as List. Each String should act as a literal of the path.
+     *
      * @return A List of Strings resembling the declared actions that could be used with the given path.
      */
     @Override
@@ -108,13 +105,14 @@ public class ActionInputAutoCompleter implements AutoCompleter {
      * INPUT_FILTER_ONSET.
      *
      * @param path A given path as List. Each String should act as a literal of the path.
+     *
      * @return A List of Strings resembling the declared actions that could be used with the given path.
      */
     private List<String> getActionInputs(List<String> path) {
         return buildActionPaths(path).stream()
                 .flatMap(actionPath -> configurationQueryHelper.getKeysForPath(actionPath).stream())
                 .distinct()
-                .filter(value -> !value.startsWith(INPUT_FILTER_ONSET))
+                .filter(value -> !value.startsWith("_"))
                 .collect(Collectors.toList());
     }
 
@@ -127,6 +125,7 @@ public class ActionInputAutoCompleter implements AutoCompleter {
      * ["inspectit","instrumentation","actions","action_B","input"] is returned.
      *
      * @param path A given path as List. Each String should act as a literal of the path.
+     *
      * @return A List containing String Lists. Each of these Lists resemble one path as described.
      */
     private List<List<String>> buildActionPaths(List<String> path) {
@@ -146,11 +145,12 @@ public class ActionInputAutoCompleter implements AutoCompleter {
      * found under "inspectit.instrumentation.rules.my-rule.entry.my-entry-method.action" are returned.
      *
      * @param path A List of Strings resembling a path to a rule-input.
+     *
      * @return The actions declared in this rule.
      */
     private List<String> getActions(List<String> path) {
         List<String> actionDeclarationPath = new ArrayList<>(path);
-        actionDeclarationPath.set(ACTION_INPUT_DEFAULT_USAGE_PATH.indexOf(INPUT_PLACEHOLDER), ACTION_LITERAL);
+        actionDeclarationPath.set(ACTION_INPUT_DEFAULT_USAGE_PATH.indexOf(INPUT_PLACEHOLDER), "action");
         return configurationQueryHelper.getKeysForPath(actionDeclarationPath);
     }
 }
