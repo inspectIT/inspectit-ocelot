@@ -221,7 +221,7 @@ public class PercentileViewManager {
         return measuresToViewsMap.values()
                 .stream()
                 .flatMap(Collection::stream)
-                .map(view -> view.computeMetrics(now))
+                .flatMap(view -> view.computeMetrics(now).stream())
                 .collect(Collectors.toList());
     }
 

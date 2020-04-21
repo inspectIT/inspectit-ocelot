@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 
@@ -101,17 +102,52 @@ public class PercentileViewTest {
         }
 
         @Test
-        void checkMMetricDescriptor() {
+        void checkQuantileMetricDescriptor() {
+            PercentileView view = new PercentileView(false, false, ImmutableSet.of(0.5),
+                    ImmutableSet.of("my_tag"), 10, "name", "unit", "description");
+
+            Timestamp queryTime = Timestamp.fromMillis(10);
+            Collection<Metric> result = view.computeMetrics(queryTime);
+            assertThat(result).hasSize(1);
+            MetricDescriptor descriptor = result.iterator().next().getMetricDescriptor();
+
+            assertThat(descriptor.getName()).isEqualTo("name");
+            assertThat(descriptor.getDescription()).isEqualTo("description");
+            assertThat(descriptor.getLabelKeys()).containsExactly(LabelKey.create("my_tag", ""), LabelKey.create("quantile", ""));
+            assertThat(descriptor.getUnit()).isEqualTo("unit");
+            assertThat(descriptor.getType()).isEqualTo(MetricDescriptor.Type.GAUGE_DOUBLE);
+        }
+
+        @Test
+        void checkMinMetricDescriptor() {
             PercentileView view = new PercentileView(true, false, Collections.emptySet(),
                     ImmutableSet.of("my_tag"), 10, "name", "unit", "description");
 
             Timestamp queryTime = Timestamp.fromMillis(10);
-            Metric result = view.computeMetrics(queryTime);
-            MetricDescriptor descriptor = result.getMetricDescriptor();
+            Collection<Metric> result = view.computeMetrics(queryTime);
+            assertThat(result).hasSize(1);
+            MetricDescriptor descriptor = result.iterator().next().getMetricDescriptor();
 
-            assertThat(descriptor.getName()).isEqualTo("name");
+            assertThat(descriptor.getName()).isEqualTo("name_min");
             assertThat(descriptor.getDescription()).isEqualTo("description");
-            assertThat(descriptor.getLabelKeys()).containsExactly(LabelKey.create("my_tag", ""), LabelKey.create("p", ""));
+            assertThat(descriptor.getLabelKeys()).containsExactly(LabelKey.create("my_tag", ""));
+            assertThat(descriptor.getUnit()).isEqualTo("unit");
+            assertThat(descriptor.getType()).isEqualTo(MetricDescriptor.Type.GAUGE_DOUBLE);
+        }
+
+        @Test
+        void checkMaxMetricDescriptor() {
+            PercentileView view = new PercentileView(false, true, Collections.emptySet(),
+                    ImmutableSet.of("my_tag"), 10, "name", "unit", "description");
+
+            Timestamp queryTime = Timestamp.fromMillis(10);
+            Collection<Metric> result = view.computeMetrics(queryTime);
+            assertThat(result).hasSize(1);
+            MetricDescriptor descriptor = result.iterator().next().getMetricDescriptor();
+
+            assertThat(descriptor.getName()).isEqualTo("name_max");
+            assertThat(descriptor.getDescription()).isEqualTo("description");
+            assertThat(descriptor.getLabelKeys()).containsExactly(LabelKey.create("my_tag", ""));
             assertThat(descriptor.getUnit()).isEqualTo("unit");
             assertThat(descriptor.getType()).isEqualTo(MetricDescriptor.Type.GAUGE_DOUBLE);
         }
@@ -127,12 +163,14 @@ public class PercentileViewTest {
             view.insertValue(100, Timestamp.fromMillis(4), createTagContext("my_tag", "bar"));
 
             Timestamp queryTime = Timestamp.fromMillis(10);
-            Metric result = view.computeMetrics(queryTime);
+            Collection<Metric> results = view.computeMetrics(queryTime);
+            assertThat(results).hasSize(1);
+            Metric result = results.iterator().next();
 
             assertThat(result.getTimeSeriesList())
                     .hasSize(2)
                     .anySatisfy(series -> {
-                        assertThat(series.getLabelValues()).containsExactly(LabelValue.create("foo"), LabelValue.create("min"));
+                        assertThat(series.getLabelValues()).containsExactly(LabelValue.create("foo"));
                         assertThat(series.getPoints())
                                 .hasSize(1)
                                 .anySatisfy(pt -> {
@@ -140,7 +178,7 @@ public class PercentileViewTest {
                                     assertThat(pt.getValue()).isEqualTo(Value.doubleValue(42));
                                 });
                     }).anySatisfy(series -> {
-                assertThat(series.getLabelValues()).containsExactly(LabelValue.create("bar"), LabelValue.create("min"));
+                assertThat(series.getLabelValues()).containsExactly(LabelValue.create("bar"));
                 assertThat(series.getPoints())
                         .hasSize(1)
                         .anySatisfy(pt -> {
@@ -161,12 +199,14 @@ public class PercentileViewTest {
             view.insertValue(100, Timestamp.fromMillis(4), createTagContext("my_tag", "bar"));
 
             Timestamp queryTime = Timestamp.fromMillis(10);
-            Metric result = view.computeMetrics(queryTime);
+            Collection<Metric> results = view.computeMetrics(queryTime);
+            assertThat(results).hasSize(1);
+            Metric result = results.iterator().next();
 
             assertThat(result.getTimeSeriesList())
                     .hasSize(2)
                     .anySatisfy(series -> {
-                        assertThat(series.getLabelValues()).containsExactly(LabelValue.create("foo"), LabelValue.create("max"));
+                        assertThat(series.getLabelValues()).containsExactly(LabelValue.create("foo"));
                         assertThat(series.getPoints())
                                 .hasSize(1)
                                 .anySatisfy(pt -> {
@@ -174,7 +214,7 @@ public class PercentileViewTest {
                                     assertThat(pt.getValue()).isEqualTo(Value.doubleValue(99));
                                 });
                     }).anySatisfy(series -> {
-                assertThat(series.getLabelValues()).containsExactly(LabelValue.create("bar"), LabelValue.create("max"));
+                assertThat(series.getLabelValues()).containsExactly(LabelValue.create("bar"));
                 assertThat(series.getPoints())
                         .hasSize(1)
                         .anySatisfy(pt -> {
@@ -195,7 +235,9 @@ public class PercentileViewTest {
             }
 
             Timestamp queryTime = Timestamp.fromMillis(10);
-            Metric result = view.computeMetrics(queryTime);
+            Collection<Metric> results = view.computeMetrics(queryTime);
+            assertThat(results).hasSize(1);
+            Metric result = results.iterator().next();
 
             assertThat(result.getTimeSeriesList())
                     .hasSize(4)

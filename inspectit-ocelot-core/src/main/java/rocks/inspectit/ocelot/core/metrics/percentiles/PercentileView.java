@@ -18,7 +18,6 @@ import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Holds the data for a given measurement splitted by a provided set of tags over a given time window.
@@ -29,17 +28,17 @@ public class PercentileView {
     /**
      * The tag to use for the percentile or "min","max" respectively.
      */
-    private static final String PERCENTILE_TAG_KEY = "p";
+    private static final String PERCENTILE_TAG_KEY = "quantile";
 
     /**
      * The tag value to use for {@link #PERCENTILE_TAG_KEY} for the "minimum" series.
      */
-    private static final String MIN_TAG = "min";
+    private static final String MIN_METRIC_SUFFIX = "_min";
 
     /**
      * The tag value to use for {@link #PERCENTILE_TAG_KEY} for the "maximum" series.
      */
-    private static final String MAX_TAG = "max";
+    private static final String MAX_METRIC_SUFFIX = "_max";
 
     /**
      * The formatter used to print percentiles to tags.
@@ -49,19 +48,17 @@ public class PercentileView {
     /**
      * The descriptor of the metric for this view.
      */
-    private MetricDescriptor metricDescriptor;
+    private MetricDescriptor percentileMetricDescriptor;
 
     /**
-     * If true, the minimum value will be exposed as a gauge.
+     * If not null, the minimum value will be exposed as this gauge.
      */
-    @Getter
-    private boolean minEnabled;
+    private MetricDescriptor minMetricDescriptor;
 
     /**
-     * If true, the maximum value will be exposed as a gauge.
+     * If not null, the maximum value will be exposed as this gauge.
      */
-    @Getter
-    private boolean maxEnabled;
+    private MetricDescriptor maxMetricDescriptor;
 
     /**
      * The percentiles to compute in the range (0,1)
@@ -129,12 +126,19 @@ public class PercentileView {
         this.viewName = viewName;
         this.unit = unit;
         this.description = description;
-        minEnabled = includeMin;
-        maxEnabled = includeMax;
         this.percentiles = new HashSet<>(percentiles);
 
-        List<LabelKey> labelKeys = getLabelKeysInOrder();
-        metricDescriptor = MetricDescriptor.create(viewName, description, unit, MetricDescriptor.Type.GAUGE_DOUBLE, labelKeys);
+        List<LabelKey> percentileLabelKeys = getLabelKeysInOrderForPercentiles();
+        List<LabelKey> minMaxLabelKeys = getLabelKeysInOrderForMinMax();
+        if (!percentiles.isEmpty()) {
+            percentileMetricDescriptor = MetricDescriptor.create(viewName, description, unit, MetricDescriptor.Type.GAUGE_DOUBLE, percentileLabelKeys);
+        }
+        if (includeMin) {
+            minMetricDescriptor = MetricDescriptor.create(viewName + MIN_METRIC_SUFFIX, description, unit, MetricDescriptor.Type.GAUGE_DOUBLE, minMaxLabelKeys);
+        }
+        if (includeMax) {
+            maxMetricDescriptor = MetricDescriptor.create(viewName + MAX_METRIC_SUFFIX, description, unit, MetricDescriptor.Type.GAUGE_DOUBLE, minMaxLabelKeys);
+        }
     }
 
     private void validateConfiguration(boolean includeMin, boolean includeMax, Set<Double> percentiles, long timeWindowMillis,
@@ -199,8 +203,8 @@ public class PercentileView {
      *
      * @return the metrics containing the percentiles and min / max
      */
-    Metric computeMetrics(Timestamp time) {
-        List<TimeSeries> resultSeries = new ArrayList<>();
+    Collection<Metric> computeMetrics(Timestamp time) {
+        ResultSeriesCollector resultSeries = new ResultSeriesCollector();
         for (Map.Entry<List<String>, WindowedDoubleQueue> series : seriesValues.entrySet()) {
             List<String> tagValues = series.getKey();
             WindowedDoubleQueue queue = series.getValue();
@@ -213,14 +217,31 @@ public class PercentileView {
                 }
             }
             if (data != null) {
-                resultSeries.addAll(computeSeries(tagValues, data, time));
+                computeSeries(tagValues, data, time, resultSeries);
             }
         }
-        return Metric.create(metricDescriptor, resultSeries);
+        List<Metric> resultMetrics = new ArrayList<>();
+        if (!percentiles.isEmpty()) {
+            resultMetrics.add(Metric.create(percentileMetricDescriptor, resultSeries.percentileSeries));
+        }
+        if (isMinEnabled()) {
+            resultMetrics.add(Metric.create(minMetricDescriptor, resultSeries.minSeries));
+        }
+        if (isMaxEnabled()) {
+            resultMetrics.add(Metric.create(maxMetricDescriptor, resultSeries.maxSeries));
+        }
+        return resultMetrics;
     }
 
-    private List<TimeSeries> computeSeries(List<String> tagValues, double[] data, Timestamp time) {
-        List<TimeSeries> results = new ArrayList<>();
+    boolean isMinEnabled() {
+        return minMetricDescriptor != null;
+    }
+
+    boolean isMaxEnabled() {
+        return maxMetricDescriptor != null;
+    }
+
+    private void computeSeries(List<String> tagValues, double[] data, Timestamp time, ResultSeriesCollector resultSeries) {
         if (isMinEnabled() || isMaxEnabled()) {
             double minValue = Double.MAX_VALUE;
             double maxValue = -Double.MAX_VALUE;
@@ -229,10 +250,10 @@ public class PercentileView {
                 maxValue = Math.max(maxValue, value);
             }
             if (isMinEnabled()) {
-                results.add(createTimeSeries(time, minValue, tagValues, MIN_TAG));
+                resultSeries.addMinimum(minValue, time, tagValues);
             }
             if (isMaxEnabled()) {
-                results.add(createTimeSeries(time, maxValue, tagValues, MAX_TAG));
+                resultSeries.addMaximum(maxValue, time, tagValues);
             }
         }
         if (!percentiles.isEmpty()) {
@@ -240,11 +261,9 @@ public class PercentileView {
             percentileComputer.setData(data);
             for (double percentile : percentiles) {
                 double percentileValue = percentileComputer.evaluate(percentile * 100);
-                String percentileTag = getPercentileTag(percentile);
-                results.add(createTimeSeries(time, percentileValue, tagValues, percentileTag));
+                resultSeries.addPercentile(percentileValue, time, tagValues, percentile);
             }
         }
-        return results;
     }
 
     @VisibleForTesting
@@ -266,19 +285,29 @@ public class PercentileView {
         return Arrays.asList(tagValues);
     }
 
-    private List<LabelValue> toLabelValues(List<String> tagValues, String percentileTag) {
-        return Stream.concat(
-                tagValues
-                        .stream()
-                        .map(LabelValue::create),
-                Stream.of(LabelValue.create(percentileTag))
-        ).collect(Collectors.toList());
+    private List<LabelValue> toLabelValues(List<String> tagValues) {
+        return tagValues
+                .stream()
+                .map(LabelValue::create)
+                .collect(Collectors.toList());
     }
 
-    private List<LabelKey> getLabelKeysInOrder() {
+    private List<LabelValue> toLabelValuesWithPercentile(List<String> tagValues, double percentile) {
+        List<LabelValue> result = new ArrayList<>(toLabelValues(tagValues));
+        result.add(LabelValue.create(getPercentileTag(percentile)));
+        return result;
+    }
+
+    private List<LabelKey> getLabelKeysInOrderForPercentiles() {
         LabelKey[] keys = new LabelKey[tagIndices.size() + 1];
         tagIndices.forEach((tag, index) -> keys[index] = LabelKey.create(tag, ""));
         keys[keys.length - 1] = LabelKey.create(PERCENTILE_TAG_KEY, "");
+        return Arrays.asList(keys);
+    }
+
+    private List<LabelKey> getLabelKeysInOrderForMinMax() {
+        LabelKey[] keys = new LabelKey[tagIndices.size()];
+        tagIndices.forEach((tag, index) -> keys[index] = LabelKey.create(tag, ""));
         return Arrays.asList(keys);
     }
 
@@ -286,10 +315,28 @@ public class PercentileView {
         return Duration.ofSeconds(time.getSeconds()).toMillis() + Duration.ofNanos(time.getNanos()).toMillis();
     }
 
-    private TimeSeries createTimeSeries(Timestamp time, double value, List<String> tags, String percentileTag) {
-        Point point = Point.create(Value.doubleValue(value), time);
-        List<LabelValue> labelValues = toLabelValues(tags, percentileTag);
-        return TimeSeries.createWithOnePoint(labelValues, point, time);
+    private class ResultSeriesCollector {
+
+        private List<TimeSeries> minSeries = new ArrayList<>();
+
+        private List<TimeSeries> maxSeries = new ArrayList<>();
+
+        private List<TimeSeries> percentileSeries = new ArrayList<>();
+
+        void addMinimum(double value, Timestamp time, List<String> tags) {
+            Point pt = Point.create(Value.doubleValue(value), time);
+            minSeries.add(TimeSeries.createWithOnePoint(toLabelValues(tags), pt, time));
+        }
+
+        void addMaximum(double value, Timestamp time, List<String> tags) {
+            Point pt = Point.create(Value.doubleValue(value), time);
+            maxSeries.add(TimeSeries.createWithOnePoint(toLabelValues(tags), pt, time));
+        }
+
+        void addPercentile(double value, Timestamp time, List<String> tags, double percentile) {
+            Point pt = Point.create(Value.doubleValue(value), time);
+            percentileSeries.add(TimeSeries.createWithOnePoint(toLabelValuesWithPercentile(tags, percentile), pt, time));
+        }
     }
 
 }
