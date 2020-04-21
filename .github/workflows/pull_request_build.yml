@@ -28,11 +28,11 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: assemble
-        run: ./gradlew assemble
+        run: ./gradlew assemble --max-workers=2
       - name: test
-        run: ./gradlew test
+        run: ./gradlew test --max-workers=2
       - name: systemTest
-        run: ./gradlew systemTest
+        run: ./gradlew systemTest --max-workers=2
   jmh-compile:
     runs-on: ubuntu-latest
     container: openjdk:8-jdk
@@ -62,4 +62,3 @@ jobs:
           pwd
           java -jar inspectit-ocelot-agent/build/inspectit-ocelot-agent-SNAPSHOT.jar $processId
           curl -4 -o /dev/null -s -w "%{http_code}" --connect-timeout 2 --max-time 2  --retry 3 --retry-delay 3 --retry-max-time 10 --retry-connrefuse http://localhost:8888
-
