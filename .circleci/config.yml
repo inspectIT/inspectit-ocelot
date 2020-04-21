@@ -191,10 +191,12 @@ workflows:
   build_and_test:
     jobs:
       - checkout
-      - sys-oracle8-codecov: &requires_checkout
+      - sys-oracle8-codecov:
           requires:
            - checkout
-
+          filters:
+            branches:
+              only: master
       - deploy-master-documentation:
           requires:
             - sys-oracle8-codecov
