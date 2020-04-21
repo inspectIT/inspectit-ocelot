@@ -44,12 +44,6 @@ public class HttpServiceOutMetricTest {
     @BeforeEach
     void setupWiremock() throws Exception {
         wireMockServer = new WireMockServer(options().port(PORT));
-        wireMockServer.addMockServiceRequestListener((req, resp) -> {
-            InternalInspectitContext ctx = Instances.contextManager.enterNewContext();
-            ctx.setData("prop_target_service", targetName);
-            ctx.makeActive();
-            ctx.close();
-        });
         wireMockServer.start();
         configureFor(wireMockServer.port());
 
@@ -71,8 +65,6 @@ public class HttpServiceOutMetricTest {
 
         @Test
         void testInternalCallRecording() throws Exception {
-            targetName = "apache_test";
-
             RequestConfig.Builder requestBuilder = RequestConfig.custom();
             HttpClientBuilder builder = HttpClientBuilder.create();
             builder.setDefaultRequestConfig(requestBuilder.build());
@@ -82,15 +74,19 @@ public class HttpServiceOutMetricTest {
                     CloseableHttpClient.class,
                     Class.forName("org.apache.http.impl.client.InternalHttpClient")), 10, TimeUnit.SECONDS);
 
+            InternalInspectitContext serviceOverride = Instances.contextManager.enterNewContext();
+            serviceOverride.setData("service", "apache_sg_test");
+            serviceOverride.makeActive();
             client.execute(URIUtils.extractHost(URI.create(TEST_URL)), new HttpGet(TEST_URL));
             client.close();
+            serviceOverride.close();
 
             TestUtils.waitForOpenCensusQueueToBeProcessed();
 
             Map<String, String> tags = new HashMap<>();
             tags.put("protocol", "http");
-            tags.put("service", SERVICE_NAME);
-            tags.put("target_service", targetName);
+            tags.put("service", "apache_sg_test");
+            tags.put("target_service", SERVICE_NAME);
 
             long cnt = ((AggregationData.CountData) TestUtils.getDataForView("service/out/count", tags)).getCount();
             double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("service/out/responsetime/sum", tags)).getSum();
@@ -110,15 +106,19 @@ public class HttpServiceOutMetricTest {
 
             TestUtils.waitForClassInstrumentation(Class.forName("sun.net.www.protocol.http.HttpURLConnection"), 10, TimeUnit.SECONDS);
 
+            InternalInspectitContext serviceOverride = Instances.contextManager.enterNewContext();
+            serviceOverride.setData("service", "httpurlconn_sg_test");
+            serviceOverride.makeActive();
             HttpURLConnection urlConnection = (HttpURLConnection) new URL(TEST_URL).openConnection();
             urlConnection.getResponseCode();
+            serviceOverride.close();
 
             TestUtils.waitForOpenCensusQueueToBeProcessed();
 
             Map<String, String> tags = new HashMap<>();
             tags.put("protocol", "http");
-            tags.put("service", SERVICE_NAME);
-            tags.put("target_service", targetName);
+            tags.put("service", "httpurlconn_sg_test");
+            tags.put("target_service", SERVICE_NAME);
 
             long cnt = ((AggregationData.CountData) TestUtils.getDataForView("service/out/count", tags)).getCount();
             double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("service/out/responsetime/sum", tags)).getSum();

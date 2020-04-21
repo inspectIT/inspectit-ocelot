@@ -29,14 +29,14 @@ inspectit:
         scopes:
           EntryPointDetectionTest-methods: true
         entry:
-          method_name: {action: set, data-input: {value: _methodName}}
-          entry_point_found: {action: set, constant-input: {value: true}}
+          method_name: {action: a_assign_value, data-input: {value: _methodName}}
+          entry_point_found: {action: a_assign_value, constant-input: {value: true}}
           is_entry_point:
             only-if-null: entry_point_found
             order:
               reads-before-written:
                 entry_point_found : true
-            action: set
+            action: a_assign_value
             constant-input: {value: 1}
         metrics:
           '[entrypoint/invocations]':

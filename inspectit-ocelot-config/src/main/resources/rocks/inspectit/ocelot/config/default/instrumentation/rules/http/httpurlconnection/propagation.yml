@@ -1,0 +1,30 @@
+# ----------------------------------------------------------------------------------
+# Defines Rules and Actions enabling down & up propagation on HTTPUrlConnection
+# ----------------------------------------------------------------------------------
+inspectit:
+  instrumentation:
+    rules:
+
+      # Writes down-propagated data to the HTTP Headers
+      'r_httpurlconnection_down_propagation':
+        include:
+          'r_httpurlconnection_detect_entry': true
+        scopes:
+          's_httpurlconnection_connect': true
+          's_httpurlconnection_getOutputStream': true
+          's_httpurlconnection_getInputStream': true
+        post-entry:
+          do_down_propagation:
+            only-if-true: 'http_is_entry'
+            action: 'a_httpurlconnection_downPropagation'
+
+      # Reads up-propagated data from the response HTTP Headers
+      'r_httpurlconnection_up_propagation':
+        include:
+          'r_httpurlconnection_detect_entry': true
+        scopes:
+          's_httpurlconnection_getInputStream': true
+        pre-exit:
+          'do_up_propagation':
+            only-if-true: 'http_is_entry'
+            action: 'a_httpurlconnection_upPropagation'
