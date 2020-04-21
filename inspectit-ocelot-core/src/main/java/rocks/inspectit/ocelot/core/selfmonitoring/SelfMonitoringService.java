@@ -165,7 +165,7 @@ public class SelfMonitoringService {
             );
 
             if (log.isTraceEnabled()) {
-                log.trace(String.format("%s reported %.1fμs", componentName, durationInMicros));
+                log.trace(String.format("%s reported %.1f\u00B5s", componentName, durationInMicros));
             }
         }
     }
