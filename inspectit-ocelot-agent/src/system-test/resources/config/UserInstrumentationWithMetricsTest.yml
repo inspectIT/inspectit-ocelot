@@ -36,12 +36,12 @@ inspectit:
         scopes:
           UserInstrumentationWithMetricsTest-invocationCount : true
         entry:
-          current_method_name:  {action: get_method_fqn}
+          current_method_name:  {action: a_method_getFQN}
         metrics:
           '[my/invocation]':
             value: 42
             data-tags: {method_name: current_method_name, user_tag: user_tag}
 
-      record_method_duration:
+      r_method_metric:
         scopes:
           UserInstrumentationWithMetricsTest-responseTimeMeasuring: true

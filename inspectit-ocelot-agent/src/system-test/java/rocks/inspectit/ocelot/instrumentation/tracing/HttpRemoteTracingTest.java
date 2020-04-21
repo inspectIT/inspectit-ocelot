@@ -60,6 +60,11 @@ public class HttpRemoteTracingTest extends TraceTestBase {
         @Override
         public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
             super.service(req, res);
+            myHandler();
+        }
+
+        public void myHandler() {
+
         }
     }
 
@@ -93,7 +98,7 @@ public class HttpRemoteTracingTest extends TraceTestBase {
                                 assertThat(sp.getParentSpanId()).isNull();
                             })
                             .anySatisfy((sp) -> {
-                                assertThat(sp.getName()).endsWith("TracingServlet.service");
+                                assertThat(sp.getName()).endsWith("TracingServlet.myHandler");
                                 assertThat(sp.getKind()).isEqualTo(Span.Kind.SERVER);
                                 assertThat(sp.getParentSpanId()).isNotNull();
                             })
@@ -142,7 +147,7 @@ public class HttpRemoteTracingTest extends TraceTestBase {
                                 assertThat(sp.getParentSpanId()).isNull();
                             })
                             .anySatisfy((sp) -> {
-                                assertThat(sp.getName()).endsWith("TracingServlet.service");
+                                assertThat(sp.getName()).endsWith("TracingServlet.myHandler");
                                 assertThat(sp.getKind()).isEqualTo(Span.Kind.SERVER);
                                 assertThat(sp.getParentSpanId()).isNotNull();
                             })
