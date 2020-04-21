@@ -33,6 +33,9 @@ jobs:
         run: ./gradlew test --max-workers=2 --no-daemon
       - name: systemTest
         run: ./gradlew systemTest --max-workers=2 --no-daemon
+      - name: codeCoverage if oracle-jdk8
+        if: job.container == 'sgrio/java:jdk_8_ubuntu'
+        run: echo 'i would execute codecoverage'
   jmh-compile:
     runs-on: ubuntu-latest
     container: openjdk:8-jdk
