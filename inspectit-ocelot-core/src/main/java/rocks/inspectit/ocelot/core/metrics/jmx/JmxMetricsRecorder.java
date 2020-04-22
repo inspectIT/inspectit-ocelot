@@ -5,7 +5,6 @@ import io.opencensus.common.Scope;
 import io.opencensus.stats.Measure;
 import io.opencensus.tags.TagContextBuilder;
 import io.opencensus.tags.TagKey;
-import io.opencensus.tags.TagValue;
 import io.opencensus.tags.Tagger;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +17,7 @@ import rocks.inspectit.ocelot.config.model.metrics.jmx.JmxMetricsRecorderSetting
 import rocks.inspectit.ocelot.core.metrics.MeasuresAndViewsManager;
 import rocks.inspectit.ocelot.core.metrics.system.AbstractPollingMetricsRecorder;
 import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
+import rocks.inspectit.ocelot.core.tags.TagUtils;
 
 import javax.management.ObjectName;
 import java.time.Duration;
@@ -134,7 +134,7 @@ public class JmxMetricsRecorder extends AbstractPollingMetricsRecorder implement
             TagContextBuilder tagContextBuilder = tagger.currentBuilder();
             beanProperties.entrySet().stream()
                     .skip(1)
-                    .forEach(entry -> tagContextBuilder.putLocal(TagKey.create(entry.getKey()), TagValue.create(entry.getValue())));
+                    .forEach(entry -> tagContextBuilder.putLocal(TagKey.create(entry.getKey()), TagUtils.createTagValue(entry.getValue())));
 
             measureManager.tryRecordingMeasurement(measure.getName(), metricValue, tagContextBuilder.build());
         });

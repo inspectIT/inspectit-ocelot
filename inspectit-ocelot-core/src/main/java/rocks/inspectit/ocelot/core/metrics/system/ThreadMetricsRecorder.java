@@ -2,12 +2,12 @@ package rocks.inspectit.ocelot.core.metrics.system;
 
 import io.opencensus.tags.TagContext;
 import io.opencensus.tags.TagKey;
-import io.opencensus.tags.TagValue;
 import io.opencensus.tags.Tagger;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import rocks.inspectit.ocelot.config.model.metrics.MetricsSettings;
+import rocks.inspectit.ocelot.core.tags.TagUtils;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
@@ -77,7 +77,7 @@ public class ThreadMetricsRecorder extends AbstractPollingMetricsRecorder {
     private void recordStateMetric() {
         String stateMeasureName = METRIC_NAME_PREFIX + STATE_METRIC_NAME;
         for (Thread.State state : Thread.State.values()) {
-            TagContext tags = tagger.currentBuilder().putLocal(stateTag, TagValue.create(state.name())).build();
+            TagContext tags = tagger.currentBuilder().putLocal(stateTag, TagUtils.createTagValue(state.name())).build();
             long count = Arrays.stream(threadBean.getThreadInfo(threadBean.getAllThreadIds()))
                     .filter(Objects::nonNull)
                     .map(ThreadInfo::getThreadState)

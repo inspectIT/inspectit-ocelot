@@ -3,12 +3,12 @@ package rocks.inspectit.oce.eum.server.metrics;
 import io.opencensus.stats.*;
 import io.opencensus.tags.TagContextBuilder;
 import io.opencensus.tags.TagKey;
-import io.opencensus.tags.TagValue;
 import io.opencensus.tags.Tags;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
+import rocks.inspectit.oce.eum.server.utils.TagUtils;
 import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings;
 import rocks.inspectit.ocelot.config.model.metrics.definition.ViewDefinitionSettings;
 
@@ -127,7 +127,7 @@ public class MeasuresAndViewsManager {
         TagContextBuilder tagContextBuilder = Tags.getTagger().currentBuilder();
 
         for (Map.Entry<String, String> extraTag : configuration.getTags().getExtra().entrySet()) {
-            tagContextBuilder.putLocal(TagKey.create(extraTag.getKey()), TagValue.create(extraTag.getValue()));
+            tagContextBuilder.putLocal(TagKey.create(extraTag.getKey()), TagUtils.createTagValue(extraTag.getValue()));
         }
 
         return tagContextBuilder;
@@ -144,7 +144,7 @@ public class MeasuresAndViewsManager {
         TagContextBuilder tagContextBuilder = getTagContext();
 
         for (Map.Entry<String, String> customTag : customTags.entrySet()) {
-            tagContextBuilder.putLocal(TagKey.create(customTag.getKey()), TagValue.create(customTag.getValue()));
+            tagContextBuilder.putLocal(TagKey.create(customTag.getKey()), TagUtils.createTagValue(customTag.getValue()));
         }
 
         return tagContextBuilder;
