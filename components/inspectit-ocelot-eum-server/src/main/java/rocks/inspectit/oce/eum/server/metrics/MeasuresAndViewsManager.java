@@ -12,7 +12,6 @@ import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration
 import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings;
 import rocks.inspectit.ocelot.config.model.metrics.definition.ViewDefinitionSettings;
 
-import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -68,8 +67,7 @@ public class MeasuresAndViewsManager {
      */
     public void updateMetrics(String name, MetricDefinitionSettings metricDefinition) {
         if (!metrics.containsKey(name)) {
-            MetricDefinitionSettings populatedMetricDefinition = metricDefinition.getCopyWithDefaultsPopulated(name, Duration
-                    .ofSeconds(15));
+            MetricDefinitionSettings populatedMetricDefinition = metricDefinition.getCopyWithDefaultsPopulated(name);
             Measure measure = createMeasure(name, populatedMetricDefinition);
             metrics.put(name, measure);
             updateViews(name, populatedMetricDefinition);

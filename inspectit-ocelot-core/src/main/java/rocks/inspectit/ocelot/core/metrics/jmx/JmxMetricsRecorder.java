@@ -150,7 +150,7 @@ public class JmxMetricsRecorder extends AbstractPollingMetricsRecorder implement
                         .build()
                 )
                 .build()
-                .getCopyWithDefaultsPopulated(metricName, null); //percentile views are not used, therefore no time window is needed
+                .getCopyWithDefaultsPopulated(metricName);
 
         measureManager.addOrUpdateAndCacheMeasureWithViews(metricName, definitionSettingsWithLastValueView);
         return measureManager.getMeasureDouble(metricName).get();

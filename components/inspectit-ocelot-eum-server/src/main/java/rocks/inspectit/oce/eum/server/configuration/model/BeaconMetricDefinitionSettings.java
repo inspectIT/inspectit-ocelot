@@ -11,7 +11,6 @@ import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -50,8 +49,8 @@ public class BeaconMetricDefinitionSettings extends MetricDefinitionSettings {
     }
 
     @Override
-    public BeaconMetricDefinitionSettings getCopyWithDefaultsPopulated(String metricName, Duration defaultTimeWindow) {
-        MetricDefinitionSettings metricDefinition = super.getCopyWithDefaultsPopulated(metricName, defaultTimeWindow);
+    public BeaconMetricDefinitionSettings getCopyWithDefaultsPopulated(String metricName) {
+        MetricDefinitionSettings metricDefinition = super.getCopyWithDefaultsPopulated(metricName);
 
         return beaconMetricBuilder()
                 .beaconRequirements(getBeaconRequirements())

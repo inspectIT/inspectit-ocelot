@@ -92,6 +92,9 @@ public class ViewDefinitionSettings {
             result.description(aggregation.getReadableName() + " of " + measureDescription + " [" + unit + "]");
         }
         if (timeWindow == null) {
+            if (defaultTimeWindow == null && aggregation == Aggregation.QUANTILES) {
+                throw new IllegalArgumentException("A default time window must be provided for quantile views");
+            }
             result.timeWindow(defaultTimeWindow);
         }
         return result.build();

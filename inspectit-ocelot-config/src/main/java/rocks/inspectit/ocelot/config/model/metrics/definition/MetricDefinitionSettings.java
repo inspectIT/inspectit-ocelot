@@ -54,6 +54,18 @@ public class MetricDefinitionSettings {
 
     /**
      * Copies the settings of this object but applies the defaults, like creating a default view if no views were defined.
+     * Does not provide a default time window for windowed views.
+     *
+     * @param metricName the name of the measure, derived form the key in {@link MetricsSettings#getDefinitions()}
+     *
+     * @return a copy of this view definition with the default populated
+     */
+    public MetricDefinitionSettings getCopyWithDefaultsPopulated(String metricName) {
+        return getCopyWithDefaultsPopulated(metricName, null);
+    }
+
+    /**
+     * Copies the settings of this object but applies the defaults, like creating a default view if no views were defined.
      *
      * @param metricName        the name of the measure, derived form the key in {@link MetricsSettings#getDefinitions()}
      * @param defaultTimeWindow the size of the time window to use as default for windowed metrics (e.g. quantiles)
