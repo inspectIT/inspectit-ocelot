@@ -40,6 +40,11 @@ inspectit:
         retention-policy: "autogen"
         # If true, the specified database will be created with the autogen retention policy
         create-database: true
+        # If disabled, the raw values of each counter will be written to the InfluxDB on each export.
+        # When enabled, only the change of the counter in comparison to the previous export will be written.
+        # This difference will only be written if the counter has changed (=the difference is non-zero).
+        # This can greatly reduce the total data written to influx and makes writing queries easier.
+        counters-as-differences: true
 
     # settings for trace exporters
     tracing:

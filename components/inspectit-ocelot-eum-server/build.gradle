@@ -61,7 +61,7 @@ dependencies {
 			'com.maxmind.geoip2:geoip2:2.12.0',
 			'commons-net:commons-net:3.3',
 			'org.springframework.boot:spring-boot-starter-actuator',
-            "rocks.inspectit:opencensus-influxdb-exporter:1.0",
+            "rocks.inspectit:opencensus-influxdb-exporter:1.1",
 			"org.influxdb:influxdb-java:2.15"
 	)
 	compileOnly "org.projectlombok:lombok:1.18.4"

@@ -54,6 +54,14 @@ When enabled, all metrics are sent via gRCP to the OpenCensus Agent. By default,
 If enabled, metrics are pushed at a specified interval directly to a given influxDB v1.x instance.
 To enable the InfluxDB Exporters, it is only required to specify the `url`.
 
+The InfluxDB exporter provides a special handling for counter and sum metrics which is enabled by default and can be disabled using the `counters-as-differences` option.
+When querying the data, usually the absolute value of such counters is irrelevant.
+Instead all that matters is how much the counter has increased within a certain time interval.
+With the `counters-as-differences` option enabled, counters are preprocessed before being exported.
+Instead of writing the absolute value of each counter to InfluxDB, only the increase since the last export is exported.
+In addition no value will be exported, if the counter has not changed since the last export.
+This can greatly reduce the amount of data written to influx in case your counter metrics don't change between every export.
+
 |Property |Default| Description
 |---|---|---|
 |`inspectit.exporters.metrics.influx.enabled`|`true`|If true, the agent will try to start the Influx exporter, if also the `url` is not empty.
@@ -64,3 +72,4 @@ To enable the InfluxDB Exporters, it is only required to specify the `url`.
 |`inspectit.exporters.metrics.influx.retention-policy`|`autogen`| The retention policy of the database to use for writing metrics.
 |`inspectit.exporters.metrics.influx.create-database`|`true`| If enabled, the database defined by the `database` property is automatically created on startup with an `autogen` retention policy if it does not exist yet.
 |`inspectit.exporters.metrics.influx.export-interval`|refers to `inspectit.metrics.frequency`|Defines how often metrics are pushed to the influxDB.
+|`inspectit.exporters.metrics.influx.counters-as-differences`|`true`|Defines whether counters are exported using their absolute value or as the increase between exports
