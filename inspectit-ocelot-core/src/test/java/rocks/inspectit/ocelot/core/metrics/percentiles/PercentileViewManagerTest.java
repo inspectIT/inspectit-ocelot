@@ -258,6 +258,7 @@ public class PercentileViewManagerTest {
                     .buildScoped()) {
                 viewManager.recordMeasurement("my/measure", 1000);
             }
+            awaitMetricsProcessing();
 
             Collection<Metric> result = viewManager.computeMetrics();
 
