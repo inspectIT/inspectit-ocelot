@@ -1,8 +1,5 @@
 package rocks.inspectit.ocelot.core.metrics.system;
 
-import io.opencensus.stats.Measure;
-import io.opencensus.stats.StatsRecorder;
-import io.opencensus.stats.ViewManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
@@ -11,9 +8,6 @@ import rocks.inspectit.ocelot.core.metrics.MeasuresAndViewsManager;
 import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * Base class for dynamically enableable metrics recorders.
  */
@@ -21,26 +15,10 @@ import java.util.Map;
 public abstract class AbstractMetricsRecorder extends DynamicallyActivatableService {
 
     @Autowired
-    protected StatsRecorder recorder;
-
-    @Autowired
-    protected ViewManager viewManager;
-
-    @Autowired
     protected MeasuresAndViewsManager measureManager;
 
     @Autowired
     protected CommonTagsManager commonTags;
-
-    /**
-     * Storage for lazily created long measures.
-     */
-    private Map<String, Measure.MeasureLong> createdMeasureLongs = new HashMap<>();
-
-    /**
-     * Storage for lazily created double measures.
-     */
-    private Map<String, Measure.MeasureDouble> createdMeasureDoubles = new HashMap<>();
 
     /**
      * Constructor.
@@ -63,6 +41,7 @@ public abstract class AbstractMetricsRecorder extends DynamicallyActivatableServ
      * The master switch does not need to be checked, this is handled by {@link AbstractMetricsRecorder}.
      *
      * @param ms the metrics settings
+     *
      * @return true if the recorder should be enabled
      */
     protected abstract boolean checkEnabledForConfig(MetricsSettings ms);

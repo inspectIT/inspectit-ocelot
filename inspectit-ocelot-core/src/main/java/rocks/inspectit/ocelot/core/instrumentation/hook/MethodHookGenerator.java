@@ -1,7 +1,6 @@
 package rocks.inspectit.ocelot.core.instrumentation.hook;
 
 import com.google.common.annotations.VisibleForTesting;
-import io.opencensus.stats.StatsRecorder;
 import io.opencensus.trace.Sampler;
 import io.opencensus.trace.samplers.Samplers;
 import lombok.extern.slf4j.Slf4j;
@@ -46,9 +45,6 @@ public class MethodHookGenerator {
     private MeasuresAndViewsManager metricsManager;
 
     @Autowired
-    private StatsRecorder statsRecorder;
-
-    @Autowired
     private ActionCallGenerator actionCallGenerator;
 
     @Autowired
@@ -66,6 +62,7 @@ public class MethodHookGenerator {
      * @param declaringClass teh class defining the method which is being hooked
      * @param method         a method descriptor of the hooked method
      * @param config         the configuration to use for building the hook
+     *
      * @return the generated method hook
      */
     public MethodHook buildHook(Class<?> declaringClass, MethodDescription method, MethodHookConfiguration config) {
@@ -95,7 +92,6 @@ public class MethodHookGenerator {
 
         return builder.build();
     }
-
 
     private List<IHookAction> buildTracingEntryActions(RuleTracingSettings tracing) {
         if (tracing.getStartSpan() || tracing.getContinueSpan() != null) {
@@ -176,7 +172,6 @@ public class MethodHookGenerator {
             }
         }
 
-
         return result;
     }
 
@@ -187,7 +182,7 @@ public class MethodHookGenerator {
                     .map(this::buildMetricAccessor)
                     .collect(Collectors.toList());
 
-            MetricsRecorder recorder = new MetricsRecorder(metricAccessors, commonTagsManager, metricsManager, statsRecorder);
+            MetricsRecorder recorder = new MetricsRecorder(metricAccessors, commonTagsManager, metricsManager);
             return Optional.of(recorder);
         } else {
             return Optional.empty();
@@ -223,6 +218,5 @@ public class MethodHookGenerator {
         }
         return result;
     }
-
 
 }

@@ -1,8 +1,6 @@
 package rocks.inspectit.ocelot.core.metrics.jmx;
 
 import io.opencensus.stats.Measure;
-import io.opencensus.stats.MeasureMap;
-import io.opencensus.stats.StatsRecorder;
 import io.opencensus.tags.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -35,14 +33,11 @@ class JmxMetricsRecorderTest {
     MeasuresAndViewsManager measuresManager;
 
     @Mock
-    StatsRecorder statsRecorder;
-
-    @Mock
     CommonTagsManager commonTagsManager;
 
     @BeforeEach
     public void initMocks() {
-        this.jmxMetricsRecorder = new JmxMetricsRecorder(tagger, measuresManager, statsRecorder, commonTagsManager);
+        jmxMetricsRecorder = new JmxMetricsRecorder(tagger, measuresManager, commonTagsManager);
     }
 
     @Nested
@@ -50,9 +45,6 @@ class JmxMetricsRecorderTest {
 
         @Mock
         Measure.MeasureDouble measureDoubleMock;
-
-        @Mock
-        MeasureMap measureMap;
 
         @Captor
         ArgumentCaptor<MetricDefinitionSettings> definitionCaptor;
@@ -63,7 +55,7 @@ class JmxMetricsRecorderTest {
             double value = 1.2565;
             String expectedMeasureName = "jvm/jmx/my/domain/att";
             when(measuresManager.getMeasureDouble(expectedMeasureName)).thenReturn(Optional.of(measureDoubleMock));
-            when(statsRecorder.newMeasureMap()).thenReturn(measureMap);
+            when(measureDoubleMock.getName()).thenReturn(expectedMeasureName);
             when(tagger.currentBuilder()).thenReturn(tagContextBuilder);
 
             jmxMetricsRecorder.recordBean("my.domain", new LinkedHashMap<>(), new LinkedList<>(), "att", null, "desc", value);
@@ -72,11 +64,9 @@ class JmxMetricsRecorderTest {
             assertThat(InternalUtils.getTags(tagContext)).isEmpty();
 
             verify(measuresManager).getMeasureDouble(expectedMeasureName);
-            verify(statsRecorder).newMeasureMap();
             verify(tagger).currentBuilder();
-            verify(measureMap).put(measureDoubleMock, value);
-            verify(measureMap).record(tagContext);
-            verifyNoMoreInteractions(measuresManager, statsRecorder, commonTagsManager, tagger);
+            verify(measuresManager).tryRecordingMeasurement(expectedMeasureName, value, tagContext);
+            verifyNoMoreInteractions(measuresManager, commonTagsManager, tagger);
         }
 
         @Test
@@ -84,7 +74,7 @@ class JmxMetricsRecorderTest {
             TagContextBuilder tagContextBuilder = Tags.getTagger().emptyBuilder();
             String expectedMeasureName = "jvm/jmx/my/domain/attbool";
             when(measuresManager.getMeasureDouble(expectedMeasureName)).thenReturn(Optional.of(measureDoubleMock));
-            when(statsRecorder.newMeasureMap()).thenReturn(measureMap);
+            when(measureDoubleMock.getName()).thenReturn(expectedMeasureName);
             when(tagger.currentBuilder()).thenReturn(tagContextBuilder);
 
             jmxMetricsRecorder.recordBean("my.domain", new LinkedHashMap<>(), new LinkedList<>(), "attbool", null, "desc", Boolean.TRUE);
@@ -93,11 +83,9 @@ class JmxMetricsRecorderTest {
             assertThat(InternalUtils.getTags(tagContext)).isEmpty();
 
             verify(measuresManager).getMeasureDouble(expectedMeasureName);
-            verify(statsRecorder).newMeasureMap();
             verify(tagger).currentBuilder();
-            verify(measureMap).put(measureDoubleMock, 1d);
-            verify(measureMap).record(tagContext);
-            verifyNoMoreInteractions(measuresManager, statsRecorder, commonTagsManager, tagger);
+            verify(measuresManager).tryRecordingMeasurement(expectedMeasureName, 1d, tagContext);
+            verifyNoMoreInteractions(measuresManager, commonTagsManager, tagger);
         }
 
         @Test
@@ -105,7 +93,7 @@ class JmxMetricsRecorderTest {
             TagContextBuilder tagContextBuilder = Tags.getTagger().emptyBuilder();
             String expectedMeasureName = "jvm/jmx/my/domain/attbool";
             when(measuresManager.getMeasureDouble(expectedMeasureName)).thenReturn(Optional.of(measureDoubleMock));
-            when(statsRecorder.newMeasureMap()).thenReturn(measureMap);
+            when(measureDoubleMock.getName()).thenReturn(expectedMeasureName);
             when(tagger.currentBuilder()).thenReturn(tagContextBuilder);
 
             jmxMetricsRecorder.recordBean("my.domain", new LinkedHashMap<>(), new LinkedList<>(), "attbool", null, "desc", Boolean.FALSE);
@@ -114,11 +102,9 @@ class JmxMetricsRecorderTest {
             assertThat(InternalUtils.getTags(tagContext)).isEmpty();
 
             verify(measuresManager).getMeasureDouble(expectedMeasureName);
-            verify(statsRecorder).newMeasureMap();
             verify(tagger).currentBuilder();
-            verify(measureMap).put(measureDoubleMock, 0d);
-            verify(measureMap).record(tagContext);
-            verifyNoMoreInteractions(measuresManager, statsRecorder, commonTagsManager, tagger);
+            verify(measuresManager).tryRecordingMeasurement(expectedMeasureName, 0d, tagContext);
+            verifyNoMoreInteractions(measuresManager, commonTagsManager, tagger);
         }
 
         @Test
@@ -126,8 +112,9 @@ class JmxMetricsRecorderTest {
             TagContextBuilder tagContextBuilder = Tags.getTagger().emptyBuilder();
             double value = 1.2565;
             String expectedMeasureName = "jvm/jmx/my/domain/att";
-            when(measuresManager.getMeasureDouble(expectedMeasureName)).thenReturn(Optional.empty()).thenReturn(Optional.of(measureDoubleMock));
-            when(statsRecorder.newMeasureMap()).thenReturn(measureMap);
+            when(measureDoubleMock.getName()).thenReturn(expectedMeasureName);
+            when(measuresManager.getMeasureDouble(expectedMeasureName)).thenReturn(Optional.empty())
+                    .thenReturn(Optional.of(measureDoubleMock));
             when(tagger.currentBuilder()).thenReturn(tagContextBuilder);
 
             jmxMetricsRecorder.recordBean("my.domain", new LinkedHashMap<>(), new LinkedList<>(), "att", null, "desc", value);
@@ -137,11 +124,9 @@ class JmxMetricsRecorderTest {
 
             verify(measuresManager, times(2)).getMeasureDouble(expectedMeasureName);
             verify(measuresManager).addOrUpdateAndCacheMeasureWithViews(eq(expectedMeasureName), definitionCaptor.capture());
-            verify(statsRecorder).newMeasureMap();
             verify(tagger).currentBuilder();
-            verify(measureMap).put(measureDoubleMock, value);
-            verify(measureMap).record(tagContext);
-            verifyNoMoreInteractions(measuresManager, statsRecorder, commonTagsManager, tagger);
+            verify(measuresManager).tryRecordingMeasurement(expectedMeasureName, value, tagContext);
+            verifyNoMoreInteractions(measuresManager, commonTagsManager, tagger);
 
             assertThat(definitionCaptor.getValue()).satisfies(metricDefinitionSettings -> {
                 assertThat(metricDefinitionSettings.getDescription()).isEqualTo("desc");
@@ -165,8 +150,8 @@ class JmxMetricsRecorderTest {
             beanProps.put("prop2", "Prop2Value");
             beanProps.put("prop3", "Prop3Value");
             String expectedMeasureName = "jvm/jmx/my/domain/Prop1Value/key1/key2/att";
+            when(measureDoubleMock.getName()).thenReturn(expectedMeasureName);
             when(measuresManager.getMeasureDouble(expectedMeasureName)).thenReturn(Optional.of(measureDoubleMock));
-            when(statsRecorder.newMeasureMap()).thenReturn(measureMap);
             when(tagger.currentBuilder()).thenReturn(tagContextBuilder);
 
             jmxMetricsRecorder.recordBean("my.domain", beanProps, attributes, "att", null, "desc", value);
@@ -183,25 +168,23 @@ class JmxMetricsRecorderTest {
                     });
 
             verify(measuresManager).getMeasureDouble(expectedMeasureName);
-            verify(statsRecorder).newMeasureMap();
             verify(tagger).currentBuilder();
-            verify(measureMap).put(measureDoubleMock, value);
-            verify(measureMap).record(tagContext);
-            verifyNoMoreInteractions(measuresManager, statsRecorder, commonTagsManager, tagger);
+            verify(measuresManager).tryRecordingMeasurement(expectedMeasureName, value, tagContext);
+            verifyNoMoreInteractions(measuresManager, commonTagsManager, tagger);
         }
 
         @Test
         public void valueNegative() {
             jmxMetricsRecorder.recordBean(null, null, null, null, null, null, -1d);
 
-            verifyNoMoreInteractions(measuresManager, statsRecorder, commonTagsManager);
+            verifyNoMoreInteractions(measuresManager, commonTagsManager);
         }
 
         @Test
         public void valueNotNumber() {
             jmxMetricsRecorder.recordBean(null, null, null, null, null, null, "something");
 
-            verifyNoMoreInteractions(measuresManager, statsRecorder, commonTagsManager);
+            verifyNoMoreInteractions(measuresManager, commonTagsManager);
         }
 
     }

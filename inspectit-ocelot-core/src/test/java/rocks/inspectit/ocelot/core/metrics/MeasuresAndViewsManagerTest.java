@@ -1,25 +1,25 @@
 package rocks.inspectit.ocelot.core.metrics;
 
+import com.google.common.collect.ImmutableMap;
 import io.opencensus.stats.*;
 import io.opencensus.tags.TagKey;
+import io.opencensus.tags.Tags;
 import org.assertj.core.util.Maps;
+import org.junit.AssumptionViolatedException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Answers;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
-import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings;
 import rocks.inspectit.ocelot.config.model.metrics.definition.ViewDefinitionSettings;
+import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
+import rocks.inspectit.ocelot.core.metrics.percentiles.PercentileViewManager;
 import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.time.Duration;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyMap;
@@ -32,12 +32,17 @@ public class MeasuresAndViewsManagerTest {
     @Mock
     ViewManager viewManager;
 
-
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     InspectitEnvironment environment;
 
     @Mock
     CommonTagsManager commonTagsManager;
+
+    @Mock
+    StatsRecorder recorder;
+
+    @Mock
+    PercentileViewManager percentileViewManager;
 
     private final TagKey[] commonTags = {TagKey.create("common-A"), TagKey.create("common-B")};
 
@@ -54,7 +59,9 @@ public class MeasuresAndViewsManagerTest {
                     .unit("my-unit")
                     .build();
             when(environment.getCurrentConfig().getMetrics().isEnabled()).thenReturn(true);
-            when(environment.getCurrentConfig().getMetrics().getDefinitions()).thenReturn(Maps.newHashMap(metricName, metricDefinition));
+            when(environment.getCurrentConfig()
+                    .getMetrics()
+                    .getDefinitions()).thenReturn(Maps.newHashMap(metricName, metricDefinition));
             when(viewManager.getAllExportedViews()).thenReturn(Collections.emptySet());
 
             manager.updateMetricDefinitions();
@@ -69,77 +76,101 @@ public class MeasuresAndViewsManagerTest {
     }
 
     @Nested
-    class TryRecordingMeasurement {
+    class RecordingMeasurement {
 
         @Mock
         MeasureMap measureMap;
 
         private static final String DOUBLE_METRIC = "my-double";
+
         private static final String LONG_METRIC = "my-long";
 
         @BeforeEach
-        void defineMetrics() {
+        void defineMetricsAndSetupMock() {
+            lenient().doReturn(measureMap).when(recorder).newMeasureMap();
+
             MetricDefinitionSettings doubleMetric = MetricDefinitionSettings.builder()
                     .unit("my-unit")
                     .build()
-                    .getCopyWithDefaultsPopulated(DOUBLE_METRIC);
+                    .getCopyWithDefaultsPopulated(DOUBLE_METRIC, Duration.ofMillis(123));
             manager.addOrUpdateAndCacheMeasureWithViews(DOUBLE_METRIC, doubleMetric, emptyMap(), emptyMap());
 
             MetricDefinitionSettings longMetric = MetricDefinitionSettings.builder()
                     .unit("my-unit")
                     .type(MetricDefinitionSettings.MeasureType.LONG)
                     .build()
-                    .getCopyWithDefaultsPopulated(LONG_METRIC);
+                    .getCopyWithDefaultsPopulated(LONG_METRIC, Duration.ofMillis(123));
             manager.addOrUpdateAndCacheMeasureWithViews(LONG_METRIC, longMetric, emptyMap(), emptyMap());
         }
 
         @Test
         void tryRecordingDoubleMetric() {
-            manager.tryRecordingMeasurement(DOUBLE_METRIC, measureMap, 42.0);
+            manager.tryRecordingMeasurement(DOUBLE_METRIC, 42.0);
 
-            verify(measureMap, times(1)).put(any(Measure.MeasureDouble.class), eq(42.0));
-            verify(measureMap, never()).put(any(Measure.MeasureLong.class), any(long.class));
+            verify(recorder).newMeasureMap();
+            verify(measureMap).put(any(Measure.MeasureDouble.class), eq(42.0));
+            verify(measureMap).record(eq(Tags.getTagger().getCurrentTagContext()));
+            verifyNoMoreInteractions(recorder);
+            verifyNoMoreInteractions(measureMap);
+            verify(percentileViewManager).recordMeasurement(DOUBLE_METRIC, 42.0, Tags.getTagger()
+                    .getCurrentTagContext());
         }
 
         @Test
         void tryRecordingLongMetric() {
-            manager.tryRecordingMeasurement(LONG_METRIC, measureMap, 42L);
+            manager.tryRecordingMeasurement(LONG_METRIC, 42L);
 
-            verify(measureMap, never()).put(any(Measure.MeasureDouble.class), any(double.class));
+            verify(recorder).newMeasureMap();
             verify(measureMap, times(1)).put(any(Measure.MeasureLong.class), eq(42L));
+            verify(measureMap).record(eq(Tags.getTagger().getCurrentTagContext()));
+            verifyNoMoreInteractions(recorder);
+            verifyNoMoreInteractions(measureMap);
+            verify(percentileViewManager).recordMeasurement(LONG_METRIC, 42.0, Tags.getTagger()
+                    .getCurrentTagContext());
         }
 
         @Test
         void tryRecordingNonExistingLongMetric() {
-            manager.tryRecordingMeasurement("nonexisting", measureMap, 42L);
+            manager.tryRecordingMeasurement("nonexisting", 42L);
 
-            verify(measureMap, never()).put(any(Measure.MeasureDouble.class), any(double.class));
-            verify(measureMap, never()).put(any(Measure.MeasureLong.class), any(long.class));
+            verifyZeroInteractions(recorder);
+            verify(percentileViewManager).recordMeasurement("nonexisting", 42.0, Tags.getTagger()
+                    .getCurrentTagContext());
         }
 
         @Test
         void tryRecordingNonExistingDoubleMetric() {
-            manager.tryRecordingMeasurement("nonexisting", measureMap, 42.0);
+            manager.tryRecordingMeasurement("nonexisting", 42.0);
 
-            verify(measureMap, never()).put(any(Measure.MeasureDouble.class), any(double.class));
-            verify(measureMap, never()).put(any(Measure.MeasureLong.class), any(long.class));
+            verifyZeroInteractions(recorder);
+            verify(percentileViewManager).recordMeasurement("nonexisting", 42.0, Tags.getTagger()
+                    .getCurrentTagContext());
         }
 
         @Test
         void tryRecordingDoubleForLongMetric() {
-            manager.tryRecordingMeasurement(LONG_METRIC, measureMap, 42.0);
+            manager.tryRecordingMeasurement(LONG_METRIC, 42.0);
 
-            verify(measureMap, never()).put(any(Measure.MeasureDouble.class), any(double.class));
-            verify(measureMap, never()).put(any(Measure.MeasureLong.class), any(long.class));
+            verify(recorder).newMeasureMap();
+            verify(measureMap, times(1)).put(any(Measure.MeasureLong.class), eq(42L));
+            verify(measureMap).record(eq(Tags.getTagger().getCurrentTagContext()));
+            verifyNoMoreInteractions(recorder);
+            verifyNoMoreInteractions(measureMap);
+            verify(percentileViewManager).recordMeasurement(LONG_METRIC, 42.0, Tags.getTagger()
+                    .getCurrentTagContext());
         }
-
 
         @Test
         void tryRecordingLongForDoubleMetric() {
-            manager.tryRecordingMeasurement(DOUBLE_METRIC, measureMap, 42L);
+            manager.tryRecordingMeasurement(DOUBLE_METRIC, 42L);
 
-            verify(measureMap, never()).put(any(Measure.MeasureDouble.class), any(double.class));
-            verify(measureMap, never()).put(any(Measure.MeasureLong.class), any(long.class));
+            verify(recorder).newMeasureMap();
+            verify(measureMap).put(any(Measure.MeasureDouble.class), eq(42.0));
+            verify(measureMap).record(eq(Tags.getTagger().getCurrentTagContext()));
+            verifyNoMoreInteractions(recorder);
+            verifyNoMoreInteractions(measureMap);
+            verify(percentileViewManager).recordMeasurement(DOUBLE_METRIC, 42.0, Tags.getTagger()
+                    .getCurrentTagContext());
         }
 
     }
@@ -155,7 +186,7 @@ public class MeasuresAndViewsManagerTest {
             MetricDefinitionSettings metricDefinition = MetricDefinitionSettings.builder()
                     .unit("my-unit")
                     .build()
-                    .getCopyWithDefaultsPopulated(metricName);
+                    .getCopyWithDefaultsPopulated(metricName, Duration.ofMillis(123));
 
             manager.addOrUpdateAndCacheMeasureWithViews(metricName, metricDefinition, emptyMap(), emptyMap());
 
@@ -176,7 +207,6 @@ public class MeasuresAndViewsManagerTest {
 
         }
 
-
         @Test
         void testMetricWithDefaultsAndCustomViewCreation() {
             when(commonTagsManager.getCommonTagKeys()).thenReturn(Arrays.asList(commonTags));
@@ -191,7 +221,7 @@ public class MeasuresAndViewsManagerTest {
                             .bucketBoundaries(Arrays.asList(7.0, 42.0))
                             .build())
                     .build()
-                    .getCopyWithDefaultsPopulated(metricName);
+                    .getCopyWithDefaultsPopulated(metricName, Duration.ofMillis(123));
 
             manager.addOrUpdateAndCacheMeasureWithViews(metricName, metricDefinition, emptyMap(), emptyMap());
 
@@ -228,7 +258,7 @@ public class MeasuresAndViewsManagerTest {
                             .tag("disabled-tag", false)
                             .build())
                     .build()
-                    .getCopyWithDefaultsPopulated(metricName);
+                    .getCopyWithDefaultsPopulated(metricName, Duration.ofMillis(123));
 
             manager.addOrUpdateAndCacheMeasureWithViews(metricName, metricDefinition, emptyMap(), emptyMap());
 
@@ -250,7 +280,7 @@ public class MeasuresAndViewsManagerTest {
                             .tag("common-A", false)
                             .build())
                     .build()
-                    .getCopyWithDefaultsPopulated(metricName);
+                    .getCopyWithDefaultsPopulated(metricName, Duration.ofMillis(123));
 
             manager.addOrUpdateAndCacheMeasureWithViews(metricName, metricDefinition, emptyMap(), emptyMap());
 
@@ -261,7 +291,6 @@ public class MeasuresAndViewsManagerTest {
             assertThat(view.getColumns()).containsExactlyInAnyOrder(TagKey.create("my-tag"), TagKey.create("common-B"));
         }
 
-
         @Test
         void testDefaultViewCanBeDisabled() {
             String metricName = "my-metric";
@@ -269,14 +298,13 @@ public class MeasuresAndViewsManagerTest {
                     .unit("my-unit")
                     .view(metricName, ViewDefinitionSettings.builder().enabled(false).build())
                     .build()
-                    .getCopyWithDefaultsPopulated(metricName);
+                    .getCopyWithDefaultsPopulated(metricName, Duration.ofMillis(123));
 
             manager.addOrUpdateAndCacheMeasureWithViews(metricName, metricDefinition, emptyMap(), emptyMap());
 
             verify(viewManager, never()).registerView(any());
             assertThat(manager.getMeasure(metricName)).isNotEmpty();
         }
-
 
         @Test
         void testExistingViewsAndMeasuresNotReRegistered() {
@@ -292,7 +320,7 @@ public class MeasuresAndViewsManagerTest {
                     .view("existing", ViewDefinitionSettings.builder().build())
                     .view("newView", ViewDefinitionSettings.builder().build())
                     .build()
-                    .getCopyWithDefaultsPopulated(metricName);
+                    .getCopyWithDefaultsPopulated(metricName, Duration.ofMillis(123));
 
             manager.addOrUpdateAndCacheMeasureWithViews(metricName, metricDefinition,
                     Maps.newHashMap(metricName, existingMeasure), Maps.newHashMap("existing", existingView));
@@ -312,7 +340,8 @@ public class MeasuresAndViewsManagerTest {
 
         @Test
         void testExceptionsDuringViewRegistrationHandled() {
-            doThrow(new RuntimeException()).when(viewManager).registerView(argThat(v -> v.getName().asString().equals("viewB")));
+            doThrow(new RuntimeException()).when(viewManager)
+                    .registerView(argThat(v -> v.getName().asString().equals("viewB")));
             doNothing().when(viewManager).registerView(argThat(v -> !v.getName().asString().equals("viewB")));
             String metricName = "my-metric";
             MetricDefinitionSettings metricDefinition = MetricDefinitionSettings.builder()
@@ -321,7 +350,7 @@ public class MeasuresAndViewsManagerTest {
                     .view("viewB", ViewDefinitionSettings.builder().build())
                     .view("viewC", ViewDefinitionSettings.builder().build())
                     .build()
-                    .getCopyWithDefaultsPopulated(metricName);
+                    .getCopyWithDefaultsPopulated(metricName, Duration.ofMillis(123));
 
             manager.addOrUpdateAndCacheMeasureWithViews(metricName, metricDefinition, emptyMap(), emptyMap());
 
@@ -332,7 +361,122 @@ public class MeasuresAndViewsManagerTest {
                     .map(v -> v.getName().asString())
                     .collect(Collectors.toList());
             assertThat(names).containsExactlyInAnyOrder("viewA", "viewB", "viewC");
+        }
 
+        @Test
+        void testQuantilesViewRegistrations() {
+            when(commonTagsManager.getCommonTagKeys()).thenReturn(Arrays.asList(commonTags));
+
+            String metricName = "my-metric";
+            MetricDefinitionSettings metricDefinition = MetricDefinitionSettings.builder()
+                    .unit("my-unit")
+                    .view("custom-view", ViewDefinitionSettings.builder()
+                            .tag("my-tag", true)
+                            .description("Cool view")
+                            .aggregation(ViewDefinitionSettings.Aggregation.QUANTILES)
+                            .quantiles(Arrays.asList(0.0, 0.5))
+                            .build())
+                    .build()
+                    .getCopyWithDefaultsPopulated(metricName, Duration.ofMillis(123));
+
+            manager.addOrUpdateAndCacheMeasureWithViews(metricName, metricDefinition, emptyMap(), emptyMap());
+
+            Measure resultMeasure = manager.getMeasure(metricName)
+                    .orElseThrow(() -> new AssumptionViolatedException("Measure did not exist"));
+            assertThat(resultMeasure.getName()).isEqualTo(metricName);
+            assertThat(resultMeasure.getDescription()).isEqualTo(metricName);
+            assertThat(resultMeasure).isInstanceOf(Measure.MeasureDouble.class);
+
+            HashSet<String> expectedTags = Arrays.stream(commonTags)
+                    .map(TagKey::getName)
+                    .collect(Collectors.toCollection(HashSet::new));
+            expectedTags.add("my-tag");
+
+            verify(percentileViewManager, times(1)).createOrUpdateView(
+                    metricName, "custom-view", "my-unit", "Cool view",
+                    true, false, Arrays.asList(0.5), 123, expectedTags);
+
+            verifyZeroInteractions(viewManager);
+        }
+
+        @Test
+        void testQuantilesViewUpdate() {
+            when(commonTagsManager.getCommonTagKeys()).thenReturn(Arrays.asList(commonTags));
+            when(percentileViewManager.isViewRegistered("my-metric", "custom-view")).thenReturn(true);
+
+            String metricName = "my-metric";
+            MetricDefinitionSettings metricDefinition = MetricDefinitionSettings.builder()
+                    .unit("my-unit")
+                    .view("custom-view", ViewDefinitionSettings.builder()
+                            .tag("my-tag", true)
+                            .description("Cool view")
+                            .aggregation(ViewDefinitionSettings.Aggregation.QUANTILES)
+                            .quantiles(Arrays.asList(0.0, 0.5))
+                            .build())
+                    .build()
+                    .getCopyWithDefaultsPopulated(metricName, Duration.ofMillis(123));
+
+            manager.addOrUpdateAndCacheMeasureWithViews(metricName, metricDefinition, emptyMap(), emptyMap());
+
+            Measure resultMeasure = manager.getMeasure(metricName)
+                    .orElseThrow(() -> new AssumptionViolatedException("Measure did not exist"));
+            assertThat(resultMeasure.getName()).isEqualTo(metricName);
+            assertThat(resultMeasure.getDescription()).isEqualTo(metricName);
+            assertThat(resultMeasure).isInstanceOf(Measure.MeasureDouble.class);
+
+            HashSet<String> expectedTags = Arrays.stream(commonTags)
+                    .map(TagKey::getName)
+                    .collect(Collectors.toCollection(HashSet::new));
+            expectedTags.add("my-tag");
+
+            verify(percentileViewManager, times(1)).createOrUpdateView(
+                    metricName, "custom-view", "my-unit", "Cool view",
+                    true, false, Arrays.asList(0.5), 123, expectedTags);
+
+            verifyZeroInteractions(viewManager);
+        }
+
+        @Test
+        void testSwitchFromQuantileToOtherType() {
+            when(percentileViewManager.isViewRegistered("my-metric", "custom-view")).thenReturn(true);
+
+            String metricName = "my-metric";
+            MetricDefinitionSettings metricDefinition = MetricDefinitionSettings.builder()
+                    .unit("my-unit")
+                    .view("custom-view", ViewDefinitionSettings.builder()
+                            .tag("my-tag", true)
+                            .description("Cool view")
+                            .aggregation(ViewDefinitionSettings.Aggregation.SUM)
+                            .build())
+                    .build()
+                    .getCopyWithDefaultsPopulated(metricName, Duration.ofMillis(123));
+
+            manager.addOrUpdateAndCacheMeasureWithViews(metricName, metricDefinition, emptyMap(), emptyMap());
+
+            verify(percentileViewManager, times(1)).isViewRegistered("my-metric", "custom-view");
+            verifyNoMoreInteractions(percentileViewManager);
+            verifyZeroInteractions(viewManager);
+        }
+
+        @Test
+        void testExistingViewForQuantileView() {
+            Map<String, View> existingViews = ImmutableMap.of("custom-view", Mockito.mock(View.class));
+
+            String metricName = "my-metric";
+            MetricDefinitionSettings metricDefinition = MetricDefinitionSettings.builder()
+                    .unit("my-unit")
+                    .view("custom-view", ViewDefinitionSettings.builder()
+                            .tag("my-tag", true)
+                            .description("Cool view")
+                            .aggregation(ViewDefinitionSettings.Aggregation.QUANTILES)
+                            .build())
+                    .build()
+                    .getCopyWithDefaultsPopulated(metricName, Duration.ofMillis(123));
+
+            manager.addOrUpdateAndCacheMeasureWithViews(metricName, metricDefinition, emptyMap(), existingViews);
+
+            verifyZeroInteractions(percentileViewManager);
+            verifyZeroInteractions(viewManager);
         }
     }
 
