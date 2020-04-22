@@ -9,6 +9,7 @@ import io.opencensus.tags.InternalUtils;
 import io.opencensus.tags.Tag;
 import io.opencensus.tags.TagContext;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 
@@ -17,12 +18,14 @@ import java.text.DecimalFormatSymbols;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
  * Holds the data for a given measurement splitted by a provided set of tags over a given time window.
  * For the data within this window, percentiles and min / max values can be computed.
  */
+@Slf4j
 public class PercentileView {
 
     /**
@@ -107,6 +110,20 @@ public class PercentileView {
     private String description;
 
     /**
+     * The maximum amount of measurement points to buffer.
+     * If this limit is reached, new measuremetns will be rejected until there is space again.
+     */
+    @Getter
+    private int bufferLimit;
+
+    private boolean overflowWarningPrinted = false;
+
+    /**
+     * The current number of points stored in this view, limited by {@link #bufferLimit}.
+     */
+    private AtomicInteger numberOfPoints;
+
+    /**
      * Constructor.
      *
      * @param includeMin       true, if the minimum value should be exposed as metric
@@ -117,9 +134,10 @@ public class PercentileView {
      * @param viewName         the prefix to use for the names of all exposed metrics
      * @param unit             the unit of the measure
      * @param description      the description of this view
+     * @param bufferLimit      the maximum number of measurements to be buffered by this view
      */
-    PercentileView(boolean includeMin, boolean includeMax, Set<Double> percentiles, Set<String> tags, long timeWindowMillis, String viewName, String unit, String description) {
-        validateConfiguration(includeMin, includeMax, percentiles, timeWindowMillis, viewName, unit, description);
+    PercentileView(boolean includeMin, boolean includeMax, Set<Double> percentiles, Set<String> tags, long timeWindowMillis, String viewName, String unit, String description, int bufferLimit) {
+        validateConfiguration(includeMin, includeMax, percentiles, timeWindowMillis, viewName, unit, description, bufferLimit);
         assignTagIndices(tags);
         seriesValues = new ConcurrentHashMap<>();
         this.timeWindowMillis = timeWindowMillis;
@@ -127,6 +145,8 @@ public class PercentileView {
         this.unit = unit;
         this.description = description;
         this.percentiles = new HashSet<>(percentiles);
+        this.bufferLimit = bufferLimit;
+        numberOfPoints = new AtomicInteger(0);
 
         List<LabelKey> percentileLabelKeys = getLabelKeysInOrderForPercentiles();
         List<LabelKey> minMaxLabelKeys = getLabelKeysInOrderForMinMax();
@@ -142,7 +162,7 @@ public class PercentileView {
     }
 
     private void validateConfiguration(boolean includeMin, boolean includeMax, Set<Double> percentiles, long timeWindowMillis,
-                                       String baseViewName, String unit, String description) {
+                                       String baseViewName, String unit, String description, int bufferLimit) {
         percentiles.stream()
                 .filter(p -> p <= 0.0 || p >= 1.0)
                 .forEach(p -> {
@@ -163,6 +183,9 @@ public class PercentileView {
         if (percentiles.isEmpty() && !includeMin && !includeMax) {
             throw new IllegalArgumentException("You must specify at least one percentile or enable minimum or maximum computation!");
         }
+        if (bufferLimit < 1) {
+            throw new IllegalArgumentException("The buffer limit must be greater than or equal to 1!");
+        }
     }
 
     private void assignTagIndices(Set<String> tags) {
@@ -180,12 +203,43 @@ public class PercentileView {
      * @param value      the value of the measure
      * @param time       the timestamp when this value was observed
      * @param tagContext the tags with which this value was observed
+     *
+     * @return true, if the point could be added, false otherwise.
      */
-    void insertValue(double value, Timestamp time, TagContext tagContext) {
+    boolean insertValue(double value, Timestamp time, TagContext tagContext) {
         List<String> tags = getTagsList(tagContext);
-        WindowedDoubleQueue queue = seriesValues.computeIfAbsent(tags, (key) -> new WindowedDoubleQueue(timeWindowMillis));
-        synchronized (queue) {
-            queue.insert(value, getInMillis(time));
+        if (acquireSpaceForPoint(tags, time)) {
+            WindowedDoubleQueue queue = seriesValues.computeIfAbsent(tags, (key) -> new WindowedDoubleQueue(timeWindowMillis));
+            synchronized (queue) {
+                int removed = queue.insert(value, getInMillis(time));
+                numberOfPoints.getAndAdd(-removed);
+            }
+            return true;
+        } else {
+            if (!overflowWarningPrinted) {
+                overflowWarningPrinted = true;
+                log.warn("Dropping points for Percentiles-View '{}' because the buffer limit has been reached!" +
+                        " Quantiles will be inaccurate." +
+                        " This warning will not be shwon for future drops!", viewName);
+            }
+            return false;
+        }
+    }
+
+    /**
+     * Removes all data which ihas fallen out of the time window based on the given timestamp.
+     * <p>
+     * Should be called regularly to avoid stale series blocking new points in other series from acquiring a place.
+     *
+     * @param time the current time
+     */
+    public void removeStalePoints(Timestamp time) {
+        long timeInMillis = getInMillis(time);
+        for (WindowedDoubleQueue queue : seriesValues.values()) {
+            synchronized (queue) {
+                int removed = queue.removeStaleValues(timeInMillis);
+                numberOfPoints.getAndAdd(-removed);
+            }
         }
     }
 
@@ -204,13 +258,13 @@ public class PercentileView {
      * @return the metrics containing the percentiles and min / max
      */
     Collection<Metric> computeMetrics(Timestamp time) {
+        removeStalePoints(time);
         ResultSeriesCollector resultSeries = new ResultSeriesCollector();
         for (Map.Entry<List<String>, WindowedDoubleQueue> series : seriesValues.entrySet()) {
             List<String> tagValues = series.getKey();
             WindowedDoubleQueue queue = series.getValue();
             double[] data = null;
             synchronized (queue) {
-                queue.removeStaleValues(getInMillis(time));
                 int size = queue.size();
                 if (size > 0) {
                     data = queue.copy();
@@ -231,6 +285,32 @@ public class PercentileView {
             resultMetrics.add(Metric.create(maxMetricDescriptor, resultSeries.maxSeries));
         }
         return resultMetrics;
+    }
+
+    private boolean acquireSpaceForPoint(List<String> tags, Timestamp time) {
+        int currentSize = numberOfPoints.get();
+        if (currentSize == bufferLimit) {
+            // try to make some space in our own queue
+            // we do not loop over all queues for each insert, as this might be a big number of series
+            WindowedDoubleQueue queue = seriesValues.get(tags);
+            if (queue != null) {
+                synchronized (queue) {
+                    int removed = queue.removeStaleValues(getInMillis(time));
+                    numberOfPoints.getAndAdd(-removed);
+                }
+            }
+        }
+        //try to earn a place until the queue is full again
+        while (true) {
+            currentSize = numberOfPoints.get();
+            if (currentSize == bufferLimit) {
+                return false;
+            }
+            boolean success = numberOfPoints.compareAndSet(currentSize, currentSize + 1);
+            if (success) {
+                return true;
+            }
+        }
     }
 
     boolean isMinEnabled() {

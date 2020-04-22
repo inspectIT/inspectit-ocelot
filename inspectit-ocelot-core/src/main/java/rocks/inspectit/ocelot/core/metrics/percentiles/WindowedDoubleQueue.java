@@ -74,15 +74,19 @@ public class WindowedDoubleQueue {
      * You should never insert data which is older than the latest element in the queue.
      * <p>
      * This method has an amortized O(1) runtime, with a worst case of O(n).
+     * <p>
+     * In addition, this method is guaranteed to not alter the queue in case it throws an exception.
      *
      * @param value     the value of the new observation to insert
      * @param timeStamp the timestamp of the point to insert
+     *
+     * @return the number of points which have been removed from this queue before performing the insert
      */
-    public void insert(double value, long timeStamp) {
+    public int insert(double value, long timeStamp) {
         if (size > 0 && timeStamps[normalizeIndex(startIndex + size - 1)] > timeStamp) {
             throw new IllegalArgumentException("The provided timestamp is older than the most recent timestamp present in the queue");
         }
-        removeStaleValues(timeStamp);
+        int removed = removeStaleValues(timeStamp);
         if (size == capacity()) {
             increaseCapacity();
         }
@@ -90,6 +94,7 @@ public class WindowedDoubleQueue {
         values[insertIdx] = value;
         timeStamps[insertIdx] = timeStamp;
         size++;
+        return removed;
     }
 
     /**
@@ -97,18 +102,23 @@ public class WindowedDoubleQueue {
      *
      * @param nowTimeStamp the time stamp which represents the current point in time.
      *                     E.g. if the timeRange for this queue is 10s this method is called t=72s, all points with a timestamp older than 62s will be erased.
+     *
+     * @return the number of points which have been removed from this queue
      */
-    public void removeStaleValues(long nowTimeStamp) {
+    public int removeStaleValues(long nowTimeStamp) {
         long timeLimit = nowTimeStamp - timeRange;
+        int removedCount = 0;
         while (size > 0) {
             if (timeStamps[startIndex] <= timeLimit) {
                 startIndex = normalizeIndex(startIndex + 1);
                 size--;
+                removedCount++;
             } else {
                 break;
             }
         }
         trimToSize();
+        return removedCount;
     }
 
     /**

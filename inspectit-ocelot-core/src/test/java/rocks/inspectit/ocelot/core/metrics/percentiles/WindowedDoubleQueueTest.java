@@ -55,6 +55,20 @@ public class WindowedDoubleQueueTest {
         }
 
         @Test
+        void removedPointCountReturned() {
+            WindowedDoubleQueue queue = new WindowedDoubleQueue(1);
+            for (int i = 0; i < 10; i++) {
+                queue.insert(i * 100 + 1, 0);
+            }
+
+            int removedAll = queue.insert(42, 42);
+            int removedOne = queue.insert(42, 100);
+
+            assertThat(removedAll).isEqualTo(10);
+            assertThat(removedOne).isEqualTo(1);
+        }
+
+        @Test
         void testUnalignedGrowth() {
             WindowedDoubleQueue queue = new WindowedDoubleQueue(1);
 
@@ -105,22 +119,24 @@ public class WindowedDoubleQueueTest {
             for (int i = 0; i < WindowedDoubleQueue.MIN_CAPACITY * 100; i++) {
                 queue.insert(i, 0);
             }
-            queue.removeStaleValues(1);
+            int removed = queue.removeStaleValues(1);
 
+            assertThat(removed).isEqualTo(WindowedDoubleQueue.MIN_CAPACITY * 100);
             assertThat(queue.capacity()).isEqualTo(WindowedDoubleQueue.MIN_CAPACITY);
             assertThat(queue.size()).isEqualTo(0);
         }
 
         @Test
         void removeAllExceptOneValues() {
-            WindowedDoubleQueue queue = new WindowedDoubleQueue(1);
+            WindowedDoubleQueue queue = new WindowedDoubleQueue(2);
 
             for (int i = 0; i < WindowedDoubleQueue.MIN_CAPACITY * 100; i++) {
                 queue.insert(i, 0);
             }
             queue.insert(42, 1);
-            queue.removeStaleValues(1);
+            int removed = queue.removeStaleValues(2);
 
+            assertThat(removed).isEqualTo(WindowedDoubleQueue.MIN_CAPACITY * 100);
             assertThat(queue.capacity()).isEqualTo(WindowedDoubleQueue.MIN_CAPACITY);
             assertThat(queue.copy()).contains(42);
         }
@@ -136,9 +152,10 @@ public class WindowedDoubleQueueTest {
             for (int i = 0; i < keepCount; i++) {
                 queue.insert(42 + i, 1);
             }
-            queue.removeStaleValues(2);
+            int removed = queue.removeStaleValues(2);
 
             double[] expectedResult = IntStream.range(0, keepCount).mapToDouble(i -> 42 + i).toArray();
+            assertThat(removed).isEqualTo(WindowedDoubleQueue.MIN_CAPACITY * 100);
             assertThat(queue.capacity()).isEqualTo(WindowedDoubleQueue.MIN_CAPACITY * 4);
             assertThat(queue.copy()).isEqualTo(expectedResult);
         }
@@ -157,8 +174,9 @@ public class WindowedDoubleQueueTest {
             for (int i = 0; i < keepCount; i++) {
                 queue.insert(42 + i, time + 1);
             }
-            queue.removeStaleValues(time + WindowedDoubleQueue.MIN_CAPACITY * 2);
+            int removed = queue.removeStaleValues(time + WindowedDoubleQueue.MIN_CAPACITY * 2);
 
+            assertThat(removed).isEqualTo(WindowedDoubleQueue.MIN_CAPACITY * 3 - keepCount - 1);
             double[] expectedResult = IntStream.range(0, keepCount).mapToDouble(i -> 42 + i).toArray();
             assertThat(queue.capacity()).isEqualTo(WindowedDoubleQueue.MIN_CAPACITY * 4);
             assertThat(queue.copy()).isEqualTo(expectedResult);

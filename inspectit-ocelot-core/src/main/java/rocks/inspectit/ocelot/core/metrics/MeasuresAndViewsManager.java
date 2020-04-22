@@ -286,7 +286,8 @@ public class MeasuresAndViewsManager {
                 .filter(p -> p > 0 && p < 1)
                 .collect(Collectors.toList());
         percentileViewManager.createOrUpdateView(measure.getName(), viewName, measure.getUnit(), def.getDescription(),
-                minEnabled, maxEnabled, percentilesFiltered, def.getTimeWindow().toMillis(), tagsAsStrings);
+                minEnabled, maxEnabled, percentilesFiltered, def.getTimeWindow()
+                        .toMillis(), tagsAsStrings, def.getMaxBufferedPoints());
     }
 
     private void registerNewView(String viewName, Measure measure, ViewDefinitionSettings def) {

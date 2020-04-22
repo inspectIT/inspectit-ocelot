@@ -4,10 +4,7 @@ import lombok.*;
 import org.hibernate.validator.constraints.time.DurationMin;
 import org.springframework.util.CollectionUtils;
 
-import javax.validation.constraints.AssertFalse;
-import javax.validation.constraints.AssertTrue;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.*;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
@@ -75,6 +72,15 @@ public class ViewDefinitionSettings {
      */
     @DurationMin(millis = 1L)
     private Duration timeWindow;
+
+    /**
+     * The maximum number of points to be buffered by this View.
+     * Currently only relevant if the aggregation is QUANTILES.
+     * <p>
+     * If this number is exceeded, a warning will be printed and points will be rejected until space is free again.
+     */
+    @Min(1)
+    private int maxBufferedPoints = 16384;
 
     /**
      * Defines if this view should by default include all common tags.
