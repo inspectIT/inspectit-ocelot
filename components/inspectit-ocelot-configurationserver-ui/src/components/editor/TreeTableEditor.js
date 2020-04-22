@@ -21,6 +21,8 @@ const schemaType = {
   ENUM: 'ENUM',
 };
 
+const DEFAULT_EXPANDED_KEYS = { inspectit: true };
+
 /**
  * Editor for showing the config file as the table tree.
  *
@@ -45,7 +47,7 @@ class TreeTableEditor extends React.Component {
 
     this.state = {
       data: undefined,
-      expandedKeys: { inspectit: true },
+      expandedKeys: DEFAULT_EXPANDED_KEYS,
       showAll: true,
     };
   }
@@ -68,14 +70,14 @@ class TreeTableEditor extends React.Component {
     const allKeys = {};
     if (this.props.config) {
       const data = this.processKey(this.props.config, [this.props.schema], allKeys);
+      const expandedKeys = Object.assign({}, this.state.expandedKeys, allKeys);
       this.setState({
         data,
-        expandedKeys: allKeys,
+        expandedKeys,
       });
     } else {
       this.setState({
         data: undefined,
-        expandedKeys: allKeys,
       });
     }
   };
