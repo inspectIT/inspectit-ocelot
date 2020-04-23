@@ -28,6 +28,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class PercentileView {
 
+    private static final Duration CLEANUP_INTERVAL = Duration.ofSeconds(1);
+
     /**
      * The tag to use for the percentile or "min","max" respectively.
      */
@@ -124,6 +126,11 @@ public class PercentileView {
     private AtomicInteger numberOfPoints;
 
     /**
+     * The timestamp when the last full cleanup happened.
+     */
+    private volatile long lastCleanupTimeMs;
+
+    /**
      * Constructor.
      *
      * @param includeMin       true, if the minimum value should be exposed as metric
@@ -207,38 +214,46 @@ public class PercentileView {
      * @return true, if the point could be added, false otherwise.
      */
     boolean insertValue(double value, Timestamp time, TagContext tagContext) {
+        removeStalePoints(time, false);
         List<String> tags = getTagsList(tagContext);
-        if (acquireSpaceForPoint(tags, time)) {
-            WindowedDoubleQueue queue = seriesValues.computeIfAbsent(tags, (key) -> new WindowedDoubleQueue(timeWindowMillis));
-            synchronized (queue) {
-                int removed = queue.insert(value, getInMillis(time));
-                numberOfPoints.getAndAdd(-removed);
+        WindowedDoubleQueue queue = seriesValues.computeIfAbsent(tags, (key) -> new WindowedDoubleQueue(timeWindowMillis));
+        synchronized (queue) {
+            long timeMillis = getInMillis(time);
+            int removed = queue.removeStaleValues(timeMillis);
+            int currentSize = numberOfPoints.addAndGet(-removed);
+            if (currentSize < bufferLimit) {
+                numberOfPoints.incrementAndGet();
+                queue.insert(value, timeMillis);
+            } else {
+                if (!overflowWarningPrinted) {
+                    overflowWarningPrinted = true;
+                    log.warn("Dropping points for Percentiles-View '{}' because the buffer limit has been reached!" +
+                            " Quantiles/Min/Max will be meaningless." +
+                            " This warning will not be shwon for future drops!", viewName);
+                }
+                return false;
             }
-            return true;
-        } else {
-            if (!overflowWarningPrinted) {
-                overflowWarningPrinted = true;
-                log.warn("Dropping points for Percentiles-View '{}' because the buffer limit has been reached!" +
-                        " Quantiles will be inaccurate." +
-                        " This warning will not be shwon for future drops!", viewName);
-            }
-            return false;
         }
+        return true;
     }
 
     /**
-     * Removes all data which ihas fallen out of the time window based on the given timestamp.
-     * <p>
-     * Should be called regularly to avoid stale series blocking new points in other series from acquiring a place.
+     * Removes all data which has fallen out of the time window based on the given timestamp.
      *
-     * @param time the current time
+     * @param time  the current time
+     * @param force if true, a full cleanup will always happen. Otherwise the data is only cleaned if the bufferLimit
+     *              is reached and the last clean happened more than {@link #CLEANUP_INTERVAL} time ago.
      */
-    public void removeStalePoints(Timestamp time) {
-        long timeInMillis = getInMillis(time);
-        for (WindowedDoubleQueue queue : seriesValues.values()) {
-            synchronized (queue) {
-                int removed = queue.removeStaleValues(timeInMillis);
-                numberOfPoints.getAndAdd(-removed);
+    private void removeStalePoints(Timestamp time, boolean force) {
+        long timeMillis = getInMillis(time);
+        boolean timeThresholdExceeded = timeMillis - lastCleanupTimeMs > CLEANUP_INTERVAL.toMillis();
+        if (force || (timeThresholdExceeded && numberOfPoints.get() >= bufferLimit)) {
+            lastCleanupTimeMs = timeMillis;
+            for (WindowedDoubleQueue queue : seriesValues.values()) {
+                synchronized (queue) {
+                    int removed = queue.removeStaleValues(timeMillis);
+                    numberOfPoints.getAndAdd(-removed);
+                }
             }
         }
     }
@@ -258,7 +273,7 @@ public class PercentileView {
      * @return the metrics containing the percentiles and min / max
      */
     Collection<Metric> computeMetrics(Timestamp time) {
-        removeStalePoints(time);
+        removeStalePoints(time, true);
         ResultSeriesCollector resultSeries = new ResultSeriesCollector();
         for (Map.Entry<List<String>, WindowedDoubleQueue> series : seriesValues.entrySet()) {
             List<String> tagValues = series.getKey();
@@ -285,32 +300,6 @@ public class PercentileView {
             resultMetrics.add(Metric.create(maxMetricDescriptor, resultSeries.maxSeries));
         }
         return resultMetrics;
-    }
-
-    private boolean acquireSpaceForPoint(List<String> tags, Timestamp time) {
-        int currentSize = numberOfPoints.get();
-        if (currentSize == bufferLimit) {
-            // try to make some space in our own queue
-            // we do not loop over all queues for each insert, as this might be a big number of series
-            WindowedDoubleQueue queue = seriesValues.get(tags);
-            if (queue != null) {
-                synchronized (queue) {
-                    int removed = queue.removeStaleValues(getInMillis(time));
-                    numberOfPoints.getAndAdd(-removed);
-                }
-            }
-        }
-        //try to earn a place until the queue is full again
-        while (true) {
-            currentSize = numberOfPoints.get();
-            if (currentSize == bufferLimit) {
-                return false;
-            }
-            boolean success = numberOfPoints.compareAndSet(currentSize, currentSize + 1);
-            if (success) {
-                return true;
-            }
-        }
     }
 
     boolean isMinEnabled() {

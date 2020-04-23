@@ -45,6 +45,7 @@ public class WindowedDoubleQueuePerfTest {
         double msPerPoint = 1000.0 / pointsPerSecond;
         double time = startTime;
         while ((time - startTime) < duration) {
+            queue.removeStaleValues((long) time);
             queue.insert(time, (long) time);
             time += msPerPoint;
         }

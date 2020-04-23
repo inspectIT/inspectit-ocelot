@@ -8,7 +8,6 @@ import io.opencensus.metrics.export.MetricProducer;
 import io.opencensus.stats.MeasureMap;
 import io.opencensus.tags.TagContext;
 import io.opencensus.tags.Tags;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -18,7 +17,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -30,8 +30,6 @@ import java.util.stream.Collectors;
  */
 @Component
 public class PercentileViewManager {
-
-    private static final Duration CLEANUP_INTERVAL = Duration.ofSeconds(1);
 
     /**
      * Maps the name of measures to registered percentile views.
@@ -50,11 +48,6 @@ public class PercentileViewManager {
      */
     private final Supplier<Long> clock;
 
-    @Autowired
-    private ScheduledExecutorService scheduledExecutor;
-
-    private Future<?> cleanupTask;
-
     /**
      * Recording observation takes amortized O(1) time.
      * However, the worst-case time of a recording is O(n), which is why we decouple the recording from the application threads.
@@ -64,30 +57,23 @@ public class PercentileViewManager {
     final AsyncMetricRecorder worker = new AsyncMetricRecorder(this::recordSynchronous);
 
     public PercentileViewManager() {
-        this(System::currentTimeMillis, null);
+        this(System::currentTimeMillis);
     }
 
     @VisibleForTesting
-    PercentileViewManager(Supplier<Long> clock, ScheduledExecutorService scheduledExecutor) {
+    PercentileViewManager(Supplier<Long> clock) {
         this.clock = clock;
-        this.scheduledExecutor = scheduledExecutor;
     }
 
     @PostConstruct
     void init() {
         Metrics.getExportComponent().getMetricProducerManager().add(producer);
-        cleanupTask = scheduledExecutor.scheduleWithFixedDelay(() ->
-                        measuresToViewsMap.values().stream()
-                                .flatMap(Collection::stream)
-                                .forEach(view -> view.removeStalePoints(getCurrentTime()))
-                , 0, CLEANUP_INTERVAL.toMillis(), TimeUnit.MILLISECONDS);
     }
 
     @PreDestroy
     void destroy() {
         worker.destroy();
         Metrics.getExportComponent().getMetricProducerManager().remove(producer);
-        cleanupTask.cancel(false);
     }
 
     /**

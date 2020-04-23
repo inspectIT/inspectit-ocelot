@@ -66,9 +66,7 @@ public class WindowedDoubleQueue {
 
     /**
      * Inserts a new point into the queue.
-     * This call also removes all data, which is older than the specified timeRange, relative to the time of the inserted point.
-     * <p>
-     * E.g. if the timeRange for this queue is 10s and a new point is inserted with t=72s, all points with a timestamp older than 62s will be erased.
+     * This call does not remove stale data, you should call removeStaleValues() before.
      * <p>
      * The queue expects that all inserts happen ordered in time!
      * You should never insert data which is older than the latest element in the queue.
@@ -77,16 +75,16 @@ public class WindowedDoubleQueue {
      * <p>
      * In addition, this method is guaranteed to not alter the queue in case it throws an exception.
      *
-     * @param value     the value of the new observation to insert
-     * @param timeStamp the timestamp of the point to insert
+     * @param value       the value of the new observation to insert
+     * @param timeStamp   the timestamp of the point to insert
+     * @param allowGrowth if true, the queue is allowed to increase in size
      *
-     * @return the number of points which have been removed from this queue before performing the insert
+     * @return the number of points which have been added to the queue, can be negative if more were added than removed
      */
-    public int insert(double value, long timeStamp) {
+    public void insert(double value, long timeStamp) {
         if (size > 0 && timeStamps[normalizeIndex(startIndex + size - 1)] > timeStamp) {
             throw new IllegalArgumentException("The provided timestamp is older than the most recent timestamp present in the queue");
         }
-        int removed = removeStaleValues(timeStamp);
         if (size == capacity()) {
             increaseCapacity();
         }
@@ -94,7 +92,6 @@ public class WindowedDoubleQueue {
         values[insertIdx] = value;
         timeStamps[insertIdx] = timeStamp;
         size++;
-        return removed;
     }
 
     /**

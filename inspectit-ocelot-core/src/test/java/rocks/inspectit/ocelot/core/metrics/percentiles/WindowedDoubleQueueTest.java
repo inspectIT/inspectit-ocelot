@@ -55,20 +55,6 @@ public class WindowedDoubleQueueTest {
         }
 
         @Test
-        void removedPointCountReturned() {
-            WindowedDoubleQueue queue = new WindowedDoubleQueue(1);
-            for (int i = 0; i < 10; i++) {
-                queue.insert(i * 100 + 1, 0);
-            }
-
-            int removedAll = queue.insert(42, 42);
-            int removedOne = queue.insert(42, 100);
-
-            assertThat(removedAll).isEqualTo(10);
-            assertThat(removedOne).isEqualTo(1);
-        }
-
-        @Test
         void testUnalignedGrowth() {
             WindowedDoubleQueue queue = new WindowedDoubleQueue(1);
 
@@ -76,6 +62,7 @@ public class WindowedDoubleQueueTest {
             queue.insert(-12345, 0);
             queue.insert(-12345, 0);
             for (int i = 0; i <= WindowedDoubleQueue.MIN_CAPACITY; i++) {
+                queue.removeStaleValues(1);
                 queue.insert(i * 100 + 1, 1);
 
             }
@@ -93,6 +80,7 @@ public class WindowedDoubleQueueTest {
             WindowedDoubleQueue queue = new WindowedDoubleQueue(WindowedDoubleQueue.MIN_CAPACITY);
 
             for (int i = 0; i < WindowedDoubleQueue.MIN_CAPACITY * 10; i++) {
+                queue.removeStaleValues(i);
                 queue.insert(i, i);
             }
 
@@ -168,10 +156,12 @@ public class WindowedDoubleQueueTest {
             int time = 0;
 
             for (int i = 0; i < WindowedDoubleQueue.MIN_CAPACITY * 3; i++) {
+                queue.removeStaleValues(time);
                 queue.insert(-9999999, time);
                 time++;
             }
             for (int i = 0; i < keepCount; i++) {
+                queue.removeStaleValues(time + 1);
                 queue.insert(42 + i, time + 1);
             }
             int removed = queue.removeStaleValues(time + WindowedDoubleQueue.MIN_CAPACITY * 2);

@@ -15,21 +15,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.*;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 
 @ExtendWith(MockitoExtension.class)
 public class PercentileViewManagerTest {
@@ -38,23 +33,13 @@ public class PercentileViewManagerTest {
 
     private Supplier<Long> clock;
 
-    @Mock
-    private ScheduledExecutorService mockExecutor;
-
-    private Runnable cleanupTask;
-
     @BeforeEach
     @SuppressWarnings("unchecked")
     void init() {
-        doReturn(Mockito.mock(ScheduledFuture.class)).when(mockExecutor)
-                .scheduleWithFixedDelay(any(), anyLong(), anyLong(), any());
         clock = Mockito.mock(Supplier.class);
         lenient().doReturn(0L).when(clock).get();
-        viewManager = new PercentileViewManager(clock, mockExecutor);
+        viewManager = new PercentileViewManager(clock);
         viewManager.init();
-        ArgumentCaptor<Runnable> cleanUpTaskCapture = ArgumentCaptor.forClass(Runnable.class);
-        verify(mockExecutor).scheduleWithFixedDelay(cleanUpTaskCapture.capture(), anyLong(), anyLong(), any());
-        cleanupTask = cleanUpTaskCapture.getValue();
     }
 
     @AfterEach
@@ -219,22 +204,17 @@ public class PercentileViewManagerTest {
             try (Scope s = Tags.getTagger().emptyBuilder()
                     .putLocal(TagKey.create("tag"), TagValue.create("foo"))
                     .buildScoped()) {
-                for (int i = 0; i < 10; i++) {
-                    viewManager.recordMeasurement("my/measure", i);
+                for (int i = 0; i < 20; i++) {
+                    viewManager.recordMeasurement("my/measure", 20 - i);
                 }
             }
             awaitMetricsProcessing();
-            doReturn(10000L).when(clock).get();
-            try (Scope s = Tags.getTagger().emptyBuilder()
-                    .putLocal(TagKey.create("tag"), TagValue.create("bar"))
-                    .buildScoped()) {
-                viewManager.recordMeasurement("my/measure", 1000);
-            }
 
             Collection<Metric> result = viewManager.computeMetrics();
 
             assertThat(result).hasSize(1);
-            assertTotalSeriesCount(result, 0);
+            assertTotalSeriesCount(result, 1);
+            assertContainsMetric(result, "my/view_min", 11.0, "tag", "foo");
         }
 
         @Test
@@ -252,7 +232,6 @@ public class PercentileViewManagerTest {
             }
             awaitMetricsProcessing();
             doReturn(10000L).when(clock).get();
-            cleanupTask.run();
             try (Scope s = Tags.getTagger().emptyBuilder()
                     .putLocal(TagKey.create("tag"), TagValue.create("bar"))
                     .buildScoped()) {
