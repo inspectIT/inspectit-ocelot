@@ -1,15 +1,15 @@
-import App, { Container } from 'next/app'
-import Head from 'next/head'
-import React from 'react'
-import withReduxStore from '../lib/with-redux-store'
-import { persistStore } from 'redux-persist'
-import { PersistGate } from 'redux-persist/integration/react'
-import { Provider } from 'react-redux'
+import App, { Container } from 'next/app';
+import Head from 'next/head';
+import React from 'react';
+import withReduxStore from '../lib/with-redux-store';
+import { persistStore } from 'redux-persist';
+import { PersistGate } from 'redux-persist/integration/react';
+import { Provider } from 'react-redux';
 import AuthenticationRouter from '../components/common/AuthenticationRouter';
 import NotificationHandler from '../components/common/NotificationHandler';
 import UnsavedChangesGate from '../components/common/UnsavedChangesGate';
 
-import { BASE_PAGE_TITLE } from '../data/constants'
+import { BASE_PAGE_TITLE } from '../data/constants';
 import { linkPrefix } from '../lib/configuration';
 
 // importing required css files for primereact
@@ -19,26 +19,27 @@ import 'primeicons/primeicons.css';
 import 'primeflex/primeflex.css';
 
 class OcelotConfigurationUI extends App {
-
   constructor(props) {
-    super(props)
-    this.persistor = persistStore(props.reduxStore)
+    super(props);
+    this.persistor = persistStore(props.reduxStore);
   }
 
   render() {
-    const { Component, pageProps, reduxStore } = this.props
+    const { Component, pageProps, reduxStore } = this.props;
     return (
       <Container>
-        <style global jsx>{`
-        body {
-          margin: 0;
-          font-family: "Open Sans", "Helvetica Neue", sans-serif;
-        }
-        `}</style>
+        <style global jsx>
+          {`
+            body {
+              margin: 0;
+              font-family: 'Open Sans', 'Helvetica Neue', sans-serif;
+            }
+          `}
+        </style>
         <Head>
           <meta charSet="utf-8" />
           <title>{BASE_PAGE_TITLE}</title>
-          <link rel="shortcut icon" type="image/x-icon" href={linkPrefix + "/favicon.ico"} />
+          <link rel="shortcut icon" type="image/x-icon" href={linkPrefix + '/favicon.ico'} />
         </Head>
         <Provider store={reduxStore}>
           <PersistGate loading={null} persistor={this.persistor}>
@@ -51,9 +52,9 @@ class OcelotConfigurationUI extends App {
             </NotificationHandler>
           </PersistGate>
         </Provider>
-      </Container >
-    )
+      </Container>
+    );
   }
 }
 
-export default withReduxStore(OcelotConfigurationUI)
+export default withReduxStore(OcelotConfigurationUI);

@@ -70,17 +70,18 @@ class AgentConfigurationReloadTask implements Runnable {
     public void run() {
         log.info("Starting configuration reloading...");
         List<AgentConfiguration> newConfigurations = new ArrayList<>();
-        try {
-            for (AgentMapping mapping : mappingsToLoad) {
+        for (AgentMapping mapping : mappingsToLoad) {
+            try {
                 String configYaml = loadConfigForMapping(mapping);
                 if (cancelFlag.get()) {
                     log.debug("Configuration reloading canceled");
                     return;
                 }
-                newConfigurations.add(new AgentConfiguration(mapping, configYaml));
+                AgentConfiguration agentConfiguration = AgentConfiguration.builder().mapping(mapping).configYaml(configYaml).build();
+                newConfigurations.add(agentConfiguration);
+            } catch (Exception e) {
+                log.error("Could not load agent mapping '{}'.", mapping.getName(), e);
             }
-        } catch (Exception e) {
-            log.error("Could not load configurations", e);
         }
         synchronized (this) {
             if (cancelFlag.get()) {
@@ -151,7 +152,7 @@ class AgentConfigurationReloadTask implements Runnable {
     }
 
     /**
-     * Loads a yaml file as a Map/List strucutre and merges it with an existing map/list structure
+     * Loads a yaml file as a Map/List structure and merges it with an existing map/list structure
      *
      * @param toMerge the existing structure of nested maps / lists with which the loaded yaml will be merged.
      * @param path    the path of the yaml file to load
@@ -161,11 +162,24 @@ class AgentConfigurationReloadTask implements Runnable {
     private Object loadAndMergeYaml(Object toMerge, String path) throws IOException {
         Yaml yaml = new Yaml();
         String src = fileManager.readFile(path);
-        Object loadedYaml = yaml.load(src);
-        if (toMerge == null) {
-            return loadedYaml;
-        } else {
-            return ObjectStructureMerger.merge(toMerge, loadedYaml);
+        try {
+            Object loadedYaml = yaml.load(src);
+            if (toMerge == null) {
+                return loadedYaml;
+            } else {
+                return ObjectStructureMerger.merge(toMerge, loadedYaml);
+            }
+        } catch (Exception e) {
+            throw new InvalidConfigurationFileException(path, e);
+        }
+    }
+
+    /**
+     * This exception will be thrown if a configuration file cannot be parsed, e.g. it contains invalid characters.
+     */
+    static class InvalidConfigurationFileException extends RuntimeException {
+        public InvalidConfigurationFileException(String path, Exception e) {
+            super(String.format("The configuration file '%s' is invalid and cannot be parsed.", path), e);
         }
     }
 }

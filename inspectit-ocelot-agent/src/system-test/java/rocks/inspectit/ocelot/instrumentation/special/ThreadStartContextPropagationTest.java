@@ -72,7 +72,7 @@ public class ThreadStartContextPropagationTest extends InstrumentationSysTestBas
             latch.countDown();
         });
 
-        try (Scope s = tagger.currentBuilder().put(tagKey, tagValue).buildScoped()) {
+        try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
             thread.start();
         }
 
@@ -96,7 +96,7 @@ public class ThreadStartContextPropagationTest extends InstrumentationSysTestBas
             latch.countDown();
         });
 
-        try (Scope s = tagger.currentBuilder().put(tagKey, tagValue).buildScoped()) {
+        try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
             thread.start();
         }
 
@@ -125,7 +125,7 @@ public class ThreadStartContextPropagationTest extends InstrumentationSysTestBas
             refTags.set(iter);
         });
 
-        try (Scope s = tagger.currentBuilder().put(tagKey, tagValue).buildScoped()) {
+        try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
             storeContextForThread.invoke(contextManagerInstance, thread);
         }
 
@@ -152,7 +152,7 @@ public class ThreadStartContextPropagationTest extends InstrumentationSysTestBas
             }
         };
 
-        try (Scope s = tagger.currentBuilder().put(tagKey, tagValue).buildScoped()) {
+        try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
             thread.start();
         }
 
@@ -172,7 +172,7 @@ public class ThreadStartContextPropagationTest extends InstrumentationSysTestBas
 
         Thread thread;
 
-        try (Scope s = tagger.currentBuilder().put(tagKey, tagValue).buildScoped()) {
+        try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
             thread = new Thread(() -> {
                 Iterator<Tag> iter = InternalUtils.getTags(tagger.getCurrentTagContext());
                 refTags.set(iter);

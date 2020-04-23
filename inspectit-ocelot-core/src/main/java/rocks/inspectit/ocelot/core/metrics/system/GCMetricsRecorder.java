@@ -4,7 +4,6 @@ import com.sun.management.GarbageCollectionNotificationInfo;
 import com.sun.management.GcInfo;
 import io.opencensus.tags.TagContext;
 import io.opencensus.tags.TagKey;
-import io.opencensus.tags.TagValue;
 import io.opencensus.tags.Tagger;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -14,6 +13,7 @@ import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.metrics.MetricsSettings;
 import rocks.inspectit.ocelot.config.model.metrics.StandardMetricsSettings;
 import rocks.inspectit.ocelot.core.selfmonitoring.SelfMonitoringService;
+import rocks.inspectit.ocelot.core.tags.TagUtils;
 
 import javax.management.ListenerNotFoundException;
 import javax.management.Notification;
@@ -200,68 +200,37 @@ public class GCMetricsRecorder extends AbstractMetricsRecorder {
     }
 
     private void recordConcurrentPhaseTime(GarbageCollectionNotificationInfo notificationInfo) {
-        measureManager.getMeasureLong(CONCURRENT_PHASE_TIME_METRIC_FULL_NAME)
-                .ifPresent(measure -> {
-                    TagContext tags = tagger.toBuilder(commonTags.getCommonTagContext())
-                            .put(actionTagKey, TagValue.create(notificationInfo.getGcAction()))
-                            .put(causeTagKey, TagValue.create(notificationInfo.getGcCause()))
-                            .build();
-
-                    recorder.newMeasureMap()
-                            .put(measure, notificationInfo.getGcInfo().getDuration())
-                            .record(tags);
-                });
+        TagContext tags = tagger.toBuilder(commonTags.getCommonTagContext())
+                .putLocal(actionTagKey, TagUtils.createTagValue(notificationInfo.getGcAction()))
+                .putLocal(causeTagKey, TagUtils.createTagValue(notificationInfo.getGcCause()))
+                .build();
+        measureManager.tryRecordingMeasurement(CONCURRENT_PHASE_TIME_METRIC_FULL_NAME, notificationInfo.getGcInfo()
+                .getDuration(), tags);
     }
 
     private void recordGCPause(GarbageCollectionNotificationInfo notificationInfo) {
-        measureManager.getMeasureLong(PAUSE_METRIC_FULL_NAME)
-                .ifPresent(measure -> {
-                    TagContext tags = tagger.toBuilder(commonTags.getCommonTagContext())
-                            .put(actionTagKey, TagValue.create(notificationInfo.getGcAction()))
-                            .put(causeTagKey, TagValue.create(notificationInfo.getGcCause()))
-                            .build();
-
-                    recorder.newMeasureMap()
-                            .put(measure, notificationInfo.getGcInfo().getDuration())
-                            .record(tags);
-
-                });
+        TagContext tags = tagger.toBuilder(commonTags.getCommonTagContext())
+                .putLocal(actionTagKey, TagUtils.createTagValue(notificationInfo.getGcAction()))
+                .putLocal(causeTagKey, TagUtils.createTagValue(notificationInfo.getGcCause()))
+                .build();
+        measureManager.tryRecordingMeasurement(PAUSE_METRIC_FULL_NAME, notificationInfo.getGcInfo()
+                .getDuration(), tags);
     }
 
     private void recordPromotedBytes(long bytes) {
-        measureManager.getMeasureLong(MEMORY_PROMOTED_METRIC_FULL_NAME)
-                .ifPresent(measure ->
-                        recorder.newMeasureMap()
-                                .put(measure, bytes)
-                                .record(commonTags.getCommonTagContext())
-                );
+        measureManager.tryRecordingMeasurement(MEMORY_PROMOTED_METRIC_FULL_NAME, bytes, commonTags.getCommonTagContext());
     }
 
     private void recordAllocatedBytes(long bytes) {
-        measureManager.getMeasureLong(MEMORY_ALLOCATED_METRIC_FULL_NAME)
-                .ifPresent(measure ->
-                        recorder.newMeasureMap()
-                                .put(measure, bytes)
-                                .record(commonTags.getCommonTagContext())
-                );
+        measureManager.tryRecordingMeasurement(MEMORY_ALLOCATED_METRIC_FULL_NAME, bytes, commonTags.getCommonTagContext());
     }
 
     private void recordLiveDataSize(long bytes) {
-        measureManager.getMeasureLong(LIVE_DATA_SIZE_METRIC_FULL_NAME)
-                .ifPresent(measure ->
-                        recorder.newMeasureMap()
-                                .put(measure, bytes)
-                                .record(commonTags.getCommonTagContext())
-                );
+        measureManager.tryRecordingMeasurement(LIVE_DATA_SIZE_METRIC_FULL_NAME, bytes, commonTags.getCommonTagContext());
     }
 
     private void recordMaxDataSize(long bytes) {
-        measureManager.getMeasureLong(MAX_DATA_SIZE_METRIC_FULL_NAME)
-                .ifPresent(measure ->
-                        recorder.newMeasureMap()
-                                .put(measure, bytes)
-                                .record(commonTags.getCommonTagContext())
-                );
+        measureManager.tryRecordingMeasurement(MAX_DATA_SIZE_METRIC_FULL_NAME, bytes, commonTags.getCommonTagContext());
     }
 
     private static boolean isManagementExtensionsPresent() {

@@ -8,8 +8,12 @@ import rocks.inspectit.ocelot.config.model.instrumentation.InstrumentationSettin
 import rocks.inspectit.ocelot.config.model.metrics.MetricsSettings;
 import rocks.inspectit.ocelot.config.model.tracing.TracingSettings;
 import rocks.inspectit.ocelot.core.instrumentation.config.InstrumentationConfigurationResolver;
+import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;
 
-import java.util.Set;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Contains the resolved instrumentation settings.
@@ -18,40 +22,74 @@ import java.util.Set;
  * For example, in the resolved InstrumentationConfiguration profiles have been unrolled, so that a complete set of rules is available.
  */
 @Value
-@Builder(toBuilder = true)
 @NonFinal //for testing
 public class InstrumentationConfiguration {
 
     /**
      * Corresponds to {@link MetricsSettings#isEnabled()}
      */
-    @Builder.Default
-    private boolean metricsEnabled = true;
+    private boolean metricsEnabled;
 
     /**
      * Corresponds to {@link TracingSettings#isEnabled()}
      */
-    @Builder.Default
-    private boolean tracingEnabled = true;
-
-    /**
-     * Corresponds to {@link TracingSettings#getSampleProbability()}
-     */
-    @Builder.Default
-    private double defaultTraceSampleProbability = 1.0;
+    private boolean tracingEnabled;
 
     /**
      * The instrumentation settings which have been used to derive this configuration.
      */
     private InstrumentationSettings source;
 
-    private DataProperties dataProperties;
+    private PropagationMetaData propagationMetaData;
 
     private TracingSettings tracingSettings;
 
     /**
      * The currently active instrumentation rules.
      */
-    @Singular
-    private Set<InstrumentationRule> rules;
+    private Map<String, InstrumentationRule> rulesMap;
+
+    /**
+     * Constructor
+     *
+     * @param metricsEnabled      corresponds to {@link MetricsSettings#isEnabled()}, true if null (for testing)
+     * @param tracingEnabled      corresponds to {@link TracingSettings#isEnabled()}, true if null (for testing)
+     * @param source              the settings used for building this instrumentation configuration
+     * @param propagationMetaData the propagation meta data
+     * @param tracingSettings     the tracing settings
+     * @param rules               the set of active rules
+     */
+    @Builder(toBuilder = true)
+    public InstrumentationConfiguration(Boolean metricsEnabled,
+                                        Boolean tracingEnabled,
+                                        InstrumentationSettings source,
+                                        PropagationMetaData propagationMetaData,
+                                        TracingSettings tracingSettings,
+                                        @Singular @Builder.ObtainVia(method = "getRules") Collection<InstrumentationRule> rules) {
+        this.metricsEnabled = Optional.ofNullable(metricsEnabled).orElse(true);
+        this.tracingEnabled = Optional.ofNullable(tracingEnabled).orElse(true);
+        this.source = source;
+        this.propagationMetaData = propagationMetaData;
+        this.tracingSettings = tracingSettings;
+        rulesMap = rules.stream().collect(Collectors.toMap(InstrumentationRule::getName, rule -> rule));
+    }
+
+    /**
+     * Returns a collection of all active rules.
+     *
+     * @return the active rules
+     */
+    public Collection<InstrumentationRule> getRules() {
+        return rulesMap.values();
+    }
+
+    /**
+     * Returns the rule with the given name, if it exists and is enabled.
+     *
+     * @param name the name of the rule
+     * @return an Optional containing the rule or an empty optional if it doesn't exist or is not active
+     */
+    public Optional<InstrumentationRule> getRuleByName(String name) {
+        return Optional.ofNullable(rulesMap.get(name));
+    }
 }

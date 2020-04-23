@@ -32,7 +32,4 @@ inspectit:
     data:
       # used for storing a received remote span id
       remote_parent_span_context:
-        is-tag: false
-      # used for the servlet-api context propagation
-      servlet_api_down_propagation_performed:
-        is-tag: false
+        down-propagation: JVM_LOCAL

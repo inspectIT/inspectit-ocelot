@@ -15,10 +15,14 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.env.PropertySource;
+import rocks.inspectit.ocelot.bootstrap.AgentManager;
+import rocks.inspectit.ocelot.bootstrap.IAgent;
 import rocks.inspectit.ocelot.config.model.config.HttpConfigSettings;
 import rocks.inspectit.ocelot.core.config.util.PropertyUtils;
 
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -34,6 +38,11 @@ import java.util.Properties;
  */
 @Slf4j
 public class HttpPropertySourceState {
+
+    /**
+     * The prefix which is used for the meta information HTTP headers.
+     */
+    private static final String META_HEADER_PREFIX = "X-OCELOT-";
 
     /**
      * Used in case the properties fetched via HTTP are empty.
@@ -71,6 +80,20 @@ public class HttpPropertySourceState {
      * Number of unsuccessful connection attempts.
      */
     private int errorCounter;
+
+    /**
+     * Flag indicates that it is the first attempt to write the configuration to file.
+     * See {@link #writePersistenceFile(String)}
+     */
+    private boolean firstFileWriteAttempt = true;
+
+    /**
+     * Flag indicates if first attempt to write configuration to file was successful.
+     * If this resolves to false no further attempts are performed.
+     * See {@link #writePersistenceFile(String)}
+     */
+    @Getter
+    private boolean firstFileWriteAttemptSuccessful = true;
 
     /**
      * Constructor.
@@ -174,6 +197,8 @@ public class HttpPropertySourceState {
             httpGet.setHeader("If-None-Match", latestETag);
         }
 
+        setAgentMetaHeaders(httpGet);
+
         String configuration = null;
         boolean isError = true;
         try {
@@ -204,9 +229,26 @@ public class HttpPropertySourceState {
     }
 
     /**
+     * Injects all the agent's meta information headers, which should be send when fetching a new configuration,
+     * into the given request request.
+     *
+     * @param httpGet the request to inject the meat information headers
+     */
+    private void setAgentMetaHeaders(HttpGet httpGet) {
+        RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
+
+        httpGet.setHeader(META_HEADER_PREFIX + "AGENT-ID", runtime.getName());
+        httpGet.setHeader(META_HEADER_PREFIX + "AGENT-VERSION", AgentManager.getAgentVersion());
+        httpGet.setHeader(META_HEADER_PREFIX + "JAVA-VERSION", System.getProperty("java.version"));
+        httpGet.setHeader(META_HEADER_PREFIX + "VM-NAME", runtime.getVmName());
+        httpGet.setHeader(META_HEADER_PREFIX + "VM-VENDOR", runtime.getVmVendor());
+        httpGet.setHeader(META_HEADER_PREFIX + "START-TIME", String.valueOf(runtime.getStartTime()));
+    }
+
+    /**
      * Increments the errorCounter and prints ERROR log if the errorCounter is power of two
      *
-     * @param message error message to log
+     * @param message   error message to log
      * @param exception exception that occurred when trying to fetch a configuration
      */
     private void logFetchError(String message, Exception exception) {
@@ -275,17 +317,23 @@ public class HttpPropertySourceState {
      *
      * @param content the content to write to the file (normally the most recent configuration)
      */
-    private void writePersistenceFile(String content) {
-        try {
-            String file = currentSettings.getPersistenceFile();
-            if (!StringUtils.isBlank(file)) {
-                log.debug("Writing HTTP Configuration persistence file '{}'", file);
-                Path path = Paths.get(file);
-                Files.createDirectories(path.getParent());
-                Files.write(path, content.getBytes(StandardCharsets.UTF_8));
+    void writePersistenceFile(String content) {
+        if (firstFileWriteAttemptSuccessful) {
+            try {
+                String file = currentSettings.getPersistenceFile();
+                if (!StringUtils.isBlank(file)) {
+                    log.debug("Writing HTTP Configuration persistence file '{}'", file);
+                    Path path = Paths.get(file);
+                    Files.createDirectories(path.getParent());
+                    Files.write(path, content.getBytes(StandardCharsets.UTF_8));
+                }
+            } catch (Exception e) {
+                if (firstFileWriteAttempt) {
+                    firstFileWriteAttemptSuccessful = false;
+                }
+                log.error("Could not write persistence file for HTTP-configuration.", e);
             }
-        } catch (Exception e) {
-            log.error("Could not write persistence file for HTTP-configuration", e);
+            firstFileWriteAttempt = false;
         }
     }
 

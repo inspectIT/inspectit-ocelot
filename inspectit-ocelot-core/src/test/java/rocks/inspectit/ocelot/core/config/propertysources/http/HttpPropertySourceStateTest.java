@@ -1,12 +1,15 @@
 package rocks.inspectit.ocelot.core.config.propertysources.http;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.http.MultiValue;
+import com.github.tomakehurst.wiremock.stubbing.ServeEvent;
 import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.env.PropertySource;
 import rocks.inspectit.ocelot.config.model.config.HttpConfigSettings;
@@ -19,12 +22,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class HttpPropertySourceStateTest {
@@ -51,16 +57,6 @@ class HttpPropertySourceStateTest {
         }
 
 
-        private String generateTempFilePath() {
-            try {
-                Path tempFile = Files.createTempFile("inspectit", "");
-                Files.delete(tempFile);
-                return tempFile.toString();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
         @AfterEach
         public void teardown() {
             mockServer.stop();
@@ -81,6 +77,23 @@ class HttpPropertySourceStateTest {
             assertTrue(updateResult);
             assertThat(new File(httpSettings.getPersistenceFile())).hasContent(config);
             assertThat(result.getProperty("inspectit.service-name")).isEqualTo("test-name");
+
+            List<ServeEvent> requests = mockServer.getServeEvents().getRequests();
+            assertThat(requests).hasSize(1);
+
+            List<String> headerKeys = requests.get(0).getRequest().getHeaders().all().stream()
+                    .map(MultiValue::key)
+                    .filter(key -> key.startsWith("X-OCELOT-"))
+                    .collect(Collectors.toList());
+
+            assertThat(headerKeys).containsOnly(
+                    "X-OCELOT-AGENT-ID",
+                    "X-OCELOT-AGENT-VERSION",
+                    "X-OCELOT-JAVA-VERSION",
+                    "X-OCELOT-VM-NAME",
+                    "X-OCELOT-VM-VENDOR",
+                    "X-OCELOT-START-TIME"
+            );
         }
 
         @Test
@@ -265,6 +278,78 @@ class HttpPropertySourceStateTest {
             state = new HttpPropertySourceState("test-state", httpSettings);
 
             assertThat(state.getEffectiveRequestUri().toString()).isEqualTo("http://localhost:4242/endpoint?fixed=something&service=myservice");
+        }
+    }
+
+
+    @Nested
+    public class SkipPersistenceFileWriteOnError {
+
+        private WireMockServer mockServer;
+
+        private HttpConfigSettings httpSettings;
+
+        @BeforeEach
+        public void setup() throws Exception {
+            mockServer = new WireMockServer(options().dynamicPort());
+            mockServer.start();
+
+            httpSettings = Mockito.spy(new HttpConfigSettings());
+            httpSettings.setUrl(new URL("http://localhost:" + mockServer.port() + "/"));
+            httpSettings.setAttributes(new HashMap<>());
+            state = Mockito.spy(new HttpPropertySourceState("test-state", httpSettings));
+        }
+
+
+        @AfterEach
+        public void teardown() {
+            mockServer.stop();
+        }
+
+
+        @Test
+        public void fileWritesSkippedOnError() {
+            // "/dev/null/*inspectit-config" will fail on Unix and Windows systems
+            when(httpSettings.getPersistenceFile()).thenReturn("/dev/null/*inspectit-config");
+
+            mockServer.stubFor(get(urlPathEqualTo("/"))
+                    .willReturn(aResponse()
+                            .withStatus(200)
+                            .withBody("{\"inspectit\": {\"service-name\": \"test-name\"}}")));
+
+            assertTrue(state.update(false));
+            assertFalse(state.isFirstFileWriteAttemptSuccessful());
+            Mockito.verify(httpSettings, Mockito.times(1)).getPersistenceFile();
+            assertTrue(state.update(false));
+            Mockito.verify(httpSettings, Mockito.times(1)).getPersistenceFile();
+
+        }
+
+        @Test
+        public void fileWritesContinuedOnSuccess() {
+            when(httpSettings.getPersistenceFile()).thenReturn(generateTempFilePath());
+            mockServer.stubFor(get(urlPathEqualTo("/"))
+                    .willReturn(aResponse()
+                            .withStatus(200)
+                            .withBody("{\"inspectit\": {\"service-name\": \"test-name\"}}")));
+
+            assertTrue(state.update(false));
+            assertTrue(state.isFirstFileWriteAttemptSuccessful());
+            Mockito.verify(httpSettings, Mockito.times(1)).getPersistenceFile();
+            assertTrue(state.update(false));
+            Mockito.verify(httpSettings, Mockito.times(2)).getPersistenceFile();
+
+        }
+    }
+
+
+    private static String generateTempFilePath() {
+        try {
+            Path tempFile = Files.createTempFile("inspectit", "");
+            Files.delete(tempFile);
+            return tempFile.toString();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 }

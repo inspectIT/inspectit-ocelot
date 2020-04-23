@@ -1,8 +1,8 @@
 {
-    "useSoftTabs": true,
-    "navigateWithinSoftTabs": true,
-    "tabSize": 2,
-    "fontSize": "1rem",
-    "enableBasicAutocompletion": true,
-    "showPrintMargin" : false
+  "useSoftTabs": true,
+  "navigateWithinSoftTabs": true,
+  "tabSize": 2,
+  "fontSize": "1rem",
+  "enableBasicAutocompletion": true,
+  "showPrintMargin": false
 }

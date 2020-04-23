@@ -3,7 +3,6 @@ package rocks.inspectit.ocelot.core.selfmonitoring;
 import io.opencensus.common.Scope;
 import io.opencensus.stats.StatsRecorder;
 import io.opencensus.tags.TagKey;
-import io.opencensus.tags.TagValue;
 import io.opencensus.tags.Tags;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +16,7 @@ import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.metrics.MeasuresAndViewsManager;
 import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
+import rocks.inspectit.ocelot.core.tags.TagUtils;
 
 import java.util.Collections;
 import java.util.Map;
@@ -120,7 +120,7 @@ public class SelfMonitoringService {
      * @param value       the actual value
      */
     public void recordMeasurement(String measureName, long value) {
-       recordMeasurement(measureName, value, Collections.emptyMap());
+        recordMeasurement(measureName, value, Collections.emptyMap());
     }
 
     /**
@@ -161,7 +161,7 @@ public class SelfMonitoringService {
                     statsRecorder.newMeasureMap()
                             .put(m, durationInMicros)
                             .record(Tags.getTagger().toBuilder(commonTags.getCommonTagContext())
-                                    .put(COMPONENT_TAG_KEY, TagValue.create(componentName)).build())
+                                    .putLocal(COMPONENT_TAG_KEY, TagUtils.createTagValue(componentName)).build())
             );
 
             if (log.isTraceEnabled()) {

@@ -3,18 +3,20 @@ package rocks.inspectit.oce.eum.server.metrics;
 import io.opencensus.common.Scope;
 import io.opencensus.tags.TagContextBuilder;
 import io.opencensus.tags.TagKey;
-import io.opencensus.tags.TagValue;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import rocks.inspectit.oce.eum.server.arithmetic.RawExpression;
 import rocks.inspectit.oce.eum.server.beacon.Beacon;
+import rocks.inspectit.oce.eum.server.beacon.recorder.BeaconRecorder;
 import rocks.inspectit.oce.eum.server.configuration.model.BeaconMetricDefinitionSettings;
 import rocks.inspectit.oce.eum.server.configuration.model.BeaconRequirement;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
-import rocks.inspectit.oce.eum.server.utils.DefaultTags;
+import rocks.inspectit.oce.eum.server.utils.TagUtils;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -30,6 +32,9 @@ public class BeaconMetricManager {
     @Autowired
     private MeasuresAndViewsManager measuresAndViewsManager;
 
+    @Autowired(required = false)
+    private List<BeaconRecorder> beaconRecorders;
+
     /**
      * Maps metric definitions to expressions.
      */
@@ -42,18 +47,28 @@ public class BeaconMetricManager {
      * @return whether the beacon has been successfully parsed
      */
     public boolean processBeacon(Beacon beacon) {
+        boolean successful = false;
+
         for (Map.Entry<String, BeaconMetricDefinitionSettings> metricDefinitionEntry : configuration.getDefinitions().entrySet()) {
             String metricName = metricDefinitionEntry.getKey();
             BeaconMetricDefinitionSettings metricDefinition = metricDefinitionEntry.getValue();
 
             if (BeaconRequirement.validate(beacon, metricDefinition.getBeaconRequirements())) {
                 recordMetric(metricName, metricDefinition, beacon);
-                return true;
+                successful = true;
             } else {
                 log.debug("Skipping beacon because requirements are not fulfilled.");
             }
         }
-        return false;
+
+        // allow each beacon recorder to record stuff
+        if (!CollectionUtils.isEmpty(beaconRecorders)) {
+            try (Scope scope = getTagContextForBeacon(beacon).buildScoped()) {
+                beaconRecorders.forEach(beaconRecorder -> beaconRecorder.record(beacon));
+            }
+        }
+
+        return successful;
     }
 
     /**
@@ -87,16 +102,9 @@ public class BeaconMetricManager {
      */
     private TagContextBuilder getTagContextForBeacon(Beacon beacon) {
         TagContextBuilder tagContextBuilder = measuresAndViewsManager.getTagContext();
-
-        for (Map.Entry<String, String> beaconTag : configuration.getTags().getBeacon().entrySet()) {
-            if (beacon.contains(beaconTag.getValue())) {
-                tagContextBuilder.putLocal(TagKey.create(beaconTag.getKey()), TagValue.create(beacon.get(beaconTag.getValue())));
-            }
-        }
-
-        for (DefaultTags defaultTag : DefaultTags.values()) {
-            if (beacon.contains(defaultTag.name())) {
-                tagContextBuilder.putLocal(TagKey.create(defaultTag.name()), TagValue.create(beacon.get(defaultTag.name())));
+        for (String key : configuration.getTags().getBeacon().keySet()) {
+            if (beacon.contains(key)) {
+                tagContextBuilder.putLocal(TagKey.create(key), TagUtils.createTagValue(beacon.get(key)));
             }
         }
         return tagContextBuilder;

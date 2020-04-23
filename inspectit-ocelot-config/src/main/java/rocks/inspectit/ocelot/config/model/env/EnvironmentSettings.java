@@ -19,4 +19,24 @@ public class EnvironmentSettings {
      * Does not contain a trailing slash.
      */
     private String agentDir;
+
+    /**
+     * The hostname where the agent is running.
+     */
+    private String hostname;
+
+    /**
+     * The process id of the JVM process.
+     */
+    private String pid;
+
+    /**
+     * The Java version used by the JVM process.
+     */
+    private String javaVersion;
+
+    /**
+     * The version of the inspectIT Ocelot agent.
+     */
+    private String agentVersion;
 }

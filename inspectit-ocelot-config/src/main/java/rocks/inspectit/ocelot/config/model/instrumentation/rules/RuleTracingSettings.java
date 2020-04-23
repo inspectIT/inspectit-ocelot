@@ -52,6 +52,14 @@ public class RuleTracingSettings {
     private String storeSpan;
 
     /**
+     * Defines whether the span shall be marked as an error.
+     * The value is interpreted as a data key.
+     * If the value of the data key is neither null, nor false, the current span (which must be started or continued by the same method)
+     * is configured with an error status.
+     */
+    private String errorStatus;
+
+    /**
      * Specifies a data key to use as span name from the {@link rocks.inspectit.ocelot.core.instrumentation.context.InspectitContext}.
      * If this is null or the value assigned to the data key is null, the FQN of the method will be used as name for the span.
      */
@@ -64,7 +72,9 @@ public class RuleTracingSettings {
      * Alternatively, if this value is a string it is interpreted as a data key. The value of the given data key is extracted and used as probability.
      * This for example allows to define different probabilities, e.g. based on the HTTP path.
      * <p>
-     * If this is null, it defaults to {@link rocks.inspectit.ocelot.config.model.tracing.TracingSettings#sampleProbability}
+     * If this is null, this means that no per-span sampler will be used.
+     * Instead, the sampling decision of the parent span will be inherited.
+     * If this span is a root span and therefore has no parent, the global sampling probability will take effect instead.
      */
     private String sampleProbability;
 

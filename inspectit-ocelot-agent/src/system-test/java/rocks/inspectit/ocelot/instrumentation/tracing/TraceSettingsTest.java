@@ -1,7 +1,10 @@
 package rocks.inspectit.ocelot.instrumentation.tracing;
 
 import io.opencensus.trace.AttributeValue;
+import io.opencensus.trace.Status;
 import io.opencensus.trace.export.SpanData;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import rocks.inspectit.ocelot.utils.TestUtils;
 
@@ -14,11 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class TraceSettingsTest extends TraceTestBase {
 
 
-    void rootA() {
-        attributesSetterWithoutSpan();
-    }
-
-    String attributesSetterWithoutSpan() {
+    String attributesSetter() {
         return "Hello A!";
     }
 
@@ -26,30 +25,29 @@ public class TraceSettingsTest extends TraceTestBase {
     void testAttributeWritingToParentSpan() {
 
         TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, 15, TimeUnit.SECONDS);
-        rootA();
+        attributesSetter();
 
         assertTraceExported((spans) ->
                 assertThat(spans)
                         .hasSize(1)
                         .anySatisfy((sp) -> {
-                            assertThat(sp.getName()).endsWith("TraceSettingsTest.rootA");
+                            assertThat(sp.getName()).endsWith("TraceSettingsTest.attributesSetter");
                             assertThat(sp.getAttributes().getAttributeMap())
-                                    .hasSize(2)
+                                    .hasSize(7)
                                     .containsEntry("entry", AttributeValue.stringAttributeValue("const"))
-                                    .containsEntry("exit", AttributeValue.stringAttributeValue("Hello A!"));
-
+                                    .containsEntry("exit", AttributeValue.stringAttributeValue("Hello A!"))
+                                    .containsEntry("toObfuscate", AttributeValue.stringAttributeValue("***"))
+                                    .containsEntry("anything", AttributeValue.stringAttributeValue("***"))
+                                    // plus include all common tags (service + key validation only)
+                                    .containsEntry("service", AttributeValue.stringAttributeValue("systemtest"))
+                                    .containsKeys("host", "host_address");
                         })
 
         );
 
     }
 
-
-    void rootB(boolean captureAttributes) {
-        attributesSetterWithoutSpanWithConditions(captureAttributes);
-    }
-
-    String attributesSetterWithoutSpanWithConditions(boolean captureAttributes) {
+    String attributesSetterWithConditions(boolean captureAttributes) {
         return "Hello B!";
     }
 
@@ -57,16 +55,17 @@ public class TraceSettingsTest extends TraceTestBase {
     void testConditionalAttributeWriting() {
 
         TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, 15, TimeUnit.SECONDS);
-        rootB(false);
-        rootB(true);
+        attributesSetterWithConditions(false);
+        attributesSetterWithConditions(true);
 
         assertTraceExported((spans) ->
                 assertThat(spans)
                         .hasSize(1)
                         .anySatisfy((sp) -> {
-                            assertThat(sp.getName()).endsWith("TraceSettingsTest.rootB");
+                            assertThat(sp.getName()).endsWith("TraceSettingsTest.attributesSetterWithConditions");
                             assertThat(sp.getAttributes().getAttributeMap())
-                                    .hasSize(0);
+                                    .hasSize(3)
+                                    .containsKeys("service", "host", "host_address");
                         })
 
         );
@@ -75,12 +74,12 @@ public class TraceSettingsTest extends TraceTestBase {
                 assertThat(spans)
                         .hasSize(1)
                         .anySatisfy((sp) -> {
-                            assertThat(sp.getName()).endsWith("TraceSettingsTest.rootB");
+                            assertThat(sp.getName()).endsWith("TraceSettingsTest.attributesSetterWithConditions");
                             assertThat(sp.getAttributes().getAttributeMap())
-                                    .hasSize(2)
+                                    .hasSize(5)
                                     .containsEntry("entry", AttributeValue.stringAttributeValue("const"))
-                                    .containsEntry("exit", AttributeValue.stringAttributeValue("Hello B!"));
-
+                                    .containsEntry("exit", AttributeValue.stringAttributeValue("Hello B!"))
+                                    .containsKeys("service", "host", "host_address");
                         })
 
         );
@@ -157,6 +156,28 @@ public class TraceSettingsTest extends TraceTestBase {
 
     }
 
+    @Test
+    void testNoCommonTagsOnChild() {
+        TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, 15, TimeUnit.SECONDS);
+
+        namedA("whatever");
+
+        assertTraceExported((spans) ->
+                assertThat(spans)
+                        .hasSize(2)
+                        .anySatisfy((sp) -> {
+                            assertThat(sp.getParentSpanId()).isNull();
+                            assertThat(sp.getAttributes().getAttributeMap()).hasSize(3);
+                        })
+                        .anySatisfy((sp) -> {
+                            assertThat(sp.getParentSpanId()).isNotNull();
+                            assertThat(sp.getAttributes().getAttributeMap()).hasSize(0);
+                        })
+
+        );
+
+    }
+
     static class AsyncTask {
         void doAsync(String att1, String att2, String att3, boolean isFinished) {
         }
@@ -199,14 +220,16 @@ public class TraceSettingsTest extends TraceTestBase {
 
             //ensure that all method invocations have been combined to single spans
             assertThat(firstSpan.getAttributes().getAttributeMap())
-                    .hasSize(2)
+                    .hasSize(5)
                     .containsEntry("1", AttributeValue.stringAttributeValue("a1"))
-                    .containsEntry("2", AttributeValue.stringAttributeValue("a2"));
+                    .containsEntry("2", AttributeValue.stringAttributeValue("a2"))
+                    .containsKeys("service", "host", "host_address");
             assertThat(secondSpan.getAttributes().getAttributeMap())
-                    .hasSize(3)
+                    .hasSize(6)
                     .containsEntry("1", AttributeValue.stringAttributeValue("b1"))
                     .containsEntry("2", AttributeValue.stringAttributeValue("b2"))
-                    .containsEntry("3", AttributeValue.stringAttributeValue("b3"));
+                    .containsEntry("3", AttributeValue.stringAttributeValue("b3"))
+                    .containsKeys("service", "host", "host_address");
 
             //ensure that the timings are valid
             assertThat(firstSpan.getEndTimestamp()).isLessThan(secondSpan.getEndTimestamp());
@@ -223,122 +246,288 @@ public class TraceSettingsTest extends TraceTestBase {
     void dynamicSamplingRateTest(String id, Object rate) {
     }
 
-    void nestedSamplingTestRoot(double rootProbability, double nestedProbability) {
+    void nestedSamplingTestRoot(Double rootProbability, Double nestedProbability) {
         nestedSamplingTestNested(nestedProbability);
+        nestedSamplingTestNestedDefault();
     }
 
-    void nestedSamplingTestNested(double nestedProbability) {
+    void nestedSamplingTestNested(Double nestedProbability) {
     }
 
-    @Test
-    void testFixedSpanSamplingRate() {
-        TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, 15, TimeUnit.SECONDS);
-        for (int i = 0; i < 10000; i++) {
-            fixedSamplingRateTest("fixed");
+    /**
+     * Runs with the default sample probability
+     */
+    void nestedSamplingTestNestedDefault() {
+    }
+
+    @Nested
+    class Sampling {
+
+        @Test
+        void testFixedSpanSamplingRate() {
+            TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, 15, TimeUnit.SECONDS);
+            for (int i = 0; i < 10000; i++) {
+                fixedSamplingRateTest("fixed");
+            }
+            samplingTestEndMarker("fixed_end");
+
+            //wait for the end marker, this ensures that all sampled spans are also exported
+            assertTraceExported((spans) ->
+                    assertThat(spans)
+                            .anySatisfy((sp) -> {
+                                assertThat(sp.getName()).isEqualTo("fixed_end");
+                            })
+            );
+
+            long numSpans = exportedSpans.stream().filter(sp -> sp.getName().equals("fixed")).count();
+            //the number of spans lies with a probability greater than 99.999% +-300 around the mean of 0.5 * 10000
+            assertThat(numSpans).isGreaterThan(4700).isLessThan(5300);
         }
-        samplingTestEndMarker("fixed_end");
-
-        //wait for the end marker, this ensures that all sampled spans are also exported
-        assertTraceExported((spans) ->
-                assertThat(spans)
-                        .anySatisfy((sp) -> {
-                            assertThat(sp.getName()).isEqualTo("fixed_end");
-                        })
-        );
-
-        long numSpans = exportedSpans.stream().filter(sp -> sp.getName().equals("fixed")).count();
-        //the number of spans lies with a probability greater than 99.999% +-300 around the mean of 0.5 * 10000
-        assertThat(numSpans).isGreaterThan(4700).isLessThan(5300);
-    }
 
 
-    @Test
-    void testDynamicSpanSamplingRate() {
-        TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, 15, TimeUnit.SECONDS);
-        for (int i = 0; i < 10000; i++) {
-            dynamicSamplingRateTest("dynamic_0.2", 0.2);
-            dynamicSamplingRateTest("dynamic_0.7", 0.7);
-            dynamicSamplingRateTest("invalid", "not a number! haha!");
-            dynamicSamplingRateTest("null", null);
+        @Test
+        void dynamicSampleRate_low() {
+            TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, 15, TimeUnit.SECONDS);
+            for (int i = 0; i < 10000; i++) {
+                dynamicSamplingRateTest("dynamic_0.2", 0.2);
+            }
+            samplingTestEndMarker("dynamic_end");
+
+            //wait for the end marker, this ensures that all sampled spans are also exported
+            assertTraceExported((spans) ->
+                    assertThat(spans)
+                            .anySatisfy((sp) -> {
+                                assertThat(sp.getName()).isEqualTo("dynamic_end");
+                            })
+            );
+
+            //the number of spans lies with a probability greater than 99.999% +-300 around the mean of 0.2 * 10000
+            long numSpans02 = exportedSpans.stream().filter(sp -> sp.getName().equals("dynamic_0.2")).count();
+            assertThat(numSpans02).isGreaterThan(1700).isLessThan(2300);
         }
-        samplingTestEndMarker("dynamic_end");
 
-        //wait for the end marker, this ensures that all sampled spans are also exported
-        assertTraceExported((spans) ->
-                assertThat(spans)
-                        .anySatisfy((sp) -> {
-                            assertThat(sp.getName()).isEqualTo("dynamic_end");
-                        })
-        );
+        @Test
+        void dynamicSampleRate_high() {
+            TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, 15, TimeUnit.SECONDS);
+            for (int i = 0; i < 10000; i++) {
+                dynamicSamplingRateTest("dynamic_0.7", 0.7);
+            }
+            samplingTestEndMarker("dynamic_end");
 
-        //the number of spans lies with a probability greater than 99.999% +-300 around the mean of 0.2 * 10000 and 0.7 * 10000
-        long numSpans02 = exportedSpans.stream().filter(sp -> sp.getName().equals("dynamic_0.2")).count();
-        assertThat(numSpans02).isGreaterThan(1700).isLessThan(2300);
+            //wait for the end marker, this ensures that all sampled spans are also exported
+            assertTraceExported((spans) ->
+                    assertThat(spans)
+                            .anySatisfy((sp) -> {
+                                assertThat(sp.getName()).isEqualTo("dynamic_end");
+                            })
+            );
 
-        long numSpans07 = exportedSpans.stream().filter(sp -> sp.getName().equals("dynamic_0.7")).count();
-        assertThat(numSpans07).isGreaterThan(6700).isLessThan(7300);
+            //the number of spans lies with a probability greater than 99.999% +-300 around the mean of 0.7 * 10000
+            long numSpans07 = exportedSpans.stream().filter(sp -> sp.getName().equals("dynamic_0.7")).count();
+            assertThat(numSpans07).isGreaterThan(6700).isLessThan(7300);
+        }
 
-        //ensure that an invalid probability is equal to "never sample"
-        long numSpansInvalid = exportedSpans.stream().filter(sp -> sp.getName().equals("invalid")).count();
-        assertThat(numSpansInvalid).isEqualTo(10000L);
 
-        long numSpansNull = exportedSpans.stream().filter(sp -> sp.getName().equals("null")).count();
-        assertThat(numSpansNull).isEqualTo(10000L);
+        @Test
+        void dynamicSampleRate_invalidRate() {
+            TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, 15, TimeUnit.SECONDS);
+            for (int i = 0; i < 10000; i++) {
+                dynamicSamplingRateTest("invalid", "not a number! haha!");
+            }
+            samplingTestEndMarker("dynamic_end");
+
+            //wait for the end marker, this ensures that all sampled spans are also exported
+            assertTraceExported((spans) ->
+                    assertThat(spans)
+                            .anySatisfy((sp) -> {
+                                assertThat(sp.getName()).isEqualTo("dynamic_end");
+                            })
+            );
+
+            //ensure that an invalid probability is equal to "never sample"
+            long numSpansInvalid = exportedSpans.stream().filter(sp -> sp.getName().equals("invalid")).count();
+            assertThat(numSpansInvalid).isEqualTo(10000L);
+        }
+
+
+        @Test
+        void dynamicSampleRate_null() {
+            TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, 15, TimeUnit.SECONDS);
+            for (int i = 0; i < 10000; i++) {
+                dynamicSamplingRateTest("null", null);
+            }
+            samplingTestEndMarker("dynamic_end");
+
+            //wait for the end marker, this ensures that all sampled spans are also exported
+            assertTraceExported((spans) ->
+                    assertThat(spans)
+                            .anySatisfy((sp) -> {
+                                assertThat(sp.getName()).isEqualTo("dynamic_end");
+                            })
+            );
+
+            //ensure that an invalid probability is equal to "never sample"
+            long numSpansNull = exportedSpans.stream().filter(sp -> sp.getName().equals("null")).count();
+            assertThat(numSpansNull).isEqualTo(10000L);
+        }
+
+        @Test
+        void testNestedZeroSamplingProbability() {
+            TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, 15, TimeUnit.SECONDS);
+
+            nestedSamplingTestRoot(1.0, 0.0);
+
+            samplingTestEndMarker("nested_zero_end");
+
+            //wait for the end marker, this ensures that all sampled spans are also exported
+            assertTraceExported((spans) ->
+                    assertThat(spans)
+                            .anySatisfy((sp) -> {
+                                assertThat(sp.getName()).isEqualTo("nested_zero_end");
+                            })
+            );
+
+            assertTraceExported((spans) ->
+                    assertThat(spans)
+                            .hasSize(3)
+                            .anySatisfy((sp) -> {
+                                assertThat(sp.getName()).isEqualTo("TraceSettingsTest.nestedSamplingTestRoot");
+                                assertThat(sp.getParentSpanId()).isNull();
+                            })
+                            .anySatisfy((sp) -> {
+                                assertThat(sp.getName()).isEqualTo("TraceSettingsTest.nestedSamplingTestNested");
+                                assertThat(sp.getParentSpanId()).isNotNull();
+                            })
+                            .anySatisfy((sp) -> {
+                                assertThat(sp.getName()).isEqualTo("TraceSettingsTest.nestedSamplingTestNestedDefault");
+                                assertThat(sp.getParentSpanId()).isNotNull();
+                            })
+
+            );
+        }
+
+        @Test
+        void testNestedOneSamplingProbability() {
+            TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, 15, TimeUnit.SECONDS);
+
+            nestedSamplingTestRoot(0.0, 1.0);
+
+            samplingTestEndMarker("nested_one_end");
+
+            //wait for the end marker, this ensures that all sampled spans are also exported
+            assertTraceExported((spans) ->
+                    assertThat(spans)
+                            .anySatisfy((sp) -> {
+                                assertThat(sp.getName()).isEqualTo("nested_one_end");
+                            })
+            );
+
+            assertThat(exportedSpans)
+                    .noneSatisfy(sp -> assertThat(sp.getName()).isEqualTo("TraceSettingsTest.nestedSamplingTestRoot"))
+                    .noneSatisfy(sp -> assertThat(sp.getName()).isEqualTo("TraceSettingsTest.nestedSamplingTestNestedDefault"))
+                    .anySatisfy(sp -> assertThat(sp.getName()).isEqualTo("TraceSettingsTest.nestedSamplingTestNested"));
+        }
+
+
+        @Test
+        void testNestedNullSamplingProbability() {
+            TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, 15, TimeUnit.SECONDS);
+
+            nestedSamplingTestRoot(0.0, null);
+
+            samplingTestEndMarker("nested_null_end");
+
+            //wait for the end marker, this ensures that all sampled spans are also exported
+            assertTraceExported((spans) ->
+                    assertThat(spans)
+                            .anySatisfy((sp) -> {
+                                assertThat(sp.getName()).isEqualTo("nested_null_end");
+                            })
+            );
+
+            assertThat(exportedSpans)
+                    .noneSatisfy(sp -> assertThat(sp.getName()).isEqualTo("TraceSettingsTest.nestedSamplingTestRoot"))
+                    .noneSatisfy(sp -> assertThat(sp.getName()).isEqualTo("TraceSettingsTest.nestedSamplingTestNestedDefault"))
+                    .noneSatisfy(sp -> assertThat(sp.getName()).isEqualTo("TraceSettingsTest.nestedSamplingTestNested"));
+        }
+
     }
 
-
-    @Test
-    void testNestedZeroSamplingProbability() {
-        TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, 15, TimeUnit.SECONDS);
-
-        nestedSamplingTestRoot(1.0, 0.0);
-
-        samplingTestEndMarker("nested_zero_end");
-
-        //wait for the end marker, this ensures that all sampled spans are also exported
-        assertTraceExported((spans) ->
-                assertThat(spans)
-                        .anySatisfy((sp) -> {
-                            assertThat(sp.getName()).isEqualTo("nested_zero_end");
-                        })
-        );
-
-        assertTraceExported((spans) ->
-                assertThat(spans)
-                        .hasSize(2)
-                        .anySatisfy((sp) -> {
-                            assertThat(sp.getName()).isEqualTo("TraceSettingsTest.nestedSamplingTestRoot");
-                            assertThat(sp.getParentSpanId()).isNull();
-                        })
-                        .anySatisfy((sp) -> {
-                            assertThat(sp.getName()).isEqualTo("TraceSettingsTest.nestedSamplingTestNested");
-                            assertThat(sp.getParentSpanId()).isNotNull();
-                        })
-
-        );
+    void withErrorStatus(Object status) {
     }
 
-    @Test
-    void testNestedOneSamplingProbability() {
-        TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, 15, TimeUnit.SECONDS);
-
-        nestedSamplingTestRoot(0.0, 1.0);
-
-        samplingTestEndMarker("nested_zero_end");
-
-        //wait for the end marker, this ensures that all sampled spans are also exported
-        assertTraceExported((spans) ->
-                assertThat(spans)
-                        .anySatisfy((sp) -> {
-                            assertThat(sp.getName()).isEqualTo("nested_zero_end");
-                        })
-        );
-
-        assertThat(exportedSpans)
-                .noneSatisfy(sp -> assertThat(sp.getName()).isEqualTo("TraceSettingsTest.nestedSamplingTestRoot"))
-                .anySatisfy(sp -> assertThat(sp.getName()).isEqualTo("TraceSettingsTest.nestedSamplingTestNested"));
+    void withoutErrorStatus() {
     }
 
+    @Nested
+    class ErrorStatus {
+
+        @BeforeEach
+        void waitForInstrumentation() {
+            TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, 15, TimeUnit.SECONDS);
+        }
+
+        @Test
+        void testWithoutErrorStatus() {
+            withoutErrorStatus();
+
+            //wait for the end marker, this ensures that all sampled spans are also exported
+            assertTraceExported((spans) ->
+                    assertThat(spans)
+                            .hasSize(1)
+                            .anySatisfy((sp) -> {
+                                assertThat(sp.getName()).isEqualTo("TraceSettingsTest.withoutErrorStatus");
+                                assertThat(sp.getStatus()).isEqualTo(Status.OK);
+                            })
+            );
+        }
+
+        @Test
+        void testNullErrorStatus() {
+            withErrorStatus(null);
+
+            //wait for the end marker, this ensures that all sampled spans are also exported
+            assertTraceExported((spans) ->
+                    assertThat(spans)
+                            .hasSize(1)
+                            .anySatisfy((sp) -> {
+                                assertThat(sp.getName()).isEqualTo("TraceSettingsTest.withErrorStatus");
+                                assertThat(sp.getStatus()).isEqualTo(Status.OK);
+                            })
+            );
+        }
+
+        @Test
+        void testFalseErrorStatus() {
+            withErrorStatus(false);
+
+            //wait for the end marker, this ensures that all sampled spans are also exported
+            assertTraceExported((spans) ->
+                    assertThat(spans)
+                            .hasSize(1)
+                            .anySatisfy((sp) -> {
+                                assertThat(sp.getName()).isEqualTo("TraceSettingsTest.withErrorStatus");
+                                assertThat(sp.getStatus()).isEqualTo(Status.OK);
+                            })
+            );
+        }
+
+
+        @Test
+        void testNonNullErrorStatus() {
+            withErrorStatus("foo");
+
+            //wait for the end marker, this ensures that all sampled spans are also exported
+            assertTraceExported((spans) ->
+                    assertThat(spans)
+                            .hasSize(1)
+                            .anySatisfy((sp) -> {
+                                assertThat(sp.getName()).isEqualTo("TraceSettingsTest.withErrorStatus");
+                                assertThat(sp.getStatus()).isEqualTo(Status.UNKNOWN);
+                            })
+            );
+        }
+    }
 
 }
 

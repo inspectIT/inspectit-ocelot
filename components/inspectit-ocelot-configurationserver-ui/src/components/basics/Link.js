@@ -7,9 +7,10 @@
  * it would be 'https://username.github.io/about/
  * This HOC solves the problem, by adding the prefix (which is defined in next.config.js)
  * to 'as' property.
- * 
+ *
  * This component is based on the work of dmitriyaa (https://github.com/zeit/next.js/issues/3335#issuecomment-489354854).
  */
+import React from 'react';
 import getConfig from 'next/config';
 import Link from 'next/link';
 

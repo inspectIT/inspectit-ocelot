@@ -74,5 +74,23 @@ The formats should be used in the following way, based on the type of property s
 | --- | --- |
 | System properties | Camel case, kebab case, or underscore notation. |
 | Environment Variables | Upper case format with the underscore as the delimiter. |
-| Property files (`.properties`) | Camel case, kebab case, or underscore notation |
-| YAML files (`.yaml`, `.yml`) | Camel case, kebab case, or underscore notation |
+| Property files (`.properties`) | Camel case, kebab case, or underscore notation. |
+| YAML files (`.yaml`, `.yml`) | Camel case, kebab case, or underscore notation. |
+
+## Environment Information
+
+Each agent stores the following information about its runtime environment: 
+
+| Property | Note |
+| --- | --- |
+| `inspectit.env.agent-dir` | Resolves to the path where the agent-jar is stored. |
+| `inspectit.env.hostname` | The hostname where the agent is running. |
+| `inspectit.env.pid` | The process id of the JVM process. |
+
+They are used to define the default behavior when writing the configuration persistence file and will be sent
+as attributes to the configuration server when fetching the configuration.
+
+You can reference these properties within the configuration using e.g. `${inspectit.env.agent-dir}` 
+as shown in the default configuration for 
+[HTTP-based configuration](configuration/external-configuration-sources.md#http-based-configuration).
+Referencing every other property follows the same schema.

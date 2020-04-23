@@ -77,7 +77,7 @@ public class HttpUrlConnectionContextPropagationTest {
         void propagationViaGetResponseCode() throws Exception {
             HttpURLConnection urlConnection = (HttpURLConnection) new URL(TEST_URL).openConnection();
             try (Scope s = Tags.getTagger().emptyBuilder()
-                    .put(TagKey.create("down_propagated"), TagValue.create("myvalue"))
+                    .putLocal(TagKey.create("down_propagated"), TagValue.create("myvalue"))
                     .buildScoped()) {
                 urlConnection.getResponseCode();
             }
@@ -90,7 +90,7 @@ public class HttpUrlConnectionContextPropagationTest {
         void propagationViaGetInputStream() throws Exception {
             HttpURLConnection urlConnection = (HttpURLConnection) new URL(TEST_URL).openConnection();
             try (Scope s = Tags.getTagger().emptyBuilder()
-                    .put(TagKey.create("down_propagated"), TagValue.create("myvalue"))
+                    .putLocal(TagKey.create("down_propagated"), TagValue.create("myvalue"))
                     .buildScoped()) {
 
                 urlConnection.getInputStream();
@@ -104,7 +104,7 @@ public class HttpUrlConnectionContextPropagationTest {
         void propagationViaConnect() throws Exception {
             HttpURLConnection urlConnection = (HttpURLConnection) new URL(TEST_URL).openConnection();
             try (Scope s = Tags.getTagger().emptyBuilder()
-                    .put(TagKey.create("down_propagated"), TagValue.create("myvalue"))
+                    .putLocal(TagKey.create("down_propagated"), TagValue.create("myvalue"))
                     .buildScoped()) {
 
                 urlConnection.connect();
@@ -121,7 +121,7 @@ public class HttpUrlConnectionContextPropagationTest {
         void propagationViaGetHeaderField() throws Exception {
             HttpURLConnection urlConnection = (HttpURLConnection) new URL(TEST_URL).openConnection();
             try (Scope s = Tags.getTagger().emptyBuilder()
-                    .put(TagKey.create("down_propagated"), TagValue.create("myvalue"))
+                    .putLocal(TagKey.create("down_propagated"), TagValue.create("myvalue"))
                     .buildScoped()) {
 
                 urlConnection.getHeaderField("some-header");

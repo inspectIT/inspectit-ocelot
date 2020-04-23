@@ -11,6 +11,7 @@ import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
 import rocks.inspectit.ocelot.core.instrumentation.hook.MethodReflectionInformation;
 import rocks.inspectit.ocelot.core.instrumentation.hook.VariableAccessor;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
+import rocks.inspectit.ocelot.core.instrumentation.hook.tags.CommonTagsToAttributesManager;
 
 import java.util.function.Predicate;
 
@@ -65,6 +66,11 @@ public class ContinueOrStartSpanAction implements IHookAction {
      */
     private Predicate<ExecutionContext> startSpanCondition;
 
+    /**
+     * Action that optionally adds common tags to the newly started span.
+     */
+    private CommonTagsToAttributesManager commonTagsToAttributesManager;
+
     @Override
     public String getName() {
         return "Span continuing / creation";
@@ -92,23 +98,37 @@ public class ContinueOrStartSpanAction implements IHookAction {
 
     private void startSpan(ExecutionContext context) {
         if (startSpanCondition.test(context)) {
+            // resolve span name
             InspectitContextImpl ctx = context.getInspectitContext();
-
             String spanName = getSpanName(context, context.getHook().getMethodInformation());
+
+            // load remote parent if it exist
             SpanContext remoteParent = ctx.getAndClearCurrentRemoteSpanContext();
+            boolean hasLocalParent = false;
+
+            // create builder based on the remote parent availability
             SpanBuilder builder;
             if (remoteParent != null) {
                 builder = Tracing.getTracer().spanBuilderWithRemoteParent(spanName, remoteParent);
             } else {
+                final Span currentSpan = Tracing.getTracer().getCurrentSpan();
+                hasLocalParent = currentSpan != BlankSpan.INSTANCE;
                 builder = Tracing.getTracer().spanBuilder(spanName);
             }
+
+            // resolve kind and sampler
             builder.setSpanKind(spanKind);
             Sampler sampler = getSampler(context);
             if (sampler != null) {
                 builder.setSampler(sampler);
             }
 
-            ctx.enterSpan(builder.startSpan());
+            // start span and add common tags
+            final Span span = builder.startSpan();
+            commonTagsToAttributesManager.writeCommonTags(span, remoteParent != null, hasLocalParent);
+
+            // enter in the our context
+            ctx.enterSpan(span);
         }
     }
 

@@ -1,0 +1,99 @@
+inspectit:
+  instrumentation:
+    actions:
+      #--------------------------------------------------------------------------------------------------------------
+      # All actions are designed to be applied on CloseableHttpClient.doExecute(HttpHost, HttpRequest, HttpContext)
+      # of the Apache HttpClient (https://hc.apache.org/httpcomponents-client-ga/)
+      #--------------------------------------------------------------------------------------------------------------
+      
+      # Extracts the target of the request in the form host:port
+      'a_apacheclient_toHostString':
+        imports:
+          - 'java.net'
+          - 'org.apache.http'
+        input:
+          _arg0: 'HttpHost'
+        value: '_arg0.toHostString()'
+
+      # Extracts the target http path
+      'a_apacheclient_getPath':
+        imports:
+          - 'java.net'
+          - 'org.apache.http'
+        input:
+          _arg1: 'HttpRequest'
+        value: 'URI.create(_arg1.getRequestLine().getUri()).getPath()'
+
+      # Extracts the HTTP Method of the request, e.g. GET or POST
+      'a_apacheclient_getMethod':
+        imports:
+          - 'org.apache.http'
+        input:
+          _arg1: 'HttpRequest'
+        value: '_arg1.getRequestLine().getMethod()'
+
+      # Extracts the response status in case the request succeeded.
+      # If an exception is thrown instead, it's name is returned (e.g. SocketTimeoutException)
+      'a_apacheclient_getStatus':
+        imports:
+          - 'org.apache.http'
+        input:
+          _returnValue: 'HttpResponse'
+          _thrown: 'Throwable'
+        value-body: |
+          if (_thrown != null) {
+            return _thrown.getClass().getSimpleName();
+          } else {
+            return Integer.valueOf(_returnValue.getStatusLine().getStatusCode());
+          }
+
+      # Writes down-propagated context data to the HTTP Headers
+      'a_apacheclient_downPropagation':
+        is-void: true
+        imports:
+          - 'java.util'
+          - 'org.apache.http'
+        input:
+          _arg1: 'HttpMessage'
+          _context: 'InspectitContext'
+        value-body: |
+          Map headers = _context.getDownPropagationHeaders();
+          Iterator it = headers.entrySet().iterator();
+          while (it.hasNext()) {
+            Map$Entry e = (Map$Entry) it.next();
+            _arg1.setHeader((String) e.getKey(), (String) e.getValue());
+          }
+
+      # Reads up-propagated context data from the HTTP Headers
+      'a_apacheclient_upPropagation':
+        is-void: true
+        imports:
+          - 'java.util'
+          - 'org.apache.http'
+        input:
+          _returnValue: 'HttpMessage'
+          _context: 'InspectitContext'
+        value-body: |
+          if (_returnValue != null) {
+            Collection headerKeys = _context.getPropagationHeaderNames();
+            Map presentHeaders = new HashMap();
+            Iterator it = headerKeys.iterator();
+            while (it.hasNext()) {
+              String name = (String) it.next();
+              Header[] headers = _returnValue.getHeaders(name);
+              if (headers != null && headers.length > 0) {
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < headers.length; i++) {
+                  String value = headers[i].getValue();
+                  if (value != null) {
+                    if (sb.length() > 0) {
+                      sb.append(',');
+                    }
+                    sb.append(value);
+                  }
+                }
+                presentHeaders.put(name, sb.toString());
+              }
+            }
+            _context.readUpPropagationHeaders(presentHeaders);
+          }

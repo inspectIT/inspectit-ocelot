@@ -1,15 +1,16 @@
 inspectit:
 
+  privacy:
+    obfuscation:
+      patterns:
+        - pattern: toObfuscate
+        - pattern: toObfuscateValue
+          checkData: true
+          replace-regex: Obfuscate
+
   instrumentation:
 
     scopes:
-      TraceSettingsTest-root:
-        type:
-          name: TraceSettingsTest
-          matcher-mode: ENDS_WITH
-        methods:
-          - name: root
-            matcher-mode: STARTS_WITH
       TraceSettingsTest-nested:
         type:
           name: TraceSettingsTest
@@ -17,18 +18,18 @@ inspectit:
         methods:
           - name: nestedC
 
-      TraceSettingsTest-attributesSetterWithoutSpan:
+      TraceSettingsTest-attributesSetter:
         type:
           name: TraceSettingsTest
           matcher-mode: ENDS_WITH
         methods:
-          - name: attributesSetterWithoutSpan
-      TraceSettingsTest-attributesSetterWithoutSpanWithConditions:
+          - name: attributesSetter
+      TraceSettingsTest-attributesSetterWithConditions:
         type:
           name: TraceSettingsTest
           matcher-mode: ENDS_WITH
         methods:
-          - name: attributesSetterWithoutSpanWithConditions
+          - name: attributesSetterWithConditions
 
       TraceSettingsTest-conditionalRoot:
         type:
@@ -83,34 +84,64 @@ inspectit:
           - name: nestedSamplingTestNested
 
 
+      TraceSettingsTest-nestedSamplingTest-Default:
+        type:
+          name: TraceSettingsTest
+          matcher-mode: ENDS_WITH
+        methods:
+          - name: nestedSamplingTestNestedDefault
+
+      TraceSettingsTest-withErrorStatus:
+        type:
+          name: TraceSettingsTest
+          matcher-mode: ENDS_WITH
+        methods:
+          - name: withErrorStatus
+
+      TraceSettingsTest-withoutErrorStatus:
+        type:
+          name: TraceSettingsTest
+          matcher-mode: ENDS_WITH
+        methods:
+          - name: withoutErrorStatus
+
+
     rules:
       TraceSettingsTest-startspan:
         scopes:
-          TraceSettingsTest-root: true
+          TraceSettingsTest-attributesSetter: true
+          TraceSettingsTest-attributesSetterWithConditions: true
           TraceSettingsTest-nested: true
+          TraceSettingsTest-nestedSamplingTest-Default: true
+          TraceSettingsTest-withoutErrorStatus: true
         tracing:
           start-span: true
 
-      TraceSettingsTest-attributesSetterWithoutSpan:
+      TraceSettingsTest-attributesSetter:
         scopes:
-          TraceSettingsTest-attributesSetterWithoutSpan: true
+          TraceSettingsTest-attributesSetter: true
         tracing:
           attributes:
             entry: entry_val
             exit: exit_val
+            toObfuscate: exit_val
+            anything: toObfuscate_val
         entry:
           entry_val:
-            action: set
+            action: a_assign_value
             constant-input: {value: "const"}
+          toObfuscate_val:
+            action: a_assign_value
+            constant-input: {value: "toObfuscateValue"}
         exit:
           exit_val:
-            action: set
+            action: a_assign_value
             data-input: {value: _returnValue}
 
 
-      TraceSettingsTest-attributesSetterWithoutSpanWithConditions:
+      TraceSettingsTest-attributesSetterWithConditions:
         scopes:
-          TraceSettingsTest-attributesSetterWithoutSpanWithConditions: true
+          TraceSettingsTest-attributesSetterWithConditions: true
         tracing:
           attributes:
             entry: entry_val
@@ -119,11 +150,11 @@ inspectit:
             only-if-true: _arg0
         entry:
           entry_val:
-            action: set
+            action: a_assign_value
             constant-input: {value: "const"}
         exit:
           exit_val:
-            action: set
+            action: a_assign_value
             data-input: {value: _returnValue}
 
       TraceSettingsTest-conditionalRoot:
@@ -157,13 +188,14 @@ inspectit:
 
         entry:
           span_id:
-            action: read_attachment_on_this
+            action: a_attachment_get
             constant-input: {key: "span_obj"}
+            data-input: {target: _this}
         exit:
           do_write_span_obj:
-            action: replace_attachment_on_this
+            action: a_attachment_put
             constant-input: {key: "span_obj"}
-            data-input: {value: span_id}
+            data-input: {value: span_id, target: _this}
 
 
       TraceSettingsTest-samplingTestEndMarker:
@@ -197,3 +229,10 @@ inspectit:
         tracing:
           start-span: true
           sample-probability: _arg0
+
+      TraceSettingsTest-withErrorStatus:
+        scopes:
+          TraceSettingsTest-withErrorStatus: true
+        tracing:
+          start-span: true
+          error-status: _arg0

@@ -1,11 +1,12 @@
 package rocks.inspectit.ocelot.core.instrumentation.config.model;
 
+import com.google.common.collect.HashMultiset;
+import com.google.common.collect.Multiset;
 import lombok.*;
-import rocks.inspectit.ocelot.config.model.instrumentation.rules.InstrumentationRuleSettings;
+import rocks.inspectit.ocelot.config.model.instrumentation.rules.MetricRecordingSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.RuleTracingSettings;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -28,6 +29,14 @@ public class InstrumentationRule {
      */
     @Singular
     private Set<InstrumentationScope> scopes;
+
+    /**
+     * The names of the included rules.
+     * This set stores the names of the included rules instead of references in order to avoid issues
+     * with hashCode() / equals() due to cyclic dependencies.
+     */
+    @Singular
+    private Set<String> includedRuleNames;
 
     /**
      * Holds all actions executed directly before the ones in {@link #entryActions}.
@@ -70,12 +79,11 @@ public class InstrumentationRule {
     private Collection<ActionCallConfig> postExitActions;
 
     /**
-     * Maps metrics to the data keys or constants used as sources, see {@link InstrumentationRuleSettings#getMetrics()}.
-     * However, this map is guaranteed to not contain null or blank values.
-     * This means that disabled metrics have been filtered out.
+     * Holds the metrics to record.
+     * Is a multiset because the same metric can be recorded twice on a given method.
      */
-    @Singular
-    private Map<String, String> metrics;
+    @Builder.Default
+    private Multiset<MetricRecordingSettings> metrics = HashMultiset.create();
 
     /**
      * The tracing related settings.

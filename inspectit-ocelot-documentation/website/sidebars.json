@@ -24,7 +24,8 @@
     "Tracing": [
       "tracing/tracing",
       "tracing/trace-exporters",
-      "tracing/log-correlation"
+      "tracing/log-correlation",
+      "tracing/privacy"
     ],
     "Instrumentation": [
       "instrumentation/instrumentation",
@@ -34,15 +35,23 @@
       "instrumentation/process"
     ],
     "End User Monitoring": [
-      "enduser-monitoring/enduser-monitoring-server"
+      "enduser-monitoring/enduser-monitoring-server",
+      "enduser-monitoring/eum-server-setup",
+      "enduser-monitoring/eum-server-configuration",
+      "enduser-monitoring/install-eum-agent"
     ],
     "Configuration Server": [
       "config-server/overview",
       "config-server/cs-configuration",
       "config-server/agent-mappings",
-      "config-server/user-authentication"
+      "config-server/user-authentication",
+      "config-server/log-config"
     ],
     "Breaking Changes": [
+      "breaking-changes/1-3",
+      "breaking-changes/1-2",
+      "breaking-changes/1-1",
+      "breaking-changes/1-0",
       "breaking-changes/0-6",
       "breaking-changes/0-5",
       "breaking-changes/0-4"

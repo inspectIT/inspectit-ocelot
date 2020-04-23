@@ -2,18 +2,21 @@ package rocks.inspectit.ocelot.core.metrics;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.opencensus.stats.*;
+import io.opencensus.tags.TagContext;
 import io.opencensus.tags.TagKey;
+import io.opencensus.tags.Tags;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
-import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
-import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.config.model.metrics.MetricsSettings;
 import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings;
 import rocks.inspectit.ocelot.config.model.metrics.definition.ViewDefinitionSettings;
+import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
+import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
+import rocks.inspectit.ocelot.core.metrics.percentiles.PercentileViewManager;
 import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
 
 import javax.annotation.PostConstruct;
@@ -33,7 +36,13 @@ public class MeasuresAndViewsManager {
     private ViewManager viewManager;
 
     @Autowired
+    private StatsRecorder statsRecorder;
+
+    @Autowired
     private CommonTagsManager commonTags;
+
+    @Autowired
+    private PercentileViewManager percentileViewManager;
 
     @Autowired
     private InspectitEnvironment env;
@@ -55,6 +64,7 @@ public class MeasuresAndViewsManager {
      * You should not cache the result of this method to make sure that dynamic updates are not missed.
      *
      * @param name the name of the measure (=the name of the {@link MetricDefinitionSettings}
+     *
      * @return the measure if it is registered, an empty optional otherwise
      */
     public Optional<Measure> getMeasure(String name) {
@@ -67,6 +77,7 @@ public class MeasuresAndViewsManager {
      * You should not cache the result of this method to make sure that dynamic updates are not missed.
      *
      * @param name the name of the measure (=the name of the {@link MetricDefinitionSettings}
+     *
      * @return the measure if it is registered and has type long, an empty optional otherwise
      */
     public Optional<Measure.MeasureLong> getMeasureLong(String name) {
@@ -83,6 +94,7 @@ public class MeasuresAndViewsManager {
      * You should not cache the result of this method to make sure that dynamic updates are not missed.
      *
      * @param name the name of the measure (=the name of the {@link MetricDefinitionSettings}
+     *
      * @return the measure if it is registered and has type double, an empty optional otherwise
      */
     public Optional<Measure.MeasureDouble> getMeasureDouble(String name) {
@@ -94,64 +106,32 @@ public class MeasuresAndViewsManager {
     }
 
     /**
-     * Calls {@link #getMeasureDouble(String)} and records a measurement if the measure was found.
-     *
-     * @param measureName the name of the measure
-     * @param resultMap   the map to store the measurement value in
-     * @param value       the measurement value for this measure
-     * @return true, if the measure exists, has type double and the measurement was recorded, false otherwise
-     */
-    public boolean tryRecordingMeasurement(String measureName, MeasureMap resultMap, double value) {
-        val measure = getMeasureDouble(measureName);
-        if (measure.isPresent()) {
-            resultMap.put(measure.get(), value);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    /**
      * Records a measurement for the given measure, if it exists.
      * Depending on the measure type either {@link Number#doubleValue()}
      * or {@link Number#longValue()} is used.
      *
      * @param measureName the name of the measure
-     * @param resultMap   the map to store the measurement value in
      * @param value       the measurement value for this measure
-     * @return true, if the measure exists, false otherwise
      */
-    public boolean tryRecordingMeasurement(String measureName, MeasureMap resultMap, Number value) {
+    public void tryRecordingMeasurement(String measureName, Number value) {
+        tryRecordingMeasurement(measureName, value, Tags.getTagger().getCurrentTagContext());
+    }
+
+    public void tryRecordingMeasurement(String measureName, Number value, TagContext tags) {
         val measure = getMeasure(measureName);
         if (measure.isPresent()) {
             val m = measure.get();
             if (m instanceof Measure.MeasureLong) {
-                resultMap.put((Measure.MeasureLong) m, value.longValue());
+                MeasureMap result = statsRecorder.newMeasureMap();
+                result.put((Measure.MeasureLong) m, value.longValue());
+                result.record(tags);
             } else if (m instanceof Measure.MeasureDouble) {
-                resultMap.put((Measure.MeasureDouble) m, value.doubleValue());
+                MeasureMap result = statsRecorder.newMeasureMap();
+                result.put((Measure.MeasureDouble) m, value.doubleValue());
+                result.record(tags);
             }
-            return true;
-        } else {
-            return false;
         }
-    }
-
-    /**
-     * Calls {@link #getMeasureLong(String)} and records a measurement if the measure was found.
-     *
-     * @param measureName the name of the measure
-     * @param resultMap   the map to store the measurement value in
-     * @param value       the measurement value for this measure
-     * @return true, if the measure exists, has type long and the measurement was recorded, false otherwise
-     */
-    public boolean tryRecordingMeasurement(String measureName, MeasureMap resultMap, long value) {
-        val measure = getMeasureLong(measureName);
-        if (measure.isPresent()) {
-            resultMap.put(measure.get(), value);
-            return true;
-        } else {
-            return false;
-        }
+        percentileViewManager.recordMeasurement(measureName, value.doubleValue(), tags);
     }
 
     /**
@@ -166,23 +146,37 @@ public class MeasuresAndViewsManager {
         if (metricsSettings.isEnabled()) {
             val newMetricDefinitions = metricsSettings.getDefinitions();
 
-            val registeredViews = viewManager.getAllExportedViews()
-                    .stream()
-                    .collect(Collectors.toMap(v -> v.getName().asString(), v -> v));
-            val registeredMeasures = registeredViews.values().stream()
-                    .map(View::getMeasure)
-                    .distinct()
-                    .collect(Collectors.toMap(Measure::getName, m -> m));
-
             newMetricDefinitions.forEach((name, def) -> {
-                val defWithDefaults = def.getCopyWithDefaultsPopulated(name);
+                val defWithDefaults = def.getCopyWithDefaultsPopulated(name, metricsSettings.getFrequency());
                 val oldDef = currentMetricDefinitionSettings.get(name);
                 if (defWithDefaults.isEnabled() && !defWithDefaults.equals(oldDef)) {
-                    addOrUpdateAndCacheMeasureWithViews(name, defWithDefaults, registeredMeasures, registeredViews);
+                    addOrUpdateAndCacheMeasureWithViews(name, defWithDefaults);
                 }
             });
         }
         //TODO: delete removed measures and views as soon as this is possible in Open-Census
+    }
+
+    /**
+     * Tries to create a measure based on on the given definition, with checking measures and views reported by {@link #viewManager}.
+     * <p>
+     * If the measure or a view already exists, info messages are printed out
+     *
+     * @param measureName the name of the measure
+     * @param definition  the definition of the measure and its views. The defaults must be already populated using {@link MetricDefinitionSettings#getCopyWithDefaultsPopulated(String)}!
+     *
+     * @see #addOrUpdateAndCacheMeasureWithViews(String, MetricDefinitionSettings, Map, Map)
+     */
+    public void addOrUpdateAndCacheMeasureWithViews(String measureName, MetricDefinitionSettings definition) {
+        val registeredViews = viewManager.getAllExportedViews()
+                .stream()
+                .collect(Collectors.toMap(v -> v.getName().asString(), v -> v));
+        val registeredMeasures = registeredViews.values().stream()
+                .map(View::getMeasure)
+                .distinct()
+                .collect(Collectors.toMap(Measure::getName, m -> m));
+
+        addOrUpdateAndCacheMeasureWithViews(measureName, definition, registeredMeasures, registeredViews);
     }
 
     /**
@@ -265,19 +259,39 @@ public class MeasuresAndViewsManager {
      * @param registeredViews a map of which views are already registered at the OpenCensus API. Maps the view names to the views.
      */
     private void addAndRegisterOrUpdateView(String viewName, Measure measure, ViewDefinitionSettings def, Map<String, View> registeredViews) {
-        Set<TagKey> viewTags = getTagKeysForView(def);
-
         View view = registeredViews.get(viewName);
         if (view != null) {
-            updateView(viewName, def, viewTags, view);
+            updateOpenCensusView(viewName, def, view);
         } else {
-            registerNewView(viewName, measure, def, viewTags);
+            if (percentileViewManager.isViewRegistered(measure.getName(), viewName) || def.getAggregation() == ViewDefinitionSettings.Aggregation.QUANTILES) {
+                addOrUpdatePercentileView(measure, viewName, def);
+            } else {
+                registerNewView(viewName, measure, def);
+            }
         }
     }
 
-    private void registerNewView(String viewName, Measure measure, ViewDefinitionSettings def, Set<TagKey> viewTags) {
-        View view;
-        view = View.create(
+    private void addOrUpdatePercentileView(Measure measure, String viewName, ViewDefinitionSettings def) {
+        if (def.getAggregation() != ViewDefinitionSettings.Aggregation.QUANTILES) {
+            log.info("Cannot switch aggregation type for View '{}' from QUANTILES to {}", viewName, def.getAggregation());
+            return;
+        }
+        Set<TagKey> viewTags = getTagKeysForView(def);
+        Set<String> tagsAsStrings = viewTags.stream()
+                .map(TagKey::getName)
+                .collect(Collectors.toSet());
+        boolean minEnabled = def.getQuantiles().contains(0.0);
+        boolean maxEnabled = def.getQuantiles().contains(1.0);
+        List<Double> percentilesFiltered = def.getQuantiles().stream()
+                .filter(p -> p > 0 && p < 1)
+                .collect(Collectors.toList());
+        percentileViewManager.createOrUpdateView(measure.getName(), viewName, measure.getUnit(), def.getDescription(),
+                minEnabled, maxEnabled, percentilesFiltered, def.getTimeWindow().toMillis(), tagsAsStrings);
+    }
+
+    private void registerNewView(String viewName, Measure measure, ViewDefinitionSettings def) {
+        Set<TagKey> viewTags = getTagKeysForView(def);
+        View view = View.create(
                 View.Name.create(viewName),
                 def.getDescription(),
                 measure,
@@ -286,7 +300,7 @@ public class MeasuresAndViewsManager {
         viewManager.registerView(view);
     }
 
-    private void updateView(String viewName, ViewDefinitionSettings def, Set<TagKey> viewTags, View view) {
+    private void updateOpenCensusView(String viewName, ViewDefinitionSettings def, View view) {
         if (!def.getDescription().equals(view.getDescription())) {
             log.info("Cannot update description of view '{}' because it has been already registered in OpenCensus!", viewName);
         }
@@ -295,12 +309,15 @@ public class MeasuresAndViewsManager {
         }
         Set<TagKey> presentTagKeys = new HashSet<>(view.getColumns());
 
+        Set<TagKey> viewTags = getTagKeysForView(def);
         presentTagKeys.stream()
                 .filter(t -> !viewTags.contains(t))
-                .forEach(tag -> log.info("Cannot remove tag '{}' from view '{}' because it has been already registered in OpenCensus!", tag.getName(), viewName));
+                .forEach(tag -> log.info("Cannot remove tag '{}' from view '{}' because it has been already registered in OpenCensus!", tag
+                        .getName(), viewName));
         viewTags.stream()
                 .filter(t -> !presentTagKeys.contains(t))
-                .forEach(tag -> log.info("Cannot add tag '{}' to view '{}' because it has been already registered in OpenCensus!", tag.getName(), viewName));
+                .forEach(tag -> log.info("Cannot add tag '{}' to view '{}' because it has been already registered in OpenCensus!", tag
+                        .getName(), viewName));
     }
 
     /**
@@ -310,6 +327,7 @@ public class MeasuresAndViewsManager {
      * and finally converts them to {@link TagKey}s.
      *
      * @param def the view definition for which the tags should be collected.
+     *
      * @return the set of tag keys
      */
     private Set<TagKey> getTagKeysForView(ViewDefinitionSettings def) {
@@ -342,7 +360,6 @@ public class MeasuresAndViewsManager {
                 throw new RuntimeException("Unhandled aggregation type: " + view.getAggregation());
         }
     }
-
 
     private Aggregation createAggregation(ViewDefinitionSettings view) {
         switch (view.getAggregation()) {

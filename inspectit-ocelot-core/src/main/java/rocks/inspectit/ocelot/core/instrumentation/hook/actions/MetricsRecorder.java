@@ -1,17 +1,19 @@
 package rocks.inspectit.ocelot.core.instrumentation.hook.actions;
 
-import io.opencensus.stats.StatsRecorder;
+import io.opencensus.tags.TagContext;
+import io.opencensus.tags.TagContextBuilder;
+import io.opencensus.tags.TagKey;
+import io.opencensus.tags.Tags;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
-import org.apache.commons.lang3.tuple.Pair;
-import rocks.inspectit.ocelot.core.instrumentation.hook.VariableAccessor;
+import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
+import rocks.inspectit.ocelot.core.instrumentation.hook.actions.model.MetricAccessor;
 import rocks.inspectit.ocelot.core.metrics.MeasuresAndViewsManager;
+import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
+import rocks.inspectit.ocelot.core.tags.TagUtils;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.Optional;
 
 /**
  * Hook action responsible for recording measurements at the exit of an instrumented method
@@ -21,64 +23,60 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class MetricsRecorder implements IHookAction {
 
     /**
-     * A list of metrics names and the corresponding constant value to record.
-     * This is stored as list and not a map because it is faster to iterate over a list than a map.
+     * A list of metric accessors which will be used to find the value and tags for the metric.
      */
-    private final List<Pair<String, ? extends Number>> constantMetrics = new ArrayList<>();
+    private final List<MetricAccessor> metrics;
 
     /**
-     * A list of metric names and corresponding variable accessors which will be used to find the value for the metric.
-     * This is stored as list and not a map because it is faster to iterate over a list than a map.
+     * Common tags manager needed for gathering common tags when recording metrics.
      */
-    private final CopyOnWriteArrayList<Pair<String, VariableAccessor>> dataMetrics = new CopyOnWriteArrayList<>();
+    private CommonTagsManager commonTagsManager;
 
     /**
      * The manager to acquire the actual OpenCensus metrics from
      */
     private MeasuresAndViewsManager metricsManager;
 
-    /**
-     * The manager to acquire the actual OpenCensus metrics from
-     */
-    private StatsRecorder statsRecorder;
-
-    public MetricsRecorder(Map<String, ? extends Number> constantMetrics, Map<String, VariableAccessor> dataMetrics, MeasuresAndViewsManager metricsManager, StatsRecorder statsRecorder) {
-        constantMetrics.forEach((m, v) -> this.constantMetrics.add(Pair.of(m, v)));
-        dataMetrics.forEach((m, v) -> this.dataMetrics.add(Pair.of(m, v)));
-
-        this.metricsManager = metricsManager;
-        this.statsRecorder = statsRecorder;
-    }
-
     @Override
     public void execute(ExecutionContext context) {
-        try (val ts = context.getInspectitContext().enterFullTagScope()) {
-            val measureMap = statsRecorder.newMeasureMap();
-
-            for (val metricAndValue : constantMetrics) {
-                metricsManager.tryRecordingMeasurement(metricAndValue.getKey(), measureMap, metricAndValue.getValue());
-            }
-
-            for (val measureAndDataKey : dataMetrics) {
-                Object value = measureAndDataKey.getValue().get(context);
-                //only record metrics where a value is present
-                //this allows to disable the recording of a metric depending on the results of action executions
-                if (value != null) {
-                    if (value instanceof Number) {
-                        metricsManager.tryRecordingMeasurement(measureAndDataKey.getKey(), measureMap, (Number) value);
-                    } else {
-                        log.error("The value of data '{}' configured to be used for metric '{}' for method '{}' was not a number!" +
-                                        " The recording of this metric is now disabled for this method!",
-                                measureAndDataKey.getValue(), measureAndDataKey.getKey(), context.getHook().getMethodInformation().getName());
-                        dataMetrics.remove(measureAndDataKey);
-                    }
+        // then iterate all metrics and enter new scope for metric collection
+        for (MetricAccessor metricAccessor : metrics) {
+            Object value = metricAccessor.getVariableAccessor().get(context);
+            if (value != null) {
+                if (value instanceof Number) {
+                    // only record metrics where a value is present
+                    // this allows to disable the recording of a metric depending on the results of action executions
+                    TagContext tagContext = getTagContext(context, metricAccessor);
+                    metricsManager.tryRecordingMeasurement(metricAccessor.getName(), (Number) value, tagContext);
                 }
             }
-
-            measureMap.record();
         }
     }
 
+    private TagContext getTagContext(ExecutionContext context, MetricAccessor metricAccessor) {
+        InspectitContextImpl inspectitContext = context.getInspectitContext();
+
+        // create builder
+        TagContextBuilder builder = Tags.getTagger().emptyBuilder();
+
+        // first common tags to allow overwrite by constant or data tags
+        commonTagsManager.getCommonTagKeys()
+                .forEach(commonTagKey -> Optional.ofNullable(inspectitContext.getData(commonTagKey.getName()))
+                        .ifPresent(value -> builder.putLocal(commonTagKey, TagUtils.createTagValue(value.toString())))
+                );
+
+        // then constant tags to allow overwrite by data
+        metricAccessor.getConstantTags()
+                .forEach((key, value) -> builder.putLocal(TagKey.create(key), TagUtils.createTagValue(value)));
+
+        // go over data tags and match the value to the key from the contextTags (if available)
+        metricAccessor.getDataTagAccessors()
+                .forEach((key, accessor) -> Optional.ofNullable(accessor.get(context))
+                        .ifPresent(tagValue -> builder.putLocal(TagKey.create(key), TagUtils.createTagValue(tagValue.toString()))));
+
+        // build and return
+        return builder.build();
+    }
 
     @Override
     public String getName() {

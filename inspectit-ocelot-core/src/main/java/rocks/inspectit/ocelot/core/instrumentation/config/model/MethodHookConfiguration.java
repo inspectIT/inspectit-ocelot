@@ -1,13 +1,15 @@
 package rocks.inspectit.ocelot.core.instrumentation.config.model;
 
+import com.google.common.collect.HashMultiset;
+import com.google.common.collect.Multiset;
 import lombok.Builder;
 import lombok.Singular;
 import lombok.Value;
+import rocks.inspectit.ocelot.config.model.instrumentation.rules.MetricRecordingSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.RuleTracingSettings;
 import rocks.inspectit.ocelot.core.instrumentation.hook.MethodHook;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * The configuration used to build a {@link MethodHook}
@@ -62,15 +64,11 @@ public class MethodHookConfiguration {
     private List<ActionCallConfig> postExitActions;
 
     /**
-     * Maps the metrics to capture to the data keys to use as value.
+     * The metrics to record.
+     * Is a {@link Multiset} instead of a set because different rules can have exactly the same {@link MetricRecordingSettings}
+     * definition but are applied on the same method.
+     * This should lead to the same metric being written twice.
      */
-    @Singular
-    private Map<String, String> dataMetrics;
-
-    /**
-     * Maps the metrics to capture to the constants which should be used as value.
-     * This is for example useful for counter metrics where you don't actually are interested in the value.
-     */
-    @Singular
-    private Map<String, Number> constantMetrics;
+    @Builder.Default
+    private Multiset<MetricRecordingSettings> metrics = HashMultiset.create();
 }

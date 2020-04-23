@@ -38,6 +38,18 @@ public class InstrumentationRuleSettings {
     private Map<@NotBlank String, Boolean> scopes = Collections.emptyMap();
 
     /**
+     * Rules can include other rules.
+     * If a rule is included it has the same effect as adding all the scopes of this rule to the included one.
+     * <p>
+     * This means that all actions, tracing settings and metrics recordings of the included rule are also included.
+     * <p>
+     * The keys of this map are the names of the rules to include, the value must be "true" for the include to be active.
+     * Note that a rule will only be included if it also is enabled!
+     */
+    @NotNull
+    private Map<@NotBlank String, Boolean> include = Collections.emptyMap();
+
+    /**
      * Defines the action to execute before {@link #entry}.
      */
     @NotNull
@@ -77,21 +89,16 @@ public class InstrumentationRuleSettings {
     private Map<@NotBlank String, @NotNull @Valid ActionCallSettings> postExit = Collections.emptyMap();
 
     /**
-     * Defines which measurements should be taken at the instrumented method.
-     * This map maps the name of the metric (=the name of the open census measure) to a data key or a constant value.
+     * Defines which metrics should be recorded at the instrumented method.
+     * This map maps the name of the metric (=the name of the open census measure) to a corresponding {@link MetricRecordingSettings} instance.
+     * The name hereby acts only as a default for {@link MetricRecordingSettings#getMetric()} and can be overridden by this property.
      * <p>
-     * If the specified value can be parsed using @{@link Double#parseDouble(String)}, the given value is used as constant
-     * measurement value for every time a method matching this rule is executed.
-     * <p>
-     * If the provided value is not parseable as a double, it is assumed that is a data key.
-     * In this case the value in the context for the data key is used as value for the given measure.
-     * For this reason the value present in the inspectit context for the given data key has to be an instance of {@link Number}.
-     * <p>
-     * The value in this map can also be null or an empty string, in this case simply no measurement is recorded.
-     * In addition the data-key can be null. This can be used to disable the recording of a metric for a rule.
+     * It is possible to directly assign a string or number value to metrics in this map due to the
+     * {@link rocks.inspectit.ocelot.config.conversion.NumberToMetricRecordingSettingsConverter} and
+     * {@link rocks.inspectit.ocelot.config.conversion.StringToMetricRecordingSettingsConverter}.
      */
     @NotNull
-    private Map<@NotBlank String, String> metrics = Collections.emptyMap();
+    private Map<@NotBlank String, @Valid MetricRecordingSettings> metrics = Collections.emptyMap();
 
     /**
      * Stores all configuration options related to tracing.
@@ -108,7 +115,8 @@ public class InstrumentationRuleSettings {
      */
     public void performValidation(InstrumentationSettings container, Set<String> definedMetrics, ViolationBuilder vios) {
         checkScopesExist(container, vios);
-        checkMetricsDefined(definedMetrics, vios);
+        checkIncludedRulesExist(container, vios);
+        checkMetricRecordingsValid(definedMetrics, vios);
         preEntry.forEach((data, call) -> call.performValidation(container,
                 vios.atProperty("preEntry").atProperty(data)));
         entry.forEach((data, call) -> call.performValidation(container,
@@ -123,13 +131,8 @@ public class InstrumentationRuleSettings {
                 vios.atProperty("postExit").atProperty(data)));
     }
 
-    private void checkMetricsDefined(Set<String> definedMetrics, ViolationBuilder vios) {
-        metrics.keySet().stream()
-                .filter(m -> !definedMetrics.contains(m))
-                .forEach(m -> vios.atProperty("metrics")
-                        .message("Metric '{metric}' is not defined in inspectit.metrics.definitions!")
-                        .parameter("metric", m)
-                        .buildAndPublish());
+    private void checkMetricRecordingsValid(Set<String> definedMetrics, ViolationBuilder vios) {
+        metrics.forEach((name, settings) -> settings.performValidation(name, definedMetrics, vios.atProperty("metrics")));
     }
 
     private void checkScopesExist(InstrumentationSettings container, ViolationBuilder vios) {
@@ -143,6 +146,20 @@ public class InstrumentationRuleSettings {
                             .parameter("scope", name)
                             .buildAndPublish();
                 });
+    }
+
+
+    private void checkIncludedRulesExist(InstrumentationSettings container, ViolationBuilder vios) {
+        include.entrySet().stream()
+                .filter(Map.Entry::getValue)
+                .map(Map.Entry::getKey)
+                .filter(name -> !container.getRules().containsKey(name))
+                .forEach(name ->
+                        vios.message("The included rule '{rule}' does not exist!")
+                                .atProperty("include")
+                                .parameter("rule", name)
+                                .buildAndPublish()
+                );
     }
 
 }

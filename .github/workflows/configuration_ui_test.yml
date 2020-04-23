@@ -1,0 +1,32 @@
+name: Test Configuration UI
+
+on:
+  pull_request:
+    paths:
+      - 'components/inspectit-ocelot-configurationserver-ui/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      working-directory: ./components/inspectit-ocelot-configurationserver-ui
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Use Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+
+      - name: Install dependencies
+        working-directory: ${{env.working-directory}}
+        run: yarn install
+
+      - name: Run Eslint
+        working-directory: ${{env.working-directory}}
+        run: yarn lint
+
+      - name: Run Prettier
+        working-directory: ${{env.working-directory}}
+        run: yarn format

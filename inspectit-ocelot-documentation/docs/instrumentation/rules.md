@@ -61,10 +61,10 @@ For this reason the inspectIT context implements _data propagation_. The propaga
 
 Up- and down propagation can also be combined: in this case then the data is attached to the control flow, meaning that it will appear as if its value will be passed around with every method call and return.
 
-The second aspect of propagation to consider is the _level_. Does the propagation happen within each Thread separately or is it propagated across threads? Also, what about propagation across JVM boarders, e.g. one micro service calling another one via HTTP? In inspectIT Ocelot we provide the following two settings for the propagation level.
+The second aspect of propagation to consider is the _level_. Does the propagation happen within each Thread separately or is it propagated across threads? Also, what about propagation across JVM borders, e.g. one micro service calling another one via HTTP? In inspectIT Ocelot we provide the following two settings for the propagation level.
 
-* **JVM local:** The data is propagated within the JVM, even across thread boarders. The behaviour when data moves from one thread to another is defined through [Special Sensors](instrumentation/special-sensors.md).
-* **Global:** Data is propagated within the JVM and even across JVM boarders. For example, when an application issues an HTTP request, the globally down propagated data is added to the headers of the request. When the response arrives, up propagated data is collected from the response headers. Again, this protocol specific behaviour is realized through [Special Sensors](instrumentation/special-sensors.md).
+* **JVM local:** The data is propagated within the JVM, even across thread borders. The behaviour when data moves from one thread to another is defined through [Special Sensors](instrumentation/special-sensors.md).
+* **Global:** Data is propagated within the JVM and even across JVM borders. For example, when an application issues an HTTP request, the globally down propagated data is added to the headers of the request. When the response arrives, up propagated data is collected from the response headers. This protocol specific behaviour is realized through default instrumentation rules provided with the agent, but can be extended as needed.
 
 ### Defining the Behaviour
 
@@ -75,7 +75,7 @@ property `inspectit.instrumentation.data`. Here are some examples extracted from
 inspectit:
   instrumentation:
     data:
-      # for correlating calls across JVM boarders
+      # for correlating calls across JVM borders
       prop_origin_service: {down-propagation: GLOBAL, is-tag: false}
       prop_target_service: {up-propagation: GLOBAL, down-propagation: JVM_LOCAL, is-tag: false}
 
@@ -92,19 +92,17 @@ The configuration options are the following:
 
 |Config Property|Default| Description
 |---|---|---|
-|`down-propagation`|`JVM_LOCAL`|Configures if values for this data key propagate down and the level of propagation.
-Possible values are `NONE`, `JVM_LOCAL` and `GLOBAL`. If `NONE` is configured, no down propagation will take place.
-|`up-propagation`|`NONE`| Configures if values for this data key propagate up and the level of propagation.
-Possible values are `NONE`, `JVM_LOCAL` and `GLOBAL`. If `NONE` is configured, no up propagation will take place.
-|`is-tag`|`true`|If true, this data will act as a tag when metrics are recorded. This does not influence propagation, e.g. typically you want tags to be down propagated JVM locally.
+| `down-propagation` | `JVM_LOCAL` if the data key is also a [common tag](metrics/common-tags.md), `NONE` otherwise | Configures if values for this data key propagate down and the level of propagation. Possible values are `NONE`, `JVM_LOCAL` and `GLOBAL`. If `NONE` is configured, no down propagation will take place. | 
+| `up-propagation` |  `NONE` |  Configures if values for this data key propagate up and the level of propagation. Possible values are `NONE`, `JVM_LOCAL` and `GLOBAL`. If `NONE` is configured, no up propagation will take place. | 
+| `is-tag` | `true` if the data key is also a [common tag](metrics/common-tags.md) or is used as tag in any [metric definition](metrics/custom-metrics.md), `false` otherwise | If true, this data will act as a tag when metrics are recorded. This does not influence propagation. | 
 
-Note that you are free to use data keys without explicitly defining them in the `inspectit.instrumentation.data` section. In this case simply all settings are assumed to be default, which corresponds to the behaviour of OpenCensus tags.
+Note that you are free to use data keys without explicitly defining them in the `inspectit.instrumentation.data` section. In this case simply all settings will have their default value.
 
 ### Interaction with OpenCensus Tags
 
 As explained previously, our inspectIT context can be seen as a more flexible variation of OpenCensus tags. In fact, we designed the inspectIT context so that it acts as a superset of the OpenCensus TagContext.
 
-Firstly, when an instrumented method is entered, a new inspectIT context is created. At this point, it imports any tag values published by OpenCensus directly as data. This also includes the [common tags](metrics/common-tags.md) created by inspectIT. This means, that you can simply read (and overwrite) values for common tags such as `service` or `host_address` at any rule.
+Firstly, when an instrumented method is entered, a new inspectIT context is created. At this point, it imports any tag values published by OpenCensus directly as data. This also includes the [common tags](metrics/common-tags.md) created by inspectIT. This means, that you can simply read (and override) values for common tags such as `service` or `host_address` at any rule.
 
 The integration is even deeper if you [configured the agent to also extract the metrics from manual instrumentation in your application](configuration/open-census-configuration.md).
 Firstly, if a method instrumented by inspectIT Ocelot is executed within a TagContext opened by your application,
@@ -388,24 +386,67 @@ example_rule:
   exit:
     method_duration:
       #action invocation here....
+    method_name:
+      #action invocation here....
+
+  metrics:
+    '[method/duration]':
+      value: method_duration
+      constant-tags:
+        action: checkout
+      data-tags:
+        method_name: method_name
+    write_my_other_metric:
+      metric: "some/other/metric"
+      value: 42
+```
+
+The metrics phase is executed after the exit phase of the rule.
+As shown above, you can assign values to metrics based on their name or explicitly define the metric name in `metric` property.
+This allows to write multiple values for the same metric from within the same rule.
+You must however have [defined the metric](metrics/custom-metrics.md) to use them.
+
+The measurement value written to the metric can be specified by giving a data key in the `value` property.
+This was done in the example above for `method/duration`:
+Here, the `value` for the data key `method_duration` is taken, which we previously wrote in the exit phase.
+Alternatively you can just specify a constant which will be used, like shown for `some/other/metric`.
+
+In addition, you should define tags that are be recorded alongside the metric value.
+The prerequisite for this is that tags have been declared in the [metric definition](metrics/custom-metrics.md) and [configured to be used as tags](#defining-the-behaviour).
+Constant tags always have same values as defined in the configuration.
+The data tags try to resolve value from the data key, which is previously wrote in the exit phase.
+If data key for the data tag can not be found, then corresponding tag is omitted.
+Note that `data-tags` have higher priority than the `constant-tags`, thus if both section define a tag with same key, the data tag will overwrite the constant one if it can be resolved.
+
+> All [common tags](metrics/common-tags.md) are always included in the metric recording and do not need explicit specification.
+
+:::warning Short notation is deprecated
+The default way to specify metric collection in Ocelot versions up to and including v1.0 was a so called short notation, which is now deprecated and will be invalid in future Ocelot releases:
+
+```yaml
+#inspectit.instrumentation.rules is omitted here
+example_rule:
+  #...
+  exit:
+    method_duration:
+      #action invocation here....
 
   metrics:
     '[method/duration]' : method_duration
     '[some/other/metric]' : 42
 ```
 
-The metrics phase is executed after the exit phase of the rule. As shown above, you can simply assign values to metrics based on their name. You must however have [defined the metric](metrics/custom-metrics.md) to use them.
-
-The measurement value written to the metric can be specified by giving a data key. This was done in the example above for `method/duration`: Here, the value for the data key `method_duration` is taken, which we previously wrote in the exit phase.
-Alternatively you can just specify a constant which will be used, like it was done for `some/other/metric`.
-
-If the value assigned with the data key you specified is `null` (e.g. no data was collected), no value for the metric will be written out.
-
-In addition, all configured tags for the metrics will also be taken from the inspectIT context, if they have been [configured to be used as tags](#defining-the-behaviour).
+As short notation does not allow specification of tags to be recorded, using the short notation means that only common tags will be collected.
+We advise to migrate to the new configuration style immediately.
+Due to the way configuration loading works, the short notation will always take precedence over the explicit notation. This means that you cannot override settings made with the short-notation by using the explicit notation.
+:::
 
 ### Collecting Traces
 
 The inspectIT Ocelot agent allows you to record method invocations as [OpenCensus spans](https://opencensus.io/tracing/span/).
+
+#### Tracing Methods
+
 In order to make your collected spans visible, you must first set up a [trace exporter](tracing/trace-exporters.md).
 
 Afterwards you can define that all methods matching a certain rule will be traced:
@@ -419,7 +460,8 @@ inspectit:
           start-span: true
 ```
 
-For example, using the previous configuration snippet, each method that matches the scope definition of the `example_rule` rule will appear within a trace. Its appearance can be customized using the following properties which can be set in the rule's `tracing` section.
+For example, using the previous configuration snippet, each method that matches the scope definition of the `example_rule` rule will appear within a trace.
+Its appearance can be customized using the following properties which can be set in the rule's `tracing` section.
 
 |Property |Default| Description
 |---|---|---|
@@ -445,6 +487,8 @@ inspectit:
 
 > The name must exist at the end of the entry section and cannot be set in the exit section.
 
+#### Trace Sampling
+
 It is often desirable to not capture every trace, but instead [sample](https://opencensus.io/tracing/sampling/) only a subset.
 This can be configured using the `sample-probability` setting under the `tracing` section:
 
@@ -465,6 +509,8 @@ This allows you for example to vary the sample probability based on the HTTP url
 
 If no sample probability is defined for a rule, the [default probability](tracing/tracing.md) is used.
 
+#### Adding Attributes
+
 Another useful property of spans is that you can attach any additional information in form of attributes.
 In most tracing backends such as ZipKin and Jaeger, you can search your traces based on attributes.
 The example below shows how you can define attributes:
@@ -475,6 +521,7 @@ inspectit:
     rules:
       servlet_api_service:
         tracing:
+          start-span: true
           attributes:
             http_host: host_name
         entry:
@@ -483,12 +530,41 @@ inspectit:
 ```
 
 The attributes property maps the names of attributes to data keys.
-After the rule's exit phase, the corresponding data keys are read and attached as attributes to the current span.
+After the rule's exit phase, the corresponding data keys are read and attached as attributes to the span started or continued by the method.
 
-Note that a rule does not have to start a span for attatching attributes.
-If a rule does not start a span, the attributes will be written to the first span opened by any method on the current call stack.
+Note that if a rule does not start or continue a span, no attributes will be written.
 
-It is also possible to conditionalize the span starting as well as the attribute writing:
+The [common tags](metrics/common-tags.md) are added as attributes in all local span roots by default.
+This behavior can be configured in the global [tracing settings](tracing/tracing.md#common-tags-as-attributes).
+
+#### Visualizing Span Errors
+
+Most tracing backends support highlighting of spans which are marked as errors.
+InspectIT Ocelot allows you to configure exactly under which circumstances your spans are interpreted
+as errors or successes.
+This is done via the `error-status` configuration property of a rule's tracing section:
+
+```yaml
+inspectit:
+  instrumentation:
+    rules:
+      example_rule:
+        tracing:
+          start-span: true
+          error-status: _thrown
+```
+
+The value of the `error-status` property can be any value from the context or any [special variable](#input-parameters).
+
+When the instrumented method finishes, Ocelot will read the value of the given variable.
+If the value is neither `null` nor `false`, the span will be marked as an error.
+
+In the example above, the special variable `_thrown` is used to define the error status.
+This means if `_thrown` is not null (which means the method threw an exception), the span will be marked as error.
+
+#### Adding Span Conditions
+
+It is possible to conditionalize the span starting as well as the attribute writing:
 
 ```yaml
 inspectit:
@@ -513,7 +589,10 @@ If any `start-span-conditions` are defined, a span will only be created when all
 Analogous to this, attributes will only be written if each condition defined in `attribute-conditions` is fulfilled.
 The conditions that can be defined are equal to the ones of actions, thus, please see the [action conditions description](#adding-conditions) for detailed information.
 
-With the previous shown settings, it is possible to add an instrumentation which creates exactly one span per invocation of an instrumented method. Especially in asynchronous scenarios, this might not be the desired behaviour:
+#### Tracing Asynchronous Invocations
+
+With the previous shown settings, it is possible to add an instrumentation which creates exactly one span per invocation of an instrumented method.
+Especially in asynchronous scenarios, this might not be the desired behaviour:
 For these cases inspectIT Ocelot offers the possibility to record multiple method invocations into a single span.
 The resulting span then has the following properties:
 
@@ -555,3 +634,60 @@ In this case, the rule will first attempt to continue the existing span. Only if
 Again, conditions for the span continuing and span ending can be specified just like for the span starting.
 The properties `continue-span-conditions` and `end-span-conditions` work just like `start-span-conditions`.
 
+### Modularizing Rules
+
+When writing complex instrumentation, it can happen that you want to reuse parts of your instrumentation across different rules.
+For example when instrumenting a HTTP library, you typically extract the HTTP path using custom actions. This HTTP path is meant
+to be used for multiple concerns, e.g. for tracing and for metrics which are specified in separate rules.
+
+A simple solution would be to copy and paste the action invocation for extracting the path into both the metrics and the tracing rule.
+This has two main downsides:
+* The work is done twice: Your action for extracting the HTTP path is invoked twice, leading to unnecessary overhead
+* When altering how the HTTP path is extracted, you need to remember every rule where you copy-pasted your instrumentation
+
+To overcome these issues, Ocelot allows you to include rules from within other rules:
+
+```yaml
+    rules:
+      myhttp_extract_path:
+        entry:
+          my_http_path:
+            #logic to extract the http path and save it in the context here...
+          
+      myhttp_tracing:
+        include:
+          myhttp_extract_path: true
+        scopes:
+          myhttp_scope: true
+        tracing:
+          start-span: true
+          attributes:
+            path: my_http_path
+            
+      myhttp_record_metric:
+        include:
+          myhttp_extract_path: true
+        scopes:
+          myhttp_scope: true
+        metrics:
+          #record http metric here...
+```
+
+In the above example we defined a rule `myhttp_extract_path`, which contains the logic for extracting the HTTP path.
+Note that this rule does not have any scope attached and therefore does not result in any instrumentation by default.
+
+However, the example also contains the two rules `myhttp_tracing` and `myhttp_record_metric`.
+They both reference the `myhttp_extract_path` rule via their `include` property.
+While in the example exactly one rule is included, it is possible to include any amount of rules.
+Includes also work transitively.
+
+If a rule is included, it has the same effect as adding all the scopes of this rule to the included one.
+This means that all actions, tracing settings and metrics recordings of the included rule are also applied.
+
+In this example this means that if either `myhttp_tracing` or `myhttp_record_metric` are enabled,
+`myhttp_extract_path` will also be applied to all methods matching the scope `myhttp_scope`.
+As a result, the `my_http_path` data variable will be populated.
+
+The key point is now that even if the rule is included multiple times for a given method, it will only be applied exactly once.
+This means that if both `myhttp_tracing` and `myhttp_record_metric` are enabled, the `myhttp_extract_path` will still only be applied once.
+This therefore solves the problem of accidentally doing the same work twice.

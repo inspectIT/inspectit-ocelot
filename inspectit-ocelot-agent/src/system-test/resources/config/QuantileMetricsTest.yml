@@ -1,0 +1,31 @@
+# overwrite settings from default.yml for system tests
+inspectit:
+  metrics:
+    definitions:
+      '[quantiles/test]':
+        unit: values
+        views:
+          '[quantiles/test/view]':
+            aggregation: QUANTILES
+            time-window: 60s
+            tags:
+              'foo': true
+
+  instrumentation:
+    scopes:
+      QuantileMetricsTest-record:
+        type:
+          name: rocks.inspectit.ocelot.instrumentation.QuantileMetricsTest
+        methods:
+          - name: record
+
+    rules:
+      QuantileMetricsTest-record:
+        scopes:
+          QuantileMetricsTest-record: true
+        metrics:
+          '[quantiles/test]':
+            value: _arg0
+            data-tags:
+              'foo': _arg1
+
