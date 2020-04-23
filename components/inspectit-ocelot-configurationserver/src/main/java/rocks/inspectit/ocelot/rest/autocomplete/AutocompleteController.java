@@ -27,14 +27,7 @@ public class AutocompleteController extends AbstractBaseController {
     @Autowired
     private List<AutoCompleter> completers;
 
-    @Secured(
-            {
-                    CustomLdapUserDetailsService.READ_ACCESS_ROLE,
-                    CustomLdapUserDetailsService.WRITE_ACCESS_ROLE,
-                    CustomLdapUserDetailsService.COMMIT_ACCESS_ROLE,
-                    CustomLdapUserDetailsService.ADMIN_ACCESS_ROLE
-            }
-    )
+    @Secured(CustomLdapUserDetailsService.READ_ACCESS_ROLE)
     @ApiOperation(value = "String which should be autocompleted")
     @ApiResponse(code = 200, message = "The options which you can enter into the string", examples =
     @Example(value = @ExampleProperty(value = "[\"interfaces\",\n" +

@@ -102,13 +102,7 @@ public class AgentMappingController extends AbstractBaseController {
      * @return 200 if the mapping has been deleted or 404 if it does not exist
      * @throws IOException In case of an error during deletion
      */
-    @Secured(
-            {
-                    CustomLdapUserDetailsService.WRITE_ACCESS_ROLE,
-                    CustomLdapUserDetailsService.COMMIT_ACCESS_ROLE,
-                    CustomLdapUserDetailsService.ADMIN_ACCESS_ROLE
-            }
-    )
+    @Secured(CustomLdapUserDetailsService.WRITE_ACCESS_ROLE)
     @DeleteMapping(value = "mappings/{mappingName}")
     public ResponseEntity deleteMappingByName(@PathVariable("mappingName") String mappingName) throws IOException {
         boolean isDeleted = mappingManager.deleteAgentMapping(mappingName);

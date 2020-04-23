@@ -19,14 +19,7 @@ import java.util.Collection;
 @RestController
 public class DirectoryController extends FileBaseController {
 
-    @Secured(
-            {
-                    CustomLdapUserDetailsService.READ_ACCESS_ROLE,
-                    CustomLdapUserDetailsService.WRITE_ACCESS_ROLE,
-                    CustomLdapUserDetailsService.COMMIT_ACCESS_ROLE,
-                    CustomLdapUserDetailsService.ADMIN_ACCESS_ROLE
-            }
-    )
+    @Secured(CustomLdapUserDetailsService.READ_ACCESS_ROLE)
     @ApiOperation(value = "List directory contents", notes = "Can be used to get a list of the contents of a given directory.")
     @ApiImplicitParam(name = "Path", value = "The part of the url after /directories/ define the path to the directory whose contents shall be read.")
     @GetMapping(value = "directories/**")
@@ -38,13 +31,7 @@ public class DirectoryController extends FileBaseController {
         return fileManager.getFilesInDirectory(path, recursive);
     }
 
-    @Secured(
-            {
-                    CustomLdapUserDetailsService.WRITE_ACCESS_ROLE,
-                    CustomLdapUserDetailsService.COMMIT_ACCESS_ROLE,
-                    CustomLdapUserDetailsService.ADMIN_ACCESS_ROLE
-            }
-    )
+    @Secured(CustomLdapUserDetailsService.WRITE_ACCESS_ROLE)
     @ApiOperation(value = "Create a directory", notes = "Creates a new, empty directory including its parent folders. Does nothing if the directory already exists.")
     @ApiImplicitParam(name = "Path", value = "The part of the url after /directories/ define the path of the directory to create.")
     @PutMapping(value = "directories/**")
@@ -53,13 +40,7 @@ public class DirectoryController extends FileBaseController {
         fileManager.createDirectory(path);
     }
 
-    @Secured(
-            {
-                    CustomLdapUserDetailsService.WRITE_ACCESS_ROLE,
-                    CustomLdapUserDetailsService.COMMIT_ACCESS_ROLE,
-                    CustomLdapUserDetailsService.ADMIN_ACCESS_ROLE
-            }
-    )
+    @Secured(CustomLdapUserDetailsService.WRITE_ACCESS_ROLE)
     @ApiOperation(value = "Delete a directory", notes = "Deletes a directory including its contents.")
     @ApiImplicitParam(name = "Path", value = "The part of the url after /directories/ define the path of the directory to delete.")
     @DeleteMapping(value = "directories/**")

@@ -13,27 +13,13 @@ import java.util.Map;
 @RestController
 public class DefaultConfigController extends AbstractBaseController {
 
-    @Secured(
-            {
-                    CustomLdapUserDetailsService.READ_ACCESS_ROLE,
-                    CustomLdapUserDetailsService.WRITE_ACCESS_ROLE,
-                    CustomLdapUserDetailsService.COMMIT_ACCESS_ROLE,
-                    CustomLdapUserDetailsService.ADMIN_ACCESS_ROLE
-            }
-    )
+    @Secured(CustomLdapUserDetailsService.READ_ACCESS_ROLE)
     @GetMapping(value = "defaultconfig")
     public Map<String, String> getDefaultConfigContent() throws IOException {
         return ConfigFileLoader.getDefaultConfigFiles();
     }
 
-    @Secured(
-            {
-                    CustomLdapUserDetailsService.READ_ACCESS_ROLE,
-                    CustomLdapUserDetailsService.WRITE_ACCESS_ROLE,
-                    CustomLdapUserDetailsService.COMMIT_ACCESS_ROLE,
-                    CustomLdapUserDetailsService.ADMIN_ACCESS_ROLE
-            }
-    )
+    @Secured(CustomLdapUserDetailsService.READ_ACCESS_ROLE)
     @GetMapping(value = "fallbackconfig")
     public Map<String, String> getFallBackConfigContent() throws IOException {
         return ConfigFileLoader.getFallbackConfigFiles();

@@ -21,13 +21,7 @@ public class FileController extends FileBaseController {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Secured(
-            {
-                    CustomLdapUserDetailsService.WRITE_ACCESS_ROLE,
-                    CustomLdapUserDetailsService.COMMIT_ACCESS_ROLE,
-                    CustomLdapUserDetailsService.ADMIN_ACCESS_ROLE
-            }
-    )
+    @Secured(CustomLdapUserDetailsService.WRITE_ACCESS_ROLE)
     @ApiOperation(value = "Write a file", notes = "Creates or overwrites a file with the provided text content")
     @ApiImplicitParam(name = "Path", type = "string", value = "The part of the url after /files/ defines the path to the file to write.")
     @PutMapping(value = "files/**")

@@ -62,14 +62,7 @@ public class AccountController extends AbstractBaseController {
         return tokenManager.createToken(user.getName());
     }
 
-    @Secured(
-            {
-                    CustomLdapUserDetailsService.READ_ACCESS_ROLE,
-                    CustomLdapUserDetailsService.WRITE_ACCESS_ROLE,
-                    CustomLdapUserDetailsService.COMMIT_ACCESS_ROLE,
-                    CustomLdapUserDetailsService.ADMIN_ACCESS_ROLE
-            }
-    )
+    @Secured(CustomLdapUserDetailsService.READ_ACCESS_ROLE)
     @ApiOperation(value = "Change Password", notes = "Changes the password of the logged in user." +
             " This endpoint does not work with token-based authentication, only HTTP basic auth is allowed.")
     @PutMapping("account/password")

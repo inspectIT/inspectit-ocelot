@@ -17,13 +17,7 @@ import java.io.IOException;
 @RestController
 public class MoveController extends FileBaseController {
 
-    @Secured(
-            {
-                    CustomLdapUserDetailsService.WRITE_ACCESS_ROLE,
-                    CustomLdapUserDetailsService.COMMIT_ACCESS_ROLE,
-                    CustomLdapUserDetailsService.ADMIN_ACCESS_ROLE
-            }
-    )
+    @Secured(CustomLdapUserDetailsService.WRITE_ACCESS_ROLE)
     @ApiOperation(value = "Move or rename a file or directory")
     @PutMapping(value = "move")
     public void moveFileOrDirectory(@RequestBody FileMoveDescription moveDescription) throws IOException {
