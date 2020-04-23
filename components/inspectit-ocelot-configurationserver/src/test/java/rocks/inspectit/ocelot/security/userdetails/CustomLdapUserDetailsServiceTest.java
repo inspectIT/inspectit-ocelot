@@ -18,8 +18,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class CustomLdapUserDetailsServiceTest {
@@ -47,9 +46,10 @@ public class CustomLdapUserDetailsServiceTest {
         when(mockSecuritySettings.getLdap()).thenReturn(mockLdapSettings);
         when(mockLdapSettings.getRoles()).thenReturn(mockRoleSettings);
 
-        when(mockRoleSettings.getWrite()).thenReturn(write);
-        when(mockRoleSettings.getCommit()).thenReturn(commit);
-        when(mockRoleSettings.getAdmin()).thenReturn(admin);
+        lenient().when(mockRoleSettings.getWrite()).thenReturn(write);
+        lenient().when(mockRoleSettings.getCommit()).thenReturn(commit);
+        lenient().when(mockRoleSettings.getAdmin()).thenReturn(admin);
+
 
         return mockSettings;
 
@@ -69,9 +69,10 @@ public class CustomLdapUserDetailsServiceTest {
                     Collections.emptyList()
             );
 
-            String output = customLdapUserDetailsServiceTest.resolveAccessRole(mockUser);
+            String[] output = customLdapUserDetailsServiceTest.resolveAccessRoleSet(mockUser);
 
-            assertThat(output).isEqualTo("OCELOT_READ");
+            assertThat(output).hasSize(1);
+            assertThat(output).contains("OCELOT_READ");
         }
 
         @Test
@@ -85,9 +86,11 @@ public class CustomLdapUserDetailsServiceTest {
                     Collections.emptyList()
             );
 
-            String output = customLdapUserDetailsServiceTest.resolveAccessRole(mockUser);
+            String[] output = customLdapUserDetailsServiceTest.resolveAccessRoleSet(mockUser);
 
-            assertThat(output).isEqualTo("OCELOT_WRITE");
+            assertThat(output).hasSize(2);
+            assertThat(output).contains("OCELOT_READ");
+            assertThat(output).contains("OCELOT_WRITE");
         }
 
         @Test
@@ -101,9 +104,12 @@ public class CustomLdapUserDetailsServiceTest {
                     Collections.emptyList()
             );
 
-            String output = customLdapUserDetailsServiceTest.resolveAccessRole(mockUser);
+            String[] output = customLdapUserDetailsServiceTest.resolveAccessRoleSet(mockUser);
 
-            assertThat(output).isEqualTo("OCELOT_COMMIT");
+            assertThat(output).hasSize(3);
+            assertThat(output).contains("OCELOT_READ");
+            assertThat(output).contains("OCELOT_WRITE");
+            assertThat(output).contains("OCELOT_COMMIT");
         }
 
         @Test
@@ -117,9 +123,13 @@ public class CustomLdapUserDetailsServiceTest {
                     Collections.singletonList("admin")
             );
 
-            String output = customLdapUserDetailsServiceTest.resolveAccessRole(mockUser);
+            String[] output = customLdapUserDetailsServiceTest.resolveAccessRoleSet(mockUser);
 
-            assertThat(output).isEqualTo("OCELOT_ADMIN");
+            assertThat(output).hasSize(4);
+            assertThat(output).contains("OCELOT_READ");
+            assertThat(output).contains("OCELOT_WRITE");
+            assertThat(output).contains("OCELOT_COMMIT");
+            assertThat(output).contains("OCELOT_ADMIN");
         }
 
         @Test
@@ -132,9 +142,13 @@ public class CustomLdapUserDetailsServiceTest {
                     Collections.singletonList("commit"),
                     Collections.singletonList("admin")
             );
-            String output = customLdapUserDetailsServiceTest.resolveAccessRole(mockUser);
+            String[] output = customLdapUserDetailsServiceTest.resolveAccessRoleSet(mockUser);
 
-            assertThat(output).isEqualTo("OCELOT_ADMIN");
+            assertThat(output).hasSize(4);
+            assertThat(output).contains("OCELOT_READ");
+            assertThat(output).contains("OCELOT_WRITE");
+            assertThat(output).contains("OCELOT_COMMIT");
+            assertThat(output).contains("OCELOT_ADMIN");
 
         }
     }

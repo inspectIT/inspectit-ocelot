@@ -38,7 +38,13 @@ public class CustomLdapUserDetailsService extends LdapUserDetailsService {
 
     private static final String ADMIN_ACCESS = "OCELOT_ADMIN";
 
-    private static final String NO_ACCESS_ROLE = "OCELOT_NONE";
+    private static final String[] READ_ROLE_PERMISSION_SET = {READ_ACCESS};
+
+    private static final String[] WRITE_ROLE_PERMISSION_SET = {READ_ACCESS, WRITE_ACCESS};
+
+    private static final String[] COMMIT_ROLE_PERMISSION_SET = {READ_ACCESS, WRITE_ACCESS, COMMIT_ACCESS};
+
+    private static final String[] ADMIN_ROLE_PERMISSION_SET = {READ_ACCESS, WRITE_ACCESS, COMMIT_ACCESS, ADMIN_ACCESS};
 
     public static final String READ_ACCESS_ROLE = ROLE_PREFIX + READ_ACCESS;
 
@@ -70,36 +76,35 @@ public class CustomLdapUserDetailsService extends LdapUserDetailsService {
             throw new UsernameNotFoundException(username);
         }
         UserDetails user = super.loadUserByUsername(username);
-        String resolvedRole = resolveAccessRole(user);
+        String[] roles = resolveAccessRoleSet(user);
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getUsername())
                 .password(user.getPassword())
-                .roles(resolvedRole)
+                .roles(roles)
                 .build();
     }
 
     /**
-     * Maps the in the ldap section of the server config defined ldap roles to a role internally used for access
-     * control. Always returns the role with highest access level if user contains multiple matching authorities.
+     * Maps the in the ldap section of the server config defined ldap roles to a role-set internally used for access
+     * control. Always returns the role-set with highest access level if user contains multiple matching authorities.
      *
      * @param user The LDAP-User object the roles should be resolved of.
      * @return The highest level of access role the user's authorities could be resolved to.
      */
     @VisibleForTesting
-    String resolveAccessRole(UserDetails user) {
+    String[] resolveAccessRoleSet(UserDetails user) {
         RoleSettings role_settings = settings.getSecurity().getLdap().getRoles();
         Collection<? extends GrantedAuthority> authorities = user.getAuthorities();
-        String resolvedRole = READ_ACCESS;
-        if (containsAuthority(authorities, role_settings.getWrite())) {
-            resolvedRole = WRITE_ACCESS;
+        if (containsAuthority(authorities, role_settings.getAdmin())) {
+            return ADMIN_ROLE_PERMISSION_SET;
         }
         if (containsAuthority(authorities, role_settings.getCommit())) {
-            resolvedRole = COMMIT_ACCESS;
+            return COMMIT_ROLE_PERMISSION_SET;
         }
-        if (containsAuthority(authorities, role_settings.getAdmin())) {
-            resolvedRole = ADMIN_ACCESS;
+        if (containsAuthority(authorities, role_settings.getWrite())) {
+            return WRITE_ROLE_PERMISSION_SET;
         }
-        return resolvedRole;
+        return READ_ROLE_PERMISSION_SET;
     }
 
     /**
