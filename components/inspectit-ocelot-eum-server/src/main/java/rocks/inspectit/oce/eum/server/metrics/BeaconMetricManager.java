@@ -3,7 +3,6 @@ package rocks.inspectit.oce.eum.server.metrics;
 import io.opencensus.common.Scope;
 import io.opencensus.tags.TagContextBuilder;
 import io.opencensus.tags.TagKey;
-import io.opencensus.tags.TagValue;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -14,6 +13,7 @@ import rocks.inspectit.oce.eum.server.beacon.recorder.BeaconRecorder;
 import rocks.inspectit.oce.eum.server.configuration.model.BeaconMetricDefinitionSettings;
 import rocks.inspectit.oce.eum.server.configuration.model.BeaconRequirement;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
+import rocks.inspectit.oce.eum.server.utils.TagUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -104,7 +104,7 @@ public class BeaconMetricManager {
         TagContextBuilder tagContextBuilder = measuresAndViewsManager.getTagContext();
         for (String key : configuration.getTags().getBeacon().keySet()) {
             if (beacon.contains(key)) {
-                tagContextBuilder.putLocal(TagKey.create(key), TagValue.create(beacon.get(key)));
+                tagContextBuilder.putLocal(TagKey.create(key), TagUtils.createTagValue(beacon.get(key)));
             }
         }
         return tagContextBuilder;

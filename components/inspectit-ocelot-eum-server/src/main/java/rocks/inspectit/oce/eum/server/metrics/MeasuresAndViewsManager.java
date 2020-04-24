@@ -3,12 +3,12 @@ package rocks.inspectit.oce.eum.server.metrics;
 import io.opencensus.stats.*;
 import io.opencensus.tags.TagContextBuilder;
 import io.opencensus.tags.TagKey;
-import io.opencensus.tags.TagValue;
 import io.opencensus.tags.Tags;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
+import rocks.inspectit.oce.eum.server.utils.TagUtils;
 import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings;
 import rocks.inspectit.ocelot.config.model.metrics.definition.ViewDefinitionSettings;
 
@@ -50,10 +50,14 @@ public class MeasuresAndViewsManager {
 
         switch (metricDefinition.getType()) {
             case LONG:
-                recorder.newMeasureMap().put((Measure.MeasureLong) metrics.get(measureName), value.longValue()).record();
+                recorder.newMeasureMap()
+                        .put((Measure.MeasureLong) metrics.get(measureName), value.longValue())
+                        .record();
                 break;
             case DOUBLE:
-                recorder.newMeasureMap().put((Measure.MeasureDouble) metrics.get(measureName), value.doubleValue()).record();
+                recorder.newMeasureMap()
+                        .put((Measure.MeasureDouble) metrics.get(measureName), value.doubleValue())
+                        .record();
                 break;
         }
     }
@@ -89,7 +93,8 @@ public class MeasuresAndViewsManager {
      * @param metricDefinition the settings of the metric definition
      */
     private void updateViews(String metricName, MetricDefinitionSettings metricDefinition) {
-        for (Map.Entry<String, ViewDefinitionSettings> viewDefinitionSettingsEntry : metricDefinition.getViews().entrySet()) {
+        for (Map.Entry<String, ViewDefinitionSettings> viewDefinitionSettingsEntry : metricDefinition.getViews()
+                .entrySet()) {
             String viewName = viewDefinitionSettingsEntry.getKey();
             ViewDefinitionSettings viewDefinitionSettings = viewDefinitionSettingsEntry.getValue();
             if (viewManager.getAllExportedViews().stream().noneMatch(v -> v.getName().asString().equals(viewName))) {
@@ -105,7 +110,6 @@ public class MeasuresAndViewsManager {
 
     /**
      * Returns all tags, which are exposed for the given metricDefinition
-     *
      */
     private Set<String> getTagsForView(ViewDefinitionSettings viewDefinitionSettings) {
         Set<String> tags = new HashSet<>(configuration.getTags().getDefineAsGlobal());
@@ -123,7 +127,7 @@ public class MeasuresAndViewsManager {
         TagContextBuilder tagContextBuilder = Tags.getTagger().currentBuilder();
 
         for (Map.Entry<String, String> extraTag : configuration.getTags().getExtra().entrySet()) {
-            tagContextBuilder.putLocal(TagKey.create(extraTag.getKey()), TagValue.create(extraTag.getValue()));
+            tagContextBuilder.putLocal(TagKey.create(extraTag.getKey()), TagUtils.createTagValue(extraTag.getValue()));
         }
 
         return tagContextBuilder;
@@ -133,13 +137,14 @@ public class MeasuresAndViewsManager {
      * Builds TagContext with custom tags.
      *
      * @param customTags Map containing the custom tags.
+     *
      * @return {@link TagContextBuilder} which contains the custom and global (extra) tags
      */
     public TagContextBuilder getTagContext(Map<String, String> customTags) {
         TagContextBuilder tagContextBuilder = getTagContext();
 
         for (Map.Entry<String, String> customTag : customTags.entrySet()) {
-            tagContextBuilder.putLocal(TagKey.create(customTag.getKey()), TagValue.create(customTag.getValue()));
+            tagContextBuilder.putLocal(TagKey.create(customTag.getKey()), TagUtils.createTagValue(customTag.getValue()));
         }
 
         return tagContextBuilder;
@@ -147,7 +152,6 @@ public class MeasuresAndViewsManager {
 
     /**
      * Creates an aggregation depending on the given {@link Aggregation}
-     *
      */
     private static Aggregation createAggregation(ViewDefinitionSettings viewDefinitionSettings) {
         switch (viewDefinitionSettings.getAggregation()) {

@@ -3,7 +3,6 @@ package rocks.inspectit.ocelot.core.metrics.percentiles;
 import com.google.common.annotations.VisibleForTesting;
 import io.opencensus.common.Timestamp;
 import io.opencensus.tags.TagContext;
-import io.opencensus.tags.Tags;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 
@@ -37,9 +36,8 @@ class AsyncMetricRecorder {
         worker.start();
     }
 
-    void recordWithCurrentTagContext(String measureName, double value, Timestamp time) {
-        boolean success = recordsQueue.offer(new MetricRecord(value, measureName, time,
-                Tags.getTagger().getCurrentTagContext()));
+    void record(String measureName, double value, Timestamp time, TagContext tags) {
+        boolean success = recordsQueue.offer(new MetricRecord(value, measureName, time, tags));
         if (!success && !overflowLogged) {
             overflowLogged = true;
             log.warn("Measurement for percentiles has been dropped because queue is full. This message will not be shown for further drops!");

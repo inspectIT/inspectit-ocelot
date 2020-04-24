@@ -7,6 +7,7 @@ import io.opencensus.metrics.export.Metric;
 import io.opencensus.metrics.export.MetricProducer;
 import io.opencensus.stats.MeasureMap;
 import io.opencensus.tags.TagContext;
+import io.opencensus.tags.Tags;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -83,8 +84,19 @@ public class PercentileViewManager {
      * @param value       the observation to record
      */
     public void recordMeasurement(String measureName, double value) {
+        recordMeasurement(measureName, value, Tags.getTagger().getCurrentTagContext());
+    }
+
+    /**
+     * Records a measurement observation for a given measure.
+     *
+     * @param measureName the name of the measure, e.g. http/responsetime
+     * @param value       the observation to record
+     * @param tags        the TagContext to use
+     */
+    public void recordMeasurement(String measureName, double value, TagContext tags) {
         if (areAnyViewsRegisteredForMeasure(measureName)) {
-            worker.recordWithCurrentTagContext(measureName, value, getCurrentTime());
+            worker.record(measureName, value, getCurrentTime(), tags);
         }
     }
 
@@ -121,6 +133,16 @@ public class PercentileViewManager {
             existingView.ifPresent(views::remove);
             views.add(updatedView.get());
         }
+    }
+
+    public synchronized boolean isViewRegistered(String measureName, String viewName) {
+        List<PercentileView> views = measuresToViewsMap.get(measureName);
+        if (views != null) {
+            return views.stream()
+                    .map(PercentileView::getViewName)
+                    .anyMatch(name -> name.equals(viewName));
+        }
+        return false;
     }
 
     /**
