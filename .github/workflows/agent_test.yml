@@ -1,12 +1,32 @@
-name: pull request checks
+name: Test agent
 
 on:
   pull_request:
     branches:
       - master
+    paths:
+      - '.github/workflows/agent_test.yml'
+      - 'inspect-ocelot-*'
+      - '!inspect-ocelot-documentation'
+      - '!inspect-ocelot-demo'
+      - '!components/**'
+      - '!.github/workflows/configuration_ui_test.yml'
+      - '!.github/workflows/configurationserver_test.yml'
+      - '!.github/workflows/eumserver_test.yml'
+      - '!*.md'
   push:
     branches-ignore:
       - master
+    paths:
+      - '.github/workflows/agent_test.yml'
+      - 'inspect-ocelot-*'
+      - '!inspect-ocelot-documentation'
+      - '!inspect-ocelot-demo'
+      - '!components/**'
+      - '!.github/workflows/configuration_ui_test.yml'
+      - '!.github/workflows/configurationserver_test.yml'
+      - '!.github/workflows/eumserver_test.yml'
+      - '!*.md'
 jobs:
   pr-check:
     name: ${{ matrix.dockerimage }}
@@ -28,11 +48,11 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: assemble
-        run: ./gradlew assemble --max-workers=2
+        run: ./gradlew assemble
       - name: test
-        run: ./gradlew test --max-workers=2
+        run: ./gradlew test
       - name: systemTest
-        run: ./gradlew systemTest --max-workers=2
+        run: ./gradlew systemTest
       - name: codeCoverage if oracle-jdk8
         if: matrix.dockerimage == 'sgrio/java:jdk_8_ubuntu' && github.event_name == 'pull_request'
         run: |
