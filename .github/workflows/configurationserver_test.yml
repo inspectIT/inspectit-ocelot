@@ -5,12 +5,14 @@ on:
     branches-ignore:
       - master
     paths:
+      - '.github/workflows/configurationserver_test.yml'
       - 'components/inspectit-ocelot-configurationserver/**'
       - '!components/inspectit-ocelot-configurationserver/README.md'
   pull_request:
     branches:
       - master
     paths:
+      - '.github/workflows/configurationserver_test.yml'
       - 'components/inspectit-ocelot-configurationserver/**'
       - '!components/inspectit-ocelot-configurationserver/README.md'
 jobs:
@@ -36,21 +38,8 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: assemble
-        run: ./gradlew assemble
+        run: ../../gradlew assemble
         working-directory: ${{env.working-directory}}
       - name: test
-        run: ./gradlew test --max-workers=2
-        working-directory: ${{env.working-directory}}
-      - name: systemTest
-        run: ./gradlew systemTest --max-workers=2
-        working-directory: ${{env.working-directory}}
-      - name: codeCoverage if oracle-jdk8
-        if: matrix.dockerimage == 'sgrio/java:jdk_8_ubuntu' && github.event_name == 'pull_request'
-        run: ./gradlew codeCoverageReport
-        working-directory: ${{env.working-directory}}
-      - name: upload to codecov.io
-        if: matrix.dockerimage == 'sgrio/java:jdk_8_ubuntu' && github.event_name == 'pull_request'
-        uses: codecov/codecov-action@v1
-        with:
-          file: ./build/reports/jacoco/report.xml
+        run: ../../gradlew test
         working-directory: ${{env.working-directory}}
