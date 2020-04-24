@@ -6,7 +6,7 @@ import * as types from './types';
 
 /**
  * Fetches all existing configuration files and directories.
- * 
+ *
  * @param {string} newSelectionOnSuccess - If not empty, this path will be selected on successful fetch.
  */
 export const fetchFiles = (newSelectionOnSuccess) => {
@@ -19,7 +19,7 @@ export const fetchFiles = (newSelectionOnSuccess) => {
         const files = res.data;
         sortFiles(files);
         dispatch({ type: types.FETCH_FILES_SUCCESS, payload: { files } });
-        if(newSelectionOnSuccess) {
+        if (newSelectionOnSuccess) {
           dispatch(selectFile(newSelectionOnSuccess));
         }
       })
@@ -156,11 +156,11 @@ export const deleteSelection = (fetchFilesOnSuccess, selectedFile = null) => {
 
 /**
  * Attempts to write the given contents to the given file.
- * 
+ *
  * @param {string} file - absolute path of the file to write (e.g. /configs/prod/interfaces.yml)
  * @param {string} content - the content to place in the file
  * @param {boolean} fetchFilesOnSuccess - if true, the file tree be refeteched on a successful write
- * @param {boolean} selectFileOnSuccess - if true, the newly created file will be selected on success. 
+ * @param {boolean} selectFileOnSuccess - if true, the newly created file will be selected on success.
  *                                        Requires fetchFilesOnSuccess to be true
  */
 export const writeFile = (file, content, fetchFilesOnSuccess, selectFileOnSuccess) => {
@@ -182,8 +182,8 @@ export const writeFile = (file, content, fetchFilesOnSuccess, selectFileOnSucces
         dispatch({ type: types.WRITE_FILE_SUCCESS, payload });
 
         if (fetchFilesOnSuccess) {
-          if(selectFileOnSuccess) {
-            dispatch(fetchFiles("/"+filePath));
+          if (selectFileOnSuccess) {
+            dispatch(fetchFiles('/' + filePath));
           } else {
             dispatch(fetchFiles());
           }
@@ -199,10 +199,10 @@ export const writeFile = (file, content, fetchFilesOnSuccess, selectFileOnSucces
 
 /**
  * Attempts to create the given directory.
- * 
+ *
  * @param {string} path - absolute path of the directory to create (e.g. /configs/prod/myDir)
  * @param {boolean} fetchFilesOnSuccess - if true, the file tree will be refeteched on a successful creation
- * @param {boolean} selectFolderOnSucces - if true, the newly created directory will be selected on success. 
+ * @param {boolean} selectFolderOnSucces - if true, the newly created directory will be selected on success.
  *                                        Requires fetchFilesOnSuccess to be true
  */
 export const createDirectory = (path, fetchFilesOnSuccess, selectFolderOnSuccess) => {
@@ -216,8 +216,8 @@ export const createDirectory = (path, fetchFilesOnSuccess, selectFolderOnSuccess
       .then(() => {
         dispatch({ type: types.CREATE_DIRECTORY_SUCCESS });
         if (fetchFilesOnSuccess) {
-          if(selectFolderOnSuccess) {
-            dispatch(fetchFiles("/"+dirPath));
+          if (selectFolderOnSuccess) {
+            dispatch(fetchFiles('/' + dirPath));
           } else {
             dispatch(fetchFiles());
           }
