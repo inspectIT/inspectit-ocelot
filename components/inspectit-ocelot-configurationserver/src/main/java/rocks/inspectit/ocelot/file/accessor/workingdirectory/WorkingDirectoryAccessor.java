@@ -7,15 +7,13 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
+import rocks.inspectit.ocelot.file.FileChangedEvent;
 import rocks.inspectit.ocelot.file.FileInfo;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.AccessDeniedException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -26,17 +24,19 @@ import java.util.stream.Stream;
 @Component
 public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
 
-    private InspectitServerSettings config;
+    private ApplicationEventPublisher eventPublisher;
 
     private Path workingDirectory;
 
     @Autowired
     public WorkingDirectoryAccessor(InspectitServerSettings config, ApplicationEventPublisher eventPublisher) {
-        super(eventPublisher);
+        this.workingDirectory = Paths.get(config.getWorkingDirectory()).toAbsolutePath().normalize();
+        this.eventPublisher = eventPublisher;
+    }
 
-        this.config = config;
-
-        workingDirectory = Paths.get(config.getWorkingDirectory()).toAbsolutePath().normalize();
+    private void fireFileChangeEvent() {
+        FileChangedEvent event = new FileChangedEvent(this);
+        eventPublisher.publishEvent(event);
     }
 
     private Path resolve(String path) {
@@ -98,17 +98,34 @@ public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
     }
 
     @Override
-    protected synchronized void writeFile(String path, String content) throws IOException {
-        Path targetFile = resolve(path);
-        if (Files.exists(targetFile) && !Files.isRegularFile(targetFile)) {
-            throw new AccessDeniedException("'" + targetFile + "' is a directory!");
+    protected synchronized void createDirectory(String path) throws IOException {
+        Path targetDirectory = resolve(path);
+
+        if (Files.exists(targetDirectory)) {
+            throw new FileAlreadyExistsException("Directory already exists: " + targetDirectory);
         }
-        FileUtils.forceMkdir(targetFile.getParent().toFile());
-        Files.write(targetFile, content.getBytes(FILE_ENCODING));
+
+        Files.createDirectories(targetDirectory);
+
+        fireFileChangeEvent();
     }
 
     @Override
-    protected synchronized void moveFile(String sourcePath, String targetPath) throws IOException {
+    protected synchronized void writeFile(String path, String content) throws IOException {
+        Path targetFile = resolve(path);
+
+        if (Files.exists(targetFile) && Files.isDirectory(targetFile)) {
+            throw new IOException("Cannot write file because target is already a directory: " + targetFile);
+        }
+
+        FileUtils.forceMkdir(targetFile.getParent().toFile());
+        Files.write(targetFile, content.getBytes(FILE_ENCODING));
+
+        fireFileChangeEvent();
+    }
+
+    @Override
+    protected synchronized void move(String sourcePath, String targetPath) throws IOException {
         Path source = resolve(sourcePath);
         Path target = resolve(targetPath);
 
@@ -119,15 +136,42 @@ public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
         } else {
             FileUtils.moveFile(source.toFile(), target.toFile());
         }
+
+        fireFileChangeEvent();
     }
 
     @Override
-    protected synchronized void deleteFile(String path) throws IOException {
-        Path targetFile = resolve(path);
-        if (Files.isRegularFile(targetFile)) {
-            Files.delete(targetFile);
+    protected synchronized void delete(String path) throws IOException {
+        Path targetPath = resolve(path);
+
+        if (!Files.exists(targetPath)) {
+            throw new FileNotFoundException("Path cannot be deleted because it does not exist: " + targetPath);
+        } else if (Files.isDirectory(targetPath)) {
+            FileUtils.deleteDirectory(targetPath.toFile());
+        } else if (Files.isRegularFile(targetPath)) {
+            Files.delete(targetPath);
         } else {
-            throw new AccessDeniedException("'" + targetFile + "' could not be deleted.");
+            throw new AccessDeniedException("'" + targetPath + "' could not be deleted.");
         }
+
+        fireFileChangeEvent();
+    }
+
+    @Override
+    protected String verifyPath(String relativeBasePath, String relativePath) {
+        Path path = Paths.get(relativePath);
+
+        if (path.isAbsolute()) {
+            throw new IllegalArgumentException("Path must be relative: " + path);
+        }
+
+        Path basePath = workingDirectory.resolve(relativeBasePath);
+        Path resolvedPath = basePath.resolve(path).normalize();
+
+        if (!resolvedPath.startsWith(basePath)) {
+            throw new IllegalArgumentException("User path escapes the base path: " + path);
+        }
+
+        return resolvedPath.toString();
     }
 }

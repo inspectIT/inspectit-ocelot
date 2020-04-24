@@ -38,7 +38,7 @@ public class MoveControllerTest {
                     .build());
 
             verify(fileManager).getWorkingDirectory();
-            verify(fileAccessor).moveConfigurationFile(eq("src"), eq("dest"));
+            verify(fileAccessor).moveConfiguration(eq("src"), eq("dest"));
             verifyNoMoreInteractions(fileManager, fileAccessor);
         }
 
@@ -52,7 +52,7 @@ public class MoveControllerTest {
                     .build());
 
             verify(fileManager).getWorkingDirectory();
-            verify(fileAccessor).moveConfigurationFile(eq("src"), eq("dest"));
+            verify(fileAccessor).moveConfiguration(eq("src"), eq("dest"));
             verifyNoMoreInteractions(fileManager, fileAccessor);
         }
 

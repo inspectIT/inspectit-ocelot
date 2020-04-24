@@ -10,6 +10,9 @@ import rocks.inspectit.ocelot.rest.util.RequestUtil;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Controller for managing the configurations.
@@ -21,12 +24,11 @@ public class DirectoryController extends FileBaseController {
     @ApiOperation(value = "List directory contents", notes = "Can be used to get a list of the contents of a given directory.")
     @ApiImplicitParam(name = "Path", value = "The part of the url after /directories/ define the path to the directory whose contents shall be read.")
     @GetMapping(value = "directories/**")
-    public Collection<FileInfo> listContents(HttpServletRequest request,
-
-                                             @ApiParam("If false, only direct children of this directory are returned. Otherwise the entire file tree is returned.")
-                                             @RequestParam(defaultValue = "true") boolean recursive) throws IOException {
+    public Collection<FileInfo> listContents(HttpServletRequest request) {
         String path = RequestUtil.getRequestSubPath(request);
-        return fileManager.getFilesInDirectory(path, recursive);
+        //TODO add tests!!!!!!!!!!
+        Optional<List<FileInfo>> fileInfos = fileManager.getWorkingDirectory().listConfigurationFiles(path);
+        return fileInfos.orElse(Collections.emptyList());
     }
 
 
@@ -35,7 +37,7 @@ public class DirectoryController extends FileBaseController {
     @PutMapping(value = "directories/**")
     public void createNewDirectory(HttpServletRequest request) throws IOException {
         String path = RequestUtil.getRequestSubPath(request);
-        fileManager.createDirectory(path);
+        fileManager.getWorkingDirectory().createConfigurationDirectory(path);
     }
 
     @ApiOperation(value = "Delete a directory", notes = "Deletes a directory including its contents.")
@@ -43,7 +45,7 @@ public class DirectoryController extends FileBaseController {
     @DeleteMapping(value = "directories/**")
     public void deleteDirectory(HttpServletRequest request) throws IOException {
         String path = RequestUtil.getRequestSubPath(request);
-        fileManager.deleteDirectory(path);
+        fileManager.getWorkingDirectory().deleteConfiguration(path);
     }
 
 }

@@ -5,7 +5,6 @@ import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import rocks.inspectit.ocelot.file.FileData;
-import rocks.inspectit.ocelot.file.accessor.workingdirectory.AbstractWorkingDirectoryAccessor;
 import rocks.inspectit.ocelot.rest.util.RequestUtil;
 
 import javax.servlet.http.HttpServletRequest;
@@ -35,14 +34,15 @@ public class FileController extends FileBaseController {
                           @RequestBody(required = false) String content) throws IOException {
         String path = RequestUtil.getRequestSubPath(request);
 
-        AbstractWorkingDirectoryAccessor workingDirectory = fileManager.getWorkingDirectory();
+        String fileContent;
         if (raw || content == null) {
-            String fileContent = content == null ? "" : content;
-            workingDirectory.writeConfigurationFile(path, fileContent);
+            fileContent = content == null ? "" : content;
         } else {
             FileData data = objectMapper.readValue(content, FileData.class);
-            workingDirectory.writeConfigurationFile(path, data.getContent());
+            fileContent = data.getContent();
         }
+
+        fileManager.getWorkingDirectory().writeConfigurationFile(path, fileContent);
     }
 
     @ApiOperation(value = "Read a file", notes = "Returns the contents of the given file.")
@@ -72,6 +72,6 @@ public class FileController extends FileBaseController {
     public void deleteFile(HttpServletRequest request) throws IOException {
         String path = RequestUtil.getRequestSubPath(request);
 
-        fileManager.getWorkingDirectory().deleteConfigurationFile(path);
+        fileManager.getWorkingDirectory().deleteConfiguration(path);
     }
 }

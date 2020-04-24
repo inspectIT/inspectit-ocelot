@@ -9,10 +9,10 @@ import org.springframework.context.ApplicationEventPublisher;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.file.FileChangedEvent;
 import rocks.inspectit.ocelot.file.FileInfo;
-import rocks.inspectit.ocelot.file.accessor.DirectoryTraversalException;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -96,7 +96,7 @@ class WorkingDirectoryAccessorTest {
         public void readFile() {
             createTestFiles("files/test.yml=content");
 
-            Optional<String> result = accessor.readConfigurationFile("test.yml");
+            Optional<String> result = accessor.readConfigurationFile("./test.yml");
 
             assertThat(result).hasValue("content");
         }
@@ -111,11 +111,37 @@ class WorkingDirectoryAccessorTest {
         }
 
         @Test
-        public void traversalException() {
+        public void validTraversal() {
             createTestFiles("files/test.yml");
 
-            assertThatExceptionOfType(DirectoryTraversalException.class)
-                    .isThrownBy(() -> accessor.readConfigurationFile("sub/../test.yml"));
+            Optional<String> result = accessor.readConfigurationFile("sub/../test.yml");
+
+            assertThat(result).hasValue("");
+        }
+
+        @Test
+        public void illegalPath() {
+            createTestFiles("files/test.yml");
+
+            assertThatExceptionOfType(IllegalArgumentException.class)
+                    .isThrownBy(() -> accessor.readConfigurationFile("../test.yml"))
+                    .withMessage("User path escapes the base path: ..\\test.yml");
+        }
+
+        @Test
+        public void absolutePath() {
+            createTestFiles("files/test.yml");
+
+            String path;
+            if (System.getProperty("os.name").contains("Windows")) {
+                path = "c:/file";
+            } else {
+                path = "/absolute/file";
+            }
+
+            assertThatExceptionOfType(IllegalArgumentException.class)
+                    .isThrownBy(() -> accessor.readConfigurationFile(path))
+                    .withMessageStartingWith("Path must be relative:");
         }
     }
 
@@ -202,7 +228,7 @@ class WorkingDirectoryAccessorTest {
     class WriteAgentMappings {
 
         @Test
-        public void writeAgentMappings() {
+        public void writeAgentMappings() throws IOException {
             accessor.writeAgentMappings("new content");
 
             Optional<String> result = accessor.readAgentMappings();
@@ -214,7 +240,7 @@ class WorkingDirectoryAccessorTest {
         }
 
         @Test
-        public void overwriteAgentMappings() {
+        public void overwriteAgentMappings() throws IOException {
             createTestFiles("agent_mappings.yaml=old content");
 
             Optional<String> before = accessor.readAgentMappings();
@@ -232,28 +258,66 @@ class WorkingDirectoryAccessorTest {
     }
 
     @Nested
-    class DeleteConfigurationFile {
+    class DeleteConfiguration {
 
         @Test
         public void deleteNonExistingFile() {
-            boolean result = accessor.deleteConfigurationFile("first.yml");
-
-            assertThat(result).isFalse();
+            assertThatExceptionOfType(IOException.class)
+                    .isThrownBy(() -> accessor.deleteConfiguration("first.yml"))
+                    .withMessageStartingWith("Path cannot be deleted because it does not exist: ");
 
             verifyZeroInteractions(eventPublisher);
         }
 
         @Test
-        public void deleteFile() {
+        public void deleteRoot() {
+            createTestFiles("files/file.yml");
+
+            assertThatExceptionOfType(IllegalArgumentException.class)
+                    .isThrownBy(() -> accessor.deleteConfiguration("."))
+                    .withMessageStartingWith("Cannot delete base directory: .");
+
+            verifyZeroInteractions(eventPublisher);
+        }
+
+        @Test
+        public void deleteRootTraversal() {
+            createTestFiles("files/file.yml");
+
+            assertThatExceptionOfType(IllegalArgumentException.class)
+                    .isThrownBy(() -> accessor.deleteConfiguration("./dummy/.."))
+                    .withMessageStartingWith("Cannot delete base directory: .");
+
+            verifyZeroInteractions(eventPublisher);
+        }
+
+        @Test
+        public void deleteFile() throws IOException {
             createTestFiles("files/first.yml");
 
             Optional<List<FileInfo>> before = accessor.listConfigurationFiles("");
 
-            boolean result = accessor.deleteConfigurationFile("first.yml");
+            accessor.deleteConfiguration("first.yml");
 
             Optional<List<FileInfo>> after = accessor.listConfigurationFiles("");
 
-            assertThat(result).isTrue();
+            assertThat(before.get()).hasSize(1);
+            assertThat(after.get()).isEmpty();
+
+            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
+            verifyNoMoreInteractions(eventPublisher);
+        }
+
+        @Test
+        public void deleteDirectory() throws IOException {
+            createTestFiles("files/sub/first.yml");
+
+            Optional<List<FileInfo>> before = accessor.listConfigurationFiles("sub");
+
+            accessor.deleteConfiguration("sub");
+
+            Optional<List<FileInfo>> after = accessor.listConfigurationFiles("");
+
             assertThat(before.get()).hasSize(1);
             assertThat(after.get()).isEmpty();
 
@@ -266,15 +330,14 @@ class WorkingDirectoryAccessorTest {
     class WriteConfigurationFile {
 
         @Test
-        public void writeFile() {
+        public void writeFile() throws IOException {
             Optional<List<FileInfo>> before = accessor.listConfigurationFiles("");
 
-            boolean result = accessor.writeConfigurationFile("first.yml", "new content");
+            accessor.writeConfigurationFile("first.yml", "new content");
 
             Optional<List<FileInfo>> after = accessor.listConfigurationFiles("");
             Optional<String> fileContent = accessor.readConfigurationFile("first.yml");
 
-            assertThat(result).isTrue();
             assertThat(before.get()).isEmpty();
             assertThat(after.get()).isNotEmpty()
                     .anySatisfy(fileInfo -> {
@@ -290,18 +353,74 @@ class WorkingDirectoryAccessorTest {
         }
 
         @Test
-        public void overwriteFile() {
+        public void overwriteFile() throws IOException {
             createTestFiles("files/first.yml=old content");
 
             Optional<String> before = accessor.readConfigurationFile("first.yml");
 
-            boolean result = accessor.writeConfigurationFile("first.yml", "new content");
+            accessor.writeConfigurationFile("first.yml", "new content");
 
             Optional<String> after = accessor.readConfigurationFile("first.yml");
 
-            assertThat(result).isTrue();
             assertThat(before).hasValue("old content");
             assertThat(after).hasValue("new content");
+
+            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
+            verifyNoMoreInteractions(eventPublisher);
+        }
+
+        @Test
+        public void fileIsDirectory() {
+            createTestFiles("files/sub/first.yml");
+
+            assertThatExceptionOfType(IOException.class)
+                    .isThrownBy(() -> accessor.writeConfigurationFile("sub", "new content"))
+                    .withMessageStartingWith("Cannot write file because target is already a directory: ");
+
+            verifyZeroInteractions(eventPublisher);
+        }
+    }
+
+    @Nested
+    class MoveConfiguration {
+
+        @Test
+        public void moveFile() throws IOException {
+            createTestFiles("files/first.yml=my file");
+
+            Optional<String> beforeA = accessor.readConfigurationFile("first.yml");
+            Optional<String> beforeB = accessor.readConfigurationFile("sub/moved.yml");
+
+            accessor.moveConfiguration("first.yml", "sub/moved.yml");
+
+            Optional<String> afterA = accessor.readConfigurationFile("first.yml");
+            Optional<String> afterB = accessor.readConfigurationFile("sub/moved.yml");
+
+            assertThat(beforeA).hasValue("my file");
+            assertThat(beforeB).isEmpty();
+            assertThat(afterA).isEmpty();
+            assertThat(afterB).hasValue("my file");
+
+            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
+            verifyNoMoreInteractions(eventPublisher);
+        }
+
+        @Test
+        public void moveDirectory() throws IOException {
+            createTestFiles("files/sub_a/file.yml=my file");
+
+            Optional<String> beforeA = accessor.readConfigurationFile("sub_a/file.yml");
+            Optional<String> beforeB = accessor.readConfigurationFile("sub_b/file.yml");
+
+            accessor.moveConfiguration("sub_a", "sub_b");
+
+            Optional<String> afterA = accessor.readConfigurationFile("sub_a/file.yml");
+            Optional<String> afterB = accessor.readConfigurationFile("sub_b/file.yml");
+
+            assertThat(beforeA).hasValue("my file");
+            assertThat(beforeB).isEmpty();
+            assertThat(afterA).isEmpty();
+            assertThat(afterB).hasValue("my file");
 
             verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
             verifyNoMoreInteractions(eventPublisher);
@@ -309,50 +428,41 @@ class WorkingDirectoryAccessorTest {
     }
 
     @Nested
-    class MoveConfigurationFile {
+    class CreateConfigurationDirectory {
 
         @Test
-        public void moveFile() {
-            createTestFiles("files/first.yml=my file");
+        public void createDirectory() throws IOException {
+            accessor.createConfigurationDirectory("test");
 
-            Optional<String> beforeA = accessor.readConfigurationFile("first.yml");
-            Optional<String> beforeB = accessor.readConfigurationFile("sub/moved.yml");
-
-            boolean result = accessor.moveConfigurationFile("first.yml", "sub/moved.yml");
-
-            Optional<String> afterA = accessor.readConfigurationFile("first.yml");
-            Optional<String> afterB = accessor.readConfigurationFile("sub/moved.yml");
-
-            assertThat(result).isTrue();
-            assertThat(beforeA).hasValue("my file");
-            assertThat(beforeB).isEmpty();
-            assertThat(afterA).isEmpty();
-            assertThat(afterB).hasValue("my file");
-
-            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
-            verifyNoMoreInteractions(eventPublisher);
+            Path targetDirectory = tempDirectory.resolve("files/test");
+            assertThat(targetDirectory).exists();
         }
 
         @Test
-        public void moveDirectory() {
-            createTestFiles("files/sub_a/file.yml=my file");
+        public void alreadyExists() {
+            createTestFiles("files/test/file");
 
-            Optional<String> beforeA = accessor.readConfigurationFile("sub_a/file.yml");
-            Optional<String> beforeB = accessor.readConfigurationFile("sub_b/file.yml");
+            assertThatExceptionOfType(FileAlreadyExistsException.class)
+                    .isThrownBy(() -> accessor.createConfigurationDirectory("test"))
+                    .withMessageStartingWith("Directory already exists:");
+        }
 
-            boolean result = accessor.moveConfigurationFile("sub_a", "sub_b");
+        @Test
+        public void fileWithSameName() {
+            createTestFiles("files/test");
 
-            Optional<String> afterA = accessor.readConfigurationFile("sub_a/file.yml");
-            Optional<String> afterB = accessor.readConfigurationFile("sub_b/file.yml");
+            assertThatExceptionOfType(FileAlreadyExistsException.class)
+                    .isThrownBy(() -> accessor.createConfigurationDirectory("test"))
+                    .withMessageStartingWith("Directory already exists:");
+        }
 
-            assertThat(result).isTrue();
-            assertThat(beforeA).hasValue("my file");
-            assertThat(beforeB).isEmpty();
-            assertThat(afterA).isEmpty();
-            assertThat(afterB).hasValue("my file");
+        @Test
+        public void invalidLocation() {
+            createTestFiles("test/file");
 
-            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
-            verifyNoMoreInteractions(eventPublisher);
+            assertThatExceptionOfType(IllegalArgumentException.class)
+                    .isThrownBy(() -> accessor.createConfigurationDirectory("../test"))
+                    .withMessage("User path escapes the base path: ..\\test");
         }
     }
 }

@@ -118,38 +118,6 @@ public class FileManager {
     }
 
     /**
-     * Creates a new directory with the given path
-     *
-     * @param path the path of the directory to create
-     * @throws IOException if the directory already exists or could not be created for any reason
-     */
-    public synchronized void createDirectory(String path) throws IOException {
-        assertValidSubPath(path);
-        Path dir = filesRoot.resolve(path);
-
-        FileUtils.forceMkdir(dir.toFile());
-        fireFileChangeEvent();
-    }
-
-    /**
-     * Deletes the given directory including all contents.
-     *
-     * @param path the path of the directory
-     * @throws IOException if the directory could not be deleted
-     */
-    public synchronized void deleteDirectory(String path) throws IOException {
-        assertValidSubPath(path);
-        Path dir = filesRoot.resolve(path);
-        // throw a more meaningful exception instead of the illegal argument exception thrown by
-        // FileUtils.deleteDirectory
-        if (!Files.exists(dir) || !Files.isDirectory(dir)) {
-            throw new NotDirectoryException(getRelativePath(dir));
-        }
-        FileUtils.deleteDirectory(dir.toFile());
-        fireFileChangeEvent();
-    }
-
-    /**
      * Reads the given file content into a string
      *
      * @param path the path of the file
@@ -163,70 +131,6 @@ public class FileManager {
             throw new AccessDeniedException(path + " is a directory!");
         }
         return new String(Files.readAllBytes(file), ENCODING);
-    }
-
-//    /**
-//     * Creates or replaces the file under the given path with the given content.
-//     * If required, parent directories are automatically created.
-//     *
-//     * @param path    the path of the file
-//     * @param content the content of the file
-//     * @throws IOException if the file could not be written
-//     */
-//    public synchronized void createOrReplaceFile(String path, String content) throws IOException {
-//        assertValidSubPath(path);
-//        Path file = filesRoot.resolve(path);
-//        if (Files.exists(file) && !Files.isRegularFile(file)) {
-//            throw new AccessDeniedException(path + " is a directory!");
-//        }
-//        FileUtils.forceMkdir(file.getParent().toFile());
-//        Files.write(file, content.getBytes(ENCODING));
-//        fireFileChangeEvent();
-//    }
-
-//    /**
-//     * Deletes the given file. Does not delete directories.
-//     *
-//     * @param path the path of the file to delete
-//     * @throws IOException if the file could not be deleted.
-//     */
-//    public synchronized void deleteFile(String path) throws IOException {
-//        assertValidSubPath(path);
-//        Path file = filesRoot.resolve(path);
-//        if (Files.isRegularFile(file)) {
-//            Files.delete(file);
-//            fireFileChangeEvent();
-//        } else {
-//            throw new AccessDeniedException(path);
-//        }
-//    }
-
-//    /**
-//     * Moves and / or renames the given file or directories.
-//     * Directories are moved including their contents.
-//     *
-//     * @param source      the source file or directory path
-//     * @param destination the target file or directory path
-//     * @throws IOException if the given file or directory could not be renamed / moved
-//     */
-//    public synchronized void move(String source, String destination) throws IOException {
-//        assertValidSubPath(source);
-//        assertValidSubPath(destination);
-//        Path src = filesRoot.resolve(source);
-//        Path dest = filesRoot.resolve(destination);
-//
-//        FileUtils.forceMkdir(dest.getParent().toFile());
-//
-//        if (Files.isDirectory(src)) {
-//            FileUtils.moveDirectory(src.toFile(), dest.toFile());
-//        } else {
-//            FileUtils.moveFile(src.toFile(), dest.toFile());
-//        }
-//        fireFileChangeEvent();
-//    }
-
-    private void fireFileChangeEvent() {
-        eventPublisher.publishEvent(new FileChangedEvent(this));
     }
 
     private String getRelativePath(Path f) {

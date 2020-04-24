@@ -184,229 +184,229 @@ public class FileManagerTest {
         }
     }
 
-    @Nested
-    class CreateDirectory {
+//    @Nested
+//    class CreateDirectory {
+//
+//        @Test
+//        void createDirInRootDirect() throws Exception {
+//            setupTestFiles("topA", "topB");
+//
+//            fm.createDirectory("myDir");
+//
+//            assertThat(fm.getFilesInDirectory("", true))
+//                    .hasSize(3)
+//                    .anySatisfy((f) -> {
+//                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+//                        assertThat(f.getName()).isEqualTo("topA");
+//                    })
+//                    .anySatisfy((f) -> {
+//                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+//                        assertThat(f.getName()).isEqualTo("topB");
+//                    })
+//                    .anySatisfy((f) -> {
+//                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+//                        assertThat(f.getName()).isEqualTo("myDir");
+//                    });
+//
+//            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
+//        }
+//
+//
+//        @Test
+//        void createDirInRootIndirect() throws Exception {
+//            setupTestFiles("topA", "topB");
+//
+//            fm.createDirectory("topB/.././myDir");
+//
+//            assertThat(fm.getFilesInDirectory("", true))
+//                    .hasSize(3)
+//                    .anySatisfy((f) -> {
+//                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+//                        assertThat(f.getName()).isEqualTo("topA");
+//                    })
+//                    .anySatisfy((f) -> {
+//                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+//                        assertThat(f.getName()).isEqualTo("topB");
+//                    })
+//                    .anySatisfy((f) -> {
+//                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+//                        assertThat(f.getName()).isEqualTo("myDir");
+//                    });
+//
+//            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
+//        }
+//
+//
+//        @Test
+//        void createDirInSubFolder() throws Exception {
+//            setupTestFiles("topA", "topB");
+//
+//            fm.createDirectory("topA/subA/subB");
+//
+//            assertThat(fm.getFilesInDirectory("", true))
+//                    .hasSize(2)
+//                    .anySatisfy((f) -> {
+//                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+//                        assertThat(f.getName()).isEqualTo("topA");
+//                        assertThat(f.getChildren())
+//                                .hasSize(1)
+//                                .anySatisfy((f2) -> {
+//                                    assertThat(f2.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+//                                    assertThat(f2.getName()).isEqualTo("subA");
+//                                    assertThat(f2.getChildren())
+//                                            .hasSize(1)
+//                                            .anySatisfy((f3) -> {
+//                                                assertThat(f3.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+//                                                assertThat(f3.getName()).isEqualTo("subB");
+//                                                assertThat(f3.getChildren()).isEmpty();
+//                                            });
+//                                });
+//                    })
+//                    .anySatisfy((f) -> {
+//                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+//                        assertThat(f.getName()).isEqualTo("topB");
+//                    });
+//
+//            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
+//        }
+//
+//        @Test
+//        void createDirOnExistingDir() throws Exception {
+//            setupTestFiles("topA/subA", "topB");
+//
+//            fm.createDirectory("topA/subA");
+//
+//            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
+//        }
+//
+//        @Test
+//        void createDirOnExistingFile() {
+//            setupTestFiles("topA=content");
+//
+//            assertThatThrownBy(() -> fm.createDirectory("topA"))
+//                    .isInstanceOf(IOException.class);
+//        }
+//
+//
+//        @Test
+//        void createDirBeneathExistingFile() {
+//            setupTestFiles("topA=content");
+//
+//            assertThatThrownBy(() -> fm.createDirectory("topA/subDir"))
+//                    .isInstanceOf(IOException.class);
+//        }
+//
+//        @Test
+//        void verifyDirOutsideWorkdirNotCreateable() {
+//            setupTestFiles("top");
+//
+//            assertThatThrownBy(() -> fm.createDirectory(null))
+//                    .isInstanceOf(AccessDeniedException.class);
+//            assertThatThrownBy(() -> fm.createDirectory(""))
+//                    .isInstanceOf(AccessDeniedException.class);
+//            assertThatThrownBy(() -> fm.createDirectory("./"))
+//                    .isInstanceOf(AccessDeniedException.class);
+//            assertThatThrownBy(() -> fm.createDirectory("../mydir"))
+//                    .isInstanceOf(AccessDeniedException.class);
+//            assertThatThrownBy(() -> fm.createDirectory("top/../../mydir"))
+//                    .isInstanceOf(AccessDeniedException.class);
+//            assertThatThrownBy(() -> fm.createDirectory("../../mydir"))
+//                    .isInstanceOf(AccessDeniedException.class);
+//        }
+//    }
 
-        @Test
-        void createDirInRootDirect() throws Exception {
-            setupTestFiles("topA", "topB");
-
-            fm.createDirectory("myDir");
-
-            assertThat(fm.getFilesInDirectory("", true))
-                    .hasSize(3)
-                    .anySatisfy((f) -> {
-                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getName()).isEqualTo("topA");
-                    })
-                    .anySatisfy((f) -> {
-                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getName()).isEqualTo("topB");
-                    })
-                    .anySatisfy((f) -> {
-                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getName()).isEqualTo("myDir");
-                    });
-
-            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
-        }
-
-
-        @Test
-        void createDirInRootIndirect() throws Exception {
-            setupTestFiles("topA", "topB");
-
-            fm.createDirectory("topB/.././myDir");
-
-            assertThat(fm.getFilesInDirectory("", true))
-                    .hasSize(3)
-                    .anySatisfy((f) -> {
-                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getName()).isEqualTo("topA");
-                    })
-                    .anySatisfy((f) -> {
-                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getName()).isEqualTo("topB");
-                    })
-                    .anySatisfy((f) -> {
-                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getName()).isEqualTo("myDir");
-                    });
-
-            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
-        }
-
-
-        @Test
-        void createDirInSubFolder() throws Exception {
-            setupTestFiles("topA", "topB");
-
-            fm.createDirectory("topA/subA/subB");
-
-            assertThat(fm.getFilesInDirectory("", true))
-                    .hasSize(2)
-                    .anySatisfy((f) -> {
-                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getName()).isEqualTo("topA");
-                        assertThat(f.getChildren())
-                                .hasSize(1)
-                                .anySatisfy((f2) -> {
-                                    assertThat(f2.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                                    assertThat(f2.getName()).isEqualTo("subA");
-                                    assertThat(f2.getChildren())
-                                            .hasSize(1)
-                                            .anySatisfy((f3) -> {
-                                                assertThat(f3.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                                                assertThat(f3.getName()).isEqualTo("subB");
-                                                assertThat(f3.getChildren()).isEmpty();
-                                            });
-                                });
-                    })
-                    .anySatisfy((f) -> {
-                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getName()).isEqualTo("topB");
-                    });
-
-            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
-        }
-
-        @Test
-        void createDirOnExistingDir() throws Exception {
-            setupTestFiles("topA/subA", "topB");
-
-            fm.createDirectory("topA/subA");
-
-            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
-        }
-
-        @Test
-        void createDirOnExistingFile() {
-            setupTestFiles("topA=content");
-
-            assertThatThrownBy(() -> fm.createDirectory("topA"))
-                    .isInstanceOf(IOException.class);
-        }
-
-
-        @Test
-        void createDirBeneathExistingFile() {
-            setupTestFiles("topA=content");
-
-            assertThatThrownBy(() -> fm.createDirectory("topA/subDir"))
-                    .isInstanceOf(IOException.class);
-        }
-
-        @Test
-        void verifyDirOutsideWorkdirNotCreateable() {
-            setupTestFiles("top");
-
-            assertThatThrownBy(() -> fm.createDirectory(null))
-                    .isInstanceOf(AccessDeniedException.class);
-            assertThatThrownBy(() -> fm.createDirectory(""))
-                    .isInstanceOf(AccessDeniedException.class);
-            assertThatThrownBy(() -> fm.createDirectory("./"))
-                    .isInstanceOf(AccessDeniedException.class);
-            assertThatThrownBy(() -> fm.createDirectory("../mydir"))
-                    .isInstanceOf(AccessDeniedException.class);
-            assertThatThrownBy(() -> fm.createDirectory("top/../../mydir"))
-                    .isInstanceOf(AccessDeniedException.class);
-            assertThatThrownBy(() -> fm.createDirectory("../../mydir"))
-                    .isInstanceOf(AccessDeniedException.class);
-        }
-    }
-
-
-    @Nested
-    class DeleteDirectory {
-
-        @Test
-        void deleteDirInRootDirect() throws Exception {
-            setupTestFiles("topA", "topB");
-
-            fm.deleteDirectory("topA");
-
-            assertThat(fm.getFilesInDirectory("", true))
-                    .hasSize(1)
-                    .anySatisfy((f) -> {
-                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getName()).isEqualTo("topB");
-                    });
-
-            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
-        }
-
-
-        @Test
-        void deleteDirInRootIndirect() throws Exception {
-            setupTestFiles("topA", "topB");
-
-            fm.deleteDirectory("topB/../topA");
-
-            assertThat(fm.getFilesInDirectory("", true))
-                    .hasSize(1)
-                    .anySatisfy((f) -> {
-                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getName()).isEqualTo("topB");
-                    });
-
-            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
-        }
-
-
-        @Test
-        void deleteDirInSubFolderWithContents() throws Exception {
-            setupTestFiles("topA/subA/subB/somedir", "topA/subA/somefile=foo", "topB");
-
-            fm.deleteDirectory("topA/subA");
-
-            assertThat(fm.getFilesInDirectory("", true))
-                    .hasSize(2)
-                    .anySatisfy((f) -> {
-                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getName()).isEqualTo("topA");
-                    })
-                    .anySatisfy((f) -> {
-                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                        assertThat(f.getName()).isEqualTo("topB");
-                    });
-
-            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
-        }
-
-        @Test
-        void deleteNonExistingDir() {
-            setupTestFiles("topA/subA", "topB");
-
-            assertThatThrownBy(() -> fm.deleteDirectory("topC"))
-                    .isInstanceOf(NotDirectoryException.class);
-        }
-
-        @Test
-        void deleteFile() {
-            setupTestFiles("topA=i_am_a_file", "topB");
-
-            assertThatThrownBy(() -> fm.deleteDirectory("topA"))
-                    .isInstanceOf(NotDirectoryException.class);
-        }
-
-        @Test
-        void verifyDirOutsideWorkdirNotDeleteable() {
-            setupTestFiles("top");
-
-            assertThatThrownBy(() -> fm.deleteDirectory(null))
-                    .isInstanceOf(AccessDeniedException.class);
-            assertThatThrownBy(() -> fm.deleteDirectory(""))
-                    .isInstanceOf(AccessDeniedException.class);
-            assertThatThrownBy(() -> fm.deleteDirectory("./"))
-                    .isInstanceOf(AccessDeniedException.class);
-            assertThatThrownBy(() -> fm.deleteDirectory("../mydir"))
-                    .isInstanceOf(AccessDeniedException.class);
-            assertThatThrownBy(() -> fm.deleteDirectory("top/../../mydir"))
-                    .isInstanceOf(AccessDeniedException.class);
-            assertThatThrownBy(() -> fm.deleteDirectory("../../mydir"))
-                    .isInstanceOf(AccessDeniedException.class);
-        }
-    }
+//
+//    @Nested
+//    class DeleteDirectory {
+//
+//        @Test
+//        void deleteDirInRootDirect() throws Exception {
+//            setupTestFiles("topA", "topB");
+//
+//            fm.deleteDirectory("topA");
+//
+//            assertThat(fm.getFilesInDirectory("", true))
+//                    .hasSize(1)
+//                    .anySatisfy((f) -> {
+//                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+//                        assertThat(f.getName()).isEqualTo("topB");
+//                    });
+//
+//            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
+//        }
+//
+//
+//        @Test
+//        void deleteDirInRootIndirect() throws Exception {
+//            setupTestFiles("topA", "topB");
+//
+//            fm.deleteDirectory("topB/../topA");
+//
+//            assertThat(fm.getFilesInDirectory("", true))
+//                    .hasSize(1)
+//                    .anySatisfy((f) -> {
+//                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+//                        assertThat(f.getName()).isEqualTo("topB");
+//                    });
+//
+//            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
+//        }
+//
+//
+//        @Test
+//        void deleteDirInSubFolderWithContents() throws Exception {
+//            setupTestFiles("topA/subA/subB/somedir", "topA/subA/somefile=foo", "topB");
+//
+//            fm.deleteDirectory("topA/subA");
+//
+//            assertThat(fm.getFilesInDirectory("", true))
+//                    .hasSize(2)
+//                    .anySatisfy((f) -> {
+//                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+//                        assertThat(f.getName()).isEqualTo("topA");
+//                    })
+//                    .anySatisfy((f) -> {
+//                        assertThat(f.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+//                        assertThat(f.getName()).isEqualTo("topB");
+//                    });
+//
+//            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
+//        }
+//
+//        @Test
+//        void deleteNonExistingDir() {
+//            setupTestFiles("topA/subA", "topB");
+//
+//            assertThatThrownBy(() -> fm.deleteDirectory("topC"))
+//                    .isInstanceOf(NotDirectoryException.class);
+//        }
+//
+//        @Test
+//        void deleteFile() {
+//            setupTestFiles("topA=i_am_a_file", "topB");
+//
+//            assertThatThrownBy(() -> fm.deleteDirectory("topA"))
+//                    .isInstanceOf(NotDirectoryException.class);
+//        }
+//
+//        @Test
+//        void verifyDirOutsideWorkdirNotDeleteable() {
+//            setupTestFiles("top");
+//
+//            assertThatThrownBy(() -> fm.deleteDirectory(null))
+//                    .isInstanceOf(AccessDeniedException.class);
+//            assertThatThrownBy(() -> fm.deleteDirectory(""))
+//                    .isInstanceOf(AccessDeniedException.class);
+//            assertThatThrownBy(() -> fm.deleteDirectory("./"))
+//                    .isInstanceOf(AccessDeniedException.class);
+//            assertThatThrownBy(() -> fm.deleteDirectory("../mydir"))
+//                    .isInstanceOf(AccessDeniedException.class);
+//            assertThatThrownBy(() -> fm.deleteDirectory("top/../../mydir"))
+//                    .isInstanceOf(AccessDeniedException.class);
+//            assertThatThrownBy(() -> fm.deleteDirectory("../../mydir"))
+//                    .isInstanceOf(AccessDeniedException.class);
+//        }
+//    }
 
 
     @Nested

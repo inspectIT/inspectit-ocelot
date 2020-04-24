@@ -23,7 +23,7 @@ public class MoveController extends FileBaseController {
         String target = removeLeadingSlash(moveDescription.getTarget());
 
         AbstractWorkingDirectoryAccessor fileAccessor = fileManager.getWorkingDirectory();
-        fileAccessor.moveConfigurationFile(source, target);
+        fileAccessor.moveConfiguration(source, target);
     }
 
     private String removeLeadingSlash(String path) {

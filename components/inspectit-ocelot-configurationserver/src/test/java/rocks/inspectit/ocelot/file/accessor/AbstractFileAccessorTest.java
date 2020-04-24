@@ -8,11 +8,16 @@ import rocks.inspectit.ocelot.file.FileInfo;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 class AbstractFileAccessorTest {
 
     private AbstractFileAccessor accessor = new AbstractFileAccessor() {
+        @Override
+        protected String verifyPath(String relativeBasePath, String path) {
+            return null;
+        }
+
         @Override
         protected Optional<byte[]> readFile(String path) {
             return Optional.empty();
@@ -38,5 +43,4 @@ class AbstractFileAccessorTest {
         }
 
     }
-
 }

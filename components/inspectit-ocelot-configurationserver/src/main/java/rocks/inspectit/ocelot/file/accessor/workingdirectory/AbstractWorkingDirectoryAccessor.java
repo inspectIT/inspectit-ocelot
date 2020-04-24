@@ -1,96 +1,54 @@
 package rocks.inspectit.ocelot.file.accessor.workingdirectory;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
-import rocks.inspectit.ocelot.file.FileChangedEvent;
 import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 
 @Slf4j
 @Component
 public abstract class AbstractWorkingDirectoryAccessor extends AbstractFileAccessor {
 
-    private ApplicationEventPublisher eventPublisher;
+    public void createConfigurationDirectory(String directory) throws IOException {
+        String targetPath = verifyPath(CONFIGURATION_FILES_SUBFOLDER, directory);
 
-    public AbstractWorkingDirectoryAccessor(ApplicationEventPublisher eventPublisher) {
-        this.eventPublisher = eventPublisher;
+        createDirectory(targetPath);
     }
 
-    private void fireFileChangeEvent() {
-        FileChangedEvent event = new FileChangedEvent(this);
-        eventPublisher.publishEvent(event);
+    public void writeConfigurationFile(String file, String content) throws IOException {
+        String targetPath = verifyPath(CONFIGURATION_FILES_SUBFOLDER, file);
+
+        writeFile(targetPath, content);
     }
 
-    public boolean writeConfigurationFile(String file, String content) {
-        verifyPath(file);
-        //TODO sanitize
-        //TODO check location, sub path
-        //TODO remove leading slash
+    public void deleteConfiguration(String path) throws IOException {
+        String targetPath = verifyPath(CONFIGURATION_FILES_SUBFOLDER, path);
 
-        try {
-            writeFile(CONFIGURATION_FILES_SUBFOLDER + File.separator + file, content);
-            fireFileChangeEvent();
-            return true;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
+        if (Paths.get(path).normalize().toString().isEmpty()) {
+            throw new IllegalArgumentException("Cannot delete base directory: " + path);
         }
+
+        delete(targetPath);
     }
 
-    public boolean deleteConfigurationFile(String file) {
-        verifyPath(file);
+    public void moveConfiguration(String source, String target) throws IOException {
+        String sourcePath = verifyPath(CONFIGURATION_FILES_SUBFOLDER, source);
+        String targetPath = verifyPath(CONFIGURATION_FILES_SUBFOLDER, target);
 
-        //TODO sanitize
-        //TODO check location, sub path
-        //TODO remove leading slash
-        try {
-            deleteFile(CONFIGURATION_FILES_SUBFOLDER + File.separator + file);
-            fireFileChangeEvent();
-            return true;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
+        move(sourcePath, targetPath);
     }
 
-    public boolean moveConfigurationFile(String sourcePath, String targetPath) {
-        verifyPath(sourcePath);
-        verifyPath(targetPath);
-
-        //TODO sanitize
-        //TODO check location, sub path
-        //TODO remove leading slash
-
-        try {
-            String source = CONFIGURATION_FILES_SUBFOLDER + File.separator + sourcePath;
-            String target = CONFIGURATION_FILES_SUBFOLDER + File.separator + targetPath;
-
-            moveFile(source, target);
-            fireFileChangeEvent();
-            return true;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    public boolean writeAgentMappings(String content) {
-        try {
-            writeFile(AGENT_MAPPINGS_FILE_NAME, content);
-            fireFileChangeEvent();
-            return true;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
+    public void writeAgentMappings(String content) throws IOException {
+        writeFile(AGENT_MAPPINGS_FILE_NAME, content);
     }
 
     protected abstract void writeFile(String path, String content) throws IOException;
 
-    protected abstract void moveFile(String sourcePath, String targetPath) throws IOException;
+    protected abstract void createDirectory(String path) throws IOException;
 
-    protected abstract void deleteFile(String path) throws IOException;
+    protected abstract void move(String sourcePath, String targetPath) throws IOException;
+
+    protected abstract void delete(String path) throws IOException;
 }
