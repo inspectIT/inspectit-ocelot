@@ -49,8 +49,12 @@ const EditorToolbar = ({
         {onRefresh && (
           <Button disabled={!enableButtons || isRefreshing} icon={'pi pi-refresh' + (isRefreshing ? ' pi-spin' : '')} onClick={onRefresh} />
         )}
-        <Button disabled={!enableButtons} icon="pi pi-question" onClick={onHelp} />
-        <Button disabled={!enableButtons} icon="pi pi-search" onClick={onSearch} />
+        {!visualConfig && (
+          <>
+            <Button disabled={!enableButtons} icon="pi pi-question" onClick={onHelp} />
+            <Button disabled={!enableButtons} icon="pi pi-search" onClick={onSearch} />
+          </>
+        )}
         <Button disabled={!enableButtons || !canSave} onClick={onSave} label="Save" icon="pi pi-save" />
       </div>
     </Toolbar>

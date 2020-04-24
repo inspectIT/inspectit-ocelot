@@ -50,10 +50,14 @@ public class MeasuresAndViewsManager {
 
         switch (metricDefinition.getType()) {
             case LONG:
-                recorder.newMeasureMap().put((Measure.MeasureLong) metrics.get(measureName), value.longValue()).record();
+                recorder.newMeasureMap()
+                        .put((Measure.MeasureLong) metrics.get(measureName), value.longValue())
+                        .record();
                 break;
             case DOUBLE:
-                recorder.newMeasureMap().put((Measure.MeasureDouble) metrics.get(measureName), value.doubleValue()).record();
+                recorder.newMeasureMap()
+                        .put((Measure.MeasureDouble) metrics.get(measureName), value.doubleValue())
+                        .record();
                 break;
         }
     }
@@ -89,7 +93,8 @@ public class MeasuresAndViewsManager {
      * @param metricDefinition the settings of the metric definition
      */
     private void updateViews(String metricName, MetricDefinitionSettings metricDefinition) {
-        for (Map.Entry<String, ViewDefinitionSettings> viewDefinitionSettingsEntry : metricDefinition.getViews().entrySet()) {
+        for (Map.Entry<String, ViewDefinitionSettings> viewDefinitionSettingsEntry : metricDefinition.getViews()
+                .entrySet()) {
             String viewName = viewDefinitionSettingsEntry.getKey();
             ViewDefinitionSettings viewDefinitionSettings = viewDefinitionSettingsEntry.getValue();
             if (viewManager.getAllExportedViews().stream().noneMatch(v -> v.getName().asString().equals(viewName))) {
@@ -132,6 +137,7 @@ public class MeasuresAndViewsManager {
      * Builds TagContext with custom tags.
      *
      * @param customTags Map containing the custom tags.
+     *
      * @return {@link TagContextBuilder} which contains the custom and global (extra) tags
      */
     public TagContextBuilder getTagContext(Map<String, String> customTags) {

@@ -12,9 +12,10 @@ import java.time.Duration;
 @Slf4j
 public class DiskMetricsRecorder extends AbstractPollingMetricsRecorder {
 
-
     private static final String METRIC_NAME_PREFIX = "disk/";
+
     private static final String FREE_METRIC_NAME = "free";
+
     private static final String TOTAL_METRIC_NAME = "total";
 
     public DiskMetricsRecorder() {
@@ -33,16 +34,14 @@ public class DiskMetricsRecorder extends AbstractPollingMetricsRecorder {
 
     @Override
     protected void takeMeasurement(MetricsSettings config) {
-        val mm = recorder.newMeasureMap();
         val disk = config.getDisk();
         if (disk.getEnabled().getOrDefault(FREE_METRIC_NAME, false)) {
-            measureManager.tryRecordingMeasurement(METRIC_NAME_PREFIX + FREE_METRIC_NAME, mm,
+            measureManager.tryRecordingMeasurement(METRIC_NAME_PREFIX + FREE_METRIC_NAME,
                     new File("/").getFreeSpace());
         }
         if (disk.getEnabled().getOrDefault(TOTAL_METRIC_NAME, false)) {
-            measureManager.tryRecordingMeasurement(METRIC_NAME_PREFIX + TOTAL_METRIC_NAME, mm,
+            measureManager.tryRecordingMeasurement(METRIC_NAME_PREFIX + TOTAL_METRIC_NAME,
                     new File("/").getTotalSpace());
         }
-        mm.record();
     }
 }

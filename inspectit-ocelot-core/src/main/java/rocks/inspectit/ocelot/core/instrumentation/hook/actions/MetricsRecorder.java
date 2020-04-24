@@ -1,7 +1,5 @@
 package rocks.inspectit.ocelot.core.instrumentation.hook.actions;
 
-import io.opencensus.stats.MeasureMap;
-import io.opencensus.stats.StatsRecorder;
 import io.opencensus.tags.TagContext;
 import io.opencensus.tags.TagContextBuilder;
 import io.opencensus.tags.TagKey;
@@ -39,11 +37,6 @@ public class MetricsRecorder implements IHookAction {
      */
     private MeasuresAndViewsManager metricsManager;
 
-    /**
-     * The manager to acquire the actual OpenCensus metrics from
-     */
-    private StatsRecorder statsRecorder;
-
     @Override
     public void execute(ExecutionContext context) {
         // then iterate all metrics and enter new scope for metric collection
@@ -53,10 +46,8 @@ public class MetricsRecorder implements IHookAction {
                 if (value instanceof Number) {
                     // only record metrics where a value is present
                     // this allows to disable the recording of a metric depending on the results of action executions
-                    MeasureMap measureMap = statsRecorder.newMeasureMap();
-                    metricsManager.tryRecordingMeasurement(metricAccessor.getName(), measureMap, (Number) value);
                     TagContext tagContext = getTagContext(context, metricAccessor);
-                    measureMap.record(tagContext);
+                    metricsManager.tryRecordingMeasurement(metricAccessor.getName(), (Number) value, tagContext);
                 }
             }
         }

@@ -2,6 +2,10 @@ package rocks.inspectit.ocelot.utils;
 
 import com.google.common.cache.Cache;
 import io.opencensus.impl.internal.DisruptorEventQueue;
+import io.opencensus.metrics.LabelKey;
+import io.opencensus.metrics.LabelValue;
+import io.opencensus.metrics.Metrics;
+import io.opencensus.metrics.export.TimeSeries;
 import io.opencensus.stats.*;
 import io.opencensus.tags.InternalUtils;
 import io.opencensus.tags.TagKey;
@@ -12,10 +16,7 @@ import rocks.inspectit.ocelot.bootstrap.AgentManager;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -75,7 +76,8 @@ public class TestUtils {
                 getBean.setAccessible(true);
                 Object instrumentationManager = getBean.invoke(ctx, "instrumentationManager");
 
-                activeInstrumentations = (Cache<Class<?>, Object>) getField(instrumentationManager.getClass(), "activeInstrumentations").get(instrumentationManager);
+                activeInstrumentations = (Cache<Class<?>, Object>) getField(instrumentationManager.getClass(), "activeInstrumentations")
+                        .get(instrumentationManager);
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
@@ -173,12 +175,17 @@ public class TestUtils {
      *
      * @param viewName the name of the views
      * @param tags     the expected tag values
+     *
      * @return the found aggregation data, null otherwise
      */
     public static AggregationData getDataForView(String viewName, Map<String, String> tags) {
         ViewManager viewManager = Stats.getViewManager();
         ViewData view = viewManager.getView(View.Name.create(viewName));
-        List<String> orderedTagKeys = view.getView().getColumns().stream().map(TagKey::getName).collect(Collectors.toList());
+        List<String> orderedTagKeys = view.getView()
+                .getColumns()
+                .stream()
+                .map(TagKey::getName)
+                .collect(Collectors.toList());
         assertThat(orderedTagKeys).contains(tags.keySet().toArray(new String[]{}));
         List<String> expectedTagValues = orderedTagKeys.stream().map(tags::get).collect(Collectors.toList());
 
@@ -197,6 +204,40 @@ public class TestUtils {
                 })
                 .map(Map.Entry::getValue)
                 .findFirst().orElse(null);
+    }
+
+    public static TimeSeries getTimeseries(String metricName, Map<String, String> tags) {
+        Optional<TimeSeries> series = Metrics.getExportComponent()
+                .getMetricProducerManager()
+                .getAllMetricProducer()
+                .stream()
+                .flatMap(mp -> mp.getMetrics().stream())
+                .filter(m -> m.getMetricDescriptor().getName().equals(metricName))
+                .flatMap(m -> {
+                    List<String> orderedTagKeys = m.getMetricDescriptor()
+                            .getLabelKeys().stream()
+                            .map(LabelKey::getKey)
+                            .collect(Collectors.toList());
+                    assertThat(orderedTagKeys).contains(tags.keySet().toArray(new String[]{}));
+                    List<String> expectedTagValues = orderedTagKeys.stream()
+                            .map(tags::get)
+                            .collect(Collectors.toList());
+                    return m.getTimeSeriesList().stream()
+                            .filter(ts -> {
+                                List<LabelValue> tagValues = ts.getLabelValues();
+                                for (int i = 0; i < tagValues.size(); i++) {
+                                    String regex = expectedTagValues.get(i);
+                                    LabelValue tagValue = tagValues.get(i);
+                                    if (regex != null && (tagValue == null || !tagValue.getValue().matches(regex))) {
+                                        return false;
+                                    }
+                                }
+                                return true;
+                            });
+                })
+                .findFirst();
+        assertThat(series).isNotEmpty();
+        return series.get();
     }
 
     private static long getInstrumentationQueueLength() {
