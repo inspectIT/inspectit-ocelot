@@ -1,0 +1,56 @@
+name: Test Configuration Server
+
+on:
+  push:
+    branches-ignore:
+      - master
+    paths:
+      - 'components/inspectit-ocelot-configurationserver/**'
+      - '!components/inspectit-ocelot-configurationserver/README.md'
+  pull_request:
+    branches:
+      - master
+    paths:
+      - 'components/inspectit-ocelot-configurationserver/**'
+      - '!components/inspectit-ocelot-configurationserver/README.md'
+jobs:
+  test:
+    name: ${{ matrix.dockerimage }}
+    runs-on: ubuntu-latest
+    env:
+      working-directory: ./components/inspectit-ocelot-configurationserver
+    strategy:
+      fail-fast: false
+      matrix:
+        dockerimage:
+          - 'openjdk:8-jdk'
+          - 'openjdk:9-jdk'
+          - 'openjdk:11-jdk'
+          - 'ibmcom/ibmjava:8-sdk'
+          - 'sgrio/java:jdk_8_ubuntu'
+          - 'sgrio/java:jdk_11_ubuntu'
+          - 'adoptopenjdk/openjdk8:latest'
+    container: ${{ matrix.dockerimage }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: assemble
+        run: ./gradlew assemble
+        working-directory: ${{env.working-directory}}
+      - name: test
+        run: ./gradlew test --max-workers=2
+        working-directory: ${{env.working-directory}}
+      - name: systemTest
+        run: ./gradlew systemTest --max-workers=2
+        working-directory: ${{env.working-directory}}
+      - name: codeCoverage if oracle-jdk8
+        if: matrix.dockerimage == 'sgrio/java:jdk_8_ubuntu' && github.event_name == 'pull_request'
+        run: ./gradlew codeCoverageReport
+        working-directory: ${{env.working-directory}}
+      - name: upload to codecov.io
+        if: matrix.dockerimage == 'sgrio/java:jdk_8_ubuntu' && github.event_name == 'pull_request'
+        uses: codecov/codecov-action@v1
+        with:
+          file: ./build/reports/jacoco/report.xml
+        working-directory: ${{env.working-directory}}
