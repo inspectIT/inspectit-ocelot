@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.error.exceptions.NotSupportedWithLdapException;
 import rocks.inspectit.ocelot.rest.AbstractBaseController;
 import rocks.inspectit.ocelot.rest.ErrorInfo;
@@ -45,9 +44,6 @@ public class AccountController extends AbstractBaseController {
 
     @Autowired
     private JwtTokenManager tokenManager;
-
-    @Autowired
-    private InspectitServerSettings settings;
 
     @ApiOperation(value = "Create an access token", notes = "Creates a fresh access token for the user making this request." +
             " Instead of using User and Password based HTTP authentication, the user can then user the header 'Authorization: Bearer <TOKEN>' for authentication." +

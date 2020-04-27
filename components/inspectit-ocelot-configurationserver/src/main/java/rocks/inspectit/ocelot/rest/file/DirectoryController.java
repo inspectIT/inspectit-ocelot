@@ -2,8 +2,10 @@ package rocks.inspectit.ocelot.rest.file;
 
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RestController;
 import rocks.inspectit.ocelot.file.FileInfo;
 import rocks.inspectit.ocelot.rest.util.RequestUtil;
 

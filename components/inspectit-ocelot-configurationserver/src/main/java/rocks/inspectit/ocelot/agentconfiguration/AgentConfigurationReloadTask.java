@@ -132,7 +132,7 @@ class AgentConfigurationReloadTask implements Runnable {
      * @param path the path to check for yaml files, can start with a slash which will be ignored
      * @return a list of absolute paths of contained YAML files
      */
-    private List<String> getAllYamlFiles(String path) throws IOException {
+    private List<String> getAllYamlFiles(String path) {
         String cleanedPath;
         if (path.startsWith("/")) {
             cleanedPath = path.substring(1);
