@@ -1,6 +1,7 @@
 package rocks.inspectit.ocelot.agentconfiguration;
 
 import org.apache.commons.lang3.mutable.MutableObject;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,11 +10,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.file.FileInfo;
 import rocks.inspectit.ocelot.file.FileManager;
+import rocks.inspectit.ocelot.file.accessor.workingdirectory.WorkingDirectoryAccessor;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -31,6 +35,14 @@ public class AgentConfigurationReloadTaskTest {
     @Mock
     FileManager fileManager;
 
+    @Mock
+    WorkingDirectoryAccessor workingDirectoryAccessor;
+
+    @BeforeEach
+    public void beforeEach() {
+        lenient().when(fileManager.getWorkingDirectory()).thenReturn(workingDirectoryAccessor);
+    }
+
     @Nested
     class Run {
 
@@ -38,11 +50,11 @@ public class AgentConfigurationReloadTaskTest {
         public void loadWithException() throws Exception {
             FileInfo fileInfo = mock(FileInfo.class);
             when(fileInfo.getAbsoluteFilePaths(any())).thenReturn(Stream.of("/test.yml"), Stream.of("/test.yml"));
-            when(fileManager.exists(anyString())).thenReturn(true);
-            when(fileManager.isDirectory(anyString())).thenReturn(true);
-            when(fileManager.getFilesInDirectory(anyString(), anyBoolean())).thenReturn(Arrays.asList(fileInfo));
+            when(workingDirectoryAccessor.configurationFileExists(anyString())).thenReturn(true);
+            when(workingDirectoryAccessor.configurationFileIsDirectory(anyString())).thenReturn(true);
+            when(workingDirectoryAccessor.listConfigurationFiles(anyString())).thenReturn(Optional.of(Collections.singletonList(fileInfo)));
             // the first call will return a broken file
-            when(fileManager.readFile(anyString())).thenReturn("key:\tbroken", "key: valid");
+            when(workingDirectoryAccessor.readConfigurationFile(anyString())).thenReturn(Optional.of("key:\tbroken"), Optional.of("key: valid"));
 
             AgentMapping mapping = AgentMapping.builder().name("test").source("/test").build();
             AgentMapping mapping2 = AgentMapping.builder().name("test2").source("/test2").build();
@@ -70,10 +82,10 @@ public class AgentConfigurationReloadTaskTest {
         public void loadYaml() throws IOException {
             FileInfo fileInfo = mock(FileInfo.class);
             when(fileInfo.getAbsoluteFilePaths(any())).thenReturn(Stream.of("/test.yml"));
-            when(fileManager.exists("test")).thenReturn(true);
-            when(fileManager.isDirectory("test")).thenReturn(true);
-            when(fileManager.getFilesInDirectory(anyString(), anyBoolean())).thenReturn(Arrays.asList(fileInfo));
-            when(fileManager.readFile("/test.yml")).thenReturn("key: value");
+            when(workingDirectoryAccessor.configurationFileExists("test")).thenReturn(true);
+            when(workingDirectoryAccessor.configurationFileIsDirectory("test")).thenReturn(true);
+            when(workingDirectoryAccessor.listConfigurationFiles(anyString())).thenReturn(Optional.of(Collections.singletonList(fileInfo)));
+            when(workingDirectoryAccessor.readConfigurationFile("/test.yml")).thenReturn(Optional.of("key: value"));
 
             AgentMapping mapping = AgentMapping.builder().name("test").source("/test").build();
             String string = reloadTask.loadConfigForMapping(mapping);
@@ -82,13 +94,13 @@ public class AgentConfigurationReloadTaskTest {
         }
 
         @Test
-        public void yamlWithTab() throws IOException {
+        public void yamlWithTab() {
             FileInfo fileInfo = mock(FileInfo.class);
             when(fileInfo.getAbsoluteFilePaths(any())).thenReturn(Stream.of("/test.yml"));
-            when(fileManager.exists("test")).thenReturn(true);
-            when(fileManager.isDirectory("test")).thenReturn(true);
-            when(fileManager.getFilesInDirectory(anyString(), anyBoolean())).thenReturn(Arrays.asList(fileInfo));
-            when(fileManager.readFile("/test.yml")).thenReturn("key:\tvalue");
+            when(workingDirectoryAccessor.configurationFileExists("test")).thenReturn(true);
+            when(workingDirectoryAccessor.configurationFileIsDirectory("test")).thenReturn(true);
+            when(workingDirectoryAccessor.listConfigurationFiles(anyString())).thenReturn(Optional.of(Collections.singletonList(fileInfo)));
+            when(workingDirectoryAccessor.readConfigurationFile("/test.yml")).thenReturn(Optional.of("key:\tvalue"));
 
             AgentMapping mapping = AgentMapping.builder().name("test").source("/test").build();
 
@@ -113,8 +125,8 @@ public class AgentConfigurationReloadTaskTest {
 
         @Test
         void nonExistingSourcesSpecified() throws IOException {
-            doReturn(false).when(fileManager).exists("a.yml");
-            doReturn(false).when(fileManager).exists("some/folder");
+            doReturn(false).when(workingDirectoryAccessor).configurationFileExists("a.yml");
+            doReturn(false).when(workingDirectoryAccessor).configurationFileExists("some/folder");
 
             String result = reloadTask.loadConfigForMapping(
                     AgentMapping.builder()
@@ -128,9 +140,9 @@ public class AgentConfigurationReloadTaskTest {
 
         @Test
         void nonYamlIgnored() throws IOException {
-            doReturn(true).when(fileManager).exists(any());
-            doReturn(false).when(fileManager).isDirectory(any());
-            doReturn("").when(fileManager).readFile(any());
+            doReturn(true).when(workingDirectoryAccessor).configurationFileExists(any());
+            doReturn(false).when(workingDirectoryAccessor).configurationFileIsDirectory(any());
+            doReturn(Optional.of("")).when(workingDirectoryAccessor).readConfigurationFile(any());
 
             String result = reloadTask.loadConfigForMapping(
                     AgentMapping.builder()
@@ -141,38 +153,38 @@ public class AgentConfigurationReloadTaskTest {
                             .build());
 
             assertThat(result).isEmpty();
-            verify(fileManager).readFile("a.yml");
-            verify(fileManager).readFile("b.YmL");
-            verify(fileManager).readFile("c.yaml");
+            verify(workingDirectoryAccessor).readConfigurationFile("a.yml");
+            verify(workingDirectoryAccessor).readConfigurationFile("b.YmL");
+            verify(workingDirectoryAccessor).readConfigurationFile("c.yaml");
 
-            verify(fileManager, never()).readFile("d.txt");
+            verify(workingDirectoryAccessor, never()).readConfigurationFile("d.txt");
         }
 
 
         @Test
         void leadingSlashesInSourcesRemoved() throws IOException {
-            doReturn(false).when(fileManager).exists("a.yml");
+            doReturn(false).when(workingDirectoryAccessor).configurationFileExists("a.yml");
 
-            lenient().doThrow(new RuntimeException()).when(fileManager).exists(startsWith("/"));
+            lenient().doThrow(new RuntimeException()).when(workingDirectoryAccessor).configurationFileExists(startsWith("/"));
 
             reloadTask.loadConfigForMapping(
                     AgentMapping.builder()
                             .source("/a.yml")
                             .build());
 
-            verify(fileManager).exists(eq("a.yml"));
+            verify(workingDirectoryAccessor).configurationFileExists(eq("a.yml"));
         }
 
 
         @Test
         void priorityRespected() throws IOException {
 
-            doReturn(true).when(fileManager).exists(any());
+            doReturn(true).when(workingDirectoryAccessor).configurationFileExists(any());
 
-            doReturn(true).when(fileManager).isDirectory("folder");
-            doReturn(false).when(fileManager).isDirectory("z.yml");
+            doReturn(true).when(workingDirectoryAccessor).configurationFileIsDirectory("folder");
+            doReturn(false).when(workingDirectoryAccessor).configurationFileIsDirectory("z.yml");
 
-            doReturn(Arrays.asList(
+            List<FileInfo> fileInfos = Arrays.asList(
                     FileInfo.builder()
                             .type(FileInfo.Type.FILE)
                             .name("b.yml")
@@ -186,11 +198,12 @@ public class AgentConfigurationReloadTaskTest {
                             .name("somethingelse")
                             .build()
 
-            )).when(fileManager).getFilesInDirectory("folder", true);
+            );
+            doReturn(Optional.of(fileInfos)).when(workingDirectoryAccessor).listConfigurationFiles("folder");
 
-            doReturn("{ val1: z}").when(fileManager).readFile("z.yml");
-            doReturn("{ val1: a, val2: a}").when(fileManager).readFile("folder/a.yml");
-            doReturn("{ val1: b, val2: b, val3: b}").when(fileManager).readFile("folder/b.yml");
+            doReturn(Optional.of("{ val1: z}")).when(workingDirectoryAccessor).readConfigurationFile("z.yml");
+            doReturn(Optional.of("{ val1: a, val2: a}")).when(workingDirectoryAccessor).readConfigurationFile("folder/a.yml");
+            doReturn(Optional.of("{ val1: b, val2: b, val3: b}")).when(workingDirectoryAccessor).readConfigurationFile("folder/b.yml");
 
 
             String result = reloadTask.loadConfigForMapping(
@@ -201,7 +214,7 @@ public class AgentConfigurationReloadTaskTest {
 
 
             assertThat(result).isEqualTo("{val1: z, val2: a, val3: b}\n");
-            verify(fileManager, never()).readFile("folder/somethingelse");
+            verify(workingDirectoryAccessor, never()).readConfigurationFile("folder/somethingelse");
         }
     }
 }

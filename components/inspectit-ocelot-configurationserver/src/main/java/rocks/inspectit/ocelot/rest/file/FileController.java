@@ -3,12 +3,14 @@ package rocks.inspectit.ocelot.rest.file;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import rocks.inspectit.ocelot.file.FileData;
 import rocks.inspectit.ocelot.rest.util.RequestUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.Optional;
 
 /**
  * Controller for managing the configurations.
@@ -56,14 +58,21 @@ public class FileController extends FileBaseController {
     @GetMapping(value = "files/**")
     public Object readFile(HttpServletRequest request,
                            @ApiParam("If true, the response body is not formatted as json and is instead the plain text content of the file.")
-                           @RequestParam(defaultValue = "false") boolean raw) throws IOException {
+                           @RequestParam(defaultValue = "false") boolean raw) {
         String path = RequestUtil.getRequestSubPath(request);
-        String content = fileManager.readFile(path);
-        if (raw) {
-            return content;
-        } else {
-            return FileData.builder().content(content).build();
+        Optional<String> contentOptional = fileManager.getWorkingDirectory().readConfigurationFile(path);
+
+        if (!contentOptional.isPresent()) {
+            return ResponseEntity.notFound();
         }
+
+        return contentOptional.map(content -> {
+            if (raw) {
+                return content;
+            } else {
+                return FileData.builder().content(content).build();
+            }
+        });
     }
 
     @ApiOperation(value = "Delete a file", notes = "Deletes the given file")

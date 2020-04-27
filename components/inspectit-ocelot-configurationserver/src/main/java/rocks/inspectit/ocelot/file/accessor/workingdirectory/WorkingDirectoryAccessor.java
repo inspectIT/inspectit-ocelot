@@ -10,6 +10,7 @@ import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.file.FileChangedEvent;
 import rocks.inspectit.ocelot.file.FileInfo;
 
+import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -32,6 +33,11 @@ public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
     public WorkingDirectoryAccessor(InspectitServerSettings config, ApplicationEventPublisher eventPublisher) {
         this.workingDirectory = Paths.get(config.getWorkingDirectory()).toAbsolutePath().normalize();
         this.eventPublisher = eventPublisher;
+    }
+
+    @PostConstruct
+    private void init() throws IOException {
+        Files.createDirectories(workingDirectory);
     }
 
     private void fireFileChangeEvent() {
@@ -64,7 +70,6 @@ public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
 
     @Override
     protected synchronized List<FileInfo> listFiles(String path) {
-        log.info("list: " + path);
         Path targetPath = resolve(path);
 
         if (!Files.exists(targetPath)) {
@@ -155,6 +160,18 @@ public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
         }
 
         fireFileChangeEvent();
+    }
+
+    @Override
+    protected boolean exists(String path) {
+        Path targetPath = resolve(path);
+        return Files.exists(targetPath);
+    }
+
+    @Override
+    protected boolean isDirectory(String path) {
+        Path targetPath = resolve(path);
+        return Files.isDirectory(targetPath);
     }
 
     @Override

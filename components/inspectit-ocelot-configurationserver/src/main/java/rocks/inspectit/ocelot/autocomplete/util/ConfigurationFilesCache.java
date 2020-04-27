@@ -8,14 +8,12 @@ import org.springframework.stereotype.Component;
 import org.yaml.snakeyaml.Yaml;
 import rocks.inspectit.ocelot.config.loaders.ConfigFileLoader;
 import rocks.inspectit.ocelot.file.FileChangedEvent;
+import rocks.inspectit.ocelot.file.FileInfo;
 import rocks.inspectit.ocelot.file.FileManager;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -97,17 +95,13 @@ public class ConfigurationFilesCache {
      */
     @VisibleForTesting
     Object loadYamlFile(String path) {
-        String src;
-        try {
-            src = fileManager.readFile(path);
-        } catch (IOException e) {
+        Optional<String> src = fileManager.getWorkingDirectory().readConfigurationFile(path);
+
+        if (!src.isPresent()) {
             log.warn("Unable to load file with path {}", path);
-            return null;
         }
-        if (src != null) {
-            return parseYaml(src);
-        }
-        return null;
+
+        return src.map(this::parseYaml).orElse(null);
     }
 
     /**
@@ -119,8 +113,10 @@ public class ConfigurationFilesCache {
     @VisibleForTesting
     List<String> getAllPaths() {
         try {
-            return fileManager.getFilesInDirectory("", true).stream()
-                    .flatMap(f -> f.getAbsoluteFilePaths(""))
+            List<FileInfo> fileInfos = fileManager.getWorkingDirectory().listConfigurationFiles("").orElse(Collections.emptyList());
+
+            return fileInfos.stream()
+                    .flatMap(file -> file.getAbsoluteFilePaths(""))
                     .filter(HAS_YAML_ENDING)
                     .sorted()
                     .collect(Collectors.toList());

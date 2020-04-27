@@ -1,29 +1,30 @@
 package rocks.inspectit.ocelot.file.accessor.workingdirectory;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
 
 import java.io.IOException;
 import java.nio.file.Paths;
 
 @Slf4j
-@Component
 public abstract class AbstractWorkingDirectoryAccessor extends AbstractFileAccessor {
 
     public void createConfigurationDirectory(String directory) throws IOException {
+        log.debug("Creating configuration directory: {}", directory);
         String targetPath = verifyPath(CONFIGURATION_FILES_SUBFOLDER, directory);
 
         createDirectory(targetPath);
     }
 
     public void writeConfigurationFile(String file, String content) throws IOException {
+        log.debug("Writing configuration file: {}", file);
         String targetPath = verifyPath(CONFIGURATION_FILES_SUBFOLDER, file);
 
         writeFile(targetPath, content);
     }
 
     public void deleteConfiguration(String path) throws IOException {
+        log.debug("Deleting configuration: {}", path);
         String targetPath = verifyPath(CONFIGURATION_FILES_SUBFOLDER, path);
 
         if (Paths.get(path).normalize().toString().isEmpty()) {
@@ -34,6 +35,7 @@ public abstract class AbstractWorkingDirectoryAccessor extends AbstractFileAcces
     }
 
     public void moveConfiguration(String source, String target) throws IOException {
+        log.debug("Moving configuration: {} -> {}", source, target);
         String sourcePath = verifyPath(CONFIGURATION_FILES_SUBFOLDER, source);
         String targetPath = verifyPath(CONFIGURATION_FILES_SUBFOLDER, target);
 
@@ -41,6 +43,7 @@ public abstract class AbstractWorkingDirectoryAccessor extends AbstractFileAcces
     }
 
     public void writeAgentMappings(String content) throws IOException {
+        log.debug("Writing agent mappings");
         writeFile(AGENT_MAPPINGS_FILE_NAME, content);
     }
 

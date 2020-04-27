@@ -20,17 +20,14 @@ import java.util.Optional;
 @RestController
 public class DirectoryController extends FileBaseController {
 
-
     @ApiOperation(value = "List directory contents", notes = "Can be used to get a list of the contents of a given directory.")
     @ApiImplicitParam(name = "Path", value = "The part of the url after /directories/ define the path to the directory whose contents shall be read.")
     @GetMapping(value = "directories/**")
     public Collection<FileInfo> listContents(HttpServletRequest request) {
         String path = RequestUtil.getRequestSubPath(request);
-        //TODO add tests!!!!!!!!!!
         Optional<List<FileInfo>> fileInfos = fileManager.getWorkingDirectory().listConfigurationFiles(path);
         return fileInfos.orElse(Collections.emptyList());
     }
-
 
     @ApiOperation(value = "Create a directory", notes = "Creates a new, empty directory including its parent folders. Does nothing if the directory already exists.")
     @ApiImplicitParam(name = "Path", value = "The part of the url after /directories/ define the path of the directory to create.")

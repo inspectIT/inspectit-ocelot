@@ -465,4 +465,62 @@ class WorkingDirectoryAccessorTest {
                     .withMessage("User path escapes the base path: ..\\test");
         }
     }
+
+    @Nested
+    class ConfigurationFileExists {
+
+        @Test
+        public void doesNotExist() {
+            boolean result = accessor.configurationFileExists("file");
+
+            assertThat(result).isFalse();
+        }
+
+        @Test
+        public void fileExist() {
+            createTestFiles("files/sub/file");
+
+            boolean result = accessor.configurationFileExists("sub/file");
+
+            assertThat(result).isTrue();
+        }
+
+        @Test
+        public void directoryExist() {
+            createTestFiles("files/sub/file");
+
+            boolean result = accessor.configurationFileExists("sub");
+
+            assertThat(result).isTrue();
+        }
+    }
+
+    @Nested
+    class ConfigurationFileIsDirectory {
+
+        @Test
+        public void doesNotExist() {
+            boolean result = accessor.configurationFileIsDirectory("target");
+
+            assertThat(result).isFalse();
+        }
+
+        @Test
+        public void isDirectory() {
+            createTestFiles("files/target/file");
+
+            boolean result = accessor.configurationFileIsDirectory("target");
+
+            assertThat(result).isTrue();
+        }
+
+        @Test
+        public void isNotDirectory() {
+            createTestFiles("files/target/file");
+
+            boolean result = accessor.configurationFileIsDirectory("target/file");
+
+            assertThat(result).isFalse();
+        }
+    }
 }
