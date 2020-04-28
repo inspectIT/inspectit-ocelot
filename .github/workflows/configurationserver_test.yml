@@ -17,22 +17,11 @@ on:
       - '!components/inspectit-ocelot-configurationserver/README.md'
 jobs:
   test:
-    name: ${{ matrix.dockerimage }}
+    name: test-against-openjdk-8
     runs-on: ubuntu-latest
     env:
       working-directory: ./components/inspectit-ocelot-configurationserver
-    strategy:
-      fail-fast: false
-      matrix:
-        dockerimage:
-          - 'openjdk:8-jdk'
-          - 'openjdk:9-jdk'
-          - 'openjdk:11-jdk'
-          - 'ibmcom/ibmjava:8-sdk'
-          - 'sgrio/java:jdk_8_ubuntu'
-          - 'sgrio/java:jdk_11_ubuntu'
-          - 'adoptopenjdk/openjdk8:latest'
-    container: ${{ matrix.dockerimage }}
+    container: openjdk:8-jdk
     steps:
       - uses: actions/checkout@v2
       - name: Grant execute permission for gradlew
