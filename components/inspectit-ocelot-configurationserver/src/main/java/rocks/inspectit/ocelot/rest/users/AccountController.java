@@ -22,8 +22,8 @@ import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.error.exceptions.NotSupportedWithLdapException;
 import rocks.inspectit.ocelot.rest.AbstractBaseController;
 import rocks.inspectit.ocelot.rest.ErrorInfo;
+import rocks.inspectit.ocelot.security.config.UserRoleConfiguration;
 import rocks.inspectit.ocelot.security.jwt.JwtTokenManager;
-import rocks.inspectit.ocelot.security.userdetails.CustomLdapUserDetailsService;
 import rocks.inspectit.ocelot.user.User;
 import rocks.inspectit.ocelot.user.UserService;
 
@@ -62,7 +62,7 @@ public class AccountController extends AbstractBaseController {
         return tokenManager.createToken(user.getName());
     }
 
-    @Secured(CustomLdapUserDetailsService.READ_ACCESS_ROLE)
+    @Secured(UserRoleConfiguration.READ_ACCESS_ROLE)
     @ApiOperation(value = "Change Password", notes = "Changes the password of the logged in user." +
             " This endpoint does not work with token-based authentication, only HTTP basic auth is allowed.")
     @PutMapping("account/password")

@@ -11,7 +11,7 @@ import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 import rocks.inspectit.ocelot.rest.AbstractBaseController;
 import rocks.inspectit.ocelot.security.audit.AuditDetail;
 import rocks.inspectit.ocelot.security.audit.EntityAuditLogger;
-import rocks.inspectit.ocelot.security.userdetails.CustomLdapUserDetailsService;
+import rocks.inspectit.ocelot.security.config.UserRoleConfiguration;
 
 import javax.validation.Valid;
 import java.io.IOException;
@@ -39,14 +39,7 @@ public class AgentMappingController extends AbstractBaseController {
      *
      * @return List of {@link AgentMapping}s.
      */
-    @Secured(
-            {
-                    CustomLdapUserDetailsService.READ_ACCESS_ROLE,
-                    CustomLdapUserDetailsService.WRITE_ACCESS_ROLE,
-                    CustomLdapUserDetailsService.COMMIT_ACCESS_ROLE,
-                    CustomLdapUserDetailsService.ADMIN_ACCESS_ROLE
-            }
-    )
+    @Secured(UserRoleConfiguration.READ_ACCESS_ROLE)
     @GetMapping(value = "mappings")
     public List<AgentMapping> getMappings() {
         return mappingManager.getAgentMappings();
@@ -59,13 +52,7 @@ public class AgentMappingController extends AbstractBaseController {
      * @param agentMappings The new {@link AgentMapping}s
      * @throws IOException In case the new mappings cannot be written into a file.
      */
-    @Secured(
-            {
-                    CustomLdapUserDetailsService.WRITE_ACCESS_ROLE,
-                    CustomLdapUserDetailsService.COMMIT_ACCESS_ROLE,
-                    CustomLdapUserDetailsService.ADMIN_ACCESS_ROLE
-            }
-    )
+    @Secured(UserRoleConfiguration.WRITE_ACCESS_ROLE)
     @PutMapping(value = "mappings")
     public void putMappings(@Valid @RequestBody List<AgentMapping> agentMappings) throws IOException {
         mappingManager.setAgentMappings(agentMappings);
@@ -81,14 +68,7 @@ public class AgentMappingController extends AbstractBaseController {
      * @param mappingName the name of the {@link AgentMapping}
      * @return The {@link AgentMapping} with the given name or a 404 if it does not exist
      */
-    @Secured(
-            {
-                    CustomLdapUserDetailsService.READ_ACCESS_ROLE,
-                    CustomLdapUserDetailsService.WRITE_ACCESS_ROLE,
-                    CustomLdapUserDetailsService.COMMIT_ACCESS_ROLE,
-                    CustomLdapUserDetailsService.ADMIN_ACCESS_ROLE
-            }
-    )
+    @Secured(UserRoleConfiguration.READ_ACCESS_ROLE)
     @GetMapping(value = "mappings/{mappingName}")
     public ResponseEntity<AgentMapping> getMappingByName(@PathVariable("mappingName") String mappingName) {
         Optional<AgentMapping> agentMapping = mappingManager.getAgentMapping(mappingName);
@@ -102,7 +82,7 @@ public class AgentMappingController extends AbstractBaseController {
      * @return 200 if the mapping has been deleted or 404 if it does not exist
      * @throws IOException In case of an error during deletion
      */
-    @Secured(CustomLdapUserDetailsService.WRITE_ACCESS_ROLE)
+    @Secured(UserRoleConfiguration.WRITE_ACCESS_ROLE)
     @DeleteMapping(value = "mappings/{mappingName}")
     public ResponseEntity deleteMappingByName(@PathVariable("mappingName") String mappingName) throws IOException {
         boolean isDeleted = mappingManager.deleteAgentMapping(mappingName);
@@ -130,13 +110,7 @@ public class AgentMappingController extends AbstractBaseController {
      * @return 200 in case the operation was successful
      * @throws IOException In case of an error
      */
-    @Secured(
-            {
-                    CustomLdapUserDetailsService.WRITE_ACCESS_ROLE,
-                    CustomLdapUserDetailsService.COMMIT_ACCESS_ROLE,
-                    CustomLdapUserDetailsService.ADMIN_ACCESS_ROLE
-            }
-    )
+    @Secured(UserRoleConfiguration.WRITE_ACCESS_ROLE)
     @PutMapping(value = "mappings/{mappingName}")
     public ResponseEntity putMapping(@PathVariable("mappingName") String mappingName, @Valid @RequestBody AgentMapping agentMapping, @RequestParam(required = false) String before, @RequestParam(required = false) String after) throws IOException {
         checkArgument(!StringUtils.isEmpty(mappingName), "The mapping name should not be empty or null.");

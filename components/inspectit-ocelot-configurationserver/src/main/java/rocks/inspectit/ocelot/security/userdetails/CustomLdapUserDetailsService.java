@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.conditional.ConditionalOnLdap;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.config.model.RoleSettings;
+import rocks.inspectit.ocelot.security.config.UserRoleConfiguration;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -28,33 +29,7 @@ import java.util.stream.Collectors;
 @ConditionalOnLdap
 public class CustomLdapUserDetailsService extends LdapUserDetailsService {
 
-    private static final String ROLE_PREFIX = "ROLE_";
-
-    private static final String READ_ACCESS = "OCELOT_READ";
-
-    private static final String WRITE_ACCESS = "OCELOT_WRITE";
-
-    private static final String COMMIT_ACCESS = "OCELOT_COMMIT";
-
-    private static final String ADMIN_ACCESS = "OCELOT_ADMIN";
-
-    private static final String[] READ_ROLE_PERMISSION_SET = {READ_ACCESS};
-
-    private static final String[] WRITE_ROLE_PERMISSION_SET = {READ_ACCESS, WRITE_ACCESS};
-
-    private static final String[] COMMIT_ROLE_PERMISSION_SET = {READ_ACCESS, WRITE_ACCESS, COMMIT_ACCESS};
-
-    private static final String[] ADMIN_ROLE_PERMISSION_SET = {READ_ACCESS, WRITE_ACCESS, COMMIT_ACCESS, ADMIN_ACCESS};
-
-    public static final String READ_ACCESS_ROLE = ROLE_PREFIX + READ_ACCESS;
-
-    public static final String WRITE_ACCESS_ROLE = ROLE_PREFIX + WRITE_ACCESS;
-
-    public static final String COMMIT_ACCESS_ROLE = ROLE_PREFIX + COMMIT_ACCESS;
-
-    public static final String ADMIN_ACCESS_ROLE = ROLE_PREFIX + ADMIN_ACCESS;
-
-    public static final List<String> OCELOT_ACCESS_USER_ROLES = Arrays.asList(READ_ACCESS, WRITE_ACCESS, COMMIT_ACCESS, ADMIN_ACCESS);
+    public static final List<String> OCELOT_ACCESS_USER_ROLES = Arrays.asList(UserRoleConfiguration.ADMIN_ROLE_PERMISSION_SET);
 
     @Autowired
     @VisibleForTesting
@@ -96,15 +71,15 @@ public class CustomLdapUserDetailsService extends LdapUserDetailsService {
         RoleSettings role_settings = settings.getSecurity().getLdap().getRoles();
         Collection<? extends GrantedAuthority> authorities = user.getAuthorities();
         if (containsAuthority(authorities, role_settings.getAdmin())) {
-            return ADMIN_ROLE_PERMISSION_SET;
+            return UserRoleConfiguration.ADMIN_ROLE_PERMISSION_SET;
         }
         if (containsAuthority(authorities, role_settings.getCommit())) {
-            return COMMIT_ROLE_PERMISSION_SET;
+            return UserRoleConfiguration.COMMIT_ROLE_PERMISSION_SET;
         }
         if (containsAuthority(authorities, role_settings.getWrite())) {
-            return WRITE_ROLE_PERMISSION_SET;
+            return UserRoleConfiguration.WRITE_ROLE_PERMISSION_SET;
         }
-        return READ_ROLE_PERMISSION_SET;
+        return UserRoleConfiguration.READ_ROLE_PERMISSION_SET;
     }
 
     /**

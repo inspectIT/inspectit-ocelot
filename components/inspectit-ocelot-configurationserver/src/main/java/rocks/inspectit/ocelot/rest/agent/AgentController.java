@@ -16,7 +16,7 @@ import rocks.inspectit.ocelot.agentconfiguration.AgentConfigurationManager;
 import rocks.inspectit.ocelot.agentstatus.AgentStatusManager;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.rest.AbstractBaseController;
-import rocks.inspectit.ocelot.security.userdetails.CustomLdapUserDetailsService;
+import rocks.inspectit.ocelot.security.config.UserRoleConfiguration;
 
 import java.io.IOException;
 import java.util.Map;
@@ -42,7 +42,7 @@ public class AgentController extends AbstractBaseController {
      * @param attributes the attributes of the agents used to select the mapping
      * @return The configuration mapped on the given agent name
      */
-    @Secured(CustomLdapUserDetailsService.READ_ACCESS_ROLE)
+    @Secured(UserRoleConfiguration.READ_ACCESS_ROLE)
     @ApiOperation(value = "Fetch the Agent Configuration", notes = "Reads the configuration for the given agent and returns it as a yaml string")
     @GetMapping(value = "agent/configuration", produces = "text/plain")
     public ResponseEntity<String> fetchConfiguration(@ApiParam("The agent attributes used to select the correct mapping") @RequestParam Map<String, String> attributes, @RequestHeader Map<String, String> headers) throws IOException {
