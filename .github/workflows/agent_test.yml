@@ -62,6 +62,7 @@ jobs:
         uses: codecov/codecov-action@v1
         with:
           file: ./build/reports/jacoco/report.xml
+          fail_ci_if_error: true
   jmh-compile:
     runs-on: ubuntu-latest
     container: openjdk:8-jdk
