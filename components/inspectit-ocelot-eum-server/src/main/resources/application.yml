@@ -119,6 +119,14 @@ inspectit-eum-server:
         # This difference will only be written if the counter has changed (=the difference is non-zero).
         # This can greatly reduce the total data written to influx and makes writing queries easier.
         counters-as-differences: true
+    tracing:
+      jaeger:
+        # if jaeger exporter for the OT received spans is enabled
+        enabled: false
+        # url pointing to the host and port of the jaeger collector
+        url: http://localhost:14250
+        # service name for all exported spans
+        service-name: browser-js
 
   # settings for the EUM server's self-monitoring
   self-monitoring:
