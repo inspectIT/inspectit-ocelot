@@ -1,0 +1,34 @@
+name: Test Configuration Server
+
+on:
+  push:
+    branches-ignore:
+      - master
+    paths:
+      - '.github/workflows/configurationserver_test.yml'
+      - 'components/inspectit-ocelot-configurationserver/**'
+      - '!components/inspectit-ocelot-configurationserver/README.md'
+  pull_request:
+    branches:
+      - master
+    paths:
+      - '.github/workflows/configurationserver_test.yml'
+      - 'components/inspectit-ocelot-configurationserver/**'
+      - '!components/inspectit-ocelot-configurationserver/README.md'
+jobs:
+  test:
+    name: test-against-openjdk-8
+    runs-on: ubuntu-latest
+    env:
+      working-directory: ./components/inspectit-ocelot-configurationserver
+    container: openjdk:8-jdk
+    steps:
+      - uses: actions/checkout@v2
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: assemble
+        run: ../../gradlew assemble
+        working-directory: ${{env.working-directory}}
+      - name: test
+        run: ../../gradlew test
+        working-directory: ${{env.working-directory}}
