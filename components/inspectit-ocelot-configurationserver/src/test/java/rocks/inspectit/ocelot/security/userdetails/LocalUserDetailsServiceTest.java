@@ -33,9 +33,9 @@ public class LocalUserDetailsServiceTest {
 
         @BeforeEach
         public void before() throws Exception {
-            Field field = LocalUserDetailsService.class.getDeclaredField("accessRole");
+            Field field = LocalUserDetailsService.class.getDeclaredField("accessRoles");
             field.setAccessible(true);
-            field.set(detailsService, "role");
+            field.set(detailsService, new String[]{"role"});
         }
 
         @Test
