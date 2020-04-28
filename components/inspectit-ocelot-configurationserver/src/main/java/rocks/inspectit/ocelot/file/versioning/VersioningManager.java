@@ -65,6 +65,7 @@ public class VersioningManager {
         log.info("Committing all staged changes.");
 
         git.commit()
+                .setAll(true)
                 .setMessage("Commit configuration file and agent mapping changes")
                 .setAuthor(versioningSettings.getGitUsername(), versioningSettings.getGitMail())
                 .call();
