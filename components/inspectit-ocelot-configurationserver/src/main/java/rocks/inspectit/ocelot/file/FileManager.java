@@ -6,6 +6,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.file.accessor.workingdirectory.AbstractWorkingDirectoryAccessor;
+import rocks.inspectit.ocelot.file.accessor.workingdirectory.AutoCommitWorkingDirectoryProxy;
 import rocks.inspectit.ocelot.file.accessor.workingdirectory.WorkingDirectoryAccessor;
 
 import java.nio.file.Path;
@@ -18,7 +19,7 @@ import java.nio.file.Paths;
 @Slf4j
 public class FileManager {
 
-    private WorkingDirectoryAccessor workingDirectoryAccessor;
+    private AbstractWorkingDirectoryAccessor workingDirectoryAccessor;
 
     @Autowired
     public FileManager(InspectitServerSettings settings, ApplicationEventPublisher eventPublisher) {

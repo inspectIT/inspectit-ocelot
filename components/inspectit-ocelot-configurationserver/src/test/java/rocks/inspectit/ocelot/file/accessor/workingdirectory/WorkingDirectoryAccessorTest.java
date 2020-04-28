@@ -9,9 +9,9 @@ import org.springframework.context.ApplicationEventPublisher;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.file.FileChangedEvent;
 import rocks.inspectit.ocelot.file.FileInfo;
+import rocks.inspectit.ocelot.file.FileTestBase;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -23,13 +23,11 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-class WorkingDirectoryAccessorTest {
+class WorkingDirectoryAccessorTest extends FileTestBase {
 
     private AbstractWorkingDirectoryAccessor accessor;
 
     private ApplicationEventPublisher eventPublisher;
-
-    private Path tempDirectory;
 
     @BeforeEach
     public void beforeEach() throws IOException {
@@ -43,29 +41,6 @@ class WorkingDirectoryAccessorTest {
     @AfterEach
     public void afterEach() throws IOException {
         FileUtils.deleteDirectory(tempDirectory.toFile());
-    }
-
-    private void createTestFiles(String... files) {
-        try {
-            for (String file : files) {
-                String path;
-                String content;
-                if (file.contains("=")) {
-                    String[] splitted = file.split("=");
-                    path = splitted[0];
-                    content = splitted.length == 2 ? splitted[1] : "";
-                } else {
-                    path = file;
-                    content = "";
-                }
-
-                Path targetFile = tempDirectory.resolve(path);
-                Files.createDirectories(targetFile.getParent());
-                Files.write(targetFile, content.getBytes(StandardCharsets.UTF_8));
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @Nested

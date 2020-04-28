@@ -41,6 +41,10 @@ inspectit-config-server:
     # Whether LDAP authentication should be used
     ldap-authentication: false
 
+  versioning:
+    git-username: inspectIT Ocelot Configuration-Server
+    git-mail: inspectit@inspectit.rocks
+
 # ACTUATOR PROPERTIES
 management:
   # Whether to enable or disable all endpoints by default.
