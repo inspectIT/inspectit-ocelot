@@ -1,4 +1,9 @@
-comment: off
+comment:
+  layout: "reach, diff, files"
+    behavior: default
+  require_changes: false
+  branches:
+    - "master"
 coverage:
   precision: 2
   round: nearest
