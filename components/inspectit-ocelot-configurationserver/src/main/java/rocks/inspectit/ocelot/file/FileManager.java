@@ -20,6 +20,11 @@ public class FileManager {
         this.workingDirectoryAccessor = workingDirectoryAccessor;
     }
 
+    /**
+     * Returns the file accessor to access the files in the working directory.
+     *
+     * @return an instance of {@link WorkingDirectoryAccessor}
+     */
     public AbstractWorkingDirectoryAccessor getWorkingDirectory() {
         return workingDirectoryAccessor;
     }

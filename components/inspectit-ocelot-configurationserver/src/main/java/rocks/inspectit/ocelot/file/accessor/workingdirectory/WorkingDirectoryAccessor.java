@@ -21,12 +21,21 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+/**
+ * Concrete implementation to access and modify files in the server's working directory.
+ */
 @Slf4j
 @Component
 public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
 
+    /**
+     * Event publisher to trigger events when files are being modified.
+     */
     private ApplicationEventPublisher eventPublisher;
 
+    /**
+     * The base path of the working directory.
+     */
     private Path workingDirectory;
 
     @Autowired
@@ -40,11 +49,20 @@ public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
         Files.createDirectories(workingDirectory);
     }
 
+    /**
+     * Fires a new {@link FileChangedEvent}.
+     */
     private void fireFileChangeEvent() {
         FileChangedEvent event = new FileChangedEvent(this);
         eventPublisher.publishEvent(event);
     }
 
+    /**
+     * Resolve the given path in relation to the current working directory.
+     *
+     * @param path the relative path
+     * @return {@link Path} representing the given path string
+     */
     private Path resolve(String path) {
         if (StringUtils.isEmpty(path)) {
             return workingDirectory;
