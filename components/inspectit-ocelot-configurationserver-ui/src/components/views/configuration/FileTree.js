@@ -82,11 +82,12 @@ class FileTree extends React.Component {
    * Returns the old (source) and expected (target) key when a node is found.
    */
   comparePaths = (parentKey, nodes) => {
-    let foundFile = filter(nodes, (file) => file.key !== `${parentKey}/${file.label}`);
+    const getFileName = (fileNode) => fileNode.key.substring(fileNode.key.lastIndexOf('/') + 1);
+    let foundFile = filter(nodes, (file) => file.key !== `${parentKey}/${getFileName(file)}`);
     if (foundFile.length === 1) {
       return {
         source: foundFile[0].key,
-        target: `${parentKey}/${foundFile[0].label}`,
+        target: `${parentKey}/${getFileName(foundFile[0])}`,
       };
     }
 

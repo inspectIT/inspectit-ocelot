@@ -79,6 +79,32 @@ export const hasUnsavedChanges = createSelector(configurationSelector, (configur
 });
 
 /**
+ * Compares two path strings for sorting.
+ * Sorting ensures that directories appear before files and that they are sorted lexicographically.
+ */
+const comparePaths = (firstPath, secondPath) => {
+  const firstNames = firstPath.split('/');
+  const secondNames = secondPath.split('/');
+  let depth = 0;
+  while (depth < firstNames.length && depth < secondNames.length) {
+    let firstIsFile = firstNames.length === depth + 1;
+    let secondIsFile = secondNames.length === depth + 1;
+    if (firstIsFile && !secondIsFile) {
+      return 1;
+    }
+    if (!firstIsFile && secondIsFile) {
+      return -1;
+    }
+    const nameComparison = firstNames[depth].localeCompare(secondNames[depth]);
+    if (nameComparison !== 0) {
+      return nameComparison;
+    }
+    depth++;
+  }
+  return 0; //both are equal
+};
+
+/**
  * Returns the default configuration key/value ~ path/content pairs in a tree structure used by the FileTree component.
  */
 export const getDefaultConfigTree = createSelector(configurationSelector, (configuration) => {
@@ -90,6 +116,7 @@ export const getDefaultConfigTree = createSelector(configurationSelector, (confi
   if (paths.length !== 0) {
     res.push(_getDefaultRoot(selectedDefaultConfigFile));
 
+    paths.sort(comparePaths);
     for (const path of paths) {
       _addNode(res[0], path);
     }

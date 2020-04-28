@@ -6,8 +6,10 @@ import * as types from './types';
 
 /**
  * Fetches all existing configuration files and directories.
+ *
+ * @param {string} newSelectionOnSuccess - If not empty, this path will be selected on successful fetch.
  */
-export const fetchFiles = () => {
+export const fetchFiles = (newSelectionOnSuccess) => {
   return (dispatch) => {
     dispatch({ type: types.FETCH_FILES_STARTED });
 
@@ -17,6 +19,9 @@ export const fetchFiles = () => {
         const files = res.data;
         sortFiles(files);
         dispatch({ type: types.FETCH_FILES_SUCCESS, payload: { files } });
+        if (newSelectionOnSuccess) {
+          dispatch(selectFile(newSelectionOnSuccess));
+        }
       })
       .catch(() => {
         dispatch({ type: types.FETCH_FILES_FAILURE });
@@ -151,9 +156,14 @@ export const deleteSelection = (fetchFilesOnSuccess, selectedFile = null) => {
 
 /**
  * Attempts to write the given contents to the given file.
- * Triggers fetchFiles() if requested on success.
+ *
+ * @param {string} file - absolute path of the file to write (e.g. /configs/prod/interfaces.yml)
+ * @param {string} content - the content to place in the file
+ * @param {boolean} fetchFilesOnSuccess - if true, the file tree be refeteched on a successful write
+ * @param {boolean} selectFileOnSuccess - if true, the newly created file will be selected on success.
+ *                                        Requires fetchFilesOnSuccess to be true
  */
-export const writeFile = (file, content, fetchFilesOnSuccess) => {
+export const writeFile = (file, content, fetchFilesOnSuccess, selectFileOnSuccess) => {
   return (dispatch) => {
     const filePath = file.startsWith('/') ? file.substring(1) : file;
 
@@ -172,7 +182,11 @@ export const writeFile = (file, content, fetchFilesOnSuccess) => {
         dispatch({ type: types.WRITE_FILE_SUCCESS, payload });
 
         if (fetchFilesOnSuccess) {
-          dispatch(fetchFiles());
+          if (selectFileOnSuccess) {
+            dispatch(fetchFiles('/' + filePath));
+          } else {
+            dispatch(fetchFiles());
+          }
         }
 
         dispatch(notificationActions.showSuccessMessage('Configuration Saved', 'The configuration has been successfully saved.'));
@@ -185,9 +199,13 @@ export const writeFile = (file, content, fetchFilesOnSuccess) => {
 
 /**
  * Attempts to create the given directory.
- * Triggers fetchFiles() if requested on success.
+ *
+ * @param {string} path - absolute path of the directory to create (e.g. /configs/prod/myDir)
+ * @param {boolean} fetchFilesOnSuccess - if true, the file tree will be refeteched on a successful creation
+ * @param {boolean} selectFolderOnSucces - if true, the newly created directory will be selected on success.
+ *                                        Requires fetchFilesOnSuccess to be true
  */
-export const createDirectory = (path, fetchFilesOnSuccess) => {
+export const createDirectory = (path, fetchFilesOnSuccess, selectFolderOnSuccess) => {
   return (dispatch) => {
     const dirPath = path.startsWith('/') ? path.substring(1) : path;
 
@@ -198,7 +216,11 @@ export const createDirectory = (path, fetchFilesOnSuccess) => {
       .then(() => {
         dispatch({ type: types.CREATE_DIRECTORY_SUCCESS });
         if (fetchFilesOnSuccess) {
-          dispatch(fetchFiles());
+          if (selectFolderOnSuccess) {
+            dispatch(fetchFiles('/' + dirPath));
+          } else {
+            dispatch(fetchFiles());
+          }
         }
       })
       .catch(() => {
