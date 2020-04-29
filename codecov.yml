@@ -1,9 +1,7 @@
 comment:
-  layout: "reach, diff, files"
-  behavior: default
+  layout: "diff, files"
+  behavior: once
   require_changes: false
-  branches:
-    - "master"
 coverage:
   precision: 2
   round: nearest
@@ -15,4 +13,3 @@ coverage:
     patch:
       default:
         target: 25%
-        
