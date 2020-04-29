@@ -1,0 +1,93 @@
+name: Test agent
+
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - '.github/workflows/agent_test.yml'
+      - 'inspect-ocelot-*'
+      - '!inspect-ocelot-documentation'
+      - '!inspect-ocelot-demo'
+      - '!components/**'
+      - '!.github/workflows/configuration_ui_test.yml'
+      - '!.github/workflows/configurationserver_test.yml'
+      - '!.github/workflows/eumserver_test.yml'
+      - '!*.md'
+  push:
+    branches-ignore:
+      - master
+    paths:
+      - '.github/workflows/agent_test.yml'
+      - 'inspect-ocelot-*'
+      - '!inspect-ocelot-documentation'
+      - '!inspect-ocelot-demo'
+      - '!components/**'
+      - '!.github/workflows/configuration_ui_test.yml'
+      - '!.github/workflows/configurationserver_test.yml'
+      - '!.github/workflows/eumserver_test.yml'
+      - '!*.md'
+jobs:
+  pr-check:
+    name: ${{ matrix.dockerimage }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        dockerimage:
+          - 'openjdk:8-jdk'
+          - 'openjdk:9-jdk'
+          - 'openjdk:11-jdk'
+          - 'ibmcom/ibmjava:8-sdk'
+          - 'sgrio/java:jdk_8_ubuntu'
+          - 'sgrio/java:jdk_11_ubuntu'
+          - 'adoptopenjdk/openjdk8:latest'
+    container: ${{ matrix.dockerimage }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: assemble
+        run: ./gradlew assemble
+      - name: test
+        run: ./gradlew test
+      - name: systemTest
+        run: ./gradlew systemTest
+      - name: codeCoverage if oracle-jdk8
+        if: matrix.dockerimage == 'sgrio/java:jdk_8_ubuntu' && github.event_name == 'pull_request'
+        run: |
+          ./gradlew codeCoverageReport
+      - name: upload to codecov.io
+        if: matrix.dockerimage == 'sgrio/java:jdk_8_ubuntu' && github.event_name == 'pull_request'
+        uses: codecov/codecov-action@v1
+        with:
+          file: ./build/reports/jacoco/report.xml
+  jmh-compile:
+    runs-on: ubuntu-latest
+    container: openjdk:8-jdk
+    steps:
+      - uses: actions/checkout@v2
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: jmhCompile
+        run: ./gradlew jmhCompile
+  attach-alpine-jdk8:
+    runs-on: ubuntu-latest
+    container: openjdk:8-jdk-alpine
+    steps:
+      - uses: actions/checkout@v2
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: assemble
+        run: ./gradlew assemble
+      - name: attach
+        run: |
+          apk update && apk add curl
+          echo "class Dummy{public static void main(String[] args)throws InterruptedException{while (true){Thread.sleep(1000);}}}" > Dummy.java
+          javac Dummy.java
+          $(nohup java Dummy > out.txt &)
+          sleep 2
+          processId=$( ps -e -o pid,comm | grep java | awk {'print $1'} )
+          pwd
+          java -jar inspectit-ocelot-agent/build/inspectit-ocelot-agent-SNAPSHOT.jar $processId
+          curl -4 -o /dev/null -s -w "%{http_code}" --connect-timeout 2 --max-time 2  --retry 3 --retry-delay 3 --retry-max-time 10 --retry-connrefuse http://localhost:8888
