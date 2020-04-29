@@ -35,9 +35,6 @@ public class SecuritySettings {
     @Builder.Default
     private boolean accessLog = true;
 
-    @Valid
-    private RoleSettings roles;
-
     /**
      * Verify that LDAP settings exist if LDAP is enabled.
      */

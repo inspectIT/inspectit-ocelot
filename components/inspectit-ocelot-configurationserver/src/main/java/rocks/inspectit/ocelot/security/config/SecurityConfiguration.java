@@ -102,7 +102,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
      *
      * @return the role names to use as an array of Strings.
      */
-    //TODO Make getAccessRole return a List of access Roles. All default roles ->  ldapauthRole
     private String[] getAccessRoles() {
         List<String> activeUserRoles = new ArrayList<>(OCELOT_ACCESS_USER_ROLES);
         if (serverSettings.getSecurity().isLdapAuthentication()) {

@@ -13,7 +13,7 @@ import org.springframework.security.ldap.userdetails.LdapUserDetailsService;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.conditional.ConditionalOnLdap;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
-import rocks.inspectit.ocelot.config.model.RoleSettings;
+import rocks.inspectit.ocelot.config.model.LdapRoleResolveSettings;
 import rocks.inspectit.ocelot.security.config.UserRoleConfiguration;
 
 import java.util.Arrays;
@@ -68,7 +68,7 @@ public class CustomLdapUserDetailsService extends LdapUserDetailsService {
      */
     @VisibleForTesting
     String[] resolveAccessRoleSet(UserDetails user) {
-        RoleSettings role_settings = settings.getSecurity().getLdap().getRoles();
+        LdapRoleResolveSettings role_settings = settings.getSecurity().getLdap().getRoles();
         Collection<? extends GrantedAuthority> authorities = user.getAuthorities();
         if (containsAuthority(authorities, role_settings.getAdmin())) {
             return UserRoleConfiguration.ADMIN_ROLE_PERMISSION_SET;

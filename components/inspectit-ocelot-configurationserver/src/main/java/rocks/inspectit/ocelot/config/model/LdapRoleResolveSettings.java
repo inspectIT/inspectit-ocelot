@@ -14,7 +14,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class RoleSettings {
+public class LdapRoleResolveSettings {
 
     /**
      * Roles defined in this list are granted read access.

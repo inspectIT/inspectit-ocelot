@@ -10,8 +10,8 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.ldap.search.LdapUserSearch;
 import org.springframework.security.ldap.userdetails.DefaultLdapAuthoritiesPopulator;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
+import rocks.inspectit.ocelot.config.model.LdapRoleResolveSettings;
 import rocks.inspectit.ocelot.config.model.LdapSettings;
-import rocks.inspectit.ocelot.config.model.RoleSettings;
 import rocks.inspectit.ocelot.config.model.SecuritySettings;
 
 import java.util.Collections;
@@ -39,16 +39,16 @@ public class CustomLdapUserDetailsServiceTest {
     ) {
         InspectitServerSettings mockSettings = mock(InspectitServerSettings.class);
         SecuritySettings mockSecuritySettings = mock(SecuritySettings.class);
-        RoleSettings mockRoleSettings = mock(RoleSettings.class);
+        LdapRoleResolveSettings mockLdapRoleResolveSettings = mock(LdapRoleResolveSettings.class);
         LdapSettings mockLdapSettings = mock(LdapSettings.class);
 
         when(mockSettings.getSecurity()).thenReturn(mockSecuritySettings);
         when(mockSecuritySettings.getLdap()).thenReturn(mockLdapSettings);
-        when(mockLdapSettings.getRoles()).thenReturn(mockRoleSettings);
+        when(mockLdapSettings.getRoles()).thenReturn(mockLdapRoleResolveSettings);
 
-        lenient().when(mockRoleSettings.getWrite()).thenReturn(write);
-        lenient().when(mockRoleSettings.getCommit()).thenReturn(commit);
-        lenient().when(mockRoleSettings.getAdmin()).thenReturn(admin);
+        lenient().when(mockLdapRoleResolveSettings.getWrite()).thenReturn(write);
+        lenient().when(mockLdapRoleResolveSettings.getCommit()).thenReturn(commit);
+        lenient().when(mockLdapRoleResolveSettings.getAdmin()).thenReturn(admin);
 
 
         return mockSettings;

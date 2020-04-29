@@ -68,6 +68,9 @@ public class LdapSettings {
     @NotNull
     private String groupSearchFilter;
 
-    private RoleSettings roles;
+    /**
+     * Contains the LDAP Group mapped to access roles.
+     */
+    private LdapRoleResolveSettings roles;
 
 }
