@@ -2,7 +2,7 @@
 
 # inspectIT Ocelot 
 
-[![Build Status](https://circleci.com/gh/inspectIT/inspectit-ocelot.svg?style=svg)](https://circleci.com/gh/inspectIT/inspectit-ocelot)
+[![CI tests agent](https://github.com/inspectIT/inspectit-ocelot/workflows/CI%20tests%20agent/badge.svg)](https://github.com/inspectIT/inspectit-ocelot/actions?query=workflow%3A%22CI+tests+agent%22)
 [![Code Coverage](https://codecov.io/gh/inspectit/inspectit-ocelot/branch/master/graph/badge.svg)](https://codecov.io/gh/inspectIT/inspectit-ocelot)
 
 [inspectIT Ocelot](https://inspectit.rocks/) is a zero-configuration Java agent for dynamically collecting application performance,
