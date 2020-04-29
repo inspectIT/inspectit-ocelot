@@ -1,4 +1,4 @@
-name: Test eum Server
+name: CI test eum Server
 
 on:
   push:

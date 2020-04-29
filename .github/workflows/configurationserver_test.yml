@@ -1,4 +1,4 @@
-name: Test Configuration Server
+name: CI tests configuration server
 
 on:
   push:

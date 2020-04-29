@@ -1,4 +1,4 @@
-name: Test agent
+name: CI tests agent
 
 on:
   pull_request:
