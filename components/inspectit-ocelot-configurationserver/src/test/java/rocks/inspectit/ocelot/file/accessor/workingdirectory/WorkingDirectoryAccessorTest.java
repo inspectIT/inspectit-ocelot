@@ -125,7 +125,7 @@ class WorkingDirectoryAccessorTest {
 
             assertThatExceptionOfType(IllegalArgumentException.class)
                     .isThrownBy(() -> accessor.readConfigurationFile("../test.yml"))
-                    .withMessage("User path escapes the base path: ..\\test.yml");
+                    .withMessageStartingWith("User path escapes the base path:");
         }
 
         @Test
@@ -492,7 +492,7 @@ class WorkingDirectoryAccessorTest {
 
             assertThatExceptionOfType(IllegalArgumentException.class)
                     .isThrownBy(() -> accessor.createConfigurationDirectory("../test"))
-                    .withMessage("User path escapes the base path: ..\\test");
+                    .withMessageStartingWith("User path escapes the base path:");
         }
     }
 
