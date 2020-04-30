@@ -98,6 +98,10 @@ sourceCompatibility = 1.8
 
 test {
     useJUnitPlatform()
+
+    testLogging {
+        exceptionFormat = 'full'
+    }
 }
 
 dependencies {
