@@ -1,4 +1,4 @@
-name: CI test eum Server
+name: EUM Server Tests
 
 on:
   push:
@@ -19,7 +19,7 @@ on:
       - '!components/inspectit-ocelot-eum-server/README.md'
 jobs:
   test:
-    name: test-against-openjdk-8
+    name: Assemble & Test
     runs-on: ubuntu-latest
     env:
       working-directory: ./components/inspectit-ocelot-eum-server

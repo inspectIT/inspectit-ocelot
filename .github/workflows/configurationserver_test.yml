@@ -1,4 +1,4 @@
-name: CI tests configuration server
+name: Configuration Server Tests
 
 on:
   push:
@@ -17,7 +17,7 @@ on:
       - '!components/inspectit-ocelot-configurationserver/README.md'
 jobs:
   test:
-    name: test-against-openjdk-8
+    name: Assemble & Test
     runs-on: ubuntu-latest
     env:
       working-directory: ./components/inspectit-ocelot-configurationserver
