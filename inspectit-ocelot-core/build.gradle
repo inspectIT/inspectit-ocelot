@@ -10,6 +10,10 @@ configurations {
 
 test {
     useJUnitPlatform()
+
+    testLogging {
+        exceptionFormat = 'full'
+    }
 }
 
 sourceCompatibility = 1.8
