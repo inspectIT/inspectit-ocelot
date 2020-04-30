@@ -50,9 +50,14 @@ class EditSources extends React.Component {
   };
 
   handleChangeSources = (sources = []) => {
+    const prevSources = this.props.sources || [];
     /** uniqWith removes 'equal' entries of the given array using the given function to compare elements */
-    const newSourceArray = uniqWith(sources.sort(), treeUtils.isSubfile);
-
+    const filteredSourceArray = uniqWith(sources.slice().sort(), treeUtils.isSubfile);
+    //this is done to preserve the sorting:
+    const existingSources = prevSources.filter((source) => filteredSourceArray.includes(source));
+    //and finally to include added sources:
+    const addedSources = filteredSourceArray.filter((source) => !prevSources.includes(source));
+    const newSourceArray = existingSources.concat(addedSources);
     if (!isEqual(newSourceArray, this.props.sources)) {
       this.props.onChange(newSourceArray);
     }
