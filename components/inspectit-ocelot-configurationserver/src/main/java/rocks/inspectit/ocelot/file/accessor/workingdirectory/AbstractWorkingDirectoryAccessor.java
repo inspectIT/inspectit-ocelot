@@ -56,6 +56,10 @@ public abstract class AbstractWorkingDirectoryAccessor extends AbstractFileAcces
         log.debug("Creating configuration directory: {}", directory);
         String targetPath = verifyPath(CONFIGURATION_FILES_SUBFOLDER, directory);
 
+        if (Paths.get(directory).normalize().toString().isEmpty()) {
+            throw new IllegalArgumentException("Cannot create directory. It is equal to the working directory.");
+        }
+
         createDirectory(targetPath);
     }
 
