@@ -2,7 +2,7 @@ name: EUM Server Tests
 
 on:
   push:
-    branches-ignore:
+    branches:
       - master
     paths:
       - '.github/workflows/eumserver_test.yml'

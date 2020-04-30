@@ -2,7 +2,7 @@ name: Configuration Server Tests
 
 on:
   push:
-    branches-ignore:
+    branches:
       - master
     paths:
       - '.github/workflows/configurationserver_test.yml'
