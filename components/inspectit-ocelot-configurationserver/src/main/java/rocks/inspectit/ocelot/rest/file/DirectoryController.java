@@ -27,8 +27,7 @@ public class DirectoryController extends FileBaseController {
     @GetMapping(value = "directories/**")
     public Collection<FileInfo> listContents(HttpServletRequest request) {
         String path = RequestUtil.getRequestSubPath(request);
-        Optional<List<FileInfo>> fileInfos = fileManager.getWorkingDirectory().listConfigurationFiles(path);
-        return fileInfos.orElse(Collections.emptyList());
+        return fileManager.getWorkingDirectory().listConfigurationFiles(path);
     }
 
     @ApiOperation(value = "Create a directory", notes = "Creates a new, empty directory including its parent folders. Does nothing if the directory already exists.")

@@ -97,11 +97,10 @@ public class ConfigurationFilesCache {
     Object loadYamlFile(String path) {
         Optional<String> src = fileManager.getWorkingDirectory().readConfigurationFile(path);
 
-        if (!src.isPresent()) {
+        return src.map(this::parseYaml).orElseGet(() -> {
             log.warn("Unable to load file with path {}", path);
-        }
-
-        return src.map(this::parseYaml).orElse(null);
+            return null;
+        });
     }
 
     /**
@@ -113,7 +112,7 @@ public class ConfigurationFilesCache {
     @VisibleForTesting
     List<String> getAllPaths() {
         try {
-            List<FileInfo> fileInfos = fileManager.getWorkingDirectory().listConfigurationFiles("").orElse(Collections.emptyList());
+            List<FileInfo> fileInfos = fileManager.getWorkingDirectory().listConfigurationFiles("");
 
             return fileInfos.stream()
                     .flatMap(file -> file.getAbsoluteFilePaths(""))

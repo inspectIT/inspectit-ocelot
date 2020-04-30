@@ -73,7 +73,7 @@ public class ConfigurationFilesCacheTest {
             Stream<String> streamB = Stream.of("path/b.yaml");
             when(mockFileInfo2.getAbsoluteFilePaths(any())).thenReturn(streamB);
             List<FileInfo> mockInfoList = Arrays.asList(mockFileInfo, mockFileInfo2);
-            when(workingDirectoryAccessor.listConfigurationFiles("")).thenReturn(Optional.of(mockInfoList));
+            when(workingDirectoryAccessor.listConfigurationFiles("")).thenReturn(mockInfoList);
 
             List<String> paths = configurationFilesCache.getAllPaths();
 
@@ -88,7 +88,7 @@ public class ConfigurationFilesCacheTest {
             Stream<String> streamA = Stream.of("path/a.xml");
             when(mockFileInfo.getAbsoluteFilePaths(any())).thenReturn(streamA);
             List<FileInfo> mockInfoList = Arrays.asList(mockFileInfo);
-            when(workingDirectoryAccessor.listConfigurationFiles("")).thenReturn(Optional.of(mockInfoList));
+            when(workingDirectoryAccessor.listConfigurationFiles("")).thenReturn(mockInfoList);
 
             List<String> paths = configurationFilesCache.getAllPaths();
 
@@ -107,7 +107,7 @@ public class ConfigurationFilesCacheTest {
             when(mockFileInfo1.getAbsoluteFilePaths("")).thenReturn(Stream.of("a.yaml"));
             FileInfo mockFileInfo2 = mock(FileInfo.class);
             when(mockFileInfo2.getAbsoluteFilePaths("")).thenReturn(Stream.of("b.yaml"));
-            when(workingDirectoryAccessor.listConfigurationFiles("")).thenReturn(Optional.of(Arrays.asList(mockFileInfo1, mockFileInfo2)));
+            when(workingDirectoryAccessor.listConfigurationFiles("")).thenReturn(Arrays.asList(mockFileInfo1, mockFileInfo2));
             List<String> list = Arrays.asList("test", "yaml");
             LinkedHashMap<String, Object> firstElement = new LinkedHashMap<>();
             firstElement.put("i am a", list);

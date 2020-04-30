@@ -46,7 +46,7 @@ class DirectoryControllerTest {
         public void nullResult() {
             HttpServletRequest request = mock(HttpServletRequest.class);
             when(request.getAttribute(anyString())).thenReturn("/api/target", "/api/**");
-            when(accessor.listConfigurationFiles(any())).thenReturn(Optional.empty());
+            when(accessor.listConfigurationFiles(any())).thenReturn(Collections.emptyList());
 
             Collection<FileInfo> result = controller.listContents(request);
 
@@ -59,8 +59,7 @@ class DirectoryControllerTest {
         public void emptyResult() {
             HttpServletRequest request = mock(HttpServletRequest.class);
             when(request.getAttribute(anyString())).thenReturn("/api/target", "/api/**");
-            Optional<List<FileInfo>> optional = Optional.of(Collections.emptyList());
-            when(accessor.listConfigurationFiles("target")).thenReturn(optional);
+            when(accessor.listConfigurationFiles("target")).thenReturn(Collections.emptyList());
 
             Collection<FileInfo> result = controller.listContents(request);
 
@@ -74,8 +73,7 @@ class DirectoryControllerTest {
             HttpServletRequest request = mock(HttpServletRequest.class);
             when(request.getAttribute(anyString())).thenReturn("/api/target", "/api/**");
             FileInfo fileInfo = mock(FileInfo.class);
-            Optional<List<FileInfo>> optional = Optional.of(Collections.singletonList(fileInfo));
-            when(accessor.listConfigurationFiles("target")).thenReturn(optional);
+            when(accessor.listConfigurationFiles("target")).thenReturn(Collections.singletonList(fileInfo));
 
             Collection<FileInfo> result = controller.listContents(request);
 

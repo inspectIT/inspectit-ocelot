@@ -180,29 +180,51 @@ class WorkingDirectoryAccessorTest {
 
         @Test
         public void listFiles() {
-            createTestFiles("one.yml", "files/second.yml", "files/sub/third.yml");
+            createTestFiles("one.yml", "files/second.yml", "files/sub/third.yml", "files/sub/deep/four.yml", "files/sub/five.yml", "files/six.yml");
 
-            Optional<List<FileInfo>> result = accessor.listConfigurationFiles(".");
+            List<FileInfo> result = accessor.listConfigurationFiles(".");
 
             assertThat(result).isNotEmpty();
 
-            List<FileInfo> files = result.get();
-            assertThat(files).hasSize(2);
-            assertThat(files).anySatisfy(fileInfo -> {
+            assertThat(result).hasSize(3);
+            assertThat(result).anySatisfy(fileInfo -> {
                 assertThat(fileInfo.getName()).isEqualTo("second.yml");
                 assertThat(fileInfo.getType()).isEqualTo(FileInfo.Type.FILE);
                 assertThat(fileInfo.getChildren()).isNull();
             });
-            assertThat(files).anySatisfy(fileInfo -> {
+            assertThat(result).anySatisfy(fileInfo -> {
+                assertThat(fileInfo.getName()).isEqualTo("six.yml");
+                assertThat(fileInfo.getType()).isEqualTo(FileInfo.Type.FILE);
+                assertThat(fileInfo.getChildren()).isNull();
+            });
+            assertThat(result).anySatisfy(fileInfo -> {
                 assertThat(fileInfo.getName()).isEqualTo("sub");
                 assertThat(fileInfo.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-                assertThat(fileInfo.getChildren()).hasSize(1);
+                assertThat(fileInfo.getChildren()).hasSize(3);
 
-                FileInfo child = fileInfo.getChildren().get(0);
+                List<FileInfo> subChildren = fileInfo.getChildren();
 
-                assertThat(child.getName()).isEqualTo("third.yml");
-                assertThat(child.getType()).isEqualTo(FileInfo.Type.FILE);
-                assertThat(child.getChildren()).isNull();
+                assertThat(subChildren).anySatisfy(subFileInfo -> {
+                    assertThat(subFileInfo.getName()).isEqualTo("third.yml");
+                    assertThat(subFileInfo.getType()).isEqualTo(FileInfo.Type.FILE);
+                    assertThat(subFileInfo.getChildren()).isNull();
+                });
+                assertThat(subChildren).anySatisfy(subFileInfo -> {
+                    assertThat(subFileInfo.getName()).isEqualTo("five.yml");
+                    assertThat(subFileInfo.getType()).isEqualTo(FileInfo.Type.FILE);
+                    assertThat(subFileInfo.getChildren()).isNull();
+                });
+                assertThat(subChildren).anySatisfy(subFileInfo -> {
+                    assertThat(subFileInfo.getName()).isEqualTo("deep");
+                    assertThat(subFileInfo.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+                    assertThat(subFileInfo.getChildren()).hasSize(1);
+
+                    FileInfo child = subFileInfo.getChildren().get(0);
+
+                    assertThat(child.getName()).isEqualTo("four.yml");
+                    assertThat(child.getType()).isEqualTo(FileInfo.Type.FILE);
+                    assertThat(child.getChildren()).isNull();
+                });
             });
         }
 
@@ -210,17 +232,25 @@ class WorkingDirectoryAccessorTest {
         public void listNestedFiles() {
             createTestFiles("one.yml", "files/second.yml", "files/sub/third.yml");
 
-            Optional<List<FileInfo>> result = accessor.listConfigurationFiles("sub");
+            List<FileInfo> result = accessor.listConfigurationFiles("sub");
 
             assertThat(result).isNotEmpty();
 
-            List<FileInfo> files = result.get();
-            assertThat(files).hasSize(1);
-            assertThat(files).anySatisfy(fileInfo -> {
+            assertThat(result).hasSize(1);
+            assertThat(result).anySatisfy(fileInfo -> {
                 assertThat(fileInfo.getName()).isEqualTo("third.yml");
                 assertThat(fileInfo.getType()).isEqualTo(FileInfo.Type.FILE);
                 assertThat(fileInfo.getChildren()).isNull();
             });
+        }
+
+        @Test
+        public void directoryDoesNotExist() {
+            createTestFiles("one.yml", "files/second.yml");
+
+            List<FileInfo> result = accessor.listConfigurationFiles("not-existing");
+
+            assertThat(result).isEmpty();
         }
     }
 
@@ -295,14 +325,14 @@ class WorkingDirectoryAccessorTest {
         public void deleteFile() throws IOException {
             createTestFiles("files/first.yml");
 
-            Optional<List<FileInfo>> before = accessor.listConfigurationFiles("");
+            List<FileInfo> before = accessor.listConfigurationFiles("");
 
             accessor.deleteConfiguration("first.yml");
 
-            Optional<List<FileInfo>> after = accessor.listConfigurationFiles("");
+            List<FileInfo> after = accessor.listConfigurationFiles("");
 
-            assertThat(before.get()).hasSize(1);
-            assertThat(after.get()).isEmpty();
+            assertThat(before).hasSize(1);
+            assertThat(after).isEmpty();
 
             verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
             verifyNoMoreInteractions(eventPublisher);
@@ -312,14 +342,14 @@ class WorkingDirectoryAccessorTest {
         public void deleteDirectory() throws IOException {
             createTestFiles("files/sub/first.yml");
 
-            Optional<List<FileInfo>> before = accessor.listConfigurationFiles("sub");
+            List<FileInfo> before = accessor.listConfigurationFiles("sub");
 
             accessor.deleteConfiguration("sub");
 
-            Optional<List<FileInfo>> after = accessor.listConfigurationFiles("");
+            List<FileInfo> after = accessor.listConfigurationFiles("");
 
-            assertThat(before.get()).hasSize(1);
-            assertThat(after.get()).isEmpty();
+            assertThat(before).hasSize(1);
+            assertThat(after).isEmpty();
 
             verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
             verifyNoMoreInteractions(eventPublisher);
@@ -331,15 +361,15 @@ class WorkingDirectoryAccessorTest {
 
         @Test
         public void writeFile() throws IOException {
-            Optional<List<FileInfo>> before = accessor.listConfigurationFiles("");
+            List<FileInfo> before = accessor.listConfigurationFiles("");
 
             accessor.writeConfigurationFile("first.yml", "new content");
 
-            Optional<List<FileInfo>> after = accessor.listConfigurationFiles("");
+            List<FileInfo> after = accessor.listConfigurationFiles("");
             Optional<String> fileContent = accessor.readConfigurationFile("first.yml");
 
-            assertThat(before.get()).isEmpty();
-            assertThat(after.get()).isNotEmpty()
+            assertThat(before).isEmpty();
+            assertThat(after).isNotEmpty()
                     .anySatisfy(fileInfo -> {
                         assertThat(fileInfo.getName()).isEqualTo("first.yml");
                         assertThat(fileInfo.getType()).isEqualTo(FileInfo.Type.FILE);

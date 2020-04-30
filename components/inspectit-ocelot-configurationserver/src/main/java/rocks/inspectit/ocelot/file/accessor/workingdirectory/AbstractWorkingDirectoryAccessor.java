@@ -13,6 +13,40 @@ import java.nio.file.Paths;
 public abstract class AbstractWorkingDirectoryAccessor extends AbstractFileAccessor {
 
     /**
+     * Writes the given content to the specified file. The file will be overwritten, if it already exists.
+     *
+     * @param path    the target file
+     * @param content the content to write
+     * @throws IOException in case the file can not be written
+     */
+    protected abstract void writeFile(String path, String content) throws IOException;
+
+    /**
+     * Creates the specified directory.
+     *
+     * @param path the directory to create
+     * @throws IOException in case the file can not be written
+     */
+    protected abstract void createDirectory(String path) throws IOException;
+
+    /**
+     * Moves the specified source path to the specified target - can be a file or directory.
+     *
+     * @param sourcePath the source path
+     * @param targetPath the target path
+     * @throws IOException in case the file or directory can not be moved
+     */
+    protected abstract void move(String sourcePath, String targetPath) throws IOException;
+
+    /**
+     * Deletes the specified path - can be a file or directory.
+     *
+     * @param path the path to delete
+     * @throws IOException in case the file or directory can not be deleted
+     */
+    protected abstract void delete(String path) throws IOException;
+
+    /**
      * Creating a new configuration directory.
      *
      * @param directory the directory to create
@@ -83,38 +117,4 @@ public abstract class AbstractWorkingDirectoryAccessor extends AbstractFileAcces
         log.debug("Writing agent mappings");
         writeFile(AGENT_MAPPINGS_FILE_NAME, content);
     }
-
-    /**
-     * Writes the given content to the specified file.
-     *
-     * @param path the target file
-     * @param content the content to write
-     * @throws IOException in case the file can not be written
-     */
-    protected abstract void writeFile(String path, String content) throws IOException;
-
-    /**
-     * Creates the specified directory.
-     *
-     * @param path the directory to create
-     * @throws IOException in case the file can not be written
-     */
-    protected abstract void createDirectory(String path) throws IOException;
-
-    /**
-     * Moves the specified source path to the specified target - can be a file or directory.
-     *
-     * @param sourcePath the source path
-     * @param targetPath the target path
-     * @throws IOException in case the file or directory can not be moved
-     */
-    protected abstract void move(String sourcePath, String targetPath) throws IOException;
-
-    /**
-     * Deletes the specified path - can be a file or directory.
-     *
-     * @param path the path to delete
-     * @throws IOException in case the file or directory can not be deleted
-     */
-    protected abstract void delete(String path) throws IOException;
 }

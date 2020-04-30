@@ -9,17 +9,15 @@ import org.springframework.util.StringUtils;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.file.FileChangedEvent;
 import rocks.inspectit.ocelot.file.FileInfo;
+import rocks.inspectit.ocelot.file.FileInfoVisitor;
 
 import javax.annotation.PostConstruct;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.*;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 /**
  * Concrete implementation to access and modify files in the server's working directory.
@@ -72,7 +70,7 @@ public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
     }
 
     @Override
-    protected synchronized Optional<byte[]> readFile(String path) {
+    protected Optional<byte[]> readFile(String path) {
         Path targetPath = resolve(path);
 
         if (!Files.exists(targetPath) || Files.isDirectory(targetPath)) {
@@ -87,41 +85,27 @@ public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
     }
 
     @Override
-    protected synchronized List<FileInfo> listFiles(String path) {
+    protected List<FileInfo> listFiles(String path) {
         Path targetPath = resolve(path);
 
         if (!Files.exists(targetPath)) {
             return Collections.emptyList();
         }
 
-        try (Stream<Path> files = Files.list(targetPath)) {
-            List<FileInfo> result = new ArrayList<>();
+        try {
+            FileInfoVisitor fileInfoVisitor = new FileInfoVisitor();
 
-            files.forEach(childPath -> {
-                boolean isDirectory = Files.isDirectory(childPath);
-                String fileName = childPath.getFileName().toString();
+            Files.walkFileTree(targetPath, fileInfoVisitor);
 
-                FileInfo.FileInfoBuilder builder = FileInfo.builder()
-                        .name(fileName)
-                        .type(isDirectory ? FileInfo.Type.DIRECTORY : FileInfo.Type.FILE);
-
-                if (isDirectory) {
-                    String nestedPath = path + File.separator + fileName;
-                    builder.children(listFiles(nestedPath));
-                }
-
-                result.add(builder.build());
-            });
-
-            return result;
+            return fileInfoVisitor.getFileInfos();
         } catch (IOException e) {
-            log.error("Exception while listing files in path '" + path + "'.", e);
+            log.error("Exception while listing files in path '{}'.", path, e);
             return Collections.emptyList();
         }
     }
 
     @Override
-    protected synchronized void createDirectory(String path) throws IOException {
+    protected void createDirectory(String path) throws IOException {
         Path targetDirectory = resolve(path);
 
         if (Files.exists(targetDirectory)) {
@@ -134,21 +118,21 @@ public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
     }
 
     @Override
-    protected synchronized void writeFile(String path, String content) throws IOException {
+    protected void writeFile(String path, String content) throws IOException {
         Path targetFile = resolve(path);
 
         if (Files.exists(targetFile) && Files.isDirectory(targetFile)) {
             throw new IOException("Cannot write file because target is already a directory: " + targetFile);
         }
 
-        FileUtils.forceMkdir(targetFile.getParent().toFile());
+        Files.createDirectories(targetFile.getParent());
         Files.write(targetFile, content.getBytes(FILE_ENCODING));
 
         fireFileChangeEvent();
     }
 
     @Override
-    protected synchronized void move(String sourcePath, String targetPath) throws IOException {
+    protected void move(String sourcePath, String targetPath) throws IOException {
         Path source = resolve(sourcePath);
         Path target = resolve(targetPath);
 
@@ -164,7 +148,7 @@ public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
     }
 
     @Override
-    protected synchronized void delete(String path) throws IOException {
+    protected void delete(String path) throws IOException {
         Path targetPath = resolve(path);
 
         if (!Files.exists(targetPath)) {

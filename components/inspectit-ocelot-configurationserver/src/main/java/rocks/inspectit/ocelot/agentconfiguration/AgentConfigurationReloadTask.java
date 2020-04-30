@@ -144,7 +144,7 @@ class AgentConfigurationReloadTask implements Runnable {
 
         if (workingDirectory.configurationFileExists(cleanedPath)) {
             if (workingDirectory.configurationFileIsDirectory(cleanedPath)) {
-                List<FileInfo> fileInfos = workingDirectory.listConfigurationFiles(cleanedPath).orElse(Collections.emptyList());
+                List<FileInfo> fileInfos = workingDirectory.listConfigurationFiles(cleanedPath);
 
                 return fileInfos.stream()
                         .flatMap(file -> file.getAbsoluteFilePaths(cleanedPath))

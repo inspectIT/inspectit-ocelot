@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -42,5 +43,17 @@ public class FileInfo {
         } else {
             return Stream.of(absolutePath);
         }
+    }
+
+    /**
+     * Adds a child and initializes the children list in case it does not exist.
+     *
+     * @param fileInfo the child to add
+     */
+    synchronized void addChild(FileInfo fileInfo) {
+        if (children == null) {
+            children = new ArrayList<>();
+        }
+        children.add(fileInfo);
     }
 }
