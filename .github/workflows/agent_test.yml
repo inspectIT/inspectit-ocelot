@@ -1,6 +1,19 @@
-name: Test agent
+name: Java Agent Tests
 
 on:
+  push:
+    branches:
+      - master
+    paths:
+      - '.github/workflows/agent_test.yml'
+      - 'inspect-ocelot-*'
+      - '!inspect-ocelot-documentation'
+      - '!inspect-ocelot-demo'
+      - '!components/**'
+      - '!.github/workflows/configuration_ui_test.yml'
+      - '!.github/workflows/configurationserver_test.yml'
+      - '!.github/workflows/eumserver_test.yml'
+      - '!*.md'
   pull_request:
     branches:
       - master
@@ -14,22 +27,10 @@ on:
       - '!.github/workflows/configurationserver_test.yml'
       - '!.github/workflows/eumserver_test.yml'
       - '!*.md'
-  push:
-    branches-ignore:
-      - master
-    paths:
-      - '.github/workflows/agent_test.yml'
-      - 'inspect-ocelot-*'
-      - '!inspect-ocelot-documentation'
-      - '!inspect-ocelot-demo'
-      - '!components/**'
-      - '!.github/workflows/configuration_ui_test.yml'
-      - '!.github/workflows/configurationserver_test.yml'
-      - '!.github/workflows/eumserver_test.yml'
-      - '!*.md'
+
 jobs:
   pr-check:
-    name: ${{ matrix.dockerimage }}
+    name: 'Testing on ${{ matrix.dockerimage }}'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -62,7 +63,9 @@ jobs:
         uses: codecov/codecov-action@v1
         with:
           file: ./build/reports/jacoco/report.xml
+          fail_ci_if_error: true
   jmh-compile:
+    name: Compile JMH Tests
     runs-on: ubuntu-latest
     container: openjdk:8-jdk
     steps:
@@ -72,6 +75,7 @@ jobs:
       - name: jmhCompile
         run: ./gradlew jmhCompile
   attach-alpine-jdk8:
+    name: Testing Runtime Attachment
     runs-on: ubuntu-latest
     container: openjdk:8-jdk-alpine
     steps:
