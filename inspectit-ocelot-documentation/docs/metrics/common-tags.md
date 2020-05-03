@@ -39,8 +39,8 @@ User defined tags can be added to the common tag context by defining the `inspec
    inspectit:
      tags:
        extra:
-         region: us-west-1
-         stage: preprod
+         'region': 'us-west-1'
+         'stage': 'preprod'
    ```
 
 ## Environment Tags

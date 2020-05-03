@@ -13,9 +13,9 @@ Scopes are defined under the configuration key `inspectit.instrumentation.scopes
 inspectit:
   instrumentation:
     scopes:
-      my_scope:
+      's_my_scope':
         # SCOPE_DEFINITION
-      another_scope:
+      's_another_scope':
         # SCOPE_DEFINITION
 ```
 
@@ -76,11 +76,11 @@ A type matcher consists of the following attributes:
 The following example will match against a type which is exactly named `java.util.AbstractList` and is annotated with the annotation `any.Annotation`.
 
 ```yaml
-name: "java.util.AbstractList"
-matcher-mode: "EQUALS_FULLY"
+name: 'java.util.AbstractList'
+matcher-mode: EQUALS_FULLY
 annotations:
-  - name: "any.Annotation"
-    matcher-mode: "EQUALS_FULLY"
+  - name: 'any.Annotation'
+    matcher-mode: EQUALS_FULLY
 ```
 
 ## Method Matcher
@@ -99,14 +99,14 @@ Besides `name`, `matcher-mode` and `annotations`, the method matcher contains th
 The following example will match against all methods which are exactly named `contains`, use the `PUBLIC` visibility modifier, have exactly one argument which is a `java.lang.Object`, are not synchronized and are annotated by the annotation `any.Annotation`.
 
 ```yaml
-name: "contains"
-matcher-mode: "EQUALS_FULLY"
+name: 'contains'
+matcher-mode: EQUALS_FULLY
 visibility: [PUBLIC]
 arguments: ["java.lang.Object"]
 is-synchronized: false
 annotations:
-  - name: "any.Annotation"
-    matcher-mode: "EQUALS_FULLY"
+  - name: 'any.Annotation'
+    matcher-mode: EQUALS_FULLY
 is-constructor: false
 ```
 
@@ -129,44 +129,44 @@ inspectit:
   instrumentation:
         scopes:
           # the id of the following defined scope element - this example scope targets the ArrayList's contains method
-          example-list-scope:
+          's_example-list-scope':
             # interfaces which have to be implemented
             interfaces:
-              - name: "java.util.List"
-                matcher-mode: "EQUALS_FULLY"
+              - name: 'java.util.List'
+                matcher-mode: EQUALS_FULLY
                 annotations:
-                  - name: "any.Annotation"
-                    matcher-mode: "EQUALS_FULLY"
+                  - name: 'any.Annotation'
+                    matcher-mode: EQUALS_FULLY
             # the superclass which has to be extended
             superclass:
-              name: "java.util.AbstractList"
-              matcher-mode: "EQUALS_FULLY"
+              name: 'java.util.AbstractList'
+              matcher-mode: EQUALS_FULLY
               annotations:
-                - name: "any.Annotation"
-                  matcher-mode: "EQUALS_FULLY"
+                - name: 'any.Annotation'
+                  matcher-mode: EQUALS_FULLY
             # matcher describing the class' name (full qualified)
             type:
-              name: "ArrayList"
-              matcher-mode: "ENDS_WITH"
+              name: 'ArrayList'
+              matcher-mode: ENDS_WITH
               annotations:
-                - name: "any.Annotation"
-                  matcher-mode: "EQUALS_FULLY"
+                - name: 'any.Annotation'
+                  matcher-mode: EQUALS_FULLY
             # the targeted method - each method which matches at least one of the defined matchers will be instrumented
             methods:
-              - name: "contains"
-                matcher-mode: "EQUALS_FULLY"
+              - name: 'contains'
+                matcher-mode: EQUALS_FULLY
                 visibility: [PUBLIC]
                 arguments: ["java.lang.Object"]
                 is-synchronized: false
                 annotations:
-                  - name: "any.Annotation"
-                    matcher-mode: "EQUALS_FULLY"
+                  - name: 'any.Annotation'
+                    matcher-mode: EQUALS_FULLY
               - is-constructor: true
                 visibility: [PUBLIC]
                 arguments: []
                 annotations:
-                  - name: "any.Annotation"
-                    matcher-mode: "EQUALS_FULLY"
+                  - name: 'any.Annotation'
+                    matcher-mode: EQUALS_FULLY
              # advances settings which can be used to specify and narrow the instrumentation
             advanced:
               instrument-only-inherited-methods: false
