@@ -24,11 +24,13 @@ Prometheus exporter exposes the metrics in Prometheus format and is the default 
 When enabled, inspectIT starts a Prometheus HTTP server in parallel with your application.
 The server is by default started on the port `8888` and metrics can then be accessed by visiting http://localhost:8888/metrics.
 
+The following properties are nested properties below the `inspectit.exporters.metrics.prometheus` property:
+
 |Property |Default| Description
 |---|---|---|
-|`inspectit.exporters.metrics.prometheus.enabled`|`true`|If true, the inspectIT Ocelot agent will try to start the Prometheus metrics exporter and Prometheus HTTP server.
-|`inspectit.exporters.metrics.prometheus.host`|`0.0.0.0`|The hostname or network address to which the Prometheus HTTP server should bind.
-|`inspectit.exporters.metrics.prometheus.port`|`8888`|The port the Prometheus HTTP server should use.
+|`.enabled`|`true`|If true, the inspectIT Ocelot agent will try to start the Prometheus metrics exporter and Prometheus HTTP server.
+|`.host`|`0.0.0.0`|The hostname or network address to which the Prometheus HTTP server should bind.
+|`.port`|`8888`|The port the Prometheus HTTP server should use.
 
 
 > Don't forget to check [the official OpenCensus Prometheus exporter documentation](https://opencensus.io/exporters/supported-exporters/java/prometheus/).
@@ -38,14 +40,16 @@ The server is by default started on the port `8888` and metrics can then be acce
 Metrics can be additionally exported to the [OpenCensus Agent](https://opencensus.io/service/components/agent/).
 When enabled, all metrics are sent via gRCP to the OpenCensus Agent. By default, the exporter is enabled, but the agent address is set to `null`.
 
+The following properties are nested properties below the `inspectit.exporters.metrics.open-census-agent` property:
+
 |Property |Default| Description
 |---|---|---|
-|`inspectit.exporters.metrics.open-census-agent.enabled`|`true`|If true, the agent will try to start the OpenCensus Agent Metrics exporter.
-|`inspectit.exporters.metrics.open-census-agent.address`|`null`|Address of the open-census agent (e.g. localhost:1234).
-|`inspectit.exporters.metrics.open-census-agent.use-insecure`|`false`|If true, SSL is disabled.
-|`inspectit.exporters.metrics.open-census-agent.service-name`|refers to `inspectit.service-name`|The service-name which will be used to publish the metrics.
-|`inspectit.exporters.metrics.open-census-agent.reconnection-period`|`5`|The time at which the exporter tries to reconnect to the OpenCensus agent.
-|`inspectit.exporters.metrics.open-census-agent.export-interval`|refers to `inspectit.metrics.frequency`|The export interval of the metrics.
+|`.enabled`|`true`|If true, the agent will try to start the OpenCensus Agent Metrics exporter.
+|`.address`|`null`|Address of the open-census agent (e.g. localhost:1234).
+|`.use-insecure`|`false`|If true, SSL is disabled.
+|`.service-name`|refers to `inspectit.service-name`|The service-name which will be used to publish the metrics.
+|<nobr>`.reconnection-period`</nobr>|`5`|The time at which the exporter tries to reconnect to the OpenCensus agent.
+|`.export-interval`|refers to `inspectit.metrics.frequency`|The export interval of the metrics.
 
 > Don't forget to check [the official OpenCensus Agent exporter documentation](https://opencensus.io/exporters/supported-exporters/java/ocagent/).
 
@@ -55,21 +59,23 @@ If enabled, metrics are pushed at a specified interval directly to a given influ
 To enable the InfluxDB Exporters, it is only required to specify the `url`.
 
 The InfluxDB exporter provides a special handling for counter and sum metrics which is enabled by default and can be disabled using the `counters-as-differences` option.
-When querying the data, usually the absolute value of such counters is irrelevant.
-Instead all that matters is how much the counter has increased within a certain time interval.
+Usually, the absolute value of such counters is irrelevant when querying the data, instead you want to have the increase of it over a certain period of time.
 With the `counters-as-differences` option enabled, counters are preprocessed before being exported.
-Instead of writing the absolute value of each counter to InfluxDB, only the increase since the last export is exported.
+
+Instead of writing the absolute value of each counter into the InfluxDB, only the increase since the last export will be written.
 In addition no value will be exported, if the counter has not changed since the last export.
-This can greatly reduce the amount of data written to influx in case your counter metrics don't change between every export.
+This can greatly reduce the amount of data written into the InfluxDB, especially if the metrics are quite constant and won't change much.
+
+The following properties are nested properties below the `inspectit.exporters.metrics.influx` property:
 
 |Property |Default| Description
 |---|---|---|
-|`inspectit.exporters.metrics.influx.enabled`|`true`|If true, the agent will try to start the Influx exporter, if also the `url` is not empty.
-|`inspectit.exporters.metrics.influx.url`|`null`|The HTTP url of the influxDB, e.g. `http://localhost:8086`.
-|`inspectit.exporters.metrics.influx.user`|`null`| The user to use for connecting to the influxDB, can be empty if the influxDB is configured for unauthorized access.
-|`inspectit.exporters.metrics.influx.password`|`null`|The password to use for connecting to the influxDB, can be empty if the influxDB is configured for unauthorized access.
-|`inspectit.exporters.metrics.influx.database`|`inspectit`| The influxDB database to which the metrics are pushed.
-|`inspectit.exporters.metrics.influx.retention-policy`|`autogen`| The retention policy of the database to use for writing metrics.
-|`inspectit.exporters.metrics.influx.create-database`|`true`| If enabled, the database defined by the `database` property is automatically created on startup with an `autogen` retention policy if it does not exist yet.
-|`inspectit.exporters.metrics.influx.export-interval`|refers to `inspectit.metrics.frequency`|Defines how often metrics are pushed to the influxDB.
-|`inspectit.exporters.metrics.influx.counters-as-differences`|`true`|Defines whether counters are exported using their absolute value or as the increase between exports
+|`.enabled`|`true`|If true, the agent will try to start the Influx exporter, if also the `url` is not empty.
+|`.url`|`null`|The HTTP url of the influxDB, e.g. `http://localhost:8086`.
+|`.user`|`null`| The user to use for connecting to the influxDB, can be empty if the influxDB is configured for unauthorized access.
+|`.password`|`null`|The password to use for connecting to the influxDB, can be empty if the influxDB is configured for unauthorized access.
+|`.database`|`inspectit`| The influxDB database to which the metrics are pushed.
+|`.retention-policy`|`autogen`| The retention policy of the database to use for writing metrics.
+|`.create-database`|`true`| If enabled, the database defined by the `database` property is automatically created on startup with an `autogen` retention policy if it does not exist yet.
+|`.export-interval`|refers to `inspectit.metrics.frequency`|Defines how often metrics are pushed to the influxDB.
+|<nobr>`.counters-as-differences`</nobr>|`true`|Defines whether counters are exported using their absolute value or as the increase between exports
