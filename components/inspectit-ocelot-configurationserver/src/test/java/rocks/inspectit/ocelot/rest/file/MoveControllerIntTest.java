@@ -2,80 +2,63 @@ package rocks.inspectit.ocelot.rest.file;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import rocks.inspectit.ocelot.IntegrationTestBase;
 import rocks.inspectit.ocelot.file.FileMoveDescription;
 
 import java.nio.file.Paths;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class MoveControllerIntTest extends IntegrationTestBase {
-
-    @Autowired
-    private MoveController controller;
 
     @Nested
     class MoveFileOrDirectory {
 
         @Test
-        public void srcNotExisting() throws Exception {
-            FileMoveDescription content = FileMoveDescription.builder()
+        public void srcNotExisting() {
+            HttpEntity<FileMoveDescription> request = new HttpEntity<>(FileMoveDescription.builder()
                     .source("src")
                     .target("trgt")
-                    .build();
+                    .build());
+            ResponseEntity<Void> result = authRest.exchange("/api/v1/move", HttpMethod.PUT, request, Void.class);
 
-            MvcResult mvcResult = mockMvc.perform(
-                    put("/api/v1/move")
-                            .with(httpBasic("admin", "admin"))
-                            .contentType("application/json")
-                            .content(objectMapper.writeValueAsString(content)))
-                    .andExpect(status().isNotFound())
-                    .andReturn();
+            assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         }
 
         @Test
-        public void targetExists() throws Exception {
-            createTestFiles("files/trgt/file.yml", "files/src/file.yml");
+        public void targetExists() {
+            // create test files
+            authRest.exchange("/api/v1/files/src/file.yml", HttpMethod.PUT, null, Void.class);
+            authRest.exchange("/api/v1/files/trgt/file.yml", HttpMethod.PUT, null, Void.class);
 
-            FileMoveDescription content = FileMoveDescription.builder()
+            HttpEntity<FileMoveDescription> request = new HttpEntity<>(FileMoveDescription.builder()
                     .source("src")
                     .target("trgt")
-                    .build();
+                    .build());
+            ResponseEntity<Void> result = authRest.exchange("/api/v1/move", HttpMethod.PUT, request, Void.class);
 
-            MvcResult mvcResult = mockMvc.perform(
-                    put("/api/v1/move")
-                            .with(httpBasic("admin", "admin"))
-                            .contentType("application/json")
-                            .content(objectMapper.writeValueAsString(content)))
-                    .andExpect(status().isConflict())
-                    .andReturn();
+            assertThat(result.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
         }
 
         @Test
-        public void successfulMove() throws Exception {
-            createTestFiles("files/src/file.yml");
-
-            FileMoveDescription content = FileMoveDescription.builder()
-                    .source("src")
-                    .target("trgt")
-                    .build();
+        public void successfulMove() {
+            // create test files
+            authRest.exchange("/api/v1/files/src/file.yml", HttpMethod.PUT, null, Void.class);
 
             assertThat(Paths.get(settings.getWorkingDirectory(), "files/src/file.yml")).exists();
             assertThat(Paths.get(settings.getWorkingDirectory(), "files/trgt/file.yml")).doesNotExist();
 
-            MvcResult mvcResult = mockMvc.perform(
-                    put("/api/v1/move")
-                            .with(httpBasic("admin", "admin"))
-                            .contentType("application/json")
-                            .content(objectMapper.writeValueAsString(content)))
-                    .andExpect(status().isOk())
-                    .andReturn();
+            HttpEntity<FileMoveDescription> request = new HttpEntity<>(FileMoveDescription.builder()
+                    .source("src")
+                    .target("trgt")
+                    .build());
+            ResponseEntity<Void> result = authRest.exchange("/api/v1/move", HttpMethod.PUT, request, Void.class);
 
+            assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(Paths.get(settings.getWorkingDirectory(), "files/src/file.yml")).doesNotExist();
             assertThat(Paths.get(settings.getWorkingDirectory(), "files/trgt/file.yml")).exists();
         }
