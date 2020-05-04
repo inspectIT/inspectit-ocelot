@@ -14,7 +14,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -24,6 +26,7 @@ import static org.awaitility.Awaitility.await;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 
+@ExtendWith(MockitoExtension.class)
 public class PercentileViewManagerTest {
 
     private PercentileViewManager viewManager;
@@ -95,7 +98,7 @@ public class PercentileViewManagerTest {
         @Test
         void testNoData() {
             viewManager.createOrUpdateView("my/measure", "my/view", "ms", "foo",
-                    true, true, Arrays.asList(0.5, 0.95), 15000, Collections.emptyList());
+                    true, true, Arrays.asList(0.5, 0.95), 15000, Collections.emptyList(), 1);
 
             Collection<Metric> result = viewManager.computeMetrics();
 
@@ -106,7 +109,7 @@ public class PercentileViewManagerTest {
         @Test
         void testWithData() {
             viewManager.createOrUpdateView("my/measure", "my/view", "ms", "foo",
-                    true, true, Arrays.asList(0.5, 0.95), 15000, Collections.emptyList());
+                    true, true, Arrays.asList(0.5, 0.95), 15000, Collections.emptyList(), 100);
 
             for (int i = 1; i < 100; i++) {
                 doReturn((long) i).when(clock).get();
@@ -128,7 +131,7 @@ public class PercentileViewManagerTest {
         @Test
         void testMultiSeriesData() {
             viewManager.createOrUpdateView("my/measure", "my/view", "ms", "foo",
-                    true, true, Arrays.asList(0.5, 0.95), 15000, Arrays.asList("tag1", "tag2"));
+                    true, true, Arrays.asList(0.5, 0.95), 15000, Arrays.asList("tag1", "tag2"), 198);
 
             for (int i = 1; i < 100; i++) {
                 doReturn((long) i).when(clock).get();
@@ -159,9 +162,9 @@ public class PercentileViewManagerTest {
         @Test
         void testMultipleViewsForSameMeasure() {
             viewManager.createOrUpdateView("my/measure", "viewA", "ms", "foo",
-                    true, false, Collections.emptyList(), 1, Collections.emptyList());
+                    true, false, Collections.emptyList(), 1, Collections.emptyList(), 1);
             viewManager.createOrUpdateView("my/measure", "viewB", "ms", "foo",
-                    true, false, Collections.emptyList(), 1, Arrays.asList("tag1"));
+                    true, false, Collections.emptyList(), 1, Arrays.asList("tag1"), 1);
 
             viewManager.recordMeasurement("my/measure", 1);
             awaitMetricsProcessing();
@@ -177,7 +180,7 @@ public class PercentileViewManagerTest {
         @Test
         void testWithStaleData() {
             viewManager.createOrUpdateView("my/measure", "my/view", "ms", "foo",
-                    true, true, Arrays.asList(0.5, 0.95), 15000, Collections.emptyList());
+                    true, true, Arrays.asList(0.5, 0.95), 15000, Collections.emptyList(), 99);
 
             for (int i = 1; i < 100; i++) {
                 doReturn((long) i).when(clock).get();
@@ -191,6 +194,57 @@ public class PercentileViewManagerTest {
             assertThat(result).hasSize(3);
             assertTotalSeriesCount(result, 0);
         }
+
+        @Test
+        void testDroppingBecauseBufferIsFull() {
+            viewManager.createOrUpdateView("my/measure", "my/view", "ms", "foo",
+                    true, false, Collections.emptyList(), 1, Arrays.asList("tag"), 10);
+
+            doReturn(0L).when(clock).get();
+            try (Scope s = Tags.getTagger().emptyBuilder()
+                    .putLocal(TagKey.create("tag"), TagValue.create("foo"))
+                    .buildScoped()) {
+                for (int i = 0; i < 20; i++) {
+                    viewManager.recordMeasurement("my/measure", 20 - i);
+                }
+            }
+            awaitMetricsProcessing();
+
+            Collection<Metric> result = viewManager.computeMetrics();
+
+            assertThat(result).hasSize(1);
+            assertTotalSeriesCount(result, 1);
+            assertContainsMetric(result, "my/view_min", 11.0, "tag", "foo");
+        }
+
+        @Test
+        void testDroppingPreventedThroughCleanupTask() {
+            viewManager.createOrUpdateView("my/measure", "my/view", "ms", "foo",
+                    true, false, Collections.emptyList(), 1, Arrays.asList("tag"), 10);
+
+            doReturn(0L).when(clock).get();
+            try (Scope s = Tags.getTagger().emptyBuilder()
+                    .putLocal(TagKey.create("tag"), TagValue.create("foo"))
+                    .buildScoped()) {
+                for (int i = 0; i < 10; i++) {
+                    viewManager.recordMeasurement("my/measure", i);
+                }
+            }
+            awaitMetricsProcessing();
+            doReturn(10000L).when(clock).get();
+            try (Scope s = Tags.getTagger().emptyBuilder()
+                    .putLocal(TagKey.create("tag"), TagValue.create("bar"))
+                    .buildScoped()) {
+                viewManager.recordMeasurement("my/measure", 1000);
+            }
+            awaitMetricsProcessing();
+
+            Collection<Metric> result = viewManager.computeMetrics();
+
+            assertThat(result).hasSize(1);
+            assertTotalSeriesCount(result, 1);
+            assertContainsMetric(result, "my/view_min", 1000, "tag", "bar");
+        }
     }
 
     @Nested
@@ -199,9 +253,9 @@ public class PercentileViewManagerTest {
         @Test
         void updateMetricDescription() {
             viewManager.createOrUpdateView("my/measure", "my/view", "ms", "foo",
-                    true, false, Collections.emptyList(), 1, Collections.emptyList());
+                    true, false, Collections.emptyList(), 1, Collections.emptyList(), 100);
             viewManager.createOrUpdateView("my/measure", "my/view", "s", "bar",
-                    true, false, Collections.emptyList(), 1, Collections.emptyList());
+                    true, false, Collections.emptyList(), 1, Collections.emptyList(), 100);
 
             viewManager.recordMeasurement("my/measure", 42);
             awaitMetricsProcessing();
@@ -218,9 +272,9 @@ public class PercentileViewManagerTest {
         @Test
         void updateMinMaxPercentiles() {
             viewManager.createOrUpdateView("my/measure", "my/view", "ms", "foo",
-                    true, false, Collections.emptyList(), 1, Collections.emptyList());
+                    true, false, Collections.emptyList(), 1, Collections.emptyList(), 100);
             viewManager.createOrUpdateView("my/measure", "my/view", "s", "bar",
-                    false, true, Arrays.asList(0.5), 1, Collections.emptyList());
+                    false, true, Arrays.asList(0.5), 1, Collections.emptyList(), 100);
 
             viewManager.recordMeasurement("my/measure", 42);
             awaitMetricsProcessing();
@@ -234,9 +288,9 @@ public class PercentileViewManagerTest {
         @Test
         void updateTimeWindow() {
             viewManager.createOrUpdateView("my/measure", "my/view", "ms", "foo",
-                    true, false, Collections.emptyList(), 1, Collections.emptyList());
+                    true, false, Collections.emptyList(), 1, Collections.emptyList(), 100);
             viewManager.createOrUpdateView("my/measure", "my/view", "ms", "foo",
-                    true, false, Collections.emptyList(), 100, Collections.emptyList());
+                    true, false, Collections.emptyList(), 100, Collections.emptyList(), 100);
 
             doReturn(0L).when(clock).get();
             viewManager.recordMeasurement("my/measure", 42);
@@ -249,11 +303,29 @@ public class PercentileViewManagerTest {
         }
 
         @Test
+        void updateBufferSize() {
+            viewManager.createOrUpdateView("my/measure", "my/view", "ms", "foo",
+                    true, false, Collections.emptyList(), 100, Collections.emptyList(), 100);
+            viewManager.createOrUpdateView("my/measure", "my/view", "ms", "foo",
+                    true, false, Collections.emptyList(), 100, Collections.emptyList(), 1);
+
+            doReturn(0L).when(clock).get();
+            viewManager.recordMeasurement("my/measure", 100);
+            viewManager.recordMeasurement("my/measure", 10);
+            awaitMetricsProcessing();
+
+            doReturn(99L).when(clock).get();
+            Collection<Metric> result = viewManager.computeMetrics();
+            assertThat(result).hasSize(1);
+            assertContainsMetric(result, "my/view_min", 100); //because the second point has been dropped
+        }
+
+        @Test
         void updateTags() {
             viewManager.createOrUpdateView("my/measure", "my/view", "ms", "foo",
-                    true, false, Collections.emptyList(), 1, Collections.emptyList());
+                    true, false, Collections.emptyList(), 1, Collections.emptyList(), 100);
             viewManager.createOrUpdateView("my/measure", "my/view", "ms", "foo",
-                    true, false, Collections.emptyList(), 1, Arrays.asList("tag1", "tag2"));
+                    true, false, Collections.emptyList(), 1, Arrays.asList("tag1", "tag2"), 100);
 
             try (Scope s = Tags.getTagger().emptyBuilder()
                     .putLocal(TagKey.create("tag1"), TagValue.create("foo"))
@@ -270,12 +342,12 @@ public class PercentileViewManagerTest {
         @Test
         void updateWithValueRecorded() {
             viewManager.createOrUpdateView("my/measure", "my/view", "ms", "foo",
-                    true, false, Collections.emptyList(), 1, Collections.emptyList());
+                    true, false, Collections.emptyList(), 1, Collections.emptyList(), 100);
             viewManager.recordMeasurement("my/measure", 42);
             awaitMetricsProcessing();
 
             viewManager.createOrUpdateView("my/measure", "my/view", "ms", "foo",
-                    true, false, Collections.emptyList(), 1, Arrays.asList("tag1", "tag2"));
+                    true, false, Collections.emptyList(), 1, Arrays.asList("tag1", "tag2"), 100);
 
             try (Scope s = Tags.getTagger().emptyBuilder()
                     .putLocal(TagKey.create("tag1"), TagValue.create("foo"))
@@ -296,7 +368,7 @@ public class PercentileViewManagerTest {
         @Test
         void checkViewRemoved() {
             viewManager.createOrUpdateView("my/measure", "my/view", "ms", "foo",
-                    true, false, Collections.emptyList(), 100, Collections.emptyList());
+                    true, false, Collections.emptyList(), 100, Collections.emptyList(), 100);
 
             viewManager.recordMeasurement("my/measure", 42);
             awaitMetricsProcessing();

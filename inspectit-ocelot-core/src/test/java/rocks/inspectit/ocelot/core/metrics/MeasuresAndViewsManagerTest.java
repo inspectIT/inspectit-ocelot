@@ -375,6 +375,7 @@ public class MeasuresAndViewsManagerTest {
                             .description("Cool view")
                             .aggregation(ViewDefinitionSettings.Aggregation.QUANTILES)
                             .quantiles(Arrays.asList(0.0, 0.5))
+                            .maxBufferedPoints(345)
                             .build())
                     .build()
                     .getCopyWithDefaultsPopulated(metricName, Duration.ofMillis(123));
@@ -394,7 +395,7 @@ public class MeasuresAndViewsManagerTest {
 
             verify(percentileViewManager, times(1)).createOrUpdateView(
                     metricName, "custom-view", "my-unit", "Cool view",
-                    true, false, Arrays.asList(0.5), 123, expectedTags);
+                    true, false, Arrays.asList(0.5), 123, expectedTags, 345);
 
             verifyZeroInteractions(viewManager);
         }
@@ -412,6 +413,7 @@ public class MeasuresAndViewsManagerTest {
                             .description("Cool view")
                             .aggregation(ViewDefinitionSettings.Aggregation.QUANTILES)
                             .quantiles(Arrays.asList(0.0, 0.5))
+                            .maxBufferedPoints(345)
                             .build())
                     .build()
                     .getCopyWithDefaultsPopulated(metricName, Duration.ofMillis(123));
@@ -431,7 +433,7 @@ public class MeasuresAndViewsManagerTest {
 
             verify(percentileViewManager, times(1)).createOrUpdateView(
                     metricName, "custom-view", "my-unit", "Cool view",
-                    true, false, Arrays.asList(0.5), 123, expectedTags);
+                    true, false, Arrays.asList(0.5), 123, expectedTags, 345);
 
             verifyZeroInteractions(viewManager);
         }
