@@ -19,6 +19,7 @@ import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 /**
@@ -128,7 +129,7 @@ public class PercentileView {
     /**
      * The timestamp when the last full cleanup happened.
      */
-    private volatile long lastCleanupTimeMs;
+    private AtomicLong lastCleanupTimeMs;
 
     /**
      * Constructor.
@@ -154,6 +155,7 @@ public class PercentileView {
         this.percentiles = new HashSet<>(percentiles);
         this.bufferLimit = bufferLimit;
         numberOfPoints = new AtomicInteger(0);
+        lastCleanupTimeMs = new AtomicLong(0);
 
         List<LabelKey> percentileLabelKeys = getLabelKeysInOrderForPercentiles();
         List<LabelKey> minMaxLabelKeys = getLabelKeysInOrderForMinMax();
@@ -214,7 +216,7 @@ public class PercentileView {
      * @return true, if the point could be added, false otherwise.
      */
     boolean insertValue(double value, Timestamp time, TagContext tagContext) {
-        removeStalePoints(time, false);
+        removeStalePointsIfTimeThresholdExceeded(time);
         List<String> tags = getTagsList(tagContext);
         WindowedDoubleQueue queue = seriesValues.computeIfAbsent(tags, (key) -> new WindowedDoubleQueue(timeWindowMillis));
         synchronized (queue) {
@@ -229,7 +231,7 @@ public class PercentileView {
                     overflowWarningPrinted = true;
                     log.warn("Dropping points for Percentiles-View '{}' because the buffer limit has been reached!" +
                             " Quantiles/Min/Max will be meaningless." +
-                            " This warning will not be shwon for future drops!", viewName);
+                            " This warning will not be shown for future drops!", viewName);
                 }
                 return false;
             }
@@ -240,21 +242,32 @@ public class PercentileView {
     /**
      * Removes all data which has fallen out of the time window based on the given timestamp.
      *
-     * @param time  the current time
-     * @param force if true, a full cleanup will always happen. Otherwise the data is only cleaned if the bufferLimit
-     *              is reached and the last clean happened more than {@link #CLEANUP_INTERVAL} time ago.
+     * @param time the current time
      */
-    private void removeStalePoints(Timestamp time, boolean force) {
+    private void removeStalePoints(Timestamp time) {
         long timeMillis = getInMillis(time);
-        boolean timeThresholdExceeded = timeMillis - lastCleanupTimeMs > CLEANUP_INTERVAL.toMillis();
-        if (force || (timeThresholdExceeded && numberOfPoints.get() >= bufferLimit)) {
-            lastCleanupTimeMs = timeMillis;
-            for (WindowedDoubleQueue queue : seriesValues.values()) {
-                synchronized (queue) {
-                    int removed = queue.removeStaleValues(timeMillis);
-                    numberOfPoints.getAndAdd(-removed);
-                }
+        lastCleanupTimeMs.set(timeMillis);
+        for (WindowedDoubleQueue queue : seriesValues.values()) {
+            synchronized (queue) {
+                int removed = queue.removeStaleValues(timeMillis);
+                numberOfPoints.getAndAdd(-removed);
             }
+        }
+    }
+
+    /**
+     * Removes all data which has fallen out of the time window based on the given timestamp.
+     * Only performs the cleanup if the last cleanup has been done more than {@link #CLEANUP_INTERVAL} ago
+     * and the buffer is running on it's capacity limit.
+     *
+     * @param time the current time
+     */
+    private void removeStalePointsIfTimeThresholdExceeded(Timestamp time) {
+        long timeMillis = getInMillis(time);
+        long lastCleanupTime = lastCleanupTimeMs.get();
+        boolean timeThresholdExceeded = timeMillis - lastCleanupTime > CLEANUP_INTERVAL.toMillis();
+        if (timeThresholdExceeded && numberOfPoints.get() >= bufferLimit) {
+            removeStalePoints(time);
         }
     }
 
@@ -273,7 +286,7 @@ public class PercentileView {
      * @return the metrics containing the percentiles and min / max
      */
     Collection<Metric> computeMetrics(Timestamp time) {
-        removeStalePoints(time, true);
+        removeStalePoints(time);
         ResultSeriesCollector resultSeries = new ResultSeriesCollector();
         for (Map.Entry<List<String>, WindowedDoubleQueue> series : seriesValues.entrySet()) {
             List<String> tagValues = series.getKey();
