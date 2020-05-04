@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import rocks.inspectit.ocelot.file.FileMoveDescription;
+import rocks.inspectit.ocelot.file.accessor.workingdirectory.AbstractWorkingDirectoryAccessor;
 
 import java.io.IOException;
 
@@ -20,7 +21,9 @@ public class MoveController extends FileBaseController {
     public void moveFileOrDirectory(@RequestBody FileMoveDescription moveDescription) throws IOException {
         String source = removeLeadingSlash(moveDescription.getSource());
         String target = removeLeadingSlash(moveDescription.getTarget());
-        fileManager.move(source, target);
+
+        AbstractWorkingDirectoryAccessor fileAccessor = fileManager.getWorkingDirectory();
+        fileAccessor.moveConfiguration(source, target);
     }
 
     private String removeLeadingSlash(String path) {

@@ -18,5 +18,5 @@ public class DefaultUserSettings {
     private String name;
 
     private String password;
-    
+
 }

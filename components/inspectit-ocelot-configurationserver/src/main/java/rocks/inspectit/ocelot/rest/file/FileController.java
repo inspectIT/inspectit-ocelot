@@ -3,12 +3,14 @@ package rocks.inspectit.ocelot.rest.file;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import rocks.inspectit.ocelot.file.FileData;
 import rocks.inspectit.ocelot.rest.util.RequestUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.Optional;
 
 /**
  * Controller for managing the configurations.
@@ -33,12 +35,16 @@ public class FileController extends FileBaseController {
 
                           @RequestBody(required = false) String content) throws IOException {
         String path = RequestUtil.getRequestSubPath(request);
+
+        String fileContent;
         if (raw || content == null) {
-            fileManager.createOrReplaceFile(path, content == null ? "" : content);
+            fileContent = content == null ? "" : content;
         } else {
             FileData data = objectMapper.readValue(content, FileData.class);
-            fileManager.createOrReplaceFile(path, data.getContent());
+            fileContent = data.getContent();
         }
+
+        fileManager.getWorkingDirectory().writeConfigurationFile(path, fileContent);
     }
 
     @ApiOperation(value = "Read a file", notes = "Returns the contents of the given file.")
@@ -52,14 +58,21 @@ public class FileController extends FileBaseController {
     @GetMapping(value = "files/**")
     public Object readFile(HttpServletRequest request,
                            @ApiParam("If true, the response body is not formatted as json and is instead the plain text content of the file.")
-                           @RequestParam(defaultValue = "false") boolean raw) throws IOException {
+                           @RequestParam(defaultValue = "false") boolean raw) {
         String path = RequestUtil.getRequestSubPath(request);
-        String content = fileManager.readFile(path);
-        if (raw) {
-            return content;
-        } else {
-            return FileData.builder().content(content).build();
+        Optional<String> contentOptional = fileManager.getWorkingDirectory().readConfigurationFile(path);
+
+        if (!contentOptional.isPresent()) {
+            return ResponseEntity.notFound();
         }
+
+        return contentOptional.map(content -> {
+            if (raw) {
+                return content;
+            } else {
+                return FileData.builder().content(content).build();
+            }
+        });
     }
 
     @ApiOperation(value = "Delete a file", notes = "Deletes the given file")
@@ -67,6 +80,7 @@ public class FileController extends FileBaseController {
     @DeleteMapping(value = "files/**")
     public void deleteFile(HttpServletRequest request) throws IOException {
         String path = RequestUtil.getRequestSubPath(request);
-        fileManager.deleteFile(path);
+
+        fileManager.getWorkingDirectory().deleteConfiguration(path);
     }
 }

@@ -57,5 +57,5 @@ public class InspectitServerSettings {
 
     @Valid
     @Builder.Default
-    private SecuritySettings security =  SecuritySettings.builder().build();
+    private SecuritySettings security = SecuritySettings.builder().build();
 }

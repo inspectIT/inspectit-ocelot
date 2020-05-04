@@ -1,6 +1,7 @@
 package rocks.inspectit.ocelot.agentconfiguration;
 
 import com.google.common.collect.ImmutableMap;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,12 +10,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.file.FileManager;
+import rocks.inspectit.ocelot.file.accessor.workingdirectory.WorkingDirectoryAccessor;
 import rocks.inspectit.ocelot.mappings.AgentMappingManager;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -22,6 +24,9 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class AgentConfigurationManagerTest {
+
+    @InjectMocks
+    AgentConfigurationManager configManager;
 
     @Mock
     FileManager fileManager;
@@ -32,8 +37,13 @@ public class AgentConfigurationManagerTest {
     @Mock
     ExecutorService executor;
 
-    @InjectMocks
-    AgentConfigurationManager configManager;
+    @Mock
+    WorkingDirectoryAccessor workingDirectoryAccessor;
+
+    @BeforeEach
+    public void beforeEach() {
+        lenient().when(fileManager.getWorkingDirectory()).thenReturn(workingDirectoryAccessor);
+    }
 
     void init() {
         doAnswer(a -> {
@@ -53,7 +63,7 @@ public class AgentConfigurationManagerTest {
     class GetConfiguration {
 
         @Test
-        void noMatchingMapping() throws IOException {
+        void noMatchingMapping() {
             doReturn(Arrays.asList(
                     AgentMapping.builder()
                             .attribute("service", "test-\\d+")
@@ -68,7 +78,7 @@ public class AgentConfigurationManagerTest {
         }
 
         @Test
-        void priorityRespected() throws IOException {
+        void priorityRespected() {
             doReturn(Arrays.asList(
                     AgentMapping.builder()
                             .attribute("service", "test")
@@ -80,10 +90,10 @@ public class AgentConfigurationManagerTest {
                             .build()))
                     .when(mappingManager).getAgentMappings();
 
-            doReturn(true).when(fileManager).exists(any());
-            doReturn(false).when(fileManager).isDirectory(any());
-            doReturn("a: test").when(fileManager).readFile("test.yml");
-            doReturn("a: default").when(fileManager).readFile("default.yml");
+            doReturn(true).when(workingDirectoryAccessor).configurationFileExists(any());
+            doReturn(false).when(workingDirectoryAccessor).configurationFileIsDirectory(any());
+            doReturn(Optional.of("a: test")).when(workingDirectoryAccessor).readConfigurationFile("test.yml");
+            doReturn(Optional.of("a: default")).when(workingDirectoryAccessor).readConfigurationFile("default.yml");
 
             init();
 
@@ -96,7 +106,7 @@ public class AgentConfigurationManagerTest {
 
 
         @Test
-        void multipleAttributesChecked() throws IOException {
+        void multipleAttributesChecked() {
             doReturn(Arrays.asList(
                     AgentMapping.builder()
                             .attribute("service", "test-\\d+")
@@ -105,9 +115,9 @@ public class AgentConfigurationManagerTest {
                             .build()))
                     .when(mappingManager).getAgentMappings();
 
-            doReturn(true).when(fileManager).exists(any());
-            doReturn(false).when(fileManager).isDirectory(any());
-            doReturn("a: test").when(fileManager).readFile("test.yml");
+            doReturn(true).when(workingDirectoryAccessor).configurationFileExists(any());
+            doReturn(false).when(workingDirectoryAccessor).configurationFileIsDirectory(any());
+            doReturn(Optional.of("a: test")).when(workingDirectoryAccessor).readConfigurationFile("test.yml");
 
             init();
 

@@ -22,9 +22,6 @@ import static rocks.inspectit.ocelot.rest.users.AccountController.PasswordChange
 public class AccountControllerIntTest extends IntegrationTestBase {
 
     @Autowired
-    InspectitServerSettings settings;
-
-    @Autowired
     UserService userService;
 
     @Autowired

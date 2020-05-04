@@ -1,7 +1,6 @@
 package rocks.inspectit.ocelot.error;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.Builder;
 import lombok.Data;
 import org.springframework.http.HttpStatus;
 
