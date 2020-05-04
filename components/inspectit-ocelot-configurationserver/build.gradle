@@ -98,6 +98,10 @@ sourceCompatibility = 1.8
 
 test {
     useJUnitPlatform()
+
+    testLogging {
+        exceptionFormat = 'full'
+    }
 }
 
 dependencies {
@@ -135,6 +139,7 @@ dependencies {
     )
     testImplementation(
             'org.springframework.boot:spring-boot-starter-test:2.1.6.RELEASE',
+            "org.springframework.security:spring-security-test:5.1.5.RELEASE",
             'org.junit.jupiter:junit-jupiter-api:5.3.1',
             'org.mockito:mockito-junit-jupiter:2.23.0',
             'com.h2database:h2:1.4.194'
