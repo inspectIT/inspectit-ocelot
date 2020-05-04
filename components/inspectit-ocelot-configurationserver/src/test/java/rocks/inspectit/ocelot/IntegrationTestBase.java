@@ -1,6 +1,7 @@
 package rocks.inspectit.ocelot;
 
 import org.apache.commons.io.FileUtils;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,6 +15,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
+import rocks.inspectit.ocelot.file.versioning.VersioningManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -55,14 +57,21 @@ public class IntegrationTestBase {
     @Autowired
     protected InspectitServerSettings settings;
 
+    @Autowired
+    private VersioningManager versioningManager;
+
     /**
      * Authenticated restTemplate;
      */
     protected TestRestTemplate authRest;
 
     @BeforeEach
-    void setupAuthentication() {
+    void setupAuthentication() throws GitAPIException {
         authRest = rest.withBasicAuth(settings.getDefaultUser().getName(), settings.getDefaultUser().getPassword());
+
+        // we clean the working directory after each test, thus, we have to reinitialize the working directory, otherwise
+        // it is not a git repository
+        versioningManager.init();
     }
 
     @AfterEach
