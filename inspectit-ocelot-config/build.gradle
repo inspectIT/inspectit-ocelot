@@ -4,6 +4,10 @@ apply plugin: "maven" //for publishing to the local maven repository
 
 test {
     useJUnitPlatform()
+
+    testLogging {
+        exceptionFormat = 'full'
+    }
 }
 
 repositories {

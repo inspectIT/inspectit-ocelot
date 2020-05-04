@@ -1,8 +1,8 @@
-name: Test eum Server
+name: EUM Server Tests
 
 on:
   push:
-    branches-ignore:
+    branches:
       - master
     paths:
       - '.github/workflows/eumserver_test.yml'
@@ -19,7 +19,7 @@ on:
       - '!components/inspectit-ocelot-eum-server/README.md'
 jobs:
   test:
-    name: test-against-openjdk-8
+    name: Assemble & Test
     runs-on: ubuntu-latest
     env:
       working-directory: ./components/inspectit-ocelot-eum-server

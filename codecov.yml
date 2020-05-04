@@ -1,4 +1,7 @@
-comment: off
+comment:
+  layout: "diff, files"
+  behavior: once
+  require_changes: false
 coverage:
   precision: 2
   round: nearest
@@ -10,4 +13,3 @@ coverage:
     patch:
       default:
         target: 25%
-        
