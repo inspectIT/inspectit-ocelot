@@ -29,8 +29,6 @@ class AutoCommitWorkingDirectoryProxyIntTest extends FileTestBase {
 
     private AutoCommitWorkingDirectoryProxy accessor;
 
-    private InspectitServerSettings settings;
-
     private ApplicationEventPublisher eventPublisher;
 
     private VersioningManager versioningManager;
@@ -47,13 +45,13 @@ class AutoCommitWorkingDirectoryProxyIntTest extends FileTestBase {
         VersioningSettings versioningSettings = new VersioningSettings();
         versioningSettings.setGitUsername("ocelot");
         versioningSettings.setGitMail("ocelot@inspectit.rocks");
-        settings = new InspectitServerSettings();
+        InspectitServerSettings settings = new InspectitServerSettings();
         settings.setWorkingDirectory(tempDirectory.toString());
         settings.setVersioning(versioningSettings);
 
         eventPublisher = mock(ApplicationEventPublisher.class);
 
-        WorkingDirectoryAccessor workingDirectoryAccessor = new WorkingDirectoryAccessor(settings, eventPublisher);
+        WorkingDirectoryAccessor workingDirectoryAccessor = new WorkingDirectoryAccessor(tempDirectory, eventPublisher);
 
         versioningManager = new VersioningManager(settings);
         versioningManager.init();

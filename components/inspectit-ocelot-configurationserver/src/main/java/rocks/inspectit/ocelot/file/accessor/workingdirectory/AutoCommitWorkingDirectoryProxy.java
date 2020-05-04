@@ -2,8 +2,6 @@ package rocks.inspectit.ocelot.file.accessor.workingdirectory;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.file.FileInfo;
 import rocks.inspectit.ocelot.file.versioning.VersioningManager;
 
@@ -11,20 +9,24 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Delegation proxy for the {@link WorkingDirectoryAccessor} which directly stages and commits changes.
+ */
 @Slf4j
-@Component
 public class AutoCommitWorkingDirectoryProxy extends AbstractWorkingDirectoryAccessor {
 
     private WorkingDirectoryAccessor workingDirectoryAccessor;
 
     private VersioningManager versioningManager;
 
-    @Autowired
     public AutoCommitWorkingDirectoryProxy(WorkingDirectoryAccessor workingDirectoryAccessor, VersioningManager versioningManager) {
         this.workingDirectoryAccessor = workingDirectoryAccessor;
         this.versioningManager = versioningManager;
     }
 
+    /**
+     * Stages and commits the current working directory files.
+     */
     private void commit() {
         try {
             versioningManager.stageAndCommit();

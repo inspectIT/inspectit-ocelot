@@ -5,9 +5,11 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
+import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.file.accessor.workingdirectory.AbstractWorkingDirectoryAccessor;
 import rocks.inspectit.ocelot.file.accessor.workingdirectory.AutoCommitWorkingDirectoryProxy;
-import rocks.inspectit.ocelot.file.accessor.workingdirectory.WorkingDirectoryAccessor;
+import rocks.inspectit.ocelot.file.versioning.VersioningManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -20,12 +22,15 @@ public class FileManagerTest {
 
         @Test
         public void getAccessor() {
-            AutoCommitWorkingDirectoryProxy accessor = mock(AutoCommitWorkingDirectoryProxy.class);
-            FileManager manager = new FileManager(accessor);
+            InspectitServerSettings settings = new InspectitServerSettings();
+            settings.setWorkingDirectory("/test");
+            ApplicationEventPublisher eventPublisher = mock(ApplicationEventPublisher.class);
+            VersioningManager versioningManager = mock(VersioningManager.class);
+            FileManager manager = new FileManager(settings, eventPublisher, versioningManager);
 
             AbstractWorkingDirectoryAccessor result = manager.getWorkingDirectory();
 
-            assertThat(result).isSameAs(accessor);
+            assertThat(result).isInstanceOf(AutoCommitWorkingDirectoryProxy.class);
         }
     }
 }
