@@ -44,7 +44,6 @@ public class FileController extends FileBaseController {
         }
     }
 
-    @Secured(UserRoleConfiguration.READ_ACCESS_ROLE)
     @ApiOperation(value = "Read a file", notes = "Returns the contents of the given file.")
     @ApiImplicitParam(name = "Path", type = "string", value = "The part of the url after /files/ defines the path to the file to read.")
     @ApiResponse(code = 200,

@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,7 +21,6 @@ import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.error.exceptions.NotSupportedWithLdapException;
 import rocks.inspectit.ocelot.rest.AbstractBaseController;
 import rocks.inspectit.ocelot.rest.ErrorInfo;
-import rocks.inspectit.ocelot.security.config.UserRoleConfiguration;
 import rocks.inspectit.ocelot.security.jwt.JwtTokenManager;
 import rocks.inspectit.ocelot.user.User;
 import rocks.inspectit.ocelot.user.UserService;
@@ -62,7 +60,6 @@ public class AccountController extends AbstractBaseController {
         return tokenManager.createToken(user.getName());
     }
 
-    @Secured(UserRoleConfiguration.READ_ACCESS_ROLE)
     @ApiOperation(value = "Change Password", notes = "Changes the password of the logged in user." +
             " This endpoint does not work with token-based authentication, only HTTP basic auth is allowed.")
     @PutMapping("account/password")

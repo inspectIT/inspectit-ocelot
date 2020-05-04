@@ -61,7 +61,7 @@ public class CustomLdapUserDetailsServiceTest {
         @Test
         public void hasRead() {
             User mockUser = mock(User.class);
-            SimpleGrantedAuthority simpleGrantedAuthority = new SimpleGrantedAuthority("DefaultAccessRole");
+            SimpleGrantedAuthority simpleGrantedAuthority = new SimpleGrantedAuthority("ROLE_DefaultAccessRole");
             when(mockUser.getAuthorities()).thenReturn(Collections.singletonList(simpleGrantedAuthority));
             customLdapUserDetailsServiceTest.settings = setupRoleSettings(
                     Collections.emptyList(),
@@ -69,7 +69,7 @@ public class CustomLdapUserDetailsServiceTest {
                     Collections.emptyList()
             );
 
-            String[] output = customLdapUserDetailsServiceTest.resolveAccessRoleSet(mockUser);
+            String[] output = customLdapUserDetailsServiceTest.resolvePermissionSet(mockUser);
 
             assertThat(output).hasSize(1);
             assertThat(output).contains("OCELOT_READ");
@@ -78,7 +78,7 @@ public class CustomLdapUserDetailsServiceTest {
         @Test
         public void hasWrite() {
             User mockUser = mock(User.class);
-            SimpleGrantedAuthority simpleGrantedAuthority = new SimpleGrantedAuthority("write");
+            SimpleGrantedAuthority simpleGrantedAuthority = new SimpleGrantedAuthority("ROLE_write");
             when(mockUser.getAuthorities()).thenReturn(Collections.singletonList(simpleGrantedAuthority));
             customLdapUserDetailsServiceTest.settings = setupRoleSettings(
                     Collections.singletonList("write"),
@@ -86,7 +86,7 @@ public class CustomLdapUserDetailsServiceTest {
                     Collections.emptyList()
             );
 
-            String[] output = customLdapUserDetailsServiceTest.resolveAccessRoleSet(mockUser);
+            String[] output = customLdapUserDetailsServiceTest.resolvePermissionSet(mockUser);
 
             assertThat(output).hasSize(2);
             assertThat(output).contains("OCELOT_READ");
@@ -96,7 +96,7 @@ public class CustomLdapUserDetailsServiceTest {
         @Test
         public void hasCommit() {
             User mockUser = mock(User.class);
-            SimpleGrantedAuthority simpleGrantedAuthority = new SimpleGrantedAuthority("commit");
+            SimpleGrantedAuthority simpleGrantedAuthority = new SimpleGrantedAuthority("ROLE_commit");
             when(mockUser.getAuthorities()).thenReturn(Collections.singletonList(simpleGrantedAuthority));
             customLdapUserDetailsServiceTest.settings = setupRoleSettings(
                     Collections.emptyList(),
@@ -104,7 +104,7 @@ public class CustomLdapUserDetailsServiceTest {
                     Collections.emptyList()
             );
 
-            String[] output = customLdapUserDetailsServiceTest.resolveAccessRoleSet(mockUser);
+            String[] output = customLdapUserDetailsServiceTest.resolvePermissionSet(mockUser);
 
             assertThat(output).hasSize(3);
             assertThat(output).contains("OCELOT_READ");
@@ -115,7 +115,7 @@ public class CustomLdapUserDetailsServiceTest {
         @Test
         public void hasAdmin() {
             User mockUser = mock(User.class);
-            SimpleGrantedAuthority simpleGrantedAuthority = new SimpleGrantedAuthority("admin");
+            SimpleGrantedAuthority simpleGrantedAuthority = new SimpleGrantedAuthority("ROLE_admin");
             when(mockUser.getAuthorities()).thenReturn(Collections.singletonList(simpleGrantedAuthority));
             customLdapUserDetailsServiceTest.settings = setupRoleSettings(
                     Collections.emptyList(),
@@ -123,7 +123,7 @@ public class CustomLdapUserDetailsServiceTest {
                     Collections.singletonList("admin")
             );
 
-            String[] output = customLdapUserDetailsServiceTest.resolveAccessRoleSet(mockUser);
+            String[] output = customLdapUserDetailsServiceTest.resolvePermissionSet(mockUser);
 
             assertThat(output).hasSize(4);
             assertThat(output).contains("OCELOT_READ");
@@ -135,14 +135,14 @@ public class CustomLdapUserDetailsServiceTest {
         @Test
         public void hasMultiple() {
             User mockUser = mock(User.class);
-            SimpleGrantedAuthority simpleGrantedAuthority = new SimpleGrantedAuthority("admin");
+            SimpleGrantedAuthority simpleGrantedAuthority = new SimpleGrantedAuthority("ROLE_admin");
             when(mockUser.getAuthorities()).thenReturn(Collections.singletonList(simpleGrantedAuthority));
             customLdapUserDetailsServiceTest.settings = setupRoleSettings(
                     Collections.singletonList("write"),
                     Collections.singletonList("commit"),
                     Collections.singletonList("admin")
             );
-            String[] output = customLdapUserDetailsServiceTest.resolveAccessRoleSet(mockUser);
+            String[] output = customLdapUserDetailsServiceTest.resolvePermissionSet(mockUser);
 
             assertThat(output).hasSize(4);
             assertThat(output).contains("OCELOT_READ");

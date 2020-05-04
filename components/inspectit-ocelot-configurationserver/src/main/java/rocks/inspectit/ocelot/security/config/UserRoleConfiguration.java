@@ -10,7 +10,7 @@ public class UserRoleConfiguration {
     /**
      * Permission name for read access.
      */
-    private static final String READ_ACCESS = "OCELOT_READ";
+    public static final String READ_ACCESS = "OCELOT_READ";
 
     /**
      * Permission name for write access.

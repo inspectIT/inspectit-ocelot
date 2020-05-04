@@ -19,8 +19,11 @@ public class LdapSettings {
 
     /**
      * The group name which is required by a user to get admin access rights.
+     *
+     * @deprecated This property is deprecated in favor of role based access. A List of LDAP Groups that
+     * should be granted admin access can be defined in inspectit-config-server.security.ldap.roles.admin.
      */
-    @NotEmpty
+    @Deprecated
     private String adminGroup;
 
     /**

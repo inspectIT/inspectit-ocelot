@@ -13,7 +13,6 @@ import rocks.inspectit.ocelot.security.config.UserRoleConfiguration;
 import rocks.inspectit.ocelot.user.User;
 import rocks.inspectit.ocelot.user.UserService;
 
-import javax.annotation.PostConstruct;
 import java.util.Optional;
 
 /**
@@ -30,23 +29,6 @@ public class LocalUserDetailsService implements UserDetailsService {
 
     @Autowired
     private UserService userService;
-
-    /**
-     * The access role which will be assigned to the users.
-     */
-    private String[] accessRoles;
-
-    /**
-     * Sets the access role field {@link #accessRoles} which will be assigned to authenticated users.
-     */
-    @PostConstruct
-    private void postConstruct() {
-        if (settings.getSecurity().isLdapAuthentication()) {
-            accessRoles = new String[]{settings.getSecurity().getLdap().getAdminGroup()};
-        } else {
-            accessRoles = UserRoleConfiguration.ADMIN_ROLE_PERMISSION_SET;
-        }
-    }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -69,7 +51,7 @@ public class LocalUserDetailsService implements UserDetailsService {
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getUsername())
                 .password(user.getPasswordHash())
-                .roles(accessRoles)
+                .roles(UserRoleConfiguration.ADMIN_ROLE_PERMISSION_SET)
                 .build();
     }
 }

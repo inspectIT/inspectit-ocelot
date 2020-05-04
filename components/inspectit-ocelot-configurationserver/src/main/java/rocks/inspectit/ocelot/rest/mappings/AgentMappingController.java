@@ -39,7 +39,6 @@ public class AgentMappingController extends AbstractBaseController {
      *
      * @return List of {@link AgentMapping}s.
      */
-    @Secured(UserRoleConfiguration.READ_ACCESS_ROLE)
     @GetMapping(value = "mappings")
     public List<AgentMapping> getMappings() {
         return mappingManager.getAgentMappings();
@@ -68,7 +67,6 @@ public class AgentMappingController extends AbstractBaseController {
      * @param mappingName the name of the {@link AgentMapping}
      * @return The {@link AgentMapping} with the given name or a 404 if it does not exist
      */
-    @Secured(UserRoleConfiguration.READ_ACCESS_ROLE)
     @GetMapping(value = "mappings/{mappingName}")
     public ResponseEntity<AgentMapping> getMappingByName(@PathVariable("mappingName") String mappingName) {
         Optional<AgentMapping> agentMapping = mappingManager.getAgentMapping(mappingName);

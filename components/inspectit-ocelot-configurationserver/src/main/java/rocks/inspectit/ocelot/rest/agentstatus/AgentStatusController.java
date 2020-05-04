@@ -25,7 +25,6 @@ public class AgentStatusController extends AbstractBaseController {
     @Autowired
     private AgentStatusManager statusManager;
 
-    @Secured(UserRoleConfiguration.READ_ACCESS_ROLE)
     @ApiOperation(value = "Fetch the List of Agent Statuses", notes = "Gives a list of connected agents")
     @GetMapping(value = "agentstatus")
     public Collection<AgentStatus> getAgentStatuses(@RequestParam Map<String, String> attributes) {

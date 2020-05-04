@@ -19,7 +19,6 @@ import java.util.Collection;
 @RestController
 public class DirectoryController extends FileBaseController {
 
-    @Secured(UserRoleConfiguration.READ_ACCESS_ROLE)
     @ApiOperation(value = "List directory contents", notes = "Can be used to get a list of the contents of a given directory.")
     @ApiImplicitParam(name = "Path", value = "The part of the url after /directories/ define the path to the directory whose contents shall be read.")
     @GetMapping(value = "directories/**")

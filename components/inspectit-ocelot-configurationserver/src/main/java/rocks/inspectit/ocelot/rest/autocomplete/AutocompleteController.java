@@ -5,7 +5,6 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.Example;
 import io.swagger.annotations.ExampleProperty;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,7 +12,6 @@ import rocks.inspectit.ocelot.autocomplete.AutoCompleteRequest;
 import rocks.inspectit.ocelot.autocomplete.AutoCompleter;
 import rocks.inspectit.ocelot.config.validation.PropertyPathHelper;
 import rocks.inspectit.ocelot.rest.AbstractBaseController;
-import rocks.inspectit.ocelot.security.config.UserRoleConfiguration;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,7 +25,6 @@ public class AutocompleteController extends AbstractBaseController {
     @Autowired
     private List<AutoCompleter> completers;
 
-    @Secured(UserRoleConfiguration.READ_ACCESS_ROLE)
     @ApiOperation(value = "String which should be autocompleted")
     @ApiResponse(code = 200, message = "The options which you can enter into the string", examples =
     @Example(value = @ExampleProperty(value = "[\"interfaces\",\n" +

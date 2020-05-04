@@ -16,10 +16,8 @@ import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.config.model.LdapRoleResolveSettings;
 import rocks.inspectit.ocelot.security.config.UserRoleConfiguration;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * The user details service used for authentication against the configured LDAP system.
@@ -28,8 +26,6 @@ import java.util.stream.Collectors;
 @Order(1)
 @ConditionalOnLdap
 public class CustomLdapUserDetailsService extends LdapUserDetailsService {
-
-    public static final List<String> OCELOT_ACCESS_USER_ROLES = Arrays.asList(UserRoleConfiguration.ADMIN_ROLE_PERMISSION_SET);
 
     @Autowired
     @VisibleForTesting
@@ -51,11 +47,11 @@ public class CustomLdapUserDetailsService extends LdapUserDetailsService {
             throw new UsernameNotFoundException(username);
         }
         UserDetails user = super.loadUserByUsername(username);
-        String[] roles = resolveAccessRoleSet(user);
+        String[] permissions = resolvePermissionSet(user);
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getUsername())
                 .password(user.getPassword())
-                .roles(roles)
+                .roles(permissions)
                 .build();
     }
 
@@ -67,10 +63,10 @@ public class CustomLdapUserDetailsService extends LdapUserDetailsService {
      * @return The highest level of access role the user's authorities could be resolved to.
      */
     @VisibleForTesting
-    String[] resolveAccessRoleSet(UserDetails user) {
-        LdapRoleResolveSettings role_settings = settings.getSecurity().getLdap().getRoles();
+    String[] resolvePermissionSet(UserDetails user) {
         Collection<? extends GrantedAuthority> authorities = user.getAuthorities();
-        if (containsAuthority(authorities, role_settings.getAdmin())) {
+        LdapRoleResolveSettings role_settings = settings.getSecurity().getLdap().getRoles();
+        if (containsAuthority(authorities, role_settings.getAdmin()) || hasAdminGroup(authorities)) {
             return UserRoleConfiguration.ADMIN_ROLE_PERMISSION_SET;
         }
         if (containsAuthority(authorities, role_settings.getCommit())) {
@@ -90,10 +86,26 @@ public class CustomLdapUserDetailsService extends LdapUserDetailsService {
      * @return Returns true if at least one element of authorities is contained in roleList or vice versa.
      */
     private boolean containsAuthority(Collection<? extends GrantedAuthority> authorities, List<String> roleList) {
-        return !authorities.stream()
+        return authorities.stream()
                 .map(GrantedAuthority::getAuthority)
                 .distinct()
-                .filter(roleList::contains)
-                .collect(Collectors.toSet()).isEmpty();
+                .anyMatch(authority -> roleList.contains(authority.substring("ROLE_".length())));
+    }
+
+    /**
+     * Checks if a collection of GrantedAuthorities contains the admin group defined in application.yml. This method
+     * ensures backwards compatibility for the old configuration standard.
+     *
+     * @param authorities A collection of authorities the admin group should be contained in.
+     * @return True if the given admin group is contained in the authorities. Otherwise false.
+     */
+    private boolean hasAdminGroup(Collection<? extends GrantedAuthority> authorities) {
+        String ldapAdminGroup = settings.getSecurity().getLdap().getAdminGroup();
+        return authorities.stream()
+                .anyMatch(
+                        authority -> authority.getAuthority()
+                                .substring("ROLE_".length())
+                                .equals(ldapAdminGroup)
+                );
     }
 }
