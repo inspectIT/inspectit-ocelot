@@ -33,7 +33,6 @@ public class InfluxExporterService extends DynamicallyActivatableService {
      */
     private Future exporterTask;
 
-
     public InfluxExporterService() {
         super("exporters.metrics.influx", "metrics.enabled");
     }
@@ -51,7 +50,8 @@ public class InfluxExporterService extends DynamicallyActivatableService {
     @Override
     protected boolean doEnable(InspectitConfig configuration) {
         InfluxExporterSettings influx = configuration.getExporters().getMetrics().getInflux();
-        log.info("Starting InfluxDB Exporter to '{}:{}' on '{}'", influx.getDatabase(), influx.getRetentionPolicy(), influx.getUrl());
+        log.info("Starting InfluxDB Exporter to '{}:{}' on '{}'", influx.getDatabase(), influx.getRetentionPolicy(), influx
+                .getUrl());
         activeExporter = InfluxExporter.builder()
                 .url(influx.getUrl())
                 .database(influx.getDatabase())
@@ -59,8 +59,10 @@ public class InfluxExporterService extends DynamicallyActivatableService {
                 .user(influx.getUser())
                 .password(influx.getPassword())
                 .createDatabase(influx.isCreateDatabase())
+                .exportDifference(influx.isCountersAsDifferences())
                 .build();
-        exporterTask = executor.scheduleAtFixedRate(activeExporter::export, 0, influx.getExportInterval().toMillis(), TimeUnit.MILLISECONDS);
+        exporterTask = executor.scheduleAtFixedRate(activeExporter::export, 0, influx.getExportInterval()
+                .toMillis(), TimeUnit.MILLISECONDS);
         return true;
     }
 

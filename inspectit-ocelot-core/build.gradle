@@ -38,7 +38,6 @@ dependencies {
             project(':inspectit-ocelot-config'),
             project(':inspectit-ocelot-sdk'),
 
-            "rocks.inspectit:opencensus-influxdb-exporter:1.0",
             
             // spring releated
             "org.springframework.boot:spring-boot:${springVersion}",
@@ -69,6 +68,7 @@ dependencies {
             "io.opencensus:opencensus-exporter-trace-jaeger:${openCensusVersion}",
             "io.opencensus:opencensus-exporter-metrics-ocagent:${openCensusVersion}",
             "io.opencensus:opencensus-exporter-trace-ocagent:${openCensusVersion}",
+            "rocks.inspectit:opencensus-influxdb-exporter:1.1",
             
             // bytecode manipulation
             "net.bytebuddy:byte-buddy:1.9.2"

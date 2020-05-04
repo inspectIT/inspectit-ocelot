@@ -46,7 +46,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1580133689920,
+  "iteration": 1587549662471,
   "links": [],
   "panels": [
     {
@@ -58,9 +58,9 @@
         "requestRateColumn": "in_count",
         "requestRateExternalColumn": "request-rate-external",
         "requestRateOutgoingColumn": "out_count",
-        "responseTimeColumn": "in_timesum",
+        "responseTimeColumn": "in_responsetime",
         "responseTimeExternalColumn": "response-time-external",
-        "responseTimeOutgoingColumn": "out_timesum",
+        "responseTimeOutgoingColumn": "out_responsetime",
         "sourceComponentPrefix": "origin_",
         "targetComponentPrefix": "target_",
         "type": "protocol"
@@ -97,7 +97,7 @@
         "layout": "ltrTree",
         "maxVolume": 10000,
         "showConnectionStats": true,
-        "sumTimings": true
+        "sumTimings": false
       },
       "sdgStyle": {
         "dangerColor": "rgb(184, 36, 36)",
@@ -124,7 +124,7 @@
           "measurement": "service_in_count",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SUM(\"cnt\") AS \"in_count\" FROM (\n              SELECT spread(\"count\") AS \"cnt\" FROM \"autogen\".\"service_in_responsetime\" \n              WHERE ((\"service\" =~ /^$service$/ OR \"origin_service\" =~ /^$service$/) AND \"application\" =~ /^$application$/) AND $timeFilter\n              GROUP BY *) \nGROUP BY \"service\", \"origin_service\", \"target_external\", \"protocol\"",
+          "query": "SELECT SUM(\"count\") AS \"in_count\" FROM \"autogen\".\"service_in_responsetime\" \nWHERE ((\"service\" =~ /^$service$/ OR \"origin_service\" =~ /^$service$/) AND \"application\" =~ /^$application$/) AND $timeFilter\nGROUP BY \"service\", \"origin_service\", \"target_external\", \"protocol\"",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -162,7 +162,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SUM(\"cnt\") AS \"out_count\" FROM (\n              SELECT spread(\"count\") AS \"cnt\" FROM \"autogen\".\"service_out_responsetime\" \n              WHERE ((\"service\" =~ /^$service$/ OR \"target_service\" =~ /^$service$/) AND \"application\" =~ /^$application$/) AND $timeFilter\n              GROUP BY *) \nGROUP BY \"service\", \"target_service\", \"target_external\", \"protocol\"",
+          "query": "SELECT SUM(\"count\") AS \"out_count\" FROM \"autogen\".\"service_out_responsetime\" \nWHERE ((\"service\" =~ /^$service$/ OR \"target_service\" =~ /^$service$/) AND \"application\" =~ /^$application$/) AND $timeFilter\nGROUP BY \"service\", \"target_service\", \"target_external\", \"protocol\"",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "table",
@@ -200,7 +200,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SUM(\"cnt\") AS \"in_timesum\" FROM (\n              SELECT spread(\"sum\") AS \"cnt\" FROM \"autogen\".\"service_in_responsetime\" \n              WHERE ((\"service\" =~ /^$service$/ OR \"origin_service\" =~ /^$service$/) AND \"application\" =~ /^$application$/) AND $timeFilter\n              GROUP BY *) \nGROUP BY \"service\", \"origin_service\", \"target_external\", \"protocol\"",
+          "query": "SELECT SUM(\"sum\")/SUM(\"count\") AS \"in_responsetime\" FROM \"autogen\".\"service_in_responsetime\" \nWHERE ((\"service\" =~ /^$service$/ OR \"origin_service\" =~ /^$service$/) AND \"application\" =~ /^$application$/) AND $timeFilter\nGROUP BY \"service\", \"origin_service\", \"target_external\", \"protocol\"",
           "rawQuery": true,
           "refId": "C",
           "resultFormat": "table",
@@ -238,7 +238,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SUM(\"cnt\") AS \"out_timesum\" FROM (\n              SELECT spread(\"sum\") AS \"cnt\" FROM \"autogen\".\"service_out_responsetime\" \n              WHERE ((\"service\" =~ /^$service$/ OR \"target_service\" =~ /^$service$/) AND \"application\" =~ /^$application$/) AND $timeFilter\n              GROUP BY *) \nGROUP BY \"service\", \"target_service\", \"target_external\", \"protocol\"",
+          "query": "SELECT SUM(\"sum\")/SUM(\"count\") AS \"out_responsetime\" FROM \"autogen\".\"service_out_responsetime\" \nWHERE ((\"service\" =~ /^$service$/ OR \"target_service\" =~ /^$service$/) AND \"application\" =~ /^$application$/) AND $timeFilter\nGROUP BY \"service\", \"target_service\", \"target_external\", \"protocol\"",
           "rawQuery": true,
           "refId": "D",
           "resultFormat": "table",
@@ -272,6 +272,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "service",
           "value": "service"
         },
