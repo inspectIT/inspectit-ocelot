@@ -15,8 +15,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 3,
-  "iteration": 1580138904830,
+  "id": 5,
+  "iteration": 1587549200544,
   "links": [],
   "panels": [
     {
@@ -883,7 +883,7 @@
           "measurement": "jvm_gc_memory_allocated",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SUM(val) FROM (SELECT NON_NEGATIVE_DIFFERENCE(\"counter\") AS val FROM \"jvm_gc_memory_allocated\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY *) GROUP BY time($__interval)",
+          "query": "SELECT SUM(\"counter\") FROM \"jvm_gc_memory_allocated\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time($__interval)",
           "rawQuery": true,
           "refId": "D",
           "resultFormat": "time_series",
@@ -927,7 +927,7 @@
           "measurement": "jvm_gc_memory_promoted",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SUM(val) FROM (SELECT NON_NEGATIVE_DIFFERENCE(\"counter\") AS val FROM \"jvm_gc_memory_promoted\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY *) GROUP BY time($__interval)",
+          "query": "SELECT SUM(\"counter\")  FROM \"jvm_gc_memory_promoted\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time($__interval)",
           "rawQuery": true,
           "refId": "F",
           "resultFormat": "time_series",
@@ -1676,7 +1676,7 @@
           "measurement": "jvm_gc_pause",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SUM(times) FROM (SELECT non_negative_difference(\"counter\") AS times FROM \"jvm_gc_pause\" WHERE (\"service\" =~ /^$service$/ AND \"action\" = 'end of minor GC') AND $timeFilter GROUP BY *) WHERE times > 0 GROUP BY time($__interval) fill(none)",
+          "query": "SELECT SUM(\"counter\") FROM \"jvm_gc_pause\" WHERE (\"service\" =~ /^$service$/ AND \"action\" = 'end of minor GC') AND $timeFilter GROUP BY time($__interval) fill(none)",
           "rawQuery": true,
           "refId": "C",
           "resultFormat": "time_series",
@@ -1726,7 +1726,7 @@
           "measurement": "jvm_gc_pause",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SUM(times) FROM (SELECT non_negative_difference(\"counter\") AS times FROM \"jvm_gc_pause\" WHERE (\"service\" =~ /^$service$/ AND \"action\" = 'end of major GC') AND $timeFilter GROUP BY *) WHERE times > 0 GROUP BY time($__interval) fill(none)",
+          "query": "SELECT SUM(\"counter\") FROM \"jvm_gc_pause\" WHERE (\"service\" =~ /^$service$/ AND \"action\" = 'end of major GC') AND $timeFilter GROUP BY time($__interval) fill(none)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1949,7 +1949,7 @@
       "id": 52,
       "panels": [],
       "repeat": null,
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 7,
       "scopedVars": {
         "service": {
@@ -1996,7 +1996,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 11,
       "repeatedByRow": true,
       "scopedVars": {
@@ -2183,7 +2183,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 39,
       "repeatedByRow": true,
       "scopedVars": {
@@ -2444,7 +2444,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 42,
       "repeatedByRow": true,
       "scopedVars": {
@@ -2682,7 +2682,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 46,
       "repeatedByRow": true,
       "scopedVars": {
@@ -2816,7 +2816,7 @@
           "measurement": "jvm_gc_memory_allocated",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SUM(val) FROM (SELECT NON_NEGATIVE_DIFFERENCE(\"counter\") AS val FROM \"jvm_gc_memory_allocated\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY *) GROUP BY time($__interval)",
+          "query": "SELECT SUM(\"counter\") FROM \"jvm_gc_memory_allocated\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time($__interval)",
           "rawQuery": true,
           "refId": "D",
           "resultFormat": "time_series",
@@ -2860,7 +2860,7 @@
           "measurement": "jvm_gc_memory_promoted",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SUM(val) FROM (SELECT NON_NEGATIVE_DIFFERENCE(\"counter\") AS val FROM \"jvm_gc_memory_promoted\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY *) GROUP BY time($__interval)",
+          "query": "SELECT SUM(\"counter\")  FROM \"jvm_gc_memory_promoted\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time($__interval)",
           "rawQuery": true,
           "refId": "F",
           "resultFormat": "time_series",
@@ -2984,7 +2984,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 49,
       "repeatedByRow": true,
       "scopedVars": {
@@ -3099,7 +3099,7 @@
       ],
       "repeat": null,
       "repeatDirection": "h",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 4,
       "repeatedByRow": true,
       "scopedVars": {
@@ -3193,7 +3193,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 40,
       "repeatedByRow": true,
       "scopedVars": {
@@ -3449,7 +3449,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 41,
       "repeatedByRow": true,
       "scopedVars": {
@@ -3591,7 +3591,7 @@
       "pointradius": 3,
       "points": true,
       "renderer": "flot",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 47,
       "repeatedByRow": true,
       "scopedVars": {
@@ -3624,7 +3624,7 @@
           "measurement": "jvm_gc_pause",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SUM(times) FROM (SELECT non_negative_difference(\"counter\") AS times FROM \"jvm_gc_pause\" WHERE (\"service\" =~ /^$service$/ AND \"action\" = 'end of minor GC') AND $timeFilter GROUP BY *) WHERE times > 0 GROUP BY time($__interval) fill(none)",
+          "query": "SELECT SUM(\"counter\") FROM \"jvm_gc_pause\" WHERE (\"service\" =~ /^$service$/ AND \"action\" = 'end of minor GC') AND $timeFilter GROUP BY time($__interval) fill(none)",
           "rawQuery": true,
           "refId": "C",
           "resultFormat": "time_series",
@@ -3674,7 +3674,7 @@
           "measurement": "jvm_gc_pause",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SUM(times) FROM (SELECT non_negative_difference(\"counter\") AS times FROM \"jvm_gc_pause\" WHERE (\"service\" =~ /^$service$/ AND \"action\" = 'end of major GC') AND $timeFilter GROUP BY *) WHERE times > 0 GROUP BY time($__interval) fill(none)",
+          "query": "SELECT SUM(\"counter\") FROM \"jvm_gc_pause\" WHERE (\"service\" =~ /^$service$/ AND \"action\" = 'end of major GC') AND $timeFilter GROUP BY time($__interval) fill(none)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -3805,7 +3805,7 @@
         }
       ],
       "repeatDirection": "h",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 12,
       "repeatedByRow": true,
       "scopedVars": {
@@ -3878,7 +3878,7 @@
       "id": 63,
       "links": [],
       "mode": "html",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 51,
       "repeatedByRow": true,
       "scopedVars": {
@@ -3903,7 +3903,7 @@
       "id": 64,
       "panels": [],
       "repeat": null,
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 7,
       "scopedVars": {
         "service": {
@@ -3950,7 +3950,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 11,
       "repeatedByRow": true,
       "scopedVars": {
@@ -4137,7 +4137,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 39,
       "repeatedByRow": true,
       "scopedVars": {
@@ -4398,7 +4398,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 42,
       "repeatedByRow": true,
       "scopedVars": {
@@ -4636,7 +4636,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 46,
       "repeatedByRow": true,
       "scopedVars": {
@@ -4770,7 +4770,7 @@
           "measurement": "jvm_gc_memory_allocated",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SUM(val) FROM (SELECT NON_NEGATIVE_DIFFERENCE(\"counter\") AS val FROM \"jvm_gc_memory_allocated\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY *) GROUP BY time($__interval)",
+          "query": "SELECT SUM(\"counter\") FROM \"jvm_gc_memory_allocated\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time($__interval)",
           "rawQuery": true,
           "refId": "D",
           "resultFormat": "time_series",
@@ -4814,7 +4814,7 @@
           "measurement": "jvm_gc_memory_promoted",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SUM(val) FROM (SELECT NON_NEGATIVE_DIFFERENCE(\"counter\") AS val FROM \"jvm_gc_memory_promoted\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY *) GROUP BY time($__interval)",
+          "query": "SELECT SUM(\"counter\")  FROM \"jvm_gc_memory_promoted\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time($__interval)",
           "rawQuery": true,
           "refId": "F",
           "resultFormat": "time_series",
@@ -4938,7 +4938,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 49,
       "repeatedByRow": true,
       "scopedVars": {
@@ -5053,7 +5053,7 @@
       ],
       "repeat": null,
       "repeatDirection": "h",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 4,
       "repeatedByRow": true,
       "scopedVars": {
@@ -5147,7 +5147,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 40,
       "repeatedByRow": true,
       "scopedVars": {
@@ -5403,7 +5403,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 41,
       "repeatedByRow": true,
       "scopedVars": {
@@ -5545,7 +5545,7 @@
       "pointradius": 3,
       "points": true,
       "renderer": "flot",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 47,
       "repeatedByRow": true,
       "scopedVars": {
@@ -5578,7 +5578,7 @@
           "measurement": "jvm_gc_pause",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SUM(times) FROM (SELECT non_negative_difference(\"counter\") AS times FROM \"jvm_gc_pause\" WHERE (\"service\" =~ /^$service$/ AND \"action\" = 'end of minor GC') AND $timeFilter GROUP BY *) WHERE times > 0 GROUP BY time($__interval) fill(none)",
+          "query": "SELECT SUM(\"counter\") FROM \"jvm_gc_pause\" WHERE (\"service\" =~ /^$service$/ AND \"action\" = 'end of minor GC') AND $timeFilter GROUP BY time($__interval) fill(none)",
           "rawQuery": true,
           "refId": "C",
           "resultFormat": "time_series",
@@ -5628,7 +5628,7 @@
           "measurement": "jvm_gc_pause",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SUM(times) FROM (SELECT non_negative_difference(\"counter\") AS times FROM \"jvm_gc_pause\" WHERE (\"service\" =~ /^$service$/ AND \"action\" = 'end of major GC') AND $timeFilter GROUP BY *) WHERE times > 0 GROUP BY time($__interval) fill(none)",
+          "query": "SELECT SUM(\"counter\") FROM \"jvm_gc_pause\" WHERE (\"service\" =~ /^$service$/ AND \"action\" = 'end of major GC') AND $timeFilter GROUP BY time($__interval) fill(none)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -5759,7 +5759,7 @@
         }
       ],
       "repeatDirection": "h",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 12,
       "repeatedByRow": true,
       "scopedVars": {
@@ -5832,7 +5832,7 @@
       "id": 75,
       "links": [],
       "mode": "html",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 51,
       "repeatedByRow": true,
       "scopedVars": {
@@ -5857,7 +5857,7 @@
       "id": 76,
       "panels": [],
       "repeat": null,
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 7,
       "scopedVars": {
         "service": {
@@ -5904,7 +5904,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 11,
       "repeatedByRow": true,
       "scopedVars": {
@@ -6091,7 +6091,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 39,
       "repeatedByRow": true,
       "scopedVars": {
@@ -6352,7 +6352,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 42,
       "repeatedByRow": true,
       "scopedVars": {
@@ -6590,7 +6590,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 46,
       "repeatedByRow": true,
       "scopedVars": {
@@ -6724,7 +6724,7 @@
           "measurement": "jvm_gc_memory_allocated",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SUM(val) FROM (SELECT NON_NEGATIVE_DIFFERENCE(\"counter\") AS val FROM \"jvm_gc_memory_allocated\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY *) GROUP BY time($__interval)",
+          "query": "SELECT SUM(\"counter\") FROM \"jvm_gc_memory_allocated\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time($__interval)",
           "rawQuery": true,
           "refId": "D",
           "resultFormat": "time_series",
@@ -6768,7 +6768,7 @@
           "measurement": "jvm_gc_memory_promoted",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SUM(val) FROM (SELECT NON_NEGATIVE_DIFFERENCE(\"counter\") AS val FROM \"jvm_gc_memory_promoted\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY *) GROUP BY time($__interval)",
+          "query": "SELECT SUM(\"counter\")  FROM \"jvm_gc_memory_promoted\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time($__interval)",
           "rawQuery": true,
           "refId": "F",
           "resultFormat": "time_series",
@@ -6892,7 +6892,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 49,
       "repeatedByRow": true,
       "scopedVars": {
@@ -7007,7 +7007,7 @@
       ],
       "repeat": null,
       "repeatDirection": "h",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 4,
       "repeatedByRow": true,
       "scopedVars": {
@@ -7101,7 +7101,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 40,
       "repeatedByRow": true,
       "scopedVars": {
@@ -7357,7 +7357,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 41,
       "repeatedByRow": true,
       "scopedVars": {
@@ -7499,7 +7499,7 @@
       "pointradius": 3,
       "points": true,
       "renderer": "flot",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 47,
       "repeatedByRow": true,
       "scopedVars": {
@@ -7532,7 +7532,7 @@
           "measurement": "jvm_gc_pause",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SUM(times) FROM (SELECT non_negative_difference(\"counter\") AS times FROM \"jvm_gc_pause\" WHERE (\"service\" =~ /^$service$/ AND \"action\" = 'end of minor GC') AND $timeFilter GROUP BY *) WHERE times > 0 GROUP BY time($__interval) fill(none)",
+          "query": "SELECT SUM(\"counter\") FROM \"jvm_gc_pause\" WHERE (\"service\" =~ /^$service$/ AND \"action\" = 'end of minor GC') AND $timeFilter GROUP BY time($__interval) fill(none)",
           "rawQuery": true,
           "refId": "C",
           "resultFormat": "time_series",
@@ -7582,7 +7582,7 @@
           "measurement": "jvm_gc_pause",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SUM(times) FROM (SELECT non_negative_difference(\"counter\") AS times FROM \"jvm_gc_pause\" WHERE (\"service\" =~ /^$service$/ AND \"action\" = 'end of major GC') AND $timeFilter GROUP BY *) WHERE times > 0 GROUP BY time($__interval) fill(none)",
+          "query": "SELECT SUM(\"counter\") FROM \"jvm_gc_pause\" WHERE (\"service\" =~ /^$service$/ AND \"action\" = 'end of major GC') AND $timeFilter GROUP BY time($__interval) fill(none)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -7713,7 +7713,7 @@
         }
       ],
       "repeatDirection": "h",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 12,
       "repeatedByRow": true,
       "scopedVars": {
@@ -7786,7 +7786,7 @@
       "id": 87,
       "links": [],
       "mode": "html",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 51,
       "repeatedByRow": true,
       "scopedVars": {
@@ -7811,7 +7811,7 @@
       "id": 88,
       "panels": [],
       "repeat": null,
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 7,
       "scopedVars": {
         "service": {
@@ -7858,7 +7858,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 11,
       "repeatedByRow": true,
       "scopedVars": {
@@ -8045,7 +8045,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 39,
       "repeatedByRow": true,
       "scopedVars": {
@@ -8306,7 +8306,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 42,
       "repeatedByRow": true,
       "scopedVars": {
@@ -8544,7 +8544,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 46,
       "repeatedByRow": true,
       "scopedVars": {
@@ -8678,7 +8678,7 @@
           "measurement": "jvm_gc_memory_allocated",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SUM(val) FROM (SELECT NON_NEGATIVE_DIFFERENCE(\"counter\") AS val FROM \"jvm_gc_memory_allocated\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY *) GROUP BY time($__interval)",
+          "query": "SELECT SUM(\"counter\") FROM \"jvm_gc_memory_allocated\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time($__interval)",
           "rawQuery": true,
           "refId": "D",
           "resultFormat": "time_series",
@@ -8722,7 +8722,7 @@
           "measurement": "jvm_gc_memory_promoted",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SUM(val) FROM (SELECT NON_NEGATIVE_DIFFERENCE(\"counter\") AS val FROM \"jvm_gc_memory_promoted\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY *) GROUP BY time($__interval)",
+          "query": "SELECT SUM(\"counter\")  FROM \"jvm_gc_memory_promoted\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time($__interval)",
           "rawQuery": true,
           "refId": "F",
           "resultFormat": "time_series",
@@ -8846,7 +8846,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 49,
       "repeatedByRow": true,
       "scopedVars": {
@@ -8961,7 +8961,7 @@
       ],
       "repeat": null,
       "repeatDirection": "h",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 4,
       "repeatedByRow": true,
       "scopedVars": {
@@ -9055,7 +9055,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 40,
       "repeatedByRow": true,
       "scopedVars": {
@@ -9311,7 +9311,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 41,
       "repeatedByRow": true,
       "scopedVars": {
@@ -9453,7 +9453,7 @@
       "pointradius": 3,
       "points": true,
       "renderer": "flot",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 47,
       "repeatedByRow": true,
       "scopedVars": {
@@ -9486,7 +9486,7 @@
           "measurement": "jvm_gc_pause",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SUM(times) FROM (SELECT non_negative_difference(\"counter\") AS times FROM \"jvm_gc_pause\" WHERE (\"service\" =~ /^$service$/ AND \"action\" = 'end of minor GC') AND $timeFilter GROUP BY *) WHERE times > 0 GROUP BY time($__interval) fill(none)",
+          "query": "SELECT SUM(\"counter\") FROM \"jvm_gc_pause\" WHERE (\"service\" =~ /^$service$/ AND \"action\" = 'end of minor GC') AND $timeFilter GROUP BY time($__interval) fill(none)",
           "rawQuery": true,
           "refId": "C",
           "resultFormat": "time_series",
@@ -9536,7 +9536,7 @@
           "measurement": "jvm_gc_pause",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SUM(times) FROM (SELECT non_negative_difference(\"counter\") AS times FROM \"jvm_gc_pause\" WHERE (\"service\" =~ /^$service$/ AND \"action\" = 'end of major GC') AND $timeFilter GROUP BY *) WHERE times > 0 GROUP BY time($__interval) fill(none)",
+          "query": "SELECT SUM(\"counter\") FROM \"jvm_gc_pause\" WHERE (\"service\" =~ /^$service$/ AND \"action\" = 'end of major GC') AND $timeFilter GROUP BY time($__interval) fill(none)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -9667,7 +9667,7 @@
         }
       ],
       "repeatDirection": "h",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 12,
       "repeatedByRow": true,
       "scopedVars": {
@@ -9740,7 +9740,7 @@
       "id": 99,
       "links": [],
       "mode": "html",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 51,
       "repeatedByRow": true,
       "scopedVars": {
@@ -9765,7 +9765,7 @@
       "id": 100,
       "panels": [],
       "repeat": null,
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 7,
       "scopedVars": {
         "service": {
@@ -9812,7 +9812,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 11,
       "repeatedByRow": true,
       "scopedVars": {
@@ -9999,7 +9999,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 39,
       "repeatedByRow": true,
       "scopedVars": {
@@ -10260,7 +10260,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 42,
       "repeatedByRow": true,
       "scopedVars": {
@@ -10498,7 +10498,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 46,
       "repeatedByRow": true,
       "scopedVars": {
@@ -10632,7 +10632,7 @@
           "measurement": "jvm_gc_memory_allocated",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SUM(val) FROM (SELECT NON_NEGATIVE_DIFFERENCE(\"counter\") AS val FROM \"jvm_gc_memory_allocated\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY *) GROUP BY time($__interval)",
+          "query": "SELECT SUM(\"counter\") FROM \"jvm_gc_memory_allocated\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time($__interval)",
           "rawQuery": true,
           "refId": "D",
           "resultFormat": "time_series",
@@ -10676,7 +10676,7 @@
           "measurement": "jvm_gc_memory_promoted",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SUM(val) FROM (SELECT NON_NEGATIVE_DIFFERENCE(\"counter\") AS val FROM \"jvm_gc_memory_promoted\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY *) GROUP BY time($__interval)",
+          "query": "SELECT SUM(\"counter\")  FROM \"jvm_gc_memory_promoted\" WHERE (\"service\" =~ /^$service$/) AND $timeFilter GROUP BY time($__interval)",
           "rawQuery": true,
           "refId": "F",
           "resultFormat": "time_series",
@@ -10800,7 +10800,7 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 49,
       "repeatedByRow": true,
       "scopedVars": {
@@ -10915,7 +10915,7 @@
       ],
       "repeat": null,
       "repeatDirection": "h",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 4,
       "repeatedByRow": true,
       "scopedVars": {
@@ -11009,7 +11009,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 40,
       "repeatedByRow": true,
       "scopedVars": {
@@ -11265,7 +11265,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 41,
       "repeatedByRow": true,
       "scopedVars": {
@@ -11407,7 +11407,7 @@
       "pointradius": 3,
       "points": true,
       "renderer": "flot",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 47,
       "repeatedByRow": true,
       "scopedVars": {
@@ -11440,7 +11440,7 @@
           "measurement": "jvm_gc_pause",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SUM(times) FROM (SELECT non_negative_difference(\"counter\") AS times FROM \"jvm_gc_pause\" WHERE (\"service\" =~ /^$service$/ AND \"action\" = 'end of minor GC') AND $timeFilter GROUP BY *) WHERE times > 0 GROUP BY time($__interval) fill(none)",
+          "query": "SELECT SUM(\"counter\") FROM \"jvm_gc_pause\" WHERE (\"service\" =~ /^$service$/ AND \"action\" = 'end of minor GC') AND $timeFilter GROUP BY time($__interval) fill(none)",
           "rawQuery": true,
           "refId": "C",
           "resultFormat": "time_series",
@@ -11490,7 +11490,7 @@
           "measurement": "jvm_gc_pause",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SUM(times) FROM (SELECT non_negative_difference(\"counter\") AS times FROM \"jvm_gc_pause\" WHERE (\"service\" =~ /^$service$/ AND \"action\" = 'end of major GC') AND $timeFilter GROUP BY *) WHERE times > 0 GROUP BY time($__interval) fill(none)",
+          "query": "SELECT SUM(\"counter\") FROM \"jvm_gc_pause\" WHERE (\"service\" =~ /^$service$/ AND \"action\" = 'end of major GC') AND $timeFilter GROUP BY time($__interval) fill(none)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -11621,7 +11621,7 @@
         }
       ],
       "repeatDirection": "h",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 12,
       "repeatedByRow": true,
       "scopedVars": {
@@ -11694,7 +11694,7 @@
       "id": 111,
       "links": [],
       "mode": "html",
-      "repeatIteration": 1580138904830,
+      "repeatIteration": 1587549200544,
       "repeatPanelId": 51,
       "repeatedByRow": true,
       "scopedVars": {
@@ -11718,6 +11718,7 @@
       {
         "allValue": null,
         "current": {
+          "tags": [],
           "text": "All",
           "value": [
             "$__all"

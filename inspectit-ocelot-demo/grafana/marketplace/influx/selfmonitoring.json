@@ -58,7 +58,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1580134615470,
+  "iteration": 1587549636297,
   "links": [],
   "panels": [
     {
@@ -350,78 +350,6 @@
               "value": "/^$service$/"
             }
           ]
-        },
-        {
-          "alias": "# errors since startup",
-          "groupBy": [],
-          "measurement": "inspectit_self_logs",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "D",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "counter"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "service",
-              "operator": "=~",
-              "value": "/^$service$/"
-            },
-            {
-              "condition": "AND",
-              "key": "level",
-              "operator": "=",
-              "value": "ERROR"
-            }
-          ]
-        },
-        {
-          "alias": "# warnings since startup",
-          "groupBy": [],
-          "measurement": "inspectit_self_logs",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "E",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "counter"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "service",
-              "operator": "=~",
-              "value": "/^$service$/"
-            },
-            {
-              "condition": "AND",
-              "key": "level",
-              "operator": "=",
-              "value": "WARN"
-            }
-          ]
         }
       ],
       "title": "Instrumentation State",
@@ -618,7 +546,7 @@
           "measurement": "inspectit_self_logs",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SUM(\"diffs\") FROM (SELECT non_negative_difference(\"counter\") AS \"diffs\" FROM \"inspectit_self_logs\" WHERE (\"service\" =~ /^$service$/ AND \"level\" =~ /^ERROR$/ ) AND $timeFilter)",
+          "query": "SELECT SUM(\"counter\") FROM \"inspectit_self_logs\" WHERE (\"service\" =~ /^$service$/ AND \"level\" =~ /^ERROR$/ ) AND $timeFilter",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1023,7 +951,7 @@
           "measurement": "inspectit_self_logs",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SUM(\"diffs\") FROM (SELECT non_negative_difference(\"counter\") AS \"diffs\" FROM \"inspectit_self_logs\" WHERE (\"service\" =~ /^$service$/ AND \"level\" =~ /^WARN$/ ) AND $timeFilter)",
+          "query": "SELECT SUM(\"counter\") FROM \"inspectit_self_logs\" WHERE (\"service\" =~ /^$service$/ AND \"level\" =~ /^WARN$/ ) AND $timeFilter",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1151,7 +1079,7 @@
           "measurement": "inspectit_self_logs",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SUM(\"diffs\") FROM (SELECT non_negative_difference(\"counter\") AS \"diffs\" FROM \"inspectit_self_logs\" WHERE (\"service\" =~ /^$service$/ AND \"level\" =~ /^INFO|DEBUG|TRACE$/ ) AND $timeFilter)",
+          "query": "SELECT SUM(\"counter\") FROM \"inspectit_self_logs\" WHERE (\"service\" =~ /^$service$/ AND \"level\" =~ /^INFO|DEBUG|TRACE$/ ) AND $timeFilter",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1264,5 +1192,5 @@
   "timezone": "",
   "title": "inspectIT Agent Self-Monitoring",
   "uid": "D-EaVt_ik",
-  "version": 1
+  "version": 2
 }

@@ -54,4 +54,12 @@ public class InfluxExporterSettings {
      * If enabled, the Influx Exporter creates the specified database upon initial connection.
      */
     private boolean createDatabase;
+
+    /**
+     * If disabled, the raw values of each counter will be written to the InfluxDB on each export.
+     * When enabled, only the change of the counter in comparison to the previous export will be written.
+     * This difference will only be exposed if the counter has changed (=the difference is non-zero).
+     * This can greatly reduce the total data written to influx and makes writing queries easier.
+     */
+    private boolean countersAsDifferences;
 }
