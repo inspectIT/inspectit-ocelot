@@ -27,8 +27,6 @@ class WorkingDirectoryAccessorTest {
 
     private AbstractWorkingDirectoryAccessor accessor;
 
-    private InspectitServerSettings settings;
-
     private ApplicationEventPublisher eventPublisher;
 
     private Path tempDirectory;
@@ -37,12 +35,9 @@ class WorkingDirectoryAccessorTest {
     public void beforeEach() throws IOException {
         tempDirectory = Files.createTempDirectory("ocelot");
 
-        settings = new InspectitServerSettings();
-        settings.setWorkingDirectory(tempDirectory.toString());
-
         eventPublisher = mock(ApplicationEventPublisher.class);
 
-        accessor = new WorkingDirectoryAccessor(settings, eventPublisher);
+        accessor = new WorkingDirectoryAccessor(tempDirectory, eventPublisher);
     }
 
     @AfterEach

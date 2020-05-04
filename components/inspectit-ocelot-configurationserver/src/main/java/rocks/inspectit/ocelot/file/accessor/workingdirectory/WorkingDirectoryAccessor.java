@@ -23,7 +23,6 @@ import java.util.Optional;
  * Concrete implementation to access and modify files in the server's working directory.
  */
 @Slf4j
-@Component
 public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
 
     /**
@@ -36,9 +35,8 @@ public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
      */
     private Path workingDirectory;
 
-    @Autowired
-    public WorkingDirectoryAccessor(InspectitServerSettings config, ApplicationEventPublisher eventPublisher) {
-        this.workingDirectory = Paths.get(config.getWorkingDirectory()).toAbsolutePath().normalize();
+    public WorkingDirectoryAccessor(Path workingDirectory, ApplicationEventPublisher eventPublisher) {
+        this.workingDirectory = workingDirectory;
         this.eventPublisher = eventPublisher;
     }
 
