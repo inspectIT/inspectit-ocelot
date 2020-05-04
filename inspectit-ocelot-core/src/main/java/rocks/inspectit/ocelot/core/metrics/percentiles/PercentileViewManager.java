@@ -114,10 +114,11 @@ public class PercentileViewManager {
      * @param percentiles      specified which percentiles shall be exposed as metric, values are in the range (0,1)
      * @param timeWindowMillis the length of the sliding time window to use for computing min / max and the percentiles
      * @param tags             the tags to use for the view
+     * @param bufferLimit      the maximum number of points this view is allowed to buffer
      */
     public synchronized void createOrUpdateView(String measureName, String viewName, String unit, String description,
                                                 boolean minEnabled, boolean maxEnabled, Collection<Double> percentiles,
-                                                long timeWindowMillis, Collection<String> tags) {
+                                                long timeWindowMillis, Collection<String> tags, int bufferLimit) {
 
         List<PercentileView> views = measuresToViewsMap.computeIfAbsent(measureName, (name) -> new CopyOnWriteArrayList<>());
         Optional<PercentileView> existingView = views.stream()
@@ -125,9 +126,9 @@ public class PercentileViewManager {
                 .findFirst();
         Optional<PercentileView> updatedView;
         if (existingView.isPresent()) {
-            updatedView = updateView(existingView.get(), unit, description, minEnabled, maxEnabled, percentiles, timeWindowMillis, tags);
+            updatedView = updateView(existingView.get(), unit, description, minEnabled, maxEnabled, percentiles, timeWindowMillis, tags, bufferLimit);
         } else {
-            updatedView = Optional.of(createView(viewName, unit, description, minEnabled, maxEnabled, percentiles, timeWindowMillis, tags));
+            updatedView = Optional.of(createView(viewName, unit, description, minEnabled, maxEnabled, percentiles, timeWindowMillis, tags, bufferLimit));
         }
         if (updatedView.isPresent()) {
             existingView.ifPresent(views::remove);
@@ -206,9 +207,9 @@ public class PercentileViewManager {
 
     private Optional<PercentileView> updateView(PercentileView existingView, String unit, String description,
                                                 boolean minEnabled, boolean maxEnabled, Collection<Double> percentiles,
-                                                long timeWindowMillis, Collection<String> tags) {
+                                                long timeWindowMillis, Collection<String> tags, int bufferLimit) {
         Supplier<PercentileView> creator = () -> createView(existingView.getViewName(), unit, description,
-                minEnabled, maxEnabled, percentiles, timeWindowMillis, tags);
+                minEnabled, maxEnabled, percentiles, timeWindowMillis, tags, bufferLimit);
         if (!unit.equals(existingView.getUnit())) {
             return Optional.of(creator.get());
         }
@@ -230,11 +231,16 @@ public class PercentileViewManager {
         if (!existingView.getTagKeys().equals(new HashSet<>(tags))) {
             return Optional.of(creator.get());
         }
+        if (existingView.getBufferLimit() != bufferLimit) {
+            return Optional.of(creator.get());
+        }
         return Optional.empty();
     }
 
-    private PercentileView createView(String viewName, String unit, String description, boolean minEnabled, boolean maxEnabled, Collection<Double> percentiles, long timeWindowMillis, Collection<String> tags) {
-        return new PercentileView(minEnabled, maxEnabled, new HashSet<>(percentiles), new HashSet<>(tags), timeWindowMillis, viewName, unit, description);
+    private PercentileView createView(String viewName, String unit, String description, boolean minEnabled, boolean maxEnabled,
+                                      Collection<Double> percentiles, long timeWindowMillis, Collection<String> tags, int bufferLimit) {
+        return new PercentileView(minEnabled, maxEnabled, new HashSet<>(percentiles), new HashSet<>(tags),
+                timeWindowMillis, viewName, unit, description, bufferLimit);
     }
 
     @VisibleForTesting
