@@ -80,14 +80,15 @@ In order to use run-time updates, you must enable one of the <a href="configurat
 <p>Prometheus exporter exposes the metrics in Prometheus format and is the default metrics exporter set up by inspectIT Ocelot.
 When enabled, inspectIT starts a Prometheus HTTP server in parallel with your application.
 The server is by default started on the port <code>8888</code> and metrics can then be accessed by visiting <a href="http://localhost:8888/metrics">http://localhost:8888/metrics</a>.</p>
+<p>The following properties are nested properties below the <code>inspectit.exporters.metrics.prometheus</code> property:</p>
 <table>
 <thead>
 <tr><th>Property</th><th>Default</th><th>Description</th></tr>
 </thead>
 <tbody>
-<tr><td><code>inspectit.exporters.metrics.prometheus.enabled</code></td><td><code>true</code></td><td>If true, the inspectIT Ocelot agent will try to start the Prometheus metrics exporter and Prometheus HTTP server.</td></tr>
-<tr><td><code>inspectit.exporters.metrics.prometheus.host</code></td><td><code>0.0.0.0</code></td><td>The hostname or network address to which the Prometheus HTTP server should bind.</td></tr>
-<tr><td><code>inspectit.exporters.metrics.prometheus.port</code></td><td><code>8888</code></td><td>The port the Prometheus HTTP server should use.</td></tr>
+<tr><td><code>.enabled</code></td><td><code>true</code></td><td>If true, the inspectIT Ocelot agent will try to start the Prometheus metrics exporter and Prometheus HTTP server.</td></tr>
+<tr><td><code>.host</code></td><td><code>0.0.0.0</code></td><td>The hostname or network address to which the Prometheus HTTP server should bind.</td></tr>
+<tr><td><code>.port</code></td><td><code>8888</code></td><td>The port the Prometheus HTTP server should use.</td></tr>
 </tbody>
 </table>
 <blockquote>
@@ -96,17 +97,18 @@ The server is by default started on the port <code>8888</code> and metrics can t
 <h2><a class="anchor" aria-hidden="true" id="opencensus-agent-metrics-exporter"></a><a href="#opencensus-agent-metrics-exporter" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>OpenCensus Agent Metrics Exporter</h2>
 <p>Metrics can be additionally exported to the <a href="https://opencensus.io/service/components/agent/">OpenCensus Agent</a>.
 When enabled, all metrics are sent via gRCP to the OpenCensus Agent. By default, the exporter is enabled, but the agent address is set to <code>null</code>.</p>
+<p>The following properties are nested properties below the <code>inspectit.exporters.metrics.open-census-agent</code> property:</p>
 <table>
 <thead>
 <tr><th>Property</th><th>Default</th><th>Description</th></tr>
 </thead>
 <tbody>
-<tr><td><code>inspectit.exporters.metrics.open-census-agent.enabled</code></td><td><code>true</code></td><td>If true, the agent will try to start the OpenCensus Agent Metrics exporter.</td></tr>
-<tr><td><code>inspectit.exporters.metrics.open-census-agent.address</code></td><td><code>null</code></td><td>Address of the open-census agent (e.g. localhost:1234).</td></tr>
-<tr><td><code>inspectit.exporters.metrics.open-census-agent.use-insecure</code></td><td><code>false</code></td><td>If true, SSL is disabled.</td></tr>
-<tr><td><code>inspectit.exporters.metrics.open-census-agent.service-name</code></td><td>refers to <code>inspectit.service-name</code></td><td>The service-name which will be used to publish the metrics.</td></tr>
-<tr><td><code>inspectit.exporters.metrics.open-census-agent.reconnection-period</code></td><td><code>5</code></td><td>The time at which the exporter tries to reconnect to the OpenCensus agent.</td></tr>
-<tr><td><code>inspectit.exporters.metrics.open-census-agent.export-interval</code></td><td>refers to <code>inspectit.metrics.frequency</code></td><td>The export interval of the metrics.</td></tr>
+<tr><td><code>.enabled</code></td><td><code>true</code></td><td>If true, the agent will try to start the OpenCensus Agent Metrics exporter.</td></tr>
+<tr><td><code>.address</code></td><td><code>null</code></td><td>Address of the open-census agent (e.g. localhost:1234).</td></tr>
+<tr><td><code>.use-insecure</code></td><td><code>false</code></td><td>If true, SSL is disabled.</td></tr>
+<tr><td><code>.service-name</code></td><td>refers to <code>inspectit.service-name</code></td><td>The service-name which will be used to publish the metrics.</td></tr>
+<tr><td><nobr><code>.reconnection-period</code></nobr></td><td><code>5</code></td><td>The time at which the exporter tries to reconnect to the OpenCensus agent.</td></tr>
+<tr><td><code>.export-interval</code></td><td>refers to <code>inspectit.metrics.frequency</code></td><td>The export interval of the metrics.</td></tr>
 </tbody>
 </table>
 <blockquote>
@@ -115,22 +117,30 @@ When enabled, all metrics are sent via gRCP to the OpenCensus Agent. By default,
 <h2><a class="anchor" aria-hidden="true" id="influxdb-exporter"></a><a href="#influxdb-exporter" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>InfluxDB Exporter</h2>
 <p>If enabled, metrics are pushed at a specified interval directly to a given influxDB v1.x instance.
 To enable the InfluxDB Exporters, it is only required to specify the <code>url</code>.</p>
+<p>The InfluxDB exporter provides a special handling for counter and sum metrics which is enabled by default and can be disabled using the <code>counters-as-differences</code> option.
+Usually, the absolute value of such counters is irrelevant when querying the data, instead you want to have the increase of it over a certain period of time.
+With the <code>counters-as-differences</code> option enabled, counters are preprocessed before being exported.</p>
+<p>Instead of writing the absolute value of each counter into the InfluxDB, only the increase since the last export will be written.
+In addition no value will be exported, if the counter has not changed since the last export.
+This can greatly reduce the amount of data written into the InfluxDB, especially if the metrics are quite constant and won't change much.</p>
+<p>The following properties are nested properties below the <code>inspectit.exporters.metrics.influx</code> property:</p>
 <table>
 <thead>
 <tr><th>Property</th><th>Default</th><th>Description</th></tr>
 </thead>
 <tbody>
-<tr><td><code>inspectit.exporters.metrics.influx.enabled</code></td><td><code>true</code></td><td>If true, the agent will try to start the Influx exporter, if also the <code>url</code> is not empty.</td></tr>
-<tr><td><code>inspectit.exporters.metrics.influx.url</code></td><td><code>null</code></td><td>The HTTP url of the influxDB, e.g. <code>http://localhost:8086</code>.</td></tr>
-<tr><td><code>inspectit.exporters.metrics.influx.user</code></td><td><code>null</code></td><td>The user to use for connecting to the influxDB, can be empty if the influxDB is configured for unauthorized access.</td></tr>
-<tr><td><code>inspectit.exporters.metrics.influx.password</code></td><td><code>null</code></td><td>The password to use for connecting to the influxDB, can be empty if the influxDB is configured for unauthorized access.</td></tr>
-<tr><td><code>inspectit.exporters.metrics.influx.database</code></td><td><code>inspectit</code></td><td>The influxDB database to which the metrics are pushed.</td></tr>
-<tr><td><code>inspectit.exporters.metrics.influx.retention-policy</code></td><td><code>autogen</code></td><td>The retention policy of the database to use for writing metrics.</td></tr>
-<tr><td><code>inspectit.exporters.metrics.influx.create-database</code></td><td><code>true</code></td><td>If enabled, the database defined by the <code>database</code> property is automatically created on startup with an <code>autogen</code> retention policy if it does not exist yet.</td></tr>
-<tr><td><code>inspectit.exporters.metrics.influx.export-interval</code></td><td>refers to <code>inspectit.metrics.frequency</code></td><td>Defines how often metrics are pushed to the influxDB.</td></tr>
+<tr><td><code>.enabled</code></td><td><code>true</code></td><td>If true, the agent will try to start the Influx exporter, if also the <code>url</code> is not empty.</td></tr>
+<tr><td><code>.url</code></td><td><code>null</code></td><td>The HTTP url of the influxDB, e.g. <code>http://localhost:8086</code>.</td></tr>
+<tr><td><code>.user</code></td><td><code>null</code></td><td>The user to use for connecting to the influxDB, can be empty if the influxDB is configured for unauthorized access.</td></tr>
+<tr><td><code>.password</code></td><td><code>null</code></td><td>The password to use for connecting to the influxDB, can be empty if the influxDB is configured for unauthorized access.</td></tr>
+<tr><td><code>.database</code></td><td><code>inspectit</code></td><td>The influxDB database to which the metrics are pushed.</td></tr>
+<tr><td><code>.retention-policy</code></td><td><code>autogen</code></td><td>The retention policy of the database to use for writing metrics.</td></tr>
+<tr><td><code>.create-database</code></td><td><code>true</code></td><td>If enabled, the database defined by the <code>database</code> property is automatically created on startup with an <code>autogen</code> retention policy if it does not exist yet.</td></tr>
+<tr><td><code>.export-interval</code></td><td>refers to <code>inspectit.metrics.frequency</code></td><td>Defines how often metrics are pushed to the influxDB.</td></tr>
+<tr><td><nobr><code>.counters-as-differences</code></nobr></td><td><code>true</code></td><td>Defines whether counters are exported using their absolute value or as the increase between exports</td></tr>
 </tbody>
 </table>
-</span></div></article></div><div class="docLastUpdate"><em>Last updated on 2020-1-31 by Jonas Kunz</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/next/metrics/metric-recorders"><span class="arrow-prev">← </span><span>Metrics Recorders</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/next/metrics/common-tags"><span>Common Tags</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#prometheus-exporter">Prometheus Exporter</a></li><li><a href="#opencensus-agent-metrics-exporter">OpenCensus Agent Metrics Exporter</a></li><li><a href="#influxdb-exporter">InfluxDB Exporter</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2020 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</span></div></article></div><div class="docLastUpdate"><em>Last updated on 2020-5-4 by Jonas Kunz</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/next/metrics/metric-recorders"><span class="arrow-prev">← </span><span>Metrics Recorders</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/next/metrics/common-tags"><span>Common Tags</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#prometheus-exporter">Prometheus Exporter</a></li><li><a href="#opencensus-agent-metrics-exporter">OpenCensus Agent Metrics Exporter</a></li><li><a href="#influxdb-exporter">InfluxDB Exporter</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2020 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
