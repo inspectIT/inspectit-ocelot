@@ -80,6 +80,7 @@ public class ViewDefinitionSettings {
      * If this number is exceeded, a warning will be printed and points will be rejected until space is free again.
      */
     @Min(1)
+    @Builder.Default
     private int maxBufferedPoints = 16384;
 
     /**
