@@ -239,6 +239,20 @@ public class PercentileView {
         return true;
     }
 
+    Set<String> getSeriesNames() {
+        Set<String> result = new HashSet<>();
+        if (minMetricDescriptor != null) {
+            result.add(minMetricDescriptor.getName());
+        }
+        if (maxMetricDescriptor != null) {
+            result.add(maxMetricDescriptor.getName());
+        }
+        if (!percentiles.isEmpty()) {
+            result.add(percentileMetricDescriptor.getName());
+        }
+        return result;
+    }
+
     /**
      * Removes all data which has fallen out of the time window based on the given timestamp.
      *

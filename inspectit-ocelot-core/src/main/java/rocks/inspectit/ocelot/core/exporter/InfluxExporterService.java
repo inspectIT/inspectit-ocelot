@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.exporters.metrics.InfluxExporterSettings;
+import rocks.inspectit.ocelot.core.metrics.percentiles.PercentileViewManager;
 import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 import rocks.inspectit.opencensus.influx.InfluxExporter;
 
@@ -22,6 +23,9 @@ public class InfluxExporterService extends DynamicallyActivatableService {
 
     @Autowired
     private ScheduledExecutorService executor;
+
+    @Autowired
+    private PercentileViewManager percentileViewManager;
 
     /**
      * The currently active influx exporter, null if none is active.
@@ -60,6 +64,7 @@ public class InfluxExporterService extends DynamicallyActivatableService {
                 .password(influx.getPassword())
                 .createDatabase(influx.isCreateDatabase())
                 .exportDifference(influx.isCountersAsDifferences())
+                .measurementNameProvider(percentileViewManager::getMeasureForSeries)
                 .build();
         exporterTask = executor.scheduleAtFixedRate(activeExporter::export, 0, influx.getExportInterval()
                 .toMillis(), TimeUnit.MILLISECONDS);

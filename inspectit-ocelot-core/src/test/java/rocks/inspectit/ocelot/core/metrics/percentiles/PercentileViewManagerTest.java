@@ -93,6 +93,69 @@ public class PercentileViewManagerTest {
     }
 
     @Nested
+    class GetMeasureForSeries {
+
+        @Test
+        void noViewsRegistered() {
+            assertThat(viewManager.getMeasureForSeries("test")).isNull();
+        }
+
+        @Test
+        void singleViewRegistered() {
+            viewManager.createOrUpdateView("my/measure", "my/view", "ms", "foo",
+                    true, false, Arrays.asList(0.5, 0.95), 15000, Collections.emptyList(), 1);
+
+            assertThat(viewManager.getMeasureForSeries("my/view")).isEqualTo("my/measure");
+            assertThat(viewManager.getMeasureForSeries("my/view_min")).isEqualTo("my/measure");
+            assertThat(viewManager.getMeasureForSeries("my/view_max")).isNull();
+        }
+
+        @Test
+        void multipleViewsRegistered() {
+            viewManager.createOrUpdateView("my/measure", "my/view", "ms", "foo",
+                    true, false, Arrays.asList(0.5, 0.95), 15000, Collections.emptyList(), 1);
+
+            assertThat(viewManager.getMeasureForSeries("my/view")).isEqualTo("my/measure");
+            assertThat(viewManager.getMeasureForSeries("my/view_min")).isEqualTo("my/measure");
+            assertThat(viewManager.getMeasureForSeries("my/view_max")).isNull();
+
+            viewManager.createOrUpdateView("my/other_measure", "my/other_view", "ms", "foo",
+                    false, true, Collections.emptySet(), 15000, Collections.emptyList(), 1);
+
+            assertThat(viewManager.getMeasureForSeries("my/view")).isEqualTo("my/measure");
+            assertThat(viewManager.getMeasureForSeries("my/view_min")).isEqualTo("my/measure");
+            assertThat(viewManager.getMeasureForSeries("my/view_max")).isNull();
+            assertThat(viewManager.getMeasureForSeries("my/other_view")).isNull();
+            assertThat(viewManager.getMeasureForSeries("my/other_view_min")).isNull();
+            assertThat(viewManager.getMeasureForSeries("my/other_view_max")).isEqualTo("my/other_measure");
+        }
+
+        @Test
+        void viewRemoved() {
+            viewManager.createOrUpdateView("my/measure", "my/view", "ms", "foo",
+                    true, false, Arrays.asList(0.5, 0.95), 15000, Collections.emptyList(), 1);
+            viewManager.createOrUpdateView("my/other_measure", "my/other_view", "ms", "foo",
+                    false, true, Collections.emptySet(), 15000, Collections.emptyList(), 1);
+
+            assertThat(viewManager.getMeasureForSeries("my/view")).isEqualTo("my/measure");
+            assertThat(viewManager.getMeasureForSeries("my/view_min")).isEqualTo("my/measure");
+            assertThat(viewManager.getMeasureForSeries("my/view_max")).isNull();
+            assertThat(viewManager.getMeasureForSeries("my/other_view")).isNull();
+            assertThat(viewManager.getMeasureForSeries("my/other_view_min")).isNull();
+            assertThat(viewManager.getMeasureForSeries("my/other_view_max")).isEqualTo("my/other_measure");
+
+            viewManager.removeView("my/measure", "my/view");
+
+            assertThat(viewManager.getMeasureForSeries("my/view")).isNull();
+            assertThat(viewManager.getMeasureForSeries("my/view_min")).isNull();
+            assertThat(viewManager.getMeasureForSeries("my/view_max")).isNull();
+            assertThat(viewManager.getMeasureForSeries("my/other_view")).isNull();
+            assertThat(viewManager.getMeasureForSeries("my/other_view_min")).isNull();
+            assertThat(viewManager.getMeasureForSeries("my/other_view_max")).isEqualTo("my/other_measure");
+        }
+    }
+
+    @Nested
     class ComputeMetrics {
 
         @Test

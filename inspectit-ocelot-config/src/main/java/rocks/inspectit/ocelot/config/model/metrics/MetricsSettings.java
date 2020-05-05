@@ -88,7 +88,7 @@ public class MetricsSettings {
     public void noDuplicateViewNames(ViolationBuilder vios) {
         Map<String, String> viewsToMeasuresMap = new HashMap<>();
         definitions.forEach((measure, def) -> {
-            val views = def.getCopyWithDefaultsPopulated(measure).getViews();
+            val views = def.getCopyWithDefaultsPopulated(measure, Duration.ZERO).getViews();
             if (!CollectionUtils.isEmpty(views)) {
                 views.forEach((view, viewDef) -> {
                     if (viewDef.isEnabled()) {

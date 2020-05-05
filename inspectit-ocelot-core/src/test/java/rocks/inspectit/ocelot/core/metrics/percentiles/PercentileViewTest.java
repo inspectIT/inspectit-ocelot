@@ -98,6 +98,34 @@ public class PercentileViewTest {
     }
 
     @Nested
+    class GetSeriesNames {
+
+        @Test
+        void checkPercentileSeries() {
+            PercentileView view = new PercentileView(false, false, ImmutableSet.of(0.5),
+                    Collections.emptySet(), 10, "name", "unit", "description", 1);
+
+            assertThat(view.getSeriesNames()).containsExactly("name");
+        }
+
+        @Test
+        void checkMinSeries() {
+            PercentileView view = new PercentileView(true, false, Collections.emptySet(),
+                    Collections.emptySet(), 10, "name", "unit", "description", 1);
+
+            assertThat(view.getSeriesNames()).containsExactly("name_min");
+        }
+
+        @Test
+        void checkMaxSeries() {
+            PercentileView view = new PercentileView(false, true, Collections.emptySet(),
+                    Collections.emptySet(), 10, "name", "unit", "description", 1);
+
+            assertThat(view.getSeriesNames()).containsExactly("name_max");
+        }
+    }
+
+    @Nested
     class ComputeMetrics {
 
         private TagContext createTagContext(String... keyValuePairs) {
