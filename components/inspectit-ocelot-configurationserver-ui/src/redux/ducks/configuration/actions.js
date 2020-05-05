@@ -52,7 +52,7 @@ const sortFiles = (allFiles) => {
     return 0;
   });
   allFiles.forEach((element) => {
-    if (element.type === 'directory' && element.children.length > 0) {
+    if (element.children) {
       sortFiles(element.children);
     }
   });
