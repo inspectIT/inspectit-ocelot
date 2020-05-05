@@ -15,15 +15,15 @@ Long story short: actions allow you to specify _Java snippets in your configurat
 > All instrumentation settings can be changed without restarting the application! They can even be changed while a previous instrumentation is still in progress. In this case the inspectIT Ocelot agent will automatically switch to the new instrumentation as soon as the configuration is loaded.
 
 ## Naming Convention
-Differentiating from rules, actions and scopes as well as differentiating from keys and values you defined your own and those which are predefined can be tricky from time to time. Therefore, to increase readability of your configuration files the following naming convention is recommended:
+Differentiating between rules, actions and scopes as well as differentiating between keys and values
+in teh configuration can be tricky from time to time.
+Therefore, to increase readability of your configuration files the following naming convention is recommended:
 
-Scope names always start with "s_", e.g. `s_my_scope`.
-
-Action names always start with "a_", e.g. `a_my_action`.
-
-Rule names always start with "r_", e.g. `r_my_rule`.
-
-Fields which are defined by the user should always be set in single quotations marks, e.g. `input: 'my_input'`. This rule also applies to keys which  can be entirely defined by the user, for example when defining the name of a custom action or attribute names. Excluded are special keys starting with "_", such as `_arg0`.
+* Scope names always start with "s_", e.g. `s_my_scope`.
+* Action names always start with "a_", e.g. `a_my_action`.
+* Rule names always start with "r_", e.g. `r_my_rule`.
+* Fields which are defined by the user should always be put in single quotations marks, e.g. `input: 'my_input'`. This rule also applies to keys which
+  can be entirely defined by the user, for example when defining the name of a custom action or attribute names.
 
 This naming convention is used both in this documentation and the default configuration provided.
 

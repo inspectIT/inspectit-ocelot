@@ -122,14 +122,14 @@ The scope definition's advanced settings contains currently the following two at
 ## Example Scope Definition
 
 The following code-snippet contains an example of a complete scope definitions.
-Note: the following configuration contains all possible attributes even they are not necessary!
+Note: the following configuration contains all possible attributes even though they are not all necessary!
 
 ```yaml
 inspectit:
   instrumentation:
         scopes:
           # the id of the following defined scope element - this example scope targets the ArrayList's contains method
-          's_example-list-scope':
+          's_example_list_scope':
             # interfaces which have to be implemented
             interfaces:
               - name: 'java.util.List'

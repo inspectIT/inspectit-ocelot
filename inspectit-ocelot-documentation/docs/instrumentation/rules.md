@@ -23,28 +23,39 @@ inspectit:
 
         entry:
           'method_entry_time':
-            action: 'timestamp_nanos'
-          'method_name':
-            action: 'get_method_fqn'
+            action: 'a_timing_nanos'
+          'class_name':
+            action: 'a_method_getClassFQN'
+          'method_name_with_params':
+            action: 'a_method_getNameWithParameters'
 
         exit:
           'method_duration':
-            action: 'a_elapsed_millis'
+            action: 'a_timing_elapsedMillis'
             data-input:
-              'sinceNanos': 'method_entry_time'
+              'since_nanos': 'method_entry_time'
 
         metrics:
-          '[method/duration]' : 'method_duration'
+          '[method/duration]' : 
+            value: 'method_duration'
+            data-tags:
+              'class': 'class_name'
+              'method': 'method_name_with_params'
+             
 ```
 
-This example rule named `record_method_duration` measures the duration of the instrumented method and outputs the value using the `method/duration` metric.
+This example rule named `r_record_method_duration` measures the duration of the instrumented method and outputs the value using
+the `method/duration` metric.
 
-As the name states, we define under the `entry` property of the rule which actions are performed on method entry. Similarly, the `exit` property defines what is done when the instrumented method returns. In both sections we collect data.
+As the name states, we define under the `entry` property of the rule which actions are performed on method entry.
+Similarly, the `exit` property defines what is done when the instrumented method returns. In both sections we collect data.
 
-On entry, we collect the current timestamp in a variable named `method_entry_time` and the name of the currently executed method in `method_name`.
-These variables are _data_, their names are referred to as _data keys_. Note that we also define how the data is collected: For `method_entry_time` we invoke the [action](#actions) named `timestamp_nanos` and for `method_name` the one named `get_method_fqn`.
+On entry, we collect the current timestamp in a variable named `method_entry_time` and the name and class of the currently executed
+method in `method_name_with_params` and `class_name`.
+These variables are _data_, their names are referred to as _data keys_.
+Note that we also define how the data is collected: For `method_entry_time` we invoke the [action](#actions) named `a_timing_nanos` and for `class_name` the one named `a_method_getClassFQN`.
 
-This data is then used on method exit: using the action `elapsed_millis` we compute the time which has passed since `method_entry_time`. Finally, the duration computed this way is used as a value for the `method/duration` metric. As shown in the [definition](metrics/custom-metrics.md) of this metric, the collected `method_name` is used as a tag for all of its views.
+This data is then used on method exit: using the action `a_timing_elapsedMillis` we compute the time which has passed since `method_entry_time`. Finally, the duration computed this way is used as a value for the `method/duration` metric. As shown in the [definition](metrics/custom-metrics.md) of this metric, the collected class and name of the method is used as a tag for all of its views.
 
 ## Data Propagation
 
@@ -121,14 +132,14 @@ inspectit:
     actions:
 
       #computes a nanosecond-timestamp as a long for the current point in time
-      'a_timestamp_nanos':
+      'a_timing_nanos':
         value: 'new Long(System.nanoTime())'
 
       #computes the elapsed milliseconds as double since a given nanosecond-timestamp
-      'a_elapsed_millis':
+      'a_timing_elapsedMillis':
         input:
           #the timestamp captured via System.nanoTime() to compare against
-          'sinceNanos': 'long'
+          'since_nanos': 'long'
         value: 'new Double( (System.nanoTime() - sinceNanos) * 1E-6)'
 
       'a_string_replace_all':
@@ -138,18 +149,20 @@ inspectit:
           'string': 'String'
         value: 'string.replaceAll(regex,replacement)'
 
-      'a_get_method_fqn':
+      'a_method_getClassFQN':
         input:
-          _methodName: String
           _class: Class
-        value: 'new StringBuilder(_class.getName()).append('.').append(_methodName).toString()'
+        value: '_class.getName()'
 ```
 
-The names of the first two actions, `timestamp_nanos` and `elapsed_millis` should be familiar for you from the initial example in the [rules section](instrumentation/rules.md).
+The names of the first two actions, `a_timing_nanos` and `a_timing_elapsedMillis` should be familiar for you from the initial example in the [rules section](instrumentation/rules.md).
 
-The code executed when an action is invoked is defined through the `value` configuration property. In YAML, this is simply a string. InspectIT however will interpret this string as a Java expression to evaluate. The result value of this expression will be used as result for the action invocation.
+The code executed when an action is invoked is defined through the `value` configuration property.
+In YAML, this is simply a string. InspectIT however will interpret this string as a Java expression to evaluate. The result value of this expression will be used as result for the action invocation.
 
-Note that the code will not be interpreted at runtime, but instead inspectIT Ocelot will compile the expression to bytecode to ensure maximum efficiency. As indicated by the manual primitive boxing performed for `timestamp_nanos` the compiler has some restrictions. For example Autoboxing is not supported. However, actions are expected to return Objects, therefore manual boxing has to be performed. Under the hood, inspectIT uses the [javassist](http://www.javassist.org/) library, where all imposed restrictions can be found.
+Note that the code will not be interpreted at runtime, but instead inspectIT Ocelot will compile the expression to bytecode to ensure maximum efficiency.
+As indicated by the manual primitive boxing performed for `timestamp_nanos` the compiler has some restrictions. For example Autoboxing is not supported.
+However, actions are expected to return Objects, therefore manual boxing has to be performed. Under the hood, inspectIT uses the [javassist](http://www.javassist.org/) library, where all imposed restrictions can be found.
 The most important ones are that neither Autoboxing, Generics, Anonymous Classes or Lambda Expressions are supported.
 
 After actions have been compiled, they are placed in the same class loader as the class you instrument with them. This means that they can access any class that your application class could also access.
@@ -160,11 +173,11 @@ After actions have been compiled, they are placed in the same class loader as th
 
 As previously mentioned actions are also free to define any kind of _input parameters_ they need. This is done using the `input` configuration property.
 This property maps the names of the input parameters to their expected Java type.
-For example, the `elapsed_millis` action declares a single input variable named `sinceNanos` which has the type `long`. Note that for input parameters automatic primitive unboxing is supported.
+For example, the `a_timing_elapsedMillis` action declares a single input variable named `sinceNanos` which has the type `long`. Note that for input parameters automatic primitive unboxing is supported.
 
-Another example where the action even defines multiple inputs is `string_replace_all`. Guess what this action does? [Hint](https://docs.oracle.com/javase/8/docs/api/java/lang/String.html#replaceAll-java.lang.String-java.lang.String).
+Another example where the action even defines multiple inputs is `a_string_replace_all`. Guess what this action does? [Hint](https://docs.oracle.com/javase/8/docs/api/java/lang/String.html#replaceAll-java.lang.String-java.lang.String).
 
-The fourth example shown above is `get_method_fqn`, which uses the _special_ input parameters `_methodName` and `_class`. The fact that these variables are special is indicated by the leading underscore. When normally invoking actions from rules, the user has to take care that all input parameters are assigned a value. For special input parameters inspectIT automatically assigned the desired value. This means that for example `get_method_fqn` can be called without manually assigning any parameter, like it was done in the initial example in the [rules section](instrumentation/rules.md). An overview of all available special input parameters is given below:
+The fourth example shown above is `a_method_getClassFQN`, which uses the _special_ input parameter `_class`. The fact that these variables are special is indicated by the leading underscore. When normally invoking actions from rules, the user has to take care that all input parameters are assigned a value. For special input parameters inspectIT automatically assigned the desired value. This means that for example `a_method_getClassFQN` can be called without manually assigning any parameter, like it was done in the initial example in the [rules section](instrumentation/rules.md). An overview of all available special input parameters is given below:
 
 |Parameter Name|Type| Description
 |---|---|---|
@@ -253,9 +266,11 @@ Let's take a look again at the entry phase definitions of the ``record_method_du
 'r_record_method_duration':
   entry:
     'method_entry_time':
-      action: 'a_timestamp_nanos'
-    'method_name':
-      action: 'a_get_method_fqn'
+      action: 'a_timing_nanos'
+    'class_name':
+      action: 'a_method_getClassFQN'
+    'method_name_with_params':
+      action: 'a_method_getNameWithParameters'
 ```
 
 The `entry` and `exit` configuration options are YAML dictionaries mapping data keys to _action invocations_.
@@ -271,20 +286,21 @@ There are currently two possible ways of doing this:
 * **Assigning Data Values:** In this case, the value for a given data key is extracted from the [inspectIT context](#data-propagation) and passed to the action
 * **Assigning Constant Values:** In this case a literal specified in the configuration will directly be passed to the action.
 
-We have already seen how the assignment of data values to parameters is done in the exit phase of the `record_method_duration` rule:
+We have already seen how the assignment of data values to parameters is done in the exit phase of the `r_record_method_duration` rule:
 
 ```yaml
 #inspectit.instrumentation.rules is omitted here
 'r_record_method_duration':
   exit:
     'method_duration':
-      action: 'a_elapsed_millis'
-      data-input:
-        'sinceNanos': 'method_entry_time'
+      action: 'a_timing_elapsedMillis'
+        data-input:
+          'since_nanos': 'method_entry_time'
+
 ```
 
-The `elapsed_millis` action requires a value for the input parameter `sinceNanos`.
-In this example we defined that the value for the data key `method_entry_time` is used for `sinceNanos`.
+The `a_timing_elapsedMillis` action requires a value for the input parameter `since_nanos`.
+In this example we defined that the value for the data key `method_entry_time` is used for `since_nanos`.
 
 The assignment of constant values works very similar:
 
@@ -292,8 +308,8 @@ The assignment of constant values works very similar:
 #inspectit.instrumentation.rules is omitted here
 'r_example_rule':
   entry:
-    'a_hello_world_text':
-      action: set
+    'hello_world_text':
+      action: 'a_assign_value'
       constant-input:
         'value': 'Hello World!'
 ```
@@ -339,7 +355,7 @@ An example for the usage of a condition is given below:
 'r_example_rule':
   entry:
     'application_name':
-      action: 'set'
+      action: 'a_assign_value'
       constant-input:
         'value': 'My-Application'
     only-if-null: 'application_name'
@@ -368,7 +384,7 @@ In some rare cases you might want to change this behaviour. E.g. in tracing cont
 'r_example_rule':
   entry:
     'parent_span':
-      action: 'set'
+      action: 'a_assign_value'
       data-input:
         'value': 'span_id'
     'before':
