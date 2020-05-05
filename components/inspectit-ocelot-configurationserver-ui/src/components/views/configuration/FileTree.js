@@ -81,7 +81,7 @@ class FileTree extends React.Component {
    * Handle delete key press
    */
   onKeyDown = (event) => {
-    if(event.key === "Delete" && this.props.selection){
+    if (event.key === 'Delete' && this.props.selection) {
       this.props.showDeleteFileDialog(this.props.selection);
     }
   };
