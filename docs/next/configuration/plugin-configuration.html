@@ -69,7 +69,7 @@ take a look at <a href="https://github.com/inspectIT/inspectit-ocelot-plugins">t
 In order to enable the plugin system, you need to tell the agent where it should look for plugin JARs:</p>
 <pre><code class="hljs css language-yaml"><span class="hljs-attr">inspectit:</span>
   <span class="hljs-attr">plugins:</span>
-    <span class="hljs-attr">path:</span> <span class="hljs-string">/path/to/directory</span>
+    <span class="hljs-attr">path:</span> <span class="hljs-string">'/path/to/directory'</span>
 </code></pre>
 <p>The directory will be scanned on startup of the agent and all found plugins will be loaded.</p>
 <blockquote>
@@ -79,7 +79,7 @@ In order to enable the plugin system, you need to tell the agent where it should
 The settings for each plugin can be defined under the plugins section based on its name:</p>
 <pre><code class="hljs css language-yaml"><span class="hljs-attr">inspectit:</span>
   <span class="hljs-attr">plugins:</span>
-    <span class="hljs-attr">path:</span> <span class="hljs-string">/path/to/directory</span>
+    <span class="hljs-attr">path:</span> <span class="hljs-string">'/path/to/directory'</span>
     
     <span class="hljs-attr">some-plugin:</span>
       <span class="hljs-attr">some-config-option:</span> <span class="hljs-string">...</span>
@@ -87,7 +87,7 @@ The settings for each plugin can be defined under the plugins section based on i
     <span class="hljs-attr">some-other-plugin:</span>
       <span class="hljs-attr">soemthing:</span> <span class="hljs-string">...</span>
 </code></pre>
-</span></div></article></div><div class="docLastUpdate"><em>Last updated on 2019-12-16 by Ariane Kraus</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/next/configuration/open-census-configuration"><span class="arrow-prev">← </span><span class="function-name-prevnext">OpenCensus Configuration</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/next/metrics/metrics"><span>Metrics</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2020 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</span></div></article></div><div class="docLastUpdate"><em>Last updated on 2020-5-5 by Marius Brill</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/next/configuration/open-census-configuration"><span class="arrow-prev">← </span><span class="function-name-prevnext">OpenCensus Configuration</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/next/metrics/metrics"><span>Metrics</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2020 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
