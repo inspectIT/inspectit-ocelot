@@ -23,8 +23,8 @@ inspectit:
     obfuscation:
       enabled: true
       patterns:
-        - pattern: username
-        - pattern: [a-z]+
+        - pattern: 'username'
+        - pattern: '[a-z]+'
 ```
 
 :::warning Obfuscation Deactivation
@@ -53,7 +53,7 @@ inspectit:
   privacy:
     obfuscation:
       patterns:
-        - pattern: address
+        - pattern: 'address'
 ```
 The following table shows the effect of the previous obfuscation configuration on collected span attributes:
 
@@ -72,7 +72,7 @@ inspectit:
   privacy:
     obfuscation:
       patterns:
-        - pattern: address
+        - pattern: 'address'
           case-insensitive: false   # ignore capitalization
           check-key: true           # this is true by default
           check-data: true          # also check the attributes value

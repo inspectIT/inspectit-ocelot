@@ -21,16 +21,16 @@ inspectit:
     definitions:
       '[method/duration]':
         unit: ms
-        description: "the duration from method entry to method exit"
+        description: 'the duration from method entry to method exit'
         views:
           '[method/duration/sum]':
             aggregation: SUM
             tags:
-              method_name : true
+              'method_name' : true
           '[method/duration/count]':
             aggregation: COUNT
             tags:
-              method_name: true
+              'method_name': true
 ```
 
 This snippet defines a metric with the name `method/duration` and the two views `method/duration/sum`
