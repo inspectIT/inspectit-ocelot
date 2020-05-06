@@ -158,7 +158,7 @@ public class PercentileViewManager {
      *
      * @return the name of the source measure or null if this series does not originate from a percentile view.
      */
-    public String getMeasureForSeries(String seriesName) {
+    public String getMeasureNameForSeries(String seriesName) {
         return getSeriesToMeasuresCache().get(seriesName);
     }
 
@@ -219,7 +219,8 @@ public class PercentileViewManager {
         if (seriesToMeasuresCache == null) {
             seriesToMeasuresCache = new HashMap<>();
             measuresToViewsMap.forEach((measure, views) ->
-                    views.stream().flatMap(view -> view.getSeriesNames().stream())
+                    views.stream()
+                            .flatMap(view -> view.getSeriesNames().stream())
                             .forEach(series -> seriesToMeasuresCache.put(series, measure))
             );
         }

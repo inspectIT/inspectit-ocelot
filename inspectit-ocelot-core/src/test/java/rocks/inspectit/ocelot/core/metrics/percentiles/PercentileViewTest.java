@@ -123,6 +123,15 @@ public class PercentileViewTest {
 
             assertThat(view.getSeriesNames()).containsExactly("name_max");
         }
+
+        @Test
+        void checkAllPercentileSeries() {
+            PercentileView view = new PercentileView(true, true, ImmutableSet.of(0.5),
+                    Collections.emptySet(), 10, "name", "unit", "description", 1);
+
+            assertThat(view.getSeriesNames()).containsExactlyInAnyOrder("name", "name_min", "name_max");
+        }
+
     }
 
     @Nested

@@ -239,6 +239,12 @@ public class PercentileView {
         return true;
     }
 
+    /**
+     * Returns the name of the series exposed by this view.
+     * This can be up to three series, depending on whether min/max and quantiles are enabled.
+     *
+     * @return the names of the exposed series.
+     */
     Set<String> getSeriesNames() {
         Set<String> result = new HashSet<>();
         if (minMetricDescriptor != null) {
