@@ -84,6 +84,11 @@ inspectit-eum-server:
         enabled: true
         host: localhost
         port: 8888
+    tracing:
+      jaeger:
+        enabled: true
+        grpc: localhost:14250
+        service-name: browser-js
 ```
 
 ## Metrics Definition
@@ -293,12 +298,20 @@ The resource timing processing is enabled by default and can be disabled by sett
 
 ## Exporters
 
+### Metrics
+
 The EUM server comes with the same Prometheus and InfluxDB exporter as the Ocelot agent.
 The exporter's configurations options are the same as for the [agent](metrics/metric-exporters.md).
 However, they are located under the `inspectit-eum-server.exporters.metrics` configuration path.
 
 By default, the prometheus exporter is enabled and available on port `8888`.
 The InfluxDB exporter is disabled by default and can be enabled by setting the URL via `inspectit-eum-server.exporters.metrics.influx.url`.
+
+### Tracing
+
+The EUM server supports trace data forwarding to the Jaeger exporter.
+The exporter is using the [Jaeger Protobuf via gRPC API](https://www.jaegertracing.io/docs/1.16/apis/#protobuf-via-grpc-stable) in order to forward trace data.
+By default, the Jaeger exporter is disabled.
 
 ## Self-Monitoring
 
