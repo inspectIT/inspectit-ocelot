@@ -10,7 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import rocks.inspectit.oce.eum.server.tracing.opentelemtry.OpenTelemetryProtoConverter;
 
@@ -19,7 +22,6 @@ import java.util.Collection;
 import java.util.List;
 
 @RestController()
-@RequestMapping("/")
 @Slf4j
 public class OpenTelemetryTraceController {
 
@@ -55,8 +57,11 @@ public class OpenTelemetryTraceController {
             // in case of exception send proper response back
         } catch (InvalidProtocolBufferException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "OpenTelemetry data corrupted.", e);
+        } catch (Exception e) {
+            // catch any exception in order to log
+            log.warn("Exception thrown processing OpenTelemetry trace service request with post data=[{}].", data, e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, null, e);
         }
-        // TODO what with runtime exceptions!!!
     }
 
 }

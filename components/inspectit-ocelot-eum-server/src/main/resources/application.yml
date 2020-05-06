@@ -122,9 +122,10 @@ inspectit-eum-server:
     tracing:
       jaeger:
         # if jaeger exporter for the OT received spans is enabled
-        enabled: false
-        # url pointing to the host and port of the jaeger collector
-        url: http://localhost:14250
+        enabled: true
+        # location of the jaeger gRPC API
+        # either a valid NameResolver-compliant URI, or an authority string
+        grpc:
         # service name for all exported spans
         service-name: browser-js
 

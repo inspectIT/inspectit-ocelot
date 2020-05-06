@@ -26,9 +26,15 @@ public class JaegerExporterService extends DynamicallyActivatableService {
     @Override
     protected boolean checkEnabledForConfig(InspectitConfig conf) {
         @Valid JaegerExporterSettings jaeger = conf.getExporters().getTracing().getJaeger();
-        return jaeger.isEnabled()
-                && !StringUtils.isEmpty(jaeger.getUrl())
-                && conf.getTracing().isEnabled();
+        if (conf.getTracing().isEnabled() && jaeger.isEnabled()) {
+            if (!StringUtils.isEmpty(jaeger.getUrl())) {
+                return true;
+            } else if (StringUtils.isNotEmpty(jaeger.getGrpc())) {
+                // print warning if user used wrong setup
+                log.warn("In order to use Jaeger span exporter, please specify the HTTP URL endpoint property instead of the gRPC.");
+            }
+        }
+        return false;
     }
 
     @Override
