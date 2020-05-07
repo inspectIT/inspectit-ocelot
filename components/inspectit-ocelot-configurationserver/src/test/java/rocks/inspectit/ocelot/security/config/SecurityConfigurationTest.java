@@ -16,6 +16,7 @@ import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.config.model.LdapSettings;
 import rocks.inspectit.ocelot.config.model.SecuritySettings;
 import rocks.inspectit.ocelot.security.userdetails.LocalUserDetailsService;
+import rocks.inspectit.ocelot.user.LdapUserAuthorityPopulator;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -46,6 +47,9 @@ class SecurityConfigurationTest {
 
         @Mock
         LdapAuthenticationProviderConfigurer ldapConfigurer;
+
+        @Mock
+        LdapUserAuthorityPopulator ldapUserAuthorityPopulator;
 
         @Test
         public void useLocalUserService() throws Exception {
@@ -79,6 +83,8 @@ class SecurityConfigurationTest {
             when(ldapConfigurer.userSearchBase(anyString())).thenReturn(ldapConfigurer);
             when(ldapConfigurer.groupSearchFilter(anyString())).thenReturn(ldapConfigurer);
             when(ldapConfigurer.groupSearchBase(anyString())).thenReturn(ldapConfigurer);
+            when(ldapConfigurer.contextSource(any())).thenReturn(ldapConfigurer);
+            when(ldapConfigurer.ldapAuthoritiesPopulator(any())).thenReturn(ldapConfigurer);
             when(auth.userDetailsService(any())).thenReturn(daoAuthenticationConfigurer);
 
             configuration.configure(auth);
@@ -89,6 +95,7 @@ class SecurityConfigurationTest {
             verify(ldapConfigurer).groupSearchFilter("group-filter");
             verify(ldapConfigurer).groupSearchBase("group-base");
             verify(ldapConfigurer).contextSource(any());
+            verify(ldapConfigurer).ldapAuthoritiesPopulator(any());
             verify(auth).userDetailsService(localUserDetailsService);
             verify(daoAuthenticationConfigurer).passwordEncoder(passwordEncoder);
             verify(context).getBean(LdapContextSource.class);
