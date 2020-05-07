@@ -14,24 +14,25 @@
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "5.4.2"
+      "version": "6.7.3"
     },
     {
       "type": "datasource",
       "id": "influxdb",
       "name": "InfluxDB",
-      "version": "5.0.0"
+      "version": "1.0.0"
     },
     {
       "type": "panel",
       "id": "novatec-service-dependency-graph-panel",
       "name": "Service Dependency Graph",
-      "version": "0.2"
+      "version": "2.0"
     }
   ],
   "annotations": {
     "list": [
       {
+        "$$hashKey": "object:728",
         "builtIn": 1,
         "datasource": "-- Grafana --",
         "enable": true,
@@ -46,7 +47,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1587549662471,
+  "iteration": 1588835372501,
   "links": [],
   "panels": [
     {
@@ -103,6 +104,54 @@
         "dangerColor": "rgb(184, 36, 36)",
         "healthyColor": "rgb(87, 148, 242)"
       },
+      "settings": {
+        "animate": true,
+        "dataMapping": {
+          "errorRateColumn": "in_errors",
+          "errorRateOutgoingColumn": "out_errors",
+          "extOrigin": "origin_external",
+          "extTarget": "target_external",
+          "requestRateColumn": "in_count",
+          "requestRateOutgoingColumn": "out_count",
+          "responseTimeColumn": "in_responsetime",
+          "responseTimeOutgoingColumn": "out_responsetime",
+          "sourceComponentPrefix": "origin_",
+          "targetComponentPrefix": "target_",
+          "type": "protocol"
+        },
+        "drillDownLink": "",
+        "externalIcons": [
+          {
+            "$$hashKey": "object:822",
+            "filename": "web",
+            "name": "web"
+          },
+          {
+            "$$hashKey": "object:823",
+            "filename": "message",
+            "name": "jms"
+          },
+          {
+            "$$hashKey": "object:824",
+            "filename": "database",
+            "name": "jdbc"
+          },
+          {
+            "$$hashKey": "object:825",
+            "filename": "http",
+            "name": "http"
+          }
+        ],
+        "filterEmptyConnections": true,
+        "showConnectionStats": true,
+        "showDebugInformation": false,
+        "showDummyData": false,
+        "style": {
+          "dangerColor": "rgb(184, 36, 36)",
+          "healthyColor": "rgb(87, 148, 242)"
+        },
+        "sumTimings": false
+      },
       "targets": [
         {
           "alias": "in_count",
@@ -124,7 +173,7 @@
           "measurement": "service_in_count",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SUM(\"count\") AS \"in_count\" FROM \"autogen\".\"service_in_responsetime\" \nWHERE ((\"service\" =~ /^$service$/ OR \"origin_service\" =~ /^$service$/) AND \"application\" =~ /^$application$/) AND $timeFilter\nGROUP BY \"service\", \"origin_service\", \"target_external\", \"protocol\"",
+          "query": "SELECT SUM(\"count\") AS \"in_count\" FROM \"autogen\".\"service_in_responsetime\" \nWHERE (\"service\" =~ /^$service$/ OR \"origin_service\" =~ /^$service$/) AND $timeFilter\nGROUP BY \"service\", \"origin_service\", \"target_external\", \"protocol\"",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -162,7 +211,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SUM(\"count\") AS \"out_count\" FROM \"autogen\".\"service_out_responsetime\" \nWHERE ((\"service\" =~ /^$service$/ OR \"target_service\" =~ /^$service$/) AND \"application\" =~ /^$application$/) AND $timeFilter\nGROUP BY \"service\", \"target_service\", \"target_external\", \"protocol\"",
+          "query": "SELECT SUM(\"count\") AS \"out_count\" FROM \"autogen\".\"service_out_responsetime\" \nWHERE (\"service\" =~ /^$service$/ OR \"target_service\" =~ /^$service$/) AND $timeFilter\nGROUP BY \"service\", \"target_service\", \"target_external\", \"protocol\"",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "table",
@@ -200,7 +249,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SUM(\"sum\")/SUM(\"count\") AS \"in_responsetime\" FROM \"autogen\".\"service_in_responsetime\" \nWHERE ((\"service\" =~ /^$service$/ OR \"origin_service\" =~ /^$service$/) AND \"application\" =~ /^$application$/) AND $timeFilter\nGROUP BY \"service\", \"origin_service\", \"target_external\", \"protocol\"",
+          "query": "SELECT SUM(\"sum\")/SUM(\"count\") AS \"in_responsetime\" FROM \"autogen\".\"service_in_responsetime\" \nWHERE (\"service\" =~ /^$service$/ OR \"origin_service\" =~ /^$service$/) AND $timeFilter\nGROUP BY \"service\", \"origin_service\", \"target_external\", \"protocol\"",
           "rawQuery": true,
           "refId": "C",
           "resultFormat": "table",
@@ -238,9 +287,87 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SUM(\"sum\")/SUM(\"count\") AS \"out_responsetime\" FROM \"autogen\".\"service_out_responsetime\" \nWHERE ((\"service\" =~ /^$service$/ OR \"target_service\" =~ /^$service$/) AND \"application\" =~ /^$application$/) AND $timeFilter\nGROUP BY \"service\", \"target_service\", \"target_external\", \"protocol\"",
+          "query": "SELECT SUM(\"sum\")/SUM(\"count\") AS \"out_responsetime\" FROM \"autogen\".\"service_out_responsetime\" \nWHERE (\"service\" =~ /^$service$/ OR \"target_service\" =~ /^$service$/) AND $timeFilter\nGROUP BY \"service\", \"target_service\", \"target_external\", \"protocol\"",
           "rawQuery": true,
           "refId": "D",
+          "resultFormat": "table",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        },
+        {
+          "alias": "in_count",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "measurement": "service_in_count",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT SUM(\"count\") AS \"in_errors\" FROM \"autogen\".\"service_in_responsetime\" \nWHERE (\"service\" =~ /^$service$/ OR \"origin_service\" =~ /^$service$/) AND \"error\"='true' AND $timeFilter\nGROUP BY \"service\", \"origin_service\", \"target_external\", \"protocol\"",
+          "rawQuery": true,
+          "refId": "E",
+          "resultFormat": "table",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "spread"
+              }
+            ]
+          ],
+          "tags": []
+        },
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT SUM(\"count\") AS \"out_errors\" FROM \"autogen\".\"service_out_responsetime\" \nWHERE (\"service\" =~ /^$service$/ OR \"target_service\" =~ /^$service$/) AND \"error\"='true' AND $timeFilter\nGROUP BY \"service\", \"target_service\", \"target_external\", \"protocol\"",
+          "rawQuery": true,
+          "refId": "F",
           "resultFormat": "table",
           "select": [
             [
@@ -264,7 +391,7 @@
     }
   ],
   "refresh": "30s",
-  "schemaVersion": 16,
+  "schemaVersion": 22,
   "style": "dark",
   "tags": [],
   "templating": {
@@ -299,6 +426,7 @@
         "definition": "SHOW TAG VALUES WITH KEY=\"service\"",
         "hide": 0,
         "includeAll": true,
+        "index": -1,
         "label": "Service",
         "multi": true,
         "name": "service",
@@ -308,28 +436,6 @@
         "regex": "",
         "skipUrlSync": false,
         "sort": 1,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
-      },
-      {
-        "allValue": ".*",
-        "current": {},
-        "datasource": "${DS_LOCALINFLUX}",
-        "definition": "SHOW TAG VALUES WITH KEY = \"application\"",
-        "hide": 0,
-        "includeAll": true,
-        "label": "Application",
-        "multi": false,
-        "name": "application",
-        "options": [],
-        "query": "SHOW TAG VALUES WITH KEY = \"application\"",
-        "refresh": 1,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
         "tagValuesQuery": "",
         "tags": [],
         "tagsQuery": "",
@@ -370,5 +476,8 @@
   "timezone": "",
   "title": "Service Graph",
   "uid": "Kx4wbZRZk",
+  "variables": {
+    "list": []
+  },
   "version": 1
 }

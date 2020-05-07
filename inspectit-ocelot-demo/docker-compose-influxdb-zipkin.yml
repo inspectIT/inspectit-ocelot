@@ -198,7 +198,7 @@ services:
       - 9411:9411
 
   grafana:
-    image: inspectit/grafana:servicegraph-v0.2
+    image: inspectit/grafana:servicegraph-v2.1
     container_name: grafana
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=demo
