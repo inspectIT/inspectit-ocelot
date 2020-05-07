@@ -46,7 +46,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Autowired
     private LocalUserDetailsService localUserDetailsService;
 
-    @Autowired
+    @Autowired(required = false)
     private LdapUserAuthorityPopulator ldapUserAuthorityPopulator;
 
     @Autowired
@@ -108,7 +108,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     private void configureLdapAuthentication(AuthenticationManagerBuilder auth) throws Exception {
         LdapContextSource contextSource = getApplicationContext().getBean(LdapContextSource.class);
         LdapSettings ldapSettings = serverSettings.getSecurity().getLdap();
-
         auth
                 .ldapAuthentication()
                 .userSearchFilter(ldapSettings.getUserSearchFilter())

@@ -53,11 +53,6 @@ public class UserRoleConfiguration {
     private static final String ROLE_PREFIX = "ROLE_";
 
     /**
-     * Permission required for read access.
-     */
-    public static final String READ_ACCESS_ROLE = ROLE_PREFIX + READ_ACCESS;
-
-    /**
      * Permission required for write access.
      */
     public static final String WRITE_ACCESS_ROLE = ROLE_PREFIX + WRITE_ACCESS;
