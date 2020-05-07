@@ -1,6 +1,5 @@
 package rocks.inspectit.ocelot.security.userdetails;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,10 +8,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import rocks.inspectit.ocelot.security.config.UserRoleConfiguration;
 import rocks.inspectit.ocelot.user.User;
 import rocks.inspectit.ocelot.user.UserService;
 
-import java.lang.reflect.Field;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,24 +29,19 @@ public class LocalUserDetailsServiceTest {
 
     @Nested
     public class LoadUserByUsername {
-
-        @BeforeEach
-        public void before() throws Exception {
-            Field field = LocalUserDetailsService.class.getDeclaredField("accessRoles");
-            field.setAccessible(true);
-            field.set(detailsService, new String[]{"role"});
-        }
-
         @Test
         public void successfullyFindUser() {
             User user = User.builder().username("username").passwordHash("hash").isLdapUser(false).build();
             when(userService.getUserByName("username")).thenReturn(Optional.of(user));
+            String[] adminAccessPermissions = UserRoleConfiguration.ADMIN_ROLE_PERMISSION_SET;
 
             UserDetails result = detailsService.loadUserByUsername("username");
 
             assertThat(result.getUsername()).isEqualTo("username");
             assertThat(result.getPassword()).isEqualTo("hash");
-            assertThat(result.getAuthorities()).extracting(Object::toString).containsExactly("ROLE_role");
+            assertThat(result.getAuthorities())
+                    .extracting(object -> object.toString().substring("ROLE_".length()))
+                    .containsExactlyInAnyOrder(adminAccessPermissions);
             verify(userService).getUserByName(anyString());
             verifyNoMoreInteractions(userService);
         }
