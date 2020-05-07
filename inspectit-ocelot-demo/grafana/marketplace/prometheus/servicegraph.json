@@ -14,24 +14,25 @@
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "5.4.2"
+      "version": "6.7.3"
     },
     {
       "type": "panel",
       "id": "novatec-service-dependency-graph-panel",
       "name": "Service Dependency Graph",
-      "version": "0.2"
+      "version": "2.0"
     },
     {
       "type": "datasource",
       "id": "prometheus",
       "name": "Prometheus",
-      "version": "5.0.0"
+      "version": "1.0.0"
     }
   ],
   "annotations": {
     "list": [
       {
+        "$$hashKey": "object:1388",
         "builtIn": 1,
         "datasource": "-- Grafana --",
         "enable": true,
@@ -46,7 +47,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1567608142832,
+  "iteration": 1588833980797,
   "links": [],
   "panels": [
     {
@@ -103,34 +104,106 @@
         "dangerColor": "rgb(184, 36, 36)",
         "healthyColor": "rgb(87, 148, 242)"
       },
+      "settings": {
+        "animate": true,
+        "dataMapping": {
+          "errorRateColumn": "Value #E",
+          "errorRateOutgoingColumn": "Value #F",
+          "extOrigin": "origin_external",
+          "extTarget": "target_external",
+          "requestRateColumn": "Value #A",
+          "requestRateOutgoingColumn": "Value #B",
+          "responseTimeColumn": "Value #C",
+          "responseTimeOutgoingColumn": "Value #D",
+          "sourceComponentPrefix": "origin_",
+          "targetComponentPrefix": "target_",
+          "type": "protocol"
+        },
+        "drillDownLink": "",
+        "externalIcons": [
+          {
+            "$$hashKey": "object:1411",
+            "filename": "web",
+            "name": "web"
+          },
+          {
+            "$$hashKey": "object:1412",
+            "filename": "message",
+            "name": "jms"
+          },
+          {
+            "$$hashKey": "object:1413",
+            "filename": "database",
+            "name": "jdbc"
+          },
+          {
+            "$$hashKey": "object:1414",
+            "filename": "http",
+            "name": "http"
+          }
+        ],
+        "filterEmptyConnections": true,
+        "showConnectionStats": true,
+        "showDebugInformation": false,
+        "showDummyData": false,
+        "style": {
+          "dangerColor": "rgb(184, 36, 36)",
+          "healthyColor": "rgb(87, 148, 242)"
+        },
+        "sumTimings": true
+      },
       "targets": [
         {
-          "expr": "sum(increase(service_in_count{application=~\"$application\",service=~\"$service\"}[$__range]) or increase(service_in_count{application=~\"$application\",origin_service=~\"$service\"}[$__range]) >= 0) by (service,origin_service,origin_external,protocol) > 0",
+          "expr": "sum(increase(service_in_count{service=~\"$service\"}[$__range]) or increase(service_in_count{origin_service=~\"$service\"}[$__range]) >= 0) by (service,origin_service,origin_external,protocol) > 0",
           "format": "table",
           "instant": true,
+          "interval": "",
           "intervalFactor": 1,
+          "legendFormat": "",
           "refId": "A"
         },
         {
-          "expr": "sum(increase(service_out_count{application=~\"$application\",service=~\"$service\"}[$__range]) or increase(service_out_count{application=~\"$application\",target_service=~\"$service\"}[$__range]) >= 0) by (service,target_service,target_external,protocol) > 0",
+          "expr": "sum(increase(service_out_count{service=~\"$service\"}[$__range]) or increase(service_out_count{target_service=~\"$service\"}[$__range]) >= 0) by (service,target_service,target_external,protocol) > 0",
           "format": "table",
           "instant": true,
+          "interval": "",
           "intervalFactor": 1,
+          "legendFormat": "",
           "refId": "B"
         },
         {
-          "expr": "sum(increase(service_in_responsetime_sum{application=~\"$application\",service=~\"$service\"}[$__range]) or increase(service_in_responsetime_sum{application=~\"$application\",origin_service=~\"$service\"}[$__range]) >= 0) by (service,origin_service,origin_external,protocol) > 0",
+          "expr": "sum(increase(service_in_responsetime_sum{service=~\"$service\"}[$__range]) or increase(service_in_responsetime_sum{origin_service=~\"$service\"}[$__range]) >= 0) by (service,origin_service,origin_external,protocol) > 0",
           "format": "table",
           "instant": true,
+          "interval": "",
           "intervalFactor": 1,
+          "legendFormat": "",
           "refId": "C"
         },
         {
-          "expr": "sum(increase(service_out_responsetime_sum{application=~\"$application\",service=~\"$service\"}[$__range]) or increase(service_out_responsetime_sum{application=~\"$application\",target_service=~\"$service\"}[$__range]) >= 0) by (service,target_service,target_external,protocol) > 0",
+          "expr": "sum(increase(service_out_responsetime_sum{service=~\"$service\"}[$__range]) or increase(service_out_responsetime_sum{target_service=~\"$service\"}[$__range]) >= 0) by (service,target_service,target_external,protocol) > 0",
           "format": "table",
           "instant": true,
+          "interval": "",
           "intervalFactor": 1,
+          "legendFormat": "",
           "refId": "D"
+        },
+        {
+          "expr": "sum(increase(service_in_count{service=~\"$service\",error=\"true\"}[$__range]) or increase(service_in_count{origin_service=~\"$service\",error=\"true\"}[$__range]) >= 0) by (service,origin_service,origin_external,protocol) > 0",
+          "format": "table",
+          "instant": true,
+          "interval": "",
+          "legendFormat": "",
+          "refId": "E"
+        },
+        {
+          "expr": "sum(increase(service_out_count{service=~\"$service\",error=\"true\"}[$__range]) or increase(service_out_count{target_service=~\"$service\",error=\"true\"}[$__range]) >= 0) by (service,target_service,target_external,protocol) > 0",
+          "format": "table",
+          "instant": true,
+          "interval": "",
+          "legendFormat": "",
+          "refId": "F"
         }
       ],
       "title": "Service Graph",
@@ -138,7 +211,7 @@
     }
   ],
   "refresh": "30s",
-  "schemaVersion": 16,
+  "schemaVersion": 22,
   "style": "dark",
   "tags": [],
   "templating": {
@@ -169,31 +242,10 @@
         "allValue": ".*",
         "current": {},
         "datasource": "${DS_LOCALPROMETHEUS}",
-        "definition": "label_values(application)",
-        "hide": 0,
-        "includeAll": true,
-        "label": "Application",
-        "multi": true,
-        "name": "application",
-        "options": [],
-        "query": "label_values(application)",
-        "refresh": 1,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 1,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
-      },
-      {
-        "allValue": ".*",
-        "current": {},
-        "datasource": "${DS_LOCALPROMETHEUS}",
         "definition": "label_values(service)",
         "hide": 0,
         "includeAll": true,
+        "index": -1,
         "label": "Services",
         "multi": true,
         "name": "service",
@@ -243,5 +295,8 @@
   "timezone": "",
   "title": "Service Graph",
   "uid": "FlzDnieiz",
+  "variables": {
+    "list": []
+  },
   "version": 1
 }
