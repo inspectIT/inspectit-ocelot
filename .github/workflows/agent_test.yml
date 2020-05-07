@@ -4,29 +4,6 @@ on:
   push:
     branches:
       - master
-    paths:
-      - '.github/workflows/agent_test.yml'
-      - 'inspect-ocelot-*'
-      - '!inspect-ocelot-documentation'
-      - '!inspect-ocelot-demo'
-      - '!components/**'
-      - '!.github/workflows/configuration_ui_test.yml'
-      - '!.github/workflows/configurationserver_test.yml'
-      - '!.github/workflows/eumserver_test.yml'
-      - '!*.md'
-  pull_request:
-    branches:
-      - master
-    paths:
-      - '.github/workflows/agent_test.yml'
-      - 'inspect-ocelot-*'
-      - '!inspect-ocelot-documentation'
-      - '!inspect-ocelot-demo'
-      - '!components/**'
-      - '!.github/workflows/configuration_ui_test.yml'
-      - '!.github/workflows/configurationserver_test.yml'
-      - '!.github/workflows/eumserver_test.yml'
-      - '!*.md'
 
 jobs:
   pr-check:
