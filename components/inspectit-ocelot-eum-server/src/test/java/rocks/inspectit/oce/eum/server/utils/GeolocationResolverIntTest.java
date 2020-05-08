@@ -1,25 +1,22 @@
 package rocks.inspectit.oce.eum.server.utils;
 
-import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.BasicResponseHandler;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
+import rocks.inspectit.oce.eum.server.beacon.Beacon;
 import rocks.inspectit.oce.eum.server.beacon.processor.CountryCodeBeaconProcessor;
+import rocks.inspectit.oce.eum.server.metrics.BeaconMetricManager;
 
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +24,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -45,13 +43,11 @@ public class GeolocationResolverIntTest {
     @Autowired
     protected MockMvc mockMvc;
 
-    private static CloseableHttpClient testClient;
+    @MockBean
+    BeaconMetricManager beaconMetricManager;
 
-    @BeforeEach
-    public void initClient() {
-        HttpClientBuilder builder = HttpClientBuilder.create();
-        testClient = builder.build();
-    }
+    @Captor
+    ArgumentCaptor<Beacon> beaconCaptor;
 
     /**
      * Sends beacon to mocked endpoint /beacon
@@ -70,13 +66,8 @@ public class GeolocationResolverIntTest {
         return beacon;
     }
 
-    @AfterEach
-    public void closeClient() throws Exception {
-        testClient.close();
-    }
-
     /**
-     * The application should expose a view, where the tag COUNTRY_CODE is set to DE
+     * The application should process a beacon, where the tag COUNTRY_CODE is set to DE
      *
      * @throws Exception
      */
@@ -87,13 +78,12 @@ public class GeolocationResolverIntTest {
 
         sendBeacon(beacon, "94.186.169.18");
 
-        HttpResponse response = testClient.execute(new HttpGet("http://localhost:8888/metrics)"));
-        ResponseHandler responseHandler = new BasicResponseHandler();
-        assertThat(responseHandler.handleResponse(response).toString()).contains(CountryCodeBeaconProcessor.TAG_COUNTRY_CODE + "=" + "\"DE\"");
+        verify(beaconMetricManager).processBeacon(beaconCaptor.capture());
+        assertThat(beaconCaptor.getValue().get(CountryCodeBeaconProcessor.TAG_COUNTRY_CODE)).isEqualTo("DE");
     }
 
     /**
-     * The application should expose a view, where the tag COUNTRY_CODE is not set
+     * The application should process a beacon, where the tag COUNTRY_CODE is not set
      *
      * @throws Exception
      */
@@ -104,13 +94,12 @@ public class GeolocationResolverIntTest {
 
         sendBeacon(beacon, "127.0.0.1");
 
-        HttpResponse response = testClient.execute(new HttpGet("http://localhost:8888/metrics)"));
-        ResponseHandler responseHandler = new BasicResponseHandler();
-        assertThat(responseHandler.handleResponse(response).toString()).contains(CountryCodeBeaconProcessor.TAG_COUNTRY_CODE + "=" + "\"\"");
+        verify(beaconMetricManager).processBeacon(beaconCaptor.capture());
+        assertThat(beaconCaptor.getValue().get(CountryCodeBeaconProcessor.TAG_COUNTRY_CODE)).isEmpty();
     }
 
     /**
-     * The application should expose a view, where the tag COUNTRY_CODE is not set
+     * The application should process a beacon, where the tag COUNTRY_CODE is not set
      *
      * @throws Exception
      */
@@ -121,8 +110,8 @@ public class GeolocationResolverIntTest {
 
         sendBeacon(beacon, "wrong-formatted-ip");
 
-        HttpResponse response = testClient.execute(new HttpGet("http://localhost:8888/metrics)"));
-        ResponseHandler responseHandler = new BasicResponseHandler();
-        assertThat(responseHandler.handleResponse(response).toString()).contains(CountryCodeBeaconProcessor.TAG_COUNTRY_CODE + "=" + "\"\"");
+        verify(beaconMetricManager).processBeacon(beaconCaptor.capture());
+        assertThat(beaconCaptor.getValue().get(CountryCodeBeaconProcessor.TAG_COUNTRY_CODE)).isEmpty();
     }
+
 }
