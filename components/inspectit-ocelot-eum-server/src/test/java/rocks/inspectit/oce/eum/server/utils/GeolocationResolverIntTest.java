@@ -108,7 +108,7 @@ public class GeolocationResolverIntTest {
         Map<String, String> beacon = getBasicBeacon();
         beacon.put(BEACON_KEY_NAME, "12");
 
-        sendBeacon(beacon, "wrong-formatted-ip");
+        sendBeacon(beacon, "127.0.0.0.1");
 
         verify(beaconMetricManager).processBeacon(beaconCaptor.capture());
         assertThat(beaconCaptor.getValue().get(CountryCodeBeaconProcessor.TAG_COUNTRY_CODE)).isEmpty();
