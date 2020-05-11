@@ -3,10 +3,12 @@ package rocks.inspectit.ocelot.core.instrumentation.config.model;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 import lombok.*;
+import rocks.inspectit.ocelot.config.model.instrumentation.rules.EventRecordingSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.MetricRecordingSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.RuleTracingSettings;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 
 /**
@@ -90,4 +92,10 @@ public class InstrumentationRule {
      */
     @Builder.Default
     private RuleTracingSettings tracing = RuleTracingSettings.NO_TRACING_AND_ATTRIBUTES;
+
+    /**
+     * The events to be recorded.
+     */
+    @Builder.Default
+    private Set<EventRecordingSettings> events = Collections.emptySet();
 }

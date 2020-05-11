@@ -214,6 +214,7 @@ public class InstrumentationConfigurationResolver {
                 .metricsEnabled(config.getMetrics().isEnabled())
                 .tracingEnabled(config.getTracing().isEnabled())
                 .tracingSettings(config.getTracing())
+                .eventsEnabled(config.getEvents().isEnabled())
                 .source(config.getInstrumentation())
                 .rules(ruleResolver.resolve(config.getInstrumentation(), genericActions))
                 .propagationMetaData(propagationMetaDataResolver.resolve(config))
