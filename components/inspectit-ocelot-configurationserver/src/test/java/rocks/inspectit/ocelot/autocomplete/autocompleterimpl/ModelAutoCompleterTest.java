@@ -74,7 +74,8 @@ public class ModelAutoCompleterTest {
                     "service-name",
                     "tags",
                     "thread-pool-size",
-                    "tracing");
+                    "tracing",
+                    "events");
         }
 
         @Test
@@ -162,7 +163,8 @@ public class ModelAutoCompleterTest {
                     "service-name",
                     "tags",
                     "thread-pool-size",
-                    "tracing");
+                    "tracing",
+                    "events");
         }
     }
 }

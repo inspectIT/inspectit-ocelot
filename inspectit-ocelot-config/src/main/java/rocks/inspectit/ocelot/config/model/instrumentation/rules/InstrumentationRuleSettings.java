@@ -106,6 +106,9 @@ public class InstrumentationRuleSettings {
     @Valid
     private RuleTracingSettings tracing = null;
 
+    @NotNull
+    private Map<@NotBlank String, @Valid EventRecordingSettings > events = Collections.emptyMap();
+
     /**
      * Validates this rule, invoked by {@link InstrumentationSettings#performValidation(InspectitConfig, ViolationBuilder)}
      *
