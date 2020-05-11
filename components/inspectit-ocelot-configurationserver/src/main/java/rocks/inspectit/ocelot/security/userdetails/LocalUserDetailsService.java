@@ -51,7 +51,7 @@ public class LocalUserDetailsService implements UserDetailsService {
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getUsername())
                 .password(user.getPasswordHash())
-                .roles(UserRoleConfiguration.ADMIN_ROLE_PERMISSION_SET)
+                .authorities(UserRoleConfiguration.ADMIN_ROLE_PERMISSION_SET)
                 .build();
     }
 }

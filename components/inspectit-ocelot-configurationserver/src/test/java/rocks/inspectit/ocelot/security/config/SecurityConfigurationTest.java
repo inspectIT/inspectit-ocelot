@@ -15,8 +15,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.config.model.LdapSettings;
 import rocks.inspectit.ocelot.config.model.SecuritySettings;
+import rocks.inspectit.ocelot.security.userdetails.CustomUserAuthoritiesMapper;
 import rocks.inspectit.ocelot.security.userdetails.LocalUserDetailsService;
-import rocks.inspectit.ocelot.user.LdapUserAuthorityPopulator;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -49,7 +49,7 @@ class SecurityConfigurationTest {
         LdapAuthenticationProviderConfigurer ldapConfigurer;
 
         @Mock
-        LdapUserAuthorityPopulator ldapUserAuthorityPopulator;
+        CustomUserAuthoritiesMapper customUserAuthoritiesMapper;
 
         @Test
         public void useLocalUserService() throws Exception {

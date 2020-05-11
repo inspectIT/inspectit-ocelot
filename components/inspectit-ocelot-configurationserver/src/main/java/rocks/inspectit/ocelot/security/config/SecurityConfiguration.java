@@ -18,8 +18,8 @@ import rocks.inspectit.ocelot.config.model.LdapSettings;
 import rocks.inspectit.ocelot.filters.AccessLogFilter;
 import rocks.inspectit.ocelot.security.jwt.JwtTokenFilter;
 import rocks.inspectit.ocelot.security.jwt.JwtTokenManager;
+import rocks.inspectit.ocelot.security.userdetails.CustomUserAuthoritiesMapper;
 import rocks.inspectit.ocelot.security.userdetails.LocalUserDetailsService;
-import rocks.inspectit.ocelot.user.LdapUserAuthorityPopulator;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.Collections;
@@ -47,7 +47,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     private LocalUserDetailsService localUserDetailsService;
 
     @Autowired(required = false)
-    private LdapUserAuthorityPopulator ldapUserAuthorityPopulator;
+    private CustomUserAuthoritiesMapper customUserAuthoritiesPopulator;
 
     @Autowired
     @VisibleForTesting
@@ -115,7 +115,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .groupSearchFilter(ldapSettings.getGroupSearchFilter())
                 .groupSearchBase(ldapSettings.getGroupSearchBase())
                 .contextSource(contextSource)
-                .ldapAuthoritiesPopulator(ldapUserAuthorityPopulator);
+                .authoritiesMapper(customUserAuthoritiesPopulator);
     }
 
     /**
