@@ -240,6 +240,26 @@ public class PercentileView {
     }
 
     /**
+     * Returns the name of the series exposed by this view.
+     * This can be up to three series, depending on whether min/max and quantiles are enabled.
+     *
+     * @return the names of the exposed series.
+     */
+    Set<String> getSeriesNames() {
+        Set<String> result = new HashSet<>();
+        if (minMetricDescriptor != null) {
+            result.add(minMetricDescriptor.getName());
+        }
+        if (maxMetricDescriptor != null) {
+            result.add(maxMetricDescriptor.getName());
+        }
+        if (!percentiles.isEmpty()) {
+            result.add(percentileMetricDescriptor.getName());
+        }
+        return result;
+    }
+
+    /**
      * Removes all data which has fallen out of the time window based on the given timestamp.
      *
      * @param time the current time

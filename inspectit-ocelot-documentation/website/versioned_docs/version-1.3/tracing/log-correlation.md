@@ -1,6 +1,7 @@
 ---
-id: log-correlation
+id: version-1.3-log-correlation
 title: Log Correlation
+original_id: log-correlation
 ---
 
 InspectIT Ocelot allows you to add trace information to your log statements in order to correlate them.

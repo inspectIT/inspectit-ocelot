@@ -1,6 +1,7 @@
 ---
-id: custom-metrics
+id: version-1.3-custom-metrics
 title: Custom Metrics
+original_id: custom-metrics
 ---
 
 One of the main benefits of inspectIT Ocelot is that it gives you complete

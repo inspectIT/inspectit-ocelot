@@ -1,6 +1,7 @@
 ---
-id: rules
+id: version-1.3-rules
 title: Rules
+original_id: rules
 ---
 
 Rules define (a) how data should be extracted when the instrumented
@@ -358,7 +359,7 @@ An example for the usage of a condition is given below:
       action: 'a_assign_value'
       constant-input:
         'value': 'My-Application'
-      only-if-null: 'application_name'
+    only-if-null: 'application_name'
 ```
 
 In this example we define an invocation to set the value of the data key `application_name`

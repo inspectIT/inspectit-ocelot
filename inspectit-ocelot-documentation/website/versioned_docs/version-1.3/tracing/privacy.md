@@ -1,6 +1,7 @@
 ---
-id: privacy
+id: version-1.3-privacy
 title: Data Privacy
+original_id: privacy
 ---
 
 InspectIT Ocelot offers you a mechanism to protect your privacy when collecting traces and to prevent the collection of sensitive data.

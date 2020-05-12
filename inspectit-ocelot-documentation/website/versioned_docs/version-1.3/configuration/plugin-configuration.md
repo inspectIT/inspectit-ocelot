@@ -1,6 +1,7 @@
 ---
-id: plugin-configuration
+id: version-1.3-plugin-configuration
 title: Plugin Configuration
+original_id: plugin-configuration
 ---
 
 There are more OpenCensus exporters available than the ones we have included with inspectIT Ocelot.

@@ -13,10 +13,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.time.Duration;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Supplier;
@@ -47,6 +44,12 @@ public class PercentileViewManager {
      * The clock used for timing metrics.
      */
     private final Supplier<Long> clock;
+
+    /**
+     * Maps series names to the corresponding names of measures.
+     * Acts as a cache which is invalidated when views are added changed or removed.
+     */
+    private Map<String, String> seriesToMeasuresCache;
 
     /**
      * Recording observation takes amortized O(1) time.
@@ -134,6 +137,7 @@ public class PercentileViewManager {
             existingView.ifPresent(views::remove);
             views.add(updatedView.get());
         }
+        seriesToMeasuresCache = null;
     }
 
     public synchronized boolean isViewRegistered(String measureName, String viewName) {
@@ -144,6 +148,18 @@ public class PercentileViewManager {
                     .anyMatch(name -> name.equals(viewName));
         }
         return false;
+    }
+
+    /**
+     * Each percentile view can expose a set of series.
+     * Given the name of such a series, this method returns the measure for which the corresponding view is registered.
+     *
+     * @param seriesName the name of the series
+     *
+     * @return the name of the source measure or null if this series does not originate from a percentile view.
+     */
+    public String getMeasureNameForSeries(String seriesName) {
+        return getSeriesToMeasuresCache().get(seriesName);
     }
 
     /**
@@ -165,6 +181,7 @@ public class PercentileViewManager {
                 if (views.isEmpty()) {
                     measuresToViewsMap.remove(measureName);
                 }
+                seriesToMeasuresCache = null;
                 return true;
             }
         }
@@ -196,6 +213,18 @@ public class PercentileViewManager {
         if (views != null) {
             views.forEach(view -> view.insertValue(value, time, tagContext));
         }
+    }
+
+    private synchronized Map<String, String> getSeriesToMeasuresCache() {
+        if (seriesToMeasuresCache == null) {
+            seriesToMeasuresCache = new HashMap<>();
+            measuresToViewsMap.forEach((measure, views) ->
+                    views.stream()
+                            .flatMap(view -> view.getSeriesNames().stream())
+                            .forEach(series -> seriesToMeasuresCache.put(series, measure))
+            );
+        }
+        return seriesToMeasuresCache;
     }
 
     /**

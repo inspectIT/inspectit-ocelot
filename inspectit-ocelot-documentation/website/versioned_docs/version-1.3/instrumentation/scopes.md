@@ -1,6 +1,7 @@
 ---
-id: scopes
+id: version-1.3-scopes
 title: Scopes
+original_id: scopes
 ---
 
 A Scope is one of the basic instrumentation configuration components.

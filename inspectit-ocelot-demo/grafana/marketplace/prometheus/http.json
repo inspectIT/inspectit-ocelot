@@ -14,36 +14,37 @@
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "5.4.2"
+      "version": "6.7.3"
     },
     {
       "type": "panel",
       "id": "graph",
       "name": "Graph",
-      "version": "5.0.0"
+      "version": ""
     },
     {
       "type": "datasource",
       "id": "prometheus",
       "name": "Prometheus",
-      "version": "5.0.0"
+      "version": "1.0.0"
     },
     {
       "type": "panel",
       "id": "singlestat",
       "name": "Singlestat",
-      "version": "5.0.0"
+      "version": ""
     },
     {
       "type": "panel",
       "id": "table",
       "name": "Table",
-      "version": "5.0.0"
+      "version": ""
     }
   ],
   "annotations": {
     "list": [
       {
+        "$$hashKey": "object:1734",
         "builtIn": 1,
         "datasource": "-- Grafana --",
         "enable": true,
@@ -58,11 +59,12 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1567608106204,
+  "iteration": 1588834567590,
   "links": [],
   "panels": [
     {
       "collapsed": false,
+      "datasource": null,
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -99,6 +101,7 @@
       "styles": [
         {
           "alias": "",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -115,6 +118,7 @@
         },
         {
           "alias": "Requests",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -131,6 +135,7 @@
         },
         {
           "alias": "Avg. Response Time",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -148,6 +153,7 @@
         },
         {
           "alias": "HTTP Path",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -164,6 +170,7 @@
         },
         {
           "alias": "Error Rate",
+          "align": "auto",
           "colorMode": "cell",
           "colors": [
             "rgba(50, 172, 45, 0.97)",
@@ -184,25 +191,30 @@
       ],
       "targets": [
         {
-          "expr": "sum(increase(http_in_count{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__range])) by (http_path) > 0",
+          "expr": "sum(increase(http_in_count{service=\"$service\",http_path=~\"$path\"}[$__range])) by (http_path) > 0",
           "format": "table",
           "instant": true,
+          "interval": "",
           "intervalFactor": 1,
           "legendFormat": "",
           "refId": "A"
         },
         {
-          "expr": "sum(increase(http_in_responsetime_sum{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__range])) by (http_path) \n/ sum(increase(http_in_count{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__range])) by (http_path) > 0",
+          "expr": "sum(increase(http_in_responsetime_sum{service=\"$service\",http_path=~\"$path\"}[$__range])) by (http_path) \n/ sum(increase(http_in_count{service=\"$service\",http_path=~\"$path\"}[$__range])) by (http_path) > 0",
           "format": "table",
           "instant": true,
+          "interval": "",
           "intervalFactor": 1,
+          "legendFormat": "",
           "refId": "B"
         },
         {
-          "expr": "(sum(increase(http_in_count{http_status!~\"(1|2|3)\\\\d\\\\d\",service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__range])) by (http_path) \n/ sum(increase(http_in_count{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__range])) by (http_path)) >= 0\nor (sum(increase(http_in_count{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__range])) by (http_path) > 0) * 0",
+          "expr": "(sum(increase(http_in_count{http_status!~\"(1|2|3)\\\\d\\\\d\",service=\"$service\",http_path=~\"$path\"}[$__range])) by (http_path) \n/ sum(increase(http_in_count{service=\"$service\",http_path=~\"$path\"}[$__range])) by (http_path)) >= 0\nor (sum(increase(http_in_count{service=\"$service\",http_path=~\"$path\"}[$__range])) by (http_path) > 0) * 0",
           "format": "table",
           "instant": true,
+          "interval": "",
           "intervalFactor": 1,
+          "legendFormat": "",
           "refId": "C"
         }
       ],
@@ -218,12 +230,14 @@
       "datasource": "${DS_LOCALPROMETHEUS}",
       "description": "",
       "fill": 1,
+      "fillGradient": 0,
       "gridPos": {
         "h": 5,
         "w": 9,
         "x": 11,
         "y": 1
       },
+      "hiddenSeries": false,
       "id": 23,
       "legend": {
         "avg": false,
@@ -238,6 +252,9 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -248,9 +265,10 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "(sum(increase(http_in_responsetime_sum{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__interval])) by (http_path)\n/ sum(increase(http_in_count{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__interval])) by (http_path)) >= 0",
+          "expr": "(sum(increase(http_in_responsetime_sum{service=\"$service\",http_path=~\"$path\"}[$__interval])) by (http_path)\n/ sum(increase(http_in_count{service=\"$service\",http_path=~\"$path\"}[$__interval])) by (http_path)) >= 0",
           "format": "time_series",
           "instant": false,
+          "interval": "",
           "intervalFactor": 1,
           "legendFormat": "{{http_path}}",
           "refId": "A"
@@ -361,10 +379,12 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum(rate(http_in_count{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__interval]))",
+          "expr": "sum(rate(http_in_count{service=\"$service\",http_path=~\"$path\"}[$__interval]))",
           "format": "time_series",
           "instant": false,
+          "interval": "",
           "intervalFactor": 1,
+          "legendFormat": "",
           "refId": "A"
         }
       ],
@@ -448,10 +468,12 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "(sum(increase(http_in_count{http_status!~\"(1|2|3)\\\\d\\\\d\",service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__range]))\n/ sum(increase(http_in_count{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__range])) >= 0)\nor (sum(increase(http_in_count{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__range])) > 0) * 0",
+          "expr": "(sum(increase(http_in_count{http_status!~\"(1|2|3)\\\\d\\\\d\",service=\"$service\",http_path=~\"$path\"}[$__range]))\n/ sum(increase(http_in_count{service=\"$service\",http_path=~\"$path\"}[$__range])) >= 0)\nor (sum(increase(http_in_count{service=\"$service\",http_path=~\"$path\"}[$__range])) > 0) * 0",
           "format": "time_series",
           "instant": true,
+          "interval": "",
           "intervalFactor": 1,
+          "legendFormat": "",
           "refId": "A"
         }
       ],
@@ -493,6 +515,7 @@
       "styles": [
         {
           "alias": "",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -509,6 +532,7 @@
         },
         {
           "alias": "Requests",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -525,6 +549,7 @@
         },
         {
           "alias": "Avg. Response Time",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -542,6 +567,7 @@
         },
         {
           "alias": "HTTP Path",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -559,6 +585,7 @@
         },
         {
           "alias": "Error Rate",
+          "align": "auto",
           "colorMode": "cell",
           "colors": [
             "rgba(50, 172, 45, 0.97)",
@@ -578,6 +605,7 @@
         },
         {
           "alias": "Target Host",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -594,6 +622,7 @@
         },
         {
           "alias": "Http URL",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -611,27 +640,32 @@
       ],
       "targets": [
         {
-          "expr": "sum(label_join(increase(http_out_count{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__range]), \"http_url\", \"\", \"http_host\", \"http_path\")) by (http_url) > 0",
+          "expr": "sum(label_join(increase(http_out_count{service=\"$service\",http_path=~\"$path\"}[$__range]), \"http_url\", \"\", \"http_host\", \"http_path\")) by (http_url) > 0",
           "format": "table",
           "instant": true,
+          "interval": "",
           "intervalFactor": 1,
           "legendFormat": "",
           "refId": "A"
         },
         {
-          "expr": "label_join(sum(increase(http_out_responsetime_sum{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__range])) by (http_host,http_path) \n/ sum(increase(http_out_count{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__range])) by (http_host,http_path) > 0, \"http_url\", \"\", \"http_host\", \"http_path\")",
+          "expr": "label_join(sum(increase(http_out_responsetime_sum{service=\"$service\",http_path=~\"$path\"}[$__range])) by (http_host,http_path) \n/ sum(increase(http_out_count{service=\"$service\",http_path=~\"$path\"}[$__range])) by (http_host,http_path) > 0, \"http_url\", \"\", \"http_host\", \"http_path\")",
           "format": "table",
           "hide": false,
           "instant": true,
+          "interval": "",
           "intervalFactor": 1,
+          "legendFormat": "",
           "refId": "B"
         },
         {
-          "expr": "label_join((sum(increase(http_out_count{http_status!~\"(1|2|3)\\\\d\\\\d\",service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__range])) by (http_path) \n/ sum(increase(http_out_count{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__range])) by (http_host,http_path)) >= 0\nor (sum(increase(http_out_count{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__range])) by (http_host,http_path) > 0) * 0 , \"http_url\", \"\", \"http_host\", \"http_path\")",
+          "expr": "label_join((sum(increase(http_out_count{http_status!~\"(1|2|3)\\\\d\\\\d\",service=\"$service\",http_path=~\"$path\"}[$__range])) by (http_path) \n/ sum(increase(http_out_count{service=\"$service\",http_path=~\"$path\"}[$__range])) by (http_host,http_path)) >= 0\nor (sum(increase(http_out_count{service=\"$service\",http_path=~\"$path\"}[$__range])) by (http_host,http_path) > 0) * 0 , \"http_url\", \"\", \"http_host\", \"http_path\")",
           "format": "table",
           "hide": false,
           "instant": true,
+          "interval": "",
           "intervalFactor": 1,
+          "legendFormat": "",
           "refId": "C"
         }
       ],
@@ -647,12 +681,14 @@
       "datasource": "${DS_LOCALPROMETHEUS}",
       "description": "",
       "fill": 1,
+      "fillGradient": 0,
       "gridPos": {
         "h": 5,
         "w": 9,
         "x": 11,
         "y": 6
       },
+      "hiddenSeries": false,
       "id": 76,
       "legend": {
         "avg": false,
@@ -667,6 +703,9 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -677,9 +716,10 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "(sum(increase(http_out_responsetime_sum{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__interval])) by (http_host,http_path)\n/ sum(increase(http_out_count{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__interval])) by (http_host,http_path)) >= 0",
+          "expr": "(sum(increase(http_out_responsetime_sum{service=\"$service\",http_path=~\"$path\"}[$__interval])) by (http_host,http_path)\n/ sum(increase(http_out_count{service=\"$service\",http_path=~\"$path\"}[$__interval])) by (http_host,http_path)) >= 0",
           "format": "time_series",
           "instant": false,
+          "interval": "",
           "intervalFactor": 1,
           "legendFormat": "{{http_host}}{{http_path}}",
           "refId": "A"
@@ -790,10 +830,12 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum(rate(http_out_count{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__interval]))",
+          "expr": "sum(rate(http_out_count{service=\"$service\",http_path=~\"$path\"}[$__interval]))",
           "format": "time_series",
           "instant": false,
+          "interval": "",
           "intervalFactor": 1,
+          "legendFormat": "",
           "refId": "A"
         }
       ],
@@ -877,10 +919,12 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "(sum(increase(http_out_count{http_status!~\"(1|2|3)\\\\d\\\\d\",service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__range]))\n/ sum(increase(http_out_count{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__range])) >= 0)\nor (sum(increase(http_out_count{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__range])) > 0) * 0",
+          "expr": "(sum(increase(http_out_count{http_status!~\"(1|2|3)\\\\d\\\\d\",service=\"$service\",http_path=~\"$path\"}[$__range]))\n/ sum(increase(http_out_count{service=\"$service\",http_path=~\"$path\"}[$__range])) >= 0)\nor (sum(increase(http_out_count{service=\"$service\",http_path=~\"$path\"}[$__range])) > 0) * 0",
           "format": "time_series",
           "instant": true,
+          "interval": "",
           "intervalFactor": 1,
+          "legendFormat": "",
           "refId": "A"
         }
       ],
@@ -901,7 +945,7 @@
     }
   ],
   "refresh": "30s",
-  "schemaVersion": 16,
+  "schemaVersion": 22,
   "style": "dark",
   "tags": [],
   "templating": {
@@ -913,6 +957,7 @@
         "definition": "label_values(service)",
         "hide": 0,
         "includeAll": true,
+        "index": -1,
         "label": "Service",
         "multi": true,
         "name": "service",
@@ -932,31 +977,10 @@
         "allValue": ".*",
         "current": {},
         "datasource": "${DS_LOCALPROMETHEUS}",
-        "definition": "label_values(application)",
-        "hide": 0,
-        "includeAll": true,
-        "label": "Application",
-        "multi": false,
-        "name": "application",
-        "options": [],
-        "query": "label_values(application)",
-        "refresh": 1,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 1,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
-      },
-      {
-        "allValue": ".*",
-        "current": {},
-        "datasource": "${DS_LOCALPROMETHEUS}",
         "definition": "label_values(http_path)",
         "hide": 0,
         "includeAll": true,
+        "index": -1,
         "label": "Endpoint",
         "multi": true,
         "name": "path",
@@ -1006,5 +1030,8 @@
   "timezone": "",
   "title": "HTTP Overview",
   "uid": "523wqxqmz",
+  "variables": {
+    "list": []
+  },
   "version": 1
 }

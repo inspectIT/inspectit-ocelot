@@ -43,16 +43,12 @@ const sortFiles = (allFiles) => {
     }
     const nameFirst = first.name.toUpperCase();
     const nameSecond = second.name.toUpperCase();
-    if (nameFirst < nameSecond) {
-      return -1;
-    }
-    if (nameFirst > nameSecond) {
-      return 1;
-    }
-    return 0;
+
+    return nameFirst.localeCompare(nameSecond);
   });
+
   allFiles.forEach((element) => {
-    if (element.type === 'directory' && element.children.length > 0) {
+    if (element.children) {
       sortFiles(element.children);
     }
   });

@@ -78,6 +78,15 @@ class FileTree extends React.Component {
   };
 
   /**
+   * Handle delete key press
+   */
+  onKeyDown = (event) => {
+    if (event.key === 'Delete' && this.props.selection) {
+      this.props.showDeleteFileDialog(this.props.selection);
+    }
+  };
+
+  /**
    * Attempt to find a file in the 'wrong' place by comparing a node's key with it's expected key.
    * Returns the old (source) and expected (target) key when a node is found.
    */
@@ -105,7 +114,7 @@ class FileTree extends React.Component {
 
   render() {
     return (
-      <div className="this" onContextMenu={this.showContextMenu}>
+      <div className="this" onContextMenu={this.showContextMenu} onKeyDown={this.onKeyDown}>
         <style jsx>{`
                     .this {
                         overflow: auto;

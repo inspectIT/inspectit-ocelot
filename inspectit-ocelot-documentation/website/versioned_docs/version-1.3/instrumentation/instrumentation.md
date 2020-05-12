@@ -1,6 +1,7 @@
 ---
-id: instrumentation
+id: version-1.3-instrumentation
 title: Instrumentation
+original_id: instrumentation
 ---
 This section describes how the inspectIT Ocelot Java agent can be used to inject predefined or custom monitoring code into the target application.
 

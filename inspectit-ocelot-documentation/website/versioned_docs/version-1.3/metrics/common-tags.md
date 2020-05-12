@@ -1,6 +1,7 @@
 ---
-id: common-tags
+id: version-1.3-common-tags
 title: Common Tags
+original_id: common-tags
 ---
 
 inspectIT Ocelot provides a map of common tag keys and values that are used when recording all metrics.
