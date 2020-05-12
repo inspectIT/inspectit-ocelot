@@ -6,14 +6,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import rocks.inspectit.ocelot.security.config.UserRoleConfiguration;
 import rocks.inspectit.ocelot.user.User;
 import rocks.inspectit.ocelot.user.UserService;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,15 +32,14 @@ public class LocalUserDetailsServiceTest {
         public void successfullyFindUser() {
             User user = User.builder().username("username").passwordHash("hash").isLdapUser(false).build();
             when(userService.getUserByName("username")).thenReturn(Optional.of(user));
-            List<? extends GrantedAuthority> adminAccessPermissions = UserRoleConfiguration.ADMIN_ROLE_PERMISSION_SET;
 
             UserDetails result = detailsService.loadUserByUsername("username");
 
             assertThat(result.getUsername()).isEqualTo("username");
             assertThat(result.getPassword()).isEqualTo("hash");
             assertThat(result.getAuthorities())
-                    .extracting(object -> object.toString().substring("ROLE_".length()));
-            //.containsExactlyInAnyOrder(adminAccessPermissions);
+                    .extracting(object -> object.toString().substring("ROLE_".length()))
+                    .containsExactlyInAnyOrder("OCELOT_WRITE", "OCELOT_READ", "OCELOT_COMMIT", "OCELOT_ADMIN");
             verify(userService).getUserByName(anyString());
             verifyNoMoreInteractions(userService);
         }

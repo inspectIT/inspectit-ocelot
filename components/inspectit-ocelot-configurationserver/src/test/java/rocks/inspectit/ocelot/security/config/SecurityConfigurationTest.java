@@ -84,7 +84,7 @@ class SecurityConfigurationTest {
             when(ldapConfigurer.groupSearchFilter(anyString())).thenReturn(ldapConfigurer);
             when(ldapConfigurer.groupSearchBase(anyString())).thenReturn(ldapConfigurer);
             when(ldapConfigurer.contextSource(any())).thenReturn(ldapConfigurer);
-            when(ldapConfigurer.ldapAuthoritiesPopulator(any())).thenReturn(ldapConfigurer);
+            when(ldapConfigurer.authoritiesMapper(any())).thenReturn(ldapConfigurer);
             when(auth.userDetailsService(any())).thenReturn(daoAuthenticationConfigurer);
 
             configuration.configure(auth);
@@ -95,7 +95,7 @@ class SecurityConfigurationTest {
             verify(ldapConfigurer).groupSearchFilter("group-filter");
             verify(ldapConfigurer).groupSearchBase("group-base");
             verify(ldapConfigurer).contextSource(any());
-            verify(ldapConfigurer).ldapAuthoritiesPopulator(any());
+            verify(ldapConfigurer).authoritiesMapper(any());
             verify(auth).userDetailsService(localUserDetailsService);
             verify(daoAuthenticationConfigurer).passwordEncoder(passwordEncoder);
             verify(context).getBean(LdapContextSource.class);
