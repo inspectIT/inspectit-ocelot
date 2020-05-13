@@ -14,7 +14,9 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
+import rocks.inspectit.ocelot.file.FileManager;
 import rocks.inspectit.ocelot.file.versioning.VersioningManager;
 
 import java.io.File;
@@ -58,7 +60,7 @@ public class IntegrationTestBase {
     protected InspectitServerSettings settings;
 
     @Autowired
-    private VersioningManager versioningManager;
+    protected FileManager fileManager;
 
     /**
      * Authenticated restTemplate;
@@ -66,12 +68,13 @@ public class IntegrationTestBase {
     protected TestRestTemplate authRest;
 
     @BeforeEach
-    void setupAuthentication() throws GitAPIException {
+    void setup() throws GitAPIException {
         authRest = rest.withBasicAuth(settings.getDefaultUser().getName(), settings.getDefaultUser().getPassword());
 
         // we clean the working directory after each test, thus, we have to reinitialize the working directory, otherwise
-        // it is not a git repository
-        versioningManager.init();
+        // it is not a git repository anymore
+        VersioningManager versioningManager = (VersioningManager) ReflectionTestUtils.getField(fileManager, "versioningManager");
+        versioningManager.initialize();
     }
 
     @AfterEach

@@ -1,42 +1,45 @@
 package rocks.inspectit.ocelot.file.versioning;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Iterables;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
+import org.eclipse.jgit.api.CommitCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
-import rocks.inspectit.ocelot.config.model.VersioningSettings;
+import org.eclipse.jgit.revwalk.RevWalk;
+import org.springframework.security.core.Authentication;
 import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.time.Duration;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 @Slf4j
-@Component
 public class VersioningManager {
-
-    private VersioningSettings versioningSettings;
 
     private Path workingDirectory;
 
     private Git git;
 
-    @Autowired
-    public VersioningManager(InspectitServerSettings settings) {
-        this.versioningSettings = settings.getVersioning();
-        this.workingDirectory = Paths.get(settings.getWorkingDirectory()).toAbsolutePath().normalize();
+    private Supplier<Authentication> authenticationSupplier;
+
+    @Setter
+    private long amendTimeout = Duration.ofMinutes(10).toMillis();
+
+    public VersioningManager(Path workingDirectory, Supplier<Authentication> authenticationSupplier) {
+        this.workingDirectory = workingDirectory;
+        this.authenticationSupplier = authenticationSupplier;
     }
 
-    @PostConstruct
-    public void init() throws GitAPIException {
+    public synchronized void initialize() throws GitAPIException {
         boolean hasGit = isGitRepository();
 
         git = Git.init().setDirectory(workingDirectory.toFile()).call();
@@ -48,27 +51,59 @@ public class VersioningManager {
         }
     }
 
-    @PreDestroy
-    @VisibleForTesting
-    void destroy() {
+    public void destroy() {
         git.close();
     }
 
-    public void stageAndCommit() throws GitAPIException {
+    public synchronized void stageAndCommit() throws GitAPIException {
         if (!isClean()) {
             stageAll();
             commit();
         }
     }
 
+    public synchronized void resetConfigurationFiles() throws GitAPIException {
+        //TODO has to be discussed whether it is meaningful this way. This ensures that the Git repository
+        //TODO is not affected by changes which are done by editing files in the working directory manually.
+        //TODO Imo it is valid to assume, that all changes HAVE TO BE done via the config-server.
+        if (!isClean()) {
+            try {
+                Path filePath = workingDirectory.resolve(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER);
+                FileUtils.cleanDirectory(filePath.toFile());
+            } catch (IOException e) {
+                log.warn("Working directory could not be cleaned.", e);
+            }
+
+            git.checkout()
+                    .addPath(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER)
+                    .call();
+        }
+    }
+
     private void commit() throws GitAPIException {
         log.info("Committing all staged changes.");
 
-        git.commit()
+        PersonIdent author = getAuthor();
+
+        CommitCommand commitCommand = git.commit()
                 .setAll(true)
                 .setMessage("Commit configuration file and agent mapping changes")
-                .setAuthor(versioningSettings.getGitUsername(), versioningSettings.getGitMail())
-                .call();
+                .setAuthor(author);
+
+        if (getCommitCount() > 0) {
+            PersonIdent latestAuthor = getLatestCommitAuthor();
+            boolean sameAuthor = latestAuthor != null && author.getName().equals(latestAuthor.getName());
+
+            long latestCommitTime = getLatestCommitTime() * 1000L;
+            boolean expired = latestCommitTime + amendTimeout < System.currentTimeMillis();
+
+            if (sameAuthor && !expired) {
+                log.debug("|-Executing an amend commit.");
+                commitCommand.setAmend(true);
+            }
+        }
+
+        commitCommand.call();
     }
 
     private void stageAll() throws GitAPIException {
@@ -93,7 +128,7 @@ public class VersioningManager {
         try {
             Iterable<RevCommit> commits = git.log().call();
             return Iterables.size(commits);
-        } catch (GitAPIException e) {
+        } catch (Exception e) {
             return 0;
         }
     }
@@ -106,6 +141,40 @@ public class VersioningManager {
             return true;
         } catch (IOException e) {
             return false;
+        }
+    }
+
+    private PersonIdent getAuthor() {
+        Authentication authentication = authenticationSupplier.get();
+        String username = authentication.getName();
+
+        return new PersonIdent(username, "info@inspectit.rocks");
+    }
+
+    private PersonIdent getLatestCommitAuthor() {
+        return getLatestCommit().map(RevCommit::getAuthorIdent).orElse(null);
+    }
+
+    private int getLatestCommitTime() {
+        return getLatestCommit().map(RevCommit::getCommitTime).orElse(-1);
+    }
+
+    private Optional<RevCommit> getLatestCommit() {
+        try {
+            ObjectId commitId = git.getRepository().resolve(Constants.HEAD);
+
+            if (commitId == null) {
+                return Optional.empty();
+            }
+
+            try (RevWalk revWalk = new RevWalk(git.getRepository())) {
+                RevCommit commit = revWalk.parseCommit(commitId);
+                return Optional.ofNullable(commit);
+            }
+        } catch (IOException e) {
+            //TODO error message
+            log.error("error", e);
+            return Optional.empty();
         }
     }
 }

@@ -35,20 +35,21 @@ class AutoCommitWorkingDirectoryProxyTest {
             accessor.createDirectory("test");
 
             verify(wdAccessor).createDirectory("test");
+            verify(versioningManager).resetConfigurationFiles();
             verify(versioningManager).stageAndCommit();
             verifyNoMoreInteractions(wdAccessor, versioningManager);
         }
 
         @Test
-        public void ioException() throws IOException {
+        public void ioException() throws IOException, GitAPIException {
             doThrow(IOException.class).when(wdAccessor).createDirectory(anyString());
 
             assertThatIOException()
                     .isThrownBy(() -> accessor.createDirectory("test"));
 
             verify(wdAccessor).createDirectory("test");
-            verifyNoMoreInteractions(wdAccessor);
-            verifyZeroInteractions(versioningManager);
+            verify(versioningManager).resetConfigurationFiles();
+            verifyNoMoreInteractions(wdAccessor, versioningManager);
         }
 
         @Test
@@ -58,6 +59,7 @@ class AutoCommitWorkingDirectoryProxyTest {
             accessor.createDirectory("test");
 
             verify(wdAccessor).createDirectory("test");
+            verify(versioningManager).resetConfigurationFiles();
             verify(versioningManager).stageAndCommit();
             verifyNoMoreInteractions(wdAccessor, versioningManager);
         }
@@ -71,20 +73,21 @@ class AutoCommitWorkingDirectoryProxyTest {
             accessor.writeFile("path", "content");
 
             verify(wdAccessor).writeFile("path", "content");
+            verify(versioningManager).resetConfigurationFiles();
             verify(versioningManager).stageAndCommit();
             verifyNoMoreInteractions(wdAccessor, versioningManager);
         }
 
         @Test
-        public void ioException() throws IOException {
+        public void ioException() throws IOException, GitAPIException {
             doThrow(IOException.class).when(wdAccessor).writeFile(anyString(), anyString());
 
             assertThatIOException()
                     .isThrownBy(() -> accessor.writeFile("path", "content"));
 
             verify(wdAccessor).writeFile("path", "content");
-            verifyNoMoreInteractions(wdAccessor);
-            verifyZeroInteractions(versioningManager);
+            verify(versioningManager).resetConfigurationFiles();
+            verifyNoMoreInteractions(wdAccessor, versioningManager);
         }
 
         @Test
@@ -94,6 +97,7 @@ class AutoCommitWorkingDirectoryProxyTest {
             accessor.writeFile("path", "content");
 
             verify(wdAccessor).writeFile("path", "content");
+            verify(versioningManager).resetConfigurationFiles();
             verify(versioningManager).stageAndCommit();
             verifyNoMoreInteractions(wdAccessor, versioningManager);
         }
@@ -107,20 +111,21 @@ class AutoCommitWorkingDirectoryProxyTest {
             accessor.move("src", "trgt");
 
             verify(wdAccessor).move("src", "trgt");
+            verify(versioningManager).resetConfigurationFiles();
             verify(versioningManager).stageAndCommit();
             verifyNoMoreInteractions(wdAccessor, versioningManager);
         }
 
         @Test
-        public void ioException() throws IOException {
+        public void ioException() throws IOException, GitAPIException {
             doThrow(IOException.class).when(wdAccessor).move(anyString(), anyString());
 
             assertThatIOException()
                     .isThrownBy(() -> accessor.move("src", "trgt"));
 
             verify(wdAccessor).move("src", "trgt");
-            verifyNoMoreInteractions(wdAccessor);
-            verifyZeroInteractions(versioningManager);
+            verify(versioningManager).resetConfigurationFiles();
+            verifyNoMoreInteractions(wdAccessor, versioningManager);
         }
 
         @Test
@@ -130,6 +135,7 @@ class AutoCommitWorkingDirectoryProxyTest {
             accessor.move("src", "trgt");
 
             verify(wdAccessor).move("src", "trgt");
+            verify(versioningManager).resetConfigurationFiles();
             verify(versioningManager).stageAndCommit();
             verifyNoMoreInteractions(wdAccessor, versioningManager);
         }
@@ -143,20 +149,21 @@ class AutoCommitWorkingDirectoryProxyTest {
             accessor.delete("test");
 
             verify(wdAccessor).delete("test");
+            verify(versioningManager).resetConfigurationFiles();
             verify(versioningManager).stageAndCommit();
             verifyNoMoreInteractions(wdAccessor, versioningManager);
         }
 
         @Test
-        public void ioException() throws IOException {
+        public void ioException() throws IOException, GitAPIException {
             doThrow(IOException.class).when(wdAccessor).delete(anyString());
 
             assertThatIOException()
                     .isThrownBy(() -> accessor.delete("test"));
 
             verify(wdAccessor).delete("test");
-            verifyNoMoreInteractions(wdAccessor);
-            verifyZeroInteractions(versioningManager);
+            verify(versioningManager).resetConfigurationFiles();
+            verifyNoMoreInteractions(wdAccessor, versioningManager);
         }
 
         @Test
@@ -166,6 +173,7 @@ class AutoCommitWorkingDirectoryProxyTest {
             accessor.delete("test");
 
             verify(wdAccessor).delete("test");
+            verify(versioningManager).resetConfigurationFiles();
             verify(versioningManager).stageAndCommit();
             verifyNoMoreInteractions(wdAccessor, versioningManager);
         }

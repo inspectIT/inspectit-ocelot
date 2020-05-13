@@ -61,9 +61,4 @@ public class InspectitServerSettings {
     @Valid
     @Builder.Default
     private SecuritySettings security = SecuritySettings.builder().build();
-
-    /**
-     * The versioning settings.
-     */
-    private VersioningSettings versioning;
 }

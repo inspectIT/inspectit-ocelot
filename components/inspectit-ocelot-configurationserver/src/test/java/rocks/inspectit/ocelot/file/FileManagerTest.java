@@ -1,6 +1,7 @@
 package rocks.inspectit.ocelot.file;
 
 
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,12 +22,11 @@ public class FileManagerTest {
     class GetWorkingDirectory {
 
         @Test
-        public void getAccessor() {
+        public void getAccessor() throws GitAPIException {
             InspectitServerSettings settings = new InspectitServerSettings();
             settings.setWorkingDirectory("/test");
             ApplicationEventPublisher eventPublisher = mock(ApplicationEventPublisher.class);
-            VersioningManager versioningManager = mock(VersioningManager.class);
-            FileManager manager = new FileManager(settings, eventPublisher, versioningManager);
+            FileManager manager = new FileManager(settings, eventPublisher);
 
             AbstractWorkingDirectoryAccessor result = manager.getWorkingDirectory();
 

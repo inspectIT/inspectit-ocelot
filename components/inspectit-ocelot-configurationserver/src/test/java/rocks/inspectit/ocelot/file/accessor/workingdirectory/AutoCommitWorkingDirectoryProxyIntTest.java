@@ -7,8 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationEventPublisher;
-import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
-import rocks.inspectit.ocelot.config.model.VersioningSettings;
+import org.springframework.security.core.Authentication;
 import rocks.inspectit.ocelot.file.FileTestBase;
 import rocks.inspectit.ocelot.file.versioning.VersioningManager;
 
@@ -18,6 +17,7 @@ import java.nio.file.Paths;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class AutoCommitWorkingDirectoryProxyIntTest extends FileTestBase {
 
@@ -42,19 +42,14 @@ class AutoCommitWorkingDirectoryProxyIntTest extends FileTestBase {
             FileUtils.cleanDirectory(tempDirectory.toFile());
         }
 
-        VersioningSettings versioningSettings = new VersioningSettings();
-        versioningSettings.setGitUsername("ocelot");
-        versioningSettings.setGitMail("ocelot@inspectit.rocks");
-        InspectitServerSettings settings = new InspectitServerSettings();
-        settings.setWorkingDirectory(tempDirectory.toString());
-        settings.setVersioning(versioningSettings);
-
         eventPublisher = mock(ApplicationEventPublisher.class);
 
         WorkingDirectoryAccessor workingDirectoryAccessor = new WorkingDirectoryAccessor(tempDirectory, eventPublisher);
 
-        versioningManager = new VersioningManager(settings);
-        versioningManager.init();
+        Authentication authentication = mock(Authentication.class);
+        when(authentication.getName()).thenReturn("user");
+        versioningManager = new VersioningManager(tempDirectory, () -> authentication);
+        versioningManager.initialize();
 
         accessor = new AutoCommitWorkingDirectoryProxy(workingDirectoryAccessor, versioningManager);
 
@@ -93,13 +88,15 @@ class AutoCommitWorkingDirectoryProxyIntTest extends FileTestBase {
             accessor.writeFile("files/file.yml", "hello");
 
             boolean second = versioningManager.isClean();
+            int commitCountFirst = versioningManager.getCommitCount();
 
             accessor.writeFile("files/file.yml", "new content");
 
             boolean third = versioningManager.isClean();
-            int commitCount = versioningManager.getCommitCount();
+            int commitCountSecond = versioningManager.getCommitCount();
 
-            assertThat(commitCount).isEqualTo(2);
+            assertThat(commitCountFirst).isOne();
+            assertThat(commitCountSecond).isOne();
             assertThat(first).isTrue();
             assertThat(second).isTrue();
             assertThat(third).isTrue();

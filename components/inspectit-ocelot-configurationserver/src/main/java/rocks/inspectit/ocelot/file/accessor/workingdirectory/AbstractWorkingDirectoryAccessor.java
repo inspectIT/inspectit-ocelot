@@ -52,7 +52,7 @@ public abstract class AbstractWorkingDirectoryAccessor extends AbstractFileAcces
      * @param directory the directory to create
      * @throws IOException in case the directory can not be created
      */
-    public void createConfigurationDirectory(String directory) throws IOException {
+    public synchronized void createConfigurationDirectory(String directory) throws IOException {
         log.debug("Creating configuration directory: {}", directory);
         String targetPath = verifyPath(CONFIGURATION_FILES_SUBFOLDER, directory);
 
@@ -72,7 +72,7 @@ public abstract class AbstractWorkingDirectoryAccessor extends AbstractFileAcces
      * @param content the content to write
      * @throws IOException in case the file can not be written
      */
-    public void writeConfigurationFile(String file, String content) throws IOException {
+    public synchronized void writeConfigurationFile(String file, String content) throws IOException {
         log.debug("Writing configuration file: {}", file);
         String targetPath = verifyPath(CONFIGURATION_FILES_SUBFOLDER, file);
 
@@ -85,7 +85,7 @@ public abstract class AbstractWorkingDirectoryAccessor extends AbstractFileAcces
      * @param path the configuration to delete
      * @throws IOException in case the file or directory can not be deleted
      */
-    public void deleteConfiguration(String path) throws IOException {
+    public synchronized void deleteConfiguration(String path) throws IOException {
         log.debug("Deleting configuration: {}", path);
         String targetPath = verifyPath(CONFIGURATION_FILES_SUBFOLDER, path);
 
@@ -103,7 +103,7 @@ public abstract class AbstractWorkingDirectoryAccessor extends AbstractFileAcces
      * @param target the target item
      * @throws IOException in case the file or directory can not be moved
      */
-    public void moveConfiguration(String source, String target) throws IOException {
+    public synchronized void moveConfiguration(String source, String target) throws IOException {
         log.debug("Moving configuration: {} -> {}", source, target);
         String sourcePath = verifyPath(CONFIGURATION_FILES_SUBFOLDER, source);
         String targetPath = verifyPath(CONFIGURATION_FILES_SUBFOLDER, target);
@@ -117,7 +117,7 @@ public abstract class AbstractWorkingDirectoryAccessor extends AbstractFileAcces
      * @param content the content to write
      * @throws IOException in case the agent mappings can not be written
      */
-    public void writeAgentMappings(String content) throws IOException {
+    public synchronized void writeAgentMappings(String content) throws IOException {
         log.debug("Writing agent mappings");
         writeFile(AGENT_MAPPINGS_FILE_NAME, content);
     }

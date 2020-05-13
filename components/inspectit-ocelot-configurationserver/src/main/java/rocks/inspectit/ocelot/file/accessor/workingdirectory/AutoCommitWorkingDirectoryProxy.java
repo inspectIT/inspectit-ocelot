@@ -35,26 +35,39 @@ public class AutoCommitWorkingDirectoryProxy extends AbstractWorkingDirectoryAcc
         }
     }
 
+    private void clean() {
+        try {
+            versioningManager.resetConfigurationFiles();
+        } catch (GitAPIException e) {
+            //TODO
+            throw new RuntimeException(e);
+        }
+    }
+
     @Override
     protected void writeFile(String path, String content) throws IOException {
+        clean();
         workingDirectoryAccessor.writeFile(path, content);
         commit();
     }
 
     @Override
     protected void createDirectory(String path) throws IOException {
+        clean();
         workingDirectoryAccessor.createDirectory(path);
         commit();
     }
 
     @Override
     protected void move(String sourcePath, String targetPath) throws IOException {
+        clean();
         workingDirectoryAccessor.move(sourcePath, targetPath);
         commit();
     }
 
     @Override
     protected void delete(String path) throws IOException {
+        clean();
         workingDirectoryAccessor.delete(path);
         commit();
     }
