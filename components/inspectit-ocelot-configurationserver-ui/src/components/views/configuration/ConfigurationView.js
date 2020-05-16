@@ -119,8 +119,10 @@ class ConfigurationView extends React.Component {
       yamlError,
       selectedDefaultConfigFile,
       schema,
-      showVisualConfigurationView,
       toggleVisualConfigurationView,
+      showTreeTableView,
+      showBusinessTransactionView,
+      showScopeView
     } = this.props;
     const showEditor = (selection || selectedDefaultConfigFile) && !isDirectory;
 
@@ -188,8 +190,10 @@ class ConfigurationView extends React.Component {
           notificationText={yamlError}
           loading={loading}
           readOnly={!!selectedDefaultConfigFile}
-          showVisualConfigurationView={showVisualConfigurationView}
           onToggleVisualConfigurationView={toggleVisualConfigurationView}
+          showScopeView= {showScopeView} 
+          showBusinessTransactionView= {showBusinessTransactionView} 
+          showTreeTableView = {showTreeTableView}
         >
           {showHeader ? (
             <EditorHeader
@@ -241,7 +245,9 @@ function mapStateToProps(state) {
     pendingRequests,
     selectedDefaultConfigFile,
     schema,
-    showVisualConfigurationView,
+    showScopeView,
+    showBusinessTransactionView,
+    showTreeTableView 
   } = state.configuration;
   const unsavedFileContent = selection ? configurationSelectors.getSelectedFileUnsavedContents(state) : null;
   const fileContent = unsavedFileContent !== null ? unsavedFileContent : selectedFileContent;
@@ -256,7 +262,9 @@ function mapStateToProps(state) {
     loading: pendingRequests > 0,
     selectedDefaultConfigFile,
     schema,
-    showVisualConfigurationView,
+    showScopeView, 
+    showBusinessTransactionView, 
+    showTreeTableView
   };
 }
 

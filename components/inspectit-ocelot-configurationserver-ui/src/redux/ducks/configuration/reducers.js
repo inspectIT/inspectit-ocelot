@@ -165,11 +165,30 @@ const configurationReducer = createReducer(initialState)({
     };
   },
   [types.FETCH_SCHEMA_FAILURE]: decrementPendingRequests,
-  [types.TOGGLE_VISUAL_CONFIGURATION_VIEW]: (state) => {
-    return {
-      ...state,
-      showVisualConfigurationView: !state.showVisualConfigurationView,
-    };
+  [types.TOGGLE_VISUAL_CONFIGURATION_VIEW]: (state, action) => {
+    switch (action.viewType) {
+        case 'showScopeView': 
+            return {
+                ...state,
+                showScopeView: !state.showScopeView,
+                showBusinessTransactionView: false,
+                showTreeTableView: false,
+            };
+        case 'showBusinessTransactionView': 
+            return {
+                ...state,
+                showScopeView: false,
+                showBusinessTransactionView: !state.showBusinessTransactionView,
+                showTreeTableView: false,
+            };
+        case 'showTreeTableView': 
+            return {
+                ...state,
+                showScopeView: false,
+                showBusinessTransactionView: false,
+                showTreeTableView: !state.showTreeTableView,
+            };
+    }
   },
 });
 

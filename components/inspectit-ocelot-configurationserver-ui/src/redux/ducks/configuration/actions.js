@@ -301,8 +301,10 @@ export const fetchConfigurationSchema = () => {
 };
 
 /**
- * Shows or hides the split view for the configuration properties.
+ * Shows or hides the diffrent split views
  */
-export const toggleVisualConfigurationView = () => ({
-  type: types.TOGGLE_VISUAL_CONFIGURATION_VIEW,
-});
+export const toggleVisualConfigurationView = (viewType) => {
+  return dispatch => {
+      dispatch({ type: types.TOGGLE_VISUAL_CONFIGURATION_VIEW, viewType: viewType})
+  }
+}

@@ -5,6 +5,7 @@ import editorConfig from '../../data/yaml-editor-config.json';
 import EditorToolbar from './EditorToolbar';
 import Notificationbar from './Notificationbar';
 import VisualEditor from './VisualEditor';
+import ScopeEditor from './ScopeEditor';
 
 const AceEditor = dynamic(() => import('./AceEditor'), { ssr: false });
 const TreeTableEditor = dynamic(() => import('./TreeTableEditor'), { ssr: false });
@@ -35,6 +36,9 @@ class EditorView extends React.Component {
       readOnly,
       showVisualConfigurationView,
       onToggleVisualConfigurationView,
+      showScopeView,
+      showTreeTableView,
+      showBusinessTransactionView, 
     } = this.props;
 
     return (
@@ -80,44 +84,51 @@ class EditorView extends React.Component {
             onSave={onSave}
             onSearch={() => this.editor.executeCommand('find')}
             onHelp={() => this.editor.showShortcuts()}
-            visualConfig={showVisualConfigurationView}
             onVisualConfigChange={onToggleVisualConfigurationView}
+            showScopeView= {showScopeView} 
+            showBusinessTransactionView= {showBusinessTransactionView} 
+            showTreeTableView = {showTreeTableView}
           >
             {children}
           </EditorToolbar>
         </div>
-        {showEditor && !showVisualConfigurationView && (
+        {
+          showEditor && !showScopeView && !showTreeTableView && 
           <div className="p-col editor-container">
-            <AceEditor
-              editorRef={(editor) => (this.editor = editor)}
-              onCreate={onCreate}
-              mode="yaml"
-              theme="cobalt"
-              options={editorConfig}
-              value={value}
-              onChange={onChange}
-              canSave={canSave}
-              onSave={onSave}
-              readOnly={readOnly}
-            />
+              <AceEditor editorRef={(editor) => this.editor = editor} onCreate={onCreate} mode="yaml" theme="cobalt" options={editorConfig} value={value} onChange={onChange} canSave={canSave} onSave={this.handleSave} readOnly={readOnly} />
           </div>
-        )}
-        {showEditor && showVisualConfigurationView && (
+        }
+        {
+          showEditor && showScopeView &&
           <div className="p-col visual-editor-container">
-            <VisualEditor yamlConfig={value} onUpdate={onChange}>
-              {(onUpdate, config) => (
-                <TreeTableEditor config={config} schema={schema} loading={loading} readOnly={readOnly} onUpdate={onUpdate} />
-              )}
-            </VisualEditor>
+              <VisualEditor yamlConfig={value} onUpdate={onChange}>
+                  {(onUpdate, config) => (
+                      // 'OR Statement here?'
+                      <ScopeEditor config={config} schema={schema} loading={loading} readOnly={readOnly} onUpdate={onUpdate} />
+                  )}
+              </VisualEditor>
+              
           </div>
-        )}
-        {!showEditor && (
+        }
+        {
+          showEditor && showTreeTableView &&
+          <div className="p-col visual-editor-container">
+              <VisualEditor yamlConfig={value} onUpdate={onChange}>
+                  {(onUpdate, config) => (
+                      <TreeTableEditor config={config} schema={schema} loading={loading} readOnly={readOnly} onUpdate={onUpdate} />
+                  )}
+              </VisualEditor>
+              
+          </div>
+        }
+        {
+          !showEditor &&
           <div className="p-col">
-            <div className="selection-information">
-              <div>{hint}</div>
-            </div>
+              <div className="selection-information">
+                  <div>{hint}</div>
+              </div>
           </div>
-        )}
+        }
         {loading && (
           <div className="p-col">
             <div className="loading-overlay">
@@ -175,7 +186,9 @@ EditorView.defaultProps = {
   enableButtons: true,
   canSave: true,
   loading: false,
-  showVisualConfigurationView: false,
+  showScopeView: false,
+  showTreeTableView: false,
+  showBusinessTransactionView: false,
 };
 
 export default EditorView;
