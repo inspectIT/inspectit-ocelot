@@ -44,9 +44,7 @@ const EditorToolbar = ({
         <Button disabled={!enableButtons} icon="pi pi-table" className={!visualConfig && "p-button-outlined"} onClick={() => {onVisualConfigChange('showTreeTableView')}} />
  
         {onRefresh && (
-          <React.Fragment>
           <Button disabled={!enableButtons || isRefreshing} icon={'pi pi-refresh' + (isRefreshing ? ' pi-spin' : '')} onClick={onRefresh} />
-          </React.Fragment>
         )}
         {!visualConfig && (
           <>
