@@ -3,7 +3,6 @@ package rocks.inspectit.ocelot.security.config;
 import com.google.common.annotations.VisibleForTesting;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -11,13 +10,14 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.password.LdapShaPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
-import rocks.inspectit.ocelot.config.model.LdapSettings;
 import rocks.inspectit.ocelot.filters.AccessLogFilter;
 import rocks.inspectit.ocelot.security.jwt.JwtTokenFilter;
 import rocks.inspectit.ocelot.security.jwt.JwtTokenManager;
+import rocks.inspectit.ocelot.security.userdetails.CustomLdapUserDetailsService;
 import rocks.inspectit.ocelot.security.userdetails.CustomUserAuthoritiesMapper;
 import rocks.inspectit.ocelot.security.userdetails.LocalUserDetailsService;
 
@@ -48,6 +48,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Autowired(required = false)
     private CustomUserAuthoritiesMapper customUserAuthoritiesPopulator;
+
+    @Autowired
+    private CustomLdapUserDetailsService customLdapUserDetailsService;
 
     @Autowired
     @VisibleForTesting
@@ -106,16 +109,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
      * Configures the user authentication to use LDAP user management and authentication
      */
     private void configureLdapAuthentication(AuthenticationManagerBuilder auth) throws Exception {
-        LdapContextSource contextSource = getApplicationContext().getBean(LdapContextSource.class);
-        LdapSettings ldapSettings = serverSettings.getSecurity().getLdap();
-        auth
-                .ldapAuthentication()
-                .userSearchFilter(ldapSettings.getUserSearchFilter())
-                .userSearchBase(ldapSettings.getUserSearchBase())
-                .groupSearchFilter(ldapSettings.getGroupSearchFilter())
-                .groupSearchBase(ldapSettings.getGroupSearchBase())
-                .contextSource(contextSource)
-                .authoritiesMapper(customUserAuthoritiesPopulator);
+        auth.userDetailsService(customLdapUserDetailsService).passwordEncoder(new LdapShaPasswordEncoder());
     }
 
     /**
