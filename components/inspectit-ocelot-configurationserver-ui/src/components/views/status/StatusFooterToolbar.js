@@ -1,9 +1,13 @@
 import React from 'react';
 import { filter } from 'lodash';
 
-const StatusFooterToolbar = ({ data }) => {
+const StatusFooterToolbar = ({ data, filterAgents }) => {
   const totalCount = data.length;
-  const agentCount = filter(data, (d) => d.metaInformation).length;
+  let agentCount = filter(data, (d) => d.metaInformation).length;
+  const filterCount = filter(filterAgents, (f) => f.metaInformation).length;
+  if(filterCount !== agentCount){
+    agentCount = filterCount;
+  }
   return (
     <>
       <style jsx>

@@ -14,7 +14,7 @@ class StatusView extends React.Component {
     filter: '',
   };
 
-  filterTets(filter, agents) {
+  filterAgents(filter, agents) {
     var newAgents = [];
     if (filter.length !== 0) {
       for (let i = 0; i < agents.length; i++) {
@@ -45,7 +45,7 @@ class StatusView extends React.Component {
   render() {
     const { filter } = this.state;
     const { agents } = this.props;
-    const filterAgents = this.filterTets(filter, agents);
+    const filterAgents = this.filterAgents(filter, agents);
     return (
       <>
         <style jsx>{`
@@ -68,7 +68,7 @@ class StatusView extends React.Component {
             <StatusTable data={filterAgents} />
           </div>
           <div>
-            <StatusFooterToolbar data={agents} />
+            <StatusFooterToolbar data={agents} filterAgents={filterAgents} />
           </div>
         </div>
       </>
