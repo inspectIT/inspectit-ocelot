@@ -20,24 +20,34 @@ class StatusView extends React.Component {
       for (let i = 0; i < agents.length; i++) {
 
         let found = false;
-        if (agents[i].attributes.id.includes(filter) && !found) {
-          newAgents.push(agents[i]);
+        if (!found && agents[i].attributes.id) {
+          if (agents[i].attributes.id.includes(filter)) {
+            newAgents.push(agents[i]);
+            found = true;
+          }
+        } else if (!found && agents[i].attributes.service) {
+          if (agents[i].attributes.service.includes(filter)) {
+            newAgents.push(agents[i]);
+            found = true;
+          }
+        } else if (!found && agents[i].mappingName) {
+          if (agents[i].mappingName.includes(filter))
+            newAgents.push(agents[i]);
           found = true;
-        } else if (agents[i].attributes.service.includes(filter) && !found) {
-          newAgents.push(agents[i]);
-          found = true;
-        } else if (agents[i].mappingName.includes(filter) && !found) {
-          newAgents.push(agents[i]);
-          found = true;
-        } else if (agents[i].metaInformation.agentVersion.includes(filter) && !found) {
-          newAgents.push(agents[i]);
-        } else if (agents[i].metaInformation.javaVersion.includes(filter) && !found) {
-          newAgents.push(agents[i]);
+        } else if (!found & agents[i].metaInformation.agentVersion) {
+          if (agents[i].metaInformation.agentVersion.includes(filter)) {
+            newAgents.push(agents[i]);
+            found = true;
+          }
+        } else if (!found & agents[i].metaInformation.javaVersion) {
+          if (agents[i].metaInformation.javaVersion.includes(filter)) {
+            newAgents.push(agents[i]);
+            found = true;
+          }
         }
-
       }
       return newAgents
-    } else{
+    } else {
       return agents;
     }
   }

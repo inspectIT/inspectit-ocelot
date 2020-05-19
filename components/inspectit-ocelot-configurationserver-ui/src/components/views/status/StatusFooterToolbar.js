@@ -3,11 +3,9 @@ import { filter } from 'lodash';
 
 const StatusFooterToolbar = ({ data, filterAgents }) => {
   const totalCount = data.length;
-  let agentCount = filter(data, (d) => d.metaInformation).length;
-  const filterCount = filter(filterAgents, (f) => f.metaInformation).length;
-  if(filterCount !== agentCount){
-    agentCount = filterCount;
-  }
+  const totalFilterCount = filterAgents.length
+  const agentCount = filter(filterAgents, (f) => f.metaInformation).length;
+   
   return (
     <>
       <style jsx>
@@ -26,7 +24,7 @@ const StatusFooterToolbar = ({ data, filterAgents }) => {
         `}
       </style>
       <div className="this">
-        inspectIT Ocelot Agents: {agentCount} <span className="separator">|</span> Generic Clients: {totalCount - agentCount}{' '}
+        inspectIT Ocelot Agents: {agentCount} <span className="separator">|</span> Generic Clients: {totalFilterCount - agentCount}{' '}
         <span className="separator">|</span> Total: {totalCount}
       </div>
     </>
