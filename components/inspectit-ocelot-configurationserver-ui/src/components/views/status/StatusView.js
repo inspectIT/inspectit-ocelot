@@ -14,9 +14,38 @@ class StatusView extends React.Component {
     filter: '',
   };
 
+  filterTets(filter, agents) {
+    var newAgents = [];
+    if (filter.length !== 0) {
+      for (let i = 0; i < agents.length; i++) {
+
+        let found = false;
+        if (agents[i].attributes.id.includes(filter) && !found) {
+          newAgents.push(agents[i]);
+          found = true;
+        } else if (agents[i].attributes.service.includes(filter) && !found) {
+          newAgents.push(agents[i]);
+          found = true;
+        } else if (agents[i].mappingName.includes(filter) && !found) {
+          newAgents.push(agents[i]);
+          found = true;
+        } else if (agents[i].metaInformation.agentVersion.includes(filter) && !found) {
+          newAgents.push(agents[i]);
+        } else if (agents[i].metaInformation.javaVersion.includes(filter) && !found) {
+          newAgents.push(agents[i]);
+        }
+
+      }
+      return newAgents
+    } else{
+      return agents;
+    }
+  }
+
   render() {
     const { filter } = this.state;
     const { agents } = this.props;
+    const filterAgents = this.filterTets(filter, agents);
     return (
       <>
         <style jsx>{`
@@ -36,7 +65,7 @@ class StatusView extends React.Component {
             <StatusToolbar filter={filter} onFilterChange={(filter) => this.setState({ filter })} />
           </div>
           <div className="data-table">
-            <StatusTable data={agents} filter={filter} />
+            <StatusTable data={filterAgents} />
           </div>
           <div>
             <StatusFooterToolbar data={agents} />
