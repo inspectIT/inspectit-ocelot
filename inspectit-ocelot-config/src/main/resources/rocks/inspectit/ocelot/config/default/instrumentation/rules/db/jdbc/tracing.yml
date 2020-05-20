@@ -38,6 +38,8 @@ inspectit:
         include:
           'r_jdbc_detect_entry': true
           'r_jdbc_extract_url': true
+          'r_tracing_global_attributes': true
+          'r_tracing_exception_attributes': true
         tracing:
           start-span: true
           start-span-conditions:
@@ -45,7 +47,6 @@ inspectit:
           attributes:
             'db.type': 'db_type_sql'
             'db.url': 'jdbc_url'
-            'java.exception': _thrown
           error-status: _thrown
         entry:
           'db_type_sql':
