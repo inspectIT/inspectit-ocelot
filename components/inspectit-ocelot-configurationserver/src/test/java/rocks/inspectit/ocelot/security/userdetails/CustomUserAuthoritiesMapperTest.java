@@ -21,7 +21,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class CustomUserAuthoritiesPopulatorTest {
+public class CustomUserAuthoritiesMapperTest {
 
     CustomUserAuthoritiesMapper customUserAuthoritiesMapper;
 
@@ -54,7 +54,7 @@ public class CustomUserAuthoritiesPopulatorTest {
     }
 
     @Nested
-    public class ResolveAccessRole {
+    public class MapAuthorities {
 
         @Test
         public void hasRead() {

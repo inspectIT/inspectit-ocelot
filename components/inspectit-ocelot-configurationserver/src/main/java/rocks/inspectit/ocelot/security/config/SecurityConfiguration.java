@@ -18,7 +18,6 @@ import rocks.inspectit.ocelot.filters.AccessLogFilter;
 import rocks.inspectit.ocelot.security.jwt.JwtTokenFilter;
 import rocks.inspectit.ocelot.security.jwt.JwtTokenManager;
 import rocks.inspectit.ocelot.security.userdetails.CustomLdapUserDetailsService;
-import rocks.inspectit.ocelot.security.userdetails.CustomUserAuthoritiesMapper;
 import rocks.inspectit.ocelot.security.userdetails.LocalUserDetailsService;
 
 import javax.servlet.http.HttpServletResponse;
@@ -47,9 +46,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     private LocalUserDetailsService localUserDetailsService;
 
     @Autowired(required = false)
-    private CustomUserAuthoritiesMapper customUserAuthoritiesPopulator;
-
-    @Autowired
     private CustomLdapUserDetailsService customLdapUserDetailsService;
 
     @Autowired
@@ -99,17 +95,19 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        configureLocalAuthentication(auth);
         if (serverSettings.getSecurity().isLdapAuthentication()) {
             configureLdapAuthentication(auth);
         }
-        configureLocalAuthentication(auth);
     }
 
     /**
      * Configures the user authentication to use LDAP user management and authentication
      */
     private void configureLdapAuthentication(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(customLdapUserDetailsService).passwordEncoder(new LdapShaPasswordEncoder());
+        auth
+                .userDetailsService(customLdapUserDetailsService)
+                .passwordEncoder(new LdapShaPasswordEncoder());
     }
 
     /**

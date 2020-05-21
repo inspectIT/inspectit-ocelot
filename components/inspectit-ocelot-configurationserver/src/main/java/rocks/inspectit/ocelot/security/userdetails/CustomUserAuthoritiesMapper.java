@@ -1,6 +1,5 @@
 package rocks.inspectit.ocelot.security.userdetails;
 
-import com.google.common.annotations.VisibleForTesting;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.core.GrantedAuthority;
@@ -23,20 +22,16 @@ public class CustomUserAuthoritiesMapper implements GrantedAuthoritiesMapper {
     @Autowired
     InspectitServerSettings settings;
 
-    @Override
-    public Collection<? extends GrantedAuthority> mapAuthorities(Collection<? extends GrantedAuthority> authorities) {
-        return resolvePermissionSet(authorities);
-    }
-
     /**
-     * Maps the in the ldap section of the server config defined ldap roles to a role-set internally used for access
-     * control. Always returns the role-set with highest access level if user contains multiple matching authorities.
+     * Maps the in the ldap section of the server config defined ldap roles to the role set defined in
+     * {@link UserRoleConfiguration}. Always returns the role-set with highest access level if user contains multiple
+     * matching authorities.
      *
      * @param authorities A List of GrantedAuthority-Objects that should be mapped.
      * @return The highest level of access role the user's authorities could be resolved to.
      */
-    @VisibleForTesting
-    private List<? extends GrantedAuthority> resolvePermissionSet(Collection<? extends GrantedAuthority> authorities) {
+    @Override
+    public Collection<? extends GrantedAuthority> mapAuthorities(Collection<? extends GrantedAuthority> authorities) {
         LdapRoleResolveSettings role_settings = settings.getSecurity().getLdap().getRoles();
         if (containsAuthority(authorities, role_settings.getAdmin()) || hasAdminGroup(authorities)) {
             return UserRoleConfiguration.ADMIN_ROLE_PERMISSION_SET;
@@ -49,6 +44,7 @@ public class CustomUserAuthoritiesMapper implements GrantedAuthoritiesMapper {
         }
         return UserRoleConfiguration.READ_ROLE_PERMISSION_SET;
     }
+
 
     /**
      * Checks if at least one entry of a Collection of authorities is contained in a List of Strings.
