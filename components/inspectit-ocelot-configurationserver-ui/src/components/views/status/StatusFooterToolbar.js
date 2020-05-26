@@ -1,10 +1,9 @@
 import React from 'react';
 import { filter } from 'lodash';
 
-const StatusFooterToolbar = ({ data, filterAgents }) => {
+const StatusFooterToolbar = ({ data }) => {
   const totalCount = data.length;
-  const totalFilterCount = filterAgents.length
-  const agentCount = filter(filterAgents, (f) => f.metaInformation).length;
+  const agentCount = filter(data, (d) => d.metaInformation).length;
    
   return (
     <>
@@ -24,7 +23,7 @@ const StatusFooterToolbar = ({ data, filterAgents }) => {
         `}
       </style>
       <div className="this">
-        inspectIT Ocelot Agents: {agentCount} <span className="separator">|</span> Generic Clients: {totalFilterCount - agentCount}{' '}
+        inspectIT Ocelot Agents: {agentCount} <span className="separator">|</span> Generic Clients: {totalCount - agentCount}{' '}
         <span className="separator">|</span> Total: {totalCount}
       </div>
     </>

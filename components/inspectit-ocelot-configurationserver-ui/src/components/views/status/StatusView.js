@@ -15,38 +15,42 @@ class StatusView extends React.Component {
   };
 
   filterAgents(filter, agents) {
-    var newAgents = [];
+    let filterAgents = [];
     if (filter.length !== 0) {
       for (let i = 0; i < agents.length; i++) {
 
-        let found = false;
-        if (!found && agents[i].attributes.id) {
+        if (agents[i].attributes.id) {
           if (agents[i].attributes.id.includes(filter)) {
-            newAgents.push(agents[i]);
-            found = true;
+            filterAgents.push(agents[i]);
+            continue;
           }
-        } else if (!found && agents[i].attributes.service) {
+        }
+        if (agents[i].attributes.service) {
           if (agents[i].attributes.service.includes(filter)) {
-            newAgents.push(agents[i]);
-            found = true;
+            filterAgents.push(agents[i]);
+            continue;
           }
-        } else if (!found && agents[i].mappingName) {
-          if (agents[i].mappingName.includes(filter))
-            newAgents.push(agents[i]);
-          found = true;
-        } else if (!found & agents[i].metaInformation.agentVersion) {
+        }
+        if (agents[i].mappingName) {
+          if (agents[i].mappingName.includes(filter)) {
+            filterAgents.push(agents[i]);
+            continue;
+          }
+        }
+        if (agents[i].metaInformation != null) {
           if (agents[i].metaInformation.agentVersion.includes(filter)) {
-            newAgents.push(agents[i]);
-            found = true;
+            filterAgents.push(agents[i]);
+            continue;
           }
-        } else if (!found & agents[i].metaInformation.javaVersion) {
+        }
+        if (agents[i].metaInformation != null) {
           if (agents[i].metaInformation.javaVersion.includes(filter)) {
-            newAgents.push(agents[i]);
-            found = true;
+            filterAgents.push(agents[i]);
+            continue;
           }
         }
       }
-      return newAgents
+      return filterAgents;
     } else {
       return agents;
     }
@@ -78,7 +82,7 @@ class StatusView extends React.Component {
             <StatusTable data={filterAgents} />
           </div>
           <div>
-            <StatusFooterToolbar data={agents} filterAgents={filterAgents} />
+            <StatusFooterToolbar data={filterAgents} />
           </div>
         </div>
       </>
