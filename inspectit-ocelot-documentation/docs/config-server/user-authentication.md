@@ -30,6 +30,28 @@ Furthermore, the HTTP APIs which are related to the user management (`/api/v1/us
 In order to use LDAP for user authentication the `inspectit-config-server.security.ldap-authentication` property must be set to `true`.
 
 The LDAP related configuration properties have to be specified using the property `inspectit-config-server.security.ldap`.
+
+###Access Control
+
+By default, there are four different access roles provided: read, write, commit and admin. These access roles are hierarchical.
+A user with write access also has read access, a user with commit access also has both read and write access and so on.
+
+####Roles
+read-role: may only read files on the server.
+
+write-role: may read and edit files on the server.
+
+commit-role: may commit new file versions (functions not implemented yet).
+
+admin-role: may read, write and commit files. Can also edit user accounts.
+
+####Configuration
+
+In order to map an access role to a ldap group, you have to add the name of the ldap group in the respective list in 
+`inspectit-config-server.security.ldap.roles`. In the example below, only the ldap group "SHIP_CREW" has admin access.
+All other ldap groups of this ldap server have no access to the configuration server. 
+
+
 The following configuration snippet shows an example LDAP configuration (this configuration was created for [this](https://github.com/rroemhild/docker-test-openldap) LDAP server).
 
 ```YAML
@@ -46,6 +68,15 @@ inspectit-config-server:
             user-search-filter: "(uid={0})"
             group-search-base: "ou=people,dc=planetexpress,dc=com"
             group-search-filter: "(member={0})"
+            roles:
+              read:
+                -
+              write:
+                -
+              commit:
+                -
+              admin:
+                - SHIP_CREW
 ```
 
 ### LDAP Configuration Properties
@@ -64,6 +95,7 @@ Each property is located below the property `inspectit-config-server.security.ld
 | `user-search-filter` | The LDAP filter used to search for users. For example `(uid={0})`. |
 | `group-search-base` | The search base for group membership searches. |
 | `group-search-filter` | The LDAP filter to search for groups. |
+| `roles` | The mapping from LDAP-Groups to internal access roles. |
 
 ## Access Log
 
