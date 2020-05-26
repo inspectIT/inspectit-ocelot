@@ -18,7 +18,6 @@ class StatusView extends React.Component {
     let filterAgents = [];
     if (filter.length !== 0) {
       for (let i = 0; i < agents.length; i++) {
-
         if (agents[i].attributes.id) {
           if (agents[i].attributes.id.includes(filter)) {
             filterAgents.push(agents[i]);
