@@ -17,6 +17,11 @@ import java.util.List;
 public class LdapRoleResolveSettings {
 
     /**
+     * Roles defined in this list are granted read access.
+     */
+    private List<String> read;
+
+    /**
      * Roles defined in this list are granted read and write access.
      */
     private List<String> write;

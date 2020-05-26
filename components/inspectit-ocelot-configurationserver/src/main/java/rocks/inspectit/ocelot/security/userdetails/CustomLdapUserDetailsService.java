@@ -1,30 +1,61 @@
 package rocks.inspectit.ocelot.security.userdetails;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.core.annotation.Order;
+import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.ldap.search.LdapUserSearch;
+import org.springframework.security.ldap.search.FilterBasedLdapUserSearch;
 import org.springframework.security.ldap.userdetails.DefaultLdapAuthoritiesPopulator;
 import org.springframework.security.ldap.userdetails.LdapUserDetailsService;
-import org.springframework.stereotype.Component;
+import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
+import rocks.inspectit.ocelot.config.model.LdapSettings;
 
 /**
  * The user details service used for authentication against the configured LDAP system.
  */
-@Component
-@Order(1)
-@ConditionalOnProperty(value = "inspectit-config-server.security.ldap-authentication", havingValue = "true")
 public class CustomLdapUserDetailsService extends LdapUserDetailsService {
 
-    @Autowired
     private CustomUserAuthoritiesMapper customUserAuthoritiesMapper;
 
-    @Autowired
-    public CustomLdapUserDetailsService(LdapUserSearch ldapUserSearch, DefaultLdapAuthoritiesPopulator defaultLdapAuthoritiesPopulator) {
-        super(ldapUserSearch, defaultLdapAuthoritiesPopulator);
+    public CustomLdapUserDetailsService(
+            InspectitServerSettings serverSettings,
+            LdapContextSource contextSource
+    ) {
+        super(
+                buildFilterBasedLdapUserSearch(serverSettings, contextSource),
+                buildDefaultLdapAuthoritiesPopulator(serverSettings, contextSource)
+        );
+        customUserAuthoritiesMapper = new CustomUserAuthoritiesMapper(serverSettings);
+    }
+
+    /**
+     * Creates and returns an instance of FilterBasedLdapUserSearch based on the given parameters.
+     *
+     * @param serverSettings The InspectitServerSettings the server was started with
+     * @param contextSource  The LdapContextSource of the current Application context.
+     * @return An instance of FilterBasedLdapUserSearch
+     */
+    private static FilterBasedLdapUserSearch buildFilterBasedLdapUserSearch(InspectitServerSettings serverSettings, LdapContextSource contextSource
+    ) {
+        LdapSettings ldapSettings = serverSettings.getSecurity().getLdap();
+        return new FilterBasedLdapUserSearch(ldapSettings.getGroupSearchBase(), ldapSettings.getUserSearchFilter(), contextSource);
+    }
+
+    /**
+     * Creates and returns an instance of DefaultLdapAuthoritiesPopulator based on the given parameters.
+     *
+     * @param serverSettings The InspectitServerSettings the server was started with
+     * @param contextSource  The LdapContextSource of the current Application context.
+     * @return An instance of DefaultLdapAuthoritiesPopulator
+     */
+    private static DefaultLdapAuthoritiesPopulator buildDefaultLdapAuthoritiesPopulator(
+            InspectitServerSettings serverSettings,
+            LdapContextSource contextSource
+    ) {
+        LdapSettings ldapSettings = serverSettings.getSecurity().getLdap();
+        DefaultLdapAuthoritiesPopulator defaultLdapAuthoritiesPopulator = new DefaultLdapAuthoritiesPopulator(contextSource, ldapSettings.getGroupSearchBase());
+        defaultLdapAuthoritiesPopulator.setGroupSearchFilter(ldapSettings.getGroupSearchFilter());
+        return defaultLdapAuthoritiesPopulator;
     }
 
     /**

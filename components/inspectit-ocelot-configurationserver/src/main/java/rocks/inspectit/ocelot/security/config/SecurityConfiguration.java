@@ -3,6 +3,7 @@ package rocks.inspectit.ocelot.security.config;
 import com.google.common.annotations.VisibleForTesting;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -44,9 +45,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private LocalUserDetailsService localUserDetailsService;
-
-    @Autowired(required = false)
-    private CustomLdapUserDetailsService customLdapUserDetailsService;
 
     @Autowired
     @VisibleForTesting
@@ -95,16 +93,21 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        configureLocalAuthentication(auth);
         if (serverSettings.getSecurity().isLdapAuthentication()) {
             configureLdapAuthentication(auth);
         }
+        configureLocalAuthentication(auth);
     }
 
     /**
      * Configures the user authentication to use LDAP user management and authentication
      */
     private void configureLdapAuthentication(AuthenticationManagerBuilder auth) throws Exception {
+        LdapContextSource contextSource = getApplicationContext().getBean(LdapContextSource.class);
+        CustomLdapUserDetailsService customLdapUserDetailsService = new CustomLdapUserDetailsService(
+                serverSettings,
+                contextSource
+        );
         auth
                 .userDetailsService(customLdapUserDetailsService)
                 .passwordEncoder(new LdapShaPasswordEncoder());

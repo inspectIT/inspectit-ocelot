@@ -1,26 +1,26 @@
 package rocks.inspectit.ocelot.security.userdetails;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
-import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.config.model.LdapRoleResolveSettings;
 import rocks.inspectit.ocelot.security.config.UserRoleConfiguration;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
  * This LdapAuthoritiesPopulator is used to populate user object with roles upon basic authentication when they are
  * authenticated by a ldap server.
  */
-@Component
-@ConditionalOnProperty(value = "inspectit-config-server.security.ldap-authentication", havingValue = "true")
 public class CustomUserAuthoritiesMapper implements GrantedAuthoritiesMapper {
-    @Autowired
+
     InspectitServerSettings settings;
+
+    public CustomUserAuthoritiesMapper(InspectitServerSettings settings) {
+        this.settings = settings;
+    }
 
     /**
      * Maps the in the ldap section of the server config defined ldap roles to the role set defined in
@@ -42,7 +42,11 @@ public class CustomUserAuthoritiesMapper implements GrantedAuthoritiesMapper {
         if (containsAuthority(authorities, role_settings.getWrite())) {
             return UserRoleConfiguration.WRITE_ROLE_PERMISSION_SET;
         }
-        return UserRoleConfiguration.READ_ROLE_PERMISSION_SET;
+        if (containsAuthority(authorities, role_settings.getRead())) {
+            return UserRoleConfiguration.READ_ROLE_PERMISSION_SET;
+        }
+        return Collections.EMPTY_LIST;
+
     }
 
 
