@@ -76,23 +76,18 @@ When using this authentication mode, users and their credentials will be managed
 When using LDAP, users which are added using the <em>local user authentication</em> mode will not be available.
 Furthermore, the HTTP APIs which are related to the user management (<code>/api/v1/users</code>, <code>/api/v1/account/password</code>) cannot be used.</p>
 <p>In order to use LDAP for user authentication the <code>inspectit-config-server.security.ldap-authentication</code> property must be set to <code>true</code>.</p>
-<p>The LDAP related configuration properties have to be specified using the property <code>inspectit-config-server.security.ldap</code>.
-The following configuration snippet shows an example LDAP configuration (this configuration was created for <a href="https://github.com/rroemhild/docker-test-openldap">this</a> LDAP server).</p>
-<pre><code class="hljs css language-YAML"><span class="hljs-attr">inspectit-config-server:</span>
-    <span class="hljs-attr">security:</span>
-        <span class="hljs-attr">ldap-authentication:</span> <span class="hljs-literal">true</span>
-        <span class="hljs-attr">ldap:</span>
-            <span class="hljs-attr">admin-group:</span> <span class="hljs-string">"SHIP_CREW"</span>
-            <span class="hljs-attr">url:</span> <span class="hljs-string">"ldap://localhost:389/"</span>
-            <span class="hljs-attr">base-dn:</span> <span class="hljs-string">""</span>
-            <span class="hljs-attr">manager-dn:</span> <span class="hljs-string">"cn=admin,dc=planetexpress,dc=com"</span>
-            <span class="hljs-attr">manager-password:</span> <span class="hljs-string">"GoodNewsEveryone"</span>
-            <span class="hljs-attr">user-search-base:</span> <span class="hljs-string">"ou=people,dc=planetexpress,dc=com"</span>
-            <span class="hljs-attr">user-search-filter:</span> <span class="hljs-string">"(uid={0})"</span>
-            <span class="hljs-attr">group-search-base:</span> <span class="hljs-string">"ou=people,dc=planetexpress,dc=com"</span>
-            <span class="hljs-attr">group-search-filter:</span> <span class="hljs-string">"(member={0})"</span>
-</code></pre>
-<h3><a class="anchor" aria-hidden="true" id="ldap-configuration-properties"></a><a href="#ldap-configuration-properties" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>LDAP Configuration Properties</h3>
+<p>The LDAP related configuration properties have to be specified using the property <code>inspectit-config-server.security.ldap</code>.</p>
+<h3><a class="anchor" aria-hidden="true" id="authorization"></a><a href="#authorization" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Authorization</h3>
+<p>There are four different access roles available: read, write, commit and admin. These access roles are hierarchical.
+A user with write access also has read access, a user with commit access also has both read and write access and so on.
+The exact permissions of the roles are the following:</p>
+<ul>
+<li><em>Read</em>: may only read files on the server.</li>
+<li><em>Write</em>: may read and edit files on the server.</li>
+<li><em>Commit</em>: may read, write and commit files (This feature is not implemented yet).</li>
+<li><em>Admin</em>: may read, write and commit files. Can also edit user accounts.</li>
+</ul>
+<h4><a class="anchor" aria-hidden="true" id="configuration"></a><a href="#configuration" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Configuration</h4>
 <p>The following tables contains the required LDAP configuration properties including a description for each property.
 Each property is located below the property <code>inspectit-config-server.security.ldap</code>.</p>
 <table>
@@ -100,7 +95,6 @@ Each property is located below the property <code>inspectit-config-server.securi
 <tr><th>Property</th><th>Note</th></tr>
 </thead>
 <tbody>
-<tr><td><code>admin-group</code></td><td>The group to which a user must be assigned to gain administrator access.</td></tr>
 <tr><td><code>url</code></td><td>Url of the LDAP server.</td></tr>
 <tr><td><code>base-dn</code></td><td>Set the base suffix from which all operations should origin.</td></tr>
 <tr><td><code>manager-dn</code></td><td>Set the user distinguished name (principal) to use for getting authenticated contexts.</td></tr>
@@ -109,8 +103,32 @@ Each property is located below the property <code>inspectit-config-server.securi
 <tr><td><code>user-search-filter</code></td><td>The LDAP filter used to search for users. For example <code>(uid={0})</code>.</td></tr>
 <tr><td><code>group-search-base</code></td><td>The search base for group membership searches.</td></tr>
 <tr><td><code>group-search-filter</code></td><td>The LDAP filter to search for groups.</td></tr>
+<tr><td><code>roles.read</code></td><td>A list of LDAP-Groups which will gain read-access.</td></tr>
+<tr><td><code>roles.write</code></td><td>A list of LDAP-Groups which will gain write-access.</td></tr>
+<tr><td><code>roles.commit</code></td><td>A list of LDAP-Groups which will gain commit-access.</td></tr>
+<tr><td><code>roles.admin</code></td><td>A list of LDAP-Groups which will gain admin-access.</td></tr>
 </tbody>
 </table>
+<p>The following configuration snippet shows an example LDAP configuration (this configuration was created for <a href="https://github.com/rroemhild/docker-test-openldap">this</a> LDAP server).</p>
+<pre><code class="hljs css language-YAML"><span class="hljs-attr">inspectit-config-server:</span>
+    <span class="hljs-attr">security:</span>
+        <span class="hljs-attr">ldap-authentication:</span> <span class="hljs-literal">true</span>
+        <span class="hljs-attr">ldap:</span>
+            <span class="hljs-attr">url:</span> <span class="hljs-string">"ldap://localhost:389/"</span>
+            <span class="hljs-attr">base-dn:</span> <span class="hljs-string">""</span>
+            <span class="hljs-attr">manager-dn:</span> <span class="hljs-string">"cn=admin,dc=planetexpress,dc=com"</span>
+            <span class="hljs-attr">manager-password:</span> <span class="hljs-string">"GoodNewsEveryone"</span>
+            <span class="hljs-attr">user-search-base:</span> <span class="hljs-string">"ou=people,dc=planetexpress,dc=com"</span>
+            <span class="hljs-attr">user-search-filter:</span> <span class="hljs-string">"(uid={0})"</span>
+            <span class="hljs-attr">group-search-base:</span> <span class="hljs-string">"ou=people,dc=planetexpress,dc=com"</span>
+            <span class="hljs-attr">group-search-filter:</span> <span class="hljs-string">"(member={0})"</span>
+            <span class="hljs-attr">roles:</span>
+              <span class="hljs-attr">read:</span> <span class="hljs-string">[]</span>
+              <span class="hljs-attr">write:</span> <span class="hljs-string">[]</span>
+              <span class="hljs-attr">commit:</span> <span class="hljs-string">[]</span>
+              <span class="hljs-attr">admin:</span>
+                <span class="hljs-bullet">-</span> <span class="hljs-string">SHIP_CREW</span>
+</code></pre>
 <h2><a class="anchor" aria-hidden="true" id="access-log"></a><a href="#access-log" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Access Log</h2>
 <p>By default, the server will log all authorized and unauthorized access attempts to secured endpoints.
 Access logging can be disabled using the following property:</p>
@@ -118,7 +136,7 @@ Access logging can be disabled using the following property:</p>
     <span class="hljs-attr">security:</span>
         <span class="hljs-attr">access-log:</span> <span class="hljs-literal">false</span>
 </code></pre>
-</span></div></article></div><div class="docLastUpdate"><em>Last updated on 2019-10-16 by Marius Brill</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/next/config-server/agent-mappings"><span class="arrow-prev">← </span><span>Agent Mappings</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/next/config-server/log-config"><span>Server Logging Configuration</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#local-user-authentication">Local User Authentication</a></li><li><a href="#ldap-user-authentication">LDAP User Authentication</a><ul class="toc-headings"><li><a href="#ldap-configuration-properties">LDAP Configuration Properties</a></li></ul></li><li><a href="#access-log">Access Log</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2020 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</span></div></article></div><div class="docLastUpdate"><em>Last updated on 2020-5-27 by Marius Brill</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/next/config-server/agent-mappings"><span class="arrow-prev">← </span><span>Agent Mappings</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/next/config-server/log-config"><span>Server Logging Configuration</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#local-user-authentication">Local User Authentication</a></li><li><a href="#ldap-user-authentication">LDAP User Authentication</a><ul class="toc-headings"><li><a href="#authorization">Authorization</a></li></ul></li><li><a href="#access-log">Access Log</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2020 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
