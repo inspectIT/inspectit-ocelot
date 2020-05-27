@@ -82,13 +82,14 @@ public class AccountController extends AbstractBaseController {
         return ResponseEntity.ok().build();
     }
 
-    @ApiOperation(value = "Get the user's permissions", notes = "Queries the permissions of the user.")
+    @ApiOperation(value = "Get the user's permissions", notes = "Queries the permissions of the currently logged-in user.")
     @ApiResponse(code = 200, message = "The permissions of the user")
     @GetMapping("account/permissions")
     public UserPermissions getPermissions(Authentication auth) {
         Set<String> roles = auth.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toSet());
+
         return UserPermissions.builder()
                 .write(roles.contains(UserRoleConfiguration.WRITE_ACCESS_ROLE))
                 .commit(roles.contains(UserRoleConfiguration.COMMIT_ACCESS_ROLE))
