@@ -40,6 +40,12 @@ bootJar {
 		include "boomerang.js"
 		into "static/boomerang"
 	}
+	from ("$buildDir/boomerang-${boomerangVersion}"){
+		
+		include "boomerang.js"
+		into "static/boomerang"
+		rename 'boomerang.js', 'inspectit.js'
+	}
 }
 
 test {
