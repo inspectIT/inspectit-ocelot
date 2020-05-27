@@ -11,6 +11,7 @@ inspectit:
           'r_capture_method_duration_conditional': true
         scopes:
           's_httpurlconnection_getInputStream': true
+          's_httpurlconnection_requestInitiators': true
         entry:
           'capture_time_condition': # Defined for r_capture_method_duration_conditional
             action: 'a_assign_true'
