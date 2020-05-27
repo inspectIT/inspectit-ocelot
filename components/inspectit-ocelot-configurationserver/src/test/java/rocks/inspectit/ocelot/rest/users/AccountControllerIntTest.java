@@ -11,9 +11,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import rocks.inspectit.ocelot.IntegrationTestBase;
-import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.rest.ErrorInfo;
 import rocks.inspectit.ocelot.user.User;
+import rocks.inspectit.ocelot.user.UserPermissions;
 import rocks.inspectit.ocelot.user.UserService;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -93,6 +93,30 @@ public class AccountControllerIntTest extends IntegrationTestBase {
             assertThat(result.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
             assertThat(result.getBody().getError()).isEqualTo(ErrorInfo.Type.NO_PASSWORD);
 
+        }
+    }
+
+    @Nested
+    class GetPermissions {
+
+        @Test
+        void testAdminPermissions() {
+            userService.addOrUpdateUser(User.builder()
+                    .username("John")
+                    .password("doe")
+                    .build());
+
+            ResponseEntity<UserPermissions> result = rest
+                    .withBasicAuth("John", "doe")
+                    .getForEntity("/api/v1/account/permissions", UserPermissions.class);
+            assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            assertThat(result.getBody())
+                    .isEqualTo(UserPermissions.builder()
+                            .write(true)
+                            .commit(true)
+                            .admin(true)
+                            .build());
         }
     }
 }
