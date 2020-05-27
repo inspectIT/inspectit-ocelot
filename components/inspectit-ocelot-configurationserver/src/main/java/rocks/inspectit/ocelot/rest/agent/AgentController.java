@@ -16,7 +16,6 @@ import rocks.inspectit.ocelot.agentstatus.AgentStatusManager;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.rest.AbstractBaseController;
 
-import java.io.IOException;
 import java.util.Map;
 
 
@@ -42,7 +41,7 @@ public class AgentController extends AbstractBaseController {
      */
     @ApiOperation(value = "Fetch the Agent Configuration", notes = "Reads the configuration for the given agent and returns it as a yaml string")
     @GetMapping(value = "agent/configuration", produces = "text/plain")
-    public ResponseEntity<String> fetchConfiguration(@ApiParam("The agent attributes used to select the correct mapping") @RequestParam Map<String, String> attributes, @RequestHeader Map<String, String> headers) throws IOException {
+    public ResponseEntity<String> fetchConfiguration(@ApiParam("The agent attributes used to select the correct mapping") @RequestParam Map<String, String> attributes, @RequestHeader Map<String, String> headers) {
         log.debug("Fetching the agent configuration for agent ({})", attributes.toString());
         AgentConfiguration configuration = configManager.getConfiguration(attributes);
         statusManager.notifyAgentConfigurationFetched(attributes, headers, configuration);

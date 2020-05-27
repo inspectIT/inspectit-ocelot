@@ -17,15 +17,19 @@ import java.util.stream.Stream;
 public class ProcessorMetricsRecorder extends AbstractPollingMetricsRecorder {
 
     private static final String CPU_COUNT_METRIC_NAME = "count";
+
     private static final String CPU_COUNT_METRIC_FULL_NAME = "system/cpu/count";
 
     private static final String AVERAGE_LOAD_METRIC_NAME = "system.average";
+
     private static final String AVERAGE_LOAD_METRIC_FULL_NAME = "system/load/average/1m";
 
     private static final String SYSTEM_USAGE_METRIC_NAME = "system.usage";
+
     private static final String SYSTEM_USAGE_METRIC_FULL_NAME = "system/cpu/usage";
 
     private static final String PROCESS_USAGE_METRIC_NAME = "process.usage";
+
     private static final String PROCESS_USAGE_METRIC_FULL_NAME = "process/cpu/usage";
 
     private static final List<String> OPERATING_SYSTEM_BEAN_CLASS_NAMES = Arrays.asList(
@@ -34,9 +38,13 @@ public class ProcessorMetricsRecorder extends AbstractPollingMetricsRecorder {
     );
 
     private Runtime runtime;
+
     private OperatingSystemMXBean operatingSystemBean;
+
     private Optional<Method> systemCpuUsage;
+
     private Optional<Method> processCpuUsage;
+
     private boolean averageLoadAvailable;
 
     public ProcessorMetricsRecorder() {
@@ -66,19 +74,18 @@ public class ProcessorMetricsRecorder extends AbstractPollingMetricsRecorder {
 
     @Override
     protected void takeMeasurement(MetricsSettings config) {
-        val mm = recorder.newMeasureMap();
         Map<String, Boolean> enabled = config.getProcessor().getEnabled();
         if (enabled.getOrDefault(CPU_COUNT_METRIC_NAME, false)) {
-            measureManager.tryRecordingMeasurement(CPU_COUNT_METRIC_FULL_NAME, mm, runtime.availableProcessors());
+            measureManager.tryRecordingMeasurement(CPU_COUNT_METRIC_FULL_NAME, runtime.availableProcessors());
         }
         if (enabled.getOrDefault(AVERAGE_LOAD_METRIC_NAME, false) && averageLoadAvailable) {
-            measureManager.tryRecordingMeasurement(AVERAGE_LOAD_METRIC_FULL_NAME, mm, operatingSystemBean.getSystemLoadAverage());
+            measureManager.tryRecordingMeasurement(AVERAGE_LOAD_METRIC_FULL_NAME, operatingSystemBean.getSystemLoadAverage());
         }
         if (enabled.getOrDefault(SYSTEM_USAGE_METRIC_NAME, false) && systemCpuUsage.isPresent()) {
             try {
                 double value = (double) systemCpuUsage.get().invoke(operatingSystemBean);
                 if (value >= 0D) {
-                    measureManager.tryRecordingMeasurement(SYSTEM_USAGE_METRIC_FULL_NAME, mm, value);
+                    measureManager.tryRecordingMeasurement(SYSTEM_USAGE_METRIC_FULL_NAME, value);
                 }
             } catch (Exception e) {
                 log.error("Error reading system cpu usage", e);
@@ -88,13 +95,12 @@ public class ProcessorMetricsRecorder extends AbstractPollingMetricsRecorder {
             try {
                 double value = (double) processCpuUsage.get().invoke(operatingSystemBean);
                 if (value >= 0D) {
-                    measureManager.tryRecordingMeasurement(PROCESS_USAGE_METRIC_FULL_NAME, mm, value);
+                    measureManager.tryRecordingMeasurement(PROCESS_USAGE_METRIC_FULL_NAME, value);
                 }
             } catch (Exception e) {
                 log.error("Error reading system cpu usage", e);
             }
         }
-        mm.record();
     }
 
     @Override
@@ -116,7 +122,6 @@ public class ProcessorMetricsRecorder extends AbstractPollingMetricsRecorder {
         }
         return enabled.containsValue(true);
     }
-
 
     private Optional<Method> findOSBeanMethod(String methodName) {
         return OPERATING_SYSTEM_BEAN_CLASS_NAMES.stream().flatMap((cn) -> {

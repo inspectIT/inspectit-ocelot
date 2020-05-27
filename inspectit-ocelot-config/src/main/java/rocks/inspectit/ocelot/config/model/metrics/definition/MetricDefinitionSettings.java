@@ -7,6 +7,7 @@ import rocks.inspectit.ocelot.config.model.metrics.MetricsSettings;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.time.Duration;
 import java.util.Map;
 
 /**
@@ -53,23 +54,37 @@ public class MetricDefinitionSettings {
 
     /**
      * Copies the settings of this object but applies the defaults, like creating a default view if no views were defined.
+     * Does not provide a default time window for windowed views.
      *
      * @param metricName the name of the measure, derived form the key in {@link MetricsSettings#getDefinitions()}
+     *
      * @return a copy of this view definition with the default populated
      */
     public MetricDefinitionSettings getCopyWithDefaultsPopulated(String metricName) {
+        return getCopyWithDefaultsPopulated(metricName, null);
+    }
+
+    /**
+     * Copies the settings of this object but applies the defaults, like creating a default view if no views were defined.
+     *
+     * @param metricName        the name of the measure, derived form the key in {@link MetricsSettings#getDefinitions()}
+     * @param defaultTimeWindow the size of the time window to use as default for windowed metrics (e.g. quantiles)
+     *
+     * @return a copy of this view definition with the default populated
+     */
+    public MetricDefinitionSettings getCopyWithDefaultsPopulated(String metricName, Duration defaultTimeWindow) {
         val resultDescription = description == null ? metricName : description;
         val result = toBuilder()
                 .description(resultDescription)
                 .clearViews();
         if (!CollectionUtils.isEmpty(views)) {
             views.forEach((name, def) ->
-                    result.view(name, def.getCopyWithDefaultsPopulated(name, resultDescription, unit)));
+                    result.view(name, def.getCopyWithDefaultsPopulated(resultDescription, unit, defaultTimeWindow)));
         } else {
             result.view(metricName, ViewDefinitionSettings.builder()
                     .aggregation(ViewDefinitionSettings.Aggregation.LAST_VALUE)
                     .build()
-                    .getCopyWithDefaultsPopulated(metricName, resultDescription, unit));
+                    .getCopyWithDefaultsPopulated(resultDescription, unit, defaultTimeWindow));
         }
         return result.build();
     }

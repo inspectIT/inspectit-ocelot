@@ -43,6 +43,10 @@ bootJar {
 
 test {
 	useJUnitPlatform()
+
+	testLogging {
+		exceptionFormat = 'full'
+	}
 }
 
 dependencies {
@@ -54,10 +58,15 @@ dependencies {
 			"io.opencensus:opencensus-impl:${openCensusVersion}",
 			"io.prometheus:simpleclient_httpserver:${prometheusClientVersion}",
 			"io.opencensus:opencensus-exporter-stats-prometheus:${openCensusVersion}",
+			"io.opentelemetry:opentelemetry-proto:0.3.0",
+			"io.opentelemetry:opentelemetry-exporters-jaeger:0.3.0",
+			"io.opentelemetry:opentelemetry-sdk:0.3.0",
+			"io.grpc:grpc-netty:1.+",
+			"com.google.protobuf:protobuf-java-util:3.+",
 			'com.maxmind.geoip2:geoip2:2.12.0',
 			'commons-net:commons-net:3.3',
 			'org.springframework.boot:spring-boot-starter-actuator',
-            "rocks.inspectit:opencensus-influxdb-exporter:1.0",
+            "rocks.inspectit:opencensus-influxdb-exporter:1.1",
 			"org.influxdb:influxdb-java:2.15"
 	)
 	compileOnly "org.projectlombok:lombok:1.18.4"

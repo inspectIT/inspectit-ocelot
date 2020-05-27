@@ -2,6 +2,7 @@
   "annotations": {
     "list": [
       {
+        "$$hashKey": "object:290",
         "builtIn": 1,
         "datasource": "-- Grafana --",
         "enable": true,
@@ -15,12 +16,13 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 3,
-  "iteration": 1580728711394,
+  "id": 2,
+  "iteration": 1588835205546,
   "links": [],
   "panels": [
     {
       "collapsed": false,
+      "datasource": null,
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -33,8 +35,8 @@
       "scopedVars": {
         "service": {
           "selected": false,
-          "text": "config-server",
-          "value": "config-server"
+          "text": "api-gateway",
+          "value": "api-gateway"
         }
       },
       "title": "$service",
@@ -58,8 +60,8 @@
       "scopedVars": {
         "service": {
           "selected": false,
-          "text": "config-server",
-          "value": "config-server"
+          "text": "api-gateway",
+          "value": "api-gateway"
         }
       },
       "scroll": true,
@@ -71,6 +73,7 @@
       "styles": [
         {
           "alias": "Requests",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -87,6 +90,7 @@
         },
         {
           "alias": "Avg. Response Time",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -104,6 +108,7 @@
         },
         {
           "alias": "HTTP Path",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -120,6 +125,7 @@
         },
         {
           "alias": "Error Rate",
+          "align": "auto",
           "colorMode": "cell",
           "colors": [
             "rgba(50, 172, 45, 0.97)",
@@ -139,6 +145,7 @@
         },
         {
           "alias": "",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -151,7 +158,7 @@
           "pattern": "Time",
           "thresholds": [],
           "type": "hidden",
-          "unit": "short"
+          "unit": "none"
         }
       ],
       "targets": [
@@ -173,7 +180,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT * FROM (\n SELECT  SUM(total) as za_requests, SUM(times) / SUM(total) AS zb_response_time FROM (\n      SELECT spread(\"count\") AS total, spread(\"sum\") AS times FROM \"http_in_responsetime\" \n      WHERE $timeFilter AND service =~ /^$service$/ AND application =~ /^$application$/ AND http_path =~ /^$path$/  GROUP BY *) GROUP BY http_path fill(0)\n) WHERE za_requests > 0",
+          "query": "SELECT  SUM(total) as za_requests, SUM(times) / SUM(total) AS zb_response_time FROM (\n  SELECT SUM(\"count\") AS total, SUM(\"sum\") AS times FROM \"http_in_responsetime\" \n  WHERE $timeFilter AND service =~ /^$service$/ AND http_path =~ /^$path$/  GROUP BY http_path\n) GROUP BY http_path",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -208,10 +215,9 @@
               "type": "fill"
             }
           ],
-          "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT zc_error_rate FROM (\nSELECT  SUM(errors) / SUM(total) AS zc_error_rate, SUM(total) as total FROM (\n      SELECT spread(\"count\") AS total, spread(\"errorcount\")AS errors FROM \"http_in_error\" \n      WHERE $timeFilter AND service =~ /^$service$/ AND application =~ /^$application$/ AND http_path =~ /^$path$/  GROUP BY *) \nGROUP BY http_path fill(0)\n) WHERE total > 0 GROUP BY http_path fill(0)",
+          "query": "SELECT  SUM(errors) / SUM(total) AS zc_error_rate FROM (\n  SELECT SUM(\"count\") AS total, SUM(\"errorcount\") AS errors FROM \"http_in_error\" \n  WHERE $timeFilter AND service =~ /^$service$/ AND http_path =~ /^$path$/  GROUP BY http_path fill(0)\n)\nGROUP BY http_path",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "table",
@@ -244,14 +250,16 @@
       "datasource": "LocalInflux",
       "description": "",
       "fill": 1,
+      "fillGradient": 0,
       "gridPos": {
         "h": 5,
         "w": 9,
         "x": 11,
         "y": 1
       },
+      "hiddenSeries": false,
       "id": 23,
-      "interval": "5s",
+      "interval": "15s",
       "legend": {
         "avg": false,
         "current": false,
@@ -265,6 +273,9 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -272,8 +283,8 @@
       "scopedVars": {
         "service": {
           "selected": false,
-          "text": "config-server",
-          "value": "config-server"
+          "text": "api-gateway",
+          "value": "api-gateway"
         }
       },
       "seriesOverrides": [],
@@ -304,7 +315,7 @@
           "legendFormat": "{{http_path}}",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT  SUM(times) / SUM(total) AS value FROM (\n      SELECT difference(\"count\") AS total, difference(\"sum\") AS times FROM \"http_in_responsetime\" \n      WHERE $timeFilter AND service =~ /^$service$/  AND application=~ /^$application$/  AND http_path=~ /^$path$/ GROUP BY  *) \nWHERE total > 0\nGROUP BY time($__interval), http_path fill(linear)",
+          "query": "SELECT  SUM(sum) / SUM(count)\nFROM \"http_in_responsetime\" \nWHERE $timeFilter AND service =~ /^$service$/  AND http_path=~ /^$path$/\nGROUP BY time($__interval), http_path fill(none)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -394,7 +405,7 @@
       },
       "hideTimeOverride": true,
       "id": 6,
-      "interval": "1s",
+      "interval": "15s",
       "links": [],
       "mappingType": 1,
       "mappingTypes": [
@@ -424,8 +435,8 @@
       "scopedVars": {
         "service": {
           "selected": false,
-          "text": "config-server",
-          "value": "config-server"
+          "text": "api-gateway",
+          "value": "api-gateway"
         }
       },
       "sparkline": {
@@ -457,7 +468,7 @@
           "intervalFactor": 1,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT  SUM(total)/$__interval_ms*1000 AS value FROM (\n      SELECT difference(\"count\") AS total FROM \"http_in_responsetime\" \n      WHERE $timeFilter AND service =~ /^$service$/  AND application=~ /^$application$/  AND http_path=~ /^$path$/ GROUP BY *) \nGROUP BY time($__interval) fill(linear)",
+          "query": "SELECT  SUM(count)/$__interval_ms*1000 AS value\nFROM \"http_in_responsetime\" \nWHERE $timeFilter AND service =~ /^$service$/  AND http_path=~ /^$path$/ \nGROUP BY time($__interval) fill(0)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -552,8 +563,8 @@
       "scopedVars": {
         "service": {
           "selected": false,
-          "text": "config-server",
-          "value": "config-server"
+          "text": "api-gateway",
+          "value": "api-gateway"
         }
       },
       "sparkline": {
@@ -585,7 +596,7 @@
           "intervalFactor": 1,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT  SUM(errors)/SUM(total) AS value FROM (\n      SELECT difference(\"count\") AS total, difference(\"errorcount\") AS errors FROM \"http_in_error\" \n      WHERE $timeFilter AND service =~ /^$service/  AND application=~ /^$application$/  AND http_path=~ /^$path$/ GROUP BY * ) \nGROUP BY time($__interval) fill(0)",
+          "query": "SELECT  SUM(errors) / SUM(total) AS value FROM (\n  SELECT SUM(\"count\") AS total, SUM(\"errorcount\") AS errors FROM \"http_in_error\" \n  WHERE $timeFilter AND service =~ /^$service$/ AND http_path =~ /^$path$/  GROUP BY time($__interval) fill(0)\n)\nWHERE total > 0\nGROUP BY time($__interval)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -638,8 +649,8 @@
       "scopedVars": {
         "service": {
           "selected": false,
-          "text": "config-server",
-          "value": "config-server"
+          "text": "api-gateway",
+          "value": "api-gateway"
         }
       },
       "scroll": true,
@@ -651,6 +662,7 @@
       "styles": [
         {
           "alias": "",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -667,6 +679,7 @@
         },
         {
           "alias": "Requests",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -683,6 +696,7 @@
         },
         {
           "alias": "Avg. Response Time",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -700,6 +714,7 @@
         },
         {
           "alias": "HTTP Path",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -717,6 +732,7 @@
         },
         {
           "alias": "Error Rate",
+          "align": "auto",
           "colorMode": "cell",
           "colors": [
             "rgba(50, 172, 45, 0.97)",
@@ -736,6 +752,7 @@
         },
         {
           "alias": "Target Host",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -774,7 +791,7 @@
           "legendFormat": "",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT * FROM (\n SELECT  SUM(total) as za_requests, SUM(times) / SUM(total) AS zb_response_time FROM (\n      SELECT spread(\"count\") AS total, spread(\"sum\") AS times FROM \"http_out_responsetime\" \n      WHERE $timeFilter AND service =~ /^$service$/ AND application =~ /^$application$/ AND http_path =~ /^$path$/  GROUP BY *) GROUP BY http_host, http_path fill(0)\n) WHERE za_requests > 0",
+          "query": "SELECT  SUM(total) as za_requests, SUM(times) / SUM(total) AS zb_response_time FROM (\n  SELECT SUM(\"count\") AS total, SUM(\"sum\") AS times FROM \"http_out_responsetime\" \n  WHERE $timeFilter AND service =~ /^$service$/ AND http_path =~ /^$path$/  GROUP BY http_path,http_host\n) GROUP BY *",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -811,7 +828,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT zc_error_rate FROM (\nSELECT  SUM(errors) / SUM(total) AS zc_error_rate, SUM(total) as total FROM (\n      SELECT spread(\"count\") AS total, spread(\"errorcount\")AS errors FROM \"http_out_error\" \n      WHERE $timeFilter AND service =~ /^$service$/ AND application =~ /^$application$/ AND http_path =~ /^$path$/  GROUP BY *) \nGROUP BY http_host,http_path fill(0)\n) WHERE total > 0 GROUP BY http_host, http_path fill(0)",
+          "query": "SELECT  SUM(errors) / SUM(total) AS zc_error_rate FROM (\n  SELECT SUM(\"count\") AS total, SUM(\"errorcount\") AS errors FROM \"http_out_error\" \n  WHERE $timeFilter AND service =~ /^$service$/ AND http_path =~ /^$path$/  GROUP BY http_path,http_host fill(0)\n)\nGROUP BY *",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "table",
@@ -844,13 +861,16 @@
       "datasource": "LocalInflux",
       "description": "",
       "fill": 1,
+      "fillGradient": 0,
       "gridPos": {
         "h": 5,
         "w": 9,
         "x": 11,
         "y": 6
       },
+      "hiddenSeries": false,
       "id": 76,
+      "interval": "15s",
       "legend": {
         "avg": false,
         "current": false,
@@ -864,6 +884,9 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -871,8 +894,8 @@
       "scopedVars": {
         "service": {
           "selected": false,
-          "text": "config-server",
-          "value": "config-server"
+          "text": "api-gateway",
+          "value": "api-gateway"
         }
       },
       "seriesOverrides": [],
@@ -898,7 +921,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT  SUM(times) / SUM(total) AS value FROM (\n      SELECT difference(\"count\") AS total, difference(\"sum\") AS times FROM \"http_out_responsetime\" \n      WHERE $timeFilter AND service =~ /^$service$/  AND application=~ /^$application$/  AND http_path=~ /^$path$/ GROUP BY  *) \nWHERE total > 0\nGROUP BY time($__interval), http_path,http_host fill(linear)",
+          "query": "SELECT  SUM(sum) / SUM(count) AS value \nFROM \"http_out_responsetime\" \nWHERE $timeFilter AND service =~ /^$service$/  AND http_path=~ /^$path$/\nGROUP BY time($__interval), http_path,http_host fill(none)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1018,8 +1041,8 @@
       "scopedVars": {
         "service": {
           "selected": false,
-          "text": "config-server",
-          "value": "config-server"
+          "text": "api-gateway",
+          "value": "api-gateway"
         }
       },
       "sparkline": {
@@ -1051,7 +1074,7 @@
           "intervalFactor": 1,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT  SUM(total)/$__interval_ms*1000 AS value FROM (\n      SELECT difference(\"count\") AS total FROM \"http_out_responsetime\" \n      WHERE $timeFilter AND service =~ /^$service$/  AND application=~ /^$application$/  AND http_path=~ /^$path$/ GROUP BY * ) \nGROUP BY time($__interval) fill(linear)",
+          "query": "SELECT  SUM(count)/$__interval_ms*1000 AS value\nFROM \"http_out_responsetime\" \nWHERE $timeFilter AND service =~ /^$service$/ AND http_path=~ /^$path$/ \nGROUP BY time($__interval) fill(0)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1146,8 +1169,8 @@
       "scopedVars": {
         "service": {
           "selected": false,
-          "text": "config-server",
-          "value": "config-server"
+          "text": "api-gateway",
+          "value": "api-gateway"
         }
       },
       "sparkline": {
@@ -1179,7 +1202,7 @@
           "intervalFactor": 1,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT  SUM(errors)/SUM(total) AS value FROM (\n      SELECT difference(\"count\") AS total, difference(\"errorcount\") AS errors FROM \"http_out_error\" \n      WHERE $timeFilter AND service =~ /^$service/  AND application=~ /^$application$/  AND http_path=~ /^$path$/ GROUP BY *) \nGROUP BY time($__interval) fill(0)",
+          "query": "SELECT  SUM(errors) / SUM(total) AS value FROM (\n  SELECT SUM(\"count\") AS total, SUM(\"errorcount\") AS errors FROM \"http_out_error\" \n  WHERE $timeFilter AND service =~ /^$service$/ AND http_path =~ /^$path$/  GROUP BY time($__interval) fill(0)\n)\nWHERE total > 0\nGROUP BY time($__interval)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1217,6 +1240,7 @@
     },
     {
       "collapsed": false,
+      "datasource": null,
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -1226,13 +1250,13 @@
       "id": 154,
       "panels": [],
       "repeat": null,
-      "repeatIteration": 1580728711394,
+      "repeatIteration": 1588835205546,
       "repeatPanelId": 4,
       "scopedVars": {
         "service": {
           "selected": false,
-          "text": "discovery-server",
-          "value": "discovery-server"
+          "text": "config-server",
+          "value": "config-server"
         }
       },
       "title": "$service",
@@ -1253,14 +1277,14 @@
       "pageSize": null,
       "repeat": null,
       "repeatDirection": "h",
-      "repeatIteration": 1580728711394,
+      "repeatIteration": 1588835205546,
       "repeatPanelId": 2,
       "repeatedByRow": true,
       "scopedVars": {
         "service": {
           "selected": false,
-          "text": "discovery-server",
-          "value": "discovery-server"
+          "text": "config-server",
+          "value": "config-server"
         }
       },
       "scroll": true,
@@ -1272,6 +1296,7 @@
       "styles": [
         {
           "alias": "Requests",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -1288,6 +1313,7 @@
         },
         {
           "alias": "Avg. Response Time",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -1305,6 +1331,7 @@
         },
         {
           "alias": "HTTP Path",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -1321,6 +1348,7 @@
         },
         {
           "alias": "Error Rate",
+          "align": "auto",
           "colorMode": "cell",
           "colors": [
             "rgba(50, 172, 45, 0.97)",
@@ -1340,6 +1368,7 @@
         },
         {
           "alias": "",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -1352,7 +1381,7 @@
           "pattern": "Time",
           "thresholds": [],
           "type": "hidden",
-          "unit": "short"
+          "unit": "none"
         }
       ],
       "targets": [
@@ -1374,7 +1403,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT * FROM (\n SELECT  SUM(total) as za_requests, SUM(times) / SUM(total) AS zb_response_time FROM (\n      SELECT spread(\"count\") AS total, spread(\"sum\") AS times FROM \"http_in_responsetime\" \n      WHERE $timeFilter AND service =~ /^$service$/ AND application =~ /^$application$/ AND http_path =~ /^$path$/  GROUP BY *) GROUP BY http_path fill(0)\n) WHERE za_requests > 0",
+          "query": "SELECT  SUM(total) as za_requests, SUM(times) / SUM(total) AS zb_response_time FROM (\n  SELECT SUM(\"count\") AS total, SUM(\"sum\") AS times FROM \"http_in_responsetime\" \n  WHERE $timeFilter AND service =~ /^$service$/ AND http_path =~ /^$path$/  GROUP BY http_path\n) GROUP BY http_path",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -1409,10 +1438,9 @@
               "type": "fill"
             }
           ],
-          "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT zc_error_rate FROM (\nSELECT  SUM(errors) / SUM(total) AS zc_error_rate, SUM(total) as total FROM (\n      SELECT spread(\"count\") AS total, spread(\"errorcount\")AS errors FROM \"http_in_error\" \n      WHERE $timeFilter AND service =~ /^$service$/ AND application =~ /^$application$/ AND http_path =~ /^$path$/  GROUP BY *) \nGROUP BY http_path fill(0)\n) WHERE total > 0 GROUP BY http_path fill(0)",
+          "query": "SELECT  SUM(errors) / SUM(total) AS zc_error_rate FROM (\n  SELECT SUM(\"count\") AS total, SUM(\"errorcount\") AS errors FROM \"http_in_error\" \n  WHERE $timeFilter AND service =~ /^$service$/ AND http_path =~ /^$path$/  GROUP BY http_path fill(0)\n)\nGROUP BY http_path",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "table",
@@ -1445,14 +1473,16 @@
       "datasource": "LocalInflux",
       "description": "",
       "fill": 1,
+      "fillGradient": 0,
       "gridPos": {
         "h": 5,
         "w": 9,
         "x": 11,
         "y": 12
       },
+      "hiddenSeries": false,
       "id": 156,
-      "interval": "5s",
+      "interval": "15s",
       "legend": {
         "avg": false,
         "current": false,
@@ -1466,18 +1496,21 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
       "percentage": false,
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1580728711394,
+      "repeatIteration": 1588835205546,
       "repeatPanelId": 23,
       "repeatedByRow": true,
       "scopedVars": {
         "service": {
           "selected": false,
-          "text": "discovery-server",
-          "value": "discovery-server"
+          "text": "config-server",
+          "value": "config-server"
         }
       },
       "seriesOverrides": [],
@@ -1508,7 +1541,7 @@
           "legendFormat": "{{http_path}}",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT  SUM(times) / SUM(total) AS value FROM (\n      SELECT difference(\"count\") AS total, difference(\"sum\") AS times FROM \"http_in_responsetime\" \n      WHERE $timeFilter AND service =~ /^$service$/  AND application=~ /^$application$/  AND http_path=~ /^$path$/ GROUP BY  *) \nWHERE total > 0\nGROUP BY time($__interval), http_path fill(linear)",
+          "query": "SELECT  SUM(sum) / SUM(count)\nFROM \"http_in_responsetime\" \nWHERE $timeFilter AND service =~ /^$service$/  AND http_path=~ /^$path$/\nGROUP BY time($__interval), http_path fill(none)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1598,7 +1631,7 @@
       },
       "hideTimeOverride": true,
       "id": 157,
-      "interval": "1s",
+      "interval": "15s",
       "links": [],
       "mappingType": 1,
       "mappingTypes": [
@@ -1625,14 +1658,14 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1580728711394,
+      "repeatIteration": 1588835205546,
       "repeatPanelId": 6,
       "repeatedByRow": true,
       "scopedVars": {
         "service": {
           "selected": false,
-          "text": "discovery-server",
-          "value": "discovery-server"
+          "text": "config-server",
+          "value": "config-server"
         }
       },
       "sparkline": {
@@ -1664,7 +1697,7 @@
           "intervalFactor": 1,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT  SUM(total)/$__interval_ms*1000 AS value FROM (\n      SELECT difference(\"count\") AS total FROM \"http_in_responsetime\" \n      WHERE $timeFilter AND service =~ /^$service$/  AND application=~ /^$application$/  AND http_path=~ /^$path$/ GROUP BY *) \nGROUP BY time($__interval) fill(linear)",
+          "query": "SELECT  SUM(count)/$__interval_ms*1000 AS value\nFROM \"http_in_responsetime\" \nWHERE $timeFilter AND service =~ /^$service$/  AND http_path=~ /^$path$/ \nGROUP BY time($__interval) fill(0)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1756,14 +1789,14 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1580728711394,
+      "repeatIteration": 1588835205546,
       "repeatPanelId": 44,
       "repeatedByRow": true,
       "scopedVars": {
         "service": {
           "selected": false,
-          "text": "discovery-server",
-          "value": "discovery-server"
+          "text": "config-server",
+          "value": "config-server"
         }
       },
       "sparkline": {
@@ -1795,7 +1828,7 @@
           "intervalFactor": 1,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT  SUM(errors)/SUM(total) AS value FROM (\n      SELECT difference(\"count\") AS total, difference(\"errorcount\") AS errors FROM \"http_in_error\" \n      WHERE $timeFilter AND service =~ /^$service/  AND application=~ /^$application$/  AND http_path=~ /^$path$/ GROUP BY * ) \nGROUP BY time($__interval) fill(0)",
+          "query": "SELECT  SUM(errors) / SUM(total) AS value FROM (\n  SELECT SUM(\"count\") AS total, SUM(\"errorcount\") AS errors FROM \"http_in_error\" \n  WHERE $timeFilter AND service =~ /^$service$/ AND http_path =~ /^$path$/  GROUP BY time($__interval) fill(0)\n)\nWHERE total > 0\nGROUP BY time($__interval)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1845,14 +1878,14 @@
       "links": [],
       "pageSize": null,
       "repeatDirection": "h",
-      "repeatIteration": 1580728711394,
+      "repeatIteration": 1588835205546,
       "repeatPanelId": 45,
       "repeatedByRow": true,
       "scopedVars": {
         "service": {
           "selected": false,
-          "text": "discovery-server",
-          "value": "discovery-server"
+          "text": "config-server",
+          "value": "config-server"
         }
       },
       "scroll": true,
@@ -1864,6 +1897,7 @@
       "styles": [
         {
           "alias": "",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -1880,6 +1914,7 @@
         },
         {
           "alias": "Requests",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -1896,6 +1931,7 @@
         },
         {
           "alias": "Avg. Response Time",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -1913,6 +1949,7 @@
         },
         {
           "alias": "HTTP Path",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -1930,6 +1967,7 @@
         },
         {
           "alias": "Error Rate",
+          "align": "auto",
           "colorMode": "cell",
           "colors": [
             "rgba(50, 172, 45, 0.97)",
@@ -1949,6 +1987,7 @@
         },
         {
           "alias": "Target Host",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -1987,7 +2026,7 @@
           "legendFormat": "",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT * FROM (\n SELECT  SUM(total) as za_requests, SUM(times) / SUM(total) AS zb_response_time FROM (\n      SELECT spread(\"count\") AS total, spread(\"sum\") AS times FROM \"http_out_responsetime\" \n      WHERE $timeFilter AND service =~ /^$service$/ AND application =~ /^$application$/ AND http_path =~ /^$path$/  GROUP BY *) GROUP BY http_host, http_path fill(0)\n) WHERE za_requests > 0",
+          "query": "SELECT  SUM(total) as za_requests, SUM(times) / SUM(total) AS zb_response_time FROM (\n  SELECT SUM(\"count\") AS total, SUM(\"sum\") AS times FROM \"http_out_responsetime\" \n  WHERE $timeFilter AND service =~ /^$service$/ AND http_path =~ /^$path$/  GROUP BY http_path,http_host\n) GROUP BY *",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -2024,7 +2063,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT zc_error_rate FROM (\nSELECT  SUM(errors) / SUM(total) AS zc_error_rate, SUM(total) as total FROM (\n      SELECT spread(\"count\") AS total, spread(\"errorcount\")AS errors FROM \"http_out_error\" \n      WHERE $timeFilter AND service =~ /^$service$/ AND application =~ /^$application$/ AND http_path =~ /^$path$/  GROUP BY *) \nGROUP BY http_host,http_path fill(0)\n) WHERE total > 0 GROUP BY http_host, http_path fill(0)",
+          "query": "SELECT  SUM(errors) / SUM(total) AS zc_error_rate FROM (\n  SELECT SUM(\"count\") AS total, SUM(\"errorcount\") AS errors FROM \"http_out_error\" \n  WHERE $timeFilter AND service =~ /^$service$/ AND http_path =~ /^$path$/  GROUP BY http_path,http_host fill(0)\n)\nGROUP BY *",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "table",
@@ -2057,13 +2096,16 @@
       "datasource": "LocalInflux",
       "description": "",
       "fill": 1,
+      "fillGradient": 0,
       "gridPos": {
         "h": 5,
         "w": 9,
         "x": 11,
         "y": 17
       },
+      "hiddenSeries": false,
       "id": 160,
+      "interval": "15s",
       "legend": {
         "avg": false,
         "current": false,
@@ -2077,18 +2119,21 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
       "percentage": false,
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeatIteration": 1580728711394,
+      "repeatIteration": 1588835205546,
       "repeatPanelId": 76,
       "repeatedByRow": true,
       "scopedVars": {
         "service": {
           "selected": false,
-          "text": "discovery-server",
-          "value": "discovery-server"
+          "text": "config-server",
+          "value": "config-server"
         }
       },
       "seriesOverrides": [],
@@ -2114,7 +2159,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT  SUM(times) / SUM(total) AS value FROM (\n      SELECT difference(\"count\") AS total, difference(\"sum\") AS times FROM \"http_out_responsetime\" \n      WHERE $timeFilter AND service =~ /^$service$/  AND application=~ /^$application$/  AND http_path=~ /^$path$/ GROUP BY  *) \nWHERE total > 0\nGROUP BY time($__interval), http_path,http_host fill(linear)",
+          "query": "SELECT  SUM(sum) / SUM(count) AS value \nFROM \"http_out_responsetime\" \nWHERE $timeFilter AND service =~ /^$service$/  AND http_path=~ /^$path$/\nGROUP BY time($__interval), http_path,http_host fill(none)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -2231,14 +2276,14 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1580728711394,
+      "repeatIteration": 1588835205546,
       "repeatPanelId": 112,
       "repeatedByRow": true,
       "scopedVars": {
         "service": {
           "selected": false,
-          "text": "discovery-server",
-          "value": "discovery-server"
+          "text": "config-server",
+          "value": "config-server"
         }
       },
       "sparkline": {
@@ -2270,7 +2315,7 @@
           "intervalFactor": 1,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT  SUM(total)/$__interval_ms*1000 AS value FROM (\n      SELECT difference(\"count\") AS total FROM \"http_out_responsetime\" \n      WHERE $timeFilter AND service =~ /^$service$/  AND application=~ /^$application$/  AND http_path=~ /^$path$/ GROUP BY * ) \nGROUP BY time($__interval) fill(linear)",
+          "query": "SELECT  SUM(count)/$__interval_ms*1000 AS value\nFROM \"http_out_responsetime\" \nWHERE $timeFilter AND service =~ /^$service$/ AND http_path=~ /^$path$/ \nGROUP BY time($__interval) fill(0)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -2362,7 +2407,2495 @@
           "to": "null"
         }
       ],
-      "repeatIteration": 1580728711394,
+      "repeatIteration": 1588835205546,
+      "repeatPanelId": 153,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "config-server",
+          "value": "config-server"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": true
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "expr": "(sum(increase(http_out_count{http_status!~\"(1|2|3)\\\\d\\\\d\",service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__range]))\n/ sum(increase(http_out_count{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__range])) >= 0)\nor (sum(increase(http_out_count{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__range])) > 0) * 0",
+          "format": "time_series",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "instant": true,
+          "intervalFactor": 1,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT  SUM(errors) / SUM(total) AS value FROM (\n  SELECT SUM(\"count\") AS total, SUM(\"errorcount\") AS errors FROM \"http_out_error\" \n  WHERE $timeFilter AND service =~ /^$service$/ AND http_path =~ /^$path$/  GROUP BY time($__interval) fill(0)\n)\nWHERE total > 0\nGROUP BY time($__interval)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": "0.01,0.1",
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Out Error Rate",
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
+      "collapsed": false,
+      "datasource": null,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 22
+      },
+      "id": 163,
+      "panels": [],
+      "repeat": null,
+      "repeatIteration": 1588835205546,
+      "repeatPanelId": 4,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "customers-service",
+          "value": "customers-service"
+        }
+      },
+      "title": "$service",
+      "type": "row"
+    },
+    {
+      "columns": [],
+      "datasource": "LocalInflux",
+      "fontSize": "100%",
+      "gridPos": {
+        "h": 5,
+        "w": 11,
+        "x": 0,
+        "y": 23
+      },
+      "id": 164,
+      "links": [],
+      "pageSize": null,
+      "repeat": null,
+      "repeatDirection": "h",
+      "repeatIteration": 1588835205546,
+      "repeatPanelId": 2,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "customers-service",
+          "value": "customers-service"
+        }
+      },
+      "scroll": true,
+      "showHeader": true,
+      "sort": {
+        "col": 4,
+        "desc": true
+      },
+      "styles": [
+        {
+          "alias": "Requests",
+          "align": "auto",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 0,
+          "mappingType": 1,
+          "pattern": "za_requests",
+          "thresholds": [],
+          "type": "number",
+          "unit": "none"
+        },
+        {
+          "alias": "Avg. Response Time",
+          "align": "auto",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "link": false,
+          "mappingType": 1,
+          "pattern": "zb_response_time",
+          "thresholds": [],
+          "type": "number",
+          "unit": "ms"
+        },
+        {
+          "alias": "HTTP Path",
+          "align": "auto",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "http_path",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        },
+        {
+          "alias": "Error Rate",
+          "align": "auto",
+          "colorMode": "cell",
+          "colors": [
+            "rgba(50, 172, 45, 0.97)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(245, 54, 54, 0.9)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "zc_error_rate",
+          "thresholds": [
+            "0.0001",
+            "0.3"
+          ],
+          "type": "number",
+          "unit": "percentunit"
+        },
+        {
+          "alias": "",
+          "align": "auto",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "Time",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "none"
+        }
+      ],
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT  SUM(total) as za_requests, SUM(times) / SUM(total) AS zb_response_time FROM (\n  SELECT SUM(\"count\") AS total, SUM(\"sum\") AS times FROM \"http_in_responsetime\" \n  WHERE $timeFilter AND service =~ /^$service$/ AND http_path =~ /^$path$/  GROUP BY http_path\n) GROUP BY http_path",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "table",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        },
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT  SUM(errors) / SUM(total) AS zc_error_rate FROM (\n  SELECT SUM(\"count\") AS total, SUM(\"errorcount\") AS errors FROM \"http_in_error\" \n  WHERE $timeFilter AND service =~ /^$service$/ AND http_path =~ /^$path$/  GROUP BY http_path fill(0)\n)\nGROUP BY http_path",
+          "rawQuery": true,
+          "refId": "B",
+          "resultFormat": "table",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "title": "Incoming Requests",
+      "transform": "table",
+      "type": "table"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "LocalInflux",
+      "description": "",
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 5,
+        "w": 9,
+        "x": 11,
+        "y": 23
+      },
+      "hiddenSeries": false,
+      "id": 165,
+      "interval": "15s",
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": false,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "repeatIteration": 1588835205546,
+      "repeatPanelId": 23,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "customers-service",
+          "value": "customers-service"
+        }
+      },
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "alias": "$tag_http_path",
+          "expr": "(sum(increase(http_in_responsetime_sum{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__interval])) by (http_path)\n/ sum(increase(http_in_count{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__interval])) by (http_path)) >= 0",
+          "format": "time_series",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "instant": false,
+          "intervalFactor": 1,
+          "legendFormat": "{{http_path}}",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT  SUM(sum) / SUM(count)\nFROM \"http_in_responsetime\" \nWHERE $timeFilter AND service =~ /^$service$/  AND http_path=~ /^$path$/\nGROUP BY time($__interval), http_path fill(none)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Incoming Avg. Response Time",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "ms",
+          "label": "",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "ms",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "datasource": "LocalInflux",
+      "decimals": 2,
+      "description": "Incoming HTTP Requests per second for the selected endpoints and applications",
+      "format": "none",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 2,
+        "x": 20,
+        "y": 23
+      },
+      "hideTimeOverride": true,
+      "id": 166,
+      "interval": "15s",
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatIteration": 1588835205546,
+      "repeatPanelId": 6,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "customers-service",
+          "value": "customers-service"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": true
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "expr": "sum(rate(http_in_count{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__interval]))",
+          "format": "time_series",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "instant": false,
+          "intervalFactor": 1,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT  SUM(count)/$__interval_ms*1000 AS value\nFROM \"http_in_responsetime\" \nWHERE $timeFilter AND service =~ /^$service$/  AND http_path=~ /^$path$/ \nGROUP BY time($__interval) fill(0)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": "",
+      "timeShift": null,
+      "title": "In Req / Sec",
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorPostfix": false,
+      "colorPrefix": false,
+      "colorValue": true,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "datasource": "LocalInflux",
+      "decimals": 2,
+      "description": "The error rate of incoming http requests for the selected endpoints and applications",
+      "format": "percentunit",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 2,
+        "x": 22,
+        "y": 23
+      },
+      "hideTimeOverride": true,
+      "id": 167,
+      "interval": "15s",
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatIteration": 1588835205546,
+      "repeatPanelId": 44,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "customers-service",
+          "value": "customers-service"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": true
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "expr": "(sum(increase(http_in_count{http_status!~\"(1|2|3)\\\\d\\\\d\",service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__range]))\n/ sum(increase(http_in_count{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__range])) >= 0)\nor (sum(increase(http_in_count{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__range])) > 0) * 0",
+          "format": "time_series",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "instant": true,
+          "intervalFactor": 1,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT  SUM(errors) / SUM(total) AS value FROM (\n  SELECT SUM(\"count\") AS total, SUM(\"errorcount\") AS errors FROM \"http_in_error\" \n  WHERE $timeFilter AND service =~ /^$service$/ AND http_path =~ /^$path$/  GROUP BY time($__interval) fill(0)\n)\nWHERE total > 0\nGROUP BY time($__interval)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": "0.01,0.1",
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "In Error Rate",
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
+      "columns": [],
+      "datasource": "LocalInflux",
+      "fontSize": "100%",
+      "gridPos": {
+        "h": 5,
+        "w": 11,
+        "x": 0,
+        "y": 28
+      },
+      "id": 168,
+      "links": [],
+      "pageSize": null,
+      "repeatDirection": "h",
+      "repeatIteration": 1588835205546,
+      "repeatPanelId": 45,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "customers-service",
+          "value": "customers-service"
+        }
+      },
+      "scroll": true,
+      "showHeader": true,
+      "sort": {
+        "col": 6,
+        "desc": true
+      },
+      "styles": [
+        {
+          "alias": "",
+          "align": "auto",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "Time",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
+        },
+        {
+          "alias": "Requests",
+          "align": "auto",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 0,
+          "mappingType": 1,
+          "pattern": "za_requests",
+          "thresholds": [],
+          "type": "number",
+          "unit": "none"
+        },
+        {
+          "alias": "Avg. Response Time",
+          "align": "auto",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "link": false,
+          "mappingType": 1,
+          "pattern": "zb_response_time",
+          "thresholds": [],
+          "type": "number",
+          "unit": "ms"
+        },
+        {
+          "alias": "HTTP Path",
+          "align": "auto",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "http_path",
+          "preserveFormat": false,
+          "thresholds": [],
+          "type": "string",
+          "unit": "short"
+        },
+        {
+          "alias": "Error Rate",
+          "align": "auto",
+          "colorMode": "cell",
+          "colors": [
+            "rgba(50, 172, 45, 0.97)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(245, 54, 54, 0.9)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "zc_error_rate",
+          "thresholds": [
+            "0.0001",
+            "0.3"
+          ],
+          "type": "number",
+          "unit": "percentunit"
+        },
+        {
+          "alias": "Target Host",
+          "align": "auto",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "http_host",
+          "thresholds": [],
+          "type": "string",
+          "unit": "short"
+        }
+      ],
+      "targets": [
+        {
+          "expr": "sum(label_join(increase(http_out_count{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__range]), \"http_url\", \"\", \"http_host\", \"http_path\")) by (http_url) > 0",
+          "format": "table",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "instant": true,
+          "intervalFactor": 1,
+          "legendFormat": "",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT  SUM(total) as za_requests, SUM(times) / SUM(total) AS zb_response_time FROM (\n  SELECT SUM(\"count\") AS total, SUM(\"sum\") AS times FROM \"http_out_responsetime\" \n  WHERE $timeFilter AND service =~ /^$service$/ AND http_path =~ /^$path$/  GROUP BY http_path,http_host\n) GROUP BY *",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "table",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        },
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT  SUM(errors) / SUM(total) AS zc_error_rate FROM (\n  SELECT SUM(\"count\") AS total, SUM(\"errorcount\") AS errors FROM \"http_out_error\" \n  WHERE $timeFilter AND service =~ /^$service$/ AND http_path =~ /^$path$/  GROUP BY http_path,http_host fill(0)\n)\nGROUP BY *",
+          "rawQuery": true,
+          "refId": "B",
+          "resultFormat": "table",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "title": "Outgoing Requests",
+      "transform": "table",
+      "type": "table"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "LocalInflux",
+      "description": "",
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 5,
+        "w": 9,
+        "x": 11,
+        "y": 28
+      },
+      "hiddenSeries": false,
+      "id": 169,
+      "interval": "15s",
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": false,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "repeatIteration": 1588835205546,
+      "repeatPanelId": 76,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "customers-service",
+          "value": "customers-service"
+        }
+      },
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "alias": "$tag_http_host$tag_http_path",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT  SUM(sum) / SUM(count) AS value \nFROM \"http_out_responsetime\" \nWHERE $timeFilter AND service =~ /^$service$/  AND http_path=~ /^$path$/\nGROUP BY time($__interval), http_path,http_host fill(none)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Outgoing Avg. Response Time",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "ms",
+          "label": "",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "ms",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "datasource": "LocalInflux",
+      "decimals": 2,
+      "description": "Outgoing HTTP Requests per second issued towards the selected endpoints from the given application",
+      "format": "none",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 2,
+        "x": 20,
+        "y": 28
+      },
+      "hideTimeOverride": true,
+      "id": 170,
+      "interval": "15s",
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatIteration": 1588835205546,
+      "repeatPanelId": 112,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "customers-service",
+          "value": "customers-service"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": true
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "expr": "sum(rate(http_out_count{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__interval]))",
+          "format": "time_series",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "instant": false,
+          "intervalFactor": 1,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT  SUM(count)/$__interval_ms*1000 AS value\nFROM \"http_out_responsetime\" \nWHERE $timeFilter AND service =~ /^$service$/ AND http_path=~ /^$path$/ \nGROUP BY time($__interval) fill(0)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": "",
+      "timeShift": null,
+      "title": "Out Req / Sec",
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorPostfix": false,
+      "colorPrefix": false,
+      "colorValue": true,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "datasource": "LocalInflux",
+      "decimals": 2,
+      "description": "The error rate of outgoing http requests issued towards the selected endpoints of the selected application",
+      "format": "percentunit",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 2,
+        "x": 22,
+        "y": 28
+      },
+      "hideTimeOverride": true,
+      "id": 171,
+      "interval": "15s",
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatIteration": 1588835205546,
+      "repeatPanelId": 153,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "customers-service",
+          "value": "customers-service"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": true
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "expr": "(sum(increase(http_out_count{http_status!~\"(1|2|3)\\\\d\\\\d\",service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__range]))\n/ sum(increase(http_out_count{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__range])) >= 0)\nor (sum(increase(http_out_count{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__range])) > 0) * 0",
+          "format": "time_series",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "instant": true,
+          "intervalFactor": 1,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT  SUM(errors) / SUM(total) AS value FROM (\n  SELECT SUM(\"count\") AS total, SUM(\"errorcount\") AS errors FROM \"http_out_error\" \n  WHERE $timeFilter AND service =~ /^$service$/ AND http_path =~ /^$path$/  GROUP BY time($__interval) fill(0)\n)\nWHERE total > 0\nGROUP BY time($__interval)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": "0.01,0.1",
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Out Error Rate",
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
+      "collapsed": false,
+      "datasource": null,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 33
+      },
+      "id": 172,
+      "panels": [],
+      "repeat": null,
+      "repeatIteration": 1588835205546,
+      "repeatPanelId": 4,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "discovery-server",
+          "value": "discovery-server"
+        }
+      },
+      "title": "$service",
+      "type": "row"
+    },
+    {
+      "columns": [],
+      "datasource": "LocalInflux",
+      "fontSize": "100%",
+      "gridPos": {
+        "h": 5,
+        "w": 11,
+        "x": 0,
+        "y": 34
+      },
+      "id": 173,
+      "links": [],
+      "pageSize": null,
+      "repeat": null,
+      "repeatDirection": "h",
+      "repeatIteration": 1588835205546,
+      "repeatPanelId": 2,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "discovery-server",
+          "value": "discovery-server"
+        }
+      },
+      "scroll": true,
+      "showHeader": true,
+      "sort": {
+        "col": 4,
+        "desc": true
+      },
+      "styles": [
+        {
+          "alias": "Requests",
+          "align": "auto",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 0,
+          "mappingType": 1,
+          "pattern": "za_requests",
+          "thresholds": [],
+          "type": "number",
+          "unit": "none"
+        },
+        {
+          "alias": "Avg. Response Time",
+          "align": "auto",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "link": false,
+          "mappingType": 1,
+          "pattern": "zb_response_time",
+          "thresholds": [],
+          "type": "number",
+          "unit": "ms"
+        },
+        {
+          "alias": "HTTP Path",
+          "align": "auto",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "http_path",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        },
+        {
+          "alias": "Error Rate",
+          "align": "auto",
+          "colorMode": "cell",
+          "colors": [
+            "rgba(50, 172, 45, 0.97)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(245, 54, 54, 0.9)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "zc_error_rate",
+          "thresholds": [
+            "0.0001",
+            "0.3"
+          ],
+          "type": "number",
+          "unit": "percentunit"
+        },
+        {
+          "alias": "",
+          "align": "auto",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "Time",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "none"
+        }
+      ],
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT  SUM(total) as za_requests, SUM(times) / SUM(total) AS zb_response_time FROM (\n  SELECT SUM(\"count\") AS total, SUM(\"sum\") AS times FROM \"http_in_responsetime\" \n  WHERE $timeFilter AND service =~ /^$service$/ AND http_path =~ /^$path$/  GROUP BY http_path\n) GROUP BY http_path",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "table",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        },
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT  SUM(errors) / SUM(total) AS zc_error_rate FROM (\n  SELECT SUM(\"count\") AS total, SUM(\"errorcount\") AS errors FROM \"http_in_error\" \n  WHERE $timeFilter AND service =~ /^$service$/ AND http_path =~ /^$path$/  GROUP BY http_path fill(0)\n)\nGROUP BY http_path",
+          "rawQuery": true,
+          "refId": "B",
+          "resultFormat": "table",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "title": "Incoming Requests",
+      "transform": "table",
+      "type": "table"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "LocalInflux",
+      "description": "",
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 5,
+        "w": 9,
+        "x": 11,
+        "y": 34
+      },
+      "hiddenSeries": false,
+      "id": 174,
+      "interval": "15s",
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": false,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "repeatIteration": 1588835205546,
+      "repeatPanelId": 23,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "discovery-server",
+          "value": "discovery-server"
+        }
+      },
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "alias": "$tag_http_path",
+          "expr": "(sum(increase(http_in_responsetime_sum{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__interval])) by (http_path)\n/ sum(increase(http_in_count{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__interval])) by (http_path)) >= 0",
+          "format": "time_series",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "instant": false,
+          "intervalFactor": 1,
+          "legendFormat": "{{http_path}}",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT  SUM(sum) / SUM(count)\nFROM \"http_in_responsetime\" \nWHERE $timeFilter AND service =~ /^$service$/  AND http_path=~ /^$path$/\nGROUP BY time($__interval), http_path fill(none)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Incoming Avg. Response Time",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "ms",
+          "label": "",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "ms",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "datasource": "LocalInflux",
+      "decimals": 2,
+      "description": "Incoming HTTP Requests per second for the selected endpoints and applications",
+      "format": "none",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 2,
+        "x": 20,
+        "y": 34
+      },
+      "hideTimeOverride": true,
+      "id": 175,
+      "interval": "15s",
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatIteration": 1588835205546,
+      "repeatPanelId": 6,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "discovery-server",
+          "value": "discovery-server"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": true
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "expr": "sum(rate(http_in_count{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__interval]))",
+          "format": "time_series",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "instant": false,
+          "intervalFactor": 1,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT  SUM(count)/$__interval_ms*1000 AS value\nFROM \"http_in_responsetime\" \nWHERE $timeFilter AND service =~ /^$service$/  AND http_path=~ /^$path$/ \nGROUP BY time($__interval) fill(0)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": "",
+      "timeShift": null,
+      "title": "In Req / Sec",
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorPostfix": false,
+      "colorPrefix": false,
+      "colorValue": true,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "datasource": "LocalInflux",
+      "decimals": 2,
+      "description": "The error rate of incoming http requests for the selected endpoints and applications",
+      "format": "percentunit",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 2,
+        "x": 22,
+        "y": 34
+      },
+      "hideTimeOverride": true,
+      "id": 176,
+      "interval": "15s",
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatIteration": 1588835205546,
+      "repeatPanelId": 44,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "discovery-server",
+          "value": "discovery-server"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": true
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "expr": "(sum(increase(http_in_count{http_status!~\"(1|2|3)\\\\d\\\\d\",service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__range]))\n/ sum(increase(http_in_count{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__range])) >= 0)\nor (sum(increase(http_in_count{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__range])) > 0) * 0",
+          "format": "time_series",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "instant": true,
+          "intervalFactor": 1,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT  SUM(errors) / SUM(total) AS value FROM (\n  SELECT SUM(\"count\") AS total, SUM(\"errorcount\") AS errors FROM \"http_in_error\" \n  WHERE $timeFilter AND service =~ /^$service$/ AND http_path =~ /^$path$/  GROUP BY time($__interval) fill(0)\n)\nWHERE total > 0\nGROUP BY time($__interval)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": "0.01,0.1",
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "In Error Rate",
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
+      "columns": [],
+      "datasource": "LocalInflux",
+      "fontSize": "100%",
+      "gridPos": {
+        "h": 5,
+        "w": 11,
+        "x": 0,
+        "y": 39
+      },
+      "id": 177,
+      "links": [],
+      "pageSize": null,
+      "repeatDirection": "h",
+      "repeatIteration": 1588835205546,
+      "repeatPanelId": 45,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "discovery-server",
+          "value": "discovery-server"
+        }
+      },
+      "scroll": true,
+      "showHeader": true,
+      "sort": {
+        "col": 6,
+        "desc": true
+      },
+      "styles": [
+        {
+          "alias": "",
+          "align": "auto",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "Time",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
+        },
+        {
+          "alias": "Requests",
+          "align": "auto",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 0,
+          "mappingType": 1,
+          "pattern": "za_requests",
+          "thresholds": [],
+          "type": "number",
+          "unit": "none"
+        },
+        {
+          "alias": "Avg. Response Time",
+          "align": "auto",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "link": false,
+          "mappingType": 1,
+          "pattern": "zb_response_time",
+          "thresholds": [],
+          "type": "number",
+          "unit": "ms"
+        },
+        {
+          "alias": "HTTP Path",
+          "align": "auto",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "http_path",
+          "preserveFormat": false,
+          "thresholds": [],
+          "type": "string",
+          "unit": "short"
+        },
+        {
+          "alias": "Error Rate",
+          "align": "auto",
+          "colorMode": "cell",
+          "colors": [
+            "rgba(50, 172, 45, 0.97)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(245, 54, 54, 0.9)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "zc_error_rate",
+          "thresholds": [
+            "0.0001",
+            "0.3"
+          ],
+          "type": "number",
+          "unit": "percentunit"
+        },
+        {
+          "alias": "Target Host",
+          "align": "auto",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "http_host",
+          "thresholds": [],
+          "type": "string",
+          "unit": "short"
+        }
+      ],
+      "targets": [
+        {
+          "expr": "sum(label_join(increase(http_out_count{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__range]), \"http_url\", \"\", \"http_host\", \"http_path\")) by (http_url) > 0",
+          "format": "table",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "instant": true,
+          "intervalFactor": 1,
+          "legendFormat": "",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT  SUM(total) as za_requests, SUM(times) / SUM(total) AS zb_response_time FROM (\n  SELECT SUM(\"count\") AS total, SUM(\"sum\") AS times FROM \"http_out_responsetime\" \n  WHERE $timeFilter AND service =~ /^$service$/ AND http_path =~ /^$path$/  GROUP BY http_path,http_host\n) GROUP BY *",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "table",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        },
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT  SUM(errors) / SUM(total) AS zc_error_rate FROM (\n  SELECT SUM(\"count\") AS total, SUM(\"errorcount\") AS errors FROM \"http_out_error\" \n  WHERE $timeFilter AND service =~ /^$service$/ AND http_path =~ /^$path$/  GROUP BY http_path,http_host fill(0)\n)\nGROUP BY *",
+          "rawQuery": true,
+          "refId": "B",
+          "resultFormat": "table",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "title": "Outgoing Requests",
+      "transform": "table",
+      "type": "table"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "LocalInflux",
+      "description": "",
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 5,
+        "w": 9,
+        "x": 11,
+        "y": 39
+      },
+      "hiddenSeries": false,
+      "id": 178,
+      "interval": "15s",
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": false,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "repeatIteration": 1588835205546,
+      "repeatPanelId": 76,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "discovery-server",
+          "value": "discovery-server"
+        }
+      },
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "alias": "$tag_http_host$tag_http_path",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT  SUM(sum) / SUM(count) AS value \nFROM \"http_out_responsetime\" \nWHERE $timeFilter AND service =~ /^$service$/  AND http_path=~ /^$path$/\nGROUP BY time($__interval), http_path,http_host fill(none)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Outgoing Avg. Response Time",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "ms",
+          "label": "",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "ms",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "datasource": "LocalInflux",
+      "decimals": 2,
+      "description": "Outgoing HTTP Requests per second issued towards the selected endpoints from the given application",
+      "format": "none",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 2,
+        "x": 20,
+        "y": 39
+      },
+      "hideTimeOverride": true,
+      "id": 179,
+      "interval": "15s",
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatIteration": 1588835205546,
+      "repeatPanelId": 112,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "discovery-server",
+          "value": "discovery-server"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": true
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "expr": "sum(rate(http_out_count{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__interval]))",
+          "format": "time_series",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "instant": false,
+          "intervalFactor": 1,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT  SUM(count)/$__interval_ms*1000 AS value\nFROM \"http_out_responsetime\" \nWHERE $timeFilter AND service =~ /^$service$/ AND http_path=~ /^$path$/ \nGROUP BY time($__interval) fill(0)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": "",
+      "timeShift": null,
+      "title": "Out Req / Sec",
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorPostfix": false,
+      "colorPrefix": false,
+      "colorValue": true,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "datasource": "LocalInflux",
+      "decimals": 2,
+      "description": "The error rate of outgoing http requests issued towards the selected endpoints of the selected application",
+      "format": "percentunit",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 2,
+        "x": 22,
+        "y": 39
+      },
+      "hideTimeOverride": true,
+      "id": 180,
+      "interval": "15s",
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatIteration": 1588835205546,
       "repeatPanelId": 153,
       "repeatedByRow": true,
       "scopedVars": {
@@ -2401,7 +4934,2495 @@
           "intervalFactor": 1,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT  SUM(errors)/SUM(total) AS value FROM (\n      SELECT difference(\"count\") AS total, difference(\"errorcount\") AS errors FROM \"http_out_error\" \n      WHERE $timeFilter AND service =~ /^$service/  AND application=~ /^$application$/  AND http_path=~ /^$path$/ GROUP BY *) \nGROUP BY time($__interval) fill(0)",
+          "query": "SELECT  SUM(errors) / SUM(total) AS value FROM (\n  SELECT SUM(\"count\") AS total, SUM(\"errorcount\") AS errors FROM \"http_out_error\" \n  WHERE $timeFilter AND service =~ /^$service$/ AND http_path =~ /^$path$/  GROUP BY time($__interval) fill(0)\n)\nWHERE total > 0\nGROUP BY time($__interval)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": "0.01,0.1",
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Out Error Rate",
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
+      "collapsed": false,
+      "datasource": null,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 44
+      },
+      "id": 181,
+      "panels": [],
+      "repeat": null,
+      "repeatIteration": 1588835205546,
+      "repeatPanelId": 4,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "vets-service",
+          "value": "vets-service"
+        }
+      },
+      "title": "$service",
+      "type": "row"
+    },
+    {
+      "columns": [],
+      "datasource": "LocalInflux",
+      "fontSize": "100%",
+      "gridPos": {
+        "h": 5,
+        "w": 11,
+        "x": 0,
+        "y": 45
+      },
+      "id": 182,
+      "links": [],
+      "pageSize": null,
+      "repeat": null,
+      "repeatDirection": "h",
+      "repeatIteration": 1588835205546,
+      "repeatPanelId": 2,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "vets-service",
+          "value": "vets-service"
+        }
+      },
+      "scroll": true,
+      "showHeader": true,
+      "sort": {
+        "col": 4,
+        "desc": true
+      },
+      "styles": [
+        {
+          "alias": "Requests",
+          "align": "auto",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 0,
+          "mappingType": 1,
+          "pattern": "za_requests",
+          "thresholds": [],
+          "type": "number",
+          "unit": "none"
+        },
+        {
+          "alias": "Avg. Response Time",
+          "align": "auto",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "link": false,
+          "mappingType": 1,
+          "pattern": "zb_response_time",
+          "thresholds": [],
+          "type": "number",
+          "unit": "ms"
+        },
+        {
+          "alias": "HTTP Path",
+          "align": "auto",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "http_path",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        },
+        {
+          "alias": "Error Rate",
+          "align": "auto",
+          "colorMode": "cell",
+          "colors": [
+            "rgba(50, 172, 45, 0.97)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(245, 54, 54, 0.9)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "zc_error_rate",
+          "thresholds": [
+            "0.0001",
+            "0.3"
+          ],
+          "type": "number",
+          "unit": "percentunit"
+        },
+        {
+          "alias": "",
+          "align": "auto",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "Time",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "none"
+        }
+      ],
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT  SUM(total) as za_requests, SUM(times) / SUM(total) AS zb_response_time FROM (\n  SELECT SUM(\"count\") AS total, SUM(\"sum\") AS times FROM \"http_in_responsetime\" \n  WHERE $timeFilter AND service =~ /^$service$/ AND http_path =~ /^$path$/  GROUP BY http_path\n) GROUP BY http_path",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "table",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        },
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT  SUM(errors) / SUM(total) AS zc_error_rate FROM (\n  SELECT SUM(\"count\") AS total, SUM(\"errorcount\") AS errors FROM \"http_in_error\" \n  WHERE $timeFilter AND service =~ /^$service$/ AND http_path =~ /^$path$/  GROUP BY http_path fill(0)\n)\nGROUP BY http_path",
+          "rawQuery": true,
+          "refId": "B",
+          "resultFormat": "table",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "title": "Incoming Requests",
+      "transform": "table",
+      "type": "table"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "LocalInflux",
+      "description": "",
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 5,
+        "w": 9,
+        "x": 11,
+        "y": 45
+      },
+      "hiddenSeries": false,
+      "id": 183,
+      "interval": "15s",
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": false,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "repeatIteration": 1588835205546,
+      "repeatPanelId": 23,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "vets-service",
+          "value": "vets-service"
+        }
+      },
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "alias": "$tag_http_path",
+          "expr": "(sum(increase(http_in_responsetime_sum{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__interval])) by (http_path)\n/ sum(increase(http_in_count{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__interval])) by (http_path)) >= 0",
+          "format": "time_series",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "instant": false,
+          "intervalFactor": 1,
+          "legendFormat": "{{http_path}}",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT  SUM(sum) / SUM(count)\nFROM \"http_in_responsetime\" \nWHERE $timeFilter AND service =~ /^$service$/  AND http_path=~ /^$path$/\nGROUP BY time($__interval), http_path fill(none)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Incoming Avg. Response Time",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "ms",
+          "label": "",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "ms",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "datasource": "LocalInflux",
+      "decimals": 2,
+      "description": "Incoming HTTP Requests per second for the selected endpoints and applications",
+      "format": "none",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 2,
+        "x": 20,
+        "y": 45
+      },
+      "hideTimeOverride": true,
+      "id": 184,
+      "interval": "15s",
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatIteration": 1588835205546,
+      "repeatPanelId": 6,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "vets-service",
+          "value": "vets-service"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": true
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "expr": "sum(rate(http_in_count{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__interval]))",
+          "format": "time_series",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "instant": false,
+          "intervalFactor": 1,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT  SUM(count)/$__interval_ms*1000 AS value\nFROM \"http_in_responsetime\" \nWHERE $timeFilter AND service =~ /^$service$/  AND http_path=~ /^$path$/ \nGROUP BY time($__interval) fill(0)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": "",
+      "timeShift": null,
+      "title": "In Req / Sec",
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorPostfix": false,
+      "colorPrefix": false,
+      "colorValue": true,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "datasource": "LocalInflux",
+      "decimals": 2,
+      "description": "The error rate of incoming http requests for the selected endpoints and applications",
+      "format": "percentunit",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 2,
+        "x": 22,
+        "y": 45
+      },
+      "hideTimeOverride": true,
+      "id": 185,
+      "interval": "15s",
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatIteration": 1588835205546,
+      "repeatPanelId": 44,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "vets-service",
+          "value": "vets-service"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": true
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "expr": "(sum(increase(http_in_count{http_status!~\"(1|2|3)\\\\d\\\\d\",service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__range]))\n/ sum(increase(http_in_count{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__range])) >= 0)\nor (sum(increase(http_in_count{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__range])) > 0) * 0",
+          "format": "time_series",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "instant": true,
+          "intervalFactor": 1,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT  SUM(errors) / SUM(total) AS value FROM (\n  SELECT SUM(\"count\") AS total, SUM(\"errorcount\") AS errors FROM \"http_in_error\" \n  WHERE $timeFilter AND service =~ /^$service$/ AND http_path =~ /^$path$/  GROUP BY time($__interval) fill(0)\n)\nWHERE total > 0\nGROUP BY time($__interval)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": "0.01,0.1",
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "In Error Rate",
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
+      "columns": [],
+      "datasource": "LocalInflux",
+      "fontSize": "100%",
+      "gridPos": {
+        "h": 5,
+        "w": 11,
+        "x": 0,
+        "y": 50
+      },
+      "id": 186,
+      "links": [],
+      "pageSize": null,
+      "repeatDirection": "h",
+      "repeatIteration": 1588835205546,
+      "repeatPanelId": 45,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "vets-service",
+          "value": "vets-service"
+        }
+      },
+      "scroll": true,
+      "showHeader": true,
+      "sort": {
+        "col": 6,
+        "desc": true
+      },
+      "styles": [
+        {
+          "alias": "",
+          "align": "auto",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "Time",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
+        },
+        {
+          "alias": "Requests",
+          "align": "auto",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 0,
+          "mappingType": 1,
+          "pattern": "za_requests",
+          "thresholds": [],
+          "type": "number",
+          "unit": "none"
+        },
+        {
+          "alias": "Avg. Response Time",
+          "align": "auto",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "link": false,
+          "mappingType": 1,
+          "pattern": "zb_response_time",
+          "thresholds": [],
+          "type": "number",
+          "unit": "ms"
+        },
+        {
+          "alias": "HTTP Path",
+          "align": "auto",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "http_path",
+          "preserveFormat": false,
+          "thresholds": [],
+          "type": "string",
+          "unit": "short"
+        },
+        {
+          "alias": "Error Rate",
+          "align": "auto",
+          "colorMode": "cell",
+          "colors": [
+            "rgba(50, 172, 45, 0.97)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(245, 54, 54, 0.9)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "zc_error_rate",
+          "thresholds": [
+            "0.0001",
+            "0.3"
+          ],
+          "type": "number",
+          "unit": "percentunit"
+        },
+        {
+          "alias": "Target Host",
+          "align": "auto",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "http_host",
+          "thresholds": [],
+          "type": "string",
+          "unit": "short"
+        }
+      ],
+      "targets": [
+        {
+          "expr": "sum(label_join(increase(http_out_count{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__range]), \"http_url\", \"\", \"http_host\", \"http_path\")) by (http_url) > 0",
+          "format": "table",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "instant": true,
+          "intervalFactor": 1,
+          "legendFormat": "",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT  SUM(total) as za_requests, SUM(times) / SUM(total) AS zb_response_time FROM (\n  SELECT SUM(\"count\") AS total, SUM(\"sum\") AS times FROM \"http_out_responsetime\" \n  WHERE $timeFilter AND service =~ /^$service$/ AND http_path =~ /^$path$/  GROUP BY http_path,http_host\n) GROUP BY *",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "table",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        },
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT  SUM(errors) / SUM(total) AS zc_error_rate FROM (\n  SELECT SUM(\"count\") AS total, SUM(\"errorcount\") AS errors FROM \"http_out_error\" \n  WHERE $timeFilter AND service =~ /^$service$/ AND http_path =~ /^$path$/  GROUP BY http_path,http_host fill(0)\n)\nGROUP BY *",
+          "rawQuery": true,
+          "refId": "B",
+          "resultFormat": "table",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "title": "Outgoing Requests",
+      "transform": "table",
+      "type": "table"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "LocalInflux",
+      "description": "",
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 5,
+        "w": 9,
+        "x": 11,
+        "y": 50
+      },
+      "hiddenSeries": false,
+      "id": 187,
+      "interval": "15s",
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": false,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "repeatIteration": 1588835205546,
+      "repeatPanelId": 76,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "vets-service",
+          "value": "vets-service"
+        }
+      },
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "alias": "$tag_http_host$tag_http_path",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT  SUM(sum) / SUM(count) AS value \nFROM \"http_out_responsetime\" \nWHERE $timeFilter AND service =~ /^$service$/  AND http_path=~ /^$path$/\nGROUP BY time($__interval), http_path,http_host fill(none)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Outgoing Avg. Response Time",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "ms",
+          "label": "",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "ms",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "datasource": "LocalInflux",
+      "decimals": 2,
+      "description": "Outgoing HTTP Requests per second issued towards the selected endpoints from the given application",
+      "format": "none",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 2,
+        "x": 20,
+        "y": 50
+      },
+      "hideTimeOverride": true,
+      "id": 188,
+      "interval": "15s",
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatIteration": 1588835205546,
+      "repeatPanelId": 112,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "vets-service",
+          "value": "vets-service"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": true
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "expr": "sum(rate(http_out_count{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__interval]))",
+          "format": "time_series",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "instant": false,
+          "intervalFactor": 1,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT  SUM(count)/$__interval_ms*1000 AS value\nFROM \"http_out_responsetime\" \nWHERE $timeFilter AND service =~ /^$service$/ AND http_path=~ /^$path$/ \nGROUP BY time($__interval) fill(0)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": "",
+      "timeShift": null,
+      "title": "Out Req / Sec",
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorPostfix": false,
+      "colorPrefix": false,
+      "colorValue": true,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "datasource": "LocalInflux",
+      "decimals": 2,
+      "description": "The error rate of outgoing http requests issued towards the selected endpoints of the selected application",
+      "format": "percentunit",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 2,
+        "x": 22,
+        "y": 50
+      },
+      "hideTimeOverride": true,
+      "id": 189,
+      "interval": "15s",
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatIteration": 1588835205546,
+      "repeatPanelId": 153,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "vets-service",
+          "value": "vets-service"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": true
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "expr": "(sum(increase(http_out_count{http_status!~\"(1|2|3)\\\\d\\\\d\",service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__range]))\n/ sum(increase(http_out_count{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__range])) >= 0)\nor (sum(increase(http_out_count{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__range])) > 0) * 0",
+          "format": "time_series",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "instant": true,
+          "intervalFactor": 1,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT  SUM(errors) / SUM(total) AS value FROM (\n  SELECT SUM(\"count\") AS total, SUM(\"errorcount\") AS errors FROM \"http_out_error\" \n  WHERE $timeFilter AND service =~ /^$service$/ AND http_path =~ /^$path$/  GROUP BY time($__interval) fill(0)\n)\nWHERE total > 0\nGROUP BY time($__interval)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": "0.01,0.1",
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Out Error Rate",
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
+      "collapsed": false,
+      "datasource": null,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 55
+      },
+      "id": 190,
+      "panels": [],
+      "repeat": null,
+      "repeatIteration": 1588835205546,
+      "repeatPanelId": 4,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "visits-service",
+          "value": "visits-service"
+        }
+      },
+      "title": "$service",
+      "type": "row"
+    },
+    {
+      "columns": [],
+      "datasource": "LocalInflux",
+      "fontSize": "100%",
+      "gridPos": {
+        "h": 5,
+        "w": 11,
+        "x": 0,
+        "y": 56
+      },
+      "id": 191,
+      "links": [],
+      "pageSize": null,
+      "repeat": null,
+      "repeatDirection": "h",
+      "repeatIteration": 1588835205546,
+      "repeatPanelId": 2,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "visits-service",
+          "value": "visits-service"
+        }
+      },
+      "scroll": true,
+      "showHeader": true,
+      "sort": {
+        "col": 4,
+        "desc": true
+      },
+      "styles": [
+        {
+          "alias": "Requests",
+          "align": "auto",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 0,
+          "mappingType": 1,
+          "pattern": "za_requests",
+          "thresholds": [],
+          "type": "number",
+          "unit": "none"
+        },
+        {
+          "alias": "Avg. Response Time",
+          "align": "auto",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "link": false,
+          "mappingType": 1,
+          "pattern": "zb_response_time",
+          "thresholds": [],
+          "type": "number",
+          "unit": "ms"
+        },
+        {
+          "alias": "HTTP Path",
+          "align": "auto",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "http_path",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        },
+        {
+          "alias": "Error Rate",
+          "align": "auto",
+          "colorMode": "cell",
+          "colors": [
+            "rgba(50, 172, 45, 0.97)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(245, 54, 54, 0.9)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "zc_error_rate",
+          "thresholds": [
+            "0.0001",
+            "0.3"
+          ],
+          "type": "number",
+          "unit": "percentunit"
+        },
+        {
+          "alias": "",
+          "align": "auto",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "Time",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "none"
+        }
+      ],
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT  SUM(total) as za_requests, SUM(times) / SUM(total) AS zb_response_time FROM (\n  SELECT SUM(\"count\") AS total, SUM(\"sum\") AS times FROM \"http_in_responsetime\" \n  WHERE $timeFilter AND service =~ /^$service$/ AND http_path =~ /^$path$/  GROUP BY http_path\n) GROUP BY http_path",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "table",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        },
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT  SUM(errors) / SUM(total) AS zc_error_rate FROM (\n  SELECT SUM(\"count\") AS total, SUM(\"errorcount\") AS errors FROM \"http_in_error\" \n  WHERE $timeFilter AND service =~ /^$service$/ AND http_path =~ /^$path$/  GROUP BY http_path fill(0)\n)\nGROUP BY http_path",
+          "rawQuery": true,
+          "refId": "B",
+          "resultFormat": "table",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "title": "Incoming Requests",
+      "transform": "table",
+      "type": "table"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "LocalInflux",
+      "description": "",
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 5,
+        "w": 9,
+        "x": 11,
+        "y": 56
+      },
+      "hiddenSeries": false,
+      "id": 192,
+      "interval": "15s",
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": false,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "repeatIteration": 1588835205546,
+      "repeatPanelId": 23,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "visits-service",
+          "value": "visits-service"
+        }
+      },
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "alias": "$tag_http_path",
+          "expr": "(sum(increase(http_in_responsetime_sum{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__interval])) by (http_path)\n/ sum(increase(http_in_count{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__interval])) by (http_path)) >= 0",
+          "format": "time_series",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "instant": false,
+          "intervalFactor": 1,
+          "legendFormat": "{{http_path}}",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT  SUM(sum) / SUM(count)\nFROM \"http_in_responsetime\" \nWHERE $timeFilter AND service =~ /^$service$/  AND http_path=~ /^$path$/\nGROUP BY time($__interval), http_path fill(none)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Incoming Avg. Response Time",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "ms",
+          "label": "",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "ms",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "datasource": "LocalInflux",
+      "decimals": 2,
+      "description": "Incoming HTTP Requests per second for the selected endpoints and applications",
+      "format": "none",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 2,
+        "x": 20,
+        "y": 56
+      },
+      "hideTimeOverride": true,
+      "id": 193,
+      "interval": "15s",
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatIteration": 1588835205546,
+      "repeatPanelId": 6,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "visits-service",
+          "value": "visits-service"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": true
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "expr": "sum(rate(http_in_count{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__interval]))",
+          "format": "time_series",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "instant": false,
+          "intervalFactor": 1,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT  SUM(count)/$__interval_ms*1000 AS value\nFROM \"http_in_responsetime\" \nWHERE $timeFilter AND service =~ /^$service$/  AND http_path=~ /^$path$/ \nGROUP BY time($__interval) fill(0)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": "",
+      "timeShift": null,
+      "title": "In Req / Sec",
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorPostfix": false,
+      "colorPrefix": false,
+      "colorValue": true,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "datasource": "LocalInflux",
+      "decimals": 2,
+      "description": "The error rate of incoming http requests for the selected endpoints and applications",
+      "format": "percentunit",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 2,
+        "x": 22,
+        "y": 56
+      },
+      "hideTimeOverride": true,
+      "id": 194,
+      "interval": "15s",
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatIteration": 1588835205546,
+      "repeatPanelId": 44,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "visits-service",
+          "value": "visits-service"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": true
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "expr": "(sum(increase(http_in_count{http_status!~\"(1|2|3)\\\\d\\\\d\",service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__range]))\n/ sum(increase(http_in_count{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__range])) >= 0)\nor (sum(increase(http_in_count{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__range])) > 0) * 0",
+          "format": "time_series",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "instant": true,
+          "intervalFactor": 1,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT  SUM(errors) / SUM(total) AS value FROM (\n  SELECT SUM(\"count\") AS total, SUM(\"errorcount\") AS errors FROM \"http_in_error\" \n  WHERE $timeFilter AND service =~ /^$service$/ AND http_path =~ /^$path$/  GROUP BY time($__interval) fill(0)\n)\nWHERE total > 0\nGROUP BY time($__interval)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": "0.01,0.1",
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "In Error Rate",
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
+      "columns": [],
+      "datasource": "LocalInflux",
+      "fontSize": "100%",
+      "gridPos": {
+        "h": 5,
+        "w": 11,
+        "x": 0,
+        "y": 61
+      },
+      "id": 195,
+      "links": [],
+      "pageSize": null,
+      "repeatDirection": "h",
+      "repeatIteration": 1588835205546,
+      "repeatPanelId": 45,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "visits-service",
+          "value": "visits-service"
+        }
+      },
+      "scroll": true,
+      "showHeader": true,
+      "sort": {
+        "col": 6,
+        "desc": true
+      },
+      "styles": [
+        {
+          "alias": "",
+          "align": "auto",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "Time",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
+        },
+        {
+          "alias": "Requests",
+          "align": "auto",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 0,
+          "mappingType": 1,
+          "pattern": "za_requests",
+          "thresholds": [],
+          "type": "number",
+          "unit": "none"
+        },
+        {
+          "alias": "Avg. Response Time",
+          "align": "auto",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "link": false,
+          "mappingType": 1,
+          "pattern": "zb_response_time",
+          "thresholds": [],
+          "type": "number",
+          "unit": "ms"
+        },
+        {
+          "alias": "HTTP Path",
+          "align": "auto",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "http_path",
+          "preserveFormat": false,
+          "thresholds": [],
+          "type": "string",
+          "unit": "short"
+        },
+        {
+          "alias": "Error Rate",
+          "align": "auto",
+          "colorMode": "cell",
+          "colors": [
+            "rgba(50, 172, 45, 0.97)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(245, 54, 54, 0.9)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "zc_error_rate",
+          "thresholds": [
+            "0.0001",
+            "0.3"
+          ],
+          "type": "number",
+          "unit": "percentunit"
+        },
+        {
+          "alias": "Target Host",
+          "align": "auto",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "http_host",
+          "thresholds": [],
+          "type": "string",
+          "unit": "short"
+        }
+      ],
+      "targets": [
+        {
+          "expr": "sum(label_join(increase(http_out_count{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__range]), \"http_url\", \"\", \"http_host\", \"http_path\")) by (http_url) > 0",
+          "format": "table",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "instant": true,
+          "intervalFactor": 1,
+          "legendFormat": "",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT  SUM(total) as za_requests, SUM(times) / SUM(total) AS zb_response_time FROM (\n  SELECT SUM(\"count\") AS total, SUM(\"sum\") AS times FROM \"http_out_responsetime\" \n  WHERE $timeFilter AND service =~ /^$service$/ AND http_path =~ /^$path$/  GROUP BY http_path,http_host\n) GROUP BY *",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "table",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        },
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT  SUM(errors) / SUM(total) AS zc_error_rate FROM (\n  SELECT SUM(\"count\") AS total, SUM(\"errorcount\") AS errors FROM \"http_out_error\" \n  WHERE $timeFilter AND service =~ /^$service$/ AND http_path =~ /^$path$/  GROUP BY http_path,http_host fill(0)\n)\nGROUP BY *",
+          "rawQuery": true,
+          "refId": "B",
+          "resultFormat": "table",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "title": "Outgoing Requests",
+      "transform": "table",
+      "type": "table"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "LocalInflux",
+      "description": "",
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 5,
+        "w": 9,
+        "x": 11,
+        "y": 61
+      },
+      "hiddenSeries": false,
+      "id": 196,
+      "interval": "15s",
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": false,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "repeatIteration": 1588835205546,
+      "repeatPanelId": 76,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "visits-service",
+          "value": "visits-service"
+        }
+      },
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "alias": "$tag_http_host$tag_http_path",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT  SUM(sum) / SUM(count) AS value \nFROM \"http_out_responsetime\" \nWHERE $timeFilter AND service =~ /^$service$/  AND http_path=~ /^$path$/\nGROUP BY time($__interval), http_path,http_host fill(none)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Outgoing Avg. Response Time",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "ms",
+          "label": "",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "ms",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "datasource": "LocalInflux",
+      "decimals": 2,
+      "description": "Outgoing HTTP Requests per second issued towards the selected endpoints from the given application",
+      "format": "none",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 2,
+        "x": 20,
+        "y": 61
+      },
+      "hideTimeOverride": true,
+      "id": 197,
+      "interval": "15s",
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatIteration": 1588835205546,
+      "repeatPanelId": 112,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "visits-service",
+          "value": "visits-service"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": true
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "expr": "sum(rate(http_out_count{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__interval]))",
+          "format": "time_series",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "instant": false,
+          "intervalFactor": 1,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT  SUM(count)/$__interval_ms*1000 AS value\nFROM \"http_out_responsetime\" \nWHERE $timeFilter AND service =~ /^$service$/ AND http_path=~ /^$path$/ \nGROUP BY time($__interval) fill(0)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": "",
+      "timeShift": null,
+      "title": "Out Req / Sec",
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorPostfix": false,
+      "colorPrefix": false,
+      "colorValue": true,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "datasource": "LocalInflux",
+      "decimals": 2,
+      "description": "The error rate of outgoing http requests issued towards the selected endpoints of the selected application",
+      "format": "percentunit",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 2,
+        "x": 22,
+        "y": 61
+      },
+      "hideTimeOverride": true,
+      "id": 198,
+      "interval": "15s",
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatIteration": 1588835205546,
+      "repeatPanelId": 153,
+      "repeatedByRow": true,
+      "scopedVars": {
+        "service": {
+          "selected": false,
+          "text": "visits-service",
+          "value": "visits-service"
+        }
+      },
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": true
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "expr": "(sum(increase(http_out_count{http_status!~\"(1|2|3)\\\\d\\\\d\",service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__range]))\n/ sum(increase(http_out_count{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__range])) >= 0)\nor (sum(increase(http_out_count{service=\"$service\",application=~\"$application\",http_path=~\"$path\"}[$__range])) > 0) * 0",
+          "format": "time_series",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "instant": true,
+          "intervalFactor": 1,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT  SUM(errors) / SUM(total) AS value FROM (\n  SELECT SUM(\"count\") AS total, SUM(\"errorcount\") AS errors FROM \"http_out_error\" \n  WHERE $timeFilter AND service =~ /^$service$/ AND http_path =~ /^$path$/  GROUP BY time($__interval) fill(0)\n)\nWHERE total > 0\nGROUP BY time($__interval)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -2439,7 +7460,7 @@
     }
   ],
   "refresh": "30s",
-  "schemaVersion": 16,
+  "schemaVersion": 22,
   "style": "dark",
   "tags": [],
   "templating": {
@@ -2447,15 +7468,15 @@
       {
         "allValue": null,
         "current": {
+          "selected": false,
           "text": "All",
-          "value": [
-            "$__all"
-          ]
+          "value": "$__all"
         },
         "datasource": "LocalInflux",
         "definition": "SHOW TAG VALUES WITH key = \"service\"",
         "hide": 0,
         "includeAll": true,
+        "index": -1,
         "label": "Service",
         "multi": true,
         "name": "service",
@@ -2474,31 +7495,7 @@
       {
         "allValue": ".*",
         "current": {
-          "text": "All",
-          "value": "$__all"
-        },
-        "datasource": "LocalInflux",
-        "definition": "SHOW TAG VALUES WITH key = application",
-        "hide": 0,
-        "includeAll": true,
-        "label": "Application",
-        "multi": false,
-        "name": "application",
-        "options": [],
-        "query": "SHOW TAG VALUES WITH key = application",
-        "refresh": 1,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 1,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
-      },
-      {
-        "allValue": ".*",
-        "current": {
+          "selected": false,
           "text": "All",
           "value": "$__all"
         },
@@ -2506,6 +7503,7 @@
         "definition": "SHOW TAG VALUES WITH key = \"http_path\"",
         "hide": 0,
         "includeAll": true,
+        "index": -1,
         "label": "Endpoint",
         "multi": true,
         "name": "path",
@@ -2524,7 +7522,7 @@
     ]
   },
   "time": {
-    "from": "now-15m",
+    "from": "now-5m",
     "to": "now"
   },
   "timepicker": {
@@ -2555,5 +7553,8 @@
   "timezone": "",
   "title": "HTTP Overview",
   "uid": "523wqxqmz",
+  "variables": {
+    "list": []
+  },
   "version": 1
 }

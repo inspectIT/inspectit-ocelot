@@ -19,32 +19,43 @@ inspectit:
   instrumentation:
     rules:
 
-      record_method_duration:
+      'r_record_method_duration':
 
         entry:
-          method_entry_time:
-            action: timestamp_nanos
-          method_name:
-            action: get_method_fqn
+          'method_entry_time':
+            action: 'a_timing_nanos'
+          'class_name':
+            action: 'a_method_getClassFQN'
+          'method_name_with_params':
+            action: 'a_method_getNameWithParameters'
 
         exit:
-          method_duration:
-            action: elapsed_millis
+          'method_duration':
+            action: 'a_timing_elapsedMillis'
             data-input:
-              sinceNanos: method_entry_time
+              'since_nanos': 'method_entry_time'
 
         metrics:
-          '[method/duration]' : method_duration
+          '[method/duration]' : 
+            value: 'method_duration'
+            data-tags:
+              'class': 'class_name'
+              'method': 'method_name_with_params'
+             
 ```
 
-This example rule named `record_method_duration` measures the duration of the instrumented method and outputs the value using the `method/duration` metric.
+This example rule named `r_record_method_duration` measures the duration of the instrumented method and outputs the value using
+the `method/duration` metric.
 
-As the name states, we define under the `entry` property of the rule which actions are performed on method entry. Similarly, the `exit` property defines what is done when the instrumented method returns. In both sections we collect data.
+As the name states, we define under the `entry` property of the rule which actions are performed on method entry.
+Similarly, the `exit` property defines what is done when the instrumented method returns. In both sections we collect data.
 
-On entry, we collect the current timestamp in a variable named `method_entry_time` and the name of the currently executed method in `method_name`.
-These variables are _data_, their names are referred to as _data keys_. Note that we also define how the data is collected: For `method_entry_time` we invoke the [action](#actions) named `timestamp_nanos` and for `method_name` the one named `get_method_fqn`.
+On entry, we collect the current timestamp in a variable named `method_entry_time` and the name and class of the currently executed
+method in `method_name_with_params` and `class_name`.
+These variables are _data_, their names are referred to as _data keys_.
+Note that we also define how the data is collected: For `method_entry_time` we invoke the [action](#actions) named `a_timing_nanos` and for `class_name` the one named `a_method_getClassFQN`.
 
-This data is then used on method exit: using the action `elapsed_millis` we compute the time which has passed since `method_entry_time`. Finally, the duration computed this way is used as a value for the `method/duration` metric. As shown in the [definition](metrics/custom-metrics.md) of this metric, the collected `method_name` is used as a tag for all of its views.
+This data is then used on method exit: using the action `a_timing_elapsedMillis` we compute the time which has passed since `method_entry_time`. Finally, the duration computed this way is used as a value for the `method/duration` metric. As shown in the [definition](metrics/custom-metrics.md) of this metric, the collected class and name of the method is used as a tag for all of its views.
 
 ## Data Propagation
 
@@ -76,15 +87,15 @@ inspectit:
   instrumentation:
     data:
       # for correlating calls across JVM borders
-      prop_origin_service: {down-propagation: GLOBAL, is-tag: false}
-      prop_target_service: {up-propagation: GLOBAL, down-propagation: JVM_LOCAL, is-tag: false}
+      'prop_origin_service': {down-propagation: "GLOBAL", is-tag: "false"}
+      'prop_target_service': {up-propagation: "GLOBAL", down-propagation: "JVM_LOCAL", is-tag: "false"}
 
       #we allow the application to be defined at the beginning and to be down propagated from there
-      application: {down-propagation: GLOBAL, is-tag: true}
+      'application': {down-propagation: "GLOBAL", is-tag: "true"}
 
       #this data will only be visible locally in the method where it is collected
-      http_method: {down-propagation: NONE}
-      http_status: {down-propagation: NONE}
+      'http_method': {down-propagation: "NONE"}
+      'http_status': {down-propagation: "NONE"}
 ```
 
 Under `inspectit.instrumentation.data`, the data keys are mapped to their desired behaviour.
@@ -121,35 +132,37 @@ inspectit:
     actions:
 
       #computes a nanosecond-timestamp as a long for the current point in time
-      timestamp_nanos:
-        value: "new Long(System.nanoTime())"
+      'a_timing_nanos':
+        value: 'new Long(System.nanoTime())'
 
       #computes the elapsed milliseconds as double since a given nanosecond-timestamp
-      elapsed_millis:
+      'a_timing_elapsedMillis':
         input:
           #the timestamp captured via System.nanoTime() to compare against
-          sinceNanos: long
-        value: "new Double( (System.nanoTime() - sinceNanos) * 1E-6)"
+          'since_nanos': 'long'
+        value: 'new Double( (System.nanoTime() - sinceNanos) * 1E-6)'
 
-      string_replace_all:
+      'a_string_replace_all':
         input:
-          regex: String
-          replacement: String
-          string: String
-        value: "string.replaceAll(regex,replacement)"
+          'regex': 'String'
+          'replacement': 'String'
+          'string': 'String'
+        value: 'string.replaceAll(regex,replacement)'
 
-      get_method_fqn:
+      'a_method_getClassFQN':
         input:
-          _methodName: String
           _class: Class
-        value: "new StringBuilder(_class.getName()).append('.').append(_methodName).toString()"
+        value: '_class.getName()'
 ```
 
-The names of the first two actions, `timestamp_nanos` and `elapsed_millis` should be familiar for you from the initial example in the [rules section](instrumentation/rules.md).
+The names of the first two actions, `a_timing_nanos` and `a_timing_elapsedMillis` should be familiar for you from the initial example in the [rules section](instrumentation/rules.md).
 
-The code executed when an action is invoked is defined through the `value` configuration property. In YAML, this is simply a string. InspectIT however will interpret this string as a Java expression to evaluate. The result value of this expression will be used as result for the action invocation.
+The code executed when an action is invoked is defined through the `value` configuration property.
+In YAML, this is simply a string. InspectIT however will interpret this string as a Java expression to evaluate. The result value of this expression will be used as result for the action invocation.
 
-Note that the code will not be interpreted at runtime, but instead inspectIT Ocelot will compile the expression to bytecode to ensure maximum efficiency. As indicated by the manual primitive boxing performed for `timestamp_nanos` the compiler has some restrictions. For example Autoboxing is not supported. However, actions are expected to return Objects, therefore manual boxing has to be performed. Under the hood, inspectIT uses the [javassist](http://www.javassist.org/) library, where all imposed restrictions can be found.
+Note that the code will not be interpreted at runtime, but instead inspectIT Ocelot will compile the expression to bytecode to ensure maximum efficiency.
+As indicated by the manual primitive boxing performed for `timestamp_nanos` the compiler has some restrictions. For example Autoboxing is not supported.
+However, actions are expected to return Objects, therefore manual boxing has to be performed. Under the hood, inspectIT uses the [javassist](http://www.javassist.org/) library, where all imposed restrictions can be found.
 The most important ones are that neither Autoboxing, Generics, Anonymous Classes or Lambda Expressions are supported.
 
 After actions have been compiled, they are placed in the same class loader as the class you instrument with them. This means that they can access any class that your application class could also access.
@@ -160,11 +173,11 @@ After actions have been compiled, they are placed in the same class loader as th
 
 As previously mentioned actions are also free to define any kind of _input parameters_ they need. This is done using the `input` configuration property.
 This property maps the names of the input parameters to their expected Java type.
-For example, the `elapsed_millis` action declares a single input variable named `sinceNanos` which has the type `long`. Note that for input parameters automatic primitive unboxing is supported.
+For example, the `a_timing_elapsedMillis` action declares a single input variable named `sinceNanos` which has the type `long`. Note that for input parameters automatic primitive unboxing is supported.
 
-Another example where the action even defines multiple inputs is `string_replace_all`. Guess what this action does? [Hint](https://docs.oracle.com/javase/8/docs/api/java/lang/String.html#replaceAll-java.lang.String-java.lang.String).
+Another example where the action even defines multiple inputs is `a_string_replace_all`. Guess what this action does? [Hint](https://docs.oracle.com/javase/8/docs/api/java/lang/String.html#replaceAll-java.lang.String-java.lang.String).
 
-The fourth example shown above is `get_method_fqn`, which uses the _special_ input parameters `_methodName` and `_class`. The fact that these variables are special is indicated by the leading underscore. When normally invoking actions from rules, the user has to take care that all input parameters are assigned a value. For special input parameters inspectIT automatically assigned the desired value. This means that for example `get_method_fqn` can be called without manually assigning any parameter, like it was done in the initial example in the [rules section](instrumentation/rules.md). An overview of all available special input parameters is given below:
+The fourth example shown above is `a_method_getClassFQN`, which uses the _special_ input parameter `_class`. The fact that these variables are special is indicated by the leading underscore. When normally invoking actions from rules, the user has to take care that all input parameters are assigned a value. For special input parameters inspectIT automatically assigned the desired value. This means that for example `a_method_getClassFQN` can be called without manually assigning any parameter, like it was done in the initial example in the [rules section](instrumentation/rules.md). An overview of all available special input parameters is given below:
 
 |Parameter Name|Type| Description
 |---|---|---|
@@ -190,17 +203,17 @@ For this purpose we introduced the `value-body` configuration property for actio
 inspectit:
   instrumentation:
     actions:
-      get_servlet_request_path:
+      'a_get_servlet_request_path':
         imports:
-          - javax.servlet
-          - javax.servlet.http
+          - 'javax.servlet'
+          - 'javax.servlet.http'
         input:
           _arg0: ServletRequest
         value-body: |
-          if(_arg0 instanceof HttpServletRequest) {
+          'if(_arg0 instanceof HttpServletRequest) {
             return java.net.URI.create(((HttpServletRequest)_arg0).getRequestURI()).getPath();
           }
-          return null;
+          return null;'
 ```
 
 This action is designed to be applied on the Servlet API [doFilter](https://javaee.github.io/javaee-spec/javadocs/javax/servlet/Filter.html#doFilter-javax.servlet.ServletRequest-javax.servlet.ServletResponse-javax.servlet.FilterChain) and
@@ -221,10 +234,10 @@ inspectit:
   instrumentation:
     rules:
 
-      record_method_duration:
+      'r_record_method_duration':
         scopes:
-          my_first_scope: true
-          my_second_scope: true
+          's_my_first_scope': true
+          's_my_second_scope': true
 ```
 
 With this snippet we defined that the existing rule `record_method_duration` gets applied on the two scopes named `my_first_scope` and `my_second_scope`. The `scopes` configuration option maps scope names to `true` or `false`. The rule will be applied on all methods matching any scope where the value is `true`.
@@ -250,12 +263,14 @@ Let's take a look again at the entry phase definitions of the ``record_method_du
 
 ```yaml
 #inspectit.instrumentation.rules is omitted here
-record_method_duration:
+'r_record_method_duration':
   entry:
-    method_entry_time:
-      action: timestamp_nanos
-    method_name:
-      action: get_method_fqn
+    'method_entry_time':
+      action: 'a_timing_nanos'
+    'class_name':
+      action: 'a_method_getClassFQN'
+    'method_name_with_params':
+      action: 'a_method_getNameWithParameters'
 ```
 
 The `entry` and `exit` configuration options are YAML dictionaries mapping data keys to _action invocations_.
@@ -271,31 +286,32 @@ There are currently two possible ways of doing this:
 * **Assigning Data Values:** In this case, the value for a given data key is extracted from the [inspectIT context](#data-propagation) and passed to the action
 * **Assigning Constant Values:** In this case a literal specified in the configuration will directly be passed to the action.
 
-We have already seen how the assignment of data values to parameters is done in the exit phase of the `record_method_duration` rule:
+We have already seen how the assignment of data values to parameters is done in the exit phase of the `r_record_method_duration` rule:
 
 ```yaml
 #inspectit.instrumentation.rules is omitted here
-record_method_duration:
+'r_record_method_duration':
   exit:
-    method_duration:
-      action: elapsed_millis
-      data-input:
-        sinceNanos: method_entry_time
+    'method_duration':
+      action: 'a_timing_elapsedMillis'
+        data-input:
+          'since_nanos': 'method_entry_time'
+
 ```
 
-The `elapsed_millis` action requires a value for the input parameter `sinceNanos`.
-In this example we defined that the value for the data key `method_entry_time` is used for `sinceNanos`.
+The `a_timing_elapsedMillis` action requires a value for the input parameter `since_nanos`.
+In this example we defined that the value for the data key `method_entry_time` is used for `since_nanos`.
 
 The assignment of constant values works very similar:
 
 ```yaml
 #inspectit.instrumentation.rules is omitted here
-example_rule:
+'r_example_rule':
   entry:
-    hello_world_text:
-      action: set
+    'hello_world_text':
+      action: 'a_assign_value'
       constant-input:
-        value: "Hello World!"
+        'value': 'Hello World!'
 ```
 
 Note that when assigning a constant value, inspectIT Ocelot automatically converts the given value to the type expected by the action. This is done using the [Spring Conversion Service](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/core/convert/ConversionService.html). For example, if your action expects a parameter of type `java.time.Duration`, you can simply pass in `"42s"` as constant.
@@ -307,15 +323,15 @@ You can also mix which parameters you assign from data and which from constants:
 
 ```yaml
 #inspectit.instrumentation.rules is omitted here
-example_rule:
+'r_example_rule':
   entry:
-    bye_world_text:
-      action: string_replace_all
+    'a_bye_world_text':
+      action: 'a_string_replace_all'
       data-input:
-        string: hello_world_text
+        'string': 'hello_world_text'
       constant-input:
-        regex: "Hello"
-        replacement: "Bye"
+        'regex': 'Hello'
+        'replacement': 'Bye'
 ```
 
 As expected given the [definition](#actions) of the `string_replace_all` action, the value of `bye_world_text` will be `"Bye World!"`
@@ -336,13 +352,13 @@ An example for the usage of a condition is given below:
 
 ```yaml
 #inspectit.instrumentation.rules is omitted here
-example_rule:
+'r_example_rule':
   entry:
-    application_name:
-      action: set
+    'application_name':
+      action: 'a_assign_value'
       constant-input:
-        value: "My-Application"
-    only-if-null: application_name
+        'value': 'My-Application'
+      only-if-null: 'application_name'
 ```
 
 In this example we define an invocation to set the value of the data key `application_name`
@@ -365,14 +381,14 @@ In some rare cases you might want to change this behaviour. E.g. in tracing cont
 
 ```yaml
 #inspectit.instrumentation.rules is omitted here
-example_rule:
+'r_example_rule':
   entry:
-    parent_span:
-      action: set
+    'parent_span':
+      action: 'a_assign_value'
       data-input:
-        value: span_id
-    before:
-      span_id: true
+        'value': 'span_id'
+    'before':
+      'span_id': true
 ```
 
 ### Collecting Metrics
@@ -381,24 +397,24 @@ Metrics collection is done in the metrics phase of a rule, which can be configur
 
 ```yaml
 #inspectit.instrumentation.rules is omitted here
-example_rule:
+'r_example_rule':
   #...
   exit:
-    method_duration:
+    'method_duration':
       #action invocation here....
-    method_name:
+    'method_name':
       #action invocation here....
 
   metrics:
     '[method/duration]':
-      value: method_duration
+      value: 'method_duration'
       constant-tags:
-        action: checkout
+        action: 'checkout'
       data-tags:
-        method_name: method_name
-    write_my_other_metric:
-      metric: "some/other/metric"
-      value: 42
+        method_name: 'method_name'
+    'write_my_other_metric':
+      metric: 'some/other/metric'
+      value: '42'
 ```
 
 The metrics phase is executed after the exit phase of the rule.
@@ -425,15 +441,15 @@ The default way to specify metric collection in Ocelot versions up to and includ
 
 ```yaml
 #inspectit.instrumentation.rules is omitted here
-example_rule:
+'r_example_rule':
   #...
   exit:
-    method_duration:
+    'method_duration':
       #action invocation here....
 
   metrics:
-    '[method/duration]' : method_duration
-    '[some/other/metric]' : 42
+    '[method/duration]' : 'method_duration'
+    '[some/other/metric]' : '42'
 ```
 
 As short notation does not allow specification of tags to be recorded, using the short notation means that only common tags will be collected.
@@ -455,7 +471,7 @@ Afterwards you can define that all methods matching a certain rule will be trace
 inspectit:
   instrumentation:
     rules:
-      example_rule:
+      'r_example_rule':
         tracing:
           start-span: true
 ```
@@ -476,12 +492,12 @@ Commonly, you do not want to have the fully qualified name of the instrumented m
 inspectit:
   instrumentation:
     rules:
-      servlet_api_service:
+      'r_servlet_api_service':
         tracing:
           start-span: true
-          name: http_path
+          name: 'http_path'
         entry:
-          http_path:
+          'http_path':
            #... action call to fetch the http path here
 ```
 
@@ -496,10 +512,10 @@ This can be configured using the `sample-probability` setting under the `tracing
 inspectit:
   instrumentation:
     rules:
-      servlet_api_service:
+      'r_servlet_api_service':
         tracing:
           start-span: true
-          sample-probability: 0.2
+          sample-probability: '0.2'
 ```
 
 The example shown above will ensure that only 20% of all traces starting at the given rule will actually be exported.
@@ -519,13 +535,13 @@ The example below shows how you can define attributes:
 inspectit:
   instrumentation:
     rules:
-      servlet_api_service:
+      'r_servlet_api_service':
         tracing:
-          start-span: true
+          start-span: 'true'
           attributes:
-            http_host: host_name
+            'http_host': 'host_name'
         entry:
-          host_name:
+          'host_name':
            #... action call to fetch the http host here
 ```
 
@@ -548,7 +564,7 @@ This is done via the `error-status` configuration property of a rule's tracing s
 inspectit:
   instrumentation:
     rules:
-      example_rule:
+      'r_example_rule"':
         tracing:
           start-span: true
           error-status: _thrown
@@ -570,19 +586,19 @@ It is possible to conditionalize the span starting as well as the attribute writ
 inspectit:
   instrumentation:
     rules:
-      span_starting_rule:
+      'r_span_starting_rule':
         tracing:
           start-span: true
           start-span-conditions:
-            only-if-true: my_condition_data
+            only-if-true: 'my_condition_data'
 #....
-      attribute_writing_rule:
+      'r_attribute_writing_rule':
         tracing:
           attributes:
-            attrA: data_a
-            attrB: data_b
+            'attrA': 'data_a'
+            'attrB': 'data_b'
           attribute-conditions:
-            only-if-true: my_condition_data
+            only-if-true: 'my_condition_data'
 ```
 
 If any `start-span-conditions` are defined, a span will only be created when all conditions are met.
@@ -606,10 +622,10 @@ Firstly, it is possible to "remember" the span created or continued using the `s
 
 ```yaml
     rules:
-      span_starting_rule:
+      'r_span_starting_rule':
         tracing:
           start-span: true
-          store-span: my_span_data
+          store-span: 'my_span_data'
           end-span: false
 ```
 
@@ -620,9 +636,9 @@ By setting `end-span` to false, the span is kept open instead. It can then be co
 
 ```yaml
     rules:
-      span_finishing_rule:
+      'r_span_finishing_rule':
         tracing:
-          continue-span: my_span_data
+          continue-span: 'my_span_data'
           end-span: true # actually not necessary as it is the default value
 ```
 
@@ -649,26 +665,26 @@ To overcome these issues, Ocelot allows you to include rules from within other r
 
 ```yaml
     rules:
-      myhttp_extract_path:
+      'r_myhttp_extract_path':
         entry:
-          my_http_path:
+          'my_http_path':
             #logic to extract the http path and save it in the context here...
           
-      myhttp_tracing:
+      'r_myhttp_tracing':
         include:
-          myhttp_extract_path: true
+          'myhttp_extract_path': true
         scopes:
-          myhttp_scope: true
+          's_myhttp_scope': true
         tracing:
           start-span: true
           attributes:
-            path: my_http_path
+            'path': 'my_http_path'
             
-      myhttp_record_metric:
+      'r_myhttp_record_metric':
         include:
-          myhttp_extract_path: true
+          'myhttp_extract_path': true
         scopes:
-          myhttp_scope: true
+          's_myhttp_scope': true
         metrics:
           #record http metric here...
 ```

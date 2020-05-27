@@ -1,12 +1,12 @@
 package rocks.inspectit.ocelot.config.model.metrics.definition;
 
 import lombok.*;
+import org.hibernate.validator.constraints.time.DurationMin;
 import org.springframework.util.CollectionUtils;
 
-import javax.validation.constraints.AssertFalse;
-import javax.validation.constraints.AssertTrue;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.*;
+import java.time.Duration;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -22,7 +22,10 @@ public class ViewDefinitionSettings {
 
     @AllArgsConstructor
     public enum Aggregation {
-        LAST_VALUE("last value"), SUM("sum"), COUNT("count"),
+        LAST_VALUE("last value"),
+        SUM("sum"),
+        COUNT("count"),
+        QUANTILES("quantiles"),
         /**
          * Corresponds to OpenCensus "Distribution" aggregation
          */
@@ -56,22 +59,57 @@ public class ViewDefinitionSettings {
     private List<@NotNull Double> bucketBoundaries;
 
     /**
+     * In case the view is a quantile view, this list defines which quantiles shall be captured.
+     * 0 corresponds to the minimum, 1 to the maximum.
+     */
+    @Builder.Default
+    private List<@NotNull Double> quantiles = Arrays.asList(0.0, 0.5, 0.9, 0.95, 0.99, 1.0);
+
+    /**
+     * The time window to use for windowed metrics (currently only quantiles).
+     * Can be null, in this case the default provided via {@link #getCopyWithDefaultsPopulated(String, String, Duration)}.
+     * is used.
+     */
+    @DurationMin(millis = 1L)
+    private Duration timeWindow;
+
+    /**
+     * The maximum number of points to be buffered by this View.
+     * Currently only relevant if the aggregation is QUANTILES.
+     * <p>
+     * If this number is exceeded, a warning will be printed and points will be rejected until space is free again.
+     */
+    @Min(1)
+    @Builder.Default
+    private int maxBufferedPoints = 16384;
+
+    /**
      * Defines if this view should by default include all common tags.
      * Individual tags can still be disabled via {@link #tags}.
      */
     @Builder.Default
     private boolean withCommonTags = true;
 
-
     @Singular
     private Map<@NotBlank String, @NotNull Boolean> tags;
 
-    public ViewDefinitionSettings getCopyWithDefaultsPopulated(String viewName, String measureDescription, String unit) {
+    public ViewDefinitionSettings getCopyWithDefaultsPopulated(String measureDescription, String unit, Duration defaultTimeWindow) {
         val result = toBuilder();
         if (description == null) {
             result.description(aggregation.getReadableName() + " of " + measureDescription + " [" + unit + "]");
         }
+        if (timeWindow == null) {
+            if (defaultTimeWindow == null && aggregation == Aggregation.QUANTILES) {
+                throw new IllegalArgumentException("A default time window must be provided for quantile views");
+            }
+            result.timeWindow(defaultTimeWindow);
+        }
         return result.build();
+    }
+
+    @AssertFalse(message = "When using QUANTILES aggregation you must specify the quantiles to use!")
+    boolean isQuantilesNotSpecifiedForercentileType() {
+        return enabled && aggregation == Aggregation.QUANTILES && CollectionUtils.isEmpty(quantiles);
     }
 
     @AssertFalse(message = "When using HISTOGRAM aggregation you must specify the bucket-boundaries!")
@@ -93,5 +131,10 @@ public class ViewDefinitionSettings {
         return true;
     }
 
+    @AssertTrue(message = "The quantiles must be in the range [0,1]")
+    boolean isQuantilesInRange() {
+        return !enabled || aggregation != Aggregation.QUANTILES ||
+                quantiles.stream().noneMatch(q -> q < 0 || q > 1);
+    }
 
 }

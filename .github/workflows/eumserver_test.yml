@@ -1,0 +1,36 @@
+name: EUM Server Tests
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - '.github/workflows/eumserver_test.yml'
+      - 'inspectit-ocelot-config'
+      - 'components/inspectit-ocelot-eum-server/**'
+      - '!components/inspectit-ocelot-eum-server/README.md'
+  pull_request:
+    branches:
+      - master
+    paths:
+      - '.github/workflows/eumserver_test.yml'
+      - 'inspectit-ocelot-config'
+      - 'components/inspectit-ocelot-eum-server/**'
+      - '!components/inspectit-ocelot-eum-server/README.md'
+jobs:
+  test:
+    name: Assemble & Test
+    runs-on: ubuntu-latest
+    env:
+      working-directory: ./components/inspectit-ocelot-eum-server
+    container: openjdk:8-jdk
+    steps:
+      - uses: actions/checkout@v2
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: assemble
+        run: ../../gradlew assemble
+        working-directory: ${{env.working-directory}}
+      - name: test
+        run: ../../gradlew test
+        working-directory: ${{env.working-directory}}

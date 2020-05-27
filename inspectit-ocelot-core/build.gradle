@@ -10,6 +10,10 @@ configurations {
 
 test {
     useJUnitPlatform()
+
+    testLogging {
+        exceptionFormat = 'full'
+    }
 }
 
 sourceCompatibility = 1.8
@@ -34,7 +38,6 @@ dependencies {
             project(':inspectit-ocelot-config'),
             project(':inspectit-ocelot-sdk'),
 
-            "rocks.inspectit:opencensus-influxdb-exporter:1.0",
             
             // spring releated
             "org.springframework.boot:spring-boot:${springVersion}",
@@ -50,6 +53,7 @@ dependencies {
 
             // utils
             "org.apache.commons:commons-lang3:3.+",
+            'org.apache.commons:commons-math3:3.6.1',
             'org.apache.httpcomponents:httpclient:4.5.8',
             'commons-io:commons-io:2.6',
             'piccolo:piccolo:1.0.3',
@@ -64,6 +68,7 @@ dependencies {
             "io.opencensus:opencensus-exporter-trace-jaeger:${openCensusVersion}",
             "io.opencensus:opencensus-exporter-metrics-ocagent:${openCensusVersion}",
             "io.opencensus:opencensus-exporter-trace-ocagent:${openCensusVersion}",
+            "rocks.inspectit:opencensus-influxdb-exporter:1.1",
             
             // bytecode manipulation
             "net.bytebuddy:byte-buddy:1.9.2"

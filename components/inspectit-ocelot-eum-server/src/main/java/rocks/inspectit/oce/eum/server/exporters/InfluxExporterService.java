@@ -50,7 +50,8 @@ public class InfluxExporterService {
     private void doEnable() {
         InfluxExporterSettings influx = config.getExporters().getMetrics().getInflux();
         if (shouldEnable()) {
-            log.info("Starting InfluxDB Exporter to '{}:{}' on '{}'", influx.getDatabase(), influx.getRetentionPolicy(), influx.getUrl());
+            log.info("Starting InfluxDB Exporter to '{}:{}' on '{}'", influx.getDatabase(), influx.getRetentionPolicy(), influx
+                    .getUrl());
             activeExporter = InfluxExporter.builder()
                     .url(influx.getUrl())
                     .database(influx.getDatabase())
@@ -58,8 +59,10 @@ public class InfluxExporterService {
                     .user(influx.getUser())
                     .password(influx.getPassword())
                     .createDatabase(influx.isCreateDatabase())
+                    .exportDifference(influx.isCountersAsDifferences())
                     .build();
-            exporterTask = executor.scheduleAtFixedRate(activeExporter::export, 0, influx.getExportInterval().toMillis(), TimeUnit.MILLISECONDS);
+            exporterTask = executor.scheduleAtFixedRate(activeExporter::export, 0, influx.getExportInterval()
+                    .toMillis(), TimeUnit.MILLISECONDS);
         }
     }
 

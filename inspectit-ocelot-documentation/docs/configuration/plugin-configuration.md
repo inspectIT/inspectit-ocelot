@@ -16,7 +16,7 @@ In order to enable the plugin system, you need to tell the agent where it should
 ```yaml
 inspectit:
   plugins:
-    path: /path/to/directory
+    path: '/path/to/directory'
 ```
 
 The directory will be scanned on startup of the agent and all found plugins will be loaded.
@@ -30,7 +30,7 @@ The settings for each plugin can be defined under the plugins section based on i
 ```yaml
 inspectit:
   plugins:
-    path: /path/to/directory
+    path: '/path/to/directory'
     
     some-plugin:
       some-config-option: ...

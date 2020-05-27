@@ -8,7 +8,7 @@ inspectit:
           name: HttpRemoteTracingTest$TracingServlet
           matcher-mode: ENDS_WITH
         methods:
-          - name: service
+          - name: myHandler
 
       HttpRemoteTracingTest-clientSpan:
         type:

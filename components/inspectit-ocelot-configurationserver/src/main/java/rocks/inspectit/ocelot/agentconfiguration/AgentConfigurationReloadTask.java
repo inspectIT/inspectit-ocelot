@@ -3,7 +3,9 @@ package rocks.inspectit.ocelot.agentconfiguration;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
 import org.yaml.snakeyaml.Yaml;
+import rocks.inspectit.ocelot.file.FileInfo;
 import rocks.inspectit.ocelot.file.FileManager;
+import rocks.inspectit.ocelot.file.accessor.workingdirectory.AbstractWorkingDirectoryAccessor;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 
 import java.io.IOException;
@@ -130,17 +132,22 @@ class AgentConfigurationReloadTask implements Runnable {
      * @param path the path to check for yaml files, can start with a slash which will be ignored
      * @return a list of absolute paths of contained YAML files
      */
-    private List<String> getAllYamlFiles(String path) throws IOException {
+    private List<String> getAllYamlFiles(String path) {
         String cleanedPath;
         if (path.startsWith("/")) {
             cleanedPath = path.substring(1);
         } else {
             cleanedPath = path;
         }
-        if (fileManager.exists(cleanedPath)) {
-            if (fileManager.isDirectory(cleanedPath)) {
-                return fileManager.getFilesInDirectory(cleanedPath, true).stream()
-                        .flatMap(f -> f.getAbsoluteFilePaths(cleanedPath))
+
+        AbstractWorkingDirectoryAccessor workingDirectory = fileManager.getWorkingDirectory();
+
+        if (workingDirectory.configurationFileExists(cleanedPath)) {
+            if (workingDirectory.configurationFileIsDirectory(cleanedPath)) {
+                List<FileInfo> fileInfos = workingDirectory.listConfigurationFiles(cleanedPath);
+
+                return fileInfos.stream()
+                        .flatMap(file -> file.getAbsoluteFilePaths(cleanedPath))
                         .filter(HAS_YAML_ENDING)
                         .sorted()
                         .collect(Collectors.toList());
@@ -157,11 +164,11 @@ class AgentConfigurationReloadTask implements Runnable {
      * @param toMerge the existing structure of nested maps / lists with which the loaded yaml will be merged.
      * @param path    the path of the yaml file to load
      * @return the merged structure
-     * @throws IOException in case an error occurs while loading the file
      */
-    private Object loadAndMergeYaml(Object toMerge, String path) throws IOException {
+    private Object loadAndMergeYaml(Object toMerge, String path) {
         Yaml yaml = new Yaml();
-        String src = fileManager.readFile(path);
+        String src = fileManager.getWorkingDirectory().readConfigurationFile(path).orElse("");
+
         try {
             Object loadedYaml = yaml.load(src);
             if (toMerge == null) {

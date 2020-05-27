@@ -14,36 +14,37 @@
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "5.4.2"
+      "version": "6.7.3"
     },
     {
       "type": "panel",
       "id": "graph",
       "name": "Graph",
-      "version": "5.0.0"
+      "version": ""
     },
     {
       "type": "datasource",
       "id": "influxdb",
       "name": "InfluxDB",
-      "version": "5.0.0"
+      "version": "1.0.0"
     },
     {
       "type": "panel",
       "id": "singlestat",
       "name": "Singlestat",
-      "version": "5.0.0"
+      "version": ""
     },
     {
       "type": "panel",
       "id": "table",
       "name": "Table",
-      "version": "5.0.0"
+      "version": ""
     }
   ],
   "annotations": {
     "list": [
       {
+        "$$hashKey": "object:10",
         "builtIn": 1,
         "datasource": "-- Grafana --",
         "enable": true,
@@ -58,11 +59,12 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1580134615470,
+  "iteration": 1588835108154,
   "links": [],
   "panels": [
     {
       "collapsed": false,
+      "datasource": null,
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -134,7 +136,7 @@
         "lineColor": "rgb(31, 120, 193)",
         "show": false
       },
-      "tableColumn": "Time",
+      "tableColumn": "",
       "targets": [
         {
           "groupBy": [
@@ -209,12 +211,14 @@
       "styles": [
         {
           "alias": "Time",
+          "align": "auto",
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "pattern": "Time",
           "type": "hidden"
         },
         {
           "alias": "Description",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -231,6 +235,7 @@
         },
         {
           "alias": "Count",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -247,6 +252,7 @@
         },
         {
           "alias": "",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -350,78 +356,6 @@
               "value": "/^$service$/"
             }
           ]
-        },
-        {
-          "alias": "# errors since startup",
-          "groupBy": [],
-          "measurement": "inspectit_self_logs",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "D",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "counter"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "service",
-              "operator": "=~",
-              "value": "/^$service$/"
-            },
-            {
-              "condition": "AND",
-              "key": "level",
-              "operator": "=",
-              "value": "ERROR"
-            }
-          ]
-        },
-        {
-          "alias": "# warnings since startup",
-          "groupBy": [],
-          "measurement": "inspectit_self_logs",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "E",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "counter"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "service",
-              "operator": "=~",
-              "value": "/^$service$/"
-            },
-            {
-              "condition": "AND",
-              "key": "level",
-              "operator": "=",
-              "value": "WARN"
-            }
-          ]
         }
       ],
       "title": "Instrumentation State",
@@ -486,7 +420,7 @@
         "lineColor": "rgb(31, 120, 193)",
         "show": false
       },
-      "tableColumn": "Time",
+      "tableColumn": "",
       "targets": [
         {
           "groupBy": [
@@ -570,10 +504,12 @@
       "mappingType": 1,
       "mappingTypes": [
         {
+          "$$hashKey": "object:380",
           "name": "value to text",
           "value": 1
         },
         {
+          "$$hashKey": "object:381",
           "name": "range to text",
           "value": 2
         }
@@ -618,7 +554,7 @@
           "measurement": "inspectit_self_logs",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SUM(\"diffs\") FROM (SELECT non_negative_difference(\"counter\") AS \"diffs\" FROM \"inspectit_self_logs\" WHERE (\"service\" =~ /^$service$/ AND \"level\" =~ /^ERROR$/ ) AND $timeFilter)",
+          "query": "SELECT SUM(\"counter\") FROM \"inspectit_self_logs\" WHERE (\"service\" =~ /^$service$/ AND \"level\" =~ /^ERROR$/ ) AND $timeFilter",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -658,9 +594,10 @@
       "thresholds": "1",
       "title": "Errors",
       "type": "singlestat",
-      "valueFontSize": "100%",
+      "valueFontSize": "80%",
       "valueMaps": [
         {
+          "$$hashKey": "object:383",
           "op": "=",
           "text": "0",
           "value": "null"
@@ -677,12 +614,14 @@
       "dashes": false,
       "datasource": "${DS_LOCALINFLUX}",
       "fill": 5,
+      "fillGradient": 0,
       "gridPos": {
         "h": 6,
         "w": 10,
         "x": 14,
         "y": 1
       },
+      "hiddenSeries": false,
       "id": 49,
       "legend": {
         "avg": false,
@@ -697,6 +636,9 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -975,10 +917,12 @@
       "mappingType": 1,
       "mappingTypes": [
         {
+          "$$hashKey": "object:421",
           "name": "value to text",
           "value": 1
         },
         {
+          "$$hashKey": "object:422",
           "name": "range to text",
           "value": 2
         }
@@ -1023,7 +967,7 @@
           "measurement": "inspectit_self_logs",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SUM(\"diffs\") FROM (SELECT non_negative_difference(\"counter\") AS \"diffs\" FROM \"inspectit_self_logs\" WHERE (\"service\" =~ /^$service$/ AND \"level\" =~ /^WARN$/ ) AND $timeFilter)",
+          "query": "SELECT SUM(\"counter\") FROM \"inspectit_self_logs\" WHERE (\"service\" =~ /^$service$/ AND \"level\" =~ /^WARN$/ ) AND $timeFilter",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1063,9 +1007,10 @@
       "thresholds": "1",
       "title": "Warnings",
       "type": "singlestat",
-      "valueFontSize": "100%",
+      "valueFontSize": "80%",
       "valueMaps": [
         {
+          "$$hashKey": "object:424",
           "op": "=",
           "text": "0",
           "value": "null"
@@ -1103,10 +1048,12 @@
       "mappingType": 1,
       "mappingTypes": [
         {
+          "$$hashKey": "object:462",
           "name": "value to text",
           "value": 1
         },
         {
+          "$$hashKey": "object:463",
           "name": "range to text",
           "value": 2
         }
@@ -1151,7 +1098,7 @@
           "measurement": "inspectit_self_logs",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SUM(\"diffs\") FROM (SELECT non_negative_difference(\"counter\") AS \"diffs\" FROM \"inspectit_self_logs\" WHERE (\"service\" =~ /^$service$/ AND \"level\" =~ /^INFO|DEBUG|TRACE$/ ) AND $timeFilter)",
+          "query": "SELECT SUM(\"counter\") FROM \"inspectit_self_logs\" WHERE (\"service\" =~ /^$service$/ AND \"level\" =~ /^INFO|DEBUG|TRACE$/ ) AND $timeFilter",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1191,9 +1138,10 @@
       "thresholds": "1",
       "title": "Other Logs",
       "type": "singlestat",
-      "valueFontSize": "100%",
+      "valueFontSize": "80%",
       "valueMaps": [
         {
+          "$$hashKey": "object:465",
           "op": "=",
           "text": "0",
           "value": "null"
@@ -1203,7 +1151,7 @@
     }
   ],
   "refresh": "30s",
-  "schemaVersion": 16,
+  "schemaVersion": 22,
   "style": "dark",
   "tags": [],
   "templating": {
@@ -1215,6 +1163,7 @@
         "definition": "SHOW TAG VALUES WITH KEY = \"service\"",
         "hide": 0,
         "includeAll": true,
+        "index": -1,
         "label": null,
         "multi": true,
         "name": "service",
@@ -1264,5 +1213,8 @@
   "timezone": "",
   "title": "inspectIT Agent Self-Monitoring",
   "uid": "D-EaVt_ik",
+  "variables": {
+    "list": []
+  },
   "version": 1
 }

@@ -14,36 +14,37 @@
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "5.4.2"
+      "version": "6.7.3"
     },
     {
       "type": "panel",
       "id": "graph",
       "name": "Graph",
-      "version": "5.0.0"
+      "version": ""
     },
     {
       "type": "datasource",
       "id": "prometheus",
       "name": "Prometheus",
-      "version": "5.0.0"
+      "version": "1.0.0"
     },
     {
       "type": "panel",
       "id": "singlestat",
       "name": "Singlestat",
-      "version": "5.0.0"
+      "version": ""
     },
     {
       "type": "panel",
       "id": "table",
       "name": "Table",
-      "version": "5.0.0"
+      "version": ""
     }
   ],
   "annotations": {
     "list": [
       {
+        "$$hashKey": "object:181",
         "builtIn": 1,
         "datasource": "-- Grafana --",
         "enable": true,
@@ -58,11 +59,12 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1567683957608,
+  "iteration": 1588836480548,
   "links": [],
   "panels": [
     {
       "collapsed": false,
+      "datasource": null,
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -134,7 +136,7 @@
         "lineColor": "rgb(31, 120, 193)",
         "show": false
       },
-      "tableColumn": "Time",
+      "tableColumn": "",
       "targets": [
         {
           "expr": "inspectit_self_instrumented_classes{service=\"$service\"} / jvm_classes_loaded{service=\"$service\"}",
@@ -181,12 +183,14 @@
       "styles": [
         {
           "alias": "Time",
+          "align": "auto",
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "pattern": "Time",
           "type": "hidden"
         },
         {
           "alias": "Description",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -203,6 +207,7 @@
         },
         {
           "alias": "Count",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -219,6 +224,7 @@
         },
         {
           "alias": "",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -392,10 +398,12 @@
       "mappingType": 1,
       "mappingTypes": [
         {
+          "$$hashKey": "object:291",
           "name": "value to text",
           "value": 1
         },
         {
+          "$$hashKey": "object:292",
           "name": "range to text",
           "value": 2
         }
@@ -420,7 +428,7 @@
         "lineColor": "rgb(31, 120, 193)",
         "show": false
       },
-      "tableColumn": "host",
+      "tableColumn": "",
       "targets": [
         {
           "expr": "sum(increase(inspectit_self_logs{service=~\"$service\",level=~\"FATAL|ERROR\"}[$__range]))",
@@ -432,11 +440,11 @@
       ],
       "thresholds": "1",
       "title": "Errors",
-      "transparent": false,
       "type": "singlestat",
-      "valueFontSize": "100%",
+      "valueFontSize": "80%",
       "valueMaps": [
         {
+          "$$hashKey": "object:294",
           "op": "=",
           "text": "0",
           "value": "null"
@@ -502,7 +510,7 @@
         "lineColor": "rgb(31, 120, 193)",
         "show": false
       },
-      "tableColumn": "Time",
+      "tableColumn": "",
       "targets": [
         {
           "expr": "1 - (inspectit_self_instrumentation_queue_size{service=\"$service\"}/jvm_classes_loaded{service=\"$service\"})",
@@ -536,12 +544,14 @@
       "dashes": false,
       "datasource": "${DS_LOCALPROMETHEUS}",
       "fill": 5,
+      "fillGradient": 0,
       "gridPos": {
         "h": 6,
         "w": 9,
         "x": 15,
         "y": 1
       },
+      "hiddenSeries": false,
       "id": 49,
       "legend": {
         "avg": false,
@@ -556,6 +566,9 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -798,10 +811,12 @@
       "mappingType": 1,
       "mappingTypes": [
         {
+          "$$hashKey": "object:397",
           "name": "value to text",
           "value": 1
         },
         {
+          "$$hashKey": "object:398",
           "name": "range to text",
           "value": 2
         }
@@ -826,7 +841,7 @@
         "lineColor": "rgb(31, 120, 193)",
         "show": false
       },
-      "tableColumn": "host",
+      "tableColumn": "",
       "targets": [
         {
           "expr": "increase(inspectit_self_logs{service=~\"$service\",level=~\"WARN\"}[$__range])",
@@ -838,11 +853,11 @@
       ],
       "thresholds": "1",
       "title": "Warnings",
-      "transparent": false,
       "type": "singlestat",
-      "valueFontSize": "100%",
+      "valueFontSize": "80%",
       "valueMaps": [
         {
+          "$$hashKey": "object:400",
           "op": "=",
           "text": "0",
           "value": "null"
@@ -883,10 +898,12 @@
       "mappingType": 1,
       "mappingTypes": [
         {
+          "$$hashKey": "object:431",
           "name": "value to text",
           "value": 1
         },
         {
+          "$$hashKey": "object:432",
           "name": "range to text",
           "value": 2
         }
@@ -911,7 +928,7 @@
         "lineColor": "rgb(31, 120, 193)",
         "show": false
       },
-      "tableColumn": "host",
+      "tableColumn": "",
       "targets": [
         {
           "expr": "SUM(increase(inspectit_self_logs{service=~\"$service\",level=~\"INFO|DEBUG|TRACE\"}[$__range]))",
@@ -923,11 +940,11 @@
       ],
       "thresholds": "",
       "title": "Other Logs",
-      "transparent": false,
       "type": "singlestat",
-      "valueFontSize": "100%",
+      "valueFontSize": "80%",
       "valueMaps": [
         {
+          "$$hashKey": "object:434",
           "op": "=",
           "text": "0",
           "value": "null"
@@ -937,7 +954,7 @@
     }
   ],
   "refresh": "30s",
-  "schemaVersion": 16,
+  "schemaVersion": 22,
   "style": "dark",
   "tags": [],
   "templating": {
@@ -949,6 +966,7 @@
         "definition": "label_values(service)",
         "hide": 0,
         "includeAll": true,
+        "index": -1,
         "label": null,
         "multi": true,
         "name": "service",
@@ -998,5 +1016,8 @@
   "timezone": "",
   "title": "inspectIT Agent Self-Monitoring",
   "uid": "oG69sg5Zk",
-  "version": 3
+  "variables": {
+    "list": []
+  },
+  "version": 1
 }

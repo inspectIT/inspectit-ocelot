@@ -78,8 +78,8 @@ inspectit:
   tracing:
     log-correlation:
       trace-id-auto-injection:
-        prefix: "[TraceID: "
-        suffix: "]"
+        prefix: '[TraceID: '
+        suffix: ']'
 ```
 
 The previous configuration would lead to the following log statement:

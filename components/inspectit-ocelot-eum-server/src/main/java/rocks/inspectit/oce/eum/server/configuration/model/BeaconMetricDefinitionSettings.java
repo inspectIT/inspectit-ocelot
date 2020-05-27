@@ -39,7 +39,6 @@ public class BeaconMetricDefinitionSettings extends MetricDefinitionSettings {
     @Valid
     private List<BeaconRequirement> beaconRequirements;
 
-
     @Builder(builderMethodName = "beaconMetricBuilder")
     public BeaconMetricDefinitionSettings(boolean enabled, @NotBlank String unit, @NotNull MeasureType type, String description,
                                           Map<@NotBlank String, @Valid @NotNull ViewDefinitionSettings> views, @NotEmpty List<BeaconRequirement> beaconRequirements,

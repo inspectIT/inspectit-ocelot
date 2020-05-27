@@ -4,6 +4,7 @@
 *.log
 *.zip
 *.swp
+hooks
 
 ### STS ###
 .apt_generated
@@ -30,3 +31,4 @@
 /.nb-gradle/
 
 /working_directory/
+inspectit-ocelot-demo/configuration-server/users.db

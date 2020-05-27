@@ -34,7 +34,7 @@ services:
       - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_PORT=9096
       - INSPECTIT_EXPORTERS_TRACING_JAEGER_URL=http://jaeger:14268/api/traces
     mem_limit: 512M
-    entrypoint: ["sh", "-c","
+    entrypoint: ["sh", "-c", "
       java -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Djava.security.egd=file:/dev/./urandom
       -javaagent:/agent/inspectit-ocelot-agent.jar
       -jar /app.jar"]
@@ -58,7 +58,7 @@ services:
       - ocelot-config-server
       - agent
       - config-server
-    entrypoint: ["sh", "-c","
+    entrypoint: ["sh", "-c", "
       ./dockerize -wait=tcp://config-server:8888 -timeout=120s -- &&
       java -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Djava.security.egd=file:/dev/./urandom
       -javaagent:/agent/inspectit-ocelot-agent.jar
@@ -84,7 +84,7 @@ services:
       - agent
       - config-server
       - discovery-server
-    entrypoint: ["sh", "-c","
+    entrypoint: ["sh", "-c", "
       ./dockerize -wait=tcp://discovery-server:8761 -timeout=120s -- &&
       java -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Djava.security.egd=file:/dev/./urandom
       -javaagent:/agent/inspectit-ocelot-agent.jar
@@ -110,7 +110,7 @@ services:
       - agent
       - config-server
       - discovery-server
-    entrypoint: ["sh", "-c","
+    entrypoint: ["sh", "-c", "
       ./dockerize -wait=tcp://discovery-server:8761 -timeout=120s -- &&
       java -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Djava.security.egd=file:/dev/./urandom
       -javaagent:/agent/inspectit-ocelot-agent.jar
@@ -136,7 +136,7 @@ services:
       - agent
       - config-server
       - discovery-server
-    entrypoint: ["sh", "-c","
+    entrypoint: ["sh", "-c", "
       ./dockerize -wait=tcp://discovery-server:8761 -timeout=120s -- &&
       java -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Djava.security.egd=file:/dev/./urandom
       -javaagent:/agent/inspectit-ocelot-agent.jar
@@ -162,7 +162,7 @@ services:
       - agent
       - config-server
       - discovery-server
-    entrypoint: ["sh", "-c","
+    entrypoint: ["sh", "-c", "
       ./dockerize -wait=tcp://discovery-server:8761 -timeout=120s -- &&
       java -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Djava.security.egd=file:/dev/./urandom
       -javaagent:/agent/inspectit-ocelot-agent.jar
@@ -192,7 +192,7 @@ services:
       - 9090:9090
 
   grafana:
-    image: inspectit/grafana:servicegraph-v0.2
+    image: inspectit/grafana:servicegraph-v2.1
     container_name: grafana
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=demo

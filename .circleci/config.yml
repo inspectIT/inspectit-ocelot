@@ -45,87 +45,6 @@ jobs:
           paths:
             - repo
 
-  # Testing on OpenJDK 8
-  sys-openjdk8: &base_test_job
-    docker:
-      - image: circleci/openjdk:8-jdk
-    working_directory: ~/inspectit
-    steps:
-      - attach_repo
-      - build_and_test_agent
-
-  # Testing on OpenJDK 9
-  sys-openjdk9:
-    <<: *base_test_job
-    docker:
-      - image: circleci/openjdk:9-jdk
-
-  # Testing on OpenJDK 11
-  sys-openjdk11:
-    <<: *base_test_job
-    docker:
-      - image: circleci/openjdk:11-jdk
-
-  # Testing on IBM JDK 8
-  sys-ibmjava8:
-    <<: *base_test_job
-    docker:
-      - image: ibmcom/ibmjava:8-sdk
-
-  # Testing on Oracle JDK 8 - this test will also generate the code coverage report
-  sys-oracle8-codecov:
-    <<: *base_test_job
-    docker:
-      - image: sgrio/java:jdk_8_ubuntu
-    working_directory: ~/inspectit
-    steps:
-      - attach_repo
-      - build_and_test_agent
-      - run: cd repo && ./gradlew codeCoverageReport
-      - run: cd repo && bash <(curl -s https://codecov.io/bash) -y ./codecov.yml
-
-  # Testing on Oracle JDK 11
-  sys-oracle11:
-    <<: *base_test_job
-    docker:
-      - image: sgrio/java:jdk_11_ubuntu
-
-  # Testing on AdoptOpenJDK
-  sys-adoptjdk8:
-    <<: *base_test_job
-    docker:
-      - image: adoptopenjdk/openjdk8:latest
-
-  # Ensure inspectit Agent can attach itself on Alpine Linux
-  attach-alpine-jdk8:
-    docker:
-      - image: openjdk:8-jdk-alpine
-    working_directory: ~/inspectit
-    steps:
-      - attach_repo
-      - run: cd repo && ./gradlew assemble --max-workers=2 --no-daemon && cd ..
-      - run:
-          command: |
-            apk update && apk add curl
-            echo "class Dummy{public static void main(String[] args)throws InterruptedException{while (true){Thread.sleep(1000);}}}" > Dummy.java
-            javac Dummy.java
-            $(nohup java Dummy > out.txt &)
-            sleep 2
-            processId=$( ps -e -o pid,comm | grep java | awk {'print $1'} )
-            java -jar ~/inspectit/repo/inspectit-ocelot-agent/build/inspectit-ocelot-agent-SNAPSHOT.jar $processId
-            curl -4 -o /dev/null -s -w "%{http_code}" --connect-timeout 2 --max-time 2  --retry 3 --retry-delay 3 --retry-max-time 10 --retry-connrefuse http://localhost:8888
-
-  # Testing the compilation of JMH tests
-  jmh-compile:
-    docker:
-      - image: circleci/openjdk:8-jdk
-    working_directory: ~/inspectit
-    steps:
-      - attach_workspace:
-          at: ~/inspectit
-      - run: cd repo && ./gradlew jmhCompile
-
-
   # Building the release artifacts (agent and demo)
   build_release_artifacts:
     docker:
@@ -257,40 +176,13 @@ jobs:
 workflows:
   version: 2
 
-  # Workflow for testing and deploying master documentation
-  build_and_test:
+  # Workflow for deploying master documentation
+  deploy_documentation:
     jobs:
       - checkout
-      - sys-oracle8-codecov: &requires_checkout
-          requires:
-           - checkout
-      - sys-oracle11:
-          <<: *requires_checkout
-      - sys-openjdk8:
-          <<: *requires_checkout
-      - sys-openjdk9:
-          <<: *requires_checkout
-      - sys-openjdk11:
-          <<: *requires_checkout
-      - sys-ibmjava8:
-          <<: *requires_checkout
-      - sys-adoptjdk8:
-          <<: *requires_checkout
-      - jmh-compile:
-          <<: *requires_checkout
-      - attach-alpine-jdk8:
-          <<: *requires_checkout
-
       - deploy-master-documentation:
           requires:
-            - sys-oracle8-codecov
-            - sys-oracle11
-            - sys-openjdk8
-            - sys-openjdk9
-            - sys-openjdk11
-            - sys-ibmjava8
-            - sys-adoptjdk8
-            - jmh-compile
+            - checkout
           filters:
             branches:
               only: master

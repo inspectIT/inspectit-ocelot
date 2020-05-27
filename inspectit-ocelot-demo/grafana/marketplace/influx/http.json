@@ -14,36 +14,37 @@
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "5.4.2"
+      "version": "6.7.3"
     },
     {
       "type": "panel",
       "id": "graph",
       "name": "Graph",
-      "version": "5.0.0"
+      "version": ""
     },
     {
       "type": "datasource",
       "id": "influxdb",
       "name": "InfluxDB",
-      "version": "5.0.0"
+      "version": "1.0.0"
     },
     {
       "type": "panel",
       "id": "singlestat",
       "name": "Singlestat",
-      "version": "5.0.0"
+      "version": ""
     },
     {
       "type": "panel",
       "id": "table",
       "name": "Table",
-      "version": "5.0.0"
+      "version": ""
     }
   ],
   "annotations": {
     "list": [
       {
+        "$$hashKey": "object:290",
         "builtIn": 1,
         "datasource": "-- Grafana --",
         "enable": true,
@@ -58,11 +59,12 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1580728981189,
+  "iteration": 1588835205547,
   "links": [],
   "panels": [
     {
       "collapsed": false,
+      "datasource": null,
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -99,6 +101,7 @@
       "styles": [
         {
           "alias": "Requests",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -115,6 +118,7 @@
         },
         {
           "alias": "Avg. Response Time",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -132,6 +136,7 @@
         },
         {
           "alias": "HTTP Path",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -148,6 +153,7 @@
         },
         {
           "alias": "Error Rate",
+          "align": "auto",
           "colorMode": "cell",
           "colors": [
             "rgba(50, 172, 45, 0.97)",
@@ -167,6 +173,7 @@
         },
         {
           "alias": "",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -179,7 +186,7 @@
           "pattern": "Time",
           "thresholds": [],
           "type": "hidden",
-          "unit": "short"
+          "unit": "none"
         }
       ],
       "targets": [
@@ -201,7 +208,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT * FROM (\n SELECT  SUM(total) as za_requests, SUM(times) / SUM(total) AS zb_response_time FROM (\n      SELECT spread(\"count\") AS total, spread(\"sum\") AS times FROM \"http_in_responsetime\" \n      WHERE $timeFilter AND service =~ /^$service$/ AND application =~ /^$application$/ AND http_path =~ /^$path$/  GROUP BY *) GROUP BY http_path fill(0)\n) WHERE za_requests > 0",
+          "query": "SELECT  SUM(total) as za_requests, SUM(times) / SUM(total) AS zb_response_time FROM (\n  SELECT SUM(\"count\") AS total, SUM(\"sum\") AS times FROM \"http_in_responsetime\" \n  WHERE $timeFilter AND service =~ /^$service$/ AND http_path =~ /^$path$/  GROUP BY http_path\n) GROUP BY http_path",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -236,10 +243,9 @@
               "type": "fill"
             }
           ],
-          "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT zc_error_rate FROM (\nSELECT  SUM(errors) / SUM(total) AS zc_error_rate, SUM(total) as total FROM (\n      SELECT spread(\"count\") AS total, spread(\"errorcount\")AS errors FROM \"http_in_error\" \n      WHERE $timeFilter AND service =~ /^$service$/ AND application =~ /^$application$/ AND http_path =~ /^$path$/  GROUP BY *) \nGROUP BY http_path fill(0)\n) WHERE total > 0 GROUP BY http_path fill(0)",
+          "query": "SELECT  SUM(errors) / SUM(total) AS zc_error_rate FROM (\n  SELECT SUM(\"count\") AS total, SUM(\"errorcount\") AS errors FROM \"http_in_error\" \n  WHERE $timeFilter AND service =~ /^$service$/ AND http_path =~ /^$path$/  GROUP BY http_path fill(0)\n)\nGROUP BY http_path",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "table",
@@ -272,14 +278,16 @@
       "datasource": "${DS_LOCALINFLUX}",
       "description": "",
       "fill": 1,
+      "fillGradient": 0,
       "gridPos": {
         "h": 5,
         "w": 9,
         "x": 11,
         "y": 1
       },
+      "hiddenSeries": false,
       "id": 23,
-      "interval": "5s",
+      "interval": "15s",
       "legend": {
         "avg": false,
         "current": false,
@@ -293,6 +301,9 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -325,7 +336,7 @@
           "legendFormat": "{{http_path}}",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT  SUM(times) / SUM(total) AS value FROM (\n      SELECT difference(\"count\") AS total, difference(\"sum\") AS times FROM \"http_in_responsetime\" \n      WHERE $timeFilter AND service =~ /^$service$/  AND application=~ /^$application$/  AND http_path=~ /^$path$/ GROUP BY  *) \nWHERE total > 0\nGROUP BY time($__interval), http_path fill(linear)",
+          "query": "SELECT  SUM(sum) / SUM(count)\nFROM \"http_in_responsetime\" \nWHERE $timeFilter AND service =~ /^$service$/  AND http_path=~ /^$path$/\nGROUP BY time($__interval), http_path fill(none)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -415,7 +426,7 @@
       },
       "hideTimeOverride": true,
       "id": 6,
-      "interval": "1s",
+      "interval": "15s",
       "links": [],
       "mappingType": 1,
       "mappingTypes": [
@@ -471,7 +482,7 @@
           "intervalFactor": 1,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT  SUM(total)/$__interval_ms*1000 AS value FROM (\n      SELECT difference(\"count\") AS total FROM \"http_in_responsetime\" \n      WHERE $timeFilter AND service =~ /^$service$/  AND application=~ /^$application$/  AND http_path=~ /^$path$/ GROUP BY *) \nGROUP BY time($__interval) fill(linear)",
+          "query": "SELECT  SUM(count)/$__interval_ms*1000 AS value\nFROM \"http_in_responsetime\" \nWHERE $timeFilter AND service =~ /^$service$/  AND http_path=~ /^$path$/ \nGROUP BY time($__interval) fill(0)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -592,7 +603,7 @@
           "intervalFactor": 1,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT  SUM(errors)/SUM(total) AS value FROM (\n      SELECT difference(\"count\") AS total, difference(\"errorcount\") AS errors FROM \"http_in_error\" \n      WHERE $timeFilter AND service =~ /^$service/  AND application=~ /^$application$/  AND http_path=~ /^$path$/ GROUP BY * ) \nGROUP BY time($__interval) fill(0)",
+          "query": "SELECT  SUM(errors) / SUM(total) AS value FROM (\n  SELECT SUM(\"count\") AS total, SUM(\"errorcount\") AS errors FROM \"http_in_error\" \n  WHERE $timeFilter AND service =~ /^$service$/ AND http_path =~ /^$path$/  GROUP BY time($__interval) fill(0)\n)\nWHERE total > 0\nGROUP BY time($__interval)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -651,6 +662,7 @@
       "styles": [
         {
           "alias": "",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -667,6 +679,7 @@
         },
         {
           "alias": "Requests",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -683,6 +696,7 @@
         },
         {
           "alias": "Avg. Response Time",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -700,6 +714,7 @@
         },
         {
           "alias": "HTTP Path",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -717,6 +732,7 @@
         },
         {
           "alias": "Error Rate",
+          "align": "auto",
           "colorMode": "cell",
           "colors": [
             "rgba(50, 172, 45, 0.97)",
@@ -736,6 +752,7 @@
         },
         {
           "alias": "Target Host",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -774,7 +791,7 @@
           "legendFormat": "",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT * FROM (\n SELECT  SUM(total) as za_requests, SUM(times) / SUM(total) AS zb_response_time FROM (\n      SELECT spread(\"count\") AS total, spread(\"sum\") AS times FROM \"http_out_responsetime\" \n      WHERE $timeFilter AND service =~ /^$service$/ AND application =~ /^$application$/ AND http_path =~ /^$path$/  GROUP BY *) GROUP BY http_host, http_path fill(0)\n) WHERE za_requests > 0",
+          "query": "SELECT  SUM(total) as za_requests, SUM(times) / SUM(total) AS zb_response_time FROM (\n  SELECT SUM(\"count\") AS total, SUM(\"sum\") AS times FROM \"http_out_responsetime\" \n  WHERE $timeFilter AND service =~ /^$service$/ AND http_path =~ /^$path$/  GROUP BY http_path,http_host\n) GROUP BY *",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -811,7 +828,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT zc_error_rate FROM (\nSELECT  SUM(errors) / SUM(total) AS zc_error_rate, SUM(total) as total FROM (\n      SELECT spread(\"count\") AS total, spread(\"errorcount\")AS errors FROM \"http_out_error\" \n      WHERE $timeFilter AND service =~ /^$service$/ AND application =~ /^$application$/ AND http_path =~ /^$path$/  GROUP BY *) \nGROUP BY http_host,http_path fill(0)\n) WHERE total > 0 GROUP BY http_host, http_path fill(0)",
+          "query": "SELECT  SUM(errors) / SUM(total) AS zc_error_rate FROM (\n  SELECT SUM(\"count\") AS total, SUM(\"errorcount\") AS errors FROM \"http_out_error\" \n  WHERE $timeFilter AND service =~ /^$service$/ AND http_path =~ /^$path$/  GROUP BY http_path,http_host fill(0)\n)\nGROUP BY *",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "table",
@@ -844,13 +861,16 @@
       "datasource": "${DS_LOCALINFLUX}",
       "description": "",
       "fill": 1,
+      "fillGradient": 0,
       "gridPos": {
         "h": 5,
         "w": 9,
         "x": 11,
         "y": 6
       },
+      "hiddenSeries": false,
       "id": 76,
+      "interval": "15s",
       "legend": {
         "avg": false,
         "current": false,
@@ -864,6 +884,9 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -891,7 +914,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT  SUM(times) / SUM(total) AS value FROM (\n      SELECT difference(\"count\") AS total, difference(\"sum\") AS times FROM \"http_out_responsetime\" \n      WHERE $timeFilter AND service =~ /^$service$/  AND application=~ /^$application$/  AND http_path=~ /^$path$/ GROUP BY  *) \nWHERE total > 0\nGROUP BY time($__interval), http_path,http_host fill(linear)",
+          "query": "SELECT  SUM(sum) / SUM(count) AS value \nFROM \"http_out_responsetime\" \nWHERE $timeFilter AND service =~ /^$service$/  AND http_path=~ /^$path$/\nGROUP BY time($__interval), http_path,http_host fill(none)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1037,7 +1060,7 @@
           "intervalFactor": 1,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT  SUM(total)/$__interval_ms*1000 AS value FROM (\n      SELECT difference(\"count\") AS total FROM \"http_out_responsetime\" \n      WHERE $timeFilter AND service =~ /^$service$/  AND application=~ /^$application$/  AND http_path=~ /^$path$/ GROUP BY * ) \nGROUP BY time($__interval) fill(linear)",
+          "query": "SELECT  SUM(count)/$__interval_ms*1000 AS value\nFROM \"http_out_responsetime\" \nWHERE $timeFilter AND service =~ /^$service$/ AND http_path=~ /^$path$/ \nGROUP BY time($__interval) fill(0)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1158,7 +1181,7 @@
           "intervalFactor": 1,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT  SUM(errors)/SUM(total) AS value FROM (\n      SELECT difference(\"count\") AS total, difference(\"errorcount\") AS errors FROM \"http_out_error\" \n      WHERE $timeFilter AND service =~ /^$service/  AND application=~ /^$application$/  AND http_path=~ /^$path$/ GROUP BY *) \nGROUP BY time($__interval) fill(0)",
+          "query": "SELECT  SUM(errors) / SUM(total) AS value FROM (\n  SELECT SUM(\"count\") AS total, SUM(\"errorcount\") AS errors FROM \"http_out_error\" \n  WHERE $timeFilter AND service =~ /^$service$/ AND http_path =~ /^$path$/  GROUP BY time($__interval) fill(0)\n)\nWHERE total > 0\nGROUP BY time($__interval)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1196,7 +1219,7 @@
     }
   ],
   "refresh": "30s",
-  "schemaVersion": 16,
+  "schemaVersion": 22,
   "style": "dark",
   "tags": [],
   "templating": {
@@ -1208,6 +1231,7 @@
         "definition": "SHOW TAG VALUES WITH key = \"service\"",
         "hide": 0,
         "includeAll": true,
+        "index": -1,
         "label": "Service",
         "multi": true,
         "name": "service",
@@ -1227,31 +1251,10 @@
         "allValue": ".*",
         "current": {},
         "datasource": "${DS_LOCALINFLUX}",
-        "definition": "SHOW TAG VALUES WITH key = application",
-        "hide": 0,
-        "includeAll": true,
-        "label": "Application",
-        "multi": false,
-        "name": "application",
-        "options": [],
-        "query": "SHOW TAG VALUES WITH key = application",
-        "refresh": 1,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 1,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
-      },
-      {
-        "allValue": ".*",
-        "current": {},
-        "datasource": "${DS_LOCALINFLUX}",
         "definition": "SHOW TAG VALUES WITH key = \"http_path\"",
         "hide": 0,
         "includeAll": true,
+        "index": -1,
         "label": "Endpoint",
         "multi": true,
         "name": "path",
@@ -1270,7 +1273,7 @@
     ]
   },
   "time": {
-    "from": "now-15m",
+    "from": "now-5m",
     "to": "now"
   },
   "timepicker": {
@@ -1301,5 +1304,8 @@
   "timezone": "",
   "title": "HTTP Overview",
   "uid": "523wqxqmz",
-  "version": 2
+  "variables": {
+    "list": []
+  },
+  "version": 1
 }
