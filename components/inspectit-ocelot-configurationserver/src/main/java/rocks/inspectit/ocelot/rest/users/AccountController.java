@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -20,9 +21,14 @@ import org.springframework.web.bind.annotation.RestController;
 import rocks.inspectit.ocelot.error.exceptions.NotSupportedWithLdapException;
 import rocks.inspectit.ocelot.rest.AbstractBaseController;
 import rocks.inspectit.ocelot.rest.ErrorInfo;
+import rocks.inspectit.ocelot.security.config.UserRoleConfiguration;
 import rocks.inspectit.ocelot.security.jwt.JwtTokenManager;
 import rocks.inspectit.ocelot.user.User;
+import rocks.inspectit.ocelot.user.UserPermissions;
 import rocks.inspectit.ocelot.user.UserService;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Rest controller allowing users to manage their own account.
@@ -76,6 +82,20 @@ public class AccountController extends AbstractBaseController {
         return ResponseEntity.ok().build();
     }
 
+    @ApiOperation(value = "Get the user's permissions", notes = "Queries the permissions of the user.")
+    @ApiResponse(code = 200, message = "The permissions of the user")
+    @GetMapping("account/permissions")
+    public UserPermissions getPermissions(Authentication auth) {
+        Set<String> roles = auth.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toSet());
+        return UserPermissions.builder()
+                .write(roles.contains(UserRoleConfiguration.WRITE_ACCESS_ROLE))
+                .commit(roles.contains(UserRoleConfiguration.COMMIT_ACCESS_ROLE))
+                .admin(roles.contains(UserRoleConfiguration.ADMIN_ACCESS_ROLE))
+                .build();
+    }
+
     /**
      * The payload for a password change, passed to {@link #changePassword(PasswordChangeRequest, Authentication)}.
      */
@@ -84,6 +104,7 @@ public class AccountController extends AbstractBaseController {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class PasswordChangeRequest {
+
         private String password;
     }
 }

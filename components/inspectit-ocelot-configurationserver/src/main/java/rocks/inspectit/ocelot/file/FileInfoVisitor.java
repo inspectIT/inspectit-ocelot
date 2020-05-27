@@ -7,6 +7,7 @@ import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
@@ -32,6 +33,7 @@ public class FileInfoVisitor implements FileVisitor<Path> {
         FileInfo currentDirectory = FileInfo.builder()
                 .name(directory.getFileName().toString())
                 .type(FileInfo.Type.DIRECTORY)
+                .children(new ArrayList<>())
                 .build();
 
         // add directory as child, otherwise set it as root
