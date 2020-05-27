@@ -1,75 +1,52 @@
 package rocks.inspectit.ocelot.security.userdetails;
 
-import org.springframework.ldap.core.support.LdapContextSource;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.ldap.search.FilterBasedLdapUserSearch;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.ldap.core.DirContextOperations;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.ldap.search.LdapUserSearch;
 import org.springframework.security.ldap.userdetails.DefaultLdapAuthoritiesPopulator;
+import org.springframework.security.ldap.userdetails.LdapAuthoritiesPopulator;
 import org.springframework.security.ldap.userdetails.LdapUserDetailsService;
+import org.springframework.stereotype.Component;
+import rocks.inspectit.ocelot.config.conditional.ConditionalOnLdap;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
-import rocks.inspectit.ocelot.config.model.LdapSettings;
+
+import java.util.Collection;
 
 /**
  * The user details service used for authentication against the configured LDAP system.
  */
+@Component
+@ConditionalOnLdap
 public class CustomLdapUserDetailsService extends LdapUserDetailsService {
 
-    private CustomUserAuthoritiesMapper customUserAuthoritiesMapper;
+    private static class MappingLdapAuthoritiesPopulator implements LdapAuthoritiesPopulator {
 
-    public CustomLdapUserDetailsService(
-            InspectitServerSettings serverSettings,
-            LdapContextSource contextSource
-    ) {
-        super(
-                buildFilterBasedLdapUserSearch(serverSettings, contextSource),
-                buildDefaultLdapAuthoritiesPopulator(serverSettings, contextSource)
-        );
-        customUserAuthoritiesMapper = new CustomUserAuthoritiesMapper(serverSettings);
+        private CustomUserAuthoritiesMapper customUserAuthoritiesMapper;
+
+        private DefaultLdapAuthoritiesPopulator delegate;
+
+        private MappingLdapAuthoritiesPopulator(DefaultLdapAuthoritiesPopulator populator, InspectitServerSettings serverSettings) {
+            customUserAuthoritiesMapper = new CustomUserAuthoritiesMapper(serverSettings);
+            delegate = populator;
+        }
+
+        @Override
+        public Collection<? extends GrantedAuthority> getGrantedAuthorities(DirContextOperations userData, String username) {
+            return customUserAuthoritiesMapper.mapAuthorities(delegate.getGrantedAuthorities(userData, username));
+        }
     }
 
     /**
-     * Creates and returns an instance of FilterBasedLdapUserSearch based on the given parameters.
+     * Constructor.
      *
-     * @param serverSettings The InspectitServerSettings the server was started with
-     * @param contextSource  The LdapContextSource of the current Application context.
-     * @return An instance of FilterBasedLdapUserSearch
+     * @param search         created via {@link rocks.inspectit.ocelot.security.config.SecurityBeanConfiguration}
+     * @param populator      created via {@link rocks.inspectit.ocelot.security.config.SecurityBeanConfiguration}
+     * @param serverSettings the settings used for deriving roles
      */
-    private static FilterBasedLdapUserSearch buildFilterBasedLdapUserSearch(InspectitServerSettings serverSettings, LdapContextSource contextSource
-    ) {
-        LdapSettings ldapSettings = serverSettings.getSecurity().getLdap();
-        return new FilterBasedLdapUserSearch(ldapSettings.getGroupSearchBase(), ldapSettings.getUserSearchFilter(), contextSource);
+    @Autowired
+    public CustomLdapUserDetailsService(LdapUserSearch search, DefaultLdapAuthoritiesPopulator populator, InspectitServerSettings serverSettings) {
+        super(search, new MappingLdapAuthoritiesPopulator(populator, serverSettings));
     }
 
-    /**
-     * Creates and returns an instance of DefaultLdapAuthoritiesPopulator based on the given parameters.
-     *
-     * @param serverSettings The InspectitServerSettings the server was started with
-     * @param contextSource  The LdapContextSource of the current Application context.
-     * @return An instance of DefaultLdapAuthoritiesPopulator
-     */
-    private static DefaultLdapAuthoritiesPopulator buildDefaultLdapAuthoritiesPopulator(
-            InspectitServerSettings serverSettings,
-            LdapContextSource contextSource
-    ) {
-        LdapSettings ldapSettings = serverSettings.getSecurity().getLdap();
-        DefaultLdapAuthoritiesPopulator defaultLdapAuthoritiesPopulator = new DefaultLdapAuthoritiesPopulator(contextSource, ldapSettings.getGroupSearchBase());
-        defaultLdapAuthoritiesPopulator.setGroupSearchFilter(ldapSettings.getGroupSearchFilter());
-        return defaultLdapAuthoritiesPopulator;
-    }
-
-    /**
-     * Loads {@link UserDetails} by a username. See {@link UserDetailsService#loadUserByUsername(String)}.
-     * <p>
-     * If LDAP authentication is disabled, this method will always throw a {@link UsernameNotFoundException}.
-     */
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserDetails user = super.loadUserByUsername(username);
-        return org.springframework.security.core.userdetails.User.builder()
-                .username(user.getUsername())
-                .password(user.getPassword())
-                .authorities(customUserAuthoritiesMapper.mapAuthorities(user.getAuthorities()))
-                .build();
-    }
 }

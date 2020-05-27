@@ -74,6 +74,7 @@ public class LdapSettings {
     /**
      * Contains the LDAP Group mapped to access roles.
      */
-    private LdapRoleResolveSettings roles;
+    @Builder.Default
+    private LdapRoleResolveSettings roles = new LdapRoleResolveSettings();
 
 }

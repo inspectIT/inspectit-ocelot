@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -19,20 +20,24 @@ public class LdapRoleResolveSettings {
     /**
      * Roles defined in this list are granted read access.
      */
-    private List<String> read;
+    @Builder.Default
+    private List<String> read = new ArrayList<>();
 
     /**
      * Roles defined in this list are granted read and write access.
      */
-    private List<String> write;
+    @Builder.Default
+    private List<String> write = new ArrayList<>();
 
     /**
      * Roles defined in this list are granted read, write and commit access.
      */
-    private List<String> commit;
+    @Builder.Default
+    private List<String> commit = new ArrayList<>();
 
     /**
      * Roles defined in this list are granted read, write, commit and admin access.
      */
-    private List<String> admin;
+    @Builder.Default
+    private List<String> admin = new ArrayList<>();
 }

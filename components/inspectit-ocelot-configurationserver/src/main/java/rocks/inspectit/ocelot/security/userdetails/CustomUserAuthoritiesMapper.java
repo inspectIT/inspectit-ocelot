@@ -9,6 +9,8 @@ import rocks.inspectit.ocelot.security.config.UserRoleConfiguration;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * This LdapAuthoritiesPopulator is used to populate user object with roles upon basic authentication when they are
@@ -16,7 +18,7 @@ import java.util.List;
  */
 public class CustomUserAuthoritiesMapper implements GrantedAuthoritiesMapper {
 
-    InspectitServerSettings settings;
+    private InspectitServerSettings settings;
 
     public CustomUserAuthoritiesMapper(InspectitServerSettings settings) {
         this.settings = settings;
@@ -28,6 +30,7 @@ public class CustomUserAuthoritiesMapper implements GrantedAuthoritiesMapper {
      * matching authorities.
      *
      * @param authorities A List of GrantedAuthority-Objects that should be mapped.
+     *
      * @return The highest level of access role the user's authorities could be resolved to.
      */
     @Override
@@ -45,23 +48,26 @@ public class CustomUserAuthoritiesMapper implements GrantedAuthoritiesMapper {
         if (containsAuthority(authorities, role_settings.getRead())) {
             return UserRoleConfiguration.READ_ROLE_PERMISSION_SET;
         }
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
 
     }
-
 
     /**
      * Checks if at least one entry of a Collection of authorities is contained in a List of Strings.
      *
      * @param authorities A Collection containing GrantedAuthority objects.
      * @param roleList    The List of Strings the authorities are checked with.
+     *
      * @return Returns true if at least one element of authorities is contained in roleList or vice versa.
      */
     private boolean containsAuthority(Collection<? extends GrantedAuthority> authorities, List<String> roleList) {
+        Set<String> rolesLowerCase = roleList.stream()
+                .map(String::toLowerCase)
+                .collect(Collectors.toSet());
         return authorities.stream()
                 .map(GrantedAuthority::getAuthority)
                 .distinct()
-                .anyMatch(authority -> roleList.contains(authority.substring("ROLE_".length())));
+                .anyMatch(authority -> rolesLowerCase.contains(authority.substring("ROLE_".length()).toLowerCase()));
     }
 
     /**
@@ -69,15 +75,17 @@ public class CustomUserAuthoritiesMapper implements GrantedAuthoritiesMapper {
      * ensures backwards compatibility for the old configuration standard.
      *
      * @param authorities A collection of authorities the admin group should be contained in.
+     *
      * @return True if the given admin group is contained in the authorities. Otherwise false.
      */
+    @SuppressWarnings("deprecation")
     private boolean hasAdminGroup(Collection<? extends GrantedAuthority> authorities) {
         String ldapAdminGroup = settings.getSecurity().getLdap().getAdminGroup();
         return authorities.stream()
                 .anyMatch(
                         authority -> authority.getAuthority()
                                 .substring("ROLE_".length())
-                                .equals(ldapAdminGroup)
+                                .equalsIgnoreCase(ldapAdminGroup)
                 );
     }
 }

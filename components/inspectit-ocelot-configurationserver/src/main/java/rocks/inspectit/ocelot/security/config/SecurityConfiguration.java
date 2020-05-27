@@ -3,7 +3,6 @@ package rocks.inspectit.ocelot.security.config;
 import com.google.common.annotations.VisibleForTesting;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -46,6 +45,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Autowired
     private LocalUserDetailsService localUserDetailsService;
 
+    @Autowired(required = false)
+    private CustomLdapUserDetailsService customLdapUserDetailsService;
+
     @Autowired
     @VisibleForTesting
     InspectitServerSettings serverSettings;
@@ -67,20 +69,25 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
-                .csrf().disable()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .csrf()
+                .disable()
+                .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 
                 .and()
                 .cors()
 
                 .and()
                 .authorizeRequests()
-                .anyRequest().hasRole(UserRoleConfiguration.READ_ACCESS)
+                .anyRequest()
+                .hasRole(UserRoleConfiguration.READ_ACCESS)
 
                 .and()
                 // Custom authentication endpoint to prevent sending the "WWW-Authenticate" which causes Browsers to open the basic authentication dialog.
                 // See the following post: https://stackoverflow.com/a/50023070/2478009
-                .httpBasic().authenticationEntryPoint((req, resp, authException) -> resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage()))
+                .httpBasic()
+                .authenticationEntryPoint((req, resp, authException) -> resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException
+                        .getMessage()))
 
                 .and()
                 //TODO: The "correct" way of selectively enabling token based would be to have multiple spring security configs.
@@ -88,7 +95,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .addFilterBefore(
                         new JwtTokenFilter(tokenManager, eventPublisher, Collections.singletonList("/api/v1/account/password")),
                         BasicAuthenticationFilter.class
-                ).addFilterBefore(accessLogFilter.getFilter(), JwtTokenFilter.class);
+                )
+                .addFilterBefore(accessLogFilter.getFilter(), JwtTokenFilter.class);
     }
 
     @Override
@@ -102,12 +110,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     /**
      * Configures the user authentication to use LDAP user management and authentication
      */
+    @SuppressWarnings("deprecation")
     private void configureLdapAuthentication(AuthenticationManagerBuilder auth) throws Exception {
-        LdapContextSource contextSource = getApplicationContext().getBean(LdapContextSource.class);
-        CustomLdapUserDetailsService customLdapUserDetailsService = new CustomLdapUserDetailsService(
-                serverSettings,
-                contextSource
-        );
         auth
                 .userDetailsService(customLdapUserDetailsService)
                 .passwordEncoder(new LdapShaPasswordEncoder());

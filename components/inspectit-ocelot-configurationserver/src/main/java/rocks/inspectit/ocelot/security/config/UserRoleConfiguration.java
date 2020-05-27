@@ -25,7 +25,6 @@ public class UserRoleConfiguration {
      */
     private static final String ROLE_PREFIX = "ROLE_";
 
-
     /**
      * Permission required for read access.
      */
