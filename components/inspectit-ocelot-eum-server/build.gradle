@@ -22,6 +22,7 @@ task downloadBoomerangZipFile() {
 task downloadAndUnzipBoomerang(dependsOn: downloadBoomerangZipFile, type: Copy) {
 	from zipTree(downloadBoomerangZipFile.dest)
 	into project.buildDir
+	filter { line -> line.replaceAll('%boomerang_version%', "${boomerangVersion}") }
 }
 
 bootJar {
