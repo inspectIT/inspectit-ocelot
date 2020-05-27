@@ -36,7 +36,8 @@ class EditMappingDialog extends React.Component {
   render() {
     const { name, sources, attributes, isNewMapping } = this.state;
     const heightFieldset = window.innerHeight * 0.35;
-
+    console.log("Hello World");
+    console.log(this.props.visible);
     return (
       <div className="this">
         <style jsx>{`

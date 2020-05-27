@@ -17,42 +17,49 @@ class StatusView extends React.Component {
   filterAgents(filter, agents) {
     let filterAgents = [];
     if (filter.length !== 0) {
+      let regex = RegExp(filter);
+
+      let position = filter.indexOf("*");
+      if (position !== -1) {
+        filter = filter.substring(0, position) + "." + filter.substring(position);
+        regex = RegExp(filter);
+      }
+
       for (let i = 0; i < agents.length; i++) {
         if (agents[i].attributes.id) {
-          if (agents[i].attributes.id.includes(filter)) {
+          if (regex.test(agents[i].attributes.id)) {
             filterAgents.push(agents[i]);
             continue;
           }
         }
         if (agents[i].attributes.service) {
-          if (agents[i].attributes.service.includes(filter)) {
+          if (regex.test(agents[i].attributes.service)) {
             filterAgents.push(agents[i]);
             continue;
           }
         }
         if (agents[i].mappingName) {
-          if (agents[i].mappingName.includes(filter)) {
+          if (regex.test(agents[i].mappingName)) {
             filterAgents.push(agents[i]);
             continue;
           }
         }
         if (agents[i].metaInformation != null) {
-          if (agents[i].metaInformation.agentVersion.includes(filter)) {
+          if (regex.test(agents[i].metaInformation.agentVersion)) {
             filterAgents.push(agents[i]);
             continue;
           }
         }
         if (agents[i].metaInformation != null) {
-          if (agents[i].metaInformation.javaVersion.includes(filter)) {
+          if (regex.test(agents[i].metaInformation.javaVersion)) {
             filterAgents.push(agents[i]);
             continue;
           }
         }
       }
       return filterAgents;
-    } else {
-      return agents;
     }
+    return agents;
   }
 
   render() {
