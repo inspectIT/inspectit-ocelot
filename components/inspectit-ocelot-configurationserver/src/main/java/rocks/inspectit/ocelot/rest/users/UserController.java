@@ -7,11 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 import rocks.inspectit.ocelot.rest.AbstractBaseController;
 import rocks.inspectit.ocelot.rest.ErrorInfo;
+import rocks.inspectit.ocelot.security.config.UserRoleConfiguration;
 import rocks.inspectit.ocelot.user.User;
 import rocks.inspectit.ocelot.user.UserService;
 
@@ -45,6 +47,7 @@ public class UserController extends AbstractBaseController {
     @Autowired
     private UserService userService;
 
+    @Secured(UserRoleConfiguration.ADMIN_ACCESS_ROLE)
     @ApiOperation(value = "Select users", notes = "Fetches the list of registered users." +
             " If a username query parameter is given, the list is filtered to contain only the user matching the given username." +
             " If none match, an empty list is returned.")
@@ -61,6 +64,7 @@ public class UserController extends AbstractBaseController {
         }
     }
 
+    @Secured(UserRoleConfiguration.ADMIN_ACCESS_ROLE)
     @ApiOperation(value = "Fetch a single user", notes = "Fetches a single user based on his ID.")
     @GetMapping("users/{id}")
     public ResponseEntity<?> getUser(@ApiParam("The ID of the user")
@@ -71,6 +75,7 @@ public class UserController extends AbstractBaseController {
     }
 
 
+    @Secured(UserRoleConfiguration.ADMIN_ACCESS_ROLE)
     @ApiOperation(value = "Add a new user", notes = "Registers a user with a given username and password.")
     @PostMapping("users")
     public ResponseEntity<?> addUser(
@@ -98,6 +103,7 @@ public class UserController extends AbstractBaseController {
     }
 
 
+    @Secured(UserRoleConfiguration.ADMIN_ACCESS_ROLE)
     @ApiOperation(value = "Delete a user", notes = "Deletes a user based on his id. After he is deleted, he immediately is unauthorized.")
     @DeleteMapping("users/{id}")
     public ResponseEntity<?> deleteUser(@ApiParam("The is of the user to delete")

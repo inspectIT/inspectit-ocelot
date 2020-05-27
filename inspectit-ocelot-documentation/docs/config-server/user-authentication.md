@@ -30,32 +30,25 @@ Furthermore, the HTTP APIs which are related to the user management (`/api/v1/us
 In order to use LDAP for user authentication the `inspectit-config-server.security.ldap-authentication` property must be set to `true`.
 
 The LDAP related configuration properties have to be specified using the property `inspectit-config-server.security.ldap`.
-The following configuration snippet shows an example LDAP configuration (this configuration was created for [this](https://github.com/rroemhild/docker-test-openldap) LDAP server).
 
-```YAML
-inspectit-config-server:
-    security:
-        ldap-authentication: true
-        ldap:
-            admin-group: "SHIP_CREW"
-            url: "ldap://localhost:389/"
-            base-dn: ""
-            manager-dn: "cn=admin,dc=planetexpress,dc=com"
-            manager-password: "GoodNewsEveryone"
-            user-search-base: "ou=people,dc=planetexpress,dc=com"
-            user-search-filter: "(uid={0})"
-            group-search-base: "ou=people,dc=planetexpress,dc=com"
-            group-search-filter: "(member={0})"
-```
+### Authorization
 
-### LDAP Configuration Properties
+There are four different access roles available: read, write, commit and admin. These access roles are hierarchical.
+A user with write access also has read access, a user with commit access also has both read and write access and so on.
+The exact permissions of the roles are the following:
+
+* *Read*: may only read files on the server.
+* *Write*: may read and edit files on the server.
+* *Commit*: may read, write and commit files (This feature is not implemented yet).
+* *Admin*: may read, write and commit files. Can also edit user accounts.
+
+#### Configuration
 
 The following tables contains the required LDAP configuration properties including a description for each property.
 Each property is located below the property `inspectit-config-server.security.ldap`.
 
 | Property | Note |
 | --- | --- |
-| `admin-group` | The group to which a user must be assigned to gain administrator access. |
 | `url` | Url of the LDAP server. |
 | `base-dn` | Set the base suffix from which all operations should origin. |
 | `manager-dn` | Set the user distinguished name (principal) to use for getting authenticated contexts. |
@@ -64,6 +57,34 @@ Each property is located below the property `inspectit-config-server.security.ld
 | `user-search-filter` | The LDAP filter used to search for users. For example `(uid={0})`. |
 | `group-search-base` | The search base for group membership searches. |
 | `group-search-filter` | The LDAP filter to search for groups. |
+| `roles.read` | A list of LDAP-Groups which will gain read-access. |
+| `roles.write` | A list of LDAP-Groups which will gain write-access. |
+| `roles.commit` | A list of LDAP-Groups which will gain commit-access. |
+| `roles.admin` | A list of LDAP-Groups which will gain admin-access. |
+
+The following configuration snippet shows an example LDAP configuration (this configuration was created for [this](https://github.com/rroemhild/docker-test-openldap) LDAP server).
+
+```YAML
+inspectit-config-server:
+    security:
+        ldap-authentication: true
+        ldap:
+            url: "ldap://localhost:389/"
+            base-dn: ""
+            manager-dn: "cn=admin,dc=planetexpress,dc=com"
+            manager-password: "GoodNewsEveryone"
+            user-search-base: "ou=people,dc=planetexpress,dc=com"
+            user-search-filter: "(uid={0})"
+            group-search-base: "ou=people,dc=planetexpress,dc=com"
+            group-search-filter: "(member={0})"
+            roles:
+              read: []
+              write: []
+              commit: []
+              admin:
+                - SHIP_CREW
+```
+
 
 ## Access Log
 

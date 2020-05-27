@@ -3,6 +3,7 @@ package rocks.inspectit.ocelot.rest.mappings;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import rocks.inspectit.ocelot.mappings.AgentMappingManager;
@@ -10,6 +11,7 @@ import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 import rocks.inspectit.ocelot.rest.AbstractBaseController;
 import rocks.inspectit.ocelot.security.audit.AuditDetail;
 import rocks.inspectit.ocelot.security.audit.EntityAuditLogger;
+import rocks.inspectit.ocelot.security.config.UserRoleConfiguration;
 
 import javax.validation.Valid;
 import java.io.IOException;
@@ -49,6 +51,7 @@ public class AgentMappingController extends AbstractBaseController {
      * @param agentMappings The new {@link AgentMapping}s
      * @throws IOException In case the new mappings cannot be written into a file.
      */
+    @Secured(UserRoleConfiguration.WRITE_ACCESS_ROLE)
     @PutMapping(value = "mappings")
     public void putMappings(@Valid @RequestBody List<AgentMapping> agentMappings) throws IOException {
         mappingManager.setAgentMappings(agentMappings);
@@ -77,6 +80,7 @@ public class AgentMappingController extends AbstractBaseController {
      * @return 200 if the mapping has been deleted or 404 if it does not exist
      * @throws IOException In case of an error during deletion
      */
+    @Secured(UserRoleConfiguration.WRITE_ACCESS_ROLE)
     @DeleteMapping(value = "mappings/{mappingName}")
     public ResponseEntity deleteMappingByName(@PathVariable("mappingName") String mappingName) throws IOException {
         boolean isDeleted = mappingManager.deleteAgentMapping(mappingName);
@@ -104,6 +108,7 @@ public class AgentMappingController extends AbstractBaseController {
      * @return 200 in case the operation was successful
      * @throws IOException In case of an error
      */
+    @Secured(UserRoleConfiguration.WRITE_ACCESS_ROLE)
     @PutMapping(value = "mappings/{mappingName}")
     public ResponseEntity putMapping(@PathVariable("mappingName") String mappingName, @Valid @RequestBody AgentMapping agentMapping, @RequestParam(required = false) String before, @RequestParam(required = false) String after) throws IOException {
         checkArgument(!StringUtils.isEmpty(mappingName), "The mapping name should not be empty or null.");

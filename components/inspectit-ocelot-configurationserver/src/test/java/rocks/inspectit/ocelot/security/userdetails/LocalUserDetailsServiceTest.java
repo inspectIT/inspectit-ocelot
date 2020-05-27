@@ -1,6 +1,5 @@
 package rocks.inspectit.ocelot.security.userdetails;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,7 +11,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import rocks.inspectit.ocelot.user.User;
 import rocks.inspectit.ocelot.user.UserService;
 
-import java.lang.reflect.Field;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,14 +28,6 @@ public class LocalUserDetailsServiceTest {
 
     @Nested
     public class LoadUserByUsername {
-
-        @BeforeEach
-        public void before() throws Exception {
-            Field field = LocalUserDetailsService.class.getDeclaredField("accessRole");
-            field.setAccessible(true);
-            field.set(detailsService, "role");
-        }
-
         @Test
         public void successfullyFindUser() {
             User user = User.builder().username("username").passwordHash("hash").isLdapUser(false).build();
@@ -47,7 +37,9 @@ public class LocalUserDetailsServiceTest {
 
             assertThat(result.getUsername()).isEqualTo("username");
             assertThat(result.getPassword()).isEqualTo("hash");
-            assertThat(result.getAuthorities()).extracting(Object::toString).containsExactly("ROLE_role");
+            assertThat(result.getAuthorities())
+                    .extracting(object -> object.toString().substring("ROLE_".length()))
+                    .containsExactlyInAnyOrder("OCELOT_WRITE", "OCELOT_READ", "OCELOT_COMMIT", "OCELOT_ADMIN");
             verify(userService).getUserByName(anyString());
             verifyNoMoreInteractions(userService);
         }
