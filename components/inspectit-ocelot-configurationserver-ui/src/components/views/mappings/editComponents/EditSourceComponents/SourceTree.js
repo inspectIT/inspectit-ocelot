@@ -14,6 +14,7 @@ class SourceTree extends React.Component {
   state = {
     tree: [treeUtils.rootNode],
     selectedSources: {},
+    visible: false,
   };
 
   render() {
@@ -34,14 +35,14 @@ class SourceTree extends React.Component {
      * makes it more likely for the files already beeing fetched
      * and this.props.files to not be empty
      */
-    if (!prevProps.visible && this.props.visible) {
+    if (!this.state.visible) {
       const newTree = [
         {
           ...treeUtils.rootNode,
           children: cloneDeep(this.props.files),
         },
       ];
-      this.setState({ tree: newTree });
+      this.setState({ tree: newTree, visible: true });
       return;
     }
 
