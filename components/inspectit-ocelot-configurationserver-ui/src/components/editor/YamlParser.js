@@ -28,25 +28,25 @@ class YamlParserCache {
   parse = (yamlString) => {
     let matchingEntry = this.cache.find((entry) => entry.yamlString === yamlString);
     if (matchingEntry) {
-      return matchingEntry.parsed;
+      return matchingEntry.config;
     } else {
-      let parsed;
+      let config;
       try {
-        parsed = yaml.safeLoad(yamlString);
+        config = yaml.safeLoad(yamlString);
       } catch (error) {
-        parsed = null;
+        config = null;
       }
-      this.cache[this.writeIndex] = { yamlString, parsed };
+      this.cache[this.writeIndex] = { yamlString, config };
       this.writeIndex = (this.writeIndex + 1) % this.size;
-      return parsed;
+      return config;
     }
   };
 
-  dump = (parsed) => {
-    let yamlString = yaml.dump(parsed);
+  dump = (config) => {
+    let yamlString = yaml.dump(config);
     let matchingEntry = this.cache.find((entry) => entry.yamlString === yamlString);
     if (matchingEntry === undefined) {
-      this.cache[this.writeIndex] = { yamlString, parsed };
+      this.cache[this.writeIndex] = { yamlString, config };
       this.writeIndex = (this.writeIndex + 1) % this.size;
     }
     return yamlString;
@@ -54,25 +54,24 @@ class YamlParserCache {
 }
 
 class YamlParser extends React.Component {
-  constructor() {
-    super();
-    this.state = {
-      showWarn: false,
-    };
-  }
 
   parser = new YamlParserCache(10);
+
+  state = {
+    showWarn: false
+  }
+
 
   isNormalized = () => {
     let parsed = this.parser.parse(this.props.yamlConfig);
     return parsed !== null && this.parser.dump(parsed) === this.props.yamlConfig;
   };
 
-  onUpdate = (config) => {
-    const updatedYamlConfig = this.parser.dump(config);
-    const oldConfigNormalized = this.isNormalized();
+  onUpdate = (newConfig) => {
+    const updatedYamlConfig = this.parser.dump(newConfig);
+    const configNormalized = this.isNormalized();
 
-    if (oldConfigNormalized) {
+    if (configNormalized) {
       this.props.onUpdate(updatedYamlConfig);
     } else {
       this.setState({
@@ -82,16 +81,15 @@ class YamlParser extends React.Component {
     }
   };
 
-  normalizedDoAccept = () => {
+  onAcceptNormalization = () => {
     const { pendingConfigUpdate } = this.state;
     this.setState({
       showWarn: false,
       pendingConfigUpdate: undefined,
-    });
-    this.props.onUpdate(pendingConfigUpdate);
+    }, () => this.props.onUpdate(pendingConfigUpdate));
   };
 
-  normalizedDoDecline = () =>
+  onDeclineNormalization = () =>
     this.setState({
       showWarn: false,
       pendingConfigUpdate: undefined,
@@ -123,8 +121,8 @@ class YamlParser extends React.Component {
           header="Config file overwrite"
           footer={
             <div>
-              <Button label="Yes" icon="pi pi-check" onClick={this.normalizedDoAccept} />
-              <Button label="No" icon="pi pi-times" onClick={this.normalizedDoDecline} />
+              <Button label="Yes" icon="pi pi-check" onClick={this.onAcceptNormalization} />
+              <Button label="No" icon="pi pi-times" onClick={this.onDeclineNormalization} />
             </div>
           }
           closable={false}
