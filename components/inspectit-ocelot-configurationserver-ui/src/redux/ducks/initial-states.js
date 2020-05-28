@@ -5,7 +5,7 @@ const authentication = {
   permissions: {
     write: false,
     commit: false,
-    admin: false
+    admin: false,
   },
   /** Specifying whether a login request is currently be executed */
   loading: false,

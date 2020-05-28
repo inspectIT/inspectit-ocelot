@@ -13,17 +13,21 @@ import ConfigurationDownload from './ConfigurationDownload';
 import { cloneDeep, find } from 'lodash';
 
 /** Component including the menu button for each mapping */
-const ButtonCell = ({readOnly, mapping, onEdit, onDelete, onDownload, onDuplicate, appendRef }) => {
+const ButtonCell = ({ readOnly, mapping, onEdit, onDelete, onDownload, onDuplicate, appendRef }) => {
   const thisCell = {};
   const menuItems = [
-    ... readOnly ? [] : [{
-      label: 'Edit',
-      icon: 'pi pi-fw pi-pencil',
-      command: (e) => {
-        thisCell.menu.toggle(e);
-        onEdit(mapping);
-      },
-    }],
+    ...(readOnly
+      ? []
+      : [
+          {
+            label: 'Edit',
+            icon: 'pi pi-fw pi-pencil',
+            command: (e) => {
+              thisCell.menu.toggle(e);
+              onEdit(mapping);
+            },
+          },
+        ]),
     {
       label: 'Download Configuration',
       icon: 'pi pi-fw pi-download',
@@ -32,26 +36,29 @@ const ButtonCell = ({readOnly, mapping, onEdit, onDelete, onDownload, onDuplicat
         onDownload(mapping.attributes);
       },
     },
-    ... readOnly ? [] : [
-    {
-      label: 'Duplicate',
-      icon: 'pi pi-fw pi-clone',
-      command: (e) => {
-        thisCell.menu.toggle(e);
-        onDuplicate(mapping);
-      },
-    },
-    {
-      separator: true,
-    },
-    {
-      label: 'Delete',
-      icon: 'pi pi-fw pi-trash',
-      command: (e) => {
-        thisCell.menu.toggle(e);
-        onDelete(mapping.name);
-      },
-    }]
+    ...(readOnly
+      ? []
+      : [
+          {
+            label: 'Duplicate',
+            icon: 'pi pi-fw pi-clone',
+            command: (e) => {
+              thisCell.menu.toggle(e);
+              onDuplicate(mapping);
+            },
+          },
+          {
+            separator: true,
+          },
+          {
+            label: 'Delete',
+            icon: 'pi pi-fw pi-trash',
+            command: (e) => {
+              thisCell.menu.toggle(e);
+              onDelete(mapping.name);
+            },
+          },
+        ]),
   ];
   return (
     <div ref={(el) => (thisCell.div = el)} className="this">
@@ -126,7 +133,7 @@ class MappingsTable extends React.Component {
   state = {};
 
   render() {
-    const {readOnly, filterValue, maxHeight, mappings, putMappings } = this.props;
+    const { readOnly, filterValue, maxHeight, mappings, putMappings } = this.props;
 
     const mappingValues = mappings.map((mapping) => {
       //build a dummy string to allow filtering
@@ -154,9 +161,7 @@ class MappingsTable extends React.Component {
           }}
           globalFilter={filterValue}
         >
-          { !readOnly &&
-            <Column rowReorder={!filterValue} style={{ width: '3em' }} />
-          }
+          {!readOnly && <Column rowReorder={!filterValue} style={{ width: '3em' }} />}
           <Column columnKey="name" field="name" header="Mapping Name" />
           <Column
             columnKey="sources"

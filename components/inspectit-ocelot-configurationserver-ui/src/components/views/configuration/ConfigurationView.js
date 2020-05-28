@@ -121,7 +121,7 @@ class ConfigurationView extends React.Component {
       schema,
       showVisualConfigurationView,
       toggleVisualConfigurationView,
-      readOnly
+      readOnly,
     } = this.props;
     const showEditor = (selection || selectedDefaultConfigFile) && !isDirectory;
 
@@ -260,7 +260,7 @@ function mapStateToProps(state) {
     selectedDefaultConfigFile,
     schema,
     showVisualConfigurationView,
-    readOnly: !state.authentication.permissions.write
+    readOnly: !state.authentication.permissions.write,
   };
 }
 

@@ -113,14 +113,7 @@ class FileTree extends React.Component {
   };
 
   render() {
-    const {
-      className,
-      defaultTree,
-      files,
-      selection,
-      selectedDefaultConfigFile,
-      readOnly
-    } = this.props;
+    const { className, defaultTree, files, selection, selectedDefaultConfigFile, readOnly } = this.props;
     return (
       <div className="this" onContextMenu={readOnly ? undefined : this.showContextMenu} onKeyDown={readOnly ? undefined : this.onKeyDown}>
         <style jsx>{`
@@ -154,7 +147,7 @@ class FileTree extends React.Component {
           selectionKeys={selection || selectedDefaultConfigFile}
           onSelectionChange={this.onSelectionChange}
           onContextMenuSelectionChange={readOnly ? undefined : this.showContextMenu}
-          dragdropScope={readOnly ? undefined : "config-file-tree"}
+          dragdropScope={readOnly ? undefined : 'config-file-tree'}
           onDragDrop={readOnly ? undefined : this.onDragDrop}
         />
       </div>

@@ -68,7 +68,7 @@ class AgentMappingView extends React.Component {
 
 function mapStateToProps(state) {
   return {
-    readOnly: !state.authentication.permissions.write
+    readOnly: !state.authentication.permissions.write,
   };
 }
 export default connect(mapStateToProps)(AgentMappingView);

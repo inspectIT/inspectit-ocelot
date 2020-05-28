@@ -27,12 +27,12 @@ const authorizationReducer = createReducer(initialState)({
       error: null,
       token,
       username: username.toLowerCase(),
-      permissions
+      permissions,
     };
   },
-  [types.LOGOUT]: (state) => {
+  [types.LOGOUT]: () => {
     return {
-      ...initialState
+      ...initialState,
     };
   },
   [types.RENEW_TOKEN_SUCCESS]: (state, action) => {
@@ -41,7 +41,7 @@ const authorizationReducer = createReducer(initialState)({
       ...state,
       error: null,
       token,
-      permissions
+      permissions,
     };
   },
   // SPECIAL REDUCER - dispatched by redux-persist to rehydrate store
@@ -58,7 +58,7 @@ const authorizationReducer = createReducer(initialState)({
           ...initialState,
           token,
           username,
-          permissions
+          permissions,
         };
       }
     }

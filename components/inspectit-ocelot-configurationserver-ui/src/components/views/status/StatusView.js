@@ -68,7 +68,7 @@ function mapStateToProps(state) {
   return {
     loading: pendingRequests > 0,
     agents,
-    disableClear: !state.authentication.permissions.write
+    disableClear: !state.authentication.permissions.write,
   };
 }
 
