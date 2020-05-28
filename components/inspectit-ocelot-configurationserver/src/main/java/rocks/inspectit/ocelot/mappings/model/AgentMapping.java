@@ -14,6 +14,7 @@ import javax.validation.constraints.NotBlank;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * The model of the agent mappings.
@@ -55,10 +56,13 @@ public class AgentMapping implements Auditable {
      */
     public boolean matchesAttributes(Map<String, String> agentAttributes) {
         for (Map.Entry<String, String> pair : attributes.entrySet()) {
-            String expected = pair.getValue();
+            String pattern = pair.getValue();
             String value = agentAttributes.getOrDefault(pair.getKey(), "");
 
-            if (!StringUtils.equalsIgnoreCase(value, expected)) {
+            boolean matches = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE)
+                    .matcher(value)
+                    .matches();
+            if (!matches) {
                 return false;
             }
         }
