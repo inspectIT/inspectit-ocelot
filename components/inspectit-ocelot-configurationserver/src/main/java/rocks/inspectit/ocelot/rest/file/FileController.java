@@ -3,10 +3,12 @@ package rocks.inspectit.ocelot.rest.file;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import rocks.inspectit.ocelot.file.FileData;
 import rocks.inspectit.ocelot.rest.util.RequestUtil;
+import rocks.inspectit.ocelot.security.config.UserRoleConfiguration;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -21,6 +23,7 @@ public class FileController extends FileBaseController {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Secured(UserRoleConfiguration.WRITE_ACCESS_ROLE)
     @ApiOperation(value = "Write a file", notes = "Creates or overwrites a file with the provided text content")
     @ApiImplicitParam(name = "Path", type = "string", value = "The part of the url after /files/ defines the path to the file to write.")
     @PutMapping(value = "files/**")
@@ -75,6 +78,7 @@ public class FileController extends FileBaseController {
         });
     }
 
+    @Secured(UserRoleConfiguration.WRITE_ACCESS_ROLE)
     @ApiOperation(value = "Delete a file", notes = "Deletes the given file")
     @ApiImplicitParam(name = "Path", type = "string", value = "The part of the url after /files/ defines the path to the file to delete.")
     @DeleteMapping(value = "files/**")

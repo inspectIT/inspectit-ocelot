@@ -34,3 +34,7 @@ Note that this approach is not recommended for production use as the scripts are
 
 Boomerang recommends that you use a [minified JS containing all your plugins](https://developer.akamai.com/tools/boomerang/docs/tutorial-building.html#asynchronously). 
 In addition you should use asynchronous injection as described in the [Boomerang documentation](https://developer.akamai.com/tools/boomerang/docs/index.html).
+
+:::tip
+For automatic collection of the EUM traces have a look on the [Boomerang OpenTelemetry plugin](https://github.com/NovatecConsulting/boomerang-opentelemetry-plugin).
+:::
