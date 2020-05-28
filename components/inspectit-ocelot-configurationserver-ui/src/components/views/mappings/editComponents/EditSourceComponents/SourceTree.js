@@ -17,9 +17,6 @@ class SourceTree extends React.Component {
   };
 
   render() {
-    console.log("TestTest");
-    console.log(this.state.tree);
-    console.log(this.props.files);
     return (
       <Tree
         value={this.state.tree}

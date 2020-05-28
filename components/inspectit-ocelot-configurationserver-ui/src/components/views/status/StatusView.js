@@ -19,9 +19,9 @@ class StatusView extends React.Component {
     if (filter.length !== 0) {
       let regex = RegExp(filter);
 
-      let position = filter.indexOf("*");
+      let position = filter.indexOf('*');
       if (position !== -1) {
-        filter = filter.substring(0, position) + "." + filter.substring(position);
+        filter = filter.substring(0, position) + '.' + filter.substring(position);
         regex = RegExp(filter);
       }
 
