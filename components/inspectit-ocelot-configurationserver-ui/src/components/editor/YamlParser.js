@@ -54,13 +54,11 @@ class YamlParserCache {
 }
 
 class YamlParser extends React.Component {
-
   parser = new YamlParserCache(10);
 
   state = {
-    showWarn: false
-  }
-
+    showWarn: false,
+  };
 
   isNormalized = () => {
     let parsed = this.parser.parse(this.props.yamlConfig);
@@ -83,10 +81,13 @@ class YamlParser extends React.Component {
 
   onAcceptNormalization = () => {
     const { pendingConfigUpdate } = this.state;
-    this.setState({
-      showWarn: false,
-      pendingConfigUpdate: undefined,
-    }, () => this.props.onUpdate(pendingConfigUpdate));
+    this.setState(
+      {
+        showWarn: false,
+        pendingConfigUpdate: undefined,
+      },
+      () => this.props.onUpdate(pendingConfigUpdate)
+    );
   };
 
   onDeclineNormalization = () =>
