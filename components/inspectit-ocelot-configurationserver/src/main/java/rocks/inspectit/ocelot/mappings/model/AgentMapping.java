@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Singular;
 import lombok.Value;
+import org.apache.commons.lang3.StringUtils;
 import rocks.inspectit.ocelot.security.audit.AuditDetail;
 import rocks.inspectit.ocelot.security.audit.Auditable;
 
@@ -13,6 +14,7 @@ import javax.validation.constraints.NotBlank;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * The model of the agent mappings.
@@ -54,8 +56,13 @@ public class AgentMapping implements Auditable {
      */
     public boolean matchesAttributes(Map<String, String> agentAttributes) {
         for (Map.Entry<String, String> pair : attributes.entrySet()) {
+            String pattern = pair.getValue();
             String value = agentAttributes.getOrDefault(pair.getKey(), "");
-            if (!value.matches(pair.getValue())) {
+
+            boolean matches = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE)
+                    .matcher(value)
+                    .matches();
+            if (!matches) {
                 return false;
             }
         }

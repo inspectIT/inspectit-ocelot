@@ -100,7 +100,7 @@ public class AgentConfigurationManager {
                     @Override
                     public AgentConfiguration load(Map<String, String> agentAttributes) {
                         return newConfigurations.stream()
-                                .filter(config -> config.getMapping().matchesAttributes(agentAttributes))
+                                .filter(configuration -> configuration.getMapping().matchesAttributes(agentAttributes))
                                 .findFirst()
                                 .orElse(NO_MATCHING_MAPPING);
                     }
