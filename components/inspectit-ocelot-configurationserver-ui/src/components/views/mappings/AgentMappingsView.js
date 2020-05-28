@@ -1,4 +1,5 @@
 import React from 'react';
+import { connect } from 'react-redux';
 
 import MappingsToolbar from './MappingToolbar';
 import MappingsTable from './MappingsTable';
@@ -25,6 +26,7 @@ class AgentMappingView extends React.Component {
 
   render() {
     const contentHeight = 'calc(100vh - 7rem)';
+    const readOnly = this.props.readOnly;
     return (
       <div className="this">
         <style jsx>{`
@@ -45,6 +47,7 @@ class AgentMappingView extends React.Component {
             onChangeFilter={this.handleFilterChange}
             onAddNewMapping={this.showEditMappingDialog}
             onDownload={this.showDownloadDialog}
+            readOnly={readOnly}
           />
         </div>
         <div className="content">
@@ -53,6 +56,7 @@ class AgentMappingView extends React.Component {
             onEditMapping={this.showEditMappingDialog}
             onDuplicateMapping={this.showEditMappingDialog}
             maxHeight={`calc(${contentHeight} - 2.5em)`}
+            readOnly={readOnly}
           />
         </div>
         <EditDialog visible={this.state.isEditDialogShown} onHide={this.hideEditMappingDialog} mapping={this.state.selectedMapping} />
@@ -62,4 +66,9 @@ class AgentMappingView extends React.Component {
   }
 }
 
-export default AgentMappingView;
+function mapStateToProps(state) {
+  return {
+    readOnly: !state.authentication.permissions.write
+  };
+}
+export default connect(mapStateToProps)(AgentMappingView);

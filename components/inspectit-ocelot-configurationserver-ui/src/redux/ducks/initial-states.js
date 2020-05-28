@@ -1,6 +1,12 @@
 const authentication = {
   /** The access token which is used for bearer authentication. */
   token: null,
+  /** The authorization permissions the user has*/
+  permissions: {
+    write: false,
+    commit: false,
+    admin: false
+  },
   /** Specifying whether a login request is currently be executed */
   loading: false,
   /** This contains the error message if the last request has failed. */

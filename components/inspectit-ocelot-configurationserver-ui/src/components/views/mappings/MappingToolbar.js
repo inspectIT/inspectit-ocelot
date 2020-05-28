@@ -11,7 +11,7 @@ const searchFieldTooltipText =
 /** Toolbar for mappingsView for changing mappings filter, downloading config files, reloading & adding mappings */
 class MappingToolbar extends React.Component {
   render() {
-    const { filterValue, onChangeFilter, onAddNewMapping, onDownload, fetchMappings } = this.props;
+    const { filterValue, onChangeFilter, onAddNewMapping, onDownload, fetchMappings, readOnly } = this.props;
     return (
       <Toolbar style={{ border: '0', backgroundColor: '#eee' }}>
         <style jsx>
@@ -42,7 +42,7 @@ class MappingToolbar extends React.Component {
         </div>
         <div className="p-toolbar-group-right">
           <Button icon="pi pi-refresh" onClick={fetchMappings} style={{ marginRight: '.25em' }} />
-          <Button icon="pi pi-plus" onClick={() => onAddNewMapping()} style={{ marginRight: '.25em' }} />
+          <Button icon="pi pi-plus" onClick={() => onAddNewMapping()} style={{ marginRight: '.25em' }} disabled={readOnly} />
           {/** if primereact/dialog is in here, it would be hidden by default -> so it would need to be appended to body/mappingsview or the like */}
           <Button icon="pi pi-download" label="Config File" onClick={onDownload} />
         </div>

@@ -1,5 +1,6 @@
 import React from 'react';
 import NavigationItem from './SideNavigationItem';
+import {connect} from 'react-redux'
 
 /** Data */
 import itemData from '../../data/side-navigation-items.json';
@@ -8,7 +9,7 @@ import itemData from '../../data/side-navigation-items.json';
  * The application's side-navigation.
  * The items are defined in the JSON file which has been imported.
  */
-const SideNavigation = () => {
+const SideNavigation = ({isAdmin}) => {
   return (
     <div className="this">
       <style jsx>
@@ -31,11 +32,16 @@ const SideNavigation = () => {
         <NavigationItem key={item.name} href={item.href} name={item.name} icon={item.icon} />
       ))}
       <div style={{ flexGrow: 1 }} />
-      {itemData.bottom.map((item) => (
+      {isAdmin && itemData.bottom.map((item) => (
         <NavigationItem key={item.name} href={item.href} name={item.name} icon={item.icon} />
       ))}
     </div>
   );
 };
 
-export default SideNavigation;
+function mapStateToProps(state) {
+  return {
+    isAdmin: state.authentication.permissions.admin
+  };
+}
+export default connect(mapStateToProps)(SideNavigation);
