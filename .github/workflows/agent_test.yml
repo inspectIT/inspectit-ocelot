@@ -4,6 +4,14 @@ on:
   push:
     branches:
       - master
+  pull_request:
+    branches:
+      - master
+    paths-ignore:
+      - 'components/**'
+      - 'inspectit-ocelot-demo/**'
+      - 'inspectit-ocelot-documentation/**'
+      - 'resources/**'
 
 jobs:
   pr-check:
