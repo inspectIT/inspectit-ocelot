@@ -4,17 +4,12 @@ on:
   push:
     branches:
       - master
-    paths:
-      - '.github/workflows/eumserver_test.yml'
-      - 'inspectit-ocelot-config'
-      - 'components/inspectit-ocelot-eum-server/**'
-      - '!components/inspectit-ocelot-eum-server/README.md'
   pull_request:
     branches:
       - master
     paths:
       - '.github/workflows/eumserver_test.yml'
-      - 'inspectit-ocelot-config'
+      - 'inspectit-ocelot-config/**'
       - 'components/inspectit-ocelot-eum-server/**'
       - '!components/inspectit-ocelot-eum-server/README.md'
 jobs:
