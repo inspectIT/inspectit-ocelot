@@ -4,8 +4,8 @@ This project contains the Ocelot configuration server.
 It's a standalone component based on Spring Boot.
 It can be build by `gradle bootJar` and started by `java -jar inspectit-ocelot-configurationserver-X.X.X.jar` or directly via gradle `gradle bootRun`.
 
-To use a custom logback config start Configuration Server like this `java -Dlogging.config=<PATH_TO_YOUR_LOGBACK_CONFIG> -jar inspectit-ocelot-configurationserver-X.X.X.jar`
-_Spring Boot ignores the default `-Dlogback.configurationFile` property_
+To use a custom logback configuration, you have to start the Configuration Server like this: `java -Dlogging.config=<PATH_TO_YOUR_LOGBACK_CONFIG> -jar inspectit-ocelot-configurationserver-X.X.X.jar`
+_Please note that Spring Boot ignores the default `-Dlogback.configurationFile` property!_
 
 It is used to manage and store agent configurations.
 The configurations can be fetched by Ocelot agents via a REST interface.
