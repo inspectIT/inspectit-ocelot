@@ -4,10 +4,6 @@ on:
   push:
     branches:
       - master
-    paths:
-      - '.github/workflows/configurationserver_test.yml'
-      - 'components/inspectit-ocelot-configurationserver/**'
-      - '!components/inspectit-ocelot-configurationserver/README.md'
   pull_request:
     branches:
       - master

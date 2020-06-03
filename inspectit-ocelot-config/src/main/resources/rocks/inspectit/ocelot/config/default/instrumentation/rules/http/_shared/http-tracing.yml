@@ -31,6 +31,8 @@ inspectit:
               
       # This rule is included by all HTTP Client AND Server tracing rules to define which attributes should be added to the span
       'r_http_tracing_default_attributes':
+        include:
+          'r_tracing_global_attributes': true
         tracing:
           attributes:
             'http.status_code': 'http_status'
