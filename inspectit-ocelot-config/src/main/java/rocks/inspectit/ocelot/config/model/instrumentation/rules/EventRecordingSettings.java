@@ -22,10 +22,16 @@ public class EventRecordingSettings {
      */
     private String name;
 
+    /**
+     * The attributes to define events.
+     */
     @Builder.Default
     @NotNull
     private Map<@NotBlank String, Object> attributes = Collections.emptyMap();
 
+    /**
+     * Constant data tags attributes will be resolved to.
+     */
     @Builder.Default
     @NotNull
     private Map<String, String> constantTags = Collections.emptyMap();
@@ -35,7 +41,7 @@ public class EventRecordingSettings {
      * Sets the name prop, in case it is empty before.
      *
      * @param defaultEventName The default name which should be used in case event is null
-     * @return EventRecordingSettings
+     * @return a copy of the given Event
      */
     public EventRecordingSettings copyWithDefaultEventName(String defaultEventName) {
         String eventName = getEventNameOrDefault(defaultEventName);
