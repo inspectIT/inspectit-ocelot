@@ -56,6 +56,10 @@ public class MethodHookConfigurationResolver {
             resolveTracing(result, matchedRules);
         }
 
+        if(allSettings.isEventsEnabled()) {
+            resolveEvents(result, matchedRules);
+        }
+
         return result.build();
     }
 
@@ -191,6 +195,18 @@ public class MethodHookConfigurationResolver {
         result.metrics(matchedRules.stream()
                 .flatMap(rule -> rule.getMetrics().stream())
                 .collect(Collectors.toCollection(HashMultiset::create)));
+    }
+
+    /**
+     * Combines all event definitions from the given rules
+     *
+     * @param result       the hook configuration to which the measurement definitions are added
+     * @param matchedRules the rules to combine
+     */
+    private void resolveEvents(MethodHookConfiguration.MethodHookConfigurationBuilder result, Set<InstrumentationRule> matchedRules) {
+        result.events(matchedRules.stream()
+                .flatMap(rule -> rule.getEvents().stream())
+                .collect(Collectors.toSet()));
     }
 
     /**

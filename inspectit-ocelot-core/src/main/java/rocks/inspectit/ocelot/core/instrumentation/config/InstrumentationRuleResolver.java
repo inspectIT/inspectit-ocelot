@@ -11,6 +11,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import rocks.inspectit.ocelot.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.actions.ActionCallSettings;
+import rocks.inspectit.ocelot.config.model.instrumentation.rules.EventRecordingSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.InstrumentationRuleSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.MetricRecordingSettings;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.ActionCallConfig;
@@ -106,6 +107,8 @@ public class InstrumentationRuleResolver {
 
         result.tracing(settings.getTracing());
 
+        result.events(resolveEventRecordings(settings));
+
         return result.build();
     }
 
@@ -115,6 +118,12 @@ public class InstrumentationRuleResolver {
                 .filter(e -> !StringUtils.isEmpty(e.getValue().getValue()))
                 .map(entry -> entry.getValue().copyWithDefaultMetricName(entry.getKey())) //use map key as default metric name
                 .collect(Collectors.toCollection(HashMultiset::create));
+    }
+
+    private Set<EventRecordingSettings> resolveEventRecordings(InstrumentationRuleSettings settings) {
+        return settings.getEvents().entrySet().stream()
+                .map(entry -> entry.getValue().copyWithDefaultEventName(entry.getKey()))
+                .collect(Collectors.toSet());
     }
 
     /**

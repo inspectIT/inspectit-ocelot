@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Singular;
 import lombok.Value;
 import lombok.experimental.NonFinal;
+import rocks.inspectit.ocelot.config.model.events.EventSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.ocelot.config.model.metrics.MetricsSettings;
 import rocks.inspectit.ocelot.config.model.tracing.TracingSettings;
@@ -36,6 +37,11 @@ public class InstrumentationConfiguration {
     private boolean tracingEnabled;
 
     /**
+     * Corresponds to {@link EventSettings#isEnabled()}
+     */
+    private boolean eventsEnabled;
+
+    /**
      * The instrumentation settings which have been used to derive this configuration.
      */
     private InstrumentationSettings source;
@@ -54,6 +60,7 @@ public class InstrumentationConfiguration {
      *
      * @param metricsEnabled      corresponds to {@link MetricsSettings#isEnabled()}, true if null (for testing)
      * @param tracingEnabled      corresponds to {@link TracingSettings#isEnabled()}, true if null (for testing)
+     * @param eventsEnabled       corresponds to {@link EventSettings#isEnabled()}
      * @param source              the settings used for building this instrumentation configuration
      * @param propagationMetaData the propagation meta data
      * @param tracingSettings     the tracing settings
@@ -62,12 +69,14 @@ public class InstrumentationConfiguration {
     @Builder(toBuilder = true)
     public InstrumentationConfiguration(Boolean metricsEnabled,
                                         Boolean tracingEnabled,
+                                        Boolean eventsEnabled,
                                         InstrumentationSettings source,
                                         PropagationMetaData propagationMetaData,
                                         TracingSettings tracingSettings,
                                         @Singular @Builder.ObtainVia(method = "getRules") Collection<InstrumentationRule> rules) {
         this.metricsEnabled = Optional.ofNullable(metricsEnabled).orElse(true);
         this.tracingEnabled = Optional.ofNullable(tracingEnabled).orElse(true);
+        this.eventsEnabled = Optional.ofNullable(eventsEnabled).orElse(true);
         this.source = source;
         this.propagationMetaData = propagationMetaData;
         this.tracingSettings = tracingSettings;
