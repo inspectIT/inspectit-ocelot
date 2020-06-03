@@ -7,13 +7,9 @@ inspectit:
       #
       # This rule can be either included or scopes can be directly added to it
       'r_trace_method':
-        'tracing':
+        include:
+          'r_tracing_global_attributes': true
+        tracing:
           start-span: true
           error-status: _thrown
-          attributes:
-            'java.exception': _thrown
-            'java.fqn': 'method_fqn'
-        entry:
-          'method_fqn':
-            action: 'a_method_getFQN'
           
