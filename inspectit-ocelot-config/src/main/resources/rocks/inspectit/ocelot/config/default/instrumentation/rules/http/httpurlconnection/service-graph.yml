@@ -20,6 +20,7 @@ inspectit:
           'r_httpurlconnection_extract_request_details': true
         scopes:
           's_httpurlconnection_getInputStream': true
+          's_httpurlconnection_requestInitiators': true
         entry:
           'servicegraph_is_entry':
             action: 'a_entrypoint_check'

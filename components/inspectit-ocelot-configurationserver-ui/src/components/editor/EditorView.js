@@ -4,7 +4,7 @@ import React from 'react';
 import editorConfig from '../../data/yaml-editor-config.json';
 import EditorToolbar from './EditorToolbar';
 import Notificationbar from './Notificationbar';
-import VisualEditor from './VisualEditor';
+import YamlParser from './YamlParser';
 
 const AceEditor = dynamic(() => import('./AceEditor'), { ssr: false });
 const TreeTableEditor = dynamic(() => import('./TreeTableEditor'), { ssr: false });
@@ -104,11 +104,11 @@ class EditorView extends React.Component {
         )}
         {showEditor && showVisualConfigurationView && (
           <div className="p-col visual-editor-container">
-            <VisualEditor yamlConfig={value} onUpdate={onChange}>
+            <YamlParser yamlConfig={value} onUpdate={onChange}>
               {(onUpdate, config) => (
                 <TreeTableEditor config={config} schema={schema} loading={loading} readOnly={readOnly} onUpdate={onUpdate} />
               )}
-            </VisualEditor>
+            </YamlParser>
           </div>
         )}
         {!showEditor && (

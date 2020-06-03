@@ -9,10 +9,10 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
+import rocks.inspectit.ocelot.security.config.UserRoleConfiguration;
 import rocks.inspectit.ocelot.user.User;
 import rocks.inspectit.ocelot.user.UserService;
 
-import javax.annotation.PostConstruct;
 import java.util.Optional;
 
 /**
@@ -23,31 +23,12 @@ import java.util.Optional;
 @Order(2)
 public class LocalUserDetailsService implements UserDetailsService {
 
-    public static final String DEFAULT_ACCESS_USER_ROLE = "OCELOT_ADMIN";
-
     @Autowired
     @VisibleForTesting
     InspectitServerSettings settings;
 
     @Autowired
     private UserService userService;
-
-    /**
-     * The access role which will be assigned to the users.
-     */
-    private String accessRole;
-
-    /**
-     * Sets the access role field {@link #accessRole} which will be assigned to authenticated users.
-     */
-    @PostConstruct
-    private void postConstruct() {
-        if (settings.getSecurity().isLdapAuthentication()) {
-            accessRole = settings.getSecurity().getLdap().getAdminGroup();
-        } else {
-            accessRole = DEFAULT_ACCESS_USER_ROLE;
-        }
-    }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -70,7 +51,7 @@ public class LocalUserDetailsService implements UserDetailsService {
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getUsername())
                 .password(user.getPasswordHash())
-                .roles(accessRole)
+                .authorities(UserRoleConfiguration.ADMIN_ROLE_PERMISSION_SET)
                 .build();
     }
 }

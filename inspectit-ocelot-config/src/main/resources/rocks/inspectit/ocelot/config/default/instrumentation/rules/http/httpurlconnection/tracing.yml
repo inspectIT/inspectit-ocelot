@@ -20,6 +20,7 @@ inspectit:
           kind: CLIENT
         post-entry:
           'span_obj':
+            only-if-true: 'httpurlconnection_is_start'
             action: 'a_attachment_put'
             data-input: 
               'target': _this
@@ -38,6 +39,7 @@ inspectit:
           'r_httpurlconnection_extract_response_details': true
         scopes:
           's_httpurlconnection_getInputStream': true
+          's_httpurlconnection_requestInitiators': true
         tracing:
           start-span: true
           continue-span: 'httpurlconnection_span'
@@ -46,6 +48,7 @@ inspectit:
           start-span-conditions:
             only-if-true: 'httpurlconnection_is_end'
           end-span: true
+          error-status: 'http_is_error'
           kind: CLIENT
         entry:
           'httpurlconnection_span':
