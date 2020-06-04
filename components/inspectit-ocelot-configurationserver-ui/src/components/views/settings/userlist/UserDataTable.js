@@ -30,6 +30,7 @@ class UserDataTable extends React.Component {
         <DataTable value={users} globalFilter={filterValue} scrollable={true} scrollHeight={maxHeight}>
           <Column field="id" header="ID" />
           <Column field="username" header="Username" />
+          <Column field="lastLoginTime" header="Last Login Time" />
           <Column field="ldapUser" header="LDAP User" body={(data) => <i className={data.ldapUser ? 'pi pi-check' : 'pi pi-times'}></i>} />
           <Column
             style={{ width: '3.5rem' }}
