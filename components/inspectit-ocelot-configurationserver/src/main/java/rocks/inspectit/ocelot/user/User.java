@@ -56,6 +56,9 @@ public class User implements Auditable {
     @Column(nullable = false)
     private boolean isLdapUser;
 
+    @Column
+    private String lastLoginTime;
+
     @Override
     @JsonIgnore
     public AuditDetail getAuditDetail() {

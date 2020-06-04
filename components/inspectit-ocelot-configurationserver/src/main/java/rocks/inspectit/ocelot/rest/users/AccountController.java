@@ -27,6 +27,10 @@ import rocks.inspectit.ocelot.user.User;
 import rocks.inspectit.ocelot.user.UserPermissions;
 import rocks.inspectit.ocelot.user.UserService;
 
+import java.sql.Timestamp;
+import java.text.Format;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -58,8 +62,12 @@ public class AccountController extends AbstractBaseController {
     @ApiResponse(code = 200, message = "The access token", examples =
     @Example(value = @ExampleProperty(value = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImV4cCI6MTU2MTYyODE1NH0.KelDW1OXg9xlMjSiblwZqui7sya4Crq833b-98p8UZ4", mediaType = "text/plain")))
     @GetMapping("account/token")
-    public String acuireNewAccessToken(Authentication user) {
-        return tokenManager.createToken(user.getName());
+    public String acuireNewAccessToken(Authentication auth) {
+        String timeStamp = new SimpleDateFormat("dd/MM/yyyy    HH:mm").format(new Date());
+        User user = userService.getUserByName(auth.getName()).get();
+        user.setLastLoginTime(timeStamp);
+        userService.addOrUpdateUser(user);
+        return tokenManager.createToken(auth.getName());
     }
 
     @ApiOperation(value = "Change Password", notes = "Changes the password of the logged in user." +
