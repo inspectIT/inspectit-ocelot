@@ -2,17 +2,27 @@ package rocks.inspectit.ocelot.instrumentation.special.logging;
 
 import io.opencensus.common.Scope;
 import io.opencensus.trace.Tracing;
+import org.apache.log4j.Category;
 import org.apache.log4j.Logger;
 import org.apache.log4j.spi.LoggingEvent;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import rocks.inspectit.ocelot.instrumentation.InstrumentationSysTestBase;
 import rocks.inspectit.ocelot.logging.Log4JLoggingRecorder;
+import rocks.inspectit.ocelot.utils.TestUtils;
+
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class Log4JTraceIdAutoInjectorTest extends InstrumentationSysTestBase {
 
     private static final Logger LOGGER = Logger.getLogger(Log4JTraceIdAutoInjectorTest.class.getName());
+
+    @BeforeAll
+    public static void waitForInstrumentation() {
+        TestUtils.waitForClassInstrumentation(Category.class, 15, TimeUnit.SECONDS);
+    }
 
     @Test
     public void traceExists() {
