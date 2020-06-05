@@ -25,6 +25,8 @@ import java.util.function.Supplier;
 @Slf4j
 public class VersioningManager {
 
+    private static final PersonIdent GIT_SYSTEM_AUTHOR = new PersonIdent("System", "info@inspectit.rocks");
+
     private Path workingDirectory;
 
     private Git git;
@@ -46,8 +48,10 @@ public class VersioningManager {
 
         if (!hasGit) {
             log.info("Working directory is not managed by Git. Initializing Git repository and staging and committing all existing file.");
-
-            stageAndCommit();
+            commit(GIT_SYSTEM_AUTHOR, "Initializing Git repository using existing working directory", false);
+        } else if (!isClean()) {
+            log.info("Changes in the configuration or agent mapping files have been detected and will be committed to the repository.");
+            commit(GIT_SYSTEM_AUTHOR, "Staging and committing of external changes during startup", false);
         }
     }
 
@@ -55,46 +59,43 @@ public class VersioningManager {
         git.close();
     }
 
-    public synchronized void stageAndCommit() throws GitAPIException {
-        if (!isClean()) {
-            stageAll();
-            commit();
+    public synchronized void commitAsExternalChange() throws GitAPIException {
+        if (isClean()) {
+            return;
         }
+        log.info("Staging and committing of external changes to the configuration files or agent mappings");
+        commit(GIT_SYSTEM_AUTHOR, "Staging and committing of external changes", false);
     }
 
-    public synchronized void resetConfigurationFiles() throws GitAPIException {
-        //TODO has to be discussed whether it is meaningful this way. This ensures that the Git repository
-        //TODO is not affected by changes which are done by editing files in the working directory manually.
-        //TODO Imo it is valid to assume, that all changes HAVE TO BE done via the config-server.
-        if (!isClean()) {
-            try {
-                Path filePath = workingDirectory.resolve(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER);
-                FileUtils.cleanDirectory(filePath.toFile());
-            } catch (IOException e) {
-                log.warn("Working directory could not be cleaned.", e);
-            }
-
-            git.checkout()
-                    .addPath(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER)
-                    .call();
-        }
-    }
-
-    private void commit() throws GitAPIException {
-        log.info("Committing all staged changes.");
-
+    public synchronized void commit(String message) throws GitAPIException {
         PersonIdent author = getAuthor();
 
+        commit(author, message, true);
+    }
+
+    private synchronized void commit(PersonIdent author, String message, boolean allowAmend) throws GitAPIException {
+        if (isClean()) {
+            return;
+        }
+
+        stageFiles();
+        commitFiles(author, message, allowAmend);
+    }
+
+    private void commitFiles(PersonIdent author, String message, boolean allowAmend) throws GitAPIException {
+        log.info("Committing staged changes.");
+
         CommitCommand commitCommand = git.commit()
-                .setAll(true)
-                .setMessage("Commit configuration file and agent mapping changes")
+                .setAll(true) // in order to remove deleted files from index
+                .setMessage(message)
                 .setAuthor(author);
 
-        if (getCommitCount() > 0) {
-            PersonIdent latestAuthor = getLatestCommitAuthor();
+        Optional<RevCommit> latestCommit = getLatestCommit();
+        if (allowAmend && latestCommit.isPresent()) {
+            PersonIdent latestAuthor = latestCommit.get().getAuthorIdent();
             boolean sameAuthor = latestAuthor != null && author.getName().equals(latestAuthor.getName());
 
-            long latestCommitTime = getLatestCommitTime() * 1000L;
+            long latestCommitTime = latestCommit.get().getCommitTime() * 1000L;
             boolean expired = latestCommitTime + amendTimeout < System.currentTimeMillis();
 
             if (sameAuthor && !expired) {
@@ -106,7 +107,7 @@ public class VersioningManager {
         commitCommand.call();
     }
 
-    private void stageAll() throws GitAPIException {
+    private void stageFiles() throws GitAPIException {
         log.info("Staging all configuration files and agent mappings.");
 
         git.add()
@@ -151,14 +152,6 @@ public class VersioningManager {
         return new PersonIdent(username, "info@inspectit.rocks");
     }
 
-    private PersonIdent getLatestCommitAuthor() {
-        return getLatestCommit().map(RevCommit::getAuthorIdent).orElse(null);
-    }
-
-    private int getLatestCommitTime() {
-        return getLatestCommit().map(RevCommit::getCommitTime).orElse(-1);
-    }
-
     private Optional<RevCommit> getLatestCommit() {
         try {
             ObjectId commitId = git.getRepository().resolve(Constants.HEAD);
@@ -169,11 +162,10 @@ public class VersioningManager {
 
             try (RevWalk revWalk = new RevWalk(git.getRepository())) {
                 RevCommit commit = revWalk.parseCommit(commitId);
-                return Optional.ofNullable(commit);
+                return Optional.of(commit);
             }
         } catch (IOException e) {
-            //TODO error message
-            log.error("error", e);
+            log.error("An exception occurred while trying to load the latest commit.", e);
             return Optional.empty();
         }
     }

@@ -35,8 +35,8 @@ class AutoCommitWorkingDirectoryProxyTest {
             accessor.createDirectory("test");
 
             verify(wdAccessor).createDirectory("test");
-            verify(versioningManager).resetConfigurationFiles();
-            verify(versioningManager).stageAndCommit();
+            verify(versioningManager).commitAsExternalChange();
+            verify(versioningManager).commit("Commit configuration file and agent mapping changes");
             verifyNoMoreInteractions(wdAccessor, versioningManager);
         }
 
@@ -48,19 +48,19 @@ class AutoCommitWorkingDirectoryProxyTest {
                     .isThrownBy(() -> accessor.createDirectory("test"));
 
             verify(wdAccessor).createDirectory("test");
-            verify(versioningManager).resetConfigurationFiles();
+            verify(versioningManager).commitAsExternalChange();
             verifyNoMoreInteractions(wdAccessor, versioningManager);
         }
 
         @Test
         public void gitException() throws GitAPIException, IOException {
-            doThrow(CanceledException.class).when(versioningManager).stageAndCommit();
+            doThrow(CanceledException.class).when(versioningManager).commit("Commit configuration file and agent mapping changes");
 
             accessor.createDirectory("test");
 
             verify(wdAccessor).createDirectory("test");
-            verify(versioningManager).resetConfigurationFiles();
-            verify(versioningManager).stageAndCommit();
+            verify(versioningManager).commitAsExternalChange();
+            verify(versioningManager).commit("Commit configuration file and agent mapping changes");
             verifyNoMoreInteractions(wdAccessor, versioningManager);
         }
     }
@@ -73,8 +73,8 @@ class AutoCommitWorkingDirectoryProxyTest {
             accessor.writeFile("path", "content");
 
             verify(wdAccessor).writeFile("path", "content");
-            verify(versioningManager).resetConfigurationFiles();
-            verify(versioningManager).stageAndCommit();
+            verify(versioningManager).commitAsExternalChange();
+            verify(versioningManager).commit("Commit configuration file and agent mapping changes");
             verifyNoMoreInteractions(wdAccessor, versioningManager);
         }
 
@@ -86,19 +86,19 @@ class AutoCommitWorkingDirectoryProxyTest {
                     .isThrownBy(() -> accessor.writeFile("path", "content"));
 
             verify(wdAccessor).writeFile("path", "content");
-            verify(versioningManager).resetConfigurationFiles();
+            verify(versioningManager).commitAsExternalChange();
             verifyNoMoreInteractions(wdAccessor, versioningManager);
         }
 
         @Test
         public void gitException() throws GitAPIException, IOException {
-            doThrow(CanceledException.class).when(versioningManager).stageAndCommit();
+            doThrow(CanceledException.class).when(versioningManager).commit("Commit configuration file and agent mapping changes");
 
             accessor.writeFile("path", "content");
 
             verify(wdAccessor).writeFile("path", "content");
-            verify(versioningManager).resetConfigurationFiles();
-            verify(versioningManager).stageAndCommit();
+            verify(versioningManager).commitAsExternalChange();
+            verify(versioningManager).commit("Commit configuration file and agent mapping changes");
             verifyNoMoreInteractions(wdAccessor, versioningManager);
         }
     }
@@ -111,8 +111,8 @@ class AutoCommitWorkingDirectoryProxyTest {
             accessor.move("src", "trgt");
 
             verify(wdAccessor).move("src", "trgt");
-            verify(versioningManager).resetConfigurationFiles();
-            verify(versioningManager).stageAndCommit();
+            verify(versioningManager).commitAsExternalChange();
+            verify(versioningManager).commit("Commit configuration file and agent mapping changes");
             verifyNoMoreInteractions(wdAccessor, versioningManager);
         }
 
@@ -124,19 +124,19 @@ class AutoCommitWorkingDirectoryProxyTest {
                     .isThrownBy(() -> accessor.move("src", "trgt"));
 
             verify(wdAccessor).move("src", "trgt");
-            verify(versioningManager).resetConfigurationFiles();
+            verify(versioningManager).commitAsExternalChange();
             verifyNoMoreInteractions(wdAccessor, versioningManager);
         }
 
         @Test
         public void gitException() throws GitAPIException, IOException {
-            doThrow(CanceledException.class).when(versioningManager).stageAndCommit();
+            doThrow(CanceledException.class).when(versioningManager).commit("Commit configuration file and agent mapping changes");
 
             accessor.move("src", "trgt");
 
             verify(wdAccessor).move("src", "trgt");
-            verify(versioningManager).resetConfigurationFiles();
-            verify(versioningManager).stageAndCommit();
+            verify(versioningManager).commitAsExternalChange();
+            verify(versioningManager).commit("Commit configuration file and agent mapping changes");
             verifyNoMoreInteractions(wdAccessor, versioningManager);
         }
     }
@@ -149,8 +149,8 @@ class AutoCommitWorkingDirectoryProxyTest {
             accessor.delete("test");
 
             verify(wdAccessor).delete("test");
-            verify(versioningManager).resetConfigurationFiles();
-            verify(versioningManager).stageAndCommit();
+            verify(versioningManager).commitAsExternalChange();
+            verify(versioningManager).commit("Commit configuration file and agent mapping changes");
             verifyNoMoreInteractions(wdAccessor, versioningManager);
         }
 
@@ -162,19 +162,19 @@ class AutoCommitWorkingDirectoryProxyTest {
                     .isThrownBy(() -> accessor.delete("test"));
 
             verify(wdAccessor).delete("test");
-            verify(versioningManager).resetConfigurationFiles();
+            verify(versioningManager).commitAsExternalChange();
             verifyNoMoreInteractions(wdAccessor, versioningManager);
         }
 
         @Test
         public void gitException() throws GitAPIException, IOException {
-            doThrow(CanceledException.class).when(versioningManager).stageAndCommit();
+            doThrow(CanceledException.class).when(versioningManager).commit("Commit configuration file and agent mapping changes");
 
             accessor.delete("test");
 
             verify(wdAccessor).delete("test");
-            verify(versioningManager).resetConfigurationFiles();
-            verify(versioningManager).stageAndCommit();
+            verify(versioningManager).commitAsExternalChange();
+            verify(versioningManager).commit("Commit configuration file and agent mapping changes");
             verifyNoMoreInteractions(wdAccessor, versioningManager);
         }
     }

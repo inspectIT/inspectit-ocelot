@@ -29,7 +29,7 @@ public class AutoCommitWorkingDirectoryProxy extends AbstractWorkingDirectoryAcc
      */
     private void commit() {
         try {
-            versioningManager.stageAndCommit();
+            versioningManager.commit("Commit configuration file and agent mapping changes");
         } catch (GitAPIException e) {
             log.error("File modification was successful but staging and committing of the change failed!", e);
         }
@@ -37,36 +37,36 @@ public class AutoCommitWorkingDirectoryProxy extends AbstractWorkingDirectoryAcc
 
     private void clean() {
         try {
-            versioningManager.resetConfigurationFiles();
+            versioningManager.commitAsExternalChange();
         } catch (GitAPIException e) {
-            //TODO
+            log.error("Could not clean the working directory.");
             throw new RuntimeException(e);
         }
     }
 
     @Override
-    protected void writeFile(String path, String content) throws IOException {
+    protected synchronized void writeFile(String path, String content) throws IOException {
         clean();
         workingDirectoryAccessor.writeFile(path, content);
         commit();
     }
 
     @Override
-    protected void createDirectory(String path) throws IOException {
+    protected synchronized void createDirectory(String path) throws IOException {
         clean();
         workingDirectoryAccessor.createDirectory(path);
         commit();
     }
 
     @Override
-    protected void move(String sourcePath, String targetPath) throws IOException {
+    protected synchronized void move(String sourcePath, String targetPath) throws IOException {
         clean();
         workingDirectoryAccessor.move(sourcePath, targetPath);
         commit();
     }
 
     @Override
-    protected void delete(String path) throws IOException {
+    protected synchronized void delete(String path) throws IOException {
         clean();
         workingDirectoryAccessor.delete(path);
         commit();

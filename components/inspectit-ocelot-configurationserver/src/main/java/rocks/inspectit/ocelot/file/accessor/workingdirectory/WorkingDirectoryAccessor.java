@@ -103,7 +103,7 @@ public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
     }
 
     @Override
-    protected void createDirectory(String path) throws IOException {
+    protected synchronized void createDirectory(String path) throws IOException {
         Path targetDirectory = resolve(path);
 
         if (Files.exists(targetDirectory)) {
@@ -116,7 +116,7 @@ public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
     }
 
     @Override
-    protected void writeFile(String path, String content) throws IOException {
+    protected synchronized void writeFile(String path, String content) throws IOException {
         Path targetFile = resolve(path);
 
         if (Files.exists(targetFile) && Files.isDirectory(targetFile)) {
@@ -130,7 +130,7 @@ public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
     }
 
     @Override
-    protected void move(String sourcePath, String targetPath) throws IOException {
+    protected synchronized void move(String sourcePath, String targetPath) throws IOException {
         Path source = resolve(sourcePath);
         Path target = resolve(targetPath);
 
@@ -146,7 +146,7 @@ public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
     }
 
     @Override
-    protected void delete(String path) throws IOException {
+    protected synchronized void delete(String path) throws IOException {
         Path targetPath = resolve(path);
 
         if (!Files.exists(targetPath)) {

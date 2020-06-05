@@ -67,11 +67,13 @@ class VersioningManagerTest extends FileTestBase {
             versioningManager.initialize();
 
             boolean after = Files.exists(tempDirectory.resolve(".git"));
+            int count = versioningManager.getCommitCount();
 
             boolean clean = versioningManager.isClean();
             assertThat(clean).isTrue();
             assertThat(before).isFalse();
             assertThat(after).isTrue();
+            assertThat(count).isOne();
         }
 
         @Test
@@ -99,9 +101,106 @@ class VersioningManagerTest extends FileTestBase {
             assertThat(cleanSecond).isTrue();
             assertThat(thirdCount).isOne();
         }
+
+        @Test
+        public void externalChanges() throws GitAPIException {
+            createTestFiles(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME, AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml", "untracked-file");
+
+            boolean initFirst = Files.exists(tempDirectory.resolve(".git"));
+            int firstCount = versioningManager.getCommitCount();
+            assertThat(initFirst).isFalse();
+            assertThat(firstCount).isZero();
+
+            versioningManager.initialize();
+
+            boolean cleanFirst = versioningManager.isClean();
+            boolean initSecond = Files.exists(tempDirectory.resolve(".git"));
+            int secondCount = versioningManager.getCommitCount();
+            assertThat(initSecond).isTrue();
+            assertThat(cleanFirst).isTrue();
+            assertThat(secondCount).isOne();
+
+            // edit file
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml=content");
+
+            versioningManager.initialize();
+
+            boolean cleanSecond = versioningManager.isClean();
+            int thirdCount = versioningManager.getCommitCount();
+            assertThat(cleanSecond).isTrue();
+            assertThat(thirdCount).isEqualTo(2);
+        }
     }
 
     @Nested
+    class Commit {
+
+        @Test
+        public void commitFile() throws GitAPIException {
+            versioningManager.initialize();
+            assertThat(versioningManager.getCommitCount()).isZero();
+
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml");
+
+            versioningManager.commit("test");
+
+            assertThat(versioningManager.getCommitCount()).isOne();
+            assertThat(versioningManager.isClean()).isTrue();
+        }
+
+        @Test
+        public void amendCommit() throws GitAPIException {
+            versioningManager.initialize();
+            assertThat(versioningManager.getCommitCount()).isZero();
+
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml");
+
+            versioningManager.commit("test");
+
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml=content");
+
+            versioningManager.commit("another commit");
+
+            assertThat(versioningManager.getCommitCount()).isOne();
+            assertThat(versioningManager.isClean()).isTrue();
+        }
+
+        @Test
+        public void noAmendAfterTimeout() throws GitAPIException {
+            versioningManager.initialize();
+            versioningManager.setAmendTimeout(-2000);
+            assertThat(versioningManager.getCommitCount()).isZero();
+
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml");
+
+            versioningManager.commit("test");
+
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml=content");
+
+            versioningManager.commit("another commit");
+
+            assertThat(versioningManager.getCommitCount()).isEqualTo(2);
+            assertThat(versioningManager.isClean()).isTrue();
+        }
+
+        @Test
+        public void noChanges() throws GitAPIException {
+            versioningManager.initialize();
+            versioningManager.setAmendTimeout(-2000);
+
+            assertThat(versioningManager.getCommitCount()).isZero();
+
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml");
+
+            versioningManager.commit("test");
+            versioningManager.commit("no change");
+
+            assertThat(versioningManager.getCommitCount()).isOne();
+            assertThat(versioningManager.isClean()).isTrue();
+        }
+    }
+
+        @Nested
     class IsClean {
 
         @Test
@@ -167,67 +266,6 @@ class VersioningManagerTest extends FileTestBase {
 
             verify(gitMock).close();
             verifyNoMoreInteractions(gitMock);
-        }
-    }
-
-
-    @Nested
-    class ResetConfigurationFiles {
-
-        @Test
-        public void test() throws GitAPIException {
-            versioningManager.initialize();
-
-            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml");
-            versioningManager.stageAndCommit();
-
-            assertThat(versioningManager.getCommitCount()).isOne();
-
-            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml=asdasdasd");
-
-
-            versioningManager.stageAndCommit();
-            versioningManager.resetConfigurationFiles();
-
-            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml=asdasdasd");
-            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/another.yml");
-
-            versioningManager.resetConfigurationFiles();
-        }
-    }
-
-    @Nested
-    class StageAndCommit {
-
-        @Test
-        public void amend() throws GitAPIException {
-            versioningManager.initialize();
-
-            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml");
-            versioningManager.stageAndCommit();
-
-            assertThat(versioningManager.getCommitCount()).isOne();
-
-            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml=new_content");
-            versioningManager.stageAndCommit();
-
-            assertThat(versioningManager.getCommitCount()).isOne();
-        }
-
-        @Test
-        public void amendTimeout() throws GitAPIException {
-            versioningManager.initialize();
-            versioningManager.setAmendTimeout(-2000);
-
-            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml");
-            versioningManager.stageAndCommit();
-
-            assertThat(versioningManager.getCommitCount()).isOne();
-
-            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml=new_content");
-            versioningManager.stageAndCommit();
-
-            assertThat(versioningManager.getCommitCount()).isEqualTo(2);
         }
     }
 }
