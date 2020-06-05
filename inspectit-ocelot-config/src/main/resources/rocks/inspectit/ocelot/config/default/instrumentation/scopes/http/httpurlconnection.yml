@@ -22,3 +22,15 @@ inspectit:
         methods:
           - name: 'connect'
             arguments: []
+
+      's_httpurlconnection_requestInitiators':
+        superclass:
+          name: 'java.net.HttpURLConnection'
+        methods:
+          - name: 'getHeaderField'
+          - name: 'getHeaderFieldDate'
+          - name: 'getHeaderFieldKey'
+          - name: 'getResponseCode'
+          - name: 'getResponseMessage'
+        advanced:
+          instrument-only-inherited-methods: true

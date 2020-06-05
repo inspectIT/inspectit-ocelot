@@ -15,6 +15,11 @@ public class JaegerExporterSettings {
     private String url;
 
     /**
+     * The URI of the Jaeger gRPC proto-buf API.
+     */
+    private String grpc;
+
+    /**
      * The service name under which traces are published, defaults to inspectit.service-name;
      */
     private String serviceName;

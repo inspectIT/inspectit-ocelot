@@ -111,6 +111,12 @@ A good starting point is the [CONTRIBUTING.md](CONTRIBUTING.md).
 
 If you need additional or in-depth information on the actual implementation of inspectIT Ocelot, check out the README files in the child projects of this repository. 
 
+#### Thanks to all people who have already contributed!
+
+<a href="https://github.com/inspectit/inspectit-ocelot/graphs/contributors">
+  <img src="https://contributors-img.web.app/image?repo=inspectit/inspectit-ocelot" />
+</a>
+
 ## FAQ
 
 #### Is it pronounced inspect-"IT" or "it"?
