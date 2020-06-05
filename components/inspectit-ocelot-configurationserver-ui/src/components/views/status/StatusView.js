@@ -16,7 +16,7 @@ class StatusView extends React.Component {
 
   render() {
     const { filter } = this.state;
-    const { agents, disableClear } = this.props;
+    const { agents, readOnly } = this.props;
     return (
       <>
         <style jsx>{`
@@ -33,7 +33,7 @@ class StatusView extends React.Component {
         `}</style>
         <div className="this">
           <div>
-            <StatusToolbar filter={filter} onFilterChange={(filter) => this.setState({ filter })} disableClear={disableClear} />
+            <StatusToolbar filter={filter} onFilterChange={(filter) => this.setState({ filter })} disableClear={readOnly} />
           </div>
           <div className="data-table">
             <StatusTable data={agents} filter={filter} />
@@ -68,7 +68,7 @@ function mapStateToProps(state) {
   return {
     loading: pendingRequests > 0,
     agents,
-    disableClear: !state.authentication.permissions.write,
+    readOnly: !state.authentication.permissions.write,
   };
 }
 

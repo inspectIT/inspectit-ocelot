@@ -1,6 +1,6 @@
 import React from 'react';
 import NavigationItem from './SideNavigationItem';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 /** Data */
 import itemData from '../../data/side-navigation-items.json';
@@ -9,7 +9,9 @@ import itemData from '../../data/side-navigation-items.json';
  * The application's side-navigation.
  * The items are defined in the JSON file which has been imported.
  */
-const SideNavigation = ({ isAdmin }) => {
+const SideNavigation = () => {
+  const isAdmin = useSelector((state) => state.authentication.permissions.admin);
+
   return (
     <div className="this">
       <style jsx>
@@ -36,10 +38,4 @@ const SideNavigation = ({ isAdmin }) => {
     </div>
   );
 };
-
-function mapStateToProps(state) {
-  return {
-    isAdmin: state.authentication.permissions.admin,
-  };
-}
-export default connect(mapStateToProps)(SideNavigation);
+export default SideNavigation;

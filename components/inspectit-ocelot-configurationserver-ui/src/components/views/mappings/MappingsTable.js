@@ -15,51 +15,48 @@ import { cloneDeep, find } from 'lodash';
 /** Component including the menu button for each mapping */
 const ButtonCell = ({ readOnly, mapping, onEdit, onDelete, onDownload, onDuplicate, appendRef }) => {
   const thisCell = {};
-  const menuItems = [
-    ...(readOnly
-      ? []
-      : [
-          {
-            label: 'Edit',
-            icon: 'pi pi-fw pi-pencil',
-            command: (e) => {
-              thisCell.menu.toggle(e);
-              onEdit(mapping);
-            },
-          },
-        ]),
-    {
-      label: 'Download Configuration',
-      icon: 'pi pi-fw pi-download',
+  let menuItems = [];
+  if (!readOnly) {
+    menuItems.push({
+      label: 'Edit',
+      icon: 'pi pi-fw pi-pencil',
       command: (e) => {
         thisCell.menu.toggle(e);
-        onDownload(mapping.attributes);
+        onEdit(mapping);
       },
+    });
+  }
+  menuItems.push({
+    label: 'Download Configuration',
+    icon: 'pi pi-fw pi-download',
+    command: (e) => {
+      thisCell.menu.toggle(e);
+      onDownload(mapping.attributes);
     },
-    ...(readOnly
-      ? []
-      : [
-          {
-            label: 'Duplicate',
-            icon: 'pi pi-fw pi-clone',
-            command: (e) => {
-              thisCell.menu.toggle(e);
-              onDuplicate(mapping);
-            },
-          },
-          {
-            separator: true,
-          },
-          {
-            label: 'Delete',
-            icon: 'pi pi-fw pi-trash',
-            command: (e) => {
-              thisCell.menu.toggle(e);
-              onDelete(mapping.name);
-            },
-          },
-        ]),
-  ];
+  });
+  if (!readOnly) {
+    menuItems = menuItems.concat([
+      {
+        label: 'Duplicate',
+        icon: 'pi pi-fw pi-clone',
+        command: (e) => {
+          thisCell.menu.toggle(e);
+          onDuplicate(mapping);
+        },
+      },
+      {
+        separator: true,
+      },
+      {
+        label: 'Delete',
+        icon: 'pi pi-fw pi-trash',
+        command: (e) => {
+          thisCell.menu.toggle(e);
+          onDelete(mapping.name);
+        },
+      },
+    ]);
+  }
   return (
     <div ref={(el) => (thisCell.div = el)} className="this">
       <style jsx>{`

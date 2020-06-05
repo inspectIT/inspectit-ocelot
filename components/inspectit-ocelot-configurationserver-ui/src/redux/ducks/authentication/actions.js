@@ -19,12 +19,15 @@ export const fetchToken = (username, password) => {
       password: password,
     };
 
+    const tokenRequest = axiosPlain.get('/account/token', { auth });
+    const permissionsRequest = axiosPlain.get('/account/permissions', { auth });
+
     axios
-      .all([axiosPlain.get('/account/token', { auth }), axiosPlain.get('/account/permissions', { auth })])
+      .all([tokenRequest, permissionsRequest])
       .then(
-        axios.spread((tokenResponse, permissionResponse) => {
-          const token = tokenResponse.data;
-          const permissions = permissionResponse.data;
+        axios.spread((...responses) => {
+          const token = responses[0].data;
+          const permissions = responses[1].data;
           dispatch({ type: types.FETCH_TOKEN_SUCCESS, payload: { token, username, permissions } });
         })
       )
@@ -47,12 +50,15 @@ export const fetchToken = (username, password) => {
  */
 export const renewToken = () => {
   return (dispatch) => {
+    const tokenRequest = axiosBearer.get('/account/token');
+    const permissionsRequest = axiosBearer.get('/account/permissions');
+
     axios
-      .all([axiosBearer.get('/account/token'), axiosBearer.get('/account/permissions')])
+      .all([tokenRequest, permissionsRequest])
       .then(
-        axios.spread((tokenResponse, permissionResponse) => {
-          const token = tokenResponse.data;
-          const permissions = permissionResponse.data;
+        axios.spread((...responses) => {
+          const token = responses[0].data;
+          const permissions = responses[0].data;
           dispatch({ type: types.RENEW_TOKEN_SUCCESS, payload: { token, permissions } });
         })
       )
