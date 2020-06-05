@@ -58,6 +58,6 @@ const AgentMappingView = () => {
       <DownloadDialog visible={isDownloadDialogShown} onHide={() => setDownloadDialogShown(false)} />
     </div>
   );
-}
+};
 
 export default AgentMappingView;

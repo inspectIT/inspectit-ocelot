@@ -84,20 +84,20 @@ const SourceCell = ({ sources = [], appendRef }) => {
       {sources.length <= 5 ? (
         sources.map((source) => <p key={source}>{source}</p>)
       ) : (
-          <div onMouseEnter={(e) => thisCell.op.show(e)} onMouseLeave={(e) => thisCell.op.hide(e)}>
-            <p>{sources[0]}</p>
-            <p>{sources[1]}</p>
-            <p>{sources[2]}</p>
-            <p>{sources[3]}</p>
-            <p>{sources[4]}</p>
-            <p>...</p>
-            <OverlayPanel appendTo={appendRef} ref={(el) => (thisCell.op = el)}>
-              {sources.map((source) => (
-                <p key={source}>{source}</p>
-              ))}
-            </OverlayPanel>
-          </div>
-        )}
+        <div onMouseEnter={(e) => thisCell.op.show(e)} onMouseLeave={(e) => thisCell.op.hide(e)}>
+          <p>{sources[0]}</p>
+          <p>{sources[1]}</p>
+          <p>{sources[2]}</p>
+          <p>{sources[3]}</p>
+          <p>{sources[4]}</p>
+          <p>...</p>
+          <OverlayPanel appendTo={appendRef} ref={(el) => (thisCell.op = el)}>
+            {sources.map((source) => (
+              <p key={source}>{source}</p>
+            ))}
+          </OverlayPanel>
+        </div>
+      )}
     </div>
   );
 };
@@ -112,20 +112,20 @@ const AttributesCell = ({ attributes = {}, appendRef }) => {
       {keys && keys.length <= 5 ? (
         keys.map((key) => <p key={key}>{`${key}: ${attributes[key]}`}</p>)
       ) : (
-          <div onMouseEnter={(e) => thisCell.op.show(e)} onMouseLeave={(e) => thisCell.op.hide(e)}>
-            <p>{`${keys[0]}: ${attributes[keys[0]]}`}</p>
-            <p>{`${keys[1]}: ${attributes[keys[1]]}`}</p>
-            <p>{`${keys[2]}: ${attributes[keys[2]]}`}</p>
-            <p>{`${keys[3]}: ${attributes[keys[3]]}`}</p>
-            <p>{`${keys[4]}: ${attributes[keys[4]]}`}</p>
-            <p>...</p>
-            <OverlayPanel appendTo={appendRef} ref={(el) => (thisCell.op = el)}>
-              {keys.map((key) => (
-                <p key={key}>{`${key}: ${attributes[key]}`}</p>
-              ))}
-            </OverlayPanel>
-          </div>
-        )}
+        <div onMouseEnter={(e) => thisCell.op.show(e)} onMouseLeave={(e) => thisCell.op.hide(e)}>
+          <p>{`${keys[0]}: ${attributes[keys[0]]}`}</p>
+          <p>{`${keys[1]}: ${attributes[keys[1]]}`}</p>
+          <p>{`${keys[2]}: ${attributes[keys[2]]}`}</p>
+          <p>{`${keys[3]}: ${attributes[keys[3]]}`}</p>
+          <p>{`${keys[4]}: ${attributes[keys[4]]}`}</p>
+          <p>...</p>
+          <OverlayPanel appendTo={appendRef} ref={(el) => (thisCell.op = el)}>
+            {keys.map((key) => (
+              <p key={key}>{`${key}: ${attributes[key]}`}</p>
+            ))}
+          </OverlayPanel>
+        </div>
+      )}
     </div>
   );
 };
