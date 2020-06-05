@@ -26,6 +26,8 @@ public class FileManager {
 
     private AbstractWorkingDirectoryAccessor workingDirectoryAccessor;
 
+    private VersioningManager versioningManager;
+
     @Autowired
     public FileManager(InspectitServerSettings settings, ApplicationEventPublisher eventPublisher) throws GitAPIException {
         Path workingDirectory = Paths.get(settings.getWorkingDirectory()).toAbsolutePath().normalize();
@@ -33,7 +35,7 @@ public class FileManager {
         WorkingDirectoryAccessor workingDirectoryAccessorImpl = new WorkingDirectoryAccessor(workingDirectory, eventPublisher);
 
         Supplier<Authentication> authenticationSupplier = () -> SecurityContextHolder.getContext().getAuthentication();
-        VersioningManager versioningManager = new VersioningManager(workingDirectory, authenticationSupplier);
+        versioningManager = new VersioningManager(workingDirectory, authenticationSupplier);
         versioningManager.initialize();
 
         this.workingDirectoryAccessor = new AutoCommitWorkingDirectoryProxy(workingDirectoryAccessorImpl, versioningManager);
