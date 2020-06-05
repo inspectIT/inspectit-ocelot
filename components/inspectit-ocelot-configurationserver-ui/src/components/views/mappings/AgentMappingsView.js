@@ -8,7 +8,7 @@ import EditDialog from './dialogs/EditDialog';
 import DownloadDialog from './dialogs/DownloadDialog';
 
 /** View to display and change mappings */
-function AgentMappingView() {
+const AgentMappingView = () => {
   const readOnly = useSelector((state) => !state.authentication.permissions.write);
 
   const [mappingsFilter, setMappingsFilter] = useState('');
