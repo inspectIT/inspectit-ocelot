@@ -22,8 +22,43 @@ class UserDataTable extends React.Component {
     this.setState({ userToDelete: null });
   };
 
+  addZero(x, n) {
+    while (x.toString().length < n) {
+      x = '0' + x;
+    }
+    return x;
+  }
+
+  buildTimeStamp(users) {
+    for (let i = 0; i < users.length; i++) {
+      try {
+        const time = users[i].lastLoginTime;
+        const d = new Date(time);
+        const timeStamp =
+          this.addZero(d.getDate(), 2) +
+          '/' +
+          this.addZero(d.getMonth() + 1, 2) +
+          '/' +
+          d.getFullYear() +
+          '  ' +
+          this.addZero(d.getHours(), 2) +
+          ':' +
+          this.addZero(d.getMinutes(), 2) +
+          ':' +
+          this.addZero(d.getSeconds(), 2);
+        users[i].lastLoginTime = timeStamp;
+      } catch (e) {
+        continue;
+      }
+    }
+    return users;
+  }
+
   render() {
-    const { users, filterValue, maxHeight } = this.props;
+    const { filterValue, maxHeight } = this.props;
+    let { users } = this.props;
+
+    users = this.buildTimeStamp(users);
 
     return (
       <div>
