@@ -5,6 +5,7 @@ import { InputText } from 'primereact/inputtext';
 import ClearDialog from './dialogs/ClearDialog';
 import { connect } from 'react-redux';
 import { agentStatusActions } from '../../../redux/ducks/agent-status';
+import { Checkbox } from 'primereact/checkbox';
 
 /**
  * Toolbar in the status view. Allows filtering of statuses, refreshing and clearing all statuses.
@@ -34,6 +35,15 @@ class StatusToolbar extends React.Component {
           .p-toolbar-group-right > :global(*) {
             margin-left: 0.25rem;
           }
+          .p-toolbar-label {
+            margin-top: 0.5rem;
+            margin-left: 1rem;
+            padding-right: -1rem;
+          }
+          .p-toolbar-checkbox {
+            margin-left: 5rem;
+            margin-top: -1.2rem;
+          }
         `}</style>
         <Toolbar>
           <div className="p-toolbar-group-left">
@@ -46,6 +56,12 @@ class StatusToolbar extends React.Component {
                 placeholder={'Filter Agents'}
                 onChange={(e) => onFilterChange(e.target.value)}
               />
+              <div className="p-toolbar-label">
+                <label>With Regex</label>
+                <div className="p-toolbar-checkbox">
+                  <Checkbox onChange={this.props.changeFilter()} checked={this.props.filterStatus} />
+                </div>
+              </div>
             </div>
           </div>
           <div className="p-toolbar-group-right">
