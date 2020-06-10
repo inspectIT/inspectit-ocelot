@@ -11,6 +11,7 @@ import java.lang.instrument.Instrumentation;
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
+import java.security.ProtectionDomain;
 import java.util.*;
 
 /**
@@ -116,7 +117,7 @@ public class ClassInjector {
         if (loader == null) {
             //for bootstrap classes the standard injection does not work properly
             //however it also is not necessary as a reference to the bootstrap loader won't cause a memoryleak anyway
-            return bootstrapChildLoader.defineNewClass(className, byteCode);
+            return bootstrapChildLoader.defineNewClass(className, byteCode, neighborClass);
         } else {
             return ClassDefinitionUtils.defineClass(className, byteCode, neighborClass, loader);
         }
@@ -221,8 +222,9 @@ public class ClassInjector {
 
     private static class InjectionClassLoader extends ClassLoader {
 
-        public Class<?> defineNewClass(String className, byte[] code) throws Exception {
-            super.defineClass(className, code, 0, code.length);
+        public Class<?> defineNewClass(final String className, final byte[] code, final Class<?> neighborClass) throws Exception {
+            ProtectionDomain protectionDomain = neighborClass.getProtectionDomain();
+        	super.defineClass(className, code, 0, code.length, protectionDomain);
             return Class.forName(className, false, this);
         }
     }
