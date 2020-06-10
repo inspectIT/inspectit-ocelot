@@ -22,7 +22,7 @@ public class JBossLogmanagerMDCAdapter extends AbstractStaticMapMDCAdapter {
     /**
      * Creates an Adapater given a ThreadContext class.
      *
-     * @param mdcClazz the org.apache.logging.log4j.ThreadContext class
+     * @param mdcClazz the org.jboss.logmanager.MDC class
      * @return and adapter for setting values on the given thread context.
      */
     public static JBossLogmanagerMDCAdapter get(Class<?> mdcClazz) {
