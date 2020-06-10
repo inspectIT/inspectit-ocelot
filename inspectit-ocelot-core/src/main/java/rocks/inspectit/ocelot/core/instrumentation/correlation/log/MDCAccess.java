@@ -9,6 +9,7 @@ import rocks.inspectit.ocelot.core.instrumentation.correlation.log.adapters.Log4
 import rocks.inspectit.ocelot.core.instrumentation.correlation.log.adapters.Log4J2MDCAdapter;
 import rocks.inspectit.ocelot.core.instrumentation.correlation.log.adapters.MDCAdapter;
 import rocks.inspectit.ocelot.core.instrumentation.correlation.log.adapters.Slf4jMDCAdapter;
+import rocks.inspectit.ocelot.core.instrumentation.correlation.log.adapters.JBossLogmanagerMDCAdapter;
 import rocks.inspectit.ocelot.core.instrumentation.event.IClassDiscoveryListener;
 
 import javax.annotation.PostConstruct;
@@ -56,6 +57,7 @@ public class MDCAccess implements IClassDiscoveryListener {
         mdcAdapterBuilders.put(Slf4jMDCAdapter.MDC_CLASS, Slf4jMDCAdapter::get);
         mdcAdapterBuilders.put(Log4J2MDCAdapter.THREAD_CONTEXT_CLASS, Log4J2MDCAdapter::get);
         mdcAdapterBuilders.put(Log4J1MDCAdapter.MDC_CLASS, Log4J1MDCAdapter::get);
+        mdcAdapterBuilders.put(JBossLogmanagerMDCAdapter.MDC_CLASS, JBossLogmanagerMDCAdapter::get);
     }
 
     /**
