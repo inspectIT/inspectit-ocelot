@@ -8,10 +8,13 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 import rocks.inspectit.ocelot.file.FileData;
 import rocks.inspectit.ocelot.rest.util.RequestUtil;
+import rocks.inspectit.ocelot.search.FileContentSearchEngine;
+import rocks.inspectit.ocelot.search.SearchResult;
 import rocks.inspectit.ocelot.security.config.UserRoleConfiguration;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -22,6 +25,9 @@ public class FileController extends FileBaseController {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private FileContentSearchEngine fileContentSearchEngine;
 
     @Secured(UserRoleConfiguration.WRITE_ACCESS_ROLE)
     @ApiOperation(value = "Write a file", notes = "Creates or overwrites a file with the provided text content")
@@ -86,5 +92,12 @@ public class FileController extends FileBaseController {
         String path = RequestUtil.getRequestSubPath(request);
 
         fileManager.getWorkingDirectory().deleteConfiguration(path);
+    }
+
+    @ApiOperation(value = "Search the given query in all present files.", notes = "Search the given query in all present files.")
+    @ApiImplicitParam(name = "query", type = "string", value = "The query string that should be searched in the files.")
+    @GetMapping(value = "search")
+    public List<SearchResult> searchQuery(@RequestParam String query, @RequestParam(defaultValue = "-1") int limit) {
+        return fileContentSearchEngine.searchInFiles(query, limit);
     }
 }

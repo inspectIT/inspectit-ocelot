@@ -8,9 +8,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.autocomplete.util.ConfigurationFilesCache;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -33,19 +32,22 @@ public class FileContentSearchEngineTest {
             HashMap<String, String> testMap = new HashMap<>();
             testMap.put("file", "test1 \nabc \nfootest1");
             when(configurationFilesCache.getFiles()).thenReturn(testMap);
-            ArrayList<MatchedSubstringIndicator> filesList = new ArrayList<>();
-            MatchedSubstringIndicator matchedSubstring1 = new MatchedSubstringIndicator();
-            matchedSubstring1.setStart(0, 0);
-            matchedSubstring1.setEnd(0, 4);
-            MatchedSubstringIndicator matchedSubstring2 = new MatchedSubstringIndicator();
-            matchedSubstring2.setStart(2, 4);
-            matchedSubstring2.setEnd(2, 8);
-            filesList.add(matchedSubstring1);
-            filesList.add(matchedSubstring2);
 
-            Map<?, ?> output = fileContentSearchEngine.searchInFiles("test1");
+            List<SearchResult> output = fileContentSearchEngine.searchInFiles("test1", -1);
 
-            assertThat(output.get("file")).isEqualTo(filesList);
+            assertThat(output).hasSize(2);
+            SearchResult result = output.get(0);
+            assertThat(result.getFile()).isEqualTo("file");
+            assertThat(result.getStartLine()).isEqualTo(1);
+            assertThat(result.getEndLine()).isEqualTo(1);
+            assertThat(result.getStartColumn()).isEqualTo(1);
+            assertThat(result.getEndColumn()).isEqualTo(5);
+            result = output.get(1);
+            assertThat(result.getFile()).isEqualTo("file");
+            assertThat(result.getStartLine()).isEqualTo(3);
+            assertThat(result.getEndLine()).isEqualTo(3);
+            assertThat(result.getStartColumn()).isEqualTo(4);
+            assertThat(result.getEndColumn()).isEqualTo(8);
         }
 
         @Test
@@ -53,23 +55,28 @@ public class FileContentSearchEngineTest {
             HashMap<String, String> testMap = new HashMap<>();
             testMap.put("file", "testtesttest");
             when(configurationFilesCache.getFiles()).thenReturn(testMap);
-            ArrayList<MatchedSubstringIndicator> filesList = new ArrayList<>();
-            MatchedSubstringIndicator matchedSubstring1 = new MatchedSubstringIndicator();
-            matchedSubstring1.setStart(0, 0);
-            matchedSubstring1.setEnd(0, 3);
-            MatchedSubstringIndicator matchedSubstring2 = new MatchedSubstringIndicator();
-            matchedSubstring2.setStart(0, 4);
-            matchedSubstring2.setEnd(0, 7);
-            MatchedSubstringIndicator matchedSubstring3 = new MatchedSubstringIndicator();
-            matchedSubstring3.setStart(0, 8);
-            matchedSubstring3.setEnd(0, 11);
-            filesList.add(matchedSubstring1);
-            filesList.add(matchedSubstring2);
-            filesList.add(matchedSubstring3);
 
-            Map<?, ?> output = fileContentSearchEngine.searchInFiles("test");
+            List<SearchResult> output = fileContentSearchEngine.searchInFiles("test", -1);
 
-            assertThat(output.get("file")).isEqualTo(filesList);
+            assertThat(output).hasSize(3);
+            SearchResult result = output.get(0);
+            assertThat(result.getFile()).isEqualTo("file");
+            assertThat(result.getStartLine()).isEqualTo(1);
+            assertThat(result.getEndLine()).isEqualTo(1);
+            assertThat(result.getStartColumn()).isEqualTo(1);
+            assertThat(result.getEndColumn()).isEqualTo(4);
+            result = output.get(1);
+            assertThat(result.getFile()).isEqualTo("file");
+            assertThat(result.getStartLine()).isEqualTo(1);
+            assertThat(result.getEndLine()).isEqualTo(1);
+            assertThat(result.getStartColumn()).isEqualTo(5);
+            assertThat(result.getEndColumn()).isEqualTo(8);
+            result = output.get(2);
+            assertThat(result.getFile()).isEqualTo("file");
+            assertThat(result.getStartLine()).isEqualTo(1);
+            assertThat(result.getEndLine()).isEqualTo(1);
+            assertThat(result.getStartColumn()).isEqualTo(9);
+            assertThat(result.getEndColumn()).isEqualTo(12);
         }
 
         @Test
@@ -77,15 +84,34 @@ public class FileContentSearchEngineTest {
             HashMap<String, String> testMap = new HashMap<>();
             testMap.put("file", "foo\nbar");
             when(configurationFilesCache.getFiles()).thenReturn(testMap);
-            ArrayList<MatchedSubstringIndicator> filesList = new ArrayList<>();
-            MatchedSubstringIndicator matchedSubstring = new MatchedSubstringIndicator();
-            matchedSubstring.setStart(0, 0);
-            matchedSubstring.setEnd(1, 3);
-            filesList.add(matchedSubstring);
 
-            Map<?, ?> output = fileContentSearchEngine.searchInFiles("foo\nbar");
+            List<SearchResult> output = fileContentSearchEngine.searchInFiles("foo\nbar", -1);
 
-            assertThat(output.get("file")).isEqualTo(filesList);
+            assertThat(output).hasSize(1);
+            SearchResult result = output.get(0);
+            assertThat(result.getFile()).isEqualTo("file");
+            assertThat(result.getStartLine()).isEqualTo(1);
+            assertThat(result.getEndLine()).isEqualTo(2);
+            assertThat(result.getStartColumn()).isEqualTo(1);
+            assertThat(result.getEndColumn()).isEqualTo(3);
+
+        }
+
+        @Test
+        void withLimit() {
+            HashMap<String, String> testMap = new HashMap<>();
+            testMap.put("file", "testtesttest");
+            when(configurationFilesCache.getFiles()).thenReturn(testMap);
+
+            List<SearchResult> output = fileContentSearchEngine.searchInFiles("test", 1);
+
+            assertThat(output).hasSize(1);
+            SearchResult result = output.get(0);
+            assertThat(result.getFile()).isEqualTo("file");
+            assertThat(result.getStartLine()).isEqualTo(1);
+            assertThat(result.getEndLine()).isEqualTo(1);
+            assertThat(result.getStartColumn()).isEqualTo(1);
+            assertThat(result.getEndColumn()).isEqualTo(4);
         }
 
         @Test
@@ -93,18 +119,15 @@ public class FileContentSearchEngineTest {
             HashMap<String, String> testMap = new HashMap<>();
             testMap.put("file1", "test1 \n abc \n test1");
             when(configurationFilesCache.getFiles()).thenReturn(testMap);
-            ArrayList<Integer> listFile = new ArrayList<>();
-            listFile.add(1);
-            listFile.add(3);
 
-            Map<?, ?> output = fileContentSearchEngine.searchInFiles("foo");
+            List<SearchResult> output = fileContentSearchEngine.searchInFiles("foo", -1);
 
             assertThat(output).isEmpty();
         }
 
         @Test
         void emptyQuery() {
-            Map<?, ?> output = fileContentSearchEngine.searchInFiles("");
+            List<SearchResult> output = fileContentSearchEngine.searchInFiles("", -1);
 
             assertThat(output).hasSize(0);
         }
