@@ -12,7 +12,7 @@ class FileToolbar extends React.Component {
   fetchFiles = () => this.props.fetchFiles();
 
   render() {
-    const { loading, selection } = this.props;
+    const { loading, selection, readOnly } = this.props;
 
     const tooltipOptions = {
       showDelay: 500,
@@ -35,28 +35,28 @@ class FileToolbar extends React.Component {
         <Toolbar>
           <div className="p-toolbar-group-left">
             <Button
-              disabled={loading}
+              disabled={readOnly || loading}
               tooltip="New file"
               icon="pi pi-file"
               tooltipOptions={tooltipOptions}
               onClick={() => this.props.showCreateFileDialog(selection)}
             />
             <Button
-              disabled={loading}
+              disabled={readOnly || loading}
               tooltip="New directory"
               icon="pi pi-folder-open"
               tooltipOptions={tooltipOptions}
               onClick={() => this.props.showCreateDirectoryDialog(selection)}
             />
             <Button
-              disabled={loading || !selection}
+              disabled={readOnly || loading || !selection}
               tooltip="Move/Rename file or directory"
               icon="pi pi-pencil"
               tooltipOptions={tooltipOptions}
               onClick={() => this.props.showMoveDialog(selection)}
             />
             <Button
-              disabled={loading || !selection}
+              disabled={readOnly || loading || !selection}
               tooltip="Delete file or directory"
               icon="pi pi-trash"
               tooltipOptions={tooltipOptions}
