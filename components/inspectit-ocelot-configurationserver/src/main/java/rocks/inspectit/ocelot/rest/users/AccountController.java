@@ -26,6 +26,8 @@ import rocks.inspectit.ocelot.security.jwt.JwtTokenManager;
 import rocks.inspectit.ocelot.user.User;
 import rocks.inspectit.ocelot.user.UserPermissions;
 import rocks.inspectit.ocelot.user.UserService;
+
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -57,11 +59,12 @@ public class AccountController extends AbstractBaseController {
     @ApiResponse(code = 200, message = "The access token", examples =
     @Example(value = @ExampleProperty(value = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImV4cCI6MTU2MTYyODE1NH0.KelDW1OXg9xlMjSiblwZqui7sya4Crq833b-98p8UZ4", mediaType = "text/plain")))
     @GetMapping("account/token")
-    public String acuireNewAccessToken(Authentication auth) {
-        long timeStamp = System.currentTimeMillis();
-        if(userService.getUserByName(auth.getName()).isPresent()){
-            User user = userService.getUserByName(auth.getName()).get();
-            user.setLastLoginTime(timeStamp);
+    public String acquireNewAccessToken(Authentication auth) {
+        Optional<User> userOptional = userService.getUserByName(auth.getName());
+
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            user.setLastLoginTime(System.currentTimeMillis());
             userService.addOrUpdateUser(user);
         }
         return tokenManager.createToken(auth.getName());

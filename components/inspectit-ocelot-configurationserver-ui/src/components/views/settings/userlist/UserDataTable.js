@@ -6,6 +6,7 @@ import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
 import { settingsActions } from '../../../../redux/ducks/settings';
 import DeleteDialog from '../dialogs/DeleteDialog';
+import dateformat from 'dateformat';
 
 /**
  * Fetches and lists all users.
@@ -22,50 +23,19 @@ class UserDataTable extends React.Component {
     this.setState({ userToDelete: null });
   };
 
-  addZero(x, n) {
-    while (x.toString().length < n) {
-      x = '0' + x;
-    }
-    return x;
-  }
-
-  buildTimeStamp(users) {
-    for (let i = 0; i < users.length; i++) {
-      try {
-        const time = users[i].lastLoginTime;
-        const d = new Date(time);
-        const timeStamp =
-          this.addZero(d.getDate(), 2) +
-          '/' +
-          this.addZero(d.getMonth() + 1, 2) +
-          '/' +
-          d.getFullYear() +
-          '  ' +
-          this.addZero(d.getHours(), 2) +
-          ':' +
-          this.addZero(d.getMinutes(), 2) +
-          ':' +
-          this.addZero(d.getSeconds(), 2);
-        users[i].lastLoginTime = timeStamp;
-      } catch (e) {
-        continue;
-      }
-    }
-    return users;
-  }
-
   render() {
-    const { filterValue, maxHeight } = this.props;
-    let { users } = this.props;
-
-    users = this.buildTimeStamp(users);
+    const { users, filterValue, maxHeight } = this.props;
 
     return (
       <div>
         <DataTable value={users} globalFilter={filterValue} scrollable={true} scrollHeight={maxHeight}>
           <Column field="id" header="ID" />
           <Column field="username" header="Username" />
-          <Column field="lastLoginTime" header="Last Login Time" />
+          <Column
+            field="lastLoginTime"
+            header="Last Login Time"
+            body={(user) => (user.lastLoginTime === 0 ? '-' : dateformat(user.lastLoginTime, 'yyyy-mm-dd HH:MM:ss'))}
+          />
           <Column field="ldapUser" header="LDAP User" body={(data) => <i className={data.ldapUser ? 'pi pi-check' : 'pi pi-times'}></i>} />
           <Column
             style={{ width: '3.5rem' }}
