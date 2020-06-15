@@ -119,4 +119,35 @@ public class AccountControllerIntTest extends IntegrationTestBase {
                             .build());
         }
     }
+
+    @Nested
+    class AcquireNewAccessToken {
+
+        @Test
+        void acquireToken() {
+            long now = System.currentTimeMillis();
+
+            userService.addOrUpdateUser(User.builder()
+                    .username("John")
+                    .password("doe")
+                    .build());
+
+            long loginTimeBefore = userService
+                    .getUserByName("John").get()
+                    .getLastLoginTime();
+            assertThat(loginTimeBefore).isZero();
+
+            ResponseEntity<String> result = rest
+                    .withBasicAuth("John", "doe")
+                    .getForEntity("/api/v1/account/token", String.class);
+
+            assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            long loginTimeAfter = userService
+                    .getUserByName("John").get()
+                    .getLastLoginTime();
+            assertThat(loginTimeAfter).isGreaterThanOrEqualTo(now);
+        }
+
+    }
 }

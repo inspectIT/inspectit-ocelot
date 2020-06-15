@@ -6,6 +6,7 @@ import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
 import { settingsActions } from '../../../../redux/ducks/settings';
 import DeleteDialog from '../dialogs/DeleteDialog';
+import dateformat from 'dateformat';
 
 /**
  * Fetches and lists all users.
@@ -30,6 +31,11 @@ class UserDataTable extends React.Component {
         <DataTable value={users} globalFilter={filterValue} scrollable={true} scrollHeight={maxHeight}>
           <Column field="id" header="ID" />
           <Column field="username" header="Username" />
+          <Column
+            field="lastLoginTime"
+            header="Last Login Time"
+            body={(user) => (user.lastLoginTime === 0 ? '-' : dateformat(user.lastLoginTime, 'yyyy-mm-dd HH:MM:ss'))}
+          />
           <Column field="ldapUser" header="LDAP User" body={(data) => <i className={data.ldapUser ? 'pi pi-check' : 'pi pi-times'}></i>} />
           <Column
             style={{ width: '3.5rem' }}
