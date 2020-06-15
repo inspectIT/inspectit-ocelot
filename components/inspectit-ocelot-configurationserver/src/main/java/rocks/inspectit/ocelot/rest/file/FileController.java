@@ -94,8 +94,24 @@ public class FileController extends FileBaseController {
         fileManager.getWorkingDirectory().deleteConfiguration(path);
     }
 
-    @ApiOperation(value = "Search the given query in all present files.", notes = "Search the given query in all present files.")
-    @ApiImplicitParam(name = "query", type = "string", value = "The query string that should be searched in the files.")
+    @ApiOperation(value = "Search the given query in all present files.", notes = "Searches the given query in all present files. " +
+            "Returns as many files as defined by the limit parameter. If the the limit is set to -1, all found files are returned. " +
+            "All found matches are returned in a list of SearchResult object. Each of these objects contains the following variables:" +
+            "<p>" +
+            "<b>file:</b> a String resembling the name of the file the match was found in." +
+            "<p>" +
+            "<b>startLine:</b> the number of the line in this file where the found match starts as integer." +
+            "<p>" +
+            "<b>endLine:</b> the number of the line in this file where the found match ends as integer." +
+            "<p>" +
+            "<b>startColumn:</b> the number of the column where the found found match starts as integer." +
+            "<p>" +
+            "<b>endColumn:</b> the number of the column where the found match ends as integer."
+    )
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "query", value = "The query string that should be searched in the files."),
+            @ApiImplicitParam(name = "limit", value = "The limit for the returned values. Use '-1' for no limit.")
+    })
     @GetMapping(value = "search")
     public List<SearchResult> searchQuery(@RequestParam String query, @RequestParam(defaultValue = "-1") int limit) {
         return fileContentSearchEngine.searchInFiles(query, limit);
