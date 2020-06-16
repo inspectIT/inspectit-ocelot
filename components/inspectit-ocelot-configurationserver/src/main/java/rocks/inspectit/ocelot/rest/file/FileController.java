@@ -95,7 +95,7 @@ public class FileController extends FileBaseController {
     }
 
     @ApiOperation(value = "Search the given query in all present files.", notes = "Searches the given query in all present files. " +
-            "Returns as many files as defined by the limit parameter. If the the limit is set to -1, all found files are returned. " +
+            "Returns as many matches as defined by the limit parameter. If the the limit is set to -1, all found matches are returned. " +
             "All found matches are returned in a list of SearchResult object. Each of these objects contains the following variables:" +
             "<p>" +
             "<b>file:</b> a String resembling the name of the file the match was found in." +
@@ -113,7 +113,7 @@ public class FileController extends FileBaseController {
             @ApiImplicitParam(name = "limit", value = "The limit for the returned values. Use '-1' for no limit.")
     })
     @GetMapping(value = "search")
-    public List<SearchResult> searchQuery(@RequestParam String query, @RequestParam(defaultValue = "-1") int limit) {
+    public List<SearchResult> searchForContent(@RequestParam String query, @RequestParam(defaultValue = "-1") int limit) {
         return fileContentSearchEngine.searchInFiles(query, limit);
     }
 }
