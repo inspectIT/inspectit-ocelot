@@ -31,9 +31,9 @@ class RevisionAccessTest {
 
         @Test
         public void validPath() {
-            String result = revisionAccess.verifyPath("files", "files/test/");
+            String result = revisionAccess.verifyPath("files", "test");
 
-            assertThat(result).isEqualTo(Paths.get("files", "test").toString());
+            assertThat(result).isEqualTo("files/test");
         }
 
         @Test
@@ -53,8 +53,8 @@ class RevisionAccessTest {
         @Test
         public void invalidPath() {
             assertThatExceptionOfType(IllegalArgumentException.class)
-                    .isThrownBy(() -> revisionAccess.verifyPath("files", "outside/test/"))
-                    .withMessage("User path escapes the base path: outside/test/");
+                    .isThrownBy(() -> revisionAccess.verifyPath("files", "../test/"))
+                    .withMessage("User path escapes the base path: ../test/");
         }
     }
 

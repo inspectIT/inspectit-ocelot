@@ -2,6 +2,8 @@ package rocks.inspectit.ocelot.file.accessor.git;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
@@ -31,24 +33,43 @@ public class RevisionAccess extends AbstractFileAccessor {
 
     @Override
     protected String verifyPath(String relativeBasePath, String relativePath) throws IllegalArgumentException {
-        Path normalizedPath = Paths.get(relativePath).normalize();
+        Path path = Paths.get(relativePath).normalize();
 
         if (StringUtils.isBlank(relativeBasePath)) {
-            return normalizedPath.toString();
+            return path.toString().replaceAll("\\\\", "/");
         }
 
-        Path normalizedBasePath = Paths.get(relativeBasePath).normalize();
+        Path basePath = Paths.get(relativeBasePath).normalize();
+        Path resolvedPath = basePath.resolve(path).normalize();
 
-        if (!normalizedPath.startsWith(normalizedBasePath)) {
+        if (!resolvedPath.startsWith(basePath)) {
             throw new IllegalArgumentException("User path escapes the base path: " + relativePath);
         }
 
-        return normalizedPath.toString();
+        return resolvedPath.toString().replaceAll("\\\\", "/");
     }
 
     @Override
     protected Optional<byte[]> readFile(String path) {
-        return Optional.empty();
+        try (TreeWalk treeWalk = TreeWalk.forPath(repository, path, revCommit.getTree())) {
+            if (treeWalk == null) {
+                log.warn("Did not find expected file '{}' in git repository", path);
+                return Optional.empty();
+            }
+
+            if (treeWalk.isSubtree()) {
+                log.warn("Target must be a file but found directory: {}", path);
+                return Optional.empty();
+            }
+
+            ObjectId objectId = treeWalk.getObjectId(0);
+            ObjectLoader loader = repository.open(objectId);
+
+            return Optional.of(loader.getBytes());
+        } catch (Exception e) {
+            log.error("Could not read file {} from git repository", path, e);
+            return Optional.empty();
+        }
     }
 
     @Override
@@ -63,61 +84,23 @@ public class RevisionAccess extends AbstractFileAccessor {
 
     @Override
     protected boolean exists(String path) {
-        return false;
+        try (TreeWalk treeWalk = TreeWalk.forPath(repository, path, revCommit.getTree())) {
+            return treeWalk != null && !treeWalk.isSubtree();
+        } catch (Exception e) {
+            log.error("Could not read file {} from git repository", path, e);
+            return false;
+        }
     }
 
     @Override
     protected boolean isDirectory(String path) {
-        return false;
+        try (TreeWalk treeWalk = TreeWalk.forPath(repository, path, revCommit.getTree())) {
+            return treeWalk != null && treeWalk.isSubtree();
+        } catch (Exception e) {
+            log.error("Could not read file {} from git repository", path, e);
+            return false;
+        }
     }
-
-//    private List<String> readElementsAt(String path) throws IOException {
-//        // and using commit's tree find the path
-//        RevTree tree = revCommit.getTree();
-//        //System.out.println("Having tree: " + tree + " for commit " + commit);
-//
-//        List<String> items = new ArrayList<>();
-//
-//        // shortcut for root-path
-//        if (path.isEmpty()) {
-//            try (TreeWalk treeWalk = new TreeWalk(repository)) {
-//                treeWalk.addTree(tree);
-//                treeWalk.setRecursive(true);
-//                treeWalk.setPostOrderTraversal(false);
-//
-//                while (treeWalk.next()) {
-//                    items.add(treeWalk.getPathString());
-//                }
-//            }
-//        } else {
-//            // now try to find a specific file
-//            try (TreeWalk treeWalk = buildTreeWalk(tree, path)) {
-//                if ((treeWalk.getFileMode(0).getBits() & FileMode.TYPE_TREE) == 0) {
-//                    throw new IllegalStateException("Tried to read the elements of a non-tree for path '" + path + "', had filemode " + treeWalk.getFileMode(0).getBits());
-//                }
-//
-//                try (TreeWalk dirWalk = new TreeWalk(repository)) {
-//                    dirWalk.addTree(treeWalk.getObjectId(0));
-//                    dirWalk.setRecursive(true);
-//                    while (dirWalk.next()) {
-//                        items.add(dirWalk.getPathString());
-//                    }
-//                }
-//            }
-//        }
-//
-//        return items;
-//    }
-//
-//    private TreeWalk buildTreeWalk(RevTree tree, final String path) throws IOException {
-//        TreeWalk treeWalk = TreeWalk.forPath(repository, path, tree);
-//
-//        if (treeWalk == null) {
-//            throw new FileNotFoundException("Did not find expected file '" + path + "' in tree '" + tree.getName() + "'");
-//        }
-//
-//        return treeWalk;
-//    }
 
     /**
      * Lists all files in the given path.
@@ -132,28 +115,33 @@ public class RevisionAccess extends AbstractFileAccessor {
             path = path.substring(1);
         }
 
-        // using commit's tree find the path
         RevTree tree = revCommit.getTree();
 
         boolean skipNext = false;
 
-        TreeWalk treeWalk;
-        if (StringUtils.isBlank(path)) {
-            treeWalk = new TreeWalk(repository);
-            treeWalk.addTree(tree);
-            treeWalk.setRecursive(false);
-        } else {
-            treeWalk = TreeWalk.forPath(repository, path, tree);
-            if (treeWalk == null) {
-                return Collections.emptyList();
-            } else if (treeWalk.isSubtree()) {
-                treeWalk.enterSubtree();
+        TreeWalk treeWalk = null;
+        try {
+            if (StringUtils.isBlank(path)) {
+                treeWalk = new TreeWalk(repository);
+                treeWalk.addTree(tree);
+                treeWalk.setRecursive(false);
             } else {
-                skipNext = true;
+                treeWalk = TreeWalk.forPath(repository, path, tree);
+                if (treeWalk == null) {
+                    return Collections.emptyList();
+                } else if (treeWalk.isSubtree()) {
+                    treeWalk.enterSubtree();
+                } else {
+                    skipNext = true;
+                }
+            }
+
+            return collectFiles(treeWalk, recursive, skipNext);
+        } finally {
+            if (treeWalk != null) {
+                treeWalk.close();
             }
         }
-
-        return collectFiles(treeWalk, recursive, skipNext);
     }
 
     /**

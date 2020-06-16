@@ -32,9 +32,26 @@ public abstract class AbstractFileAccessor {
 
     /**
      * Verifies the given path and checks if it is located beneath the given base path. It has to be ensured, that
-     * the given path is not navigate out of the given base path, resulting in a traversal attack. A cleaned and
+     * the given path is not navigating out of the given base path, resulting in a traversal attack. A cleaned and
      * sanitized path is returned of this method, which can safely be used be the concrete implementation for file
      * handling.
+     * Example 1:
+     * ---
+     * Input relativeBasePath: files
+     * Input path: file.yml
+     * Result: files/file.yml
+     * <p>
+     * Example 2
+     * ---
+     * Input relativeBasePath: files
+     * Input path: sub/../file.yml
+     * Result: files/file.yml
+     * <p>
+     * Example 3:
+     * ---
+     * Input relativeBasePath: files
+     * Input path: ../file.yml
+     * Result: IllegalArgumentException
      *
      * @param relativeBasePath the base path where the path must be in
      * @param path             the relative user path

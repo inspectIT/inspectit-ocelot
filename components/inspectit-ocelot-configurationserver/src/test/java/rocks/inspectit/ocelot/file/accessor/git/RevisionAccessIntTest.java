@@ -15,8 +15,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -27,6 +29,8 @@ class RevisionAccessIntTest extends FileTestBase {
      * Note: the specified directory is CLEANED before each run, thus, if you have files there, they will be gone ;)
      */
     public static final String TEST_DIRECTORY = "C:\\test";
+
+    private RevisionAccess revision;
 
     private VersioningManager versioningManager;
 
@@ -44,6 +48,10 @@ class RevisionAccessIntTest extends FileTestBase {
         versioningManager = new VersioningManager(tempDirectory, () -> authentication);
         versioningManager.initialize();
 
+        setupRepository();
+
+        revision = versioningManager.getLiveRevision();
+
         System.out.println("Test data in: " + tempDirectory.toString());
     }
 
@@ -54,28 +62,152 @@ class RevisionAccessIntTest extends FileTestBase {
         }
     }
 
+    public void setupRepository() throws GitAPIException, IOException {
+        versioningManager.setAmendTimeout(-1);
+
+        createTestFiles("files/file_a.yml=a1", "files/sub/file_z.yml=z1", "untracked.yml");
+        versioningManager.commit("first");
+
+        Files.delete(tempDirectory.resolve("files").resolve("sub").resolve("file_z.yml"));
+        versioningManager.commit("second");
+
+        createTestFiles("files/file_a.yml=a2", "files/file_b.yml=b1");
+        versioningManager.commit("third");
+    }
+
     @Nested
-    class X {
+    class ListConfigurationFiles {
 
         @Test
-        public void xxx() throws GitAPIException {
-            versioningManager.setAmendTimeout(-1);
-
-            createTestFiles("files/file_a.yml=a1", "files/z/file_z.yml=z", "untracked.yml");
-            versioningManager.commit("first");
-
-            createTestFiles("files/file_b.yml=b");
-            versioningManager.commit("second");
-
-            createTestFiles("files/file_b.yml=b2", "files/file_c.yml=c");
-            versioningManager.commit("third");
-
-            RevisionAccess revision = versioningManager.getLiveRevision();
-
+        public void listFiles() {
             List<FileInfo> result = revision.listConfigurationFiles("");
 
-            assertThat(result).isNotEmpty();
+            assertThat(result).hasSize(2);
+            assertThat(result).anySatisfy(fileInfo -> {
+                assertThat(fileInfo.getName()).isEqualTo("file_a.yml");
+                assertThat(fileInfo.getType()).isEqualTo(FileInfo.Type.FILE);
+                assertThat(fileInfo.getChildren()).isNull();
+            });
+            assertThat(result).anySatisfy(fileInfo -> {
+                assertThat(fileInfo.getName()).isEqualTo("sub");
+                assertThat(fileInfo.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+
+                List<FileInfo> subChildren = fileInfo.getChildren();
+
+                assertThat(subChildren).hasOnlyOneElementSatisfying(subFileInfo -> {
+                    assertThat(subFileInfo.getName()).isEqualTo("file_z.yml");
+                    assertThat(subFileInfo.getType()).isEqualTo(FileInfo.Type.FILE);
+                    assertThat(subFileInfo.getChildren()).isNull();
+                });
+            });
+        }
+    }
+
+    @Nested
+    class ReadConfigurationFile {
+
+        @Test
+        public void readFile() {
+            Optional<String> result = revision.readConfigurationFile("file_a.yml");
+
+            assertThat(result).hasValue("a1");
         }
 
+        @Test
+        public void traversalRead() {
+            Optional<String> result = revision.readConfigurationFile("dir/../file_a.yml");
+
+            assertThat(result).hasValue("a1");
+        }
+
+        @Test
+        public void readNestedFile() {
+            Optional<String> result = revision.readConfigurationFile("sub/file_z.yml");
+
+            assertThat(result).hasValue("z1");
+        }
+
+        @Test
+        public void readDirectory() {
+            Optional<String> result = revision.readConfigurationFile("sub");
+
+            assertThat(result).isEmpty();
+        }
+
+        @Test
+        public void readMissingFile() {
+            Optional<String> result = revision.readConfigurationFile("not_existing.yml");
+
+            assertThat(result).isEmpty();
+        }
+
+        @Test
+        public void illegalPath() {
+            assertThatExceptionOfType(IllegalArgumentException.class)
+                    .isThrownBy(() -> revision.readConfigurationFile("../untracked.yml"));
+        }
+    }
+
+    @Nested
+    class ConfigurationFileExists {
+
+        @Test
+        public void checkFile() {
+            boolean result = revision.configurationFileExists("file_a.yml");
+
+            assertThat(result).isTrue();
+        }
+
+        @Test
+        public void checkNestedFile() {
+            boolean result = revision.configurationFileExists("sub/file_z.yml");
+
+            assertThat(result).isTrue();
+        }
+
+        @Test
+        public void fileNotExisting() {
+            boolean result = revision.configurationFileExists("not_existing.yml");
+
+            assertThat(result).isFalse();
+        }
+
+        @Test
+        public void illegalPath() {
+            assertThatExceptionOfType(IllegalArgumentException.class)
+                    .isThrownBy(() -> revision.configurationFileExists("../untracked.yml"));
+        }
+    }
+
+
+    @Nested
+    class ConfigurationFileIsDirectory {
+
+        @Test
+        public void checkFile() {
+            boolean result = revision.configurationFileIsDirectory("file_a.yml");
+
+            assertThat(result).isFalse();
+        }
+
+        @Test
+        public void checkDirectory() {
+            boolean result = revision.configurationFileIsDirectory("sub");
+
+            assertThat(result).isTrue();
+        }
+
+        @Test
+        public void fileNotExisting() {
+            boolean result = revision.configurationFileIsDirectory("not_existing");
+
+            assertThat(result).isFalse();
+        }
+
+        @Test
+        public void illegalPath() {
+            assertThatExceptionOfType(IllegalArgumentException.class)
+                    .isThrownBy(() -> revision.configurationFileExists(".."));
+        }
     }
 }
