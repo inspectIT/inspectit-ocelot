@@ -48,11 +48,6 @@ class StatusView extends React.Component {
 
     // With regex
     let regex;
-    const position = filter.indexOf('*');
-
-    if (position !== -1) {
-      filter = filter.substring(0, position) + '.' + filter.substring(position);
-    }
 
     try {
       regex = RegExp(filter, 'i');
@@ -61,7 +56,7 @@ class StatusView extends React.Component {
     }
 
     for (let i = 0; i < agentValues.length; i++) {
-      if (this.checkRedux(agentValues[i], regex)) {
+      if (this.checkRegex(agentValues[i], regex)) {
         filterAgents.push(agents[i]);
       }
     }
@@ -85,53 +80,49 @@ class StatusView extends React.Component {
   checkWithoutRegex = (agent, filter) => {
     filter = filter.toLowerCase();
 
-    if (agent.attributes.id) {
-      if (agent.attributes.id.toLowerCase().includes(filter)) {
+    if(agent.name){
+      if(agent.name.toLowerCase().includes(filter)){
         return true;
       }
     }
-    if (agent.attributes.service) {
-      if (agent.attributes.service.toLowerCase().includes(filter)) {
+    for(let i=0; i<agent.mappingFilter.length;i++){
+      if(agent.mappingFilter[i].toLowerCase().includes(filter)){
         return true;
       }
     }
-    if (agent.mappingName) {
-      if (agent.mappingName.toLowerCase().includes(filter)) {
-        return true;
-      }
-    }
-    if (agent.metaInformation != null && agent.attributes.id != null) {
+    if (agent.metaInformation != null) {
       if (agent.metaInformation.agentVersion.toLowerCase().includes(filter)) {
         return true;
       }
       if (agent.metaInformation.javaVersion.toLowerCase().includes(filter)) {
         return true;
       }
+      if(agent.metaInformation.agentId.toLowerCase().includes(filter)){
+        return true;
+      }
     }
     return false;
   };
 
-  checkRedux = (agent, regex) => {
-    if (agent.attributes.id) {
-      if (regex.test(agent.attributes.id)) {
+  checkRegex = (agent, regex) => {
+    if(agent.name){
+      if(regex.test(agent.name)){
         return true;
       }
     }
-    if (agent.attributes.service) {
-      if (regex.test(agent.attributes.service)) {
+    for(let i=0; i<agent.mappingFilter.length;i++){
+      if(regex.test(agent.mappingFilter[i])){
         return true;
       }
     }
-    if (agent.mappingName) {
-      if (regex.test(agent.mappingName)) {
-        return true;
-      }
-    }
-    if (agent.metaInformation != null && agent.attributes.id != null) {
+    if (agent.metaInformation != null) {
       if (regex.test(agent.metaInformation.agentVersion)) {
         return true;
       }
       if (regex.test(agent.metaInformation.javaVersion)) {
+        return true;
+      }
+      if(regex.test(agent.metaInformation.agentId)){
         return true;
       }
     }
