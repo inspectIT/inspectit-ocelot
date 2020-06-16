@@ -38,16 +38,16 @@ public class FileContentSearchEngineTest {
             assertThat(output).hasSize(2);
             SearchResult result = output.get(0);
             assertThat(result.getFile()).isEqualTo("file");
-            assertThat(result.getStartLine()).isEqualTo(1);
-            assertThat(result.getEndLine()).isEqualTo(1);
-            assertThat(result.getStartColumn()).isEqualTo(1);
-            assertThat(result.getEndColumn()).isEqualTo(5);
+            assertThat(result.getStartLine()).isEqualTo(0);
+            assertThat(result.getEndLine()).isEqualTo(0);
+            assertThat(result.getStartColumn()).isEqualTo(0);
+            assertThat(result.getEndColumn()).isEqualTo(4);
             result = output.get(1);
             assertThat(result.getFile()).isEqualTo("file");
-            assertThat(result.getStartLine()).isEqualTo(3);
-            assertThat(result.getEndLine()).isEqualTo(3);
-            assertThat(result.getStartColumn()).isEqualTo(4);
-            assertThat(result.getEndColumn()).isEqualTo(8);
+            assertThat(result.getStartLine()).isEqualTo(2);
+            assertThat(result.getEndLine()).isEqualTo(2);
+            assertThat(result.getStartColumn()).isEqualTo(3);
+            assertThat(result.getEndColumn()).isEqualTo(7);
         }
 
         @Test
@@ -61,22 +61,22 @@ public class FileContentSearchEngineTest {
             assertThat(output).hasSize(3);
             SearchResult result = output.get(0);
             assertThat(result.getFile()).isEqualTo("file");
-            assertThat(result.getStartLine()).isEqualTo(1);
-            assertThat(result.getEndLine()).isEqualTo(1);
-            assertThat(result.getStartColumn()).isEqualTo(1);
-            assertThat(result.getEndColumn()).isEqualTo(4);
+            assertThat(result.getStartLine()).isEqualTo(0);
+            assertThat(result.getEndLine()).isEqualTo(0);
+            assertThat(result.getStartColumn()).isEqualTo(0);
+            assertThat(result.getEndColumn()).isEqualTo(3);
             result = output.get(1);
             assertThat(result.getFile()).isEqualTo("file");
-            assertThat(result.getStartLine()).isEqualTo(1);
-            assertThat(result.getEndLine()).isEqualTo(1);
-            assertThat(result.getStartColumn()).isEqualTo(5);
-            assertThat(result.getEndColumn()).isEqualTo(8);
+            assertThat(result.getStartLine()).isEqualTo(0);
+            assertThat(result.getEndLine()).isEqualTo(0);
+            assertThat(result.getStartColumn()).isEqualTo(4);
+            assertThat(result.getEndColumn()).isEqualTo(7);
             result = output.get(2);
             assertThat(result.getFile()).isEqualTo("file");
-            assertThat(result.getStartLine()).isEqualTo(1);
-            assertThat(result.getEndLine()).isEqualTo(1);
-            assertThat(result.getStartColumn()).isEqualTo(9);
-            assertThat(result.getEndColumn()).isEqualTo(12);
+            assertThat(result.getStartLine()).isEqualTo(0);
+            assertThat(result.getEndLine()).isEqualTo(0);
+            assertThat(result.getStartColumn()).isEqualTo(8);
+            assertThat(result.getEndColumn()).isEqualTo(11);
         }
 
         @Test
@@ -90,10 +90,10 @@ public class FileContentSearchEngineTest {
             assertThat(output).hasSize(1);
             SearchResult result = output.get(0);
             assertThat(result.getFile()).isEqualTo("file");
-            assertThat(result.getStartLine()).isEqualTo(1);
-            assertThat(result.getEndLine()).isEqualTo(2);
-            assertThat(result.getStartColumn()).isEqualTo(1);
-            assertThat(result.getEndColumn()).isEqualTo(3);
+            assertThat(result.getStartLine()).isEqualTo(0);
+            assertThat(result.getEndLine()).isEqualTo(1);
+            assertThat(result.getStartColumn()).isEqualTo(0);
+            assertThat(result.getEndColumn()).isEqualTo(2);
 
         }
 
@@ -108,10 +108,10 @@ public class FileContentSearchEngineTest {
             assertThat(output).hasSize(1);
             SearchResult result = output.get(0);
             assertThat(result.getFile()).isEqualTo("file");
-            assertThat(result.getStartLine()).isEqualTo(1);
-            assertThat(result.getEndLine()).isEqualTo(1);
-            assertThat(result.getStartColumn()).isEqualTo(1);
-            assertThat(result.getEndColumn()).isEqualTo(4);
+            assertThat(result.getStartLine()).isEqualTo(0);
+            assertThat(result.getEndLine()).isEqualTo(0);
+            assertThat(result.getStartColumn()).isEqualTo(0);
+            assertThat(result.getEndColumn()).isEqualTo(3);
         }
 
         @Test

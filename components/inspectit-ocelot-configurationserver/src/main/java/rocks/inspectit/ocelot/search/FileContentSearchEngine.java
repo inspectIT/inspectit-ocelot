@@ -93,9 +93,9 @@ public class FileContentSearchEngine {
                     new SearchResult(
                             fileName,
                             getLineNumberOf(currentSubstring),
-                            fromIndex - getLineOffset(currentSubstring) + 1,
+                            fromIndex - getLineOffset(currentSubstring),
                             getLineNumberOf(currentSubstringWithQuery),
-                            fromIndex - getLineOffset(currentSubstringWithQuery) + query.length()
+                            fromIndex - getLineOffset(currentSubstringWithQuery) + query.length() - 1
                     )
             );
             fromIndex++;
@@ -112,7 +112,7 @@ public class FileContentSearchEngine {
      * @return The line number of the given String.
      */
     private int getLineNumberOf(String content) {
-        int fromIndex = 0, counter = 1;
+        int fromIndex = 0, counter = 0;
         while ((fromIndex = content.indexOf("\n", fromIndex)) != -1) {
             fromIndex++;
             counter++;
