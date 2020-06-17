@@ -86,4 +86,21 @@ const settings = {
   pendingRequests: 0,
 };
 
-export { authentication, configuration, notification, mappings, agentStatus, settings };
+const promotion = {
+  /** The list of promotion files */
+  files: [],
+  /** Specifies how many requests are currently loading the data in the background */
+  pendingRequests: 0,
+
+  workspaceCommitId: null,
+
+  liveCommitId: null,
+
+  updateDate: null,
+
+  currentSelection: null,
+
+  approvals: []
+}
+
+export { authentication, configuration, notification, mappings, agentStatus, settings, promotion };

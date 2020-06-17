@@ -1,0 +1,8 @@
+export const FETCH_PROMOTIONS_STARTED = 'promotions/FETCH_PROMOTIONS_STARTED';
+export const FETCH_PROMOTIONS_FAILURE = 'promotions/FETCH_PROMOTIONS_FAILURE';
+export const FETCH_PROMOTIONS_SUCCESS = 'promotions/FETCH_PROMOTIONS_SUCCESS';
+
+export const SET_CURRENT_SELECTION = 'promotions/SET_CURRENT_SELECTION';
+
+export const APPROVE_FILE = 'promotions/APPROVE_FILE';
+export const DISAPPROVE_FILE = 'promotions/DISAPPROVE_FILE';
