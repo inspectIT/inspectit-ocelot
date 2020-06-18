@@ -68,6 +68,7 @@ const PromotionSidebar = () => {
   const dispatch = useDispatch();
 
   const promotionFiles = useSelector((state) => state.promotion.files);
+  const updateDate = useSelector((state) => state.promotion.updateDate);
   const currentSelection = useSelector(promotionSelectors.getCurrentSelectionFile);
 
   const setCurrentSelection = (file) => {
@@ -81,6 +82,8 @@ const PromotionSidebar = () => {
           .this {
             height: 100%;
             overflow-y: auto;
+            display: flex;
+            flex-direction: column;
           }
           .this :global(.p-listbox) {
             width: 20rem;
@@ -94,6 +97,12 @@ const PromotionSidebar = () => {
           .this :global(.p-listbox .p-listbox-list .p-listbox-item) {
             padding: 0;
           }
+          .information {
+            color: #aaa;
+            font-size: 0.75rem;
+            text-align: center;
+            padding: 0.25rem 0;
+          }
         `}
       </style>
 
@@ -105,6 +114,7 @@ const PromotionSidebar = () => {
           itemTemplate={selectionTemplate}
           optionLabel="file"
         />
+        <div className="information">Last Refresh: {updateDate ? new Date(updateDate).toLocaleString() : '-'}</div>
       </div>
     </>
   );

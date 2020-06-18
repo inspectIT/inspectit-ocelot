@@ -27,14 +27,13 @@ const promotionReducer = createReducer(initialState)({
       ...state,
       pendingRequests: state.pendingRequests - 1,
       updateDate: Date.now(),
-      files: diffEntries,
       liveCommitId,
       workspaceCommitId,
     };
 
     if (liveCommitId !== state.liveCommitId || workspaceCommitId !== state.workspaceCommitId) {
       newState.currentSelection = initialState.currentSelection;
-      newState.approvals = initialState.approvals;
+      newState.files = diffEntries;
     }
 
     return newState;
