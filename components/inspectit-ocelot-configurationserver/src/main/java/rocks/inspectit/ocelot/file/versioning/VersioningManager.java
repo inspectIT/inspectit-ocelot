@@ -25,9 +25,11 @@ import rocks.inspectit.ocelot.file.versioning.model.WorkspaceDiff;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -388,7 +390,7 @@ public class VersioningManager {
                 String liveCommitId = liveCommitOptional.get().getId().name();
 
                 if (!liveCommitId.equals(promotion.getLiveCommitId())) {
-                    throw new RuntimeException("change in between");
+                    throw new ConcurrentModificationException("change in between");
                 }
             } else {
                 throw new RuntimeException("should not happen");
@@ -441,4 +443,6 @@ public class VersioningManager {
             //TODO hard reset in case of error?
         }
     }
+
+
 }
