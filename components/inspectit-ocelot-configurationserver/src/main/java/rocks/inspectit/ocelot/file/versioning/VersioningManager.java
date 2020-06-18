@@ -379,6 +379,7 @@ public class VersioningManager {
 
     //TODO synchronize working directory
     public void promoteConfiguration(ConfigurationPromotion promotion) throws GitAPIException, IOException {
+        //TODO check if files exists
         try {
             git.checkout().setName(Branch.LIVE.getBranchName()).call();
 
