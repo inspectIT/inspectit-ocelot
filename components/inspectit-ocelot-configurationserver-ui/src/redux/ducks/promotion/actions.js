@@ -52,9 +52,9 @@ export const promoteConfiguration = () => {
     const promotionFiles = _(files).filter({ approved: true }).map('file').value();
 
     const payload = {
-        files: promotionFiles,
-        workspaceCommitId,
-        liveCommitId
+      files: promotionFiles,
+      workspaceCommitId,
+      liveCommitId,
     };
 
     axios
@@ -66,8 +66,15 @@ export const promoteConfiguration = () => {
       })
       .catch(() => {
         dispatch({ type: types.PROMOTE_CONFIGURATION_FAILURE });
+        dispatch({ type: types.SHOW_CONFLICT_DIALOG });
       });
 
     dispatch({ type: types.PROMOTE_CONFIGURATION_SUCCESS });
+  };
+};
+
+export const hideConflictDialog = () => {
+  return (dispatch) => {
+    dispatch({ type: types.HIDE_CONFLICT_DIALOG });
   };
 };

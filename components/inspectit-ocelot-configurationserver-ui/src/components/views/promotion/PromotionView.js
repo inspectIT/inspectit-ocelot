@@ -12,10 +12,10 @@ const PromotionView = () => {
   const contentHeight = 'calc(100vh - 7rem)';
 
   const currentSelection = useSelector(promotionSelectors.getCurrentSelectionFile);
-
+  
   const fetchPromotionFiles = () => {
     dispatch(promotionActions.fetchPromotions());
-  };
+  }; 
 
   useEffect(fetchPromotionFiles, []);
 

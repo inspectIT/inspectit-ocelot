@@ -13,6 +13,10 @@ const PromotionToolbar = () => {
     dispatch(promotionActions.promoteConfiguration());
   };
 
+  const refreshConfiguration = () => {
+    dispatch(promotionActions.fetchPromotions());
+  };
+
   const approvalCount = useSelector(promotionSelectors.getApprovalCount);
 
   return (
@@ -40,7 +44,7 @@ const PromotionToolbar = () => {
           </div>
         </div>
         <div className="p-toolbar-group-right">
-        <Button icon="pi pi-refresh" onClick={console.log} style={{ marginLeft: '.25em' }} />
+        <Button icon="pi pi-refresh" onClick={refreshConfiguration} style={{ marginLeft: '.25em' }} />
         <Button disabled={approvalCount === 0} icon="pi pi-unlock" label="Promote Approved Configurations" onClick={promoteConfiguration} style={{ marginLeft: '.25em' }} />
         </div>
       </Toolbar>

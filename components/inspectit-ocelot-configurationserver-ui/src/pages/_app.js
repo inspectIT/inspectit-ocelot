@@ -8,6 +8,7 @@ import { Provider } from 'react-redux';
 import AuthenticationRouter from '../components/common/AuthenticationRouter';
 import NotificationHandler from '../components/common/NotificationHandler';
 import UnsavedChangesGate from '../components/common/UnsavedChangesGate';
+import DialogContainer from '../components/dialogs/DialogContainer';
 
 import { BASE_PAGE_TITLE } from '../data/constants';
 import { linkPrefix } from '../lib/configuration';
@@ -49,6 +50,8 @@ class OcelotConfigurationUI extends App {
                   <Component {...pageProps} />
                 </AuthenticationRouter>
               </UnsavedChangesGate>
+
+              <DialogContainer />
             </NotificationHandler>
           </PersistGate>
         </Provider>
