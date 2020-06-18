@@ -1,12 +1,20 @@
 import React from 'react';
-import { connect, useSelector } from 'react-redux';
-import { mappingsActions } from '../../../redux/ducks/mappings';
+import { useSelector, useDispatch } from 'react-redux';
+import { promotionActions, promotionSelectors } from '../../../redux/ducks/promotion';
 import { Toolbar } from 'primereact/toolbar';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 
 /** Toolbar for mappingsView for changing mappings filter, downloading config files, reloading & adding mappings */
 const PromotionToolbar = () => {
+  const dispatch = useDispatch();
+
+  const promoteConfiguration = () => {
+    dispatch(promotionActions.promoteConfiguration());
+  };
+
+  const approvalCount = useSelector(promotionSelectors.getApprovalCount);
+
   return (
     <>
       <style jsx>
@@ -32,7 +40,8 @@ const PromotionToolbar = () => {
           </div>
         </div>
         <div className="p-toolbar-group-right">
-          <Button icon="pi pi-refresh" onClick={console.log} style={{ marginRight: '.25em' }} />
+        <Button icon="pi pi-refresh" onClick={console.log} style={{ marginLeft: '.25em' }} />
+        <Button disabled={approvalCount === 0} icon="pi pi-unlock" label="Promote Approved Configurations" onClick={promoteConfiguration} style={{ marginLeft: '.25em' }} />
         </div>
       </Toolbar>
     </>

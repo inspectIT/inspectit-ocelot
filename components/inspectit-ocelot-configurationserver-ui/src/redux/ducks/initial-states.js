@@ -99,8 +99,6 @@ const promotion = {
   updateDate: null,
 
   currentSelection: null,
-
-  approvals: []
 }
 
 export { authentication, configuration, notification, mappings, agentStatus, settings, promotion };

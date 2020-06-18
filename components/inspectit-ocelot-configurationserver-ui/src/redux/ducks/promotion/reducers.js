@@ -1,6 +1,7 @@
 import * as types from './types';
 import { createReducer } from '../../utils';
 import { promotion as initialState } from '../initial-states';
+import _ from 'lodash';
 
 const promotionReducer = createReducer(initialState)({
   [types.FETCH_PROMOTIONS_STARTED]: (state) => {
@@ -20,6 +21,8 @@ const promotionReducer = createReducer(initialState)({
       promotions: { diffEntries, liveCommitId, workspaceCommitId },
     } = action.payload;
 
+    _.sortBy(diffEntries, ['file']);
+
     const newState = {
       ...state,
       pendingRequests: state.pendingRequests - 1,
@@ -37,26 +40,53 @@ const promotionReducer = createReducer(initialState)({
     return newState;
   },
   [types.SET_CURRENT_SELECTION]: (state, action) => {
-    const { file } = action.payload;
+    const { filename } = action.payload;
     return {
       ...state,
-      currentSelection: file,
+      currentSelection: filename,
     };
   },
   [types.APPROVE_FILE]: (state, action) => {
     const { file } = action.payload;
 
+    const newFiles = _.cloneDeep(state.files);
+    const targetFile = _.find(newFiles, { file });
+    targetFile.approved = true;
+
     return {
       ...state,
-      approvals: [...state.approvals, file]
+      files: newFiles,
     };
   },
   [types.DISAPPROVE_FILE]: (state, action) => {
     const { file } = action.payload;
-    
+
+    const newFiles = _.cloneDeep(state.files);
+    const targetFile = _.find(newFiles, { file });
+    targetFile.approved = false;
+
     return {
       ...state,
-      approvals: state.approvals.filter(e => e !== file).map(e => e)
+      files: newFiles,
+    };
+  },
+
+  [types.PROMOTE_CONFIGURATION_STARTED]: (state) => {
+    return {
+      ...state,
+      pendingRequests: state.pendingRequests + 1,
+    };
+  },
+  [types.PROMOTE_CONFIGURATION_SUCCESS]: (state) => {
+    return {
+      ...state,
+      pendingRequests: state.pendingRequests - 1,
+    };
+  },
+  [types.PROMOTE_CONFIGURATION_FAILURE]: (state) => {
+    return {
+      ...state,
+      pendingRequests: state.pendingRequests - 1,
     };
   },
 });

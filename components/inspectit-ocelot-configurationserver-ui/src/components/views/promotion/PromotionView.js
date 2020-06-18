@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import PromotionToolbar from './PromotionToolbar';
-import { promotionActions } from '../../../redux/ducks/promotion';
+import { promotionActions, promotionSelectors } from '../../../redux/ducks/promotion';
 import PromotionSidebar from './PromotionSidebar';
 import PromotionFileViewer from './PromotionFileView';
 import PromotionFileApproval from './PromotionFileApproval';
@@ -11,7 +11,7 @@ const PromotionView = () => {
   const dispatch = useDispatch();
   const contentHeight = 'calc(100vh - 7rem)';
 
-  const currentSelection = useSelector((state) => state.promotion.currentSelection);
+  const currentSelection = useSelector(promotionSelectors.getCurrentSelectionFile);
 
   const fetchPromotionFiles = () => {
     dispatch(promotionActions.fetchPromotions());

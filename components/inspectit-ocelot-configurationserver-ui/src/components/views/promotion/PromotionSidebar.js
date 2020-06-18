@@ -1,97 +1,113 @@
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { ListBox } from 'primereact/listbox';
-import {Checkbox} from 'primereact/checkbox';
 import classnames from 'classnames';
-import { promotionActions } from '../../../redux/ducks/promotion';
+import { promotionActions, promotionSelectors } from '../../../redux/ducks/promotion';
+import _ from 'lodash';
 
-const selectionTemplate = (option) => {
-    const { file, type } = option;
+const selectionTemplate = ({ file, type, approved }) => {
+  const iconClassNames = classnames('pi', {
+    green: type === 'ADD',
+    yellow: type === 'MODIFY',
+    red: type === 'DELETE',
+    'pi-plus': type === 'ADD',
+    'pi-pencil': type === 'MODIFY',
+    'pi-minus': type === 'DELETE',
+  });
 
-    let classNames = classnames({
-        'pi': true,
-        'add': type === 'ADD',
-        'modify': type === 'MODIFY',
-        'remove': type === 'DELETE'
-    });
+  const itemClassNames = classnames('p-clearfix', 'item', {
+    approved: approved,
+  });
 
-    if (type === 'ADD') {
-        classNames += ' pi-plus';
-    } else if (type === 'MODIFY') {
-        classNames += ' pi-pencil';
-    } else if (type === 'DELETE') {
-        classNames += ' pi-minus';
-    } else {
-        classNames += ' pi-question';
-    }
-
-    return (
-        <>
-        <style jsx>
+  return (
+    <>
+      <style jsx>
         {`
-        .add {
+          .green {
             color: #38ad38;
-        }
-        .modify {
+          }
+          .yellow {
             color: #ff9900;
-        }
-        .remove {
+          }
+          .red {
             color: #ff0000;
-        }
-        .item {
+          }
+          .item {
+            padding: 0.5rem 0.75rem;
+          }
+          .item-wrapper {
             display: flex;
             height: 1.5rem;
             align-items: center;
-        }
-        .label {
+          }
+          .label {
             margin-left: 1rem;
-        }
+            flex-grow: 1;
+          }
+          .approved {
+            background-color: #dff1df;
+          }
+          :global(.p-highlight) .approved {
+            background-color: inherit;
+          }
         `}
-        </style>
+      </style>
 
-        <div className="p-clearfix item" key={file}>
-            <i className={classNames }></i>
-            <span className="label">{file}</span>
+      <div className={itemClassNames} key={file}>
+        <div className="item-wrapper">
+          <i className={iconClassNames}></i>
+          <span className="label">{file}</span>
+          {approved && <i className="pi pi-check-circle green"></i>}
         </div>
-        </>
-    );
+      </div>
+    </>
+  );
 };
 
 const PromotionSidebar = () => {
-    const dispatch = useDispatch();
+  const dispatch = useDispatch();
 
-    const promotionFiles = useSelector(state => state.promotion.files);
-    const currentSelection = useSelector(state => state.promotion.currentSelection);
+  const promotionFiles = useSelector((state) => state.promotion.files);
+  const currentSelection = useSelector(promotionSelectors.getCurrentSelectionFile);
 
-    const setCurrentSelection = (file) => {
-        dispatch(promotionActions.setCurrentSelection(file));
-    }
+  const setCurrentSelection = (file) => {
+    dispatch(promotionActions.setCurrentSelection(file));
+  };
 
-    return (
-        <>
-            <style jsx>
-            {`
-            .this {
-                height: 100%;
-                overflow-y: auto;
-            }
-            .this :global(.p-listbox) {
-                width: 20rem;
-                height: 100%;
-                border: none;
-                border-right: 1px solid #dddddd;
-            }
-            .this :global(.p-listbox-list-wrapper) {
-                border-radius: 0;
-            }
-            `}
-            </style>
+  return (
+    <>
+      <style jsx>
+        {`
+          .this {
+            height: 100%;
+            overflow-y: auto;
+          }
+          .this :global(.p-listbox) {
+            width: 20rem;
+            height: 100%;
+            border: none;
+            border-right: 1px solid #dddddd;
+          }
+          .this :global(.p-listbox-list-wrapper) {
+            border-radius: 0;
+          }
+          .this :global(.p-listbox .p-listbox-list .p-listbox-item) {
+            padding: 0;
+          }
+        `}
+      </style>
 
-            <div className="this">
-                <ListBox value={currentSelection} options={promotionFiles} onChange={(e) => setCurrentSelection(e.value)} itemTemplate={selectionTemplate} optionLabel="file" />
-            </div>
-        </>
-    );
+      <div className="this">
+        <ListBox
+          value={currentSelection}
+          options={promotionFiles}
+          onChange={(e) => setCurrentSelection(e.value ? e.value.file : null)}
+          itemTemplate={selectionTemplate}
+          optionLabel="file"
+        />
+      </div>
+    </>
+  );
 };
 
 export default PromotionSidebar;

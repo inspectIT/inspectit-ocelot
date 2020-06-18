@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSelector, useDispatch, shallowEqual } from 'react-redux';
-import { mappingsActions } from '../../../redux/ducks/mappings';
+import { promotionSelectors } from '../../../redux/ducks/promotion';
 import { ToggleButton } from 'primereact/togglebutton';
 import { promotionActions } from '../../../redux/ducks/promotion';
 
@@ -8,10 +8,8 @@ import { promotionActions } from '../../../redux/ducks/promotion';
 const PromotionFileApproval = () => {
   const dispatch = useDispatch();
 
-  const currentSelection = useSelector((state) => state.promotion.currentSelection);
-  const approvals = useSelector((state) => state.promotion.approvals, shallowEqual);
-
-  const approved = approvals.includes(currentSelection.file);
+  const currentSelection = useSelector(promotionSelectors.getCurrentSelectionFile);
+  const approved = currentSelection.approved;
 
   const updateFileApproval = (approved) => {
     if (approved) {
