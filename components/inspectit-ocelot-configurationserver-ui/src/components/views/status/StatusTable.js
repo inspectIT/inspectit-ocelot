@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
@@ -9,6 +9,7 @@ import { map } from 'lodash';
 
 import ConfigurationDownload from '../mappings/ConfigurationDownload';
 import { linkPrefix } from '../../../lib/configuration';
+import AgentConfiguration from './dialogs/AgentConfiguration'
 
 const timeFormatter = (time, unit, suffix) => {
   if (unit === 'second') {
@@ -140,8 +141,8 @@ class StatusTable extends React.Component {
         <Button
           className="download-button"
           icon="pi pi-download"
-          onClick={() => this.configDownload.download(attributes)}
-          tooltip="Click here to download the configuration file for this agent"
+          onClick={() => this.props.setAgentConfigurationShown(true)}
+          tooltip="Show Agent Configuration"
         />
       </div>
     );
@@ -287,8 +288,8 @@ class StatusTable extends React.Component {
             style={{ width: '200px' }}
           />
         </DataTable>
-
         <ConfigurationDownload onRef={(ref) => (this.configDownload = ref)} />
+        <AgentConfiguration visible={this.props.isAgentConfigurationShown} onHide={()=>this.props.setAgentConfigurationShown(false)}/>
       </div>
     );
   }

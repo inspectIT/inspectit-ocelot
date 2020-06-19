@@ -4,6 +4,7 @@ import { agentStatusActions } from '../../../redux/ducks/agent-status';
 import StatusTable from './StatusTable';
 import StatusToolbar from './StatusToolbar';
 import StatusFooterToolbar from './StatusFooterToolbar';
+import AgentConfiguration from './dialogs/AgentConfiguration';
 
 /**
  * The view presenting a list of connected agents, their mapping and when they last connected to the server.
@@ -12,8 +13,9 @@ import StatusFooterToolbar from './StatusFooterToolbar';
 class StatusView extends React.Component {
   state = {
     filter: '',
+    isAgentConfigurationShown: false,
   };
-
+  
   render() {
     const { filter } = this.state;
     const { agents, readOnly } = this.props;
@@ -36,7 +38,7 @@ class StatusView extends React.Component {
             <StatusToolbar filter={filter} onFilterChange={(filter) => this.setState({ filter })} disableClear={readOnly} />
           </div>
           <div className="data-table">
-            <StatusTable data={agents} filter={filter} />
+            <StatusTable data={agents} filter={filter} isAgentConfigurationShown={this.state.isAgentConfigurationShown} setAgentConfigurationShown={this.setAgentConfigurationShown}/>
           </div>
           <div>
             <StatusFooterToolbar data={agents} />
@@ -61,6 +63,15 @@ class StatusView extends React.Component {
       fetchStatus();
     }
   };
+
+  setAgentConfigurationShown = (isShown) =>{
+    this.setState({
+      isAgentConfigurationShown: isShown
+    })
+  }
+
+
+
 }
 
 function mapStateToProps(state) {
