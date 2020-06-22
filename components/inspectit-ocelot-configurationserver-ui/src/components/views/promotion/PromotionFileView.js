@@ -12,8 +12,8 @@ const PromotionFileViewer = () => {
   };
 
   useEffect(() => {
-    window.addEventListener("resize", updateMedia);
-    return () => window.removeEventListener("resize", updateMedia);
+    window.addEventListener('resize', updateMedia);
+    return () => window.removeEventListener('resize', updateMedia);
   });
 
   const currentSelection = useSelector(promotionSelectors.getCurrentSelectionFile);

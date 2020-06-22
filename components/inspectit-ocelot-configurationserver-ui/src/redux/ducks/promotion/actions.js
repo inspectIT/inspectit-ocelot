@@ -2,6 +2,7 @@ import * as types from './types';
 import axios from '../../../lib/axios-api';
 import { notificationActions } from '../notification';
 import { dialogActions } from '../dialog';
+import _ from 'lodash';
 
 /**
  * Fetches the promotions from the server.
@@ -60,7 +61,7 @@ export const promoteConfiguration = () => {
 
     axios
       .post('/configuration/promote', payload)
-      .then((response) => {
+      .then(() => {
         dispatch({ type: types.PROMOTE_CONFIGURATION_SUCCESS });
         dispatch(notificationActions.showSuccessMessage('Promotion Successful', 'The approved configuration files have been promoted.'));
         dispatch(fetchPromotions());
