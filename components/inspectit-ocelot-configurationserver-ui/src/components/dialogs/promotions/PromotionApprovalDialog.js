@@ -9,6 +9,11 @@ import { Button } from 'primereact/button';
 const PromotionApprovalDialog = () => {
   const dispatch = useDispatch();
 
+  const canCommit = useSelector((state) => state.authentication.permissions.commit);
+  if (!canCommit) {
+    return <></>;
+  }
+
   const show = useSelector((state) => state.dialog.show) === PROMOTION_APPROVAL_DIALOG;
   const approvedFiles = useSelector((state) => state.promotion.files).filter((file) => file.approved);
 

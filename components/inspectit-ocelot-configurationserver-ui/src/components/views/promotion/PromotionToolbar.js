@@ -19,6 +19,7 @@ const PromotionToolbar = () => {
 
   const approvalCount = useSelector(promotionSelectors.getApprovalCount);
   const updating = useSelector((state) => state.promotion.pendingRequests) > 0;
+  const canCommit = useSelector((state) => state.authentication.permissions.commit);
 
   const tooltipOptions = {
     showDelay: 500,
@@ -58,7 +59,7 @@ const PromotionToolbar = () => {
         </div>
         <div className="p-toolbar-group-right buttons">
           <Button
-            disabled={updating}
+            disabled={updating || !canCommit}
             tooltip="Reload Configurations"
             tooltipOptions={tooltipOptions}
             icon={'pi pi-refresh' + (updating ? ' pi-spin' : '')}

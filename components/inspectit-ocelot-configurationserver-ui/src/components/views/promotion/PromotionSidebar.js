@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { ListBox } from 'primereact/listbox';
 import classnames from 'classnames';
 import { promotionActions, promotionSelectors } from '../../../redux/ducks/promotion';
-import _ from 'lodash';
 
 const selectionTemplate = ({ file, type, approved }) => {
   const iconClassNames = classnames('pi', {

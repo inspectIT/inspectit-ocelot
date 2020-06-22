@@ -1,5 +1,5 @@
 import React from 'react';
-import { useSelector, useDispatch, shallowEqual } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { promotionSelectors } from '../../../redux/ducks/promotion';
 import { ToggleButton } from 'primereact/togglebutton';
 import { promotionActions } from '../../../redux/ducks/promotion';
