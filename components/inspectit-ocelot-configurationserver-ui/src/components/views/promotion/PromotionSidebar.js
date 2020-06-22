@@ -84,12 +84,12 @@ const PromotionSidebar = () => {
             overflow-y: auto;
             display: flex;
             flex-direction: column;
+            border-right: 1px solid #dddddd;
           }
           .this :global(.p-listbox) {
             width: 20rem;
             height: 100%;
             border: none;
-            border-right: 1px solid #dddddd;
           }
           .this :global(.p-listbox-list-wrapper) {
             border-radius: 0;
@@ -103,10 +103,20 @@ const PromotionSidebar = () => {
             text-align: center;
             padding: 0.25rem 0;
           }
+          .title {
+            font-family: monospace;
+            color: #212529;
+            font-size: 1rem;
+            padding: 1rem;
+            border-bottom: 1px solid #eeeeee;
+            line-height: 1rem; /** In order to match the DiffView */
+            padding: 0.9rem;
+          }
         `}
       </style>
 
       <div className="this">
+        <div className="title">Modified Configurations</div>
         <ListBox
           value={currentSelection}
           options={promotionFiles}

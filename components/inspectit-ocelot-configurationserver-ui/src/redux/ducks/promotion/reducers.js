@@ -88,19 +88,6 @@ const promotionReducer = createReducer(initialState)({
       pendingRequests: state.pendingRequests - 1,
     };
   },
-
-  [types.SHOW_CONFLICT_DIALOG]: (state) => {
-    return {
-      ...state,
-      showConflictDialog: true,
-    };
-  },
-  [types.HIDE_CONFLICT_DIALOG]: (state) => {
-    return {
-      ...state,
-      showConflictDialog: false,
-    };
-  },
 });
 
 export default promotionReducer;

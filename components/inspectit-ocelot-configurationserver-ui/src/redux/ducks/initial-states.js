@@ -99,8 +99,12 @@ const promotion = {
   updateDate: null,
 
   currentSelection: null,
-
-  showConflictDialog: false
 }
 
-export { authentication, configuration, notification, mappings, agentStatus, settings, promotion };
+const dialog = {
+  show: null,
+
+  payload: null
+}
+
+export { authentication, configuration, notification, mappings, agentStatus, settings, promotion, dialog };

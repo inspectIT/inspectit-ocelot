@@ -1,20 +1,24 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { promotionActions } from '../../../redux/ducks/promotion';
+import { dialogActions } from '../../../redux/ducks/dialog';
+import { PROMOTION_CONFLICT_DIALOG } from '../dialogs';
 import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 
 const PromotionConflictDialog = () => {
   const dispatch = useDispatch();
 
-  const showConflictDialog = useSelector((state) => state.promotion.showConflictDialog);
+  const show = useSelector((state) => state.dialog.show) === PROMOTION_CONFLICT_DIALOG;
 
   const hideConflictDialog = () => {
-    dispatch(promotionActions.hideConflictDialog());
+    if (show) {
+      dispatch(dialogActions.hideDialogs());
+    }
   };
 
   const hideAndRefresh = () => {
-    dispatch(promotionActions.hideConflictDialog());
+    hideConflictDialog();
     dispatch(promotionActions.fetchPromotions());
   };
 
@@ -28,7 +32,7 @@ const PromotionConflictDialog = () => {
   return (
     <Dialog
       header="Concurrent Modification of Configurations"
-      visible={showConflictDialog}
+      visible={show}
       style={{ width: '50vw' }}
       modal={true}
       onHide={() => hideConflictDialog()}

@@ -1,6 +1,7 @@
 import * as types from './types';
 import axios from '../../../lib/axios-api';
 import { notificationActions } from '../notification';
+import { dialogActions } from '../dialog';
 
 /**
  * Fetches the promotions from the server.
@@ -66,15 +67,9 @@ export const promoteConfiguration = () => {
       })
       .catch(() => {
         dispatch({ type: types.PROMOTE_CONFIGURATION_FAILURE });
-        dispatch({ type: types.SHOW_CONFLICT_DIALOG });
+        dispatch(dialogActions.showPromotionConflictDialog());
       });
 
     dispatch({ type: types.PROMOTE_CONFIGURATION_SUCCESS });
-  };
-};
-
-export const hideConflictDialog = () => {
-  return (dispatch) => {
-    dispatch({ type: types.HIDE_CONFLICT_DIALOG });
   };
 };

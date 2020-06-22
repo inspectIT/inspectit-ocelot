@@ -17,7 +17,7 @@
     },
     {
       "name": "Configuration Promotion",
-      "icon": "pi-unlock",
+      "icon": "pi-cloud-upload",
       "href": "/promotion"
     }
   ],
