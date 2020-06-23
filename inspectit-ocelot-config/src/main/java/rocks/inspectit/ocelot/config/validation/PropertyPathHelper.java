@@ -105,10 +105,10 @@ public class PropertyPathHelper {
     }
 
     /**
-     * Checks if a given type is a terminal type or an enum
+     * Checks if a given type is a terminal type or an enum.
      *
-     * @param type
-     * @return True: the given type is a terminal or an enum False: the given type is neither a terminal type nor an enum
+     * @param type The type to be checked.
+     * @return True: the given type is a terminal or an enum. False: the given type is neither a terminal type nor an enum.
      */
     public boolean isTerminal(Type type) {
         if (TERMINAL_TYPES.contains(type)) {
@@ -116,8 +116,8 @@ public class PropertyPathHelper {
         } else if (type instanceof Class) {
             return ((Class<?>) type).isEnum()
                     || ((Class<?>) type).isPrimitive()
-                    || InspectitConfigConversionService.getInstance().canConvert(String.class, (Class<?>) type)
-                    || InspectitConfigConversionService.getInstance().canConvert(Number.class, (Class<?>) type);
+                    || InspectitConfigConversionService.getInstance().canConvert((Class<?>) type, String.class)
+                    || InspectitConfigConversionService.getInstance().canConvert((Class<?>) type, Number.class);
         }
         return false;
     }
