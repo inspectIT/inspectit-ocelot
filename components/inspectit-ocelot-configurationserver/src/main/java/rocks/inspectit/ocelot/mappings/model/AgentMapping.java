@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Singular;
 import lombok.Value;
-import org.apache.commons.lang3.StringUtils;
 import rocks.inspectit.ocelot.security.audit.AuditDetail;
 import rocks.inspectit.ocelot.security.audit.Auditable;
 
