@@ -6,6 +6,10 @@ import { PROMOTION_CONFLICT_DIALOG } from '../dialogs';
 import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 
+/**
+ * Dialog for showing promotion conflicts. A conflict can occure if the
+ * live branch has been modified and the user tries to promote new files.
+ */
 const PromotionConflictDialog = () => {
   const dispatch = useDispatch();
 

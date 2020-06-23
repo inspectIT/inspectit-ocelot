@@ -4,7 +4,9 @@ import { promotionSelectors } from '../../../redux/ducks/promotion';
 import { ToggleButton } from 'primereact/togglebutton';
 import { promotionActions } from '../../../redux/ducks/promotion';
 
-/** Toolbar for mappingsView for changing mappings filter, downloading config files, reloading & adding mappings */
+/**
+ * The footer bar used by users to approve the currently selected promotion file.
+ */
 const PromotionFileApproval = () => {
   const dispatch = useDispatch();
 

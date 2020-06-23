@@ -2,15 +2,18 @@ import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { promotionActions, promotionSelectors } from '../../../redux/ducks/promotion';
 import { dialogActions } from '../../../redux/ducks/dialog';
+import { PROMOTION_APPROVAL_DIALOG } from '../../dialogs/dialogs';
 import { Toolbar } from 'primereact/toolbar';
 import { Button } from 'primereact/button';
 
-/** Toolbar for mappingsView for changing mappings filter, downloading config files, reloading & adding mappings */
+/**
+ * The toolbar of the promotion view.
+ */
 const PromotionToolbar = () => {
   const dispatch = useDispatch();
 
   const promoteConfiguration = () => {
-    dispatch(dialogActions.showPromotionApprovalDialog());
+    dispatch(dialogActions.showDialog(PROMOTION_APPROVAL_DIALOG));
   };
 
   const refreshConfiguration = () => {

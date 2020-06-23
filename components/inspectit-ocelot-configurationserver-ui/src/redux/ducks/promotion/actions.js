@@ -2,10 +2,11 @@ import * as types from './types';
 import axios from '../../../lib/axios-api';
 import { notificationActions } from '../notification';
 import { dialogActions } from '../dialog';
+import { PROMOTION_CONFLICT_DIALOG } from '../../../components/dialogs/dialogs';
 import _ from 'lodash';
 
 /**
- * Fetches the promotions from the server.
+ * Fetches the promotion files from the server.
  */
 export const fetchPromotions = () => {
   return (dispatch) => {
@@ -27,24 +28,42 @@ export const fetchPromotions = () => {
   };
 };
 
+/**
+ * Sets the current selected promotion file
+ *
+ * @param {string} filename
+ */
 export const setCurrentSelection = (filename) => {
   return (dispatch) => {
     dispatch({ type: types.SET_CURRENT_SELECTION, payload: { filename } });
   };
 };
 
-export const approveFile = (file) => {
+/**
+ * Approve the given file and marks it ready for promotion.
+ *
+ * @param {string} filename
+ */
+export const approveFile = (filename) => {
   return (dispatch) => {
-    dispatch({ type: types.APPROVE_FILE, payload: { file } });
+    dispatch({ type: types.APPROVE_FILE, payload: { filename } });
   };
 };
 
-export const disapproveFile = (file) => {
+/**
+ * Disapprove the given file, so it will not be promoted.
+ *
+ * @param {string} filename
+ */
+export const disapproveFile = (filename) => {
   return (dispatch) => {
-    dispatch({ type: types.DISAPPROVE_FILE, payload: { file } });
+    dispatch({ type: types.DISAPPROVE_FILE, payload: { filename } });
   };
 };
 
+/**
+ * Trigger a configuration promotion.
+ */
 export const promoteConfiguration = () => {
   return (dispatch, getState) => {
     dispatch({ type: types.PROMOTE_CONFIGURATION_STARTED });
@@ -68,7 +87,7 @@ export const promoteConfiguration = () => {
       })
       .catch(() => {
         dispatch({ type: types.PROMOTE_CONFIGURATION_FAILURE });
-        dispatch(dialogActions.showPromotionConflictDialog());
+        dispatch(dialogActions.showDialog(PROMOTION_CONFLICT_DIALOG));
       });
 
     dispatch({ type: types.PROMOTE_CONFIGURATION_SUCCESS });

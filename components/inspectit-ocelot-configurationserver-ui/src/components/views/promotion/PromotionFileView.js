@@ -4,6 +4,9 @@ import { promotionSelectors } from '../../../redux/ducks/promotion';
 
 import ReactDiffViewer, { DiffMethod } from 'react-diff-viewer';
 
+/**
+ * The view for showing the diff of the currently selected promotion file.
+ */
 const PromotionFileViewer = () => {
   const [isLargeScreen, setLargeScreen] = useState(window.innerWidth > 1280);
 

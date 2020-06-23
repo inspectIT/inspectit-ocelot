@@ -6,16 +6,20 @@ import { PROMOTION_APPROVAL_DIALOG } from '../dialogs';
 import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 
+/**
+ * Dialog for showing the currently approved files before promoting them.
+ */
 const PromotionApprovalDialog = () => {
   const dispatch = useDispatch();
 
   const canCommit = useSelector((state) => state.authentication.permissions.commit);
-  if (!canCommit) {
-    return <></>;
-  }
-
   const show = useSelector((state) => state.dialog.show) === PROMOTION_APPROVAL_DIALOG;
   const approvedFiles = useSelector((state) => state.promotion.files).filter((file) => file.approved);
+
+  if (!canCommit) {
+    // dialog not needed
+    return <></>;
+  }
 
   const hideDialog = () => {
     if (show) {

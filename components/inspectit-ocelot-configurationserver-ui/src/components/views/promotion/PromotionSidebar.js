@@ -4,6 +4,11 @@ import { ListBox } from 'primereact/listbox';
 import classnames from 'classnames';
 import { promotionActions, promotionSelectors } from '../../../redux/ducks/promotion';
 
+/**
+ * Item template for a promotion file in the sidebar.
+ *
+ * @param {object} option current list option
+ */
 const selectionTemplate = ({ file, type, approved }) => {
   const iconClassNames = classnames('pi', {
     green: type === 'ADD',
@@ -63,6 +68,9 @@ const selectionTemplate = ({ file, type, approved }) => {
   );
 };
 
+/**
+ * Sidebar for showing existing configuration promotion files.
+ */
 const PromotionSidebar = () => {
   const dispatch = useDispatch();
 

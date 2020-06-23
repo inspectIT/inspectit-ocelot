@@ -6,7 +6,9 @@ import PromotionSidebar from './PromotionSidebar';
 import PromotionFileViewer from './PromotionFileView';
 import PromotionFileApproval from './PromotionFileApproval';
 
-/** View to display and change mappings */
+/**
+ * The view for displaying existing promotion files including their modifications.
+ */
 const PromotionView = () => {
   const dispatch = useDispatch();
   const contentHeight = 'calc(100vh - 7rem)';
@@ -14,6 +16,7 @@ const PromotionView = () => {
   const currentSelection = useSelector(promotionSelectors.getCurrentSelectionFile);
   const fileCount = useSelector(promotionSelectors.getFileCount);
   const updateDate = useSelector((state) => state.promotion.updateDate);
+  const canCommit = useSelector((state) => state.authentication.permissions.commit);
 
   const fetchPromotionFiles = () => {
     dispatch(promotionActions.fetchPromotions());
@@ -66,7 +69,7 @@ const PromotionView = () => {
                 {currentSelection ? (
                   <>
                     <PromotionFileViewer />
-                    <PromotionFileApproval />
+                    {canCommit && <PromotionFileApproval />}
                   </>
                 ) : (
                   <div className="selection-information">

@@ -46,10 +46,10 @@ const promotionReducer = createReducer(initialState)({
     };
   },
   [types.APPROVE_FILE]: (state, action) => {
-    const { file } = action.payload;
+    const { filename } = action.payload;
 
     const newFiles = _.cloneDeep(state.files);
-    const targetFile = _.find(newFiles, { file });
+    const targetFile = _.find(newFiles, { file: filename });
     targetFile.approved = true;
 
     return {
@@ -58,10 +58,10 @@ const promotionReducer = createReducer(initialState)({
     };
   },
   [types.DISAPPROVE_FILE]: (state, action) => {
-    const { file } = action.payload;
+    const { filename } = action.payload;
 
     const newFiles = _.cloneDeep(state.files);
-    const targetFile = _.find(newFiles, { file });
+    const targetFile = _.find(newFiles, { file: filename });
     targetFile.approved = false;
 
     return {
