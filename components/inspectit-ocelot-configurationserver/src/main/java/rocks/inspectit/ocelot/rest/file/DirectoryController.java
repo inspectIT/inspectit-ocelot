@@ -2,7 +2,6 @@ package rocks.inspectit.ocelot.rest.file;
 
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,9 +14,6 @@ import rocks.inspectit.ocelot.security.config.UserRoleConfiguration;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
 
 /**
  * Controller for managing the configurations.

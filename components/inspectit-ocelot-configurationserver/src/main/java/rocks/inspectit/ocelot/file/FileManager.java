@@ -24,8 +24,14 @@ import java.util.function.Supplier;
 @Slf4j
 public class FileManager {
 
+    /**
+     * The accessor used to access the working directory.
+     */
     private AbstractWorkingDirectoryAccessor workingDirectoryAccessor;
 
+    /**
+     * The manager used for Git interactions.
+     */
     private VersioningManager versioningManager;
 
     @Autowired
