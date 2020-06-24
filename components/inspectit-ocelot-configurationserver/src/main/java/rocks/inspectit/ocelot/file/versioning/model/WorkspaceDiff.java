@@ -5,7 +5,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class Diff {
+public class WorkspaceDiff {
 
     private List<SimpleDiffEntry> diffEntries;
 

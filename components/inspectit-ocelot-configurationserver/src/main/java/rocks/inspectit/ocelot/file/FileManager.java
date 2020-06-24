@@ -12,8 +12,11 @@ import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
 import rocks.inspectit.ocelot.file.accessor.workingdirectory.AbstractWorkingDirectoryAccessor;
 import rocks.inspectit.ocelot.file.accessor.workingdirectory.AutoCommitWorkingDirectoryProxy;
 import rocks.inspectit.ocelot.file.accessor.workingdirectory.WorkingDirectoryAccessor;
+import rocks.inspectit.ocelot.file.versioning.ConfigurationPromotion;
 import rocks.inspectit.ocelot.file.versioning.VersioningManager;
+import rocks.inspectit.ocelot.file.versioning.model.WorkspaceDiff;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.Supplier;
@@ -59,5 +62,23 @@ public class FileManager {
 
     public AbstractFileAccessor getLiveRevision() {
         return versioningManager.getLiveRevision();
+    }
+
+    public WorkspaceDiff getWorkspaceDiff(boolean includeContent) {
+        try {
+            return versioningManager.getWorkspaceDiff(includeContent);
+        } catch (IOException | GitAPIException e) {
+            log.error("error", e);
+            return null;
+        }
+    }
+
+    public void promoteConfiguration(ConfigurationPromotion promotion){
+        try {
+            versioningManager.promoteConfiguration(promotion);
+        } catch (GitAPIException | IOException e) {
+            log.error("error", e);
+            throw new RuntimeException();
+        }
     }
 }

@@ -14,8 +14,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.test.util.ReflectionTestUtils;
 import rocks.inspectit.ocelot.file.FileTestBase;
 import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
-import rocks.inspectit.ocelot.file.versioning.model.Diff;
 import rocks.inspectit.ocelot.file.versioning.model.SimpleDiffEntry;
+import rocks.inspectit.ocelot.file.versioning.model.WorkspaceDiff;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -146,38 +146,20 @@ class VersioningManagerTest extends FileTestBase {
         @Test
         public void commitFile() throws GitAPIException {
             versioningManager.initialize();
-            assertThat(versioningManager.getCommitCount()).isZero();
+            assertThat(versioningManager.getCommitCount()).isOne();
 
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml");
 
             versioningManager.commit("test");
 
-            assertThat(versioningManager.getCommitCount()).isOne();
+            assertThat(versioningManager.getCommitCount()).isEqualTo(2);
             assertThat(versioningManager.isClean()).isTrue();
         }
 
         @Test
         public void amendCommit() throws GitAPIException {
             versioningManager.initialize();
-            assertThat(versioningManager.getCommitCount()).isZero();
-
-            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml");
-
-            versioningManager.commit("test");
-
-            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml=content");
-
-            versioningManager.commit("another commit");
-
             assertThat(versioningManager.getCommitCount()).isOne();
-            assertThat(versioningManager.isClean()).isTrue();
-        }
-
-        @Test
-        public void noAmendAfterTimeout() throws GitAPIException {
-            versioningManager.initialize();
-            versioningManager.setAmendTimeout(-2000);
-            assertThat(versioningManager.getCommitCount()).isZero();
 
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml");
 
@@ -192,18 +174,36 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
+        public void noAmendAfterTimeout() throws GitAPIException {
+            versioningManager.initialize();
+            versioningManager.setAmendTimeout(-2000);
+            assertThat(versioningManager.getCommitCount()).isOne();
+
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml");
+
+            versioningManager.commit("test");
+
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml=content");
+
+            versioningManager.commit("another commit");
+
+            assertThat(versioningManager.getCommitCount()).isEqualTo(3);
+            assertThat(versioningManager.isClean()).isTrue();
+        }
+
+        @Test
         public void noChanges() throws GitAPIException {
             versioningManager.initialize();
             versioningManager.setAmendTimeout(-2000);
 
-            assertThat(versioningManager.getCommitCount()).isZero();
+            assertThat(versioningManager.getCommitCount()).isOne();
 
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml");
 
             versioningManager.commit("test");
             versioningManager.commit("no change");
 
-            assertThat(versioningManager.getCommitCount()).isOne();
+            assertThat(versioningManager.getCommitCount()).isEqualTo(2);
             assertThat(versioningManager.isClean()).isTrue();
         }
     }
@@ -281,14 +281,15 @@ class VersioningManagerTest extends FileTestBase {
     class GetLatestCommit {
 
         @Test
-        public void noCommit() throws GitAPIException {
+        public void emptyCommit() throws GitAPIException {
             versioningManager.initialize();
 
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml");
 
             Optional<RevCommit> latestCommit = versioningManager.getLatestCommit();
 
-            assertThat(latestCommit).isEmpty();
+            assertThat(latestCommit).isNotEmpty();
+            assertThat(latestCommit.get().getFullMessage()).isEqualTo("Initializing Git repository");
         }
 
         @Test
@@ -330,7 +331,7 @@ class VersioningManagerTest extends FileTestBase {
     }
 
     @Nested
-    class GetDiff {
+    class GetWorkspaceDiff {
 
         @Test
         public void getDiff() throws IOException, GitAPIException {
@@ -343,12 +344,33 @@ class VersioningManagerTest extends FileTestBase {
             Files.delete(tempDirectory.resolve(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_removed.yml"));
             versioningManager.commit("new commit");
 
-            Diff result = versioningManager.getDiff();
+            WorkspaceDiff result = versioningManager.getWorkspaceDiff();
 
             assertThat(result.getDiffEntries()).containsExactlyInAnyOrder(
-                    new SimpleDiffEntry(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_added.yml", DiffEntry.ChangeType.ADD),
-                    new SimpleDiffEntry(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml", DiffEntry.ChangeType.MODIFY),
-                    new SimpleDiffEntry(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_removed.yml", DiffEntry.ChangeType.DELETE)
+                    SimpleDiffEntry.builder().file("/file_added.yml").type(DiffEntry.ChangeType.ADD).build(),
+                    SimpleDiffEntry.builder().file("/file_modified.yml").type(DiffEntry.ChangeType.MODIFY).build(),
+                    SimpleDiffEntry.builder().file("/file_removed.yml").type(DiffEntry.ChangeType.DELETE).build()
+            );
+            assertThat(result.getLiveCommitId()).isNotEqualTo(result.getWorkspaceCommitId());
+        }
+
+        @Test
+        public void getDiffWithContent() throws IOException, GitAPIException {
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_removed.yml=content");
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_no_change.yml");
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml");
+            versioningManager.initialize();
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml=new content");
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_added.yml");
+            Files.delete(tempDirectory.resolve(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_removed.yml"));
+            versioningManager.commit("new commit");
+
+            WorkspaceDiff result = versioningManager.getWorkspaceDiff(true);
+
+            assertThat(result.getDiffEntries()).containsExactlyInAnyOrder(
+                    SimpleDiffEntry.builder().file("/file_added.yml").type(DiffEntry.ChangeType.ADD).newContent("").build(),
+                    SimpleDiffEntry.builder().file("/file_modified.yml").type(DiffEntry.ChangeType.MODIFY).oldContent("").newContent("new content").build(),
+                    SimpleDiffEntry.builder().file("/file_removed.yml").type(DiffEntry.ChangeType.DELETE).oldContent("content").build()
             );
             assertThat(result.getLiveCommitId()).isNotEqualTo(result.getWorkspaceCommitId());
         }
@@ -375,14 +397,14 @@ class VersioningManagerTest extends FileTestBase {
             promotion.setLiveCommitId(liveId);
             promotion.setWorkspaceCommitId(workspaceId);
             promotion.setFiles(Arrays.asList(
-                    AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_added.yml",
-                    AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml",
-                    AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_removed.yml"
+                    "/file_added.yml",
+                    "/file_modified.yml",
+                    "/file_removed.yml"
             ));
 
             versioningManager.promoteConfiguration(promotion);
 
-            Diff diff = versioningManager.getDiff();
+            WorkspaceDiff diff = versioningManager.getWorkspaceDiff();
 
             assertThat(diff.getDiffEntries()).isEmpty();
         }
@@ -405,16 +427,16 @@ class VersioningManagerTest extends FileTestBase {
             promotion.setLiveCommitId(liveId);
             promotion.setWorkspaceCommitId(workspaceId);
             promotion.setFiles(Arrays.asList(
-                    AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml",
-                    AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_removed.yml"
+                    "/file_modified.yml",
+                    "/file_removed.yml"
             ));
 
             versioningManager.promoteConfiguration(promotion);
 
-            Diff diff = versioningManager.getDiff();
+            WorkspaceDiff diff = versioningManager.getWorkspaceDiff();
 
             assertThat(diff.getDiffEntries()).containsExactlyInAnyOrder(
-                    new SimpleDiffEntry(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_added.yml", DiffEntry.ChangeType.ADD)
+                    SimpleDiffEntry.builder().file("/file_added.yml").type(DiffEntry.ChangeType.ADD).build()
             );
         }
 
@@ -436,7 +458,7 @@ class VersioningManagerTest extends FileTestBase {
             promotion.setLiveCommitId(liveId);
             promotion.setWorkspaceCommitId(workspaceId);
             promotion.setFiles(Arrays.asList(
-                    AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml"
+                    "/file_modified.yml"
             ));
 
             // first promotion
@@ -453,18 +475,18 @@ class VersioningManagerTest extends FileTestBase {
             promotion.setLiveCommitId(liveId);
             promotion.setWorkspaceCommitId(workspaceId);
             promotion.setFiles(Arrays.asList(
-                    AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml"
+                    "/file_modified.yml"
             ));
 
             // second promotion
             versioningManager.promoteConfiguration(promotion);
 
             // diff
-            Diff diff = versioningManager.getDiff();
+            WorkspaceDiff diff = versioningManager.getWorkspaceDiff();
 
             assertThat(diff.getDiffEntries()).containsExactlyInAnyOrder(
-                    new SimpleDiffEntry(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_added.yml", DiffEntry.ChangeType.ADD),
-                    new SimpleDiffEntry(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_removed.yml", DiffEntry.ChangeType.DELETE)
+                    SimpleDiffEntry.builder().file("/file_added.yml").type(DiffEntry.ChangeType.ADD).build(),
+                    SimpleDiffEntry.builder().file("/file_removed.yml").type(DiffEntry.ChangeType.DELETE).build()
             );
         }
 
@@ -486,7 +508,7 @@ class VersioningManagerTest extends FileTestBase {
             promotion.setLiveCommitId(liveId);
             promotion.setWorkspaceCommitId(workspaceId);
             promotion.setFiles(Arrays.asList(
-                    AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml"
+                    "/file_modified.yml"
             ));
 
             versioningManager.promoteConfiguration(promotion);
@@ -495,12 +517,31 @@ class VersioningManagerTest extends FileTestBase {
             secondPromotion.setLiveCommitId(liveId);
             secondPromotion.setWorkspaceCommitId(workspaceId);
             secondPromotion.setFiles(Arrays.asList(
-                    AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_added.yml"
+                    "/file_added.yml"
             ));
 
             assertThatExceptionOfType(RuntimeException.class)
                     .isThrownBy(() -> versioningManager.promoteConfiguration(secondPromotion))
                     .withMessage("change in between");
+        }
+    }
+
+    @Nested
+    class GetRevisionById {
+
+        @Test
+        public void getRevision() throws GitAPIException, IOException {
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml=a");
+            versioningManager.initialize();
+
+            WorkspaceDiff workspaceDiff = versioningManager.getWorkspaceDiff();
+
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml=b");
+            versioningManager.commit("commit");
+
+            Optional<String> result = versioningManager.getRevisionById(workspaceDiff.getWorkspaceCommitId()).readConfigurationFile("file.yml");
+
+            assertThat(result).hasValue("a");
         }
     }
 }

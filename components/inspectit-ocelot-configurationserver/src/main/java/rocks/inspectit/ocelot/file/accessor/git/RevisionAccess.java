@@ -33,6 +33,10 @@ public class RevisionAccess extends AbstractFileAccessor {
 
     @Override
     protected String verifyPath(String relativeBasePath, String relativePath) throws IllegalArgumentException {
+        if (relativePath.startsWith("/")) {
+            relativePath = relativePath.substring(1);
+        }
+
         Path path = Paths.get(relativePath).normalize();
 
         if (StringUtils.isBlank(relativeBasePath)) {

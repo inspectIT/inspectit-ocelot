@@ -1,13 +1,13 @@
 package rocks.inspectit.ocelot.file.versioning.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.*;
 import org.eclipse.jgit.diff.DiffEntry;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class SimpleDiffEntry {
 
     public static SimpleDiffEntry of(DiffEntry entry) {
@@ -24,8 +24,15 @@ public class SimpleDiffEntry {
         return simpleEntry;
     }
 
+    @NonNull
     private String file;
 
+    @NonNull
     private DiffEntry.ChangeType type;
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String oldContent;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String newContent;
 }

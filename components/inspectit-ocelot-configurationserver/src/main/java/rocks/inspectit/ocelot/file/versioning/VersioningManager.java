@@ -19,8 +19,8 @@ import org.springframework.security.core.Authentication;
 import rocks.inspectit.ocelot.events.ConfigurationPromotionEvent;
 import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
 import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
-import rocks.inspectit.ocelot.file.versioning.model.Diff;
 import rocks.inspectit.ocelot.file.versioning.model.SimpleDiffEntry;
+import rocks.inspectit.ocelot.file.versioning.model.WorkspaceDiff;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -59,11 +59,6 @@ public class VersioningManager {
 
     private ApplicationEventPublisher eventPublisher;
 
-    private boolean setupBranches = false;
-
-    /**
-     * Timeout for amend commits. Consecutive commits of the same user within this time will be amended.
-     */
     @Setter
     private long amendTimeout = Duration.ofMinutes(10).toMillis();
 
@@ -87,11 +82,11 @@ public class VersioningManager {
             log.info("Working directory is not managed by Git. Initializing Git repository and staging and committing all existing file.");
             commit(GIT_SYSTEM_AUTHOR, "Initializing Git repository using existing working directory", true, false);
 
-            if (getCommitCount() > 0) {
-                setupBranches();
-            } else {
-                setupBranches = true;
+            if (getCommitCount() <= 0) {
+                createEmptyCommit();
             }
+
+            setupBranches();
         } else if (!isClean()) {
             log.info("Changes in the configuration or agent mapping files have been detected and will be committed to the repository.");
             commit(GIT_SYSTEM_AUTHOR, "Staging and committing of external changes during startup", true, false);
@@ -181,16 +176,18 @@ public class VersioningManager {
         }
 
         commitCommand.call();
+    }
 
-        if (setupBranches) {
-            setupBranches = false;
-            setupBranches();
-        }
+    private void createEmptyCommit() throws GitAPIException {
+        git.commit()
+                .setAllowEmpty(true)
+                .setAuthor(GIT_SYSTEM_AUTHOR)
+                .setMessage("Initializing Git repository")
+                .call();
     }
 
     private void setupBranches() throws GitAPIException {
         git.branchRename().setNewName(Branch.WORKSPACE.getBranchName()).call();
-
         git.branchCreate().setName(Branch.LIVE.getBranchName()).call();
     }
 
@@ -262,7 +259,19 @@ public class VersioningManager {
     public Optional<RevCommit> getLatestCommit(Branch targetBranch) {
         try {
             ObjectId commitId = git.getRepository().resolve("refs/heads/" + targetBranch.getBranchName());
+            return getCommit(commitId);
+        } catch (IOException e) {
+            log.error("An exception occurred while trying to load the latest commit.", e);
+            return Optional.empty();
+        }
+    }
 
+    private Optional<RevCommit> getCommit(String commitId) {
+        return getCommit(ObjectId.fromString(commitId));
+    }
+
+    private Optional<RevCommit> getCommit(ObjectId commitId) {
+        try {
             if (commitId == null) {
                 return Optional.empty();
             }
@@ -282,13 +291,22 @@ public class VersioningManager {
         return latestCommit.map(revCommit -> new RevisionAccess(git.getRepository(), revCommit)).orElse(null);
     }
 
+    public RevisionAccess getRevisionById(String commitId) {
+        Optional<RevCommit> commit = getCommit(commitId);
+        return commit.map(revCommit -> new RevisionAccess(git.getRepository(), revCommit)).orElse(null);
+    }
+
+    public WorkspaceDiff getWorkspaceDiff() throws IOException, GitAPIException {
+        return getWorkspaceDiff(false);
+    }
+
     /**
      * See: https://github.com/centic9/jgit-cookbook/blob/master/src/main/java/org/dstadler/jgit/porcelain/ShowBranchDiff.java
      *
      * @throws IOException
      * @throws GitAPIException
      */
-    public Diff getDiff() throws IOException, GitAPIException {
+    public WorkspaceDiff getWorkspaceDiff(boolean includeFileContent) throws IOException, GitAPIException {
         Repository repository = git.getRepository();
 
         // the diff works on TreeIterators, we prepare two for the two branches
@@ -300,14 +318,44 @@ public class VersioningManager {
 
         List<SimpleDiffEntry> simpleDiffEntries = diffEntries.stream()
                 .map(SimpleDiffEntry::of)
+                .filter(entry -> entry.getFile().startsWith(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER))
+                .peek(entry -> {
+                    String shortenFile = entry.getFile().substring(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER.length());
+                    entry.setFile(shortenFile);
+                })
                 .collect(Collectors.toList());
 
-        Diff diff = new Diff();
+        if (includeFileContent) {
+            RevisionAccess liveRevision = getRevisionById(oldTree.getRight());
+            RevisionAccess workspaceRevision = getRevisionById(newTree.getRight());
+
+            simpleDiffEntries.forEach(entry -> fillFileContent(entry, liveRevision, workspaceRevision));
+        }
+
+        WorkspaceDiff diff = new WorkspaceDiff();
         diff.setDiffEntries(simpleDiffEntries);
         diff.setLiveCommitId(oldTree.getRight());
         diff.setWorkspaceCommitId(newTree.getRight());
 
         return diff;
+    }
+
+    private void fillFileContent(SimpleDiffEntry entry, RevisionAccess liveRevision, RevisionAccess workspaceRevision) {
+        String file = entry.getFile();
+        String oldContent = null;
+        String newContent = null;
+
+        if (entry.getType() == DiffEntry.ChangeType.ADD) {
+            newContent = workspaceRevision.readConfigurationFile(file).orElse(null);
+        } else if (entry.getType() == DiffEntry.ChangeType.MODIFY) {
+            oldContent = liveRevision.readConfigurationFile(file).orElse(null);
+            newContent = workspaceRevision.readConfigurationFile(file).orElse(null);
+        } else if (entry.getType() == DiffEntry.ChangeType.DELETE) {
+            oldContent = liveRevision.readConfigurationFile(file).orElse(null);
+        }
+
+        entry.setOldContent(oldContent);
+        entry.setNewContent(newContent);
     }
 
     private static Pair<AbstractTreeIterator, String> prepareTreeParser(Repository repository, String ref) throws IOException {
@@ -345,7 +393,8 @@ public class VersioningManager {
                 throw new RuntimeException("should not happen");
             }
 
-            Diff diff = getDiff();
+            //TODO has to consider ID!
+            WorkspaceDiff diff = getWorkspaceDiff();
             Map<String, DiffEntry.ChangeType> changeIndex = diff.getDiffEntries().stream()
                     .collect(Collectors.toMap(SimpleDiffEntry::getFile, SimpleDiffEntry::getType));
 
@@ -357,11 +406,19 @@ public class VersioningManager {
             for (String file : promotion.getFiles()) {
                 DiffEntry.ChangeType changeType = changeIndex.get(file);
                 if (changeType != null) {
+
+                    String realFile;
+                    if (file.startsWith("/")) {
+                        realFile = AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + file;
+                    } else {
+                        realFile = AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/" + file;
+                    }
+
                     if (changeType == DiffEntry.ChangeType.DELETE) {
-                        rmCommand.addFilepattern(file);
+                        rmCommand.addFilepattern(realFile);
                         callRemove = true;
                     } else {
-                        checkoutCommand.addPath(file);
+                        checkoutCommand.addPath(realFile);
                         callCheckout = true;
                     }
                 }
