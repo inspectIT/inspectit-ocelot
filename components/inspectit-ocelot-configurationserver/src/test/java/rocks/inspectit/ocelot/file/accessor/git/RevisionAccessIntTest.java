@@ -10,6 +10,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.Authentication;
 import rocks.inspectit.ocelot.file.FileInfo;
 import rocks.inspectit.ocelot.file.FileTestBase;
+import rocks.inspectit.ocelot.file.versioning.ConfigurationPromotion;
 import rocks.inspectit.ocelot.file.versioning.VersioningManager;
 
 import java.io.IOException;
@@ -48,7 +49,6 @@ class RevisionAccessIntTest extends FileTestBase {
         when(authentication.getName()).thenReturn("user");
         ApplicationEventPublisher eventPublisher = mock(ApplicationEventPublisher.class);
         versioningManager = new VersioningManager(tempDirectory, () -> authentication, eventPublisher);
-        versioningManager.initialize();
 
         setupRepository();
 
@@ -67,14 +67,15 @@ class RevisionAccessIntTest extends FileTestBase {
     public void setupRepository() throws GitAPIException, IOException {
         versioningManager.setAmendTimeout(-1);
 
+        // initial files - will be included in the live branch
         createTestFiles("files/file_a.yml=a1", "files/sub/file_z.yml=z1", "untracked.yml");
-        versioningManager.commit("first");
+        versioningManager.initialize();
 
         Files.delete(tempDirectory.resolve("files").resolve("sub").resolve("file_z.yml"));
-        versioningManager.commit("second");
+        versioningManager.commit("first");
 
         createTestFiles("files/file_a.yml=a2", "files/file_b.yml=b1");
-        versioningManager.commit("third");
+        versioningManager.commit("second");
     }
 
     @Nested

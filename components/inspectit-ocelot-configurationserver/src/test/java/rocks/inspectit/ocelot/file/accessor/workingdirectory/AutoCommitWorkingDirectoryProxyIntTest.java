@@ -76,7 +76,7 @@ class AutoCommitWorkingDirectoryProxyIntTest extends FileTestBase {
 
             int commitCount = versioningManager.getCommitCount();
 
-            assertThat(commitCount).isZero();
+            assertThat(commitCount).isOne();
             assertThat(first).isTrue();
             assertThat(second).isTrue();
         }
@@ -95,8 +95,8 @@ class AutoCommitWorkingDirectoryProxyIntTest extends FileTestBase {
             boolean third = versioningManager.isClean();
             int commitCountSecond = versioningManager.getCommitCount();
 
-            assertThat(commitCountFirst).isOne();
-            assertThat(commitCountSecond).isOne();
+            assertThat(commitCountFirst).isEqualTo(2);
+            assertThat(commitCountSecond).isEqualTo(2);
             assertThat(first).isTrue();
             assertThat(second).isTrue();
             assertThat(third).isTrue();
