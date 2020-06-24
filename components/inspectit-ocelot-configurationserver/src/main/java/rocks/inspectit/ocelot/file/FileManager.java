@@ -19,6 +19,8 @@ import rocks.inspectit.ocelot.file.versioning.model.WorkspaceDiff;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Supplier;
 
 /**
@@ -27,6 +29,8 @@ import java.util.function.Supplier;
 @Component
 @Slf4j
 public class FileManager {
+
+    public static final ReadWriteLock WORKING_DIRECTORY_LOCK = new ReentrantReadWriteLock();
 
     /**
      * The accessor used to access the working directory.
@@ -73,12 +77,7 @@ public class FileManager {
         }
     }
 
-    public void promoteConfiguration(ConfigurationPromotion promotion) {
-        try {
-            versioningManager.promoteConfiguration(promotion);
-        } catch (GitAPIException | IOException e) {
-            log.error("error", e);
-            throw new RuntimeException();
-        }
+    public void promoteConfiguration(ConfigurationPromotion promotion) throws GitAPIException {
+        versioningManager.promoteConfiguration(promotion);
     }
 }

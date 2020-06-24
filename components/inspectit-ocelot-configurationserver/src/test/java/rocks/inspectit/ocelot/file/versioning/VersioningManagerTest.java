@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.util.ReflectionTestUtils;
+import rocks.inspectit.ocelot.file.FileManager;
 import rocks.inspectit.ocelot.file.FileTestBase;
 import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
 import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
@@ -556,7 +557,7 @@ class VersioningManagerTest extends FileTestBase {
 
             assertThatExceptionOfType(RuntimeException.class)
                     .isThrownBy(() -> versioningManager.promoteConfiguration(secondPromotion))
-                    .withMessage("change in between");
+                    .withMessage("Live branch has been modified. The provided promotion definition is out of sync.");
         }
 
         @Test

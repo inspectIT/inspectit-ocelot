@@ -1,6 +1,7 @@
 package rocks.inspectit.ocelot.rest.configuration;
 
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +26,7 @@ public class PromotionController extends AbstractBaseController {
     }
 
     @PostMapping(value = "configuration/promote")
-    public ResponseEntity promoteConfiguration(@RequestBody ConfigurationPromotion promotion) {
+    public ResponseEntity promoteConfiguration(@RequestBody ConfigurationPromotion promotion) throws GitAPIException {
         try {
             fileManager.promoteConfiguration(promotion);
             return ResponseEntity.ok().build();

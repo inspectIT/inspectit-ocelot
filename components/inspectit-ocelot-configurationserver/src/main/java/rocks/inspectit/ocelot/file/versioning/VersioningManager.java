@@ -20,6 +20,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.CollectionUtils;
 import rocks.inspectit.ocelot.events.ConfigurationPromotionEvent;
+import rocks.inspectit.ocelot.file.FileManager;
 import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
 import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
 import rocks.inspectit.ocelot.file.versioning.model.ConfigurationPromotion;
@@ -163,16 +164,24 @@ public class VersioningManager {
             return;
         }
 
-        if (stageFiles) {
-            stageFiles();
-        }
+        // lock the working directory
+        FileManager.WORKING_DIRECTORY_LOCK.writeLock().lock();
 
-        commitFiles(author, message, allowAmend);
+        try {
+            if (stageFiles) {
+                stageFiles();
+            }
+
+            commitFiles(author, message, allowAmend);
+        } finally {
+            FileManager.WORKING_DIRECTORY_LOCK.writeLock().unlock();
+        }
     }
 
     /**
      * Commits the staged files using the given author and message. Consecutive of the same user within {@link #amendTimeout}
-     * milliseconds will be amended if specified.
+     * milliseconds will be amended if specified. When used, ensure to lock the working directory, otherwise it may be
+     * that you' re committing to the wrong branch.
      *
      * @param author     the author to use
      * @param message    the commit message to use
@@ -185,6 +194,7 @@ public class VersioningManager {
                 .setAll(true) // in order to remove deleted files from index
                 .setMessage(message)
                 .setAuthor(author);
+
 
         Optional<RevCommit> latestCommit = getLatestCommit();
         if (allowAmend && latestCommit.isPresent()) {
@@ -447,75 +457,84 @@ public class VersioningManager {
         }
     }
 
-    //TODO the working directory has to be synchronized/locked thus no change is done when a promotion is happening
-    public synchronized void promoteConfiguration(ConfigurationPromotion promotion) throws GitAPIException, IOException {
+    /**
+     * Promoting the configuration files according to the specified {@link ConfigurationPromotion} definition.
+     *
+     * @param promotion the promotion definition
+     */
+    public void promoteConfiguration(ConfigurationPromotion promotion) throws GitAPIException {
         if (promotion == null || CollectionUtils.isEmpty(promotion.getFiles())) {
             throw new IllegalArgumentException("ConfigurationPromotion must not be null and has to promote at least one file!");
         }
 
+        // lock the working directory
+        FileManager.WORKING_DIRECTORY_LOCK.writeLock().lock();
+
         try {
-            Optional<RevCommit> liveCommitOptional = getLatestCommit(Branch.LIVE);
-            if (liveCommitOptional.isPresent()) {
-                String liveCommitId = liveCommitOptional.get().getId().name();
-
-                if (!liveCommitId.equals(promotion.getLiveCommitId())) {
-                    throw new ConcurrentModificationException("change in between");
-                }
-            } else {
-                throw new RuntimeException("should not happen");
-            }
-
             ObjectId liveCommitId = ObjectId.fromString(promotion.getLiveCommitId());
             ObjectId workspaceCommitId = ObjectId.fromString(promotion.getWorkspaceCommitId());
 
-            git.checkout().setName(Branch.LIVE.getBranchName()).call();
+            ObjectId currentLiveBranchId = git.getRepository().exactRef("refs/heads/" + Branch.LIVE.getBranchName()).getObjectId();
 
+            if (!liveCommitId.equals(currentLiveBranchId)) {
+                throw new ConcurrentModificationException("Live branch has been modified. The provided promotion definition is out of sync.");
+            }
+
+            // get modified files between the specified diff - we only consider files which exists in the diff
             WorkspaceDiff diff = getWorkspaceDiff(false, liveCommitId, workspaceCommitId);
             Map<String, DiffEntry.ChangeType> changeIndex = diff.getDiffEntries().stream()
                     .collect(Collectors.toMap(SimpleDiffEntry::getFile, SimpleDiffEntry::getType));
 
-            boolean callRemove = false;
-            boolean callCheckout = false;
-            RmCommand rmCommand = git.rm();
-            CheckoutCommand checkoutCommand = git.checkout().setStartPoint(promotion.getWorkspaceCommitId());
+            // map the specified files to the "real" ones. the {@link ConfigurationPromotion} does not know that the
+            // files are actually located in the {@link AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER} directory
+            List<String> realFiles = promotion.getFiles().stream()
+                    .map(file -> {
+                        if (file.startsWith("/")) {
+                            return AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + file;
+                        } else {
+                            return AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/" + file;
+                        }
+                    })
+                    .collect(Collectors.toList());
+//TODO real files sind nicht in dem changeIndex vorhanden!
+            List<String> removeFiles = realFiles.stream()
+                    .filter(file -> changeIndex.get(file) == DiffEntry.ChangeType.DELETE)
+                    .collect(Collectors.toList());
 
-            for (String file : promotion.getFiles()) {
-                DiffEntry.ChangeType changeType = changeIndex.get(file);
-                if (changeType != null) {
+            List<String> checkoutFiles = realFiles.stream()
+                    .filter(file -> changeIndex.get(file) != DiffEntry.ChangeType.DELETE)
+                    .collect(Collectors.toList());
 
-                    String realFile;
-                    if (file.startsWith("/")) {
-                        realFile = AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + file;
-                    } else {
-                        realFile = AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/" + file;
-                    }
+            // checkout live branch
+            git.checkout().setName(Branch.LIVE.getBranchName()).call();
 
-                    if (changeType == DiffEntry.ChangeType.DELETE) {
-                        rmCommand.addFilepattern(realFile);
-                        callRemove = true;
-                    } else {
-                        checkoutCommand.addPath(realFile);
-                        callCheckout = true;
-                    }
-                }
-            }
-
-            if (callRemove) {
+            // remove all deleted files
+            if (!removeFiles.isEmpty()) {
+                RmCommand rmCommand = git.rm();
+                removeFiles.forEach(rmCommand::addFilepattern);
                 rmCommand.call();
             }
-            if (callCheckout) {
+            // checkout added and modified files
+            if (!checkoutFiles.isEmpty()) {
+                CheckoutCommand checkoutCommand = git.checkout().setStartPoint(promotion.getWorkspaceCommitId());
+                checkoutFiles.forEach(checkoutCommand::addPath);
                 checkoutCommand.call();
             }
 
-            commit(getCurrentAuthor(), "Promoting configuration", false, false);
+            // commit changes
+            commit(getCurrentAuthor(), "Promoting configuration files", false, false);
 
+        } catch (IOException | GitAPIException ex) {
+            throw new PromotionFailedException("Configuration promotion has failed.", ex);
         } finally {
+            // checkout workspace branch
+            git.checkout().setName(Branch.WORKSPACE.getBranchName()).call();
+
             eventPublisher.publishEvent(new ConfigurationPromotionEvent(this));
 
-            git.checkout().setName(Branch.WORKSPACE.getBranchName()).call();
             //TODO should we hard reset the repository in case an error occurs?
+
+            FileManager.WORKING_DIRECTORY_LOCK.writeLock().unlock();
         }
     }
-
-
 }
