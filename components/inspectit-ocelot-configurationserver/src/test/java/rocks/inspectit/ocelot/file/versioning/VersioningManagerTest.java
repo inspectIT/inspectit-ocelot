@@ -15,6 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.test.util.ReflectionTestUtils;
 import rocks.inspectit.ocelot.file.FileTestBase;
 import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
+import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
 import rocks.inspectit.ocelot.file.versioning.model.ConfigurationPromotion;
 import rocks.inspectit.ocelot.file.versioning.model.SimpleDiffEntry;
 import rocks.inspectit.ocelot.file.versioning.model.WorkspaceDiff;
@@ -604,9 +605,10 @@ class VersioningManagerTest extends FileTestBase {
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml=b");
             versioningManager.commit("commit");
 
-            Optional<String> result = versioningManager.getRevisionById(workspaceDiff.getWorkspaceCommitId()).readConfigurationFile("file.yml");
+            RevisionAccess result = versioningManager.getRevisionById(ObjectId.fromString(workspaceDiff.getWorkspaceCommitId()));
 
-            assertThat(result).hasValue("a");
+            Optional<String> fileContent = result.readConfigurationFile("file.yml");
+            assertThat(fileContent).hasValue("a");
         }
     }
 }

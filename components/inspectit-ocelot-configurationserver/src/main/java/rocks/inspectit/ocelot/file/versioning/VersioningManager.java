@@ -4,7 +4,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Iterables;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
@@ -63,11 +62,24 @@ public class VersioningManager {
      */
     private Supplier<Authentication> authenticationSupplier;
 
+    /**
+     * Used for sending application events.
+     */
     private ApplicationEventPublisher eventPublisher;
 
+    /**
+     * Timeout for amend commits. Consecutive commits of the same user within this time will be amended.
+     */
     @Setter
     private long amendTimeout = Duration.ofMinutes(10).toMillis();
 
+    /**
+     * Constructor.
+     *
+     * @param workingDirectory       the working directory to use
+     * @param authenticationSupplier the supplier to user for accessing the current user
+     * @param eventPublisher         the event publisher to use
+     */
     public VersioningManager(Path workingDirectory, Supplier<Authentication> authenticationSupplier, ApplicationEventPublisher eventPublisher) {
         this.workingDirectory = workingDirectory;
         this.authenticationSupplier = authenticationSupplier;
@@ -89,10 +101,17 @@ public class VersioningManager {
             commit(GIT_SYSTEM_AUTHOR, "Initializing Git repository using existing working directory", true, false);
 
             if (getCommitCount() <= 0) {
-                createEmptyCommit();
+                // creating an empty commit
+                git.commit()
+                        .setAllowEmpty(true)
+                        .setAuthor(GIT_SYSTEM_AUTHOR)
+                        .setMessage("Initializing Git repository")
+                        .call();
             }
 
-            setupBranches();
+            // create the branches which will be used
+            git.branchRename().setNewName(Branch.WORKSPACE.getBranchName()).call();
+            git.branchCreate().setName(Branch.LIVE.getBranchName()).call();
         } else if (!isClean()) {
             log.info("Changes in the configuration or agent mapping files have been detected and will be committed to the repository.");
             commit(GIT_SYSTEM_AUTHOR, "Staging and committing of external changes during startup", true, false);
@@ -184,19 +203,6 @@ public class VersioningManager {
         commitCommand.call();
     }
 
-    private void createEmptyCommit() throws GitAPIException {
-        git.commit()
-                .setAllowEmpty(true)
-                .setAuthor(GIT_SYSTEM_AUTHOR)
-                .setMessage("Initializing Git repository")
-                .call();
-    }
-
-    private void setupBranches() throws GitAPIException {
-        git.branchRename().setNewName(Branch.WORKSPACE.getBranchName()).call();
-        git.branchCreate().setName(Branch.LIVE.getBranchName()).call();
-    }
-
     /**
      * Stage all modified/added/removed configuration files and the agent mapping file.
      */
@@ -256,66 +262,89 @@ public class VersioningManager {
     }
 
     /**
-     * @return Returns the latest commit of the current branch.
+     * @return Returns the latest commit of the workspace branch.
      */
     public Optional<RevCommit> getLatestCommit() {
         return getLatestCommit(Branch.WORKSPACE);
     }
 
+    /**
+     * @return Returns the latest commit of the specified branch.
+     */
     public Optional<RevCommit> getLatestCommit(Branch targetBranch) {
         try {
-            ObjectId commitId = git.getRepository().resolve("refs/heads/" + targetBranch.getBranchName());
-            return getCommit(commitId);
+            String ref = "refs/heads/" + targetBranch.getBranchName();
+            ObjectId commitId = git.getRepository().resolve(ref);
+            RevCommit commit = getCommit(commitId);
+            return Optional.ofNullable(commit);
         } catch (IOException e) {
             log.error("An exception occurred while trying to load the latest commit.", e);
             return Optional.empty();
         }
     }
 
-    private Optional<RevCommit> getCommit(String commitId) {
-        return getCommit(ObjectId.fromString(commitId));
-    }
-
-    private Optional<RevCommit> getCommit(ObjectId commitId) {
+    /**
+     * Returns the commit with the given id. In case the commit does not exist, the id is wrong or any other kind
+     * of error, <code>null</code> will be returned.
+     *
+     * @param commitId the id of the desired commit
+     * @return the commit object or null if the commit could not be loaded
+     */
+    private RevCommit getCommit(ObjectId commitId) {
         try {
             if (commitId == null) {
-                return Optional.empty();
+                return null;
             }
 
             try (RevWalk revWalk = new RevWalk(git.getRepository())) {
-                RevCommit commit = revWalk.parseCommit(commitId);
-                return Optional.of(commit);
+                return revWalk.parseCommit(commitId);
             }
         } catch (IOException e) {
             log.error("An exception occurred while trying to load the latest commit.", e);
-            return Optional.empty();
+            return null;
         }
     }
 
+    /**
+     * @return A {@link RevisionAccess} instance to access the current live branch.
+     */
     public RevisionAccess getLiveRevision() {
         Optional<RevCommit> latestCommit = getLatestCommit(Branch.LIVE);
         return latestCommit.map(revCommit -> new RevisionAccess(git.getRepository(), revCommit)).orElse(null);
     }
 
+    /**
+     * @return @return A {@link RevisionAccess} instance to access the current workspace branch.
+     */
     public RevisionAccess getWorkspaceRevision() {
         Optional<RevCommit> latestCommit = getLatestCommit(Branch.WORKSPACE);
         return latestCommit.map(revCommit -> new RevisionAccess(git.getRepository(), revCommit)).orElse(null);
     }
 
-    public RevisionAccess getRevisionById(String commitId) {
-        Optional<RevCommit> commit = getCommit(commitId);
-        return commit.map(revCommit -> new RevisionAccess(git.getRepository(), revCommit)).orElse(null);
+    /**
+     * @return @return A {@link RevisionAccess} instance to access the commit with the specified Id.
+     */
+    public RevisionAccess getRevisionById(ObjectId commitId) {
+        RevCommit commit = getCommit(commitId);
+        if (commit != null) {
+            return new RevisionAccess(git.getRepository(), commit);
+        }
+        return null;
     }
 
+    /**
+     * @return Returns the diff between the current live branch and the current workspace branch. The actual file
+     * difference (old and new content) will not be returned.
+     */
     public WorkspaceDiff getWorkspaceDiff() throws IOException, GitAPIException {
         return getWorkspaceDiff(false);
     }
 
     /**
-     * See: https://github.com/centic9/jgit-cookbook/blob/master/src/main/java/org/dstadler/jgit/porcelain/ShowBranchDiff.java
+     * Returns the diff between the current live branch and the current workspace branch.
      *
-     * @throws IOException
-     * @throws GitAPIException
+     * @param includeFileContent whether the file difference (old and new content) is included
+     * @return the diff between the live and workspace branch
      */
     public WorkspaceDiff getWorkspaceDiff(boolean includeFileContent) throws IOException, GitAPIException {
         Repository repository = git.getRepository();
@@ -325,17 +354,27 @@ public class VersioningManager {
         return getWorkspaceDiff(includeFileContent, oldCommitId, newCommitId);
     }
 
+    /**
+     * Returns the diff between the specified commits. In case the `includeFileContent` argument is true, the actual
+     * file difference (old and new content) will be included in the resulting object.
+     * <p>
+     * This method is based on the following implementation: https://github.com/centic9/jgit-cookbook/blob/master/src/main/java/org/dstadler/jgit/porcelain/ShowBranchDiff.java
+     *
+     * @param includeFileContent whether the file difference (old and new content) is included
+     * @param oldCommit          the commit id of the base (old) commit
+     * @param newCommit          the commit id of the target (new) commit
+     * @return the diff between the specified branches
+     */
     @VisibleForTesting
     WorkspaceDiff getWorkspaceDiff(boolean includeFileContent, ObjectId oldCommit, ObjectId newCommit) throws IOException, GitAPIException {
-        Repository repository = git.getRepository();
-
         // the diff works on TreeIterators, we prepare two for the two branches
-        Pair<AbstractTreeIterator, String> oldTree = prepareTreeParser(repository, oldCommit);
-        Pair<AbstractTreeIterator, String> newTree = prepareTreeParser(repository, newCommit);
+        AbstractTreeIterator oldTree = prepareTreeParser(oldCommit);
+        AbstractTreeIterator newTree = prepareTreeParser(newCommit);
 
         // then the procelain diff-command returns a list of diff entries
-        List<DiffEntry> diffEntries = git.diff().setOldTree(oldTree.getLeft()).setNewTree(newTree.getLeft()).call();
+        List<DiffEntry> diffEntries = git.diff().setOldTree(oldTree).setNewTree(newTree).call();
 
+        // the diff entries are converted into custom ones
         List<SimpleDiffEntry> simpleDiffEntries = diffEntries.stream()
                 .map(SimpleDiffEntry::of)
                 .filter(entry -> entry.getFile().startsWith(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER))
@@ -345,39 +384,54 @@ public class VersioningManager {
                 })
                 .collect(Collectors.toList());
 
+        // the diff entries will get their file difference if specified
         if (includeFileContent) {
-            RevisionAccess liveRevision = getRevisionById(oldTree.getRight());
-            RevisionAccess workspaceRevision = getRevisionById(newTree.getRight());
+            RevisionAccess liveRevision = getRevisionById(oldCommit);
+            RevisionAccess workspaceRevision = getRevisionById(newCommit);
 
             simpleDiffEntries.forEach(entry -> fillFileContent(entry, liveRevision, workspaceRevision));
         }
 
         return WorkspaceDiff.builder()
                 .diffEntries(simpleDiffEntries)
-                .liveCommitId(oldTree.getRight())
-                .workspaceCommitId(newTree.getRight())
+                .liveCommitId(oldCommit.name())
+                .workspaceCommitId(newCommit.name())
                 .build();
     }
 
-    private void fillFileContent(SimpleDiffEntry entry, RevisionAccess liveRevision, RevisionAccess workspaceRevision) {
+    /**
+     * Sets the old and new file content of the specified diff entry using the given revision access instances.
+     *
+     * @param entry       the entry to fill its content
+     * @param oldRevision the revision access representing the old state of the file
+     * @param newRevision the revision access representing the new state of the file
+     */
+    private void fillFileContent(SimpleDiffEntry entry, RevisionAccess oldRevision, RevisionAccess newRevision) {
         String file = entry.getFile();
         String oldContent = null;
         String newContent = null;
 
         if (entry.getType() == DiffEntry.ChangeType.ADD) {
-            newContent = workspaceRevision.readConfigurationFile(file).orElse(null);
+            newContent = newRevision.readConfigurationFile(file).orElse(null);
         } else if (entry.getType() == DiffEntry.ChangeType.MODIFY) {
-            oldContent = liveRevision.readConfigurationFile(file).orElse(null);
-            newContent = workspaceRevision.readConfigurationFile(file).orElse(null);
+            oldContent = oldRevision.readConfigurationFile(file).orElse(null);
+            newContent = newRevision.readConfigurationFile(file).orElse(null);
         } else if (entry.getType() == DiffEntry.ChangeType.DELETE) {
-            oldContent = liveRevision.readConfigurationFile(file).orElse(null);
+            oldContent = oldRevision.readConfigurationFile(file).orElse(null);
         }
 
         entry.setOldContent(oldContent);
         entry.setNewContent(newContent);
     }
 
-    private static Pair<AbstractTreeIterator, String> prepareTreeParser(Repository repository, ObjectId commitId) throws IOException {
+    /**
+     * Creates an {@link AbstractTreeIterator} for the specified commit.
+     *
+     * @param commitId the commit which is used as basis for the tree iterator
+     * @return the created {@link AbstractTreeIterator}
+     */
+    private AbstractTreeIterator prepareTreeParser(ObjectId commitId) throws IOException {
+        Repository repository = git.getRepository();
         try (RevWalk walk = new RevWalk(repository)) {
             RevCommit commit = walk.parseCommit(commitId);
             RevTree tree = walk.parseTree(commit.getTree().getId());
@@ -389,7 +443,7 @@ public class VersioningManager {
 
             walk.dispose();
 
-            return Pair.of(treeParser, commit.getId().name());
+            return treeParser;
         }
     }
 
