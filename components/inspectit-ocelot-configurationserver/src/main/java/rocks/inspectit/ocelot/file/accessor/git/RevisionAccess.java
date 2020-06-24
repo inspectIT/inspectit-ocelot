@@ -85,7 +85,7 @@ public class RevisionAccess extends AbstractFileAccessor {
     @Override
     protected boolean exists(String path) {
         try (TreeWalk treeWalk = TreeWalk.forPath(repository, path, revCommit.getTree())) {
-            return treeWalk != null && !treeWalk.isSubtree();
+            return treeWalk != null;
         } catch (Exception e) {
             log.error("Could not read file {} from git repository", path, e);
             return false;

@@ -42,7 +42,7 @@ public class FileManager {
         WorkingDirectoryAccessor workingDirectoryAccessorImpl = new WorkingDirectoryAccessor(workingDirectory, eventPublisher);
 
         Supplier<Authentication> authenticationSupplier = () -> SecurityContextHolder.getContext().getAuthentication();
-        versioningManager = new VersioningManager(workingDirectory, authenticationSupplier);
+        versioningManager = new VersioningManager(workingDirectory, authenticationSupplier, eventPublisher);
         versioningManager.initialize();
 
         this.workingDirectoryAccessor = new AutoCommitWorkingDirectoryProxy(workingDirectoryAccessorImpl, versioningManager);

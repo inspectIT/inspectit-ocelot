@@ -128,6 +128,9 @@ public abstract class AbstractFileAccessor {
     }
 
     /**
+     * It does not check whether the path is a file or directory, only
+     * whether it exists or not.
+     *
      * @return Returns whether the given path exists.
      */
     public boolean configurationFileExists(String path) {

@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.yaml.snakeyaml.Yaml;
 import rocks.inspectit.ocelot.file.FileInfo;
 import rocks.inspectit.ocelot.file.FileManager;
+import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
 import rocks.inspectit.ocelot.file.accessor.workingdirectory.AbstractWorkingDirectoryAccessor;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 
@@ -102,16 +103,17 @@ class AgentConfigurationReloadTask implements Runnable {
      * @param mapping the mapping to load
      * @return the merged yaml for the given mapping or an empty string if the mapping does not contain any existing files
      * If this task has been canceled, null is returned.
-     * @throws IOException in case a file could not be loaded
      */
     @VisibleForTesting
-    String loadConfigForMapping(AgentMapping mapping) throws IOException {
+    String loadConfigForMapping(AgentMapping mapping) {
+        AbstractFileAccessor fileAccessor = fileManager.getLiveRevision();
+
         LinkedHashSet<String> allYamlFiles = new LinkedHashSet<>();
         for (String path : mapping.getSources()) {
             if (cancelFlag.get()) {
                 return null;
             }
-            allYamlFiles.addAll(getAllYamlFiles(path));
+            allYamlFiles.addAll(getAllYamlFiles(fileAccessor, path));
         }
 
         Object result = null;
@@ -119,7 +121,7 @@ class AgentConfigurationReloadTask implements Runnable {
             if (cancelFlag.get()) {
                 return null;
             }
-            result = loadAndMergeYaml(result, path);
+            result = loadAndMergeYaml(fileAccessor, result, path);
         }
         return result == null ? "" : new Yaml().dump(result);
     }
@@ -132,7 +134,7 @@ class AgentConfigurationReloadTask implements Runnable {
      * @param path the path to check for yaml files, can start with a slash which will be ignored
      * @return a list of absolute paths of contained YAML files
      */
-    private List<String> getAllYamlFiles(String path) {
+    private List<String> getAllYamlFiles(AbstractFileAccessor fileAccessor, String path) {
         String cleanedPath;
         if (path.startsWith("/")) {
             cleanedPath = path.substring(1);
@@ -140,11 +142,9 @@ class AgentConfigurationReloadTask implements Runnable {
             cleanedPath = path;
         }
 
-        AbstractWorkingDirectoryAccessor workingDirectory = fileManager.getWorkingDirectory();
-
-        if (workingDirectory.configurationFileExists(cleanedPath)) {
-            if (workingDirectory.configurationFileIsDirectory(cleanedPath)) {
-                List<FileInfo> fileInfos = workingDirectory.listConfigurationFiles(cleanedPath);
+        if (fileAccessor.configurationFileExists(cleanedPath)) {
+            if (fileAccessor.configurationFileIsDirectory(cleanedPath)) {
+                List<FileInfo> fileInfos = fileAccessor.listConfigurationFiles(cleanedPath);
 
                 return fileInfos.stream()
                         .flatMap(file -> file.getAbsoluteFilePaths(cleanedPath))
@@ -165,9 +165,9 @@ class AgentConfigurationReloadTask implements Runnable {
      * @param path    the path of the yaml file to load
      * @return the merged structure
      */
-    private Object loadAndMergeYaml(Object toMerge, String path) {
+    private Object loadAndMergeYaml(AbstractFileAccessor fileAccessor, Object toMerge, String path) {
         Yaml yaml = new Yaml();
-        String src = fileManager.getWorkingDirectory().readConfigurationFile(path).orElse("");
+        String src = fileAccessor.readConfigurationFile(path).orElse("");
 
         try {
             Object loadedYaml = yaml.load(src);

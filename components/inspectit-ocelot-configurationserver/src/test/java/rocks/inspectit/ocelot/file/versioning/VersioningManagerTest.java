@@ -9,6 +9,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.util.ReflectionTestUtils;
 import rocks.inspectit.ocelot.file.FileTestBase;
@@ -49,8 +50,8 @@ class VersioningManagerTest extends FileTestBase {
 
         authentication = mock(Authentication.class);
         when(authentication.getName()).thenReturn("user");
-
-        versioningManager = new VersioningManager(tempDirectory, () -> authentication);
+        ApplicationEventPublisher eventPublisher = mock(ApplicationEventPublisher.class);
+        versioningManager = new VersioningManager(tempDirectory, () -> authentication, eventPublisher);
 
         System.out.println("Test data in: " + tempDirectory.toString());
     }

@@ -6,6 +6,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.Authentication;
 import rocks.inspectit.ocelot.file.FileInfo;
 import rocks.inspectit.ocelot.file.FileTestBase;
@@ -45,7 +46,8 @@ class RevisionAccessIntTest extends FileTestBase {
 
         Authentication authentication = mock(Authentication.class);
         when(authentication.getName()).thenReturn("user");
-        versioningManager = new VersioningManager(tempDirectory, () -> authentication);
+        ApplicationEventPublisher eventPublisher = mock(ApplicationEventPublisher.class);
+        versioningManager = new VersioningManager(tempDirectory, () -> authentication, eventPublisher);
         versioningManager.initialize();
 
         setupRepository();
@@ -161,6 +163,13 @@ class RevisionAccessIntTest extends FileTestBase {
         @Test
         public void checkNestedFile() {
             boolean result = revision.configurationFileExists("sub/file_z.yml");
+
+            assertThat(result).isTrue();
+        }
+
+        @Test
+        public void checkDirectory() {
+            boolean result = revision.configurationFileExists("sub");
 
             assertThat(result).isTrue();
         }

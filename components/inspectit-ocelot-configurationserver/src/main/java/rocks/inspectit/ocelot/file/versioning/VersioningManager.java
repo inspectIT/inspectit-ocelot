@@ -14,7 +14,9 @@ import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.AbstractTreeIterator;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.Authentication;
+import rocks.inspectit.ocelot.events.ConfigurationPromotionEvent;
 import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
 import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
 import rocks.inspectit.ocelot.file.versioning.model.Diff;
@@ -55,6 +57,8 @@ public class VersioningManager {
      */
     private Supplier<Authentication> authenticationSupplier;
 
+    private ApplicationEventPublisher eventPublisher;
+
     private boolean setupBranches = false;
 
     /**
@@ -63,15 +67,10 @@ public class VersioningManager {
     @Setter
     private long amendTimeout = Duration.ofMinutes(10).toMillis();
 
-    /**
-     * Constructor.
-     *
-     * @param workingDirectory       the working directory to use
-     * @param authenticationSupplier the supplier to user for accessing the current user
-     */
-    public VersioningManager(Path workingDirectory, Supplier<Authentication> authenticationSupplier) {
+    public VersioningManager(Path workingDirectory, Supplier<Authentication> authenticationSupplier, ApplicationEventPublisher eventPublisher) {
         this.workingDirectory = workingDirectory;
         this.authenticationSupplier = authenticationSupplier;
+        this.eventPublisher = eventPublisher;
     }
 
     /**
@@ -378,6 +377,8 @@ public class VersioningManager {
             commit(getCurrentAuthor(), "Promoting configuration", false, false);
 
         } finally {
+            eventPublisher.publishEvent(new ConfigurationPromotionEvent(this));
+
             git.checkout().setName(Branch.WORKSPACE.getBranchName()).call();
             //TODO hard reset in case of error?
         }
