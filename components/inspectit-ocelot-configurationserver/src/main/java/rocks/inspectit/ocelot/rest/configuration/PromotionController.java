@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import rocks.inspectit.ocelot.file.FileManager;
-import rocks.inspectit.ocelot.file.versioning.ConfigurationPromotion;
+import rocks.inspectit.ocelot.file.versioning.model.ConfigurationPromotion;
 import rocks.inspectit.ocelot.file.versioning.model.WorkspaceDiff;
 import rocks.inspectit.ocelot.rest.AbstractBaseController;
 

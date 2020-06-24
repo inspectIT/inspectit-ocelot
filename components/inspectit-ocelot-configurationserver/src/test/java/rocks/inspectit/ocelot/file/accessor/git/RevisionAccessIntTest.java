@@ -10,7 +10,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.Authentication;
 import rocks.inspectit.ocelot.file.FileInfo;
 import rocks.inspectit.ocelot.file.FileTestBase;
-import rocks.inspectit.ocelot.file.versioning.ConfigurationPromotion;
 import rocks.inspectit.ocelot.file.versioning.VersioningManager;
 
 import java.io.IOException;

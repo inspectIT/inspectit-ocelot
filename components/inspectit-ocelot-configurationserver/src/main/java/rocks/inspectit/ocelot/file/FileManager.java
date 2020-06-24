@@ -12,7 +12,7 @@ import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
 import rocks.inspectit.ocelot.file.accessor.workingdirectory.AbstractWorkingDirectoryAccessor;
 import rocks.inspectit.ocelot.file.accessor.workingdirectory.AutoCommitWorkingDirectoryProxy;
 import rocks.inspectit.ocelot.file.accessor.workingdirectory.WorkingDirectoryAccessor;
-import rocks.inspectit.ocelot.file.versioning.ConfigurationPromotion;
+import rocks.inspectit.ocelot.file.versioning.model.ConfigurationPromotion;
 import rocks.inspectit.ocelot.file.versioning.VersioningManager;
 import rocks.inspectit.ocelot.file.versioning.model.WorkspaceDiff;
 

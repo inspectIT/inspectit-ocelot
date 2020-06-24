@@ -8,7 +8,10 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
-import org.eclipse.jgit.lib.*;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.ObjectReader;
+import org.eclipse.jgit.lib.PersonIdent;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
@@ -16,9 +19,11 @@ import org.eclipse.jgit.treewalk.AbstractTreeIterator;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.Authentication;
+import org.springframework.util.CollectionUtils;
 import rocks.inspectit.ocelot.events.ConfigurationPromotionEvent;
 import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
 import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
+import rocks.inspectit.ocelot.file.versioning.model.ConfigurationPromotion;
 import rocks.inspectit.ocelot.file.versioning.model.SimpleDiffEntry;
 import rocks.inspectit.ocelot.file.versioning.model.WorkspaceDiff;
 
@@ -29,7 +34,6 @@ import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -293,6 +297,11 @@ public class VersioningManager {
         return latestCommit.map(revCommit -> new RevisionAccess(git.getRepository(), revCommit)).orElse(null);
     }
 
+    public RevisionAccess getWorkspaceRevision() {
+        Optional<RevCommit> latestCommit = getLatestCommit(Branch.WORKSPACE);
+        return latestCommit.map(revCommit -> new RevisionAccess(git.getRepository(), revCommit)).orElse(null);
+    }
+
     public RevisionAccess getRevisionById(String commitId) {
         Optional<RevCommit> commit = getCommit(commitId);
         return commit.map(revCommit -> new RevisionAccess(git.getRepository(), revCommit)).orElse(null);
@@ -310,10 +319,19 @@ public class VersioningManager {
      */
     public WorkspaceDiff getWorkspaceDiff(boolean includeFileContent) throws IOException, GitAPIException {
         Repository repository = git.getRepository();
+        ObjectId oldCommitId = repository.exactRef("refs/heads/" + Branch.LIVE.getBranchName()).getObjectId();
+        ObjectId newCommitId = repository.exactRef("refs/heads/" + Branch.WORKSPACE.getBranchName()).getObjectId();
+
+        return getWorkspaceDiff(includeFileContent, oldCommitId, newCommitId);
+    }
+
+    @VisibleForTesting
+    WorkspaceDiff getWorkspaceDiff(boolean includeFileContent, ObjectId oldCommit, ObjectId newCommit) throws IOException, GitAPIException {
+        Repository repository = git.getRepository();
 
         // the diff works on TreeIterators, we prepare two for the two branches
-        Pair<AbstractTreeIterator, String> oldTree = prepareTreeParser(repository, "refs/heads/" + Branch.LIVE.getBranchName());
-        Pair<AbstractTreeIterator, String> newTree = prepareTreeParser(repository, "refs/heads/" + Branch.WORKSPACE.getBranchName());
+        Pair<AbstractTreeIterator, String> oldTree = prepareTreeParser(repository, oldCommit);
+        Pair<AbstractTreeIterator, String> newTree = prepareTreeParser(repository, newCommit);
 
         // then the procelain diff-command returns a list of diff entries
         List<DiffEntry> diffEntries = git.diff().setOldTree(oldTree.getLeft()).setNewTree(newTree.getLeft()).call();
@@ -334,12 +352,11 @@ public class VersioningManager {
             simpleDiffEntries.forEach(entry -> fillFileContent(entry, liveRevision, workspaceRevision));
         }
 
-        WorkspaceDiff diff = new WorkspaceDiff();
-        diff.setDiffEntries(simpleDiffEntries);
-        diff.setLiveCommitId(oldTree.getRight());
-        diff.setWorkspaceCommitId(newTree.getRight());
-
-        return diff;
+        return WorkspaceDiff.builder()
+                .diffEntries(simpleDiffEntries)
+                .liveCommitId(oldTree.getRight())
+                .workspaceCommitId(newTree.getRight())
+                .build();
     }
 
     private void fillFileContent(SimpleDiffEntry entry, RevisionAccess liveRevision, RevisionAccess workspaceRevision) {
@@ -360,12 +377,9 @@ public class VersioningManager {
         entry.setNewContent(newContent);
     }
 
-    private static Pair<AbstractTreeIterator, String> prepareTreeParser(Repository repository, String ref) throws IOException {
-
-        // from the commit we can build the tree which allows us to construct the TreeParser
-        Ref head = repository.exactRef(ref);
+    private static Pair<AbstractTreeIterator, String> prepareTreeParser(Repository repository, ObjectId commitId) throws IOException {
         try (RevWalk walk = new RevWalk(repository)) {
-            RevCommit commit = walk.parseCommit(head.getObjectId());
+            RevCommit commit = walk.parseCommit(commitId);
             RevTree tree = walk.parseTree(commit.getTree().getId());
 
             CanonicalTreeParser treeParser = new CanonicalTreeParser();
@@ -379,12 +393,13 @@ public class VersioningManager {
         }
     }
 
-    //TODO synchronize working directory
-    public void promoteConfiguration(ConfigurationPromotion promotion) throws GitAPIException, IOException {
-        //TODO check if files exists
-        try {
-            git.checkout().setName(Branch.LIVE.getBranchName()).call();
+    //TODO the working directory has to be synchronized/locked thus no change is done when a promotion is happening
+    public synchronized void promoteConfiguration(ConfigurationPromotion promotion) throws GitAPIException, IOException {
+        if (promotion == null || CollectionUtils.isEmpty(promotion.getFiles())) {
+            throw new IllegalArgumentException("ConfigurationPromotion must not be null and has to promote at least one file!");
+        }
 
+        try {
             Optional<RevCommit> liveCommitOptional = getLatestCommit(Branch.LIVE);
             if (liveCommitOptional.isPresent()) {
                 String liveCommitId = liveCommitOptional.get().getId().name();
@@ -396,8 +411,12 @@ public class VersioningManager {
                 throw new RuntimeException("should not happen");
             }
 
-            //TODO has to consider ID!
-            WorkspaceDiff diff = getWorkspaceDiff();
+            ObjectId liveCommitId = ObjectId.fromString(promotion.getLiveCommitId());
+            ObjectId workspaceCommitId = ObjectId.fromString(promotion.getWorkspaceCommitId());
+
+            git.checkout().setName(Branch.LIVE.getBranchName()).call();
+
+            WorkspaceDiff diff = getWorkspaceDiff(false, liveCommitId, workspaceCommitId);
             Map<String, DiffEntry.ChangeType> changeIndex = diff.getDiffEntries().stream()
                     .collect(Collectors.toMap(SimpleDiffEntry::getFile, SimpleDiffEntry::getType));
 
@@ -440,7 +459,7 @@ public class VersioningManager {
             eventPublisher.publishEvent(new ConfigurationPromotionEvent(this));
 
             git.checkout().setName(Branch.WORKSPACE.getBranchName()).call();
-            //TODO hard reset in case of error?
+            //TODO should we hard reset the repository in case an error occurs?
         }
     }
 

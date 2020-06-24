@@ -4,6 +4,7 @@ import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
+import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,6 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.test.util.ReflectionTestUtils;
 import rocks.inspectit.ocelot.file.FileTestBase;
 import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
+import rocks.inspectit.ocelot.file.versioning.model.ConfigurationPromotion;
 import rocks.inspectit.ocelot.file.versioning.model.SimpleDiffEntry;
 import rocks.inspectit.ocelot.file.versioning.model.WorkspaceDiff;
 
@@ -374,6 +376,37 @@ class VersioningManagerTest extends FileTestBase {
             );
             assertThat(result.getLiveCommitId()).isNotEqualTo(result.getWorkspaceCommitId());
         }
+
+        @Test
+        public void getDiffById() throws IOException, GitAPIException {
+            // initial
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml");
+            versioningManager.initialize();
+            // commit 1
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml=new content");
+            versioningManager.commit("commit");
+            ObjectId workspaceId = versioningManager.getLatestCommit().get().getId();
+            ObjectId liveId = versioningManager.getLatestCommit(Branch.LIVE).get().getId();
+            // commit 2
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml=another content");
+            versioningManager.commit("commit");
+            ObjectId latestWorkspaceId = versioningManager.getLatestCommit().get().getId();
+
+            WorkspaceDiff resultFirst = versioningManager.getWorkspaceDiff(true, liveId, workspaceId);
+            WorkspaceDiff resultSecond = versioningManager.getWorkspaceDiff(true, liveId, latestWorkspaceId);
+
+            assertThat(resultFirst.getDiffEntries()).containsExactlyInAnyOrder(
+                    SimpleDiffEntry.builder().file("/file_modified.yml").type(DiffEntry.ChangeType.MODIFY).oldContent("").newContent("new content").build()
+            );
+            assertThat(resultFirst.getLiveCommitId()).isEqualTo(liveId.name());
+            assertThat(resultFirst.getWorkspaceCommitId()).isEqualTo(workspaceId.name());
+
+            assertThat(resultSecond.getDiffEntries()).containsExactlyInAnyOrder(
+                    SimpleDiffEntry.builder().file("/file_modified.yml").type(DiffEntry.ChangeType.MODIFY).oldContent("").newContent("another content").build()
+            );
+            assertThat(resultSecond.getLiveCommitId()).isEqualTo(liveId.name());
+            assertThat(resultSecond.getWorkspaceCommitId()).isEqualTo(latestWorkspaceId.name());
+        }
     }
 
     @Nested
@@ -523,6 +556,38 @@ class VersioningManagerTest extends FileTestBase {
             assertThatExceptionOfType(RuntimeException.class)
                     .isThrownBy(() -> versioningManager.promoteConfiguration(secondPromotion))
                     .withMessage("change in between");
+        }
+
+        @Test
+        public void promotionWithModifictaion() throws GitAPIException, IOException {
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml");
+            versioningManager.initialize();
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml=content_A");
+            versioningManager.commit("commit");
+
+            String liveId = versioningManager.getLatestCommit(Branch.LIVE).get().getId().name();
+            String workspaceId = versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId().name();
+
+            ConfigurationPromotion promotion = new ConfigurationPromotion();
+            promotion.setLiveCommitId(liveId);
+            promotion.setWorkspaceCommitId(workspaceId);
+            promotion.setFiles(Arrays.asList(
+                    "/file_modified.yml"
+            ));
+
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml=content_B");
+            versioningManager.commit("commit");
+
+            versioningManager.promoteConfiguration(promotion);
+
+            // diff live -> workspace
+            WorkspaceDiff diff = versioningManager.getWorkspaceDiff();
+
+            assertThat(diff.getDiffEntries()).containsExactlyInAnyOrder(
+                    SimpleDiffEntry.builder().file("/file_modified.yml").type(DiffEntry.ChangeType.MODIFY).build()
+            );
+            assertThat(versioningManager.getLiveRevision().readConfigurationFile("file_modified.yml")).hasValue("content_A");
+            assertThat(versioningManager.getWorkspaceRevision().readConfigurationFile("file_modified.yml")).hasValue("content_B");
         }
     }
 

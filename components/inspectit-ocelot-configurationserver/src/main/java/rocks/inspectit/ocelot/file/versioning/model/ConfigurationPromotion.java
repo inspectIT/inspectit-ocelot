@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.file.versioning;
+package rocks.inspectit.ocelot.file.versioning.model;
 
 import lombok.Data;
 
