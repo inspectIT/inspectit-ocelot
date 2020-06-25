@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationEventPublisher;
 import rocks.inspectit.ocelot.file.FileChangedEvent;
 import rocks.inspectit.ocelot.file.FileInfo;
-import rocks.inspectit.ocelot.file.FileManager;
 import rocks.inspectit.ocelot.file.FileTestBase;
 
 import java.io.IOException;
