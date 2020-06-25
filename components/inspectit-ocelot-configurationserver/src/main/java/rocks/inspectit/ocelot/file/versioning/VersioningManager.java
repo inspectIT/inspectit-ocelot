@@ -485,24 +485,14 @@ public class VersioningManager {
             Map<String, DiffEntry.ChangeType> changeIndex = diff.getDiffEntries().stream()
                     .collect(Collectors.toMap(SimpleDiffEntry::getFile, SimpleDiffEntry::getType));
 
-            // map the specified files to the "real" ones. the {@link ConfigurationPromotion} does not know that the
-            // files are actually located in the {@link AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER} directory
-            List<String> realFiles = promotion.getFiles().stream()
-                    .map(file -> {
-                        if (file.startsWith("/")) {
-                            return AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + file;
-                        } else {
-                            return AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/" + file;
-                        }
-                    })
-                    .collect(Collectors.toList());
-//TODO real files sind nicht in dem changeIndex vorhanden!
-            List<String> removeFiles = realFiles.stream()
+            List<String> removeFiles = promotion.getFiles().stream()
                     .filter(file -> changeIndex.get(file) == DiffEntry.ChangeType.DELETE)
+                    .map(this::prefixRelativeFile)
                     .collect(Collectors.toList());
 
-            List<String> checkoutFiles = realFiles.stream()
+            List<String> checkoutFiles = promotion.getFiles().stream()
                     .filter(file -> changeIndex.get(file) != DiffEntry.ChangeType.DELETE)
+                    .map(this::prefixRelativeFile)
                     .collect(Collectors.toList());
 
             // checkout live branch
@@ -532,9 +522,25 @@ public class VersioningManager {
 
             eventPublisher.publishEvent(new ConfigurationPromotionEvent(this));
 
-            //TODO should we hard reset the repository in case an error occurs?
+            //TODO should we hard reset the repository in case an error occurs, thus we're in a clean state?
 
             FileManager.WORKING_DIRECTORY_LOCK.writeLock().unlock();
+        }
+    }
+
+    /**
+     * Prefixes the given file path using the configuration's file subfolder.
+     * <p>
+     * Example, the input `/my_file.yml` will result in `files/my_file.yml` if `files` is the files subfolder.
+     *
+     * @param file the relative file path
+     * @return the file path including the files directory
+     */
+    private String prefixRelativeFile(String file) {
+        if (file.startsWith("/")) {
+            return AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + file;
+        } else {
+            return AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/" + file;
         }
     }
 }
