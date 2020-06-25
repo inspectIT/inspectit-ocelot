@@ -29,7 +29,7 @@ class RevisionAccessIntTest extends FileTestBase {
      * For convenience: if this field is not null, it will used as working directory during tests.
      * Note: the specified directory is CLEANED before each run, thus, if you have files there, they will be gone ;)
      */
-    public static final String TEST_DIRECTORY = "C:\\test";
+    public static final String TEST_DIRECTORY = null;
 
     private RevisionAccess revision;
 
