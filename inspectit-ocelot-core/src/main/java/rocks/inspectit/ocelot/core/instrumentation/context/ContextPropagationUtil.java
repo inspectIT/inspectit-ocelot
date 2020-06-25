@@ -61,6 +61,7 @@ public class ContextPropagationUtil {
     static {
         PROPAGATION_FIELDS.add(CORRELATION_CONTEXT_HEADER);
         PROPAGATION_FIELDS.addAll(Tracing.getPropagationComponent().getB3Format().fields());
+        PROPAGATION_FIELDS.addAll(Tracing.getPropagationComponent().getTraceContextFormat().fields());
     }
 
     static {
@@ -165,6 +166,7 @@ public class ContextPropagationUtil {
      * @return if the data contained any trace correlation, the SpanContext is returned. Otherwise returns null
      */
     public static SpanContext readPropagatedSpanContextFromHeaderMap(Map<String, String> propagationMap) {
+
         boolean anyB3Header = Tracing.getPropagationComponent().getB3Format().fields().stream().anyMatch(propagationMap::containsKey);
         if (anyB3Header) {
             try {
@@ -174,6 +176,16 @@ public class ContextPropagationUtil {
                 log.error("Error reading trace correlation data from B3 headers: {}", headerString, t);
             }
         }
+
+        boolean anyTraceContextHeader = Tracing.getPropagationComponent().getTraceContextFormat().fields().stream().anyMatch(propagationMap::containsKey);
+        if (anyTraceContextHeader) {
+            try {
+                return Tracing.getPropagationComponent().getTraceContextFormat().extract(propagationMap, MAP_EXTRACTOR);
+            } catch (Throwable t) {
+                log.error("Error reading trace correlation data from the trace context headers.", t);
+            }
+        }
+
         return null;
     }
 
