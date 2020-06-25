@@ -1,28 +1,51 @@
 package rocks.inspectit.ocelot.rest.configuration;
 
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+import rocks.inspectit.ocelot.file.FileChangedEvent;
+import rocks.inspectit.ocelot.rest.AbstractBaseController;
+import io.swagger.annotations.ApiParam;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 import rocks.inspectit.ocelot.agentconfiguration.AgentConfiguration;
 import rocks.inspectit.ocelot.agentconfiguration.AgentConfigurationManager;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
-import rocks.inspectit.ocelot.rest.AbstractBaseController;
 
 import java.util.Map;
 
-/**
- * Controller for endpoints related to configuration files.
- */
 @RestController
 public class ConfigurationController extends AbstractBaseController {
 
+    /**
+     * Event publisher to trigger events upon incoming reload requests.
+     */
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
     @Autowired
     private AgentConfigurationManager configManager;
+
+    /**
+     * Fires a new {@link FileChangedEvent}.
+     */
+    private void fireFileChangeEvent() {
+        FileChangedEvent event = new FileChangedEvent(this);
+        eventPublisher.publishEvent(event);
+    }
+
+    /**
+     * Reloads all configuration files present in the servers working directory.
+     */
+    @ApiOperation(value = "Reloads all configuration files.", notes = "Reloads all configuration files present in the " +
+            "servers working directory.")
+    @GetMapping(value = "configuration/reload", produces = "text/plain")
+    public void reloadConfiguration() {
+        fireFileChangeEvent();
+    }
 
     /**
      * Returns the {@link InspectitConfig} for the agent with the given name without logging the access in the agent
