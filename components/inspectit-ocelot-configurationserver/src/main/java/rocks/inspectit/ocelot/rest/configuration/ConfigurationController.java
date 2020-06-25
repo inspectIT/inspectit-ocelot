@@ -15,6 +15,9 @@ import rocks.inspectit.ocelot.rest.AbstractBaseController;
 
 import java.util.Map;
 
+/**
+ * Controller for endpoints related to configuration files.
+ */
 @RestController
 public class ConfigurationController extends AbstractBaseController {
 
@@ -31,7 +34,7 @@ public class ConfigurationController extends AbstractBaseController {
      */
     @ApiOperation(value = "Fetch the Agent Configuration without logging the access.", notes = "Reads the configuration for the given agent and returns it as a yaml string." +
             "Does not log the access in the agent status.")
-    @GetMapping(value = "configuration/agent-config", produces = "text/plain")
+    @GetMapping(value = "configuration/agent-configuration", produces = "text/plain")
     public ResponseEntity<String> fetchConfiguration(@ApiParam("The agent attributes used to select the correct mapping") @RequestParam Map<String, String> attributes) {
         AgentConfiguration configuration = configManager.getConfiguration(attributes);
         if (configuration == null) {
