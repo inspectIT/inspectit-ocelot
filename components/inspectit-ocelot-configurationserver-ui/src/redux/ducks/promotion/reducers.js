@@ -18,10 +18,10 @@ const promotionReducer = createReducer(initialState)({
   },
   [types.FETCH_PROMOTIONS_SUCCESS]: (state, action) => {
     const {
-      promotions: { diffEntries, liveCommitId, workspaceCommitId },
+      promotions: { entries, liveCommitId, workspaceCommitId },
     } = action.payload;
 
-    _.sortBy(diffEntries, ['file']);
+    _.sortBy(entries, ['file']);
 
     const newState = {
       ...state,
@@ -33,7 +33,7 @@ const promotionReducer = createReducer(initialState)({
 
     if (liveCommitId !== state.liveCommitId || workspaceCommitId !== state.workspaceCommitId) {
       newState.currentSelection = initialState.currentSelection;
-      newState.files = diffEntries;
+      newState.files = entries;
     }
 
     return newState;

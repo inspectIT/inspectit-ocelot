@@ -19,13 +19,29 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Accessor to access specific Git revision/commits. Using this class ensures that all operations will be executed
+ * on the same commit, thus, it will return a consistent result event new commits are committed to the repository.
+ */
 @Slf4j
 public class RevisionAccess extends AbstractFileAccessor {
 
+    /**
+     * The repository to use.
+     */
     private Repository repository;
 
+    /**
+     * The commit which will be used for the operations.
+     */
     private RevCommit revCommit;
 
+    /**
+     * Constructor.
+     *
+     * @param repository the repository to use
+     * @param revCommit  the commit which will be used for the operations
+     */
     public RevisionAccess(Repository repository, RevCommit revCommit) {
         this.repository = repository;
         this.revCommit = revCommit;

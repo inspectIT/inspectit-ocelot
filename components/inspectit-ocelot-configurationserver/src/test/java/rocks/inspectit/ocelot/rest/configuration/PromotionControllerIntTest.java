@@ -12,7 +12,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class PromotionControllerIntTest extends IntegrationTestBase {
 
-
     @Nested
     class GetPromotions {
 
