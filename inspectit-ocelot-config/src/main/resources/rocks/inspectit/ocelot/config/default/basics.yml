@@ -28,6 +28,9 @@ inspectit:
     # global sample probability used to decide if a trace shall be sampled or not
     # this value can be overridden by the tracing settings of individual instrumentation rules.
     sample-probability: 1.0
+    # the format for propagating correlation headers.
+    # options are: B3, TRACE_CONTEXT, DATADOG
+    propagation-format: B3
     # defines when to add common tags as attributes to spans
     # options are: NEVER, ON_GLOBAL_ROOT, ON_LOCAL_ROOT, ALWAYS
     add-common-tags: ON_LOCAL_ROOT
