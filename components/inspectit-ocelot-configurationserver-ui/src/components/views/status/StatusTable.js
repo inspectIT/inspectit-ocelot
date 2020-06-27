@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
@@ -6,10 +6,9 @@ import { Button } from 'primereact/button';
 import dateformat from 'dateformat';
 import TimeAgo from 'react-timeago';
 import { map } from 'lodash';
-
 import ConfigurationDownload from '../mappings/ConfigurationDownload';
 import { linkPrefix } from '../../../lib/configuration';
-import AgentConfiguration from './dialogs/AgentConfiguration'
+import AgentConfiguration from './dialogs/AgentConfiguration';
 
 const timeFormatter = (time, unit, suffix) => {
   if (unit === 'second') {
@@ -40,6 +39,7 @@ class AgentMappingCell extends React.Component {
     } = this.props;
     const { showAttributes } = this.state;
 
+    console.log(attributes);
     let name;
     let classname;
     if (mappingName) {
@@ -98,6 +98,12 @@ class AgentMappingCell extends React.Component {
  * The table listing all agent statuses
  */
 class StatusTable extends React.Component {
+
+  state = {
+    configurationValue: "",
+    attributes: {},
+  }
+
   configDownload = React.createRef();
 
   downloadConfiguration = (attributes) => {
@@ -141,7 +147,7 @@ class StatusTable extends React.Component {
         <Button
           className="download-button"
           icon="pi pi-download"
-          onClick={() => this.props.setAgentConfigurationShown(true)}
+          onClick={() => this.getAgentConfiguration(attributes)}
           tooltip="Show Agent Configuration"
         />
       </div>
@@ -221,10 +227,18 @@ class StatusTable extends React.Component {
     return filterArray;
   };
 
+  getAgentConfiguration = (attribute) => {
+    this.setState({
+      attributes: attribute
+    })
+    this.props.setAgentConfigurationShown(true);
+  }
+
   render() {
     const { data: agents } = this.props;
-
     const agentValues = map(agents, (agent) => {
+
+
       return {
         ...agent,
         name: this.getAgentName(agent),
@@ -289,7 +303,11 @@ class StatusTable extends React.Component {
           />
         </DataTable>
         <ConfigurationDownload onRef={(ref) => (this.configDownload = ref)} />
-        <AgentConfiguration visible={this.props.isAgentConfigurationShown} onHide={()=>this.props.setAgentConfigurationShown(false)}/>
+
+        <AgentConfiguration visible={this.props.isAgentConfigurationShown}
+          onHide={() => this.props.setAgentConfigurationShown(false)}
+          attributes={this.state.attributes}
+        />
       </div>
     );
   }

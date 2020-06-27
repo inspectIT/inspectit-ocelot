@@ -4,7 +4,6 @@ import { agentStatusActions } from '../../../redux/ducks/agent-status';
 import StatusTable from './StatusTable';
 import StatusToolbar from './StatusToolbar';
 import StatusFooterToolbar from './StatusFooterToolbar';
-import AgentConfiguration from './dialogs/AgentConfiguration';
 
 /**
  * The view presenting a list of connected agents, their mapping and when they last connected to the server.
