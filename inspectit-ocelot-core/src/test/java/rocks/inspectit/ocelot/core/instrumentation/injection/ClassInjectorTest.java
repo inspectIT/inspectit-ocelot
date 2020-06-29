@@ -7,9 +7,11 @@ import javassist.Modifier;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.testutils.DummyClassLoader;
 import rocks.inspectit.ocelot.core.testutils.GcUtils;
 
@@ -26,6 +28,9 @@ import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 public class ClassInjectorTest {
+
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    InspectitEnvironment env;
 
     @Mock
     Instrumentation instrumentation;
@@ -110,7 +115,6 @@ public class ClassInjectorTest {
                     .hasMessageContaining("default package");
         }
 
-
         @Test
         public void testReuseWithExceptionPassThrough() throws Exception {
             DummyClassLoader dummy = new DummyClassLoader(ClassToInject7.class);
@@ -136,7 +140,6 @@ public class ClassInjectorTest {
             assertThat(clazz7.getInjectedClassObject().get()).isSameAs(injectedClass);
             verify(instrumentation, times(1)).redefineClasses(any());
         }
-
 
         @Test
         public void testNormalClassloaderReuseForSameIdentifier() throws Exception {
@@ -186,7 +189,6 @@ public class ClassInjectorTest {
             assertThat(clazz7.getInjectedClassObject().get().getMethod("getValue").invoke(null)).isEqualTo(7);
             assertThat(clazz7.getInjectedClassObject().get().getClassLoader()).isSameAs(dummy);
         }
-
 
     }
 }
