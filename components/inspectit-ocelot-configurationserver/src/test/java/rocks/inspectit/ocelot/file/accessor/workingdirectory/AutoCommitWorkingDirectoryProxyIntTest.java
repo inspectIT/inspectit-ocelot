@@ -14,10 +14,10 @@ import rocks.inspectit.ocelot.file.versioning.VersioningManager;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.concurrent.locks.ReadWriteLock;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class AutoCommitWorkingDirectoryProxyIntTest extends FileTestBase {
 
@@ -33,6 +33,8 @@ class AutoCommitWorkingDirectoryProxyIntTest extends FileTestBase {
 
     private VersioningManager versioningManager;
 
+    private ReadWriteLock lock;
+
     @BeforeEach
     public void beforeEach() throws IOException, GitAPIException {
         if (TEST_DIRECTORY == null) {
@@ -43,15 +45,16 @@ class AutoCommitWorkingDirectoryProxyIntTest extends FileTestBase {
         }
 
         eventPublisher = mock(ApplicationEventPublisher.class);
+        lock = mock(ReadWriteLock.class);
 
-        WorkingDirectoryAccessor workingDirectoryAccessor = new WorkingDirectoryAccessor(tempDirectory, eventPublisher);
+        WorkingDirectoryAccessor workingDirectoryAccessor = new WorkingDirectoryAccessor(lock, tempDirectory, eventPublisher);
 
         Authentication authentication = mock(Authentication.class);
         when(authentication.getName()).thenReturn("user");
         versioningManager = new VersioningManager(tempDirectory, () -> authentication, eventPublisher);
         versioningManager.initialize();
 
-        accessor = new AutoCommitWorkingDirectoryProxy(workingDirectoryAccessor, versioningManager);
+        accessor = new AutoCommitWorkingDirectoryProxy(lock, workingDirectoryAccessor, versioningManager);
 
         System.out.println("Test data in: " + tempDirectory.toString());
     }

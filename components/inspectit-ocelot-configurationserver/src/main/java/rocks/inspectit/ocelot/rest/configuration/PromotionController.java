@@ -13,6 +13,7 @@ import rocks.inspectit.ocelot.file.versioning.model.ConfigurationPromotion;
 import rocks.inspectit.ocelot.file.versioning.model.WorkspaceDiff;
 import rocks.inspectit.ocelot.rest.AbstractBaseController;
 
+import java.io.IOException;
 import java.util.ConcurrentModificationException;
 
 /**
@@ -27,7 +28,7 @@ public class PromotionController extends AbstractBaseController {
 
     @ApiOperation(value = "Fetch promotion files", notes = "Fetches all configuration files which are ready for promotion.")
     @GetMapping(value = "configuration/promotions")
-    public WorkspaceDiff getPromotions(@ApiParam("Specifies whether the old and new content of each files should also be returned.") @RequestParam(defaultValue = "false", name = "include-content") boolean includeContent) {
+    public WorkspaceDiff getPromotions(@ApiParam("Specifies whether the old and new content of each files should also be returned.") @RequestParam(defaultValue = "false", name = "include-content") boolean includeContent) throws IOException, GitAPIException {
         return fileManager.getWorkspaceDiff(includeContent);
     }
 

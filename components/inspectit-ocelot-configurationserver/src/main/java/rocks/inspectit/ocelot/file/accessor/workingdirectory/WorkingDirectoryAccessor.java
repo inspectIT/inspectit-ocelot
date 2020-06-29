@@ -7,7 +7,6 @@ import org.springframework.util.StringUtils;
 import rocks.inspectit.ocelot.file.FileChangedEvent;
 import rocks.inspectit.ocelot.file.FileInfo;
 import rocks.inspectit.ocelot.file.FileInfoVisitor;
-import rocks.inspectit.ocelot.file.FileManager;
 
 import javax.annotation.PostConstruct;
 import java.io.FileNotFoundException;
@@ -15,7 +14,7 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
+import java.util.concurrent.locks.ReadWriteLock;
 
 /**
  * Concrete implementation to access and modify files in the server's working directory.
@@ -28,12 +27,14 @@ public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
      */
     private ApplicationEventPublisher eventPublisher;
 
+    private ReadWriteLock workingDirectoryLock;
     /**
      * The base path of the working directory.
      */
     private Path workingDirectory;
 
-    public WorkingDirectoryAccessor(Path workingDirectory, ApplicationEventPublisher eventPublisher) {
+    public WorkingDirectoryAccessor(ReadWriteLock workingDirectoryLock, Path workingDirectory, ApplicationEventPublisher eventPublisher) {
+        this.workingDirectoryLock = workingDirectoryLock;
         this.workingDirectory = workingDirectory;
         this.eventPublisher = eventPublisher;
     }
@@ -66,28 +67,28 @@ public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
     }
 
     @Override
-    protected Optional<byte[]> readFile(String path) {
-        FileManager.WORKING_DIRECTORY_LOCK.readLock().lock();
+    protected byte[] readFile(String path) throws IOException {
+        workingDirectoryLock.readLock().lock();
         try {
             Path targetPath = resolve(path);
 
-            if (!Files.exists(targetPath) || Files.isDirectory(targetPath)) {
-                return Optional.empty();
+            if (!Files.exists(targetPath)) {
+                throw new FileNotFoundException("File '" + path + "' does not exist.");
             }
 
-            try {
-                return Optional.of(Files.readAllBytes(targetPath));
-            } catch (IOException e) {
-                return Optional.empty();
+            if (Files.isDirectory(targetPath)) {
+                throw new IllegalArgumentException("The specified '" + path + "' is not a file but directory.");
             }
+
+            return Files.readAllBytes(targetPath);
         } finally {
-            FileManager.WORKING_DIRECTORY_LOCK.readLock().unlock();
+            workingDirectoryLock.readLock().unlock();
         }
     }
 
     @Override
     protected List<FileInfo> listFiles(String path) {
-        FileManager.WORKING_DIRECTORY_LOCK.readLock().lock();
+        workingDirectoryLock.readLock().lock();
         try {
             Path targetPath = resolve(path);
 
@@ -95,24 +96,22 @@ public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
                 return Collections.emptyList();
             }
 
-            try {
-                FileInfoVisitor fileInfoVisitor = new FileInfoVisitor();
+            FileInfoVisitor fileInfoVisitor = new FileInfoVisitor();
 
-                Files.walkFileTree(targetPath, fileInfoVisitor);
+            Files.walkFileTree(targetPath, fileInfoVisitor);
 
-                return fileInfoVisitor.getFileInfos();
-            } catch (IOException e) {
-                log.error("Exception while listing files in path '{}'.", path, e);
-                return Collections.emptyList();
-            }
+            return fileInfoVisitor.getFileInfos();
+        } catch (IOException e) {
+            log.error("Exception while listing files in path '{}'.", path, e);
+            return Collections.emptyList();
         } finally {
-            FileManager.WORKING_DIRECTORY_LOCK.readLock().unlock();
+            workingDirectoryLock.readLock().unlock();
         }
     }
 
     @Override
     protected void createDirectory(String path) throws IOException {
-        FileManager.WORKING_DIRECTORY_LOCK.writeLock().lock();
+        workingDirectoryLock.writeLock().lock();
         try {
             Path targetDirectory = resolve(path);
 
@@ -124,13 +123,13 @@ public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
 
             fireFileChangeEvent();
         } finally {
-            FileManager.WORKING_DIRECTORY_LOCK.writeLock().unlock();
+            workingDirectoryLock.writeLock().unlock();
         }
     }
 
     @Override
     protected void writeFile(String path, String content) throws IOException {
-        FileManager.WORKING_DIRECTORY_LOCK.writeLock().lock();
+        workingDirectoryLock.writeLock().lock();
         try {
             Path targetFile = resolve(path);
 
@@ -143,13 +142,13 @@ public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
 
             fireFileChangeEvent();
         } finally {
-            FileManager.WORKING_DIRECTORY_LOCK.writeLock().unlock();
+            workingDirectoryLock.writeLock().unlock();
         }
     }
 
     @Override
     protected void move(String sourcePath, String targetPath) throws IOException {
-        FileManager.WORKING_DIRECTORY_LOCK.writeLock().lock();
+        workingDirectoryLock.writeLock().lock();
         try {
             Path source = resolve(sourcePath);
             Path target = resolve(targetPath);
@@ -164,13 +163,13 @@ public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
 
             fireFileChangeEvent();
         } finally {
-            FileManager.WORKING_DIRECTORY_LOCK.writeLock().unlock();
+            workingDirectoryLock.writeLock().unlock();
         }
     }
 
     @Override
     protected void delete(String path) throws IOException {
-        FileManager.WORKING_DIRECTORY_LOCK.writeLock().lock();
+        workingDirectoryLock.writeLock().lock();
         try {
             Path targetPath = resolve(path);
 
@@ -186,29 +185,29 @@ public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
 
             fireFileChangeEvent();
         } finally {
-            FileManager.WORKING_DIRECTORY_LOCK.writeLock().unlock();
+            workingDirectoryLock.writeLock().unlock();
         }
     }
 
     @Override
     protected boolean exists(String path) {
-        FileManager.WORKING_DIRECTORY_LOCK.readLock().lock();
+        workingDirectoryLock.readLock().lock();
         try {
             Path targetPath = resolve(path);
             return Files.exists(targetPath);
         } finally {
-            FileManager.WORKING_DIRECTORY_LOCK.readLock().unlock();
+            workingDirectoryLock.readLock().unlock();
         }
     }
 
     @Override
     protected boolean isDirectory(String path) {
-        FileManager.WORKING_DIRECTORY_LOCK.readLock().lock();
+        workingDirectoryLock.readLock().lock();
         try {
             Path targetPath = resolve(path);
             return Files.isDirectory(targetPath);
         } finally {
-            FileManager.WORKING_DIRECTORY_LOCK.readLock().unlock();
+            workingDirectoryLock.readLock().unlock();
         }
     }
 

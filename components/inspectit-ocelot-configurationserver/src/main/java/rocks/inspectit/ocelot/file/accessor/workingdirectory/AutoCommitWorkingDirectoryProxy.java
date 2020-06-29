@@ -3,12 +3,11 @@ package rocks.inspectit.ocelot.file.accessor.workingdirectory;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import rocks.inspectit.ocelot.file.FileInfo;
-import rocks.inspectit.ocelot.file.FileManager;
 import rocks.inspectit.ocelot.file.versioning.VersioningManager;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
+import java.util.concurrent.locks.ReadWriteLock;
 
 /**
  * Delegation proxy for the {@link WorkingDirectoryAccessor} which directly stages and commits changes.
@@ -16,11 +15,14 @@ import java.util.Optional;
 @Slf4j
 public class AutoCommitWorkingDirectoryProxy extends AbstractWorkingDirectoryAccessor {
 
+    private ReadWriteLock workingDirectoryLock;
+
     private WorkingDirectoryAccessor workingDirectoryAccessor;
 
     private VersioningManager versioningManager;
 
-    public AutoCommitWorkingDirectoryProxy(WorkingDirectoryAccessor workingDirectoryAccessor, VersioningManager versioningManager) {
+    public AutoCommitWorkingDirectoryProxy(ReadWriteLock workingDirectoryLock, WorkingDirectoryAccessor workingDirectoryAccessor, VersioningManager versioningManager) {
+        this.workingDirectoryLock = workingDirectoryLock;
         this.workingDirectoryAccessor = workingDirectoryAccessor;
         this.versioningManager = versioningManager;
     }
@@ -30,7 +32,7 @@ public class AutoCommitWorkingDirectoryProxy extends AbstractWorkingDirectoryAcc
      */
     private void commit() {
         try {
-            versioningManager.commit("Commit configuration file and agent mapping changes");
+            versioningManager.commitAllChanges("Commit configuration file and agent mapping changes");
         } catch (GitAPIException e) {
             log.error("File modification was successful but staging and committing of the change failed!", e);
         }
@@ -47,49 +49,49 @@ public class AutoCommitWorkingDirectoryProxy extends AbstractWorkingDirectoryAcc
 
     @Override
     protected void writeFile(String path, String content) throws IOException {
-        FileManager.WORKING_DIRECTORY_LOCK.writeLock().lock();
+        workingDirectoryLock.writeLock().lock();
         try {
             clean();
             workingDirectoryAccessor.writeFile(path, content);
             commit();
         } finally {
-            FileManager.WORKING_DIRECTORY_LOCK.writeLock().unlock();
+            workingDirectoryLock.writeLock().unlock();
         }
     }
 
     @Override
     protected void createDirectory(String path) throws IOException {
-        FileManager.WORKING_DIRECTORY_LOCK.writeLock().lock();
+        workingDirectoryLock.writeLock().lock();
         try {
             clean();
             workingDirectoryAccessor.createDirectory(path);
             commit();
         } finally {
-            FileManager.WORKING_DIRECTORY_LOCK.writeLock().unlock();
+            workingDirectoryLock.writeLock().unlock();
         }
     }
 
     @Override
     protected void move(String sourcePath, String targetPath) throws IOException {
-        FileManager.WORKING_DIRECTORY_LOCK.writeLock().lock();
+        workingDirectoryLock.writeLock().lock();
         try {
             clean();
             workingDirectoryAccessor.move(sourcePath, targetPath);
             commit();
         } finally {
-            FileManager.WORKING_DIRECTORY_LOCK.writeLock().unlock();
+            workingDirectoryLock.writeLock().unlock();
         }
     }
 
     @Override
     protected void delete(String path) throws IOException {
-        FileManager.WORKING_DIRECTORY_LOCK.writeLock().lock();
+        workingDirectoryLock.writeLock().lock();
         try {
             clean();
             workingDirectoryAccessor.delete(path);
             commit();
         } finally {
-            FileManager.WORKING_DIRECTORY_LOCK.writeLock().unlock();
+            workingDirectoryLock.writeLock().unlock();
         }
     }
 
@@ -99,7 +101,7 @@ public class AutoCommitWorkingDirectoryProxy extends AbstractWorkingDirectoryAcc
     }
 
     @Override
-    protected Optional<byte[]> readFile(String path) {
+    protected byte[] readFile(String path) throws IOException {
         return workingDirectoryAccessor.readFile(path);
     }
 

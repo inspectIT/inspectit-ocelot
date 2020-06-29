@@ -71,10 +71,10 @@ class RevisionAccessIntTest extends FileTestBase {
         versioningManager.initialize();
 
         Files.delete(tempDirectory.resolve("files").resolve("sub").resolve("file_z.yml"));
-        versioningManager.commit("first");
+        versioningManager.commitAllChanges("first");
 
         createTestFiles("files/file_a.yml=a2", "files/file_b.yml=b1");
-        versioningManager.commit("second");
+        versioningManager.commitAllChanges("second");
     }
 
     @Nested

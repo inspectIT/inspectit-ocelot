@@ -30,7 +30,7 @@ import java.util.function.Supplier;
 @Slf4j
 public class FileManager {
 
-    public static final ReadWriteLock WORKING_DIRECTORY_LOCK = new ReentrantReadWriteLock();
+    private final ReadWriteLock workingDirectoryLock = new ReentrantReadWriteLock();
 
     /**
      * The accessor used to access the working directory.
@@ -46,13 +46,13 @@ public class FileManager {
     public FileManager(InspectitServerSettings settings, ApplicationEventPublisher eventPublisher) throws GitAPIException {
         Path workingDirectory = Paths.get(settings.getWorkingDirectory()).toAbsolutePath().normalize();
 
-        WorkingDirectoryAccessor workingDirectoryAccessorImpl = new WorkingDirectoryAccessor(workingDirectory, eventPublisher);
+        WorkingDirectoryAccessor workingDirectoryAccessorImpl = new WorkingDirectoryAccessor(workingDirectoryLock, workingDirectory, eventPublisher);
 
         Supplier<Authentication> authenticationSupplier = () -> SecurityContextHolder.getContext().getAuthentication();
         versioningManager = new VersioningManager(workingDirectory, authenticationSupplier, eventPublisher);
         versioningManager.initialize();
 
-        this.workingDirectoryAccessor = new AutoCommitWorkingDirectoryProxy(workingDirectoryAccessorImpl, versioningManager);
+        this.workingDirectoryAccessor = new AutoCommitWorkingDirectoryProxy(workingDirectoryLock, workingDirectoryAccessorImpl, versioningManager);
     }
 
     /**
@@ -68,16 +68,17 @@ public class FileManager {
         return versioningManager.getLiveRevision();
     }
 
-    public WorkspaceDiff getWorkspaceDiff(boolean includeContent) {
-        try {
-            return versioningManager.getWorkspaceDiff(includeContent);
-        } catch (IOException | GitAPIException e) {
-            log.error("error", e);
-            return null;
-        }
+    public WorkspaceDiff getWorkspaceDiff(boolean includeContent) throws IOException, GitAPIException {
+        return versioningManager.getWorkspaceDiff(includeContent);
     }
 
     public void promoteConfiguration(ConfigurationPromotion promotion) throws GitAPIException {
-        versioningManager.promoteConfiguration(promotion);
+        workingDirectoryLock.writeLock().lock();
+
+        try {
+            versioningManager.promoteConfiguration(promotion);
+        } finally {
+            workingDirectoryLock.writeLock().unlock();
+        }
     }
 }

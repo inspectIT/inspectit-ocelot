@@ -3,6 +3,7 @@ package rocks.inspectit.ocelot.file.accessor;
 import lombok.extern.slf4j.Slf4j;
 import rocks.inspectit.ocelot.file.FileInfo;
 
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -66,7 +67,7 @@ public abstract class AbstractFileAccessor {
      * @param path the file to read
      * @return the content of the file
      */
-    protected abstract Optional<byte[]> readFile(String path);
+    protected abstract byte[] readFile(String path) throws IOException;
 
     /**
      * Returns a list of all files and directories located under the specified path.
@@ -97,9 +98,14 @@ public abstract class AbstractFileAccessor {
         log.debug("Reading configuration file: {}", file);
         String targetPath = verifyPath(CONFIGURATION_FILES_SUBFOLDER, file);
 
-        Optional<byte[]> fileContent = readFile(targetPath);
-
-        return fileContent.map(String::new);
+        try {
+            byte[] rawFileContent = readFile(targetPath);
+            String fileContent = new String(rawFileContent, FILE_ENCODING);
+            return Optional.of(fileContent);
+        } catch (IOException ex) {
+            log.error("File '{}' could not been loaded.", ex);
+            return Optional.empty();
+        }
     }
 
     /**
@@ -122,9 +128,14 @@ public abstract class AbstractFileAccessor {
     public Optional<String> readAgentMappings() {
         log.debug("Reading agent mappings");
 
-        Optional<byte[]> fileContent = readFile(AGENT_MAPPINGS_FILE_NAME);
-
-        return fileContent.map(bytes -> new String(bytes, FILE_ENCODING));
+        try {
+            byte[] rawFileContent = readFile(AGENT_MAPPINGS_FILE_NAME);
+            String fileContent = new String(rawFileContent, FILE_ENCODING);
+            return Optional.of(fileContent);
+        } catch (IOException ex) {
+            log.error("File '{}' could not been loaded.", ex);
+            return Optional.empty();
+        }
     }
 
     /**

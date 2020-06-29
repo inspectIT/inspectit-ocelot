@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import rocks.inspectit.ocelot.file.versioning.VersioningManager;
 
 import java.io.IOException;
+import java.util.concurrent.locks.ReadWriteLock;
 
 import static org.assertj.core.api.Assertions.assertThatIOException;
 import static org.mockito.Mockito.*;
@@ -20,11 +21,14 @@ class AutoCommitWorkingDirectoryProxyTest {
 
     private WorkingDirectoryAccessor wdAccessor;
 
+    private ReadWriteLock lock;
+
     @BeforeEach
     public void beforeEach() {
         wdAccessor = mock(WorkingDirectoryAccessor.class);
         versioningManager = mock(VersioningManager.class);
-        accessor = new AutoCommitWorkingDirectoryProxy(wdAccessor, versioningManager);
+        lock = mock(ReadWriteLock.class);
+        accessor = new AutoCommitWorkingDirectoryProxy(lock, wdAccessor, versioningManager);
     }
 
     @Nested
@@ -36,7 +40,7 @@ class AutoCommitWorkingDirectoryProxyTest {
 
             verify(wdAccessor).createDirectory("test");
             verify(versioningManager).commitAsExternalChange();
-            verify(versioningManager).commit("Commit configuration file and agent mapping changes");
+            verify(versioningManager).commitAllChanges("Commit configuration file and agent mapping changes");
             verifyNoMoreInteractions(wdAccessor, versioningManager);
         }
 
@@ -54,13 +58,13 @@ class AutoCommitWorkingDirectoryProxyTest {
 
         @Test
         public void gitException() throws GitAPIException, IOException {
-            doThrow(CanceledException.class).when(versioningManager).commit("Commit configuration file and agent mapping changes");
+            doThrow(CanceledException.class).when(versioningManager).commitAllChanges("Commit configuration file and agent mapping changes");
 
             accessor.createDirectory("test");
 
             verify(wdAccessor).createDirectory("test");
             verify(versioningManager).commitAsExternalChange();
-            verify(versioningManager).commit("Commit configuration file and agent mapping changes");
+            verify(versioningManager).commitAllChanges("Commit configuration file and agent mapping changes");
             verifyNoMoreInteractions(wdAccessor, versioningManager);
         }
     }
@@ -74,7 +78,7 @@ class AutoCommitWorkingDirectoryProxyTest {
 
             verify(wdAccessor).writeFile("path", "content");
             verify(versioningManager).commitAsExternalChange();
-            verify(versioningManager).commit("Commit configuration file and agent mapping changes");
+            verify(versioningManager).commitAllChanges("Commit configuration file and agent mapping changes");
             verifyNoMoreInteractions(wdAccessor, versioningManager);
         }
 
@@ -92,13 +96,13 @@ class AutoCommitWorkingDirectoryProxyTest {
 
         @Test
         public void gitException() throws GitAPIException, IOException {
-            doThrow(CanceledException.class).when(versioningManager).commit("Commit configuration file and agent mapping changes");
+            doThrow(CanceledException.class).when(versioningManager).commitAllChanges("Commit configuration file and agent mapping changes");
 
             accessor.writeFile("path", "content");
 
             verify(wdAccessor).writeFile("path", "content");
             verify(versioningManager).commitAsExternalChange();
-            verify(versioningManager).commit("Commit configuration file and agent mapping changes");
+            verify(versioningManager).commitAllChanges("Commit configuration file and agent mapping changes");
             verifyNoMoreInteractions(wdAccessor, versioningManager);
         }
     }
@@ -112,7 +116,7 @@ class AutoCommitWorkingDirectoryProxyTest {
 
             verify(wdAccessor).move("src", "trgt");
             verify(versioningManager).commitAsExternalChange();
-            verify(versioningManager).commit("Commit configuration file and agent mapping changes");
+            verify(versioningManager).commitAllChanges("Commit configuration file and agent mapping changes");
             verifyNoMoreInteractions(wdAccessor, versioningManager);
         }
 
@@ -130,13 +134,13 @@ class AutoCommitWorkingDirectoryProxyTest {
 
         @Test
         public void gitException() throws GitAPIException, IOException {
-            doThrow(CanceledException.class).when(versioningManager).commit("Commit configuration file and agent mapping changes");
+            doThrow(CanceledException.class).when(versioningManager).commitAllChanges("Commit configuration file and agent mapping changes");
 
             accessor.move("src", "trgt");
 
             verify(wdAccessor).move("src", "trgt");
             verify(versioningManager).commitAsExternalChange();
-            verify(versioningManager).commit("Commit configuration file and agent mapping changes");
+            verify(versioningManager).commitAllChanges("Commit configuration file and agent mapping changes");
             verifyNoMoreInteractions(wdAccessor, versioningManager);
         }
     }
@@ -150,7 +154,7 @@ class AutoCommitWorkingDirectoryProxyTest {
 
             verify(wdAccessor).delete("test");
             verify(versioningManager).commitAsExternalChange();
-            verify(versioningManager).commit("Commit configuration file and agent mapping changes");
+            verify(versioningManager).commitAllChanges("Commit configuration file and agent mapping changes");
             verifyNoMoreInteractions(wdAccessor, versioningManager);
         }
 
@@ -168,13 +172,13 @@ class AutoCommitWorkingDirectoryProxyTest {
 
         @Test
         public void gitException() throws GitAPIException, IOException {
-            doThrow(CanceledException.class).when(versioningManager).commit("Commit configuration file and agent mapping changes");
+            doThrow(CanceledException.class).when(versioningManager).commitAllChanges("Commit configuration file and agent mapping changes");
 
             accessor.delete("test");
 
             verify(wdAccessor).delete("test");
             verify(versioningManager).commitAsExternalChange();
-            verify(versioningManager).commit("Commit configuration file and agent mapping changes");
+            verify(versioningManager).commitAllChanges("Commit configuration file and agent mapping changes");
             verifyNoMoreInteractions(wdAccessor, versioningManager);
         }
     }

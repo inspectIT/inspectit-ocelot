@@ -11,13 +11,13 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import rocks.inspectit.ocelot.file.FileInfo;
 import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Accessor to access specific Git revision/commits. Using this class ensures that all operations will be executed
@@ -70,32 +70,27 @@ public class RevisionAccess extends AbstractFileAccessor {
     }
 
     @Override
-    protected Optional<byte[]> readFile(String path) {
+    protected byte[] readFile(String path) throws IOException {
         try (TreeWalk treeWalk = TreeWalk.forPath(repository, path, revCommit.getTree())) {
             if (treeWalk == null) {
-                log.warn("Did not find expected file '{}' in git repository", path);
-                return Optional.empty();
+                throw new FileNotFoundException("Did not find expected file '" + path + "' in git repository");
             }
 
             if (treeWalk.isSubtree()) {
-                log.warn("Target must be a file but found directory: {}", path);
-                return Optional.empty();
+                throw new IllegalArgumentException("Target must be a file but found directory: " + path);
             }
 
             ObjectId objectId = treeWalk.getObjectId(0);
             ObjectLoader loader = repository.open(objectId);
 
-            return Optional.of(loader.getBytes());
-        } catch (Exception e) {
-            log.error("Could not read file {} from git repository", path, e);
-            return Optional.empty();
+            return loader.getBytes();
         }
     }
 
     @Override
     protected List<FileInfo> listFiles(String path) {
         try {
-            return listFiles(path, true);
+            return listFiles2(path);
         } catch (IOException e) {
             log.error("Exception while listing files in path '{}'.", path, e);
             return Collections.emptyList();
@@ -125,19 +120,16 @@ public class RevisionAccess extends AbstractFileAccessor {
     /**
      * Lists all files in the given path.
      *
-     * @param path      The path which should be considered as root.
-     * @param recursive Whether the tree should be resolved recursively.
+     * @param path The path which should be considered as root.
      * @return List of{@link FileInfo} representing the content of the repository.
      * @throws IOException in case the repository cannot be read
      */
-    private List<FileInfo> listFiles(String path, boolean recursive) throws IOException {
+    private List<FileInfo> listFiles2(String path) throws IOException {
         if (path.startsWith("/")) {
             path = path.substring(1);
         }
 
         RevTree tree = revCommit.getTree();
-
-        boolean skipNext = false;
 
         TreeWalk treeWalk = null;
         try {
@@ -151,12 +143,11 @@ public class RevisionAccess extends AbstractFileAccessor {
                     return Collections.emptyList();
                 } else if (treeWalk.isSubtree()) {
                     treeWalk.enterSubtree();
-                } else {
-                    skipNext = true;
+                    treeWalk.next();
                 }
             }
 
-            return collectFiles(treeWalk, recursive, skipNext);
+            return collectFiles(treeWalk);
         } finally {
             if (treeWalk != null) {
                 treeWalk.close();
@@ -167,27 +158,22 @@ public class RevisionAccess extends AbstractFileAccessor {
     /**
      * Collects the files within the current path of the given {@link TreeWalk}.
      *
-     * @param treeWalk  The {@link TreeWalk} to traverse.
-     * @param recursive Whether sub trees should be resolved.
-     * @param skipNext  Flag indicating whether {@link TreeWalk#next()} should be invoked at the beginning.
-     *                  For example, this may be the case if the tree is created using {@link TreeWalk#forPath(Repository, String, RevTree)}.
+     * @param treeWalk The {@link TreeWalk} to traverse.
      * @return The files within the current tree.
      * @throws IOException in case the repository cannot be read
      */
-    private List<FileInfo> collectFiles(TreeWalk treeWalk, boolean recursive, boolean skipNext) throws IOException {
+    private List<FileInfo> collectFiles(TreeWalk treeWalk) throws IOException {
         List<FileInfo> resultList = new ArrayList<>();
 
-
-        while (skipNext || treeWalk.next()) {
-            skipNext = false;
-
+        do {
             String name = treeWalk.getNameString();
 
             FileInfo.FileInfoBuilder fileBuilder = FileInfo.builder().name(name);
 
-            if (recursive && treeWalk.isSubtree()) {
+            if (treeWalk.isSubtree()) {
                 treeWalk.enterSubtree();
-                List<FileInfo> nestedFiles = collectFiles(treeWalk, true, false);
+                treeWalk.next();
+                List<FileInfo> nestedFiles = collectFiles(treeWalk);
 
                 fileBuilder
                         .type(FileInfo.Type.DIRECTORY)
@@ -198,7 +184,7 @@ public class RevisionAccess extends AbstractFileAccessor {
 
             FileInfo fileInfo = fileBuilder.build();
             resultList.add(fileInfo);
-        }
+        } while (treeWalk.next());
 
         return resultList;
     }

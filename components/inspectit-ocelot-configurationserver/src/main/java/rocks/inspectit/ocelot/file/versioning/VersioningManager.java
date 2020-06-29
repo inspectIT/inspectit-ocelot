@@ -20,7 +20,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.CollectionUtils;
 import rocks.inspectit.ocelot.events.ConfigurationPromotionEvent;
-import rocks.inspectit.ocelot.file.FileManager;
 import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
 import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
 import rocks.inspectit.ocelot.file.versioning.model.ConfigurationPromotion;
@@ -99,7 +98,9 @@ public class VersioningManager {
 
         if (!hasGit) {
             log.info("Working directory is not managed by Git. Initializing Git repository and staging and committing all existing file.");
-            commit(GIT_SYSTEM_AUTHOR, "Initializing Git repository using existing working directory", true, false);
+
+            stageFiles();
+            commitFiles(GIT_SYSTEM_AUTHOR, "Initializing Git repository using existing working directory", false);
 
             if (getCommitCount() <= 0) {
                 // creating an empty commit
@@ -115,7 +116,9 @@ public class VersioningManager {
             git.branchCreate().setName(Branch.LIVE.getBranchName()).call();
         } else if (!isClean()) {
             log.info("Changes in the configuration or agent mapping files have been detected and will be committed to the repository.");
-            commit(GIT_SYSTEM_AUTHOR, "Staging and committing of external changes during startup", true, false);
+
+            stageFiles();
+            commitFiles(GIT_SYSTEM_AUTHOR, "Staging and committing of external changes during startup", false);
         }
     }
 
@@ -136,7 +139,9 @@ public class VersioningManager {
             return;
         }
         log.info("Staging and committing of external changes to the configuration files or agent mappings");
-        commit(GIT_SYSTEM_AUTHOR, "Staging and committing of external changes", true, false);
+
+        stageFiles();
+        commitFiles(GIT_SYSTEM_AUTHOR, "Staging and committing of external changes", false);
     }
 
     /**
@@ -146,37 +151,28 @@ public class VersioningManager {
      *
      * @param message the commit message to use
      */
-    public synchronized void commit(String message) throws GitAPIException {
+    public synchronized void commitAllChanges(String message) throws GitAPIException {
         PersonIdent author = getCurrentAuthor();
 
-        commit(author, message, true, true);
+        stageFiles();
+
+        commitFiles(author, message, true);
     }
 
-    /**
-     * Committing all currently modified files using the given commit message and the given author.
-     *
-     * @param author     the author to use
-     * @param message    the commit message to use
-     * @param allowAmend whether commits should be amended if possible (same user and below timeout)
-     */
-    private synchronized void commit(PersonIdent author, String message, boolean stageFiles, boolean allowAmend) throws GitAPIException {
-        if (isClean()) {
-            return;
-        }
-
-        // lock the working directory
-        FileManager.WORKING_DIRECTORY_LOCK.writeLock().lock();
-
-        try {
-            if (stageFiles) {
-                stageFiles();
-            }
-
-            commitFiles(author, message, allowAmend);
-        } finally {
-            FileManager.WORKING_DIRECTORY_LOCK.writeLock().unlock();
-        }
-    }
+//    /**
+//     * Committing all currently modified files using the given commit message and the given author.
+//     *
+//     * @param author     the author to use
+//     * @param message    the commit message to use
+//     * @param allowAmend whether commits should be amended if possible (same user and below timeout)
+//     */
+//    private void commit(PersonIdent author, String message, boolean allowAmend) throws GitAPIException {
+//        if (isClean()) {
+//            return;
+//        }
+//
+//        commitFiles(author, message, allowAmend);
+//    }
 
     /**
      * Commits the staged files using the given author and message. Consecutive of the same user within {@link #amendTimeout}
@@ -188,13 +184,17 @@ public class VersioningManager {
      * @param allowAmend whether commits should be amended if possible (same user and below timeout)
      */
     private void commitFiles(PersonIdent author, String message, boolean allowAmend) throws GitAPIException {
-        log.info("Committing staged changes.");
+        if (isClean()) {
+            log.info("Repository is in clean state, thus, committing will be skipped.");
+            return;
+        } else {
+            log.info("Committing staged changes.");
+        }
 
         CommitCommand commitCommand = git.commit()
                 .setAll(true) // in order to remove deleted files from index
                 .setMessage(message)
                 .setAuthor(author);
-
 
         Optional<RevCommit> latestCommit = getLatestCommit();
         if (allowAmend && latestCommit.isPresent()) {
@@ -467,9 +467,6 @@ public class VersioningManager {
             throw new IllegalArgumentException("ConfigurationPromotion must not be null and has to promote at least one file!");
         }
 
-        // lock the working directory
-        FileManager.WORKING_DIRECTORY_LOCK.writeLock().lock();
-
         try {
             ObjectId liveCommitId = ObjectId.fromString(promotion.getLiveCommitId());
             ObjectId workspaceCommitId = ObjectId.fromString(promotion.getWorkspaceCommitId());
@@ -512,7 +509,7 @@ public class VersioningManager {
             }
 
             // commit changes
-            commit(getCurrentAuthor(), "Promoting configuration files", false, false);
+            commitFiles(getCurrentAuthor(), "Promoting configuration files", false);
 
         } catch (IOException | GitAPIException ex) {
             throw new PromotionFailedException("Configuration promotion has failed.", ex);
@@ -523,8 +520,6 @@ public class VersioningManager {
             eventPublisher.publishEvent(new ConfigurationPromotionEvent(this));
 
             //TODO should we hard reset the repository in case an error occurs, thus we're in a clean state?
-
-            FileManager.WORKING_DIRECTORY_LOCK.writeLock().unlock();
         }
     }
 
