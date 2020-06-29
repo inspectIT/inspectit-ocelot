@@ -14,10 +14,12 @@ import rocks.inspectit.ocelot.file.versioning.VersioningManager;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class AutoCommitWorkingDirectoryProxyIntTest extends FileTestBase {
 
@@ -46,6 +48,8 @@ class AutoCommitWorkingDirectoryProxyIntTest extends FileTestBase {
 
         eventPublisher = mock(ApplicationEventPublisher.class);
         lock = mock(ReadWriteLock.class);
+        when(lock.writeLock()).thenReturn(mock(Lock.class));
+        when(lock.readLock()).thenReturn(mock(Lock.class));
 
         WorkingDirectoryAccessor workingDirectoryAccessor = new WorkingDirectoryAccessor(lock, tempDirectory, eventPublisher);
 
@@ -55,8 +59,6 @@ class AutoCommitWorkingDirectoryProxyIntTest extends FileTestBase {
         versioningManager.initialize();
 
         accessor = new AutoCommitWorkingDirectoryProxy(lock, workingDirectoryAccessor, versioningManager);
-
-        System.out.println("Test data in: " + tempDirectory.toString());
     }
 
     @AfterEach

@@ -16,6 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,7 +37,10 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
         tempDirectory = Files.createTempDirectory("ocelot");
 
         eventPublisher = mock(ApplicationEventPublisher.class);
+
         lock = mock(ReadWriteLock.class);
+        when(lock.writeLock()).thenReturn(mock(Lock.class));
+        when(lock.readLock()).thenReturn(mock(Lock.class));
 
         accessor = new WorkingDirectoryAccessor(lock, tempDirectory, eventPublisher);
     }

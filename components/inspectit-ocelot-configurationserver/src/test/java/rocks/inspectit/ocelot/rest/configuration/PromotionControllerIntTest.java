@@ -1,12 +1,18 @@
 package rocks.inspectit.ocelot.rest.configuration;
 
+import org.eclipse.jgit.diff.DiffEntry;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import rocks.inspectit.ocelot.IntegrationTestBase;
+import rocks.inspectit.ocelot.file.versioning.model.ConfigurationPromotion;
+import rocks.inspectit.ocelot.file.versioning.model.SimpleDiffEntry;
 import rocks.inspectit.ocelot.file.versioning.model.WorkspaceDiff;
+
+import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -20,7 +26,7 @@ class PromotionControllerIntTest extends IntegrationTestBase {
             ResponseEntity<WorkspaceDiff> result = authRest.getForEntity("/api/v1/configuration/promotions", WorkspaceDiff.class);
 
             assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
-            assertThat(result.getBody().getDiffEntries()).isEmpty();
+            assertThat(result.getBody().getEntries()).isEmpty();
         }
 
         @Test
@@ -30,7 +36,43 @@ class PromotionControllerIntTest extends IntegrationTestBase {
             ResponseEntity<WorkspaceDiff> result = authRest.getForEntity("/api/v1/configuration/promotions", WorkspaceDiff.class);
 
             assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
-            assertThat(result.getBody().getDiffEntries()).hasSize(1);
+            assertThat(result.getBody().getEntries()).containsExactly(SimpleDiffEntry.builder().file("/src/file.yml").type(DiffEntry.ChangeType.ADD).build());
+        }
+    }
+
+    @Nested
+    class PromoteConfiguration {
+
+        @Test
+        public void promoteFiles() {
+            authRest.exchange("/api/v1/files/src/file.yml", HttpMethod.PUT, null, Void.class);
+
+            ResponseEntity<WorkspaceDiff> diff = authRest.getForEntity("/api/v1/configuration/promotions", WorkspaceDiff.class);
+
+            ConfigurationPromotion promotion = new ConfigurationPromotion();
+            promotion.setFiles(Collections.singletonList("/src/file.yml"));
+            promotion.setLiveCommitId(diff.getBody().getLiveCommitId());
+            promotion.setWorkspaceCommitId(diff.getBody().getWorkspaceCommitId());
+
+            ResponseEntity<Void> result = authRest.exchange("/api/v1/configuration/promote", HttpMethod.POST, new HttpEntity<>(promotion), Void.class);
+
+            assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+        }
+
+        @Test
+        public void promoteNoFiles() {
+            authRest.exchange("/api/v1/files/src/file.yml", HttpMethod.PUT, null, Void.class);
+
+            ResponseEntity<WorkspaceDiff> diff = authRest.getForEntity("/api/v1/configuration/promotions", WorkspaceDiff.class);
+
+            ConfigurationPromotion promotion = new ConfigurationPromotion();
+            promotion.setFiles(Collections.emptyList());
+            promotion.setLiveCommitId(diff.getBody().getLiveCommitId());
+            promotion.setWorkspaceCommitId(diff.getBody().getWorkspaceCommitId());
+
+            ResponseEntity<Void> result = authRest.exchange("/api/v1/configuration/promote", HttpMethod.POST, new HttpEntity<>(promotion), Void.class);
+
+            assertThat(result.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

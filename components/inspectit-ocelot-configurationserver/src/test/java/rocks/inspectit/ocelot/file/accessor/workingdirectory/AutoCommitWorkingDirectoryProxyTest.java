@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import rocks.inspectit.ocelot.file.versioning.VersioningManager;
 
 import java.io.IOException;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 
 import static org.assertj.core.api.Assertions.assertThatIOException;
@@ -27,7 +28,11 @@ class AutoCommitWorkingDirectoryProxyTest {
     public void beforeEach() {
         wdAccessor = mock(WorkingDirectoryAccessor.class);
         versioningManager = mock(VersioningManager.class);
+
         lock = mock(ReadWriteLock.class);
+        when(lock.writeLock()).thenReturn(mock(Lock.class));
+        when(lock.readLock()).thenReturn(mock(Lock.class));
+
         accessor = new AutoCommitWorkingDirectoryProxy(lock, wdAccessor, versioningManager);
     }
 

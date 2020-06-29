@@ -7,11 +7,13 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 import rocks.inspectit.ocelot.file.FileManager;
 import rocks.inspectit.ocelot.file.versioning.model.ConfigurationPromotion;
 import rocks.inspectit.ocelot.file.versioning.model.WorkspaceDiff;
 import rocks.inspectit.ocelot.rest.AbstractBaseController;
+import rocks.inspectit.ocelot.security.config.UserRoleConfiguration;
 
 import java.io.IOException;
 import java.util.ConcurrentModificationException;
@@ -32,6 +34,7 @@ public class PromotionController extends AbstractBaseController {
         return fileManager.getWorkspaceDiff(includeContent);
     }
 
+    @Secured(UserRoleConfiguration.COMMIT_ACCESS_ROLE)
     @ApiOperation(value = "Promote configurations", notes = "Promotes the specified configuration files.")
     @PostMapping(value = "configuration/promote")
     public ResponseEntity promoteConfiguration(@ApiParam("The definition that contains the information about which files to promote.") @RequestBody ConfigurationPromotion promotion) throws GitAPIException {

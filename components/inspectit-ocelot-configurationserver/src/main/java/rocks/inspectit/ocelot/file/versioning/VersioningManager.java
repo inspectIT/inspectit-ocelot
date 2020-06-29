@@ -38,6 +38,7 @@ import java.util.stream.Collectors;
 
 /**
  * This manager handles the interaction with the versioned (Git) representation of the working directory.
+ * When using this class, ensure to lock the working directory or resource accordingly to prevent any racing conditions.
  */
 @Slf4j
 public class VersioningManager {
@@ -144,14 +145,30 @@ public class VersioningManager {
         commitFiles(GIT_SYSTEM_AUTHOR, "Staging and committing of external changes", false);
     }
 
+    private boolean isWorkspaceBranch() {
+        try {
+            String fullBranch = git.getRepository().getFullBranch();
+            String workspaceRef = "refs/heads/" + Branch.WORKSPACE.getBranchName();
+            return workspaceRef.equals(fullBranch);
+        } catch (IOException e) {
+            throw new RuntimeException("Exception while accessing Git workspace repository.", e);
+        }
+    }
+
     /**
      * Committing all currently modified files using the given commit message. The author of the commit is provided
      * by the {@link #authenticationSupplier}. Commits will be amended in case the previous one is made by the same
      * user and is newer than {@link #amendTimeout} milliseconds.
+     * The commit will be against the workspace branch!
      *
      * @param message the commit message to use
+     * @throws IllegalStateException in case the workspace branch is not the currently checked out branch
      */
-    public synchronized void commitAllChanges(String message) throws GitAPIException {
+    public void commitAllChanges(String message) throws GitAPIException {
+        if (!isWorkspaceBranch()) {
+            throw new IllegalStateException("The workspace branch is currently not checked out. Ensure your working directory is in a correct state!");
+        }
+
         PersonIdent author = getCurrentAuthor();
 
         stageFiles();
@@ -159,25 +176,9 @@ public class VersioningManager {
         commitFiles(author, message, true);
     }
 
-//    /**
-//     * Committing all currently modified files using the given commit message and the given author.
-//     *
-//     * @param author     the author to use
-//     * @param message    the commit message to use
-//     * @param allowAmend whether commits should be amended if possible (same user and below timeout)
-//     */
-//    private void commit(PersonIdent author, String message, boolean allowAmend) throws GitAPIException {
-//        if (isClean()) {
-//            return;
-//        }
-//
-//        commitFiles(author, message, allowAmend);
-//    }
-
     /**
      * Commits the staged files using the given author and message. Consecutive of the same user within {@link #amendTimeout}
-     * milliseconds will be amended if specified. When used, ensure to lock the working directory, otherwise it may be
-     * that you' re committing to the wrong branch.
+     * milliseconds will be amended if specified. The commit will be against the workspace branch!
      *
      * @param author     the author to use
      * @param message    the commit message to use
@@ -185,10 +186,10 @@ public class VersioningManager {
      */
     private void commitFiles(PersonIdent author, String message, boolean allowAmend) throws GitAPIException {
         if (isClean()) {
-            log.info("Repository is in clean state, thus, committing will be skipped.");
+            log.debug("Repository is in clean state, thus, committing will be skipped.");
             return;
         } else {
-            log.info("Committing staged changes.");
+            log.debug("Committing staged changes.");
         }
 
         CommitCommand commitCommand = git.commit()
@@ -196,7 +197,7 @@ public class VersioningManager {
                 .setMessage(message)
                 .setAuthor(author);
 
-        Optional<RevCommit> latestCommit = getLatestCommit();
+        Optional<RevCommit> latestCommit = getLatestCommit(Branch.WORKSPACE);
         if (allowAmend && latestCommit.isPresent()) {
             PersonIdent latestAuthor = latestCommit.get().getAuthorIdent();
             boolean sameAuthor = latestAuthor != null && author.getName().equals(latestAuthor.getName());
@@ -217,7 +218,7 @@ public class VersioningManager {
      * Stage all modified/added/removed configuration files and the agent mapping file.
      */
     private void stageFiles() throws GitAPIException {
-        log.info("Staging all configuration files and agent mappings.");
+        log.debug("Staging all configuration files and agent mappings.");
 
         git.add()
                 .addFilepattern(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER)
@@ -269,13 +270,6 @@ public class VersioningManager {
         String username = authentication.getName();
 
         return new PersonIdent(username, "info@inspectit.rocks");
-    }
-
-    /**
-     * @return Returns the latest commit of the workspace branch.
-     */
-    public Optional<RevCommit> getLatestCommit() {
-        return getLatestCommit(Branch.WORKSPACE);
     }
 
     /**
@@ -346,7 +340,7 @@ public class VersioningManager {
      * @return Returns the diff between the current live branch and the current workspace branch. The actual file
      * difference (old and new content) will not be returned.
      */
-    public WorkspaceDiff getWorkspaceDiff() throws IOException, GitAPIException {
+    public WorkspaceDiff getWorkspaceDiffWithoutContent() throws IOException, GitAPIException {
         return getWorkspaceDiff(false);
     }
 
@@ -403,7 +397,7 @@ public class VersioningManager {
         }
 
         return WorkspaceDiff.builder()
-                .diffEntries(simpleDiffEntries)
+                .entries(simpleDiffEntries)
                 .liveCommitId(oldCommit.name())
                 .workspaceCommitId(newCommit.name())
                 .build();
@@ -479,7 +473,7 @@ public class VersioningManager {
 
             // get modified files between the specified diff - we only consider files which exists in the diff
             WorkspaceDiff diff = getWorkspaceDiff(false, liveCommitId, workspaceCommitId);
-            Map<String, DiffEntry.ChangeType> changeIndex = diff.getDiffEntries().stream()
+            Map<String, DiffEntry.ChangeType> changeIndex = diff.getEntries().stream()
                     .collect(Collectors.toMap(SimpleDiffEntry::getFile, SimpleDiffEntry::getType));
 
             List<String> removeFiles = promotion.getFiles().stream()
@@ -518,8 +512,6 @@ public class VersioningManager {
             git.checkout().setName(Branch.WORKSPACE.getBranchName()).call();
 
             eventPublisher.publishEvent(new ConfigurationPromotionEvent(this));
-
-            //TODO should we hard reset the repository in case an error occurs, thus we're in a clean state?
         }
     }
 

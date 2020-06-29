@@ -18,8 +18,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -52,8 +51,6 @@ class RevisionAccessIntTest extends FileTestBase {
         setupRepository();
 
         revision = versioningManager.getLiveRevision();
-
-        System.out.println("Test data in: " + tempDirectory.toString());
     }
 
     @AfterEach
@@ -131,9 +128,9 @@ class RevisionAccessIntTest extends FileTestBase {
 
         @Test
         public void readDirectory() {
-            Optional<String> result = revision.readConfigurationFile("sub");
-
-            assertThat(result).isEmpty();
+            assertThatIllegalArgumentException()
+                    .isThrownBy(() -> revision.readConfigurationFile("sub"))
+                    .withMessage("Target must be a file but found directory: files/sub");
         }
 
         @Test

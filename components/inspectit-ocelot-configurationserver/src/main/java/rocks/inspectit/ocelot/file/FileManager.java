@@ -64,14 +64,30 @@ public class FileManager {
         return workingDirectoryAccessor;
     }
 
+    /**
+     * Returns access to the latest commit of the live branch.
+     *
+     * @return accessor to access the current live branch
+     */
     public AbstractFileAccessor getLiveRevision() {
         return versioningManager.getLiveRevision();
     }
 
+    /**
+     * Returns the diff between the current live branch and the current workspace branch.
+     *
+     * @param includeContent whether the file difference (old and new content) is included
+     * @return the diff between the live and workspace branch
+     */
     public WorkspaceDiff getWorkspaceDiff(boolean includeContent) throws IOException, GitAPIException {
         return versioningManager.getWorkspaceDiff(includeContent);
     }
 
+    /**
+     * Executes a file promotion according to the specified {@link ConfigurationPromotion} definition.
+     *
+     * @param promotion the definition what to promote
+     */
     public void promoteConfiguration(ConfigurationPromotion promotion) throws GitAPIException {
         workingDirectoryLock.writeLock().lock();
 

@@ -1,6 +1,5 @@
 package rocks.inspectit.ocelot.file.versioning.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,8 +19,7 @@ public class WorkspaceDiff {
     /**
      * All elements which have been changed.
      */
-    @JsonProperty("entries")
-    private List<SimpleDiffEntry> diffEntries;
+    private List<SimpleDiffEntry> entries;
 
     /**
      * The base commit - representing the live branch.
