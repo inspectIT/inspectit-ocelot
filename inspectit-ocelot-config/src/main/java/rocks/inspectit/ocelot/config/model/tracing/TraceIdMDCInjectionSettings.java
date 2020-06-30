@@ -36,4 +36,9 @@ public class TraceIdMDCInjectionSettings {
      * Slf4j injection will only take place, if this field and {@link #enabled} are true.
      */
     private boolean slf4jEnabled;
+
+    /**
+     * JBoss LogManager injection will only take place, if this field and {@link #enabled} are true.
+     */
+    private boolean jbossLogmanagerEnabled;
 }
