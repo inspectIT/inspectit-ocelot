@@ -271,18 +271,40 @@ public class ContextPropagationUtilTest {
     public class ReadPropagatedSpanContextFromHeaderMap {
 
         @Test
-        public void readB3Header() {
+        public void readB3Header_sampled() {
+            Map<String, String> data = ImmutableMap.of("key-one", "value-one", "X-B3-TraceId", TRACE_ID, "X-B3-SpanId", SPAN_ID, "X-B3-Sampled", "1");
+
+            SpanContext spanContext = ContextPropagationUtil.readPropagatedSpanContextFromHeaderMap(data);
+
+            assertThat(spanContext.getTraceId().toLowerBase16()).isEqualTo(TRACE_ID);
+            assertThat(spanContext.getSpanId().toLowerBase16()).isEqualTo(SPAN_ID);
+            assertThat(spanContext.getTraceOptions().isSampled()).isTrue();
+        }
+
+        @Test
+        public void readB3Header_notSampled_explicit() {
+            Map<String, String> data = ImmutableMap.of("key-one", "value-one", "X-B3-TraceId", TRACE_ID, "X-B3-SpanId", SPAN_ID, "X-B3-Sampled", "0");
+
+            SpanContext spanContext = ContextPropagationUtil.readPropagatedSpanContextFromHeaderMap(data);
+
+            assertThat(spanContext.getTraceId().toLowerBase16()).isEqualTo(TRACE_ID);
+            assertThat(spanContext.getSpanId().toLowerBase16()).isEqualTo(SPAN_ID);
+            assertThat(spanContext.getTraceOptions().isSampled()).isFalse();
+        }
+
+        @Test
+        public void readB3Header_notSampled_implicit() {
             Map<String, String> data = ImmutableMap.of("key-one", "value-one", "X-B3-TraceId", TRACE_ID, "X-B3-SpanId", SPAN_ID);
 
             SpanContext spanContext = ContextPropagationUtil.readPropagatedSpanContextFromHeaderMap(data);
 
             assertThat(spanContext.getTraceId().toLowerBase16()).isEqualTo(TRACE_ID);
             assertThat(spanContext.getSpanId().toLowerBase16()).isEqualTo(SPAN_ID);
+            assertThat(spanContext.getTraceOptions().isSampled()).isFalse();
         }
 
-
         @Test
-        public void readTraceContextHeader() {
+        public void readTraceContextHeader_sampled() {
             String header = "00-" + TRACE_ID + "-" + SPAN_ID + "-01";
             Map<String, String> data = ImmutableMap.of("key-one", "value-one", "traceparent", header);
 
@@ -290,16 +312,52 @@ public class ContextPropagationUtilTest {
 
             assertThat(spanContext.getTraceId().toLowerBase16()).isEqualTo(TRACE_ID);
             assertThat(spanContext.getSpanId().toLowerBase16()).isEqualTo(SPAN_ID);
+            assertThat(spanContext.getTraceOptions().isSampled()).isTrue();
         }
 
         @Test
-        public void readDatadogHeader() {
+        public void readTraceContextHeader_notSampled() {
+            String header = "00-" + TRACE_ID + "-" + SPAN_ID + "-00";
+            Map<String, String> data = ImmutableMap.of("key-one", "value-one", "traceparent", header);
+
+            SpanContext spanContext = ContextPropagationUtil.readPropagatedSpanContextFromHeaderMap(data);
+
+            assertThat(spanContext.getTraceId().toLowerBase16()).isEqualTo(TRACE_ID);
+            assertThat(spanContext.getSpanId().toLowerBase16()).isEqualTo(SPAN_ID);
+            assertThat(spanContext.getTraceOptions().isSampled()).isFalse();
+        }
+
+        @Test
+        public void readDatadogHeader_sampled() {
+            Map<String, String> data = ImmutableMap.of("key-one", "value-one", "X-Datadog-Trace-ID", TRACE_ID_DATADOG, "X-Datadog-Parent-ID", SPAN_ID_DATADOG, "X-Datadog-Sampling-Priority", "1");
+
+            SpanContext spanContext = ContextPropagationUtil.readPropagatedSpanContextFromHeaderMap(data);
+
+            assertThat(spanContext.getTraceId().toLowerBase16()).isEqualTo(TRACE_ID);
+            assertThat(spanContext.getSpanId().toLowerBase16()).isEqualTo(SPAN_ID);
+            assertThat(spanContext.getTraceOptions().isSampled()).isTrue();
+        }
+
+        @Test
+        public void readDatadogHeader_notSampled_explicit() {
+            Map<String, String> data = ImmutableMap.of("key-one", "value-one", "X-Datadog-Trace-ID", TRACE_ID_DATADOG, "X-Datadog-Parent-ID", SPAN_ID_DATADOG, "X-Datadog-Sampling-Priority", "0");
+
+            SpanContext spanContext = ContextPropagationUtil.readPropagatedSpanContextFromHeaderMap(data);
+
+            assertThat(spanContext.getTraceId().toLowerBase16()).isEqualTo(TRACE_ID);
+            assertThat(spanContext.getSpanId().toLowerBase16()).isEqualTo(SPAN_ID);
+            assertThat(spanContext.getTraceOptions().isSampled()).isFalse();
+        }
+
+        @Test
+        public void readDatadogHeader_notSampled_implicit() {
             Map<String, String> data = ImmutableMap.of("key-one", "value-one", "X-Datadog-Trace-ID", TRACE_ID_DATADOG, "X-Datadog-Parent-ID", SPAN_ID_DATADOG);
 
             SpanContext spanContext = ContextPropagationUtil.readPropagatedSpanContextFromHeaderMap(data);
 
             assertThat(spanContext.getTraceId().toLowerBase16()).isEqualTo(TRACE_ID);
             assertThat(spanContext.getSpanId().toLowerBase16()).isEqualTo(SPAN_ID);
+            assertThat(spanContext.getTraceOptions().isSampled()).isFalse();
         }
     }
 }

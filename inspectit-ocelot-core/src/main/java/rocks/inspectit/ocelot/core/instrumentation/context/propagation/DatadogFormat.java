@@ -21,13 +21,13 @@ public class DatadogFormat extends TextFormat {
     public static final DatadogFormat INSTANCE = new DatadogFormat();
 
     private static final Tracestate TRACESTATE_DEFAULT = Tracestate.builder().build();
-    private static final TraceOptions TRACE_OPTIONS = TraceOptions.DEFAULT;
 
     /**
      * Datadog header keys.
      */
     private static final String X_DATADOG_TRACE_ID = "X-Datadog-Trace-ID";
     private static final String X_DATADOG_PARENT_ID = "X-Datadog-Parent-ID";
+    private static final String X_DATADOG_SAMPLING_PRIORITY = "X-Datadog-Sampling-Priority";
 
     /**
      * Used as the upper TraceId.SIZE hex characters of the traceID. Datadog used to send TraceId.SIZE hex characters (8-bytes traceId).
@@ -76,11 +76,17 @@ public class DatadogFormat extends TextFormat {
 
             String spanIdStr = getter.get(carrier, X_DATADOG_PARENT_ID);
             if (spanIdStr == null) {
-                throw new SpanContextParseException("Missing X_B3_SPAN_ID.");
+                throw new SpanContextParseException("Missing X_DATADOG_PARENT_ID.");
             }
             SpanId spanId = SpanId.fromLowerBase16(Long.toHexString(Long.parseLong(spanIdStr)));
 
-            return SpanContext.create(traceId, spanId, TRACE_OPTIONS, TRACESTATE_DEFAULT);
+            String samplingPriority = getter.get(carrier, X_DATADOG_SAMPLING_PRIORITY);
+            TraceOptions traceOptions = TraceOptions.DEFAULT;
+            if ("1".equals(samplingPriority)) {
+                traceOptions = TraceOptions.builder().setIsSampled(true).build();
+            }
+
+            return SpanContext.create(traceId, spanId, traceOptions, TRACESTATE_DEFAULT);
         } catch (IllegalArgumentException e) {
             throw new SpanContextParseException("Invalid input.", e);
         }
