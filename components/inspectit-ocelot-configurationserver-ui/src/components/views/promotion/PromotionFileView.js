@@ -1,13 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { promotionSelectors } from '../../../redux/ducks/promotion';
-
 import ReactDiffViewer, { DiffMethod } from 'react-diff-viewer';
 
 /**
  * The view for showing the diff of the currently selected promotion file.
  */
-const PromotionFileViewer = () => {
+const PromotionFileViewer = ({oldValue, newValue}) => {
   const [isLargeScreen, setLargeScreen] = useState(window.innerWidth > 1280);
 
   const updateMedia = () => {
@@ -18,8 +15,6 @@ const PromotionFileViewer = () => {
     window.addEventListener('resize', updateMedia);
     return () => window.removeEventListener('resize', updateMedia);
   });
-
-  const currentSelection = useSelector(promotionSelectors.getCurrentSelectionFile);
 
   return (
     <>
@@ -34,8 +29,8 @@ const PromotionFileViewer = () => {
         <ReactDiffViewer
           leftTitle="Live Configuration"
           rightTitle="Workspace Configuration"
-          oldValue={currentSelection.oldContent || ''}
-          newValue={currentSelection.newContent || ''}
+          oldValue={oldValue || ''}
+          newValue={newValue || ''}
           splitView={isLargeScreen}
           compareMethod={DiffMethod.WORDS_WITH_SPACE}
         />

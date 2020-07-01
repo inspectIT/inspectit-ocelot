@@ -87,27 +87,11 @@ const settings = {
 };
 
 const promotion = {
-  /** The list of promotion files. Each file contains the following fields:
-   * {file, type, oldContent?, newContent?, approved?}
-   */
-  files: [],
-  /** Specifies how many requests are currently loading the data in the background */
-  pendingRequests: 0,
+  approvals: [],
   /** The commit id of the working directory related to the currently changed files */
   workspaceCommitId: null,
   /** The commit id of the live directory related to the currently changed files */
-  liveCommitId: null,
-  /** The date when the promotion files have been fetched. */
-  updateDate: null,
-  /** The name of the currently selected promotion file. */
-  currentSelection: null,
+  liveCommitId: null
 };
 
-const dialog = {
-  /** The name of the dialog which should be shown */
-  show: null,
-  /** Payload which is given to the dialog for showing */
-  payload: null,
-};
-
-export { authentication, configuration, notification, mappings, agentStatus, settings, promotion, dialog };
+export { authentication, configuration, notification, mappings, agentStatus, settings, promotion };

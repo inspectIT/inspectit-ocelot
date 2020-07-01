@@ -1,15 +1,13 @@
 import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
 import { ListBox } from 'primereact/listbox';
 import classnames from 'classnames';
-import { promotionActions, promotionSelectors } from '../../../redux/ducks/promotion';
 
 /**
  * Item template for a promotion file in the sidebar.
  *
  * @param {object} option current list option
  */
-const selectionTemplate = ({ file, type, approved }) => {
+const selectionTemplate = ({ file, type, isApproved }) => {
   const iconClassNames = classnames('pi', {
     green: type === 'ADD',
     yellow: type === 'MODIFY',
@@ -20,7 +18,7 @@ const selectionTemplate = ({ file, type, approved }) => {
   });
 
   const itemClassNames = classnames('p-clearfix', 'item', {
-    approved: approved,
+    approved: isApproved,
   });
 
   return (
@@ -61,7 +59,7 @@ const selectionTemplate = ({ file, type, approved }) => {
         <div className="item-wrapper">
           <i className={iconClassNames}></i>
           <span className="label">{file}</span>
-          {approved && <i className="pi pi-check-circle green"></i>}
+          {isApproved && <i className="pi pi-check-circle green"></i>}
         </div>
       </div>
     </>
@@ -71,17 +69,7 @@ const selectionTemplate = ({ file, type, approved }) => {
 /**
  * Sidebar for showing existing configuration promotion files.
  */
-const PromotionSidebar = () => {
-  const dispatch = useDispatch();
-
-  const promotionFiles = useSelector((state) => state.promotion.files);
-  const updateDate = useSelector((state) => state.promotion.updateDate);
-  const currentSelection = useSelector(promotionSelectors.getCurrentSelectionFile);
-
-  const setCurrentSelection = (file) => {
-    dispatch(promotionActions.setCurrentSelection(file));
-  };
-
+const PromotionSidebar = ({selection, onSelectionChange, promotionFiles, updateDate}) => {
   return (
     <>
       <style jsx>
@@ -125,11 +113,12 @@ const PromotionSidebar = () => {
       <div className="this">
         <div className="title">Modified Configurations</div>
         <ListBox
-          value={currentSelection}
+          value={selection}
           options={promotionFiles}
-          onChange={(e) => setCurrentSelection(e.value ? e.value.file : null)}
+          onChange={(e) => onSelectionChange(e.value ? e.value.file : null)}
           itemTemplate={selectionTemplate}
           optionLabel="file"
+          dataKey="file"
         />
         <div className="information">Last Refresh: {updateDate ? new Date(updateDate).toLocaleString() : '-'}</div>
       </div>

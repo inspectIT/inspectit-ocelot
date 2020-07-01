@@ -1,29 +1,11 @@
 import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { promotionActions, promotionSelectors } from '../../../redux/ducks/promotion';
-import { dialogActions } from '../../../redux/ducks/dialog';
-import { PROMOTION_APPROVAL_DIALOG } from '../../dialogs/dialogs';
 import { Toolbar } from 'primereact/toolbar';
 import { Button } from 'primereact/button';
 
 /**
  * The toolbar of the promotion view.
  */
-const PromotionToolbar = () => {
-  const dispatch = useDispatch();
-
-  const promoteConfiguration = () => {
-    dispatch(dialogActions.showDialog(PROMOTION_APPROVAL_DIALOG));
-  };
-
-  const refreshConfiguration = () => {
-    dispatch(promotionActions.fetchPromotions());
-  };
-
-  const approvalCount = useSelector(promotionSelectors.getApprovalCount);
-  const updating = useSelector((state) => state.promotion.pendingRequests) > 0;
-  const canCommit = useSelector((state) => state.authentication.permissions.commit);
-
+const PromotionToolbar = ({ onRefresh, onPromote, loading, enabled }) => {
   const tooltipOptions = {
     showDelay: 500,
     position: 'top',
@@ -62,13 +44,13 @@ const PromotionToolbar = () => {
         </div>
         <div className="p-toolbar-group-right buttons">
           <Button
-            disabled={updating || !canCommit}
+            disabled={loading}
             tooltip="Reload Configurations"
             tooltipOptions={tooltipOptions}
-            icon={'pi pi-refresh' + (updating ? ' pi-spin' : '')}
-            onClick={refreshConfiguration}
+            icon={'pi pi-refresh' + (loading ? ' pi-spin' : '')}
+            onClick={onRefresh}
           />
-          <Button disabled={approvalCount === 0} icon="pi pi-cloud-upload" label="Promote Configurations" onClick={promoteConfiguration} />
+          <Button disabled={!enabled} icon="pi pi-cloud-upload" label="Promote Configurations" onClick={onPromote} />
         </div>
       </Toolbar>
     </>

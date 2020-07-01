@@ -5,4 +5,3 @@ export { default as mappings } from './mappings';
 export { default as agentStatus } from './agent-status';
 export { default as settings } from './settings';
 export { default as promotion } from './promotion';
-export { default as dialog } from './dialog';
