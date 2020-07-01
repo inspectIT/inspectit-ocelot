@@ -25,7 +25,6 @@ class AgentConfiguration extends React.Component {
 
     };
 
-
     getConfiguration = (attributes) => {
         const requestParams = this.solveRegexValues(attributes);
         if (!requestParams) {
@@ -46,6 +45,16 @@ class AgentConfiguration extends React.Component {
             });
     };
 
+
+    download = () => {
+
+        var blob = new Blob([this.state.configurationValue], { type: 'text/x-yaml' });
+        this.url = window.URL.createObjectURL(blob);
+
+        return this.url;
+    }
+
+
     solveRegexValues = (obj = {}) => {
         try {
             let res = {};
@@ -60,7 +69,7 @@ class AgentConfiguration extends React.Component {
             return null;
         }
     };
-    
+
     render() {
 
         return (
@@ -71,7 +80,9 @@ class AgentConfiguration extends React.Component {
                 onHide={this.props.onHide}
                 footer={
                     <div>
-                        <Button label="Download" className="p-button-primary" onClick={() => this.configDownload.download(this.props.attributes)} />
+                        <a href={this.download()} download="agent-config.yml">
+                            <Button label="Download" className="p-button-primary" />
+                        </a>
                         <Button label="Cancel" className="p-button-secondary" onClick={this.handleClose} />
                     </div>
                 }
