@@ -14,54 +14,66 @@ class StatusView extends React.Component {
   state = {
     filter: '',
     filterStatus: true,
+    error: false,
+    filteredAgents: null,
   };
 
   changeFilter = () => {
     this.setState({
       filterStatus: !this.state.filterStatus,
-    });
+      error: false,   
+    },
+    this.filterAgents(this.state.filter)
+    );
   };
 
-  filterAgents(filter, agents) {
+  filterAgents = (filter) => {
+    let error = false;
+    let unchangedFilter = filter;
+    let filteredAgents;
+    const agents = this.props.agents;
+
     if (filter.length === 0) {
-      return agents;
-    }
-    const filterAgents = [];
-
-    const agentValues = map(agents, (agent) => {
-      return {
-        ...agent,
-        name: this.getAgentName(agent),
-        mappingFilter: this.getMappingFilter(agent),
-      };
-    });
-
-    // Without regex
-    if (!this.state.filterStatus) {
+      filteredAgents = agents;
+    } else {
+      const filterAgents = [];
+      const agentValues = map(agents, (agent) => {
+        return {
+          ...agent,
+          name: this.getAgentName(agent),
+          mappingFilter: this.getMappingFilter(agent),
+        };
+      });
+      // Without regex
+      if (!this.state.filterStatus) {
+        filter = filter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      }
+      let regex;
+      try {
+        regex = RegExp(filter, 'i');
+      } catch (error) {
+        if (!this.state.error) {
+          this.setState({
+            error: true,
+            filteredAgents: agents,
+            filter,
+          });
+        }
+        return;
+      }
       for (let i = 0; i < agentValues.length; i++) {
-        if (this.checkWithoutRegex(agentValues[i], filter)) {
+        if (this.checkRegex(agentValues[i], regex)) {
           filterAgents.push(agents[i]);
         }
       }
-      return filterAgents;
+      filteredAgents = filterAgents;
     }
-
-    // With regex
-    let regex;
-
-    try {
-      regex = RegExp(filter, 'i');
-    } catch (error) {
-      return agents;
-    }
-
-    for (let i = 0; i < agentValues.length; i++) {
-      if (this.checkRegex(agentValues[i], regex)) {
-        filterAgents.push(agents[i]);
-      }
-    }
-    return filterAgents;
-  }
+    this.setState({
+      filter: unchangedFilter,
+      filteredAgents,
+      error,
+    });
+  };
 
   getAgentName = ({ metaInformation, attributes }) => {
     if (metaInformation) {
@@ -77,41 +89,14 @@ class StatusView extends React.Component {
     return filterArray;
   };
 
-  checkWithoutRegex = (agent, filter) => {
-    filter = filter.toLowerCase();
-
-    if(agent.name){
-      if(agent.name.toLowerCase().includes(filter)){
-        return true;
-      }
-    }
-    for(let i=0; i<agent.mappingFilter.length;i++){
-      if(agent.mappingFilter[i].toLowerCase().includes(filter)){
-        return true;
-      }
-    }
-    if (agent.metaInformation != null) {
-      if (agent.metaInformation.agentVersion.toLowerCase().includes(filter)) {
-        return true;
-      }
-      if (agent.metaInformation.javaVersion.toLowerCase().includes(filter)) {
-        return true;
-      }
-      if(agent.metaInformation.agentId.toLowerCase().includes(filter)){
-        return true;
-      }
-    }
-    return false;
-  };
-
   checkRegex = (agent, regex) => {
-    if(agent.name){
-      if(regex.test(agent.name)){
+    if (agent.name) {
+      if (regex.test(agent.name)) {
         return true;
       }
     }
-    for(let i=0; i<agent.mappingFilter.length;i++){
-      if(regex.test(agent.mappingFilter[i])){
+    for (let i = 0; i < agent.mappingFilter.length; i++) {
+      if (regex.test(agent.mappingFilter[i])) {
         return true;
       }
     }
@@ -122,7 +107,7 @@ class StatusView extends React.Component {
       if (regex.test(agent.metaInformation.javaVersion)) {
         return true;
       }
-      if(regex.test(agent.metaInformation.agentId)){
+      if (regex.test(agent.metaInformation.agentId)) {
         return true;
       }
     }
@@ -130,9 +115,12 @@ class StatusView extends React.Component {
   };
 
   render() {
-    const { filter, filterStatus } = this.state;
-    const { agents } = this.props;
-    const filteredAgents = this.filterAgents(filter, agents);
+    const { filter } = this.state;
+    let filteredAgents = this.state.filteredAgents;
+
+    if (filteredAgents === null) {
+      filteredAgents = this.props.agents;
+    }
 
     return (
       <>
@@ -152,9 +140,10 @@ class StatusView extends React.Component {
           <div>
             <StatusToolbar
               filter={filter}
-              onFilterChange={(filter) => this.setState({ filter })}
+              onFilterChange={(filter) => this.filterAgents(filter)}
               changeFilter={() => this.changeFilter}
               filterStatus={this.state.filterStatus}
+              error={this.state.error}
             />
           </div>
           <div className="data-table">

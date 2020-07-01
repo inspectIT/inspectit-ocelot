@@ -35,6 +35,13 @@ class StatusToolbar extends React.Component {
           .p-toolbar-group-right > :global(*) {
             margin-left: 0.25rem;
           }
+          .p-toolbar-warning {
+            margin-top: 0.3rem;
+            margin-left: 0.7rem;
+            font-size: 1.1rem;
+            font-weight: 900;
+            color: red;
+          }
           .p-toolbar-label {
             margin-top: 0.5rem;
             margin-left: 1rem;
@@ -56,6 +63,11 @@ class StatusToolbar extends React.Component {
                 placeholder={'Filter Agents'}
                 onChange={(e) => onFilterChange(e.target.value)}
               />
+              {this.props.error ? (
+                <div className="p-toolbar-warning">
+                  <label title="Regex is not valid">!</label>
+                </div>
+              ) : null}
               <div className="p-toolbar-label">
                 <label>With Regex</label>
                 <div className="p-toolbar-checkbox">
