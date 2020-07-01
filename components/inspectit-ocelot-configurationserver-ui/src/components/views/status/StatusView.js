@@ -14,7 +14,7 @@ class StatusView extends React.Component {
     filter: '',
     isAgentConfigurationShown: false,
   };
-  
+
   render() {
     const { filter } = this.state;
     const { agents, readOnly } = this.props;
@@ -37,7 +37,12 @@ class StatusView extends React.Component {
             <StatusToolbar filter={filter} onFilterChange={(filter) => this.setState({ filter })} disableClear={readOnly} />
           </div>
           <div className="data-table">
-            <StatusTable data={agents} filter={filter} isAgentConfigurationShown={this.state.isAgentConfigurationShown} setAgentConfigurationShown={this.setAgentConfigurationShown}/>
+            <StatusTable
+              data={agents}
+              filter={filter}
+              isAgentConfigurationShown={this.state.isAgentConfigurationShown}
+              setAgentConfigurationShown={this.setAgentConfigurationShown}
+            />
           </div>
           <div>
             <StatusFooterToolbar data={agents} />
@@ -63,14 +68,11 @@ class StatusView extends React.Component {
     }
   };
 
-  setAgentConfigurationShown = (isShown) =>{
+  setAgentConfigurationShown = (isShown) => {
     this.setState({
-      isAgentConfigurationShown: isShown
-    })
-  }
-
-
-
+      isAgentConfigurationShown: isShown,
+    });
+  };
 }
 
 function mapStateToProps(state) {
