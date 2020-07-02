@@ -10,6 +10,7 @@ import useFetchData from '../../../hooks/use-fetch-data';
 import PromotionApprovalDialog from './dialogs/PromotionApprovalDialog';
 import axios from '../../../lib/axios-api';
 import PromotionConflictDialog from './dialogs/PromotionConflictDialog';
+import _ from 'lodash';
 
 /**
  * The view for displaying existing promotion files including their modifications.
@@ -30,7 +31,7 @@ const PromotionView = () => {
   const canCommit = useSelector((state) => state.authentication.permissions.commit);
 
   // fetching promotion data
-  const [{ data, isLoading, isError, lastUpdate }, refreshData] = useFetchData('/configuration/promotions', { 'include-content': 'true' });
+  const [{ data, isLoading, lastUpdate }, refreshData] = useFetchData('/configuration/promotions', { 'include-content': 'true' });
 
   // derived variables
   const entries = data && Array.isArray(data.entries) ? data.entries : []; // all modified files
@@ -65,14 +66,6 @@ const PromotionView = () => {
   /**
    * Promotes the currently approved files.
    */
-  const promoteConfigurations2 = () => {
-    executePromotionRequest();
-    setShowPromotionDialog(false);
-  };
-
-  /**
-   * Executes the actual promotion request.
-   */
   const promoteConfigurations = async () => {
     const payload = {
       files: currentApprovals,
@@ -81,9 +74,9 @@ const PromotionView = () => {
     };
 
     setIsPromoting(true);
-    
+
     try {
-      const result = await axios.post('/configuration/promote', payload);
+      await axios.post('/configuration/promote', payload);
 
       dispatch(
         notificationActions.showSuccessMessage('Configuration Promoted', 'The approved configurations have been successfully promoted.')

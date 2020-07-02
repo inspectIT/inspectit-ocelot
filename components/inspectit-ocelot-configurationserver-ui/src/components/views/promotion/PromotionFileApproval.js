@@ -4,7 +4,7 @@ import { ToggleButton } from 'primereact/togglebutton';
 /**
  * The footer bar used by users to approve the currently selected promotion file.
  */
-const PromotionFileApproval = ({approved, onApproveFile}) => {
+const PromotionFileApproval = ({ approved, onApproveFile }) => {
   return (
     <>
       <style jsx>

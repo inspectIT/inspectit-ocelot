@@ -69,7 +69,7 @@ const selectionTemplate = ({ file, type, isApproved }) => {
 /**
  * Sidebar for showing existing configuration promotion files.
  */
-const PromotionSidebar = ({selection, onSelectionChange, promotionFiles, updateDate}) => {
+const PromotionSidebar = ({ selection, onSelectionChange, promotionFiles, updateDate }) => {
   return (
     <>
       <style jsx>
