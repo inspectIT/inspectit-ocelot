@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import PromotionToolbar from './PromotionToolbar';
-import { promotionActions, promotionSelectors } from '../../../redux/ducks/promotion';
+import { promotionActions } from '../../../redux/ducks/promotion';
+import { notificationActions } from '../../../redux/ducks/notification';
 import PromotionSidebar from './PromotionSidebar';
 import PromotionFileViewer from './PromotionFileView';
 import PromotionFileApproval from './PromotionFileApproval';
 import useFetchData from '../../../hooks/use-fetch-data';
-import usePrevious from '../../../hooks/use-previous';
 import PromotionApprovalDialog from './dialogs/PromotionApprovalDialog';
 import axios from '../../../lib/axios-api';
 import PromotionConflictDialog from './dialogs/PromotionConflictDialog';
@@ -17,38 +17,43 @@ import PromotionConflictDialog from './dialogs/PromotionConflictDialog';
 const PromotionView = () => {
   const dispatch = useDispatch();
 
-  const [currentSelection, setCurrentSelection] = useState(null);
+  // state variables
+  const [currentSelection, setCurrentSelection] = useState(null); // the current selected file name
   const [showPromotionDialog, setShowPromotionDialog] = useState(false);
   const [showConflictDialog, setShowConflictDialog] = useState(false);
+  const [isPromoting, setIsPromoting] = useState(false);
 
+  // global state variables
   const currentApprovals = useSelector((state) => state.promotion.approvals);
   const workspaceCommitId = useSelector((state) => state.promotion.workspaceCommitId);
   const liveCommitId = useSelector((state) => state.promotion.liveCommitId);
   const canCommit = useSelector((state) => state.authentication.permissions.commit);
 
+  // fetching promotion data
   const [{ data, isLoading, isError, lastUpdate }, refreshData] = useFetchData('/configuration/promotions', { 'include-content': 'true' });
-  const entries = data ? data.entries : [];
 
-  const currentSelectionFile = currentSelection ? _.find(entries, { file: currentSelection }) : null;
-  
+  // derived variables
+  const entries = data && Array.isArray(data.entries) ? data.entries : []; // all modified files
+  const currentSelectionFile = currentSelection ? _.find(entries, { file: currentSelection }) : null; // the current selected file object
+  const hasApprovals = !_.isEmpty(currentApprovals); // if more at least one file is approved and waiting for promotion
+  const isCurrentSelectionApproved = currentApprovals.includes(currentSelection); // whether the current selected file is approved
+  const entriesWithApproval = _.map(entries, (element) => {
+    return {
+      ...element,
+      isApproved: currentApprovals.includes(element.file),
+    };
+  }); // copy of the entries array including the data whether a file is approved or not.
 
+  // updating commit ids in the global state using the latest data
   useEffect(() => {
     if (data) {
       dispatch(promotionActions.updateCommitIds(data.workspaceCommitId, data.liveCommitId));
     }
   }, [data]);
 
-  const fileCount = Array.isArray(entries) ? entries.length : 0;
-  const hasApprovals = !_.isEmpty(currentApprovals);
-  const isCurrentSelectionApproved = currentApprovals.includes(currentSelection);
-
-  const promotionFiles = _.map(entries, (element) => {
-    return {
-      ...element,
-      isApproved: currentApprovals.includes(element.file),
-    };
-  });
-
+  /**
+   * Toggles the approval state of the current selected file.
+   */
   const toggleFileApproval = () => {
     if (isCurrentSelectionApproved) {
       dispatch(promotionActions.disapproveFile(currentSelection));
@@ -57,6 +62,17 @@ const PromotionView = () => {
     }
   };
 
+  /**
+   * Promotes the currently approved files.
+   */
+  const promoteConfigurations2 = () => {
+    executePromotionRequest();
+    setShowPromotionDialog(false);
+  };
+
+  /**
+   * Executes the actual promotion request.
+   */
   const promoteConfigurations = async () => {
     const payload = {
       files: currentApprovals,
@@ -64,19 +80,22 @@ const PromotionView = () => {
       liveCommitId,
     };
 
+    setIsPromoting(true);
+    
     try {
       const result = await axios.post('/configuration/promote', payload);
 
+      dispatch(
+        notificationActions.showSuccessMessage('Configuration Promoted', 'The approved configurations have been successfully promoted.')
+      );
       refreshData();
     } catch (error) {
-      if (error.response.status === 409) {
+      if (error.response && error.response.status === 409) {
         setShowConflictDialog(true);
       }
     }
-  };
 
-  const promoteFiles = () => {
-    promoteConfigurations();
+    setIsPromoting(false);
     setShowPromotionDialog(false);
   };
 
@@ -115,8 +134,9 @@ const PromotionView = () => {
       <PromotionApprovalDialog
         visible={showPromotionDialog}
         onHide={() => setShowPromotionDialog(false)}
-        onPromote={promoteFiles}
+        onPromote={promoteConfigurations}
         approvedFiles={currentApprovals}
+        isLoading={isPromoting}
       />
 
       <PromotionConflictDialog visible={showConflictDialog} onHide={() => setShowConflictDialog(false)} onRefresh={refreshData} />
@@ -131,10 +151,10 @@ const PromotionView = () => {
           />
         </div>
         <div className="content">
-          {fileCount > 0 ? (
+          {entries.length > 0 ? (
             <>
               <PromotionSidebar
-                promotionFiles={promotionFiles}
+                promotionFiles={entriesWithApproval}
                 selection={currentSelectionFile}
                 onSelectionChange={setCurrentSelection}
                 updateDate={lastUpdate}

@@ -22,12 +22,22 @@ export const disapproveFile = (filename) => {
   };
 };
 
+/**
+ * Resets the currently approved files.
+ */
 export const resetFileApprovals = () => {
   return (dispatch) => {
     dispatch({ type: types.RESET_FILE_APPROVALS });
   };
 };
 
+/**
+ * Updates the state's commit ids with the given ones. In case the existing ids differs from the
+ * specified ones, the file approvals will be resetted.
+ *
+ * @param {string} workspaceId
+ * @param {string} liveId
+ */
 export const updateCommitIds = (workspaceId, liveId) => {
   return (dispatch, getState) => {
     const { workspaceCommitId, liveCommitId } = getState().promotion;

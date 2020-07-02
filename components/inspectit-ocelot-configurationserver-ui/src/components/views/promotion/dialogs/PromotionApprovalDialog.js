@@ -1,15 +1,16 @@
 import React from 'react';
 import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
+import { ProgressBar } from 'primereact/progressbar';
 
 /**
  * Dialog for showing the currently approved files before promoting them.
  */
-const PromotionApprovalDialog = ({ visible, onHide, onPromote, approvedFiles = [] }) => {
+const PromotionApprovalDialog = ({ visible, onHide, onPromote, isLoading, approvedFiles = [] }) => {
   const footer = (
     <div>
-      <Button label="Promote" onClick={onPromote} />
-      <Button label="Cancel" className="p-button-secondary" onClick={onHide} />
+      <Button label="Promote" onClick={onPromote} disabled={isLoading} />
+      <Button label="Cancel" className="p-button-secondary" onClick={onHide} disabled={isLoading} />
     </div>
   );
 
@@ -17,10 +18,12 @@ const PromotionApprovalDialog = ({ visible, onHide, onPromote, approvedFiles = [
     <>
       <style jsx>
         {`
-          .content {
-          }
           .list li {
             font-family: monospace;
+          }
+
+          .content :global(.p-progressbar) {
+            height: 0.5rem;
           }
         `}
       </style>
@@ -33,6 +36,8 @@ const PromotionApprovalDialog = ({ visible, onHide, onPromote, approvedFiles = [
               <li key={file}>{file}</li>
             ))}
           </ul>
+
+          {isLoading && <ProgressBar mode="indeterminate" />}
         </div>
       </Dialog>
     </>
