@@ -4,75 +4,82 @@ import { agentStatusActions } from '../../../redux/ducks/agent-status';
 import StatusTable from './StatusTable';
 import StatusToolbar from './StatusToolbar';
 import StatusFooterToolbar from './StatusFooterToolbar';
-import { map } from 'lodash';
+import { map, isEqual } from 'lodash';
 
 /**
  * The view presenting a list of connected agents, their mapping and when they last connected to the server.
  * The view is automatically refreshed and can also be refreshed manually using a refresh button.
  */
 class StatusView extends React.Component {
-  state = {
-    filter: '',
-    filterStatus: true,
-    error: false,
-    filteredAgents: null,
-  };
+  constructor(props) {
+    super(props);
 
-  changeFilter = () => {
-    this.setState({
-      filterStatus: !this.state.filterStatus,
-      error: false,   
-    },
-    this.filterAgents(this.state.filter)
-    );
-  };
+    this.state = {
+      filter: '',
+      useRegexFilter: false,
+      error: false,
+      filteredAgents: props.agents,
+    };
+  }
 
-  filterAgents = (filter) => {
-    let error = false;
-    let unchangedFilter = filter;
-    let filteredAgents;
-    const agents = this.props.agents;
-
-    if (filter.length === 0) {
-      filteredAgents = agents;
-    } else {
-      const filterAgents = [];
-      const agentValues = map(agents, (agent) => {
-        return {
-          ...agent,
-          name: this.getAgentName(agent),
-          mappingFilter: this.getMappingFilter(agent),
-        };
-      });
-      // Without regex
-      if (!this.state.filterStatus) {
-        filter = filter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      }
-      let regex;
-      try {
-        regex = RegExp(filter, 'i');
-      } catch (error) {
-        if (!this.state.error) {
-          this.setState({
-            error: true,
-            filteredAgents: agents,
-            filter,
-          });
-        }
-        return;
-      }
-      for (let i = 0; i < agentValues.length; i++) {
-        if (this.checkRegex(agentValues[i], regex)) {
-          filterAgents.push(agents[i]);
-        }
-      }
-      filteredAgents = filterAgents;
+  componentDidUpdate(prevProps) {
+    if (!isEqual(prevProps.agents, this.props.agents)) {
+      this.filterAgents();
     }
-    this.setState({
-      filter: unchangedFilter,
-      filteredAgents,
-      error,
-    });
+  }
+
+  onFilterModeChange = ({ checked }) => {
+    this.setState({ useRegexFilter: checked }, this.filterAgents);
+  };
+
+  updateFilter = (filter) => {
+    this.setState({ filter }, this.filterAgents);
+  };
+
+  filterAgents = () => {
+    const { agents } = this.props;
+    const { filter, useRegexFilter } = this.state;
+
+    if (filter === '') {
+      this.setState({
+        error: false,
+        filteredAgents: agents,
+      });
+    } else {
+      try {
+        let filterValue;
+        if (useRegexFilter) {
+          filterValue = filter;
+        } else {
+          filterValue = filter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        const regex = RegExp(filterValue, 'i');
+
+        const filteredAgents = agents.filter((agent) => {
+          const agentFilter = this.getAgentFilter(agent);
+          return this.checkRegex(agentFilter, regex);
+        });
+
+        this.setState({
+          error: false,
+          filteredAgents,
+        });
+      } catch (error) {
+        this.setState({
+          error: true,
+          filteredAgents: agents,
+        });
+      }
+    }
+  };
+
+  getAgentFilter = (agent) => {
+    return {
+      ...agent,
+      name: this.getAgentName(agent),
+      mappingFilter: this.getMappingFilter(agent),
+    };
   };
 
   getAgentName = ({ metaInformation, attributes }) => {
@@ -115,12 +122,7 @@ class StatusView extends React.Component {
   };
 
   render() {
-    const { filter } = this.state;
-    let filteredAgents = this.state.filteredAgents;
-
-    if (filteredAgents === null) {
-      filteredAgents = this.props.agents;
-    }
+    const { filter, filteredAgents, useRegexFilter, error } = this.state;
 
     return (
       <>
@@ -140,10 +142,10 @@ class StatusView extends React.Component {
           <div>
             <StatusToolbar
               filter={filter}
-              onFilterChange={(filter) => this.filterAgents(filter)}
-              changeFilter={() => this.changeFilter}
-              filterStatus={this.state.filterStatus}
-              error={this.state.error}
+              onFilterChange={this.updateFilter}
+              onModeChange={this.onFilterModeChange}
+              useRegexFilter={useRegexFilter}
+              error={error}
             />
           </div>
           <div className="data-table">

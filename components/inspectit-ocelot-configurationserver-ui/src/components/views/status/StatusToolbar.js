@@ -16,7 +16,7 @@ class StatusToolbar extends React.Component {
   };
 
   render() {
-    const { clearing, refreshing, fetchStatus, filter, onFilterChange } = this.props;
+    const { clearing, refreshing, fetchStatus, filter, onFilterChange, onModeChange, useRegexFilter, error } = this.props;
 
     const tooltipOptions = {
       showDelay: 500,
@@ -32,6 +32,10 @@ class StatusToolbar extends React.Component {
             background-color: #eee;
             border-bottom: 1px solid #ddd;
           }
+          .p-toolbar-group-left {
+            align-items: center;
+            display: flex;
+          }
           .p-toolbar-group-right > :global(*) {
             margin-left: 0.25rem;
           }
@@ -42,20 +46,21 @@ class StatusToolbar extends React.Component {
             font-weight: 900;
             color: red;
           }
-          .p-toolbar-label {
-            margin-top: 0.5rem;
+          .checkbox-group {
             margin-left: 1rem;
-            padding-right: -1rem;
           }
-          .p-toolbar-checkbox {
-            margin-left: 5rem;
-            margin-top: -1.2rem;
+          .checkbox-group label {
+            margin-right: 0.5rem;
+          }
+          .regex-error {
+            color: red !important;
           }
         `}</style>
         <Toolbar>
           <div className="p-toolbar-group-left">
-            <div className="p-inputgroup" style={{ display: 'inline-flex', verticalAlign: 'middle' }}>
+            <div className="p-inputgroup">
               <span className="pi p-inputgroup-addon pi-search" />
+
               <InputText
                 onKeyPress={this.onKeyPress}
                 style={{ width: '300px' }}
@@ -63,17 +68,13 @@ class StatusToolbar extends React.Component {
                 placeholder={'Filter Agents'}
                 onChange={(e) => onFilterChange(e.target.value)}
               />
-              {this.props.error ? (
-                <div className="p-toolbar-warning">
-                  <label title="Regex is not valid">!</label>
-                </div>
-              ) : null}
-              <div className="p-toolbar-label">
-                <label>With Regex</label>
-                <div className="p-toolbar-checkbox">
-                  <Checkbox onChange={this.props.changeFilter()} checked={this.props.filterStatus} />
-                </div>
-              </div>
+
+              {error && <span className="p-inputgroup-addon regex-error">Invalid regular expression</span>}
+            </div>
+
+            <div className="p-inputgroup checkbox-group">
+              <label>Use Regex</label>
+              <Checkbox onChange={onModeChange} checked={useRegexFilter} />
             </div>
           </div>
           <div className="p-toolbar-group-right">
