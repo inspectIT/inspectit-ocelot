@@ -103,6 +103,58 @@ class RevisionAccessIntTest extends FileTestBase {
     }
 
     @Nested
+    class ListFiles {
+
+        @Test
+        public void listFiles() {
+            List<FileInfo> result = revision.listFiles("files");
+
+            assertThat(result).hasSize(2);
+            assertThat(result).anySatisfy(fileInfo -> {
+                assertThat(fileInfo.getName()).isEqualTo("file_a.yml");
+                assertThat(fileInfo.getType()).isEqualTo(FileInfo.Type.FILE);
+                assertThat(fileInfo.getChildren()).isNull();
+            });
+            assertThat(result).anySatisfy(fileInfo -> {
+                assertThat(fileInfo.getName()).isEqualTo("sub");
+                assertThat(fileInfo.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+
+                List<FileInfo> subChildren = fileInfo.getChildren();
+
+                assertThat(subChildren).hasOnlyOneElementSatisfying(subFileInfo -> {
+                    assertThat(subFileInfo.getName()).isEqualTo("file_z.yml");
+                    assertThat(subFileInfo.getType()).isEqualTo(FileInfo.Type.FILE);
+                    assertThat(subFileInfo.getChildren()).isNull();
+                });
+            });
+        }
+
+        @Test
+        public void listFilesNullPath() {
+            List<FileInfo> result = revision.listFiles(null);
+
+            assertThat(result).hasSize(1);
+            assertThat(result).anySatisfy(fileInfo -> {
+                assertThat(fileInfo.getName()).isEqualTo("files");
+                assertThat(fileInfo.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+
+                List<FileInfo> children = fileInfo.getChildren();
+                assertThat(children).hasSize(2);
+                assertThat(children).anySatisfy(subFileInfo -> {
+                    assertThat(subFileInfo.getName()).isEqualTo("file_a.yml");
+                    assertThat(subFileInfo.getType()).isEqualTo(FileInfo.Type.FILE);
+                    assertThat(subFileInfo.getChildren()).isNull();
+                });
+                assertThat(children).anySatisfy(subFileInfo -> {
+                    assertThat(subFileInfo.getName()).isEqualTo("sub");
+                    assertThat(subFileInfo.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
+                    assertThat(subFileInfo.getChildren()).hasSize(1);
+                });
+            });
+        }
+    }
+
+    @Nested
     class ReadConfigurationFile {
 
         @Test
@@ -128,9 +180,9 @@ class RevisionAccessIntTest extends FileTestBase {
 
         @Test
         public void readDirectory() {
-            assertThatIllegalArgumentException()
-                    .isThrownBy(() -> revision.readConfigurationFile("sub"))
-                    .withMessage("Target must be a file but found directory: files/sub");
+            Optional<String> result = revision.readConfigurationFile("sub");
+
+            assertThat(result).isEmpty();
         }
 
         @Test

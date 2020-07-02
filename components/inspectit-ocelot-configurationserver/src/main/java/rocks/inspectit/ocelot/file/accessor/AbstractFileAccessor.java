@@ -102,7 +102,7 @@ public abstract class AbstractFileAccessor {
             byte[] rawFileContent = readFile(targetPath);
             String fileContent = new String(rawFileContent, FILE_ENCODING);
             return Optional.of(fileContent);
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             log.error("File '{}' could not been loaded.", ex);
             return Optional.empty();
         }
@@ -132,7 +132,7 @@ public abstract class AbstractFileAccessor {
             byte[] rawFileContent = readFile(AGENT_MAPPINGS_FILE_NAME);
             String fileContent = new String(rawFileContent, FILE_ENCODING);
             return Optional.of(fileContent);
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             log.error("File '{}' could not been loaded.", ex);
             return Optional.empty();
         }

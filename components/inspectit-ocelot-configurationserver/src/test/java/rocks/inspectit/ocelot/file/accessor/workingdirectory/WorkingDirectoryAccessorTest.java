@@ -30,19 +30,16 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
 
     private ApplicationEventPublisher eventPublisher;
 
-    private ReadWriteLock lock;
-
     @BeforeEach
     public void beforeEach() throws IOException {
         tempDirectory = Files.createTempDirectory("ocelot");
 
         eventPublisher = mock(ApplicationEventPublisher.class);
 
-        lock = mock(ReadWriteLock.class);
-        when(lock.writeLock()).thenReturn(mock(Lock.class));
-        when(lock.readLock()).thenReturn(mock(Lock.class));
+        Lock readLock = mock(Lock.class);
+        Lock writeLock = mock(Lock.class);
 
-        accessor = new WorkingDirectoryAccessor(lock, tempDirectory, eventPublisher);
+        accessor = new WorkingDirectoryAccessor(readLock, writeLock, tempDirectory, eventPublisher);
     }
 
     @AfterEach

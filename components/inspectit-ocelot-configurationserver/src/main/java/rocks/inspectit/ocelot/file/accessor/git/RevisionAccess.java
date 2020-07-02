@@ -88,16 +88,6 @@ public class RevisionAccess extends AbstractFileAccessor {
     }
 
     @Override
-    protected List<FileInfo> listFiles(String path) {
-        try {
-            return listFiles2(path);
-        } catch (IOException e) {
-            log.error("Exception while listing files in path '{}'.", path, e);
-            return Collections.emptyList();
-        }
-    }
-
-    @Override
     protected boolean exists(String path) {
         try (TreeWalk treeWalk = TreeWalk.forPath(repository, path, revCommit.getTree())) {
             return treeWalk != null;
@@ -117,15 +107,9 @@ public class RevisionAccess extends AbstractFileAccessor {
         }
     }
 
-    /**
-     * Lists all files in the given path.
-     *
-     * @param path The path which should be considered as root.
-     * @return List of{@link FileInfo} representing the content of the repository.
-     * @throws IOException in case the repository cannot be read
-     */
-    private List<FileInfo> listFiles2(String path) throws IOException {
-        if (path.startsWith("/")) {
+    @Override
+    protected List<FileInfo> listFiles(String path) {
+        if (StringUtils.startsWith(path, "/")) {
             path = path.substring(1);
         }
 
@@ -137,6 +121,7 @@ public class RevisionAccess extends AbstractFileAccessor {
                 treeWalk = new TreeWalk(repository);
                 treeWalk.addTree(tree);
                 treeWalk.setRecursive(false);
+                treeWalk.next();
             } else {
                 treeWalk = TreeWalk.forPath(repository, path, tree);
                 if (treeWalk == null) {
@@ -148,6 +133,9 @@ public class RevisionAccess extends AbstractFileAccessor {
             }
 
             return collectFiles(treeWalk);
+        } catch (IOException e) {
+            log.error("Exception while listing files in path '{}'.", path, e);
+            return Collections.emptyList();
         } finally {
             if (treeWalk != null) {
                 treeWalk.close();

@@ -7,7 +7,7 @@ import rocks.inspectit.ocelot.file.versioning.VersioningManager;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.Lock;
 
 /**
  * Delegation proxy for the {@link WorkingDirectoryAccessor} which directly stages and commits changes.
@@ -15,14 +15,23 @@ import java.util.concurrent.locks.ReadWriteLock;
 @Slf4j
 public class AutoCommitWorkingDirectoryProxy extends AbstractWorkingDirectoryAccessor {
 
-    private ReadWriteLock workingDirectoryLock;
+    /**
+     * Lock which is used when writing to the working directory.
+     */
+    private Lock writeLock;
 
+    /**
+     * The accessor which actually does the working directory access.
+     */
     private WorkingDirectoryAccessor workingDirectoryAccessor;
 
+    /**
+     * The version manager to use.
+     */
     private VersioningManager versioningManager;
 
-    public AutoCommitWorkingDirectoryProxy(ReadWriteLock workingDirectoryLock, WorkingDirectoryAccessor workingDirectoryAccessor, VersioningManager versioningManager) {
-        this.workingDirectoryLock = workingDirectoryLock;
+    public AutoCommitWorkingDirectoryProxy(Lock writeLock, WorkingDirectoryAccessor workingDirectoryAccessor, VersioningManager versioningManager) {
+        this.writeLock = writeLock;
         this.workingDirectoryAccessor = workingDirectoryAccessor;
         this.versioningManager = versioningManager;
     }
@@ -38,6 +47,10 @@ public class AutoCommitWorkingDirectoryProxy extends AbstractWorkingDirectoryAcc
         }
     }
 
+    /**
+     * Brings the working directory into a clean state. Currently, existing changes will be committed and marked
+     * as external changes.
+     */
     private void clean() {
         try {
             versioningManager.commitAsExternalChange();
@@ -49,49 +62,49 @@ public class AutoCommitWorkingDirectoryProxy extends AbstractWorkingDirectoryAcc
 
     @Override
     protected void writeFile(String path, String content) throws IOException {
-        workingDirectoryLock.writeLock().lock();
+        writeLock.lock();
         try {
             clean();
             workingDirectoryAccessor.writeFile(path, content);
             commit();
         } finally {
-            workingDirectoryLock.writeLock().unlock();
+            writeLock.unlock();
         }
     }
 
     @Override
     protected void createDirectory(String path) throws IOException {
-        workingDirectoryLock.writeLock().lock();
+        writeLock.lock();
         try {
             clean();
             workingDirectoryAccessor.createDirectory(path);
             commit();
         } finally {
-            workingDirectoryLock.writeLock().unlock();
+            writeLock.unlock();
         }
     }
 
     @Override
     protected void move(String sourcePath, String targetPath) throws IOException {
-        workingDirectoryLock.writeLock().lock();
+        writeLock.lock();
         try {
             clean();
             workingDirectoryAccessor.move(sourcePath, targetPath);
             commit();
         } finally {
-            workingDirectoryLock.writeLock().unlock();
+            writeLock.unlock();
         }
     }
 
     @Override
     protected void delete(String path) throws IOException {
-        workingDirectoryLock.writeLock().lock();
+        writeLock.lock();
         try {
             clean();
             workingDirectoryAccessor.delete(path);
             commit();
         } finally {
-            workingDirectoryLock.writeLock().unlock();
+            writeLock.unlock();
         }
     }
 

@@ -178,7 +178,7 @@ public class VersioningManager {
 
     /**
      * Commits the staged files using the given author and message. Consecutive of the same user within {@link #amendTimeout}
-     * milliseconds will be amended if specified. The commit will be against the workspace branch!
+     * milliseconds will be amended if specified.
      *
      * @param author     the author to use
      * @param message    the commit message to use

@@ -46,13 +46,13 @@ public class FileManager {
     public FileManager(InspectitServerSettings settings, ApplicationEventPublisher eventPublisher) throws GitAPIException {
         Path workingDirectory = Paths.get(settings.getWorkingDirectory()).toAbsolutePath().normalize();
 
-        WorkingDirectoryAccessor workingDirectoryAccessorImpl = new WorkingDirectoryAccessor(workingDirectoryLock, workingDirectory, eventPublisher);
+        WorkingDirectoryAccessor workingDirectoryAccessorImpl = new WorkingDirectoryAccessor(workingDirectoryLock.readLock(), workingDirectoryLock.writeLock(), workingDirectory, eventPublisher);
 
         Supplier<Authentication> authenticationSupplier = () -> SecurityContextHolder.getContext().getAuthentication();
         versioningManager = new VersioningManager(workingDirectory, authenticationSupplier, eventPublisher);
         versioningManager.initialize();
 
-        this.workingDirectoryAccessor = new AutoCommitWorkingDirectoryProxy(workingDirectoryLock, workingDirectoryAccessorImpl, versioningManager);
+        this.workingDirectoryAccessor = new AutoCommitWorkingDirectoryProxy(workingDirectoryLock.writeLock(), workingDirectoryAccessorImpl, versioningManager);
     }
 
     /**

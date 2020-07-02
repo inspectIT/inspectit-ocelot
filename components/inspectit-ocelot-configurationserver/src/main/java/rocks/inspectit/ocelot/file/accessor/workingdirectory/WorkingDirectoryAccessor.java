@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.Lock;
 
 /**
  * Concrete implementation to access and modify files in the server's working directory.
@@ -27,14 +27,24 @@ public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
      */
     private ApplicationEventPublisher eventPublisher;
 
-    private ReadWriteLock workingDirectoryLock;
+    /**
+     * Lock used when reading from the working directory.
+     */
+    private Lock readLock;
+
+    /**
+     * Lock used when writing to the working directory.
+     */
+    private Lock writeLock;
+
     /**
      * The base path of the working directory.
      */
     private Path workingDirectory;
 
-    public WorkingDirectoryAccessor(ReadWriteLock workingDirectoryLock, Path workingDirectory, ApplicationEventPublisher eventPublisher) {
-        this.workingDirectoryLock = workingDirectoryLock;
+    public WorkingDirectoryAccessor(Lock readLock, Lock writeLock, Path workingDirectory, ApplicationEventPublisher eventPublisher) {
+        this.readLock = readLock;
+        this.writeLock = writeLock;
         this.workingDirectory = workingDirectory;
         this.eventPublisher = eventPublisher;
     }
@@ -68,7 +78,7 @@ public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
 
     @Override
     protected byte[] readFile(String path) throws IOException {
-        workingDirectoryLock.readLock().lock();
+        readLock.lock();
         try {
             Path targetPath = resolve(path);
 
@@ -82,13 +92,13 @@ public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
 
             return Files.readAllBytes(targetPath);
         } finally {
-            workingDirectoryLock.readLock().unlock();
+            readLock.unlock();
         }
     }
 
     @Override
     protected List<FileInfo> listFiles(String path) {
-        workingDirectoryLock.readLock().lock();
+        readLock.lock();
         try {
             Path targetPath = resolve(path);
 
@@ -105,13 +115,13 @@ public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
             log.error("Exception while listing files in path '{}'.", path, e);
             return Collections.emptyList();
         } finally {
-            workingDirectoryLock.readLock().unlock();
+            readLock.unlock();
         }
     }
 
     @Override
     protected void createDirectory(String path) throws IOException {
-        workingDirectoryLock.writeLock().lock();
+        writeLock.lock();
         try {
             Path targetDirectory = resolve(path);
 
@@ -123,13 +133,13 @@ public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
 
             fireFileChangeEvent();
         } finally {
-            workingDirectoryLock.writeLock().unlock();
+            writeLock.unlock();
         }
     }
 
     @Override
     protected void writeFile(String path, String content) throws IOException {
-        workingDirectoryLock.writeLock().lock();
+        writeLock.lock();
         try {
             Path targetFile = resolve(path);
 
@@ -142,13 +152,13 @@ public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
 
             fireFileChangeEvent();
         } finally {
-            workingDirectoryLock.writeLock().unlock();
+            writeLock.unlock();
         }
     }
 
     @Override
     protected void move(String sourcePath, String targetPath) throws IOException {
-        workingDirectoryLock.writeLock().lock();
+        writeLock.lock();
         try {
             Path source = resolve(sourcePath);
             Path target = resolve(targetPath);
@@ -163,13 +173,13 @@ public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
 
             fireFileChangeEvent();
         } finally {
-            workingDirectoryLock.writeLock().unlock();
+            writeLock.unlock();
         }
     }
 
     @Override
     protected void delete(String path) throws IOException {
-        workingDirectoryLock.writeLock().lock();
+        writeLock.lock();
         try {
             Path targetPath = resolve(path);
 
@@ -185,29 +195,29 @@ public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
 
             fireFileChangeEvent();
         } finally {
-            workingDirectoryLock.writeLock().unlock();
+            writeLock.unlock();
         }
     }
 
     @Override
     protected boolean exists(String path) {
-        workingDirectoryLock.readLock().lock();
+        readLock.lock();
         try {
             Path targetPath = resolve(path);
             return Files.exists(targetPath);
         } finally {
-            workingDirectoryLock.readLock().unlock();
+            readLock.unlock();
         }
     }
 
     @Override
     protected boolean isDirectory(String path) {
-        workingDirectoryLock.readLock().lock();
+        readLock.lock();
         try {
             Path targetPath = resolve(path);
             return Files.isDirectory(targetPath);
         } finally {
-            workingDirectoryLock.readLock().unlock();
+            readLock.unlock();
         }
     }
 

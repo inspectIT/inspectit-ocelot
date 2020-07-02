@@ -35,8 +35,6 @@ class AutoCommitWorkingDirectoryProxyIntTest extends FileTestBase {
 
     private VersioningManager versioningManager;
 
-    private ReadWriteLock lock;
-
     @BeforeEach
     public void beforeEach() throws IOException, GitAPIException {
         if (TEST_DIRECTORY == null) {
@@ -47,18 +45,17 @@ class AutoCommitWorkingDirectoryProxyIntTest extends FileTestBase {
         }
 
         eventPublisher = mock(ApplicationEventPublisher.class);
-        lock = mock(ReadWriteLock.class);
-        when(lock.writeLock()).thenReturn(mock(Lock.class));
-        when(lock.readLock()).thenReturn(mock(Lock.class));
+        Lock readLock = mock(Lock.class);
+        Lock writeLock = mock(Lock.class);
 
-        WorkingDirectoryAccessor workingDirectoryAccessor = new WorkingDirectoryAccessor(lock, tempDirectory, eventPublisher);
+        WorkingDirectoryAccessor workingDirectoryAccessor = new WorkingDirectoryAccessor(readLock, writeLock, tempDirectory, eventPublisher);
 
         Authentication authentication = mock(Authentication.class);
         when(authentication.getName()).thenReturn("user");
         versioningManager = new VersioningManager(tempDirectory, () -> authentication, eventPublisher);
         versioningManager.initialize();
 
-        accessor = new AutoCommitWorkingDirectoryProxy(lock, workingDirectoryAccessor, versioningManager);
+        accessor = new AutoCommitWorkingDirectoryProxy(writeLock, workingDirectoryAccessor, versioningManager);
     }
 
     @AfterEach

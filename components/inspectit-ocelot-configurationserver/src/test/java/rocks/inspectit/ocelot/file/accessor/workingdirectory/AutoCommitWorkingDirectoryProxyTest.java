@@ -22,18 +22,14 @@ class AutoCommitWorkingDirectoryProxyTest {
 
     private WorkingDirectoryAccessor wdAccessor;
 
-    private ReadWriteLock lock;
-
     @BeforeEach
     public void beforeEach() {
         wdAccessor = mock(WorkingDirectoryAccessor.class);
         versioningManager = mock(VersioningManager.class);
 
-        lock = mock(ReadWriteLock.class);
-        when(lock.writeLock()).thenReturn(mock(Lock.class));
-        when(lock.readLock()).thenReturn(mock(Lock.class));
+        Lock writeLock = mock(Lock.class);
 
-        accessor = new AutoCommitWorkingDirectoryProxy(lock, wdAccessor, versioningManager);
+        accessor = new AutoCommitWorkingDirectoryProxy(writeLock, wdAccessor, versioningManager);
     }
 
     @Nested
