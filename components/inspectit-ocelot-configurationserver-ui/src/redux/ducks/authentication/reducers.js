@@ -20,30 +20,28 @@ const authorizationReducer = createReducer(initialState)({
     };
   },
   [types.FETCH_TOKEN_SUCCESS]: (state, action) => {
-    const { token, username } = action.payload;
+    const { token, username, permissions } = action.payload;
     return {
       ...state,
       loading: false,
       error: null,
       token,
       username: username.toLowerCase(),
+      permissions,
     };
   },
-  [types.LOGOUT]: (state) => {
+  [types.LOGOUT]: () => {
     return {
-      ...state,
-      loading: false,
-      error: null,
-      token: null,
-      username: null,
+      ...initialState,
     };
   },
   [types.RENEW_TOKEN_SUCCESS]: (state, action) => {
-    const { token } = action.payload;
+    const { token, permissions } = action.payload;
     return {
       ...state,
       error: null,
       token,
+      permissions,
     };
   },
   // SPECIAL REDUCER - dispatched by redux-persist to rehydrate store
@@ -52,7 +50,7 @@ const authorizationReducer = createReducer(initialState)({
       return { ...state };
     }
 
-    const { token, username } = action.payload.authentication;
+    const { token, username, permissions } = action.payload.authentication;
     if (token) {
       const expired = isTokenExpired(token);
       if (!expired) {
@@ -60,6 +58,7 @@ const authorizationReducer = createReducer(initialState)({
           ...initialState,
           token,
           username,
+          permissions,
         };
       }
     }

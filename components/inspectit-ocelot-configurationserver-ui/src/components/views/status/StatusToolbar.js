@@ -16,7 +16,7 @@ class StatusToolbar extends React.Component {
   };
 
   render() {
-    const { clearing, refreshing, fetchStatus, filter, onFilterChange, onModeChange, useRegexFilter, error } = this.props;
+    const { clearing, refreshing, fetchStatus, filter, onFilterChange, disableClear, onModeChange, useRegexFilter, error } = this.props;
 
     const tooltipOptions = {
       showDelay: 500,
@@ -84,7 +84,7 @@ class StatusToolbar extends React.Component {
               icon={'pi pi-refresh' + (refreshing ? ' pi-spin' : '')}
               tooltipOptions={tooltipOptions}
             />
-            <Button disabled={clearing} onClick={() => this.setState({ isClearDialogShown: true })} label="Clear All" />
+            <Button disabled={disableClear || clearing} onClick={() => this.setState({ isClearDialogShown: true })} label="Clear All" />
           </div>
         </Toolbar>
         <ClearDialog visible={this.state.isClearDialogShown} onHide={() => this.setState({ isClearDialogShown: false })} />

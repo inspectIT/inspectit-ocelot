@@ -122,7 +122,7 @@ class StatusView extends React.Component {
   };
 
   render() {
-    const { filter, filteredAgents, useRegexFilter, error } = this.state;
+    const { filter, filteredAgents, useRegexFilter, error, readOnly } = this.state;
 
     return (
       <>
@@ -146,6 +146,7 @@ class StatusView extends React.Component {
               onModeChange={this.onFilterModeChange}
               useRegexFilter={useRegexFilter}
               error={error}
+              disableClear={readOnly}
             />
           </div>
           <div className="data-table">
@@ -181,6 +182,7 @@ function mapStateToProps(state) {
   return {
     loading: pendingRequests > 0,
     agents,
+    readOnly: !state.authentication.permissions.write,
   };
 }
 

@@ -2,11 +2,8 @@ package rocks.inspectit.ocelot.file.accessor.workingdirectory;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.file.FileChangedEvent;
 import rocks.inspectit.ocelot.file.FileInfo;
 import rocks.inspectit.ocelot.file.FileInfoVisitor;
@@ -103,7 +100,7 @@ public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
     }
 
     @Override
-    protected void createDirectory(String path) throws IOException {
+    protected synchronized void createDirectory(String path) throws IOException {
         Path targetDirectory = resolve(path);
 
         if (Files.exists(targetDirectory)) {
@@ -116,7 +113,7 @@ public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
     }
 
     @Override
-    protected void writeFile(String path, String content) throws IOException {
+    protected synchronized void writeFile(String path, String content) throws IOException {
         Path targetFile = resolve(path);
 
         if (Files.exists(targetFile) && Files.isDirectory(targetFile)) {
@@ -130,7 +127,7 @@ public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
     }
 
     @Override
-    protected void move(String sourcePath, String targetPath) throws IOException {
+    protected synchronized void move(String sourcePath, String targetPath) throws IOException {
         Path source = resolve(sourcePath);
         Path target = resolve(targetPath);
 
@@ -146,7 +143,7 @@ public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
     }
 
     @Override
-    protected void delete(String path) throws IOException {
+    protected synchronized void delete(String path) throws IOException {
         Path targetPath = resolve(path);
 
         if (!Files.exists(targetPath)) {
