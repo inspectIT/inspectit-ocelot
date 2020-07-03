@@ -136,7 +136,7 @@ public class ClassInjector {
         ClassLoader loader = neighborClass.getClassLoader();
         if (loader == null) {
             //for bootstrap classes the standard injection does not work properly
-            //however it also is not necessary as a reference to the bootstrap loader won't cause a memoryleak anyway
+            //however it also is not necessary as a reference to the bootstrap loader won't cause a memory leak anyway
             return bootstrapChildLoader.defineNewClass(className, byteCode, protectionDomain);
         } else {
             return DefineClassHelper.defineClass(className, byteCode, 0, byteCode.length, neighborClass, loader, protectionDomain);
