@@ -39,6 +39,6 @@ public class Log4J2MDCAdapter extends AbstractStaticMapMDCAdapter {
 
     @Override
     public boolean isEnabledForConfig(TraceIdMDCInjectionSettings settings) {
-        return settings.isLog4j2Enabled() && settings.isEnabled();
+        return settings.isLog4j2Enabled();
     }
 }
