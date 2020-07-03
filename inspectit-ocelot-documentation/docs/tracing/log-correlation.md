@@ -47,7 +47,7 @@ As a result, log messages, generated within an exported trace, will be prefixed 
 
 You can change the key under which the trace-id is placed in the MDC using the property `inspectit.tracing.log-correlation.trace-id-mdc-injection.key`.
 
-By default, the trace-id will inserted into all MDCs. If required, you can selectively exclude the supported libraries using the following flags:
+By default, the trace-id will be inserted into all MDCs. If required, you can selectively exclude the supported libraries using the following flags:
 ```yaml
 inspectit:
   tracing:

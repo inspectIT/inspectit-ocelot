@@ -18,7 +18,6 @@ import rocks.inspectit.ocelot.core.instrumentation.event.IClassDiscoveryListener
 
 import javax.annotation.PostConstruct;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -123,6 +122,6 @@ public class MDCAccess implements IClassDiscoveryListener {
                 inspectitEnv.getCurrentConfig().getTracing().getLogCorrelation().getTraceIdMdcInjection();
         enabledAdapters = availableAdapters.values().stream()
                 .filter(adapter -> adapter.isEnabledForConfig(settings))
-                .collect(Collectors.toCollection(() -> Collections.newSetFromMap(new ConcurrentHashMap<>())));
+                .collect(Collectors.toCollection(() -> Collections.newSetFromMap(new WeakHashMap<>())));
     }
 }
