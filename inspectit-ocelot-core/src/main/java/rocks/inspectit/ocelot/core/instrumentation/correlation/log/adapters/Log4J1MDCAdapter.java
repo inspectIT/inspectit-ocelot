@@ -39,6 +39,6 @@ public class Log4J1MDCAdapter extends AbstractStaticMapMDCAdapter {
 
     @Override
     public boolean isEnabledForConfig(TraceIdMDCInjectionSettings settings) {
-        return settings.isLog4j1Enabled() && settings.isEnabled();
+        return settings.isLog4j1Enabled();
     }
 }
