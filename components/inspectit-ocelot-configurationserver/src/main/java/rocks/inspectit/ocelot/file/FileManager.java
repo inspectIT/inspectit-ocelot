@@ -8,13 +8,19 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
+import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
 import rocks.inspectit.ocelot.file.accessor.workingdirectory.AbstractWorkingDirectoryAccessor;
 import rocks.inspectit.ocelot.file.accessor.workingdirectory.AutoCommitWorkingDirectoryProxy;
 import rocks.inspectit.ocelot.file.accessor.workingdirectory.WorkingDirectoryAccessor;
 import rocks.inspectit.ocelot.file.versioning.VersioningManager;
+import rocks.inspectit.ocelot.file.versioning.model.ConfigurationPromotion;
+import rocks.inspectit.ocelot.file.versioning.model.WorkspaceDiff;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Supplier;
 
 /**
@@ -23,6 +29,8 @@ import java.util.function.Supplier;
 @Component
 @Slf4j
 public class FileManager {
+
+    private final ReadWriteLock workingDirectoryLock = new ReentrantReadWriteLock();
 
     /**
      * The accessor used to access the working directory.
@@ -38,13 +46,13 @@ public class FileManager {
     public FileManager(InspectitServerSettings settings, ApplicationEventPublisher eventPublisher) throws GitAPIException {
         Path workingDirectory = Paths.get(settings.getWorkingDirectory()).toAbsolutePath().normalize();
 
-        WorkingDirectoryAccessor workingDirectoryAccessorImpl = new WorkingDirectoryAccessor(workingDirectory, eventPublisher);
+        WorkingDirectoryAccessor workingDirectoryAccessorImpl = new WorkingDirectoryAccessor(workingDirectoryLock.readLock(), workingDirectoryLock.writeLock(), workingDirectory, eventPublisher);
 
         Supplier<Authentication> authenticationSupplier = () -> SecurityContextHolder.getContext().getAuthentication();
-        versioningManager = new VersioningManager(workingDirectory, authenticationSupplier);
+        versioningManager = new VersioningManager(workingDirectory, authenticationSupplier, eventPublisher);
         versioningManager.initialize();
 
-        this.workingDirectoryAccessor = new AutoCommitWorkingDirectoryProxy(workingDirectoryAccessorImpl, versioningManager);
+        this.workingDirectoryAccessor = new AutoCommitWorkingDirectoryProxy(workingDirectoryLock.writeLock(), workingDirectoryAccessorImpl, versioningManager);
     }
 
     /**
@@ -54,5 +62,39 @@ public class FileManager {
      */
     public AbstractWorkingDirectoryAccessor getWorkingDirectory() {
         return workingDirectoryAccessor;
+    }
+
+    /**
+     * Returns access to the latest commit of the live branch.
+     *
+     * @return accessor to access the current live branch
+     */
+    public AbstractFileAccessor getLiveRevision() {
+        return versioningManager.getLiveRevision();
+    }
+
+    /**
+     * Returns the diff between the current live branch and the current workspace branch.
+     *
+     * @param includeContent whether the file difference (old and new content) is included
+     * @return the diff between the live and workspace branch
+     */
+    public WorkspaceDiff getWorkspaceDiff(boolean includeContent) throws IOException, GitAPIException {
+        return versioningManager.getWorkspaceDiff(includeContent);
+    }
+
+    /**
+     * Executes a file promotion according to the specified {@link ConfigurationPromotion} definition.
+     *
+     * @param promotion the definition what to promote
+     */
+    public void promoteConfiguration(ConfigurationPromotion promotion) throws GitAPIException {
+        workingDirectoryLock.writeLock().lock();
+
+        try {
+            versioningManager.promoteConfiguration(promotion);
+        } finally {
+            workingDirectoryLock.writeLock().unlock();
+        }
     }
 }

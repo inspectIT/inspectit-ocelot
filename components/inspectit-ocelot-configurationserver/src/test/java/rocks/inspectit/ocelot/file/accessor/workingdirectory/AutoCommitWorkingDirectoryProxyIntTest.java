@@ -14,6 +14,8 @@ import rocks.inspectit.ocelot.file.versioning.VersioningManager;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -43,17 +45,17 @@ class AutoCommitWorkingDirectoryProxyIntTest extends FileTestBase {
         }
 
         eventPublisher = mock(ApplicationEventPublisher.class);
+        Lock readLock = mock(Lock.class);
+        Lock writeLock = mock(Lock.class);
 
-        WorkingDirectoryAccessor workingDirectoryAccessor = new WorkingDirectoryAccessor(tempDirectory, eventPublisher);
+        WorkingDirectoryAccessor workingDirectoryAccessor = new WorkingDirectoryAccessor(readLock, writeLock, tempDirectory, eventPublisher);
 
         Authentication authentication = mock(Authentication.class);
         when(authentication.getName()).thenReturn("user");
-        versioningManager = new VersioningManager(tempDirectory, () -> authentication);
+        versioningManager = new VersioningManager(tempDirectory, () -> authentication, eventPublisher);
         versioningManager.initialize();
 
-        accessor = new AutoCommitWorkingDirectoryProxy(workingDirectoryAccessor, versioningManager);
-
-        System.out.println("Test data in: " + tempDirectory.toString());
+        accessor = new AutoCommitWorkingDirectoryProxy(writeLock, workingDirectoryAccessor, versioningManager);
     }
 
     @AfterEach
@@ -76,7 +78,7 @@ class AutoCommitWorkingDirectoryProxyIntTest extends FileTestBase {
 
             int commitCount = versioningManager.getCommitCount();
 
-            assertThat(commitCount).isZero();
+            assertThat(commitCount).isOne();
             assertThat(first).isTrue();
             assertThat(second).isTrue();
         }
@@ -95,8 +97,8 @@ class AutoCommitWorkingDirectoryProxyIntTest extends FileTestBase {
             boolean third = versioningManager.isClean();
             int commitCountSecond = versioningManager.getCommitCount();
 
-            assertThat(commitCountFirst).isOne();
-            assertThat(commitCountSecond).isOne();
+            assertThat(commitCountFirst).isEqualTo(2);
+            assertThat(commitCountSecond).isEqualTo(2);
             assertThat(first).isTrue();
             assertThat(second).isTrue();
             assertThat(third).isTrue();

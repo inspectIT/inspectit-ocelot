@@ -6,7 +6,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationEventPublisher;
-import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.file.FileChangedEvent;
 import rocks.inspectit.ocelot.file.FileInfo;
 import rocks.inspectit.ocelot.file.FileTestBase;
@@ -17,6 +16,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -35,7 +36,10 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
 
         eventPublisher = mock(ApplicationEventPublisher.class);
 
-        accessor = new WorkingDirectoryAccessor(tempDirectory, eventPublisher);
+        Lock readLock = mock(Lock.class);
+        Lock writeLock = mock(Lock.class);
+
+        accessor = new WorkingDirectoryAccessor(readLock, writeLock, tempDirectory, eventPublisher);
     }
 
     @AfterEach
