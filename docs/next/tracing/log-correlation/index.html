@@ -94,6 +94,15 @@ In all of the logging libraries mentioned above you can use <code>%X{traceid}</c
 <p>Note that the trace ID is only available when the log statement is within a trace which is sampled, otherwise the trace-id is empty.</p>
 </blockquote>
 <p>You can change the key under which the trace-id is placed in the MDC using the property <code>inspectit.tracing.log-correlation.trace-id-mdc-injection.key</code>.</p>
+<p>By default, the trace-id will be inserted into all MDCs. If required, you can selectively exclude the supported libraries using the following flags:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">inspectit:</span>
+  <span class="hljs-attr">tracing:</span>
+    <span class="hljs-attr">log-correlation:</span>
+      <span class="hljs-attr">trace-id-mdc-injection:</span>
+        <span class="hljs-attr">slf4j-enabled:</span> <span class="hljs-literal">true</span>  <span class="hljs-comment"># Set to "false" to disable slf4J-Support</span>
+        <span class="hljs-attr">log4j1-enabled:</span> <span class="hljs-literal">true</span> <span class="hljs-comment"># Set to "false" to disable Log4J Version 1 Support</span>
+        <span class="hljs-attr">log4j2-enabled:</span> <span class="hljs-literal">true</span> <span class="hljs-comment"># Set to "false" to disable Log4J Version 2 Support</span>
+</code></pre>
 <h2><a class="anchor" aria-hidden="true" id="automatical-trace-id-injection"></a><a href="#automatical-trace-id-injection" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Automatical Trace ID Injection</h2>
 
     <div class="admonition admonition-warning">
@@ -109,7 +118,7 @@ In all of the logging libraries mentioned above you can use <code>%X{traceid}</c
 <li><code>Log4J Version 1</code></li>
 <li><code>Log4J Version 2</code></li>
 </ul>
-<p>The automatical trace ID injection is disabled by default. You can enable it using the following configuration snippet:</p>
+<p>The automatic trace ID injection is disabled by default. You can enable it using the following configuration snippet:</p>
 <pre><code class="hljs css language-yaml"><span class="hljs-attr">inspectit:</span>
   <span class="hljs-attr">tracing:</span>
     <span class="hljs-attr">log-correlation:</span>
@@ -138,7 +147,7 @@ In all of the logging libraries mentioned above you can use <code>%X{traceid}</c
 The following output shows an example when the message is logged using a certain log pattern:</p>
 <pre><code class="hljs css language-text">18:19:43.474 [main] INFO  org.Example - [TraceID: e32ce6197f774d229460b2fd14448cf6]This is a test.
 </code></pre>
-</div></div></span></div></article></div><div class="docLastUpdate"><em>Last updated on 2020-5-5 by Marius Brill</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/next/tracing/trace-exporters"><span class="arrow-prev">← </span><span>Trace Exporters</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/next/tracing/privacy"><span>Data Privacy</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#trace-id-injection-using-mdc">Trace ID Injection Using MDC</a></li><li><a href="#automatical-trace-id-injection">Automatical Trace ID Injection</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2020 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</div></div></span></div></article></div><div class="docLastUpdate"><em>Last updated on 2020-7-3 by Jonas Kunz</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/next/tracing/trace-exporters"><span class="arrow-prev">← </span><span>Trace Exporters</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/next/tracing/privacy"><span>Data Privacy</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#trace-id-injection-using-mdc">Trace ID Injection Using MDC</a></li><li><a href="#automatical-trace-id-injection">Automatical Trace ID Injection</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2020 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
