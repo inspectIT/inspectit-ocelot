@@ -41,6 +41,12 @@ inspectit:
         enabled: false
         # the key which is used to store the trace id in the MDC
         key: "traceid"
+        # Opt-out option for slf4J
+        slf4j-enabled: true
+        # Opt-out option for Log4J1
+        log4j1-enabled: true
+        # Opt-out option for Log4J2
+        log4j2-enabled: true
       trace-id-auto-injection:
         # whether the trace id should automatically injected into log statements
         enabled: false

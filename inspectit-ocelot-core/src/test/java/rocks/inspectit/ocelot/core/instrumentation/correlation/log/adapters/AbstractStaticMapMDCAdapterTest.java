@@ -3,6 +3,7 @@ package rocks.inspectit.ocelot.core.instrumentation.correlation.log.adapters;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import rocks.inspectit.ocelot.config.model.tracing.TraceIdMDCInjectionSettings;
 import rocks.inspectit.ocelot.core.utils.WeakMethodReference;
 
 import java.util.HashMap;
@@ -42,6 +43,10 @@ public class AbstractStaticMapMDCAdapterTest {
         WeakMethodReference get = WeakMethodReference.create(DummyMDC.class, "get", String.class);
         WeakMethodReference remove = WeakMethodReference.create(DummyMDC.class, "remove", String.class);
         adapter = new AbstractStaticMapMDCAdapter(put, get, remove) {
+            @Override
+            public boolean isEnabledForConfig(TraceIdMDCInjectionSettings settings) {
+                return true;
+            }
         };
     }
 
@@ -65,7 +70,6 @@ public class AbstractStaticMapMDCAdapterTest {
 
             assertThat(DummyMDC.contents.containsKey("myKey")).isFalse();
         }
-
 
         @Test
         void ensureUndoPreservesPreviousValue() {
