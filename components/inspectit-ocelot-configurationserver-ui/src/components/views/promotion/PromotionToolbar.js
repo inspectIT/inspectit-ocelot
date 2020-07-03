@@ -45,7 +45,7 @@ const PromotionToolbar = ({ onRefresh, onPromote, loading, enabled }) => {
         <div className="p-toolbar-group-right buttons">
           <Button
             disabled={loading}
-            tooltip="Reload Configurations"
+            tooltip="Reload Available Changes"
             tooltipOptions={tooltipOptions}
             icon={'pi pi-refresh' + (loading ? ' pi-spin' : '')}
             onClick={onRefresh}

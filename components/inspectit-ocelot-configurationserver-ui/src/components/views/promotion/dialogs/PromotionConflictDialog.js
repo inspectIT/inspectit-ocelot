@@ -29,7 +29,7 @@ const PromotionConflictDialog = ({ visible, onHide, onRefresh }) => {
       footer={footer}
     >
       <p>One or more configurations have been promoted in the meantime.</p>
-      <p>Your current state is out of sync, thus, cannot be promoted in order to negative side effects.</p>
+      <p>Your current state is out of sync, thus, cannot be promoted in order to prevent negative side effects.</p>
       <p>Please refresh your promotion files and try again.</p>
     </Dialog>
   );
