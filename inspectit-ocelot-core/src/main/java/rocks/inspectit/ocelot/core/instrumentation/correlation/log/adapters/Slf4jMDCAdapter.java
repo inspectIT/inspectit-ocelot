@@ -40,6 +40,6 @@ public class Slf4jMDCAdapter extends AbstractStaticMapMDCAdapter {
 
     @Override
     public boolean isEnabledForConfig(TraceIdMDCInjectionSettings settings) {
-        return settings.isSlf4jEnabled() && settings.isEnabled();
+        return settings.isSlf4jEnabled();
     }
 }

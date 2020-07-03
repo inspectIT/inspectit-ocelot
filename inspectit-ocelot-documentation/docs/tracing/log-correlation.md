@@ -56,6 +56,7 @@ inspectit:
         slf4j-enabled: true  # Set to "false" to disable slf4J-Support
         log4j1-enabled: true # Set to "false" to disable Log4J Version 1 Support
         log4j2-enabled: true # Set to "false" to disable Log4J Version 2 Support
+        jboss-logmanager-enabled: true # Set to "false" to disable JBoss Logmanager support
 ```
     
         

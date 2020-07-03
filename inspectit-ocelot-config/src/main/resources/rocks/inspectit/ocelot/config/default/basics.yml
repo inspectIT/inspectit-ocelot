@@ -44,6 +44,8 @@ inspectit:
         log4j1-enabled: true
         # Opt-out option for Log4J2
         log4j2-enabled: true
+        # Opt-out option for JBoss Logmanager
+        jboss-logmanager-enabled: true
       trace-id-auto-injection:
         # whether the trace id should automatically injected into log statements
         enabled: false

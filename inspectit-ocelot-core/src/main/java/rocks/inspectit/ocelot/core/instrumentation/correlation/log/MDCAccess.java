@@ -10,10 +10,7 @@ import rocks.inspectit.ocelot.config.model.tracing.TraceIdMDCInjectionSettings;
 import rocks.inspectit.ocelot.core.AgentImpl;
 import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
-import rocks.inspectit.ocelot.core.instrumentation.correlation.log.adapters.Log4J1MDCAdapter;
-import rocks.inspectit.ocelot.core.instrumentation.correlation.log.adapters.Log4J2MDCAdapter;
-import rocks.inspectit.ocelot.core.instrumentation.correlation.log.adapters.MDCAdapter;
-import rocks.inspectit.ocelot.core.instrumentation.correlation.log.adapters.Slf4jMDCAdapter;
+import rocks.inspectit.ocelot.core.instrumentation.correlation.log.adapters.*;
 import rocks.inspectit.ocelot.core.instrumentation.event.IClassDiscoveryListener;
 
 import javax.annotation.PostConstruct;
@@ -73,6 +70,7 @@ public class MDCAccess implements IClassDiscoveryListener {
         mdcAdapterBuilders.put(Slf4jMDCAdapter.MDC_CLASS, Slf4jMDCAdapter::get);
         mdcAdapterBuilders.put(Log4J2MDCAdapter.THREAD_CONTEXT_CLASS, Log4J2MDCAdapter::get);
         mdcAdapterBuilders.put(Log4J1MDCAdapter.MDC_CLASS, Log4J1MDCAdapter::get);
+        mdcAdapterBuilders.put(JBossLogmanagerMDCAdapter.MDC_CLASS, JBossLogmanagerMDCAdapter::get);
     }
 
     /**
