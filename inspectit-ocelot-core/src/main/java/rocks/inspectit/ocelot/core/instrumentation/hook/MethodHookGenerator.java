@@ -215,9 +215,9 @@ public class MethodHookGenerator {
             return Optional.empty();
         }
 
-        List<EventAccessor> eventAccessors = new LinkedList<>();
+        List<EventAccessor> eventAccessors = new ArrayList<>();
         for(EventRecordingSettings event : events) {
-            List<String> dataKeys = new LinkedList<>();
+            List<String> dataKeys = new ArrayList<>();
             dataKeys.add(event.getName());
             for (Object attribute : event.getAttributes().values()) {
                 getEventDataKey(attribute, dataKeys);
