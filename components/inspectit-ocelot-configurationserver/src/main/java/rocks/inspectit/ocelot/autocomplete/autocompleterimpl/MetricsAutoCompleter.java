@@ -11,8 +11,9 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Autocompleter which retrieves declared metric names. This autocompleter is triggered by the path
- * "inspectit.instrumentation.rules.*.metrics and "inspectit.instrumentation.rules.*.metrics.*.metric".
+ * Autocompleter which retrieves declared metric names. This autocompleter is triggered by the paths
+ * "inspectit.instrumentation.rules.*.metrics", "inspectit.instrumentation.rules.*.metrics.*.metric" and
+ * "inspectit.metrics.definitions".
  */
 @Component
 public class MetricsAutoCompleter implements AutoCompleter {
