@@ -21,6 +21,11 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import org.springframework.context.ApplicationEventPublisher;
+import rocks.inspectit.ocelot.file.FileChangedEvent;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 public class ConfigurationControllerTest {
@@ -30,6 +35,9 @@ public class ConfigurationControllerTest {
 
     @Mock
     AgentConfigurationManager agentConfigurationManager;
+
+    @Mock
+    ApplicationEventPublisher applicationEventPublisher;
 
     @Nested
     public class FetchConfiguration {
@@ -52,6 +60,17 @@ public class ConfigurationControllerTest {
             ResponseEntity<String> output = configurationController.fetchConfiguration(null);
 
             assertThat(output.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @Nested
+    public class ReloadConfiguration {
+
+        @Test
+        public void firesFileChangedEvent() {
+            configurationController.reloadConfiguration();
+
+            verify(applicationEventPublisher).publishEvent(any(FileChangedEvent.class));
         }
     }
 }

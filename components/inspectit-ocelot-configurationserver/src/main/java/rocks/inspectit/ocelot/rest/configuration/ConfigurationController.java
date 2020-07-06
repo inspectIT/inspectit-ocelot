@@ -3,6 +3,7 @@ package rocks.inspectit.ocelot.rest.configuration;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import rocks.inspectit.ocelot.file.FileChangedEvent;
@@ -14,9 +15,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import rocks.inspectit.ocelot.agentconfiguration.AgentConfiguration;
 import rocks.inspectit.ocelot.agentconfiguration.AgentConfigurationManager;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.security.config.UserRoleConfiguration;
 
 import java.util.Map;
 
+/**
+ * Controller for endpoints related to configuration files.
+ */
 @RestController
 public class ConfigurationController extends AbstractBaseController {
 
@@ -40,6 +45,7 @@ public class ConfigurationController extends AbstractBaseController {
     /**
      * Reloads all configuration files present in the servers working directory.
      */
+    @Secured(UserRoleConfiguration.WRITE_ACCESS_ROLE)
     @ApiOperation(value = "Reloads all configuration files.", notes = "Reloads all configuration files present in the " +
             "servers working directory.")
     @GetMapping(value = "configuration/reload", produces = "text/plain")
