@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Singular;
 import lombok.Value;
+import rocks.inspectit.ocelot.file.versioning.Branch;
 import rocks.inspectit.ocelot.security.audit.AuditDetail;
 import rocks.inspectit.ocelot.security.audit.Auditable;
 
@@ -13,6 +14,7 @@ import javax.validation.constraints.NotBlank;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 /**
@@ -27,6 +29,8 @@ public class AgentMapping implements Auditable {
      */
     private String name;
 
+    private Branch branch;
+
     /**
      * The sources which are applied to the matching agents.
      */
@@ -40,17 +44,22 @@ public class AgentMapping implements Auditable {
     private Map<@NotBlank String, @NotBlank String> attributes;
 
     @JsonCreator
-    public AgentMapping(@JsonProperty("name") String name, @JsonProperty("sources") List<@NotBlank String> sources, @JsonProperty("attributes") Map<@NotBlank String, @NotBlank String> attributes) {
+    public AgentMapping(
+            @JsonProperty("name") String name,
+            @JsonProperty("branch") Branch branch,
+            @JsonProperty("sources") List<@NotBlank String> sources,
+            @JsonProperty("attributes") Map<@NotBlank String, @NotBlank String> attributes) {
         this.name = name;
         this.sources = Collections.unmodifiableList(sources);
         this.attributes = Collections.unmodifiableMap(attributes);
+        this.branch = Optional.ofNullable(branch).orElse(Branch.WORKSPACE);
     }
-
 
     /**
      * Checks if an Agent with a given map of attributes and their values fulfills the requirements of this mapping.
      *
      * @param agentAttributes the attributes to check
+     *
      * @return true, if this mapping matches
      */
     public boolean matchesAttributes(Map<String, String> agentAttributes) {

@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -48,7 +47,7 @@ class AutoCommitWorkingDirectoryProxyIntTest extends FileTestBase {
         Lock readLock = mock(Lock.class);
         Lock writeLock = mock(Lock.class);
 
-        WorkingDirectoryAccessor workingDirectoryAccessor = new WorkingDirectoryAccessor(readLock, writeLock, tempDirectory, eventPublisher);
+        WorkingDirectoryAccessor workingDirectoryAccessor = new WorkingDirectoryAccessor(readLock, writeLock, tempDirectory);
 
         Authentication authentication = mock(Authentication.class);
         when(authentication.getName()).thenReturn("user");

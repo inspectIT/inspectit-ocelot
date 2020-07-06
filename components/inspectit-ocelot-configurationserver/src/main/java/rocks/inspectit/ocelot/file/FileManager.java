@@ -8,7 +8,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
-import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
+import rocks.inspectit.ocelot.file.accessor.git.CachingRevisionAccess;
+import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
 import rocks.inspectit.ocelot.file.accessor.workingdirectory.AbstractWorkingDirectoryAccessor;
 import rocks.inspectit.ocelot.file.accessor.workingdirectory.AutoCommitWorkingDirectoryProxy;
 import rocks.inspectit.ocelot.file.accessor.workingdirectory.WorkingDirectoryAccessor;
@@ -19,6 +20,7 @@ import rocks.inspectit.ocelot.file.versioning.model.WorkspaceDiff;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.concurrent.Executor;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Supplier;
@@ -42,17 +44,26 @@ public class FileManager {
      */
     private VersioningManager versioningManager;
 
+    private CachingRevisionAccess cachedLiveRevision;
+
+    private CachingRevisionAccess cachedWorkspaceRevision;
+
     @Autowired
-    public FileManager(InspectitServerSettings settings, ApplicationEventPublisher eventPublisher) throws GitAPIException {
+    public FileManager(InspectitServerSettings settings, ApplicationEventPublisher eventPublisher, Executor executor) throws GitAPIException {
         Path workingDirectory = Paths.get(settings.getWorkingDirectory()).toAbsolutePath().normalize();
 
-        WorkingDirectoryAccessor workingDirectoryAccessorImpl = new WorkingDirectoryAccessor(workingDirectoryLock.readLock(), workingDirectoryLock.writeLock(), workingDirectory, eventPublisher);
+        // We use an asynchronous event publishing mechanism to make sure that Event-Listeners do not accidently get hold of locks
+        // which are owned by the thread which fires the event.
+        ApplicationEventPublisher asyncPublisher = (event) -> executor.execute(() -> eventPublisher.publishEvent(event));
+
+        WorkingDirectoryAccessor workingDirectoryAccessorImpl = new WorkingDirectoryAccessor(workingDirectoryLock.readLock(), workingDirectoryLock
+                .writeLock(), workingDirectory);
 
         Supplier<Authentication> authenticationSupplier = () -> SecurityContextHolder.getContext().getAuthentication();
-        versioningManager = new VersioningManager(workingDirectory, authenticationSupplier, eventPublisher);
+        versioningManager = new VersioningManager(workingDirectory, authenticationSupplier, asyncPublisher);
         versioningManager.initialize();
 
-        this.workingDirectoryAccessor = new AutoCommitWorkingDirectoryProxy(workingDirectoryLock.writeLock(), workingDirectoryAccessorImpl, versioningManager);
+        workingDirectoryAccessor = new AutoCommitWorkingDirectoryProxy(workingDirectoryLock.writeLock(), workingDirectoryAccessorImpl, versioningManager);
     }
 
     /**
@@ -69,14 +80,36 @@ public class FileManager {
      *
      * @return accessor to access the current live branch
      */
-    public AbstractFileAccessor getLiveRevision() {
-        return versioningManager.getLiveRevision();
+    public RevisionAccess getLiveRevision() {
+        CachingRevisionAccess currentRev = versioningManager.getLiveRevision();
+        if (cachedLiveRevision == null || !currentRev.getRevisionID().equals(cachedLiveRevision.getRevisionID())) {
+            cachedLiveRevision = currentRev;
+        }
+        return cachedLiveRevision;
+    }
+
+    /**
+     * Returns a versioned view on the current state of the working directory.
+     * When no writes happen, the file contents will be the same as for {@link #getWorkingDirectory()}.
+     * However, the instance returned by this method is immutable.
+     * The returned revision will not be affected by subsequent writes to the working directory.
+     *
+     * @return accessor to access the current live branch
+     */
+    public RevisionAccess getWorkspaceRevision() {
+        CachingRevisionAccess currentRev = versioningManager.getWorkspaceRevision();
+        if (cachedWorkspaceRevision == null
+                || !currentRev.getRevisionID().equals(cachedWorkspaceRevision.getRevisionID())) {
+            cachedWorkspaceRevision = currentRev;
+        }
+        return cachedWorkspaceRevision;
     }
 
     /**
      * Returns the diff between the current live branch and the current workspace branch.
      *
      * @param includeContent whether the file difference (old and new content) is included
+     *
      * @return the diff between the live and workspace branch
      */
     public WorkspaceDiff getWorkspaceDiff(boolean includeContent) throws IOException, GitAPIException {

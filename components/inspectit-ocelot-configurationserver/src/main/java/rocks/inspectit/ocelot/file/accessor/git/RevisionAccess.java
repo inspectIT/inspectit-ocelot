@@ -47,6 +47,13 @@ public class RevisionAccess extends AbstractFileAccessor {
         this.revCommit = revCommit;
     }
 
+    /**
+     * @return a unique ID for this revision
+     */
+    public String getRevisionID() {
+        return ObjectId.toString(revCommit.getId());
+    }
+
     @Override
     protected String verifyPath(String relativeBasePath, String relativePath) throws IllegalArgumentException {
         if (relativePath.startsWith("/")) {
@@ -147,7 +154,9 @@ public class RevisionAccess extends AbstractFileAccessor {
      * Collects the files within the current path of the given {@link TreeWalk}.
      *
      * @param treeWalk The {@link TreeWalk} to traverse.
+     *
      * @return The files within the current tree.
+     *
      * @throws IOException in case the repository cannot be read
      */
     private List<FileInfo> collectFiles(TreeWalk treeWalk) throws IOException {

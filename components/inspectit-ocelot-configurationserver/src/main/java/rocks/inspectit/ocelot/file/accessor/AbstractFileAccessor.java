@@ -56,7 +56,9 @@ public abstract class AbstractFileAccessor {
      *
      * @param relativeBasePath the base path where the path must be in
      * @param path             the relative user path
+     *
      * @return a sanitized representation of the given user path
+     *
      * @throws IllegalArgumentException is thrown if the path is not valid.
      */
     protected abstract String verifyPath(String relativeBasePath, String path) throws IllegalArgumentException;
@@ -65,6 +67,7 @@ public abstract class AbstractFileAccessor {
      * Reads and returns the file's content which is located under the given path.
      *
      * @param path the file to read
+     *
      * @return the content of the file
      */
     protected abstract byte[] readFile(String path) throws IOException;
@@ -73,6 +76,7 @@ public abstract class AbstractFileAccessor {
      * Returns a list of all files and directories located under the specified path.
      *
      * @param path the root path to start listing
+     *
      * @return a list of files and directories
      */
     protected abstract List<FileInfo> listFiles(String path);
@@ -92,6 +96,7 @@ public abstract class AbstractFileAccessor {
      * the resulting {@link Optional} will be empty.
      *
      * @param file the configuration file to read
+     *
      * @return the content of the specified file
      */
     public Optional<String> readConfigurationFile(String file) {
@@ -113,6 +118,7 @@ public abstract class AbstractFileAccessor {
      * (also in sub directories). The listing will be resolved recursively.
      *
      * @param path a list of the files in the specified directory
+     *
      * @return a list of existing files and directories
      */
     public List<FileInfo> listConfigurationFiles(String path) {
@@ -136,6 +142,10 @@ public abstract class AbstractFileAccessor {
             log.error("File '{}' could not been loaded.", ex);
             return Optional.empty();
         }
+    }
+
+    public boolean agentMappingsExist() {
+        return exists(AGENT_MAPPINGS_FILE_NAME);
     }
 
     /**

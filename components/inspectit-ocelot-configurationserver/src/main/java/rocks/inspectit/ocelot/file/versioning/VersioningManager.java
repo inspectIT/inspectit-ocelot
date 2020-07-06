@@ -20,7 +20,9 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.CollectionUtils;
 import rocks.inspectit.ocelot.events.ConfigurationPromotionEvent;
+import rocks.inspectit.ocelot.events.WorkspaceChangedEvent;
 import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
+import rocks.inspectit.ocelot.file.accessor.git.CachingRevisionAccess;
 import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
 import rocks.inspectit.ocelot.file.versioning.model.ConfigurationPromotion;
 import rocks.inspectit.ocelot.file.versioning.model.SimpleDiffEntry;
@@ -46,7 +48,8 @@ public class VersioningManager {
     /**
      * Git user used for system commits.
      */
-    private static final PersonIdent GIT_SYSTEM_AUTHOR = new PersonIdent("System", "info@inspectit.rocks");
+    @VisibleForTesting
+    static final PersonIdent GIT_SYSTEM_AUTHOR = new PersonIdent("System", "info@inspectit.rocks");
 
     /**
      * Path of the current working directory.
@@ -162,6 +165,7 @@ public class VersioningManager {
      * The commit will be against the workspace branch!
      *
      * @param message the commit message to use
+     *
      * @throws IllegalStateException in case the workspace branch is not the currently checked out branch
      */
     public void commitAllChanges(String message) throws GitAPIException {
@@ -173,7 +177,9 @@ public class VersioningManager {
 
         stageFiles();
 
-        commitFiles(author, message, true);
+        if (commitFiles(author, message, true)) {
+            eventPublisher.publishEvent(new WorkspaceChangedEvent(this));
+        }
     }
 
     /**
@@ -183,11 +189,13 @@ public class VersioningManager {
      * @param author     the author to use
      * @param message    the commit message to use
      * @param allowAmend whether commits should be amended if possible (same user and below timeout)
+     *
+     * @return true, if a commit was created. False, if there was no change to commit.
      */
-    private void commitFiles(PersonIdent author, String message, boolean allowAmend) throws GitAPIException {
+    private boolean commitFiles(PersonIdent author, String message, boolean allowAmend) throws GitAPIException {
         if (isClean()) {
             log.debug("Repository is in clean state, thus, committing will be skipped.");
-            return;
+            return false;
         } else {
             log.debug("Committing staged changes.");
         }
@@ -212,6 +220,7 @@ public class VersioningManager {
         }
 
         commitCommand.call();
+        return true;
     }
 
     /**
@@ -265,11 +274,15 @@ public class VersioningManager {
     /**
      * @return Returns the Git author of the currently logged in user.
      */
-    private PersonIdent getCurrentAuthor() {
+    @VisibleForTesting
+    PersonIdent getCurrentAuthor() {
         Authentication authentication = authenticationSupplier.get();
-        String username = authentication.getName();
-
-        return new PersonIdent(username, "info@inspectit.rocks");
+        if (authentication != null) {
+            String username = authentication.getName();
+            return new PersonIdent(username, "info@inspectit.rocks");
+        } else {
+            return GIT_SYSTEM_AUTHOR;
+        }
     }
 
     /**
@@ -292,6 +305,7 @@ public class VersioningManager {
      * of error, <code>null</code> will be returned.
      *
      * @param commitId the id of the desired commit
+     *
      * @return the commit object or null if the commit could not be loaded
      */
     private RevCommit getCommit(ObjectId commitId) {
@@ -310,28 +324,28 @@ public class VersioningManager {
     }
 
     /**
-     * @return A {@link RevisionAccess} instance to access the current live branch.
+     * @return A {@link CachingRevisionAccess} instance to access the current live branch.
      */
-    public RevisionAccess getLiveRevision() {
+    public CachingRevisionAccess getLiveRevision() {
         Optional<RevCommit> latestCommit = getLatestCommit(Branch.LIVE);
-        return latestCommit.map(revCommit -> new RevisionAccess(git.getRepository(), revCommit)).orElse(null);
+        return latestCommit.map(revCommit -> new CachingRevisionAccess(git.getRepository(), revCommit)).orElse(null);
     }
 
     /**
-     * @return @return A {@link RevisionAccess} instance to access the current workspace branch.
+     * @return @return A {@link CachingRevisionAccess} instance to access the current workspace branch.
      */
-    public RevisionAccess getWorkspaceRevision() {
+    public CachingRevisionAccess getWorkspaceRevision() {
         Optional<RevCommit> latestCommit = getLatestCommit(Branch.WORKSPACE);
-        return latestCommit.map(revCommit -> new RevisionAccess(git.getRepository(), revCommit)).orElse(null);
+        return latestCommit.map(revCommit -> new CachingRevisionAccess(git.getRepository(), revCommit)).orElse(null);
     }
 
     /**
-     * @return @return A {@link RevisionAccess} instance to access the commit with the specified Id.
+     * @return @return A {@link CachingRevisionAccess} instance to access the commit with the specified Id.
      */
-    public RevisionAccess getRevisionById(ObjectId commitId) {
+    public CachingRevisionAccess getRevisionById(ObjectId commitId) {
         RevCommit commit = getCommit(commitId);
         if (commit != null) {
-            return new RevisionAccess(git.getRepository(), commit);
+            return new CachingRevisionAccess(git.getRepository(), commit);
         }
         return null;
     }
@@ -348,6 +362,7 @@ public class VersioningManager {
      * Returns the diff between the current live branch and the current workspace branch.
      *
      * @param includeFileContent whether the file difference (old and new content) is included
+     *
      * @return the diff between the live and workspace branch
      */
     public WorkspaceDiff getWorkspaceDiff(boolean includeFileContent) throws IOException, GitAPIException {
@@ -367,6 +382,7 @@ public class VersioningManager {
      * @param includeFileContent whether the file difference (old and new content) is included
      * @param oldCommit          the commit id of the base (old) commit
      * @param newCommit          the commit id of the target (new) commit
+     *
      * @return the diff between the specified branches
      */
     @VisibleForTesting
@@ -383,7 +399,8 @@ public class VersioningManager {
                 .map(SimpleDiffEntry::of)
                 .filter(entry -> entry.getFile().startsWith(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER))
                 .peek(entry -> {
-                    String shortenFile = entry.getFile().substring(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER.length());
+                    String shortenFile = entry.getFile()
+                            .substring(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER.length());
                     entry.setFile(shortenFile);
                 })
                 .collect(Collectors.toList());
@@ -432,6 +449,7 @@ public class VersioningManager {
      * Creates an {@link AbstractTreeIterator} for the specified commit.
      *
      * @param commitId the commit which is used as basis for the tree iterator
+     *
      * @return the created {@link AbstractTreeIterator}
      */
     private AbstractTreeIterator prepareTreeParser(ObjectId commitId) throws IOException {
@@ -465,7 +483,9 @@ public class VersioningManager {
             ObjectId liveCommitId = ObjectId.fromString(promotion.getLiveCommitId());
             ObjectId workspaceCommitId = ObjectId.fromString(promotion.getWorkspaceCommitId());
 
-            ObjectId currentLiveBranchId = git.getRepository().exactRef("refs/heads/" + Branch.LIVE.getBranchName()).getObjectId();
+            ObjectId currentLiveBranchId = git.getRepository()
+                    .exactRef("refs/heads/" + Branch.LIVE.getBranchName())
+                    .getObjectId();
 
             if (!liveCommitId.equals(currentLiveBranchId)) {
                 throw new ConcurrentModificationException("Live branch has been modified. The provided promotion definition is out of sync.");
@@ -521,6 +541,7 @@ public class VersioningManager {
      * Example, the input `/my_file.yml` will result in `files/my_file.yml` if `files` is the files subfolder.
      *
      * @param file the relative file path
+     *
      * @return the file path including the files directory
      */
     private String prefixRelativeFile(String file) {
