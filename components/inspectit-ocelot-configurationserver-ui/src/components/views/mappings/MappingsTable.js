@@ -13,45 +13,55 @@ import ConfigurationDownload from './ConfigurationDownload';
 import { cloneDeep, find } from 'lodash';
 
 /** Component including the menu button for each mapping */
-const ButtonCell = ({ mapping, onEdit, onDelete, onDownload, onDuplicate, appendRef }) => {
+const ButtonCell = ({ readOnly, mapping, onEdit, onDelete, onDownload, onDuplicate, appendRef }) => {
   const thisCell = {};
-  const menuItems = [
-    {
+
+  const menuItems = [];
+
+  if (!readOnly) {
+    menuItems.push({
       label: 'Edit',
       icon: 'pi pi-fw pi-pencil',
       command: (e) => {
         thisCell.menu.toggle(e);
         onEdit(mapping);
       },
+    });
+  }
+
+  menuItems.push({
+    label: 'Download Configuration',
+    icon: 'pi pi-fw pi-download',
+    command: (e) => {
+      thisCell.menu.toggle(e);
+      onDownload(mapping.attributes);
     },
-    {
-      label: 'Download Configuration',
-      icon: 'pi pi-fw pi-download',
-      command: (e) => {
-        thisCell.menu.toggle(e);
-        onDownload(mapping.attributes);
-      },
-    },
-    {
+  });
+
+  if (!readOnly) {
+    menuItems.push({
       label: 'Duplicate',
       icon: 'pi pi-fw pi-clone',
       command: (e) => {
         thisCell.menu.toggle(e);
         onDuplicate(mapping);
       },
-    },
-    {
+    });
+
+    menuItems.push({
       separator: true,
-    },
-    {
+    });
+
+    menuItems.push({
       label: 'Delete',
       icon: 'pi pi-fw pi-trash',
       command: (e) => {
         thisCell.menu.toggle(e);
         onDelete(mapping.name);
       },
-    },
-  ];
+    });
+  }
+
   return (
     <div ref={(el) => (thisCell.div = el)} className="this">
       <style jsx>{`
@@ -125,7 +135,7 @@ class MappingsTable extends React.Component {
   state = {};
 
   render() {
-    const { filterValue, maxHeight, mappings, putMappings } = this.props;
+    const { readOnly, filterValue, maxHeight, mappings, putMappings } = this.props;
 
     const mappingValues = mappings.map((mapping) => {
       //build a dummy string to allow filtering
@@ -145,7 +155,7 @@ class MappingsTable extends React.Component {
       <div ref={(el) => (this.mappingsTable = el)}>
         <DataTable
           value={mappingValues}
-          reorderableRows={true}
+          reorderableRows={!readOnly}
           scrollable={true}
           scrollHeight={maxHeight ? maxHeight : '100%'}
           onRowReorder={(e) => {
@@ -153,7 +163,7 @@ class MappingsTable extends React.Component {
           }}
           globalFilter={filterValue}
         >
-          <Column rowReorder={!filterValue} style={{ width: '3em' }} />
+          {!readOnly && <Column rowReorder={!filterValue} style={{ width: '3em' }} />}
           <Column columnKey="name" field="name" header="Mapping Name" />
           <Column
             columnKey="sources"
@@ -171,6 +181,7 @@ class MappingsTable extends React.Component {
             columnKey="buttons"
             body={(data) => (
               <ButtonCell
+                readOnly={readOnly}
                 mapping={data}
                 onEdit={this.props.onEditMapping}
                 onDelete={this.showDeleteMappingDialog}

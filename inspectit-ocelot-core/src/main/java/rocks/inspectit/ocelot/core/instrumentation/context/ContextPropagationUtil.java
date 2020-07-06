@@ -6,6 +6,8 @@ import io.opencensus.trace.Tracing;
 import io.opencensus.trace.propagation.TextFormat;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
+import rocks.inspectit.ocelot.config.model.tracing.PropagationFormat;
+import rocks.inspectit.ocelot.core.instrumentation.context.propagation.DatadogFormat;
 
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -45,6 +47,11 @@ public class ContextPropagationUtil {
 
     private static final Set<String> PROPAGATION_FIELDS = new HashSet<>();
 
+    /**
+     * The currently used propagation format. Defaults to B3.
+     */
+    private static TextFormat propagationFormat = Tracing.getPropagationComponent().getB3Format();
+
     public static final TextFormat.Setter<Map<String, String>> MAP_INJECTOR = new TextFormat.Setter<Map<String, String>>() {
         @Override
         public void put(Map<String, String> carrier, String key, String value) {
@@ -61,6 +68,8 @@ public class ContextPropagationUtil {
     static {
         PROPAGATION_FIELDS.add(CORRELATION_CONTEXT_HEADER);
         PROPAGATION_FIELDS.addAll(Tracing.getPropagationComponent().getB3Format().fields());
+        PROPAGATION_FIELDS.addAll(Tracing.getPropagationComponent().getTraceContextFormat().fields());
+        PROPAGATION_FIELDS.addAll(DatadogFormat.INSTANCE.fields());
     }
 
     static {
@@ -106,8 +115,7 @@ public class ContextPropagationUtil {
             result.put(CORRELATION_CONTEXT_HEADER, contextCorrelationData);
         }
         if (spanToPropagate != null) {
-            TextFormat b3Format = Tracing.getPropagationComponent().getB3Format();
-            b3Format.inject(spanToPropagate, result, MAP_INJECTOR);
+            propagationFormat.inject(spanToPropagate, result, MAP_INJECTOR);
         }
         return result;
     }
@@ -165,6 +173,7 @@ public class ContextPropagationUtil {
      * @return if the data contained any trace correlation, the SpanContext is returned. Otherwise returns null
      */
     public static SpanContext readPropagatedSpanContextFromHeaderMap(Map<String, String> propagationMap) {
+
         boolean anyB3Header = Tracing.getPropagationComponent().getB3Format().fields().stream().anyMatch(propagationMap::containsKey);
         if (anyB3Header) {
             try {
@@ -174,6 +183,25 @@ public class ContextPropagationUtil {
                 log.error("Error reading trace correlation data from B3 headers: {}", headerString, t);
             }
         }
+
+        boolean anyTraceContextHeader = Tracing.getPropagationComponent().getTraceContextFormat().fields().stream().anyMatch(propagationMap::containsKey);
+        if (anyTraceContextHeader) {
+            try {
+                return Tracing.getPropagationComponent().getTraceContextFormat().extract(propagationMap, MAP_EXTRACTOR);
+            } catch (Throwable t) {
+                log.error("Error reading trace correlation data from the trace context headers.", t);
+            }
+        }
+
+        boolean anyDatadogHeader = DatadogFormat.INSTANCE.fields().stream().anyMatch(propagationMap::containsKey);
+        if (anyDatadogHeader) {
+            try {
+                return DatadogFormat.INSTANCE.extract(propagationMap, MAP_EXTRACTOR);
+            } catch (Throwable t) {
+                log.error("Error reading trace correlation data from the Datadog headers.", t);
+            }
+        }
+
         return null;
     }
 
@@ -254,5 +282,28 @@ public class ContextPropagationUtil {
         return stringValue;
     }
 
-
+    /**
+     * Sets the currently used propagation format to the specified one.
+     *
+     * @param format the format to use
+     */
+    public static void setPropagationFormat(PropagationFormat format) {
+        switch (format) {
+            case B3:
+                log.info("Using B3 format for context propagation.");
+                propagationFormat = Tracing.getPropagationComponent().getB3Format();
+                break;
+            case TRACE_CONTEXT:
+                log.info("Using TraceContext format for context propagation.");
+                propagationFormat = Tracing.getPropagationComponent().getTraceContextFormat();
+                break;
+            case DATADOG:
+                log.info("Using Datadog format for context propagation.");
+                propagationFormat = DatadogFormat.INSTANCE;
+                break;
+            default:
+                log.warn("The specified propagation format {} is not supported. Falling back to B3 format.", format);
+                propagationFormat = Tracing.getPropagationComponent().getB3Format();
+        }
+    }
 }

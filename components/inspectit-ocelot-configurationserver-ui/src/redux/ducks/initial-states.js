@@ -1,6 +1,12 @@
 const authentication = {
   /** The access token which is used for bearer authentication. */
   token: null,
+  /** The authorization permissions the user has*/
+  permissions: {
+    write: false,
+    commit: false,
+    admin: false,
+  },
   /** Specifying whether a login request is currently be executed */
   loading: false,
   /** This contains the error message if the last request has failed. */
@@ -80,4 +86,13 @@ const settings = {
   pendingRequests: 0,
 };
 
-export { authentication, configuration, notification, mappings, agentStatus, settings };
+const promotion = {
+  /** The names of the files which are currently be approved */
+  approvals: [],
+  /** The commit id of the working directory related to the currently changed files */
+  workspaceCommitId: null,
+  /** The commit id of the live directory related to the currently changed files */
+  liveCommitId: null,
+};
+
+export { authentication, configuration, notification, mappings, agentStatus, settings, promotion };

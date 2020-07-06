@@ -15,7 +15,6 @@ inspectit:
           's_httpurlconnection_getInputStream': true
         post-entry:
           do_down_propagation:
-            only-if-true: 'http_is_entry'
             action: 'a_httpurlconnection_downPropagation'
 
       # Reads up-propagated data from the response HTTP Headers
@@ -26,5 +25,4 @@ inspectit:
           's_httpurlconnection_getInputStream': true
         pre-exit:
           'do_up_propagation':
-            only-if-true: 'http_is_entry'
             action: 'a_httpurlconnection_upPropagation'

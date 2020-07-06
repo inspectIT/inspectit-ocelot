@@ -51,4 +51,9 @@ public class TracingSettings {
     @NotNull
     private AddCommonTags addCommonTags;
 
+    /**
+     * The propagation format to use.
+     */
+    @NotNull
+    private PropagationFormat propagationFormat = PropagationFormat.B3;
 }

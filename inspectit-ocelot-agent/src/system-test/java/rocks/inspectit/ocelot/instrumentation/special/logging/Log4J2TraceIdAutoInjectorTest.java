@@ -4,15 +4,25 @@ import io.opencensus.common.Scope;
 import io.opencensus.trace.Tracing;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.message.AbstractMessageFactory;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import rocks.inspectit.ocelot.instrumentation.InstrumentationSysTestBase;
 import rocks.inspectit.ocelot.logging.Log4J2LoggingRecorder;
+import rocks.inspectit.ocelot.utils.TestUtils;
+
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class Log4J2TraceIdAutoInjectorTest extends InstrumentationSysTestBase {
 
     private static final Logger LOGGER = LogManager.getLogger(Log4J2TraceIdAutoInjectorTest.class);
+
+    @BeforeAll
+    public static void waitForInstrumentation() {
+        TestUtils.waitForClassInstrumentation(AbstractMessageFactory.class, 15, TimeUnit.SECONDS);
+    }
 
     @Test
     public void logStringAndTraceExists() {

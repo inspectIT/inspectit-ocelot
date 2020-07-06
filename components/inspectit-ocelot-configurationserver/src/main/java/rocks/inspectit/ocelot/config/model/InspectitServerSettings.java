@@ -55,6 +55,9 @@ public class InspectitServerSettings {
      */
     private Duration agentEvictionDelay;
 
+    /**
+     * The security settings of the configuration server.
+     */
     @Valid
     @Builder.Default
     private SecuritySettings security = SecuritySettings.builder().build();
