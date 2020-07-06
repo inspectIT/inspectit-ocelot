@@ -144,7 +144,7 @@ public class PropertyPathHelperTest {
         }
 
         @Test
-        public void any() {
+        public void nonTerminalType() {
             boolean result = PropertyPathHelper.isTerminal(getClass());
 
             assertThat(result).isFalse();
