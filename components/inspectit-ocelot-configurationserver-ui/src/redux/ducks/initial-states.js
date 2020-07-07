@@ -67,6 +67,11 @@ const mappings = {
   updateDate: null,
 };
 
+const alerting = {
+  /** A mapping of rule names and corresponding unsaved contents.*/
+  unsavedRuleContents: {},
+};
+
 const agentStatus = {
   /**
    * The list of connected agents, each agent is an object with the following structure:
@@ -86,6 +91,7 @@ const settings = {
   pendingRequests: 0,
 };
 
+
 const promotion = {
   /** The names of the files which are currently be approved */
   approvals: [],
@@ -95,4 +101,4 @@ const promotion = {
   liveCommitId: null,
 };
 
-export { authentication, configuration, notification, mappings, agentStatus, settings, promotion };
+export { authentication, configuration, notification, mappings, agentStatus, settings, promotion, alerting };
