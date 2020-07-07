@@ -1,11 +1,20 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Toolbar } from 'primereact/toolbar';
 import { Button } from 'primereact/button';
 
 /**
  * The toolbar used in the alerting view's rules list.
  */
-const AlertingRulesToolbar = ({ loading, selectedRuleName, selectedTemplateName, readOnly, onShowCreateRuleDialog, onShowRenameDialog, onShowDeleteRuleDialog, onRefresh }) => {
+const AlertingRulesToolbar = ({
+  loading,
+  selectedRuleName,
+  selectedTemplateName,
+  readOnly,
+  onShowCreateRuleDialog,
+  onShowDeleteRuleDialog,
+  onRefresh,
+}) => {
   const tooltipOptions = {
     showDelay: 500,
     position: 'top',
@@ -53,6 +62,31 @@ const AlertingRulesToolbar = ({ loading, selectedRuleName, selectedTemplateName,
       </Toolbar>
     </div>
   );
+};
+
+AlertingRulesToolbar.propTypes = {
+  /**  Name of the selected rule */
+  selectedRuleName: PropTypes.string.isRequired,
+  /**  Name of the selected template (template in the current context) */
+  selectedTemplateName: PropTypes.string.isRequired,
+  /** If the toolbar is in loading mode */
+  loading: PropTypes.bool,
+  /**  Whether the contents are read only */
+  readOnly: PropTypes.bool,
+  /**  Callback on triggering create rule dialog */
+  onShowCreateRuleDialog: PropTypes.func,
+  /**  Callback on triggering delete rule dialog */
+  onShowDeleteRuleDialog: PropTypes.func,
+  /**  Callback on triggering refresh */
+  onRefresh: PropTypes.func,
+};
+
+AlertingRulesToolbar.defaultProps = {
+  loading: false,
+  readOnly: false,
+  onShowCreateRuleDialog: () => {},
+  onShowDeleteRuleDialog: () => {},
+  onRefresh: () => {},
 };
 
 export default AlertingRulesToolbar;

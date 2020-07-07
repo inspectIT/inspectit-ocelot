@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import { Inplace, InplaceDisplay, InplaceContent } from 'primereact/inplace';
 import classNames from 'classnames';
 import NumberEditor from '../../../../common/value-editors/NumberEditor';
@@ -21,11 +22,12 @@ const VariableView = ({ name, value, type, description, options, readOnly, onVar
       }
       onVarUpdate(name, !newValue ? null : newValue);
     }
-  }
+  };
 
   return (
     <>
-      <style jsx>{`
+      <style jsx>
+        {`
           .this {
             margin: 1rem;
             border-bottom: 1px solid #c8c8c8;
@@ -46,7 +48,7 @@ const VariableView = ({ name, value, type, description, options, readOnly, onVar
           }
           .this :global(.varDescription) {
             color: #888;
-            margin: 0.5rem 0 0.5rem; 
+            margin: 0.5rem 0 0.5rem;
           }
           .this :global(.defaultValue) {
             color: #aaa;
@@ -74,18 +76,9 @@ const VariableView = ({ name, value, type, description, options, readOnly, onVar
           <div className="varDescription">{description}</div>
         </div>
 
-        <div className="p-col-1 error-col">
-          {hasError && <i className="pi pi-exclamation-triangle" />}
-        </div>
+        <div className="p-col-1 error-col">{hasError && <i className="pi pi-exclamation-triangle" />}</div>
         <div className="p-col-5">
-          <ValueView
-            value={value}
-            type={type}
-            options={options}
-            readOnly={readOnly}
-            isDefault={isDefault}
-            onDataChanged={onDataChanged}
-          />
+          <ValueView value={value} type={type} options={options} readOnly={readOnly} isDefault={isDefault} onDataChanged={onDataChanged} />
         </div>
       </div>
     </>
@@ -98,38 +91,34 @@ const VariableView = ({ name, value, type, description, options, readOnly, onVar
 const ValueView = ({ value, type, options, readOnly, isDefault, onDataChanged }) => {
   const [inplaceActive, setInplaceState] = useState(false);
 
-  const valueEditor = type === 'bool' || !readOnly ? <ValueEditor
-    type={type}
-    value={value}
-    readOnly={readOnly}
-    options={options}
-    onDataChanged={(value) => {
-      setInplaceState(false);
-      onDataChanged(value);
-    }}
-  /> : undefined;
+  const valueEditor =
+    type === 'bool' || !readOnly ? (
+      <ValueEditor
+        type={type}
+        value={value}
+        readOnly={readOnly}
+        options={options}
+        onDataChanged={(value) => {
+          setInplaceState(false);
+          onDataChanged(value);
+        }}
+      />
+    ) : undefined;
 
   if (type === 'bool') {
     return valueEditor;
   } else if (readOnly) {
-    return <SimpleDataView
-      value={value}
-      isDefault={isDefault} />;
+    return <SimpleDataView value={value} isDefault={isDefault} />;
   } else {
-    return <Inplace
-      active={inplaceActive}
-      onToggle={() => setInplaceState(true)}
-    >
-      <InplaceDisplay>
-        <i className="pi pi-pencil" />
-        <SimpleDataView
-          value={value}
-          isDefault={isDefault} />
-      </InplaceDisplay>
-      <InplaceContent>
-        {valueEditor}
-      </InplaceContent>
-    </Inplace>
+    return (
+      <Inplace active={inplaceActive} onToggle={() => setInplaceState(true)}>
+        <InplaceDisplay>
+          <i className="pi pi-pencil" />
+          <SimpleDataView value={value} isDefault={isDefault} />
+        </InplaceDisplay>
+        <InplaceContent>{valueEditor}</InplaceContent>
+      </Inplace>
+    );
   }
 };
 
@@ -138,42 +127,15 @@ const ValueView = ({ value, type, options, readOnly, isDefault, onDataChanged })
  */
 const ValueEditor = ({ type, value, options, readOnly, onDataChanged }) => {
   if (type === 'bool') {
-    return (<BoolEditor
-      type={type}
-      value={value}
-      disabled={readOnly}
-      updateValue={onDataChanged}
-    />);
+    return <BoolEditor type={type} value={value} disabled={readOnly} updateValue={onDataChanged} />;
   } else if (type === 'int' || type === 'float') {
-    return (<NumberEditor
-      type={type}
-      value={value}
-      disabled={readOnly}
-      updateValue={onDataChanged}
-    />);
+    return <NumberEditor type={type} value={value} disabled={readOnly} updateValue={onDataChanged} />;
   } else if (type === 'string' || type === 'regex') {
-    return (<TextEditor
-      type={type}
-      value={value}
-      disabled={readOnly}
-      updateValue={onDataChanged}
-    />);
+    return <TextEditor type={type} value={value} disabled={readOnly} updateValue={onDataChanged} />;
   } else if (type === 'duration') {
-    return (<TextEditor
-      type={type}
-      value={value}
-      keyfilter={/^[\dsmhdw]+$/}
-      disabled={readOnly}
-      updateValue={onDataChanged}
-    />);
+    return <TextEditor type={type} value={value} keyfilter={/^[\dsmhdw]+$/} disabled={readOnly} updateValue={onDataChanged} />;
   } else if (type === 'selection') {
-    return (<SelectionEditor
-      options={options}
-      value={value}
-      editable={true}
-      disabled={readOnly}
-      updateValue={onDataChanged}
-    />);
+    return <SelectionEditor options={options} value={value} editable={true} disabled={readOnly} updateValue={onDataChanged} />;
   }
 };
 
@@ -181,8 +143,12 @@ const ValueEditor = ({ type, value, options, readOnly, onDataChanged }) => {
  * Simple value display component.
  */
 const SimpleDataView = ({ value, isDefault }) => {
-  const className = classNames({ 'defaultValue': isDefault });
-  return <span className={className} style={{ width: '100%' }}>{'' + value}</span>;
+  const className = classNames({ defaultValue: isDefault });
+  return (
+    <span className={className} style={{ width: '100%' }}>
+      {'' + value}
+    </span>
+  );
 };
 
 /**
@@ -195,7 +161,7 @@ const validate = (type, value) => {
     error = !validators[type](strValue);
   }
   return error;
-}
+};
 
 /**
  * Variable type dependent value validators.
@@ -212,7 +178,40 @@ const validators = {
       return false;
     }
     return true;
-  }
+  },
+};
+
+VariableView.propTypes = {
+  /**  Name of the variable */
+  name: PropTypes.string.isRequired,
+  /**  Value of the variable */
+  value: PropTypes.string.isRequired,
+  /**  Type of the variable */
+  type: PropTypes.string.isRequired,
+  /**  Description of the variable */
+  description: PropTypes.string,
+  /**  Options in case it's a selection variable */
+  options: PropTypes.array,
+  /**  Whether content is read only */
+  readOnly: PropTypes.bool,
+  /**  Whether content has errors */
+  hasError: PropTypes.bool,
+  /**  Whether value is a default value*/
+  isDefault: PropTypes.bool,
+  /**  Callback on variable update */
+  onVarUpdate: PropTypes.func,
+  /**  Callback on content error status changed */
+  onErrorStatusUpdate: PropTypes.func,
+};
+
+VariableView.defaultProps = {
+  description: '',
+  options: [],
+  readOnly: false,
+  hasError: false,
+  isDefault: false,
+  onVarUpdate: () => {},
+  onErrorStatusUpdate: () => {},
 };
 
 export default VariableView;

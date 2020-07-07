@@ -91,7 +91,6 @@ const settings = {
   pendingRequests: 0,
 };
 
-
 const promotion = {
   /** The names of the files which are currently be approved */
   approvals: [],

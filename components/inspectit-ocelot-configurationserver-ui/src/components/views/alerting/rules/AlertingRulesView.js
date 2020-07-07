@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { useSelector } from 'react-redux';
 import AlertingRulesTreeContainer from './tree/AlertingRulesTreeContainer';
@@ -15,21 +16,21 @@ const AlertingRulesView = ({ availableTopics, unsavedRules }) => {
   return (
     <div className="this">
       <style jsx>{`
-            .this {
-                height: 100%;
-                display: flex;
-                flex-grow: 1;
-            }            
-            .this :global(.editorContainer) {
-              height: 100%;
-              flex-grow: 1;
-              align-items: stretch;
-              display: flex;
-              flex-direction: column;
-              justify-content: flex-start;
-              min-width: 760px;
-            }
-            `}</style>
+        .this {
+          height: 100%;
+          display: flex;
+          flex-grow: 1;
+        }
+        .this :global(.editorContainer) {
+          height: 100%;
+          flex-grow: 1;
+          align-items: stretch;
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-start;
+          min-width: 760px;
+        }
+      `}</style>
       <AlertingRulesTreeContainer
         readOnly={readOnly}
         onSelectionChanged={(ruleName, templateName) => {
@@ -55,12 +56,24 @@ const AlertingRulesView = ({ availableTopics, unsavedRules }) => {
   );
 };
 
+AlertingRulesView.propTypes = {
+  /** An array of strings denoting the available notification topics */
+  availableTopics: PropTypes.array,
+  /**  List of rules that are unsaved */
+  unsavedRules: PropTypes.array.isRequired,
+};
+
+AlertingRulesView.defaultProps = {
+  availableTopics: [],
+  onSelectionChanged: () => {},
+};
+
 const mapStateToProps = (state) => {
   const { unsavedRuleContents } = state.alerting;
 
   return {
-    unsavedRules: Object.keys(unsavedRuleContents)
+    unsavedRules: Object.keys(unsavedRuleContents),
   };
-}
+};
 
 export default connect(mapStateToProps, {})(AlertingRulesView);
