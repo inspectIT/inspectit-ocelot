@@ -95,7 +95,7 @@ class EditMappingDialog extends React.Component {
    *
    * @param {*} nextProps
    */
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (!nextProps.mapping) {
       this.setState({ isNewMapping: true });
     } else {

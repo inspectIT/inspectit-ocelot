@@ -45,7 +45,7 @@ class EditSources extends React.Component {
       </div>
     );
   }
-  componentWillMount = () => {
+  UNSAFE_componentWillMount = () => {
     this.props.fetchFiles();
   };
 
