@@ -15,7 +15,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Accessor to access specific Git revision/commits. Using this class ensures that all operations will be executed
@@ -130,7 +132,9 @@ public class RevisionAccess extends AbstractFileAccessor {
                 }
             }
 
-            return collectFiles(treeWalk);
+            ArrayList<FileInfo> files = new ArrayList<>();
+            collectFiles(treeWalk, files);
+            return files;
         } catch (IOException e) {
             log.error("Exception while listing files in path '{}'.", path, e);
             return Collections.emptyList();
@@ -144,50 +148,41 @@ public class RevisionAccess extends AbstractFileAccessor {
     /**
      * Collects the files within the current path of the given {@link TreeWalk}.
      *
-     * @param treeWalk The {@link TreeWalk} to traverse.
+     * @param treeWalk   The {@link TreeWalk} to traverse.
+     * @param resultList the list which will be filled with the found files
      * @return The files within the current tree.
      * @throws IOException in case the repository cannot be read
      */
-    private List<FileInfo> collectFiles(TreeWalk treeWalk) throws IOException {
-        Deque<List<FileInfo>> fileStack = new ArrayDeque<>();
-        fileStack.push(new ArrayList<>());
-
-        int previousDepth = treeWalk.getDepth();
+    private boolean collectFiles(TreeWalk treeWalk, List<FileInfo> resultList) throws IOException {
+        int initialDepth = treeWalk.getDepth();
+        boolean hasNext;
 
         do {
-            while (previousDepth > treeWalk.getDepth()) {
-                // we're moving one level down in the tree
-                fileStack.pop();
-                previousDepth--;
-            }
-            previousDepth = treeWalk.getDepth();
-
-            List<FileInfo> targetList = fileStack.peek();
-            if (targetList == null) {
-                throw new IllegalStateException("Exception when listing revision files. The stack cannot contain null values.");
-            }
-
             String name = treeWalk.getNameString();
             FileInfo.FileInfoBuilder fileBuilder = FileInfo.builder().name(name);
 
             if (treeWalk.isSubtree()) {
-                // handling directories
                 treeWalk.enterSubtree();
+                treeWalk.next();
 
-                FileInfo fileInfo = fileBuilder
+                List<FileInfo> nestedFiles = new ArrayList<>();
+                hasNext = collectFiles(treeWalk, nestedFiles);
+
+                fileBuilder
                         .type(FileInfo.Type.DIRECTORY)
-                        .children(new ArrayList<>())
-                        .build();
-
-                targetList.add(fileInfo);
-                fileStack.push(fileInfo.getChildren());
+                        .children(nestedFiles);
             } else {
-                // handling files
                 fileBuilder.type(FileInfo.Type.FILE);
-                targetList.add(fileBuilder.build());
+                hasNext = treeWalk.next();
             }
-        } while (treeWalk.next());
 
-        return fileStack.getLast();
+            resultList.add(fileBuilder.build());
+
+            if (hasNext && initialDepth != treeWalk.getDepth()) {
+                return true;
+            }
+        } while (hasNext);
+
+        return false;
     }
 }
