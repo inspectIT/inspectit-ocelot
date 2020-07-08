@@ -155,9 +155,10 @@ public class RevisionAccess extends AbstractFileAccessor {
         int previousDepth = treeWalk.getDepth();
 
         do {
-            if (previousDepth > treeWalk.getDepth()) {
+            while (previousDepth > treeWalk.getDepth()) {
                 // we're moving one level down in the tree
                 fileStack.pop();
+                previousDepth--;
             }
             previousDepth = treeWalk.getDepth();
 

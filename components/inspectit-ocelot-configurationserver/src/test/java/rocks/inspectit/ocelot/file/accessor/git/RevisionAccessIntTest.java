@@ -104,7 +104,7 @@ class RevisionAccessIntTest extends FileTestBase {
 
         @Test
         public void listFiles_Deep() throws GitAPIException {
-            createTestFiles("files/sub_a/file_x.yml=x", "files/sub_b/deep/file_y.yml=y");
+            createTestFiles("files/sub_a/deep/file_x.yml=x", "files/z_file_z.yml");
             versioningManager.commitAllChanges("third");
 
             List<FileInfo> result = versioningManager.getWorkspaceRevision().listConfigurationFiles("");
@@ -115,21 +115,13 @@ class RevisionAccessIntTest extends FileTestBase {
                 assertThat(fileInfo.getType()).isEqualTo(FileInfo.Type.FILE);
                 assertThat(fileInfo.getChildren()).isNull();
             });
-
             assertThat(result).anySatisfy(fileInfo -> {
-                assertThat(fileInfo.getName()).isEqualTo("sub_a");
-                assertThat(fileInfo.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
-
-                List<FileInfo> subChildren = fileInfo.getChildren();
-
-                assertThat(subChildren).hasOnlyOneElementSatisfying(subFileInfo -> {
-                    assertThat(subFileInfo.getName()).isEqualTo("file_x.yml");
-                    assertThat(subFileInfo.getType()).isEqualTo(FileInfo.Type.FILE);
-                    assertThat(subFileInfo.getChildren()).isNull();
-                });
+                assertThat(fileInfo.getName()).isEqualTo("file_b.yml");
+                assertThat(fileInfo.getType()).isEqualTo(FileInfo.Type.FILE);
+                assertThat(fileInfo.getChildren()).isNull();
             });
             assertThat(result).anySatisfy(fileInfo -> {
-                assertThat(fileInfo.getName()).isEqualTo("sub_b");
+                assertThat(fileInfo.getName()).isEqualTo("sub_a");
                 assertThat(fileInfo.getType()).isEqualTo(FileInfo.Type.DIRECTORY);
 
                 List<FileInfo> subChildren = fileInfo.getChildren();
@@ -141,11 +133,16 @@ class RevisionAccessIntTest extends FileTestBase {
                     List<FileInfo> deepSubChildren = subFileInfo.getChildren();
 
                     assertThat(deepSubChildren).hasOnlyOneElementSatisfying(deepSubFileInfo -> {
-                        assertThat(deepSubFileInfo.getName()).isEqualTo("file_y.yml");
+                        assertThat(deepSubFileInfo.getName()).isEqualTo("file_x.yml");
                         assertThat(deepSubFileInfo.getType()).isEqualTo(FileInfo.Type.FILE);
                         assertThat(deepSubFileInfo.getChildren()).isNull();
                     });
                 });
+            });
+            assertThat(result).anySatisfy(fileInfo -> {
+                assertThat(fileInfo.getName()).isEqualTo("z_file_z.yml");
+                assertThat(fileInfo.getType()).isEqualTo(FileInfo.Type.FILE);
+                assertThat(fileInfo.getChildren()).isNull();
             });
         }
     }
