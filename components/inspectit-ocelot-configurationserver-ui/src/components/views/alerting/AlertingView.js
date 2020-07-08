@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { TabView, TabPanel } from 'primereact/tabview';
 import AlertingRulesView from './rules/AlertingRulesView';
+import AlertingChannelsView from './topics/AlertingChannelsView.js';
 import * as topicsAPI from './topics/TopicsAPI';
 
 /**
@@ -45,9 +46,9 @@ const AlertingView = () => {
         <TabPanel header="Alerting Rules">
           <AlertingRulesView availableTopics={availableTopics} />
         </TabPanel>
-        {/* Placeholder for the second part of the alerting UI
-                    <TabPanel header="Alerting Topics">    
-                    </TabPanel> */}
+        <TabPanel header="Alerting Topics">
+          <AlertingChannelsView />
+        </TabPanel>
       </TabView>
     </div>
   );

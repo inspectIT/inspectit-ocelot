@@ -252,17 +252,9 @@ export const deleteRule = (ruleName, onSuccess, onFailed) => {
 export const updateRule = (ruleContent, onSuccess, onFailed) => {
   const success = true;
   if (success) {
-    const ruleMetaInfo = {
-      id: ruleContent.id,
-      status: ruleContent.status,
-      executing: ruleContent.executing,
-      error: ruleContent.error,
-      template: ruleContent.template,
-    };
-
     remove(rules, (r) => r.id === ruleContent.id);
     remove(ruleContents, (r) => r.id === ruleContent.id);
-    rules.push(ruleMetaInfo);
+    rules.push(ruleContent);
     ruleContents.push(ruleContent);
 
     if (onSuccess) {

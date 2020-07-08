@@ -1,20 +1,40 @@
 import React, { useState, useEffect } from 'react';
+import { connect } from 'react-redux';
+import classNames from 'classnames';
+import { uniq } from 'lodash';
 import PropTypes from 'prop-types';
 import { Tree } from 'primereact/tree';
 
 /**
  * The alerting rules tree.
  */
-const AlertingRulesTree = ({ rules, templates, unsavedRules, selectedRuleName, selectedTemplateName, onSelectionChanged }) => {
+const AlertingRulesTree = ({
+  rules,
+  templates,
+  unsavedRules,
+  selectedRuleName,
+  selectedTemplateName,
+  onSelectionChanged,
+  groupingOptions,
+}) => {
   const [expandedKeys, setExpandedKeys] = useState({});
-
+  const selectedTopic = selectedRuleName ? rules.find((r) => r.id === selectedRuleName).topic : undefined;
   useEffect(() => {
-    if (selectedRuleName && selectedTemplateName && !(selectedTemplateName in expandedKeys)) {
-      setExpandedKeys({ ...expandedKeys, ...{ [selectedTemplateName]: true } });
+    var keysToAdd = undefined;
+    if (selectedRuleName && !(selectedTemplateName in expandedKeys)) {
+      keysToAdd = { [selectedTemplateName]: true };
     }
-  }, [selectedRuleName, selectedTemplateName]);
+    const rule = selectedRuleName ? rules.find((r) => r.id === selectedRuleName) : undefined;
+    const topicName = rule && rule.topic ? rule.topic : 'UNDEFINED TOPIC';
+    if (rule && !(topicName in expandedKeys)) {
+      keysToAdd = { ...keysToAdd, ...{ [topicName]: true } };
+    }
+    if (keysToAdd) {
+      setExpandedKeys({ ...expandedKeys, ...keysToAdd });
+    }
+  }, [selectedRuleName, selectedTemplateName, groupingOptions, selectedTopic]);
 
-  const rulesTree = getRulesTree(rules, templates, unsavedRules);
+  const rulesTree = getRulesTree(rules, templates, unsavedRules, groupingOptions.groupByTemplates, groupingOptions.groupByTopics);
   return (
     <div className="this">
       <style jsx>{`
@@ -70,9 +90,9 @@ const AlertingRulesTree = ({ rules, templates, unsavedRules, selectedRuleName, s
 const nodeTemplate = (node) => {
   if (node.type === 'rule') {
     var classNames = 'pi ';
-    if (node.enabled && !node.data.error) {
+    if (node.data.status === 'enabled' && !node.data.error) {
       classNames = classNames + 'pi-circle-on green';
-    } else if (node.enabled && node.data.error) {
+    } else if (node.data.status === 'enabled' && node.data.error) {
       classNames = classNames + 'pi-circle-off red';
     } else {
       classNames = classNames + 'pi-circle-off grey';
@@ -80,66 +100,115 @@ const nodeTemplate = (node) => {
 
     return (
       <div className="rule-label">
-        {node.label}
+        {node.label + (node.unsaved ? ' *' : '')}
         <i className={classNames} />
       </div>
     );
   } else {
-    return <b>{node.label}</b>;
+    return <b>{node.label + (node.unsaved ? ' *' : '')}</b>;
   }
 };
 
 /**
  * Returns the loaded rules in a tree structure used by the tree component.
  */
-const getRulesTree = (rules, templates, unsavedRules) => {
+const getRulesTree = (rules, templates, unsavedRules, groupByTemplates, groupByTopics) => {
   if (!rules || !templates) {
     return [];
   }
 
-  var treeBranches = templates.map((template) => templateToTreeBranch(template, rules, unsavedRules));
-  treeBranches.sort((t1, t2) => t1.key.localeCompare(t2.key));
-  return treeBranches;
+  var treeNodes = rules.map((rule) =>
+    toTreeBranch(
+      rule.id,
+      'rule',
+      rule,
+      rule.topic,
+      rule.template,
+      undefined,
+      unsavedRules.some((usRuleName) => usRuleName === rule.id)
+    )
+  );
+  const activeTopics = uniq(rules.map((r) => r.topic));
+  if (groupByTopics && groupByTemplates) {
+    treeNodes = uniq([...activeTopics, undefined]).map((topicName) => {
+      const leafNodesFilteredByTopic = treeNodes.filter((node) => node.topic === topicName);
+      const activeTemplates = topicName ? uniq(leafNodesFilteredByTopic.map((node) => node.template)) : templates.map((t) => t.id);
+      const templateNodes = activeTemplates.map((templateName) => {
+        const leafNodesFilteredByTemplate = leafNodesFilteredByTopic.filter((node) => node.template === templateName);
+        return toTreeBranch(
+          templateName,
+          'template',
+          templateName,
+          topicName,
+          templateName,
+          leafNodesFilteredByTemplate,
+          leafNodesFilteredByTemplate.some((child) => child.unsaved === true)
+        );
+      });
+      return toTreeBranch(
+        topicName,
+        'topic',
+        topicName,
+        topicName,
+        undefined,
+        templateNodes,
+        templateNodes.some((child) => child.unsaved === true)
+      );
+    });
+  } else if (groupByTopics) {
+    treeNodes = activeTopics.map((topicName) => {
+      const children = treeNodes.filter((treeNode) => treeNode.topic === topicName);
+      return toTreeBranch(
+        topicName,
+        'topic',
+        topicName,
+        topicName,
+        undefined,
+        children,
+        children.some((child) => child.unsaved === true)
+      );
+    });
+  } else if (groupByTemplates) {
+    treeNodes = templates
+      .map((t) => t.id)
+      .map((templateName) => {
+        const children = treeNodes.filter((treeNode) => treeNode.template === templateName);
+        return toTreeBranch(
+          templateName,
+          'template',
+          templateName,
+          undefined,
+          templateName,
+          children,
+          children.some((child) => child.unsaved === true)
+        );
+      });
+  }
+  treeNodes.sort((t1, t2) => t1.key.localeCompare(t2.key));
+  return treeNodes;
 };
 
-/**
- * Creates a tree branch for the given template and associated rules.
- * @param {*} template template to create the tree branch for
- * @param {*} rules list of all known rules
- * @param {*} unsavedRules list of unsaved rules
- */
-const templateToTreeBranch = (template, rules, unsavedRules) => {
-  const filteredRules = rules.filter((r) => r.template === template.id);
-
-  const leaf = !filteredRules || filteredRules.length <= 0;
-  var children = [];
-  if (!leaf) {
-    children = filteredRules.map((rule) => {
-      const key = rule.id;
-      const unsaved = unsavedRules.some((ruleName) => ruleName === key);
-      const label = key + (unsaved ? ' *' : '');
-
-      return {
-        key,
-        type: 'rule',
-        label,
-        data: rule,
-        enabled: rule.status === 'enabled',
-        icon: 'pi pi-fw pi-bell',
-        leaf: true,
-        unsaved,
-      };
-    });
+const toTreeBranch = (name, type, data, topic, template, children, hasUnsaved) => {
+  const iconClassNames = classNames('pi', 'pi-fw', {
+    'pi-bars': type === 'topic',
+    'pi-briefcase': type === 'template',
+    'pi-bell': type === 'rule',
+  });
+  if (children && children.length > 0) {
+    children.sort((r1, r2) => r1.key.localeCompare(r2.key));
   }
-  children.sort((r1, r2) => r1.key.localeCompare(r2.key));
+  const key = name ? name : 'UNDEFINED ' + type.toUpperCase();
   return {
-    key: template.id,
-    type: 'template',
-    label: template.id + (children.some((c) => c.unsaved) ? ' *' : ''),
-    data: template,
-    icon: 'pi pi-fw pi-briefcase',
-    leaf,
+    key: key,
+    type: type,
+    label: key,
+    data: data,
+    topic: topic,
+    template,
+    icon: iconClassNames,
+    leaf: !children || children.length <= 0,
     children,
+    unsaved: hasUnsaved,
   };
 };
 
@@ -152,6 +221,8 @@ AlertingRulesTree.propTypes = {
   rules: PropTypes.array.isRequired,
   /**  List of all templates */
   templates: PropTypes.array.isRequired,
+  /**  Whether to group by templates and / or topics */
+  groupingOptions: PropTypes.object,
   /**  List of rules that are unsaved */
   unsavedRules: PropTypes.array.isRequired,
   /**  Callback on changed selection */
@@ -160,6 +231,16 @@ AlertingRulesTree.propTypes = {
 
 AlertingRulesTree.defaultProps = {
   onSelectionChanged: () => {},
+  groupingOptions: {
+    groupByTemplates: true,
+    groupByTopics: false,
+  },
 };
 
-export default AlertingRulesTree;
+const mapStateToProps = (state) => {
+  return {
+    groupingOptions: state.alerting.ruleGrouping,
+  };
+};
+
+export default connect(mapStateToProps, {})(AlertingRulesTree);

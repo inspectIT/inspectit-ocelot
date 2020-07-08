@@ -146,7 +146,7 @@ const VariablesPart = ({ selectionName, ruleVariables, readOnly, errornuousVaria
 
 const updateTopic = (content, onContentChanged, value) => {
   var newContent = cloneDeep(content);
-  newContent.topic = value;
+  newContent.topic = value ? value : undefined;
   onContentChanged(newContent.id, newContent);
 };
 

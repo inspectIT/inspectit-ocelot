@@ -70,6 +70,10 @@ const mappings = {
 const alerting = {
   /** A mapping of rule names and corresponding unsaved contents.*/
   unsavedRuleContents: {},
+  ruleGrouping: {
+    groupByTemplates: true,
+    groupByTopics: false,
+  },
 };
 
 const agentStatus = {

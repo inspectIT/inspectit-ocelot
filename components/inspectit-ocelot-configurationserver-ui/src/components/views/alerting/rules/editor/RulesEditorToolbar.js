@@ -9,6 +9,7 @@ import TextEditor from '../../../../common/value-editors/TextEditor';
 
 const RulesEditorToolbar = ({
   selectionName,
+  selectionNameAddition,
   isRule,
   isUnsaved,
   readOnly,
@@ -82,8 +83,8 @@ const RulesEditorToolbar = ({
           color: #aaa;
           margin-right: 1rem;
         }
-        .this :global(.dirtyStateMarker) {
-          margin-left: 0.25rem;
+        .this :global(.text-addition) {
+          margin-left: 1rem;
           color: #999;
         }
         .this :global(.green-icon) {
@@ -116,8 +117,10 @@ const RulesEditorToolbar = ({
                 onNameChanged(selectionName, newName);
               }}
             />
-            {isUnsaved && <div className="dirtyStateMarker">*</div>}
-            {selectionName && readOnly && <div className="dirtyStateMarker">(read only)</div>}
+            {isUnsaved && <div className="text-addition">*</div>}
+            {selectionName && readOnly && <div className="text-addition">(read only)</div>}
+            {!!selectionNameAddition && <div className="text-addition">|</div>}
+            {!!selectionNameAddition && <div className="text-addition">{selectionNameAddition}</div>}
           </div>
         </div>
         {isRule && (
@@ -183,6 +186,8 @@ const EditableTitleView = ({ value, readOnly, updateValue }) => {
 RulesEditorToolbar.propTypes = {
   /** The name of the current selection */
   selectionName: PropTypes.string.isRequired,
+  /** Additional info to show in the tool bar */
+  selectionNameAddition: PropTypes.string,
   /** Whether selection is a rule */
   isRule: PropTypes.bool,
   /** Whether selection is unsaved */
@@ -206,7 +211,8 @@ RulesEditorToolbar.propTypes = {
 };
 
 RulesEditorToolbar.defaultProps = {
-  selectionName: [],
+  selectionNameAddition: undefined,
+  readOnly: false,
   isRule: false,
   isUnsaved: false,
   numErrors: 0,

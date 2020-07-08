@@ -13,6 +13,8 @@ const AlertingRulesTreeContainer = ({ readOnly, onSelectionChanged, selectedRule
   const [updateDate, setUpdateDate] = useState(Date.now());
   const [isDeleteRuleDialogShown, setDeleteRuleDialogShown] = useState(false);
   const [isCreateRuleDialogShown, setCreateRuleDialogShown] = useState(false);
+  const [groupByTemplates, setGroupByTemplates] = useState(true);
+  const [groupByTopics, setGroupByTopics] = useState(false);
   const [rules, setRules] = useState(undefined);
   const [templates, setTemplates] = useState(undefined);
 
@@ -66,6 +68,16 @@ const AlertingRulesTreeContainer = ({ readOnly, onSelectionChanged, selectedRule
       <AlertingRulesToolbar
         selectedRuleName={selectedRuleName}
         selectedTemplateName={selectedTemplateName}
+        groupByTemplates={groupByTemplates}
+        groupByTopics={groupByTopics}
+        onGroupingChanged={(gbTemplateValue, gbTopicValue) => {
+          if (gbTemplateValue !== groupByTemplates) {
+            setGroupByTemplates(gbTemplateValue);
+          }
+          if (gbTopicValue !== groupByTopics) {
+            setGroupByTopics(gbTopicValue);
+          }
+        }}
         onShowDeleteRuleDialog={() => setDeleteRuleDialogShown(true)}
         onShowCreateRuleDialog={() => setCreateRuleDialogShown(true)}
         onRefresh={() => refreshRulesAndTemplates()}
@@ -79,6 +91,8 @@ const AlertingRulesTreeContainer = ({ readOnly, onSelectionChanged, selectedRule
         unsavedRules={unsavedRules}
         onSelectionChanged={onSelectionChanged}
         readOnly={readOnly}
+        groupByTemplates={groupByTemplates}
+        groupByTopics={groupByTopics}
       />
       <div className="details">Last refresh: {updateDate ? new Date(updateDate).toLocaleString() : '-'}</div>
       <CreateDialog

@@ -59,6 +59,8 @@ const CreateDialog = ({
         setName('');
         setDescription('');
         setCategory(undefined);
+        setValidState(false);
+        setError(undefined);
       }}
       footer={
         <div>

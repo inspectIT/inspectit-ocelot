@@ -16,11 +16,28 @@ const topics = [
   },
 ];
 
+const handlers = {
+  'Some Topic': [{ id: 'Handler A' }, { id: 'Handler B' }],
+};
+
 export const fetchTopics = (onSuccess, onFailed) => {
   const success = true;
   if (success) {
     if (onSuccess) {
       onSuccess(topics);
+    }
+  } else {
+    if (onFailed) {
+      onFailed();
+    }
+  }
+};
+
+export const fetchHandlers = (topicName, onSuccess, onFailed) => {
+  const success = true;
+  if (success) {
+    if (onSuccess) {
+      onSuccess(topicName in handlers ? handlers[topicName] : []);
     }
   } else {
     if (onFailed) {

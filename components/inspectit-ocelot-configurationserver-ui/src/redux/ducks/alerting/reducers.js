@@ -11,6 +11,14 @@ const alertingReducer = createReducer(initialState)({
       unsavedRuleContents: unsavedRuleContentsMap,
     };
   },
+  [types.ALERTING_RULES_GROUPING_CONFIG_CHANGED]: (state, action) => {
+    const { groupingOptions } = action.payload;
+
+    return {
+      ...state,
+      ruleGrouping: groupingOptions,
+    };
+  },
 });
 
 export default alertingReducer;

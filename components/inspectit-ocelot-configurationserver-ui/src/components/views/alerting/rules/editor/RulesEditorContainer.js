@@ -49,7 +49,7 @@ const RulesEditorContainer = ({
   let { content, isUnsaved, isRule } = getContentWrapper(ruleContent, templateContent, unsavedRuleContents);
 
   const mappedVars = getMappedVars(content, templateContent);
-
+  const selectionNameAddition = isRule ? 'Base-Template: ' + selectedTemplateName + '' : undefined;
   return (
     <div className="this">
       <style jsx>{`
@@ -65,6 +65,7 @@ const RulesEditorContainer = ({
       `}</style>
       <RulesEditorToolbar
         selectionName={content ? content.id : undefined}
+        selectionNameAddition={selectionNameAddition}
         isRule={isRule}
         ruleEnabled={content && content.status === 'enabled'}
         savedRuleIsEnabled={ruleContent && ruleContent.status === 'enabled'}
