@@ -132,7 +132,9 @@ public class RevisionAccess extends AbstractFileAccessor {
                 }
             }
 
-            return collectFiles(treeWalk);
+            ArrayList<FileInfo> files = new ArrayList<>();
+            collectFiles(treeWalk, files);
+            return files;
         } catch (IOException e) {
             log.error("Exception while listing files in path '{}'.", path, e);
             return Collections.emptyList();
@@ -146,34 +148,41 @@ public class RevisionAccess extends AbstractFileAccessor {
     /**
      * Collects the files within the current path of the given {@link TreeWalk}.
      *
-     * @param treeWalk The {@link TreeWalk} to traverse.
+     * @param treeWalk   The {@link TreeWalk} to traverse.
+     * @param resultList the list which will be filled with the found files
      * @return The files within the current tree.
      * @throws IOException in case the repository cannot be read
      */
-    private List<FileInfo> collectFiles(TreeWalk treeWalk) throws IOException {
-        List<FileInfo> resultList = new ArrayList<>();
+    private boolean collectFiles(TreeWalk treeWalk, List<FileInfo> resultList) throws IOException {
+        int initialDepth = treeWalk.getDepth();
+        boolean hasNext;
 
         do {
             String name = treeWalk.getNameString();
-
             FileInfo.FileInfoBuilder fileBuilder = FileInfo.builder().name(name);
 
             if (treeWalk.isSubtree()) {
                 treeWalk.enterSubtree();
                 treeWalk.next();
-                List<FileInfo> nestedFiles = collectFiles(treeWalk);
+
+                List<FileInfo> nestedFiles = new ArrayList<>();
+                hasNext = collectFiles(treeWalk, nestedFiles);
 
                 fileBuilder
                         .type(FileInfo.Type.DIRECTORY)
                         .children(nestedFiles);
             } else {
                 fileBuilder.type(FileInfo.Type.FILE);
+                hasNext = treeWalk.next();
             }
 
-            FileInfo fileInfo = fileBuilder.build();
-            resultList.add(fileInfo);
-        } while (treeWalk.next());
+            resultList.add(fileBuilder.build());
 
-        return resultList;
+            if (hasNext && initialDepth != treeWalk.getDepth()) {
+                return true;
+            }
+        } while (hasNext);
+
+        return false;
     }
 }
