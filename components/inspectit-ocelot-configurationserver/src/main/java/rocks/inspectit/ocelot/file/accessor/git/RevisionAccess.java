@@ -15,9 +15,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * Accessor to access specific Git revision/commits. Using this class ensures that all operations will be executed
@@ -151,29 +149,44 @@ public class RevisionAccess extends AbstractFileAccessor {
      * @throws IOException in case the repository cannot be read
      */
     private List<FileInfo> collectFiles(TreeWalk treeWalk) throws IOException {
-        List<FileInfo> resultList = new ArrayList<>();
+        Deque<List<FileInfo>> fileStack = new ArrayDeque<>();
+        fileStack.push(new ArrayList<>());
+
+        int previousDepth = treeWalk.getDepth();
 
         do {
-            String name = treeWalk.getNameString();
+            if (previousDepth > treeWalk.getDepth()) {
+                // we're moving one level down in the tree
+                fileStack.pop();
+            }
+            previousDepth = treeWalk.getDepth();
 
+            List<FileInfo> targetList = fileStack.peek();
+            if (targetList == null) {
+                throw new IllegalStateException("Exception when listing revision files. The stack cannot contain null values.");
+            }
+
+            String name = treeWalk.getNameString();
             FileInfo.FileInfoBuilder fileBuilder = FileInfo.builder().name(name);
 
             if (treeWalk.isSubtree()) {
+                // handling directories
                 treeWalk.enterSubtree();
-                treeWalk.next();
-                List<FileInfo> nestedFiles = collectFiles(treeWalk);
 
-                fileBuilder
+                FileInfo fileInfo = fileBuilder
                         .type(FileInfo.Type.DIRECTORY)
-                        .children(nestedFiles);
-            } else {
-                fileBuilder.type(FileInfo.Type.FILE);
-            }
+                        .children(new ArrayList<>())
+                        .build();
 
-            FileInfo fileInfo = fileBuilder.build();
-            resultList.add(fileInfo);
+                targetList.add(fileInfo);
+                fileStack.push(fileInfo.getChildren());
+            } else {
+                // handling files
+                fileBuilder.type(FileInfo.Type.FILE);
+                targetList.add(fileBuilder.build());
+            }
         } while (treeWalk.next());
 
-        return resultList;
+        return fileStack.getLast();
     }
 }
