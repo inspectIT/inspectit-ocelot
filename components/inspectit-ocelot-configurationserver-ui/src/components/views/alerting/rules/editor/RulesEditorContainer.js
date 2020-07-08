@@ -186,7 +186,7 @@ RulesEditorContainer.propTypes = {
 RulesEditorContainer.defaultProps = {
   availableTopics: [],
   unsavedRuleContents: {},
-  readOnly: true,
+  readOnly: false,
   onUnsavedRuleContentsChanged: () => {},
   onRuleRenamed: () => {},
 };

@@ -193,7 +193,7 @@ RulesEditor.propTypes = {
 RulesEditor.defaultProps = {
   availableTopics: [],
   isRule: false,
-  readOnly: true,
+  readOnly: false,
   onContentChanged: () => {},
   onErrorStatusUpdate: () => {},
 };
