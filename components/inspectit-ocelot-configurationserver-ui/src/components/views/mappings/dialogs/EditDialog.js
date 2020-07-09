@@ -16,7 +16,8 @@ const defaultState = {
   name: '',
   sources: [],
   attributes: [],
-  isNewMapping: null,
+  isNewMapping: true,
+  currentMapping: null,
 };
 
 /**
@@ -96,10 +97,15 @@ class EditMappingDialog extends React.Component {
    * @param {*} nextProps
    */
   componentDidUpdate() {
-    if (!this.props.mapping) {
-      this.setState({ isNewMapping: true });
-    } else {
-      this.setState(buildStateObject(this.props.mapping));
+    const { currentMapping } = this.state;
+    const { mapping } = this.props;
+
+    if (currentMapping !== mapping) {
+      if (!this.props.mapping) {
+        this.setState({ ...defaultState });
+      } else {
+        this.setState({ ...buildStateObject(this.props.mapping), currentMapping: mapping });
+      }
     }
   }
 
