@@ -40,10 +40,12 @@ public class CachingRevisionAccess extends RevisionAccess {
             if (cached != null) {
                 return cached;
             }
+            byte[] contents = super.readFile(path);
+            fileContentsCache.put(path, contents);
+            return contents;
+        } else {
+            return super.readFile(null);
         }
-        byte[] contents = super.readFile(path);
-        fileContentsCache.put(path, contents);
-        return contents;
     }
 
     @Override
