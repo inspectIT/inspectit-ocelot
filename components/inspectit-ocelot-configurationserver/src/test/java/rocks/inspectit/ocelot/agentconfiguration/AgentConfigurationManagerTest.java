@@ -65,11 +65,8 @@ public class AgentConfigurationManagerTest {
         void noMatchingMapping() {
 
             doReturn(true).when(fileAccessor).agentMappingsExist();
-            doReturn(Arrays.asList(
-                    AgentMapping.builder()
-                            .attribute("service", "test-\\d+")
-                            .build()))
-                    .when(serializer).readAgentMappings(any());
+            doReturn(Arrays.asList(AgentMapping.builder().attribute("service", "test-\\d+").build())).when(serializer)
+                    .readAgentMappings(any());
 
             init();
 
@@ -80,16 +77,13 @@ public class AgentConfigurationManagerTest {
 
         @Test
         void priorityRespected() {
-            doReturn(Arrays.asList(
-                    AgentMapping.builder()
-                            .attribute("service", "test")
-                            .source("test.yml")
-                            .build(),
-                    AgentMapping.builder()
-                            .attribute("service", ".*")
-                            .source("default.yml")
-                            .build()))
-                    .when(serializer).readAgentMappings(any());
+            doReturn(Arrays.asList(AgentMapping.builder()
+                    .attribute("service", "test")
+                    .source("test.yml")
+                    .build(), AgentMapping.builder()
+                    .attribute("service", ".*")
+                    .source("default.yml")
+                    .build())).when(serializer).readAgentMappings(any());
 
             doReturn(true).when(fileAccessor).agentMappingsExist();
             doReturn(true).when(fileAccessor).configurationFileExists(any());
@@ -108,13 +102,11 @@ public class AgentConfigurationManagerTest {
 
         @Test
         void multipleAttributesChecked() {
-            doReturn(Arrays.asList(
-                    AgentMapping.builder()
-                            .attribute("service", "test-\\d+")
-                            .attribute("application", "myApp")
-                            .source("test.yml")
-                            .build()))
-                    .when(serializer).readAgentMappings(any());
+            doReturn(Arrays.asList(AgentMapping.builder()
+                    .attribute("service", "test-\\d+")
+                    .attribute("application", "myApp")
+                    .source("test.yml")
+                    .build())).when(serializer).readAgentMappings(any());
 
             doReturn(true).when(fileAccessor).agentMappingsExist();
             doReturn(true).when(fileAccessor).configurationFileExists(any());

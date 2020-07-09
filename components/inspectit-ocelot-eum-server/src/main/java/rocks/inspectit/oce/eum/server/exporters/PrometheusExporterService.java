@@ -38,7 +38,9 @@ public class PrometheusExporterService {
                 String host = config.getHost();
                 int port = config.getPort();
                 log.info("Starting Prometheus Exporter on {}:{}", host, port);
-                PrometheusStatsCollector.createAndRegister(PrometheusStatsConfiguration.builder().setRegistry(defaultRegistry).build());
+                PrometheusStatsCollector.createAndRegister(PrometheusStatsConfiguration.builder()
+                        .setRegistry(defaultRegistry)
+                        .build());
                 prometheusClient = new HTTPServer(host, port, true);
             } catch (Exception e) {
                 log.error("Error Starting Prometheus HTTP Endpoint!", e);
@@ -46,7 +48,6 @@ public class PrometheusExporterService {
             }
         }
     }
-
 
     @PreDestroy
     protected boolean doDisable() {

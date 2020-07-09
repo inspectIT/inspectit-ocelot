@@ -16,7 +16,8 @@ public class ClassInstrumentationConfiguration {
     /**
      * The configuration representing that no instrumentation of the class is performed.
      */
-    public static final ClassInstrumentationConfiguration NO_INSTRUMENTATION = new ClassInstrumentationConfiguration(Collections.emptySet(), Collections.emptySet(), null);
+    public static final ClassInstrumentationConfiguration NO_INSTRUMENTATION = new ClassInstrumentationConfiguration(Collections
+            .emptySet(), Collections.emptySet(), null);
 
     /**
      * The sensors which are active for the target class.
@@ -48,6 +49,7 @@ public class ClassInstrumentationConfiguration {
      *
      * @param clazz the type for which this configuration is meant.
      * @param other the other configuration to compare against
+     *
      * @return true if both are the same, false otherwise
      */
     public boolean isSameAs(Class<?> clazz, ClassInstrumentationConfiguration other) {

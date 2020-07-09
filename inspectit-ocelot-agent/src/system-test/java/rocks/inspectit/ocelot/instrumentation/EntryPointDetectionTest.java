@@ -7,7 +7,6 @@ import rocks.inspectit.ocelot.utils.TestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
 public class EntryPointDetectionTest extends InstrumentationSysTestBase {
 
     static void methodA(String[][] something, int[] somethingelse) {
@@ -24,18 +23,17 @@ public class EntryPointDetectionTest extends InstrumentationSysTestBase {
         methodA(null, null);
 
         TestUtils.waitForOpenCensusQueueToBeProcessed();
-        assertThat(TestUtils.getDataForView("entrypoint/invocations", Maps.newHashMap("method_name", "methodA")))
-                .isInstanceOfSatisfying(AggregationData.CountData.class, data -> assertThat(data.getCount()).isEqualTo(1));
-        assertThat(TestUtils.getDataForView("entrypoint/invocations", Maps.newHashMap("method_name", "methodB")))
-                .isNull();
+        assertThat(TestUtils.getDataForView("entrypoint/invocations", Maps.newHashMap("method_name", "methodA"))).isInstanceOfSatisfying(AggregationData.CountData.class, data -> assertThat(data
+                .getCount()).isEqualTo(1));
+        assertThat(TestUtils.getDataForView("entrypoint/invocations", Maps.newHashMap("method_name", "methodB"))).isNull();
 
         //here methodB should be recognized as entry point
         methodB();
 
         TestUtils.waitForOpenCensusQueueToBeProcessed();
-        assertThat(TestUtils.getDataForView("entrypoint/invocations", Maps.newHashMap("method_name", "methodA")))
-                .isInstanceOfSatisfying(AggregationData.CountData.class, data -> assertThat(data.getCount()).isEqualTo(1));
-        assertThat(TestUtils.getDataForView("entrypoint/invocations", Maps.newHashMap("method_name", "methodB")))
-                .isInstanceOfSatisfying(AggregationData.CountData.class, data -> assertThat(data.getCount()).isEqualTo(1));
+        assertThat(TestUtils.getDataForView("entrypoint/invocations", Maps.newHashMap("method_name", "methodA"))).isInstanceOfSatisfying(AggregationData.CountData.class, data -> assertThat(data
+                .getCount()).isEqualTo(1));
+        assertThat(TestUtils.getDataForView("entrypoint/invocations", Maps.newHashMap("method_name", "methodB"))).isInstanceOfSatisfying(AggregationData.CountData.class, data -> assertThat(data
+                .getCount()).isEqualTo(1));
     }
 }

@@ -9,6 +9,7 @@ public class CaseUtilTest {
 
     @Nested
     public class CamelCaseToKebabCase {
+
         @Test
         void twoLiteralTest() {
             assertThat(CaseUtils.camelCaseToKebabCase("testName")).isEqualTo("test-name");
@@ -32,6 +33,7 @@ public class CaseUtilTest {
 
     @Nested
     public class KebebCaseToCamelCase {
+
         @Test
         void twoLiteralTest() {
             assertThat(CaseUtils.kebabCaseToCamelCase("test-name")).isEqualTo("testName");
@@ -55,6 +57,7 @@ public class CaseUtilTest {
 
     @Nested
     public class CompareIgnoreCamelOrKebabCase {
+
         @Test
         void twoLiteralTest() {
             assertThat(CaseUtils.compareIgnoreCamelOrKebabCase("test-name", "testName")).isEqualTo(true);

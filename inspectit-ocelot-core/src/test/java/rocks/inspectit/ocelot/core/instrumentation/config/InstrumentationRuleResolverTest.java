@@ -106,7 +106,6 @@ class InstrumentationRuleResolverTest {
             verifyNoMoreInteractions(scopeResolver);
         }
 
-
         @Test
         public void verifyRuleIncludesPreserved() {
             InstrumentationRuleSettings ruleSettings = new InstrumentationRuleSettings();
@@ -119,11 +118,9 @@ class InstrumentationRuleResolverTest {
             Set<InstrumentationRule> result = ruleResolver.resolve(settings, Collections.emptyMap());
 
             assertThat(result).hasSize(1);
-            assertThat(result)
-                    .flatExtracting(InstrumentationRule::getIncludedRuleNames)
+            assertThat(result).flatExtracting(InstrumentationRule::getIncludedRuleNames)
                     .containsExactlyInAnyOrder("inc1", "inc2");
         }
-
 
         @Test
         public void verifyPreEntryActionsPreserved() {
@@ -144,7 +141,6 @@ class InstrumentationRuleResolverTest {
                     .anySatisfy((ac) -> verifyActionCall(ac, "second", second));
         }
 
-
         @Test
         public void verifyEntryActionsPreserved() {
             ActionCallSettings first = Mockito.mock(ActionCallSettings.class);
@@ -163,7 +159,6 @@ class InstrumentationRuleResolverTest {
                     .anySatisfy((ac) -> verifyActionCall(ac, "first", first))
                     .anySatisfy((ac) -> verifyActionCall(ac, "second", second));
         }
-
 
         @Test
         public void verifyPostEntryActionsPreserved() {
@@ -203,7 +198,6 @@ class InstrumentationRuleResolverTest {
                     .anySatisfy((ac) -> verifyActionCall(ac, "second", second));
         }
 
-
         @Test
         public void verifyExitActionsPreserved() {
             ActionCallSettings first = Mockito.mock(ActionCallSettings.class);
@@ -222,7 +216,6 @@ class InstrumentationRuleResolverTest {
                     .anySatisfy((ac) -> verifyActionCall(ac, "first", first))
                     .anySatisfy((ac) -> verifyActionCall(ac, "second", second));
         }
-
 
         @Test
         public void verifyPostExitActionsPreserved() {
@@ -255,10 +248,7 @@ class InstrumentationRuleResolverTest {
 
         @Test
         void emptyMetricName() {
-            MetricRecordingSettings rec = MetricRecordingSettings.builder()
-                    .value("42")
-                    .metric("")
-                    .build();
+            MetricRecordingSettings rec = MetricRecordingSettings.builder().value("42").metric("").build();
             InstrumentationRuleSettings irs = new InstrumentationRuleSettings();
             irs.setMetrics(ImmutableMap.of("default_metric", rec));
 
@@ -270,13 +260,9 @@ class InstrumentationRuleResolverTest {
             });
         }
 
-
         @Test
         void customMetricName() {
-            MetricRecordingSettings rec = MetricRecordingSettings.builder()
-                    .value("42")
-                    .metric("my_metric")
-                    .build();
+            MetricRecordingSettings rec = MetricRecordingSettings.builder().value("42").metric("my_metric").build();
             InstrumentationRuleSettings irs = new InstrumentationRuleSettings();
             irs.setMetrics(ImmutableMap.of("default_metric", rec));
 
@@ -288,12 +274,9 @@ class InstrumentationRuleResolverTest {
             });
         }
 
-
         @Test
         void emptyValue() {
-            MetricRecordingSettings rec = MetricRecordingSettings.builder()
-                    .value("")
-                    .build();
+            MetricRecordingSettings rec = MetricRecordingSettings.builder().value("").build();
             InstrumentationRuleSettings irs = new InstrumentationRuleSettings();
             irs.setMetrics(ImmutableMap.of("default_metric", rec));
 
@@ -304,9 +287,7 @@ class InstrumentationRuleResolverTest {
 
         @Test
         void nullValue() {
-            MetricRecordingSettings rec = MetricRecordingSettings.builder()
-                    .value(null)
-                    .build();
+            MetricRecordingSettings rec = MetricRecordingSettings.builder().value(null).build();
             InstrumentationRuleSettings irs = new InstrumentationRuleSettings();
             irs.setMetrics(ImmutableMap.of("default_metric", rec));
 

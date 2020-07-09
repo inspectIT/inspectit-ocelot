@@ -21,21 +21,23 @@ public class OpenCensusAgentTraceExporterService extends DynamicallyActivatableS
     @Override
     protected boolean checkEnabledForConfig(InspectitConfig conf) {
         OpenCensusAgentTraceExporterSettings openCensusAgent = conf.getExporters().getTracing().getOpenCensusAgent();
-        return conf.getTracing().isEnabled()
-                && openCensusAgent.isEnabled()
-                && !StringUtils.isEmpty(openCensusAgent.getAddress());
+        return conf.getTracing()
+                .isEnabled() && openCensusAgent.isEnabled() && !StringUtils.isEmpty(openCensusAgent.getAddress());
     }
 
     @Override
     protected boolean doEnable(InspectitConfig configuration) {
         try {
-            OpenCensusAgentTraceExporterSettings settings = configuration.getExporters().getTracing().getOpenCensusAgent();
+            OpenCensusAgentTraceExporterSettings settings = configuration.getExporters()
+                    .getTracing()
+                    .getOpenCensusAgent();
             log.info("Starting OpenCensus Agent Trace exporter");
             OcAgentTraceExporter.createAndRegister(OcAgentTraceExporterConfiguration.builder()
                     .setEndPoint(settings.getAddress())
                     .setServiceName(settings.getServiceName())
                     .setUseInsecure(settings.isUseInsecure())
-                    .setRetryInterval(Duration.fromMillis(settings.getReconnectionPeriod().toMillis())).build());
+                    .setRetryInterval(Duration.fromMillis(settings.getReconnectionPeriod().toMillis()))
+                    .build());
             return true;
         } catch (Throwable t) {
             log.error("Error creating OpenCensus Agent Trace exporter", t);

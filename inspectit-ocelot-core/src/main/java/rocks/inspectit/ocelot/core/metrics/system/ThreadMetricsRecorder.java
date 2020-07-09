@@ -48,16 +48,13 @@ public class ThreadMetricsRecorder extends AbstractPollingMetricsRecorder {
     protected void takeMeasurement(MetricsSettings config) {
         val enabled = config.getThreads().getEnabled();
         if (enabled.getOrDefault(PEAK_METRIC_NAME, false)) {
-            measureManager.tryRecordingMeasurement(METRIC_NAME_PREFIX + PEAK_METRIC_NAME,
-                    threadBean.getPeakThreadCount());
+            measureManager.tryRecordingMeasurement(METRIC_NAME_PREFIX + PEAK_METRIC_NAME, threadBean.getPeakThreadCount());
         }
         if (enabled.getOrDefault(DAEMON_METRIC_NAME, false)) {
-            measureManager.tryRecordingMeasurement(METRIC_NAME_PREFIX + DAEMON_METRIC_NAME,
-                    threadBean.getDaemonThreadCount());
+            measureManager.tryRecordingMeasurement(METRIC_NAME_PREFIX + DAEMON_METRIC_NAME, threadBean.getDaemonThreadCount());
         }
         if (enabled.getOrDefault(LIVE_METRIC_NAME, false)) {
-            measureManager.tryRecordingMeasurement(METRIC_NAME_PREFIX + LIVE_METRIC_NAME,
-                    threadBean.getThreadCount());
+            measureManager.tryRecordingMeasurement(METRIC_NAME_PREFIX + LIVE_METRIC_NAME, threadBean.getThreadCount());
         }
         if (enabled.getOrDefault(STATE_METRIC_NAME, false)) {
             recordStateMetric();

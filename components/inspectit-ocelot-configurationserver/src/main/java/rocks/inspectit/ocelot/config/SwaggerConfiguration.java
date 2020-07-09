@@ -22,8 +22,7 @@ public class SwaggerConfiguration implements WebMvcConfigurer {
 
     @Bean
     public Docket swaggerApi() {
-        return new Docket(DocumentationType.SWAGGER_2)
-                .ignoredParameterTypes(Authentication.class)
+        return new Docket(DocumentationType.SWAGGER_2).ignoredParameterTypes(Authentication.class)
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("rocks.inspectit.ocelot.rest"))
                 .paths(PathSelectors.any())
@@ -32,11 +31,7 @@ public class SwaggerConfiguration implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry
-                .addResourceHandler("swagger-ui.html")
-                .addResourceLocations("classpath:/META-INF/resources/");
-        registry
-                .addResourceHandler("/webjars/**")
-                .addResourceLocations("classpath:/META-INF/resources/webjars/");
+        registry.addResourceHandler("swagger-ui.html").addResourceLocations("classpath:/META-INF/resources/");
+        registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/");
     }
 }

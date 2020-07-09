@@ -33,6 +33,7 @@ public class ContextPropagationUtil {
      * (d is the identifier for "Double")
      */
     private static final Map<Class<?>, Character> TYPE_TO_ID_MAP = new HashMap<>();
+
     private static final Map<Character, Function<String, Object>> TYPE_ID_TO_PARSER_MAP = new HashMap<>();
 
     private static final String ENCODING_CHARSET = java.nio.charset.StandardCharsets.UTF_8.toString();
@@ -42,7 +43,9 @@ public class ContextPropagationUtil {
     private static final String B3_HEADER_PREFIX = "X-B3-";
 
     private static final Pattern COMMA_WITH_WHITESPACES = Pattern.compile(" *, *");
+
     private static final Pattern SEMICOLON_WITH_WHITESPACES = Pattern.compile(" *; *");
+
     private static final Pattern EQUALS_WITH_WHITESPACES = Pattern.compile(" *= *");
 
     private static final Set<String> PROPAGATION_FIELDS = new HashSet<>();
@@ -58,6 +61,7 @@ public class ContextPropagationUtil {
             carrier.put(key, value);
         }
     };
+
     public static final TextFormat.Getter<Map<String, String>> MAP_EXTRACTOR = new TextFormat.Getter<Map<String, String>>() {
         @Override
         public String get(Map<String, String> carrier, String key) {
@@ -95,6 +99,7 @@ public class ContextPropagationUtil {
      * Takes the given key-value pairs and encodes them into the Correlation-Context header.
      *
      * @param dataToPropagate the key-value pairs to propagate.
+     *
      * @return the result propagation map
      */
     public static Map<String, String> buildPropagationHeaderMap(Stream<Map.Entry<String, Object>> dataToPropagate) {
@@ -106,6 +111,7 @@ public class ContextPropagationUtil {
      *
      * @param dataToPropagate the key-value pairs to propagate.
      * @param spanToPropagate the span context to propagate, null if none shall be propagated
+     *
      * @return the result propagation map
      */
     public static Map<String, String> buildPropagationHeaderMap(Stream<Map.Entry<String, Object>> dataToPropagate, SpanContext spanToPropagate) {
@@ -170,11 +176,16 @@ public class ContextPropagationUtil {
      * Decodes a span context from the given header to value map into the given target context.
      *
      * @param propagationMap the headers to decode
+     *
      * @return if the data contained any trace correlation, the SpanContext is returned. Otherwise returns null
      */
     public static SpanContext readPropagatedSpanContextFromHeaderMap(Map<String, String> propagationMap) {
 
-        boolean anyB3Header = Tracing.getPropagationComponent().getB3Format().fields().stream().anyMatch(propagationMap::containsKey);
+        boolean anyB3Header = Tracing.getPropagationComponent()
+                .getB3Format()
+                .fields()
+                .stream()
+                .anyMatch(propagationMap::containsKey);
         if (anyB3Header) {
             try {
                 return Tracing.getPropagationComponent().getB3Format().extract(propagationMap, MAP_EXTRACTOR);
@@ -184,7 +195,11 @@ public class ContextPropagationUtil {
             }
         }
 
-        boolean anyTraceContextHeader = Tracing.getPropagationComponent().getTraceContextFormat().fields().stream().anyMatch(propagationMap::containsKey);
+        boolean anyTraceContextHeader = Tracing.getPropagationComponent()
+                .getTraceContextFormat()
+                .fields()
+                .stream()
+                .anyMatch(propagationMap::containsKey);
         if (anyTraceContextHeader) {
             try {
                 return Tracing.getPropagationComponent().getTraceContextFormat().extract(propagationMap, MAP_EXTRACTOR);
@@ -210,6 +225,7 @@ public class ContextPropagationUtil {
      * in the given map.
      *
      * @param headers the map containing the headers
+     *
      * @return string representation of the headers (["key": "value"]).
      */
     @VisibleForTesting
@@ -217,7 +233,8 @@ public class ContextPropagationUtil {
         StringBuilder builder = new StringBuilder("[");
 
         if (!CollectionUtils.isEmpty(headers)) {
-            String headerString = headers.entrySet().stream()
+            String headerString = headers.entrySet()
+                    .stream()
                     .filter(entry -> entry.getKey().startsWith(B3_HEADER_PREFIX))
                     .map(entry -> "\"" + entry.getKey() + "\": \"" + entry.getValue() + "\"")
                     .collect(Collectors.joining(", "));
@@ -263,6 +280,7 @@ public class ContextPropagationUtil {
      *
      * @param stringValue the value to parse
      * @param properties  the collection of property definition in the format "propertyname=value"
+     *
      * @return the parsed value
      */
     private static Object parseTyped(String stringValue, Collection<String> properties) {

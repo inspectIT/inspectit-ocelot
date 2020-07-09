@@ -18,12 +18,12 @@ public class GenericActionCallSorterTest {
 
     private GenericActionCallSorter scheduler = new GenericActionCallSorter();
 
-
     private static class TestCallBuilder {
 
         private int counter = 0;
 
         private String name;
+
         private ActionCallSettings settings = new ActionCallSettings();
 
         TestCallBuilder(String name) {
@@ -31,10 +31,7 @@ public class GenericActionCallSorterTest {
         }
 
         ActionCallConfig build() {
-            return ActionCallConfig.builder()
-                    .name(name)
-                    .callSettings(settings)
-                    .build();
+            return ActionCallConfig.builder().name(name).callSettings(settings).build();
         }
 
         TestCallBuilder withDataInput(String data) {
@@ -101,9 +98,7 @@ public class GenericActionCallSorterTest {
     }
 
     List<String> getNames(List<ActionCallConfig> calls) {
-        return calls.stream()
-                .map(ActionCallConfig::getName)
-                .collect(Collectors.toList());
+        return calls.stream().map(ActionCallConfig::getName).collect(Collectors.toList());
     }
 
     @Nested
@@ -111,26 +106,19 @@ public class GenericActionCallSorterTest {
 
         @Test
         void testElementsWithoutDependenciesPreserved() throws Exception {
-            List<ActionCallConfig> input = Arrays.asList(
-                    new TestCallBuilder("B").withDataInput("C").build(),
-                    new TestCallBuilder("C").build(),
-                    new TestCallBuilder("A").build()
-            );
+            List<ActionCallConfig> input = Arrays.asList(new TestCallBuilder("B").withDataInput("C")
+                    .build(), new TestCallBuilder("C").build(), new TestCallBuilder("A").build());
 
             List<String> result = getNames(scheduler.orderActionCalls(input));
 
             assertThat(result).containsExactly("A", "C", "B");
         }
 
-
         @Test
         void testTransitiveOrdering() throws Exception {
-            List<ActionCallConfig> input = Arrays.asList(
-                    new TestCallBuilder("A").withDataInput("B").build(),
-                    new TestCallBuilder("B").withRead("C").build(),
-                    new TestCallBuilder("C").onlyIfTrue("D").build(),
-                    new TestCallBuilder("D").build()
-            );
+            List<ActionCallConfig> input = Arrays.asList(new TestCallBuilder("A").withDataInput("B")
+                    .build(), new TestCallBuilder("B").withRead("C").build(), new TestCallBuilder("C").onlyIfTrue("D")
+                    .build(), new TestCallBuilder("D").build());
 
             List<String> result = getNames(scheduler.orderActionCalls(input));
 
@@ -139,10 +127,7 @@ public class GenericActionCallSorterTest {
 
         @Test
         void testIdenticalActions() throws Exception {
-            List<ActionCallConfig> input = Arrays.asList(
-                    new TestCallBuilder("A").build(),
-                    new TestCallBuilder("A").build()
-            );
+            List<ActionCallConfig> input = Arrays.asList(new TestCallBuilder("A").build(), new TestCallBuilder("A").build());
 
             List<String> result = getNames(scheduler.orderActionCalls(input));
 
@@ -152,12 +137,11 @@ public class GenericActionCallSorterTest {
         @Test
         void testDAGOrdering() throws Exception {
 
-            List<ActionCallConfig> input = Arrays.asList(
-                    new TestCallBuilder("A").onlyIfNull("B").onlyIfNotNull("C").build(),
-                    new TestCallBuilder("B").onlyIfFalse("E").build(),
-                    new TestCallBuilder("C").withRead("D").build(),
-                    new TestCallBuilder("D").build(),
-                    new TestCallBuilder("E").withReadsBeforeWritten("D").build() //same as saying "D" depends on "E"
+            List<ActionCallConfig> input = Arrays.asList(new TestCallBuilder("A").onlyIfNull("B")
+                    .onlyIfNotNull("C")
+                    .build(), new TestCallBuilder("B").onlyIfFalse("E").build(), new TestCallBuilder("C").withRead("D")
+                    .build(), new TestCallBuilder("D").build(), new TestCallBuilder("E").withReadsBeforeWritten("D")
+                    .build() //same as saying "D" depends on "E"
             );
 
             List<String> result = getNames(scheduler.orderActionCalls(input));
@@ -165,71 +149,50 @@ public class GenericActionCallSorterTest {
             assertThat(result).containsExactly("E", "B", "D", "C", "A");
         }
 
-
         @Test
         void testDirectCycleDetected() {
 
-            List<ActionCallConfig> input = Arrays.asList(
-                    new TestCallBuilder("A").withRead("B").build(),
-                    new TestCallBuilder("B").withRead("A").build(),
-                    new TestCallBuilder("C").withRead("A").build()
-            );
+            List<ActionCallConfig> input = Arrays.asList(new TestCallBuilder("A").withRead("B")
+                    .build(), new TestCallBuilder("B").withRead("A").build(), new TestCallBuilder("C").withRead("A")
+                    .build());
 
-            assertThatThrownBy(() -> scheduler.orderActionCalls(input))
-                    .isInstanceOf(CyclicDataDependencyException.class);
+            assertThatThrownBy(() -> scheduler.orderActionCalls(input)).isInstanceOf(CyclicDataDependencyException.class);
         }
 
         @Test
         void testIndirectCycleDetected() {
 
-            List<ActionCallConfig> input = Arrays.asList(
-                    new TestCallBuilder("A").withRead("B").build(),
-                    new TestCallBuilder("B").withRead("C").build(),
-                    new TestCallBuilder("C").withRead("A").build()
-            );
+            List<ActionCallConfig> input = Arrays.asList(new TestCallBuilder("A").withRead("B")
+                    .build(), new TestCallBuilder("B").withRead("C").build(), new TestCallBuilder("C").withRead("A")
+                    .build());
 
-            assertThatThrownBy(() -> scheduler.orderActionCalls(input))
-                    .isInstanceOf(CyclicDataDependencyException.class);
+            assertThatThrownBy(() -> scheduler.orderActionCalls(input)).isInstanceOf(CyclicDataDependencyException.class);
         }
-
 
         @Test
         void testWriteCustomization() throws Exception {
 
-            List<ActionCallConfig> input = Arrays.asList(
-                    new TestCallBuilder("A").withRead("B").build(),
-                    new TestCallBuilder("B").withWrite("C").withRemovedWrite("B").build(),
-                    new TestCallBuilder("A1").withRead("C").build()
-            );
+            List<ActionCallConfig> input = Arrays.asList(new TestCallBuilder("A").withRead("B")
+                    .build(), new TestCallBuilder("B").withWrite("C")
+                    .withRemovedWrite("B")
+                    .build(), new TestCallBuilder("A1").withRead("C").build());
 
             List<String> result = getNames(scheduler.orderActionCalls(input));
             assertThat(result).containsExactly("A", "B", "A1");
         }
 
-
         @Test
         void verifyRulesRespected() throws Exception {
 
-            List<ActionCallConfig> input = Arrays.asList(
-                    new TestCallBuilder("read_propagated")
-                            .withDataInput("http_path")
-                            .withRead("http_path")
-                            .withReadsBeforeWritten("http_path")
-                            .build(),
-                    new TestCallBuilder("http_path")
-                            .withRead("something")
-                            .build(),
-                    new TestCallBuilder("A_parametrize_http")
-                            .withRead("http_path")
-                            .withWrite("http_path")
-                            .build(),
-                    new TestCallBuilder("B_parametrize_http")
-                            .withRead("http_path")
-                            .withWrite("http_path")
-                            .build(),
-                    new TestCallBuilder("read_parametrized")
-                            .withDataInput("http_path")
-                            .build()
+            List<ActionCallConfig> input = Arrays.asList(new TestCallBuilder("read_propagated").withDataInput("http_path")
+                    .withRead("http_path")
+                    .withReadsBeforeWritten("http_path")
+                    .build(), new TestCallBuilder("http_path").withRead("something")
+                    .build(), new TestCallBuilder("A_parametrize_http").withRead("http_path")
+                    .withWrite("http_path")
+                    .build(), new TestCallBuilder("B_parametrize_http").withRead("http_path")
+                    .withWrite("http_path")
+                    .build(), new TestCallBuilder("read_parametrized").withDataInput("http_path").build()
 
             );
 

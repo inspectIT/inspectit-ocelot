@@ -7,8 +7,8 @@ import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
-import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 
 /**
  * Condition to be applied with {@link org.springframework.context.annotation.Conditional}.

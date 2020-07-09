@@ -32,10 +32,7 @@ public class MoveControllerTest {
         void sourceWithLeadingSlash() throws Exception {
             when(fileManager.getWorkingDirectory()).thenReturn(fileAccessor);
 
-            controller.moveFileOrDirectory(FileMoveDescription.builder()
-                    .source("/src")
-                    .target("dest")
-                    .build());
+            controller.moveFileOrDirectory(FileMoveDescription.builder().source("/src").target("dest").build());
 
             verify(fileManager).getWorkingDirectory();
             verify(fileAccessor).moveConfiguration(eq("src"), eq("dest"));
@@ -46,10 +43,7 @@ public class MoveControllerTest {
         void targetWithLeadingSlash() throws Exception {
             when(fileManager.getWorkingDirectory()).thenReturn(fileAccessor);
 
-            controller.moveFileOrDirectory(FileMoveDescription.builder()
-                    .source("src")
-                    .target("/dest")
-                    .build());
+            controller.moveFileOrDirectory(FileMoveDescription.builder().source("src").target("/dest").build());
 
             verify(fileManager).getWorkingDirectory();
             verify(fileAccessor).moveConfiguration(eq("src"), eq("dest"));

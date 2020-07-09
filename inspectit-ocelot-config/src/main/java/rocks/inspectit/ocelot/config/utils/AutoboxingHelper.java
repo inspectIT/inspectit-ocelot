@@ -7,8 +7,11 @@ import java.util.Set;
 public class AutoboxingHelper {
 
     private static final Map<Class<?>, Class<?>> primitiveClassesToWrapperClassesMap;
+
     private static final Map<String, String> primitivesToWrappersMap;
+
     private static final Map<String, Class<?>> primitivesToPrimitiveClassesMap;
+
     private static final Map<String, String> wrappersToPrimitivesMap;
 
     private static final Map<String, String> wrappersSimpleNametoFQNMap;
@@ -33,7 +36,8 @@ public class AutoboxingHelper {
         primitivesToWrappersMap.forEach((p, w) -> wrappersToPrimitivesMap.put(w, p));
 
         wrappersSimpleNametoFQNMap = new HashMap<>();
-        primitiveClassesToWrapperClassesMap.values().forEach(w -> wrappersSimpleNametoFQNMap.put(w.getSimpleName(), w.getName()));
+        primitiveClassesToWrapperClassesMap.values()
+                .forEach(w -> wrappersSimpleNametoFQNMap.put(w.getSimpleName(), w.getName()));
 
     }
 
@@ -53,6 +57,7 @@ public class AutoboxingHelper {
      * Returns the corresponding Wrapper class for the given type
      *
      * @param typeName the primitive or the corresponding wrapper class name, either simple or FQN
+     *
      * @return the corresponding wrapper class
      */
     public static Class<?> getWrapperClass(String typeName) {
@@ -70,6 +75,7 @@ public class AutoboxingHelper {
 
     /**
      * @param typename the name of the type
+     *
      * @return true, if the given type is a primitive
      */
     public static boolean isPrimitiveType(String typename) {
@@ -78,6 +84,7 @@ public class AutoboxingHelper {
 
     /**
      * @param typename the name of the class (either simple or FQN)
+     *
      * @return true, if the given type is a primitive wrapper
      */
     public static boolean isWrapperType(String typename) {
@@ -86,6 +93,7 @@ public class AutoboxingHelper {
 
     /**
      * @param wrapper the typename of the wrapper class, either simple or FQN
+     *
      * @return the primitive typename this wrapper wraps
      */
     public static String getPrimitiveForWrapper(String wrapper) {
@@ -97,6 +105,7 @@ public class AutoboxingHelper {
 
     /**
      * @param primitive the name of the primitive type
+     *
      * @return the FQN of the wrapper type
      */
     public static String getWrapperForPrimitive(String primitive) {
@@ -107,6 +116,7 @@ public class AutoboxingHelper {
      * Reutrn the mthod of a wrapper class which performs the unboxing, e.g. intValue for Integer, longValue for Long etc.
      *
      * @param wrapper the name of the wrapper, either FQN or simple
+     *
      * @return the name of the unboxing method
      */
     public static String getWrapperUnboxingMethodName(String wrapper) {

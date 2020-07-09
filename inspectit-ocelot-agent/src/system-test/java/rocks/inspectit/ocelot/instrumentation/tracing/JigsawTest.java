@@ -23,8 +23,9 @@ public class JigsawTest extends TraceTestBase {
         assertSpansExported(spans -> {
             assertThat(spans).anySatisfy((span) -> {
                 assertThat(span.getName()).isEqualTo("DriverManager.getDrivers");
-                assertThat(span.getAttributes().getAttributeMap().get("test"))
-                        .isEqualTo(AttributeValue.stringAttributeValue("success"));
+                assertThat(span.getAttributes()
+                        .getAttributeMap()
+                        .get("test")).isEqualTo(AttributeValue.stringAttributeValue("success"));
             });
         });
     }

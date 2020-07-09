@@ -37,7 +37,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class GeolocationResolverIntTest {
 
     private static String URL_KEY = "u";
+
     private static String SUT_URL = "http://test.com/login";
+
     private static String BEACON_KEY_NAME = "t_page";
 
     @Autowired
@@ -53,11 +55,17 @@ public class GeolocationResolverIntTest {
      * Sends beacon to mocked endpoint /beacon
      *
      * @param beacon
+     *
      * @throws Exception
      */
     private void sendBeacon(Map<String, String> beacon, String requesterIP) throws Exception {
-        List<NameValuePair> params = beacon.entrySet().stream().map(entry -> new BasicNameValuePair(entry.getKey(), entry.getValue())).collect(Collectors.toList());
-        mockMvc.perform(post("/beacon").header("X-Forwarded-For", requesterIP).contentType(MediaType.APPLICATION_FORM_URLENCODED).content(EntityUtils.toString(new UrlEncodedFormEntity(params)))).andExpect(status().isOk());
+        List<NameValuePair> params = beacon.entrySet()
+                .stream()
+                .map(entry -> new BasicNameValuePair(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList());
+        mockMvc.perform(post("/beacon").header("X-Forwarded-For", requesterIP)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .content(EntityUtils.toString(new UrlEncodedFormEntity(params)))).andExpect(status().isOk());
     }
 
     private Map<String, String> getBasicBeacon() {

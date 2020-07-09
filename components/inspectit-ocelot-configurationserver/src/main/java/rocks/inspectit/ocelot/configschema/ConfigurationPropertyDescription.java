@@ -83,6 +83,7 @@ public class ConfigurationPropertyDescription implements Comparable<Configuratio
      * On the second level, they are ordered lexicographically by name.
      *
      * @param other the other instance to compare to
+     *
      * @return -1 if this is less, 0 if the name is equal and 1 if this is greater.
      */
     @Override

@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.env.PropertiesPropertySource;
 import rocks.inspectit.ocelot.bootstrap.AgentManager;
-import rocks.inspectit.ocelot.bootstrap.IAgent;
 import rocks.inspectit.ocelot.bootstrap.Instances;
 
 import java.io.File;

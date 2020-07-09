@@ -54,9 +54,7 @@ public class BeaconMetricManagerTest {
     MeasureMap measureMap;
 
     @Spy
-    List<BeaconRecorder> beaconRecorders = ImmutableList.of(
-            mock(BeaconRecorder.class)
-    );
+    List<BeaconRecorder> beaconRecorders = ImmutableList.of(mock(BeaconRecorder.class));
 
     @Nested
     class ProcessBeacon {
@@ -65,7 +63,8 @@ public class BeaconMetricManagerTest {
 
         @BeforeEach
         void setupConfiguration() {
-            ViewDefinitionSettings view = ViewDefinitionSettings.builder().bucketBoundaries(Arrays.asList(0d, 1d))
+            ViewDefinitionSettings view = ViewDefinitionSettings.builder()
+                    .bucketBoundaries(Arrays.asList(0d, 1d))
                     .aggregation(ViewDefinitionSettings.Aggregation.HISTOGRAM)
                     .tag("TAG_1", true)
                     .tag("TAG_2", true)
@@ -73,8 +72,7 @@ public class BeaconMetricManagerTest {
             Map<String, ViewDefinitionSettings> views = new HashMap<>();
             views.put("Dummy metric name/HISTOGRAM", view);
 
-            BeaconMetricDefinitionSettings dummyMetricDefinition = BeaconMetricDefinitionSettings
-                    .beaconMetricBuilder()
+            BeaconMetricDefinitionSettings dummyMetricDefinition = BeaconMetricDefinitionSettings.beaconMetricBuilder()
                     .valueExpression("{dummy_beacon_field}")
                     .description("Dummy description")
                     .type(rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings.MeasureType.DOUBLE)

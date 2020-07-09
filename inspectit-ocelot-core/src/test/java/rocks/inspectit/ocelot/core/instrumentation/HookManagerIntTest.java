@@ -20,10 +20,8 @@ import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-@TestPropertySource(properties = {
-        "inspectit.instrumentation.internal.inter-batch-delay=1ms", //for faster responses of the test
-        "inspectit.instrumentation.scopes.scA.type.name=rocks.inspectit.ocelot.core.testutils.Dummy",
-        "inspectit.instrumentation.scopes.scA.methods[0].name=methodA",
+@TestPropertySource(properties = {"inspectit.instrumentation.internal.inter-batch-delay=1ms", //for faster responses of the test
+        "inspectit.instrumentation.scopes.scA.type.name=rocks.inspectit.ocelot.core.testutils.Dummy", "inspectit.instrumentation.scopes.scA.methods[0].name=methodA",
 
         "inspectit.instrumentation.scopes.scB.type.name=rocks.inspectit.ocelot.core.testutils.Dummy",
 
@@ -32,7 +30,6 @@ import static org.mockito.Mockito.when;
 })
 public class HookManagerIntTest extends SpringTestBase {
 
-
     @Autowired
     InstrumentationTriggerer triggerer;
 
@@ -40,10 +37,8 @@ public class HookManagerIntTest extends SpringTestBase {
 
     private Class<?> dummyClassWithoutBootstrapAccess;
 
-
     @BeforeEach
     void intitializeDummyClass() throws Exception {
-
 
         String className = Dummy.class.getName();
         // we need to load the target class from a different classloader because the "this" classloader is ignored
@@ -60,7 +55,6 @@ public class HookManagerIntTest extends SpringTestBase {
         await().atMost(10, TimeUnit.SECONDS).until(() -> triggerer.pendingClasses.size() == 0);
     }
 
-
     @Test
     @DirtiesContext
     void testInstrumentationRemoval() {
@@ -71,9 +65,7 @@ public class HookManagerIntTest extends SpringTestBase {
         assertThat(hookA).isNotSameAs(NoopMethodHook.INSTANCE);
         assertThat(hookB).isSameAs(NoopMethodHook.INSTANCE);
 
-        updateProperties(ps ->
-                ps.setProperty("inspectit.instrumentation.rules.r1.scopes.scA", "false")
-        );
+        updateProperties(ps -> ps.setProperty("inspectit.instrumentation.rules.r1.scopes.scA", "false"));
 
         waitForHookingToFinish();
 
@@ -83,15 +75,12 @@ public class HookManagerIntTest extends SpringTestBase {
         assertThat(hookB).isSameAs(NoopMethodHook.INSTANCE);
     }
 
-
     @Test
     @DirtiesContext
     void testInstrumentationAdding() {
         waitForHookingToFinish();
 
-        updateProperties(ps ->
-                ps.setProperty("inspectit.instrumentation.rules.r2.scopes.scB", "true")
-        );
+        updateProperties(ps -> ps.setProperty("inspectit.instrumentation.rules.r2.scopes.scB", "true"));
 
         waitForHookingToFinish();
 
@@ -118,7 +107,6 @@ public class HookManagerIntTest extends SpringTestBase {
         assertThat(hookB).isSameAs(NoopMethodHook.INSTANCE);
         assertThat(constructorHook).isSameAs(NoopMethodHook.INSTANCE);
     }
-
 
     @Test
     @DirtiesContext

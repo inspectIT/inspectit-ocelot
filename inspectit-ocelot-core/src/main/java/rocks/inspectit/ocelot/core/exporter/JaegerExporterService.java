@@ -42,8 +42,10 @@ public class JaegerExporterService extends DynamicallyActivatableService {
         try {
             JaegerExporterSettings settings = configuration.getExporters().getTracing().getJaeger();
             log.info("Starting Jaeger Exporter with url '{}'", settings.getUrl());
-            JaegerTraceExporter.createAndRegister(
-                    JaegerExporterConfiguration.builder().setThriftEndpoint(settings.getUrl()).setServiceName(settings.getServiceName()).build());
+            JaegerTraceExporter.createAndRegister(JaegerExporterConfiguration.builder()
+                    .setThriftEndpoint(settings.getUrl())
+                    .setServiceName(settings.getServiceName())
+                    .build());
             return true;
         } catch (Throwable t) {
             log.error("Error creating Jaeger exporter", t);

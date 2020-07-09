@@ -1,6 +1,5 @@
 package rocks.inspectit.ocelot.config.conversion;
 
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.convert.converter.Converter;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.MetricRecordingSettings;

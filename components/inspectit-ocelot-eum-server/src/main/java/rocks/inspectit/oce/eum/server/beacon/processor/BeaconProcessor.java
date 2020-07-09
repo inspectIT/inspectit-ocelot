@@ -10,6 +10,7 @@ public interface BeaconProcessor {
 
     /**
      * @param beacon The {@link Beacon} to be processed
+     *
      * @return A new {@link Beacon} instance
      */
     Beacon process(Beacon beacon);

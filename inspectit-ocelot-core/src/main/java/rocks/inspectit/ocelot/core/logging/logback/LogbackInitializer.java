@@ -50,9 +50,10 @@ public class LogbackInitializer {
 
     // flags for the filters
     static boolean consoleEnabled = true;
-    static boolean fileEnabled = true;
-    static boolean selfMonitoringEnabled = true;
 
+    static boolean fileEnabled = true;
+
+    static boolean selfMonitoringEnabled = true;
 
     public static void initDefaultLogging() {
         initLogging(null);
@@ -143,12 +144,12 @@ public class LogbackInitializer {
         }
     }
 
-
     /**
      * Sets system property if value is not null and report if the set was done.
      *
      * @param name  property name
      * @param value property value
+     *
      * @return if set was done
      */
     private static boolean setSystemProperty(String name, String value) {
@@ -163,6 +164,7 @@ public class LogbackInitializer {
      * Clears system property and report if the clear was done.
      *
      * @param name property name
+     *
      * @return true if property was set and then cleared
      */
     private static boolean clearSystemProperty(String name) {

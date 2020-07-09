@@ -44,12 +44,14 @@ public class BeaconMetricManager {
      * Processes boomerang beacon
      *
      * @param beacon The beacon containing arbitrary key-value pairs.
+     *
      * @return whether the beacon has been successfully parsed
      */
     public boolean processBeacon(Beacon beacon) {
         boolean successful = false;
 
-        for (Map.Entry<String, BeaconMetricDefinitionSettings> metricDefinitionEntry : configuration.getDefinitions().entrySet()) {
+        for (Map.Entry<String, BeaconMetricDefinitionSettings> metricDefinitionEntry : configuration.getDefinitions()
+                .entrySet()) {
             String metricName = metricDefinitionEntry.getKey();
             BeaconMetricDefinitionSettings metricDefinition = metricDefinitionEntry.getValue();
 
@@ -81,7 +83,8 @@ public class BeaconMetricManager {
      * @param beacon           the current beacon
      */
     private void recordMetric(String metricName, BeaconMetricDefinitionSettings metricDefinition, Beacon beacon) {
-        RawExpression expression = expressionCache.computeIfAbsent(metricDefinition, definition -> new RawExpression(definition.getValueExpression()));
+        RawExpression expression = expressionCache.computeIfAbsent(metricDefinition, definition -> new RawExpression(definition
+                .getValueExpression()));
 
         if (expression.isSolvable(beacon)) {
             Number value = expression.solve(beacon);

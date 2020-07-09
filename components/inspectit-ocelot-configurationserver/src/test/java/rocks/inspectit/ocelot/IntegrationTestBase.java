@@ -24,29 +24,22 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-
 @ExtendWith(SpringExtension.class)
-@TestPropertySource(properties = {
-        "spring.datasource.url=jdbc:h2:mem:userdb;DB_CLOSE_DELAY=-1",
-        "spring.datasource.driver-class-name=org.h2.Driver",
-        "spring.datasource.username=sa",
-        "spring.datasource.password=",
-        "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect",
-        "spring.jpa.hibernate.ddl-auto=create",
-})
+@TestPropertySource(properties = {"spring.datasource.url=jdbc:h2:mem:userdb;DB_CLOSE_DELAY=-1", "spring.datasource.driver-class-name=org.h2.Driver", "spring.datasource.username=sa", "spring.datasource.password=", "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect", "spring.jpa.hibernate.ddl-auto=create",})
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ContextConfiguration(initializers = IntegrationTestBase.Initializer.class)
 public class IntegrationTestBase {
 
     static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+
         @Override
         public void initialize(ConfigurableApplicationContext context) {
             try {
                 Path tempDirectory = Files.createTempDirectory("ocelot");
                 FileUtils.forceDeleteOnExit(tempDirectory.toFile());
 
-                TestPropertyValues.of("inspectit-config-server.working-directory=" + tempDirectory.toAbsolutePath().toString())
-                        .applyTo(context.getEnvironment());
+                TestPropertyValues.of("inspectit-config-server.working-directory=" + tempDirectory.toAbsolutePath()
+                        .toString()).applyTo(context.getEnvironment());
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

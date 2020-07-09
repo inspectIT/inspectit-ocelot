@@ -32,7 +32,6 @@ public class SelfMonitoringService {
 
     private static final TagKey COMPONENT_TAG_KEY = TagKey.create("component-name");
 
-
     @Autowired
     private InspectitEnvironment env;
 
@@ -45,7 +44,6 @@ public class SelfMonitoringService {
     @Autowired
     private CommonTagsManager commonTags;
 
-
     /**
      * Provides an auto-closable that can be used in try-with-resource form.
      * <p>
@@ -53,6 +51,7 @@ public class SelfMonitoringService {
      * If self monitoring is disabled, returns a no-ops closable.
      *
      * @param componentName the human readable name of the component of which the time is measured, is used as tag value
+     *
      * @return the scope performing the measurement
      */
     public Scope withDurationSelfMonitoring(String componentName) {
@@ -70,7 +69,6 @@ public class SelfMonitoringService {
     public boolean isSelfMonitoringEnabled() {
         return env.getCurrentConfig().getSelfMonitoring().isEnabled();
     }
-
 
     /**
      * Prints info logs when the configuration changes the self monitoring enabled state.
@@ -103,9 +101,7 @@ public class SelfMonitoringService {
             val measure = measureManager.getMeasureDouble(fullMeasureName);
             measure.ifPresent(m -> {
                 try (val ct = commonTags.withCommonTagScope()) {
-                    statsRecorder.newMeasureMap()
-                            .put(m, value)
-                            .record();
+                    statsRecorder.newMeasureMap().put(m, value).record();
                 }
             });
         }
@@ -139,9 +135,7 @@ public class SelfMonitoringService {
             val measure = measureManager.getMeasureLong(fullMeasureName);
             measure.ifPresent(m -> {
                 try (val ct = commonTags.withCommonTagScope(customTags)) {
-                    statsRecorder.newMeasureMap()
-                            .put(m, value)
-                            .record();
+                    statsRecorder.newMeasureMap().put(m, value).record();
                 }
             });
         }
@@ -151,24 +145,24 @@ public class SelfMonitoringService {
     public class SelfMonitoringScope implements Scope {
 
         private final String componentName;
+
         private final long start;
 
         @Override
         public void close() {
             double durationInMicros = TimeUnit.NANOSECONDS.toMicros(System.nanoTime() - start);
             val measure = measureManager.getMeasureDouble(METRICS_PREFIX + DURATION_MEASURE_NAME);
-            measure.ifPresent(m ->
-                    statsRecorder.newMeasureMap()
-                            .put(m, durationInMicros)
-                            .record(Tags.getTagger().toBuilder(commonTags.getCommonTagContext())
-                                    .putLocal(COMPONENT_TAG_KEY, TagUtils.createTagValue(componentName)).build())
-            );
+            measure.ifPresent(m -> statsRecorder.newMeasureMap()
+                    .put(m, durationInMicros)
+                    .record(Tags.getTagger()
+                            .toBuilder(commonTags.getCommonTagContext())
+                            .putLocal(COMPONENT_TAG_KEY, TagUtils.createTagValue(componentName))
+                            .build()));
 
             if (log.isTraceEnabled()) {
                 log.trace(String.format("%s reported %.1f\u00B5s", componentName, durationInMicros));
             }
         }
     }
-
 
 }

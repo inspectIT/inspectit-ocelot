@@ -26,7 +26,9 @@ public class DatadogFormat extends TextFormat {
      * Datadog header keys.
      */
     private static final String X_DATADOG_TRACE_ID = "X-Datadog-Trace-ID";
+
     private static final String X_DATADOG_PARENT_ID = "X-Datadog-Parent-ID";
+
     private static final String X_DATADOG_SAMPLING_PRIORITY = "X-Datadog-Sampling-Priority";
 
     /**
@@ -96,6 +98,7 @@ public class DatadogFormat extends TextFormat {
      * This method is based on the io.opencensus.exporter.trace.datadog.DatadogExporterHandler#convertSpanId method.
      *
      * @param spanId the span id to convert to a long
+     *
      * @return the long representing the given span id
      */
     private static long convertSpanId(final SpanId spanId) {

@@ -31,9 +31,7 @@ public class GlobalSamplerConfigurer {
         Sampler sampler = Samplers.probabilitySampler(probability);
 
         TraceParams activeParams = Tracing.getTraceConfig().getActiveTraceParams();
-        TraceParams updatedParams = activeParams.toBuilder()
-                .setSampler(sampler)
-                .build();
+        TraceParams updatedParams = activeParams.toBuilder().setSampler(sampler).build();
         Tracing.getTraceConfig().updateActiveTraceParams(updatedParams);
     }
 }

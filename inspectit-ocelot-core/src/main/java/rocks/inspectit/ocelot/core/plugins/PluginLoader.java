@@ -83,9 +83,7 @@ public class PluginLoader {
             } catch (Exception e) {
                 log.error("Error scanning for plugins", e);
             }
-            env.updatePropertySources(ps ->
-                    ps.addLast(new PropertiesPropertySource(PROPERTY_SOURCE_NAME, defaultConfigurations))
-            );
+            env.updatePropertySources(ps -> ps.addLast(new PropertiesPropertySource(PROPERTY_SOURCE_NAME, defaultConfigurations)));
             updatePlugins();
         }
     }
@@ -140,6 +138,7 @@ public class PluginLoader {
      * {@link OcelotPlugin} annotations.
      *
      * @param pluginJar The JarFile in which the classes should be searched in.
+     *
      * @return A list containing all classes annotated with {@link OcelotPlugin} in the given file.
      */
     @VisibleForTesting
@@ -162,6 +161,7 @@ public class PluginLoader {
      * Checks if an InputStream representing a .class file contains an {@link OcelotPlugin} annotation.
      *
      * @param inputStream The InputStream of the .class file which should be checked.
+     *
      * @return True if the .class file is annotated with a OcelotPlugin.
      */
     private boolean isOcelotPlugin(InputStream inputStream) throws IOException {
@@ -177,6 +177,7 @@ public class PluginLoader {
      * A JarEntry with the name "root/mypackage/myclass.class" for example would be returned as "root.mypackage.myclass".
      *
      * @param entry The entry the class name should be returned of.
+     *
      * @return The resolved name of the class.
      */
     private String resolveClassName(JarEntry entry) {
@@ -189,6 +190,7 @@ public class PluginLoader {
      * Checks if a given JarEntry is a class file.
      *
      * @param entry The entry to check.
+     *
      * @return Returns true if the given entry is a class file.
      */
     private boolean isClass(JarEntry entry) {
@@ -218,7 +220,8 @@ public class PluginLoader {
                             Properties result = PropertyUtils.readYamlFiles(new ClassPathResource(defaultConfigYml, pluginClass));
                             defaultConfigurations.putAll(result);
                         } catch (Exception e) {
-                            log.error("Error loading default config file {} of plugin {}", defaultConfigYml, pluginClass.getName(), e);
+                            log.error("Error loading default config file {} of plugin {}", defaultConfigYml, pluginClass
+                                    .getName(), e);
                         }
                     }
                     log.info("Plugin '{}' loaded!", pluginInfo.value());

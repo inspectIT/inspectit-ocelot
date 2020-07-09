@@ -36,10 +36,7 @@ public class ConfigDirWatchingIntTest {
 
     @Nested
     @DirtiesContext
-    @TestPropertySource(properties = {
-            "inspectit.config.file-based.path=" + ConfigDirWatchingIntTest.tmpDir,
-            "inspectit.config.file-based.frequency=50ms"
-    })
+    @TestPropertySource(properties = {"inspectit.config.file-based.path=" + ConfigDirWatchingIntTest.tmpDir, "inspectit.config.file-based.frequency=50ms"})
     class Polling extends SpringTestBase {
 
         @Autowired
@@ -48,37 +45,33 @@ public class ConfigDirWatchingIntTest {
         @Test
         public void testNewFilesDetected() throws Exception {
             FileUtils.write(new File(tmpDir + "/A.properties"), "inspectit.service-name=FromAproperties", Charset.defaultCharset());
-            await().atMost(15, TimeUnit.SECONDS).untilAsserted(() ->
-                    assertThat(env.getCurrentConfig().getServiceName()).isEqualTo("FromAproperties")
-            );
+            await().atMost(15, TimeUnit.SECONDS)
+                    .untilAsserted(() -> assertThat(env.getCurrentConfig()
+                            .getServiceName()).isEqualTo("FromAproperties"));
         }
-
 
         @Test
         public void testFileChangesDetected() throws Exception {
             FileUtils.write(new File(tmpDir + "/A.yml"), "inspectit.service-name: FromAproperties", Charset.defaultCharset());
-            await().atMost(15, TimeUnit.SECONDS).untilAsserted(() ->
-                    assertThat(env.getCurrentConfig().getServiceName()).isEqualTo("FromAproperties")
-            );
+            await().atMost(15, TimeUnit.SECONDS)
+                    .untilAsserted(() -> assertThat(env.getCurrentConfig()
+                            .getServiceName()).isEqualTo("FromAproperties"));
             FileUtils.write(new File(tmpDir + "/A.yml"), "inspectit.service-name: newname", Charset.defaultCharset());
-            await().atMost(15, TimeUnit.SECONDS).untilAsserted(() ->
-                    assertThat(env.getCurrentConfig().getServiceName()).isEqualTo("newname")
-            );
+            await().atMost(15, TimeUnit.SECONDS)
+                    .untilAsserted(() -> assertThat(env.getCurrentConfig().getServiceName()).isEqualTo("newname"));
         }
 
         @Test
         public void testFileDeleted() throws Exception {
             FileUtils.write(new File(tmpDir + "/A.yml"), "inspectit.service-name: FromAproperties", Charset.defaultCharset());
-            await().atMost(15, TimeUnit.SECONDS).untilAsserted(() ->
-                    assertThat(env.getCurrentConfig().getServiceName()).isEqualTo("FromAproperties")
-            );
-            await().atMost(15, TimeUnit.SECONDS).until(() ->
-                    FileUtils.deleteQuietly(new File(tmpDir + "/A.yml")));
-            await().atMost(15, TimeUnit.SECONDS).untilAsserted(() ->
-                    assertThat(env.getCurrentConfig().getServiceName()).isEqualTo("InspectIT Agent")
-            );
+            await().atMost(15, TimeUnit.SECONDS)
+                    .untilAsserted(() -> assertThat(env.getCurrentConfig()
+                            .getServiceName()).isEqualTo("FromAproperties"));
+            await().atMost(15, TimeUnit.SECONDS).until(() -> FileUtils.deleteQuietly(new File(tmpDir + "/A.yml")));
+            await().atMost(15, TimeUnit.SECONDS)
+                    .untilAsserted(() -> assertThat(env.getCurrentConfig()
+                            .getServiceName()).isEqualTo("InspectIT Agent"));
         }
     }
-
 
 }

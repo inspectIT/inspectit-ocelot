@@ -69,7 +69,6 @@ public class InspectitContextImplTest {
 
     }
 
-
     @Nested
     public class EnterSpan {
 
@@ -107,9 +106,7 @@ public class InspectitContextImplTest {
             assertThat(Tracing.getTracer().getCurrentSpan()).isNotSameAs(mySpan);
         }
 
-
     }
-
 
     @Nested
     public class DownPropagation {
@@ -129,7 +126,6 @@ public class InspectitContextImplTest {
             ctx.close();
             assertThat(InspectitContextImpl.INSPECTIT_KEY.get()).isNull();
         }
-
 
         @Test
         void verifyCommonTagsPropagatedAndOverwritable() {
@@ -153,7 +149,6 @@ public class InspectitContextImplTest {
 
             assertThat(InspectitContextImpl.INSPECTIT_KEY.get()).isNull();
         }
-
 
         @Test
         void verifyOverwritesAreLocal() {
@@ -180,7 +175,6 @@ public class InspectitContextImplTest {
             assertThat(ctxC.getData("keyA")).isEqualTo("ctxA_valueA");
             assertThat(ctxC.getData("keyB")).isEqualTo("ctxB_valueB");
 
-
             ctxC.close();
             ctxB.close();
             //ensure no up propagation took place
@@ -190,7 +184,6 @@ public class InspectitContextImplTest {
 
             assertThat(InspectitContextImpl.INSPECTIT_KEY.get()).isNull();
         }
-
 
         @Test
         void verifyOverwritesHappenOnlyWhenConfigured() {
@@ -218,7 +211,6 @@ public class InspectitContextImplTest {
             assertThat(ctxC.getData("keyA")).isEqualTo("ctxA_valueA");
             assertThat(ctxC.getData("keyB")).isNull();
 
-
             ctxC.close();
             ctxB.close();
             //ensure no up propagation took place
@@ -228,7 +220,6 @@ public class InspectitContextImplTest {
 
             assertThat(InspectitContextImpl.INSPECTIT_KEY.get()).isNull();
         }
-
 
         @Test
         void verifyContextReleasedWhenAllChildrenAreClosed() {
@@ -252,7 +243,6 @@ public class InspectitContextImplTest {
             openRemainingContext.close();
 
         }
-
 
         @Test
         void verifyDownPropagationForChildrenOnDifferentThreadWithRootNotClosed() throws Exception {
@@ -279,7 +269,6 @@ public class InspectitContextImplTest {
             assertThat(tagValue.get()).isEqualTo("rootValue");
         }
 
-
         @Test
         void verifyDownPropagationForChildrenOnDifferentThreadWithRootClosed() throws Exception {
             lenient().doReturn(true).when(propagation).isPropagatedDownWithinJVM(any());
@@ -304,7 +293,6 @@ public class InspectitContextImplTest {
 
             assertThat(tagValue.get()).isEqualTo("rootValue");
         }
-
 
         @Test
         void verifyDownPropagationForChildrenOnSameThreadWithRootClosed() throws Exception {
@@ -331,7 +319,6 @@ public class InspectitContextImplTest {
         }
 
     }
-
 
     @Nested
     public class UpPropagation {
@@ -378,7 +365,6 @@ public class InspectitContextImplTest {
             assertThat(InspectitContextImpl.INSPECTIT_KEY.get()).isNull();
         }
 
-
         @Test
         void verifyNoUpPropagationForChildrenOnDifferentThreadWithRootNotClosed() throws Exception {
             lenient().doReturn(true).when(propagation).isPropagatedUpWithinJVM(any());
@@ -401,7 +387,6 @@ public class InspectitContextImplTest {
 
             assertThat(root.getData("tag")).isEqualTo("rootValue");
         }
-
 
         @Test
         void verifyNoUpPropagationForChildrenOnDifferentThreadWithRootClosed() throws Exception {
@@ -426,7 +411,6 @@ public class InspectitContextImplTest {
             assertThat(root.getData("tag")).isEqualTo("rootValue");
         }
 
-
         @Test
         void verifyNoUpPropagationForChildrenOnSameThreadWithRootClosed() throws Exception {
             lenient().doReturn(true).when(propagation).isPropagatedUpWithinJVM(any());
@@ -449,7 +433,6 @@ public class InspectitContextImplTest {
             assertThat(root.getData("tag")).isEqualTo("rootValue");
         }
     }
-
 
     @Nested
     public class UpAndDownPropagation {
@@ -544,7 +527,6 @@ public class InspectitContextImplTest {
             assertThat(root.getData("tag")).isEqualTo("syncChildValue");
         }
 
-
         @Test
         void verifyUpPropagatedValuesInvisibleForChildrenOnDifferentThreadWithRootClosed() throws Exception {
             doReturn(true).when(propagation).isPropagatedUpWithinJVM(any());
@@ -572,11 +554,9 @@ public class InspectitContextImplTest {
             asyncTask.start();
             asyncTask.join();
 
-
             assertThat(asyncTaskTagValue.get()).isEqualTo("rootValue");
             assertThat(root.getData("tag")).isEqualTo("syncChildValue");
         }
-
 
         @Test
         void verifyUpPropagatedValuesInvisibleForChildrenOnSameThreadWithRootClosed() throws Exception {
@@ -616,7 +596,8 @@ public class InspectitContextImplTest {
         void verifyTagsExtractedOnRoot() {
             doAnswer((invocation) -> PropagationMetaData.builder()).when(propagation).copy();
 
-            TagContextBuilder tcb = Tags.getTagger().emptyBuilder()
+            TagContextBuilder tcb = Tags.getTagger()
+                    .emptyBuilder()
                     .putLocal(TagKey.create("myTag"), TagValue.create("myValue"));
             try (Scope tc = tcb.buildScoped()) {
                 InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
@@ -633,12 +614,12 @@ public class InspectitContextImplTest {
             assertThat(InspectitContextImpl.INSPECTIT_KEY.get()).isNull();
         }
 
-
         @Test
         void verifyTagPropagationPreservedOnRoot() {
             doAnswer((invocation) -> PropagationMetaData.builder()).when(propagation).copy();
 
-            TagContextBuilder tcb = Tags.getTagger().emptyBuilder()
+            TagContextBuilder tcb = Tags.getTagger()
+                    .emptyBuilder()
                     .putLocal(TagKey.create("myTag"), TagValue.create("myValue"));
             try (Scope tc = tcb.buildScoped()) {
                 InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
@@ -670,7 +651,8 @@ public class InspectitContextImplTest {
 
             root.makeActive();
 
-            TagContextBuilder tcb = Tags.getTagger().emptyBuilder()
+            TagContextBuilder tcb = Tags.getTagger()
+                    .emptyBuilder()
                     .putLocal(TagKey.create("myTag"), TagValue.create("myValue"));
             try (Scope tc = tcb.buildScoped()) {
                 InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
@@ -701,7 +683,8 @@ public class InspectitContextImplTest {
 
             root.makeActive();
 
-            TagContextBuilder tcb = Tags.getTagger().emptyBuilder()
+            TagContextBuilder tcb = Tags.getTagger()
+                    .emptyBuilder()
                     .putLocal(TagKey.create("myTag"), TagValue.create("myValue"));
             try (Scope tc = tcb.buildScoped()) {
                 InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
@@ -723,7 +706,6 @@ public class InspectitContextImplTest {
             assertThat(InspectitContextImpl.INSPECTIT_KEY.get()).isNull();
         }
 
-
         @Test
         void verifyTagSettingWithoutPropagationPreservedWithinTrace() {
             doAnswer((invocation) -> PropagationMetaData.builder()
@@ -734,7 +716,8 @@ public class InspectitContextImplTest {
             InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
             root.makeActive();
 
-            TagContextBuilder tcb = Tags.getTagger().emptyBuilder()
+            TagContextBuilder tcb = Tags.getTagger()
+                    .emptyBuilder()
                     .putLocal(TagKey.create("myTag"), TagValue.create("myValue"));
             try (Scope tc = tcb.buildScoped()) {
                 InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
@@ -756,7 +739,6 @@ public class InspectitContextImplTest {
             assertThat(InspectitContextImpl.INSPECTIT_KEY.get()).isNull();
         }
 
-
         @Test
         void verifyDataOnlyPublishedAsTagWhenConfigured() {
             doReturn(true).when(propagation).isPropagatedDownWithinJVM(any());
@@ -775,7 +757,6 @@ public class InspectitContextImplTest {
             assertThat(InspectitContextImpl.INSPECTIT_KEY.get()).isNull();
         }
 
-
         @Test
         void verifyDataTypesPreservedWithinTrace() {
             doReturn(true).when(propagation).isPropagatedDownWithinJVM(any());
@@ -788,7 +769,8 @@ public class InspectitContextImplTest {
 
             root.makeActive();
 
-            TagContextBuilder tcb = Tags.getTagger().currentBuilder()
+            TagContextBuilder tcb = Tags.getTagger()
+                    .currentBuilder()
                     .putLocal(TagKey.create("myTag"), TagValue.create("myValue"));
             try (Scope tc = tcb.buildScoped()) {
 
@@ -808,7 +790,6 @@ public class InspectitContextImplTest {
             assertThat(InspectitContextImpl.INSPECTIT_KEY.get()).isNull();
         }
 
-
         @Test
         void verifyCommonTagsPublished() {
             HashMap<String, String> tags = new HashMap<>();
@@ -827,7 +808,6 @@ public class InspectitContextImplTest {
             ctx.close();
             assertThat(InspectitContextImpl.INSPECTIT_KEY.get()).isNull();
         }
-
 
         @Test
         void verifyLocalValuesPublishedCorrectly() {
@@ -857,7 +837,6 @@ public class InspectitContextImplTest {
 
             assertThat(InspectitContextImpl.INSPECTIT_KEY.get()).isNull();
         }
-
 
         @Test
         void verifyUpPropagatedValuesOnlyAvailableInFullTagScope() {
@@ -938,7 +917,6 @@ public class InspectitContextImplTest {
         }
     }
 
-
     @Nested
     public class SpanActivation {
 
@@ -959,6 +937,5 @@ public class InspectitContextImplTest {
         }
 
     }
-
 
 }

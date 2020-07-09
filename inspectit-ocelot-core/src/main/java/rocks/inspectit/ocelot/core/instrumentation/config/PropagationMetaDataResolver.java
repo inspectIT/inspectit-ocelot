@@ -25,6 +25,7 @@ public class PropagationMetaDataResolver {
      * Configures the {@link PropagationMetaData} based on all sources of settings in the given configuration.
      *
      * @param config the configuration to extract the settings from
+     *
      * @return the resulting meta information about data keys
      */
     public PropagationMetaData resolve(InspectitConfig config) {
@@ -41,9 +42,7 @@ public class PropagationMetaDataResolver {
     void collectCommonTags(PropagationMetaData.Builder builder) {
         commonTags.getCommonTagValueMap()
                 .keySet()
-                .forEach(key -> builder
-                        .setTag(key, true)
-                        .setDownPropagation(key, PropagationMode.JVM_LOCAL));
+                .forEach(key -> builder.setTag(key, true).setDownPropagation(key, PropagationMode.JVM_LOCAL));
     }
 
     @VisibleForTesting
@@ -57,8 +56,7 @@ public class PropagationMetaDataResolver {
                         .entrySet()
                         .stream()
                         .filter(entry -> Boolean.TRUE.equals(entry.getValue()))
-                        .map(Map.Entry::getKey)
-                )
+                        .map(Map.Entry::getKey))
                 .forEach(key -> builder.setTag(key, true));
 
     }

@@ -10,6 +10,7 @@ public interface TraceIdInjector {
      * Injects the trace id (if existing) into the given message and returns the result.
      *
      * @param message the message to use
+     *
      * @return the resulting object of the injection
      */
     Object injectTraceId(Object message);

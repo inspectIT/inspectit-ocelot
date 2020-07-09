@@ -27,6 +27,7 @@ public class LoadedPluginTest {
     InspectitEnvironment env;
 
     InspectitConfig confA = new InspectitConfig();
+
     InspectitConfig confB = new InspectitConfig();
 
     @BeforeEach
@@ -57,13 +58,12 @@ public class LoadedPluginTest {
             verifyNoMoreInteractions(plugin);
         }
 
-
         @SuppressWarnings("unchecked")
         @Test
         void testConfigUpdateOnInspectitConfigChange() {
             when(plugin.getConfigurationClass()).thenReturn((Class) String.class);
-            when(env.loadAndValidateFromProperties(PluginSettings.PLUGIN_CONFIG_PREFIX + "test", String.class))
-                    .thenReturn(Optional.of("foo"));
+            when(env.loadAndValidateFromProperties(PluginSettings.PLUGIN_CONFIG_PREFIX + "test", String.class)).thenReturn(Optional
+                    .of("foo"));
             LoadedPlugin loaded = new LoadedPlugin(plugin, "test");
 
             loaded.updateConfiguration(env);
@@ -79,20 +79,19 @@ public class LoadedPluginTest {
             verifyNoMoreInteractions(plugin);
         }
 
-
         @SuppressWarnings("unchecked")
         @Test
         void testConfigUpdateOnPluginConfigChange() {
             when(plugin.getConfigurationClass()).thenReturn((Class) String.class);
-            when(env.loadAndValidateFromProperties(PluginSettings.PLUGIN_CONFIG_PREFIX + "test", String.class))
-                    .thenReturn(Optional.of("foo"));
+            when(env.loadAndValidateFromProperties(PluginSettings.PLUGIN_CONFIG_PREFIX + "test", String.class)).thenReturn(Optional
+                    .of("foo"));
             LoadedPlugin loaded = new LoadedPlugin(plugin, "test");
 
             loaded.updateConfiguration(env);
             loaded.updateConfiguration(env); //call twice to make sure it is called once
 
-            when(env.loadAndValidateFromProperties(PluginSettings.PLUGIN_CONFIG_PREFIX + "test", String.class))
-                    .thenReturn(Optional.of("bar"));
+            when(env.loadAndValidateFromProperties(PluginSettings.PLUGIN_CONFIG_PREFIX + "test", String.class)).thenReturn(Optional
+                    .of("bar"));
 
             loaded.updateConfiguration(env);
             loaded.updateConfiguration(env);
@@ -102,20 +101,19 @@ public class LoadedPluginTest {
             verifyNoMoreInteractions(plugin);
         }
 
-
         @SuppressWarnings("unchecked")
         @Test
         void testNoConfigUpdateOnInvalidConfigChange() {
             when(plugin.getConfigurationClass()).thenReturn((Class) String.class);
-            when(env.loadAndValidateFromProperties(PluginSettings.PLUGIN_CONFIG_PREFIX + "test", String.class))
-                    .thenReturn(Optional.of("foo"));
+            when(env.loadAndValidateFromProperties(PluginSettings.PLUGIN_CONFIG_PREFIX + "test", String.class)).thenReturn(Optional
+                    .of("foo"));
             LoadedPlugin loaded = new LoadedPlugin(plugin, "test");
 
             loaded.updateConfiguration(env);
             loaded.updateConfiguration(env); //call twice to make sure it is called once
 
-            when(env.loadAndValidateFromProperties(PluginSettings.PLUGIN_CONFIG_PREFIX + "test", String.class))
-                    .thenReturn(Optional.empty());
+            when(env.loadAndValidateFromProperties(PluginSettings.PLUGIN_CONFIG_PREFIX + "test", String.class)).thenReturn(Optional
+                    .empty());
 
             loaded.updateConfiguration(env);
             loaded.updateConfiguration(env);

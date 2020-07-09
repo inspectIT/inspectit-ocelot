@@ -14,6 +14,7 @@ public interface IGenericAction {
      * @param returnValue            the return value returned by the target method, if this action is executed at the end and no exception was thrown
      * @param thrown                 the exception thrown by the instrumented method, null otherwise
      * @param additionalArgs         additional arguments, such as constants or values from the data cloud which are passed to this action
+     *
      * @return the collected datum or null if nothing was collected
      */
     Object execute(Object[] instrumentedMethodArgs, Object thiz, Object returnValue, Throwable thrown, Object[] additionalArgs);

@@ -3,9 +3,9 @@ package rocks.inspectit.ocelot.core.logging;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
-import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.logging.LoggingSettings;
+import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.core.logging.logback.LogbackInitializer;
 
 import java.util.Objects;
@@ -29,7 +29,8 @@ public class LoggingConfigurationChangeListener {
         InspectitConfig oldConfig = event.getOldConfig();
 
         // only react if logging configuration has changed or our
-        if (Objects.equals(newConfig.getLogging(), oldConfig.getLogging()) && Objects.equals(newConfig.getServiceName(), oldConfig.getServiceName())) {
+        if (Objects.equals(newConfig.getLogging(), oldConfig.getLogging()) && Objects.equals(newConfig.getServiceName(), oldConfig
+                .getServiceName())) {
             return;
         }
 

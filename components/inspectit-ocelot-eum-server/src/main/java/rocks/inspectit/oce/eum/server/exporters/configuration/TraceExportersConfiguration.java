@@ -45,7 +45,9 @@ public class TraceExportersConfiguration {
     public SpanExporter jaegerSpanExporter() {
         JaegerExporterSettings jaegerExporterSettings = configuration.getExporters().getTracing().getJaeger();
 
-        ManagedChannel channel = ManagedChannelBuilder.forTarget(jaegerExporterSettings.getGrpc()).usePlaintext().build();
+        ManagedChannel channel = ManagedChannelBuilder.forTarget(jaegerExporterSettings.getGrpc())
+                .usePlaintext()
+                .build();
         return JaegerGrpcSpanExporter.newBuilder()
                 .setChannel(channel)
                 .setServiceName(jaegerExporterSettings.getServiceName())

@@ -30,7 +30,6 @@ public abstract class AbstractPollingMetricsRecorder extends AbstractMetricsReco
         super(configDependency);
     }
 
-
     /**
      * Called to take a measurement. This method is invoked in a scope where the common tags are set.
      * This method is invoked with the frequency returned by {@link #getFrequency(MetricsSettings)} when enabled.
@@ -43,6 +42,7 @@ public abstract class AbstractPollingMetricsRecorder extends AbstractMetricsReco
      * Extracts the polling frequency from the given metrics configuration.
      *
      * @param config the configuration to extract from
+     *
      * @return the frequency
      */
     protected abstract Duration getFrequency(MetricsSettings config);

@@ -27,8 +27,16 @@ public class DiskMetricsSysTest extends MetricsSysTestBase {
             assertThat(freeData.getAggregationMap()).isNotEmpty();
             assertThat(totalData.getAggregationMap()).isNotEmpty();
 
-            Map.Entry<List<TagValue>, AggregationData> free = freeData.getAggregationMap().entrySet().stream().findFirst().get();
-            Map.Entry<List<TagValue>, AggregationData> total = totalData.getAggregationMap().entrySet().stream().findFirst().get();
+            Map.Entry<List<TagValue>, AggregationData> free = freeData.getAggregationMap()
+                    .entrySet()
+                    .stream()
+                    .findFirst()
+                    .get();
+            Map.Entry<List<TagValue>, AggregationData> total = totalData.getAggregationMap()
+                    .entrySet()
+                    .stream()
+                    .findFirst()
+                    .get();
 
             //ensure that tags are present
             assertThat(free.getKey()).isNotEmpty();

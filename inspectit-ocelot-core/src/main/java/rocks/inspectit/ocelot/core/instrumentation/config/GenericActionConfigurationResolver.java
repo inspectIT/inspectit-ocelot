@@ -16,6 +16,7 @@ public class GenericActionConfigurationResolver {
      * Returns a map mapping the names of generic actions to their resolved configurations
      *
      * @param source the input configuration
+     *
      * @return the updated builder
      */
     Map<String, GenericActionConfig> resolveActions(InstrumentationSettings source) {
@@ -51,7 +52,6 @@ public class GenericActionConfigurationResolver {
             result.valueBody(conf.getValueBody());
         }
     }
-
 
     private void resolveArgumentVariables(HashMap<String, String> inputs, GenericActionConfig.GenericActionConfigBuilder result) {
         val entryIterator = inputs.entrySet().iterator();

@@ -46,11 +46,7 @@ public class EumTagsSettings extends TagsSettings {
     @AssertFalse(message = "All defined global tags should exist either in extra tags or beacon tags")
     public boolean isGlobalTagMissing() {
         return defineAsGlobal.stream()
-                .anyMatch(globalTag ->
-                        !(getExtra().containsKey(globalTag)
-                                || getBeacon().containsKey(globalTag)
-                        )
-                );
+                .anyMatch(globalTag -> !(getExtra().containsKey(globalTag) || getBeacon().containsKey(globalTag)));
     }
 
     @AssertTrue(message = "Each tag should only be defined once")
@@ -60,10 +56,13 @@ public class EumTagsSettings extends TagsSettings {
 
     @AssertTrue(message = "The ip definitions between the different categories must not overlap")
     public boolean isCheckIpRangesDoNotOverlap() {
-        return customIPMapping.values().stream()
+        return customIPMapping.values()
+                .stream()
                 .allMatch(ipList -> ipList.stream()
-                        .allMatch(adresse -> customIPMapping.values().stream()
-                                .allMatch(listToCompare -> listToCompare == ipList || listToCompare.stream().noneMatch(adresseToCompare -> areOverlapping(adresse, adresseToCompare)))));
+                        .allMatch(adresse -> customIPMapping.values()
+                                .stream()
+                                .allMatch(listToCompare -> listToCompare == ipList || listToCompare.stream()
+                                        .noneMatch(adresseToCompare -> areOverlapping(adresse, adresseToCompare)))));
     }
 
     /**
@@ -71,6 +70,7 @@ public class EumTagsSettings extends TagsSettings {
      *
      * @param address1
      * @param address2
+     *
      * @return
      */
     private boolean areOverlapping(String address1, String address2) {

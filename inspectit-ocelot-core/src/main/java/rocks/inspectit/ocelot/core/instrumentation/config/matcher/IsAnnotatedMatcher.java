@@ -39,7 +39,8 @@ public class IsAnnotatedMatcher<N extends AnnotationSource> extends DeclaringAnn
         try {
             return super.matches(target);
         } catch (Exception e) {
-            log.warn("Exception during annotation matching. The target will be considered as 'not matching'. {}: {}", target, e.getMessage());
+            log.warn("Exception during annotation matching. The target will be considered as 'not matching'. {}: {}", target, e
+                    .getMessage());
             return false;
         }
     }

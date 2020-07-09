@@ -55,9 +55,7 @@ public class MeasuresAndViewsManagerTest {
         @Test
         void verifyNoExceptionThrown() {
             String metricName = "my-metric";
-            MetricDefinitionSettings metricDefinition = MetricDefinitionSettings.builder()
-                    .unit("my-unit")
-                    .build();
+            MetricDefinitionSettings metricDefinition = MetricDefinitionSettings.builder().unit("my-unit").build();
             when(environment.getCurrentConfig().getMetrics().isEnabled()).thenReturn(true);
             when(environment.getCurrentConfig()
                     .getMetrics()
@@ -125,8 +123,7 @@ public class MeasuresAndViewsManagerTest {
             verify(measureMap).record(eq(Tags.getTagger().getCurrentTagContext()));
             verifyNoMoreInteractions(recorder);
             verifyNoMoreInteractions(measureMap);
-            verify(percentileViewManager).recordMeasurement(LONG_METRIC, 42.0, Tags.getTagger()
-                    .getCurrentTagContext());
+            verify(percentileViewManager).recordMeasurement(LONG_METRIC, 42.0, Tags.getTagger().getCurrentTagContext());
         }
 
         @Test
@@ -156,8 +153,7 @@ public class MeasuresAndViewsManagerTest {
             verify(measureMap).record(eq(Tags.getTagger().getCurrentTagContext()));
             verifyNoMoreInteractions(recorder);
             verifyNoMoreInteractions(measureMap);
-            verify(percentileViewManager).recordMeasurement(LONG_METRIC, 42.0, Tags.getTagger()
-                    .getCurrentTagContext());
+            verify(percentileViewManager).recordMeasurement(LONG_METRIC, 42.0, Tags.getTagger().getCurrentTagContext());
         }
 
         @Test
@@ -238,8 +234,8 @@ public class MeasuresAndViewsManagerTest {
             assertThat(view.getName().asString()).isEqualTo("custom-view");
             assertThat(view.getDescription()).isEqualTo("Cool view");
             assertThat(view.getAggregation()).isInstanceOf(Aggregation.Distribution.class);
-            assertThat(((Aggregation.Distribution) view.getAggregation()).getBucketBoundaries().getBoundaries())
-                    .containsExactly(7.0, 42.0);
+            assertThat(((Aggregation.Distribution) view.getAggregation()).getBucketBoundaries()
+                    .getBoundaries()).containsExactly(7.0, 42.0);
             assertThat(view.getColumns()).hasSize(3);
             assertThat(view.getColumns()).contains(commonTags);
             assertThat(view.getColumns()).contains(TagKey.create("my-tag"));
@@ -312,8 +308,8 @@ public class MeasuresAndViewsManagerTest {
 
             String metricName = "my-metric";
             Measure existingMeasure = Measure.MeasureLong.create(metricName, "abc", "def");
-            View existingView = View.create(View.Name.create("existing"), "description",
-                    existingMeasure, Aggregation.LastValue.create(), Collections.emptyList());
+            View existingView = View.create(View.Name.create("existing"), "description", existingMeasure, Aggregation.LastValue
+                    .create(), Collections.emptyList());
 
             MetricDefinitionSettings metricDefinition = MetricDefinitionSettings.builder()
                     .unit("my-unit")
@@ -322,8 +318,8 @@ public class MeasuresAndViewsManagerTest {
                     .build()
                     .getCopyWithDefaultsPopulated(metricName, Duration.ofMillis(123));
 
-            manager.addOrUpdateAndCacheMeasureWithViews(metricName, metricDefinition,
-                    Maps.newHashMap(metricName, existingMeasure), Maps.newHashMap("existing", existingView));
+            manager.addOrUpdateAndCacheMeasureWithViews(metricName, metricDefinition, Maps.newHashMap(metricName, existingMeasure), Maps
+                    .newHashMap("existing", existingView));
 
             assertThat(manager.getMeasure(metricName)).contains(existingMeasure);
 
@@ -357,7 +353,8 @@ public class MeasuresAndViewsManagerTest {
             ArgumentCaptor<View> viewArg = ArgumentCaptor.forClass(View.class);
             verify(viewManager, times(3)).registerView(viewArg.capture());
 
-            List<String> names = viewArg.getAllValues().stream()
+            List<String> names = viewArg.getAllValues()
+                    .stream()
                     .map(v -> v.getName().asString())
                     .collect(Collectors.toList());
             assertThat(names).containsExactlyInAnyOrder("viewA", "viewB", "viewC");
@@ -393,9 +390,8 @@ public class MeasuresAndViewsManagerTest {
                     .collect(Collectors.toCollection(HashSet::new));
             expectedTags.add("my-tag");
 
-            verify(percentileViewManager, times(1)).createOrUpdateView(
-                    metricName, "custom-view", "my-unit", "Cool view",
-                    true, false, Arrays.asList(0.5), 123, expectedTags, 345);
+            verify(percentileViewManager, times(1)).createOrUpdateView(metricName, "custom-view", "my-unit", "Cool view", true, false, Arrays
+                    .asList(0.5), 123, expectedTags, 345);
 
             verifyZeroInteractions(viewManager);
         }
@@ -431,9 +427,8 @@ public class MeasuresAndViewsManagerTest {
                     .collect(Collectors.toCollection(HashSet::new));
             expectedTags.add("my-tag");
 
-            verify(percentileViewManager, times(1)).createOrUpdateView(
-                    metricName, "custom-view", "my-unit", "Cool view",
-                    true, false, Arrays.asList(0.5), 123, expectedTags, 345);
+            verify(percentileViewManager, times(1)).createOrUpdateView(metricName, "custom-view", "my-unit", "Cool view", true, false, Arrays
+                    .asList(0.5), 123, expectedTags, 345);
 
             verifyZeroInteractions(viewManager);
         }

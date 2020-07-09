@@ -55,7 +55,6 @@ public class MethodReflectionInformation {
         return builder.build();
     }
 
-
     public Class<?>[] getParameterTypes() {
         Class<?>[] paramTypesArray = new Class[parameterTypes.size()];
         for (int i = 0; i < paramTypesArray.length; i++) {
@@ -70,7 +69,6 @@ public class MethodReflectionInformation {
     public Class<?> getDeclaringClass() {
         return declaringClass.get();
     }
-
 
     public String getMethodFQN() {
         val declaringClass = Optional.ofNullable(getDeclaringClass());

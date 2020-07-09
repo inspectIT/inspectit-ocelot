@@ -45,9 +45,7 @@ class CsvExpanderBeaconProcessorTest {
 
             Beacon result = processor.process(beacon);
 
-            assertThat(result.toMap()).containsOnly(
-                    entry("t_other", "value|123"),
-                    entry("t_other.value", "123"));
+            assertThat(result.toMap()).containsOnly(entry("t_other", "value|123"), entry("t_other.value", "123"));
         }
 
         @Test
@@ -56,10 +54,7 @@ class CsvExpanderBeaconProcessorTest {
 
             Beacon result = processor.process(beacon);
 
-            assertThat(result.toMap()).containsOnly(
-                    entry("t_other", "value|123,another_value|321"),
-                    entry("t_other.value", "123"),
-                    entry("t_other.another_value", "321"));
+            assertThat(result.toMap()).containsOnly(entry("t_other", "value|123,another_value|321"), entry("t_other.value", "123"), entry("t_other.another_value", "321"));
         }
     }
 }

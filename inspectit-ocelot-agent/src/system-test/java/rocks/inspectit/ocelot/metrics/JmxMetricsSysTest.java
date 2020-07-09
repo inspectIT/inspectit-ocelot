@@ -24,7 +24,11 @@ public class JmxMetricsSysTest extends MetricsSysTestBase {
             assertThat(uptimeViewData).isNotNull();
             assertThat(uptimeViewData.getAggregationMap()).isNotEmpty();
 
-            Map.Entry<List<TagValue>, AggregationData> uptime = uptimeViewData.getAggregationMap().entrySet().stream().findFirst().get();
+            Map.Entry<List<TagValue>, AggregationData> uptime = uptimeViewData.getAggregationMap()
+                    .entrySet()
+                    .stream()
+                    .findFirst()
+                    .get();
 
             //ensure that tags are present
             assertThat(uptime.getKey()).isNotEmpty();

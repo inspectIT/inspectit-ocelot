@@ -52,12 +52,8 @@ public class AccountController extends AbstractBaseController {
     @Autowired
     private JwtTokenManager tokenManager;
 
-    @ApiOperation(value = "Create an access token", notes = "Creates a fresh access token for the user making this request." +
-            " Instead of using User and Password based HTTP authentication, the user can then user the header 'Authorization: Bearer <TOKEN>' for authentication." +
-            "The token expires after the time specified by ${inspectit.token-lifespan}, which by default is 60 minutes." +
-            "In case of a server restart, all previously issued tokens become invalid.")
-    @ApiResponse(code = 200, message = "The access token", examples =
-    @Example(value = @ExampleProperty(value = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImV4cCI6MTU2MTYyODE1NH0.KelDW1OXg9xlMjSiblwZqui7sya4Crq833b-98p8UZ4", mediaType = "text/plain")))
+    @ApiOperation(value = "Create an access token", notes = "Creates a fresh access token for the user making this request." + " Instead of using User and Password based HTTP authentication, the user can then user the header 'Authorization: Bearer <TOKEN>' for authentication." + "The token expires after the time specified by ${inspectit.token-lifespan}, which by default is 60 minutes." + "In case of a server restart, all previously issued tokens become invalid.")
+    @ApiResponse(code = 200, message = "The access token", examples = @Example(value = @ExampleProperty(value = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImV4cCI6MTU2MTYyODE1NH0.KelDW1OXg9xlMjSiblwZqui7sya4Crq833b-98p8UZ4", mediaType = "text/plain")))
     @GetMapping("account/token")
     public String acquireNewAccessToken(Authentication auth) {
         Optional<User> userOptional = userService.getUserByName(auth.getName());
@@ -70,8 +66,7 @@ public class AccountController extends AbstractBaseController {
         return tokenManager.createToken(auth.getName());
     }
 
-    @ApiOperation(value = "Change Password", notes = "Changes the password of the logged in user." +
-            " This endpoint does not work with token-based authentication, only HTTP basic auth is allowed.")
+    @ApiOperation(value = "Change Password", notes = "Changes the password of the logged in user." + " This endpoint does not work with token-based authentication, only HTTP basic auth is allowed.")
     @PutMapping("account/password")
     public ResponseEntity<?> changePassword(@RequestBody PasswordChangeRequest newPassword, Authentication auth) {
         if (StringUtils.isEmpty(newPassword.getPassword())) {
@@ -81,10 +76,7 @@ public class AccountController extends AbstractBaseController {
         if (user.isLdapUser()) {
             throw new NotSupportedWithLdapException();
         }
-        User updatedUser = user
-                .toBuilder()
-                .password(newPassword.getPassword())
-                .build();
+        User updatedUser = user.toBuilder().password(newPassword.getPassword()).build();
         userService.addOrUpdateUser(updatedUser);
 
         return ResponseEntity.ok().build();
@@ -94,7 +86,8 @@ public class AccountController extends AbstractBaseController {
     @ApiResponse(code = 200, message = "The permissions of the user")
     @GetMapping("account/permissions")
     public UserPermissions getPermissions(Authentication auth) {
-        Set<String> roles = auth.getAuthorities().stream()
+        Set<String> roles = auth.getAuthorities()
+                .stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toSet());
 

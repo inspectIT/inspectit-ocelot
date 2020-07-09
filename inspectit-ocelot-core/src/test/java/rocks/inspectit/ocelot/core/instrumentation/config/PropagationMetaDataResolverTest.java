@@ -59,7 +59,6 @@ public class PropagationMetaDataResolverTest {
         }
     }
 
-
     @Nested
     class CollectTagsFromMetricDefinitions {
 
@@ -76,7 +75,6 @@ public class PropagationMetaDataResolverTest {
             verifyNoMoreInteractions(mockBuilder);
         }
 
-
         @Test
         void nullView() {
             MetricDefinitionSettings def = new MetricDefinitionSettings();
@@ -86,7 +84,6 @@ public class PropagationMetaDataResolverTest {
 
             verifyZeroInteractions(mockBuilder);
         }
-
 
         @Test
         void nullTags() {
@@ -100,7 +97,6 @@ public class PropagationMetaDataResolverTest {
             verifyZeroInteractions(mockBuilder);
         }
     }
-
 
     @Nested
     class CollectTagsFromUserSettings {
@@ -210,7 +206,6 @@ public class PropagationMetaDataResolverTest {
             assertThat(result.isPropagatedDownWithinJVM("common_key")).isTrue();
             assertThat(result.isPropagatedDownGlobally("common_key")).isFalse();
         }
-
 
         @Test
         void ensureTagsFromMetricsRespected() {

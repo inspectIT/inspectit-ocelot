@@ -22,33 +22,32 @@ public class GenericActionSettings {
     public static final String PACKAGE_REGEX = "[a-zA-Z]\\w*(\\.[a-zA-Z]\\w*)*";
 
     public static final String THIS_VARIABLE = "_this";
+
     public static final String ARGS_VARIABLE = "_args";
+
     public static final String THROWN_VARIABLE = "_thrown";
+
     public static final String RETURN_VALUE_VARIABLE = "_returnValue";
+
     public static final String ARG_VARIABLE_PREFIX = "_arg";
+
     public static final Pattern ARG_VARIABLE_REGEX = Pattern.compile(ARG_VARIABLE_PREFIX + "\\d+");
 
     //these special variables are passed in via the additionalArguments array
     public static final String CLASS_VARIABLE = "_class";
+
     public static final String METHOD_NAME_VARIABLE = "_methodName";
+
     public static final String METHOD_PARAMETER_TYPES_VARIABLE = "_parameterTypes";
 
     public static final String CONTEXT_VARIABLE = "_context";
+
     public static final String OBJECT_ATTACHMENTS_VARIABLE = "_attachments";
 
-
-    private static final List<Pattern> SPECIAL_VARIABLES_REGEXES = Arrays.asList(
-            Pattern.compile(THIS_VARIABLE),
-            Pattern.compile(ARGS_VARIABLE),
-            Pattern.compile(THROWN_VARIABLE),
-            Pattern.compile(RETURN_VALUE_VARIABLE),
-            ARG_VARIABLE_REGEX,
-            Pattern.compile(CLASS_VARIABLE),
-            Pattern.compile(METHOD_NAME_VARIABLE),
-            Pattern.compile(METHOD_PARAMETER_TYPES_VARIABLE),
-            Pattern.compile(CONTEXT_VARIABLE),
-            Pattern.compile(OBJECT_ATTACHMENTS_VARIABLE)
-    );
+    private static final List<Pattern> SPECIAL_VARIABLES_REGEXES = Arrays.asList(Pattern.compile(THIS_VARIABLE), Pattern
+            .compile(ARGS_VARIABLE), Pattern.compile(THROWN_VARIABLE), Pattern.compile(RETURN_VALUE_VARIABLE), ARG_VARIABLE_REGEX, Pattern
+            .compile(CLASS_VARIABLE), Pattern.compile(METHOD_NAME_VARIABLE), Pattern.compile(METHOD_PARAMETER_TYPES_VARIABLE), Pattern
+            .compile(CONTEXT_VARIABLE), Pattern.compile(OBJECT_ATTACHMENTS_VARIABLE));
 
     /**
      * If true, the action does not return a value.
@@ -85,8 +84,7 @@ public class GenericActionSettings {
      * If a classname is not found, the given packages will be scanned in the given order to locate the class.
      * This allows the User to use classes without the need to specify the FQN.
      */
-    private List<@javax.validation.constraints.Pattern(regexp = PACKAGE_REGEX)
-            String> imports = new ArrayList<>();
+    private List<@javax.validation.constraints.Pattern(regexp = PACKAGE_REGEX) String> imports = new ArrayList<>();
 
     /**
      * A single Java-statement (without return) defining the value of this action.

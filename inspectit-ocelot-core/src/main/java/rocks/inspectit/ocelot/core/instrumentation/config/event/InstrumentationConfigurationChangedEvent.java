@@ -2,8 +2,8 @@ package rocks.inspectit.ocelot.core.instrumentation.config.event;
 
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
-import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.core.instrumentation.config.InstrumentationConfigurationResolver;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.InstrumentationConfiguration;
 

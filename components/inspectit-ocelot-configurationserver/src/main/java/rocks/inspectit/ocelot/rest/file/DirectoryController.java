@@ -29,7 +29,6 @@ public class DirectoryController extends FileBaseController {
         return fileManager.getWorkingDirectory().listConfigurationFiles(path);
     }
 
-
     @Secured(UserRoleConfiguration.WRITE_ACCESS_ROLE)
     @ApiOperation(value = "Create a directory", notes = "Creates a new, empty directory including its parent folders. Does nothing if the directory already exists.")
     @ApiImplicitParam(name = "Path", value = "The part of the url after /directories/ define the path of the directory to create.")

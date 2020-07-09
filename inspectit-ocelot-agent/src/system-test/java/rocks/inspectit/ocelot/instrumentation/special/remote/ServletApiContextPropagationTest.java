@@ -43,8 +43,8 @@ public class ServletApiContextPropagationTest {
 
     @BeforeAll
     static void waitForInstrumentation() throws Exception {
-        TestUtils.waitForClassInstrumentations(Arrays.asList(TestFilter.class, HttpServlet.class, CloseableHttpClient.class,
-                Class.forName("sun.net.www.protocol.http.HttpURLConnection")), 10, TimeUnit.SECONDS);
+        TestUtils.waitForClassInstrumentations(Arrays.asList(TestFilter.class, HttpServlet.class, CloseableHttpClient.class, Class
+                .forName("sun.net.www.protocol.http.HttpURLConnection")), 10, TimeUnit.SECONDS);
     }
 
     @BeforeEach
@@ -165,9 +165,7 @@ public class ServletApiContextPropagationTest {
 
         @Test
         void testPropagationViaServlet() throws Exception {
-            startServer(sh ->
-                    sh.addServletWithMapping(TestServlet.class, "/*")
-            );
+            startServer(sh -> sh.addServletWithMapping(TestServlet.class, "/*"));
             TestServlet.reset();
 
             HttpURLConnection urlConnection = (HttpURLConnection) new URL(TEST_URL).openConnection();
@@ -218,9 +216,7 @@ public class ServletApiContextPropagationTest {
 
         @Test
         void testUpPropagationWithEmptyResponse() throws Exception {
-            startServer(sh ->
-                    sh.addServletWithMapping(TestServlet.class, "/*")
-            );
+            startServer(sh -> sh.addServletWithMapping(TestServlet.class, "/*"));
             TestServlet.reset();
             TestServlet.upPropagationValue = Math.PI;
 
@@ -233,8 +229,7 @@ public class ServletApiContextPropagationTest {
 
         @Test
         void testUpPropagationWithResponseViaWriter() throws Exception {
-            startServer(sh ->
-                    sh.addServletWithMapping(TestServlet.class, "/*"));
+            startServer(sh -> sh.addServletWithMapping(TestServlet.class, "/*"));
             TestServlet.reset();
             TestServlet.upPropagationValue = Math.PI;
             TestServlet.writerResponse = "Hallo Welt!";
@@ -249,9 +244,7 @@ public class ServletApiContextPropagationTest {
 
         @Test
         void testUpPropagationWithResponseViaOutputStream() throws Exception {
-            startServer(sh ->
-                    sh.addServletWithMapping(TestServlet.class, "/*")
-            );
+            startServer(sh -> sh.addServletWithMapping(TestServlet.class, "/*"));
             TestServlet.reset();
             TestServlet.upPropagationValue = Math.PI;
             TestServlet.outputStreamResponse = "Hallo Welt!";

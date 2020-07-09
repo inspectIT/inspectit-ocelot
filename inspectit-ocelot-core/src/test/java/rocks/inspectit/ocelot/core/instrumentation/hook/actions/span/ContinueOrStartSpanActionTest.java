@@ -26,9 +26,7 @@ public class ContinueOrStartSpanActionTest {
 
         @Test
         void noSampler() {
-            Sampler result = ContinueOrStartSpanAction.builder()
-                    .build()
-                    .getSampler(context);
+            Sampler result = ContinueOrStartSpanAction.builder().build().getSampler(context);
 
             assertThat(result).isNull();
             verifyZeroInteractions(context);
@@ -38,15 +36,11 @@ public class ContinueOrStartSpanActionTest {
         void staticSampler() {
             Sampler sampler = Samplers.probabilitySampler(0.5);
 
-            Sampler result = ContinueOrStartSpanAction.builder()
-                    .staticSampler(sampler)
-                    .build()
-                    .getSampler(context);
+            Sampler result = ContinueOrStartSpanAction.builder().staticSampler(sampler).build().getSampler(context);
 
             assertThat(result).isSameAs(sampler);
             verifyZeroInteractions(context);
         }
-
 
         @Test
         void dynamicNonNullProbability() {
@@ -63,7 +57,6 @@ public class ContinueOrStartSpanActionTest {
             verify(dynamicProbability).get(any());
             verifyNoMoreInteractions(context);
         }
-
 
         @Test
         void dynamicNullProbability() {

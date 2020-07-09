@@ -14,6 +14,7 @@ public interface IContextManager {
      * Wraps the given runnable so that current context is used when the runnable is invoked.
      *
      * @param r the runnable to wrap
+     *
      * @return the wrapped runnable
      */
     Runnable wrap(Runnable r);
@@ -23,6 +24,7 @@ public interface IContextManager {
      *
      * @param callable the callable to wrap
      * @param <T>      the callable's generic type
+     *
      * @return the wrapped callable
      */
     <T> Callable<T> wrap(Callable<T> callable);

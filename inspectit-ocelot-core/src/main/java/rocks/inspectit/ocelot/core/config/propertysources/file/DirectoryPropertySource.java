@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 /**
@@ -30,13 +29,15 @@ import java.util.stream.Stream;
 @Slf4j
 public class DirectoryPropertySource extends EnumerablePropertySource<Void> {
 
-
     private static final List<String> JSON_ENDINGS = Arrays.asList(".json");
+
     private static final List<String> PROPERTIES_ENDINGS = Arrays.asList(".properties");
+
     private static final List<String> YAML_ENDINGS = Arrays.asList(".yml", ".yaml");
 
     @FunctionalInterface
     private interface PropertiesLoader {
+
         Properties load(AbstractResource res) throws Exception;
     }
 
@@ -92,16 +93,15 @@ public class DirectoryPropertySource extends EnumerablePropertySource<Void> {
         }
         //alphabetical order, last loaded file wins
         List<ChildFilePropertySource> fileSources = new ArrayList<>();
-        files.sorted(Comparator.comparing(Path::toString, String.CASE_INSENSITIVE_ORDER))
-                .forEachOrdered(file -> {
-                    if (doesFileHaveEnding(file, PROPERTIES_ENDINGS)) {
-                        loadProperties(file, PropertyUtils::readPropertyFiles).ifPresent(fileSources::add);
-                    } else if (doesFileHaveEnding(file, YAML_ENDINGS)) {
-                        loadProperties(file, PropertyUtils::readYamlFiles).ifPresent(fileSources::add);
-                    } else if (doesFileHaveEnding(file, JSON_ENDINGS)) {
-                        loadProperties(file, PropertyUtils::readJsonFile).ifPresent(fileSources::add);
-                    }
-                });
+        files.sorted(Comparator.comparing(Path::toString, String.CASE_INSENSITIVE_ORDER)).forEachOrdered(file -> {
+            if (doesFileHaveEnding(file, PROPERTIES_ENDINGS)) {
+                loadProperties(file, PropertyUtils::readPropertyFiles).ifPresent(fileSources::add);
+            } else if (doesFileHaveEnding(file, YAML_ENDINGS)) {
+                loadProperties(file, PropertyUtils::readYamlFiles).ifPresent(fileSources::add);
+            } else if (doesFileHaveEnding(file, JSON_ENDINGS)) {
+                loadProperties(file, PropertyUtils::readJsonFile).ifPresent(fileSources::add);
+            }
+        });
         return fileSources;
     }
 
@@ -115,22 +115,18 @@ public class DirectoryPropertySource extends EnumerablePropertySource<Void> {
         }
     }
 
-
     private static boolean doesFileHaveEnding(Path path, Collection<String> allowedEndings) {
         String filename = path.getFileName().toString().toLowerCase();
         return allowedEndings.stream().anyMatch(ending -> filename.endsWith(ending));
     }
 
     private String getRelativePath(Path file) {
-        return rootDir.relativize(file)
-                .toString()
-                .replace(File.separator, "/");
+        return rootDir.relativize(file).toString().replace(File.separator, "/");
     }
 
     private String getCombinedName(Path file) {
         return getName() + "/" + getRelativePath(file);
     }
-
 
     @Override
     public String[] getPropertyNames() {

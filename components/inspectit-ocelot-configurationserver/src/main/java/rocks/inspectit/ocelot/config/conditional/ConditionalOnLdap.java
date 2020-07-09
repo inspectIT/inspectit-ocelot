@@ -12,4 +12,5 @@ import java.lang.annotation.*;
 @Documented
 @Conditional(OnLdapCondition.class)
 public @interface ConditionalOnLdap {
+
 }

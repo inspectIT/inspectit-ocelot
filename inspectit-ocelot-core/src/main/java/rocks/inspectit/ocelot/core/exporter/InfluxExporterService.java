@@ -44,11 +44,9 @@ public class InfluxExporterService extends DynamicallyActivatableService {
     @Override
     protected boolean checkEnabledForConfig(InspectitConfig conf) {
         InfluxExporterSettings influx = conf.getExporters().getMetrics().getInflux();
-        return conf.getMetrics().isEnabled()
-                && influx.isEnabled()
-                && !StringUtils.isEmpty(influx.getUrl())
-                && !StringUtils.isEmpty(influx.getDatabase())
-                && !StringUtils.isEmpty(influx.getRetentionPolicy());
+        return conf.getMetrics()
+                .isEnabled() && influx.isEnabled() && !StringUtils.isEmpty(influx.getUrl()) && !StringUtils.isEmpty(influx
+                .getDatabase()) && !StringUtils.isEmpty(influx.getRetentionPolicy());
     }
 
     @Override

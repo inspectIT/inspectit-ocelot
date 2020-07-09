@@ -51,9 +51,11 @@ public class MethodHookGeneratorTest {
 
         @Test
         void verifyContextManagerProvided() {
-            MethodDescription method = dummyType.getDeclaredMethods().stream()
+            MethodDescription method = dummyType.getDeclaredMethods()
+                    .stream()
                     .filter(md -> md.getName().equals("doSomething"))
-                    .findFirst().get();
+                    .findFirst()
+                    .get();
             MethodHookConfiguration config = MethodHookConfiguration.builder().build();
 
             MethodHook result = generator.buildHook(Dummy.class, method, config);
@@ -63,10 +65,12 @@ public class MethodHookGeneratorTest {
 
         @Test
         void verifyConstructorNameAndParameterTypesCorrect() {
-            MethodDescription constructor = dummyType.getDeclaredMethods().stream()
+            MethodDescription constructor = dummyType.getDeclaredMethods()
+                    .stream()
                     .filter(MethodDescription::isConstructor)
                     .filter(md -> md.getParameters().size() == 2)
-                    .findFirst().get();
+                    .findFirst()
+                    .get();
             MethodHookConfiguration config = MethodHookConfiguration.builder().build();
 
             MethodHook result = generator.buildHook(Dummy.class, constructor, config);
@@ -77,9 +81,11 @@ public class MethodHookGeneratorTest {
 
         @Test
         void verifyMethodNameAndParameterTypesCorrect() {
-            MethodDescription method = dummyType.getDeclaredMethods().stream()
+            MethodDescription method = dummyType.getDeclaredMethods()
+                    .stream()
                     .filter(md -> md.getName().equals("doSomething"))
-                    .findFirst().get();
+                    .findFirst()
+                    .get();
             MethodHookConfiguration config = MethodHookConfiguration.builder().build();
 
             MethodHook result = generator.buildHook(Dummy.class, method, config);
@@ -90,9 +96,11 @@ public class MethodHookGeneratorTest {
 
         @Test
         void verifyDeclaringClassCorrect() {
-            MethodDescription method = dummyType.getDeclaredMethods().stream()
+            MethodDescription method = dummyType.getDeclaredMethods()
+                    .stream()
                     .filter(md -> md.getName().equals("doSomething"))
-                    .findFirst().get();
+                    .findFirst()
+                    .get();
             MethodHookConfiguration config = MethodHookConfiguration.builder().build();
 
             MethodHook result = generator.buildHook(Dummy.class, method, config);
@@ -121,7 +129,10 @@ public class MethodHookGeneratorTest {
         public void dataValueOnly() {
             VariableAccessor mockAccessor = mock(VariableAccessor.class);
             when(variableAccessorFactory.getVariableAccessor("data-key")).thenReturn(mockAccessor);
-            MetricRecordingSettings settings = MetricRecordingSettings.builder().metric("name").value("data-key").build();
+            MetricRecordingSettings settings = MetricRecordingSettings.builder()
+                    .metric("name")
+                    .value("data-key")
+                    .build();
 
             MetricAccessor accessor = generator.buildMetricAccessor(settings);
 
@@ -134,8 +145,11 @@ public class MethodHookGeneratorTest {
         public void valueAndConstantTag() {
             VariableAccessor mockAccessor = mock(VariableAccessor.class);
             when(variableAccessorFactory.getConstantAccessor(1D)).thenReturn(mockAccessor);
-            MetricRecordingSettings settings = MetricRecordingSettings.builder().metric("name").value("1.0")
-                    .constantTags(Collections.singletonMap("tag-key", "tag-key")).build();
+            MetricRecordingSettings settings = MetricRecordingSettings.builder()
+                    .metric("name")
+                    .value("1.0")
+                    .constantTags(Collections.singletonMap("tag-key", "tag-key"))
+                    .build();
 
             MetricAccessor accessor = generator.buildMetricAccessor(settings);
 
@@ -150,8 +164,11 @@ public class MethodHookGeneratorTest {
             doReturn(mockAccessorA).when(variableAccessorFactory).getConstantAccessor(1D);
             VariableAccessor mockAccessorB = mock(VariableAccessor.class);
             doReturn(mockAccessorB).when(variableAccessorFactory).getVariableAccessor("tag-value");
-            MetricRecordingSettings settings = MetricRecordingSettings.builder().metric("name").value("1.0")
-                    .dataTags(Collections.singletonMap("tag-key", "tag-value")).build();
+            MetricRecordingSettings settings = MetricRecordingSettings.builder()
+                    .metric("name")
+                    .value("1.0")
+                    .dataTags(Collections.singletonMap("tag-key", "tag-value"))
+                    .build();
 
             MetricAccessor accessor = generator.buildMetricAccessor(settings);
 
@@ -191,8 +208,7 @@ public class MethodHookGeneratorTest {
 
             List<IHookAction> actions = generator.buildTracingExitActions(settings);
 
-            assertThat(actions)
-                    .hasSize(3)
+            assertThat(actions).hasSize(3)
                     .anySatisfy((action) -> assertThat(action).isInstanceOf(SetSpanStatusAction.class))
                     .anySatisfy((action) -> assertThat(action).isInstanceOf(WriteSpanAttributesAction.class))
                     .anySatisfy((action) -> assertThat(action).isInstanceOf(EndSpanAction.class));
@@ -210,8 +226,7 @@ public class MethodHookGeneratorTest {
 
             List<IHookAction> actions = generator.buildTracingExitActions(settings);
 
-            assertThat(actions)
-                    .hasSize(3)
+            assertThat(actions).hasSize(3)
                     .anySatisfy((action) -> assertThat(action).isInstanceOf(SetSpanStatusAction.class))
                     .anySatisfy((action) -> assertThat(action).isInstanceOf(WriteSpanAttributesAction.class))
                     .anySatisfy((action) -> assertThat(action).isInstanceOf(EndSpanAction.class));

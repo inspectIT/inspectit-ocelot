@@ -17,7 +17,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler({NotSupportedWithLdapException.class})
     public ResponseEntity<Object> handleNotSupportedWithLdapException(Exception exception, WebRequest request) {
-        ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, "Endpoint is not supported in the current configuration.", exception.getLocalizedMessage());
+        ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, "Endpoint is not supported in the current configuration.", exception
+                .getLocalizedMessage());
         return new ResponseEntity<>(apiError, new HttpHeaders(), apiError.getStatus());
     }
 

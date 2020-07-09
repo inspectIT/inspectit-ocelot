@@ -26,12 +26,7 @@ public class AutocompleteController extends AbstractBaseController {
     private List<AutoCompleter> completers;
 
     @ApiOperation(value = "String which should be autocompleted")
-    @ApiResponse(code = 200, message = "The options which you can enter into the string", examples =
-    @Example(value = @ExampleProperty(value = "[\"interfaces\",\n" +
-            "    \"superclass\",\n" +
-            "    \"type\",\n" +
-            "    \"methods\",\n" +
-            "    \"advanced\"]", mediaType = "text/plain")))
+    @ApiResponse(code = 200, message = "The options which you can enter into the string", examples = @Example(value = @ExampleProperty(value = "[\"interfaces\",\n" + "    \"superclass\",\n" + "    \"type\",\n" + "    \"methods\",\n" + "    \"advanced\"]", mediaType = "text/plain")))
     @PostMapping("/autocomplete")
     public List<String> getPossibleProperties(@RequestBody AutoCompleteRequest request) {
         return completers.stream()

@@ -12,8 +12,7 @@ import java.util.Map;
 /**
  * Class for defining a custom constraint violation with a parametrized message,
  * the parameter values and the bean path to the property.
- */
-public class Violation {
+ */ public class Violation {
 
     private String message;
 

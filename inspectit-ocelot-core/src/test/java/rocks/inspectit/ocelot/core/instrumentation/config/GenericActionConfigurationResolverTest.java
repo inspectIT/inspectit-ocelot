@@ -22,9 +22,11 @@ public class GenericActionConfigurationResolverTest {
     public class ResolveActions {
 
         private static final String ACTION_NAME = "My-Action1";
+
         private static final String ACTION_VALUE_BODY = "return new Integer(42);";
 
         InstrumentationSettings config;
+
         GenericActionSettings inputAction;
 
         @BeforeEach
@@ -65,7 +67,6 @@ public class GenericActionConfigurationResolverTest {
             assertThat(rc.getValueBody()).isEqualTo(ACTION_VALUE_BODY);
         }
 
-
         @Test
         void verifyMethodArgumentsExtracted() {
             inputAction.getInput().put(GenericActionSettings.ARG_VARIABLE_PREFIX + 1, "MyClass");
@@ -89,7 +90,6 @@ public class GenericActionConfigurationResolverTest {
             assertThat(rc.getImportedPackages()).isEmpty();
             assertThat(rc.getValueBody()).isEqualTo(ACTION_VALUE_BODY);
         }
-
 
         @Test
         void verifyAdditionalArgumentsExtracted() {
@@ -200,7 +200,6 @@ public class GenericActionConfigurationResolverTest {
             assertThat(rc.getImportedPackages()).isEmpty();
             assertThat(rc.getValueBody()).isEqualTo("return \"Test\";");
         }
-
 
         @Test
         void verifyValueUsedIfPresentForVoid() {

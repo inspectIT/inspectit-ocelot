@@ -26,7 +26,10 @@ public class Log4JTraceIdAutoInjector implements SpecialSensor {
     @Override
     public boolean shouldInstrument(Class<?> clazz, InstrumentationConfiguration settings) {
         TypeDescription type = TypeDescription.ForLoadedType.of(clazz);
-        return settings.getTracingSettings().getLogCorrelation().getTraceIdAutoInjection().isEnabled() && CLASSES_MATCHER.matches(type);
+        return settings.getTracingSettings()
+                .getLogCorrelation()
+                .getTraceIdAutoInjection()
+                .isEnabled() && CLASSES_MATCHER.matches(type);
     }
 
     @Override
@@ -36,8 +39,7 @@ public class Log4JTraceIdAutoInjector implements SpecialSensor {
 
     @Override
     public DynamicType.Builder instrument(Class<?> clazz, InstrumentationConfiguration settings, DynamicType.Builder builder) {
-        return builder
-                .visit(ForcedLogAdvice.TARGET);
+        return builder.visit(ForcedLogAdvice.TARGET);
     }
 
     /**
@@ -46,7 +48,8 @@ public class Log4JTraceIdAutoInjector implements SpecialSensor {
      */
     private static class ForcedLogAdvice {
 
-        static final AsmVisitorWrapper.ForDeclaredMethods TARGET = Advice.to(ForcedLogAdvice.class).on(named("forcedLog"));
+        static final AsmVisitorWrapper.ForDeclaredMethods TARGET = Advice.to(ForcedLogAdvice.class)
+                .on(named("forcedLog"));
 
         @Advice.OnMethodEnter
         public static void onMethodEnter(@Advice.Argument(value = 2, readOnly = false) Object message) {

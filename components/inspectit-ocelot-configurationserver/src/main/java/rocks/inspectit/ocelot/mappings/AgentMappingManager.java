@@ -75,9 +75,7 @@ public class AgentMappingManager {
     public Optional<AgentMapping> getAgentMapping(String mappingName) {
         checkArgument(!StringUtils.isEmpty(mappingName), "The mapping name should not be empty or null.");
 
-        return getAgentMappings().stream()
-                .filter(mapping -> mapping.getName().equals(mappingName))
-                .findFirst();
+        return getAgentMappings().stream().filter(mapping -> mapping.getName().equals(mappingName)).findFirst();
     }
 
     /**

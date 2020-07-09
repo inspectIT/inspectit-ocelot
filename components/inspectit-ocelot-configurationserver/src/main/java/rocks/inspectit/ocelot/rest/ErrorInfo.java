@@ -15,9 +15,7 @@ import lombok.NoArgsConstructor;
 public class ErrorInfo {
 
     public enum Type {
-        NO_USERNAME,
-        NO_PASSWORD,
-        USERNAME_ALREADY_TAKEN
+        NO_USERNAME, NO_PASSWORD, USERNAME_ALREADY_TAKEN
     }
 
     /**

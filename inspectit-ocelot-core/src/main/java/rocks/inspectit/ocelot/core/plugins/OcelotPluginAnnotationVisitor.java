@@ -7,7 +7,9 @@ import org.springframework.asm.Type;
 import rocks.inspectit.ocelot.sdk.OcelotPlugin;
 
 class OcelotPluginAnnotationVisitor extends ClassVisitor {
+
     public static final String OCELOT_PLUGIN_DESCRIPTOR = "L" + Type.getInternalName(OcelotPlugin.class) + ";";
+
     private boolean hasOcelotPluginAnnotation;
 
     /**

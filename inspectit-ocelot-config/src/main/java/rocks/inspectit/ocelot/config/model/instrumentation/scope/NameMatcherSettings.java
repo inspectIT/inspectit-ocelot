@@ -32,15 +32,6 @@ public class NameMatcherSettings {
      * @return Returns true if it will match basically anything.
      */
     public boolean isAnyMatcher() {
-        return (matcherMode == MatcherMode.MATCHES && ".*".equals(name))
-                || (StringUtils.isEmpty(name) && (
-                matcherMode == MatcherMode.STARTS_WITH
-                        || matcherMode == MatcherMode.STARTS_WITH_IGNORE_CASE
-                        || matcherMode == MatcherMode.CONTAINS
-                        || matcherMode == MatcherMode.CONTAINS_IGNORE_CASE
-                        || matcherMode == MatcherMode.ENDS_WITH
-                        || matcherMode == MatcherMode.ENDS_WITH_IGNORE_CASE
-        )
-        );
+        return (matcherMode == MatcherMode.MATCHES && ".*".equals(name)) || (StringUtils.isEmpty(name) && (matcherMode == MatcherMode.STARTS_WITH || matcherMode == MatcherMode.STARTS_WITH_IGNORE_CASE || matcherMode == MatcherMode.CONTAINS || matcherMode == MatcherMode.CONTAINS_IGNORE_CASE || matcherMode == MatcherMode.ENDS_WITH || matcherMode == MatcherMode.ENDS_WITH_IGNORE_CASE));
     }
 }

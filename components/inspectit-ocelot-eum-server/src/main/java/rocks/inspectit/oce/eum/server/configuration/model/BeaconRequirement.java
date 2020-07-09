@@ -22,6 +22,7 @@ public class BeaconRequirement {
      *
      * @param beacon       the beacon to validate
      * @param requirements list of requirements which have to be fulfilled
+     *
      * @return true in case the beacon fulfills the requirements otherwise false is returned
      */
     public static boolean validate(Beacon beacon, Collection<BeaconRequirement> requirements) {
@@ -29,8 +30,7 @@ public class BeaconRequirement {
             return true;
         }
 
-        boolean notFulfilled = requirements.stream()
-                .anyMatch(requirement -> !requirement.validate(beacon));
+        boolean notFulfilled = requirements.stream().anyMatch(requirement -> !requirement.validate(beacon));
 
         return !notFulfilled;
     }
@@ -48,8 +48,7 @@ public class BeaconRequirement {
         /**
          * The target field must not exist.
          */
-        NOT_EXISTS
-    }
+        NOT_EXISTS}
 
     /**
      * The field which is targeted.
@@ -67,6 +66,7 @@ public class BeaconRequirement {
      * Checks whether the given beacon fulfills this requirement.
      *
      * @param beacon the beacon to check
+     *
      * @return true in case the beacon fulfills the requirement otherwise false is returned
      */
     public boolean validate(Beacon beacon) {

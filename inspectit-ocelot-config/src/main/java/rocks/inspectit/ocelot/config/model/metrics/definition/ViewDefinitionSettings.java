@@ -22,10 +22,7 @@ public class ViewDefinitionSettings {
 
     @AllArgsConstructor
     public enum Aggregation {
-        LAST_VALUE("last value"),
-        SUM("sum"),
-        COUNT("count"),
-        QUANTILES("quantiles"),
+        LAST_VALUE("last value"), SUM("sum"), COUNT("count"), QUANTILES("quantiles"),
         /**
          * Corresponds to OpenCensus "Distribution" aggregation
          */
@@ -107,18 +104,15 @@ public class ViewDefinitionSettings {
         return result.build();
     }
 
-    @AssertFalse(message = "When using QUANTILES aggregation you must specify the quantiles to use!")
-    boolean isQuantilesNotSpecifiedForercentileType() {
+    @AssertFalse(message = "When using QUANTILES aggregation you must specify the quantiles to use!") boolean isQuantilesNotSpecifiedForercentileType() {
         return enabled && aggregation == Aggregation.QUANTILES && CollectionUtils.isEmpty(quantiles);
     }
 
-    @AssertFalse(message = "When using HISTOGRAM aggregation you must specify the bucket-boundaries!")
-    boolean isBucketBoundariesNotSpecifiedForHistogram() {
+    @AssertFalse(message = "When using HISTOGRAM aggregation you must specify the bucket-boundaries!") boolean isBucketBoundariesNotSpecifiedForHistogram() {
         return enabled && aggregation == Aggregation.HISTOGRAM && CollectionUtils.isEmpty(bucketBoundaries);
     }
 
-    @AssertTrue(message = "When using HISTOGRAM the specified bucket-boundaries must be sorted in ascending order and must contain each value at most once!")
-    boolean isBucketBoundariesSorted() {
+    @AssertTrue(message = "When using HISTOGRAM the specified bucket-boundaries must be sorted in ascending order and must contain each value at most once!") boolean isBucketBoundariesSorted() {
         if (enabled && aggregation == Aggregation.HISTOGRAM && !CollectionUtils.isEmpty(bucketBoundaries)) {
             Double previous = null;
             for (double boundary : bucketBoundaries) {
@@ -131,10 +125,8 @@ public class ViewDefinitionSettings {
         return true;
     }
 
-    @AssertTrue(message = "The quantiles must be in the range [0,1]")
-    boolean isQuantilesInRange() {
-        return !enabled || aggregation != Aggregation.QUANTILES ||
-                quantiles.stream().noneMatch(q -> q < 0 || q > 1);
+    @AssertTrue(message = "The quantiles must be in the range [0,1]") boolean isQuantilesInRange() {
+        return !enabled || aggregation != Aggregation.QUANTILES || quantiles.stream().noneMatch(q -> q < 0 || q > 1);
     }
 
 }

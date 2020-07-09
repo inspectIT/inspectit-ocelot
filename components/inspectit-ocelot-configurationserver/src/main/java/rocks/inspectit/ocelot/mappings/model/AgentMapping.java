@@ -44,11 +44,7 @@ public class AgentMapping implements Auditable {
     private Map<@NotBlank String, @NotBlank String> attributes;
 
     @JsonCreator
-    public AgentMapping(
-            @JsonProperty("name") String name,
-            @JsonProperty("branch") Branch sourceBranch,
-            @JsonProperty("sources") List<@NotBlank String> sources,
-            @JsonProperty("attributes") Map<@NotBlank String, @NotBlank String> attributes) {
+    public AgentMapping(@JsonProperty("name") String name, @JsonProperty("branch") Branch sourceBranch, @JsonProperty("sources") List<@NotBlank String> sources, @JsonProperty("attributes") Map<@NotBlank String, @NotBlank String> attributes) {
         this.name = name;
         this.sources = Collections.unmodifiableList(sources);
         this.attributes = Collections.unmodifiableMap(attributes);
@@ -67,9 +63,7 @@ public class AgentMapping implements Auditable {
             String pattern = pair.getValue();
             String value = agentAttributes.getOrDefault(pair.getKey(), "");
 
-            boolean matches = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE)
-                    .matcher(value)
-                    .matches();
+            boolean matches = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE).matcher(value).matches();
             if (!matches) {
                 return false;
             }

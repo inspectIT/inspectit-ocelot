@@ -12,13 +12,12 @@ public class RequestUtil {
      * this method returns the part of the url after the /**.
      *
      * @param request the request
+     *
      * @return the part of the request path after /**
      */
     public static String getRequestSubPath(HttpServletRequest request) {
-        String path =
-                request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE).toString();
-        String bestMatchingPattern =
-                request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE).toString();
+        String path = request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE).toString();
+        String bestMatchingPattern = request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE).toString();
         return new AntPathMatcher().extractPathWithinPattern(bestMatchingPattern, path);
     }
 }

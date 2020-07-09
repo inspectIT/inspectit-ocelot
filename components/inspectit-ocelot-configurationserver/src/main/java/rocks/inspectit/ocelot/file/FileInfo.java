@@ -18,10 +18,7 @@ import java.util.stream.Stream;
 public class FileInfo {
 
     public enum Type {
-        @JsonProperty("directory")
-        DIRECTORY,
-        @JsonProperty("file")
-        FILE
+        @JsonProperty("directory") DIRECTORY, @JsonProperty("file") FILE
     }
 
     private Type type;
@@ -36,6 +33,7 @@ public class FileInfo {
      * Otherwise the absolute paths of all (transitively) contained files (not directories) is returned.
      *
      * @param containingDir the path directory containing this file, can be empty if this file is at the root
+     *
      * @return a stream of absolute paths
      */
     public Stream<String> getAbsoluteFilePaths(String containingDir) {

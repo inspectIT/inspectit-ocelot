@@ -50,12 +50,7 @@ public class AgentMappingSerializerTest {
             ArgumentCaptor<String> writtenFile = ArgumentCaptor.forClass(String.class);
             verify(fileAccessor).writeAgentMappings(writtenFile.capture());
 
-            assertThat(writtenFile.getValue()).isEqualTo("- name: \"mapping\"\n" +
-                    "  branch: \"LIVE\"\n" +
-                    "  sources:\n" +
-                    "  - \"/any-source\"\n" +
-                    "  attributes:\n" +
-                    "    key: \"val\"\n");
+            assertThat(writtenFile.getValue()).isEqualTo("- name: \"mapping\"\n" + "  branch: \"LIVE\"\n" + "  sources:\n" + "  - \"/any-source\"\n" + "  attributes:\n" + "    key: \"val\"\n");
             verifyNoMoreInteractions(fileAccessor);
         }
     }
@@ -65,12 +60,7 @@ public class AgentMappingSerializerTest {
 
         @Test
         public void successfullyReadYaml() throws IOException {
-            String dummyYaml = "- name: \"mapping\"\n" +
-                    "  branch: \"WORKSPACE\"\n" +
-                    "  sources:\n" +
-                    "  - \"/any-source\"\n" +
-                    "  attributes:\n" +
-                    "    key: \"val\"\n";
+            String dummyYaml = "- name: \"mapping\"\n" + "  branch: \"WORKSPACE\"\n" + "  sources:\n" + "  - \"/any-source\"\n" + "  attributes:\n" + "    key: \"val\"\n";
 
             doReturn(Optional.of(dummyYaml)).when(fileAccessor).readAgentMappings();
 

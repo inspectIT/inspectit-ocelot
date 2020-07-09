@@ -66,7 +66,10 @@ class SecurityConfigurationTest {
                     .groupSearchFilter("group-filter")
                     .groupSearchBase("group-base")
                     .build();
-            SecuritySettings securitySettings = SecuritySettings.builder().ldapAuthentication(true).ldap(ldapSettings).build();
+            SecuritySettings securitySettings = SecuritySettings.builder()
+                    .ldapAuthentication(true)
+                    .ldap(ldapSettings)
+                    .build();
             InspectitServerSettings settings = InspectitServerSettings.builder().security(securitySettings).build();
             configuration.serverSettings = settings;
 

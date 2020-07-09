@@ -60,7 +60,6 @@ public class SetSpanStatusActionTest {
             verifyZeroInteractions(span);
         }
 
-
         @Test
         void throwableStatus() {
             SetSpanStatusAction action = new SetSpanStatusAction((ctx) -> new Throwable());

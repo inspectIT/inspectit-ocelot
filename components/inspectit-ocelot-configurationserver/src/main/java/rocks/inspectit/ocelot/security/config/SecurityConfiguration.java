@@ -54,22 +54,13 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(WebSecurity web) {
-        web.ignoring().antMatchers(
-                "/v2/api-docs",
-                "/configuration/**",
-                "/csrf",
-                "/",
-                "/ui/**",
-                "/actuator/**",
-                "/swagger*/**",
-                "/webjars/**",
-                "/api/v1/agent/configuration");
+        web.ignoring()
+                .antMatchers("/v2/api-docs", "/configuration/**", "/csrf", "/", "/ui/**", "/actuator/**", "/swagger*/**", "/webjars/**", "/api/v1/agent/configuration");
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http
-                .csrf()
+        http.csrf()
                 .disable()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -92,10 +83,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .and()
                 //TODO: The "correct" way of selectively enabling token based would be to have multiple spring security configs.
                 //However, previous attempts of doing so were unsuccessful, therefore we simply exclude them manually in the filter
-                .addFilterBefore(
-                        new JwtTokenFilter(tokenManager, eventPublisher, Collections.singletonList("/api/v1/account/password")),
-                        BasicAuthenticationFilter.class
-                )
+                .addFilterBefore(new JwtTokenFilter(tokenManager, eventPublisher, Collections.singletonList("/api/v1/account/password")), BasicAuthenticationFilter.class)
                 .addFilterBefore(accessLogFilter.getFilter(), JwtTokenFilter.class);
     }
 
@@ -112,17 +100,13 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
      */
     @SuppressWarnings("deprecation")
     private void configureLdapAuthentication(AuthenticationManagerBuilder auth) throws Exception {
-        auth
-                .userDetailsService(customLdapUserDetailsService)
-                .passwordEncoder(new LdapShaPasswordEncoder());
+        auth.userDetailsService(customLdapUserDetailsService).passwordEncoder(new LdapShaPasswordEncoder());
     }
 
     /**
      * Configures the user authentication to use the local and embedded database for user management and authentication.
      */
     private void configureLocalAuthentication(AuthenticationManagerBuilder auth) throws Exception {
-        auth
-                .userDetailsService(localUserDetailsService)
-                .passwordEncoder(passwordEncoder);
+        auth.userDetailsService(localUserDetailsService).passwordEncoder(passwordEncoder);
     }
 }

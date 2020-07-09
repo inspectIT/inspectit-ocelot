@@ -28,12 +28,10 @@ class SelfMonitoringSysTest extends MetricsSysTestBase {
             Map<List<TagValue>, AggregationData> aggregationMap = inspectITDuration.getAggregationMap();
 
             assertThat(aggregationMap).isNotNull().isNotEmpty();
-            assertThat(aggregationMap.keySet())
-                    .flatExtracting(tags -> tags)
+            assertThat(aggregationMap.keySet()).flatExtracting(tags -> tags)
                     .contains(TagValue.create("ProcessorMetricsRecorder"))
                     .contains(TagValue.create("ClassLoaderMetricsRecorder"))
                     .contains(TagValue.create("DiskMetricsRecorder"));
-
 
             assertThat(aggregationMap.values()).allSatisfy(data -> {
                 assertThat(data).isInstanceOf(AggregationData.SumDataDouble.class);

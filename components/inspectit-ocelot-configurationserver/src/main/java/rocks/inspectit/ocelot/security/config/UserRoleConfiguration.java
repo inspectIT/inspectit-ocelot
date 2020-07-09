@@ -48,34 +48,20 @@ public class UserRoleConfiguration {
     /**
      * Permission set for the reader-role.
      */
-    public static final List<? extends GrantedAuthority> READ_ROLE_PERMISSION_SET = Collections.singletonList(
-            new SimpleGrantedAuthority(READ_ACCESS_ROLE)
-    );
+    public static final List<? extends GrantedAuthority> READ_ROLE_PERMISSION_SET = Collections.singletonList(new SimpleGrantedAuthority(READ_ACCESS_ROLE));
 
     /**
      * Permission set for the writer-role.
      */
-    public static final List<? extends GrantedAuthority> WRITE_ROLE_PERMISSION_SET = Arrays.asList(
-            new SimpleGrantedAuthority(READ_ACCESS_ROLE),
-            new SimpleGrantedAuthority(WRITE_ACCESS_ROLE)
-    );
+    public static final List<? extends GrantedAuthority> WRITE_ROLE_PERMISSION_SET = Arrays.asList(new SimpleGrantedAuthority(READ_ACCESS_ROLE), new SimpleGrantedAuthority(WRITE_ACCESS_ROLE));
 
     /**
      * Permission set for the committer-role.
      */
-    public static final List<? extends GrantedAuthority> COMMIT_ROLE_PERMISSION_SET = Arrays.asList(
-            new SimpleGrantedAuthority(READ_ACCESS_ROLE),
-            new SimpleGrantedAuthority(WRITE_ACCESS_ROLE),
-            new SimpleGrantedAuthority(COMMIT_ACCESS_ROLE)
-    );
+    public static final List<? extends GrantedAuthority> COMMIT_ROLE_PERMISSION_SET = Arrays.asList(new SimpleGrantedAuthority(READ_ACCESS_ROLE), new SimpleGrantedAuthority(WRITE_ACCESS_ROLE), new SimpleGrantedAuthority(COMMIT_ACCESS_ROLE));
 
     /**
      * Permission set for the admin-role.
      */
-    public static final List<? extends GrantedAuthority> ADMIN_ROLE_PERMISSION_SET = Arrays.asList(
-            new SimpleGrantedAuthority(READ_ACCESS_ROLE),
-            new SimpleGrantedAuthority(WRITE_ACCESS_ROLE),
-            new SimpleGrantedAuthority(COMMIT_ACCESS_ROLE),
-            new SimpleGrantedAuthority(ADMIN_ACCESS_ROLE)
-    );
+    public static final List<? extends GrantedAuthority> ADMIN_ROLE_PERMISSION_SET = Arrays.asList(new SimpleGrantedAuthority(READ_ACCESS_ROLE), new SimpleGrantedAuthority(WRITE_ACCESS_ROLE), new SimpleGrantedAuthority(COMMIT_ACCESS_ROLE), new SimpleGrantedAuthority(ADMIN_ACCESS_ROLE));
 }

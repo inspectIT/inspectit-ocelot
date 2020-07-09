@@ -23,7 +23,8 @@ public class CompositeBeaconProcessor implements BeaconProcessor {
             try {
                 beacon = beacon.merge(beaconProcessor.process(beacon));
             } catch (Exception e) {
-                log.error("BeaconProcessor <{}> encountered an Exception! Ignoring the processor!", beaconProcessor.getClass().getName(), e);
+                log.error("BeaconProcessor <{}> encountered an Exception! Ignoring the processor!", beaconProcessor.getClass()
+                        .getName(), e);
             }
         }
         return beacon;

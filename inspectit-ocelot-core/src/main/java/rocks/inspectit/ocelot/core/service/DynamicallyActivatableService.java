@@ -6,10 +6,10 @@ import org.springframework.context.event.EventListener;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
-import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
-import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.exporters.metrics.PrometheusExporterSettings;
+import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
+import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -123,6 +123,7 @@ public abstract class DynamicallyActivatableService {
      * When changes to the configuration occur, this method will be used to correctly invoke {@link #doDisable()} and {@link #doEnable()}.
      *
      * @param configuration the configuration to check
+     *
      * @return true if the service should be enabled otherwise false
      */
     protected abstract boolean checkEnabledForConfig(InspectitConfig configuration);
@@ -133,6 +134,7 @@ public abstract class DynamicallyActivatableService {
      * If the enabling is not successful, this method has to perform the cleanup.
      *
      * @param configuration the configuration used to start the service. Is the same configuration as {@link InspectitEnvironment#getCurrentConfig()}.
+     *
      * @return true if the enabling was successful, false otherwise.
      */
     protected abstract boolean doEnable(InspectitConfig configuration);
@@ -144,6 +146,5 @@ public abstract class DynamicallyActivatableService {
      * @return true, if the disabling was successful. false if the service could not be disabled and is still running.
      */
     protected abstract boolean doDisable();
-
 
 }

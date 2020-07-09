@@ -17,6 +17,7 @@ public class LoggingSettings {
     private FileSystemResource configFile;
 
     // below only properties that are related to default logback config
+
     /**
      * If inspectIT should log in TRACE level.
      */

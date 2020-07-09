@@ -19,7 +19,6 @@ import rocks.inspectit.oce.eum.server.metrics.SelfMonitoringMetricManager;
 import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -58,9 +57,7 @@ class BeaconControllerTest {
             verifyNoMoreInteractions(beaconMetricManager, beaconProcessor, selfMonitoringService);
 
             assertThat(result).extracting(ResponseEntity::getStatusCode).isEqualTo(HttpStatus.OK);
-            assertThat(beaconCaptor.getValue().toMap())
-                    .hasSize(1)
-                    .containsEntry("key", "value");
+            assertThat(beaconCaptor.getValue().toMap()).hasSize(1).containsEntry("key", "value");
         }
 
         @Test
@@ -102,9 +99,7 @@ class BeaconControllerTest {
             verifyNoMoreInteractions(beaconMetricManager, beaconProcessor, selfMonitoringService);
 
             assertThat(result).extracting(ResponseEntity::getStatusCode).isEqualTo(HttpStatus.OK);
-            assertThat(beaconCaptor.getValue().toMap())
-                    .hasSize(1)
-                    .containsEntry("key", "value");
+            assertThat(beaconCaptor.getValue().toMap()).hasSize(1).containsEntry("key", "value");
         }
 
         @Test

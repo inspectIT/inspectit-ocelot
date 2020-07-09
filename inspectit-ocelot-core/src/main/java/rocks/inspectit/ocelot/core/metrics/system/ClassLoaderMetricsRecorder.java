@@ -27,12 +27,10 @@ public class ClassLoaderMetricsRecorder extends AbstractPollingMetricsRecorder {
     protected void takeMeasurement(MetricsSettings config) {
         val cl = config.getClassloader();
         if (cl.getEnabled().getOrDefault(LOADED_METRIC_NAME, false)) {
-            measureManager.tryRecordingMeasurement(METRIC_NAME_PREFIX + LOADED_METRIC_NAME,
-                    classLoadingBean.getLoadedClassCount());
+            measureManager.tryRecordingMeasurement(METRIC_NAME_PREFIX + LOADED_METRIC_NAME, classLoadingBean.getLoadedClassCount());
         }
         if (cl.getEnabled().getOrDefault(UNLOADED_METRIC_NAME, false)) {
-            measureManager.tryRecordingMeasurement(METRIC_NAME_PREFIX + UNLOADED_METRIC_NAME,
-                    classLoadingBean.getUnloadedClassCount());
+            measureManager.tryRecordingMeasurement(METRIC_NAME_PREFIX + UNLOADED_METRIC_NAME, classLoadingBean.getUnloadedClassCount());
         }
     }
 

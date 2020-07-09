@@ -31,16 +31,19 @@ public class MethodHookConfigurationResolverTest {
     @InjectMocks
     MethodHookConfigurationResolver resolver;
 
-
     @Nested
     class BuildHookConfiguration {
 
         InstrumentationConfiguration config;
 
         GenericActionConfig providerA;
+
         ActionCallConfig callToA1;
+
         ActionCallConfig callToA2;
+
         GenericActionConfig providerB;
+
         ActionCallConfig callToB;
 
         @BeforeEach
@@ -48,34 +51,21 @@ public class MethodHookConfigurationResolverTest {
 
             config = InstrumentationConfiguration.builder().build();
 
-            providerA = GenericActionConfig.builder()
-                    .name("providerA")
-                    .build();
+            providerA = GenericActionConfig.builder().name("providerA").build();
 
             ActionCallSettings seta1 = new ActionCallSettings();
             seta1.setAction("providerA");
-            callToA1 = ActionCallConfig.builder()
-                    .name("my_key")
-                    .callSettings(seta1)
-                    .action(providerA).build();
+            callToA1 = ActionCallConfig.builder().name("my_key").callSettings(seta1).action(providerA).build();
 
             ActionCallSettings seta2 = new ActionCallSettings();
             seta2.setAction("providerA");
-            callToA2 = ActionCallConfig.builder()
-                    .name("my_key")
-                    .callSettings(seta2)
-                    .action(providerA).build();
+            callToA2 = ActionCallConfig.builder().name("my_key").callSettings(seta2).action(providerA).build();
 
-            providerB = GenericActionConfig.builder()
-                    .name("providerB")
-                    .build();
+            providerB = GenericActionConfig.builder().name("providerB").build();
 
             ActionCallSettings setb1 = new ActionCallSettings();
             setb1.setAction("providerB");
-            callToB = ActionCallConfig.builder()
-                    .name("my_key")
-                    .callSettings(setb1)
-                    .action(providerB).build();
+            callToB = ActionCallConfig.builder().name("my_key").callSettings(setb1).action(providerB).build();
         }
 
         @Test
@@ -84,11 +74,13 @@ public class MethodHookConfigurationResolverTest {
                     .metric("my_metric")
                     .value("data")
                     .build();
-            InstrumentationRule r1 = InstrumentationRule.builder().metrics(ImmutableMultiset.of(metric, metric)).build();
+            InstrumentationRule r1 = InstrumentationRule.builder()
+                    .metrics(ImmutableMultiset.of(metric, metric))
+                    .build();
             InstrumentationRule r2 = InstrumentationRule.builder().metrics(ImmutableMultiset.of(metric)).build();
 
-            Multiset<MetricRecordingSettings> result = resolver.buildHookConfiguration(
-                    config, Sets.newHashSet(r1, r2)).getMetrics();
+            Multiset<MetricRecordingSettings> result = resolver.buildHookConfiguration(config, Sets.newHashSet(r1, r2))
+                    .getMetrics();
             assertThat(result).contains(3, metric);
         }
 
@@ -100,8 +92,9 @@ public class MethodHookConfigurationResolverTest {
                     .build();
             InstrumentationRule r1 = InstrumentationRule.builder().metrics(ImmutableMultiset.of(metric)).build();
 
-            Multiset<MetricRecordingSettings> result = resolver.buildHookConfiguration(
-                    config.toBuilder().metricsEnabled(false).build(), Sets.newHashSet(r1)).getMetrics();
+            Multiset<MetricRecordingSettings> result = resolver.buildHookConfiguration(config.toBuilder()
+                    .metricsEnabled(false)
+                    .build(), Sets.newHashSet(r1)).getMetrics();
             assertThat(result).isEmpty();
         }
 
@@ -114,13 +107,13 @@ public class MethodHookConfigurationResolverTest {
                             .build())
                     .build();
 
-            MethodHookConfiguration result = resolver.buildHookConfiguration(
-                    config.toBuilder().tracingEnabled(false).build(), Sets.newHashSet(r1));
+            MethodHookConfiguration result = resolver.buildHookConfiguration(config.toBuilder()
+                    .tracingEnabled(false)
+                    .build(), Sets.newHashSet(r1));
 
             assertThat(result.getTracing().getStartSpan()).isFalse();
             assertThat(result.getTracing().getAttributes()).isEmpty();
         }
-
 
         @Test
         void verifyTracingInformationMerged() throws Exception {
@@ -148,8 +141,8 @@ public class MethodHookConfigurationResolverTest {
                             .build())
                     .build();
 
-            RuleTracingSettings result = resolver.buildHookConfiguration(
-                    config, Sets.newHashSet(r1, r2, r3)).getTracing();
+            RuleTracingSettings result = resolver.buildHookConfiguration(config, Sets.newHashSet(r1, r2, r3))
+                    .getTracing();
 
             assertThat(result.getStartSpan()).isTrue();
             assertThat(result.getStoreSpan()).isEqualTo("store_span");
@@ -158,29 +151,22 @@ public class MethodHookConfigurationResolverTest {
             assertThat(result.getKind()).isEqualTo(Span.Kind.SERVER);
             assertThat(result.getName()).isEqualTo("data_name");
             assertThat(result.getErrorStatus()).isEqualTo("my_error_var");
-            assertThat(result.getAttributes())
-                    .hasSize(2)
+            assertThat(result.getAttributes()).hasSize(2)
                     .containsEntry("attr", "dataX")
                     .containsEntry("attr2", "dataY");
         }
-
 
         @Test
         void verifyTracingCustomSamplingProbabilityRespected() throws Exception {
             config = InstrumentationConfiguration.builder().build();
             InstrumentationRule r1 = InstrumentationRule.builder()
-                    .tracing(RuleTracingSettings.builder()
-                            .startSpan(true)
-                            .build())
+                    .tracing(RuleTracingSettings.builder().startSpan(true).build())
                     .build();
             InstrumentationRule r2 = InstrumentationRule.builder()
-                    .tracing(RuleTracingSettings.builder()
-                            .sampleProbability("foo")
-                            .build())
+                    .tracing(RuleTracingSettings.builder().sampleProbability("foo").build())
                     .build();
 
-            RuleTracingSettings result = resolver.buildHookConfiguration(
-                    config, Sets.newHashSet(r1, r2)).getTracing();
+            RuleTracingSettings result = resolver.buildHookConfiguration(config, Sets.newHashSet(r1, r2)).getTracing();
 
             assertThat(result.getSampleProbability()).isEqualTo("foo");
         }
@@ -190,18 +176,13 @@ public class MethodHookConfigurationResolverTest {
             config = InstrumentationConfiguration.builder().build();
 
             InstrumentationRule r1 = InstrumentationRule.builder()
-                    .tracing(RuleTracingSettings.builder()
-                            .startSpan(true)
-                            .sampleProbability(null)
-                            .build())
+                    .tracing(RuleTracingSettings.builder().startSpan(true).sampleProbability(null).build())
                     .build();
 
-            RuleTracingSettings result = resolver.buildHookConfiguration(
-                    config, Sets.newHashSet(r1)).getTracing();
+            RuleTracingSettings result = resolver.buildHookConfiguration(config, Sets.newHashSet(r1)).getTracing();
 
             assertThat(result.getSampleProbability()).isNull();
         }
-
 
         @Test
         void verifyProvidersOrderedByDependencies() throws Exception {
@@ -211,7 +192,8 @@ public class MethodHookConfigurationResolverTest {
             ActionCallConfig depFirst = ActionCallConfig.builder()
                     .name("second_key")
                     .callSettings(dependingOnFirst)
-                    .action(providerA).build();
+                    .action(providerA)
+                    .build();
 
             ActionCallSettings dependingOnSecond = new ActionCallSettings();
             dependingOnSecond.setAction("providerA");
@@ -219,22 +201,15 @@ public class MethodHookConfigurationResolverTest {
             ActionCallConfig depSecond = ActionCallConfig.builder()
                     .name("second_key")
                     .callSettings(dependingOnSecond)
-                    .action(providerA).build();
+                    .action(providerA)
+                    .build();
 
-            InstrumentationRule r1 = InstrumentationRule.builder()
-                    .entryAction(callToA1)
-                    .entryAction(depSecond).build();
-            InstrumentationRule r2 = InstrumentationRule.builder()
-                    .entryAction(depFirst).build();
+            InstrumentationRule r1 = InstrumentationRule.builder().entryAction(callToA1).entryAction(depSecond).build();
+            InstrumentationRule r2 = InstrumentationRule.builder().entryAction(depFirst).build();
 
             MethodHookConfiguration conf = resolver.buildHookConfiguration(config, Sets.newHashSet(r1, r2));
-            assertThat(conf.getEntryActions()).containsExactly(
-                    callToA1,
-                    depFirst,
-                    depSecond
-            );
+            assertThat(conf.getEntryActions()).containsExactly(callToA1, depFirst, depSecond);
         }
-
 
         @Test
         void verifyPreEntryProvidersPreserved() throws Exception {
@@ -243,7 +218,8 @@ public class MethodHookConfigurationResolverTest {
             ActionCallConfig first = ActionCallConfig.builder()
                     .name("first")
                     .callSettings(firstSettings)
-                    .action(providerA).build();
+                    .action(providerA)
+                    .build();
 
             ActionCallSettings secondSettings = new ActionCallSettings();
             secondSettings.setAction("providerB");
@@ -251,18 +227,13 @@ public class MethodHookConfigurationResolverTest {
             ActionCallConfig second = ActionCallConfig.builder()
                     .name("second")
                     .callSettings(secondSettings)
-                    .action(providerB).build();
-
-            InstrumentationRule r1 = InstrumentationRule.builder()
-                    .preEntryAction(first)
-                    .preEntryAction(second)
+                    .action(providerB)
                     .build();
 
+            InstrumentationRule r1 = InstrumentationRule.builder().preEntryAction(first).preEntryAction(second).build();
+
             MethodHookConfiguration conf = resolver.buildHookConfiguration(config, Sets.newHashSet(r1));
-            assertThat(conf.getPreEntryActions()).containsExactly(
-                    first,
-                    second
-            );
+            assertThat(conf.getPreEntryActions()).containsExactly(first, second);
         }
 
         @Test
@@ -272,7 +243,8 @@ public class MethodHookConfigurationResolverTest {
             ActionCallConfig first = ActionCallConfig.builder()
                     .name("first")
                     .callSettings(firstSettings)
-                    .action(providerA).build();
+                    .action(providerA)
+                    .build();
 
             ActionCallSettings secondSettings = new ActionCallSettings();
             secondSettings.setAction("providerB");
@@ -280,20 +252,14 @@ public class MethodHookConfigurationResolverTest {
             ActionCallConfig second = ActionCallConfig.builder()
                     .name("second")
                     .callSettings(secondSettings)
-                    .action(providerB).build();
-
-            InstrumentationRule r1 = InstrumentationRule.builder()
-                    .entryAction(first)
-                    .entryAction(second)
+                    .action(providerB)
                     .build();
 
-            MethodHookConfiguration conf = resolver.buildHookConfiguration(config, Sets.newHashSet(r1));
-            assertThat(conf.getEntryActions()).containsExactly(
-                    first,
-                    second
-            );
-        }
+            InstrumentationRule r1 = InstrumentationRule.builder().entryAction(first).entryAction(second).build();
 
+            MethodHookConfiguration conf = resolver.buildHookConfiguration(config, Sets.newHashSet(r1));
+            assertThat(conf.getEntryActions()).containsExactly(first, second);
+        }
 
         @Test
         void verifyPostEntryProvidersPreserved() throws Exception {
@@ -302,7 +268,8 @@ public class MethodHookConfigurationResolverTest {
             ActionCallConfig first = ActionCallConfig.builder()
                     .name("first")
                     .callSettings(firstSettings)
-                    .action(providerA).build();
+                    .action(providerA)
+                    .build();
 
             ActionCallSettings secondSettings = new ActionCallSettings();
             secondSettings.setAction("providerB");
@@ -310,7 +277,8 @@ public class MethodHookConfigurationResolverTest {
             ActionCallConfig second = ActionCallConfig.builder()
                     .name("second")
                     .callSettings(secondSettings)
-                    .action(providerB).build();
+                    .action(providerB)
+                    .build();
 
             InstrumentationRule r1 = InstrumentationRule.builder()
                     .postEntryAction(first)
@@ -318,10 +286,7 @@ public class MethodHookConfigurationResolverTest {
                     .build();
 
             MethodHookConfiguration conf = resolver.buildHookConfiguration(config, Sets.newHashSet(r1));
-            assertThat(conf.getPostEntryActions()).containsExactly(
-                    first,
-                    second
-            );
+            assertThat(conf.getPostEntryActions()).containsExactly(first, second);
         }
 
         @Test
@@ -331,7 +296,8 @@ public class MethodHookConfigurationResolverTest {
             ActionCallConfig first = ActionCallConfig.builder()
                     .name("first")
                     .callSettings(firstSettings)
-                    .action(providerA).build();
+                    .action(providerA)
+                    .build();
 
             ActionCallSettings secondSettings = new ActionCallSettings();
             secondSettings.setAction("providerB");
@@ -339,18 +305,13 @@ public class MethodHookConfigurationResolverTest {
             ActionCallConfig second = ActionCallConfig.builder()
                     .name("second")
                     .callSettings(secondSettings)
-                    .action(providerB).build();
-
-            InstrumentationRule r1 = InstrumentationRule.builder()
-                    .preExitAction(first)
-                    .preExitAction(second)
+                    .action(providerB)
                     .build();
 
+            InstrumentationRule r1 = InstrumentationRule.builder().preExitAction(first).preExitAction(second).build();
+
             MethodHookConfiguration conf = resolver.buildHookConfiguration(config, Sets.newHashSet(r1));
-            assertThat(conf.getPreExitActions()).containsExactly(
-                    first,
-                    second
-            );
+            assertThat(conf.getPreExitActions()).containsExactly(first, second);
         }
 
         @Test
@@ -360,7 +321,8 @@ public class MethodHookConfigurationResolverTest {
             ActionCallConfig first = ActionCallConfig.builder()
                     .name("first")
                     .callSettings(firstSettings)
-                    .action(providerA).build();
+                    .action(providerA)
+                    .build();
 
             ActionCallSettings secondSettings = new ActionCallSettings();
             secondSettings.setAction("providerB");
@@ -368,20 +330,14 @@ public class MethodHookConfigurationResolverTest {
             ActionCallConfig second = ActionCallConfig.builder()
                     .name("second")
                     .callSettings(secondSettings)
-                    .action(providerB).build();
-
-            InstrumentationRule r1 = InstrumentationRule.builder()
-                    .exitAction(first)
-                    .exitAction(second)
+                    .action(providerB)
                     .build();
 
-            MethodHookConfiguration conf = resolver.buildHookConfiguration(config, Sets.newHashSet(r1));
-            assertThat(conf.getExitActions()).containsExactly(
-                    first,
-                    second
-            );
-        }
+            InstrumentationRule r1 = InstrumentationRule.builder().exitAction(first).exitAction(second).build();
 
+            MethodHookConfiguration conf = resolver.buildHookConfiguration(config, Sets.newHashSet(r1));
+            assertThat(conf.getExitActions()).containsExactly(first, second);
+        }
 
         @Test
         void verifyPostExitProvidersPreserved() throws Exception {
@@ -390,7 +346,8 @@ public class MethodHookConfigurationResolverTest {
             ActionCallConfig first = ActionCallConfig.builder()
                     .name("first")
                     .callSettings(firstSettings)
-                    .action(providerA).build();
+                    .action(providerA)
+                    .build();
 
             ActionCallSettings secondSettings = new ActionCallSettings();
             secondSettings.setAction("providerB");
@@ -398,18 +355,13 @@ public class MethodHookConfigurationResolverTest {
             ActionCallConfig second = ActionCallConfig.builder()
                     .name("second")
                     .callSettings(secondSettings)
-                    .action(providerB).build();
-
-            InstrumentationRule r1 = InstrumentationRule.builder()
-                    .postExitAction(first)
-                    .postExitAction(second)
+                    .action(providerB)
                     .build();
 
+            InstrumentationRule r1 = InstrumentationRule.builder().postExitAction(first).postExitAction(second).build();
+
             MethodHookConfiguration conf = resolver.buildHookConfiguration(config, Sets.newHashSet(r1));
-            assertThat(conf.getPostExitActions()).containsExactly(
-                    first,
-                    second
-            );
+            assertThat(conf.getPostExitActions()).containsExactly(first, second);
         }
 
     }

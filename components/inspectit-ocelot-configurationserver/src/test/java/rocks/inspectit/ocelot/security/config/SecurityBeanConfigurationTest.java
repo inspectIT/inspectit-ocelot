@@ -42,12 +42,8 @@ class SecurityBeanConfigurationTest {
                     .managerDn(managerDn)
                     .managerPassword(managerPassword)
                     .build();
-            SecuritySettings securitySettings = SecuritySettings.builder()
-                    .ldap(ldapSettings)
-                    .build();
-            InspectitServerSettings settings = InspectitServerSettings.builder()
-                    .security(securitySettings)
-                    .build();
+            SecuritySettings securitySettings = SecuritySettings.builder().ldap(ldapSettings).build();
+            InspectitServerSettings settings = InspectitServerSettings.builder().security(securitySettings).build();
             return settings;
         }
 

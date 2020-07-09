@@ -15,8 +15,7 @@ public class ConfigUtilsTest {
 
         @Test
         void checkPrimitivesFound() {
-            assertThat(ConfigUtils.locateTypeWithinImports("int", null, Collections.emptyList()))
-                    .isSameAs(int.class);
+            assertThat(ConfigUtils.locateTypeWithinImports("int", null, Collections.emptyList())).isSameAs(int.class);
         }
 
         @Test
@@ -33,8 +32,8 @@ public class ConfigUtilsTest {
 
         @Test
         void checkFQNsWork() {
-            assertThat(ConfigUtils.locateTypeWithinImports("java.time.Duration", getClass().getClassLoader(), Collections.singletonList("something.else")))
-                    .isSameAs(Duration.class);
+            assertThat(ConfigUtils.locateTypeWithinImports("java.time.Duration", getClass().getClassLoader(), Collections
+                    .singletonList("something.else"))).isSameAs(Duration.class);
         }
     }
 }

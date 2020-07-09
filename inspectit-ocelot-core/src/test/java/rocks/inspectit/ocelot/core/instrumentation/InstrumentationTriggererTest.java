@@ -28,10 +28,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class InstrumentationTriggererTest {
 
-
-    final List<Class<?>> TESTING_CLASSES = Arrays.asList(
-            Integer.class, String.class, Character.class, Long.class, Short.class
-    );
+    final List<Class<?>> TESTING_CLASSES = Arrays.asList(Integer.class, String.class, Character.class, Long.class, Short.class);
 
     @Mock
     Instrumentation instrumentation;
@@ -65,12 +62,10 @@ public class InstrumentationTriggererTest {
             HookManager.HookUpdate update = mock(HookManager.HookUpdate.class);
             when(hookManager.startUpdate()).thenReturn(update);
 
-            doAnswer((invoc) ->
-                    classesToInstrument.contains(invoc.getArgument(0))
-            ).when(instrumentationManager).doesClassRequireRetransformation(any());
+            doAnswer((invoc) -> classesToInstrument.contains(invoc.getArgument(0))).when(instrumentationManager)
+                    .doesClassRequireRetransformation(any());
 
-            triggerer.checkClassesForConfigurationUpdates(
-                    new InstrumentationTriggerer.BatchSize(100, 100));
+            triggerer.checkClassesForConfigurationUpdates(new InstrumentationTriggerer.BatchSize(100, 100));
 
             assertThat(triggerer.pendingClasses.size()).isEqualTo(0);
             ArgumentCaptor<Class> classes = ArgumentCaptor.forClass(Class.class);
@@ -92,8 +87,7 @@ public class InstrumentationTriggererTest {
 
             doThrow(new RuntimeException()).when(instrumentation).retransformClasses(any());
 
-            triggerer.checkClassesForConfigurationUpdates(
-                    new InstrumentationTriggerer.BatchSize(100, 100));
+            triggerer.checkClassesForConfigurationUpdates(new InstrumentationTriggerer.BatchSize(100, 100));
 
             assertThat(triggerer.pendingClasses.size()).isEqualTo(0);
             //the classes are first retransformed in a batch and afterwards retransformed one by one
@@ -112,8 +106,7 @@ public class InstrumentationTriggererTest {
 
             doReturn(false).when(instrumentationManager).doesClassRequireRetransformation(any());
 
-            triggerer.checkClassesForConfigurationUpdates(
-                    new InstrumentationTriggerer.BatchSize(100, 100));
+            triggerer.checkClassesForConfigurationUpdates(new InstrumentationTriggerer.BatchSize(100, 100));
 
             assertThat(triggerer.pendingClasses.size()).isEqualTo(0);
             verify(instrumentation, never()).retransformClasses(any());
@@ -123,13 +116,12 @@ public class InstrumentationTriggererTest {
         @Test
         void ensureClassLoaderDelegationAppliedFirstInOrder() throws Exception {
             triggerer.pendingClasses.put(Integer.class, true);
-            when(classLoaderDelegation.getClassLoaderClassesRequiringRetransformation(any(), any()))
-                    .thenReturn(new LinkedHashSet<>(Arrays.asList(SecureClassLoader.class, URLClassLoader.class)));
+            when(classLoaderDelegation.getClassLoaderClassesRequiringRetransformation(any(), any())).thenReturn(new LinkedHashSet<>(Arrays
+                    .asList(SecureClassLoader.class, URLClassLoader.class)));
 
             doReturn(true).when(instrumentationManager).doesClassRequireRetransformation(any());
 
-            triggerer.checkClassesForConfigurationUpdates(
-                    new InstrumentationTriggerer.BatchSize(100, 100));
+            triggerer.checkClassesForConfigurationUpdates(new InstrumentationTriggerer.BatchSize(100, 100));
 
             assertThat(triggerer.pendingClasses.size()).isEqualTo(0);
             InOrder ordered = inOrder(instrumentation);
@@ -148,9 +140,7 @@ public class InstrumentationTriggererTest {
             doReturn(true).when(instrumentationManager).doesClassRequireRetransformation(any());
             when(classLoaderDelegation.getClassLoaderClassesRequiringRetransformation(any(), any())).thenReturn(new LinkedHashSet<>());
 
-            Set<Class<?>> classesSelectedForRetransform =
-                    triggerer.getBatchOfClassesToRetransform(
-                            new InstrumentationTriggerer.BatchSize(100, 100));
+            Set<Class<?>> classesSelectedForRetransform = triggerer.getBatchOfClassesToRetransform(new InstrumentationTriggerer.BatchSize(100, 100));
 
             assertThat(classesSelectedForRetransform).containsExactlyInAnyOrder(TESTING_CLASSES.toArray(new Class[]{}));
             assertThat(triggerer.pendingClasses.size()).isEqualTo(0);
@@ -162,16 +152,14 @@ public class InstrumentationTriggererTest {
             doReturn(true).when(instrumentationManager).doesClassRequireRetransformation(any());
             when(classLoaderDelegation.getClassLoaderClassesRequiringRetransformation(any(), any())).thenReturn(new LinkedHashSet<>());
 
-            Set<Class<?>> classesSelectedForRetransform =
-                    triggerer.getBatchOfClassesToRetransform(
-                            new InstrumentationTriggerer.BatchSize(5, 2));
+            Set<Class<?>> classesSelectedForRetransform = triggerer.getBatchOfClassesToRetransform(new InstrumentationTriggerer.BatchSize(5, 2));
 
             assertThat(classesSelectedForRetransform).hasSize(2);
             assertThat(triggerer.pendingClasses.size()).isEqualTo(3);
-            assertThat(classesSelectedForRetransform)
-                    .doesNotContain(triggerer.pendingClasses.asMap().keySet().toArray(new Class[]{}));
+            assertThat(classesSelectedForRetransform).doesNotContain(triggerer.pendingClasses.asMap()
+                    .keySet()
+                    .toArray(new Class[]{}));
         }
-
 
         @Test
         void testCheckLimitCapped() {
@@ -179,14 +167,13 @@ public class InstrumentationTriggererTest {
             doReturn(true).when(instrumentationManager).doesClassRequireRetransformation(any());
             when(classLoaderDelegation.getClassLoaderClassesRequiringRetransformation(any(), any())).thenReturn(new LinkedHashSet<>());
 
-            Set<Class<?>> classesSelectedForRetransform =
-                    triggerer.getBatchOfClassesToRetransform(
-                            new InstrumentationTriggerer.BatchSize(3, 10));
+            Set<Class<?>> classesSelectedForRetransform = triggerer.getBatchOfClassesToRetransform(new InstrumentationTriggerer.BatchSize(3, 10));
 
             assertThat(classesSelectedForRetransform).hasSize(3);
             assertThat(triggerer.pendingClasses.size()).isEqualTo(2);
-            assertThat(classesSelectedForRetransform)
-                    .doesNotContain(triggerer.pendingClasses.asMap().keySet().toArray(new Class[]{}));
+            assertThat(classesSelectedForRetransform).doesNotContain(triggerer.pendingClasses.asMap()
+                    .keySet()
+                    .toArray(new Class[]{}));
         }
     }
 }

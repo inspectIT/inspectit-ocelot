@@ -239,8 +239,7 @@ class RevisionAccessIntTest extends FileTestBase {
 
         @Test
         public void illegalPath() {
-            assertThatExceptionOfType(IllegalArgumentException.class)
-                    .isThrownBy(() -> revision.readConfigurationFile("../untracked.yml"));
+            assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> revision.readConfigurationFile("../untracked.yml"));
         }
     }
 
@@ -277,11 +276,9 @@ class RevisionAccessIntTest extends FileTestBase {
 
         @Test
         public void illegalPath() {
-            assertThatExceptionOfType(IllegalArgumentException.class)
-                    .isThrownBy(() -> revision.configurationFileExists("../untracked.yml"));
+            assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> revision.configurationFileExists("../untracked.yml"));
         }
     }
-
 
     @Nested
     class ConfigurationFileIsDirectory {
@@ -309,8 +306,7 @@ class RevisionAccessIntTest extends FileTestBase {
 
         @Test
         public void illegalPath() {
-            assertThatExceptionOfType(IllegalArgumentException.class)
-                    .isThrownBy(() -> revision.configurationFileExists(".."));
+            assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> revision.configurationFileExists(".."));
         }
     }
 }

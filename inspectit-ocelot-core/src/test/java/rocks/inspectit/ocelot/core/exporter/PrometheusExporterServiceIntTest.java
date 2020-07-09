@@ -45,7 +45,9 @@ public class PrometheusExporterServiceIntTest extends SpringTestBase {
     }
 
     void assertUnavailable(String url) throws Exception {
-        Throwable throwable = catchThrowable(() -> testClient.execute(new HttpGet(url)).getStatusLine().getStatusCode());
+        Throwable throwable = catchThrowable(() -> testClient.execute(new HttpGet(url))
+                .getStatusLine()
+                .getStatusCode());
 
         assertThat(throwable).isInstanceOf(IOException.class);
     }

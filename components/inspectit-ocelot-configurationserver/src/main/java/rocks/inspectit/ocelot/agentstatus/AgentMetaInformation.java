@@ -57,6 +57,7 @@ public class AgentMetaInformation {
      * was fetched via CURL), <code>null</code> will be returned.
      *
      * @param headers the header values of the potential agent
+     *
      * @return {@link AgentMetaInformation} instance or <code>null</code>
      */
     public static AgentMetaInformation of(Map<String, String> headers) {

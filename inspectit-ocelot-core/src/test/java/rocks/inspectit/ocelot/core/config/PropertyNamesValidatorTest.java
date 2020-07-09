@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
 public class PropertyNamesValidatorTest {
 
     PropertyNamesValidator validator;
@@ -18,6 +17,7 @@ public class PropertyNamesValidatorTest {
 
     @Nested
     public class CheckPropertyName {
+
         @Test
         void wrongProperty() {
             String property = "inspectit.iDoNotExist";
@@ -49,7 +49,8 @@ public class PropertyNamesValidatorTest {
         @Test
         void endsInWildcardType() {
 
-            assertThat(validator.isInvalidPropertyName("inspectit.instrumentation.actions.string_replace_all.input.regex")).isFalse();
+            assertThat(validator.isInvalidPropertyName("inspectit.instrumentation.actions.string_replace_all.input.regex"))
+                    .isFalse();
         }
     }
 }

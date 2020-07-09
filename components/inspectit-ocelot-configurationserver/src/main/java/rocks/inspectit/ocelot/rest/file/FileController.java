@@ -27,16 +27,9 @@ public class FileController extends FileBaseController {
     @ApiOperation(value = "Write a file", notes = "Creates or overwrites a file with the provided text content")
     @ApiImplicitParam(name = "Path", type = "string", value = "The part of the url after /files/ defines the path to the file to write.")
     @PutMapping(value = "files/**")
-    public void writeFile(HttpServletRequest request,
-                          @ApiParam("If true, the request body is not parsed as json and is instead written directly to the result file.") @RequestParam(defaultValue = "false") boolean raw,
-                          @ApiParam(value = "The content to write, either raw or a json",
-                                  examples = @Example(value = {
-                                          @ExampleProperty(mediaType = "application/json", value = "{ 'content' : 'This is the file content' }"),
-                                          @ExampleProperty(mediaType = "text/plain", value = "This is the file content")
-                                  })
-                          )
+    public void writeFile(HttpServletRequest request, @ApiParam("If true, the request body is not parsed as json and is instead written directly to the result file.") @RequestParam(defaultValue = "false") boolean raw, @ApiParam(value = "The content to write, either raw or a json", examples = @Example(value = {@ExampleProperty(mediaType = "application/json", value = "{ 'content' : 'This is the file content' }"), @ExampleProperty(mediaType = "text/plain", value = "This is the file content")}))
 
-                          @RequestBody(required = false) String content) throws IOException {
+    @RequestBody(required = false) String content) throws IOException {
         String path = RequestUtil.getRequestSubPath(request);
 
         String fileContent;
@@ -52,16 +45,9 @@ public class FileController extends FileBaseController {
 
     @ApiOperation(value = "Read a file", notes = "Returns the contents of the given file.")
     @ApiImplicitParam(name = "Path", type = "string", value = "The part of the url after /files/ defines the path to the file to read.")
-    @ApiResponse(code = 200,
-            message = "Ok",
-            examples = @Example(value = {
-                    @ExampleProperty(mediaType = "application/json", value = "{ 'content' : 'This is the file content' }"),
-                    @ExampleProperty(mediaType = "text/plain", value = "This is the file content")
-            }))
+    @ApiResponse(code = 200, message = "Ok", examples = @Example(value = {@ExampleProperty(mediaType = "application/json", value = "{ 'content' : 'This is the file content' }"), @ExampleProperty(mediaType = "text/plain", value = "This is the file content")}))
     @GetMapping(value = "files/**")
-    public Object readFile(HttpServletRequest request,
-                           @ApiParam("If true, the response body is not formatted as json and is instead the plain text content of the file.")
-                           @RequestParam(defaultValue = "false") boolean raw) {
+    public Object readFile(HttpServletRequest request, @ApiParam("If true, the response body is not formatted as json and is instead the plain text content of the file.") @RequestParam(defaultValue = "false") boolean raw) {
         String path = RequestUtil.getRequestSubPath(request);
         Optional<String> contentOptional = fileManager.getWorkingDirectory().readConfigurationFile(path);
 

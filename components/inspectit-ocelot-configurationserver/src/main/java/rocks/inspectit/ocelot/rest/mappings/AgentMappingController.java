@@ -49,6 +49,7 @@ public class AgentMappingController extends AbstractBaseController {
      * new mappings cannot be persisted into a file.
      *
      * @param agentMappings The new {@link AgentMapping}s
+     *
      * @throws IOException In case the new mappings cannot be written into a file.
      */
     @Secured(UserRoleConfiguration.WRITE_ACCESS_ROLE)
@@ -65,6 +66,7 @@ public class AgentMappingController extends AbstractBaseController {
      * Returns the {@link AgentMapping} with the given name or a 404 response in case it does not exist.
      *
      * @param mappingName the name of the {@link AgentMapping}
+     *
      * @return The {@link AgentMapping} with the given name or a 404 if it does not exist
      */
     @GetMapping(value = "mappings/{mappingName}")
@@ -77,7 +79,9 @@ public class AgentMappingController extends AbstractBaseController {
      * Deletes the {@link AgentMapping} with the given name.
      *
      * @param mappingName the name of the {@link AgentMapping} to delete
+     *
      * @return 200 if the mapping has been deleted or 404 if it does not exist
+     *
      * @throws IOException In case of an error during deletion
      */
     @Secured(UserRoleConfiguration.WRITE_ACCESS_ROLE)
@@ -105,7 +109,9 @@ public class AgentMappingController extends AbstractBaseController {
      * @param agentMapping the agent mapping to add
      * @param before       the name of the element after the added mapping
      * @param after        the name of the element before the added mapping
+     *
      * @return 200 in case the operation was successful
+     *
      * @throws IOException In case of an error
      */
     @Secured(UserRoleConfiguration.WRITE_ACCESS_ROLE)

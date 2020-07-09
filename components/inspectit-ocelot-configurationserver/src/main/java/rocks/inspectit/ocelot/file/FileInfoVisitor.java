@@ -51,10 +51,7 @@ public class FileInfoVisitor implements FileVisitor<Path> {
     @Override
     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
         // adding each file to the current directory
-        FileInfo fileInfo = FileInfo.builder()
-                .name(file.getFileName().toString())
-                .type(FileInfo.Type.FILE)
-                .build();
+        FileInfo fileInfo = FileInfo.builder().name(file.getFileName().toString()).type(FileInfo.Type.FILE).build();
 
         directoryStack.peek().addChild(fileInfo);
 

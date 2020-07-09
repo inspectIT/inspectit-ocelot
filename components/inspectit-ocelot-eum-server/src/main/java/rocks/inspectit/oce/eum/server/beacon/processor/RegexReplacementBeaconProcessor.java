@@ -27,7 +27,10 @@ public class RegexReplacementBeaconProcessor implements BeaconProcessor {
 
     @Autowired
     public RegexReplacementBeaconProcessor(EumServerConfiguration config) {
-        Map<String, RegexDerivedTag> unorderedTags = config.getTags().getBeacon().entrySet().stream()
+        Map<String, RegexDerivedTag> unorderedTags = config.getTags()
+                .getBeacon()
+                .entrySet()
+                .stream()
                 .map(e -> RegexDerivedTag.fromSettings(e.getKey(), e.getValue()))
                 .collect(Collectors.toMap(RegexDerivedTag::getTagName, t -> t));
         derivedTags = getInTopologicalOrder(unorderedTags.values(), tag -> {
@@ -94,6 +97,7 @@ public class RegexReplacementBeaconProcessor implements BeaconProcessor {
      * @param elements        the elements to sort
      * @param getDependencies a function given an element returning its dependencies
      * @param <T>             the element types, should have proper hashcode /equals implementation
+     *
      * @return the sorted list of all elements
      */
     private <T> List<T> getInTopologicalOrder(Collection<T> elements, Function<T, Collection<T>> getDependencies) {
@@ -122,6 +126,7 @@ public class RegexReplacementBeaconProcessor implements BeaconProcessor {
     @Value
     @Builder
     private static class RegexDerivedTag {
+
         /**
          * The name of the resulting tag / beacon field under which the result is stored
          */

@@ -34,33 +34,43 @@ public class GCMetricsRecorder extends AbstractMetricsRecorder {
     private static final String METRIC_NAME_PREFIX = "jvm/gc/";
 
     private static final String CONCURRENT_PHASE_TIME_METRIC_NAME = "concurrent.phase.time";
+
     private static final String CONCURRENT_PHASE_TIME_METRIC_FULL_NAME = METRIC_NAME_PREFIX + "concurrent/phase/time";
 
     private static final String PAUSE_METRIC_NAME = "pause";
+
     private static final String PAUSE_METRIC_FULL_NAME = METRIC_NAME_PREFIX + "pause";
 
     private static final String MEMORY_PROMOTED_METRIC_NAME = "memory.promoted";
+
     private static final String MEMORY_PROMOTED_METRIC_FULL_NAME = METRIC_NAME_PREFIX + "memory/promoted";
 
     private static final String MAX_DATA_SIZE_METRIC_NAME = "max.data.size";
+
     private static final String MAX_DATA_SIZE_METRIC_FULL_NAME = METRIC_NAME_PREFIX + "max/data/size";
 
     private static final String LIVE_DATA_SIZE_METRIC_NAME = "live.data.size";
+
     private static final String LIVE_DATA_SIZE_METRIC_FULL_NAME = METRIC_NAME_PREFIX + "live/data/size";
 
     private static final String MEMORY_ALLOCATED_METRIC_NAME = "memory.allocated";
+
     private static final String MEMORY_ALLOCATED_METRIC_FULL_NAME = METRIC_NAME_PREFIX + "memory/allocated";
 
     private static final boolean MANAGEMENT_EXTENSIONS_PRESENT = isManagementExtensionsPresent();
 
     private final NotificationListener notificationListener = this::handleNotification;
+
     private StandardMetricsSettings config;
 
     private final TagKey actionTagKey = TagKey.create("action");
+
     private final TagKey causeTagKey = TagKey.create("cause");
 
     private String youngGenPoolName;
+
     private String oldGenPoolName;
+
     private long youngGenSizeAfter = 0L;
 
     @Autowired
@@ -258,10 +268,7 @@ public class GCMetricsRecorder extends AbstractMetricsRecorder {
 /**
  * Generalization of which parts of the heap are considered "young" or "old" for multiple GC implementations
  */
-enum GcGenerationAge {
-    OLD,
-    YOUNG,
-    UNKNOWN;
+enum GcGenerationAge {OLD, YOUNG, UNKNOWN;
 
     private static Map<String, GcGenerationAge> knownCollectors = new HashMap<String, GcGenerationAge>() {{
         put("ConcurrentMarkSweep", OLD);
@@ -277,5 +284,4 @@ enum GcGenerationAge {
     static GcGenerationAge fromName(String name) {
         GcGenerationAge t = knownCollectors.get(name);
         return (t == null) ? UNKNOWN : t;
-    }
-}
+    }}

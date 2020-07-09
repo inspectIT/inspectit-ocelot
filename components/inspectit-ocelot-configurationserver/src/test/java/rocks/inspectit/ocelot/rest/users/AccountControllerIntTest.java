@@ -41,40 +41,25 @@ public class AccountControllerIntTest extends IntegrationTestBase {
 
         @Test
         void testChange() {
-            userService.addOrUpdateUser(User.builder()
-                    .username("John")
-                    .password("doe")
-                    .build());
+            userService.addOrUpdateUser(User.builder().username("John").password("doe").build());
 
             PasswordChangeRequest req = new PasswordChangeRequest("Foo");
 
-            ResponseEntity<String> result = rest
-                    .withBasicAuth("John", "doe").exchange(
-                            "/api/v1/account/password",
-                            HttpMethod.PUT,
-                            new HttpEntity<>(req),
-                            new ParameterizedTypeReference<String>() {
-                            });
+            ResponseEntity<String> result = rest.withBasicAuth("John", "doe")
+                    .exchange("/api/v1/account/password", HttpMethod.PUT, new HttpEntity<>(req), new ParameterizedTypeReference<String>() {
+                    });
             assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-            String pwHash = userService
-                    .getUserByName("John").get()
-                    .getPasswordHash();
-            assertThat(passwordEncoder
-                    .matches("Foo", pwHash))
-                    .isTrue();
+            String pwHash = userService.getUserByName("John").get().getPasswordHash();
+            assertThat(passwordEncoder.matches("Foo", pwHash)).isTrue();
         }
 
         @Test
         void emptyPassword() {
             PasswordChangeRequest req = new PasswordChangeRequest("");
 
-            ResponseEntity<ErrorInfo> result = authRest.exchange(
-                    "/api/v1/account/password",
-                    HttpMethod.PUT,
-                    new HttpEntity<>(req),
-                    new ParameterizedTypeReference<ErrorInfo>() {
-                    });
+            ResponseEntity<ErrorInfo> result = authRest.exchange("/api/v1/account/password", HttpMethod.PUT, new HttpEntity<>(req), new ParameterizedTypeReference<ErrorInfo>() {
+            });
             assertThat(result.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
             assertThat(result.getBody().getError()).isEqualTo(ErrorInfo.Type.NO_PASSWORD);
 
@@ -84,12 +69,8 @@ public class AccountControllerIntTest extends IntegrationTestBase {
         void nullPassword() {
             PasswordChangeRequest req = new PasswordChangeRequest(null);
 
-            ResponseEntity<ErrorInfo> result = authRest.exchange(
-                    "/api/v1/account/password",
-                    HttpMethod.PUT,
-                    new HttpEntity<>(req),
-                    new ParameterizedTypeReference<ErrorInfo>() {
-                    });
+            ResponseEntity<ErrorInfo> result = authRest.exchange("/api/v1/account/password", HttpMethod.PUT, new HttpEntity<>(req), new ParameterizedTypeReference<ErrorInfo>() {
+            });
             assertThat(result.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
             assertThat(result.getBody().getError()).isEqualTo(ErrorInfo.Type.NO_PASSWORD);
 
@@ -101,22 +82,17 @@ public class AccountControllerIntTest extends IntegrationTestBase {
 
         @Test
         void testAdminPermissions() {
-            userService.addOrUpdateUser(User.builder()
-                    .username("John")
-                    .password("doe")
-                    .build());
+            userService.addOrUpdateUser(User.builder().username("John").password("doe").build());
 
-            ResponseEntity<UserPermissions> result = rest
-                    .withBasicAuth("John", "doe")
+            ResponseEntity<UserPermissions> result = rest.withBasicAuth("John", "doe")
                     .getForEntity("/api/v1/account/permissions", UserPermissions.class);
             assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-            assertThat(result.getBody())
-                    .isEqualTo(UserPermissions.builder()
-                            .write(true)
-                            .commit(true)
-                            .admin(true)
-                            .build());
+            assertThat(result.getBody()).isEqualTo(UserPermissions.builder()
+                    .write(true)
+                    .commit(true)
+                    .admin(true)
+                    .build());
         }
     }
 
@@ -127,25 +103,17 @@ public class AccountControllerIntTest extends IntegrationTestBase {
         void acquireToken() {
             long now = System.currentTimeMillis();
 
-            userService.addOrUpdateUser(User.builder()
-                    .username("John")
-                    .password("doe")
-                    .build());
+            userService.addOrUpdateUser(User.builder().username("John").password("doe").build());
 
-            long loginTimeBefore = userService
-                    .getUserByName("John").get()
-                    .getLastLoginTime();
+            long loginTimeBefore = userService.getUserByName("John").get().getLastLoginTime();
             assertThat(loginTimeBefore).isZero();
 
-            ResponseEntity<String> result = rest
-                    .withBasicAuth("John", "doe")
+            ResponseEntity<String> result = rest.withBasicAuth("John", "doe")
                     .getForEntity("/api/v1/account/token", String.class);
 
             assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-            long loginTimeAfter = userService
-                    .getUserByName("John").get()
-                    .getLastLoginTime();
+            long loginTimeAfter = userService.getUserByName("John").get().getLastLoginTime();
             assertThat(loginTimeAfter).isGreaterThanOrEqualTo(now);
         }
 

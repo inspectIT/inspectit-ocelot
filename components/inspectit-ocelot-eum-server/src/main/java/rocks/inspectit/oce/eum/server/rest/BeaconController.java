@@ -48,6 +48,7 @@ public class BeaconController {
      * Processes the incoming beacon data.
      *
      * @param beaconData the received EUM data
+     *
      * @return the response used as result for the request
      */
     private ResponseEntity<Object> processBeacon(MultiValueMap<String, String> beaconData) {

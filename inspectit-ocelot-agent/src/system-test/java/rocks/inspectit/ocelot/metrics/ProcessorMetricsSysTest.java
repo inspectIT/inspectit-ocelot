@@ -23,7 +23,11 @@ public class ProcessorMetricsSysTest extends MetricsSysTestBase {
             assertThat(procCountData).isNotNull();
             assertThat(procCountData.getAggregationMap()).isNotEmpty();
 
-            Map.Entry<List<TagValue>, AggregationData> procCount = procCountData.getAggregationMap().entrySet().stream().findFirst().get();
+            Map.Entry<List<TagValue>, AggregationData> procCount = procCountData.getAggregationMap()
+                    .entrySet()
+                    .stream()
+                    .findFirst()
+                    .get();
 
             //ensure that tags are present
             assertThat(procCount.getKey()).isNotEmpty();

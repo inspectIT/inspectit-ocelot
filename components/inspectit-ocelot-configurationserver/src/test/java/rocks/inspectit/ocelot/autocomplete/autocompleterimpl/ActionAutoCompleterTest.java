@@ -28,6 +28,7 @@ public class ActionAutoCompleterTest {
 
     @Nested
     public class GetSuggestions {
+
         @Test
         public void hasActions() {
             List<String> path = Arrays.asList("inspectit", "instrumentation", "actions");

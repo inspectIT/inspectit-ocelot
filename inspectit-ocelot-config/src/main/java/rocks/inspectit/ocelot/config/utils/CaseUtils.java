@@ -2,7 +2,6 @@ package rocks.inspectit.ocelot.config.utils;
 
 import lombok.experimental.UtilityClass;
 
-
 @UtilityClass
 public class CaseUtils {
 
@@ -11,6 +10,7 @@ public class CaseUtils {
      * Any other separator characters are note affected.
      *
      * @param str the string in camelCase
+     *
      * @return the string in kebab-case
      */
     public String camelCaseToKebabCase(String str) {
@@ -29,6 +29,7 @@ public class CaseUtils {
      * Converts the given kebab-case String into camelCase
      *
      * @param name The string in kebab-case
+     *
      * @return the string in camel-case
      */
     public String kebabCaseToCamelCase(String name) {
@@ -53,6 +54,7 @@ public class CaseUtils {
      *
      * @param a the first string to be compared
      * @param b the second string to be compared
+     *
      * @return
      */
     public boolean compareIgnoreCamelOrKebabCase(String a, String b) {

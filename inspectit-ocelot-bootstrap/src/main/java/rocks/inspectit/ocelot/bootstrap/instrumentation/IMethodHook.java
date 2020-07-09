@@ -9,6 +9,7 @@ public interface IMethodHook {
      *
      * @param instrumentedMethodArgs the arguments passed to the method for which the hook is executed
      * @param thiz                   the "this" instance of the invoked method, null if the invoked method is static
+     *
      * @return the opened context, will be passed to onExit
      */
     InternalInspectitContext onEnter(Object[] instrumentedMethodArgs, Object thiz);

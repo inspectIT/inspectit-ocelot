@@ -32,7 +32,6 @@ public class InspectitEnvironmentTest {
         Assertions.assertThat(env.getCurrentConfig().getServiceName()).isEqualTo("fromproperties");
     }
 
-
     @Test
     public void testNoJsonAgentArguments() {
         System.setProperty("inspectit.service-name", "abc");

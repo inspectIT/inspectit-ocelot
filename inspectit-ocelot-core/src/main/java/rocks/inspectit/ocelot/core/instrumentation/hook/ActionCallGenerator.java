@@ -31,6 +31,7 @@ public class ActionCallGenerator {
      *
      * @param methodInfo       the method in which this action will be used.
      * @param actionCallConfig the specification of the call to the data action
+     *
      * @return the executable generic action
      */
     public IHookAction generateAndBindGenericAction(MethodReflectionInformation methodInfo, ActionCallConfig actionCallConfig) {
@@ -52,6 +53,7 @@ public class ActionCallGenerator {
      *
      * @param methodInfo       the method within which the action is executed, used to find the correct types
      * @param actionCallConfig the call whose constant assignments should be queried
+     *
      * @return a map mapping the name of the parameters to the constant value they are assigned
      */
     private Map<String, Object> getConstantInputAssignments(MethodReflectionInformation methodInfo, ActionCallConfig actionCallConfig) {
@@ -60,14 +62,14 @@ public class ActionCallGenerator {
 
         ActionCallSettings callSettings = actionCallConfig.getCallSettings();
         SortedMap<String, String> actionArgumentTypes = actionConfig.getAdditionalArgumentTypes();
-        actionCallConfig.getCallSettings().getConstantInput()
-                .forEach((argName, value) -> {
-                    String expectedTypeName = actionArgumentTypes.get(argName);
-                    ClassLoader contextClassloader = methodInfo.getDeclaringClass().getClassLoader();
-                    Class<?> expectedValueType = ConfigUtils.locateTypeWithinImports(expectedTypeName, contextClassloader, actionConfig.getImportedPackages());
-                    Object convertedValue = callSettings.getConstantInputAsType(argName, expectedValueType);
-                    constantAssignments.put(argName, convertedValue);
-                });
+        actionCallConfig.getCallSettings().getConstantInput().forEach((argName, value) -> {
+            String expectedTypeName = actionArgumentTypes.get(argName);
+            ClassLoader contextClassloader = methodInfo.getDeclaringClass().getClassLoader();
+            Class<?> expectedValueType = ConfigUtils.locateTypeWithinImports(expectedTypeName, contextClassloader, actionConfig
+                    .getImportedPackages());
+            Object convertedValue = callSettings.getConstantInputAsType(argName, expectedValueType);
+            constantAssignments.put(argName, convertedValue);
+        });
 
         for (String variable : actionArgumentTypes.keySet()) {
             Object constantSpecialValue = variableAccessorFactory.getConstantSpecialVariable(variable, methodInfo);
@@ -84,15 +86,15 @@ public class ActionCallGenerator {
      *
      * @param methodInfo       the method within which the action is executed, used to assign special variables
      * @param actionCallConfig the call whose dynamic assignments should be queried
+     *
      * @return a map mapping the parameter names to functions which are evaluated during
      * {@link IHookAction#execute(IHookAction.ExecutionContext)}  to find the concrete value for the parameter.
      */
     private Map<String, VariableAccessor> getDynamicInputAssignments(MethodReflectionInformation methodInfo, ActionCallConfig actionCallConfig) {
         Map<String, VariableAccessor> dynamicAssignments = new HashMap<>();
-        actionCallConfig.getCallSettings().getDataInput()
-                .forEach((argName, dataName) ->
-                        dynamicAssignments.put(argName, variableAccessorFactory.getVariableAccessor(dataName))
-                );
+        actionCallConfig.getCallSettings()
+                .getDataInput()
+                .forEach((argName, dataName) -> dynamicAssignments.put(argName, variableAccessorFactory.getVariableAccessor(dataName)));
         Set<String> additionalInputVars = actionCallConfig.getAction().getAdditionalArgumentTypes().keySet();
         for (String variable : additionalInputVars) {
             Object constantSpecialValue = variableAccessorFactory.getConstantSpecialVariable(variable, methodInfo);

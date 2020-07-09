@@ -104,8 +104,8 @@ public class FileManager {
      */
     public RevisionAccess getWorkspaceRevision() {
         CachingRevisionAccess currentRev = versioningManager.getWorkspaceRevision();
-        if (cachedWorkspaceRevision == null
-                || !currentRev.getRevisionID().equals(cachedWorkspaceRevision.getRevisionID())) {
+        if (cachedWorkspaceRevision == null || !currentRev.getRevisionID()
+                .equals(cachedWorkspaceRevision.getRevisionID())) {
             cachedWorkspaceRevision = currentRev;
         }
         return cachedWorkspaceRevision;

@@ -83,18 +83,13 @@ public class AgentMappingManagerTest {
 
         @Test
         public void successfullyLoadAgentMappings() throws IOException {
-            String mappingYaml = "- name: \"my-mapping\"\n" +
-                    "  sources:\n" +
-                    "  - \"/configs\"\n" +
-                    "  attributes:\n" +
-                    "    region: \"eu-west\"";
+            String mappingYaml = "- name: \"my-mapping\"\n" + "  sources:\n" + "  - \"/configs\"\n" + "  attributes:\n" + "    region: \"eu-west\"";
             doReturn(Optional.of(mappingYaml)).when(readAccessor).readAgentMappings();
 
             List<AgentMapping> agentMappings = manager.getAgentMappings();
 
             assertThat(agentMappings).hasSize(1);
-            assertThat(agentMappings.get(0))
-                    .extracting(AgentMapping::getName).isEqualTo("my-mapping");
+            assertThat(agentMappings.get(0)).extracting(AgentMapping::getName).isEqualTo("my-mapping");
         }
 
         @Test
@@ -135,16 +130,14 @@ public class AgentMappingManagerTest {
             AgentMapping mapping = AgentMapping.builder().name("mapping").build();
             doThrow(IOException.class).when(serializer).writeAgentMappings(any(), any());
 
-            assertThatExceptionOfType(IOException.class)
-                    .isThrownBy(() -> manager.setAgentMappings(Collections.singletonList(mapping)));
+            assertThatExceptionOfType(IOException.class).isThrownBy(() -> manager.setAgentMappings(Collections.singletonList(mapping)));
 
             assertThat(manager.getAgentMappings()).isEmpty();
         }
 
         @Test
         public void setNull() {
-            assertThatExceptionOfType(IllegalArgumentException.class)
-                    .isThrownBy(() -> manager.setAgentMappings(null))
+            assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> manager.setAgentMappings(null))
                     .withMessage("The agent mappings should not be null.");
 
             verifyZeroInteractions(serializer);
@@ -182,8 +175,7 @@ public class AgentMappingManagerTest {
 
         @Test
         public void getNullName() {
-            assertThatExceptionOfType(IllegalArgumentException.class)
-                    .isThrownBy(() -> manager.getAgentMapping(null))
+            assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> manager.getAgentMapping(null))
                     .withMessage("The mapping name should not be empty or null.");
 
             verifyZeroInteractions(serializer);
@@ -192,8 +184,7 @@ public class AgentMappingManagerTest {
 
         @Test
         public void getEmptyName() {
-            assertThatExceptionOfType(IllegalArgumentException.class)
-                    .isThrownBy(() -> manager.getAgentMapping(""))
+            assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> manager.getAgentMapping(""))
                     .withMessage("The mapping name should not be empty or null.");
 
             verifyZeroInteractions(serializer);
@@ -244,8 +235,7 @@ public class AgentMappingManagerTest {
 
             doReturn(Arrays.asList(mappingA, mappingB)).when(serializer).readAgentMappings(same(readAccessor));
 
-            assertThatExceptionOfType(IOException.class)
-                    .isThrownBy(() -> manager.deleteAgentMapping("first"));
+            assertThatExceptionOfType(IOException.class).isThrownBy(() -> manager.deleteAgentMapping("first"));
 
             verify(serializer, times(1)).writeAgentMappings(any(), any());
             verify(serializer).readAgentMappings(any());
@@ -253,8 +243,7 @@ public class AgentMappingManagerTest {
 
         @Test
         public void deleteNullMapping() {
-            assertThatExceptionOfType(IllegalArgumentException.class)
-                    .isThrownBy(() -> manager.deleteAgentMapping(null))
+            assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> manager.deleteAgentMapping(null))
                     .withMessage("The mapping name should not be empty or null.");
 
             verifyZeroInteractions(serializer);
@@ -305,8 +294,7 @@ public class AgentMappingManagerTest {
 
         @Test
         public void addNullMapping() {
-            assertThatExceptionOfType(IllegalArgumentException.class)
-                    .isThrownBy(() -> manager.addAgentMapping(null))
+            assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> manager.addAgentMapping(null))
                     .withMessage("The agent mapping should not be null.");
 
             verifyZeroInteractions(serializer);
@@ -316,8 +304,7 @@ public class AgentMappingManagerTest {
         public void addingAgentMappingWithNullName() {
             AgentMapping mappingA = AgentMapping.builder().name(null).build();
 
-            assertThatExceptionOfType(IllegalArgumentException.class)
-                    .isThrownBy(() -> manager.addAgentMapping(mappingA))
+            assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> manager.addAgentMapping(mappingA))
                     .withMessage("The agent mapping's name should not be null or empty.");
 
             verifyZeroInteractions(serializer);
@@ -327,8 +314,7 @@ public class AgentMappingManagerTest {
         public void addingAgentMappingWithEmptyName() {
             AgentMapping mappingA = AgentMapping.builder().name("").build();
 
-            assertThatExceptionOfType(IllegalArgumentException.class)
-                    .isThrownBy(() -> manager.addAgentMapping(mappingA))
+            assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> manager.addAgentMapping(mappingA))
                     .withMessage("The agent mapping's name should not be null or empty.");
 
             verifyZeroInteractions(serializer);
@@ -449,8 +435,7 @@ public class AgentMappingManagerTest {
 
             doReturn(Collections.singletonList(mappingA)).when(serializer).readAgentMappings(same(readAccessor));
 
-            assertThatExceptionOfType(RuntimeException.class)
-                    .isThrownBy(() -> manager.addAgentMappingBefore(mappingB, "not-existing"))
+            assertThatExceptionOfType(RuntimeException.class).isThrownBy(() -> manager.addAgentMappingBefore(mappingB, "not-existing"))
                     .withMessage("The agent mapping has not been added because the mapping 'not-existing' does not exists, thus, cannot be added before it.");
 
             verify(serializer).readAgentMappings(any());
@@ -527,8 +512,7 @@ public class AgentMappingManagerTest {
 
             doReturn(Arrays.asList(mappingA)).when(serializer).readAgentMappings(same(readAccessor));
 
-            assertThatExceptionOfType(RuntimeException.class)
-                    .isThrownBy(() -> manager.addAgentMappingAfter(mappingB, "not-existing"))
+            assertThatExceptionOfType(RuntimeException.class).isThrownBy(() -> manager.addAgentMappingAfter(mappingB, "not-existing"))
                     .withMessage("The agent mapping has not been added because the mapping 'not-existing' does not exists, thus, cannot be added after it.");
 
             verify(serializer).readAgentMappings(any());

@@ -27,7 +27,6 @@ public class BatchJobExecutorServiceTest {
     @InjectMocks
     BatchJobExecutorService batchExecutor = new BatchJobExecutorService();
 
-
     @Test
     public void testJobTermination() {
         ScheduledFuture<?> future = Mockito.mock(ScheduledFuture.class);
@@ -54,7 +53,6 @@ public class BatchJobExecutorServiceTest {
         verify(scheduledExecutor, times(2)).schedule(isA(Runnable.class), eq(interBatchDelay.toNanos()), eq(TimeUnit.NANOSECONDS));
 
     }
-
 
     @Test
     public void testJobBatchSizeUpdate() {
@@ -125,7 +123,6 @@ public class BatchJobExecutorServiceTest {
         runnableToInvoke.get().run();
         verify(scheduledExecutor, times(3)).schedule(isA(Runnable.class), anyLong(), any());
     }
-
 
     @Test
     public void testExceptionsDontPreventFutureBatches() {

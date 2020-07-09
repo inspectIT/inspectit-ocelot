@@ -74,12 +74,9 @@ public class MetricDefinitionSettings {
      */
     public MetricDefinitionSettings getCopyWithDefaultsPopulated(String metricName, Duration defaultTimeWindow) {
         val resultDescription = description == null ? metricName : description;
-        val result = toBuilder()
-                .description(resultDescription)
-                .clearViews();
+        val result = toBuilder().description(resultDescription).clearViews();
         if (!CollectionUtils.isEmpty(views)) {
-            views.forEach((name, def) ->
-                    result.view(name, def.getCopyWithDefaultsPopulated(resultDescription, unit, defaultTimeWindow)));
+            views.forEach((name, def) -> result.view(name, def.getCopyWithDefaultsPopulated(resultDescription, unit, defaultTimeWindow)));
         } else {
             result.view(metricName, ViewDefinitionSettings.builder()
                     .aggregation(ViewDefinitionSettings.Aggregation.LAST_VALUE)

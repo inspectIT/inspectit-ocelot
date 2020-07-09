@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ConfigurationQueryHelperTest {
+
     @Mock
     private ConfigurationFilesCache configurationFilesCache;
 

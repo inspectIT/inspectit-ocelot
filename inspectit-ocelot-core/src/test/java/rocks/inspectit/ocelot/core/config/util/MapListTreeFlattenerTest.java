@@ -1,6 +1,5 @@
 package rocks.inspectit.ocelot.core.config.util;
 
-
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -48,10 +47,8 @@ public class MapListTreeFlattenerTest {
 
     @Test
     public void testInvalidType() {
-        assertThatThrownBy(() -> MapListTreeFlattener.flatten(new HashSet<>()))
-                .isInstanceOf(RuntimeException.class);
+        assertThatThrownBy(() -> MapListTreeFlattener.flatten(new HashSet<>())).isInstanceOf(RuntimeException.class);
     }
-
 
     @Test
     public void testNestingInArray() {
@@ -65,7 +62,6 @@ public class MapListTreeFlattenerTest {
         assertThat(result).hasSize(2);
         assertThat(result).containsEntry("[0].name", "Hans");
         assertThat(result).containsEntry("[1].name", "Fritz");
-
 
     }
 

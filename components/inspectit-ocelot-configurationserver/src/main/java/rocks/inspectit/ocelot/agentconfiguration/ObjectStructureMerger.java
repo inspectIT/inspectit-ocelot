@@ -1,6 +1,5 @@
 package rocks.inspectit.ocelot.agentconfiguration;
 
-
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -17,6 +16,7 @@ public class ObjectStructureMerger {
      *
      * @param first  the object structure to take precedence
      * @param second the second object structure
+     *
      * @return
      */
     public static Object merge(Object first, Object second) {
@@ -35,24 +35,23 @@ public class ObjectStructureMerger {
      *
      * @param first  the first map to merge
      * @param second the second map to merge
+     *
      * @return the merged map
      */
     private static Map<?, ?> mergeMaps(Map<?, ?> first, Map<?, ?> second) {
         //use a linked hashmap to potentially preserve the order
         Map<Object, Object> result = new LinkedHashMap<>();
-        Stream.concat(first.keySet().stream(), second.keySet().stream())
-                .distinct()
-                .forEach(key -> {
-                    boolean firstContains = first.containsKey(key);
-                    boolean secondContains = second.containsKey(key);
-                    if (firstContains && secondContains) {
-                        result.put(key, merge(first.get(key), second.get(key)));
-                    } else if (firstContains) {
-                        result.put(key, first.get(key));
-                    } else if (secondContains) {
-                        result.put(key, second.get(key));
-                    }
-                });
+        Stream.concat(first.keySet().stream(), second.keySet().stream()).distinct().forEach(key -> {
+            boolean firstContains = first.containsKey(key);
+            boolean secondContains = second.containsKey(key);
+            if (firstContains && secondContains) {
+                result.put(key, merge(first.get(key), second.get(key)));
+            } else if (firstContains) {
+                result.put(key, first.get(key));
+            } else if (secondContains) {
+                result.put(key, second.get(key));
+            }
+        });
         return result;
     }
 
@@ -62,6 +61,7 @@ public class ObjectStructureMerger {
      *
      * @param first  the first list to merge
      * @param second the second list to merge
+     *
      * @return the merged map
      */
     private static List<?> mergeLists(List<?> first, List<?> second) {

@@ -79,12 +79,13 @@ public class ClassLoaderDelegationTest extends InstrumentationSysTestBase {
     }
 
     static class InherentlyBadClassLoader extends BadClassLoader2 {
-    }
 
+    }
 
     static class StackCheckingClassLoader extends DummyClassLoader {
 
         private static class SecurityManagerEx extends SecurityManager {
+
             @Override
             protected Class[] getClassContext() {
                 return super.getClassContext();
@@ -92,7 +93,6 @@ public class ClassLoaderDelegationTest extends InstrumentationSysTestBase {
         }
 
         private static SecurityManagerEx sm = new SecurityManagerEx();
-
 
         private Set<String> addedClasses = new HashSet<>();
 
@@ -119,7 +119,6 @@ public class ClassLoaderDelegationTest extends InstrumentationSysTestBase {
         }
     }
 
-
     @Test
     void verifyCLDForOverriddenLoadClass() throws Exception {
         BadClassLoader bcl = new BadClassLoader();
@@ -131,7 +130,8 @@ public class ClassLoaderDelegationTest extends InstrumentationSysTestBase {
 
         TestUtils.waitForClassInstrumentation(execClass, 15, TimeUnit.SECONDS);
 
-        try (Scope tcb = Tags.getTagger().emptyBuilder()
+        try (Scope tcb = Tags.getTagger()
+                .emptyBuilder()
                 .putLocal(TagKey.create("test_key"), TagValue.create("test_value"))
                 .buildScoped()) {
             exec.execute(() -> {
@@ -143,7 +143,6 @@ public class ClassLoaderDelegationTest extends InstrumentationSysTestBase {
         runCommand.setAccessible(true);
         runCommand.invoke(exec);
     }
-
 
     @Test
     void verifyCLDForInheritedOverriddenLoadClass() throws Exception {
@@ -156,7 +155,8 @@ public class ClassLoaderDelegationTest extends InstrumentationSysTestBase {
 
         TestUtils.waitForClassInstrumentation(execClass, 15, TimeUnit.SECONDS);
 
-        try (Scope tcb = Tags.getTagger().emptyBuilder()
+        try (Scope tcb = Tags.getTagger()
+                .emptyBuilder()
                 .putLocal(TagKey.create("test_key"), TagValue.create("test_value"))
                 .buildScoped()) {
             exec.execute(() -> {
@@ -168,7 +168,6 @@ public class ClassLoaderDelegationTest extends InstrumentationSysTestBase {
         runCommand.setAccessible(true);
         runCommand.invoke(exec);
     }
-
 
     @Test
     void verifyCLDForImplicitBootstrapDelegation() throws Exception {
@@ -181,7 +180,8 @@ public class ClassLoaderDelegationTest extends InstrumentationSysTestBase {
 
         TestUtils.waitForClassInstrumentation(execClass, 15, TimeUnit.SECONDS);
 
-        try (Scope tcb = Tags.getTagger().emptyBuilder()
+        try (Scope tcb = Tags.getTagger()
+                .emptyBuilder()
                 .putLocal(TagKey.create("test_key"), TagValue.create("test_value"))
                 .buildScoped()) {
             exec.execute(() -> {
@@ -194,7 +194,6 @@ public class ClassLoaderDelegationTest extends InstrumentationSysTestBase {
         runCommand.invoke(exec);
     }
 }
-
 
 class MyExecutor implements Executor {
 

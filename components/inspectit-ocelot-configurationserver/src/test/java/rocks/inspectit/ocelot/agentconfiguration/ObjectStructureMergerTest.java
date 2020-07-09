@@ -23,14 +23,12 @@ public class ObjectStructureMergerTest {
             assertThat(ObjectStructureMerger.merge(a, b)).isSameAs(a);
         }
 
-
         @Test
         void mergerShorterWithLongerList() {
             Object a = list("a", "b");
             Object b = list("z", "z", "c");
 
-            assertThat(ObjectStructureMerger.merge(a, b))
-                    .isEqualTo(list("a", "b", "c"));
+            assertThat(ObjectStructureMerger.merge(a, b)).isEqualTo(list("a", "b", "c"));
         }
 
         @Test
@@ -38,45 +36,19 @@ public class ObjectStructureMergerTest {
             Object a = list("a", "b", "c");
             Object b = list("z", "z");
 
-            assertThat(ObjectStructureMerger.merge(a, b))
-                    .isEqualTo(list("a", "b", "c"));
+            assertThat(ObjectStructureMerger.merge(a, b)).isEqualTo(list("a", "b", "c"));
         }
 
         @Test
         void mergeComplex() {
 
-            Object a = map(
-                    "uniqueA", "A1",
-                    "sharedVal", "A2",
-                    "sharedMap", map(
-                            "A", "A"
-                    ),
-                    "sharedList", list("A")
-            );
+            Object a = map("uniqueA", "A1", "sharedVal", "A2", "sharedMap", map("A", "A"), "sharedList", list("A"));
 
-            Object b = map(
-                    "uniqueB", "B1",
-                    "sharedVal", "B2",
-                    "sharedMap", map(
-                            "B", "B"
-                    ),
-                    "sharedList", list("C", "B")
-            );
+            Object b = map("uniqueB", "B1", "sharedVal", "B2", "sharedMap", map("B", "B"), "sharedList", list("C", "B"));
 
             Object merged = ObjectStructureMerger.merge(a, b);
 
-            assertThat(merged).isEqualTo(
-                    map(
-                            "uniqueA", "A1",
-                            "sharedVal", "A2",
-                            "sharedMap", map(
-                                    "A", "A",
-                                    "B", "B"
-                            ),
-                            "sharedList", list("A", "B"),
-                            "uniqueB", "B1"
-                    )
-            );
+            assertThat(merged).isEqualTo(map("uniqueA", "A1", "sharedVal", "A2", "sharedMap", map("A", "A", "B", "B"), "sharedList", list("A", "B"), "uniqueB", "B1"));
         }
 
     }

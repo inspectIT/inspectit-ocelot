@@ -112,7 +112,8 @@ class InstrumentationScopeResolverTest {
 
             Map<String, InstrumentationScope> result = scopeResolver.resolve(settings);
 
-            assertThat(result).flatExtracting(scopeKey).contains(new InstrumentationScope(any().and(declaresMethod(any())), any()));
+            assertThat(result).flatExtracting(scopeKey)
+                    .contains(new InstrumentationScope(any().and(declaresMethod(any())), any()));
         }
 
         @Test
@@ -125,7 +126,8 @@ class InstrumentationScopeResolverTest {
             Map<String, InstrumentationScope> result = scopeResolver.resolve(settings);
 
             assertThat(result).containsOnlyKeys(scopeKey);
-            assertThat(result).flatExtracting(scopeKey).contains(new InstrumentationScope(any().and(declaresMethod(any())), any()));
+            assertThat(result).flatExtracting(scopeKey)
+                    .contains(new InstrumentationScope(any().and(declaresMethod(any())), any()));
         }
 
         @Test
@@ -142,11 +144,9 @@ class InstrumentationScopeResolverTest {
             Map<String, InstrumentationScope> result = scopeResolver.resolve(settings);
 
             assertThat(result).containsOnlyKeys(scopeKey);
-            assertThat(result.get(scopeKey))
-                    .extracting(InstrumentationScope::getTypeMatcher, InstrumentationScope::getMethodMatcher)
-                    .containsExactly(
-                            named("class.Class").and(IsAnnotatedMatcher.of(named("annotation"))).and(declaresMethod(any())),
-                            any());
+            assertThat(result.get(scopeKey)).extracting(InstrumentationScope::getTypeMatcher, InstrumentationScope::getMethodMatcher)
+                    .containsExactly(named("class.Class").and(IsAnnotatedMatcher.of(named("annotation")))
+                            .and(declaresMethod(any())), any());
         }
 
         @Test
@@ -162,11 +162,9 @@ class InstrumentationScopeResolverTest {
             Map<String, InstrumentationScope> result = scopeResolver.resolve(settings);
 
             assertThat(result).containsOnlyKeys(scopeKey);
-            assertThat(result.get(scopeKey))
-                    .extracting(InstrumentationScope::getTypeMatcher, InstrumentationScope::getMethodMatcher)
-                    .containsExactly(
-                            named("class.Class").and(declaresMethod(not(isConstructor()).and(named("method")))),
-                            not(isConstructor()).and(named("method")));
+            assertThat(result.get(scopeKey)).extracting(InstrumentationScope::getTypeMatcher, InstrumentationScope::getMethodMatcher)
+                    .containsExactly(named("class.Class").and(declaresMethod(not(isConstructor()).and(named("method")))), not(isConstructor())
+                            .and(named("method")));
         }
 
         @Test
@@ -183,11 +181,9 @@ class InstrumentationScopeResolverTest {
             Map<String, InstrumentationScope> result = scopeResolver.resolve(settings);
 
             assertThat(result).containsOnlyKeys(scopeKey);
-            assertThat(result.get(scopeKey))
-                    .extracting(InstrumentationScope::getTypeMatcher, InstrumentationScope::getMethodMatcher)
-                    .containsExactly(
-                            named("class.Class").and(declaresMethod(not(isConstructor()).and(named("method")))),
-                            not(isConstructor()).and(named("method")));
+            assertThat(result.get(scopeKey)).extracting(InstrumentationScope::getTypeMatcher, InstrumentationScope::getMethodMatcher)
+                    .containsExactly(named("class.Class").and(declaresMethod(not(isConstructor()).and(named("method")))), not(isConstructor())
+                            .and(named("method")));
         }
 
         @Test
@@ -204,15 +200,13 @@ class InstrumentationScopeResolverTest {
 
             Map<String, InstrumentationScope> result = scopeResolver.resolve(settings);
 
-            ElementMatcher.Junction<MethodDescription> methodMatcher = not(isConstructor())
-                    .and(isPublic())
+            ElementMatcher.Junction<MethodDescription> methodMatcher = not(isConstructor()).and(isPublic())
                     .and(takesArguments(0))
                     .and(nameMatches("method"))
                     .and(isSynchronized());
 
             assertThat(result).containsOnlyKeys(scopeKey);
-            assertThat(result.get(scopeKey))
-                    .extracting(InstrumentationScope::getTypeMatcher, InstrumentationScope::getMethodMatcher)
+            assertThat(result.get(scopeKey)).extracting(InstrumentationScope::getTypeMatcher, InstrumentationScope::getMethodMatcher)
                     .containsExactly(any().and(declaresMethod(methodMatcher)), methodMatcher);
         }
 
@@ -231,13 +225,11 @@ class InstrumentationScopeResolverTest {
 
             Map<String, InstrumentationScope> result = scopeResolver.resolve(settings);
 
-            ElementMatcher.Junction<MethodDescription> methodMatcher = isConstructor()
-                    .and(isPublic())
+            ElementMatcher.Junction<MethodDescription> methodMatcher = isConstructor().and(isPublic())
                     .and(takesArguments(1).and(takesArgument(0, named("any.Class"))));
 
             assertThat(result).containsOnlyKeys(scopeKey);
-            assertThat(result.get(scopeKey))
-                    .extracting(InstrumentationScope::getTypeMatcher, InstrumentationScope::getMethodMatcher)
+            assertThat(result.get(scopeKey)).extracting(InstrumentationScope::getTypeMatcher, InstrumentationScope::getMethodMatcher)
                     .containsExactly(any().and(declaresMethod(methodMatcher)), methodMatcher);
         }
 
@@ -253,16 +245,11 @@ class InstrumentationScopeResolverTest {
 
             Map<String, InstrumentationScope> result = scopeResolver.resolve(settings);
 
-            ElementMatcher.Junction<MethodDescription> methodMatcher = not(isConstructor())
-                    .and(named("methodA"))
-                    .or(
-                            not(isConstructor())
-                                    .and(named("methodB"))
-                    );
+            ElementMatcher.Junction<MethodDescription> methodMatcher = not(isConstructor()).and(named("methodA"))
+                    .or(not(isConstructor()).and(named("methodB")));
 
             assertThat(result).containsOnlyKeys(scopeKey);
-            assertThat(result.get(scopeKey))
-                    .extracting(InstrumentationScope::getTypeMatcher, InstrumentationScope::getMethodMatcher)
+            assertThat(result.get(scopeKey)).extracting(InstrumentationScope::getTypeMatcher, InstrumentationScope::getMethodMatcher)
                     .containsExactly(any().and(declaresMethod(methodMatcher)), methodMatcher);
         }
 
@@ -285,16 +272,12 @@ class InstrumentationScopeResolverTest {
             ElementMatcher.Junction<TypeDescription> typeMatcher = hasSuperType(not(isInterface()).and(named("any.Superclass")))
                     .and(hasSuperType(isInterface().and(named("any.Interface"))));
 
-            ElementMatcher.Junction<MethodDescription> methodMatcher = not(isConstructor())
-                    .and(named("methodA"))
-                    .and(isOverriddenFrom(
-                            named("any.Interface").and(isInterface())
-                                    .or(named("any.Superclass").and(not(isInterface())))
-                    ));
+            ElementMatcher.Junction<MethodDescription> methodMatcher = not(isConstructor()).and(named("methodA"))
+                    .and(isOverriddenFrom(named("any.Interface").and(isInterface())
+                            .or(named("any.Superclass").and(not(isInterface())))));
 
             assertThat(result).containsOnlyKeys(scopeKey);
-            assertThat(result.get(scopeKey))
-                    .extracting(InstrumentationScope::getTypeMatcher, InstrumentationScope::getMethodMatcher)
+            assertThat(result.get(scopeKey)).extracting(InstrumentationScope::getTypeMatcher, InstrumentationScope::getMethodMatcher)
                     .containsExactly(typeMatcher.and(declaresMethod(methodMatcher)), methodMatcher);
         }
 
@@ -311,11 +294,11 @@ class InstrumentationScopeResolverTest {
 
             Map<String, InstrumentationScope> result = scopeResolver.resolve(settings);
 
-            ElementMatcher.Junction<TypeDescription> typeMatcher = hasSuperType(not(isInterface()).and(named("any.Superclass").and(IsAnnotatedMatcher.of(named("annotation")))));
+            ElementMatcher.Junction<TypeDescription> typeMatcher = hasSuperType(not(isInterface()).and(named("any.Superclass")
+                    .and(IsAnnotatedMatcher.of(named("annotation")))));
 
             assertThat(result).containsOnlyKeys(scopeKey);
-            assertThat(result.get(scopeKey))
-                    .extracting(InstrumentationScope::getTypeMatcher, InstrumentationScope::getMethodMatcher)
+            assertThat(result.get(scopeKey)).extracting(InstrumentationScope::getTypeMatcher, InstrumentationScope::getMethodMatcher)
                     .containsExactly(typeMatcher.and(declaresMethod(any())), any());
         }
 
@@ -332,11 +315,11 @@ class InstrumentationScopeResolverTest {
 
             Map<String, InstrumentationScope> result = scopeResolver.resolve(settings);
 
-            ElementMatcher.Junction<TypeDescription> typeMatcher = hasSuperType(isInterface().and(named("any.Interface").and(IsAnnotatedMatcher.of(named("annotation")))));
+            ElementMatcher.Junction<TypeDescription> typeMatcher = hasSuperType(isInterface().and(named("any.Interface")
+                    .and(IsAnnotatedMatcher.of(named("annotation")))));
 
             assertThat(result).containsOnlyKeys(scopeKey);
-            assertThat(result.get(scopeKey))
-                    .extracting(InstrumentationScope::getTypeMatcher, InstrumentationScope::getMethodMatcher)
+            assertThat(result.get(scopeKey)).extracting(InstrumentationScope::getTypeMatcher, InstrumentationScope::getMethodMatcher)
                     .containsExactly(typeMatcher.and(declaresMethod(any())), any());
         }
     }

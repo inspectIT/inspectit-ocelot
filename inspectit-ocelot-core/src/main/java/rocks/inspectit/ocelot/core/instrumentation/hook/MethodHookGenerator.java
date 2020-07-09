@@ -101,9 +101,9 @@ public class MethodHookGenerator {
 
             if (tracing.getStartSpan()) {
                 VariableAccessor name = Optional.ofNullable(tracing.getName())
-                        .map(variableAccessorFactory::getVariableAccessor).orElse(null);
-                actionBuilder
-                        .startSpanCondition(ConditionalHookAction.getAsPredicate(tracing.getStartSpanConditions(), variableAccessorFactory))
+                        .map(variableAccessorFactory::getVariableAccessor)
+                        .orElse(null);
+                actionBuilder.startSpanCondition(ConditionalHookAction.getAsPredicate(tracing.getStartSpanConditions(), variableAccessorFactory))
                         .nameAccessor(name)
                         .spanKind(tracing.getKind());
                 configureSampling(tracing, actionBuilder);
@@ -112,8 +112,7 @@ public class MethodHookGenerator {
             }
 
             if (tracing.getContinueSpan() != null) {
-                actionBuilder
-                        .continueSpanCondition(ConditionalHookAction.getAsPredicate(tracing.getContinueSpanConditions(), variableAccessorFactory))
+                actionBuilder.continueSpanCondition(ConditionalHookAction.getAsPredicate(tracing.getContinueSpanConditions(), variableAccessorFactory))
                         .continueSpanDataKey(tracing.getContinueSpan());
             } else {
                 actionBuilder.continueSpanCondition(ctx -> false);
@@ -199,7 +198,9 @@ public class MethodHookGenerator {
             valueAccessor = variableAccessorFactory.getVariableAccessor(value);
         }
 
-        Map<String, VariableAccessor> tagAccessors = metricSettings.getDataTags().entrySet().stream()
+        Map<String, VariableAccessor> tagAccessors = metricSettings.getDataTags()
+                .entrySet()
+                .stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> variableAccessorFactory.getVariableAccessor(entry.getValue())));
 
         return new MetricAccessor(metricSettings.getMetric(), valueAccessor, metricSettings.getConstantTags(), tagAccessors);
@@ -212,8 +213,8 @@ public class MethodHookGenerator {
             try {
                 result.add(actionCallGenerator.generateAndBindGenericAction(methodInfo, call));
             } catch (Exception e) {
-                log.error("Failed to build action {} for data {} on method {}, no value will be assigned",
-                        call.getAction().getName(), call.getName(), methodInfo.getMethodFQN(), e);
+                log.error("Failed to build action {} for data {} on method {}, no value will be assigned", call.getAction()
+                        .getName(), call.getName(), methodInfo.getMethodFQN(), e);
             }
         }
         return result;

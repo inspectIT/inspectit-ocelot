@@ -20,6 +20,7 @@ import java.util.Map;
  */
 @UtilityClass
 public class ConfigFileLoader {
+
     /**
      * The encoding used to decode the content of the loaded files.
      */
@@ -82,14 +83,11 @@ public class ConfigFileLoader {
      */
     private HashMap<String, String> loadConfig(Resource[] resources) throws IOException {
         HashMap<String, String> configMap = new HashMap<>();
-        String commonPrefix = StringUtils.getCommonPrefix(
-                Arrays.stream(resources)
-                        .map(ConfigFileLoader::getResourcePath)
-                        .toArray(String[]::new)
-        );
+        String commonPrefix = StringUtils.getCommonPrefix(Arrays.stream(resources)
+                .map(ConfigFileLoader::getResourcePath)
+                .toArray(String[]::new));
         for (Resource resource : resources) {
-            String resourceDescription = getResourcePath(resource)
-                    .substring(commonPrefix.length())
+            String resourceDescription = getResourcePath(resource).substring(commonPrefix.length())
                     .replace(File.separator, "/");
             configMap.put(resourceDescription, readResourceContent(resource));
         }
@@ -100,6 +98,7 @@ public class ConfigFileLoader {
      * This method takes a resource instance as parameter and returns it's content.
      *
      * @param resource The resource instance the content should be returned from.
+     *
      * @return The content of the resource.
      */
     private String readResourceContent(Resource resource) throws IOException {
@@ -110,6 +109,7 @@ public class ConfigFileLoader {
      * Takes a path as parameter and returns the resource found in the path.
      *
      * @param path the path to the resource that should be loaded.
+     *
      * @return the loaded resource.
      */
     private Resource[] getRessources(String path) throws IOException {
@@ -120,6 +120,7 @@ public class ConfigFileLoader {
      * Return the full path of a given resource object.
      *
      * @param resource The resource object the path should be returned of.
+     *
      * @return The full path of the resource. e.g. "C:/path/to/my/resource/file"
      */
     private static String getResourcePath(Resource resource) {

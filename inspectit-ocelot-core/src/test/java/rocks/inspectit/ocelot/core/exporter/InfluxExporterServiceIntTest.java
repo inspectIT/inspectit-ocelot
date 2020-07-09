@@ -37,8 +37,7 @@ public class InfluxExporterServiceIntTest extends SpringTestBase {
     void startInfluxDB() throws Exception {
         InfluxServer.Builder builder = new InfluxServer.Builder();
         int freeHttpPort = Network.getFreeServerPort();
-        InfluxConfigurationWriter influxConfig = new InfluxConfigurationWriter.Builder()
-                .setHttp(freeHttpPort) // by default auth is disabled
+        InfluxConfigurationWriter influxConfig = new InfluxConfigurationWriter.Builder().setHttp(freeHttpPort) // by default auth is disabled
                 .build();
         builder.setInfluxConfiguration(influxConfig);
 
@@ -62,7 +61,8 @@ public class InfluxExporterServiceIntTest extends SpringTestBase {
 
         TagKey testTag = TagKey.create("my_tag");
         Measure.MeasureDouble testMeasure = Measure.MeasureDouble.create("my/test/measure", "foo", "bars");
-        View testView = View.create(View.Name.create("my/test/measure/cool%data"), "", testMeasure, Aggregation.Sum.create(), Arrays.asList(testTag));
+        View testView = View.create(View.Name.create("my/test/measure/cool%data"), "", testMeasure, Aggregation.Sum.create(), Arrays
+                .asList(testTag));
         Stats.getViewManager().registerView(testView);
 
         try (Scope tc = Tags.getTagger().emptyBuilder().putLocal(testTag, TagValue.create("myval")).buildScoped()) {
@@ -76,20 +76,18 @@ public class InfluxExporterServiceIntTest extends SpringTestBase {
         }
 
         await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
-            QueryResult result = InfluxDBFactory.connect(url).query(new Query("SELECT LAST(cool_data) FROM " + DATABASE + ".autogen.my_test_measure GROUP BY *"));
+            QueryResult result = InfluxDBFactory.connect(url)
+                    .query(new Query("SELECT LAST(cool_data) FROM " + DATABASE + ".autogen.my_test_measure GROUP BY *"));
 
             List<QueryResult.Result> results = result.getResults();
             assertThat(results).hasSize(1);
             QueryResult.Result data = results.get(0);
             assertThat(data.getSeries()).hasSize(1);
             QueryResult.Series series = data.getSeries().get(0);
-            assertThat(series.getTags())
-                    .hasSize(1)
-                    .containsEntry("my_tag", "myval");
+            assertThat(series.getTags()).hasSize(1).containsEntry("my_tag", "myval");
             assertThat(series.getValues().get(0).get(1)).isEqualTo(42.0);
 
         });
     }
-
 
 }

@@ -28,6 +28,7 @@ public class LocalUserDetailsServiceTest {
 
     @Nested
     public class LoadUserByUsername {
+
         @Test
         public void successfullyFindUser() {
             User user = User.builder().username("username").passwordHash("hash").isLdapUser(false).build();
@@ -37,8 +38,7 @@ public class LocalUserDetailsServiceTest {
 
             assertThat(result.getUsername()).isEqualTo("username");
             assertThat(result.getPassword()).isEqualTo("hash");
-            assertThat(result.getAuthorities())
-                    .extracting(object -> object.toString().substring("ROLE_".length()))
+            assertThat(result.getAuthorities()).extracting(object -> object.toString().substring("ROLE_".length()))
                     .containsExactlyInAnyOrder("OCELOT_WRITE", "OCELOT_READ", "OCELOT_COMMIT", "OCELOT_ADMIN");
             verify(userService).getUserByName(anyString());
             verifyNoMoreInteractions(userService);
@@ -48,8 +48,7 @@ public class LocalUserDetailsServiceTest {
         public void userDoesNotExist() {
             when(userService.getUserByName(anyString())).thenReturn(Optional.empty());
 
-            assertThatExceptionOfType(UsernameNotFoundException.class)
-                    .isThrownBy(() -> detailsService.loadUserByUsername("username"))
+            assertThatExceptionOfType(UsernameNotFoundException.class).isThrownBy(() -> detailsService.loadUserByUsername("username"))
                     .withMessage("User with username 'username' has not been found.");
 
             verify(userService).getUserByName(anyString());
@@ -61,8 +60,7 @@ public class LocalUserDetailsServiceTest {
             User user = User.builder().username("username").passwordHash("hash").isLdapUser(true).build();
             when(userService.getUserByName("username")).thenReturn(Optional.of(user));
 
-            assertThatExceptionOfType(UsernameNotFoundException.class)
-                    .isThrownBy(() -> detailsService.loadUserByUsername("username"))
+            assertThatExceptionOfType(UsernameNotFoundException.class).isThrownBy(() -> detailsService.loadUserByUsername("username"))
                     .withMessage("User with username 'username' has not been found because it is a LDAP user.");
 
             verify(userService).getUserByName(anyString());

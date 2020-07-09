@@ -78,11 +78,9 @@ public class InstrumentationTriggerer implements IClassDiscoveryListener {
      * This service works through this set in batches.
      * Package-private for testing.
      */
-    Cache<Class<?>, Boolean> pendingClasses =
-            CacheBuilder.newBuilder().weakKeys().build();
+    Cache<Class<?>, Boolean> pendingClasses = CacheBuilder.newBuilder().weakKeys().build();
 
     private BatchJobExecutorService.BatchJob<BatchSize> classInstrumentationJob;
-
 
     @PostConstruct
     private void init() {
@@ -178,6 +176,7 @@ public class InstrumentationTriggerer implements IClassDiscoveryListener {
      * Package private for testing.
      *
      * @param batchSize the configured batch sizes
+     *
      * @return the classes which need retransformation
      */
     @VisibleForTesting
@@ -198,14 +197,13 @@ public class InstrumentationTriggerer implements IClassDiscoveryListener {
 
                     updateClass(clazz, classesToRetransform);
 
-                    if (checkedClassesCount >= batchSize.maxClassesToCheck
-                            || classesToRetransform.size() >= batchSize.maxClassesToRetransform) {
+                    if (checkedClassesCount >= batchSize.maxClassesToCheck || classesToRetransform.size() >= batchSize.maxClassesToRetransform) {
                         break;
                     }
                 }
                 if (checkedClassesCount > 0) {
-                    log.debug("Checked configuration of {} classes in {} ms, {} classes left to check",
-                            checkedClassesCount, watch.elapsed(TimeUnit.MILLISECONDS), pendingClasses.size());
+                    log.debug("Checked configuration of {} classes in {} ms, {} classes left to check", checkedClassesCount, watch
+                            .elapsed(TimeUnit.MILLISECONDS), pendingClasses.size());
                 }
                 if (pendingClasses.size() == 0 && currentHookUpdate != null) {
                     currentHookUpdate.commitUpdate();
@@ -247,7 +245,8 @@ public class InstrumentationTriggerer implements IClassDiscoveryListener {
 
     private void applyClassLoaderDelegation(Class<?> clazz, Set<Class<?>> classesToRetransform) {
         try (val sm = selfMonitoring.withDurationSelfMonitoring("classloader-delegation")) {
-            LinkedHashSet<Class<?>> classLoadersToRetransform = classLoaderDelegation.getClassLoaderClassesRequiringRetransformation(clazz.getClassLoader(), configResolver.getCurrentConfig());
+            LinkedHashSet<Class<?>> classLoadersToRetransform = classLoaderDelegation.getClassLoaderClassesRequiringRetransformation(clazz
+                    .getClassLoader(), configResolver.getCurrentConfig());
             //the order is important here!
             for (Class<?> classLoaderToRetransform : classLoadersToRetransform) {
                 classesToRetransform.remove(classLoaderToRetransform);
@@ -263,8 +262,7 @@ public class InstrumentationTriggerer implements IClassDiscoveryListener {
         }
     }
 
-    @EventListener(classes = {InspectitConfigChangedEvent.class},
-            condition = "!#root.event.oldConfig.selfMonitoring.enabled")
+    @EventListener(classes = {InspectitConfigChangedEvent.class}, condition = "!#root.event.oldConfig.selfMonitoring.enabled")
     private void selfMonitorQueueSize() {
         selfMonitoring.recordMeasurement("instrumentation-queue-size", pendingClasses.size());
     }
@@ -274,7 +272,9 @@ public class InstrumentationTriggerer implements IClassDiscoveryListener {
      */
     @Value
     static class BatchSize {
+
         private int maxClassesToCheck;
+
         private int maxClassesToRetransform;
     }
 }

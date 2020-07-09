@@ -83,7 +83,6 @@ public class ContinueOrStartSpanAction implements IHookAction {
         }
     }
 
-
     private boolean continueSpan(ExecutionContext context) {
         if (continueSpanDataKey != null && continueSpanCondition.test(context)) {
             InspectitContextImpl ctx = context.getInspectitContext();

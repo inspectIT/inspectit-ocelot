@@ -104,18 +104,10 @@ public class JigsawModuleInstrumenter {
      * @param extraReads The set of Module to add as readable
      * @param extraOpens Maps packages to modules to which these packages shall be run-time visible (E.g. via deep reflection)
      */
-    private void redefineModule(Object module,
-                                Set<Object> extraReads,
-                                Map<String, Set<Object>> extraOpens) {
+    private void redefineModule(Object module, Set<Object> extraReads, Map<String, Set<Object>> extraOpens) {
         try {
-            instrumentationRedefineModule.invoke(instrumentation,
-                    module,
-                    extraReads,
-                    Collections.emptyMap(),
-                    extraOpens,
-                    Collections.emptySet(),
-                    Collections.emptyMap()
-            );
+            instrumentationRedefineModule.invoke(instrumentation, module, extraReads, Collections.emptyMap(), extraOpens, Collections
+                    .emptySet(), Collections.emptyMap());
         } catch (Exception e) {
             log.error("Error redefining module {}", module, e);
         }
@@ -125,6 +117,7 @@ public class JigsawModuleInstrumenter {
      * Invokes the java 9 Class.getModule() function (never returns null)
      *
      * @param clazz the class to query the module of
+     *
      * @return the module of the given class, never null
      */
     private Object getModuleOfClass(Class<?> clazz) {

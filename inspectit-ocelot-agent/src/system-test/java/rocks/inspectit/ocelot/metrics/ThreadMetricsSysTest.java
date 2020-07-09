@@ -33,18 +33,32 @@ public class ThreadMetricsSysTest extends MetricsSysTestBase {
             assertThat(daemonData.getAggregationMap()).isNotEmpty();
             assertThat(stateData.getAggregationMap()).isNotEmpty();
 
-            Map.Entry<List<TagValue>, AggregationData> liveCount = liveData.getAggregationMap().entrySet().stream().findFirst().get();
+            Map.Entry<List<TagValue>, AggregationData> liveCount = liveData.getAggregationMap()
+                    .entrySet()
+                    .stream()
+                    .findFirst()
+                    .get();
             long live = ((AggregationData.LastValueDataLong) liveCount.getValue()).getLastValue();
-            Map.Entry<List<TagValue>, AggregationData> peakCount = peakData.getAggregationMap().entrySet().stream().findFirst().get();
+            Map.Entry<List<TagValue>, AggregationData> peakCount = peakData.getAggregationMap()
+                    .entrySet()
+                    .stream()
+                    .findFirst()
+                    .get();
             long peak = ((AggregationData.LastValueDataLong) peakCount.getValue()).getLastValue();
-            Map.Entry<List<TagValue>, AggregationData> daemonCount = daemonData.getAggregationMap().entrySet().stream().findFirst().get();
+            Map.Entry<List<TagValue>, AggregationData> daemonCount = daemonData.getAggregationMap()
+                    .entrySet()
+                    .stream()
+                    .findFirst()
+                    .get();
             long daemon = ((AggregationData.LastValueDataLong) daemonCount.getValue()).getLastValue();
 
-            long statesCount =
-                    liveData.getAggregationMap().entrySet().stream().map(Map.Entry::getValue)
-                            .map(d -> (AggregationData.LastValueDataLong) d)
-                            .mapToLong(d -> d.getLastValue())
-                            .sum();
+            long statesCount = liveData.getAggregationMap()
+                    .entrySet()
+                    .stream()
+                    .map(Map.Entry::getValue)
+                    .map(d -> (AggregationData.LastValueDataLong) d)
+                    .mapToLong(d -> d.getLastValue())
+                    .sum();
 
             assertThat(live).isEqualTo(statesCount);
             assertThat(peak).isGreaterThanOrEqualTo(live);

@@ -30,6 +30,7 @@ public class CustomUserAuthoritiesMapper implements GrantedAuthoritiesMapper {
      * matching authorities.
      *
      * @param authorities A List of GrantedAuthority-Objects that should be mapped.
+     *
      * @return The highest level of access role the user's authorities could be resolved to.
      */
     @Override
@@ -56,12 +57,11 @@ public class CustomUserAuthoritiesMapper implements GrantedAuthoritiesMapper {
      *
      * @param authorities A Collection containing GrantedAuthority objects.
      * @param roleList    The List of Strings the authorities are checked with.
+     *
      * @return Returns true if at least one element of authorities is contained in roleList or vice versa.
      */
     private boolean containsAuthority(Collection<? extends GrantedAuthority> authorities, List<String> roleList) {
-        Set<String> rolesLowerCase = roleList.stream()
-                .map(String::toLowerCase)
-                .collect(Collectors.toSet());
+        Set<String> rolesLowerCase = roleList.stream().map(String::toLowerCase).collect(Collectors.toSet());
         return authorities.stream()
                 .map(GrantedAuthority::getAuthority)
                 .distinct()
@@ -73,16 +73,15 @@ public class CustomUserAuthoritiesMapper implements GrantedAuthoritiesMapper {
      * ensures backwards compatibility for the old configuration standard.
      *
      * @param authorities A collection of authorities the admin group should be contained in.
+     *
      * @return True if the given admin group is contained in the authorities. Otherwise false.
      */
     @SuppressWarnings("deprecation")
     private boolean hasAdminGroup(Collection<? extends GrantedAuthority> authorities) {
         String ldapAdminGroup = settings.getSecurity().getLdap().getAdminGroup();
         return authorities.stream()
-                .anyMatch(
-                        authority -> authority.getAuthority()
-                                .substring("ROLE_".length())
-                                .equalsIgnoreCase(ldapAdminGroup)
-                );
+                .anyMatch(authority -> authority.getAuthority()
+                        .substring("ROLE_".length())
+                        .equalsIgnoreCase(ldapAdminGroup));
     }
 }

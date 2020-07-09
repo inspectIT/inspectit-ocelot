@@ -18,7 +18,6 @@ import rocks.inspectit.ocelot.rest.AbstractBaseController;
 
 import java.util.Map;
 
-
 /**
  * The rest controller providing the interface used by the agent for configuration fetching.
  */
@@ -37,6 +36,7 @@ public class AgentController extends AbstractBaseController {
      * Uses text/plain as mime type to ensure that the configuration is presented nicely when opened in a browser
      *
      * @param attributes the attributes of the agents used to select the mapping
+     *
      * @return The configuration mapped on the given agent name
      */
     @ApiOperation(value = "Fetch the Agent Configuration", notes = "Reads the configuration for the given agent and returns it as a yaml string")
@@ -48,9 +48,7 @@ public class AgentController extends AbstractBaseController {
         if (configuration == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } else {
-            return ResponseEntity.ok()
-                    .eTag(configuration.getHash())
-                    .body(configuration.getConfigYaml());
+            return ResponseEntity.ok().eTag(configuration.getHash()).body(configuration.getConfigYaml());
         }
     }
 }

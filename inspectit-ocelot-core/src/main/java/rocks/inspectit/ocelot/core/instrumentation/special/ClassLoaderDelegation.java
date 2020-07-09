@@ -41,18 +41,14 @@ public class ClassLoaderDelegation implements SpecialSensor {
      * We never deinstrument a classloader after we instrument it, even if {@link SpecialSensorSettings#isClassLoaderDelegation()}
      * is changed to false.
      */
-    private final Set<Class<?>> instrumentedClassloaderClasses = Collections.newSetFromMap(
-            CacheBuilder.newBuilder().weakKeys().<Class<?>, Boolean>build().asMap());
+    private final Set<Class<?>> instrumentedClassloaderClasses = Collections.newSetFromMap(CacheBuilder.newBuilder()
+            .weakKeys().<Class<?>, Boolean>build().asMap());
 
-    private final ElementMatcher<MethodDescription> LOAD_CLASS_MATCHER =
-            named("loadClass").and(
-                    takesArguments(String.class, boolean.class)
-                            .or(takesArguments(String.class)));
+    private final ElementMatcher<MethodDescription> LOAD_CLASS_MATCHER = named("loadClass").and(takesArguments(String.class, boolean.class)
+            .or(takesArguments(String.class)));
 
-    private final ElementMatcher<TypeDescription> CLASS_LOADER_MATCHER =
-            isSubTypeOf(ClassLoader.class)
-                    .and(not(nameStartsWith("java.")))
-                    .and(declaresMethod(LOAD_CLASS_MATCHER));
+    private final ElementMatcher<TypeDescription> CLASS_LOADER_MATCHER = isSubTypeOf(ClassLoader.class).and(not(nameStartsWith("java.")))
+            .and(declaresMethod(LOAD_CLASS_MATCHER));
 
     @Override
     public boolean shouldInstrument(Class<?> clazz, InstrumentationConfiguration settings) {

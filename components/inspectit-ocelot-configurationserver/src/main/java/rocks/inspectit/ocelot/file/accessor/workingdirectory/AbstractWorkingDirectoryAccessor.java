@@ -17,6 +17,7 @@ public abstract class AbstractWorkingDirectoryAccessor extends AbstractFileAcces
      *
      * @param path    the target file
      * @param content the content to write
+     *
      * @throws IOException in case the file can not be written
      */
     protected abstract void writeFile(String path, String content) throws IOException;
@@ -25,6 +26,7 @@ public abstract class AbstractWorkingDirectoryAccessor extends AbstractFileAcces
      * Creates the specified directory.
      *
      * @param path the directory to create
+     *
      * @throws IOException in case the file can not be written
      */
     protected abstract void createDirectory(String path) throws IOException;
@@ -34,6 +36,7 @@ public abstract class AbstractWorkingDirectoryAccessor extends AbstractFileAcces
      *
      * @param sourcePath the source path
      * @param targetPath the target path
+     *
      * @throws IOException in case the file or directory can not be moved
      */
     protected abstract void move(String sourcePath, String targetPath) throws IOException;
@@ -42,6 +45,7 @@ public abstract class AbstractWorkingDirectoryAccessor extends AbstractFileAcces
      * Deletes the specified path - can be a file or directory.
      *
      * @param path the path to delete
+     *
      * @throws IOException in case the file or directory can not be deleted
      */
     protected abstract void delete(String path) throws IOException;
@@ -50,6 +54,7 @@ public abstract class AbstractWorkingDirectoryAccessor extends AbstractFileAcces
      * Creating a new configuration directory.
      *
      * @param directory the directory to create
+     *
      * @throws IOException in case the directory can not be created
      */
     public void createConfigurationDirectory(String directory) throws IOException {
@@ -70,6 +75,7 @@ public abstract class AbstractWorkingDirectoryAccessor extends AbstractFileAcces
      *
      * @param file    the file to write
      * @param content the content to write
+     *
      * @throws IOException in case the file can not be written
      */
     public void writeConfigurationFile(String file, String content) throws IOException {
@@ -83,6 +89,7 @@ public abstract class AbstractWorkingDirectoryAccessor extends AbstractFileAcces
      * Deletes the specified configuration file or directory.
      *
      * @param path the configuration to delete
+     *
      * @throws IOException in case the file or directory can not be deleted
      */
     public void deleteConfiguration(String path) throws IOException {
@@ -101,6 +108,7 @@ public abstract class AbstractWorkingDirectoryAccessor extends AbstractFileAcces
      *
      * @param source the source item to move
      * @param target the target item
+     *
      * @throws IOException in case the file or directory can not be moved
      */
     public void moveConfiguration(String source, String target) throws IOException {
@@ -115,6 +123,7 @@ public abstract class AbstractWorkingDirectoryAccessor extends AbstractFileAcces
      * Writes the given content to the agent mappings file. The current file will be overwritten.
      *
      * @param content the content to write
+     *
      * @throws IOException in case the agent mappings can not be written
      */
     public void writeAgentMappings(String content) throws IOException {

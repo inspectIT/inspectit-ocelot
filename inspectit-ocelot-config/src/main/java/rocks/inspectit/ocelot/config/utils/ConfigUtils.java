@@ -24,19 +24,15 @@ public class ConfigUtils {
      * @param typename the name of the type, can also be fully qualified
      * @param context  the classloader to search in
      * @param packages the imported packages, e.g. "java.util", "javax.servlet"
+     *
      * @return the Class if it was found, null otherwise
      */
     public static Class<?> locateTypeWithinImports(String typename, ClassLoader context, Collection<String> packages) {
         if (AutoboxingHelper.isPrimitiveType(typename)) {
             return AutoboxingHelper.getPrimitiveClass(typename);
         } else {
-            return Stream.concat(
-                    Stream.concat(
-                            Stream.of(""),
-                            packages.stream().map(s -> s + ".")
-                    ),
-                    Stream.of("java.lang.")
-            ).flatMap(prefix -> {
+            return Stream.concat(Stream.concat(Stream.of(""), packages.stream()
+                    .map(s -> s + ".")), Stream.of("java.lang.")).flatMap(prefix -> {
                 try {
                     return Stream.of(Class.forName(prefix + typename, false, context));
                 } catch (Exception e) {

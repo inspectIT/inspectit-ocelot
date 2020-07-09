@@ -40,25 +40,18 @@ public class AgentStatusManagerTest {
 
         @Test
         void testWithAgentIdHeader() {
-            AgentMapping agentMapping = AgentMapping.builder()
-                    .name("test-conf")
-                    .build();
-            AgentConfiguration config = AgentConfiguration.builder()
-                    .mapping(agentMapping)
-                    .configYaml("")
-                    .build();
+            AgentMapping agentMapping = AgentMapping.builder().name("test-conf").build();
+            AgentConfiguration config = AgentConfiguration.builder().mapping(agentMapping).configYaml("").build();
             Map<String, String> attributes = ImmutableMap.of("service", "test");
 
             manager.notifyAgentConfigurationFetched(attributes, Collections.singletonMap(HEADER_AGENT_ID, "aid"), config);
 
-            assertThat(manager.getAgentStatuses())
-                    .hasSize(1)
-                    .anySatisfy(status -> {
-                        assertThat(status.getAttributes()).isEqualTo(attributes);
-                        assertThat(status.getMappingName()).isEqualTo("test-conf");
-                        assertThat(status.getMetaInformation().getAgentId()).isEqualTo("aid");
-                        assertThat(status.getLastConfigFetch()).isNotNull();
-                    });
+            assertThat(manager.getAgentStatuses()).hasSize(1).anySatisfy(status -> {
+                assertThat(status.getAttributes()).isEqualTo(attributes);
+                assertThat(status.getMappingName()).isEqualTo("test-conf");
+                assertThat(status.getMetaInformation().getAgentId()).isEqualTo("aid");
+                assertThat(status.getLastConfigFetch()).isNotNull();
+            });
         }
 
         @Test
@@ -66,59 +59,42 @@ public class AgentStatusManagerTest {
             Map<String, String> attributes = ImmutableMap.of("service", "test");
             manager.notifyAgentConfigurationFetched(attributes, Collections.emptyMap(), null);
 
-            assertThat(manager.getAgentStatuses())
-                    .hasSize(1)
-                    .anySatisfy(status -> {
-                        assertThat(status.getAttributes()).isEqualTo(attributes);
-                        assertThat(status.getMappingName()).isNull();
-                        assertThat(status.getMetaInformation()).isNull();
-                        assertThat(status.getLastConfigFetch()).isNotNull();
-                    });
+            assertThat(manager.getAgentStatuses()).hasSize(1).anySatisfy(status -> {
+                assertThat(status.getAttributes()).isEqualTo(attributes);
+                assertThat(status.getMappingName()).isNull();
+                assertThat(status.getMetaInformation()).isNull();
+                assertThat(status.getLastConfigFetch()).isNotNull();
+            });
         }
-
 
         @Test
         void testMappingFound() {
-            AgentMapping agentMapping = AgentMapping.builder()
-                    .name("test-conf")
-                    .build();
-            AgentConfiguration conf = AgentConfiguration.builder()
-                    .mapping(agentMapping)
-                    .configYaml("")
-                    .build();
+            AgentMapping agentMapping = AgentMapping.builder().name("test-conf").build();
+            AgentConfiguration conf = AgentConfiguration.builder().mapping(agentMapping).configYaml("").build();
             Map<String, String> attributes = ImmutableMap.of("service", "test");
 
             manager.notifyAgentConfigurationFetched(attributes, Collections.emptyMap(), conf);
 
-            assertThat(manager.getAgentStatuses())
-                    .hasSize(1)
-                    .anySatisfy(status -> {
-                        assertThat(status.getAttributes()).isEqualTo(attributes);
-                        assertThat(status.getMappingName()).isEqualTo("test-conf");
-                        assertThat(status.getLastConfigFetch()).isNotNull();
-                    });
+            assertThat(manager.getAgentStatuses()).hasSize(1).anySatisfy(status -> {
+                assertThat(status.getAttributes()).isEqualTo(attributes);
+                assertThat(status.getMappingName()).isEqualTo("test-conf");
+                assertThat(status.getLastConfigFetch()).isNotNull();
+            });
         }
 
         @Test
         void testOverriding() throws Exception {
-            AgentMapping agentMapping = AgentMapping.builder()
-                    .name("test-conf")
-                    .build();
-            AgentConfiguration conf = AgentConfiguration.builder()
-                    .mapping(agentMapping)
-                    .configYaml("")
-                    .build();
+            AgentMapping agentMapping = AgentMapping.builder().name("test-conf").build();
+            AgentConfiguration conf = AgentConfiguration.builder().mapping(agentMapping).configYaml("").build();
             Map<String, String> attributes = ImmutableMap.of("service", "test");
 
             manager.notifyAgentConfigurationFetched(attributes, Collections.emptyMap(), null);
 
-            assertThat(manager.getAgentStatuses())
-                    .hasSize(1)
-                    .anySatisfy(status -> {
-                        assertThat(status.getAttributes()).isEqualTo(attributes);
-                        assertThat(status.getMappingName()).isNull();
-                        assertThat(status.getLastConfigFetch()).isNotNull();
-                    });
+            assertThat(manager.getAgentStatuses()).hasSize(1).anySatisfy(status -> {
+                assertThat(status.getAttributes()).isEqualTo(attributes);
+                assertThat(status.getMappingName()).isNull();
+                assertThat(status.getLastConfigFetch()).isNotNull();
+            });
 
             Date firstFetch = manager.getAgentStatuses().iterator().next().getLastConfigFetch();
 
@@ -126,13 +102,11 @@ public class AgentStatusManagerTest {
 
             manager.notifyAgentConfigurationFetched(attributes, Collections.emptyMap(), conf);
 
-            assertThat(manager.getAgentStatuses())
-                    .hasSize(1)
-                    .anySatisfy(status -> {
-                        assertThat(status.getAttributes()).isEqualTo(attributes);
-                        assertThat(status.getMappingName()).isEqualTo("test-conf");
-                        assertThat(status.getLastConfigFetch()).isAfter(firstFetch);
-                    });
+            assertThat(manager.getAgentStatuses()).hasSize(1).anySatisfy(status -> {
+                assertThat(status.getAttributes()).isEqualTo(attributes);
+                assertThat(status.getMappingName()).isEqualTo("test-conf");
+                assertThat(status.getLastConfigFetch()).isAfter(firstFetch);
+            });
         }
     }
 }

@@ -18,7 +18,6 @@ import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
-
 public class ConfigurationSchemaProviderTest {
 
     ConfigurationSchemaProvider provider = new ConfigurationSchemaProvider();
@@ -31,6 +30,7 @@ public class ConfigurationSchemaProviderTest {
     }
 
     private class NestedProp {
+
         private String simple;
 
         public void setSimple(String str) {
@@ -146,7 +146,6 @@ public class ConfigurationSchemaProviderTest {
                 assertThat(result).isEmpty();
             }
 
-
             @Test
             void excludeOnMapType() {
                 PropertyDescriptor prop = getFirstProperty(new Object() {
@@ -190,14 +189,11 @@ public class ConfigurationSchemaProviderTest {
                 ConfigurationPropertyDescription desc = result.get();
                 assertThat(desc.getType()).isEqualTo(ConfigurationPropertyType.COMPOSITE);
                 assertThat(desc.getPropertyName()).isEqualTo("comp");
-                assertThat(desc.getChildren())
-                        .hasSize(1)
-                        .anySatisfy((child) -> {
-                            assertThat(child.getPropertyName()).isEqualTo("simple");
-                            assertThat(child.getType()).isEqualTo(ConfigurationPropertyType.STRING);
-                        });
+                assertThat(desc.getChildren()).hasSize(1).anySatisfy((child) -> {
+                    assertThat(child.getPropertyName()).isEqualTo("simple");
+                    assertThat(child.getType()).isEqualTo(ConfigurationPropertyType.STRING);
+                });
             }
-
 
             @Test
             void simpleType() {
@@ -263,8 +259,7 @@ public class ConfigurationSchemaProviderTest {
             @Test
             void notNullAnnotation() {
                 PropertyDescriptor prop = getFirstProperty(new Object() {
-                    @NotNull
-                    Boolean prop;
+                    @NotNull Boolean prop;
 
                     public void setProp(Boolean b) {
                     }
@@ -280,8 +275,7 @@ public class ConfigurationSchemaProviderTest {
             @Test
             void notBlankAnnotation() {
                 PropertyDescriptor prop = getFirstProperty(new Object() {
-                    @NotBlank
-                    String prop;
+                    @NotBlank String prop;
 
                     public void setProp(String b) {
                     }
@@ -294,12 +288,10 @@ public class ConfigurationSchemaProviderTest {
                 assertThat(desc.isNullable()).isFalse();
             }
 
-
             @Test
             void notEmptyAnnotation() {
                 PropertyDescriptor prop = getFirstProperty(new Object() {
-                    @NotEmpty
-                    String prop;
+                    @NotEmpty String prop;
 
                     public void setProp(String b) {
                     }
@@ -323,8 +315,8 @@ public class ConfigurationSchemaProviderTest {
 
         @Test
         void enumType() {
-            ConfigurationPropertyDescription result =
-                    provider.setTerminalType(TestEnum.class, ConfigurationPropertyDescription.builder()).build();
+            ConfigurationPropertyDescription result = provider.setTerminalType(TestEnum.class, ConfigurationPropertyDescription
+                    .builder()).build();
 
             assertThat(result.getType()).isEqualTo(ConfigurationPropertyType.ENUM);
             assertThat(result.getEnumValues()).containsExactly("VAL_A", "VAL_B", "VAL_C");
@@ -332,48 +324,48 @@ public class ConfigurationSchemaProviderTest {
 
         @Test
         void booleanType() {
-            ConfigurationPropertyDescription result =
-                    provider.setTerminalType(Boolean.class, ConfigurationPropertyDescription.builder()).build();
+            ConfigurationPropertyDescription result = provider.setTerminalType(Boolean.class, ConfigurationPropertyDescription
+                    .builder()).build();
 
             assertThat(result.getType()).isEqualTo(ConfigurationPropertyType.BOOLEAN);
         }
 
         @Test
         void intType() {
-            ConfigurationPropertyDescription result =
-                    provider.setTerminalType(long.class, ConfigurationPropertyDescription.builder()).build();
+            ConfigurationPropertyDescription result = provider.setTerminalType(long.class, ConfigurationPropertyDescription
+                    .builder()).build();
 
             assertThat(result.getType()).isEqualTo(ConfigurationPropertyType.INTEGER);
         }
 
         @Test
         void floatType() {
-            ConfigurationPropertyDescription result =
-                    provider.setTerminalType(double.class, ConfigurationPropertyDescription.builder()).build();
+            ConfigurationPropertyDescription result = provider.setTerminalType(double.class, ConfigurationPropertyDescription
+                    .builder()).build();
 
             assertThat(result.getType()).isEqualTo(ConfigurationPropertyType.FLOAT);
         }
 
         @Test
         void stringType() {
-            ConfigurationPropertyDescription result =
-                    provider.setTerminalType(String.class, ConfigurationPropertyDescription.builder()).build();
+            ConfigurationPropertyDescription result = provider.setTerminalType(String.class, ConfigurationPropertyDescription
+                    .builder()).build();
 
             assertThat(result.getType()).isEqualTo(ConfigurationPropertyType.STRING);
         }
 
         @Test
         void urlType() {
-            ConfigurationPropertyDescription result =
-                    provider.setTerminalType(URL.class, ConfigurationPropertyDescription.builder()).build();
+            ConfigurationPropertyDescription result = provider.setTerminalType(URL.class, ConfigurationPropertyDescription
+                    .builder()).build();
 
             assertThat(result.getType()).isEqualTo(ConfigurationPropertyType.STRING);
         }
 
         @Test
         void durationType() {
-            ConfigurationPropertyDescription result =
-                    provider.setTerminalType(Duration.class, ConfigurationPropertyDescription.builder()).build();
+            ConfigurationPropertyDescription result = provider.setTerminalType(Duration.class, ConfigurationPropertyDescription
+                    .builder()).build();
 
             assertThat(result.getType()).isEqualTo(ConfigurationPropertyType.DURATION);
         }

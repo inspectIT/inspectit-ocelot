@@ -20,8 +20,7 @@ public class TagUtilsTest {
 
     @Test
     public void createTagValue_nonPrintableCharacter() {
-        assertThat(TagUtils.createTagValue("non-printable-character-\u007f"))
-                .isEqualTo(TagValue.create("<invalid>"));
+        assertThat(TagUtils.createTagValue("non-printable-character-\u007f")).isEqualTo(TagValue.create("<invalid>"));
     }
 
 }

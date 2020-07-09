@@ -38,19 +38,13 @@ public class ObjectAttachmentsTest {
 
         TestUtils.waitForOpenCensusQueueToBeProcessed();
 
-        assertThat(TestUtils.getDataForView("writeAttachment",
-                ImmutableMap.of("target", target)))
-                .isNotNull().isInstanceOfSatisfying(AggregationData.CountData.class, (c) ->
-                assertThat(c.getCount()).isEqualTo(1)
-        );
+        assertThat(TestUtils.getDataForView("writeAttachment", ImmutableMap.of("target", target))).isNotNull()
+                .isInstanceOfSatisfying(AggregationData.CountData.class, (c) -> assertThat(c.getCount()).isEqualTo(1));
 
-        assertThat(TestUtils.getDataForView("readAttachment",
-                ImmutableMap.of("target", target, "firstVal", first, "secondVal", second)))
-                .isNotNull().isInstanceOfSatisfying(AggregationData.CountData.class, (c) ->
-                assertThat(c.getCount()).isEqualTo(2)
-        );
+        assertThat(TestUtils.getDataForView("readAttachment", ImmutableMap.of("target", target, "firstVal", first, "secondVal", second)))
+                .isNotNull()
+                .isInstanceOfSatisfying(AggregationData.CountData.class, (c) -> assertThat(c.getCount()).isEqualTo(2));
     }
-
 
     @Test
     void readNullTest() {
@@ -60,11 +54,9 @@ public class ObjectAttachmentsTest {
 
         TestUtils.waitForOpenCensusQueueToBeProcessed();
 
-        assertThat(TestUtils.getDataForView("readAttachment",
-                ImmutableMap.of("target", target, "firstVal", ".*", "secondVal", ".*")))
+        assertThat(TestUtils.getDataForView("readAttachment", ImmutableMap.of("target", target, "firstVal", ".*", "secondVal", ".*")))
                 .isNull();
     }
-
 
     @Test
     void replacementTest() {
@@ -79,26 +71,18 @@ public class ObjectAttachmentsTest {
 
         TestUtils.waitForOpenCensusQueueToBeProcessed();
 
-        assertThat(TestUtils.getDataForView("writeAttachment",
-                ImmutableMap.of("target", target)))
-                .isNotNull().isInstanceOfSatisfying(AggregationData.CountData.class, (c) ->
-                assertThat(c.getCount()).isEqualTo(1)
-        );
+        assertThat(TestUtils.getDataForView("writeAttachment", ImmutableMap.of("target", target))).isNotNull()
+                .isInstanceOfSatisfying(AggregationData.CountData.class, (c) -> assertThat(c.getCount()).isEqualTo(1));
 
-        assertThat(TestUtils.getDataForView("writeAttachment",
-                ImmutableMap.of("target", target, "firstVal", initFirst, "secondVal", initSecond)))
-                .isNotNull().isInstanceOfSatisfying(AggregationData.CountData.class, (c) ->
-                assertThat(c.getCount()).isEqualTo(1)
-        );
+        assertThat(TestUtils.getDataForView("writeAttachment", ImmutableMap.of("target", target, "firstVal", initFirst, "secondVal", initSecond)))
+                .isNotNull()
+                .isInstanceOfSatisfying(AggregationData.CountData.class, (c) -> assertThat(c.getCount()).isEqualTo(1));
 
-        assertThat(TestUtils.getDataForView("readAttachment",
-                ImmutableMap.of("target", target, "firstVal", finalFirst)))
-                .isNotNull().isInstanceOfSatisfying(AggregationData.CountData.class, (c) ->
-                assertThat(c.getCount()).isEqualTo(1)
-        );
+        assertThat(TestUtils.getDataForView("readAttachment", ImmutableMap.of("target", target, "firstVal", finalFirst)))
+                .isNotNull()
+                .isInstanceOfSatisfying(AggregationData.CountData.class, (c) -> assertThat(c.getCount()).isEqualTo(1));
 
-        assertThat(TestUtils.getDataForView("readAttachment",
-                ImmutableMap.of("target", target, "firstVal", finalFirst, "secondVal", ".*")))
+        assertThat(TestUtils.getDataForView("readAttachment", ImmutableMap.of("target", target, "firstVal", finalFirst, "secondVal", ".*")))
                 .isNull();
     }
 

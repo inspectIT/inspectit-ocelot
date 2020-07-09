@@ -46,11 +46,8 @@ public class ConfigurationFilesCacheReloadTaskTest {
 
             Object output = reloadTask.loadYamlFile(testPath);
 
-            assertThat(output)
-                    .isInstanceOf(Map.class);
-            assertThat((Map<Object, Object>) output)
-                    .hasSize(1)
-                    .containsEntry("i am a", Arrays.asList("test", "yaml"));
+            assertThat(output).isInstanceOf(Map.class);
+            assertThat((Map<Object, Object>) output).hasSize(1).containsEntry("i am a", Arrays.asList("test", "yaml"));
         }
 
         @Test

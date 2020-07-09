@@ -18,11 +18,13 @@ public class PropertyPathHelperTest {
 
     @Nested
     public class Parse {
+
         @Test
         void kebabCaseTest() {
             List<String> output = Arrays.asList("inspectit", "iCan-parse-kebab", "case", "even-in-brackets\\wow", "thisIs-awesome");
 
-            assertThat(PropertyPathHelper.parse("inspectit.iCan-parse-kebab.case[even-in-brackets\\wow].thisIs-awesome")).isEqualTo(output);
+            assertThat(PropertyPathHelper.parse("inspectit.iCan-parse-kebab.case[even-in-brackets\\wow].thisIs-awesome"))
+                    .isEqualTo(output);
         }
 
         @Test
@@ -154,6 +156,7 @@ public class PropertyPathHelperTest {
 
     @Nested
     public class CheckPropertyExists {
+
         @Test
         void terminalTest() {
             List<String> list = Arrays.asList("config", "file-based", "path");
@@ -213,6 +216,7 @@ public class PropertyPathHelperTest {
 
     @Nested
     public class CheckPropertyExistsInMap {
+
         @Test
         void nonTerminalMapTest() {
             List<String> list = Arrays.asList("matcher-mode");
@@ -224,6 +228,7 @@ public class PropertyPathHelperTest {
 
     @Nested
     public class CheckPropertyExistsInList {
+
         @Test
         void nonTerminalListTest() {
             List<String> list = Arrays.asList("instrumentation", "scopes", "jdbc_statement_execute", "interfaces", "0", "matcher-mode");
@@ -235,6 +240,7 @@ public class PropertyPathHelperTest {
 
     @Nested
     public class ComparePaths {
+
         @Test
         void identicalPaths() {
             List<String> pathA = Arrays.asList("i", "am", "a", "path");
@@ -286,6 +292,7 @@ public class PropertyPathHelperTest {
 
     @Nested
     public class HasPathPrefix {
+
         @Test
         void identicalPrefix() {
             List<String> path = Arrays.asList("i", "am", "a", "path", "and", "that's", "cool");

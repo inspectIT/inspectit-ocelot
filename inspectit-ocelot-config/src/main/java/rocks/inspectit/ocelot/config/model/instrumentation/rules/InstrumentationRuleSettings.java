@@ -62,7 +62,6 @@ public class InstrumentationRuleSettings {
     @NotNull
     private Map<@NotBlank String, @NotNull @Valid ActionCallSettings> entry = Collections.emptyMap();
 
-
     /**
      * Defines the action to execute after {@link #entry}.
      */
@@ -117,18 +116,15 @@ public class InstrumentationRuleSettings {
         checkScopesExist(container, vios);
         checkIncludedRulesExist(container, vios);
         checkMetricRecordingsValid(definedMetrics, vios);
-        preEntry.forEach((data, call) -> call.performValidation(container,
-                vios.atProperty("preEntry").atProperty(data)));
-        entry.forEach((data, call) -> call.performValidation(container,
-                vios.atProperty("entry").atProperty(data)));
-        postEntry.forEach((data, call) -> call.performValidation(container,
-                vios.atProperty("postEntry").atProperty(data)));
-        preExit.forEach((data, call) -> call.performValidation(container,
-                vios.atProperty("preExit").atProperty(data)));
-        exit.forEach((data, call) -> call.performValidation(container,
-                vios.atProperty("exit").atProperty(data)));
-        postExit.forEach((data, call) -> call.performValidation(container,
-                vios.atProperty("postExit").atProperty(data)));
+        preEntry.forEach((data, call) -> call.performValidation(container, vios.atProperty("preEntry")
+                .atProperty(data)));
+        entry.forEach((data, call) -> call.performValidation(container, vios.atProperty("entry").atProperty(data)));
+        postEntry.forEach((data, call) -> call.performValidation(container, vios.atProperty("postEntry")
+                .atProperty(data)));
+        preExit.forEach((data, call) -> call.performValidation(container, vios.atProperty("preExit").atProperty(data)));
+        exit.forEach((data, call) -> call.performValidation(container, vios.atProperty("exit").atProperty(data)));
+        postExit.forEach((data, call) -> call.performValidation(container, vios.atProperty("postExit")
+                .atProperty(data)));
     }
 
     private void checkMetricRecordingsValid(Set<String> definedMetrics, ViolationBuilder vios) {
@@ -136,7 +132,8 @@ public class InstrumentationRuleSettings {
     }
 
     private void checkScopesExist(InstrumentationSettings container, ViolationBuilder vios) {
-        scopes.entrySet().stream()
+        scopes.entrySet()
+                .stream()
                 .filter(Map.Entry::getValue)
                 .map(Map.Entry::getKey)
                 .filter(name -> !container.getScopes().containsKey(name))
@@ -148,18 +145,16 @@ public class InstrumentationRuleSettings {
                 });
     }
 
-
     private void checkIncludedRulesExist(InstrumentationSettings container, ViolationBuilder vios) {
-        include.entrySet().stream()
+        include.entrySet()
+                .stream()
                 .filter(Map.Entry::getValue)
                 .map(Map.Entry::getKey)
                 .filter(name -> !container.getRules().containsKey(name))
-                .forEach(name ->
-                        vios.message("The included rule '{rule}' does not exist!")
-                                .atProperty("include")
-                                .parameter("rule", name)
-                                .buildAndPublish()
-                );
+                .forEach(name -> vios.message("The included rule '{rule}' does not exist!")
+                        .atProperty("include")
+                        .parameter("rule", name)
+                        .buildAndPublish());
     }
 
 }

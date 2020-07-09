@@ -45,18 +45,17 @@ public class ThreadStartContextPropagationTest extends InstrumentationSysTestBas
     }
 
     private class SubThread extends AbstractThread {
+
         public SubThread(Runnable runnable) {
             super(runnable);
             setName("dummy-thread");
         }
     }
 
-
     @BeforeAll
     static void waitForInstrumentation() {
         TestUtils.waitForClassInstrumentations(Arrays.asList(AbstractThread.class, Thread.class), 15, TimeUnit.SECONDS);
     }
-
 
     @Test
     public void verifyContextPropagationViaAbstractThreads() throws InterruptedException {
@@ -78,9 +77,7 @@ public class ThreadStartContextPropagationTest extends InstrumentationSysTestBas
 
         latch.await(5, TimeUnit.SECONDS);
 
-        assertThat(refTags.get()).hasSize(1)
-                .extracting("key", "value")
-                .contains(tuple(tagKey, tagValue));
+        assertThat(refTags.get()).hasSize(1).extracting("key", "value").contains(tuple(tagKey, tagValue));
     }
 
     @Test
@@ -102,9 +99,7 @@ public class ThreadStartContextPropagationTest extends InstrumentationSysTestBas
 
         latch.await(5, TimeUnit.SECONDS);
 
-        assertThat(refTags.get()).hasSize(1)
-                .extracting("key", "value")
-                .contains(tuple(tagKey, tagValue));
+        assertThat(refTags.get()).hasSize(1).extracting("key", "value").contains(tuple(tagKey, tagValue));
     }
 
     @Test
@@ -158,9 +153,7 @@ public class ThreadStartContextPropagationTest extends InstrumentationSysTestBas
 
         latch.await(5, TimeUnit.SECONDS);
 
-        assertThat(refTags.get()).hasSize(1)
-                .extracting("key", "value")
-                .contains(tuple(tagKey, tagValue));
+        assertThat(refTags.get()).hasSize(1).extracting("key", "value").contains(tuple(tagKey, tagValue));
     }
 
     @Test

@@ -6,9 +6,9 @@ import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
 import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.config.FileBasedConfigSettings;
+import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 
 import java.io.File;
@@ -50,15 +50,13 @@ public class ConfigurationDirectoriesPoller extends DynamicallyActivatableServic
     @Override
     protected boolean doEnable(InspectitConfig conf) {
         log.info("Starting config directory polling service..");
-        env.readPropertySources(propertySources ->
-                filePollers = propertySources.stream()
-                        .filter(ps -> ps instanceof DirectoryPropertySource)
-                        .map(ps -> (DirectoryPropertySource) ps)
-                        .map(ps -> createCheckerForDirectory(ps))
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
-                        .collect(Collectors.toList())
-        );
+        env.readPropertySources(propertySources -> filePollers = propertySources.stream()
+                .filter(ps -> ps instanceof DirectoryPropertySource)
+                .map(ps -> (DirectoryPropertySource) ps)
+                .map(ps -> createCheckerForDirectory(ps))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList()));
         if (filePollers.isEmpty()) {
             log.info("No directories to watch registered, terminating poll service.");
             return false;
@@ -74,7 +72,6 @@ public class ConfigurationDirectoriesPoller extends DynamicallyActivatableServic
             poller.checkForChangesAndReloadIfRequired();
         }
     }
-
 
     @Override
     protected boolean doDisable() {
@@ -107,7 +104,9 @@ public class ConfigurationDirectoriesPoller extends DynamicallyActivatableServic
     private class DirectoryPropertySourceChangeChecker {
 
         private FileAlterationObserver observer;
+
         private DirectoryPropertySource dirToWatch;
+
         private boolean anyFileChanged = false;
 
         public void init(DirectoryPropertySource dirToWatch) throws Exception {

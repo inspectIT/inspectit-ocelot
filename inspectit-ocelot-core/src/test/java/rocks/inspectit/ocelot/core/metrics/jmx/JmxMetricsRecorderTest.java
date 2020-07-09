@@ -157,15 +157,13 @@ class JmxMetricsRecorderTest {
             jmxMetricsRecorder.recordBean("my.domain", beanProps, attributes, "att", null, "desc", value);
 
             TagContext tagContext = tagContextBuilder.build();
-            assertThat(InternalUtils.getTags(tagContext)).hasSize(2)
-                    .anySatisfy(tag -> {
-                        assertThat(tag.getKey().getName()).isEqualTo("prop2");
-                        assertThat(tag.getValue().asString()).isEqualTo("Prop2Value");
-                    })
-                    .anySatisfy(tag -> {
-                        assertThat(tag.getKey().getName()).isEqualTo("prop3");
-                        assertThat(tag.getValue().asString()).isEqualTo("Prop3Value");
-                    });
+            assertThat(InternalUtils.getTags(tagContext)).hasSize(2).anySatisfy(tag -> {
+                assertThat(tag.getKey().getName()).isEqualTo("prop2");
+                assertThat(tag.getValue().asString()).isEqualTo("Prop2Value");
+            }).anySatisfy(tag -> {
+                assertThat(tag.getKey().getName()).isEqualTo("prop3");
+                assertThat(tag.getValue().asString()).isEqualTo("Prop3Value");
+            });
 
             verify(measuresManager).getMeasureDouble(expectedMeasureName);
             verify(tagger).currentBuilder();
@@ -222,10 +220,8 @@ class JmxMetricsRecorderTest {
             scraper.doScrape();
 
             verify(receiver, atLeastOnce()).recordBean(eq("java.lang"), beanPropsCaptor.capture(), notNull(), notNull(), notNull(), notNull(), notNull());
-            assertThat(beanPropsCaptor.getAllValues()).allSatisfy(map -> assertThat(map)
-                    .hasSize(1)
-                    .containsEntry("type", "ClassLoading")
-            );
+            assertThat(beanPropsCaptor.getAllValues()).allSatisfy(map -> assertThat(map).hasSize(1)
+                    .containsEntry("type", "ClassLoading"));
         }
 
         @Test
@@ -250,9 +246,7 @@ class JmxMetricsRecorderTest {
             scraper.doScrape();
 
             verify(receiver, atLeastOnce()).recordBean(eq("java.lang"), beanPropsCaptor.capture(), notNull(), notNull(), notNull(), notNull(), notNull());
-            assertThat(beanPropsCaptor.getAllValues()).allSatisfy(map -> assertThat(map)
-                    .doesNotContainEntry("type", "Runtime")
-            );
+            assertThat(beanPropsCaptor.getAllValues()).allSatisfy(map -> assertThat(map).doesNotContainEntry("type", "Runtime"));
         }
 
     }

@@ -29,7 +29,8 @@ public class AdditionalValidationsValidator implements ConstraintValidator<Addit
                 .filter(m -> m.isAnnotationPresent(AdditionalValidation.class))
                 .filter(m -> Arrays.stream(m.getParameters())
                         .map(Parameter::getType)
-                        .collect(toList()).equals(Collections.singletonList(ViolationBuilder.class)))
+                        .collect(toList())
+                        .equals(Collections.singletonList(ViolationBuilder.class)))
                 .forEach(m -> invokeAdditionalValidationMethod(value, foundViolations, m));
 
         HibernateConstraintValidatorContext ctx = context.unwrap(HibernateConstraintValidatorContext.class);

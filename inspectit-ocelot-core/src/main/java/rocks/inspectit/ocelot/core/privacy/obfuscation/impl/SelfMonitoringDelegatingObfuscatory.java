@@ -26,7 +26,8 @@ public class SelfMonitoringDelegatingObfuscatory implements IObfuscatory {
      * {@inheritDoc}
      */
     public void putSpanAttribute(Span span, String key, Object value) {
-        try (Scope scope = selfMonitoringService.withDurationSelfMonitoring(delegatingObfuscatory.getClass().getSimpleName())) {
+        try (Scope scope = selfMonitoringService.withDurationSelfMonitoring(delegatingObfuscatory.getClass()
+                .getSimpleName())) {
             delegatingObfuscatory.putSpanAttribute(span, key, value);
         }
     }

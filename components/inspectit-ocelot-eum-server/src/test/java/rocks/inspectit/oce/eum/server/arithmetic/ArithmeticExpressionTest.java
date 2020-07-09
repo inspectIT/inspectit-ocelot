@@ -42,8 +42,7 @@ class ArithmeticExpressionTest {
         public void invalidExpression() {
             ArithmeticExpression expression = new ArithmeticExpression("(1+*5");
 
-            assertThatExceptionOfType(RuntimeException.class)
-                    .isThrownBy(expression::eval)
+            assertThatExceptionOfType(RuntimeException.class).isThrownBy(expression::eval)
                     .withMessage("Could not solve expression '(1+*5'. Unexpected character at position 3: *");
         }
     }

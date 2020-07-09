@@ -35,13 +35,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ApacheHttpClientContextPropagationTest {
 
     public static final int PORT = 9999;
+
     public static final String TEST_URL = "http://localhost:" + PORT + "/test";
+
     private WireMockServer wireMockServer;
 
     private final Map<String, Object> dataToPropagate = new HashMap<>();
 
     private CloseableHttpClient client;
-
 
     @BeforeEach
     void setupAndInstrumentClient() throws Exception {
@@ -52,10 +53,7 @@ public class ApacheHttpClientContextPropagationTest {
 
         client = builder.build();
 
-        TestUtils.waitForClassInstrumentations(Arrays.asList(
-                Class.forName("org.apache.http.impl.client.InternalHttpClient"),
-                CloseableHttpClient.class,
-                HttpServlet.class), 10, TimeUnit.SECONDS);
+        TestUtils.waitForClassInstrumentations(Arrays.asList(Class.forName("org.apache.http.impl.client.InternalHttpClient"), CloseableHttpClient.class, HttpServlet.class), 10, TimeUnit.SECONDS);
     }
 
     @BeforeEach
@@ -85,35 +83,29 @@ public class ApacheHttpClientContextPropagationTest {
         @BeforeEach
         void setupResponse() {
 
-            stubFor(get(urlEqualTo("/test"))
-                    .willReturn(aResponse()
-                            .withStatus(200)));
+            stubFor(get(urlEqualTo("/test")).willReturn(aResponse().withStatus(200)));
         }
 
         @Test
         void propagationViaSimpleExecute() throws Exception {
-            try (Scope s = Tags.getTagger().emptyBuilder()
+            try (Scope s = Tags.getTagger()
+                    .emptyBuilder()
                     .putLocal(TagKey.create("down_propagated"), TagValue.create("myvalue"))
                     .buildScoped()) {
                 client.execute(URIUtils.extractHost(URI.create(TEST_URL)), new HttpGet(TEST_URL));
             }
 
-            verify(getRequestedFor(urlEqualTo("/test"))
-                    .withHeader("Correlation-Context", containing("down_propagated=myvalue")));
+            verify(getRequestedFor(urlEqualTo("/test")).withHeader("Correlation-Context", containing("down_propagated=myvalue")));
         }
 
     }
-
 
     @Nested
     class UpPropagation {
 
         @BeforeEach
         void setupResponse() {
-            stubFor(get(urlEqualTo("/test"))
-                    .willReturn(aResponse()
-                            .withBody("body")
-                            .withStatus(200)));
+            stubFor(get(urlEqualTo("/test")).willReturn(aResponse().withBody("body").withStatus(200)));
             dataToPropagate.put("up_propagated", Math.PI);
             dataToPropagate.put("up_propagated2", "Hello World");
         }
@@ -131,8 +123,6 @@ public class ApacheHttpClientContextPropagationTest {
             assertThat(myCtx.getData("up_propagated2")).isEqualTo("Hello World");
         }
 
-
     }
-
 
 }

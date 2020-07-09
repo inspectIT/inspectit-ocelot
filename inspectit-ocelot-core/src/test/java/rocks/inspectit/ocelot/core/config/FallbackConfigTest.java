@@ -6,9 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 
-@TestPropertySource(properties = {
-        "inspectit.thread-pool-size=iAmNotANumber"
-})
+@TestPropertySource(properties = {"inspectit.thread-pool-size=iAmNotANumber"})
 public class FallbackConfigTest extends SpringTestBase {
 
     @Autowired

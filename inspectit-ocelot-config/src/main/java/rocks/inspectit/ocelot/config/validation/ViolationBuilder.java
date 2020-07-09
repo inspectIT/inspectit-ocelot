@@ -31,6 +31,7 @@ public class ViolationBuilder {
 
     /**
      * @param message the message of the violation, parameters use the syntax {parameter}
+     *
      * @return the new builder
      */
     public ViolationBuilder message(String message) {
@@ -42,12 +43,11 @@ public class ViolationBuilder {
      *
      * @param name  the name of the parameter
      * @param value its value
+     *
      * @return the newly created builder
      */
     public ViolationBuilder parameter(String name, Object value) {
-        return new ViolationBuilder(sink, current.toBuilder()
-                .parameter(name, Objects.toString(value))
-                .build());
+        return new ViolationBuilder(sink, current.toBuilder().parameter(name, Objects.toString(value)).build());
     }
 
     /**
@@ -56,12 +56,11 @@ public class ViolationBuilder {
      * atProperty("my").atProperty("attib") results in the property path "my.attribute".
      *
      * @param name the name of the property
+     *
      * @return the newly created builder
      */
     public ViolationBuilder atProperty(String name) {
-        return new ViolationBuilder(sink, current.toBuilder()
-                .beanNode(name)
-                .build());
+        return new ViolationBuilder(sink, current.toBuilder().beanNode(name).build());
     }
 
     /**

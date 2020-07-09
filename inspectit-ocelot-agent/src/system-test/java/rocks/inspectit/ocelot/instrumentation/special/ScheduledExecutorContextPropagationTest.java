@@ -32,9 +32,7 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
         }
         schedule.get();
 
-        assertThat(refTags.get()).hasSize(1)
-                .extracting("key", "value")
-                .contains(tuple(tagKey, tagValue));
+        assertThat(refTags.get()).hasSize(1).extracting("key", "value").contains(tuple(tagKey, tagValue));
     }
 
     @Test
@@ -51,9 +49,7 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
         }
         Iterator<Tag> result = future.get();
 
-        assertThat(result).hasSize(1)
-                .extracting("key", "value")
-                .contains(tuple(tagKey, tagValue));
+        assertThat(result).hasSize(1).extracting("key", "value").contains(tuple(tagKey, tagValue));
     }
 
     @Test
@@ -83,8 +79,7 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
         executorService.shutdown();
 
         assertThat(iteratorList).size().isGreaterThanOrEqualTo(iterations);
-        iteratorList.forEach(tagIterator -> assertThat(tagIterator)
-                .hasSize(1)
+        iteratorList.forEach(tagIterator -> assertThat(tagIterator).hasSize(1)
                 .extracting("key", "value")
                 .contains(tuple(tagKey, tagValue)));
     }
@@ -116,8 +111,7 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
         executorService.shutdown();
 
         assertThat(iteratorList).size().isGreaterThanOrEqualTo(iterations);
-        iteratorList.forEach(tagIterator -> assertThat(tagIterator)
-                .hasSize(1)
+        iteratorList.forEach(tagIterator -> assertThat(tagIterator).hasSize(1)
                 .extracting("key", "value")
                 .contains(tuple(tagKey, tagValue)));
     }

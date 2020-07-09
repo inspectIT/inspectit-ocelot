@@ -26,50 +26,43 @@ public class PercentileViewTest {
 
         @Test
         void noPercentilesAndMinMaxSpecified() {
-            assertThatThrownBy(() -> new PercentileView(false, false, Collections.emptySet(),
-                    Collections.emptySet(), 1000, "name", "unit", "description", 1))
+            assertThatThrownBy(() -> new PercentileView(false, false, Collections.emptySet(), Collections.emptySet(), 1000, "name", "unit", "description", 1))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
         @Test
         void invalidPercentile() {
-            assertThatThrownBy(() -> new PercentileView(true, true, new HashSet<>(Arrays.asList(1.0)),
-                    Collections.emptySet(), 1000, "name", "unit", "description", 1))
+            assertThatThrownBy(() -> new PercentileView(true, true, new HashSet<>(Arrays.asList(1.0)), Collections.emptySet(), 1000, "name", "unit", "description", 1))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
         @Test
         void blankName() {
-            assertThatThrownBy(() -> new PercentileView(true, true, Collections.emptySet(),
-                    Collections.emptySet(), 1000, " ", "unit", "description", 1))
+            assertThatThrownBy(() -> new PercentileView(true, true, Collections.emptySet(), Collections.emptySet(), 1000, " ", "unit", "description", 1))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
         @Test
         void blankUnit() {
-            assertThatThrownBy(() -> new PercentileView(true, true, Collections.emptySet(),
-                    Collections.emptySet(), 1000, "name", " ", "description", 1))
+            assertThatThrownBy(() -> new PercentileView(true, true, Collections.emptySet(), Collections.emptySet(), 1000, "name", " ", "description", 1))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
         @Test
         void blankDescription() {
-            assertThatThrownBy(() -> new PercentileView(true, true, Collections.emptySet(),
-                    Collections.emptySet(), 1000, "name", "unit", " ", 1))
+            assertThatThrownBy(() -> new PercentileView(true, true, Collections.emptySet(), Collections.emptySet(), 1000, "name", "unit", " ", 1))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
         @Test
         void invalidTimeWindow() {
-            assertThatThrownBy(() -> new PercentileView(true, true, Collections.emptySet(),
-                    Collections.emptySet(), 0, "name", "unit", "description", 1))
+            assertThatThrownBy(() -> new PercentileView(true, true, Collections.emptySet(), Collections.emptySet(), 0, "name", "unit", "description", 1))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
         @Test
         void invalidBufferSize() {
-            assertThatThrownBy(() -> new PercentileView(true, true, Collections.emptySet(),
-                    Collections.emptySet(), 1000, "name", "unit", "description", 0))
+            assertThatThrownBy(() -> new PercentileView(true, true, Collections.emptySet(), Collections.emptySet(), 1000, "name", "unit", "description", 0))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
@@ -102,32 +95,28 @@ public class PercentileViewTest {
 
         @Test
         void checkPercentileSeries() {
-            PercentileView view = new PercentileView(false, false, ImmutableSet.of(0.5),
-                    Collections.emptySet(), 10, "name", "unit", "description", 1);
+            PercentileView view = new PercentileView(false, false, ImmutableSet.of(0.5), Collections.emptySet(), 10, "name", "unit", "description", 1);
 
             assertThat(view.getSeriesNames()).containsExactly("name");
         }
 
         @Test
         void checkMinSeries() {
-            PercentileView view = new PercentileView(true, false, Collections.emptySet(),
-                    Collections.emptySet(), 10, "name", "unit", "description", 1);
+            PercentileView view = new PercentileView(true, false, Collections.emptySet(), Collections.emptySet(), 10, "name", "unit", "description", 1);
 
             assertThat(view.getSeriesNames()).containsExactly("name_min");
         }
 
         @Test
         void checkMaxSeries() {
-            PercentileView view = new PercentileView(false, true, Collections.emptySet(),
-                    Collections.emptySet(), 10, "name", "unit", "description", 1);
+            PercentileView view = new PercentileView(false, true, Collections.emptySet(), Collections.emptySet(), 10, "name", "unit", "description", 1);
 
             assertThat(view.getSeriesNames()).containsExactly("name_max");
         }
 
         @Test
         void checkAllPercentileSeries() {
-            PercentileView view = new PercentileView(true, true, ImmutableSet.of(0.5),
-                    Collections.emptySet(), 10, "name", "unit", "description", 1);
+            PercentileView view = new PercentileView(true, true, ImmutableSet.of(0.5), Collections.emptySet(), 10, "name", "unit", "description", 1);
 
             assertThat(view.getSeriesNames()).containsExactlyInAnyOrder("name", "name_min", "name_max");
         }
@@ -147,8 +136,7 @@ public class PercentileViewTest {
 
         @Test
         void checkQuantileMetricDescriptor() {
-            PercentileView view = new PercentileView(false, false, ImmutableSet.of(0.5),
-                    ImmutableSet.of("my_tag"), 10, "name", "unit", "description", 1);
+            PercentileView view = new PercentileView(false, false, ImmutableSet.of(0.5), ImmutableSet.of("my_tag"), 10, "name", "unit", "description", 1);
 
             Timestamp queryTime = Timestamp.fromMillis(10);
             Collection<Metric> result = view.computeMetrics(queryTime);
@@ -164,8 +152,7 @@ public class PercentileViewTest {
 
         @Test
         void checkMinMetricDescriptor() {
-            PercentileView view = new PercentileView(true, false, Collections.emptySet(),
-                    ImmutableSet.of("my_tag"), 10, "name", "unit", "description", 1);
+            PercentileView view = new PercentileView(true, false, Collections.emptySet(), ImmutableSet.of("my_tag"), 10, "name", "unit", "description", 1);
 
             Timestamp queryTime = Timestamp.fromMillis(10);
             Collection<Metric> result = view.computeMetrics(queryTime);
@@ -181,8 +168,7 @@ public class PercentileViewTest {
 
         @Test
         void checkMaxMetricDescriptor() {
-            PercentileView view = new PercentileView(false, true, Collections.emptySet(),
-                    ImmutableSet.of("my_tag"), 10, "name", "unit", "description", 1);
+            PercentileView view = new PercentileView(false, true, Collections.emptySet(), ImmutableSet.of("my_tag"), 10, "name", "unit", "description", 1);
 
             Timestamp queryTime = Timestamp.fromMillis(10);
             Collection<Metric> result = view.computeMetrics(queryTime);
@@ -198,8 +184,7 @@ public class PercentileViewTest {
 
         @Test
         void checkMinimumMetric() {
-            PercentileView view = new PercentileView(true, false, Collections.emptySet(),
-                    ImmutableSet.of("my_tag"), 10, "name", "unit", "description", 4);
+            PercentileView view = new PercentileView(true, false, Collections.emptySet(), ImmutableSet.of("my_tag"), 10, "name", "unit", "description", 4);
 
             view.insertValue(42, Timestamp.fromMillis(1), createTagContext("my_tag", "foo"));
             view.insertValue(99, Timestamp.fromMillis(2), createTagContext("my_tag", "foo"));
@@ -211,31 +196,24 @@ public class PercentileViewTest {
             assertThat(results).hasSize(1);
             Metric result = results.iterator().next();
 
-            assertThat(result.getTimeSeriesList())
-                    .hasSize(2)
-                    .anySatisfy(series -> {
-                        assertThat(series.getLabelValues()).containsExactly(LabelValue.create("foo"));
-                        assertThat(series.getPoints())
-                                .hasSize(1)
-                                .anySatisfy(pt -> {
-                                    assertThat(pt.getTimestamp()).isEqualTo(queryTime);
-                                    assertThat(pt.getValue()).isEqualTo(Value.doubleValue(42));
-                                });
-                    }).anySatisfy(series -> {
+            assertThat(result.getTimeSeriesList()).hasSize(2).anySatisfy(series -> {
+                assertThat(series.getLabelValues()).containsExactly(LabelValue.create("foo"));
+                assertThat(series.getPoints()).hasSize(1).anySatisfy(pt -> {
+                    assertThat(pt.getTimestamp()).isEqualTo(queryTime);
+                    assertThat(pt.getValue()).isEqualTo(Value.doubleValue(42));
+                });
+            }).anySatisfy(series -> {
                 assertThat(series.getLabelValues()).containsExactly(LabelValue.create("bar"));
-                assertThat(series.getPoints())
-                        .hasSize(1)
-                        .anySatisfy(pt -> {
-                            assertThat(pt.getTimestamp()).isEqualTo(queryTime);
-                            assertThat(pt.getValue()).isEqualTo(Value.doubleValue(100));
-                        });
+                assertThat(series.getPoints()).hasSize(1).anySatisfy(pt -> {
+                    assertThat(pt.getTimestamp()).isEqualTo(queryTime);
+                    assertThat(pt.getValue()).isEqualTo(Value.doubleValue(100));
+                });
             });
         }
 
         @Test
         void checkMaximumMetric() {
-            PercentileView view = new PercentileView(false, true, Collections.emptySet(),
-                    ImmutableSet.of("my_tag"), 10, "name", "unit", "description", 4);
+            PercentileView view = new PercentileView(false, true, Collections.emptySet(), ImmutableSet.of("my_tag"), 10, "name", "unit", "description", 4);
 
             view.insertValue(42, Timestamp.fromMillis(1), createTagContext("my_tag", "foo"));
             view.insertValue(99, Timestamp.fromMillis(2), createTagContext("my_tag", "foo"));
@@ -247,31 +225,24 @@ public class PercentileViewTest {
             assertThat(results).hasSize(1);
             Metric result = results.iterator().next();
 
-            assertThat(result.getTimeSeriesList())
-                    .hasSize(2)
-                    .anySatisfy(series -> {
-                        assertThat(series.getLabelValues()).containsExactly(LabelValue.create("foo"));
-                        assertThat(series.getPoints())
-                                .hasSize(1)
-                                .anySatisfy(pt -> {
-                                    assertThat(pt.getTimestamp()).isEqualTo(queryTime);
-                                    assertThat(pt.getValue()).isEqualTo(Value.doubleValue(99));
-                                });
-                    }).anySatisfy(series -> {
+            assertThat(result.getTimeSeriesList()).hasSize(2).anySatisfy(series -> {
+                assertThat(series.getLabelValues()).containsExactly(LabelValue.create("foo"));
+                assertThat(series.getPoints()).hasSize(1).anySatisfy(pt -> {
+                    assertThat(pt.getTimestamp()).isEqualTo(queryTime);
+                    assertThat(pt.getValue()).isEqualTo(Value.doubleValue(99));
+                });
+            }).anySatisfy(series -> {
                 assertThat(series.getLabelValues()).containsExactly(LabelValue.create("bar"));
-                assertThat(series.getPoints())
-                        .hasSize(1)
-                        .anySatisfy(pt -> {
-                            assertThat(pt.getTimestamp()).isEqualTo(queryTime);
-                            assertThat(pt.getValue()).isEqualTo(Value.doubleValue(101));
-                        });
+                assertThat(series.getPoints()).hasSize(1).anySatisfy(pt -> {
+                    assertThat(pt.getTimestamp()).isEqualTo(queryTime);
+                    assertThat(pt.getValue()).isEqualTo(Value.doubleValue(101));
+                });
             });
         }
 
         @Test
         void checkPercentileMetrics() {
-            PercentileView view = new PercentileView(false, false, ImmutableSet.of(0.5, 0.9),
-                    ImmutableSet.of("my_tag"), 10, "name", "unit", "description", 18);
+            PercentileView view = new PercentileView(false, false, ImmutableSet.of(0.5, 0.9), ImmutableSet.of("my_tag"), 10, "name", "unit", "description", 18);
 
             for (int i = 1; i < 10; i++) {
                 view.insertValue(10 + i, Timestamp.fromMillis(1), createTagContext("my_tag", "foo"));
@@ -283,40 +254,30 @@ public class PercentileViewTest {
             assertThat(results).hasSize(1);
             Metric result = results.iterator().next();
 
-            assertThat(result.getTimeSeriesList())
-                    .hasSize(4)
-                    .anySatisfy(series -> {
-                        assertThat(series.getLabelValues()).containsExactly(LabelValue.create("foo"), LabelValue.create("0.9"));
-                        assertThat(series.getPoints())
-                                .hasSize(1)
-                                .anySatisfy(pt -> {
-                                    assertThat(pt.getTimestamp()).isEqualTo(queryTime);
-                                    assertThat(pt.getValue()).isEqualTo(Value.doubleValue(19));
-                                });
-                    }).anySatisfy(series -> {
+            assertThat(result.getTimeSeriesList()).hasSize(4).anySatisfy(series -> {
+                assertThat(series.getLabelValues()).containsExactly(LabelValue.create("foo"), LabelValue.create("0.9"));
+                assertThat(series.getPoints()).hasSize(1).anySatisfy(pt -> {
+                    assertThat(pt.getTimestamp()).isEqualTo(queryTime);
+                    assertThat(pt.getValue()).isEqualTo(Value.doubleValue(19));
+                });
+            }).anySatisfy(series -> {
                 assertThat(series.getLabelValues()).containsExactly(LabelValue.create("bar"), LabelValue.create("0.9"));
-                assertThat(series.getPoints())
-                        .hasSize(1)
-                        .anySatisfy(pt -> {
-                            assertThat(pt.getTimestamp()).isEqualTo(queryTime);
-                            assertThat(pt.getValue()).isEqualTo(Value.doubleValue(109));
-                        });
+                assertThat(series.getPoints()).hasSize(1).anySatisfy(pt -> {
+                    assertThat(pt.getTimestamp()).isEqualTo(queryTime);
+                    assertThat(pt.getValue()).isEqualTo(Value.doubleValue(109));
+                });
             }).anySatisfy(series -> {
                 assertThat(series.getLabelValues()).containsExactly(LabelValue.create("foo"), LabelValue.create("0.5"));
-                assertThat(series.getPoints())
-                        .hasSize(1)
-                        .anySatisfy(pt -> {
-                            assertThat(pt.getTimestamp()).isEqualTo(queryTime);
-                            assertThat(pt.getValue()).isEqualTo(Value.doubleValue(15));
-                        });
+                assertThat(series.getPoints()).hasSize(1).anySatisfy(pt -> {
+                    assertThat(pt.getTimestamp()).isEqualTo(queryTime);
+                    assertThat(pt.getValue()).isEqualTo(Value.doubleValue(15));
+                });
             }).anySatisfy(series -> {
                 assertThat(series.getLabelValues()).containsExactly(LabelValue.create("bar"), LabelValue.create("0.5"));
-                assertThat(series.getPoints())
-                        .hasSize(1)
-                        .anySatisfy(pt -> {
-                            assertThat(pt.getTimestamp()).isEqualTo(queryTime);
-                            assertThat(pt.getValue()).isEqualTo(Value.doubleValue(105));
-                        });
+                assertThat(series.getPoints()).hasSize(1).anySatisfy(pt -> {
+                    assertThat(pt.getTimestamp()).isEqualTo(queryTime);
+                    assertThat(pt.getValue()).isEqualTo(Value.doubleValue(105));
+                });
 
             });
 

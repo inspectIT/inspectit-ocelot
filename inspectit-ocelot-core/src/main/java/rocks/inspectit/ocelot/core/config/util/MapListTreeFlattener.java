@@ -14,6 +14,7 @@ public class MapListTreeFlattener {
      * Flattens the given List or Map
      *
      * @param root the root list or map
+     *
      * @return the flattened map.
      */
     public static Map<String, Object> flatten(Object root) {
@@ -53,7 +54,6 @@ public class MapListTreeFlattener {
         });
     }
 
-
     private static void flattenDispatch(String prefix, List<?> node, Map<String, Object> results) {
         for (int i = 0; i < node.size(); i++) {
             String name = prefix + "[" + i + "]";
@@ -65,6 +65,5 @@ public class MapListTreeFlattener {
             }
         }
     }
-
 
 }

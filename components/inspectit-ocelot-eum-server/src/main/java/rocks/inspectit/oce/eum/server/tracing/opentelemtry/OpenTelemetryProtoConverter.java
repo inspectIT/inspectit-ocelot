@@ -28,20 +28,23 @@ public class OpenTelemetryProtoConverter {
      * Converts open-telemetry proto data to the open-telemetry SDK span data.
      *
      * @param data data to convert
+     *
      * @return Non-null collection of {@link SpanData}
      */
     public Collection<SpanData> convert(ExportTraceServiceRequest data) {
         List<SpanData> result = new ArrayList<>();
         data.getResourceSpansList().forEach(resourceSpans -> {
             // convert resource
-            final Map<String, AttributeValue> resourceAttributes = toOtAttributes(resourceSpans.getResource().getAttributesList());
+            final Map<String, AttributeValue> resourceAttributes = toOtAttributes(resourceSpans.getResource()
+                    .getAttributesList());
             final Resource resource = Resource.create(resourceAttributes);
 
             // then iterate all instrumentation libs
             resourceSpans.getInstrumentationLibrarySpansList().forEach(instrumentationLibrarySpans -> {
                 // convert instrumentation lib
                 InstrumentationLibrary instrumentationLibrary = instrumentationLibrarySpans.getInstrumentationLibrary();
-                InstrumentationLibraryInfo instrumentationLibraryInfo = InstrumentationLibraryInfo.create(instrumentationLibrary.getName(), instrumentationLibrary.getVersion());
+                InstrumentationLibraryInfo instrumentationLibraryInfo = InstrumentationLibraryInfo.create(instrumentationLibrary
+                        .getName(), instrumentationLibrary.getVersion());
 
                 // then iterate all spans
                 instrumentationLibrarySpans.getSpansList().forEach(span -> {
@@ -60,7 +63,6 @@ public class OpenTelemetryProtoConverter {
 
         return result;
     }
-
 
     static SpanData.Builder getSpanBuilder(SpanOrBuilder span) {
         SpanData.Builder builder = SpanData.newBuilder();
@@ -90,7 +92,6 @@ public class OpenTelemetryProtoConverter {
         List<SpanData.Link> links = toOtLink(span.getLinksList());
         builder.setLinks(links);
         builder.setTotalRecordedLinks(span.getDroppedLinksCount() + links.size());
-
 
         // status only if we can map
         if (span.hasStatus()) {
@@ -126,22 +127,21 @@ public class OpenTelemetryProtoConverter {
             return Collections.emptyList();
         }
 
-        return linksList.stream()
-                .flatMap(link -> {
-                    // TODO TraceState currently not supported
-                    // TODO increase dropped links count if we ignore a link?
-                    Optional<TraceId> traceId = toOtTraceId(link.getTraceId());
-                    Optional<SpanId> spanId = toOtSpanId(link.getSpanId());
-                    if (traceId.isPresent() && spanId.isPresent()) {
-                        SpanContext context = SpanContext.create(traceId.get(), spanId.get(), TraceFlags.getDefault(), TraceState.getDefault());
-                        Map<String, AttributeValue> attributesMap = toOtAttributes(link.getAttributesList());
-                        int totalAttributes = attributesMap.size() + link.getDroppedAttributesCount();
-                        return Stream.of(SpanData.Link.create(context, attributesMap, totalAttributes));
-                    } else {
-                        return Stream.empty();
-                    }
-                })
-                .collect(Collectors.toList());
+        return linksList.stream().flatMap(link -> {
+            // TODO TraceState currently not supported
+            // TODO increase dropped links count if we ignore a link?
+            Optional<TraceId> traceId = toOtTraceId(link.getTraceId());
+            Optional<SpanId> spanId = toOtSpanId(link.getSpanId());
+            if (traceId.isPresent() && spanId.isPresent()) {
+                SpanContext context = SpanContext.create(traceId.get(), spanId.get(), TraceFlags.getDefault(), TraceState
+                        .getDefault());
+                Map<String, AttributeValue> attributesMap = toOtAttributes(link.getAttributesList());
+                int totalAttributes = attributesMap.size() + link.getDroppedAttributesCount();
+                return Stream.of(SpanData.Link.create(context, attributesMap, totalAttributes));
+            } else {
+                return Stream.empty();
+            }
+        }).collect(Collectors.toList());
 
     }
 
@@ -150,13 +150,11 @@ public class OpenTelemetryProtoConverter {
             return Collections.emptyList();
         }
 
-        return eventsList.stream()
-                .map(event -> {
-                    Map<String, AttributeValue> attributesMap = toOtAttributes(event.getAttributesList());
-                    int totalAttributes = attributesMap.size() + event.getDroppedAttributesCount();
-                    return SpanData.TimedEvent.create(event.getTimeUnixNano(), event.getName(), attributesMap, totalAttributes);
-                })
-                .collect(Collectors.toList());
+        return eventsList.stream().map(event -> {
+            Map<String, AttributeValue> attributesMap = toOtAttributes(event.getAttributesList());
+            int totalAttributes = attributesMap.size() + event.getDroppedAttributesCount();
+            return SpanData.TimedEvent.create(event.getTimeUnixNano(), event.getName(), attributesMap, totalAttributes);
+        }).collect(Collectors.toList());
     }
 
     static Map<String, AttributeValue> toOtAttributes(List<AttributeKeyValue> attributesList) {

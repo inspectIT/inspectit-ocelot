@@ -30,18 +30,17 @@ public class ConfigurationController extends AbstractBaseController {
      * Uses text/plain as mime type to ensure that the configuration is presented nicely when opened in a browser
      *
      * @param attributes the attributes of the agents used to select the mapping
+     *
      * @return The configuration mapped on the given agent name
      */
-    @ApiOperation(value = "Fetch the Agent Configuration without logging the access.", notes = "Reads the configuration for the given agent and returns it as a yaml string." +
-            "Does not log the access in the agent status.")
+    @ApiOperation(value = "Fetch the Agent Configuration without logging the access.", notes = "Reads the configuration for the given agent and returns it as a yaml string." + "Does not log the access in the agent status.")
     @GetMapping(value = "configuration/agent-configuration", produces = "text/plain")
     public ResponseEntity<String> fetchConfiguration(@ApiParam("The agent attributes used to select the correct mapping") @RequestParam Map<String, String> attributes) {
         AgentConfiguration configuration = configManager.getConfiguration(attributes);
         if (configuration == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } else {
-            return ResponseEntity.ok()
-                    .body(configuration.getConfigYaml());
+            return ResponseEntity.ok().body(configuration.getConfigYaml());
         }
     }
 }

@@ -61,7 +61,6 @@ public class InstrumentationConfigurationResolver {
     @Autowired
     private PropagationMetaDataResolver propagationMetaDataResolver;
 
-
     /**
      * Holds the currently active instrumentation configuration.
      */
@@ -79,6 +78,7 @@ public class InstrumentationConfigurationResolver {
      * for the given class.
      *
      * @param clazz the class for which the configuration shal lbe queried
+     *
      * @return the configuration or {@link ClassInstrumentationConfiguration#NO_INSTRUMENTATION} if this class should not be instrumented
      */
     public ClassInstrumentationConfiguration getClassInstrumentationConfiguration(Class<?> clazz) {
@@ -110,6 +110,7 @@ public class InstrumentationConfigurationResolver {
      * Finds out for each method of the given class which rules apply and builds a {@link MethodHookConfiguration} for each instrumented method.
      *
      * @param clazz the class to check
+     *
      * @return a map mapping hook configurations to the methods which they should be applied on.
      */
     public Map<MethodDescription, MethodHookConfiguration> getHookConfigurations(Class<?> clazz) {
@@ -125,7 +126,8 @@ public class InstrumentationConfigurationResolver {
                 Map<MethodDescription, MethodHookConfiguration> result = new HashMap<>();
                 for (MethodDescription method : type.getDeclaredMethods()) {
                     Set<InstrumentationRule> rulesMatchingOnMethod = narrowedRules.stream()
-                            .filter(rule -> rule.getScopes().stream()
+                            .filter(rule -> rule.getScopes()
+                                    .stream()
                                     .anyMatch(scope -> scope.getMethodMatcher().matches(method)))
                             .collect(Collectors.toSet());
                     if (!rulesMatchingOnMethod.isEmpty()) {
@@ -133,8 +135,7 @@ public class InstrumentationConfigurationResolver {
                             Set<InstrumentationRule> matchedAndIncludedRules = resolveIncludes(config, rulesMatchingOnMethod);
                             result.put(method, hookResolver.buildHookConfiguration(config, matchedAndIncludedRules));
                         } catch (Exception e) {
-                            log.error("Could not build hook for {} of class {}",
-                                    CoreUtils.getSignature(method), clazz.getName(), e);
+                            log.error("Could not build hook for {} of class {}", CoreUtils.getSignature(method), clazz.getName(), e);
                         }
                     }
                 }
@@ -147,7 +148,6 @@ public class InstrumentationConfigurationResolver {
         }
         return Collections.emptyMap();
 
-
     }
 
     /**
@@ -155,6 +155,7 @@ public class InstrumentationConfigurationResolver {
      *
      * @param config the configuration which is used to resolve rule names to rules
      * @param rules  the initial collection of rules
+     *
      * @return the set of the initial rules plus their includes
      */
     @VisibleForTesting
@@ -181,16 +182,16 @@ public class InstrumentationConfigurationResolver {
      *
      * @param typeDescription the class which are the rules targeting
      * @param config          the configuration which is used as basis for the rules
+     *
      * @return Returns a set containing rules with scopes targeting only the given type.
      */
     private Set<InstrumentationRule> getNarrowedRulesFor(TypeDescription typeDescription, InstrumentationConfiguration config) {
-        return config.getRules().stream()
-                .map(rule -> Pair.of(
-                        rule,
-                        rule.getScopes()
-                                .stream()
-                                .filter(s -> s.getTypeMatcher().matches(typeDescription))
-                                .collect(Collectors.toSet())))
+        return config.getRules()
+                .stream()
+                .map(rule -> Pair.of(rule, rule.getScopes()
+                        .stream()
+                        .filter(s -> s.getTypeMatcher().matches(typeDescription))
+                        .collect(Collectors.toSet())))
                 .filter(p -> !p.getRight().isEmpty())
                 .map(p -> p.getLeft().toBuilder().clearScopes().scopes(p.getRight()).build())
                 .collect(Collectors.toSet());
@@ -225,6 +226,7 @@ public class InstrumentationConfigurationResolver {
      *
      * @param clazz  the class to check
      * @param config configuration to check for
+     *
      * @return true, if the class is ignored (=it should not be instrumented)
      */
     @VisibleForTesting
@@ -254,7 +256,10 @@ public class InstrumentationConfigurationResolver {
 
         String name = clazz.getName();
 
-        boolean isIgnored = config.getSource().getIgnoredPackages().entrySet().stream()
+        boolean isIgnored = config.getSource()
+                .getIgnoredPackages()
+                .entrySet()
+                .stream()
                 .filter(Map.Entry::getValue)
                 .anyMatch(e -> name.startsWith(e.getKey()));
         if (isIgnored) {
@@ -262,7 +267,10 @@ public class InstrumentationConfigurationResolver {
         }
 
         if (clazz.getClassLoader() == null) {
-            boolean isIgnoredOnBootstrap = config.getSource().getIgnoredBootstrapPackages().entrySet().stream()
+            boolean isIgnoredOnBootstrap = config.getSource()
+                    .getIgnoredBootstrapPackages()
+                    .entrySet()
+                    .stream()
                     .filter(Map.Entry::getValue)
                     .anyMatch(e -> name.startsWith(e.getKey()));
             if (isIgnoredOnBootstrap) {

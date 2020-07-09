@@ -100,31 +100,23 @@ public class RuleTracingSettings {
      * Defines conditions which make the start-span flag conditional.
      */
     @Builder.Default
-    @Valid
-    @NotNull
-    ConditionalActionSettings startSpanConditions = new ConditionalActionSettings();
+    @Valid @NotNull ConditionalActionSettings startSpanConditions = new ConditionalActionSettings();
 
     /**
      * Defines conditions which make the end-span flag conditional.
      */
     @Builder.Default
-    @Valid
-    @NotNull
-    ConditionalActionSettings endSpanConditions = new ConditionalActionSettings();
+    @Valid @NotNull ConditionalActionSettings endSpanConditions = new ConditionalActionSettings();
 
     /**
      * Defines conditions which make the continue-span flag conditional.
      */
     @Builder.Default
-    @Valid
-    @NotNull
-    ConditionalActionSettings continueSpanConditions = new ConditionalActionSettings();
+    @Valid @NotNull ConditionalActionSettings continueSpanConditions = new ConditionalActionSettings();
 
     /**
      * Defines conditions which make the attribute definitions conditional.
      */
     @Builder.Default
-    @Valid
-    @NotNull
-    ConditionalActionSettings attributeConditions = new ConditionalActionSettings();
+    @Valid @NotNull ConditionalActionSettings attributeConditions = new ConditionalActionSettings();
 }

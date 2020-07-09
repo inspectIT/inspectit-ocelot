@@ -13,15 +13,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class UserMetricsCapturingSysTest {
 
     private static final ViewManager viewManager = Stats.getViewManager();
+
     private static final StatsRecorder statsRecorder = Stats.getStatsRecorder();
 
     @Test
     public void testUserMetricCapturing() {
 
         Measure.MeasureLong myMeasure = Measure.MeasureLong.create("test_measure", "no actual meaning", "ms");
-        View myView = View.create(View.Name.create("test/view/test_measure"),
-                "test view", myMeasure,
-                Aggregation.Count.create(), Collections.emptyList());
+        View myView = View.create(View.Name.create("test/view/test_measure"), "test view", myMeasure, Aggregation.Count.create(), Collections
+                .emptyList());
 
         viewManager.registerView(myView);
         for (int i = 0; i < 42; i++) {
@@ -31,9 +31,10 @@ public class UserMetricsCapturingSysTest {
         TestUtils.waitForOpenCensusQueueToBeProcessed();
 
         MetricProducerManager metricProducerManager = Metrics.getExportComponent().getMetricProducerManager();
-        assertThat(metricProducerManager.getAllMetricProducer()).anyMatch(mp ->
-                mp.getMetrics().stream().filter(m -> m.getMetricDescriptor().getName() == "test/view/test_measure").count() == 1
-        );
+        assertThat(metricProducerManager.getAllMetricProducer()).anyMatch(mp -> mp.getMetrics()
+                .stream()
+                .filter(m -> m.getMetricDescriptor().getName() == "test/view/test_measure")
+                .count() == 1);
     }
 
 }

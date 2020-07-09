@@ -40,9 +40,7 @@ public class BeaconMetricDefinitionSettings extends MetricDefinitionSettings {
     private List<BeaconRequirement> beaconRequirements;
 
     @Builder(builderMethodName = "beaconMetricBuilder")
-    public BeaconMetricDefinitionSettings(boolean enabled, @NotBlank String unit, @NotNull MeasureType type, String description,
-                                          Map<@NotBlank String, @Valid @NotNull ViewDefinitionSettings> views, @NotEmpty List<BeaconRequirement> beaconRequirements,
-                                          String valueExpression) {
+    public BeaconMetricDefinitionSettings(boolean enabled, @NotBlank String unit, @NotNull MeasureType type, String description, Map<@NotBlank String, @Valid @NotNull ViewDefinitionSettings> views, @NotEmpty List<BeaconRequirement> beaconRequirements, String valueExpression) {
         super(enabled, unit, type, description, views);
         this.beaconRequirements = beaconRequirements;
         this.valueExpression = valueExpression;
@@ -52,8 +50,7 @@ public class BeaconMetricDefinitionSettings extends MetricDefinitionSettings {
     public BeaconMetricDefinitionSettings getCopyWithDefaultsPopulated(String metricName) {
         MetricDefinitionSettings metricDefinition = super.getCopyWithDefaultsPopulated(metricName);
 
-        return beaconMetricBuilder()
-                .beaconRequirements(getBeaconRequirements())
+        return beaconMetricBuilder().beaconRequirements(getBeaconRequirements())
                 .valueExpression(getValueExpression())
                 .description(metricDefinition.getDescription())
                 .unit(metricDefinition.getUnit())
@@ -67,7 +64,8 @@ public class BeaconMetricDefinitionSettings extends MetricDefinitionSettings {
     public boolean isValidValueExpression() {
         RawExpression expression = new RawExpression(valueExpression);
 
-        Map<String, String> dummyValueMap = expression.getFields().stream()
+        Map<String, String> dummyValueMap = expression.getFields()
+                .stream()
                 .collect(Collectors.toMap(Function.identity(), x -> String.valueOf(Math.random() + 1D)));
 
         try {

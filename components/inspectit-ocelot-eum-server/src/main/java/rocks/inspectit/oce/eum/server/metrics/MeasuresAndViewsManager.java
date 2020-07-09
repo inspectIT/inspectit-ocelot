@@ -77,11 +77,9 @@ public class MeasuresAndViewsManager {
     private Measure createMeasure(String name, MetricDefinitionSettings metricDefinition) {
         switch (metricDefinition.getType()) {
             case LONG:
-                return Measure.MeasureLong.create(name,
-                        metricDefinition.getDescription(), metricDefinition.getUnit());
+                return Measure.MeasureLong.create(name, metricDefinition.getDescription(), metricDefinition.getUnit());
             case DOUBLE:
-                return Measure.MeasureDouble.create(name,
-                        metricDefinition.getDescription(), metricDefinition.getUnit());
+                return Measure.MeasureDouble.create(name, metricDefinition.getDescription(), metricDefinition.getUnit());
             default:
                 throw new RuntimeException("Used measurement type is not supported");
         }
@@ -113,7 +111,9 @@ public class MeasuresAndViewsManager {
      */
     private Set<String> getTagsForView(ViewDefinitionSettings viewDefinitionSettings) {
         Set<String> tags = new HashSet<>(configuration.getTags().getDefineAsGlobal());
-        tags.addAll(viewDefinitionSettings.getTags().entrySet().stream()
+        tags.addAll(viewDefinitionSettings.getTags()
+                .entrySet()
+                .stream()
                 .filter(Map.Entry::getValue)
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList()));

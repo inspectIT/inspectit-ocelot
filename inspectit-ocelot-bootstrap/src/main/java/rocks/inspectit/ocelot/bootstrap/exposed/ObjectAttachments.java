@@ -15,6 +15,7 @@ public interface ObjectAttachments {
      * @param target the object to which this value shall be attached
      * @param key    the name under which the value shall be attached
      * @param value  the value to attach or null to remove the value.
+     *
      * @return the value previously attached to this Object with the given key
      */
     Object attach(Object target, String key, Object value);
@@ -24,6 +25,7 @@ public interface ObjectAttachments {
      *
      * @param target The object on which the target value was attached
      * @param key    the name under which the target value was attached
+     *
      * @return the value attached under the given name to the given target object, null if nothing was attached under this name
      */
     Object getAttachment(Object target, String key);

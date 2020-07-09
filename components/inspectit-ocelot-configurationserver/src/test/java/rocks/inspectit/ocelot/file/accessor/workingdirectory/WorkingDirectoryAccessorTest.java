@@ -89,8 +89,7 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
         public void illegalPath() {
             createTestFiles("files/test.yml");
 
-            assertThatExceptionOfType(IllegalArgumentException.class)
-                    .isThrownBy(() -> accessor.readConfigurationFile("../test.yml"))
+            assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> accessor.readConfigurationFile("../test.yml"))
                     .withMessageStartingWith("User path escapes the base path:");
         }
 
@@ -105,8 +104,7 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
                 path = "/absolute/file";
             }
 
-            assertThatExceptionOfType(IllegalArgumentException.class)
-                    .isThrownBy(() -> accessor.readConfigurationFile(path))
+            assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> accessor.readConfigurationFile(path))
                     .withMessageStartingWith("Path must be relative:");
         }
     }
@@ -252,8 +250,7 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
 
         @Test
         public void deleteNonExistingFile() {
-            assertThatExceptionOfType(IOException.class)
-                    .isThrownBy(() -> accessor.deleteConfiguration("first.yml"))
+            assertThatExceptionOfType(IOException.class).isThrownBy(() -> accessor.deleteConfiguration("first.yml"))
                     .withMessageStartingWith("Path cannot be deleted because it does not exist: ");
         }
 
@@ -261,8 +258,7 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
         public void deleteRoot() {
             createTestFiles("files/file.yml");
 
-            assertThatExceptionOfType(IllegalArgumentException.class)
-                    .isThrownBy(() -> accessor.deleteConfiguration("."))
+            assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> accessor.deleteConfiguration("."))
                     .withMessageStartingWith("Cannot delete base directory: .");
         }
 
@@ -270,8 +266,7 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
         public void deleteRootTraversal() {
             createTestFiles("files/file.yml");
 
-            assertThatExceptionOfType(IllegalArgumentException.class)
-                    .isThrownBy(() -> accessor.deleteConfiguration("./dummy/.."))
+            assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> accessor.deleteConfiguration("./dummy/.."))
                     .withMessageStartingWith("Cannot delete base directory: .");
         }
 
@@ -317,12 +312,11 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
             Optional<String> fileContent = accessor.readConfigurationFile("first.yml");
 
             assertThat(before).isEmpty();
-            assertThat(after).isNotEmpty()
-                    .anySatisfy(fileInfo -> {
-                        assertThat(fileInfo.getName()).isEqualTo("first.yml");
-                        assertThat(fileInfo.getType()).isEqualTo(FileInfo.Type.FILE);
-                        assertThat(fileInfo.getChildren()).isNull();
-                    });
+            assertThat(after).isNotEmpty().anySatisfy(fileInfo -> {
+                assertThat(fileInfo.getName()).isEqualTo("first.yml");
+                assertThat(fileInfo.getType()).isEqualTo(FileInfo.Type.FILE);
+                assertThat(fileInfo.getChildren()).isNull();
+            });
 
             assertThat(fileContent).hasValue("new content");
         }
@@ -345,8 +339,7 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
         public void fileIsDirectory() {
             createTestFiles("files/sub/first.yml");
 
-            assertThatExceptionOfType(IOException.class)
-                    .isThrownBy(() -> accessor.writeConfigurationFile("sub", "new content"))
+            assertThatExceptionOfType(IOException.class).isThrownBy(() -> accessor.writeConfigurationFile("sub", "new content"))
                     .withMessageStartingWith("Cannot write file because target is already a directory: ");
         }
     }
@@ -406,8 +399,7 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
         public void alreadyExists() {
             createTestFiles("files/test/file");
 
-            assertThatExceptionOfType(FileAlreadyExistsException.class)
-                    .isThrownBy(() -> accessor.createConfigurationDirectory("test"))
+            assertThatExceptionOfType(FileAlreadyExistsException.class).isThrownBy(() -> accessor.createConfigurationDirectory("test"))
                     .withMessageStartingWith("Directory already exists:");
         }
 
@@ -415,8 +407,7 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
         public void fileWithSameName() {
             createTestFiles("files/test");
 
-            assertThatExceptionOfType(FileAlreadyExistsException.class)
-                    .isThrownBy(() -> accessor.createConfigurationDirectory("test"))
+            assertThatExceptionOfType(FileAlreadyExistsException.class).isThrownBy(() -> accessor.createConfigurationDirectory("test"))
                     .withMessageStartingWith("Directory already exists:");
         }
 
@@ -424,8 +415,7 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
         public void invalidLocation() {
             createTestFiles("test/file");
 
-            assertThatExceptionOfType(IllegalArgumentException.class)
-                    .isThrownBy(() -> accessor.createConfigurationDirectory("../test"))
+            assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> accessor.createConfigurationDirectory("../test"))
                     .withMessageStartingWith("User path escapes the base path:");
         }
     }

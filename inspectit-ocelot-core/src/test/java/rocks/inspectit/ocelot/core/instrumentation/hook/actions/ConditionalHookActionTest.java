@@ -119,7 +119,6 @@ public class ConditionalHookActionTest {
         }
     }
 
-
     @Nested
     class OnlyIfFalse {
 
@@ -160,7 +159,6 @@ public class ConditionalHookActionTest {
         }
     }
 
-
     @Nested
     class Conjunction {
 
@@ -170,7 +168,8 @@ public class ConditionalHookActionTest {
             settings.setOnlyIfTrue("true_check");
             settings.setOnlyIfNotNull("not_null_check");
             doReturn((VariableAccessor) (ctx) -> true).when(variableAccessorFactory).getVariableAccessor("true_check");
-            doReturn((VariableAccessor) (ctx) -> "something").when(variableAccessorFactory).getVariableAccessor("not_null_check");
+            doReturn((VariableAccessor) (ctx) -> "something").when(variableAccessorFactory)
+                    .getVariableAccessor("not_null_check");
             IHookAction conditional = ConditionalHookAction.wrapWithConditionChecks(settings, actualAction, variableAccessorFactory);
 
             conditional.execute(ctx);
@@ -178,14 +177,14 @@ public class ConditionalHookActionTest {
             verify(actualAction).execute(same(ctx));
         }
 
-
         @Test
         void oneConditionNotMet() {
             ConditionalActionSettings settings = new ConditionalActionSettings();
             settings.setOnlyIfTrue("true_check");
             settings.setOnlyIfNotNull("not_null_check");
             doReturn((VariableAccessor) (ctx) -> false).when(variableAccessorFactory).getVariableAccessor("true_check");
-            doReturn((VariableAccessor) (ctx) -> "something").when(variableAccessorFactory).getVariableAccessor("not_null_check");
+            doReturn((VariableAccessor) (ctx) -> "something").when(variableAccessorFactory)
+                    .getVariableAccessor("not_null_check");
             IHookAction conditional = ConditionalHookAction.wrapWithConditionChecks(settings, actualAction, variableAccessorFactory);
 
             conditional.execute(ctx);
@@ -193,14 +192,14 @@ public class ConditionalHookActionTest {
             verify(actualAction, never()).execute(any());
         }
 
-
         @Test
         void bothConditionsNotMet() {
             ConditionalActionSettings settings = new ConditionalActionSettings();
             settings.setOnlyIfTrue("true_check");
             settings.setOnlyIfNotNull("not_null_check");
             doReturn((VariableAccessor) (ctx) -> false).when(variableAccessorFactory).getVariableAccessor("true_check");
-            doReturn((VariableAccessor) (ctx) -> null).when(variableAccessorFactory).getVariableAccessor("not_null_check");
+            doReturn((VariableAccessor) (ctx) -> null).when(variableAccessorFactory)
+                    .getVariableAccessor("not_null_check");
             IHookAction conditional = ConditionalHookAction.wrapWithConditionChecks(settings, actualAction, variableAccessorFactory);
 
             conditional.execute(ctx);

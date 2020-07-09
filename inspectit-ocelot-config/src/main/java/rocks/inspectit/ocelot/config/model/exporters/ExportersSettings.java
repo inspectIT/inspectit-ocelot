@@ -2,8 +2,8 @@ package rocks.inspectit.ocelot.config.model.exporters;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import rocks.inspectit.ocelot.config.model.exporters.trace.TraceExportersSettings;
 import rocks.inspectit.ocelot.config.model.exporters.metrics.MetricsExportersSettings;
+import rocks.inspectit.ocelot.config.model.exporters.trace.TraceExportersSettings;
 
 import javax.validation.Valid;
 

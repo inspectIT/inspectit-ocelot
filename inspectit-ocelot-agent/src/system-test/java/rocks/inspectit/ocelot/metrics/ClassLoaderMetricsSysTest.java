@@ -27,8 +27,16 @@ public class ClassLoaderMetricsSysTest extends MetricsSysTestBase {
             assertThat(loadedData.getAggregationMap()).isNotEmpty();
             assertThat(unloadedData.getAggregationMap()).isNotEmpty();
 
-            Map.Entry<List<TagValue>, AggregationData> loaded = loadedData.getAggregationMap().entrySet().stream().findFirst().get();
-            Map.Entry<List<TagValue>, AggregationData> unloaded = unloadedData.getAggregationMap().entrySet().stream().findFirst().get();
+            Map.Entry<List<TagValue>, AggregationData> loaded = loadedData.getAggregationMap()
+                    .entrySet()
+                    .stream()
+                    .findFirst()
+                    .get();
+            Map.Entry<List<TagValue>, AggregationData> unloaded = unloadedData.getAggregationMap()
+                    .entrySet()
+                    .stream()
+                    .findFirst()
+                    .get();
 
             //ensure that tags are present
             assertThat(loaded.getKey()).isNotEmpty();
@@ -38,8 +46,10 @@ public class ClassLoaderMetricsSysTest extends MetricsSysTestBase {
             long loadedVal = ((AggregationData.LastValueDataLong) loaded.getValue()).getLastValue();
             long unloadedVal = ((AggregationData.LastValueDataLong) unloaded.getValue()).getLastValue();
 
-            assertThat(loadedVal).isLessThanOrEqualTo(ManagementFactory.getClassLoadingMXBean().getTotalLoadedClassCount());
-            assertThat(unloadedVal).isLessThanOrEqualTo(ManagementFactory.getClassLoadingMXBean().getUnloadedClassCount());
+            assertThat(loadedVal).isLessThanOrEqualTo(ManagementFactory.getClassLoadingMXBean()
+                    .getTotalLoadedClassCount());
+            assertThat(unloadedVal).isLessThanOrEqualTo(ManagementFactory.getClassLoadingMXBean()
+                    .getUnloadedClassCount());
         });
     }
 }

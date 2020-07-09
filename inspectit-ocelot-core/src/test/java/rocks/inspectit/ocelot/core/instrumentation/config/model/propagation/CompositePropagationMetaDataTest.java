@@ -39,7 +39,6 @@ public class CompositePropagationMetaDataTest {
             assertThat(result.isPropagatedUpWithinJVM("root")).isTrue();
         }
 
-
         @Test
         void verifyNewSettingsCanBeAdded() {
             PropagationMetaData result = CompositePropagationMetaData.builder(parent)
@@ -66,8 +65,7 @@ public class CompositePropagationMetaDataTest {
 
         @Test
         void inheritedPropagation() {
-            PropagationMetaData result = CompositePropagationMetaData.builder(parent)
-                    .build();
+            PropagationMetaData result = CompositePropagationMetaData.builder(parent).build();
 
             assertThat(result.isPropagatedDownWithinJVM("my_key")).isFalse();
             verify(parent).isPropagatedDownWithinJVM(eq("my_key"));
@@ -122,14 +120,12 @@ public class CompositePropagationMetaDataTest {
         }
     }
 
-
     @Nested
     class SetUpPropagation {
 
         @Test
         void inheritedPropagation() {
-            PropagationMetaData result = CompositePropagationMetaData.builder(parent)
-                    .build();
+            PropagationMetaData result = CompositePropagationMetaData.builder(parent).build();
 
             assertThat(result.isPropagatedUpWithinJVM("my_key")).isFalse();
             verify(parent).isPropagatedUpWithinJVM(eq("my_key"));
@@ -189,8 +185,7 @@ public class CompositePropagationMetaDataTest {
 
         @Test
         void inheritedTag() {
-            PropagationMetaData result = CompositePropagationMetaData.builder(parent)
-                    .build();
+            PropagationMetaData result = CompositePropagationMetaData.builder(parent).build();
 
             assertThat(result.isTag("my_key")).isFalse();
             verify(parent).isTag(eq("my_key"));
@@ -199,9 +194,7 @@ public class CompositePropagationMetaDataTest {
 
         @Test
         void isNotATag() {
-            PropagationMetaData result = CompositePropagationMetaData.builder(parent)
-                    .setTag("my_key", false)
-                    .build();
+            PropagationMetaData result = CompositePropagationMetaData.builder(parent).setTag("my_key", false).build();
 
             assertThat(result.isTag("my_key")).isFalse();
             verifyZeroInteractions(parent);
@@ -209,9 +202,7 @@ public class CompositePropagationMetaDataTest {
 
         @Test
         void isTag() {
-            PropagationMetaData result = CompositePropagationMetaData.builder(parent)
-                    .setTag("my_key", true)
-                    .build();
+            PropagationMetaData result = CompositePropagationMetaData.builder(parent).setTag("my_key", true).build();
 
             assertThat(result.isTag("my_key")).isTrue();
             verifyZeroInteractions(parent);

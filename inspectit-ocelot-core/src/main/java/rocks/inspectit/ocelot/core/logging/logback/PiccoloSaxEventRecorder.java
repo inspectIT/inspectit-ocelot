@@ -26,6 +26,7 @@ public class PiccoloSaxEventRecorder extends SaxEventRecorder {
      * Constructor.
      *
      * @param context Context
+     *
      * @see SaxEventRecorder#SaxEventRecorder(Context)
      */
     public PiccoloSaxEventRecorder(Context context) {
@@ -61,6 +62,7 @@ public class PiccoloSaxEventRecorder extends SaxEventRecorder {
      *
      * @param errMsg message
      * @param t      throwable
+     *
      * @throws JoranException Throws checked exception.
      */
     private void handleError(String errMsg, Throwable t) throws JoranException {
@@ -74,6 +76,7 @@ public class PiccoloSaxEventRecorder extends SaxEventRecorder {
      * taken from {@link SaxEventRecorder#buildSaxParser} method.
      *
      * @return {@link SAXParser}
+     *
      * @throws JoranException If exception occurs creating the parser.
      */
     private SAXParser getSaxParser() throws JoranException {

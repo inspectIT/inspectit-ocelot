@@ -38,9 +38,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class PrometheusExporterServiceIntTest {
 
     private static String URL_KEY = "u";
+
     private static String SUT_URL = "http://test.com/login";
+
     private static String METRIC_NAME = "page_ready_time";
+
     private static String BEACON_KEY_NAME = "t_page";
+
     private static String FAKE_BEACON_KEY_NAME = "does_not_exist";
 
     @Autowired
@@ -58,11 +62,16 @@ public class PrometheusExporterServiceIntTest {
      * Sends beacon to mocked endpoint /beacon
      *
      * @param beacon
+     *
      * @throws Exception
      */
     private void sendBeacon(Map<String, String> beacon) throws Exception {
-        List<NameValuePair> params = beacon.entrySet().stream().map(entry -> new BasicNameValuePair(entry.getKey(), entry.getValue())).collect(Collectors.toList());
-        mockMvc.perform(post("/beacon").contentType(MediaType.APPLICATION_FORM_URLENCODED).content(EntityUtils.toString(new UrlEncodedFormEntity(params)))).andExpect(status().isOk());
+        List<NameValuePair> params = beacon.entrySet()
+                .stream()
+                .map(entry -> new BasicNameValuePair(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList());
+        mockMvc.perform(post("/beacon").contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .content(EntityUtils.toString(new UrlEncodedFormEntity(params)))).andExpect(status().isOk());
     }
 
     private Map<String, String> getBasicBeacon() {
@@ -118,6 +127,8 @@ public class PrometheusExporterServiceIntTest {
 
         HttpResponse response = testClient.execute(new HttpGet("http://localhost:8888/metrics)"));
         ResponseHandler responseHandler = new BasicResponseHandler();
-        assertThat(responseHandler.handleResponse(response).toString()).contains(METRIC_NAME).contains(SUT_URL).contains("12");
+        assertThat(responseHandler.handleResponse(response).toString()).contains(METRIC_NAME)
+                .contains(SUT_URL)
+                .contains("12");
     }
 }

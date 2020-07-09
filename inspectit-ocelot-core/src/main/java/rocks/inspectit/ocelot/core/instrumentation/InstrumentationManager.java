@@ -30,8 +30,9 @@ public class InstrumentationManager {
      * For each class we remember the applied instrumentation.
      * This allows us to check if a retransformation is required.
      */
-    private Cache<Class<?>, ClassInstrumentationConfiguration> activeInstrumentations =
-            CacheBuilder.newBuilder().weakKeys().build();
+    private Cache<Class<?>, ClassInstrumentationConfiguration> activeInstrumentations = CacheBuilder.newBuilder()
+            .weakKeys()
+            .build();
 
     @EventListener
     private void classInstrumented(ClassInstrumentedEvent event) {

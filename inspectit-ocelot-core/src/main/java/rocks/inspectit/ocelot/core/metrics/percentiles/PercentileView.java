@@ -170,13 +170,10 @@ public class PercentileView {
         }
     }
 
-    private void validateConfiguration(boolean includeMin, boolean includeMax, Set<Double> percentiles, long timeWindowMillis,
-                                       String baseViewName, String unit, String description, int bufferLimit) {
-        percentiles.stream()
-                .filter(p -> p <= 0.0 || p >= 1.0)
-                .forEach(p -> {
-                    throw new IllegalArgumentException("Percentiles must be in range (0,1)");
-                });
+    private void validateConfiguration(boolean includeMin, boolean includeMax, Set<Double> percentiles, long timeWindowMillis, String baseViewName, String unit, String description, int bufferLimit) {
+        percentiles.stream().filter(p -> p <= 0.0 || p >= 1.0).forEach(p -> {
+            throw new IllegalArgumentException("Percentiles must be in range (0,1)");
+        });
         if (StringUtils.isBlank(baseViewName)) {
             throw new IllegalArgumentException("View name must not be blank!");
         }
@@ -229,9 +226,7 @@ public class PercentileView {
             } else {
                 if (!overflowWarningPrinted) {
                     overflowWarningPrinted = true;
-                    log.warn("Dropping points for Percentiles-View '{}' because the buffer limit has been reached!" +
-                            " Quantiles/Min/Max will be meaningless." +
-                            " This warning will not be shown for future drops!", viewName);
+                    log.warn("Dropping points for Percentiles-View '{}' because the buffer limit has been reached!" + " Quantiles/Min/Max will be meaningless." + " This warning will not be shown for future drops!", viewName);
                 }
                 return false;
             }
@@ -388,10 +383,7 @@ public class PercentileView {
     }
 
     private List<LabelValue> toLabelValues(List<String> tagValues) {
-        return tagValues
-                .stream()
-                .map(LabelValue::create)
-                .collect(Collectors.toList());
+        return tagValues.stream().map(LabelValue::create).collect(Collectors.toList());
     }
 
     private List<LabelValue> toLabelValuesWithPercentile(List<String> tagValues, double percentile) {

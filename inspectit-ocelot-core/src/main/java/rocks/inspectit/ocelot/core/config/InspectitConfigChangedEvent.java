@@ -18,7 +18,6 @@ public class InspectitConfigChangedEvent extends ApplicationEvent {
     @Getter
     private final InspectitConfig newConfig;
 
-
     InspectitConfigChangedEvent(Object source, InspectitConfig oldConfig, InspectitConfig newConfig) {
         super(source);
         this.oldConfig = oldConfig;

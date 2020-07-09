@@ -17,6 +17,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Conditional(ActivationConfigConditionMet.class)
 public @interface ActivationConfigCondition {
+
     /**
      * The condition in Spring Expression Language to check if it evaluates to "true".
      * The condition is applied with the {@link InspectitConfig} as root,

@@ -32,8 +32,7 @@ public class ProcessorMetricsRecorder extends AbstractPollingMetricsRecorder {
 
     private static final String PROCESS_USAGE_METRIC_FULL_NAME = "process/cpu/usage";
 
-    private static final List<String> OPERATING_SYSTEM_BEAN_CLASS_NAMES = Arrays.asList(
-            "com.sun.management.OperatingSystemMXBean", // HotSpot
+    private static final List<String> OPERATING_SYSTEM_BEAN_CLASS_NAMES = Arrays.asList("com.sun.management.OperatingSystemMXBean", // HotSpot
             "com.ibm.lang.management.OperatingSystemMXBean" // J9
     );
 

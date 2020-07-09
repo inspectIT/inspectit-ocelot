@@ -38,11 +38,7 @@ class UserServiceTest {
         @Test
         void verifyUsernameConvertedToLowerCase() {
             User result = new User();
-            User input = User.builder()
-                    .id(42L)
-                    .password("test")
-                    .username("CamelCase")
-                    .build();
+            User input = User.builder().id(42L).password("test").username("CamelCase").build();
             when(repository.save(any())).thenReturn(result);
             when(passwordEncoder.encode(anyString())).thenReturn("password-hash");
 
@@ -54,7 +50,6 @@ class UserServiceTest {
             assertThat(actualResult).isSameAs(result);
         }
     }
-
 
     @Nested
     class GetUserByName {
@@ -77,8 +72,14 @@ class UserServiceTest {
         @Test
         public void addDefaultUser() {
             SecuritySettings securitySettings = SecuritySettings.builder().ldapAuthentication(false).build();
-            DefaultUserSettings userSettings = DefaultUserSettings.builder().name("username").password("passwd").build();
-            InspectitServerSettings settings = InspectitServerSettings.builder().security(securitySettings).defaultUser(userSettings).build();
+            DefaultUserSettings userSettings = DefaultUserSettings.builder()
+                    .name("username")
+                    .password("passwd")
+                    .build();
+            InspectitServerSettings settings = InspectitServerSettings.builder()
+                    .security(securitySettings)
+                    .defaultUser(userSettings)
+                    .build();
             userService.settings = settings;
             when(repository.count()).thenReturn(0L);
             when(passwordEncoder.encode(anyString())).thenReturn("password-hash");
@@ -107,7 +108,6 @@ class UserServiceTest {
             verify(repository).count();
             verifyNoMoreInteractions(repository);
         }
-
 
         @Test
         public void doNothingIfLdapUsed() {

@@ -64,7 +64,6 @@ public class PluginLoaderTest {
         }
     }
 
-
     @Nested
     class InitializePlugin {
 
@@ -77,7 +76,6 @@ public class PluginLoaderTest {
             assertThat(loader.plugins).isEmpty();
         }
 
-
         @Test
         void noExceptionOnPluginWithoutInterfaceImplementation() {
             Properties props = new Properties();
@@ -86,7 +84,6 @@ public class PluginLoaderTest {
 
             assertThat(loader.plugins).isEmpty();
         }
-
 
         @Test
         void verifyDefaultConfigLoaded() {
@@ -98,7 +95,6 @@ public class PluginLoaderTest {
             assertThat(props).hasSize(1);
             assertThat(props).containsEntry("inspectit.plugins.my-plugin.foo", "bar");
         }
-
 
         @Test
         void verifyThrownExceptionsCaught() {
@@ -174,12 +170,15 @@ public class PluginLoaderTest {
 
     @OcelotPlugin("")
     public class HasAnnotation {
+
     }
 
     public class NoAnnotation {
+
     }
 
     public class AnnotationOnMethod {
+
         @OcelotPlugin("")
         public String test() {
             return "test!";
@@ -208,16 +207,13 @@ public class PluginLoaderTest {
         }
     }
 
-
     @OcelotPlugin("plb")
     public static class PluginWithoutInterfaceImplementation {
 
     }
 
-
     @OcelotPlugin(value = "pla", defaultConfig = "my-default.yml")
     public static class PluginWithDefaultConfig implements ConfigurablePlugin {
-
 
         @Override
         public void start(InspectitConfig inspectitConfig, Object pluginConfig) {
@@ -234,7 +230,6 @@ public class PluginLoaderTest {
             return null;
         }
     }
-
 
     @OcelotPlugin(value = "pla", defaultConfig = "non-existing.yml")
     public static class PluginThrowingException implements ConfigurablePlugin {

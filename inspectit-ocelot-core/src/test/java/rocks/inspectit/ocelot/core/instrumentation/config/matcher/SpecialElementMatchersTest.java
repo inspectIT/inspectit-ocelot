@@ -96,7 +96,8 @@ class SpecialElementMatchersTest {
 
             ElementMatcher.Junction<MethodDescription> result = SpecialElementMatchers.argumentsAre(arguments);
 
-            Object expectedResult = takesArguments(2).and(takesArgument(0, named("class0"))).and(takesArgument(1, named("class1")));
+            Object expectedResult = takesArguments(2).and(takesArgument(0, named("class0")))
+                    .and(takesArgument(1, named("class1")));
             assertThat(result).isEqualTo(expectedResult);
         }
     }
@@ -240,7 +241,8 @@ class SpecialElementMatchersTest {
 
             ElementMatcher.Junction<MethodDescription> result = SpecialElementMatchers.onlyOverridenMethodsOf(scope);
 
-            Object expectedResult = isOverriddenFrom(named("interface1").and(isInterface()).or(named("superclass1").and(not(isInterface()))));
+            Object expectedResult = isOverriddenFrom(named("interface1").and(isInterface())
+                    .or(named("superclass1").and(not(isInterface()))));
             assertThat(result).isEqualTo(expectedResult);
         }
     }
@@ -302,7 +304,6 @@ class SpecialElementMatchersTest {
             assertThat(result).isEqualTo(expectedResult);
         }
 
-
         @Test
         public void multipleAnnotations() {
             NameMatcherSettings annotationMatcher1 = new NameMatcherSettings();
@@ -314,7 +315,8 @@ class SpecialElementMatchersTest {
 
             ElementMatcher.Junction<TypeDescription> result = SpecialElementMatchers.describedBy(settings);
 
-            Object expectedResult = IsAnnotatedMatcher.of(named("annotation1")).and(IsAnnotatedMatcher.of(named("annotation2")));
+            Object expectedResult = IsAnnotatedMatcher.of(named("annotation1"))
+                    .and(IsAnnotatedMatcher.of(named("annotation2")));
             assertThat(result).isEqualTo(expectedResult);
         }
 

@@ -1,7 +1,8 @@
 package rocks.inspectit.oce.eum.server.metrics;
 
-import io.opencensus.stats.*;
-import io.opencensus.tags.TagKey;
+import io.opencensus.stats.MeasureMap;
+import io.opencensus.stats.StatsRecorder;
+import io.opencensus.stats.ViewManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -13,7 +14,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.oce.eum.server.configuration.model.EumSelfMonitoringSettings;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
-import rocks.inspectit.oce.eum.server.configuration.model.EumTagsSettings;
 import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings;
 import rocks.inspectit.ocelot.config.model.metrics.definition.ViewDefinitionSettings;
 
@@ -105,7 +105,9 @@ public class SelfMonitoringMetricManagerTest {
             verify(measuresAndViewsManager).updateMetrics(eq("inspectit-eum/self/beacons_received"), mdsCaptor.capture());
             verifyZeroInteractions(viewManager, statsRecorder, measureMap);
 
-            assertThat(mdsCaptor.getValue().getViews().keySet()).containsExactly("inspectit-eum/self/beacons_received/COUNT");
+            assertThat(mdsCaptor.getValue()
+                    .getViews()
+                    .keySet()).containsExactly("inspectit-eum/self/beacons_received/COUNT");
         }
     }
 }

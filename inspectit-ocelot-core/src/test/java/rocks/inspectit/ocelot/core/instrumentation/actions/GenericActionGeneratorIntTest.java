@@ -31,6 +31,7 @@ public class GenericActionGeneratorIntTest extends SpringTestBase {
     GenericActionGenerator generator;
 
     private static DummyClassLoader dummyLoader;
+
     private static Class<?> dummyClass;
 
     @BeforeAll
@@ -74,7 +75,6 @@ public class GenericActionGeneratorIntTest extends SpringTestBase {
         assertThat(actionB).isSameAs(actionA);
     }
 
-
     @Test
     @DirtiesContext
     void testActionReuse() throws Exception {
@@ -104,7 +104,6 @@ public class GenericActionGeneratorIntTest extends SpringTestBase {
         verify(mockInstrumentation, atLeastOnce()).redefineClasses(any());
     }
 
-
     @Test
     @DirtiesContext
     void testMethodArgumentPassingAndCasting() {
@@ -122,7 +121,6 @@ public class GenericActionGeneratorIntTest extends SpringTestBase {
         assertThat(getInstance(action).execute(args, null, null, null, null)).isEqualTo(10);
 
     }
-
 
     @Test
     @DirtiesContext
@@ -155,7 +153,6 @@ public class GenericActionGeneratorIntTest extends SpringTestBase {
         assertThat(getInstance(action).execute(args, null, null, null, null)).isEqualTo(10);
     }
 
-
     @Test
     @DirtiesContext
     void testPrimitveArrayReturnValue() {
@@ -169,7 +166,6 @@ public class GenericActionGeneratorIntTest extends SpringTestBase {
         assertThat(getInstance(action).execute(null, null, new int[]{1, 2, 3}, null, null)).isEqualTo(6);
     }
 
-
     @Test
     @DirtiesContext
     void testExceptionPassing() {
@@ -181,10 +177,8 @@ public class GenericActionGeneratorIntTest extends SpringTestBase {
 
         InjectedClass<? extends IGenericAction> action = generator.getOrGenerateGenericAction(config, dummyClass);
         RuntimeException re = new RuntimeException("runtime");
-        assertThat(getInstance(action).execute(null, null, null, re, null))
-                .isEqualTo("runtime");
+        assertThat(getInstance(action).execute(null, null, null, re, null)).isEqualTo("runtime");
     }
-
 
     @Test
     @DirtiesContext
@@ -199,10 +193,8 @@ public class GenericActionGeneratorIntTest extends SpringTestBase {
                 .build();
 
         InjectedClass<? extends IGenericAction> action = generator.getOrGenerateGenericAction(config, dummyClass);
-        assertThat(getInstance(action).execute(null, null, null, null, null))
-                .isEqualTo(42);
+        assertThat(getInstance(action).execute(null, null, null, null, null)).isEqualTo(42);
     }
-
 
     @Test
     @DirtiesContext
@@ -231,10 +223,8 @@ public class GenericActionGeneratorIntTest extends SpringTestBase {
                 .build();
 
         InjectedClass<? extends IGenericAction> action = generator.getOrGenerateGenericAction(config, dummyClass);
-        assertThat(getInstance(action).execute(null, "hello world", null, null, null))
-                .isEqualTo("hello world!");
+        assertThat(getInstance(action).execute(null, "hello world", null, null, null)).isEqualTo("hello world!");
     }
-
 
     @Test
     @DirtiesContext
@@ -246,10 +236,8 @@ public class GenericActionGeneratorIntTest extends SpringTestBase {
                 .build();
 
         InjectedClass<? extends IGenericAction> action = generator.getOrGenerateGenericAction(config, dummyClass);
-        assertThat(getInstance(action).execute(null, null, "hello world", null, null))
-                .isEqualTo("hello world!");
+        assertThat(getInstance(action).execute(null, null, "hello world", null, null)).isEqualTo("hello world!");
     }
-
 
     @Test
     @DirtiesContext

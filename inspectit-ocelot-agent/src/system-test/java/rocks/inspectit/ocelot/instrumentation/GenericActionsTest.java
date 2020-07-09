@@ -10,7 +10,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class GenericActionsTest extends InstrumentationSysTestBase {
 
-
     void argumentAccessTest(NamedElement elem, Runnable assertions) {
         assertions.run();
     }
@@ -77,7 +76,6 @@ public class GenericActionsTest extends InstrumentationSysTestBase {
             assertThat(tags).containsEntry("name", "somethingelse");
         });
     }
-
 
     void conditionsTest(Runnable assertions) {
         assertions.run();

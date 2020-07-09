@@ -84,5 +84,4 @@ public class InspectitContextPerfTest {
         parent.close();
     }
 
-
 }

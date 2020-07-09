@@ -49,16 +49,14 @@ public class PropertyNamesValidator {
      * as Duration.class, Path.class, URL.class and FileSystemResource.class
      *
      * @param propertyName the path which should be checked
+     *
      * @return True: the propertyName exists as path <br> False: the propertyName does not exist as path
      */
     @VisibleForTesting
     boolean isInvalidPropertyName(String propertyName) {
         ArrayList<String> parsedName = (ArrayList<String>) PropertyPathHelper.parse(propertyName);
         try {
-            return propertyName != null
-                    && propertyName.startsWith("inspectit.")
-                    && !propertyName.startsWith(PluginSettings.PLUGIN_CONFIG_PREFIX)
-                    && isInvalidPath(parsedName);
+            return propertyName != null && propertyName.startsWith("inspectit.") && !propertyName.startsWith(PluginSettings.PLUGIN_CONFIG_PREFIX) && isInvalidPath(parsedName);
         } catch (Exception e) {
             log.error("Error while checking property existence", e);
             return false;
@@ -70,6 +68,7 @@ public class PropertyNamesValidator {
      * the InspectitConfig class
      *
      * @param parsedName the path which should be checked
+     *
      * @return True if the path is invalid, false if the path is valid
      */
     private boolean isInvalidPath(ArrayList<String> parsedName) {

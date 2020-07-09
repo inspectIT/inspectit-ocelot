@@ -21,10 +21,7 @@ public class ScopeAutoCompleter implements AutoCompleter {
 
     private final static List<String> SCOPE_DECLARATION_PATH = Arrays.asList("inspectit", "instrumentation", "scopes");
 
-    private final static List<List<String>> SCOPE_USAGE_PATHS = Arrays.asList(
-            SCOPE_DECLARATION_PATH,
-            Arrays.asList("inspectit", "instrumentation", "rules", "*", "scopes")
-    );
+    private final static List<List<String>> SCOPE_USAGE_PATHS = Arrays.asList(SCOPE_DECLARATION_PATH, Arrays.asList("inspectit", "instrumentation", "rules", "*", "scopes"));
 
     @Autowired
     private ConfigurationQueryHelper configurationQueryHelper;

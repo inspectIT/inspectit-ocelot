@@ -42,12 +42,10 @@ public class ExecutorContextPropagationTest extends InstrumentationSysTestBase {
 
     }
 
-
     @Test
     public void testContextPropagationAcrossExecutorForCallables() throws Exception {
         ExecutorService es = Executors.newFixedThreadPool(2);
         TagKey keyToPropagate = TagKey.create("propagation/test/tag");
-
 
         Future<String> taskFuture;
         try (Scope s = tagger.currentBuilder().putLocal(keyToPropagate, TagValue.create("myval")).buildScoped()) {

@@ -15,7 +15,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 
-
 @ExtendWith(MockitoExtension.class)
 public class ActionInputAutoCompleterTest {
 
@@ -27,15 +26,16 @@ public class ActionInputAutoCompleterTest {
 
     @Nested
     public class GetSuggestions {
+
         @Test
         public void getSuggestionsTest() {
             List<String> testPath = Arrays.asList("inspectit", "instrumentation", "rules", "my_method", "entry", "span_name", "data-input");
-            doReturn(Arrays.asList("action_A", "action_B"))
-                    .when(configurationQueryHelper).getKeysForPath(eq(Arrays.asList("inspectit", "instrumentation", "rules", "my_method", "entry", "span_name", "action")));
-            doReturn(Arrays.asList("first_input_of_A", "second_input_of_A"))
-                    .when(configurationQueryHelper).getKeysForPath(eq(Arrays.asList("inspectit", "instrumentation", "actions", "action_A", "input")));
-            doReturn(Arrays.asList("first_input_of_B", "second_input_of_B"))
-                    .when(configurationQueryHelper).getKeysForPath(eq(Arrays.asList("inspectit", "instrumentation", "actions", "action_B", "input")));
+            doReturn(Arrays.asList("action_A", "action_B")).when(configurationQueryHelper)
+                    .getKeysForPath(eq(Arrays.asList("inspectit", "instrumentation", "rules", "my_method", "entry", "span_name", "action")));
+            doReturn(Arrays.asList("first_input_of_A", "second_input_of_A")).when(configurationQueryHelper)
+                    .getKeysForPath(eq(Arrays.asList("inspectit", "instrumentation", "actions", "action_A", "input")));
+            doReturn(Arrays.asList("first_input_of_B", "second_input_of_B")).when(configurationQueryHelper)
+                    .getKeysForPath(eq(Arrays.asList("inspectit", "instrumentation", "actions", "action_B", "input")));
 
             List<String> output = actionInputAutoCompleter.getSuggestions(testPath);
 
@@ -58,10 +58,10 @@ public class ActionInputAutoCompleterTest {
         @Test
         public void ignoresUnderscoredValues() {
             List<String> testPath = Arrays.asList("inspectit", "instrumentation", "rules", "my_method", "entry", "span_name", "data-input");
-            doReturn(Arrays.asList("action_A", "action_B"))
-                    .when(configurationQueryHelper).getKeysForPath(eq(Arrays.asList("inspectit", "instrumentation", "rules", "my_method", "entry", "span_name", "action")));
-            doReturn(Arrays.asList("first_input_of_A", "_second_input_of_A"))
-                    .when(configurationQueryHelper).getKeysForPath(eq(Arrays.asList("inspectit", "instrumentation", "actions", "action_A", "input")));
+            doReturn(Arrays.asList("action_A", "action_B")).when(configurationQueryHelper)
+                    .getKeysForPath(eq(Arrays.asList("inspectit", "instrumentation", "rules", "my_method", "entry", "span_name", "action")));
+            doReturn(Arrays.asList("first_input_of_A", "_second_input_of_A")).when(configurationQueryHelper)
+                    .getKeysForPath(eq(Arrays.asList("inspectit", "instrumentation", "actions", "action_A", "input")));
 
             List<String> output = actionInputAutoCompleter.getSuggestions(testPath);
 

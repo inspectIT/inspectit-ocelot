@@ -18,6 +18,7 @@ public final class TagUtils {
      * If String is not valid an <code>&lt;invalid&gt;</code> TagName is created.
      *
      * @param v the tag value
+     *
      * @return the created TagValue with 'v' or '&lt;invalid&gt;'
      */
     public static TagValue createTagValue(String v) {

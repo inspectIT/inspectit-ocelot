@@ -15,6 +15,7 @@ import java.time.Duration;
 @Data
 @NoArgsConstructor
 public class FileBasedConfigSettings {
+
     /**
      * The path to the directory containing the .yml or .properties files.
      * Can be null or empty, in which case no file based configuration is used.

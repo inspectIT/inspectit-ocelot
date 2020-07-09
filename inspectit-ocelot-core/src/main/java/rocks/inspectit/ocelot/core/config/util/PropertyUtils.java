@@ -26,6 +26,7 @@ public class PropertyUtils {
      * Reads the given YAML resources into a Properties Object according to Spring rules.
      *
      * @param resources the resources to load
+     *
      * @return the generated Properties object
      */
     public static Properties readYamlFiles(Resource... resources) {
@@ -39,6 +40,7 @@ public class PropertyUtils {
      * Reads the given .properties resources into a Properties Object according to Spring rules.
      *
      * @param resources the resources to load
+     *
      * @return the generated Properties object
      */
     public static Properties readPropertyFiles(Resource... resources) throws IOException {

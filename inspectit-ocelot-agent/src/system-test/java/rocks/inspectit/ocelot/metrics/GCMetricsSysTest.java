@@ -72,14 +72,27 @@ public class GCMetricsSysTest extends MetricsSysTestBase {
 
         assertThat(pauseData.getAggregationMap()).isNotEmpty();
 
-        Map.Entry<List<TagValue>, AggregationData> minorTime = pauseData.getAggregationMap().entrySet().stream()
-                .filter(e -> e.getKey().stream().filter(tag -> tag.asString().contains("minor")).findFirst().isPresent())
-                .findFirst().get();
+        Map.Entry<List<TagValue>, AggregationData> minorTime = pauseData.getAggregationMap()
+                .entrySet()
+                .stream()
+                .filter(e -> e.getKey()
+                        .stream()
+                        .filter(tag -> tag.asString().contains("minor"))
+                        .findFirst()
+                        .isPresent())
+                .findFirst()
+                .get();
 
-        Map.Entry<List<TagValue>, AggregationData> majorTime = pauseData.getAggregationMap().entrySet().stream()
-                .filter(e -> e.getKey().stream().filter(tag -> tag.asString().contains("major")).findFirst().isPresent())
-                .findFirst().get();
-
+        Map.Entry<List<TagValue>, AggregationData> majorTime = pauseData.getAggregationMap()
+                .entrySet()
+                .stream()
+                .filter(e -> e.getKey()
+                        .stream()
+                        .filter(tag -> tag.asString().contains("major"))
+                        .findFirst()
+                        .isPresent())
+                .findFirst()
+                .get();
 
         assertThat(((AggregationData.SumDataLong) minorTime.getValue()).getSum()).isGreaterThanOrEqualTo(0);
         assertThat(((AggregationData.SumDataLong) majorTime.getValue()).getSum()).isGreaterThan(0);

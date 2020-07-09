@@ -43,13 +43,15 @@ public abstract class BoundGenericAction implements IHookAction {
      */
     protected final WeakReference<IGenericAction> action;
 
-
     protected BoundGenericAction(String callName, GenericActionConfig actionConfig, InjectedClass<?> actionClass) {
         actionName = actionConfig.getName();
         this.callName = callName;
         this.actionClass = actionClass;
         try {
-            action = new WeakReference<>((IGenericAction) actionClass.getInjectedClassObject().get().getField("INSTANCE").get(null));
+            action = new WeakReference<>((IGenericAction) actionClass.getInjectedClassObject()
+                    .get()
+                    .getField("INSTANCE")
+                    .get(null));
         } catch (Exception e) {
             throw new IllegalArgumentException("The given action is not based on the GenericActionTemplate");
         }
@@ -69,13 +71,10 @@ public abstract class BoundGenericAction implements IHookAction {
      * @param constantAssignments a map mapping input variable names to their constant values
      * @param dynamicAssignments  a map mapping input variables to a function which is used to derive
      *                            the parameter value when the action is invoked
+     *
      * @return
      */
-    public static BoundGenericAction bind(String dataKey,
-                                          GenericActionConfig actionConfig,
-                                          InjectedClass<?> action,
-                                          Map<String, Object> constantAssignments,
-                                          Map<String, VariableAccessor> dynamicAssignments) {
+    public static BoundGenericAction bind(String dataKey, GenericActionConfig actionConfig, InjectedClass<?> action, Map<String, Object> constantAssignments, Map<String, VariableAccessor> dynamicAssignments) {
 
         if (dynamicAssignments.isEmpty()) {
             if (actionConfig.isVoid()) {

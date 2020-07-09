@@ -27,7 +27,10 @@ public class Log4J2TraceIdAutoInjector implements SpecialSensor {
     @Override
     public boolean shouldInstrument(Class<?> clazz, InstrumentationConfiguration settings) {
         TypeDescription type = TypeDescription.ForLoadedType.of(clazz);
-        return settings.getTracingSettings().getLogCorrelation().getTraceIdAutoInjection().isEnabled() && CLASSES_MATCHER.matches(type);
+        return settings.getTracingSettings()
+                .getLogCorrelation()
+                .getTraceIdAutoInjection()
+                .isEnabled() && CLASSES_MATCHER.matches(type);
     }
 
     @Override
@@ -37,9 +40,7 @@ public class Log4J2TraceIdAutoInjector implements SpecialSensor {
 
     @Override
     public DynamicType.Builder instrument(Class<?> clazz, InstrumentationConfiguration settings, DynamicType.Builder builder) {
-        return builder
-                .visit(NewMessageCharSequenceAdvice.TARGET)
-                .visit(NewMessageObjectAdvice.TARGET);
+        return builder.visit(NewMessageCharSequenceAdvice.TARGET).visit(NewMessageObjectAdvice.TARGET);
     }
 
     /**

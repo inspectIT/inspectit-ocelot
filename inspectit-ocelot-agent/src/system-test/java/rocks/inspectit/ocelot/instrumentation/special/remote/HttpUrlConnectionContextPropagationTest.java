@@ -27,7 +27,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class HttpUrlConnectionContextPropagationTest {
 
     public static final int PORT = 9999;
+
     public static final String TEST_URL = "http://localhost:" + PORT + "/test";
+
     private WireMockServer wireMockServer;
 
     private final Map<String, Object> dataToPropagate = new HashMap<>();
@@ -38,8 +40,7 @@ public class HttpUrlConnectionContextPropagationTest {
         HttpURLConnection urlConnection = (HttpURLConnection) new URL("http://google.com").openConnection();
         urlConnection.getResponseCode();
 
-        TestUtils.waitForClassInstrumentations(Arrays.asList(Class.forName("sun.net.www.protocol.http.HttpURLConnection")),
-                10, TimeUnit.SECONDS);
+        TestUtils.waitForClassInstrumentations(Arrays.asList(Class.forName("sun.net.www.protocol.http.HttpURLConnection")), 10, TimeUnit.SECONDS);
 
     }
 
@@ -68,42 +69,41 @@ public class HttpUrlConnectionContextPropagationTest {
         @BeforeEach
         void setupResponse() {
 
-            stubFor(get(urlEqualTo("/test"))
-                    .willReturn(aResponse()
-                            .withStatus(200)));
+            stubFor(get(urlEqualTo("/test")).willReturn(aResponse().withStatus(200)));
         }
 
         @Test
         void propagationViaGetResponseCode() throws Exception {
             HttpURLConnection urlConnection = (HttpURLConnection) new URL(TEST_URL).openConnection();
-            try (Scope s = Tags.getTagger().emptyBuilder()
+            try (Scope s = Tags.getTagger()
+                    .emptyBuilder()
                     .putLocal(TagKey.create("down_propagated"), TagValue.create("myvalue"))
                     .buildScoped()) {
                 urlConnection.getResponseCode();
             }
 
-            verify(getRequestedFor(urlEqualTo("/test"))
-                    .withHeader("Correlation-Context", containing("down_propagated=myvalue")));
+            verify(getRequestedFor(urlEqualTo("/test")).withHeader("Correlation-Context", containing("down_propagated=myvalue")));
         }
 
         @Test
         void propagationViaGetInputStream() throws Exception {
             HttpURLConnection urlConnection = (HttpURLConnection) new URL(TEST_URL).openConnection();
-            try (Scope s = Tags.getTagger().emptyBuilder()
+            try (Scope s = Tags.getTagger()
+                    .emptyBuilder()
                     .putLocal(TagKey.create("down_propagated"), TagValue.create("myvalue"))
                     .buildScoped()) {
 
                 urlConnection.getInputStream();
             }
 
-            verify(getRequestedFor(urlEqualTo("/test"))
-                    .withHeader("Correlation-Context", containing("down_propagated=myvalue")));
+            verify(getRequestedFor(urlEqualTo("/test")).withHeader("Correlation-Context", containing("down_propagated=myvalue")));
         }
 
         @Test
         void propagationViaConnect() throws Exception {
             HttpURLConnection urlConnection = (HttpURLConnection) new URL(TEST_URL).openConnection();
-            try (Scope s = Tags.getTagger().emptyBuilder()
+            try (Scope s = Tags.getTagger()
+                    .emptyBuilder()
                     .putLocal(TagKey.create("down_propagated"), TagValue.create("myvalue"))
                     .buildScoped()) {
 
@@ -113,24 +113,22 @@ public class HttpUrlConnectionContextPropagationTest {
 
             urlConnection.getInputStream();
 
-            verify(getRequestedFor(urlEqualTo("/test"))
-                    .withHeader("Correlation-Context", containing("down_propagated=myvalue")));
+            verify(getRequestedFor(urlEqualTo("/test")).withHeader("Correlation-Context", containing("down_propagated=myvalue")));
         }
 
         @Test
         void propagationViaGetHeaderField() throws Exception {
             HttpURLConnection urlConnection = (HttpURLConnection) new URL(TEST_URL).openConnection();
-            try (Scope s = Tags.getTagger().emptyBuilder()
+            try (Scope s = Tags.getTagger()
+                    .emptyBuilder()
                     .putLocal(TagKey.create("down_propagated"), TagValue.create("myvalue"))
                     .buildScoped()) {
 
                 urlConnection.getHeaderField("some-header");
             }
 
-            verify(getRequestedFor(urlEqualTo("/test"))
-                    .withHeader("Correlation-Context", containing("down_propagated=myvalue")));
+            verify(getRequestedFor(urlEqualTo("/test")).withHeader("Correlation-Context", containing("down_propagated=myvalue")));
         }
-
 
     }
 
@@ -140,10 +138,7 @@ public class HttpUrlConnectionContextPropagationTest {
         @BeforeEach
         void setupResponse() {
 
-            stubFor(get(urlEqualTo("/test"))
-                    .willReturn(aResponse()
-                            .withBody("body")
-                            .withStatus(200)));
+            stubFor(get(urlEqualTo("/test")).willReturn(aResponse().withBody("body").withStatus(200)));
             dataToPropagate.put("up_propagated", Math.PI);
             dataToPropagate.put("up_propagated2", "Hello World");
         }
@@ -223,8 +218,6 @@ public class HttpUrlConnectionContextPropagationTest {
             assertThat(myCtx.getData("up_propagated2")).isEqualTo("Hello World");
         }
 
-
     }
-
 
 }

@@ -45,9 +45,7 @@ class ObfuscationManagerTest {
         @Test
         public void obfuscatoryNotNull() {
             Supplier<IObfuscatory> obfuscatorySupplier = obfuscationManager.obfuscatorySupplier();
-            assertThat(obfuscatorySupplier.get())
-                    .isNotNull()
-                    .isInstanceOf(NoopObfuscatory.class);
+            assertThat(obfuscatorySupplier.get()).isNotNull().isInstanceOf(NoopObfuscatory.class);
         }
     }
 
@@ -77,9 +75,7 @@ class ObfuscationManagerTest {
             obfuscationManager.update();
 
             Supplier<IObfuscatory> obfuscatorySupplier = obfuscationManager.obfuscatorySupplier();
-            assertThat(obfuscatorySupplier.get())
-                    .isNotNull()
-                    .isInstanceOf(NoopObfuscatory.class);
+            assertThat(obfuscatorySupplier.get()).isNotNull().isInstanceOf(NoopObfuscatory.class);
         }
 
         @Test
@@ -93,9 +89,7 @@ class ObfuscationManagerTest {
             obfuscationManager.update();
 
             Supplier<IObfuscatory> obfuscatorySupplier = obfuscationManager.obfuscatorySupplier();
-            assertThat(obfuscatorySupplier.get())
-                    .isNotNull()
-                    .isInstanceOf(NoopObfuscatory.class);
+            assertThat(obfuscatorySupplier.get()).isNotNull().isInstanceOf(NoopObfuscatory.class);
         }
 
         @Test
@@ -115,9 +109,7 @@ class ObfuscationManagerTest {
 
             Supplier<IObfuscatory> obfuscatorySupplier = obfuscationManager.obfuscatorySupplier();
             IObfuscatory obfuscatory = obfuscatorySupplier.get();
-            assertThat(obfuscatory)
-                    .isNotNull()
-                    .isInstanceOf(PatternObfuscatory.class);
+            assertThat(obfuscatory).isNotNull().isInstanceOf(PatternObfuscatory.class);
 
             // there is no way for me to test the correct patterns passed to the obfuscatory
             // then to actually invoke the obfuscatory
@@ -148,9 +140,7 @@ class ObfuscationManagerTest {
 
             Supplier<IObfuscatory> obfuscatorySupplier = obfuscationManager.obfuscatorySupplier();
             IObfuscatory obfuscatory = obfuscatorySupplier.get();
-            assertThat(obfuscatory)
-                    .isNotNull()
-                    .isInstanceOf(PatternObfuscatory.class);
+            assertThat(obfuscatory).isNotNull().isInstanceOf(PatternObfuscatory.class);
 
             // there is no way for me to test the correct patterns passed to the obfuscatory
             // then to actually invoke the obfuscatory
@@ -179,9 +169,7 @@ class ObfuscationManagerTest {
 
             Supplier<IObfuscatory> obfuscatorySupplier = obfuscationManager.obfuscatorySupplier();
             IObfuscatory obfuscatory = obfuscatorySupplier.get();
-            assertThat(obfuscatory)
-                    .isNotNull()
-                    .isInstanceOf(PatternObfuscatory.class);
+            assertThat(obfuscatory).isNotNull().isInstanceOf(PatternObfuscatory.class);
 
             // there is no way for me to test the correct patterns passed to the obfuscatory
             // then to actually invoke the obfuscatory
@@ -215,9 +203,7 @@ class ObfuscationManagerTest {
 
             Supplier<IObfuscatory> obfuscatorySupplier = obfuscationManager.obfuscatorySupplier();
             IObfuscatory obfuscatory = obfuscatorySupplier.get();
-            assertThat(obfuscatory)
-                    .isNotNull()
-                    .isInstanceOf(SelfMonitoringDelegatingObfuscatory.class);
+            assertThat(obfuscatory).isNotNull().isInstanceOf(SelfMonitoringDelegatingObfuscatory.class);
 
             // there is no way for me to test the correct patterns passed to the obfuscatory
             // then to actually invoke the obfuscatory

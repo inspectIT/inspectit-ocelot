@@ -64,6 +64,7 @@ public class ObfuscationManager {
      * Otherwise, the {@link PatternObfuscatory} instance will be created and return.
      *
      * @param obfuscationPatterns Collection of configured {@link ObfuscationPattern}s.
+     *
      * @return IObfuscatory
      */
     private IObfuscatory getPatternObfuscatory(Collection<ObfuscationPattern> obfuscationPatterns) {

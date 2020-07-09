@@ -24,8 +24,11 @@ import java.util.jar.JarFile;
 public class AgentMain {
 
     private static final String INSPECTIT_BOOTSTRAP_JAR_PATH = "/inspectit-ocelot-bootstrap.jar";
+
     private static final String INSPECTIT_CORE_JAR_PATH = "/inspectit-ocelot-core.jar";
+
     private static final String OPENCENSUS_FAT_JAR_PATH = "/opencensus-fat.jar";
+
     private static final String PUBLISH_OPEN_CENSUS_TO_BOOTSTRAP_PROPERTY = "inspectit.publishOpenCensusToBootstrap";
 
     /**
@@ -63,9 +66,7 @@ public class AgentMain {
                 inst.appendToBootstrapClassLoaderSearch(new JarFile(ocJarFile.toFile()));
             }
             //we make sure that the startup of inspectIT is asynchronous
-            new Thread(() ->
-                    startAgent(agentArgs, inst, !loadOpenCensusToBootstrap)
-            ).start();
+            new Thread(() -> startAgent(agentArgs, inst, !loadOpenCensusToBootstrap)).start();
         } catch (Exception e) {
             System.err.println("Error starting inspectIT Agent!");
             e.printStackTrace();
@@ -86,6 +87,7 @@ public class AgentMain {
      * Loads {@link #INSPECTIT_BOOTSTRAP_JAR_PATH} with the bootstrap classloader and @link {@link #INSPECTIT_CORE_JAR_PATH} with a new inspectIT loader.
      *
      * @return the created inspectIT classloader
+     *
      * @throws IOException
      */
     private static InspectITClassLoader initializeInspectitLoader(Instrumentation inst, boolean includeOpenCensus) throws IOException {
@@ -111,7 +113,9 @@ public class AgentMain {
      * Copies the given resource to a new temporary file with the ending ".jar"
      *
      * @param resourcePath the path to the resource
+     *
      * @return the path to the generated jar file
+     *
      * @throws IOException
      */
     private static Path copyResourceToTempJarFile(String resourcePath) throws IOException {
@@ -162,7 +166,8 @@ public class AgentMain {
                 if (javaVersion.startsWith("1.8")) {
                     return null;
                 } else {
-                    return (ClassLoader) ClassLoader.class.getDeclaredMethod("getPlatformClassLoader", new Class[]{}).invoke(null);
+                    return (ClassLoader) ClassLoader.class.getDeclaredMethod("getPlatformClassLoader", new Class[]{})
+                            .invoke(null);
                 }
             } catch (Exception e) {
                 return null;

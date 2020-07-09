@@ -30,10 +30,7 @@ class ExtrasTagsProviderIntTest {
 
     @Nested
     @DirtiesContext
-    @TestPropertySource(properties = {
-            "inspectit.tags.extra.key1=value1",
-            "inspectit.tags.extra[key2]=value2",
-    })
+    @TestPropertySource(properties = {"inspectit.tags.extra.key1=value1", "inspectit.tags.extra[key2]=value2",})
     class Defined extends SpringTestBase {
 
         @Autowired
@@ -44,8 +41,7 @@ class ExtrasTagsProviderIntTest {
 
         @Test
         public void happyPath() {
-            assertThat(provider.getTags(env.getCurrentConfig()))
-                    .hasSize(2)
+            assertThat(provider.getTags(env.getCurrentConfig())).hasSize(2)
                     .containsEntry("key1", "value1")
                     .containsEntry("key2", "value2");
         }
@@ -54,10 +50,7 @@ class ExtrasTagsProviderIntTest {
 
     @Nested
     @DirtiesContext
-    @TestPropertySource(properties = {
-            "inspectit.tags.extra.key1=value1",
-            "inspectit.tags.extra[key2]=value2",
-    })
+    @TestPropertySource(properties = {"inspectit.tags.extra.key1=value1", "inspectit.tags.extra[key2]=value2",})
     class Updated extends SpringTestBase {
 
         @Autowired
@@ -70,8 +63,7 @@ class ExtrasTagsProviderIntTest {
         public void happyPath() {
             updateProperties(properties -> properties.withProperty("inspectit.tags.extra.key1", "updatedValue"));
 
-            assertThat(provider.getTags(env.getCurrentConfig()))
-                    .hasSize(2)
+            assertThat(provider.getTags(env.getCurrentConfig())).hasSize(2)
                     .containsEntry("key1", "updatedValue")
                     .containsEntry("key2", "value2");
         }

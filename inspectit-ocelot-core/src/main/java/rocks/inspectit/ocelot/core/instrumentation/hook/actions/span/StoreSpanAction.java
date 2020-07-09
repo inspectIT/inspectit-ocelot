@@ -19,7 +19,6 @@ public class StoreSpanAction implements IHookAction {
      */
     private final String dataKey;
 
-
     @Override
     public void execute(ExecutionContext context) {
         InspectitContextImpl ctx = context.getInspectitContext();

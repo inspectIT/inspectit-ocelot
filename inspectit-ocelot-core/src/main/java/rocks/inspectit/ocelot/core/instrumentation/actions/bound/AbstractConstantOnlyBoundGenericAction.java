@@ -13,17 +13,12 @@ abstract class AbstractConstantOnlyBoundGenericAction extends BoundGenericAction
 
     protected final Object[] arguments;
 
-    public AbstractConstantOnlyBoundGenericAction(String callName, GenericActionConfig actionConfig,
-                                                  InjectedClass<?> action, Map<String, Object> constantAssignments) {
+    public AbstractConstantOnlyBoundGenericAction(String callName, GenericActionConfig actionConfig, InjectedClass<?> action, Map<String, Object> constantAssignments) {
         super(callName, actionConfig, action);
 
         // the additionalArgumentTypes is a sorted map
         // the order in which the arguments appear in this map correspond to the order in which their values
         // have to be placed in the arguments array
-        arguments = actionConfig.getAdditionalArgumentTypes()
-                .keySet().stream()
-                .map(
-                        constantAssignments::get
-                ).toArray();
+        arguments = actionConfig.getAdditionalArgumentTypes().keySet().stream().map(constantAssignments::get).toArray();
     }
 }

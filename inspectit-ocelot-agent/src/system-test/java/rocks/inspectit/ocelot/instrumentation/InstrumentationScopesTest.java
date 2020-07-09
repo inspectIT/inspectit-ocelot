@@ -4,12 +4,10 @@ import org.junit.jupiter.api.Test;
 import rocks.inspectit.ocelot.utils.TestUtils;
 
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class InstrumentationScopesTest extends InstrumentationSysTestBase {
-
 
     @Test
     void testNonOverriddenDefaultMethodInstrumentedForAnonymousClass() {

@@ -1,6 +1,5 @@
 package rocks.inspectit.ocelot.core.instrumentation.event;
 
-
 import lombok.Getter;
 import net.bytebuddy.description.type.TypeDescription;
 import org.springframework.context.ApplicationEvent;

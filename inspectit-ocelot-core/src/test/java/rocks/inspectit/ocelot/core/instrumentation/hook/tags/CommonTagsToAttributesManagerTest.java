@@ -118,7 +118,6 @@ class CommonTagsToAttributesManagerTest {
             manager.update();
         }
 
-
         @Test
         void newSpan() {
             when(commonTagsManager.getCommonTagValueMap()).thenReturn(Collections.singletonMap("key", "value"));
@@ -188,6 +187,5 @@ class CommonTagsToAttributesManagerTest {
         }
 
     }
-
 
 }

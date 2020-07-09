@@ -18,10 +18,7 @@ class RegexReplacementBeaconProcessorIntTest {
 
     @Test
     void testRemoveQueryParameters() {
-        Beacon in = Beacon.of(ImmutableMap.of(
-                "u", "http://localhost:8080/a/b?param1=value1&param2=value2",
-                "pgu", "http://otherhost:8081/foo/bar?foo=bar")
-        );
+        Beacon in = Beacon.of(ImmutableMap.of("u", "http://localhost:8080/a/b?param1=value1&param2=value2", "pgu", "http://otherhost:8081/foo/bar?foo=bar"));
         Beacon b = processor.process(in);
 
         assertThat(b.get("U_NO_QUERY")).isEqualTo("http://localhost:8080/a/b");
@@ -36,9 +33,7 @@ class RegexReplacementBeaconProcessorIntTest {
 
     @Test
     void testRemoveQueryParametersFromUnwiseUrl() {
-        Beacon in = Beacon.of(ImmutableMap.of(
-                "u", "http://localhost/a/b?match[]={t=33}&parmam2=value1")
-        );
+        Beacon in = Beacon.of(ImmutableMap.of("u", "http://localhost/a/b?match[]={t=33}&parmam2=value1"));
         Beacon b = processor.process(in);
         assertThat(b.get("U_NO_QUERY")).isEqualTo("http://localhost/a/b");
         assertThat(b.get("U_PATH")).isEqualTo("/a/b");
@@ -49,6 +44,5 @@ class RegexReplacementBeaconProcessorIntTest {
         assertThat(b.get("PGU_HOST")).isNull();
         assertThat(b.get("PGU_PORT")).isNull();
     }
-
 
 }

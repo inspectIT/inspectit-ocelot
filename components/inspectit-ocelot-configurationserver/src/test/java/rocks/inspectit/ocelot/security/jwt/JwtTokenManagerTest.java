@@ -46,7 +46,9 @@ class JwtTokenManagerTest {
 
         @Test
         public void validToken() {
-            InspectitServerSettings settings = InspectitServerSettings.builder().tokenLifespan(Duration.ofMinutes(1)).build();
+            InspectitServerSettings settings = InspectitServerSettings.builder()
+                    .tokenLifespan(Duration.ofMinutes(1))
+                    .build();
             manager.config = settings;
 
             String result = manager.createToken("username");
@@ -62,15 +64,13 @@ class JwtTokenManagerTest {
 
         @Test
         public void emptyUsername() {
-            assertThatExceptionOfType(IllegalArgumentException.class)
-                    .isThrownBy(() -> manager.createToken(""))
+            assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> manager.createToken(""))
                     .withMessage("Username must not be null or empty.");
         }
 
         @Test
         public void nullUsername() {
-            assertThatExceptionOfType(IllegalArgumentException.class)
-                    .isThrownBy(() -> manager.createToken(null))
+            assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> manager.createToken(null))
                     .withMessage("Username must not be null or empty.");
         }
     }
@@ -83,7 +83,9 @@ class JwtTokenManagerTest {
 
         @Test
         public void successfulAuthentication() {
-            InspectitServerSettings settings = InspectitServerSettings.builder().tokenLifespan(Duration.ofMinutes(1)).build();
+            InspectitServerSettings settings = InspectitServerSettings.builder()
+                    .tokenLifespan(Duration.ofMinutes(1))
+                    .build();
             manager.config = settings;
             String token = manager.createToken("username");
 
@@ -99,14 +101,15 @@ class JwtTokenManagerTest {
 
         @Test
         public void userNotFound() {
-            InspectitServerSettings settings = InspectitServerSettings.builder().tokenLifespan(Duration.ofMinutes(1)).build();
+            InspectitServerSettings settings = InspectitServerSettings.builder()
+                    .tokenLifespan(Duration.ofMinutes(1))
+                    .build();
             manager.config = settings;
             String token = manager.createToken("username");
 
             when(userDetailsService.loadUserByUsername(anyString())).thenThrow(UsernameNotFoundException.class);
 
-            assertThatExceptionOfType(UsernameNotFoundException.class)
-                    .isThrownBy(() -> manager.authenticateWithToken(token));
+            assertThatExceptionOfType(UsernameNotFoundException.class).isThrownBy(() -> manager.authenticateWithToken(token));
 
             verify(userDetailsService).loadUserByUsername("username");
             verifyNoMoreInteractions(userDetailsService);
@@ -114,11 +117,12 @@ class JwtTokenManagerTest {
 
         @Test
         public void invalidJwtToken() {
-            InspectitServerSettings settings = InspectitServerSettings.builder().tokenLifespan(Duration.ofMinutes(1)).build();
+            InspectitServerSettings settings = InspectitServerSettings.builder()
+                    .tokenLifespan(Duration.ofMinutes(1))
+                    .build();
             manager.config = settings;
 
-            assertThatExceptionOfType(JwtException.class)
-                    .isThrownBy(() -> manager.authenticateWithToken("this-is-not-a-token"));
+            assertThatExceptionOfType(JwtException.class).isThrownBy(() -> manager.authenticateWithToken("this-is-not-a-token"));
 
             verifyZeroInteractions(userDetailsService);
         }
@@ -128,7 +132,9 @@ class JwtTokenManagerTest {
             UserDetailsService mockService = mock(UserDetailsService.class);
             when(mockService.loadUserByUsername(anyString())).thenThrow(UsernameNotFoundException.class);
             manager.services.add(0, mockService);
-            InspectitServerSettings settings = InspectitServerSettings.builder().tokenLifespan(Duration.ofMinutes(1)).build();
+            InspectitServerSettings settings = InspectitServerSettings.builder()
+                    .tokenLifespan(Duration.ofMinutes(1))
+                    .build();
             manager.config = settings;
             String token = manager.createToken("username");
 

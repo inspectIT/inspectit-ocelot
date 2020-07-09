@@ -20,14 +20,14 @@ public class ExecutorContextPropagationSensor implements SpecialSensor {
 
     private static final ElementMatcher<TypeDescription> EXECUTER_CLASSES_MATCHER = isSubTypeOf(Executor.class);
 
-    private static final ElementMatcher<MethodDescription> EXECUTER_EXECUTE_METHOD_MATCHER =
-            named("execute").and(takesArgument(0, Runnable.class));
+    private static final ElementMatcher<MethodDescription> EXECUTER_EXECUTE_METHOD_MATCHER = named("execute").and(takesArgument(0, Runnable.class));
 
     @Override
     public boolean shouldInstrument(Class<?> clazz, InstrumentationConfiguration settings) {
         val type = TypeDescription.ForLoadedType.of(clazz);
-        return settings.getSource().getSpecial().isExecutorContextPropagation() &&
-                EXECUTER_CLASSES_MATCHER.matches(type);
+        return settings.getSource()
+                .getSpecial()
+                .isExecutorContextPropagation() && EXECUTER_CLASSES_MATCHER.matches(type);
     }
 
     @Override
@@ -37,12 +37,11 @@ public class ExecutorContextPropagationSensor implements SpecialSensor {
 
     @Override
     public DynamicType.Builder instrument(Class<?> clazz, InstrumentationConfiguration conf, DynamicType.Builder builder) {
-        return builder.visit(
-                Advice.to(ExecutorAdvice.class)
-                        .on(EXECUTER_EXECUTE_METHOD_MATCHER));
+        return builder.visit(Advice.to(ExecutorAdvice.class).on(EXECUTER_EXECUTE_METHOD_MATCHER));
     }
 
     private static class ExecutorAdvice {
+
         /**
          * Wraps the given runnable of {@link java.util.concurrent.Executor#execute(Runnable)} via {@link ContextManager#wrap(Runnable)}}
          *

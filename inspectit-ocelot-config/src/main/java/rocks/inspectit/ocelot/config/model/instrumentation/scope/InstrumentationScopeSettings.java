@@ -65,8 +65,6 @@ public class InstrumentationScopeSettings {
             return true;
         }
 
-        return !CollectionUtils.isEmpty(interfaces)
-                || superclass != null
-                || (type != null && !type.isAnyMatcher());
+        return !CollectionUtils.isEmpty(interfaces) || superclass != null || (type != null && !type.isAnyMatcher());
     }
 }

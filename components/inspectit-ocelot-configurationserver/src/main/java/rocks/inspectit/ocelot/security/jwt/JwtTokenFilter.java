@@ -76,6 +76,7 @@ public class JwtTokenFilter extends GenericFilterBean {
      * Extracts the bearer token from the 'Authorization' HTTP header
      *
      * @param req the request to extract the token from
+     *
      * @return the token, if a Bearer Authorization header was found, otherwise null
      */
     private String extractBearerToken(HttpServletRequest req) {

@@ -37,8 +37,7 @@ public class AgentStatusManager {
      */
     @PostConstruct
     public void reset() {
-        attributesToAgentStatusCache = CacheBuilder
-                .newBuilder()
+        attributesToAgentStatusCache = CacheBuilder.newBuilder()
                 .maximumSize(config.getMaxAgents())
                 .expireAfterWrite(config.getAgentEvictionDelay().toMillis(), TimeUnit.MILLISECONDS)
                 .build();

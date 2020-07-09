@@ -24,12 +24,7 @@ public class CustomUserAuthoritiesMapperTest {
 
     CustomUserAuthoritiesMapper customUserAuthoritiesMapper;
 
-    public InspectitServerSettings setupRoleSettings(
-            List<String> read,
-            List<String> write,
-            List<String> commit,
-            List<String> admin
-    ) {
+    public InspectitServerSettings setupRoleSettings(List<String> read, List<String> write, List<String> commit, List<String> admin) {
         InspectitServerSettings mockSettings = mock(InspectitServerSettings.class);
         SecuritySettings mockSecuritySettings = mock(SecuritySettings.class);
         LdapRoleResolveSettings mockLdapRoleResolveSettings = mock(LdapRoleResolveSettings.class);
@@ -44,22 +39,18 @@ public class CustomUserAuthoritiesMapperTest {
         lenient().when(mockLdapRoleResolveSettings.getCommit()).thenReturn(commit);
         lenient().when(mockLdapRoleResolveSettings.getAdmin()).thenReturn(admin);
 
-
         return mockSettings;
 
     }
 
     @Nested
     public class MapAuthorities {
+
         @Test
         public void hasNone() {
             List<SimpleGrantedAuthority> test_permission_set = Collections.singletonList(new SimpleGrantedAuthority("ROLE_notMatching"));
-            customUserAuthoritiesMapper = new CustomUserAuthoritiesMapper(setupRoleSettings(
-                    Collections.emptyList(),
-                    Collections.emptyList(),
-                    Collections.emptyList(),
-                    Collections.emptyList()
-            ));
+            customUserAuthoritiesMapper = new CustomUserAuthoritiesMapper(setupRoleSettings(Collections.emptyList(), Collections
+                    .emptyList(), Collections.emptyList(), Collections.emptyList()));
 
             Collection<? extends GrantedAuthority> output = customUserAuthoritiesMapper.mapAuthorities(test_permission_set);
 
@@ -69,12 +60,8 @@ public class CustomUserAuthoritiesMapperTest {
         @Test
         public void hasRead() {
             List<SimpleGrantedAuthority> test_permission_set = Collections.singletonList(new SimpleGrantedAuthority("ROLE_read"));
-            customUserAuthoritiesMapper = new CustomUserAuthoritiesMapper(setupRoleSettings(
-                    Collections.singletonList("read"),
-                    Collections.emptyList(),
-                    Collections.emptyList(),
-                    Collections.emptyList()
-            ));
+            customUserAuthoritiesMapper = new CustomUserAuthoritiesMapper(setupRoleSettings(Collections.singletonList("read"), Collections
+                    .emptyList(), Collections.emptyList(), Collections.emptyList()));
 
             Collection<? extends GrantedAuthority> output = customUserAuthoritiesMapper.mapAuthorities(test_permission_set);
 
@@ -85,12 +72,8 @@ public class CustomUserAuthoritiesMapperTest {
         @Test
         public void hasWrite() {
             List<SimpleGrantedAuthority> test_permission_set = Collections.singletonList(new SimpleGrantedAuthority("ROLE_write"));
-            customUserAuthoritiesMapper = new CustomUserAuthoritiesMapper(setupRoleSettings(
-                    Collections.emptyList(),
-                    Collections.singletonList("write"),
-                    Collections.emptyList(),
-                    Collections.emptyList()
-            ));
+            customUserAuthoritiesMapper = new CustomUserAuthoritiesMapper(setupRoleSettings(Collections.emptyList(), Collections
+                    .singletonList("write"), Collections.emptyList(), Collections.emptyList()));
 
             Collection<? extends GrantedAuthority> output = customUserAuthoritiesMapper.mapAuthorities(test_permission_set);
 
@@ -101,12 +84,8 @@ public class CustomUserAuthoritiesMapperTest {
         @Test
         public void hasCommit() {
             List<SimpleGrantedAuthority> test_permission_set = Collections.singletonList(new SimpleGrantedAuthority("ROLE_commit"));
-            customUserAuthoritiesMapper = new CustomUserAuthoritiesMapper(setupRoleSettings(
-                    Collections.emptyList(),
-                    Collections.emptyList(),
-                    Collections.singletonList("commit"),
-                    Collections.emptyList()
-            ));
+            customUserAuthoritiesMapper = new CustomUserAuthoritiesMapper(setupRoleSettings(Collections.emptyList(), Collections
+                    .emptyList(), Collections.singletonList("commit"), Collections.emptyList()));
 
             Collection<? extends GrantedAuthority> output = customUserAuthoritiesMapper.mapAuthorities(test_permission_set);
 
@@ -117,12 +96,8 @@ public class CustomUserAuthoritiesMapperTest {
         @Test
         public void hasAdmin() {
             List<SimpleGrantedAuthority> test_permission_set = Collections.singletonList(new SimpleGrantedAuthority("ROLE_admin"));
-            customUserAuthoritiesMapper = new CustomUserAuthoritiesMapper(setupRoleSettings(
-                    Collections.emptyList(),
-                    Collections.emptyList(),
-                    Collections.emptyList(),
-                    Collections.singletonList("admin")
-            ));
+            customUserAuthoritiesMapper = new CustomUserAuthoritiesMapper(setupRoleSettings(Collections.emptyList(), Collections
+                    .emptyList(), Collections.emptyList(), Collections.singletonList("admin")));
 
             Collection<? extends GrantedAuthority> output = customUserAuthoritiesMapper.mapAuthorities(test_permission_set);
 
@@ -133,12 +108,8 @@ public class CustomUserAuthoritiesMapperTest {
         @Test
         public void hasMultiple() {
             List<SimpleGrantedAuthority> test_permission_set = Collections.singletonList(new SimpleGrantedAuthority("ROLE_admin"));
-            customUserAuthoritiesMapper = new CustomUserAuthoritiesMapper(setupRoleSettings(
-                    Collections.singletonList("read"),
-                    Collections.singletonList("write"),
-                    Collections.singletonList("commit"),
-                    Collections.singletonList("admin")
-            ));
+            customUserAuthoritiesMapper = new CustomUserAuthoritiesMapper(setupRoleSettings(Collections.singletonList("read"), Collections
+                    .singletonList("write"), Collections.singletonList("commit"), Collections.singletonList("admin")));
             Collection<? extends GrantedAuthority> output = customUserAuthoritiesMapper.mapAuthorities(test_permission_set);
 
             assertThat(output).hasSize(4);

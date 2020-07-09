@@ -34,7 +34,9 @@ public class ScheduledExecutorContextPropagationSensor implements SpecialSensor 
     @Override
     public boolean shouldInstrument(Class<?> clazz, InstrumentationConfiguration settings) {
         val type = TypeDescription.ForLoadedType.of(clazz);
-        return settings.getSource().getSpecial().isScheduledExecutorContextPropagation() && CLASSES_MATCHER.matches(type);
+        return settings.getSource()
+                .getSpecial()
+                .isScheduledExecutorContextPropagation() && CLASSES_MATCHER.matches(type);
     }
 
     @Override
@@ -44,9 +46,7 @@ public class ScheduledExecutorContextPropagationSensor implements SpecialSensor 
 
     @Override
     public DynamicType.Builder instrument(Class<?> clazz, InstrumentationConfiguration settings, DynamicType.Builder builder) {
-        return builder
-                .visit(ScheduledExecutorRunnableAdvice.TARGET)
-                .visit(ScheduledExecutorCallableAdvice.TARGET);
+        return builder.visit(ScheduledExecutorRunnableAdvice.TARGET).visit(ScheduledExecutorCallableAdvice.TARGET);
     }
 
     /**

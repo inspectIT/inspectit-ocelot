@@ -63,20 +63,26 @@ public class GenericActionGenerator {
     private static ClassLoader BOOTSTRAP_LOADER_MARKER = new URLClassLoader(new URL[]{});
 
     private static String NON_VOID_GENERIC_ACTION_STRUCTURAL_ID = "genericAction";
+
     private static String VOID_GENERIC_ACTION_STRUCTURAL_ID = "voidGenericAction";
 
     private static String METHOD_ARGS = "$1";
+
     private static String THIZ = "$2";
+
     private static String RETURN_VALUE = "$3";
+
     private static String THROWN = "$4";
+
     private static String ADDITIONAL_ARGS = "$5";
 
     @Autowired
     private ClassInjector classInjector;
 
-    private LoadingCache<ClassLoader, Cache<GenericActionConfig, InjectedClass<? extends IGenericAction>>> actionsCache
-            = CacheBuilder.newBuilder().weakKeys().build(
-            new CacheLoader<ClassLoader, Cache<GenericActionConfig, InjectedClass<? extends IGenericAction>>>() {
+    private LoadingCache<ClassLoader, Cache<GenericActionConfig, InjectedClass<? extends IGenericAction>>> actionsCache = CacheBuilder
+            .newBuilder()
+            .weakKeys()
+            .build(new CacheLoader<ClassLoader, Cache<GenericActionConfig, InjectedClass<? extends IGenericAction>>>() {
                 @Override
                 public Cache<GenericActionConfig, InjectedClass<? extends IGenericAction>> load(ClassLoader key) {
                     return CacheBuilder.newBuilder().weakValues().build();
@@ -89,11 +95,11 @@ public class GenericActionGenerator {
      *
      * @param actionConfig       the configuration of the generic action to use
      * @param classToUseActionOn the context in which the action will be active. The action will be injected into the classloader of this class.
+     *
      * @return the generated action
      */
     @SuppressWarnings("unchecked")
-    public InjectedClass<? extends IGenericAction> getOrGenerateGenericAction(GenericActionConfig
-                                                                                      actionConfig, Class<?> classToUseActionOn) {
+    public InjectedClass<? extends IGenericAction> getOrGenerateGenericAction(GenericActionConfig actionConfig, Class<?> classToUseActionOn) {
         ClassLoader loader = Optional.ofNullable(classToUseActionOn.getClassLoader()).orElse(BOOTSTRAP_LOADER_MARKER);
         actionsCache.cleanUp();
         Cache<GenericActionConfig, InjectedClass<? extends IGenericAction>> clCache;
@@ -102,14 +108,10 @@ public class GenericActionGenerator {
             clCache.cleanUp(); //cleanup to make sure unused InjectedClasses are released
             try {
                 String templateType = actionConfig.isVoid() ? VOID_GENERIC_ACTION_STRUCTURAL_ID : NON_VOID_GENERIC_ACTION_STRUCTURAL_ID;
-                return clCache.get(actionConfig, () ->
-                        (InjectedClass<? extends IGenericAction>)
-                                classInjector.inject(templateType, classToUseActionOn, (className) ->
-                                        buildGenericActionByteCode(actionConfig, loader, className)
-                                ));
+                return clCache.get(actionConfig, () -> (InjectedClass<? extends IGenericAction>) classInjector.inject(templateType, classToUseActionOn, (className) -> buildGenericActionByteCode(actionConfig, loader, className)));
             } catch (ExecutionException | ExecutionError e) {
-                log.error("Error creating generic action '{}' in context of class {}! Using a No-Operation action instead!",
-                        actionConfig.getName(), classToUseActionOn.getName(), e);
+                log.error("Error creating generic action '{}' in context of class {}! Using a No-Operation action instead!", actionConfig
+                        .getName(), classToUseActionOn.getName(), e);
                 return clCache.get(actionConfig, () -> new InjectedClass<IGenericAction>(GenericActionTemplate.class));
             }
         } catch (ExecutionException e) {
@@ -118,9 +120,7 @@ public class GenericActionGenerator {
         }
     }
 
-    private byte[] buildGenericActionByteCode(GenericActionConfig actionConfig, ClassLoader loader, String
-            className) throws NotFoundException, CannotCompileException, IOException {
-
+    private byte[] buildGenericActionByteCode(GenericActionConfig actionConfig, ClassLoader loader, String className) throws NotFoundException, CannotCompileException, IOException {
 
         ClassPool cp = new ClassPool();
         cp.insertClassPath(new ClassClassPath(GenericActionTemplate.class));
@@ -183,6 +183,7 @@ public class GenericActionGenerator {
      * </pre>
      *
      * @param actionConfig the config of the action to build
+     *
      * @return the generated method body as string
      */
     private String buildActionMethod(GenericActionConfig actionConfig) {
@@ -243,7 +244,13 @@ public class GenericActionGenerator {
         if (AutoboxingHelper.isPrimitiveType(type)) {
             String wrapperType = AutoboxingHelper.getWrapperForPrimitive(type);
             String unboxingMethod = AutoboxingHelper.getWrapperUnboxingMethodName(wrapperType);
-            buf.append("((").append(wrapperType).append(")(").append(value).append(")).").append(unboxingMethod).append("()");
+            buf.append("((")
+                    .append(wrapperType)
+                    .append(")(")
+                    .append(value)
+                    .append(")).")
+                    .append(unboxingMethod)
+                    .append("()");
         } else {
             buf.append('(').append(type).append(")(").append(value).append(")");
         }

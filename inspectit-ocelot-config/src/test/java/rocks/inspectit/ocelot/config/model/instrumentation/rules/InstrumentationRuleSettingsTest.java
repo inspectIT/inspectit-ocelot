@@ -23,7 +23,6 @@ import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 
-
 public class InstrumentationRuleSettingsTest {
 
     InspectitConfig root;
@@ -53,7 +52,6 @@ public class InstrumentationRuleSettingsTest {
         root.setMetrics(metrics);
     }
 
-
     @Nested
     class PerformValidation {
 
@@ -80,9 +78,7 @@ public class InstrumentationRuleSettingsTest {
             instr.performValidation(root, new ViolationBuilder(violations));
 
             assertThat(violations).hasSize(1);
-            assertThat(violations.get(0).getMessage())
-                    .containsIgnoringCase("scope")
-                    .containsIgnoringCase("exist");
+            assertThat(violations.get(0).getMessage()).containsIgnoringCase("scope").containsIgnoringCase("exist");
         }
 
         @Test
@@ -93,9 +89,7 @@ public class InstrumentationRuleSettingsTest {
             instr.performValidation(root, new ViolationBuilder(violations));
 
             assertThat(violations).hasSize(1);
-            assertThat(violations.get(0).getMessage())
-                    .containsIgnoringCase("include")
-                    .containsIgnoringCase("exist");
+            assertThat(violations.get(0).getMessage()).containsIgnoringCase("include").containsIgnoringCase("exist");
         }
 
         @Test
@@ -109,7 +103,6 @@ public class InstrumentationRuleSettingsTest {
             ActionCallSettings postEntryCall = Mockito.spy(ActionCallSettings.class);
             postEntryCall.setAction("someAction");
             doNothing().when(postEntryCall).performValidation(any(), any());
-
 
             ActionCallSettings preExitCall = Mockito.spy(ActionCallSettings.class);
             preExitCall.setAction("someAction");

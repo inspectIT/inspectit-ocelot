@@ -26,10 +26,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class JdbcServiceOutMetricTest {
 
     static Connection conn;
+
     static PreparedStatement preparedSelect;
+
     static final String SELECT_SQL = "SELECT * FROM PERSON";
 
     static final String DB_URL_WITHOUT_JDBC = "h2:mem:test";
+
     static final String DB_URL = "jdbc:" + DB_URL_WITHOUT_JDBC;
 
     @BeforeAll
@@ -61,7 +64,6 @@ public class JdbcServiceOutMetricTest {
 
         preparedSelect.execute();
 
-
         TestUtils.waitForOpenCensusQueueToBeProcessed();
 
         Map<String, String> tags = new HashMap<>();
@@ -70,14 +72,14 @@ public class JdbcServiceOutMetricTest {
         tags.put("target_external", DB_URL_WITHOUT_JDBC);
 
         long cnt = ((AggregationData.CountData) TestUtils.getDataForView("service/out/count", tags)).getCount();
-        double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("service/out/responsetime/sum", tags)).getSum();
+        double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("service/out/responsetime/sum", tags))
+                .getSum();
 
         assertThat(cnt).isEqualTo(1);
         assertThat(respSum).isGreaterThan(0);
 
         ctx.close();
     }
-
 
     @Test
     void checkDirectStatementCounted() throws Exception {
@@ -90,7 +92,6 @@ public class JdbcServiceOutMetricTest {
 
         conn.createStatement().execute(SELECT_SQL);
 
-
         TestUtils.waitForOpenCensusQueueToBeProcessed();
 
         Map<String, String> tags = new HashMap<>();
@@ -99,13 +100,13 @@ public class JdbcServiceOutMetricTest {
         tags.put("target_external", DB_URL_WITHOUT_JDBC);
 
         long cnt = ((AggregationData.CountData) TestUtils.getDataForView("service/out/count", tags)).getCount();
-        double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("service/out/responsetime/sum", tags)).getSum();
+        double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("service/out/responsetime/sum", tags))
+                .getSum();
 
         assertThat(cnt).isEqualTo(1);
         assertThat(respSum).isGreaterThan(0);
 
         ctx.close();
     }
-
 
 }

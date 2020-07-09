@@ -34,8 +34,8 @@ class CommonTagsManagerIntTest {
             TagContext commonTagContext = provider.getCommonTagContext();
             List<TagKey> commonTagKeys = provider.getCommonTagKeys();
 
-            assertThat(InternalUtils.getTags(commonTagContext))
-                    .allSatisfy(tag -> assertThat(commonTagKeys.contains(tag.getKey())).isTrue());
+            assertThat(InternalUtils.getTags(commonTagContext)).allSatisfy(tag -> assertThat(commonTagKeys.contains(tag.getKey()))
+                    .isTrue());
         }
 
         public void scopeAvailable() {
@@ -43,12 +43,9 @@ class CommonTagsManagerIntTest {
         }
     }
 
-
     @Nested
     @DirtiesContext
-    @TestPropertySource(properties = {
-            "inspectit.tags.extra.service-name=my-service-name"
-    })
+    @TestPropertySource(properties = {"inspectit.tags.extra.service-name=my-service-name"})
     class PriorityRespected extends SpringTestBase {
 
         @Autowired
@@ -58,19 +55,16 @@ class CommonTagsManagerIntTest {
         public void extraOverwritesProviders() {
             TagContext commonTagContext = provider.getCommonTagContext();
 
-            assertThat(InternalUtils.getTags(commonTagContext))
-                    .anySatisfy(tag -> {
-                        assertThat(tag.getKey()).isEqualTo(TagKey.create("service-name"));
-                        assertThat(tag.getValue()).isEqualTo(TagValue.create("my-service-name"));
-                    });
+            assertThat(InternalUtils.getTags(commonTagContext)).anySatisfy(tag -> {
+                assertThat(tag.getKey()).isEqualTo(TagKey.create("service-name"));
+                assertThat(tag.getValue()).isEqualTo(TagValue.create("my-service-name"));
+            });
         }
     }
 
     @Nested
     @DirtiesContext
-    @TestPropertySource(properties = {
-            "inspectit.tags.extra.service-name=my-service-name"
-    })
+    @TestPropertySource(properties = {"inspectit.tags.extra.service-name=my-service-name"})
     class Updates extends SpringTestBase {
 
         @Autowired
@@ -78,33 +72,25 @@ class CommonTagsManagerIntTest {
 
         @Test
         public void extraOverwritesProviders() {
-            updateProperties(
-                    properties -> properties
-                            .withProperty("inspectit.tags.providers.environment.resolve-host-address", Boolean.FALSE)
-                            .withProperty("inspectit.tags.providers.environment.resolve-host-name", Boolean.FALSE)
-                            .withProperty("inspectit.service-name", "some-service-name")
-                            .withProperty("inspectit.tags.extra.service-name", "my-service-name")
-            );
+            updateProperties(properties -> properties.withProperty("inspectit.tags.providers.environment.resolve-host-address", Boolean.FALSE)
+                    .withProperty("inspectit.tags.providers.environment.resolve-host-name", Boolean.FALSE)
+                    .withProperty("inspectit.service-name", "some-service-name")
+                    .withProperty("inspectit.tags.extra.service-name", "my-service-name"));
 
             TagContext commonTagContext = provider.getCommonTagContext();
 
-            assertThat(InternalUtils.getTags(commonTagContext))
-                    .anySatisfy(tag -> {
-                        assertThat(tag.getKey()).isEqualTo(TagKey.create("service-name"));
-                        assertThat(tag.getValue()).isEqualTo(TagValue.create("my-service-name"));
-                    })
-                    .allSatisfy(tag -> {
-                        assertThat(tag.getKey()).isNotIn("host", "host-address");
-                    });
+            assertThat(InternalUtils.getTags(commonTagContext)).anySatisfy(tag -> {
+                assertThat(tag.getKey()).isEqualTo(TagKey.create("service-name"));
+                assertThat(tag.getValue()).isEqualTo(TagValue.create("my-service-name"));
+            }).allSatisfy(tag -> {
+                assertThat(tag.getKey()).isNotIn("host", "host-address");
+            });
         }
     }
 
     @Nested
     @DirtiesContext
-    @TestPropertySource(properties = {
-            "inspectit.tags.extra.service-name=this-value-is-over-255-characters-long ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------",
-            "inspectit.tags.extra.service-name2=non-printable-character-\u007f"
-    })
+    @TestPropertySource(properties = {"inspectit.tags.extra.service-name=this-value-is-over-255-characters-long ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------", "inspectit.tags.extra.service-name2=non-printable-character-\u007f"})
     class VeryLongTagValues extends SpringTestBase {
 
         @Autowired
@@ -114,11 +100,10 @@ class CommonTagsManagerIntTest {
         public void extraOverwritesProviders() {
             TagContext commonTagContext = provider.getCommonTagContext();
 
-            assertThat(InternalUtils.getTags(commonTagContext))
-                    .anySatisfy(tag -> {
-                        assertThat(tag.getKey()).isEqualTo(TagKey.create("service-name"));
-                        assertThat(tag.getValue()).isEqualTo(TagValue.create("<invalid>"));
-                    });
+            assertThat(InternalUtils.getTags(commonTagContext)).anySatisfy(tag -> {
+                assertThat(tag.getKey()).isEqualTo(TagKey.create("service-name"));
+                assertThat(tag.getValue()).isEqualTo(TagValue.create("<invalid>"));
+            });
         }
     }
 

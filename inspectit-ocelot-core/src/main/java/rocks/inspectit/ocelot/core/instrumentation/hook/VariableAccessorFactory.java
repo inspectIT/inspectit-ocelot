@@ -30,6 +30,7 @@ public class VariableAccessorFactory {
      * Otherwise a {@link VariableAccessor} is created which performs a lookup of the given variable in the {@link rocks.inspectit.ocelot.bootstrap.exposed.InspectitContext}.
      *
      * @param variable the name of the variable to create an accessor for
+     *
      * @return the {@link VariableAccessor} for the given variable, never null
      */
     public VariableAccessor getVariableAccessor(String variable) {
@@ -49,6 +50,7 @@ public class VariableAccessorFactory {
      * Creates a {@link VariableAccessor} which always returns the given value.
      *
      * @param value the value to return
+     *
      * @return an accessor returning the given value.
      */
     public VariableAccessor getConstantAccessor(Object value) {
@@ -59,6 +61,7 @@ public class VariableAccessorFactory {
      * Creates a {@link VariableAccessor} for the given special variable.
      *
      * @param variable the name of the special variable
+     *
      * @return the {@link VariableAccessor} for the given variable or null if "variable" does not denote a special variable
      */
     public VariableAccessor getSpecialVariableAccessor(String variable) {
@@ -105,6 +108,7 @@ public class VariableAccessorFactory {
      *
      * @param variable      the name of the special variable
      * @param contextMethod the method for which the constant value is being derived
+     *
      * @return the value of the special variable if it is a constant, null otherwise
      */
     public Object getConstantSpecialVariable(String variable, MethodReflectionInformation contextMethod) {

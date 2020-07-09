@@ -10,6 +10,7 @@ public interface IHookManager {
      *
      * @param clazz           the class to query the hook for
      * @param methodSignature the signature of the method to query the hook for
+     *
      * @return the configured hook or a no-operation hook
      */
     IMethodHook getHook(Class<?> clazz, String methodSignature);

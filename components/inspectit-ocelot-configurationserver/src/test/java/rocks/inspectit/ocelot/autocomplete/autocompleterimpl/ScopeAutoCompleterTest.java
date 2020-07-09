@@ -26,6 +26,7 @@ public class ScopeAutoCompleterTest {
 
     @Nested
     public class GetSuggestions {
+
         @Test
         public void wrongPath() {
             List<String> path = Arrays.asList("inspectit", "metrics", "processor");

@@ -157,7 +157,9 @@ public class RevisionAccess extends AbstractFileAccessor {
      *
      * @param treeWalk   The {@link TreeWalk} to traverse.
      * @param resultList the list which will be filled with the found files
+     *
      * @return The files within the current tree.
+     *
      * @throws IOException in case the repository cannot be read
      */
     private boolean collectFiles(TreeWalk treeWalk, List<FileInfo> resultList) throws IOException {
@@ -175,9 +177,7 @@ public class RevisionAccess extends AbstractFileAccessor {
                 List<FileInfo> nestedFiles = new ArrayList<>();
                 hasNext = collectFiles(treeWalk, nestedFiles);
 
-                fileBuilder
-                        .type(FileInfo.Type.DIRECTORY)
-                        .children(nestedFiles);
+                fileBuilder.type(FileInfo.Type.DIRECTORY).children(nestedFiles);
             } else {
                 fileBuilder.type(FileInfo.Type.FILE);
                 hasNext = treeWalk.next();

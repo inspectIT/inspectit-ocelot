@@ -15,7 +15,6 @@ import rocks.inspectit.ocelot.security.config.UserRoleConfiguration;
 import java.util.Collection;
 import java.util.Map;
 
-
 /**
  * The rest controller providing the interface used by the agent for configuration fetching.
  */

@@ -36,7 +36,10 @@ class PromotionControllerIntTest extends IntegrationTestBase {
             ResponseEntity<WorkspaceDiff> result = authRest.getForEntity("/api/v1/configuration/promotions", WorkspaceDiff.class);
 
             assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
-            assertThat(result.getBody().getEntries()).containsExactly(SimpleDiffEntry.builder().file("/src/file.yml").type(DiffEntry.ChangeType.ADD).build());
+            assertThat(result.getBody().getEntries()).containsExactly(SimpleDiffEntry.builder()
+                    .file("/src/file.yml")
+                    .type(DiffEntry.ChangeType.ADD)
+                    .build());
         }
     }
 

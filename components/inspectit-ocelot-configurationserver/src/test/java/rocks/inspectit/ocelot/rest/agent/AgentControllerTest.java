@@ -35,8 +35,7 @@ public class AgentControllerTest {
 
         @Test
         public void noMappingFound() throws Exception {
-            doReturn(null)
-                    .when(configManager).getConfiguration(anyMap());
+            doReturn(null).when(configManager).getConfiguration(anyMap());
 
             HashMap<String, String> attributes = new HashMap<>();
             ResponseEntity<String> result = controller.fetchConfiguration(attributes, Collections.emptyMap());
@@ -58,7 +57,6 @@ public class AgentControllerTest {
             verify(statusManager).notifyAgentConfigurationFetched(same(attributes), eq(Collections.emptyMap()), same(config));
         }
 
-
         @Test
         public void etagPresent() throws Exception {
             AgentConfiguration config = AgentConfiguration.builder().configYaml("foo : bar").build();
@@ -71,8 +69,7 @@ public class AgentControllerTest {
             assertThat(firstResult.getBody()).isEqualTo("foo : bar");
             assertThat(secondResult.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(secondResult.getBody()).isEqualTo("foo : bar");
-            assertThat(firstResult.getHeaders().getFirst("ETag"))
-                    .isNotBlank()
+            assertThat(firstResult.getHeaders().getFirst("ETag")).isNotBlank()
                     .isEqualTo(secondResult.getHeaders().getFirst("ETag"));
         }
     }

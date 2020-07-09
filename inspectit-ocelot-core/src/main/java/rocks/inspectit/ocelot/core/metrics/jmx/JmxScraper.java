@@ -21,9 +21,9 @@ import java.util.concurrent.ExecutionException;
  * Applied changes to original:true
  * <p>
  * <ul>
- *     <li>Knows how to scrape the set of MBean servers.</li>
- *     <li>Added cache for the JmxMBeanPropertyCache as now we need a cache per MBean server</li>
- *     <li>Added force platform server option</li>
+ * <li>Knows how to scrape the set of MBean servers.</li>
+ * <li>Added cache for the JmxMBeanPropertyCache as now we need a cache per MBean server</li>
+ * <li>Added force platform server option</li>
  * </ul>
  */
 @Slf4j
@@ -43,14 +43,7 @@ class JmxScraper {
          * @param attrDescription Attribute description
          * @param value           Scraped value
          */
-        void recordBean(
-                String domain,
-                LinkedHashMap<String, String> beanProperties,
-                LinkedList<String> attrKeys,
-                String attrName,
-                String attrType,
-                String attrDescription,
-                Object value);
+        void recordBean(String domain, LinkedHashMap<String, String> beanProperties, LinkedList<String> attrKeys, String attrName, String attrType, String attrDescription, Object value);
     }
 
     /**
@@ -68,7 +61,9 @@ class JmxScraper {
     /**
      * Map of cache for the jmx bean properties per mbean server.
      */
-    private final Cache<MBeanServerConnection, JmxMBeanPropertyCache> jmxMBeanPropertyCacheMap = CacheBuilder.newBuilder().weakKeys().build();
+    private final Cache<MBeanServerConnection, JmxMBeanPropertyCache> jmxMBeanPropertyCacheMap = CacheBuilder.newBuilder()
+            .weakKeys()
+            .build();
 
     /**
      * Force the creation of the platform MBean server before first scrape.
@@ -197,15 +192,8 @@ class JmxScraper {
         for (Attribute attribute : attributes.asList()) {
             MBeanAttributeInfo attr = name2AttrInfo.get(attribute.getName());
             logScrape(mbeanName, attr, "process");
-            processBeanValue(
-                    mbeanName.getDomain(),
-                    jmxMBeanPropertyCache.getKeyPropertyList(mbeanName),
-                    new LinkedList<String>(),
-                    attr.getName(),
-                    attr.getType(),
-                    attr.getDescription(),
-                    attribute.getValue()
-            );
+            processBeanValue(mbeanName.getDomain(), jmxMBeanPropertyCache.getKeyPropertyList(mbeanName), new LinkedList<String>(), attr
+                    .getName(), attr.getType(), attr.getDescription(), attribute.getValue());
         }
     }
 
@@ -215,26 +203,12 @@ class JmxScraper {
      * so this function tries to do a best-effort pass of getting the values/names
      * out in a way it can be processed elsewhere easily.
      */
-    private void processBeanValue(
-            String domain,
-            LinkedHashMap<String, String> beanProperties,
-            LinkedList<String> attrKeys,
-            String attrName,
-            String attrType,
-            String attrDescription,
-            Object value) {
+    private void processBeanValue(String domain, LinkedHashMap<String, String> beanProperties, LinkedList<String> attrKeys, String attrName, String attrType, String attrDescription, Object value) {
         if (value == null) {
             logScrape(domain + beanProperties + attrName, "null");
         } else if (value instanceof Number || value instanceof String || value instanceof Boolean) {
             logScrape(domain + beanProperties + attrName, value.toString());
-            this.receiver.recordBean(
-                    domain,
-                    beanProperties,
-                    attrKeys,
-                    attrName,
-                    attrType,
-                    attrDescription,
-                    value);
+            this.receiver.recordBean(domain, beanProperties, attrKeys, attrName, attrType, attrDescription, value);
         } else if (value instanceof CompositeData) {
             logScrape(domain + beanProperties + attrName, "compositedata");
             CompositeData composite = (CompositeData) value;
@@ -244,14 +218,7 @@ class JmxScraper {
             for (String key : type.keySet()) {
                 String typ = type.getType(key).getTypeName();
                 Object valu = composite.get(key);
-                processBeanValue(
-                        domain,
-                        beanProperties,
-                        attrKeys,
-                        key,
-                        typ,
-                        type.getDescription(),
-                        valu);
+                processBeanValue(domain, beanProperties, attrKeys, key, typ, type.getDescription(), valu);
             }
         } else if (value instanceof TabularData) {
             // I don't pretend to have a good understanding of TabularData.
@@ -295,14 +262,7 @@ class JmxScraper {
                             attrNames = attrKeys;
                             name = attrName;
                         }
-                        processBeanValue(
-                                domain,
-                                l2s,
-                                attrNames,
-                                name,
-                                typ,
-                                type.getDescription(),
-                                composite.get(valueIdx));
+                        processBeanValue(domain, l2s, attrNames, name, typ, type.getDescription(), composite.get(valueIdx));
                     }
                 } else {
                     logScrape(domain, "not a correct tabulardata format");
@@ -331,19 +291,9 @@ class JmxScraper {
     }
 
     private static class StdoutWriter implements MBeanReceiver {
-        public void recordBean(
-                String domain,
-                LinkedHashMap<String, String> beanProperties,
-                LinkedList<String> attrKeys,
-                String attrName,
-                String attrType,
-                String attrDescription,
-                Object value) {
-            System.out.println(domain +
-                    beanProperties +
-                    attrKeys +
-                    attrName +
-                    ": " + value);
+
+        public void recordBean(String domain, LinkedHashMap<String, String> beanProperties, LinkedList<String> attrKeys, String attrName, String attrType, String attrDescription, Object value) {
+            System.out.println(domain + beanProperties + attrKeys + attrName + ": " + value);
         }
     }
 

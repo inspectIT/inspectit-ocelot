@@ -116,9 +116,12 @@ public class MDCAccess implements IClassDiscoveryListener {
     @EventListener(InspectitConfigChangedEvent.class)
     @VisibleForTesting
     synchronized void updateEnabledAdaptersSet() {
-        TraceIdMDCInjectionSettings settings =
-                inspectitEnv.getCurrentConfig().getTracing().getLogCorrelation().getTraceIdMdcInjection();
-        enabledAdapters = availableAdapters.values().stream()
+        TraceIdMDCInjectionSettings settings = inspectitEnv.getCurrentConfig()
+                .getTracing()
+                .getLogCorrelation()
+                .getTraceIdMdcInjection();
+        enabledAdapters = availableAdapters.values()
+                .stream()
                 .filter(adapter -> adapter.isEnabledForConfig(settings))
                 .collect(Collectors.toCollection(() -> Collections.newSetFromMap(new WeakHashMap<>())));
     }

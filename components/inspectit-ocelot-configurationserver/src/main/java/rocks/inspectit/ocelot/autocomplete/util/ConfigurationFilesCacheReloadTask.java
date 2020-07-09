@@ -50,7 +50,8 @@ public class ConfigurationFilesCacheReloadTask extends CancellableTask<Collectio
                 }
             }
             ConfigFileLoader.getDefaultConfigFiles()
-                    .values().stream()
+                    .values()
+                    .stream()
                     .map(this::parseYaml)
                     .forEach(parsedFileContents::add);
             onTaskSuccess(parsedFileContents);

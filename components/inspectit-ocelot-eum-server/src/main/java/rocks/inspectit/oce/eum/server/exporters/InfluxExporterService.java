@@ -40,10 +40,8 @@ public class InfluxExporterService {
 
     private boolean shouldEnable() {
         InfluxExporterSettings influx = config.getExporters().getMetrics().getInflux();
-        return influx.isEnabled()
-                && !StringUtils.isEmpty(influx.getUrl())
-                && !StringUtils.isEmpty(influx.getDatabase())
-                && !StringUtils.isEmpty(influx.getRetentionPolicy());
+        return influx.isEnabled() && !StringUtils.isEmpty(influx.getUrl()) && !StringUtils.isEmpty(influx.getDatabase()) && !StringUtils
+                .isEmpty(influx.getRetentionPolicy());
     }
 
     @PostConstruct

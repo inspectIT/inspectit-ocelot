@@ -52,7 +52,6 @@ public class MethodHook implements IMethodHook {
      */
     private final CopyOnWriteArrayList<IHookAction> activeEntryActions;
 
-
     /**
      * The subset of {@link #exitActions}, which are actually active.
      * Initially, this list contains the same elements as {@link #exitActions}.
@@ -84,8 +83,8 @@ public class MethodHook implements IMethodHook {
             try {
                 action.execute(executionContext);
             } catch (Throwable t) {
-                log.error("Entry action {} executed for method {} threw an exception and from now on is disabled!",
-                        action.getName(), methodInformation.getMethodFQN(), t);
+                log.error("Entry action {} executed for method {} threw an exception and from now on is disabled!", action
+                        .getName(), methodInformation.getMethodFQN(), t);
                 activeEntryActions.remove(action);
             }
         }
@@ -101,8 +100,8 @@ public class MethodHook implements IMethodHook {
             try {
                 action.execute(executionContext);
             } catch (Throwable t) {
-                log.error("Exit action {} executed for method {} threw an exception and from now on is disabled!",
-                        action.getName(), methodInformation.getMethodFQN(), t);
+                log.error("Exit action {} executed for method {} threw an exception and from now on is disabled!", action
+                        .getName(), methodInformation.getMethodFQN(), t);
                 activeExitActions.remove(action);
             }
         }

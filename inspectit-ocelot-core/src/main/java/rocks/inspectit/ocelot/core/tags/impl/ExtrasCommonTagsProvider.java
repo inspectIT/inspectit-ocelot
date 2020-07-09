@@ -17,7 +17,6 @@ import java.util.Map;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class ExtrasCommonTagsProvider implements ICommonTagsProvider {
 
-
     @Override
     public Map<String, String> getTags(InspectitConfig configuration) {
         return configuration.getTags().getExtra();

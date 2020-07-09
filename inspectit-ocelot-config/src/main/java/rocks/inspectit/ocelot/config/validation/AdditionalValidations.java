@@ -21,6 +21,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Constraint(validatedBy = AdditionalValidationsValidator.class)
 @Documented
 public @interface AdditionalValidations {
+
     String message() default "";
 
     Class<?>[] groups() default {};

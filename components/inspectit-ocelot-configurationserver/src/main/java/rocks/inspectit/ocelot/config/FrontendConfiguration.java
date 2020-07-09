@@ -12,8 +12,6 @@ public class FrontendConfiguration implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry
-                .addResourceHandler("/ui/**")
-                .addResourceLocations("classpath:/static/ui/");
+        registry.addResourceHandler("/ui/**").addResourceLocations("classpath:/static/ui/");
     }
 }

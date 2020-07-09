@@ -34,8 +34,10 @@ public class ZipkinExporterService extends DynamicallyActivatableService {
         try {
             ZipkinExporterSettings settings = configuration.getExporters().getTracing().getZipkin();
             log.info("Starting Zipkin Exporter with url '{}'", settings.getUrl());
-            ZipkinTraceExporter.createAndRegister(
-                    ZipkinExporterConfiguration.builder().setV2Url(settings.getUrl()).setServiceName(settings.getServiceName()).build());
+            ZipkinTraceExporter.createAndRegister(ZipkinExporterConfiguration.builder()
+                    .setV2Url(settings.getUrl())
+                    .setServiceName(settings.getServiceName())
+                    .build());
             return true;
         } catch (Throwable t) {
             log.error("Error creating Zipkin exporter", t);

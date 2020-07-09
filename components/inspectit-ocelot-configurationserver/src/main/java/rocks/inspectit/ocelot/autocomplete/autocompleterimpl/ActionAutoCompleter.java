@@ -19,16 +19,10 @@ public class ActionAutoCompleter implements AutoCompleter {
 
     private static List<String> ACTION_DECLARATION_PATH = Arrays.asList("inspectit", "instrumentation", "actions");
 
-    private static List<List<String>> ACTION_USAGE_PATHS = Arrays.asList(
-            ACTION_DECLARATION_PATH,
-            Arrays.asList("inspectit", "instrumentation", "rules", "*", "preEntry", "*", "action"),
-            Arrays.asList("inspectit", "instrumentation", "rules", "*", "entry", "*", "action"),
-            Arrays.asList("inspectit", "instrumentation", "rules", "*", "exit", "*", "action"),
-            Arrays.asList("inspectit", "instrumentation", "rules", "*", "preEntry", "*", "action"),
-            Arrays.asList("inspectit", "instrumentation", "rules", "*", "postEntry", "*", "action"),
-            Arrays.asList("inspectit", "instrumentation", "rules", "*", "preExit", "*", "action"),
-            Arrays.asList("inspectit", "instrumentation", "rules", "*", "postExit", "*", "action")
-    );
+    private static List<List<String>> ACTION_USAGE_PATHS = Arrays.asList(ACTION_DECLARATION_PATH, Arrays.asList("inspectit", "instrumentation", "rules", "*", "preEntry", "*", "action"), Arrays
+            .asList("inspectit", "instrumentation", "rules", "*", "entry", "*", "action"), Arrays.asList("inspectit", "instrumentation", "rules", "*", "exit", "*", "action"), Arrays
+            .asList("inspectit", "instrumentation", "rules", "*", "preEntry", "*", "action"), Arrays.asList("inspectit", "instrumentation", "rules", "*", "postEntry", "*", "action"), Arrays
+            .asList("inspectit", "instrumentation", "rules", "*", "preExit", "*", "action"), Arrays.asList("inspectit", "instrumentation", "rules", "*", "postExit", "*", "action"));
 
     @Autowired
     private ConfigurationQueryHelper configurationQueryHelper;
@@ -41,6 +35,7 @@ public class ActionAutoCompleter implements AutoCompleter {
      * "inspectit.instrumentation.actions". '*' serves as a wild card here.
      *
      * @param path A given path as List. Each String should act as a literal of the path
+     *
      * @return A list of Strings resembling actions defined in the yaml files.
      */
     @Override

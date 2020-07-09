@@ -35,8 +35,7 @@ class DirectoryControllerIntTest extends IntegrationTestBase {
             ResponseEntity<FileInfo[]> result = authRest.getForEntity("/api/v1/directories/", FileInfo[].class);
 
             FileInfo[] resultBody = result.getBody();
-            assertThat(resultBody)
-                    .hasSize(1)
+            assertThat(resultBody).hasSize(1)
                     .extracting(FileInfo::getName, FileInfo::getType, FileInfo::getChildren)
                     .contains(tuple("file.yml", FileInfo.Type.FILE, null));
         }

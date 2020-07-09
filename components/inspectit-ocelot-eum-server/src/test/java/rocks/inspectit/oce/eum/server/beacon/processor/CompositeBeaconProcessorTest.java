@@ -19,10 +19,8 @@ class CompositeBeaconProcessorTest {
     private CompositeBeaconProcessor processor;
 
     @Spy
-    private List<BeaconProcessor> processorList = ImmutableList.of(
-            beacon -> beacon.merge(ImmutableMap.of("key2", "value2")),
-            beacon -> beacon.merge(ImmutableMap.of("key1", "value2"))
-    );
+    private List<BeaconProcessor> processorList = ImmutableList.of(beacon -> beacon.merge(ImmutableMap.of("key2", "value2")), beacon -> beacon
+            .merge(ImmutableMap.of("key1", "value2")));
 
     @Test
     public void test() {

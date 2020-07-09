@@ -6,7 +6,6 @@ import rocks.inspectit.ocelot.core.instrumentation.injection.InjectedClass;
 
 import java.util.Map;
 
-
 /**
  * Variant of a {@link AbstractDynamicBoundGenericAction} which does
  * not write the value returned by the invoked action to the context,
@@ -14,17 +13,14 @@ import java.util.Map;
  */
 class VoidDynamicBoundGenericAction extends AbstractDynamicBoundGenericAction {
 
-
-    VoidDynamicBoundGenericAction(String callName, GenericActionConfig actionConfig,
-                                  InjectedClass<?> action, Map<String, Object> constantAssignments,
-                                  Map<String, VariableAccessor> dynamicAssignments) {
+    VoidDynamicBoundGenericAction(String callName, GenericActionConfig actionConfig, InjectedClass<?> action, Map<String, Object> constantAssignments, Map<String, VariableAccessor> dynamicAssignments) {
         super(callName, actionConfig, action, constantAssignments, dynamicAssignments);
     }
 
     @Override
     public void execute(ExecutionContext context) {
         Object[] args = buildAdditionalArguments(context);
-        action.get().execute(context.getMethodArguments(), context.getThiz(),
-                context.getReturnValue(), context.getThrown(), args);
+        action.get()
+                .execute(context.getMethodArguments(), context.getThiz(), context.getReturnValue(), context.getThrown(), args);
     }
 }

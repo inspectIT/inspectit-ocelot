@@ -30,7 +30,6 @@ public class CountryCodeBeaconProcessor implements BeaconProcessor {
     @Autowired
     private EumServerConfiguration configuration;
 
-
     @Override
     public Beacon process(Beacon beacon) {
         String countryCode = resolveCountryCode();
@@ -60,13 +59,15 @@ public class CountryCodeBeaconProcessor implements BeaconProcessor {
      * Resolves custom ip mapping, if defined.
      *
      * @param ip the IP of the beacon
+     *
      * @return the CountryCode
      */
     private String resolveCustomIPMapping(String ip) {
         Map<String, List<String>> customIpMapping = configuration.getTags().getCustomIPMapping();
         if (customIpMapping != null) {
             for (Map.Entry<String, List<String>> customCountryCodeDefinition : customIpMapping.entrySet()) {
-                if (customCountryCodeDefinition.getValue().stream()
+                if (customCountryCodeDefinition.getValue()
+                        .stream()
                         .anyMatch(address -> address.contains("/") ? ipUtils.containsIp(address, ip) : address.equals(ip))) {
                     return customCountryCodeDefinition.getKey();
                 }

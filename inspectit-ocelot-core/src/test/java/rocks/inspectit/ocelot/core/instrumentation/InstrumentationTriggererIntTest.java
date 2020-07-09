@@ -21,16 +21,18 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-@TestPropertySource(properties = {
-        "inspectit.instrumentation.internal.inter-batch-delay=1ms" //for faster responses of the test
+@TestPropertySource(properties = {"inspectit.instrumentation.internal.inter-batch-delay=1ms" //for faster responses of the test
 })
 public class InstrumentationTriggererIntTest extends SpringTestBase {
 
     private static Class<?>[] classesWithInstrumentableExecuter;
+
     private static Class<?>[] classesWithoutInstrumentableExecuter;
 
     private static Class<?> instrumentableExecutorClass;
+
     private static Class<?> ignoredExecutor = FakeExecutor.class;
+
     private static byte[] bytecodeOfInstrumentableExecuter;
 
     @Autowired
@@ -38,7 +40,6 @@ public class InstrumentationTriggererIntTest extends SpringTestBase {
 
     @Autowired
     InstrumentationTriggerer triggerer;
-
 
     /**
      * After an invocation of retransformClass for FakeExecuter.class,
@@ -56,14 +57,9 @@ public class InstrumentationTriggererIntTest extends SpringTestBase {
         ClassLoader clWithBootstrapClasses = Instances.class.getClassLoader();
         instrumentableExecutorClass = Class.forName(className, true, new DummyClassLoader(clWithBootstrapClasses, FakeExecutor.class));
 
+        classesWithInstrumentableExecuter = new Class[]{String.class, Integer.class, ignoredExecutor, instrumentableExecutorClass, Comparable.class};
 
-        classesWithInstrumentableExecuter = new Class[]{
-                String.class, Integer.class, ignoredExecutor, instrumentableExecutorClass, Comparable.class
-        };
-
-        classesWithoutInstrumentableExecuter = new Class[]{
-                String.class, Integer.class, ignoredExecutor, Comparable.class
-        };
+        classesWithoutInstrumentableExecuter = new Class[]{String.class, Integer.class, ignoredExecutor, Comparable.class};
     }
 
     @BeforeEach
@@ -90,8 +86,7 @@ public class InstrumentationTriggererIntTest extends SpringTestBase {
         transformationResultOfInstrumentableExecuter = null;
         triggerer.onNewClassesDiscovered(new HashSet<>(Arrays.asList(classesWithInstrumentableExecuter)));
 
-        verify(mockInstrumentation, timeout(5000).times(1))
-                .retransformClasses(eq(instrumentableExecutorClass));
+        verify(mockInstrumentation, timeout(5000).times(1)).retransformClasses(eq(instrumentableExecutorClass));
         while (transformationResultOfInstrumentableExecuter == null) {
             Thread.sleep(10);
         }
@@ -99,11 +94,8 @@ public class InstrumentationTriggererIntTest extends SpringTestBase {
         assertThat(bytecodeOfInstrumentableExecuter).isNotEqualTo(transformationResultOfInstrumentableExecuter);
 
         transformationResultOfInstrumentableExecuter = null;
-        updateProperties(props ->
-                props.setProperty("inspectit.instrumentation.special.executor-context-propagation", false)
-        );
-        verify(mockInstrumentation, timeout(5000).times(2))
-                .retransformClasses(eq(instrumentableExecutorClass));
+        updateProperties(props -> props.setProperty("inspectit.instrumentation.special.executor-context-propagation", false));
+        verify(mockInstrumentation, timeout(5000).times(2)).retransformClasses(eq(instrumentableExecutorClass));
         while (transformationResultOfInstrumentableExecuter == null) {
             Thread.sleep(10);
         }
@@ -112,21 +104,18 @@ public class InstrumentationTriggererIntTest extends SpringTestBase {
 
     }
 
-
     @Test
     @DirtiesContext
     void testInstrumentationUpdateOnNewClassDiscovery() throws Exception {
         when(mockInstrumentation.getAllLoadedClasses()).thenReturn(classesWithoutInstrumentableExecuter);
         triggerer.onNewClassesDiscovered(new HashSet<>(Arrays.asList(classesWithoutInstrumentableExecuter)));
 
-        verify(mockInstrumentation, after(1000).never())
-                .retransformClasses(eq(instrumentableExecutorClass));
+        verify(mockInstrumentation, after(1000).never()).retransformClasses(eq(instrumentableExecutorClass));
 
         when(mockInstrumentation.getAllLoadedClasses()).thenReturn(classesWithInstrumentableExecuter);
         triggerer.onNewClassesDiscovered(new HashSet<>(Arrays.asList(instrumentableExecutorClass)));
 
-        verify(mockInstrumentation, timeout(5000).times(1))
-                .retransformClasses(eq(instrumentableExecutorClass));
+        verify(mockInstrumentation, timeout(5000).times(1)).retransformClasses(eq(instrumentableExecutorClass));
         while (transformationResultOfInstrumentableExecuter == null) {
             Thread.sleep(10);
         }

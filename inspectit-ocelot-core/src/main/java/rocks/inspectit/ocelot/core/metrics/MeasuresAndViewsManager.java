@@ -171,7 +171,8 @@ public class MeasuresAndViewsManager {
         val registeredViews = viewManager.getAllExportedViews()
                 .stream()
                 .collect(Collectors.toMap(v -> v.getName().asString(), v -> v));
-        val registeredMeasures = registeredViews.values().stream()
+        val registeredMeasures = registeredViews.values()
+                .stream()
                 .map(View::getMeasure)
                 .distinct()
                 .collect(Collectors.toMap(Measure::getName, m -> m));
@@ -242,8 +243,8 @@ public class MeasuresAndViewsManager {
         if (!fullDefinition.getUnit().equals(measure.getUnit())) {
             log.info("Cannot update unit of measure '{}' because it has been already registered in OpenCensus!", measureName);
         }
-        if ((measure instanceof Measure.MeasureLong && fullDefinition.getType() != MetricDefinitionSettings.MeasureType.LONG)
-                || (measure instanceof Measure.MeasureDouble && fullDefinition.getType() != MetricDefinitionSettings.MeasureType.DOUBLE)) {
+        if ((measure instanceof Measure.MeasureLong && fullDefinition.getType() != MetricDefinitionSettings.MeasureType.LONG) || (measure instanceof Measure.MeasureDouble && fullDefinition
+                .getType() != MetricDefinitionSettings.MeasureType.DOUBLE)) {
             log.info("Cannot update type of measure '{}' because it has been already registered in OpenCensus!", measureName);
         }
     }
@@ -277,27 +278,21 @@ public class MeasuresAndViewsManager {
             return;
         }
         Set<TagKey> viewTags = getTagKeysForView(def);
-        Set<String> tagsAsStrings = viewTags.stream()
-                .map(TagKey::getName)
-                .collect(Collectors.toSet());
+        Set<String> tagsAsStrings = viewTags.stream().map(TagKey::getName).collect(Collectors.toSet());
         boolean minEnabled = def.getQuantiles().contains(0.0);
         boolean maxEnabled = def.getQuantiles().contains(1.0);
-        List<Double> percentilesFiltered = def.getQuantiles().stream()
+        List<Double> percentilesFiltered = def.getQuantiles()
+                .stream()
                 .filter(p -> p > 0 && p < 1)
                 .collect(Collectors.toList());
-        percentileViewManager.createOrUpdateView(measure.getName(), viewName, measure.getUnit(), def.getDescription(),
-                minEnabled, maxEnabled, percentilesFiltered, def.getTimeWindow()
-                        .toMillis(), tagsAsStrings, def.getMaxBufferedPoints());
+        percentileViewManager.createOrUpdateView(measure.getName(), viewName, measure.getUnit(), def.getDescription(), minEnabled, maxEnabled, percentilesFiltered, def
+                .getTimeWindow()
+                .toMillis(), tagsAsStrings, def.getMaxBufferedPoints());
     }
 
     private void registerNewView(String viewName, Measure measure, ViewDefinitionSettings def) {
         Set<TagKey> viewTags = getTagKeysForView(def);
-        View view = View.create(
-                View.Name.create(viewName),
-                def.getDescription(),
-                measure,
-                createAggregation(def),
-                new ArrayList<>(viewTags));
+        View view = View.create(View.Name.create(viewName), def.getDescription(), measure, createAggregation(def), new ArrayList<>(viewTags));
         viewManager.registerView(view);
     }
 
@@ -334,11 +329,14 @@ public class MeasuresAndViewsManager {
     private Set<TagKey> getTagKeysForView(ViewDefinitionSettings def) {
         Set<TagKey> viewTags = new HashSet<>();
         if (def.isWithCommonTags()) {
-            commonTags.getCommonTagKeys().stream()
+            commonTags.getCommonTagKeys()
+                    .stream()
                     .filter(t -> def.getTags().get(t.getName()) != Boolean.FALSE)
                     .forEach(viewTags::add);
         }
-        def.getTags().entrySet().stream()
+        def.getTags()
+                .entrySet()
+                .stream()
                 .filter(Map.Entry::getValue)
                 .map(Map.Entry::getKey)
                 .map(TagKey::create)
@@ -353,8 +351,8 @@ public class MeasuresAndViewsManager {
             case SUM:
                 return instance instanceof Aggregation.Sum;
             case HISTOGRAM:
-                return instance instanceof Aggregation.Distribution &&
-                        ((Aggregation.Distribution) instance).getBucketBoundaries().equals(view.getBucketBoundaries());
+                return instance instanceof Aggregation.Distribution && ((Aggregation.Distribution) instance).getBucketBoundaries()
+                        .equals(view.getBucketBoundaries());
             case LAST_VALUE:
                 return instance instanceof Aggregation.LastValue;
             default:

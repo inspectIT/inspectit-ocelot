@@ -40,6 +40,7 @@ public class InstrumentationRuleResolver {
      * contained in the given {@link InstrumentationSettings}.
      *
      * @param source the configuration which is used as basis for the rules
+     *
      * @return A set containing the resolved rules.
      */
     public Set<InstrumentationRule> resolve(InstrumentationSettings source, Map<String, GenericActionConfig> actions) {
@@ -65,7 +66,8 @@ public class InstrumentationRuleResolver {
     private InstrumentationRule resolveRule(String name, InstrumentationRuleSettings settings, Map<String, InstrumentationScope> scopeMap, Map<String, GenericActionConfig> actions) {
         val result = InstrumentationRule.builder();
         result.name(name);
-        settings.getScopes().entrySet()
+        settings.getScopes()
+                .entrySet()
                 .stream()
                 .filter(Map.Entry::getValue)
                 .map(Map.Entry::getKey)
@@ -73,34 +75,24 @@ public class InstrumentationRuleResolver {
                 .filter(Objects::nonNull)
                 .forEach(result::scope);
 
-        result.includedRuleNames(settings.getInclude().entrySet().stream()
+        result.includedRuleNames(settings.getInclude()
+                .entrySet()
+                .stream()
                 .filter(e -> Boolean.TRUE.equals(e.getValue()))
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toSet()));
 
-        settings.getPreEntry().forEach((data, call) ->
-                result.preEntryAction(resolveCall(data, call, actions))
-        );
+        settings.getPreEntry().forEach((data, call) -> result.preEntryAction(resolveCall(data, call, actions)));
 
-        settings.getEntry().forEach((data, call) ->
-                result.entryAction(resolveCall(data, call, actions))
-        );
+        settings.getEntry().forEach((data, call) -> result.entryAction(resolveCall(data, call, actions)));
 
-        settings.getPostEntry().forEach((data, call) ->
-                result.postEntryAction(resolveCall(data, call, actions))
-        );
+        settings.getPostEntry().forEach((data, call) -> result.postEntryAction(resolveCall(data, call, actions)));
 
-        settings.getPreExit().forEach((data, call) ->
-                result.preExitAction(resolveCall(data, call, actions))
-        );
+        settings.getPreExit().forEach((data, call) -> result.preExitAction(resolveCall(data, call, actions)));
 
-        settings.getExit().forEach((data, call) ->
-                result.exitAction(resolveCall(data, call, actions))
-        );
+        settings.getExit().forEach((data, call) -> result.exitAction(resolveCall(data, call, actions)));
 
-        settings.getPostExit().forEach((data, call) ->
-                result.postExitAction(resolveCall(data, call, actions))
-        );
+        settings.getPostExit().forEach((data, call) -> result.postExitAction(resolveCall(data, call, actions)));
 
         result.metrics(resolveMetricRecordings(settings));
 
@@ -111,9 +103,12 @@ public class InstrumentationRuleResolver {
 
     @VisibleForTesting
     Multiset<MetricRecordingSettings> resolveMetricRecordings(InstrumentationRuleSettings settings) {
-        return settings.getMetrics().entrySet().stream()
+        return settings.getMetrics()
+                .entrySet()
+                .stream()
                 .filter(e -> !StringUtils.isEmpty(e.getValue().getValue()))
-                .map(entry -> entry.getValue().copyWithDefaultMetricName(entry.getKey())) //use map key as default metric name
+                .map(entry -> entry.getValue()
+                        .copyWithDefaultMetricName(entry.getKey())) //use map key as default metric name
                 .collect(Collectors.toCollection(HashMultiset::create));
     }
 
@@ -125,13 +120,10 @@ public class InstrumentationRuleResolver {
      * @param name    the name used for the call, corresponds to the written data key for action calls
      * @param actions a map mapping the names of data actions to their resolved configuration.
      * @param call
+     *
      * @return
      */
     private ActionCallConfig resolveCall(String name, ActionCallSettings call, Map<String, GenericActionConfig> actions) {
-        return ActionCallConfig.builder()
-                .name(name)
-                .action(actions.get(call.getAction()))
-                .callSettings(call)
-                .build();
+        return ActionCallConfig.builder().name(name).action(actions.get(call.getAction())).callSettings(call).build();
     }
 }

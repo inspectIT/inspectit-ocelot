@@ -67,7 +67,8 @@ public class SecurityBeanConfiguration {
     @ConditionalOnLdap
     public DefaultLdapAuthoritiesPopulator ldapAuthoritiesPopulator(InspectitServerSettings settings, LdapContextSource contextSource) {
         LdapSettings ldapSettings = settings.getSecurity().getLdap();
-        DefaultLdapAuthoritiesPopulator ldapAuthoritiesPopulator = new DefaultLdapAuthoritiesPopulator(contextSource, ldapSettings.getGroupSearchBase());
+        DefaultLdapAuthoritiesPopulator ldapAuthoritiesPopulator = new DefaultLdapAuthoritiesPopulator(contextSource, ldapSettings
+                .getGroupSearchBase());
         ldapAuthoritiesPopulator.setGroupSearchFilter(ldapSettings.getGroupSearchFilter());
         return ldapAuthoritiesPopulator;
     }

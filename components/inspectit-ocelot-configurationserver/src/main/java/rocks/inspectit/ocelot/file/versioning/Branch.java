@@ -27,5 +27,4 @@ public enum Branch {
 
     public String getBranchName() {
         return branchName;
-    }
-}
+    }}

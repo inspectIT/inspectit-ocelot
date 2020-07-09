@@ -14,9 +14,7 @@ import org.apache.logging.log4j.core.config.plugins.PluginFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-@Plugin(name = "Log4J2LoggingRecorder",
-        category = Core.CATEGORY_NAME,
-        elementType = Appender.ELEMENT_TYPE)
+@Plugin(name = "Log4J2LoggingRecorder", category = Core.CATEGORY_NAME, elementType = Appender.ELEMENT_TYPE)
 public class Log4J2LoggingRecorder extends AbstractAppender {
 
     public static final List<LogEvent> loggingEvents = new ArrayList<>();

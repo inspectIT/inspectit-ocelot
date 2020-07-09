@@ -15,18 +15,7 @@ public class IPUtils {
     /**
      * IP header candidates.
      */
-    private static final String[] IP_HEADER_CANDIDATES = {
-            "X-Forwarded-For",
-            "Proxy-Client-IP",
-            "WL-Proxy-Client-IP",
-            "HTTP_X_FORWARDED_FOR",
-            "HTTP_X_FORWARDED",
-            "HTTP_X_CLUSTER_CLIENT_IP",
-            "HTTP_CLIENT_IP",
-            "HTTP_FORWARDED_FOR",
-            "HTTP_FORWARDED",
-            "HTTP_VIA",
-            "REMOTE_ADDR"};
+    private static final String[] IP_HEADER_CANDIDATES = {"X-Forwarded-For", "Proxy-Client-IP", "WL-Proxy-Client-IP", "HTTP_X_FORWARDED_FOR", "HTTP_X_FORWARDED", "HTTP_X_CLUSTER_CLIENT_IP", "HTTP_CLIENT_IP", "HTTP_FORWARDED_FOR", "HTTP_FORWARDED", "HTTP_VIA", "REMOTE_ADDR"};
 
     /**
      * Returns the origin ip of the requester.
@@ -46,8 +35,10 @@ public class IPUtils {
 
     /**
      * Checks whether the given CIDRs are overlapping
+     *
      * @param net1
      * @param net2
+     *
      * @return true, if nets are overlapping
      */
     public boolean overlap(final String net1, final String net2) {
@@ -66,11 +57,13 @@ public class IPUtils {
 
     /**
      * Returns true, if given cidr contains given ip
+     *
      * @param cidr
      * @param ip
+     *
      * @return
      */
-    public boolean containsIp(String cidr, String ip){
+    public boolean containsIp(String cidr, String ip) {
         IpAddressMatcher ipAddressMatcher = new IpAddressMatcher(cidr);
         return ipAddressMatcher.matches(ip);
     }

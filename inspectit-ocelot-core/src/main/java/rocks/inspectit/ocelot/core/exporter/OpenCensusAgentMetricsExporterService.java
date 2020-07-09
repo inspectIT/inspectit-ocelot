@@ -22,23 +22,27 @@ public class OpenCensusAgentMetricsExporterService extends DynamicallyActivatabl
 
     @Override
     protected boolean checkEnabledForConfig(InspectitConfig conf) {
-        @Valid OpenCensusAgentMetricsExporterSettings openCensusAgent = conf.getExporters().getMetrics().getOpenCensusAgent();
-        return conf.getMetrics().isEnabled()
-                && openCensusAgent.isEnabled()
-                && !StringUtils.isEmpty(openCensusAgent.getAddress());
+        @Valid OpenCensusAgentMetricsExporterSettings openCensusAgent = conf.getExporters()
+                .getMetrics()
+                .getOpenCensusAgent();
+        return conf.getMetrics()
+                .isEnabled() && openCensusAgent.isEnabled() && !StringUtils.isEmpty(openCensusAgent.getAddress());
     }
 
     @Override
     protected boolean doEnable(InspectitConfig configuration) {
         try {
-            OpenCensusAgentMetricsExporterSettings settings = configuration.getExporters().getMetrics().getOpenCensusAgent();
+            OpenCensusAgentMetricsExporterSettings settings = configuration.getExporters()
+                    .getMetrics()
+                    .getOpenCensusAgent();
             log.info("Starting OpenCensus Agent Metrics exporter");
             OcAgentMetricsExporter.createAndRegister(OcAgentMetricsExporterConfiguration.builder()
                     .setExportInterval(Duration.fromMillis(settings.getExportInterval().toMillis()))
                     .setEndPoint(settings.getAddress())
                     .setServiceName(settings.getServiceName())
                     .setUseInsecure(settings.isUseInsecure())
-                    .setRetryInterval(Duration.fromMillis(settings.getReconnectionPeriod().toMillis())).build());
+                    .setRetryInterval(Duration.fromMillis(settings.getReconnectionPeriod().toMillis()))
+                    .build());
             return true;
         } catch (Throwable t) {
             log.error("Error creating OpenCensus Agent Metrics exporter", t);

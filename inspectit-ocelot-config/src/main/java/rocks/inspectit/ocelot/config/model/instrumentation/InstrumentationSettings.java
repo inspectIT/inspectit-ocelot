@@ -58,7 +58,6 @@ public class InstrumentationSettings {
     @NotNull
     private Map<@NotBlank String, @Valid GenericActionSettings> actions = Collections.emptyMap();
 
-
     /**
      * The configuration of the defined scopes. The map's key represents an unique id for the related instrumentation scope.
      */
@@ -92,8 +91,8 @@ public class InstrumentationSettings {
      */
     public void performValidation(InspectitConfig container, ViolationBuilder vios) {
         Set<String> declaredMetrics = container.getMetrics().getDefinitions().keySet();
-        rules.forEach((name, r) ->
-                r.performValidation(this, declaredMetrics, vios.atProperty("rules").atProperty(name)));
+        rules.forEach((name, r) -> r.performValidation(this, declaredMetrics, vios.atProperty("rules")
+                .atProperty(name)));
     }
 
 }

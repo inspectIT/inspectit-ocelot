@@ -30,7 +30,6 @@ public class HttpInMetricTest {
 
     private Server server;
 
-
     void fireRequest(String url) {
         try {
             HttpURLConnection urlConnection = (HttpURLConnection) new URL(url).openConnection();
@@ -63,19 +62,18 @@ public class HttpInMetricTest {
             servletHandler.addServletWithMapping(TestServlet.class, "/*");
             server.start();
 
-            TestUtils.waitForClassInstrumentations(Arrays.asList(HttpServlet.class,
-                    Class.forName("sun.net.www.protocol.http.HttpURLConnection")), 10, TimeUnit.SECONDS);
+            TestUtils.waitForClassInstrumentations(Arrays.asList(HttpServlet.class, Class.forName("sun.net.www.protocol.http.HttpURLConnection")), 10, TimeUnit.SECONDS);
 
             fireRequest("http://localhost:" + PORT + "/servletapi");
             server.stop();
-
 
             Map<String, String> tags = new HashMap<>();
             tags.put("http_path", "/servletapi");
             tags.put("http_status", "123");
 
             long cnt = ((AggregationData.CountData) TestUtils.getDataForView("http/in/count", tags)).getCount();
-            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/in/responsetime/sum", tags)).getSum();
+            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/in/responsetime/sum", tags))
+                    .getSum();
 
             assertThat(cnt).isEqualTo(1);
             assertThat(respSum).isGreaterThan(0);

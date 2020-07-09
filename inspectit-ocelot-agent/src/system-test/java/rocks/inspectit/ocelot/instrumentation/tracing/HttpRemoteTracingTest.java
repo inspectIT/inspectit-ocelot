@@ -29,9 +29,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class HttpRemoteTracingTest extends TraceTestBase {
 
-
     public static final int PORT = 9999;
+
     public static final String TEST_PATH = "/test";
+
     public static final String TEST_URL = "http://localhost:" + PORT + TEST_PATH;
 
     private static Server server;
@@ -53,7 +54,6 @@ public class HttpRemoteTracingTest extends TraceTestBase {
     static void cleanup() throws Exception {
         server.stop();
     }
-
 
     public static class TracingServlet extends HttpServlet {
 
@@ -90,25 +90,21 @@ public class HttpRemoteTracingTest extends TraceTestBase {
 
             clientSpan();
 
-            assertTraceExported((spans) ->
-                    assertThat(spans)
-                            .anySatisfy((sp) -> {
-                                assertThat(sp.getName()).endsWith("HttpUrlConnectionTest.clientSpan");
-                                assertThat(sp.getKind()).isEqualTo(Span.Kind.CLIENT);
-                                assertThat(sp.getParentSpanId()).isNull();
-                            })
-                            .anySatisfy((sp) -> {
-                                assertThat(sp.getName()).endsWith("TracingServlet.myHandler");
-                                assertThat(sp.getKind()).isEqualTo(Span.Kind.SERVER);
-                                assertThat(sp.getParentSpanId()).isNotNull();
-                            })
+            assertTraceExported((spans) -> assertThat(spans).anySatisfy((sp) -> {
+                        assertThat(sp.getName()).endsWith("HttpUrlConnectionTest.clientSpan");
+                        assertThat(sp.getKind()).isEqualTo(Span.Kind.CLIENT);
+                        assertThat(sp.getParentSpanId()).isNull();
+                    }).anySatisfy((sp) -> {
+                        assertThat(sp.getName()).endsWith("TracingServlet.myHandler");
+                        assertThat(sp.getKind()).isEqualTo(Span.Kind.SERVER);
+                        assertThat(sp.getParentSpanId()).isNotNull();
+                    })
 
             );
 
         }
 
     }
-
 
     @Nested
     class ApacheClientConnectionTest {
@@ -132,25 +128,18 @@ public class HttpRemoteTracingTest extends TraceTestBase {
         @Test
         void testPropagationViaServlet() throws Exception {
 
-            TestUtils.waitForClassInstrumentations(Arrays.asList(
-                    CloseableHttpClient.class,
-                    Class.forName("org.apache.http.impl.client.InternalHttpClient"),
-                    ApacheClientConnectionTest.class,
-                    TracingServlet.class), 15, TimeUnit.SECONDS);
+            TestUtils.waitForClassInstrumentations(Arrays.asList(CloseableHttpClient.class, Class.forName("org.apache.http.impl.client.InternalHttpClient"), ApacheClientConnectionTest.class, TracingServlet.class), 15, TimeUnit.SECONDS);
             clientSpan();
 
-            assertTraceExported((spans) ->
-                    assertThat(spans)
-                            .anySatisfy((sp) -> {
-                                assertThat(sp.getName()).endsWith("ApacheClientConnectionTest.clientSpan");
-                                assertThat(sp.getKind()).isEqualTo(Span.Kind.CLIENT);
-                                assertThat(sp.getParentSpanId()).isNull();
-                            })
-                            .anySatisfy((sp) -> {
-                                assertThat(sp.getName()).endsWith("TracingServlet.myHandler");
-                                assertThat(sp.getKind()).isEqualTo(Span.Kind.SERVER);
-                                assertThat(sp.getParentSpanId()).isNotNull();
-                            })
+            assertTraceExported((spans) -> assertThat(spans).anySatisfy((sp) -> {
+                        assertThat(sp.getName()).endsWith("ApacheClientConnectionTest.clientSpan");
+                        assertThat(sp.getKind()).isEqualTo(Span.Kind.CLIENT);
+                        assertThat(sp.getParentSpanId()).isNull();
+                    }).anySatisfy((sp) -> {
+                        assertThat(sp.getName()).endsWith("TracingServlet.myHandler");
+                        assertThat(sp.getKind()).isEqualTo(Span.Kind.SERVER);
+                        assertThat(sp.getParentSpanId()).isNotNull();
+                    })
 
             );
 

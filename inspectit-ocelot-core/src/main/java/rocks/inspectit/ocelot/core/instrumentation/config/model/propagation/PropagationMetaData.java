@@ -11,30 +11,35 @@ public interface PropagationMetaData {
 
     /**
      * @param dataKey the data key to check
+     *
      * @return true, if the dataKey is configured with JVM_LOCAL or GLOBAL down-propagation.
      */
     boolean isPropagatedDownWithinJVM(String dataKey);
 
     /**
      * @param dataKey the data key to check
+     *
      * @return true, if the dataKey is configured with GLOBAL down-propagation.
      */
     boolean isPropagatedDownGlobally(String dataKey);
 
     /**
      * @param dataKey the data key to check
+     *
      * @return true, if the dataKey is configured with JVM_LOCAL or GLOBAL up-propagation.
      */
     boolean isPropagatedUpWithinJVM(String dataKey);
 
     /**
      * @param dataKey the data key to check
+     *
      * @return true, if the dataKey is configured with GLOBAL up-propagation.
      */
     boolean isPropagatedUpGlobally(String dataKey);
 
     /**
      * @param dataKey the data key to check
+     *
      * @return true, if the data key is configured to be used as tag
      */
     boolean isTag(String dataKey);

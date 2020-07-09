@@ -1,8 +1,6 @@
 package rocks.inspectit.ocelot.core.exporter;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
-import io.opencensus.exporter.trace.zipkin.ZipkinTraceExporter;
-import io.opencensus.impl.trace.TraceComponentImpl;
 import io.opencensus.trace.Tracing;
 import io.opencensus.trace.samplers.Samplers;
 import org.junit.jupiter.api.AfterEach;
@@ -21,9 +19,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static org.awaitility.Awaitility.await;
 
-@TestPropertySource(properties = {
-        "inspectit.exporters.tracing.zipkin.url=http://127.0.0.1:9411/api/v2/spans"
-})
+@TestPropertySource(properties = {"inspectit.exporters.tracing.zipkin.url=http://127.0.0.1:9411/api/v2/spans"})
 @DirtiesContext
 public class ZipkinExporterServiceIntTest extends SpringTestBase {
 
@@ -41,8 +37,7 @@ public class ZipkinExporterServiceIntTest extends SpringTestBase {
         wireMockServer.start();
         configureFor(wireMockServer.port());
 
-        stubFor(post(urlPathEqualTo(ZIPKIN_PATH))
-                .willReturn(aResponse().withStatus(200)));
+        stubFor(post(urlPathEqualTo(ZIPKIN_PATH)).willReturn(aResponse().withStatus(200)));
     }
 
     @AfterEach
@@ -52,10 +47,8 @@ public class ZipkinExporterServiceIntTest extends SpringTestBase {
 
     @Test
     void verifyTraceSent() throws InterruptedException {
-        Tracing.getTracer().spanBuilder("zipkinspan")
-                .setSampler(Samplers.alwaysSample())
-                .startSpanAndRun(() -> {
-                });
+        Tracing.getTracer().spanBuilder("zipkinspan").setSampler(Samplers.alwaysSample()).startSpanAndRun(() -> {
+        });
 
         logger.info("Wait for Jaeger to process the span...");
         Thread.sleep(1100L);

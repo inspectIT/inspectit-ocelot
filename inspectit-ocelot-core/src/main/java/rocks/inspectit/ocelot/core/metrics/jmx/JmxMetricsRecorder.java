@@ -124,7 +124,8 @@ public class JmxMetricsRecorder extends AbstractPollingMetricsRecorder implement
         metricValue(value).ifPresent(metricValue -> {
             String metricName = metricName(domain, beanProperties, attrKeys, attrName);
             Measure.MeasureDouble measure = measureManager.getMeasureDouble(metricName).orElseGet(() -> {
-                Map<String, Boolean> tags = beanProperties.keySet().stream()
+                Map<String, Boolean> tags = beanProperties.keySet()
+                        .stream()
                         .skip(1)
                         .collect(Collectors.toMap(Function.identity(), k -> true));
 
@@ -132,9 +133,11 @@ public class JmxMetricsRecorder extends AbstractPollingMetricsRecorder implement
             });
 
             TagContextBuilder tagContextBuilder = tagger.currentBuilder();
-            beanProperties.entrySet().stream()
+            beanProperties.entrySet()
+                    .stream()
                     .skip(1)
-                    .forEach(entry -> tagContextBuilder.putLocal(TagKey.create(entry.getKey()), TagUtils.createTagValue(entry.getValue())));
+                    .forEach(entry -> tagContextBuilder.putLocal(TagKey.create(entry.getKey()), TagUtils.createTagValue(entry
+                            .getValue())));
 
             measureManager.tryRecordingMeasurement(measure.getName(), metricValue, tagContextBuilder.build());
         });
@@ -145,10 +148,7 @@ public class JmxMetricsRecorder extends AbstractPollingMetricsRecorder implement
         MetricDefinitionSettings definitionSettingsWithLastValueView = MetricDefinitionSettings.builder()
                 .description(attrDescription)
                 .unit("na")
-                .view(metricName, ViewDefinitionSettings.builder()
-                        .tags(tags)
-                        .build()
-                )
+                .view(metricName, ViewDefinitionSettings.builder().tags(tags).build())
                 .build()
                 .getCopyWithDefaultsPopulated(metricName);
 
@@ -165,8 +165,7 @@ public class JmxMetricsRecorder extends AbstractPollingMetricsRecorder implement
      */
     private Optional<Double> metricValue(Object value) {
         if (value instanceof Number) {
-            return Optional.of(((Number) value).doubleValue())
-                    .filter(d -> d >= 0d);
+            return Optional.of(((Number) value).doubleValue()).filter(d -> d >= 0d);
         } else if (value instanceof Boolean) {
             return Optional.of(((Boolean) value) ? 1d : 0d);
         } else {

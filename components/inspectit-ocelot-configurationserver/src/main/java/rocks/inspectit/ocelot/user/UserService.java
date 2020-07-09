@@ -39,6 +39,7 @@ public class UserService {
      * Selects a given user based on his username.
      *
      * @param name the username, will be turned to lower case before querying
+     *
      * @return the user, if present
      */
     public Optional<User> getUserByName(String name) {
@@ -49,6 +50,7 @@ public class UserService {
      * Checks if a user with a given name exists.
      *
      * @param name the username, will be turned to lower case before querying
+     *
      * @return true, if a user with the given name exists.
      */
     public boolean userExists(String name) {
@@ -59,6 +61,7 @@ public class UserService {
      * Fetches a user based on his ID.
      *
      * @param id the id of the user
+     *
      * @return the user, if present
      */
     public Optional<User> getUserById(long id) {
@@ -85,12 +88,11 @@ public class UserService {
      * before storing the user.
      *
      * @param user the user to add or update
+     *
      * @return the updated user entity
      */
     public User addOrUpdateUser(User user) {
-        User.UserBuilder userBuilder = user
-                .toBuilder()
-                .username(user.getUsername().toLowerCase());
+        User.UserBuilder userBuilder = user.toBuilder().username(user.getUsername().toLowerCase());
 
         if (!StringUtils.isEmpty(user.getPassword())) {
             String passwordHash = passwordEncoder.encode(user.getPassword());
@@ -107,10 +109,7 @@ public class UserService {
             String rawPassword = settings.getDefaultUser().getPassword();
 
             log.warn("Generated default user as no other users were found. Please login and change the password!");
-            User user = User.builder()
-                    .username(name)
-                    .password(rawPassword)
-                    .build();
+            User user = User.builder().username(name).password(rawPassword).build();
 
             addOrUpdateUser(user);
         }

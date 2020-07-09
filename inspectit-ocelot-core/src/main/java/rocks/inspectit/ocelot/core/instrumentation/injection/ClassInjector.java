@@ -75,8 +75,7 @@ public class ClassInjector {
     static {
         //Taken from spring ClassDefinitionUtils
         ClassInjector.class.getClass();
-        INSPECTIT_PROTECTION_DOMAIN =
-                AccessController.doPrivileged((PrivilegedAction<ProtectionDomain>) ClassInjector.class::getProtectionDomain);
+        INSPECTIT_PROTECTION_DOMAIN = AccessController.doPrivileged((PrivilegedAction<ProtectionDomain>) ClassInjector.class::getProtectionDomain);
     }
 
     /**
@@ -192,9 +191,8 @@ public class ClassInjector {
             loader = bootstrapChildLoader;
         }
         collectOrphanClasses();
-        LinkedList<WeakReference<Class<?>>> orphansOfGivenStructureInClassloader =
-                orphanClasses.getOrDefault(loader, Collections.emptyMap())
-                        .getOrDefault(classStructureIdentifier, new LinkedList<>());
+        LinkedList<WeakReference<Class<?>>> orphansOfGivenStructureInClassloader = orphanClasses.getOrDefault(loader, Collections
+                .emptyMap()).getOrDefault(classStructureIdentifier, new LinkedList<>());
 
         WeakReference<Class<?>> classToReuse = orphansOfGivenStructureInClassloader.pollFirst();
         if (classToReuse == null) {

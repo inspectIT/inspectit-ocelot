@@ -29,7 +29,7 @@ import java.util.stream.Stream;
 /**
  * This {@link BeaconRecorder} processes plain resource timing entry from the {@link Beacon} and exposes metric that:
  * <ul>
- *     <li>reports number of resources loaded sliced by type, cross-origin and cached tags</li>
+ * <li>reports number of resources loaded sliced by type, cross-origin and cached tags</li>
  * </ul>
  * <p>
  * The impl depends heavily on the Boomerang compression of the resource timing entries in the beacon. Please read
@@ -65,13 +65,11 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
                 .view(RESOURCE_TIME_METRIC_NAME + "/SUM", ViewDefinitionSettings.builder()
                         .tags(tags)
                         .aggregation(ViewDefinitionSettings.Aggregation.SUM)
-                        .build()
-                )
+                        .build())
                 .view(RESOURCE_TIME_METRIC_NAME + "/COUNT", ViewDefinitionSettings.builder()
                         .tags(tags)
                         .aggregation(ViewDefinitionSettings.Aggregation.COUNT)
-                        .build()
-                )
+                        .build())
                 .build();
     }
 
@@ -137,6 +135,7 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
      * Takes Boomerang resource timing JSON and returns stream of found {@link ResourceTimingEntry}s.
      *
      * @param resourceTiming json
+     *
      * @return stream
      */
     private Stream<ResourceTimingEntry> decodeResourceTimings(String resourceTiming) {
@@ -158,6 +157,7 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
      * Helper to construct map of resource URLs to resource timing details.
      *
      * @param node root node
+     *
      * @return Map where keys are resource URLs and values are the Boomerang compressed resource timing string.
      */
     private Map<String, String> flattenUrlTrie(JsonNode node) {
@@ -175,7 +175,9 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
             // note the | (pipe) keys
             // if a resource's URL is a prefix of another resource, then it terminates with a pipe symbol (|).
             Function<String, String> pipeResolver = (s) -> "|".equals(s) ? "" : s;
-            node.fields().forEachRemaining(entry -> this.findAllTimingValuesAsText(entry.getValue(), foundSoFar, prefix + pipeResolver.apply(entry.getKey())));
+            node.fields()
+                    .forEachRemaining(entry -> this.findAllTimingValuesAsText(entry.getValue(), foundSoFar, prefix + pipeResolver
+                            .apply(entry.getKey())));
         }
     }
 
@@ -187,6 +189,7 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
      *
      * @param url   URL of the loaded resource.
      * @param value Boomerang compressed resource timing string for a single entry
+     *
      * @return
      */
     private Stream<ResourceTimingEntry> resolveResourceTimingStringValue(String url, String value) {
@@ -196,7 +199,9 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
                     String[] split = possibleMultipleValue.split("\\|");
                     return Arrays.stream(split);
                 })
-                .flatMap(singeValue -> ResourceTimingEntry.from(url, singeValue).map(Stream::of).orElseGet(Stream::empty));
+                .flatMap(singeValue -> ResourceTimingEntry.from(url, singeValue)
+                        .map(Stream::of)
+                        .orElseGet(Stream::empty));
     }
 
     /**
@@ -204,7 +209,9 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
      *
      * @param u1 first url
      * @param u2 second url
+     *
      * @return Returns true if two urls are considered as same-origin
+     *
      * @see org.springframework.web.util.WebUtils#isSameOrigin(HttpRequest)
      * @see 'https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy'
      */
@@ -212,9 +219,9 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
         UriComponents uriComponents1 = UriComponentsBuilder.fromUriString(u1).build();
         UriComponents uriComponents2 = UriComponentsBuilder.fromUriString(u2).build();
 
-        return Objects.equals(uriComponents1.getScheme(), uriComponents2.getScheme()) &&
-                Objects.equals(uriComponents1.getHost(), uriComponents2.getHost()) &&
-                getPort(uriComponents1.getScheme(), uriComponents1.getPort()) == getPort(uriComponents2.getScheme(), uriComponents2.getPort());
+        return Objects.equals(uriComponents1.getScheme(), uriComponents2.getScheme()) && Objects.equals(uriComponents1.getHost(), uriComponents2
+                .getHost()) && getPort(uriComponents1.getScheme(), uriComponents1.getPort()) == getPort(uriComponents2.getScheme(), uriComponents2
+                .getPort());
     }
 
     private static int getPort(@Nullable String scheme, int port) {
@@ -259,15 +266,14 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
         }
 
         private Optional<Integer> getTiming(int index) {
-            return Optional.ofNullable(timings)
-                    .filter(t -> t.length - 1 >= index)
-                    .map(t -> t[index]);
+            return Optional.ofNullable(timings).filter(t -> t.length - 1 >= index).map(t -> t[index]);
         }
 
         /**
          * Cached resources only have 2 timing values if considered as same-origin requests.
          *
          * @param sameOrigin If this is considered as same origin resource loading
+         *
          * @return If cached or not.
          */
         public boolean isCached(boolean sameOrigin) {
@@ -315,8 +321,7 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
                         .url(url)
                         .initiatorType((initiatorType))
                         .timings(timings)
-                        .build()
-                );
+                        .build());
             } catch (Exception e) {
                 // in case of any exception return the empty result here
                 log.warn("Unable to create a resource timing entry for the URL {} with the Boomerang value {}.", url, value);
@@ -331,27 +336,7 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
      *
      * @see 'https://developer.akamai.com/tools/boomerang/docs/BOOMR.plugins.ResourceTiming.html'
      */
-    public enum InitiatorType {
-        OTHER('0'),
-        IMG('1'),
-        LINK('2'),
-        SCRIPT('3'),
-        CSS('4'),
-        XML_HTTP_REQUEST('5'),
-        HTML('6'),
-        IMAGE('7'),
-        BEACON('8'),
-        FETCH('9'),
-        IFRAME('a'),
-        BODY('b'),
-        INPUT('c'),
-        OBJECT('d'),
-        VIDEO('e'),
-        AUDIO('f'),
-        SOURCE('g'),
-        TRACK('h'),
-        EMBED('i'),
-        EVENT_SOURCE('j');
+    public enum InitiatorType {OTHER('0'), IMG('1'), LINK('2'), SCRIPT('3'), CSS('4'), XML_HTTP_REQUEST('5'), HTML('6'), IMAGE('7'), BEACON('8'), FETCH('9'), IFRAME('a'), BODY('b'), INPUT('c'), OBJECT('d'), VIDEO('e'), AUDIO('f'), SOURCE('g'), TRACK('h'), EMBED('i'), EVENT_SOURCE('j');
 
         private char identifier;
 
@@ -363,6 +348,7 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
          * Returns the {@link InitiatorType} represented by this char. If not found {@link #OTHER} is returned.
          *
          * @param c identifier
+         *
          * @return {@link InitiatorType}
          */
         public static InitiatorType from(char c) {

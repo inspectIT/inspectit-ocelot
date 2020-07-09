@@ -13,6 +13,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface AdditionalValidation {
+
     /**
      * A template for the message of the {@link ViolationBuilder}
      *

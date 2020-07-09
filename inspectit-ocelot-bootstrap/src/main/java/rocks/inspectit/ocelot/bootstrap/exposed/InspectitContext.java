@@ -27,6 +27,7 @@ public interface InspectitContext {
      * The value was either defined via {@link #setData(String, Object)}, down or up propagation.
      *
      * @param key the name of the data to query
+     *
      * @return the value assigned to the data or null if no value is assigned
      */
     Object getData(String key);
@@ -37,7 +38,6 @@ public interface InspectitContext {
      * @return the data iterable
      */
     Iterable<Map.Entry<String, Object>> getData();
-
 
     /**
      * Generates a map representing the globally down-propagated data stored in this context.

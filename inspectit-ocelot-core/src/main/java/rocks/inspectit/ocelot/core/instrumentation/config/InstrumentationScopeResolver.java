@@ -33,6 +33,7 @@ public class InstrumentationScopeResolver {
      * the given {@link InstrumentationSettings}.
      *
      * @param source the configuration used as basis for the {@link InstrumentationScope}s
+     *
      * @return Returns a map containing {@link InstrumentationScope} instances. The keys are representing a unique identifier for each scope.
      */
     public Map<String, InstrumentationScope> resolve(InstrumentationSettings source) {

@@ -38,13 +38,11 @@ class OpenTelemetryTraceControllerTest {
     @MockBean
     SpanExporter spanExporter;
 
-
     @Nested
     class Spans {
 
         @Captor
         ArgumentCaptor<Collection<SpanData>> spanCaptor;
-
 
         @Test
         public void empty() {
@@ -70,18 +68,17 @@ class OpenTelemetryTraceControllerTest {
                 assertThat(result.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
 
                 verify(spanExporter).export(spanCaptor.capture());
-                assertThat(spanCaptor.getValue()).hasSize(2)
-                        .allSatisfy(data -> {
-                            assertThat(data.getTraceId()).isNotNull();
-                            assertThat(data.getSpanId()).isNotNull();
-                            assertThat(data.getKind()).isNotNull();
-                            assertThat(data.getName()).isNotNull();
-                            assertThat(data.getStartEpochNanos()).isGreaterThan(0);
-                            assertThat(data.getEndEpochNanos()).isGreaterThan(0);
-                            assertThat(data.getHasEnded()).isTrue();
-                            assertThat(data.getAttributes()).isNotEmpty();
-                            assertThat(data.getTimedEvents()).isNotEmpty();
-                        });
+                assertThat(spanCaptor.getValue()).hasSize(2).allSatisfy(data -> {
+                    assertThat(data.getTraceId()).isNotNull();
+                    assertThat(data.getSpanId()).isNotNull();
+                    assertThat(data.getKind()).isNotNull();
+                    assertThat(data.getName()).isNotNull();
+                    assertThat(data.getStartEpochNanos()).isGreaterThan(0);
+                    assertThat(data.getEndEpochNanos()).isGreaterThan(0);
+                    assertThat(data.getHasEnded()).isTrue();
+                    assertThat(data.getAttributes()).isNotEmpty();
+                    assertThat(data.getTimedEvents()).isNotEmpty();
+                });
             }
         }
 

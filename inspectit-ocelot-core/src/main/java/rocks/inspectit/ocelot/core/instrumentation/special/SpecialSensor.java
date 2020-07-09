@@ -12,6 +12,7 @@ public interface SpecialSensor {
      *
      * @param clazz    the type to check for
      * @param settings the configuration ot check for
+     *
      * @return true if this sensor is active and requires an instrumentation for the given type under the given configuration
      */
     boolean shouldInstrument(Class<?> clazz, InstrumentationConfiguration settings);
@@ -26,6 +27,7 @@ public interface SpecialSensor {
      * @param clazz  the type to check for
      * @param first  the first configuration
      * @param second the second configuration
+     *
      * @return true, if a configuration change from "first" to "second" (or vice-versa) would require a change in the bytecode added by this sensor.
      */
     boolean requiresInstrumentationChange(Class<?> clazz, InstrumentationConfiguration first, InstrumentationConfiguration second);
@@ -37,6 +39,7 @@ public interface SpecialSensor {
      * @param clazz    the class being instrumented
      * @param settings the configuration to apply
      * @param builder  the builder to use for defining the instrumentation
+     *
      * @return the altered builder
      */
     DynamicType.Builder instrument(Class<?> clazz, InstrumentationConfiguration settings, DynamicType.Builder builder);

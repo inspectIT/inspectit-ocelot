@@ -26,7 +26,9 @@ public class PatternObfuscatory implements IObfuscatory {
     /**
      * Map holding already checked keys as key and info if the data should be obfuscated or not.
      */
-    private final Cache<String, CheckedKeyObfuscationValue> checkedKeysMap = CacheBuilder.newBuilder().maximumSize(1000).build();
+    private final Cache<String, CheckedKeyObfuscationValue> checkedKeysMap = CacheBuilder.newBuilder()
+            .maximumSize(1000)
+            .build();
 
     /**
      * {@inheritDoc}
@@ -34,9 +36,7 @@ public class PatternObfuscatory implements IObfuscatory {
     @Override
     public void putSpanAttribute(Span span, String key, Object value) {
         final String strValue = value.toString();
-        Object obfuscatedValue = shouldObfuscate(key, strValue)
-                .map(function -> function.apply(strValue))
-                .orElse(value);
+        Object obfuscatedValue = shouldObfuscate(key, strValue).map(function -> function.apply(strValue)).orElse(value);
 
         IObfuscatory.super.putSpanAttribute(span, key, obfuscatedValue);
     }
@@ -54,10 +54,12 @@ public class PatternObfuscatory implements IObfuscatory {
         if (null == keyObfuscationValue) {
             // first run the check of the key and store to map result
             Optional<Function<String, Object>> keyBasedObfuscation = shouldObfuscateKey(key);
-            CheckedKeyObfuscationValue.CheckedKeyObfuscationValueBuilder checkedKeyObfuscationValueBuilder = CheckedKeyObfuscationValue.builder();
+            CheckedKeyObfuscationValue.CheckedKeyObfuscationValueBuilder checkedKeyObfuscationValueBuilder = CheckedKeyObfuscationValue
+                    .builder();
 
             // if function is present, then we know obfuscation is needed and we save both boolean and function to the map
-            keyBasedObfuscation.ifPresent(stringStringFunction -> checkedKeyObfuscationValueBuilder.shouldObfuscate(true).obfuscationFunction(stringStringFunction));
+            keyBasedObfuscation.ifPresent(stringStringFunction -> checkedKeyObfuscationValueBuilder.shouldObfuscate(true)
+                    .obfuscationFunction(stringStringFunction));
             CheckedKeyObfuscationValue cacheValue = checkedKeyObfuscationValueBuilder.build();
             checkedKeysMap.put(key, cacheValue);
 

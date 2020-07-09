@@ -24,7 +24,6 @@ class InstrumentationScopeTest {
             ElementMatcher.Junction<MethodDescription> methodA = ElementMatchers.named("name")
                     .and(ElementMatchers.isOverriddenFrom(ElementMatchers.nameContains("someClass")));
 
-
             ElementMatcher.Junction<TypeDescription> typeB = ElementMatchers.named("name")
                     .and(ElementMatchers.hasSuperType(ElementMatchers.nameMatches("whatever")))
                     .and(ElementMatchers.isInterface());
@@ -48,7 +47,6 @@ class InstrumentationScopeTest {
             ElementMatcher.Junction<MethodDescription> methodA = ElementMatchers.named("name")
                     .and(ElementMatchers.isOverriddenFrom(ElementMatchers.nameContains("someClass_thisIsMissing")));
 
-
             ElementMatcher.Junction<TypeDescription> typeB = ElementMatchers.named("name")
                     .and(ElementMatchers.hasSuperType(ElementMatchers.nameMatches("whatever")))
                     .and(ElementMatchers.isInterface());
@@ -71,7 +69,6 @@ class InstrumentationScopeTest {
 
             ElementMatcher.Junction<MethodDescription> methodA = ElementMatchers.named("name")
                     .and(ElementMatchers.isOverriddenFrom(ElementMatchers.nameContains("someClass")));
-
 
             ElementMatcher.Junction<TypeDescription> typeB = ElementMatchers.named("name")
                     .and(ElementMatchers.hasSuperType(ElementMatchers.nameMatches("whatever")))
@@ -100,7 +97,6 @@ class InstrumentationScopeTest {
             ElementMatcher.Junction<MethodDescription> methodA = ElementMatchers.named("name")
                     .and(ElementMatchers.isOverriddenFrom(ElementMatchers.nameContains("someClass")));
 
-
             ElementMatcher.Junction<TypeDescription> typeB = ElementMatchers.named("name")
                     .and(ElementMatchers.hasSuperType(ElementMatchers.nameMatches("whatever")))
                     .and(ElementMatchers.isInterface());
@@ -124,7 +120,6 @@ class InstrumentationScopeTest {
             ElementMatcher.Junction<MethodDescription> methodA = ElementMatchers.named("name")
                     .and(ElementMatchers.isOverriddenFrom(ElementMatchers.nameContains("someClass_thisIsMissing")));
 
-
             ElementMatcher.Junction<TypeDescription> typeB = ElementMatchers.named("name")
                     .and(ElementMatchers.hasSuperType(ElementMatchers.nameMatches("whatever")))
                     .and(ElementMatchers.isInterface());
@@ -147,7 +142,6 @@ class InstrumentationScopeTest {
 
             ElementMatcher.Junction<MethodDescription> methodA = ElementMatchers.named("name")
                     .and(ElementMatchers.isOverriddenFrom(ElementMatchers.nameContains("someClass")));
-
 
             ElementMatcher.Junction<TypeDescription> typeB = ElementMatchers.named("name")
                     .and(ElementMatchers.hasSuperType(ElementMatchers.nameMatches("whatever")))

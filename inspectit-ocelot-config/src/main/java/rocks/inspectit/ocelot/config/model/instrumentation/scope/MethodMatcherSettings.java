@@ -22,9 +22,7 @@ public class MethodMatcherSettings extends ElementDescriptionMatcherSettings {
     /**
      * Enum for access modifiers which can be used in the instrumentation configuration.
      */
-    public enum AccessModifier {
-        PUBLIC, PROTECTED, PACKAGE, PRIVATE
-    }
+    public enum AccessModifier {PUBLIC, PROTECTED, PACKAGE, PRIVATE}
 
     /**
      * Whether the method is a constructor or not.

@@ -82,7 +82,6 @@ public class AgentMappingControllerTest {
             assertThat(result.getBody()).isSameAs(mappingMock);
         }
 
-
         @Test
         public void mappingNotFound() {
             when(mappingManager.getAgentMapping("name")).thenReturn(Optional.empty());
@@ -109,7 +108,6 @@ public class AgentMappingControllerTest {
             verifyNoMoreInteractions(mappingManager);
             assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
         }
-
 
         @Test
         public void mappingNotFound() throws IOException {
@@ -139,8 +137,7 @@ public class AgentMappingControllerTest {
 
         @Test
         public void beforeAndAfterIsSet() {
-            assertThatExceptionOfType(IllegalArgumentException.class)
-                    .isThrownBy(() -> controller.putMapping("mappingName", agentMapping, "before", "after"))
+            assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> controller.putMapping("mappingName", agentMapping, "before", "after"))
                     .withMessage("The 'before' and 'after' parameters cannot be used together.");
 
             verifyZeroInteractions(mappingManager);

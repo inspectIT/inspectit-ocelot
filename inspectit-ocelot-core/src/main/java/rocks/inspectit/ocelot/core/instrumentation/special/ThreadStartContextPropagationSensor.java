@@ -33,9 +33,7 @@ public class ThreadStartContextPropagationSensor implements SpecialSensor {
 
     @Override
     public DynamicType.Builder instrument(Class<?> clazz, InstrumentationConfiguration settings, DynamicType.Builder builder) {
-        return builder
-                .visit(ThreadStartAdvice.TARGET)
-                .visit(ThreadRunAdvice.TARGET);
+        return builder.visit(ThreadStartAdvice.TARGET).visit(ThreadRunAdvice.TARGET);
     }
 
     /**
@@ -43,7 +41,8 @@ public class ThreadStartContextPropagationSensor implements SpecialSensor {
      */
     private static class ThreadStartAdvice {
 
-        static final AsmVisitorWrapper.ForDeclaredMethods TARGET = Advice.to(ThreadStartAdvice.class).on(named("start"));
+        static final AsmVisitorWrapper.ForDeclaredMethods TARGET = Advice.to(ThreadStartAdvice.class)
+                .on(named("start"));
 
         @Advice.OnMethodEnter
         public static void onMethodEnter(@Advice.This Thread thread) {

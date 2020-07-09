@@ -17,7 +17,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class UserInstrumentationWithMetricsTest extends InstrumentationSysTestBase {
 
-
     void invocationCount() {
 
     }
@@ -28,7 +27,8 @@ public class UserInstrumentationWithMetricsTest extends InstrumentationSysTestBa
 
     @Test
     void invocationCounterTest() {
-        TagContextBuilder builder = Tags.getTagger().currentBuilder()
+        TagContextBuilder builder = Tags.getTagger()
+                .currentBuilder()
                 .putLocal(TagKey.create("user_tag"), TagValue.create("user_value"));
         try (Scope tcs = builder.buildScoped()) {
             for (int i = 0; i < 7; i++) {
@@ -46,7 +46,6 @@ public class UserInstrumentationWithMetricsTest extends InstrumentationSysTestBa
         long invocationSum = ((AggregationData.SumDataLong) TestUtils.getDataForView("my/invocation/sum", sumTags)).getSum();
         assertThat(invocationSum).isEqualTo(7 * 42);
     }
-
 
     @Test
     void responseTimeMeasuringTest() throws Exception {

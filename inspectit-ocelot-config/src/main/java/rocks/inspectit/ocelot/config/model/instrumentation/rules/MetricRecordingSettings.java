@@ -53,7 +53,6 @@ public class MetricRecordingSettings {
     @NotNull
     private Map<String, String> dataTags = Collections.emptyMap();
 
-
     public MetricRecordingSettings copyWithDefaultMetricName(String defaultMetricName) {
         String metricName = getMetricNameOrDefault(defaultMetricName);
         return toBuilder().metric(metricName)

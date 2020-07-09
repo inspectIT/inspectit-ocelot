@@ -28,7 +28,6 @@ public class ElementDescriptionMatcherSettings extends NameMatcherSettings {
 
     @Override
     public boolean isAnyMatcher() {
-        return super.isAnyMatcher()
-                && CollectionUtils.isEmpty(annotations);
+        return super.isAnyMatcher() && CollectionUtils.isEmpty(annotations);
     }
 }

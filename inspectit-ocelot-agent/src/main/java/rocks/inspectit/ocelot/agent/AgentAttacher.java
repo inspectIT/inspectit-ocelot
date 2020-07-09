@@ -1,6 +1,8 @@
 package rocks.inspectit.ocelot.agent;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -18,7 +20,10 @@ public class AgentAttacher {
     /**
      * Agent jar path.
      */
-    private static final String AGENT_PATH = new File(AgentAttacher.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getAbsolutePath();
+    private static final String AGENT_PATH = new File(AgentAttacher.class.getProtectionDomain()
+            .getCodeSource()
+            .getLocation()
+            .getFile()).getAbsolutePath();
 
     /**
      * The OS name.
@@ -70,8 +75,7 @@ public class AgentAttacher {
             commandList.add(AGENT_PATH);
         }
 
-        ProcessBuilder processBuilder = new ProcessBuilder(commandList)
-                .directory(jattachFile.getParentFile())
+        ProcessBuilder processBuilder = new ProcessBuilder(commandList).directory(jattachFile.getParentFile())
                 .redirectErrorStream(true)
                 .inheritIO();
 

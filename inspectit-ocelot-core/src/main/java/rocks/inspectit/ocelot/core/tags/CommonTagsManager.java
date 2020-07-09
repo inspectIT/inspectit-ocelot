@@ -91,6 +91,7 @@ public class CommonTagsManager {
      * </code>
      *
      * @param customTagMap Map with additional tags.
+     *
      * @return Returns newly created scope with default tag context including the additional given tags.
      */
     public Scope withCommonTagScope(Map<String, String> customTagMap) {
@@ -101,11 +102,12 @@ public class CommonTagsManager {
         TagContextBuilder tagContextBuilder = Tags.getTagger().currentBuilder();
         HashMap<String, String> tags = new HashMap<>(commonTagValueMap);
         tags.putAll(customTagMap);
-        tags.entrySet().stream()
-                .forEach(entry -> tagContextBuilder.putLocal(TagKey.create(entry.getKey()), TagUtils.createTagValue(entry.getValue())));
+        tags.entrySet()
+                .stream()
+                .forEach(entry -> tagContextBuilder.putLocal(TagKey.create(entry.getKey()), TagUtils.createTagValue(entry
+                        .getValue())));
         return tagContextBuilder.buildScoped();
     }
-
 
     /**
      * Processes all {@link #providers} and creates common context based on the providers priority.
@@ -119,8 +121,7 @@ public class CommonTagsManager {
 
         // first create map of tags based on the providers priority
         Map<String, String> newCommonTagValueMap = new HashMap<>();
-        providers
-                .forEach(provider -> provider.getTags(configuration).forEach(newCommonTagValueMap::putIfAbsent));
+        providers.forEach(provider -> provider.getTags(configuration).forEach(newCommonTagValueMap::putIfAbsent));
 
         // then create key/value tags pairs for resolved map
         List<TagKey> newCommonTagKeys = new ArrayList<>();

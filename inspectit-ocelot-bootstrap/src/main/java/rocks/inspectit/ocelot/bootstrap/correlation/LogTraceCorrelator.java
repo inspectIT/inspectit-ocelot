@@ -19,6 +19,7 @@ public interface LogTraceCorrelator {
      * In addition the span scoped is wrapped with a closeable which also undos these correlation changes.
      *
      * @param spanScopeStarter a function which starts (and returns) a scoped span
+     *
      * @return the return value of spanScopeStarter if no MDC update was required. Otherwise a wreapping closeable which closes the span and undos the log correlation.
      */
     AutoCloseable startCorrelatedSpanScope(Supplier<? extends AutoCloseable> spanScopeStarter);
@@ -27,6 +28,7 @@ public interface LogTraceCorrelator {
      * Wraps the given runnable so that on execution the trace being active is PUT onto the MDC.
      *
      * @param runnable the runnable to wrap
+     *
      * @return a wrapped runnable having log correlation enabled
      */
     Runnable wrap(Runnable runnable);
@@ -35,6 +37,7 @@ public interface LogTraceCorrelator {
      * Wraps the given callable so that on execution the trace being active is PUT onto the MDC.
      *
      * @param callable the callable to wrap
+     *
      * @return a wrapped callable having log correlation enabled
      */
     <T> Callable<T> wrap(Callable<T> callable);

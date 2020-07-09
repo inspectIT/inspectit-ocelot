@@ -8,10 +8,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.InternalSettings;
+import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.instrumentation.event.IClassDiscoveryListener;
 import rocks.inspectit.ocelot.core.selfmonitoring.SelfMonitoringService;
 
@@ -30,6 +30,7 @@ public class NewClassDiscoveryServiceTest {
 
     @Mock
     ScheduledExecutorService executor;
+
     Runnable scheduledRunnable = null;
 
     @Mock
@@ -99,6 +100,7 @@ public class NewClassDiscoveryServiceTest {
 
     @Nested
     public class UpdateCheckTask {
+
         @Test
         void newNotificationSentForNewClasses() {
             HashSet<Class<?>> classes = new HashSet<>(Arrays.asList(String.class, Integer.class));
@@ -113,14 +115,11 @@ public class NewClassDiscoveryServiceTest {
             classes.add(Long.class);
             when(instrumentation.getAllLoadedClasses()).thenReturn(classes.toArray(new Class[]{}));
 
-
             if (scheduledRunnable != null) {
                 scheduledRunnable.run();
             }
-            verify(mockListener, times(1)).onNewClassesDiscovered(
-                    eq(new HashSet<>(Arrays.asList(Long.class))));
+            verify(mockListener, times(1)).onNewClassesDiscovered(eq(new HashSet<>(Arrays.asList(Long.class))));
         }
-
 
         @Test
         void testInactivityAfterConfiguredTrials() {

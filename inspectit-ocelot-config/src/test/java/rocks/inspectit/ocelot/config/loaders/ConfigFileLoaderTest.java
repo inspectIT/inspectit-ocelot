@@ -11,22 +11,16 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ConfigFileLoaderTest {
+
     @Nested
     public class GetDefaultConfig {
+
         @Test
         void GetDefaultConfig() throws IOException {
             String testPath1 = "basics.yml";
-            String testContent1 = "i:\n" +
-                    "  am:\n" +
-                    "    a:\n" +
-                    "      basic: test.yml";
+            String testContent1 = "i:\n" + "  am:\n" + "    a:\n" + "      basic: test.yml";
             String testPath2 = "subfolder/anotherSubFolder/defaultSubfolder.yml";
-            String testContent2 = "i:\n" +
-                    "  am:\n" +
-                    "    a:\n" +
-                    "      basic: test-yml\n" +
-                    "      in-a: subfolfder\n" +
-                    "      in: another subfolder";
+            String testContent2 = "i:\n" + "  am:\n" + "    a:\n" + "      basic: test-yml\n" + "      in-a: subfolfder\n" + "      in: another subfolder";
 
             Map<String, String> output = ConfigFileLoader.getDefaultConfigFiles();
 
@@ -40,20 +34,13 @@ public class ConfigFileLoaderTest {
 
     @Nested
     public class GetFallBackConfig {
+
         @Test
         void getFallbackConfig() throws IOException {
             String testPath1 = "fallback.yml";
-            String testContent1 = "i:\n" +
-                    "  am:\n" +
-                    "    a:\n" +
-                    "      fallback: test.yml";
+            String testContent1 = "i:\n" + "  am:\n" + "    a:\n" + "      fallback: test.yml";
             String testPath2 = "subfolder/anotherSubFolder/fallbackSubfolder.yml";
-            String testContent2 = "i:\n" +
-                    "  am:\n" +
-                    "    a:\n" +
-                    "      fallback: test-yml\n" +
-                    "      in-a: subfolfder\n" +
-                    "      in: another subfolder";
+            String testContent2 = "i:\n" + "  am:\n" + "    a:\n" + "      fallback: test-yml\n" + "      in-a: subfolfder\n" + "      in: another subfolder";
 
             Map<String, String> output = ConfigFileLoader.getFallbackConfigFiles();
 
@@ -67,6 +54,7 @@ public class ConfigFileLoaderTest {
 
     @Nested
     public class GetDefaultResources {
+
         @Test
         void getDefaultResource() throws IOException {
             String filePath1 = "config/default/basics.yml]";
@@ -84,6 +72,7 @@ public class ConfigFileLoaderTest {
 
     @Nested
     public class GetFallbackResources {
+
         @Test
         void getFallbackResource() throws IOException {
             String filePath1 = "config/fallback/fallback.yml]";

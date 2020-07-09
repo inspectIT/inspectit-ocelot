@@ -14,9 +14,9 @@ public class OpenCensusUtils {
     /**
      * Flushes the span exporters.
      */
-    public static void flushSpanExporter()  {
+    public static void flushSpanExporter() {
         try {
-        SpanExporter exporter = Tracing.getExportComponent().getSpanExporter();
+            SpanExporter exporter = Tracing.getExportComponent().getSpanExporter();
             Method flushMethod = exporter.getClass().getDeclaredMethod("flush");
             flushMethod.setAccessible(true);
             flushMethod.invoke(exporter);

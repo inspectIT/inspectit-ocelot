@@ -12,7 +12,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-
 /**
  * Base class for {@link BoundGenericAction}s which have
  * constant values and values depending on the execution context
@@ -35,9 +34,7 @@ abstract class AbstractDynamicBoundGenericAction extends BoundGenericAction {
      */
     private Pair<Integer, VariableAccessor>[] dynamicAssignments;
 
-    AbstractDynamicBoundGenericAction(String callName, GenericActionConfig actionConfig,
-                                      InjectedClass<?> action, Map<String, Object> constantAssignments,
-                                      Map<String, VariableAccessor> dynamicAssignments) {
+    AbstractDynamicBoundGenericAction(String callName, GenericActionConfig actionConfig, InjectedClass<?> action, Map<String, Object> constantAssignments, Map<String, VariableAccessor> dynamicAssignments) {
         super(callName, actionConfig, action);
 
         // the sorted additionalArgumentTypes map defines the number and the order of the additional input

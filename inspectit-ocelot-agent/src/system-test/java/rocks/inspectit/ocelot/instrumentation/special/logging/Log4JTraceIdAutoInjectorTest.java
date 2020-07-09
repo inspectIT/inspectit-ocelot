@@ -36,11 +36,9 @@ public class Log4JTraceIdAutoInjectorTest extends InstrumentationSysTestBase {
             LOGGER.error(message);
         }
 
-        assertThat(Log4JLoggingRecorder.loggingEvents)
-                .hasSize(1);
+        assertThat(Log4JLoggingRecorder.loggingEvents).hasSize(1);
 
-        assertThat(Log4JLoggingRecorder.loggingEvents.get(0))
-                .extracting(LoggingEvent::getMessage)
+        assertThat(Log4JLoggingRecorder.loggingEvents.get(0)).extracting(LoggingEvent::getMessage)
                 .isEqualTo("[TraceID: " + traceId + "] " + message);
     }
 
@@ -51,11 +49,8 @@ public class Log4JTraceIdAutoInjectorTest extends InstrumentationSysTestBase {
 
         LOGGER.error(message);
 
-        assertThat(Log4JLoggingRecorder.loggingEvents)
-                .hasSize(1);
+        assertThat(Log4JLoggingRecorder.loggingEvents).hasSize(1);
 
-        assertThat(Log4JLoggingRecorder.loggingEvents.get(0))
-                .extracting(LoggingEvent::getMessage)
-                .isEqualTo(message);
+        assertThat(Log4JLoggingRecorder.loggingEvents.get(0)).extracting(LoggingEvent::getMessage).isEqualTo(message);
     }
 }

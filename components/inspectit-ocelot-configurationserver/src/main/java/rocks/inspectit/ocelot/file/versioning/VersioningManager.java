@@ -200,10 +200,8 @@ public class VersioningManager {
             log.debug("Committing staged changes.");
         }
 
-        CommitCommand commitCommand = git.commit()
-                .setAll(true) // in order to remove deleted files from index
-                .setMessage(message)
-                .setAuthor(author);
+        CommitCommand commitCommand = git.commit().setAll(true) // in order to remove deleted files from index
+                .setMessage(message).setAuthor(author);
 
         Optional<RevCommit> latestCommit = getLatestCommit(Branch.WORKSPACE);
         if (allowAmend && latestCommit.isPresent()) {
@@ -493,15 +491,18 @@ public class VersioningManager {
 
             // get modified files between the specified diff - we only consider files which exists in the diff
             WorkspaceDiff diff = getWorkspaceDiff(false, liveCommitId, workspaceCommitId);
-            Map<String, DiffEntry.ChangeType> changeIndex = diff.getEntries().stream()
+            Map<String, DiffEntry.ChangeType> changeIndex = diff.getEntries()
+                    .stream()
                     .collect(Collectors.toMap(SimpleDiffEntry::getFile, SimpleDiffEntry::getType));
 
-            List<String> removeFiles = promotion.getFiles().stream()
+            List<String> removeFiles = promotion.getFiles()
+                    .stream()
                     .filter(file -> changeIndex.get(file) == DiffEntry.ChangeType.DELETE)
                     .map(this::prefixRelativeFile)
                     .collect(Collectors.toList());
 
-            List<String> checkoutFiles = promotion.getFiles().stream()
+            List<String> checkoutFiles = promotion.getFiles()
+                    .stream()
                     .filter(file -> changeIndex.get(file) != DiffEntry.ChangeType.DELETE)
                     .map(this::prefixRelativeFile)
                     .collect(Collectors.toList());

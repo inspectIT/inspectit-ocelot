@@ -87,6 +87,7 @@ public class RawExpression {
      * does not contain all fields referenced by the expression.
      *
      * @param beacon the beacon which should be used to solve the expression
+     *
      * @return true in case it would be possible to solve the expression using the given beacon
      */
     public boolean isSolvable(Beacon beacon) {
@@ -97,6 +98,7 @@ public class RawExpression {
      * Solves the expression using the given beacon.
      *
      * @param beacon the beacon used to solve the expression
+     *
      * @return the result of the expression
      */
     public Number solve(Beacon beacon) {

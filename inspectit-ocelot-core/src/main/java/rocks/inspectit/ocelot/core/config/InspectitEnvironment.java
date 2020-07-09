@@ -13,8 +13,8 @@ import org.springframework.context.expression.StandardBeanExpressionResolver;
 import org.springframework.core.env.*;
 import org.springframework.core.io.Resource;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
-import rocks.inspectit.ocelot.config.loaders.ConfigFileLoader;
 import rocks.inspectit.ocelot.config.conversion.InspectitConfigConversionService;
+import rocks.inspectit.ocelot.config.loaders.ConfigFileLoader;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.config.ConfigSettings;
 import rocks.inspectit.ocelot.config.utils.CaseUtils;
@@ -91,17 +91,13 @@ public class InspectitEnvironment extends StandardEnvironment {
      */
     private static final String INSPECTIT_CONFIG_BEAN_EXPRESSION_VARIABLE = "inspectit";
 
-
     /**
      * Sorted list of all configuration sources.
      * They are loaded in the given order. The earlier a configuration appears in this list, the higher its priority.
      * This means that configurations loaded from items appearing earlier in the list overwrite configurations from items appearing later in the list.
      * In contrast items appearing first in the list can provide information for loading items appearing later in the list.
      */
-    private static final List<BiConsumer<MutablePropertySources, ConfigSettings>> CONFIGURATION_INIT_STEPS = Arrays.asList(
-            InspectitEnvironment::addFileBasedConfiguration,
-            InspectitEnvironment::addHttpBasedConfiguration
-    );
+    private static final List<BiConsumer<MutablePropertySources, ConfigSettings>> CONFIGURATION_INIT_STEPS = Arrays.asList(InspectitEnvironment::addFileBasedConfiguration, InspectitEnvironment::addHttpBasedConfiguration);
 
     /**
      * The currently active inspectIT configuration.
@@ -231,14 +227,14 @@ public class InspectitEnvironment extends StandardEnvironment {
      * @param prefix      the prefix to use, e.g. "inspectit" for the root config object
      * @param configClazz the class of the config to load
      * @param <T>         the type of configClazz
+     *
      * @return the loaded object in case of success or an empty optional otherwise
      */
     public synchronized <T> Optional<T> loadAndValidateFromProperties(String prefix, Class<T> configClazz) {
         T newConfig;
         try {
-            Binder binder = new Binder(ConfigurationPropertySources.get(this),
-                    new PropertySourcesPlaceholdersResolver(this),
-                    InspectitConfigConversionService.getInstance());
+            Binder binder = new Binder(ConfigurationPropertySources.get(this), new PropertySourcesPlaceholdersResolver(this), InspectitConfigConversionService
+                    .getInstance());
             newConfig = binder.bind(prefix, configClazz).get();
         } catch (Exception e) {
             log.error("Error loading the configuration '{}'.", prefix, e);
@@ -252,9 +248,7 @@ public class InspectitEnvironment extends StandardEnvironment {
             log.error("Error loading the configuration '{}'.", prefix);
             for (ConstraintViolation<T> vio : violations) {
                 String property = CaseUtils.camelCaseToKebabCase(vio.getPropertyPath().toString());
-                if (vio.getInvalidValue() instanceof CharSequence
-                        || vio.getInvalidValue() instanceof Number
-                        || vio.getInvalidValue() instanceof Duration) {
+                if (vio.getInvalidValue() instanceof CharSequence || vio.getInvalidValue() instanceof Number || vio.getInvalidValue() instanceof Duration) {
                     log.error("{} (={}) => {}", property, vio.getInvalidValue(), vio.getMessage());
                 } else {
                     log.error("{} => {}", property, vio.getMessage());
@@ -308,7 +302,6 @@ public class InspectitEnvironment extends StandardEnvironment {
         };
     }
 
-
     private static void addFileBasedConfiguration(MutablePropertySources propsList, ConfigSettings currentConfig) {
         String path = currentConfig.getFileBased().getPath();
         Path dirPath = Paths.get(path);
@@ -332,7 +325,8 @@ public class InspectitEnvironment extends StandardEnvironment {
 
         if (httpEnabled) {
 
-            HttpPropertySourceState httpSourceState = new HttpPropertySourceState(HTTP_BASED_CONFIGURATION, currentConfig.getHttp());
+            HttpPropertySourceState httpSourceState = new HttpPropertySourceState(HTTP_BASED_CONFIGURATION, currentConfig
+                    .getHttp());
             try {
                 log.info("Initializing HTTP based configuration from URL: {}", httpSourceState.getEffectiveRequestUri());
             } catch (URISyntaxException e) {

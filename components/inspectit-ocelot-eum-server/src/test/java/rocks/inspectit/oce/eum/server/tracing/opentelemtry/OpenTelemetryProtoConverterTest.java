@@ -51,16 +51,13 @@ class OpenTelemetryProtoConverterTest {
                                             .setType(AttributeKeyValue.ValueType.DOUBLE)
                                             .setKey("resource-key")
                                             .setDoubleValue(11.2d)
-                                            .build()
-                                    )
-                                    .build()
-                            )
+                                            .build())
+                                    .build())
                             .addInstrumentationLibrarySpans(InstrumentationLibrarySpans.newBuilder()
                                     .setInstrumentationLibrary(InstrumentationLibrary.newBuilder()
                                             .setName("test-inst")
                                             .setVersion("0.1.0")
-                                            .build()
-                                    )
+                                            .build())
                                     .addSpans(Span.newBuilder()
                                             .setTraceId(ByteString.copyFrom(traceIdBuffer.array()))
                                             .setSpanId(ByteString.copyFrom(spanIdBuffer.array()))
@@ -68,23 +65,29 @@ class OpenTelemetryProtoConverterTest {
                                             .setKind(Span.SpanKind.CONSUMER)
                                             .setStartTimeUnixNano(time)
                                             .setEndTimeUnixNano(time + 1L)
-                                            .setStatus(Status.newBuilder().setCodeValue(Status.StatusCode.Aborted_VALUE).setMessage("status-desc").build())
+                                            .setStatus(Status.newBuilder()
+                                                    .setCodeValue(Status.StatusCode.Aborted_VALUE)
+                                                    .setMessage("status-desc")
+                                                    .build())
                                             .addAttributes(AttributeKeyValue.newBuilder()
                                                     .setType(AttributeKeyValue.ValueType.INT)
                                                     .setKey("a1")
                                                     .setIntValue(11)
-                                                    .build()
-                                            )
+                                                    .build())
                                             .setDroppedAttributesCount(1)
-                                            .addEvents(Span.Event.newBuilder().setName("e1").setTimeUnixNano(time + 2).build())
-                                            .addEvents(Span.Event.newBuilder().setName("e2").setTimeUnixNano(time + 3).build())
+                                            .addEvents(Span.Event.newBuilder()
+                                                    .setName("e1")
+                                                    .setTimeUnixNano(time + 2)
+                                                    .build())
+                                            .addEvents(Span.Event.newBuilder()
+                                                    .setName("e2")
+                                                    .setTimeUnixNano(time + 3)
+                                                    .build())
                                             .setDroppedEventsCount(2)
                                             .setDroppedLinksCount(3)
                                             .build())
-                                    .build()
-                            )
-                            .build()
-                    )
+                                    .build())
+                            .build())
                     .build();
 
             Collection<SpanData> result = converter.convert(data);
@@ -106,19 +109,17 @@ class OpenTelemetryProtoConverterTest {
                 assertThat(spanData.getAttributes()).hasSize(1)
                         .containsEntry("a1", AttributeValue.longAttributeValue(11));
                 assertThat(spanData.getTotalAttributeCount()).isEqualTo(2);
-                assertThat(spanData.getTimedEvents()).hasSize(2)
-                        .anySatisfy(event -> {
-                            assertThat(event.getName()).isEqualTo("e1");
-                            assertThat(event.getEpochNanos()).isEqualTo(time + 2);
-                            assertThat(event.getAttributes()).isEmpty();
-                            assertThat(event.getTotalAttributeCount()).isZero();
-                        })
-                        .anySatisfy(event -> {
-                            assertThat(event.getName()).isEqualTo("e2");
-                            assertThat(event.getEpochNanos()).isEqualTo(time + 3);
-                            assertThat(event.getAttributes()).isEmpty();
-                            assertThat(event.getTotalAttributeCount()).isZero();
-                        });
+                assertThat(spanData.getTimedEvents()).hasSize(2).anySatisfy(event -> {
+                    assertThat(event.getName()).isEqualTo("e1");
+                    assertThat(event.getEpochNanos()).isEqualTo(time + 2);
+                    assertThat(event.getAttributes()).isEmpty();
+                    assertThat(event.getTotalAttributeCount()).isZero();
+                }).anySatisfy(event -> {
+                    assertThat(event.getName()).isEqualTo("e2");
+                    assertThat(event.getEpochNanos()).isEqualTo(time + 3);
+                    assertThat(event.getAttributes()).isEmpty();
+                    assertThat(event.getTotalAttributeCount()).isZero();
+                });
                 assertThat(spanData.getTotalRecordedEvents()).isEqualTo(4);
                 assertThat(spanData.getTotalRecordedLinks()).isEqualTo(3);
             });
@@ -133,10 +134,8 @@ class OpenTelemetryProtoConverterTest {
                             .addInstrumentationLibrarySpans(InstrumentationLibrarySpans.newBuilder()
                                     .setInstrumentationLibrary(InstrumentationLibrary.newBuilder().build())
                                     .addSpans(Span.newBuilder().build())
-                                    .build()
-                            )
-                            .build()
-                    )
+                                    .build())
+                            .build())
                     .build();
 
             Collection<SpanData> result = converter.convert(data);

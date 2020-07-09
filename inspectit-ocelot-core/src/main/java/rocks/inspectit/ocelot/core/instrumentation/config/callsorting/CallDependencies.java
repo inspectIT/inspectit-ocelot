@@ -20,6 +20,7 @@ class CallDependencies {
      * Reads teh given action call configuration and extracts all dependencies.
      *
      * @param call the call to analyze
+     *
      * @return the dependencies of the call.
      */
     public static CallDependencies collectFor(ActionCallConfig call) {

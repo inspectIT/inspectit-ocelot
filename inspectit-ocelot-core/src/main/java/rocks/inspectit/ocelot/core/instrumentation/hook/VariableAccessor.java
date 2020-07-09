@@ -10,11 +10,13 @@ import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
  */
 @FunctionalInterface
 public interface VariableAccessor {
+
     /**
      * Reads a fixed variable.
      * The variable can be a special variable as well as fetched from the {@link rocks.inspectit.ocelot.bootstrap.exposed.InspectitContext}.
      *
      * @param context the context within the variable is queried
+     *
      * @return the value of the variable
      */
     Object get(IHookAction.ExecutionContext context);

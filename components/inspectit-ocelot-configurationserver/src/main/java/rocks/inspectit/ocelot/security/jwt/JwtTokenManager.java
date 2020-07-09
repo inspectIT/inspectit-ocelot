@@ -49,6 +49,7 @@ public class JwtTokenManager {
      * The token expires after the specified Duration via {@link InspectitServerSettings#getTokenLifespan()} from now.
      *
      * @param username the username for which the token is generated
+     *
      * @return the generated token
      */
     public String createToken(String username) {
@@ -59,11 +60,7 @@ public class JwtTokenManager {
         Date now = new Date();
         Date expiration = new Date(now.getTime() + config.getTokenLifespan().toMillis());
 
-        return Jwts.builder()
-                .setSubject(username)
-                .setExpiration(expiration)
-                .signWith(secret)
-                .compact();
+        return Jwts.builder().setSubject(username).setExpiration(expiration).signWith(secret).compact();
     }
 
     /**
@@ -75,14 +72,14 @@ public class JwtTokenManager {
      * If any of the steps fail (meaning that the token is invalid) an exception is thrown.
      *
      * @param token the token to parse, created via {@link #createToken(String)}
+     *
      * @return the {@link Authentication} if the token was valid
+     *
      * @throws JwtException              thrown if the token is invalid or has expired
      * @throws UsernameNotFoundException thrown if the user does not exist
      */
     public Authentication authenticateWithToken(String token) throws JwtException, UsernameNotFoundException {
-        Claims jwtToken = Jwts.parser().setSigningKey(secret)
-                .parseClaimsJws(token)
-                .getBody();
+        Claims jwtToken = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
 
         String username = jwtToken.getSubject();
         UserDetails userDetails = loadUser(username);
@@ -96,7 +93,9 @@ public class JwtTokenManager {
      * not exist in any of the details services.
      *
      * @param username the username of the desired user
+     *
      * @return the found {@link UserDetails} object
+     *
      * @throws UsernameNotFoundException if the user does not exist
      */
     private UserDetails loadUser(String username) throws UsernameNotFoundException {
@@ -105,7 +104,8 @@ public class JwtTokenManager {
                 return detailsService.loadUserByUsername(username);
             } catch (UsernameNotFoundException exception) {
                 if (log.isDebugEnabled()) {
-                    log.debug("User '{}' could not be loaded using details service {}", username, detailsService.getClass().getSimpleName());
+                    log.debug("User '{}' could not be loaded using details service {}", username, detailsService.getClass()
+                            .getSimpleName());
                 }
             }
         }

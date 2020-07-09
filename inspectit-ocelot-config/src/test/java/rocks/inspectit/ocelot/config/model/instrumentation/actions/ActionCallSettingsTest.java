@@ -18,7 +18,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
 public class ActionCallSettingsTest {
 
     InstrumentationSettings instr;
@@ -28,6 +27,7 @@ public class ActionCallSettingsTest {
     GenericActionSettings action;
 
     ViolationBuilder vios;
+
     List<Violation> violations;
 
     @BeforeEach
@@ -54,9 +54,9 @@ public class ActionCallSettingsTest {
         instr.setRules(Maps.newHashMap("my-rule", rule));
     }
 
-
     @Nested
     class CheckActionExistsDecoded {
+
         @Test
         void testNonExistingAction() {
             call.setAction("blabla");
@@ -179,7 +179,6 @@ public class ActionCallSettingsTest {
             assertThat(violations).hasSize(0);
         }
 
-
         @Test
         void testFloatToDoubleWrapperAssignment() {
             action.getInput().put("p1", "Double");
@@ -190,7 +189,6 @@ public class ActionCallSettingsTest {
             assertThat(violations).hasSize(0);
         }
 
-
         @Test
         void testFloatToDoublePrimitiveAssignment() {
             action.getInput().put("p1", "double");
@@ -200,7 +198,6 @@ public class ActionCallSettingsTest {
 
             assertThat(violations).hasSize(0);
         }
-
 
         @Test
         void testDoubleToFloatPrimitiveAssignment() {
@@ -253,7 +250,6 @@ public class ActionCallSettingsTest {
 
             assertThat(violations).hasSize(1);
         }
-
 
         @Test
         void testCorrectCharacterAssignment() {

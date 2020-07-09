@@ -50,8 +50,7 @@ class RevisionAccessTest {
 
         @Test
         public void invalidPath() {
-            assertThatExceptionOfType(IllegalArgumentException.class)
-                    .isThrownBy(() -> revisionAccess.verifyPath("files", "../test/"))
+            assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> revisionAccess.verifyPath("files", "../test/"))
                     .withMessage("User path escapes the base path: ../test/");
         }
     }

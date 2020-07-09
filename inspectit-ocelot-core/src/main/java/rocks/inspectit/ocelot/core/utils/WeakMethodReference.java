@@ -17,6 +17,7 @@ public class WeakMethodReference {
     private WeakReference<Class<?>> declaringClass;
 
     private String name;
+
     private Class<?>[] parameterTypes;
 
     private WeakReference<Method> methodReference;
@@ -38,7 +39,8 @@ public class WeakMethodReference {
             try {
                 method = lookup();
                 if (method != null) {
-                    log.trace("Renewed method reference of '{}' of class '{}'", name, method.getDeclaringClass().getName());
+                    log.trace("Renewed method reference of '{}' of class '{}'", name, method.getDeclaringClass()
+                            .getName());
                     methodReference = new WeakReference<>(method);
                 }
             } catch (NoSuchMethodException e) {
@@ -47,7 +49,6 @@ public class WeakMethodReference {
         }
         return method;
     }
-
 
     private Method lookup() throws NoSuchMethodException {
         Class<?> declaring = declaringClass.get();

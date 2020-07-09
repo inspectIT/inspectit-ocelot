@@ -9,7 +9,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class AnnotationAccessTest extends InstrumentationSysTestBase {
 
-
     @MyMethodAnnotation("helloworld")
     void myAnnotatedMethod(String someArgument) {
 
@@ -39,8 +38,7 @@ public class AnnotationAccessTest extends InstrumentationSysTestBase {
 
         AggregationData data = TestUtils.getDataForView("annotation/test", Maps.newHashMap("anno_value", "helloworld"));
 
-        assertThat(((AggregationData.LastValueDataLong) data).getLastValue())
-                .isEqualTo(42);
+        assertThat(((AggregationData.LastValueDataLong) data).getLastValue()).isEqualTo(42);
     }
 
     @Test
@@ -49,8 +47,7 @@ public class AnnotationAccessTest extends InstrumentationSysTestBase {
         TestUtils.waitForOpenCensusQueueToBeProcessed();
 
         AggregationData data = TestUtils.getDataForView("annotation/test", Maps.newHashMap("anno_value", "helloconstructor"));
-        assertThat(((AggregationData.LastValueDataLong) data).getLastValue())
-                .isEqualTo(42);
+        assertThat(((AggregationData.LastValueDataLong) data).getLastValue()).isEqualTo(42);
     }
 
 }

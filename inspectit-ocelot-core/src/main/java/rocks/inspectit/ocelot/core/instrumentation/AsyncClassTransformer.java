@@ -93,7 +93,6 @@ public class AsyncClassTransformer implements ClassFileTransformer {
      */
     Cache<Class<?>, Boolean> instrumentedClasses = CacheBuilder.newBuilder().weakKeys().build();
 
-
     @Override
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] bytecode) throws IllegalClassFormatException {
         if (classBeingRedefined == null) { // class is not loaded yet! we only redefine only loaded classes to prevent blocking
@@ -102,7 +101,8 @@ public class AsyncClassTransformer implements ClassFileTransformer {
 
         }
         //retransforms can be triggered by other agents where the classloader delegation has not been applied yet
-        if (!classLoaderDelegation.getClassLoaderClassesRequiringRetransformation(loader, configResolver.getCurrentConfig()).isEmpty()) {
+        if (!classLoaderDelegation.getClassLoaderClassesRequiringRetransformation(loader, configResolver.getCurrentConfig())
+                .isEmpty()) {
             log.debug("Skipping instrumentation of {} as bootstrap classes were not made available yet for the class", className);
             return bytecode; //leave the class unchanged for now
         } else {
@@ -270,6 +270,7 @@ public class AsyncClassTransformer implements ClassFileTransformer {
      *
      * @param classBeingRedefined the class to check for
      * @param type                the classes type description
+     *
      * @return
      */
     private ClassInstrumentationConfiguration updateAndGetActiveConfiguration(Class<?> classBeingRedefined, TypeDescription type) {
@@ -293,9 +294,7 @@ public class AsyncClassTransformer implements ClassFileTransformer {
         return classConf;
     }
 
-
-    @EventListener(classes = {InspectitConfigChangedEvent.class},
-            condition = "!#root.event.oldConfig.selfMonitoring.enabled")
+    @EventListener(classes = {InspectitConfigChangedEvent.class}, condition = "!#root.event.oldConfig.selfMonitoring.enabled")
     private void selfMonitorInstrumentedClassesCount() {
         selfMonitoring.recordMeasurement("instrumented-classes", instrumentedClasses.size());
     }

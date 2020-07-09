@@ -15,8 +15,7 @@ import javax.validation.constraints.NotNull;
 /**
  * Defines how a custom beacon field is derived using a RegEx replaceAll operation from an existing beacon field.
  * If no regex is specified, the provided input field will simply be copied.
- */
-public class BeaconTagSettings {
+ */ public class BeaconTagSettings {
 
     /**
      * Decides what to do in case no match for the given Regex is found.

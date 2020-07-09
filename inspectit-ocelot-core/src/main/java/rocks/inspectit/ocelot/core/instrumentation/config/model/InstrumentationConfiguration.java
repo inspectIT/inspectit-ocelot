@@ -60,12 +60,7 @@ public class InstrumentationConfiguration {
      * @param rules               the set of active rules
      */
     @Builder(toBuilder = true)
-    public InstrumentationConfiguration(Boolean metricsEnabled,
-                                        Boolean tracingEnabled,
-                                        InstrumentationSettings source,
-                                        PropagationMetaData propagationMetaData,
-                                        TracingSettings tracingSettings,
-                                        @Singular @Builder.ObtainVia(method = "getRules") Collection<InstrumentationRule> rules) {
+    public InstrumentationConfiguration(Boolean metricsEnabled, Boolean tracingEnabled, InstrumentationSettings source, PropagationMetaData propagationMetaData, TracingSettings tracingSettings, @Singular @Builder.ObtainVia(method = "getRules") Collection<InstrumentationRule> rules) {
         this.metricsEnabled = Optional.ofNullable(metricsEnabled).orElse(true);
         this.tracingEnabled = Optional.ofNullable(tracingEnabled).orElse(true);
         this.source = source;
@@ -87,6 +82,7 @@ public class InstrumentationConfiguration {
      * Returns the rule with the given name, if it exists and is enabled.
      *
      * @param name the name of the rule
+     *
      * @return an Optional containing the rule or an empty optional if it doesn't exist or is not active
      */
     public Optional<InstrumentationRule> getRuleByName(String name) {

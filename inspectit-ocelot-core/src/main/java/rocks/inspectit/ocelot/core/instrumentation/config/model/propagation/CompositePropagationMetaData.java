@@ -43,6 +43,7 @@ class CompositePropagationMetaData implements PropagationMetaData {
      * The implementation is specialized to prevent deep-nesting of {@link CompositePropagationMetaData}s.
      *
      * @param parent the parent instance to use
+     *
      * @return the newly created builder
      */
     public static PropagationMetaData.Builder builder(PropagationMetaData parent) {

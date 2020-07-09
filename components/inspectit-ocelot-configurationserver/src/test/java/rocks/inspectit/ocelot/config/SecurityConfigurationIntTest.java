@@ -8,15 +8,11 @@ import rocks.inspectit.ocelot.IntegrationTestBase;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
-@TestPropertySource(properties = {
-        "inspectit-config-server.default-user.name=master",
-        "inspectit-config-server.default-user.password=foo",
-        "inspectit-config-server.token-lifespan=2s"
-})
+@TestPropertySource(properties = {"inspectit-config-server.default-user.name=master", "inspectit-config-server.default-user.password=foo", "inspectit-config-server.token-lifespan=2s"})
 public class SecurityConfigurationIntTest extends IntegrationTestBase {
 
     private static final String DIRECTORIES_URL = "/api/v1/directories";
+
     private static final String NEW_TOKEN_URL = "/api/v1/account/token";
 
     @Nested
@@ -29,37 +25,30 @@ public class SecurityConfigurationIntTest extends IntegrationTestBase {
         }
     }
 
-
     @Nested
     class BasicAuthentication {
 
         @Test
         void invalidUserRejected() {
-            ResponseEntity<?> resp = rest
-                    .withBasicAuth("admin", "foo")
-                    .getForEntity(DIRECTORIES_URL, String.class);
+            ResponseEntity<?> resp = rest.withBasicAuth("admin", "foo").getForEntity(DIRECTORIES_URL, String.class);
             assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
         }
 
         @Test
         void invalidPasswordRejected() {
-            ResponseEntity<?> resp = rest
-                    .withBasicAuth("master", "bar")
-                    .getForEntity(DIRECTORIES_URL, String.class);
+            ResponseEntity<?> resp = rest.withBasicAuth("master", "bar").getForEntity(DIRECTORIES_URL, String.class);
             assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
         }
 
         @Test
         void correctAuthAccepted() {
-            ResponseEntity<String> resp = rest
-                    .withBasicAuth("master", "foo")
+            ResponseEntity<String> resp = rest.withBasicAuth("master", "foo")
                     .getForEntity(DIRECTORIES_URL, String.class);
 
             assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(resp.getBody()).isEqualTo("[]");
         }
     }
-
 
     @Nested
     class TokenAuthentication {
@@ -70,20 +59,15 @@ public class SecurityConfigurationIntTest extends IntegrationTestBase {
             return rest.exchange(url, HttpMethod.GET, new HttpEntity<>(headers), respClass);
         }
 
-
         @Test
         void invalidCredentials() {
-            ResponseEntity<?> resp = rest
-                    .withBasicAuth("admin", "foo")
-                    .getForEntity(NEW_TOKEN_URL, String.class);
+            ResponseEntity<?> resp = rest.withBasicAuth("admin", "foo").getForEntity(NEW_TOKEN_URL, String.class);
             assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
         }
 
         @Test
         void tokenViaBasicAuth() {
-            String token = rest
-                    .withBasicAuth("master", "foo")
-                    .getForObject(NEW_TOKEN_URL, String.class);
+            String token = rest.withBasicAuth("master", "foo").getForObject(NEW_TOKEN_URL, String.class);
 
             assertThat(token).isNotEmpty();
 
@@ -95,9 +79,7 @@ public class SecurityConfigurationIntTest extends IntegrationTestBase {
 
         @Test
         void tokenViaTokenAuth() {
-            String token = rest
-                    .withBasicAuth("master", "foo")
-                    .getForObject(NEW_TOKEN_URL, String.class);
+            String token = rest.withBasicAuth("master", "foo").getForObject(NEW_TOKEN_URL, String.class);
 
             assertThat(token).isNotEmpty();
 
@@ -112,12 +94,9 @@ public class SecurityConfigurationIntTest extends IntegrationTestBase {
             assertThat(resp.getBody()).isEqualTo("[]");
         }
 
-
         @Test
         void tokenExpiration() throws InterruptedException {
-            String token = rest
-                    .withBasicAuth("master", "foo")
-                    .getForObject(NEW_TOKEN_URL, String.class);
+            String token = rest.withBasicAuth("master", "foo").getForObject(NEW_TOKEN_URL, String.class);
 
             assertThat(token).isNotEmpty();
 
@@ -130,9 +109,7 @@ public class SecurityConfigurationIntTest extends IntegrationTestBase {
 
         @Test
         void ensureTokenCannotChangePassword() throws InterruptedException {
-            String token = rest
-                    .withBasicAuth("master", "foo")
-                    .getForObject(NEW_TOKEN_URL, String.class);
+            String token = rest.withBasicAuth("master", "foo").getForObject(NEW_TOKEN_URL, String.class);
 
             assertThat(token).isNotEmpty();
 

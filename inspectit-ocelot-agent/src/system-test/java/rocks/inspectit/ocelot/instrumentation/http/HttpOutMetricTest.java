@@ -44,12 +44,8 @@ public class HttpOutMetricTest {
         wireMockServer.start();
         configureFor(wireMockServer.port());
 
-        stubFor(get(urlPathEqualTo(PATH_500))
-                .willReturn(aResponse()
-                        .withStatus(500)));
-        stubFor(get(urlPathEqualTo(PATH_200))
-                .willReturn(aResponse()
-                        .withStatus(200)));
+        stubFor(get(urlPathEqualTo(PATH_500)).willReturn(aResponse().withStatus(500)));
+        stubFor(get(urlPathEqualTo(PATH_200)).willReturn(aResponse().withStatus(200)));
 
         WIREMOCK_HOST_PORT = "localhost:" + wireMockServer.port();
         WIREMOCK_URL = "http://" + WIREMOCK_HOST_PORT;
@@ -72,10 +68,7 @@ public class HttpOutMetricTest {
             builder.setDefaultRequestConfig(requestBuilder.build());
             client = builder.build();
 
-            TestUtils.waitForClassInstrumentations(Arrays.asList(
-                    CloseableHttpClient.class,
-                    Class.forName("org.apache.http.impl.client.InternalHttpClient")),
-                    15, TimeUnit.SECONDS);
+            TestUtils.waitForClassInstrumentations(Arrays.asList(CloseableHttpClient.class, Class.forName("org.apache.http.impl.client.InternalHttpClient")), 15, TimeUnit.SECONDS);
         }
 
         @AfterEach
@@ -102,7 +95,8 @@ public class HttpOutMetricTest {
             tags.put("error", "false");
 
             long cnt = ((AggregationData.CountData) TestUtils.getDataForView("http/out/count", tags)).getCount();
-            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/out/responsetime/sum", tags)).getSum();
+            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/out/responsetime/sum", tags))
+                    .getSum();
 
             assertThat(cnt).isEqualTo(1);
             assertThat(respSum).isGreaterThan(0);
@@ -127,12 +121,12 @@ public class HttpOutMetricTest {
             tags.put("error", "true");
 
             long cnt = ((AggregationData.CountData) TestUtils.getDataForView("http/out/count", tags)).getCount();
-            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/out/responsetime/sum", tags)).getSum();
+            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/out/responsetime/sum", tags))
+                    .getSum();
 
             assertThat(cnt).isEqualTo(1);
             assertThat(respSum).isGreaterThan(0);
         }
-
 
         @Test
         void testExceptionStatus() throws Exception {
@@ -160,7 +154,8 @@ public class HttpOutMetricTest {
             tags.put("error", "true");
 
             long cnt = ((AggregationData.CountData) TestUtils.getDataForView("http/out/count", tags)).getCount();
-            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/out/responsetime/sum", tags)).getSum();
+            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/out/responsetime/sum", tags))
+                    .getSum();
 
             assertThat(cnt).isEqualTo(1);
             assertThat(respSum).isGreaterThan(0);
@@ -197,7 +192,8 @@ public class HttpOutMetricTest {
             tags.put("error", "false");
 
             long cnt = ((AggregationData.CountData) TestUtils.getDataForView("http/out/count", tags)).getCount();
-            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/out/responsetime/sum", tags)).getSum();
+            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/out/responsetime/sum", tags))
+                    .getSum();
 
             assertThat(cnt).isEqualTo(1);
             assertThat(respSum).isGreaterThan(0);
@@ -225,7 +221,8 @@ public class HttpOutMetricTest {
             tags.put("error", "true");
 
             long cnt = ((AggregationData.CountData) TestUtils.getDataForView("http/out/count", tags)).getCount();
-            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/out/responsetime/sum", tags)).getSum();
+            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/out/responsetime/sum", tags))
+                    .getSum();
 
             assertThat(cnt).isEqualTo(1);
             assertThat(respSum).isGreaterThan(0);
@@ -259,7 +256,8 @@ public class HttpOutMetricTest {
             tags.put("error", "true");
 
             long cnt = ((AggregationData.CountData) TestUtils.getDataForView("http/out/count", tags)).getCount();
-            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/out/responsetime/sum", tags)).getSum();
+            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/out/responsetime/sum", tags))
+                    .getSum();
 
             assertThat(cnt).isEqualTo(1);
             assertThat(respSum).isGreaterThan(0);

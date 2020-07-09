@@ -62,8 +62,7 @@ public class MetricsRecorder implements IHookAction {
         // first common tags to allow overwrite by constant or data tags
         commonTagsManager.getCommonTagKeys()
                 .forEach(commonTagKey -> Optional.ofNullable(inspectitContext.getData(commonTagKey.getName()))
-                        .ifPresent(value -> builder.putLocal(commonTagKey, TagUtils.createTagValue(value.toString())))
-                );
+                        .ifPresent(value -> builder.putLocal(commonTagKey, TagUtils.createTagValue(value.toString()))));
 
         // then constant tags to allow overwrite by data
         metricAccessor.getConstantTags()

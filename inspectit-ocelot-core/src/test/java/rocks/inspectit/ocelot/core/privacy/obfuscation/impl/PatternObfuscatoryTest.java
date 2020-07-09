@@ -24,6 +24,7 @@ class PatternObfuscatoryTest {
         Span span;
 
         Pattern p1 = Pattern.compile("[a-z]+");
+
         Pattern p2 = Pattern.compile("[0-9]+");
 
         @Test
@@ -136,7 +137,8 @@ class PatternObfuscatoryTest {
             entryBuilder2.checkData(true);
             entryBuilder2.replaceRegex("[47]");
 
-            PatternObfuscatory patternObfuscatory = new PatternObfuscatory(Arrays.asList(entryBuilder1.build(), entryBuilder2.build()));
+            PatternObfuscatory patternObfuscatory = new PatternObfuscatory(Arrays.asList(entryBuilder1.build(), entryBuilder2
+                    .build()));
 
             patternObfuscatory.putSpanAttribute(span, "abc", "abc");
             patternObfuscatory.putSpanAttribute(span, "efg", "012");
@@ -157,6 +159,5 @@ class PatternObfuscatoryTest {
         }
 
     }
-
 
 }

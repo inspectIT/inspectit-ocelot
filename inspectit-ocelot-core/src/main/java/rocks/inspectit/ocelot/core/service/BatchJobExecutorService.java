@@ -30,6 +30,7 @@ public class BatchJobExecutorService {
          * The methods return value specifies if further processing is required.
          *
          * @param batchSize the maximum size of the batch to process
+         *
          * @return true, if the job is complete (= no future batches will be scheduled)
          */
         boolean processBatch(T batchSize);
@@ -102,6 +103,7 @@ public class BatchJobExecutorService {
      * @param batchSizes      the size of the batches
      * @param startDelay      the time to wait until the execution of the first batch
      * @param interBatchDelay the pause between the batches
+     *
      * @return the started {@link BatchJob}
      */
     public <T> BatchJob<T> startJob(BatchProcessor<T> task, T batchSizes, Duration startDelay, Duration interBatchDelay) {
@@ -109,7 +111,6 @@ public class BatchJobExecutorService {
         job.scheduleNextBatch(startDelay);
         return job;
     }
-
 
     /**
      * Starts a new batch job which runs infinitely;
@@ -119,6 +120,7 @@ public class BatchJobExecutorService {
      * @param batchSizes      the size of the batches
      * @param startDelay      the time to wait until the execution of the first batch
      * @param interBatchDelay the pause between the batches
+     *
      * @return the started {@link BatchJob}
      */
     public <T> BatchJob<T> startJob(Consumer<T> task, T batchSizes, Duration startDelay, Duration interBatchDelay) {

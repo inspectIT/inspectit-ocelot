@@ -17,6 +17,7 @@ public class SimpleDiffEntry {
      * Creates a {@link SimpleDiffEntry} based an a given {@link DiffEntry}.
      *
      * @param entry the {@link DiffEntry} to use as basis
+     *
      * @return the created {@link SimpleDiffEntry}
      */
     public static SimpleDiffEntry of(DiffEntry entry) {
@@ -28,7 +29,6 @@ public class SimpleDiffEntry {
         } else {
             simpleEntry.setFile(entry.getNewPath());
         }
-
 
         return simpleEntry;
     }

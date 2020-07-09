@@ -1,6 +1,5 @@
 package rocks.inspectit.ocelot.configschema;
 
-
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 

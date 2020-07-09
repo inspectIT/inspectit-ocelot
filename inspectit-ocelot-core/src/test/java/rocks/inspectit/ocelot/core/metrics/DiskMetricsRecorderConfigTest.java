@@ -11,7 +11,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class DiskMetricsRecorderConfigTest extends SpringTestBase {
 
-
     @Autowired
     DiskMetricsRecorder recorder;
 
@@ -57,7 +56,6 @@ public class DiskMetricsRecorderConfigTest extends SpringTestBase {
             });
             assertThat(recorder.isEnabled()).isFalse();
         }
-
 
         @Test
         @DirtiesContext

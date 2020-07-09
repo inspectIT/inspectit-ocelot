@@ -37,6 +37,7 @@ public class ConditionalHookAction implements IHookAction {
      * @param conditions              the definitions of the conditions to check
      * @param inputAction             the action to execute only conditionally
      * @param variableAccessorFactory the accessor used for accessing context variables as well as special variables
+     *
      * @return the wrapped action in case conditions are defined
      */
     public static IHookAction wrapWithConditionChecks(ConditionalActionSettings conditions, IHookAction inputAction, VariableAccessorFactory variableAccessorFactory) {
@@ -53,6 +54,7 @@ public class ConditionalHookAction implements IHookAction {
      *
      * @param conditions              the conditions to evaluate
      * @param variableAccessorFactory the accessor used for accessing context variables as well as special variables
+     *
      * @return the predicate, which is {@link #ALWAYS_TRUE} if no conditions are present
      */
     public static Predicate<ExecutionContext> getAsPredicate(ConditionalActionSettings conditions, VariableAccessorFactory variableAccessorFactory) {

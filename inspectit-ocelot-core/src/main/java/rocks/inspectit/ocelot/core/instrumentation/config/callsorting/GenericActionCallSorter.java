@@ -41,7 +41,9 @@ public class GenericActionCallSorter {
      * Orders the given set of action calls based on their inter-dependencies.
      *
      * @param calls the calls to sort
+     *
      * @return the sorted calls, meaning that the actions should be executed in the order in which they appear in the list
+     *
      * @throws CyclicDataDependencyException if the action calls have a cyclic dependency and therefore cannot be ordered
      */
     public List<ActionCallConfig> orderActionCalls(Collection<ActionCallConfig> calls) throws CyclicDataDependencyException {
@@ -68,24 +70,27 @@ public class GenericActionCallSorter {
      *
      * @param call  the data-dependencies of the call
      * @param index the index to use for querying.
+     *
      * @return a set of all ActionCallConfigs, on which the ActionCallConfig represented by "call" depends.
      */
     private Set<ActionCallConfig> getActionDependencies(CallDependencies call, CallDependencyIndex index) {
         //Rule: calls ONLY reading (and not writing) a data key are executed after any call writing the given data key
-        Stream<CallDependencies> readOnlyDependencies = call.getReads().stream()
+        Stream<CallDependencies> readOnlyDependencies = call.getReads()
+                .stream()
                 .filter(key -> !call.getWrites().contains(key))
                 .flatMap(key -> index.getCallsWriting(key).stream());
 
         //Rule: calls reading AND writing data keys are executed after any call ONLY writing (and not reading) the given data key
-        Stream<CallDependencies> readAndWriteDependencies = call.getReads().stream()
+        Stream<CallDependencies> readAndWriteDependencies = call.getReads()
+                .stream()
                 .filter(key -> call.getWrites().contains(key))
-                .flatMap(key ->
-                        index.getCallsWriting(key).stream()
-                                .filter(depCall -> !depCall.getReads().contains(key))
-                );
+                .flatMap(key -> index.getCallsWriting(key)
+                        .stream()
+                        .filter(depCall -> !depCall.getReads().contains(key)));
 
         //Rule: calls writing a data key are executed after any call with a "reads-before-overriden" on the corresponding key
-        Stream<CallDependencies> writeDependencies = call.getWrites().stream()
+        Stream<CallDependencies> writeDependencies = call.getWrites()
+                .stream()
                 .flatMap(key -> index.getCallsReadingBeforeWritten(key).stream());
 
         return Stream.concat(readOnlyDependencies, Stream.concat(readAndWriteDependencies, writeDependencies))
@@ -99,7 +104,9 @@ public class GenericActionCallSorter {
      *
      * @param dependencyGraph a map mapping each data key to the data keys he depends on. This map defines the the dependency graph.
      *                        The map is allowed to contain dependencies to data keys which are not part of dataKeys, those are simply ignored.
+     *
      * @return a sorted list containing all data keys
+     *
      * @throws CyclicDataDependencyException if there is a cyclic dependency, topological sorting is not possible
      */
     private List<ActionCallConfig> getInTopologicalOrder(IdentityHashMap<ActionCallConfig, Set<ActionCallConfig>> dependencyGraph) throws CyclicDataDependencyException {
@@ -114,9 +121,7 @@ public class GenericActionCallSorter {
         for (Pair<ActionCallConfig, List<ActionCallConfig>> callWithDependencies : sortedDependencyGraph) {
             putInTopologicalOrder(result, callWithDependencies.getLeft(), sortedLookup, new LinkedHashSet<>());
         }
-        return result.stream()
-                .map(Equivalence.Wrapper::get)
-                .collect(Collectors.toList());
+        return result.stream().map(Equivalence.Wrapper::get).collect(Collectors.toList());
     }
 
     /**
@@ -124,6 +129,7 @@ public class GenericActionCallSorter {
      * This ensures a deterministic order of the action calls.
      *
      * @param dependencyGraph the unsorted dependency graph
+     *
      * @return the sorted graph
      */
     private List<Pair<ActionCallConfig, List<ActionCallConfig>>> sortDependencyGraph(IdentityHashMap<ActionCallConfig, Set<ActionCallConfig>> dependencyGraph) {
@@ -144,12 +150,10 @@ public class GenericActionCallSorter {
      * @param current         the ActionCall for which all dependencies shall be put onto the result stack
      * @param dependencyGraph the dependency graph, mapping calls to all calls which should be executed prior to them
      * @param stackTrace      stack trace of visited calls, only used to detect cyclic dependencies
+     *
      * @throws CyclicDataDependencyException
      */
-    private void putInTopologicalOrder(LinkedHashSet<Equivalence.Wrapper<ActionCallConfig>> result,
-                                       ActionCallConfig current,
-                                       IdentityHashMap<ActionCallConfig, ? extends Collection<ActionCallConfig>> dependencyGraph,
-                                       LinkedHashSet<Equivalence.Wrapper<ActionCallConfig>> stackTrace) throws CyclicDataDependencyException {
+    private void putInTopologicalOrder(LinkedHashSet<Equivalence.Wrapper<ActionCallConfig>> result, ActionCallConfig current, IdentityHashMap<ActionCallConfig, ? extends Collection<ActionCallConfig>> dependencyGraph, LinkedHashSet<Equivalence.Wrapper<ActionCallConfig>> stackTrace) throws CyclicDataDependencyException {
 
         Equivalence.Wrapper<ActionCallConfig> currentIdentity = Equivalence.identity().wrap(current);
         if (result.contains(currentIdentity)) {

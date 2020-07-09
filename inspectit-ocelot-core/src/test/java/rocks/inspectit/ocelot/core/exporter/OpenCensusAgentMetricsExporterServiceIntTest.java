@@ -29,18 +29,19 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-@TestPropertySource(properties = {
-        "inspectit.exporters.metrics.open-census-agent.address=localhost:55678",
-        "inspectit.exporters.metrics.open-census-agent.use-insecure=true",
-})
+@TestPropertySource(properties = {"inspectit.exporters.metrics.open-census-agent.address=localhost:55678", "inspectit.exporters.metrics.open-census-agent.use-insecure=true",})
 @DirtiesContext
 public class OpenCensusAgentMetricsExporterServiceIntTest extends SpringTestBase {
 
     public static final String HOST = "localhost";
+
     public static final int PORT = 55678;
+
     private static Server agent;
+
     @Autowired
     private StatsRecorder statsRecorder;
+
     private static FakeOcAgentMetricsServiceGrpcImpl fakeOcAgentMetricsServiceGrpc = new FakeOcAgentMetricsServiceGrpcImpl();
 
     @BeforeAll
@@ -73,7 +74,8 @@ public class OpenCensusAgentMetricsExporterServiceIntTest extends SpringTestBase
     private void recordDummyMetric() {
         MeasureMap mm = statsRecorder.newMeasureMap();
         Measure.MeasureLong measure = Measure.MeasureLong.create("oc-test-metric-name", "metric-description", "unit of metric");
-        View view = View.create(View.Name.create("oc-test-metric-name"), "description", measure, Aggregation.Sum.create(), Collections.emptyList());
+        View view = View.create(View.Name.create("oc-test-metric-name"), "description", measure, Aggregation.Sum.create(), Collections
+                .emptyList());
         Stats.getViewManager().registerView(view);
         mm.put(measure, 20);
         mm.record();
@@ -95,25 +97,23 @@ public class OpenCensusAgentMetricsExporterServiceIntTest extends SpringTestBase
         private final List<ExportMetricsServiceRequest> exportMetricsServiceRequests = new ArrayList<>();
 
         @GuardedBy("this")
-        private final StreamObserver<ExportMetricsServiceRequest> exportRequestObserver =
-                new StreamObserver<ExportMetricsServiceRequest>() {
-                    @Override
-                    public void onNext(ExportMetricsServiceRequest value) {
-                        addExportRequest(value);
-                    }
+        private final StreamObserver<ExportMetricsServiceRequest> exportRequestObserver = new StreamObserver<ExportMetricsServiceRequest>() {
+            @Override
+            public void onNext(ExportMetricsServiceRequest value) {
+                addExportRequest(value);
+            }
 
-                    @Override
-                    public void onError(Throwable t) {
-                    }
+            @Override
+            public void onError(Throwable t) {
+            }
 
-                    @Override
-                    public void onCompleted() {
-                    }
-                };
+            @Override
+            public void onCompleted() {
+            }
+        };
 
         @Override
-        public synchronized StreamObserver<ExportMetricsServiceRequest> export(
-                StreamObserver<ExportMetricsServiceResponse> responseObserver) {
+        public synchronized StreamObserver<ExportMetricsServiceRequest> export(StreamObserver<ExportMetricsServiceResponse> responseObserver) {
             return exportRequestObserver;
         }
 

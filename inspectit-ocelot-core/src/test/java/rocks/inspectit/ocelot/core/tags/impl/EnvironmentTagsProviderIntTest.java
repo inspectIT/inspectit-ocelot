@@ -14,9 +14,7 @@ class EnvironmentTagsProviderIntTest {
 
     @Nested
     @DirtiesContext
-    @TestPropertySource(properties = {
-            "inspectit.service-name=" + Defaults.SERVICE_NAME
-    })
+    @TestPropertySource(properties = {"inspectit.service-name=" + Defaults.SERVICE_NAME})
     class Defaults extends SpringTestBase {
 
         static final String SERVICE_NAME = "SERVICE_NAME";
@@ -29,8 +27,7 @@ class EnvironmentTagsProviderIntTest {
 
         @Test
         public void happyPath() {
-            assertThat(provider.getTags(env.getCurrentConfig()))
-                    .hasSize(3)
+            assertThat(provider.getTags(env.getCurrentConfig())).hasSize(3)
                     .containsEntry("service", SERVICE_NAME)
                     .containsKey("host")
                     .containsKey("host_address");
@@ -40,10 +37,7 @@ class EnvironmentTagsProviderIntTest {
 
     @Nested
     @DirtiesContext
-    @TestPropertySource(properties = {
-            "inspectit.tags.providers.environment.resolve-host-name=false",
-            "inspectit.tags.providers.environment.resolve-host-address=false",
-    })
+    @TestPropertySource(properties = {"inspectit.tags.providers.environment.resolve-host-name=false", "inspectit.tags.providers.environment.resolve-host-address=false",})
     class Overwritten extends SpringTestBase {
 
         @Autowired
@@ -54,18 +48,14 @@ class EnvironmentTagsProviderIntTest {
 
         @Test
         public void happyPath() {
-            assertThat(provider.getTags(env.getCurrentConfig()))
-                    .hasSize(1)
-                    .containsKeys("service");
+            assertThat(provider.getTags(env.getCurrentConfig())).hasSize(1).containsKeys("service");
         }
 
     }
 
     @Nested
     @DirtiesContext
-    @TestPropertySource(properties = {
-            "inspectit.tags.providers.environment.enabled=false"
-    })
+    @TestPropertySource(properties = {"inspectit.tags.providers.environment.enabled=false"})
     class Disabled extends SpringTestBase {
 
         @Autowired
@@ -83,9 +73,7 @@ class EnvironmentTagsProviderIntTest {
 
     @Nested
     @DirtiesContext
-    @TestPropertySource(properties = {
-            "inspectit.tags.providers.environment.enabled=false"
-    })
+    @TestPropertySource(properties = {"inspectit.tags.providers.environment.enabled=false"})
     class Update extends SpringTestBase {
 
         @Autowired
@@ -115,13 +103,9 @@ class EnvironmentTagsProviderIntTest {
 
         @Test
         public void happyPath() {
-            updateProperties(
-                    properties -> properties
-                            .withProperty("inspectit.service-name", "updatedName")
-            );
+            updateProperties(properties -> properties.withProperty("inspectit.service-name", "updatedName"));
 
-            assertThat(provider.getTags(env.getCurrentConfig())).hasSize(3)
-                    .containsEntry("service", "updatedName");
+            assertThat(provider.getTags(env.getCurrentConfig())).hasSize(3).containsEntry("service", "updatedName");
         }
 
     }
