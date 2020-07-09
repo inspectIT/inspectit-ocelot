@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.util.ReflectionTestUtils;
+import rocks.inspectit.ocelot.events.WorkspaceChangedEvent;
 import rocks.inspectit.ocelot.file.FileTestBase;
 import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
 import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
@@ -41,6 +42,8 @@ class VersioningManagerTest extends FileTestBase {
 
     private Authentication authentication;
 
+    private ApplicationEventPublisher eventPublisher;
+
     @BeforeEach
     public void beforeEach() throws IOException {
         if (TEST_DIRECTORY == null) {
@@ -52,7 +55,7 @@ class VersioningManagerTest extends FileTestBase {
 
         authentication = mock(Authentication.class);
         when(authentication.getName()).thenReturn("user");
-        ApplicationEventPublisher eventPublisher = mock(ApplicationEventPublisher.class);
+        eventPublisher = mock(ApplicationEventPublisher.class);
         versioningManager = new VersioningManager(tempDirectory, () -> authentication, eventPublisher);
 
         System.out.println("Test data in: " + tempDirectory.toString());
@@ -156,6 +159,9 @@ class VersioningManagerTest extends FileTestBase {
 
             assertThat(versioningManager.getCommitCount()).isEqualTo(2);
             assertThat(versioningManager.isClean()).isTrue();
+
+            verify(eventPublisher).publishEvent(any(WorkspaceChangedEvent.class));
+            verifyNoMoreInteractions(eventPublisher);
         }
 
         @Test
@@ -173,6 +179,9 @@ class VersioningManagerTest extends FileTestBase {
 
             assertThat(versioningManager.getCommitCount()).isEqualTo(2);
             assertThat(versioningManager.isClean()).isTrue();
+
+            verify(eventPublisher, times(2)).publishEvent(any(WorkspaceChangedEvent.class));
+            verifyNoMoreInteractions(eventPublisher);
         }
 
         @Test
@@ -191,6 +200,9 @@ class VersioningManagerTest extends FileTestBase {
 
             assertThat(versioningManager.getCommitCount()).isEqualTo(3);
             assertThat(versioningManager.isClean()).isTrue();
+
+            verify(eventPublisher, times(2)).publishEvent(any(WorkspaceChangedEvent.class));
+            verifyNoMoreInteractions(eventPublisher);
         }
 
         @Test
@@ -203,10 +215,13 @@ class VersioningManagerTest extends FileTestBase {
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml");
 
             versioningManager.commitAllChanges("test");
+            verify(eventPublisher).publishEvent(any(WorkspaceChangedEvent.class));
             versioningManager.commitAllChanges("no change");
 
             assertThat(versioningManager.getCommitCount()).isEqualTo(2);
             assertThat(versioningManager.isClean()).isTrue();
+
+            verifyNoMoreInteractions(eventPublisher);
         }
 
         @Test
@@ -224,6 +239,8 @@ class VersioningManagerTest extends FileTestBase {
 
             assertThat(versioningManager.getCommitCount()).isOne();
             assertThat(versioningManager.isClean()).isFalse();
+
+            verifyZeroInteractions(eventPublisher);
         }
     }
 
@@ -319,7 +336,8 @@ class VersioningManagerTest extends FileTestBase {
             Optional<RevCommit> latestCommit = versioningManager.getLatestCommit(Branch.WORKSPACE);
 
             assertThat(latestCommit).isNotEmpty();
-            assertThat(latestCommit.get().getFullMessage()).isEqualTo("Initializing Git repository using existing working directory");
+            assertThat(latestCommit.get()
+                    .getFullMessage()).isEqualTo("Initializing Git repository using existing working directory");
         }
 
         @Test
@@ -345,7 +363,8 @@ class VersioningManagerTest extends FileTestBase {
             Optional<RevCommit> latestCommit = versioningManager.getLatestCommit(Branch.LIVE);
 
             assertThat(latestCommit).isNotEmpty();
-            assertThat(latestCommit.get().getFullMessage()).isEqualTo("Initializing Git repository using existing working directory");
+            assertThat(latestCommit.get()
+                    .getFullMessage()).isEqualTo("Initializing Git repository using existing working directory");
         }
     }
 
@@ -387,9 +406,22 @@ class VersioningManagerTest extends FileTestBase {
             WorkspaceDiff result = versioningManager.getWorkspaceDiff(true);
 
             assertThat(result.getEntries()).containsExactlyInAnyOrder(
-                    SimpleDiffEntry.builder().file("/file_added.yml").type(DiffEntry.ChangeType.ADD).newContent("").build(),
-                    SimpleDiffEntry.builder().file("/file_modified.yml").type(DiffEntry.ChangeType.MODIFY).oldContent("").newContent("new content").build(),
-                    SimpleDiffEntry.builder().file("/file_removed.yml").type(DiffEntry.ChangeType.DELETE).oldContent("content").build()
+                    SimpleDiffEntry.builder()
+                            .file("/file_added.yml")
+                            .type(DiffEntry.ChangeType.ADD)
+                            .newContent("")
+                            .build(),
+                    SimpleDiffEntry.builder()
+                            .file("/file_modified.yml")
+                            .type(DiffEntry.ChangeType.MODIFY)
+                            .oldContent("")
+                            .newContent("new content")
+                            .build(),
+                    SimpleDiffEntry.builder()
+                            .file("/file_removed.yml")
+                            .type(DiffEntry.ChangeType.DELETE)
+                            .oldContent("content")
+                            .build()
             );
             assertThat(result.getLiveCommitId()).isNotEqualTo(result.getWorkspaceCommitId());
         }
@@ -413,13 +445,23 @@ class VersioningManagerTest extends FileTestBase {
             WorkspaceDiff resultSecond = versioningManager.getWorkspaceDiff(true, liveId, latestWorkspaceId);
 
             assertThat(resultFirst.getEntries()).containsExactlyInAnyOrder(
-                    SimpleDiffEntry.builder().file("/file_modified.yml").type(DiffEntry.ChangeType.MODIFY).oldContent("").newContent("new content").build()
+                    SimpleDiffEntry.builder()
+                            .file("/file_modified.yml")
+                            .type(DiffEntry.ChangeType.MODIFY)
+                            .oldContent("")
+                            .newContent("new content")
+                            .build()
             );
             assertThat(resultFirst.getLiveCommitId()).isEqualTo(liveId.name());
             assertThat(resultFirst.getWorkspaceCommitId()).isEqualTo(workspaceId.name());
 
             assertThat(resultSecond.getEntries()).containsExactlyInAnyOrder(
-                    SimpleDiffEntry.builder().file("/file_modified.yml").type(DiffEntry.ChangeType.MODIFY).oldContent("").newContent("another content").build()
+                    SimpleDiffEntry.builder()
+                            .file("/file_modified.yml")
+                            .type(DiffEntry.ChangeType.MODIFY)
+                            .oldContent("")
+                            .newContent("another content")
+                            .build()
             );
             assertThat(resultSecond.getLiveCommitId()).isEqualTo(liveId.name());
             assertThat(resultSecond.getWorkspaceCommitId()).isEqualTo(latestWorkspaceId.name());
@@ -603,8 +645,10 @@ class VersioningManagerTest extends FileTestBase {
             assertThat(diff.getEntries()).containsExactlyInAnyOrder(
                     SimpleDiffEntry.builder().file("/file_modified.yml").type(DiffEntry.ChangeType.MODIFY).build()
             );
-            assertThat(versioningManager.getLiveRevision().readConfigurationFile("file_modified.yml")).hasValue("content_A");
-            assertThat(versioningManager.getWorkspaceRevision().readConfigurationFile("file_modified.yml")).hasValue("content_B");
+            assertThat(versioningManager.getLiveRevision()
+                    .readConfigurationFile("file_modified.yml")).hasValue("content_A");
+            assertThat(versioningManager.getWorkspaceRevision()
+                    .readConfigurationFile("file_modified.yml")).hasValue("content_B");
         }
     }
 
@@ -625,6 +669,24 @@ class VersioningManagerTest extends FileTestBase {
 
             Optional<String> fileContent = result.readConfigurationFile("file.yml");
             assertThat(fileContent).hasValue("a");
+        }
+    }
+
+    @Nested
+    class GetCurrentAuthor {
+
+        @Test
+        void systemUserOnSystemOperationUsed() {
+            VersioningManager vm = new VersioningManager(Paths.get(""), () -> null, (event) -> {
+            });
+            assertThat(vm.getCurrentAuthor()).isEqualTo(VersioningManager.GIT_SYSTEM_AUTHOR);
+        }
+
+        @Test
+        void activeUserUsed() {
+            VersioningManager vm = new VersioningManager(Paths.get(""), () -> authentication, (event) -> {
+            });
+            assertThat(vm.getCurrentAuthor().getName()).isEqualTo(authentication.getName());
         }
     }
 }

@@ -47,6 +47,13 @@ public class RevisionAccess extends AbstractFileAccessor {
         this.revCommit = revCommit;
     }
 
+    /**
+     * @return a unique ID for this revision
+     */
+    public String getRevisionID() {
+        return ObjectId.toString(revCommit.getId());
+    }
+
     @Override
     protected String verifyPath(String relativeBasePath, String relativePath) throws IllegalArgumentException {
         if (relativePath.startsWith("/")) {
