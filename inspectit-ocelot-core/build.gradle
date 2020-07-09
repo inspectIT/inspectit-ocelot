@@ -67,7 +67,13 @@ dependencies {
             "io.opencensus:opencensus-exporter-trace-zipkin:${openCensusVersion}",
             "io.opencensus:opencensus-exporter-trace-jaeger:${openCensusVersion}",
             "io.opencensus:opencensus-exporter-metrics-ocagent:${openCensusVersion}",
+
             "io.opencensus:opencensus-exporter-trace-ocagent:${openCensusVersion}",
+            // The following dependecy is required for the OC-exporter to work correctly and msut be matched against the grpc version
+            // See https://github.com/census-instrumentation/opencensus-java/blob/master/exporters/trace/ocagent/README.md
+            'io.netty:netty-tcnative-boringssl-static:2.0.20.Final',
+
+
             "rocks.inspectit:opencensus-influxdb-exporter:1.1",
             
             // bytecode manipulation
