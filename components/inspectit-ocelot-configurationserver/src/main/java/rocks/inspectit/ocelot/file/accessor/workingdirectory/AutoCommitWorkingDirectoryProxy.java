@@ -7,7 +7,7 @@ import rocks.inspectit.ocelot.file.versioning.VersioningManager;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
+import java.util.concurrent.locks.Lock;
 
 /**
  * Delegation proxy for the {@link WorkingDirectoryAccessor} which directly stages and commits changes.
@@ -15,11 +15,23 @@ import java.util.Optional;
 @Slf4j
 public class AutoCommitWorkingDirectoryProxy extends AbstractWorkingDirectoryAccessor {
 
+    /**
+     * Lock which is used when writing to the working directory.
+     */
+    private Lock writeLock;
+
+    /**
+     * The accessor which actually does the working directory access.
+     */
     private WorkingDirectoryAccessor workingDirectoryAccessor;
 
+    /**
+     * The version manager to use.
+     */
     private VersioningManager versioningManager;
 
-    public AutoCommitWorkingDirectoryProxy(WorkingDirectoryAccessor workingDirectoryAccessor, VersioningManager versioningManager) {
+    public AutoCommitWorkingDirectoryProxy(Lock writeLock, WorkingDirectoryAccessor workingDirectoryAccessor, VersioningManager versioningManager) {
+        this.writeLock = writeLock;
         this.workingDirectoryAccessor = workingDirectoryAccessor;
         this.versioningManager = versioningManager;
     }
@@ -29,12 +41,16 @@ public class AutoCommitWorkingDirectoryProxy extends AbstractWorkingDirectoryAcc
      */
     private void commit() {
         try {
-            versioningManager.commit("Commit configuration file and agent mapping changes");
+            versioningManager.commitAllChanges("Commit configuration file and agent mapping changes");
         } catch (GitAPIException e) {
             log.error("File modification was successful but staging and committing of the change failed!", e);
         }
     }
 
+    /**
+     * Brings the working directory into a clean state. Currently, existing changes will be committed and marked
+     * as external changes.
+     */
     private void clean() {
         try {
             versioningManager.commitAsExternalChange();
@@ -45,31 +61,51 @@ public class AutoCommitWorkingDirectoryProxy extends AbstractWorkingDirectoryAcc
     }
 
     @Override
-    protected synchronized void writeFile(String path, String content) throws IOException {
-        clean();
-        workingDirectoryAccessor.writeFile(path, content);
-        commit();
+    protected void writeFile(String path, String content) throws IOException {
+        writeLock.lock();
+        try {
+            clean();
+            workingDirectoryAccessor.writeFile(path, content);
+            commit();
+        } finally {
+            writeLock.unlock();
+        }
     }
 
     @Override
-    protected synchronized void createDirectory(String path) throws IOException {
-        clean();
-        workingDirectoryAccessor.createDirectory(path);
-        commit();
+    protected void createDirectory(String path) throws IOException {
+        writeLock.lock();
+        try {
+            clean();
+            workingDirectoryAccessor.createDirectory(path);
+            commit();
+        } finally {
+            writeLock.unlock();
+        }
     }
 
     @Override
-    protected synchronized void move(String sourcePath, String targetPath) throws IOException {
-        clean();
-        workingDirectoryAccessor.move(sourcePath, targetPath);
-        commit();
+    protected void move(String sourcePath, String targetPath) throws IOException {
+        writeLock.lock();
+        try {
+            clean();
+            workingDirectoryAccessor.move(sourcePath, targetPath);
+            commit();
+        } finally {
+            writeLock.unlock();
+        }
     }
 
     @Override
-    protected synchronized void delete(String path) throws IOException {
-        clean();
-        workingDirectoryAccessor.delete(path);
-        commit();
+    protected void delete(String path) throws IOException {
+        writeLock.lock();
+        try {
+            clean();
+            workingDirectoryAccessor.delete(path);
+            commit();
+        } finally {
+            writeLock.unlock();
+        }
     }
 
     @Override
@@ -78,7 +114,7 @@ public class AutoCommitWorkingDirectoryProxy extends AbstractWorkingDirectoryAcc
     }
 
     @Override
-    protected Optional<byte[]> readFile(String path) {
+    protected byte[] readFile(String path) throws IOException {
         return workingDirectoryAccessor.readFile(path);
     }
 

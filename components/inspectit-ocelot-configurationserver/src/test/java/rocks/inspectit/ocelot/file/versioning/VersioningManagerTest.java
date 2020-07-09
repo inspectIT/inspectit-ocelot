@@ -3,20 +3,31 @@ package rocks.inspectit.ocelot.file.versioning;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.diff.DiffEntry;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.util.ReflectionTestUtils;
+import rocks.inspectit.ocelot.events.WorkspaceChangedEvent;
 import rocks.inspectit.ocelot.file.FileTestBase;
 import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
+import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
+import rocks.inspectit.ocelot.file.versioning.model.ConfigurationPromotion;
+import rocks.inspectit.ocelot.file.versioning.model.SimpleDiffEntry;
+import rocks.inspectit.ocelot.file.versioning.model.WorkspaceDiff;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class VersioningManagerTest extends FileTestBase {
@@ -31,6 +42,8 @@ class VersioningManagerTest extends FileTestBase {
 
     private Authentication authentication;
 
+    private ApplicationEventPublisher eventPublisher;
+
     @BeforeEach
     public void beforeEach() throws IOException {
         if (TEST_DIRECTORY == null) {
@@ -42,8 +55,8 @@ class VersioningManagerTest extends FileTestBase {
 
         authentication = mock(Authentication.class);
         when(authentication.getName()).thenReturn("user");
-
-        versioningManager = new VersioningManager(tempDirectory, () -> authentication);
+        eventPublisher = mock(ApplicationEventPublisher.class);
+        versioningManager = new VersioningManager(tempDirectory, () -> authentication, eventPublisher);
 
         System.out.println("Test data in: " + tempDirectory.toString());
     }
@@ -133,54 +146,63 @@ class VersioningManagerTest extends FileTestBase {
     }
 
     @Nested
-    class Commit {
+    class CommitAllChanges {
 
         @Test
         public void commitFile() throws GitAPIException {
             versioningManager.initialize();
-            assertThat(versioningManager.getCommitCount()).isZero();
+            assertThat(versioningManager.getCommitCount()).isOne();
 
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml");
 
-            versioningManager.commit("test");
+            versioningManager.commitAllChanges("test");
 
-            assertThat(versioningManager.getCommitCount()).isOne();
+            assertThat(versioningManager.getCommitCount()).isEqualTo(2);
             assertThat(versioningManager.isClean()).isTrue();
+
+            verify(eventPublisher).publishEvent(any(WorkspaceChangedEvent.class));
+            verifyNoMoreInteractions(eventPublisher);
         }
 
         @Test
         public void amendCommit() throws GitAPIException {
             versioningManager.initialize();
-            assertThat(versioningManager.getCommitCount()).isZero();
+            assertThat(versioningManager.getCommitCount()).isOne();
 
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml");
 
-            versioningManager.commit("test");
+            versioningManager.commitAllChanges("test");
 
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml=content");
 
-            versioningManager.commit("another commit");
+            versioningManager.commitAllChanges("another commit");
 
-            assertThat(versioningManager.getCommitCount()).isOne();
+            assertThat(versioningManager.getCommitCount()).isEqualTo(2);
             assertThat(versioningManager.isClean()).isTrue();
+
+            verify(eventPublisher, times(2)).publishEvent(any(WorkspaceChangedEvent.class));
+            verifyNoMoreInteractions(eventPublisher);
         }
 
         @Test
         public void noAmendAfterTimeout() throws GitAPIException {
             versioningManager.initialize();
             versioningManager.setAmendTimeout(-2000);
-            assertThat(versioningManager.getCommitCount()).isZero();
+            assertThat(versioningManager.getCommitCount()).isOne();
 
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml");
 
-            versioningManager.commit("test");
+            versioningManager.commitAllChanges("test");
 
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml=content");
 
-            versioningManager.commit("another commit");
+            versioningManager.commitAllChanges("another commit");
 
-            assertThat(versioningManager.getCommitCount()).isEqualTo(2);
+            assertThat(versioningManager.getCommitCount()).isEqualTo(3);
             assertThat(versioningManager.isClean()).isTrue();
+
+            verify(eventPublisher, times(2)).publishEvent(any(WorkspaceChangedEvent.class));
+            verifyNoMoreInteractions(eventPublisher);
         }
 
         @Test
@@ -188,19 +210,41 @@ class VersioningManagerTest extends FileTestBase {
             versioningManager.initialize();
             versioningManager.setAmendTimeout(-2000);
 
-            assertThat(versioningManager.getCommitCount()).isZero();
+            assertThat(versioningManager.getCommitCount()).isOne();
 
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml");
 
-            versioningManager.commit("test");
-            versioningManager.commit("no change");
+            versioningManager.commitAllChanges("test");
+            verify(eventPublisher).publishEvent(any(WorkspaceChangedEvent.class));
+            versioningManager.commitAllChanges("no change");
+
+            assertThat(versioningManager.getCommitCount()).isEqualTo(2);
+            assertThat(versioningManager.isClean()).isTrue();
+
+            verifyNoMoreInteractions(eventPublisher);
+        }
+
+        @Test
+        public void invalidState() throws GitAPIException {
+            versioningManager.initialize();
+
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml");
+
+            Git git = (Git) ReflectionTestUtils.getField(versioningManager, "git");
+            git.checkout().setName(Branch.LIVE.getBranchName()).call();
+
+            assertThatIllegalStateException()
+                    .isThrownBy(() -> versioningManager.commitAllChanges("test"))
+                    .withMessage("The workspace branch is currently not checked out. Ensure your working directory is in a correct state!");
 
             assertThat(versioningManager.getCommitCount()).isOne();
-            assertThat(versioningManager.isClean()).isTrue();
+            assertThat(versioningManager.isClean()).isFalse();
+
+            verifyZeroInteractions(eventPublisher);
         }
     }
 
-        @Nested
+    @Nested
     class IsClean {
 
         @Test
@@ -266,6 +310,383 @@ class VersioningManagerTest extends FileTestBase {
 
             verify(gitMock).close();
             verifyNoMoreInteractions(gitMock);
+        }
+    }
+
+    @Nested
+    class GetLatestCommit {
+
+        @Test
+        public void emptyCommit() throws GitAPIException {
+            versioningManager.initialize();
+
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml");
+
+            Optional<RevCommit> latestCommit = versioningManager.getLatestCommit(Branch.WORKSPACE);
+
+            assertThat(latestCommit).isNotEmpty();
+            assertThat(latestCommit.get().getFullMessage()).isEqualTo("Initializing Git repository");
+        }
+
+        @Test
+        public void commitExists() throws GitAPIException {
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml");
+            versioningManager.initialize();
+
+            Optional<RevCommit> latestCommit = versioningManager.getLatestCommit(Branch.WORKSPACE);
+
+            assertThat(latestCommit).isNotEmpty();
+            assertThat(latestCommit.get()
+                    .getFullMessage()).isEqualTo("Initializing Git repository using existing working directory");
+        }
+
+        @Test
+        public void getLatestCommit() throws GitAPIException {
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml");
+            versioningManager.initialize();
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml=content");
+            versioningManager.commitAllChanges("new commit");
+
+            Optional<RevCommit> latestCommit = versioningManager.getLatestCommit(Branch.WORKSPACE);
+
+            assertThat(latestCommit).isNotEmpty();
+            assertThat(latestCommit.get().getFullMessage()).isEqualTo("new commit");
+        }
+
+        @Test
+        public void getLatestCommitFromLive() throws GitAPIException {
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml");
+            versioningManager.initialize();
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml=content");
+            versioningManager.commitAllChanges("new commit");
+
+            Optional<RevCommit> latestCommit = versioningManager.getLatestCommit(Branch.LIVE);
+
+            assertThat(latestCommit).isNotEmpty();
+            assertThat(latestCommit.get()
+                    .getFullMessage()).isEqualTo("Initializing Git repository using existing working directory");
+        }
+    }
+
+    @Nested
+    class GetWorkspaceDiff {
+
+        @Test
+        public void getDiff() throws IOException, GitAPIException {
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_removed.yml=content");
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_no_change.yml");
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml");
+            versioningManager.initialize();
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml=content");
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_added.yml");
+            Files.delete(tempDirectory.resolve(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_removed.yml"));
+            versioningManager.commitAllChanges("new commit");
+
+            WorkspaceDiff result = versioningManager.getWorkspaceDiffWithoutContent();
+
+            assertThat(result.getEntries()).containsExactlyInAnyOrder(
+                    SimpleDiffEntry.builder().file("/file_added.yml").type(DiffEntry.ChangeType.ADD).build(),
+                    SimpleDiffEntry.builder().file("/file_modified.yml").type(DiffEntry.ChangeType.MODIFY).build(),
+                    SimpleDiffEntry.builder().file("/file_removed.yml").type(DiffEntry.ChangeType.DELETE).build()
+            );
+            assertThat(result.getLiveCommitId()).isNotEqualTo(result.getWorkspaceCommitId());
+        }
+
+        @Test
+        public void getDiffWithContent() throws IOException, GitAPIException {
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_removed.yml=content");
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_no_change.yml");
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml");
+            versioningManager.initialize();
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml=new content");
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_added.yml");
+            Files.delete(tempDirectory.resolve(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_removed.yml"));
+            versioningManager.commitAllChanges("new commit");
+
+            WorkspaceDiff result = versioningManager.getWorkspaceDiff(true);
+
+            assertThat(result.getEntries()).containsExactlyInAnyOrder(
+                    SimpleDiffEntry.builder()
+                            .file("/file_added.yml")
+                            .type(DiffEntry.ChangeType.ADD)
+                            .newContent("")
+                            .build(),
+                    SimpleDiffEntry.builder()
+                            .file("/file_modified.yml")
+                            .type(DiffEntry.ChangeType.MODIFY)
+                            .oldContent("")
+                            .newContent("new content")
+                            .build(),
+                    SimpleDiffEntry.builder()
+                            .file("/file_removed.yml")
+                            .type(DiffEntry.ChangeType.DELETE)
+                            .oldContent("content")
+                            .build()
+            );
+            assertThat(result.getLiveCommitId()).isNotEqualTo(result.getWorkspaceCommitId());
+        }
+
+        @Test
+        public void getDiffById() throws IOException, GitAPIException {
+            // initial
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml");
+            versioningManager.initialize();
+            // commit 1
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml=new content");
+            versioningManager.commitAllChanges("commit");
+            ObjectId workspaceId = versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId();
+            ObjectId liveId = versioningManager.getLatestCommit(Branch.LIVE).get().getId();
+            // commit 2
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml=another content");
+            versioningManager.commitAllChanges("commit");
+            ObjectId latestWorkspaceId = versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId();
+
+            WorkspaceDiff resultFirst = versioningManager.getWorkspaceDiff(true, liveId, workspaceId);
+            WorkspaceDiff resultSecond = versioningManager.getWorkspaceDiff(true, liveId, latestWorkspaceId);
+
+            assertThat(resultFirst.getEntries()).containsExactlyInAnyOrder(
+                    SimpleDiffEntry.builder()
+                            .file("/file_modified.yml")
+                            .type(DiffEntry.ChangeType.MODIFY)
+                            .oldContent("")
+                            .newContent("new content")
+                            .build()
+            );
+            assertThat(resultFirst.getLiveCommitId()).isEqualTo(liveId.name());
+            assertThat(resultFirst.getWorkspaceCommitId()).isEqualTo(workspaceId.name());
+
+            assertThat(resultSecond.getEntries()).containsExactlyInAnyOrder(
+                    SimpleDiffEntry.builder()
+                            .file("/file_modified.yml")
+                            .type(DiffEntry.ChangeType.MODIFY)
+                            .oldContent("")
+                            .newContent("another content")
+                            .build()
+            );
+            assertThat(resultSecond.getLiveCommitId()).isEqualTo(liveId.name());
+            assertThat(resultSecond.getWorkspaceCommitId()).isEqualTo(latestWorkspaceId.name());
+        }
+    }
+
+    @Nested
+    class PromoteConfiguration {
+
+        @Test
+        public void promoteEverything() throws GitAPIException, IOException {
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_removed.yml=content");
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_no_change.yml");
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml");
+            versioningManager.initialize();
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml=content");
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_added.yml");
+            Files.delete(tempDirectory.resolve(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_removed.yml"));
+            versioningManager.commitAllChanges("new commit");
+
+            String liveId = versioningManager.getLatestCommit(Branch.LIVE).get().getId().name();
+            String workspaceId = versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId().name();
+
+            ConfigurationPromotion promotion = new ConfigurationPromotion();
+            promotion.setLiveCommitId(liveId);
+            promotion.setWorkspaceCommitId(workspaceId);
+            promotion.setFiles(Arrays.asList(
+                    "/file_added.yml",
+                    "/file_modified.yml",
+                    "/file_removed.yml"
+            ));
+
+            versioningManager.promoteConfiguration(promotion);
+
+            WorkspaceDiff diff = versioningManager.getWorkspaceDiffWithoutContent();
+
+            assertThat(diff.getEntries()).isEmpty();
+        }
+
+        @Test
+        public void partialPromotion() throws GitAPIException, IOException {
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_removed.yml=content");
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_no_change.yml");
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml");
+            versioningManager.initialize();
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml=content");
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_added.yml");
+            Files.delete(tempDirectory.resolve(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_removed.yml"));
+            versioningManager.commitAllChanges("new commit");
+
+            String liveId = versioningManager.getLatestCommit(Branch.LIVE).get().getId().name();
+            String workspaceId = versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId().name();
+
+            ConfigurationPromotion promotion = new ConfigurationPromotion();
+            promotion.setLiveCommitId(liveId);
+            promotion.setWorkspaceCommitId(workspaceId);
+            promotion.setFiles(Arrays.asList(
+                    "/file_modified.yml",
+                    "/file_removed.yml"
+            ));
+
+            versioningManager.promoteConfiguration(promotion);
+
+            WorkspaceDiff diff = versioningManager.getWorkspaceDiffWithoutContent();
+
+            assertThat(diff.getEntries()).containsExactlyInAnyOrder(
+                    SimpleDiffEntry.builder().file("/file_added.yml").type(DiffEntry.ChangeType.ADD).build()
+            );
+        }
+
+        @Test
+        public void multiplePromotions() throws GitAPIException, IOException {
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_removed.yml=content");
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_no_change.yml");
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml");
+            versioningManager.initialize();
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml=content");
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_added.yml");
+            Files.delete(tempDirectory.resolve(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_removed.yml"));
+            versioningManager.commitAllChanges("new commit");
+
+            String liveId = versioningManager.getLatestCommit(Branch.LIVE).get().getId().name();
+            String workspaceId = versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId().name();
+
+            ConfigurationPromotion promotion = new ConfigurationPromotion();
+            promotion.setLiveCommitId(liveId);
+            promotion.setWorkspaceCommitId(workspaceId);
+            promotion.setFiles(Arrays.asList(
+                    "/file_modified.yml"
+            ));
+
+            // first promotion
+            versioningManager.promoteConfiguration(promotion);
+
+            // second
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml=new_content");
+            versioningManager.commitAllChanges("another commit");
+
+            liveId = versioningManager.getLatestCommit(Branch.LIVE).get().getId().name();
+            workspaceId = versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId().name();
+
+            promotion = new ConfigurationPromotion();
+            promotion.setLiveCommitId(liveId);
+            promotion.setWorkspaceCommitId(workspaceId);
+            promotion.setFiles(Arrays.asList(
+                    "/file_modified.yml"
+            ));
+
+            // second promotion
+            versioningManager.promoteConfiguration(promotion);
+
+            // diff
+            WorkspaceDiff diff = versioningManager.getWorkspaceDiffWithoutContent();
+
+            assertThat(diff.getEntries()).containsExactlyInAnyOrder(
+                    SimpleDiffEntry.builder().file("/file_added.yml").type(DiffEntry.ChangeType.ADD).build(),
+                    SimpleDiffEntry.builder().file("/file_removed.yml").type(DiffEntry.ChangeType.DELETE).build()
+            );
+        }
+
+        @Test
+        public void differentLiveBranch() throws GitAPIException, IOException {
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_removed.yml=content");
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_no_change.yml");
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml");
+            versioningManager.initialize();
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml=content");
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_added.yml");
+            Files.delete(tempDirectory.resolve(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_removed.yml"));
+            versioningManager.commitAllChanges("new commit");
+
+            String liveId = versioningManager.getLatestCommit(Branch.LIVE).get().getId().name();
+            String workspaceId = versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId().name();
+
+            ConfigurationPromotion promotion = new ConfigurationPromotion();
+            promotion.setLiveCommitId(liveId);
+            promotion.setWorkspaceCommitId(workspaceId);
+            promotion.setFiles(Arrays.asList(
+                    "/file_modified.yml"
+            ));
+
+            versioningManager.promoteConfiguration(promotion);
+
+            ConfigurationPromotion secondPromotion = new ConfigurationPromotion();
+            secondPromotion.setLiveCommitId(liveId);
+            secondPromotion.setWorkspaceCommitId(workspaceId);
+            secondPromotion.setFiles(Arrays.asList(
+                    "/file_added.yml"
+            ));
+
+            assertThatExceptionOfType(RuntimeException.class)
+                    .isThrownBy(() -> versioningManager.promoteConfiguration(secondPromotion))
+                    .withMessage("Live branch has been modified. The provided promotion definition is out of sync.");
+        }
+
+        @Test
+        public void promotionWithModifictaion() throws GitAPIException, IOException {
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml");
+            versioningManager.initialize();
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml=content_A");
+            versioningManager.commitAllChanges("commit");
+
+            String liveId = versioningManager.getLatestCommit(Branch.LIVE).get().getId().name();
+            String workspaceId = versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId().name();
+
+            ConfigurationPromotion promotion = new ConfigurationPromotion();
+            promotion.setLiveCommitId(liveId);
+            promotion.setWorkspaceCommitId(workspaceId);
+            promotion.setFiles(Arrays.asList(
+                    "/file_modified.yml"
+            ));
+
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml=content_B");
+            versioningManager.commitAllChanges("commit");
+
+            versioningManager.promoteConfiguration(promotion);
+
+            // diff live -> workspace
+            WorkspaceDiff diff = versioningManager.getWorkspaceDiffWithoutContent();
+
+            assertThat(diff.getEntries()).containsExactlyInAnyOrder(
+                    SimpleDiffEntry.builder().file("/file_modified.yml").type(DiffEntry.ChangeType.MODIFY).build()
+            );
+            assertThat(versioningManager.getLiveRevision()
+                    .readConfigurationFile("file_modified.yml")).hasValue("content_A");
+            assertThat(versioningManager.getWorkspaceRevision()
+                    .readConfigurationFile("file_modified.yml")).hasValue("content_B");
+        }
+    }
+
+    @Nested
+    class GetRevisionById {
+
+        @Test
+        public void getRevision() throws GitAPIException, IOException {
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml=a");
+            versioningManager.initialize();
+
+            WorkspaceDiff workspaceDiff = versioningManager.getWorkspaceDiffWithoutContent();
+
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml=b");
+            versioningManager.commitAllChanges("commit");
+
+            RevisionAccess result = versioningManager.getRevisionById(ObjectId.fromString(workspaceDiff.getWorkspaceCommitId()));
+
+            Optional<String> fileContent = result.readConfigurationFile("file.yml");
+            assertThat(fileContent).hasValue("a");
+        }
+    }
+
+    @Nested
+    class GetCurrentAuthor {
+
+        @Test
+        void systemUserOnSystemOperationUsed() {
+            VersioningManager vm = new VersioningManager(Paths.get(""), () -> null, (event) -> {
+            });
+            assertThat(vm.getCurrentAuthor()).isEqualTo(VersioningManager.GIT_SYSTEM_AUTHOR);
+        }
+
+        @Test
+        void activeUserUsed() {
+            VersioningManager vm = new VersioningManager(Paths.get(""), () -> authentication, (event) -> {
+            });
+            assertThat(vm.getCurrentAuthor().getName()).isEqualTo(authentication.getName());
         }
     }
 }

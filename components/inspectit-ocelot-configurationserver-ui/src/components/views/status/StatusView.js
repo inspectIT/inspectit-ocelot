@@ -6,22 +6,129 @@ import StatusToolbar from './StatusToolbar';
 import StatusFooterToolbar from './StatusFooterToolbar';
 import AgentConfigurationDialog from './dialogs/AgentConfigurationDialog';
 import axios from '../../../lib/axios-api';
+import { map, isEqual } from 'lodash';
 
 /**
  * The view presenting a list of connected agents, their mapping and when they last connected to the server.
  * The view is automatically refreshed and can also be refreshed manually using a refresh button.
  */
 class StatusView extends React.Component {
-  state = {
-    filter: '',
-    isAgentConfigurationShown: false,
-    attributes: '',
-    configurationValue: '',
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      filter: '',
+      useRegexFilter: false,
+      error: false,
+      filteredAgents: props.agents,
+      isAgentConfigurationShown: false,
+      attributes: '',
+      configurationValue: '',
+    };
+  }
+
+  componentDidUpdate(prevProps) {
+    if (!isEqual(prevProps.agents, this.props.agents)) {
+      this.filterAgents();
+    }
+  }
+
+  onFilterModeChange = ({ checked }) => {
+    this.setState({ useRegexFilter: checked }, this.filterAgents);
+  };
+
+  updateFilter = (filter) => {
+    this.setState({ filter }, this.filterAgents);
+  };
+
+  filterAgents = () => {
+    const { agents } = this.props;
+    const { filter, useRegexFilter } = this.state;
+
+    if (filter === '') {
+      this.setState({
+        error: false,
+        filteredAgents: agents,
+      });
+    } else {
+      try {
+        let filterValue;
+        if (useRegexFilter) {
+          filterValue = filter;
+        } else {
+          filterValue = filter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        const regex = RegExp(filterValue, 'i');
+
+        const filteredAgents = agents.filter((agent) => {
+          const agentFilter = this.getAgentFilter(agent);
+          return this.checkRegex(agentFilter, regex);
+        });
+
+        this.setState({
+          error: false,
+          filteredAgents,
+        });
+      } catch (error) {
+        this.setState({
+          error: true,
+          filteredAgents: agents,
+        });
+      }
+    }
+  };
+
+  getAgentFilter = (agent) => {
+    return {
+      ...agent,
+      name: this.getAgentName(agent),
+      mappingFilter: this.getMappingFilter(agent),
+    };
+  };
+
+  getAgentName = ({ metaInformation, attributes }) => {
+    if (metaInformation) {
+      return attributes.service + '(' + metaInformation.agentId + ')';
+    } else {
+      return null;
+    }
+  };
+
+  getMappingFilter = ({ mappingName, attributes }) => {
+    const filterArray = map(attributes, (value, key) => key + ':' + value);
+    filterArray.push(mappingName);
+    return filterArray;
+  };
+
+  checkRegex = (agent, regex) => {
+    if (agent.name) {
+      if (regex.test(agent.name)) {
+        return true;
+      }
+    }
+    for (let i = 0; i < agent.mappingFilter.length; i++) {
+      if (regex.test(agent.mappingFilter[i])) {
+        return true;
+      }
+    }
+    if (agent.metaInformation != null) {
+      if (regex.test(agent.metaInformation.agentVersion)) {
+        return true;
+      }
+      if (regex.test(agent.metaInformation.javaVersion)) {
+        return true;
+      }
+      if (regex.test(agent.metaInformation.agentId)) {
+        return true;
+      }
+    }
+    return false;
   };
 
   render() {
-    const { filter } = this.state;
-    const { agents, readOnly } = this.props;
+    const { filter, filteredAgents, useRegexFilter, error, readOnly } = this.state;
+
     return (
       <>
         <style jsx>{`
@@ -38,17 +145,20 @@ class StatusView extends React.Component {
         `}</style>
         <div className="this">
           <div>
-            <StatusToolbar filter={filter} onFilterChange={(filter) => this.setState({ filter })} disableClear={readOnly} />
-          </div>
-          <div className="data-table">
-            <StatusTable
-              data={agents}
+            <StatusToolbar
               filter={filter}
-              onShowConfiguration={this.getAgentConfigAttributes}
+              onFilterChange={this.updateFilter}
+              onModeChange={this.onFilterModeChange}
+              useRegexFilter={useRegexFilter}
+              error={error}
+              disableClear={readOnly}
             />
           </div>
+          <div className="data-table">
+            <StatusTable data={filteredAgents} filter={filter} onShowConfiguration={this.getAgentConfigAttributes} />
+          </div>
           <div>
-            <StatusFooterToolbar data={agents} />
+            <StatusFooterToolbar data={filteredAgents} />
           </div>
           <AgentConfigurationDialog
             visible={this.state.isAgentConfigurationShown}
@@ -83,12 +193,12 @@ class StatusView extends React.Component {
   };
 
   getAgentConfigAttributes = (attributes) => {
-    this.setAgentConfigurationShown(true);   
+    this.setAgentConfigurationShown(true);
     this.getConfiguration(attributes);
     this.setState({
-      attributes
-    })
-  }
+      attributes,
+    });
+  };
 
   getConfiguration = (attributes) => {
     const requestParams = attributes;
@@ -108,7 +218,6 @@ class StatusView extends React.Component {
         return 'error';
       });
   };
-
 }
 
 function mapStateToProps(state) {

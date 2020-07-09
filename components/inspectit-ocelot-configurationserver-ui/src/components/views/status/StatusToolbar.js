@@ -5,6 +5,7 @@ import { InputText } from 'primereact/inputtext';
 import ClearDialog from './dialogs/ClearDialog';
 import { connect } from 'react-redux';
 import { agentStatusActions } from '../../../redux/ducks/agent-status';
+import { Checkbox } from 'primereact/checkbox';
 
 /**
  * Toolbar in the status view. Allows filtering of statuses, refreshing and clearing all statuses.
@@ -15,7 +16,7 @@ class StatusToolbar extends React.Component {
   };
 
   render() {
-    const { clearing, refreshing, fetchStatus, filter, onFilterChange, disableClear } = this.props;
+    const { clearing, refreshing, fetchStatus, filter, onFilterChange, disableClear, onModeChange, useRegexFilter, error } = this.props;
 
     const tooltipOptions = {
       showDelay: 500,
@@ -31,14 +32,35 @@ class StatusToolbar extends React.Component {
             background-color: #eee;
             border-bottom: 1px solid #ddd;
           }
+          .p-toolbar-group-left {
+            align-items: center;
+            display: flex;
+          }
           .p-toolbar-group-right > :global(*) {
             margin-left: 0.25rem;
+          }
+          .p-toolbar-warning {
+            margin-top: 0.3rem;
+            margin-left: 0.7rem;
+            font-size: 1.1rem;
+            font-weight: 900;
+            color: red;
+          }
+          .checkbox-group {
+            margin-left: 1rem;
+          }
+          .checkbox-group label {
+            margin-right: 0.5rem;
+          }
+          .regex-error {
+            color: red !important;
           }
         `}</style>
         <Toolbar>
           <div className="p-toolbar-group-left">
-            <div className="p-inputgroup" style={{ display: 'inline-flex', verticalAlign: 'middle' }}>
+            <div className="p-inputgroup">
               <span className="pi p-inputgroup-addon pi-search" />
+
               <InputText
                 onKeyPress={this.onKeyPress}
                 style={{ width: '300px' }}
@@ -46,6 +68,13 @@ class StatusToolbar extends React.Component {
                 placeholder={'Filter Agents'}
                 onChange={(e) => onFilterChange(e.target.value)}
               />
+
+              {error && <span className="p-inputgroup-addon regex-error">Invalid regular expression</span>}
+            </div>
+
+            <div className="p-inputgroup checkbox-group">
+              <label>Use Regex</label>
+              <Checkbox onChange={onModeChange} checked={useRegexFilter} />
             </div>
           </div>
           <div className="p-toolbar-group-right">

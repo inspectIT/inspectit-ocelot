@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.exporters.metrics.PrometheusExporterSettings;
-import rocks.inspectit.ocelot.config.model.instrumentation.rules.MetricRecordingSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.scope.MatcherMode;
 
 import java.lang.reflect.Type;
@@ -145,15 +144,8 @@ public class PropertyPathHelperTest {
         }
 
         @Test
-        public void convertibles() {
-            boolean result = PropertyPathHelper.isTerminal(MetricRecordingSettings.class);
-
-            assertThat(result).isTrue();
-        }
-
-        @Test
-        public void any() {
-            boolean result = PropertyPathHelper.isTerminal(this.getClass());
+        public void nonTerminalType() {
+            boolean result = PropertyPathHelper.isTerminal(getClass());
 
             assertThat(result).isFalse();
         }

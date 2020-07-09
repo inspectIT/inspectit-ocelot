@@ -5,9 +5,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.springframework.context.ApplicationEventPublisher;
-import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
-import rocks.inspectit.ocelot.file.FileChangedEvent;
 import rocks.inspectit.ocelot.file.FileInfo;
 import rocks.inspectit.ocelot.file.FileTestBase;
 
@@ -17,25 +14,24 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.locks.Lock;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
 
 class WorkingDirectoryAccessorTest extends FileTestBase {
 
     private AbstractWorkingDirectoryAccessor accessor;
 
-    private ApplicationEventPublisher eventPublisher;
-
     @BeforeEach
     public void beforeEach() throws IOException {
         tempDirectory = Files.createTempDirectory("ocelot");
 
-        eventPublisher = mock(ApplicationEventPublisher.class);
+        Lock readLock = mock(Lock.class);
+        Lock writeLock = mock(Lock.class);
 
-        accessor = new WorkingDirectoryAccessor(tempDirectory, eventPublisher);
+        accessor = new WorkingDirectoryAccessor(readLock, writeLock, tempDirectory);
     }
 
     @AfterEach
@@ -234,9 +230,6 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
             Optional<String> result = accessor.readAgentMappings();
 
             assertThat(result).hasValue("new content");
-
-            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
-            verifyNoMoreInteractions(eventPublisher);
         }
 
         @Test
@@ -251,9 +244,6 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
 
             assertThat(before).hasValue("old content");
             assertThat(after).hasValue("new content");
-
-            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
-            verifyNoMoreInteractions(eventPublisher);
         }
     }
 
@@ -265,8 +255,6 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
             assertThatExceptionOfType(IOException.class)
                     .isThrownBy(() -> accessor.deleteConfiguration("first.yml"))
                     .withMessageStartingWith("Path cannot be deleted because it does not exist: ");
-
-            verifyZeroInteractions(eventPublisher);
         }
 
         @Test
@@ -276,8 +264,6 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
             assertThatExceptionOfType(IllegalArgumentException.class)
                     .isThrownBy(() -> accessor.deleteConfiguration("."))
                     .withMessageStartingWith("Cannot delete base directory: .");
-
-            verifyZeroInteractions(eventPublisher);
         }
 
         @Test
@@ -287,8 +273,6 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
             assertThatExceptionOfType(IllegalArgumentException.class)
                     .isThrownBy(() -> accessor.deleteConfiguration("./dummy/.."))
                     .withMessageStartingWith("Cannot delete base directory: .");
-
-            verifyZeroInteractions(eventPublisher);
         }
 
         @Test
@@ -303,9 +287,6 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
 
             assertThat(before).hasSize(1);
             assertThat(after).isEmpty();
-
-            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
-            verifyNoMoreInteractions(eventPublisher);
         }
 
         @Test
@@ -320,9 +301,6 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
 
             assertThat(before).hasSize(1);
             assertThat(after).isEmpty();
-
-            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
-            verifyNoMoreInteractions(eventPublisher);
         }
     }
 
@@ -347,9 +325,6 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
                     });
 
             assertThat(fileContent).hasValue("new content");
-
-            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
-            verifyNoMoreInteractions(eventPublisher);
         }
 
         @Test
@@ -364,9 +339,6 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
 
             assertThat(before).hasValue("old content");
             assertThat(after).hasValue("new content");
-
-            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
-            verifyNoMoreInteractions(eventPublisher);
         }
 
         @Test
@@ -376,8 +348,6 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
             assertThatExceptionOfType(IOException.class)
                     .isThrownBy(() -> accessor.writeConfigurationFile("sub", "new content"))
                     .withMessageStartingWith("Cannot write file because target is already a directory: ");
-
-            verifyZeroInteractions(eventPublisher);
         }
     }
 
@@ -400,9 +370,6 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
             assertThat(beforeB).isEmpty();
             assertThat(afterA).isEmpty();
             assertThat(afterB).hasValue("my file");
-
-            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
-            verifyNoMoreInteractions(eventPublisher);
         }
 
         @Test
@@ -421,9 +388,6 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
             assertThat(beforeB).isEmpty();
             assertThat(afterA).isEmpty();
             assertThat(afterB).hasValue("my file");
-
-            verify(eventPublisher).publishEvent(any(FileChangedEvent.class));
-            verifyNoMoreInteractions(eventPublisher);
         }
     }
 

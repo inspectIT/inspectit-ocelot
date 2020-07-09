@@ -86,4 +86,13 @@ const settings = {
   pendingRequests: 0,
 };
 
-export { authentication, configuration, notification, mappings, agentStatus, settings };
+const promotion = {
+  /** The names of the files which are currently be approved */
+  approvals: [],
+  /** The commit id of the working directory related to the currently changed files */
+  workspaceCommitId: null,
+  /** The commit id of the live directory related to the currently changed files */
+  liveCommitId: null,
+};
+
+export { authentication, configuration, notification, mappings, agentStatus, settings, promotion };

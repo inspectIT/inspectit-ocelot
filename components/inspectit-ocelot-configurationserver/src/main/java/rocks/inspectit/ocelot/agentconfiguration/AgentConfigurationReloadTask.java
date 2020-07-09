@@ -5,15 +5,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.yaml.snakeyaml.Yaml;
 import rocks.inspectit.ocelot.file.FileInfo;
 import rocks.inspectit.ocelot.file.FileManager;
-import rocks.inspectit.ocelot.file.accessor.workingdirectory.AbstractWorkingDirectoryAccessor;
+import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
+import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
+import rocks.inspectit.ocelot.mappings.AgentMappingSerializer;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
+import rocks.inspectit.ocelot.utils.CancellableTask;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -22,47 +23,30 @@ import java.util.stream.Collectors;
  * A task for asynchronously loading the configurations based on a given list of mappings.
  */
 @Slf4j
-class AgentConfigurationReloadTask implements Runnable {
+class AgentConfigurationReloadTask extends CancellableTask<List<AgentConfiguration>> {
 
     /**
      * Predicate to check if a given file path ends with .yml or .yaml
      */
-    private static final Predicate<String> HAS_YAML_ENDING = filePath -> filePath.toLowerCase().endsWith(".yml") || filePath.toLowerCase().endsWith(".yaml");
-
-    /**
-     * Internal flag to check if cancel has been called.
-     */
-    private AtomicBoolean cancelFlag = new AtomicBoolean(false);
-
-    /**
-     * Callback which is invoked when this task has finished.
-     */
-    private Consumer<List<AgentConfiguration>> onLoadCallback;
+    private static final Predicate<String> HAS_YAML_ENDING = filePath -> filePath.toLowerCase()
+            .endsWith(".yml") || filePath.toLowerCase().endsWith(".yaml");
 
     private FileManager fileManager;
 
-    private List<AgentMapping> mappingsToLoad;
+    private AgentMappingSerializer mappingsSerializer;
 
     /**
      * Creates a new reload task, but does NOT start it.
      * The loading process is done in {@link #run()}.
      *
-     * @param mappingsToLoad the mappings to load the configurations for
-     * @param fileManager    the FileManager used to read the configuration files
-     * @param onLoadCallback invoked when the loading has finished successfully. Will not be invoked if the loading failed or was canceled.
+     * @param mappingsSerializer the serializer responsible for extracting the mappings from the current revision
+     * @param fileManager        the FileManager used to read the configuration files
+     * @param onLoadCallback     invoked when the loading has finished successfully. Will not be invoked if the loading failed or was canceled.
      */
-    public AgentConfigurationReloadTask(List<AgentMapping> mappingsToLoad, FileManager fileManager, Consumer<List<AgentConfiguration>> onLoadCallback) {
-        this.mappingsToLoad = mappingsToLoad;
+    public AgentConfigurationReloadTask(AgentMappingSerializer mappingsSerializer, FileManager fileManager, Consumer<List<AgentConfiguration>> onLoadCallback) {
+        super(onLoadCallback);
+        this.mappingsSerializer = mappingsSerializer;
         this.fileManager = fileManager;
-        this.onLoadCallback = onLoadCallback;
-    }
-
-    /**
-     * Can be invoked to cancel this task.
-     * As soon as this method returns, it is guaranteed that the configured onLoad-callback will not be invoked anymore.
-     */
-    public synchronized void cancel() {
-        cancelFlag.set(true);
     }
 
     /**
@@ -71,57 +55,75 @@ class AgentConfigurationReloadTask implements Runnable {
     @Override
     public void run() {
         log.info("Starting configuration reloading...");
+        RevisionAccess fileAccess = fileManager.getWorkspaceRevision();
+        if (!fileAccess.agentMappingsExist()) {
+            onTaskSuccess(Collections.emptyList());
+            return;
+        }
+        List<AgentMapping> mappingsToLoad = mappingsSerializer.readAgentMappings(fileAccess);
         List<AgentConfiguration> newConfigurations = new ArrayList<>();
         for (AgentMapping mapping : mappingsToLoad) {
             try {
                 String configYaml = loadConfigForMapping(mapping);
-                if (cancelFlag.get()) {
+                if (isCanceled()) {
                     log.debug("Configuration reloading canceled");
                     return;
                 }
-                AgentConfiguration agentConfiguration = AgentConfiguration.builder().mapping(mapping).configYaml(configYaml).build();
+                AgentConfiguration agentConfiguration = AgentConfiguration.builder()
+                        .mapping(mapping)
+                        .configYaml(configYaml)
+                        .build();
                 newConfigurations.add(agentConfiguration);
             } catch (Exception e) {
                 log.error("Could not load agent mapping '{}'.", mapping.getName(), e);
             }
         }
-        synchronized (this) {
-            if (cancelFlag.get()) {
-                log.debug("Configuration reloading canceled");
-                return;
-            }
-            onLoadCallback.accept(newConfigurations);
-            log.info("Configurations successfully reloaded");
-        }
+        onTaskSuccess(newConfigurations);
     }
-
 
     /**
      * Loads the given mapping as yaml string.
      *
      * @param mapping the mapping to load
+     *
      * @return the merged yaml for the given mapping or an empty string if the mapping does not contain any existing files
      * If this task has been canceled, null is returned.
-     * @throws IOException in case a file could not be loaded
      */
     @VisibleForTesting
-    String loadConfigForMapping(AgentMapping mapping) throws IOException {
+    String loadConfigForMapping(AgentMapping mapping) {
+        AbstractFileAccessor fileAccessor = getFileAccessorForMapping(mapping);
+
         LinkedHashSet<String> allYamlFiles = new LinkedHashSet<>();
         for (String path : mapping.getSources()) {
-            if (cancelFlag.get()) {
+            if (isCanceled()) {
                 return null;
             }
-            allYamlFiles.addAll(getAllYamlFiles(path));
+            allYamlFiles.addAll(getAllYamlFiles(fileAccessor, path));
         }
 
         Object result = null;
         for (String path : allYamlFiles) {
-            if (cancelFlag.get()) {
+            if (isCanceled()) {
                 return null;
             }
-            result = loadAndMergeYaml(result, path);
+            result = loadAndMergeYaml(fileAccessor, result, path);
         }
         return result == null ? "" : new Yaml().dump(result);
+    }
+
+    private AbstractFileAccessor getFileAccessorForMapping(AgentMapping mapping) {
+        AbstractFileAccessor fileAccessor;
+        switch (mapping.getSourceBranch()) {
+            case LIVE:
+                fileAccessor = fileManager.getLiveRevision();
+                break;
+            case WORKSPACE:
+                fileAccessor = fileManager.getWorkspaceRevision();
+                break;
+            default:
+                throw new UnsupportedOperationException("Unhandled branch: " + mapping.getSourceBranch());
+        }
+        return fileAccessor;
     }
 
     /**
@@ -130,9 +132,10 @@ class AgentConfigurationReloadTask implements Runnable {
      * If it is neither, an empty list is returned.
      *
      * @param path the path to check for yaml files, can start with a slash which will be ignored
+     *
      * @return a list of absolute paths of contained YAML files
      */
-    private List<String> getAllYamlFiles(String path) {
+    private List<String> getAllYamlFiles(AbstractFileAccessor fileAccessor, String path) {
         String cleanedPath;
         if (path.startsWith("/")) {
             cleanedPath = path.substring(1);
@@ -140,11 +143,9 @@ class AgentConfigurationReloadTask implements Runnable {
             cleanedPath = path;
         }
 
-        AbstractWorkingDirectoryAccessor workingDirectory = fileManager.getWorkingDirectory();
-
-        if (workingDirectory.configurationFileExists(cleanedPath)) {
-            if (workingDirectory.configurationFileIsDirectory(cleanedPath)) {
-                List<FileInfo> fileInfos = workingDirectory.listConfigurationFiles(cleanedPath);
+        if (fileAccessor.configurationFileExists(cleanedPath)) {
+            if (fileAccessor.configurationFileIsDirectory(cleanedPath)) {
+                List<FileInfo> fileInfos = fileAccessor.listConfigurationFiles(cleanedPath);
 
                 return fileInfos.stream()
                         .flatMap(file -> file.getAbsoluteFilePaths(cleanedPath))
@@ -163,11 +164,12 @@ class AgentConfigurationReloadTask implements Runnable {
      *
      * @param toMerge the existing structure of nested maps / lists with which the loaded yaml will be merged.
      * @param path    the path of the yaml file to load
+     *
      * @return the merged structure
      */
-    private Object loadAndMergeYaml(Object toMerge, String path) {
+    private Object loadAndMergeYaml(AbstractFileAccessor fileAccessor, Object toMerge, String path) {
         Yaml yaml = new Yaml();
-        String src = fileManager.getWorkingDirectory().readConfigurationFile(path).orElse("");
+        String src = fileAccessor.readConfigurationFile(path).orElse("");
 
         try {
             Object loadedYaml = yaml.load(src);
@@ -185,6 +187,7 @@ class AgentConfigurationReloadTask implements Runnable {
      * This exception will be thrown if a configuration file cannot be parsed, e.g. it contains invalid characters.
      */
     static class InvalidConfigurationFileException extends RuntimeException {
+
         public InvalidConfigurationFileException(String path, Exception e) {
             super(String.format("The configuration file '%s' is invalid and cannot be parsed.", path), e);
         }

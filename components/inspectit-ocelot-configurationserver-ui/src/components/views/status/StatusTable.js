@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-
+import React from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
@@ -227,7 +226,6 @@ class StatusTable extends React.Component {
       return {
         ...agent,
         name: this.getAgentName(agent),
-        mappingFilter: this.getMappingFilter(agent), // used for row filtering based on attribute values
       };
     });
 
@@ -253,7 +251,7 @@ class StatusTable extends React.Component {
             vertical-align: top;
           }
         `}</style>
-        <DataTable value={agentValues} globalFilter={this.props.filter} rowHover reorderableColumns>
+        <DataTable value={agentValues} rowHover reorderableColumns>
           <Column body={this.iconTemplate} style={{ width: '34px' }} />
           <Column header="Name" field="name" body={this.nameTemplate} sortable style={{ width: '400px' }} />
           <Column
@@ -278,14 +276,7 @@ class StatusTable extends React.Component {
             style={{ width: '175px' }}
           />
           <Column header="Agent Mapping" field="mappingFilter" body={this.agentMappingTemplate} sortable />
-          <Column
-            header="Last Fetch"
-            field="lastConfigFetch"
-            body={this.lastFetchTemplate}
-            sortable
-            excludeGlobalFilter={true}
-            style={{ width: '200px' }}
-          />
+          <Column header="Last Fetch" field="lastConfigFetch" body={this.lastFetchTemplate} sortable style={{ width: '200px' }} />
         </DataTable>
       </div>
     );

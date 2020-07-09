@@ -7,7 +7,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -18,15 +19,15 @@ class AgentMappingTest {
 
     @BeforeEach
     public void beforeEach() {
-        Map<String, String> attributes = new HashMap<>();
-        attributes.put("first", "01234");
-        attributes.put("second", "AnAttribute");
-        attributes.put("third", "\\d+");
-        List<String> sources = new ArrayList<>();
-        sources.add("/one");
-        sources.add("/two/a.yml");
-        sources.add("/two/b.yml");
-        mapping = new AgentMapping("test-mapping", sources, attributes);
+        mapping = AgentMapping.builder()
+                .name("test-mapping")
+                .attribute("first", "01234")
+                .attribute("second", "AnAttribute")
+                .attribute("third", "\\d+")
+                .source("/one")
+                .source("/two/a.yml")
+                .source("/two/b.yml")
+                .build();
     }
 
     @Nested

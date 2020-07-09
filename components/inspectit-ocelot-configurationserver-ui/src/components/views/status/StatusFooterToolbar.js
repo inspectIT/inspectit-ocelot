@@ -4,6 +4,7 @@ import { filter } from 'lodash';
 const StatusFooterToolbar = ({ data }) => {
   const totalCount = data.length;
   const agentCount = filter(data, (d) => d.metaInformation).length;
+
   return (
     <>
       <style jsx>

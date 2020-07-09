@@ -3,8 +3,6 @@ import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { tomorrowNightBlue } from 'react-syntax-highlighter/dist/cjs/styles/hljs';
-import axios from '../../../../lib/axios-api';
-
 
 /**
  * Dialog shows the agent configuration.
@@ -29,7 +27,7 @@ class AgentConfigurationDialog extends React.Component {
     return this.url;
   };
 
-   /**
+  /**
    * Closing dialog.
    */
   handleClose = (success = true) => {
@@ -40,7 +38,8 @@ class AgentConfigurationDialog extends React.Component {
 
   render() {
     return (
-      <Dialog style={{ width: '50vw' }}
+      <Dialog
+        style={{ width: '50vw' }}
         header={'Agent Configuration'}
         modal={true}
         visible={this.props.visible}

@@ -4,7 +4,6 @@
 *.log
 *.zip
 *.swp
-hooks
 
 ### STS ###
 .apt_generated
