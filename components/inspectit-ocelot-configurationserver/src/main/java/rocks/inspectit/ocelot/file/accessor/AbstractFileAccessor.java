@@ -144,6 +144,9 @@ public abstract class AbstractFileAccessor {
         }
     }
 
+    /**
+     * @return true, if the file storing the agent mappings exists.
+     */
     public boolean agentMappingsExist() {
         return exists(AGENT_MAPPINGS_FILE_NAME);
     }

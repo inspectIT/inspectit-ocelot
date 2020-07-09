@@ -23,11 +23,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 public class AgentMappingManager {
 
     /**
-     * The name of the agent mappings Yaml file used to read and persist mappings.
-     */
-    private static final String AGENT_MAPPINGS_FILE = "agent_mappings.yaml";
-
-    /**
      * The mapping which is used when no mappings file exists.
      */
     @VisibleForTesting
@@ -137,7 +132,7 @@ public class AgentMappingManager {
 
         log.info("Adding new agent mapping '{}'.", agentMapping.getName());
 
-        setAgentMappings(insertAgentMapping(getAgentMappings(), agentMapping, 0));
+        addAgentMapping(getAgentMappings(), agentMapping, 0);
     }
 
     /**
@@ -157,7 +152,7 @@ public class AgentMappingManager {
         List<AgentMapping> currentMappings = getAgentMappings();
         OptionalInt indexOpt = getMappingIndex(mappingName, currentMappings);
         if (indexOpt.isPresent()) {
-            setAgentMappings(insertAgentMapping(currentMappings, agentMapping, indexOpt.getAsInt()));
+            addAgentMapping(currentMappings, agentMapping, indexOpt.getAsInt());
         } else {
             throw new IllegalArgumentException("The agent mapping has not been added because the mapping '" + mappingName + "' does not exists, thus, cannot be added before it.");
         }
@@ -180,7 +175,7 @@ public class AgentMappingManager {
         List<AgentMapping> currentMappings = getAgentMappings();
         OptionalInt indexOpt = getMappingIndex(mappingName, currentMappings);
         if (indexOpt.isPresent()) {
-            setAgentMappings(insertAgentMapping(currentMappings, agentMapping, indexOpt.getAsInt() + 1));
+            addAgentMapping(currentMappings, agentMapping, indexOpt.getAsInt() + 1);
         } else {
             throw new IllegalArgumentException("The agent mapping has not been added because the mapping '" + mappingName + "' does not exists, thus, cannot be added after it.");
         }
@@ -198,7 +193,7 @@ public class AgentMappingManager {
     /**
      * Adds a agent mapping at the specified index. An existing mapping will be removed if it has the same name as the given one.
      */
-    private List<AgentMapping> insertAgentMapping(List<AgentMapping> currentMappings, AgentMapping agentMapping, int index) throws IOException {
+    private void addAgentMapping(List<AgentMapping> currentMappings, AgentMapping agentMapping, int index) throws IOException {
         ArrayList<AgentMapping> newAgentMappings = new ArrayList<>(currentMappings);
 
         OptionalInt currentIndexOpt = getMappingIndex(agentMapping.getName(), newAgentMappings);
@@ -217,6 +212,6 @@ public class AgentMappingManager {
             newAgentMappings.add(index, agentMapping);
         }
 
-        return newAgentMappings;
+        setAgentMappings(newAgentMappings);
     }
 }

@@ -44,8 +44,6 @@ public class AgentMappingSerializer {
      * @param readAccess the accessor to use for reading the file
      *
      * @return List of {@link AgentMapping}s representing the content of the given file or an empty List in case of an error.
-     *
-     * @throws IOException if any error occurs, e.g. invalid Yaml
      */
     public List<AgentMapping> readAgentMappings(AbstractFileAccessor readAccess) {
         Optional<String> mappingsFile = readAccess.readAgentMappings();
@@ -63,7 +61,7 @@ public class AgentMappingSerializer {
      * Writing the given list of {@link AgentMapping}s as a Yaml representation into the specified file.
      *
      * @param agentMappings the {@link AgentMapping}s to write to file
-     * @param mappingsFile  the target file
+     * @param fileAccess    the accessor to which the mappings will be written
      *
      * @throws IOException if any error occurs, e.g. file cannot be written
      */

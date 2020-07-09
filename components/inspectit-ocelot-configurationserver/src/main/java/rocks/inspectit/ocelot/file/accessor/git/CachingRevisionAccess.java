@@ -8,6 +8,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Decorates {@link RevisionAccess} with a cache to make subsequent lookups of the same files faster.
+ */
 public class CachingRevisionAccess extends RevisionAccess {
 
     /**

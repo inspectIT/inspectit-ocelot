@@ -29,7 +29,7 @@ public class AgentMapping implements Auditable {
      */
     private String name;
 
-    private Branch branch;
+    private Branch sourceBranch;
 
     /**
      * The sources which are applied to the matching agents.
@@ -46,13 +46,13 @@ public class AgentMapping implements Auditable {
     @JsonCreator
     public AgentMapping(
             @JsonProperty("name") String name,
-            @JsonProperty("branch") Branch branch,
+            @JsonProperty("branch") Branch sourceBranch,
             @JsonProperty("sources") List<@NotBlank String> sources,
             @JsonProperty("attributes") Map<@NotBlank String, @NotBlank String> attributes) {
         this.name = name;
         this.sources = Collections.unmodifiableList(sources);
         this.attributes = Collections.unmodifiableMap(attributes);
-        this.branch = Optional.ofNullable(branch).orElse(Branch.WORKSPACE);
+        this.sourceBranch = Optional.ofNullable(sourceBranch).orElse(Branch.WORKSPACE);
     }
 
     /**

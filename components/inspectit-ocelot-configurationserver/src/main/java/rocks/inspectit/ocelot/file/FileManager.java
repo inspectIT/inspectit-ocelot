@@ -44,15 +44,21 @@ public class FileManager {
      */
     private VersioningManager versioningManager;
 
+    /**
+     * Caches the current live-revision to make sure the same instance is returned if no new changes were committed.
+     */
     private CachingRevisionAccess cachedLiveRevision;
 
+    /**
+     * Caches the current workspace-revision to make sure the same instance is returned if no new changes were committed.
+     */
     private CachingRevisionAccess cachedWorkspaceRevision;
 
     @Autowired
     public FileManager(InspectitServerSettings settings, ApplicationEventPublisher eventPublisher, Executor executor) throws GitAPIException {
         Path workingDirectory = Paths.get(settings.getWorkingDirectory()).toAbsolutePath().normalize();
 
-        // We use an asynchronous event publishing mechanism to make sure that Event-Listeners do not accidently get hold of locks
+        // We use an asynchronous event publishing mechanism to make sure that Event-Listeners do not accidentally get hold of locks
         // which are owned by the thread which fires the event.
         ApplicationEventPublisher asyncPublisher = (event) -> executor.execute(() -> eventPublisher.publishEvent(event));
 
@@ -94,7 +100,7 @@ public class FileManager {
      * However, the instance returned by this method is immutable.
      * The returned revision will not be affected by subsequent writes to the working directory.
      *
-     * @return accessor to access the current live branch
+     * @return accessor to access the current workspace branch
      */
     public RevisionAccess getWorkspaceRevision() {
         CachingRevisionAccess currentRev = versioningManager.getWorkspaceRevision();

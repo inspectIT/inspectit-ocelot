@@ -2,23 +2,22 @@ package rocks.inspectit.ocelot.utils;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 @Slf4j
-public abstract class CancelableTask<R> implements Runnable {
+public abstract class CancellableTask<R> implements Runnable {
 
     /**
      * Internal flag to check if cancel has been called.
      */
-    private AtomicBoolean cancelFlag = new AtomicBoolean(false);
+    private volatile boolean cancelFlag = false;
 
     /**
      * Callback which is invoked when this task has finished.
      */
     private Consumer<R> onLoadCallback;
 
-    protected CancelableTask(Consumer<R> onLoadCallback) {
+    protected CancellableTask(Consumer<R> onLoadCallback) {
         this.onLoadCallback = onLoadCallback;
     }
 
@@ -27,14 +26,14 @@ public abstract class CancelableTask<R> implements Runnable {
      * As soon as this method returns, it is guaranteed that the configured onLoad-callback will not be invoked anymore.
      */
     public final synchronized void cancel() {
-        cancelFlag.set(true);
+        cancelFlag = true;
     }
 
     /**
      * @return true, if {@link #cancel()} was called.
      */
     public final boolean isCanceled() {
-        return cancelFlag.get();
+        return cancelFlag;
     }
 
     /**
@@ -45,7 +44,7 @@ public abstract class CancelableTask<R> implements Runnable {
      */
     protected final void onTaskSuccess(R result) {
         synchronized (this) {
-            if (cancelFlag.get()) {
+            if (cancelFlag) {
                 log.debug("{} canceled", getClass().getSimpleName());
                 return;
             }

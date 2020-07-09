@@ -6,9 +6,10 @@ import org.yaml.snakeyaml.Yaml;
 import rocks.inspectit.ocelot.file.FileInfo;
 import rocks.inspectit.ocelot.file.FileManager;
 import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
+import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
 import rocks.inspectit.ocelot.mappings.AgentMappingSerializer;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
-import rocks.inspectit.ocelot.utils.CancelableTask;
+import rocks.inspectit.ocelot.utils.CancellableTask;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,7 +23,7 @@ import java.util.stream.Collectors;
  * A task for asynchronously loading the configurations based on a given list of mappings.
  */
 @Slf4j
-class AgentConfigurationReloadTask extends CancelableTask<List<AgentConfiguration>> {
+class AgentConfigurationReloadTask extends CancellableTask<List<AgentConfiguration>> {
 
     /**
      * Predicate to check if a given file path ends with .yml or .yaml
@@ -54,11 +55,12 @@ class AgentConfigurationReloadTask extends CancelableTask<List<AgentConfiguratio
     @Override
     public void run() {
         log.info("Starting configuration reloading...");
-        if (!fileManager.getWorkspaceRevision().agentMappingsExist()) {
+        RevisionAccess fileAccess = fileManager.getWorkspaceRevision();
+        if (!fileAccess.agentMappingsExist()) {
             onTaskSuccess(Collections.emptyList());
             return;
         }
-        List<AgentMapping> mappingsToLoad = mappingsSerializer.readAgentMappings(fileManager.getWorkspaceRevision());
+        List<AgentMapping> mappingsToLoad = mappingsSerializer.readAgentMappings(fileAccess);
         List<AgentConfiguration> newConfigurations = new ArrayList<>();
         for (AgentMapping mapping : mappingsToLoad) {
             try {
@@ -111,7 +113,7 @@ class AgentConfigurationReloadTask extends CancelableTask<List<AgentConfiguratio
 
     private AbstractFileAccessor getFileAccessorForMapping(AgentMapping mapping) {
         AbstractFileAccessor fileAccessor;
-        switch (mapping.getBranch()) {
+        switch (mapping.getSourceBranch()) {
             case LIVE:
                 fileAccessor = fileManager.getLiveRevision();
                 break;
@@ -119,7 +121,7 @@ class AgentConfigurationReloadTask extends CancelableTask<List<AgentConfiguratio
                 fileAccessor = fileManager.getWorkspaceRevision();
                 break;
             default:
-                throw new UnsupportedOperationException("Unhandled branch: " + mapping.getBranch());
+                throw new UnsupportedOperationException("Unhandled branch: " + mapping.getSourceBranch());
         }
         return fileAccessor;
     }

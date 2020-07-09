@@ -69,12 +69,12 @@ public class AgentConfigurationReloadTaskTest {
             AgentMapping mapping = AgentMapping.builder()
                     .name("test")
                     .source("/test")
-                    .branch(Branch.WORKSPACE)
+                    .sourceBranch(Branch.WORKSPACE)
                     .build();
             AgentMapping mapping2 = AgentMapping.builder()
                     .name("test2")
                     .source("/test2")
-                    .branch(Branch.WORKSPACE)
+                    .sourceBranch(Branch.WORKSPACE)
                     .build();
             doReturn(Arrays.asList(mapping, mapping2)).when(serializer).readAgentMappings(any());
 
@@ -109,7 +109,7 @@ public class AgentConfigurationReloadTaskTest {
             AgentMapping mapping = AgentMapping.builder()
                     .name("test")
                     .source("/test")
-                    .branch(Branch.WORKSPACE)
+                    .sourceBranch(Branch.WORKSPACE)
                     .build();
             String string = reloadTask.loadConfigForMapping(mapping);
 
@@ -128,7 +128,7 @@ public class AgentConfigurationReloadTaskTest {
             AgentMapping mapping = AgentMapping.builder()
                     .name("test")
                     .source("/test")
-                    .branch(Branch.WORKSPACE)
+                    .sourceBranch(Branch.WORKSPACE)
                     .build();
 
             assertThatExceptionOfType(AgentConfigurationReloadTask.InvalidConfigurationFileException.class)
@@ -153,7 +153,7 @@ public class AgentConfigurationReloadTaskTest {
         void liveBranchSpecified() throws IOException {
             AgentMapping mapping = AgentMapping.builder()
                     .source("a.yml")
-                    .branch(Branch.LIVE)
+                    .sourceBranch(Branch.LIVE)
                     .build();
 
             doReturn(true).when(liveAccessor).configurationFileExists("a.yml");
@@ -174,7 +174,7 @@ public class AgentConfigurationReloadTaskTest {
                     AgentMapping.builder()
                             .source("a.yml")
                             .source("/some/folder")
-                            .branch(Branch.WORKSPACE)
+                            .sourceBranch(Branch.WORKSPACE)
                             .build());
 
             assertThat(result).isEmpty();
@@ -192,7 +192,7 @@ public class AgentConfigurationReloadTaskTest {
                             .source("b.YmL")
                             .source("c.yaml")
                             .source("d.txt")
-                            .branch(Branch.WORKSPACE)
+                            .sourceBranch(Branch.WORKSPACE)
                             .build());
 
             assertThat(result).isEmpty();
@@ -212,7 +212,7 @@ public class AgentConfigurationReloadTaskTest {
             reloadTask.loadConfigForMapping(
                     AgentMapping.builder()
                             .source("/a.yml")
-                            .branch(Branch.WORKSPACE)
+                            .sourceBranch(Branch.WORKSPACE)
                             .build());
 
             verify(workspaceAccessor).configurationFileExists(eq("a.yml"));
@@ -252,7 +252,7 @@ public class AgentConfigurationReloadTaskTest {
                     AgentMapping.builder()
                             .source("/z.yml")
                             .source("/folder")
-                            .branch(Branch.WORKSPACE)
+                            .sourceBranch(Branch.WORKSPACE)
                             .build());
 
             assertThat(result).isEqualTo("{val1: z, val2: a, val3: b}\n");

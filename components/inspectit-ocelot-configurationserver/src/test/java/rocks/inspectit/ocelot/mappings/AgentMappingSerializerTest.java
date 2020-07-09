@@ -41,7 +41,7 @@ public class AgentMappingSerializerTest {
             AgentMapping mapping = AgentMapping.builder()
                     .name("mapping")
                     .source("/any-source")
-                    .branch(Branch.LIVE)
+                    .sourceBranch(Branch.LIVE)
                     .attribute("key", "val")
                     .build();
 

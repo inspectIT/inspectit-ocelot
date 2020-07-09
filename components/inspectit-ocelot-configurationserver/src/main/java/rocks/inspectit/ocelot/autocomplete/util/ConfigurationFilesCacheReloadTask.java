@@ -6,7 +6,7 @@ import org.yaml.snakeyaml.Yaml;
 import rocks.inspectit.ocelot.config.loaders.ConfigFileLoader;
 import rocks.inspectit.ocelot.file.FileInfo;
 import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
-import rocks.inspectit.ocelot.utils.CancelableTask;
+import rocks.inspectit.ocelot.utils.CancellableTask;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  * Loads all configuration files of the given revision and parses them.
  */
 @Slf4j
-public class ConfigurationFilesCacheReloadTask extends CancelableTask<Collection<Object>> {
+public class ConfigurationFilesCacheReloadTask extends CancellableTask<Collection<Object>> {
 
     /**
      * Predicate to check if a given file path ends with .yml or .yaml.
