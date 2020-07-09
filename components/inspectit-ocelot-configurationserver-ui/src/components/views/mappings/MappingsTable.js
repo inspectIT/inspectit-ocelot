@@ -11,6 +11,7 @@ import { OverlayPanel } from 'primereact/overlaypanel';
 import DeleteDialog from './dialogs/DeleteDialog';
 import ConfigurationDownload from './ConfigurationDownload';
 import { cloneDeep, find } from 'lodash';
+import classnames from 'classnames';
 
 /** Component including the menu button for each mapping */
 const ButtonCell = ({ readOnly, mapping, onEdit, onDelete, onDownload, onDuplicate, appendRef }) => {
@@ -130,9 +131,76 @@ const AttributesCell = ({ attributes = {}, appendRef }) => {
   );
 };
 
+const BranchCell = ({ branch }) => {
+  const isLiveBranch = branch === 'LIVE';
+  const branchName = isLiveBranch ? 'Live' : 'Workspace';
+  const iconClass = classnames('pi', {
+    'pi-circle-on': isLiveBranch,
+    'pi-circle-off': !isLiveBranch,
+    live: isLiveBranch,
+    workspace: !isLiveBranch,
+  });
+
+  return (
+    <>
+      <style jsx>{`
+        .this {
+          display: flex;
+          align-items: center;
+        }
+        .pi {
+          margin-right: 0.5rem;
+        }
+        .pi.live {
+          color: #ef5350;
+        }
+        .pi.workspace {
+          color: #616161;
+        }
+      `}</style>
+
+      <div className="this">
+        <i className={iconClass}></i>
+        <span>{branchName}</span>
+      </div>
+    </>
+  );
+};
+
 class MappingsTable extends React.Component {
   configDownload = React.createRef();
   state = {};
+
+  componentDidMount = () => {
+    this.props.fetchMappings();
+  };
+
+  duplicateMapping = (mapping) => {
+    const newMapping = {
+      ...cloneDeep(mapping),
+      name: this.getUniqueName(mapping.name),
+      isNew: true,
+    };
+
+    this.props.onDuplicateMapping(newMapping);
+  };
+
+  getUniqueName = (nameBase) => {
+    const { mappings } = this.props;
+
+    let name;
+    let mappingExists = true;
+    let i = 1;
+    while (mappingExists) {
+      name = nameBase + ' (' + i++ + ')';
+      mappingExists = find(mappings, { name: name });
+    }
+
+    return name;
+  };
+
+  showDeleteMappingDialog = (selectedMappingName) => this.setState({ isDeleteDialogShown: true, selectedMappingName: selectedMappingName });
+  hideDeleteMappingDialog = () => this.setState({ isDeleteDialogShown: false, selectedMappingName: null });
 
   render() {
     const { readOnly, filterValue, maxHeight, mappings, putMappings } = this.props;
@@ -165,6 +233,13 @@ class MappingsTable extends React.Component {
         >
           {!readOnly && <Column rowReorder={!filterValue} style={{ width: '3em' }} />}
           <Column columnKey="name" field="name" header="Mapping Name" />
+          <Column
+            columnKey="branch"
+            field="branch"
+            header="Source Branch"
+            style={{ width: '10em' }}
+            body={(data) => <BranchCell branch={data.sourceBranch} />}
+          />
           <Column
             columnKey="sources"
             field="sources"
@@ -203,37 +278,6 @@ class MappingsTable extends React.Component {
       </div>
     );
   }
-
-  componentDidMount = () => {
-    this.props.fetchMappings();
-  };
-
-  duplicateMapping = (mapping) => {
-    const newMapping = {
-      ...cloneDeep(mapping),
-      name: this.getUniqueName(mapping.name),
-      isNew: true,
-    };
-
-    this.props.onDuplicateMapping(newMapping);
-  };
-
-  getUniqueName = (nameBase) => {
-    const { mappings } = this.props;
-
-    let name;
-    let mappingExists = true;
-    let i = 1;
-    while (mappingExists) {
-      name = nameBase + ' (' + i++ + ')';
-      mappingExists = find(mappings, { name: name });
-    }
-
-    return name;
-  };
-
-  showDeleteMappingDialog = (selectedMappingName) => this.setState({ isDeleteDialogShown: true, selectedMappingName: selectedMappingName });
-  hideDeleteMappingDialog = () => this.setState({ isDeleteDialogShown: false, selectedMappingName: null });
 }
 
 MappingsTable.propTypes = {
