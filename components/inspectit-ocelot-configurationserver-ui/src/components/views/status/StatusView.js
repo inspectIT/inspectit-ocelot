@@ -4,6 +4,8 @@ import { agentStatusActions } from '../../../redux/ducks/agent-status';
 import StatusTable from './StatusTable';
 import StatusToolbar from './StatusToolbar';
 import StatusFooterToolbar from './StatusFooterToolbar';
+import AgentConfigurationDialog from './dialogs/AgentConfigurationDialog';
+import axios from '../../../lib/axios-api';
 
 /**
  * The view presenting a list of connected agents, their mapping and when they last connected to the server.
@@ -13,6 +15,8 @@ class StatusView extends React.Component {
   state = {
     filter: '',
     isAgentConfigurationShown: false,
+    attributes: '',
+    configurationValue: '',
   };
 
   render() {
@@ -40,13 +44,17 @@ class StatusView extends React.Component {
             <StatusTable
               data={agents}
               filter={filter}
-              isAgentConfigurationShown={this.state.isAgentConfigurationShown}
-              setAgentConfigurationShown={this.setAgentConfigurationShown}
+              onShowConfiguration={this.getAgentConfigAttributes}
             />
           </div>
           <div>
             <StatusFooterToolbar data={agents} />
           </div>
+          <AgentConfigurationDialog
+            visible={this.state.isAgentConfigurationShown}
+            onHide={() => this.setAgentConfigurationShown(false)}
+            configurationValue={this.state.configurationValue}
+          />
         </div>
       </>
     );
@@ -73,6 +81,34 @@ class StatusView extends React.Component {
       isAgentConfigurationShown: isShown,
     });
   };
+
+  getAgentConfigAttributes = (attributes) => {
+    this.setAgentConfigurationShown(true);   
+    this.getConfiguration(attributes);
+    this.setState({
+      attributes
+    })
+  }
+
+  getConfiguration = (attributes) => {
+    const requestParams = attributes;
+    if (!requestParams) {
+      return;
+    }
+    axios
+      .get('/configuration/agent-configuration', {
+        params: { ...requestParams },
+      })
+      .then((res) => {
+        this.setState({
+          configurationValue: res.data,
+        });
+      })
+      .catch(() => {
+        return 'error';
+      });
+  };
+
 }
 
 function mapStateToProps(state) {

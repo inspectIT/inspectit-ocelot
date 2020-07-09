@@ -7,7 +7,6 @@ import dateformat from 'dateformat';
 import TimeAgo from 'react-timeago';
 import { map } from 'lodash';
 import { linkPrefix } from '../../../lib/configuration';
-import AgentConfigurationDialog from './dialogs/AgentConfigurationDialog';
 
 const timeFormatter = (time, unit, suffix) => {
   if (unit === 'second') {
@@ -37,8 +36,6 @@ class AgentMappingCell extends React.Component {
       data: { mappingName, attributes },
     } = this.props;
     const { showAttributes } = this.state;
-
-    console.log(attributes);
     let name;
     let classname;
     if (mappingName) {
@@ -99,7 +96,6 @@ class AgentMappingCell extends React.Component {
 class StatusTable extends React.Component {
   state = {
     configurationValue: '',
-    attributes: {},
   };
 
   nameTemplate = (rowData) => {
@@ -118,7 +114,6 @@ class StatusTable extends React.Component {
       const agentId = metaInformation.agentId;
       agentIdElement = <span style={{ color: 'gray' }}>({agentId})</span>;
     }
-
     return (
       <div className="this">
         <style jsx>{`
@@ -139,7 +134,7 @@ class StatusTable extends React.Component {
         <Button
           className="config-info-button"
           icon="pi pi-info"
-          onClick={() => this.getAgentConfiguration(attributes)}
+          onClick={() => this.props.onShowConfiguration(attributes)}
           tooltip="Show Agent Configuration"
         />
       </div>
@@ -219,7 +214,7 @@ class StatusTable extends React.Component {
     return filterArray;
   };
 
-  getAgentConfiguration = (attribute) => {
+  showConfigurationDialog = (attribute) => {
     this.setState({
       attributes: attribute,
     });
@@ -292,11 +287,6 @@ class StatusTable extends React.Component {
             style={{ width: '200px' }}
           />
         </DataTable>
-        <AgentConfigurationDialog
-          visible={this.props.isAgentConfigurationShown}
-          onHide={() => this.props.setAgentConfigurationShown(false)}
-          attributes={this.state.attributes}
-        />
       </div>
     );
   }
