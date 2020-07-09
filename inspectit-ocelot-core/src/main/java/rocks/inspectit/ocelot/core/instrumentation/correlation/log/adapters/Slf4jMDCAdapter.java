@@ -1,6 +1,7 @@
 package rocks.inspectit.ocelot.core.instrumentation.correlation.log.adapters;
 
 import lombok.extern.slf4j.Slf4j;
+import rocks.inspectit.ocelot.config.model.tracing.TraceIdMDCInjectionSettings;
 import rocks.inspectit.ocelot.core.utils.WeakMethodReference;
 
 /**
@@ -23,6 +24,7 @@ public class Slf4jMDCAdapter extends AbstractStaticMapMDCAdapter {
      * Creates an adapter for a given org.slf4j.MDC class.
      *
      * @param mdcClazz reference to the org.slf4j.MDC class
+     *
      * @return an adapter for the given class
      */
     public static Slf4jMDCAdapter get(Class<?> mdcClazz) {
@@ -34,5 +36,10 @@ public class Slf4jMDCAdapter extends AbstractStaticMapMDCAdapter {
         } catch (NoSuchMethodException e) {
             throw new IllegalArgumentException("MDC class did not contain expected methods", e);
         }
+    }
+
+    @Override
+    public boolean isEnabledForConfig(TraceIdMDCInjectionSettings settings) {
+        return settings.isSlf4jEnabled();
     }
 }

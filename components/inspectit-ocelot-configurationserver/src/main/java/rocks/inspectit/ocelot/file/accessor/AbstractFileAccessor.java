@@ -3,6 +3,7 @@ package rocks.inspectit.ocelot.file.accessor;
 import lombok.extern.slf4j.Slf4j;
 import rocks.inspectit.ocelot.file.FileInfo;
 
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -32,9 +33,26 @@ public abstract class AbstractFileAccessor {
 
     /**
      * Verifies the given path and checks if it is located beneath the given base path. It has to be ensured, that
-     * the given path is not navigate out of the given base path, resulting in a traversal attack. A cleaned and
+     * the given path is not navigating out of the given base path, resulting in a traversal attack. A cleaned and
      * sanitized path is returned of this method, which can safely be used be the concrete implementation for file
      * handling.
+     * Example 1:
+     * ---
+     * Input relativeBasePath: files
+     * Input path: file.yml
+     * Result: files/file.yml
+     * <p>
+     * Example 2
+     * ---
+     * Input relativeBasePath: files
+     * Input path: sub/../file.yml
+     * Result: files/file.yml
+     * <p>
+     * Example 3:
+     * ---
+     * Input relativeBasePath: files
+     * Input path: ../file.yml
+     * Result: IllegalArgumentException
      *
      * @param relativeBasePath the base path where the path must be in
      * @param path             the relative user path
@@ -49,7 +67,7 @@ public abstract class AbstractFileAccessor {
      * @param path the file to read
      * @return the content of the file
      */
-    protected abstract Optional<byte[]> readFile(String path);
+    protected abstract byte[] readFile(String path) throws IOException;
 
     /**
      * Returns a list of all files and directories located under the specified path.
@@ -80,9 +98,14 @@ public abstract class AbstractFileAccessor {
         log.debug("Reading configuration file: {}", file);
         String targetPath = verifyPath(CONFIGURATION_FILES_SUBFOLDER, file);
 
-        Optional<byte[]> fileContent = readFile(targetPath);
-
-        return fileContent.map(String::new);
+        try {
+            byte[] rawFileContent = readFile(targetPath);
+            String fileContent = new String(rawFileContent, FILE_ENCODING);
+            return Optional.of(fileContent);
+        } catch (Exception ex) {
+            log.error("File '{}' could not been loaded.", ex);
+            return Optional.empty();
+        }
     }
 
     /**
@@ -105,12 +128,20 @@ public abstract class AbstractFileAccessor {
     public Optional<String> readAgentMappings() {
         log.debug("Reading agent mappings");
 
-        Optional<byte[]> fileContent = readFile(AGENT_MAPPINGS_FILE_NAME);
-
-        return fileContent.map(bytes -> new String(bytes, FILE_ENCODING));
+        try {
+            byte[] rawFileContent = readFile(AGENT_MAPPINGS_FILE_NAME);
+            String fileContent = new String(rawFileContent, FILE_ENCODING);
+            return Optional.of(fileContent);
+        } catch (Exception ex) {
+            log.error("File '{}' could not been loaded.", ex);
+            return Optional.empty();
+        }
     }
 
     /**
+     * It does not check whether the path is a file or directory, only
+     * whether it exists or not.
+     *
      * @return Returns whether the given path exists.
      */
     public boolean configurationFileExists(String path) {

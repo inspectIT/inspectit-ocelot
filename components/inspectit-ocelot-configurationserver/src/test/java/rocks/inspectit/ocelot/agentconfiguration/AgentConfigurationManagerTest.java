@@ -10,7 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.file.FileManager;
-import rocks.inspectit.ocelot.file.accessor.workingdirectory.WorkingDirectoryAccessor;
+import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
 import rocks.inspectit.ocelot.mappings.AgentMappingManager;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 
@@ -38,11 +38,11 @@ public class AgentConfigurationManagerTest {
     ExecutorService executor;
 
     @Mock
-    WorkingDirectoryAccessor workingDirectoryAccessor;
+    AbstractFileAccessor fileAccessor;
 
     @BeforeEach
     public void beforeEach() {
-        lenient().when(fileManager.getWorkingDirectory()).thenReturn(workingDirectoryAccessor);
+        lenient().when(fileManager.getLiveRevision()).thenReturn(fileAccessor);
     }
 
     void init() {
@@ -90,10 +90,10 @@ public class AgentConfigurationManagerTest {
                             .build()))
                     .when(mappingManager).getAgentMappings();
 
-            doReturn(true).when(workingDirectoryAccessor).configurationFileExists(any());
-            doReturn(false).when(workingDirectoryAccessor).configurationFileIsDirectory(any());
-            doReturn(Optional.of("a: test")).when(workingDirectoryAccessor).readConfigurationFile("test.yml");
-            doReturn(Optional.of("a: default")).when(workingDirectoryAccessor).readConfigurationFile("default.yml");
+            doReturn(true).when(fileAccessor).configurationFileExists(any());
+            doReturn(false).when(fileAccessor).configurationFileIsDirectory(any());
+            doReturn(Optional.of("a: test")).when(fileAccessor).readConfigurationFile("test.yml");
+            doReturn(Optional.of("a: default")).when(fileAccessor).readConfigurationFile("default.yml");
 
             init();
 
@@ -115,9 +115,9 @@ public class AgentConfigurationManagerTest {
                             .build()))
                     .when(mappingManager).getAgentMappings();
 
-            doReturn(true).when(workingDirectoryAccessor).configurationFileExists(any());
-            doReturn(false).when(workingDirectoryAccessor).configurationFileIsDirectory(any());
-            doReturn(Optional.of("a: test")).when(workingDirectoryAccessor).readConfigurationFile("test.yml");
+            doReturn(true).when(fileAccessor).configurationFileExists(any());
+            doReturn(false).when(fileAccessor).configurationFileIsDirectory(any());
+            doReturn(Optional.of("a: test")).when(fileAccessor).readConfigurationFile("test.yml");
 
             init();
 

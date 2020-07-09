@@ -59,7 +59,7 @@ inspectit:
               Iterator it = headers.entrySet().iterator();
               while (it.hasNext()) {
                 Map$Entry e = (Map$Entry) it.next();
-                _this.addRequestProperty((String) e.getKey(), (String) e.getValue());
+                _this.setRequestProperty((String) e.getKey(), (String) e.getValue());
               }
             } catch (Exception e) {
               // silently ignore, this will occur if the url has already been connected

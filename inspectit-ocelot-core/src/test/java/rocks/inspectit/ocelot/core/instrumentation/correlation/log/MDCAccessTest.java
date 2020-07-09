@@ -1,14 +1,17 @@
 package rocks.inspectit.ocelot.core.instrumentation.correlation.log;
 
+import com.google.common.collect.ImmutableSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
+import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.instrumentation.correlation.log.adapters.MDCAdapter;
 
 import java.util.ArrayList;
@@ -16,11 +19,16 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 
 @ExtendWith(MockitoExtension.class)
 public class MDCAccessTest {
+
+    @Mock(answer = Answers.RETURNS_MOCKS)
+    InspectitEnvironment inspectitEnv;
 
     @InjectMocks
     MDCAccess access;
@@ -36,7 +44,7 @@ public class MDCAccessTest {
 
     @BeforeEach
     void reset() {
-        access.activeAdapters.clear();
+        access.availableAdapters.clear();
     }
 
     @Nested
@@ -44,9 +52,7 @@ public class MDCAccessTest {
 
         @Test
         void verifyUndoOrderReversed() {
-            access.activeAdapters.put(Long.class, adapterA);
-            access.activeAdapters.put(Double.class, adapterB);
-            access.activeAdapters.put(Byte.class, adapterC);
+            access.enabledAdapters = ImmutableSet.of(adapterA, adapterB, adapterC);
 
             List<Object> setOrder = new ArrayList<>();
             List<Object> undoOrder = new ArrayList<>();
@@ -72,6 +78,26 @@ public class MDCAccessTest {
             Collections.reverse(reverseUndo);
             assertThat(reverseUndo).containsExactlyElementsOf(setOrder);
 
+        }
+
+    }
+
+    @Nested
+    class UpdateEnabledAdapters {
+
+        @Test
+        void verifyUndoOrderReversed() {
+            access.availableAdapters.put(Byte.class, adapterA);
+            access.availableAdapters.put(Short.class, adapterB);
+            access.availableAdapters.put(Integer.class, adapterC);
+
+            doReturn(false).when(adapterA).isEnabledForConfig(any());
+            doReturn(true).when(adapterB).isEnabledForConfig(any());
+            doReturn(true).when(adapterC).isEnabledForConfig(any());
+
+            access.updateEnabledAdaptersSet();
+
+            assertThat(access.enabledAdapters).containsExactlyInAnyOrder(adapterB, adapterC);
         }
 
     }

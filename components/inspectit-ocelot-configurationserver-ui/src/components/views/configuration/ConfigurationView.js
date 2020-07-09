@@ -121,6 +121,7 @@ class ConfigurationView extends React.Component {
       schema,
       showVisualConfigurationView,
       toggleVisualConfigurationView,
+      readOnly,
     } = this.props;
     const showEditor = (selection || selectedDefaultConfigFile) && !isDirectory;
 
@@ -162,6 +163,7 @@ class ConfigurationView extends React.Component {
             showCreateFileDialog={this.showCreateFileDialog}
             showCreateDirectoryDialog={this.showCreateDirectoryDialog}
             showMoveDialog={this.showMoveDialog}
+            readOnly={readOnly}
           />
           <FileTree
             className="fileTree"
@@ -169,6 +171,7 @@ class ConfigurationView extends React.Component {
             showCreateFileDialog={this.showCreateFileDialog}
             showCreateDirectoryDialog={this.showCreateDirectoryDialog}
             showMoveDialog={this.showMoveDialog}
+            readOnly={readOnly}
           />
           <div className="details">Last refresh: {this.props.updateDate ? new Date(this.props.updateDate).toLocaleString() : '-'}</div>
         </div>
@@ -187,7 +190,7 @@ class ConfigurationView extends React.Component {
           notificationIcon="pi-exclamation-triangle"
           notificationText={yamlError}
           loading={loading}
-          readOnly={!!selectedDefaultConfigFile}
+          readOnly={readOnly || !!selectedDefaultConfigFile}
           showVisualConfigurationView={showVisualConfigurationView}
           onToggleVisualConfigurationView={toggleVisualConfigurationView}
         >
@@ -197,7 +200,7 @@ class ConfigurationView extends React.Component {
               path={path}
               name={name}
               isContentModified={isContentModified}
-              readOnly={!!selectedDefaultConfigFile}
+              readOnly={readOnly || !!selectedDefaultConfigFile}
             />
           ) : null}
         </EditorView>
@@ -257,6 +260,7 @@ function mapStateToProps(state) {
     selectedDefaultConfigFile,
     schema,
     showVisualConfigurationView,
+    readOnly: !state.authentication.permissions.write,
   };
 }
 
