@@ -1,9 +1,11 @@
 package rocks.inspectit.ocelot.security.userdetails;
 
+import org.springframework.ldap.core.DirContextOperations;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
-import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.ldap.userdetails.LdapUserDetailsMapper;
 import rocks.inspectit.ocelot.config.model.LdapRoleResolveSettings;
+import rocks.inspectit.ocelot.config.model.LdapSettings;
 import rocks.inspectit.ocelot.security.config.UserRoleConfiguration;
 
 import java.util.Collection;
@@ -13,15 +15,21 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * This LdapAuthoritiesPopulator is used to populate user object with roles upon basic authentication when they are
+ * This class is used to populate user object with roles upon basic authentication when they are
  * authenticated by a ldap server.
  */
-public class CustomUserAuthoritiesMapper implements GrantedAuthoritiesMapper {
+public class CustomLdapUserDetailsMapper extends LdapUserDetailsMapper {
 
-    private InspectitServerSettings settings;
+    private LdapSettings settings;
 
-    public CustomUserAuthoritiesMapper(InspectitServerSettings settings) {
+    public CustomLdapUserDetailsMapper(LdapSettings settings) {
         this.settings = settings;
+    }
+
+    @Override
+    public UserDetails mapUserFromContext(DirContextOperations ctx, String username, Collection<? extends GrantedAuthority> authorities) {
+        Collection<? extends GrantedAuthority> ocelotAuthorities = mapAuthorities(authorities);
+        return super.mapUserFromContext(ctx, username, ocelotAuthorities);
     }
 
     /**
@@ -30,11 +38,11 @@ public class CustomUserAuthoritiesMapper implements GrantedAuthoritiesMapper {
      * matching authorities.
      *
      * @param authorities A List of GrantedAuthority-Objects that should be mapped.
+     *
      * @return The highest level of access role the user's authorities could be resolved to.
      */
-    @Override
     public Collection<? extends GrantedAuthority> mapAuthorities(Collection<? extends GrantedAuthority> authorities) {
-        LdapRoleResolveSettings role_settings = settings.getSecurity().getLdap().getRoles();
+        LdapRoleResolveSettings role_settings = settings.getRoles();
         if (containsAuthority(authorities, role_settings.getAdmin()) || hasAdminGroup(authorities)) {
             return UserRoleConfiguration.ADMIN_ROLE_PERMISSION_SET;
         }
@@ -56,12 +64,11 @@ public class CustomUserAuthoritiesMapper implements GrantedAuthoritiesMapper {
      *
      * @param authorities A Collection containing GrantedAuthority objects.
      * @param roleList    The List of Strings the authorities are checked with.
+     *
      * @return Returns true if at least one element of authorities is contained in roleList or vice versa.
      */
     private boolean containsAuthority(Collection<? extends GrantedAuthority> authorities, List<String> roleList) {
-        Set<String> rolesLowerCase = roleList.stream()
-                .map(String::toLowerCase)
-                .collect(Collectors.toSet());
+        Set<String> rolesLowerCase = roleList.stream().map(String::toLowerCase).collect(Collectors.toSet());
         return authorities.stream()
                 .map(GrantedAuthority::getAuthority)
                 .distinct()
@@ -73,16 +80,15 @@ public class CustomUserAuthoritiesMapper implements GrantedAuthoritiesMapper {
      * ensures backwards compatibility for the old configuration standard.
      *
      * @param authorities A collection of authorities the admin group should be contained in.
+     *
      * @return True if the given admin group is contained in the authorities. Otherwise false.
      */
     @SuppressWarnings("deprecation")
     private boolean hasAdminGroup(Collection<? extends GrantedAuthority> authorities) {
-        String ldapAdminGroup = settings.getSecurity().getLdap().getAdminGroup();
+        String ldapAdminGroup = settings.getAdminGroup();
         return authorities.stream()
-                .anyMatch(
-                        authority -> authority.getAuthority()
-                                .substring("ROLE_".length())
-                                .equalsIgnoreCase(ldapAdminGroup)
-                );
+                .anyMatch(authority -> authority.getAuthority()
+                        .substring("ROLE_".length())
+                        .equalsIgnoreCase(ldapAdminGroup));
     }
 }
