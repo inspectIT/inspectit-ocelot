@@ -8,7 +8,9 @@ There are several ways to customize the server settings according to your needs.
 
 In the following section, we use the approach of using an `application.yml` file to specify the customized settings which is located in the same directory as the server's JAR file.
 
-> Please note that the inspectIT Ocelot configuration server uses the prefix `inspectit-config-server` for its specific inspectIT properties. Up to version 0.4, the prefix `inspectit` was used which has been changed to avoid confusion between the configurations of the different components.
+:::note
+Please note that the inspectIT Ocelot configuration server uses the prefix `inspectit-config-server` for its specific inspectIT properties. Up to version 0.4, the prefix `inspectit` was used which has been changed to avoid confusion between the configurations of the different components.
+:::
 
 ## Configure the HTTP(S) Port
 
@@ -34,7 +36,9 @@ The following properties can be used to configure SSL.
 | `server.ssl.key-password` | Password used to access the key in the key store | 
 | `server.ssl.key-alias` | Alias that identifies the key in the key store (in case the store contains multiple certificates) |
 
-> Currently, it is not possible to use HTTP and HTTPS at the same time. If HTTPS is configured, the server's endpoint will not accept HTTP requests.
+:::note
+Currently, it is not possible to use HTTP and HTTPS at the same time. If HTTPS is configured, the server's endpoint will not accept HTTP requests.
+:::
 
 The following code causes the server to use the certificate which is mapped to the alias `ocelot` and contained in the key-store `/opt/inspectit/ocelot.p12`.
 
