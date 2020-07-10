@@ -42,6 +42,7 @@ inspectit-config-server:
   # security settings
   security:
     # Whether LDAP authentication should be used
+    # See the documentation on how to configure LDAP correctly: https://inspectit.github.io/inspectit-ocelot/docs/config-server/user-authentication
     ldap-authentication: false
 
 # ACTUATOR PROPERTIES

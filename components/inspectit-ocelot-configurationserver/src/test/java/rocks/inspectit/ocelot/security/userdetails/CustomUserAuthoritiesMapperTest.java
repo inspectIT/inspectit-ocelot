@@ -41,7 +41,7 @@ public class CustomUserAuthoritiesMapperTest {
 
         lenient().when(mockLdapRoleResolveSettings.getRead()).thenReturn(read);
         lenient().when(mockLdapRoleResolveSettings.getWrite()).thenReturn(write);
-        lenient().when(mockLdapRoleResolveSettings.getCommit()).thenReturn(commit);
+        lenient().when(mockLdapRoleResolveSettings.getPromote()).thenReturn(commit);
         lenient().when(mockLdapRoleResolveSettings.getAdmin()).thenReturn(admin);
 
 
@@ -100,18 +100,18 @@ public class CustomUserAuthoritiesMapperTest {
 
         @Test
         public void hasCommit() {
-            List<SimpleGrantedAuthority> test_permission_set = Collections.singletonList(new SimpleGrantedAuthority("ROLE_commit"));
+            List<SimpleGrantedAuthority> test_permission_set = Collections.singletonList(new SimpleGrantedAuthority("ROLE_promote"));
             customUserAuthoritiesMapper = new CustomUserAuthoritiesMapper(setupRoleSettings(
                     Collections.emptyList(),
                     Collections.emptyList(),
-                    Collections.singletonList("commit"),
+                    Collections.singletonList("promote"),
                     Collections.emptyList()
             ));
 
             Collection<? extends GrantedAuthority> output = customUserAuthoritiesMapper.mapAuthorities(test_permission_set);
 
             assertThat(output).hasSize(3);
-            assertThat(output).isEqualTo(UserRoleConfiguration.COMMIT_ROLE_PERMISSION_SET);
+            assertThat(output).isEqualTo(UserRoleConfiguration.PROMOTE_ROLE_PERMISSION_SET);
         }
 
         @Test
@@ -136,7 +136,7 @@ public class CustomUserAuthoritiesMapperTest {
             customUserAuthoritiesMapper = new CustomUserAuthoritiesMapper(setupRoleSettings(
                     Collections.singletonList("read"),
                     Collections.singletonList("write"),
-                    Collections.singletonList("commit"),
+                    Collections.singletonList("promote"),
                     Collections.singletonList("admin")
             ));
             Collection<? extends GrantedAuthority> output = customUserAuthoritiesMapper.mapAuthorities(test_permission_set);

@@ -51,7 +51,7 @@ public class AgentMappingSerializerTest {
             verify(fileAccessor).writeAgentMappings(writtenFile.capture());
 
             assertThat(writtenFile.getValue()).isEqualTo("- name: \"mapping\"\n" +
-                    "  branch: \"LIVE\"\n" +
+                    "  sourceBranch: \"LIVE\"\n"+
                     "  sources:\n" +
                     "  - \"/any-source\"\n" +
                     "  attributes:\n" +
@@ -64,9 +64,9 @@ public class AgentMappingSerializerTest {
     public class ReadAgentMappings {
 
         @Test
-        public void successfullyReadYaml() throws IOException {
+        public void successfullyReadYaml() {
             String dummyYaml = "- name: \"mapping\"\n" +
-                    "  branch: \"WORKSPACE\"\n" +
+                    "  sourceBranch: \"LIVE\"\n" +
                     "  sources:\n" +
                     "  - \"/any-source\"\n" +
                     "  attributes:\n" +
@@ -81,6 +81,7 @@ public class AgentMappingSerializerTest {
             assertThat(mapping.getName()).isEqualTo("mapping");
             assertThat(mapping.getSources()).containsExactly("/any-source");
             assertThat(mapping.getAttributes()).containsEntry("key", "val");
+            assertThat(mapping.getSourceBranch()).isEqualTo(Branch.LIVE);
         }
     }
 }
