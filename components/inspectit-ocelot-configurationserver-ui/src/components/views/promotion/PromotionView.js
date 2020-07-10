@@ -28,7 +28,7 @@ const PromotionView = () => {
   const currentApprovals = useSelector((state) => state.promotion.approvals);
   const workspaceCommitId = useSelector((state) => state.promotion.workspaceCommitId);
   const liveCommitId = useSelector((state) => state.promotion.liveCommitId);
-  const canCommit = useSelector((state) => state.authentication.permissions.commit);
+  const canPromote = useSelector((state) => state.authentication.permissions.promote);
 
   // fetching promotion data
   const [{ data, isLoading, lastUpdate }, refreshData] = useFetchData('/configuration/promotions', { 'include-content': 'true' });
@@ -140,7 +140,7 @@ const PromotionView = () => {
             onRefresh={refreshData}
             onPromote={() => setShowPromotionDialog(true)}
             loading={isLoading}
-            enabled={canCommit && hasApprovals}
+            enabled={canPromote && hasApprovals}
           />
         </div>
         <div className="content">
@@ -157,7 +157,7 @@ const PromotionView = () => {
                 {currentSelectionFile ? (
                   <>
                     <PromotionFileViewer oldValue={currentSelectionFile.oldContent} newValue={currentSelectionFile.newContent} />
-                    {canCommit && <PromotionFileApproval approved={isCurrentSelectionApproved} onApproveFile={toggleFileApproval} />}
+                    {canPromote && <PromotionFileApproval approved={isCurrentSelectionApproved} onApproveFile={toggleFileApproval} />}
                   </>
                 ) : (
                   <div className="selection-information">

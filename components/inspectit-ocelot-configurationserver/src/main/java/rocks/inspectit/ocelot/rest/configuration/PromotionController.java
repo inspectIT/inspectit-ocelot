@@ -34,7 +34,7 @@ public class PromotionController extends AbstractBaseController {
         return fileManager.getWorkspaceDiff(includeContent);
     }
 
-    @Secured(UserRoleConfiguration.COMMIT_ACCESS_ROLE)
+    @Secured(UserRoleConfiguration.PROMOTE_ACCESS_ROLE)
     @ApiOperation(value = "Promote configurations", notes = "Promotes the specified configuration files.")
     @PostMapping(value = "configuration/promote")
     public ResponseEntity promoteConfiguration(@ApiParam("The definition that contains the information about which files to promote.") @RequestBody ConfigurationPromotion promotion) throws GitAPIException {

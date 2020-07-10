@@ -100,7 +100,7 @@ public class AccountController extends AbstractBaseController {
 
         return UserPermissions.builder()
                 .write(roles.contains(UserRoleConfiguration.WRITE_ACCESS_ROLE))
-                .commit(roles.contains(UserRoleConfiguration.COMMIT_ACCESS_ROLE))
+                .promote(roles.contains(UserRoleConfiguration.PROMOTE_ACCESS_ROLE))
                 .admin(roles.contains(UserRoleConfiguration.ADMIN_ACCESS_ROLE))
                 .build();
     }

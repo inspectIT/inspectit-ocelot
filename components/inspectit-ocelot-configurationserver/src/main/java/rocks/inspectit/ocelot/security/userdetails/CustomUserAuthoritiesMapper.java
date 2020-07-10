@@ -38,8 +38,8 @@ public class CustomUserAuthoritiesMapper implements GrantedAuthoritiesMapper {
         if (containsAuthority(authorities, role_settings.getAdmin()) || hasAdminGroup(authorities)) {
             return UserRoleConfiguration.ADMIN_ROLE_PERMISSION_SET;
         }
-        if (containsAuthority(authorities, role_settings.getCommit())) {
-            return UserRoleConfiguration.COMMIT_ROLE_PERMISSION_SET;
+        if (containsAuthority(authorities, role_settings.getPromote())) {
+            return UserRoleConfiguration.PROMOTE_ROLE_PERMISSION_SET;
         }
         if (containsAuthority(authorities, role_settings.getWrite())) {
             return UserRoleConfiguration.WRITE_ROLE_PERMISSION_SET;

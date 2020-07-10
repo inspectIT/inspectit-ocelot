@@ -51,11 +51,11 @@ public class AgentMappingSerializerTest {
             verify(fileAccessor).writeAgentMappings(writtenFile.capture());
 
             assertThat(writtenFile.getValue()).isEqualTo("- name: \"mapping\"\n" +
-                    "  branch: \"LIVE\"\n" +
                     "  sources:\n" +
                     "  - \"/any-source\"\n" +
                     "  attributes:\n" +
-                    "    key: \"val\"\n");
+                    "    key: \"val\"\n" +
+                    "  sourceBranch: \"LIVE\"\n");
             verifyNoMoreInteractions(fileAccessor);
         }
     }
