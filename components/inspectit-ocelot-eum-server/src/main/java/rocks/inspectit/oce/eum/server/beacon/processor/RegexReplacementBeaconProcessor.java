@@ -60,20 +60,25 @@ public class RegexReplacementBeaconProcessor implements BeaconProcessor {
     }
 
     private String deriveTag(RegexDerivedTag tag, String input) {
-        if (input == null) {
-            return null;
+        String value = input;
+        if (value == null) {
+            if (tag.isNullAsEmpty()) {
+                value = "";
+            } else {
+                return null;
+            }
         }
 
         Pattern regex = tag.getRegex();
         if (regex != null) {
             try {
-                return regexReplaceAll(input, regex, tag.getReplacement(), tag.isKeepIfNoMatch());
+                return regexReplaceAll(value, regex, tag.getReplacement(), tag.isKeepIfNoMatch());
             } catch (Exception ex) {
-                log.error("Could not derive beacon tag value <{}> of input string <{}>!", tag.getTagName(), input, tag.getReplacement(), ex);
+                log.error("Could not derive beacon tag value <{}> of input string <{}>!", tag.getTagName(), value, tag.getReplacement(), ex);
                 return null;
             }
         } else {
-            return input;
+            return value;
         }
     }
 
@@ -149,6 +154,11 @@ public class RegexReplacementBeaconProcessor implements BeaconProcessor {
          */
         boolean keepIfNoMatch;
 
+        /**
+         * Specify whether the input field should be considered as an empty string if it does not exists.
+         */
+        boolean nullAsEmpty;
+
         private static RegexDerivedTag fromSettings(String tagName, BeaconTagSettings settings) {
             Pattern pattern = null;
             String regex = settings.getRegex();
@@ -161,6 +171,7 @@ public class RegexReplacementBeaconProcessor implements BeaconProcessor {
                     .regex(pattern)
                     .replacement(settings.getReplacement())
                     .keepIfNoMatch(settings.isKeepNoMatch())
+                    .nullAsEmpty(settings.isNullAsEmpty())
                     .build();
         }
     }

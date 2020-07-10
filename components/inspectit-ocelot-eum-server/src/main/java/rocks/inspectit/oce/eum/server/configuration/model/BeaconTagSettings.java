@@ -47,4 +47,9 @@ public class BeaconTagSettings {
     @Builder.Default
     private String replacement = "";
 
+    /**
+     * Specify whether the input field should be considered as an empty string if it does not exists.
+     */
+    @Builder.Default
+    private boolean nullAsEmpty = false;
 }

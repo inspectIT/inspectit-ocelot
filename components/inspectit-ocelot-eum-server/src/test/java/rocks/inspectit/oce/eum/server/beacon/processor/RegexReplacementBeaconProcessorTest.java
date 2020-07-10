@@ -139,5 +139,26 @@ public class RegexReplacementBeaconProcessorTest {
                     entry("value", "Hello World")
             );
         }
+
+        @Test
+        void nullAttributeAsEmpty() {
+            BeaconTagSettings first = BeaconTagSettings.builder().input("not-existing").regex("^$").replacement("one").nullAsEmpty(true).build();
+
+            Map<String, BeaconTagSettings> beaconTags = new LinkedHashMap<>();
+            beaconTags.put("first", first);
+
+            EumServerConfiguration conf = new EumServerConfiguration();
+            conf.setTags(new EumTagsSettings());
+            conf.getTags().setBeacon(beaconTags);
+
+            RegexReplacementBeaconProcessor processor = new RegexReplacementBeaconProcessor(conf);
+
+            Beacon result = processor.process(Beacon.of(ImmutableMap.of("value", "Hello World")));
+
+            assertThat(result.toMap()).containsOnly(
+                    entry("value", "Hello World"),
+                    entry("first", "one")
+            );
+        }
     }
 }
