@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
 import { useSelector } from 'react-redux';
 import AlertingRulesTreeContainer from './tree/AlertingRulesTreeContainer';
 import RulesEditorContainer from './editor/RulesEditorContainer';
@@ -8,7 +7,7 @@ import RulesEditorContainer from './editor/RulesEditorContainer';
 /**
  * The component for managing alerting rules.
  */
-const AlertingRulesView = ({ availableTopics, unsavedRules }) => {
+const AlertingRulesView = ({ updateDate, availableTopics, rules, templates, onRefresh }) => {
   const readOnly = useSelector((state) => !state.authentication.permissions.write).readOnly;
   const [selectedRuleName, setSelectedRuleName] = useState(undefined);
   const [selectedTemplateName, setSelectedTemplateName] = useState(undefined);
@@ -21,15 +20,6 @@ const AlertingRulesView = ({ availableTopics, unsavedRules }) => {
           display: flex;
           flex-grow: 1;
         }
-        .this :global(.editorContainer) {
-          height: 100%;
-          flex-grow: 1;
-          align-items: stretch;
-          display: flex;
-          flex-direction: column;
-          justify-content: flex-start;
-          min-width: 760px;
-        }
       `}</style>
       <AlertingRulesTreeContainer
         readOnly={readOnly}
@@ -39,18 +29,16 @@ const AlertingRulesView = ({ availableTopics, unsavedRules }) => {
         }}
         selectedRuleName={selectedRuleName}
         selectedTemplateName={selectedTemplateName}
-        unsavedRules={unsavedRules}
+        updateDate={updateDate}
+        rules={rules}
+        templates={templates}
+        onRefresh={onRefresh}
       />
       <RulesEditorContainer
         readOnly={readOnly}
         availableTopics={availableTopics}
         selectedRuleName={selectedRuleName}
         selectedTemplateName={selectedTemplateName}
-        onRuleRenamed={(oldName, newName) => {
-          if (oldName === selectedRuleName) {
-            setSelectedRuleName(newName);
-          }
-        }}
       />
     </div>
   );
@@ -59,21 +47,20 @@ const AlertingRulesView = ({ availableTopics, unsavedRules }) => {
 AlertingRulesView.propTypes = {
   /** An array of strings denoting the available notification topics */
   availableTopics: PropTypes.array,
-  /**  List of rules that are unsaved */
-  unsavedRules: PropTypes.array.isRequired,
+  /** Recent update date */
+  updateDate: PropTypes.object,
+  /** List of available rules */
+  rules: PropTypes.array,
+  /** List of available templates */
+  templates: PropTypes.array,
+  /** Callback on refresh */
+  onRefresh: PropTypes.func,
 };
 
 AlertingRulesView.defaultProps = {
   availableTopics: [],
   onSelectionChanged: () => {},
+  onRefresh: () => {},
 };
 
-const mapStateToProps = (state) => {
-  const { unsavedRuleContents } = state.alerting;
-
-  return {
-    unsavedRules: Object.keys(unsavedRuleContents),
-  };
-};
-
-export default connect(mapStateToProps, {})(AlertingRulesView);
+export default AlertingRulesView;

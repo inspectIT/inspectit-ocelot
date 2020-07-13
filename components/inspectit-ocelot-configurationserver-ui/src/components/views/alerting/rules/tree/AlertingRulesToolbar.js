@@ -11,11 +11,12 @@ import { alertingActions } from '../../../../../redux/ducks/alerting';
 const AlertingRulesToolbar = ({
   loading,
   selectedRuleName,
-  selectedTemplateName,
   readOnly,
   groupingOptions,
   onShowCreateRuleDialog,
   onShowDeleteRuleDialog,
+  onShowRenameRuleDialog,
+  onShowCopyRuleDialog,
   onGroupingChanged,
   onRefresh,
 }) => {
@@ -53,14 +54,28 @@ const AlertingRulesToolbar = ({
             tooltip="New rule"
             icon="pi pi-plus"
             tooltipOptions={tooltipOptions}
-            onClick={() => onShowCreateRuleDialog(selectedTemplateName)}
+            onClick={() => onShowCreateRuleDialog()}
+          />
+          <Button
+            disabled={readOnly || loading || !selectedRuleName}
+            tooltip="Rename rule"
+            icon="pi pi-pencil"
+            tooltipOptions={tooltipOptions}
+            onClick={() => onShowRenameRuleDialog()}
+          />
+          <Button
+            disabled={readOnly || loading || !selectedRuleName}
+            tooltip="Copy rule"
+            icon="pi pi-copy"
+            tooltipOptions={tooltipOptions}
+            onClick={() => onShowCopyRuleDialog()}
           />
           <Button
             disabled={readOnly || loading || !selectedRuleName}
             tooltip="Delete rule"
             icon="pi pi-trash"
             tooltipOptions={tooltipOptions}
-            onClick={() => onShowDeleteRuleDialog(selectedRuleName)}
+            onClick={() => onShowDeleteRuleDialog()}
           />
         </div>
         <div className="p-toolbar-group-right">
@@ -92,8 +107,6 @@ const AlertingRulesToolbar = ({
 AlertingRulesToolbar.propTypes = {
   /**  Name of the selected rule */
   selectedRuleName: PropTypes.string.isRequired,
-  /**  Name of the selected template (template in the current context) */
-  selectedTemplateName: PropTypes.string.isRequired,
   /** If the toolbar is in loading mode */
   loading: PropTypes.bool,
   /**  Whether the contents are read only */
@@ -104,6 +117,10 @@ AlertingRulesToolbar.propTypes = {
   onShowCreateRuleDialog: PropTypes.func,
   /**  Callback on triggering delete rule dialog */
   onShowDeleteRuleDialog: PropTypes.func,
+  /**  Callback on triggering rename rule dialog */
+  onShowRenameRuleDialog: PropTypes.func,
+  /**  Callback on triggering copy rule dialog */
+  onShowCopyRuleDialog: PropTypes.func,
   /**  Callback on triggering refresh */
   onRefresh: PropTypes.func,
   /** Global state update callback when rule grouping options change */
@@ -119,6 +136,8 @@ AlertingRulesToolbar.defaultProps = {
   },
   onShowCreateRuleDialog: () => {},
   onShowDeleteRuleDialog: () => {},
+  onShowRenameRuleDialog: () => {},
+  onShowCopyRuleDialog: () => {},
   onRefresh: () => {},
 };
 

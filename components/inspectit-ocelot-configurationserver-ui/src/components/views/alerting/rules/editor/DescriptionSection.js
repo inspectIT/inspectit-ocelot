@@ -41,11 +41,15 @@ const DescriptionSection = ({ value, readOnly, updateValue }) => {
         <div className="descr-content">
           <div className="descr-scrolled-content">
             {readOnly ? (
-              <SimpleDataView value={value} descriptionRef={descriptionRef} />
+              <div className="descriptionContent" ref={descriptionRef}>
+                {value}
+              </div>
             ) : (
               <Inplace active={inplaceActive} onToggle={() => setInplaceState(true)}>
                 <InplaceDisplay>
-                  <SimpleDataView value={value} descriptionRef={descriptionRef} />
+                  <div className="descriptionContent" ref={descriptionRef}>
+                    {value}
+                  </div>
                 </InplaceDisplay>
                 <InplaceContent>
                   <TextAreaEditor
@@ -63,14 +67,6 @@ const DescriptionSection = ({ value, readOnly, updateValue }) => {
         </div>
       </div>
     </>
-  );
-};
-
-const SimpleDataView = ({ value, descriptionRef }) => {
-  return (
-    <div className="descriptionContent" ref={descriptionRef}>
-      {value}
-    </div>
   );
 };
 

@@ -1,11 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { Button } from 'primereact/button';
 import { Toolbar } from 'primereact/toolbar';
 import { InputSwitch } from 'primereact/inputswitch';
-import { Inplace, InplaceDisplay, InplaceContent } from 'primereact/inplace';
-import TextEditor from '../../../../common/value-editors/TextEditor';
 
 const RulesEditorToolbar = ({
   selectionName,
@@ -18,7 +16,6 @@ const RulesEditorToolbar = ({
   savedRuleHasError,
   savedRuleIsEnabled,
   onEnabledStateChanged,
-  onNameChanged,
   onSave,
 }) => {
   const headerIconClassNames = classNames({
@@ -109,14 +106,7 @@ const RulesEditorToolbar = ({
         <div className="p-toolbar-group-left">
           <div className="header">
             <i className={headerIconClassNames}></i>
-            <EditableTitleView
-              className="name"
-              value={selectionName || 'Select Rule or Template'}
-              readOnly={readOnly || !isRule || isUnsaved}
-              updateValue={(newName) => {
-                onNameChanged(selectionName, newName);
-              }}
-            />
+            <span>{'' + (selectionName || 'Select Rule or Template')}</span>
             {isUnsaved && <div className="text-addition">*</div>}
             {selectionName && readOnly && <div className="text-addition">(read only)</div>}
             {!!selectionNameAddition && <div className="text-addition">|</div>}
@@ -153,36 +143,6 @@ const getErrorText = (numErrors) => {
   return errorText;
 };
 
-/**
- * Title view that allows to edit the title if not in read only mode.
- */
-const EditableTitleView = ({ value, readOnly, updateValue }) => {
-  const [inplaceActive, setInplaceState] = useState(false);
-
-  if (readOnly) {
-    return <span>{'' + value}</span>;
-  } else {
-    return (
-      <Inplace active={inplaceActive} onToggle={() => setInplaceState(true)}>
-        <InplaceDisplay>
-          <span>{'' + value}</span>
-          <i className="pi pi-pencil" />
-        </InplaceDisplay>
-        <InplaceContent>
-          <TextEditor
-            value={value}
-            disabled={readOnly}
-            updateValue={(value) => {
-              setInplaceState(false);
-              updateValue(value);
-            }}
-          />
-        </InplaceContent>
-      </Inplace>
-    );
-  }
-};
-
 RulesEditorToolbar.propTypes = {
   /** The name of the current selection */
   selectionName: PropTypes.string.isRequired,
@@ -204,8 +164,6 @@ RulesEditorToolbar.propTypes = {
   savedRuleIsEnabled: PropTypes.bool,
   /** Callback on enabled state change */
   onEnabledStateChanged: PropTypes.func,
-  /** Callback on name change */
-  onNameChanged: PropTypes.func,
   /** Callback on save */
   onSave: PropTypes.func,
 };
@@ -219,7 +177,6 @@ RulesEditorToolbar.defaultProps = {
   savedRuleHasError: false,
   savedRuleIsEnabled: false,
   onEnabledStateChanged: () => {},
-  onNameChanged: () => {},
   onSave: () => {},
 };
 

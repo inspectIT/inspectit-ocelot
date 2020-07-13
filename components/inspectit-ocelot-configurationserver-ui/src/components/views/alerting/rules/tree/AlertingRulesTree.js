@@ -18,7 +18,9 @@ const AlertingRulesTree = ({
   groupingOptions,
 }) => {
   const [expandedKeys, setExpandedKeys] = useState({});
-  const selectedTopic = selectedRuleName ? rules.find((r) => r.id === selectedRuleName).topic : undefined;
+  const selectedRule = selectedRuleName && rules.find((r) => r.id === selectedRuleName);
+  const selectedTopic = selectedRule && selectedRule.topic;
+
   useEffect(() => {
     var keysToAdd = undefined;
     if (selectedRuleName && !(selectedTemplateName in expandedKeys)) {

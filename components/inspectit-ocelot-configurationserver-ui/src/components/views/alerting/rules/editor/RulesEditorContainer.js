@@ -12,7 +12,6 @@ const RulesEditorContainer = ({
   selectedTemplateName,
   readOnly,
   availableTopics,
-  onRuleRenamed,
   unsavedRuleContents,
   unsavedRuleContentsChanged,
 }) => {
@@ -28,16 +27,6 @@ const RulesEditorContainer = ({
     } else {
       unsavedRuleContentsChanged(extend(unsavedRuleContents, { [ruleName]: changedContent }));
     }
-  };
-
-  const renameRule = (oldName, newName) => {
-    rulesAPI.renameRule(oldName, newName, () => {
-      if (oldName in unsavedRuleContents) {
-        const rContent = unsavedRuleContents[oldName];
-        unsavedRuleContentsChanged(extend(omit(unsavedRuleContents, oldName), { [newName]: rContent }));
-      }
-      onRuleRenamed(oldName, newName);
-    });
   };
 
   const updateEnabledState = (value) => {
@@ -73,7 +62,6 @@ const RulesEditorContainer = ({
         isUnsaved={isUnsaved}
         readOnly={readOnly || !isRule}
         onEnabledStateChanged={updateEnabledState}
-        onNameChanged={renameRule}
         variablesHaveErrors
         numErrors={numVariableErrors}
         onSave={() => {
@@ -179,17 +167,14 @@ RulesEditorContainer.propTypes = {
   /** A map of rule names to corresponding unsaved contents */
   unsavedRuleContents: PropTypes.object,
   /** Callback on content update */
-  onUnsavedRuleContentsChanged: PropTypes.func,
-  /** Callback on rule rename */
-  onRuleRenamed: PropTypes.func,
+  unsavedRuleContentsChanged: PropTypes.func,
 };
 
 RulesEditorContainer.defaultProps = {
   availableTopics: [],
   unsavedRuleContents: {},
   readOnly: false,
-  onUnsavedRuleContentsChanged: () => {},
-  onRuleRenamed: () => {},
+  unsavedRuleContentsChanged: () => {},
 };
 
 const mapStateToProps = (state) => {

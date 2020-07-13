@@ -30,7 +30,7 @@ var rules = [
     executing: false,
     error: 'This an error description',
     template: 'MyGreat Template',
-    topic: 'Some Topic',
+    topic: 'BLUB Topic',
   },
 ];
 
@@ -55,7 +55,7 @@ var ruleContents = [
           'threshold value with a quite very long text that describes the vriable to show a measurement with a great value showing the template and combining it with another value',
       },
     ],
-    topic: 'Some Topic',
+    topic: 'BLUB Topic',
   },
 ];
 
@@ -162,7 +162,7 @@ export const fetchAlertingTemplates = (onSuccess, onFailed) => {
   const success = true;
   if (success) {
     if (onSuccess) {
-      onSuccess(templates);
+      setTimeout(() => onSuccess(templates), 200);
     }
   } else {
     if (onFailed) {
@@ -180,7 +180,7 @@ export const fetchAlertingRules = (onSuccess, onFailed) => {
   const success = true;
   if (success) {
     if (onSuccess) {
-      onSuccess(rules);
+      setTimeout(() => onSuccess(rules), 200);
     }
   } else {
     if (onFailed) {
@@ -197,7 +197,7 @@ export const fetchRule = (ruleName, onSuccess, onFailed) => {
   if (success) {
     const content = ruleContents.find((r) => r.id === ruleName);
     if (onSuccess) {
-      onSuccess(content);
+      setTimeout(() => onSuccess(content), 200);
     }
   } else {
     if (onFailed) {
@@ -254,8 +254,8 @@ export const updateRule = (ruleContent, onSuccess, onFailed) => {
   if (success) {
     remove(rules, (r) => r.id === ruleContent.id);
     remove(ruleContents, (r) => r.id === ruleContent.id);
-    rules.push(ruleContent);
-    ruleContents.push(ruleContent);
+    rules.push(cloneDeep(ruleContent));
+    ruleContents.push(cloneDeep(ruleContent));
 
     if (onSuccess) {
       onSuccess(ruleContent);
@@ -289,7 +289,7 @@ export const createRule = (ruleName, templateName, description, onSuccess, onFai
 
     remove(rules, (r) => r.id === ruleName);
     remove(ruleContents, (r) => r.id === ruleName);
-    rules.push(ruleMetaInfo);
+    rules.push(cloneDeep(ruleMetaInfo));
     ruleContents.push(cloneDeep(ruleMetaInfo));
 
     if (onSuccess) {
@@ -312,6 +312,24 @@ export const renameRule = (oldName, newName, onSuccess, onFailed) => {
     ruleContents.find((r) => r.id === oldName).id = newName;
     if (onSuccess) {
       onSuccess();
+    }
+  } else {
+    if (onFailed) {
+      onFailed();
+    }
+  }
+};
+
+export const copyRule = (srcName, targetName, onSuccess, onFailed) => {
+  const success = true;
+  if (success) {
+    let ruleObj = cloneDeep(rules.find((r) => r.id === srcName));
+    ruleObj.id = targetName;
+    rules.push(ruleObj);
+    ruleContents.push(ruleObj);
+
+    if (onSuccess) {
+      onSuccess(ruleObj);
     }
   } else {
     if (onFailed) {

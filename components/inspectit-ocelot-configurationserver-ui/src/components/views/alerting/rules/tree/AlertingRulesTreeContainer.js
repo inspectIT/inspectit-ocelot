@@ -1,45 +1,36 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { connect } from 'react-redux';
+import { omit, extend } from 'lodash';
 import PropTypes from 'prop-types';
 import * as rulesAPI from '../RulesAPI';
 import AlertingRulesToolbar from './AlertingRulesToolbar';
 import AlertingRulesTree from './AlertingRulesTree';
-import CreateDialog from '../../../../common/dialogs/CreateDialog';
+import CreateDialog from './CreateDialog';
 import DeleteDialog from '../../../../common/dialogs/DeleteDialog';
+import RenameCopyDialog from '../../../../common/dialogs/RenameCopyDialog';
+import { alertingActions } from '../../../../../redux/ducks/alerting';
 
 /**
  * The container element of the alerting rules tree, the corresponding toolbar and the action dialogs.
  */
-const AlertingRulesTreeContainer = ({ readOnly, onSelectionChanged, selectedRuleName, selectedTemplateName, unsavedRules }) => {
-  const [updateDate, setUpdateDate] = useState(Date.now());
+const AlertingRulesTreeContainer = ({
+  rules,
+  templates,
+  updateDate,
+  readOnly,
+  onSelectionChanged,
+  selectedRuleName,
+  selectedTemplateName,
+  unsavedRuleContents,
+  onRefresh,
+  unsavedRuleContentsChanged,
+}) => {
   const [isDeleteRuleDialogShown, setDeleteRuleDialogShown] = useState(false);
   const [isCreateRuleDialogShown, setCreateRuleDialogShown] = useState(false);
+  const [isRenameRuleDialogShown, setRenameRuleDialogShown] = useState(false);
+  const [isCopyRuleDialogShown, setCopyRuleDialogShown] = useState(false);
   const [groupByTemplates, setGroupByTemplates] = useState(true);
   const [groupByTopics, setGroupByTopics] = useState(false);
-  const [rules, setRules] = useState(undefined);
-  const [templates, setTemplates] = useState(undefined);
-
-  const refreshRulesAndTemplates = () => {
-    rulesAPI.fetchAlertingRules(
-      (rules) => setRules(rules),
-      () => setRules([])
-    );
-    rulesAPI.fetchAlertingTemplates(
-      (templates) => setTemplates(templates),
-      () => setTemplates([])
-    );
-    setUpdateDate(Date.now());
-  };
-
-  const ruleDeleted = (ruleName) => {
-    refreshRulesAndTemplates();
-    if (ruleName === selectedRuleName) {
-      onSelectionChanged(undefined, selectedTemplateName);
-    }
-  };
-
-  useEffect(() => {
-    refreshRulesAndTemplates();
-  }, [selectedRuleName, selectedTemplateName]);
 
   return (
     <div className="treeContainer">
@@ -80,7 +71,9 @@ const AlertingRulesTreeContainer = ({ readOnly, onSelectionChanged, selectedRule
         }}
         onShowDeleteRuleDialog={() => setDeleteRuleDialogShown(true)}
         onShowCreateRuleDialog={() => setCreateRuleDialogShown(true)}
-        onRefresh={() => refreshRulesAndTemplates()}
+        onShowRenameRuleDialog={() => setRenameRuleDialogShown(true)}
+        onShowCopyRuleDialog={() => setCopyRuleDialogShown(true)}
+        onRefresh={onRefresh}
         readOnly={readOnly}
       />
       <AlertingRulesTree
@@ -88,7 +81,7 @@ const AlertingRulesTreeContainer = ({ readOnly, onSelectionChanged, selectedRule
         templates={templates}
         selectedRuleName={selectedRuleName}
         selectedTemplateName={selectedTemplateName}
-        unsavedRules={unsavedRules}
+        unsavedRules={unsavedRuleContents && Object.keys(unsavedRuleContents)}
         onSelectionChanged={onSelectionChanged}
         readOnly={readOnly}
         groupByTemplates={groupByTemplates}
@@ -96,18 +89,11 @@ const AlertingRulesTreeContainer = ({ readOnly, onSelectionChanged, selectedRule
       />
       <div className="details">Last refresh: {updateDate ? new Date(updateDate).toLocaleString() : '-'}</div>
       <CreateDialog
-        categories={templates && templates.map((t) => t.id)}
-        useDescription={true}
-        title={'Create Alerting Rule'}
-        categoryTitle={'Template'}
-        elementTitle={'Rule'}
-        text={'Create an alerting rule:'}
-        categoryIcon={'pi-briefcase'}
-        targetElementIcon={'pi-bell'}
+        templates={templates && templates.map((t) => t.id)}
+        initialTemplate={selectedTemplateName}
         reservedNames={rules && rules.map((r) => r.id)}
         visible={isCreateRuleDialogShown}
         onHide={() => setCreateRuleDialogShown(false)}
-        initialCategory={selectedTemplateName}
         onSuccess={(ruleName, templateName, description) => {
           setCreateRuleDialogShown(false);
           rulesAPI.createRule(
@@ -119,33 +105,97 @@ const AlertingRulesTreeContainer = ({ readOnly, onSelectionChanged, selectedRule
           );
         }}
       />
+      <RenameCopyDialog
+        name={selectedRuleName}
+        reservedNames={rules && rules.map((r) => r.id)}
+        visible={isRenameRuleDialogShown}
+        onHide={() => setRenameRuleDialogShown(false)}
+        text={'Rename alerting rule:'}
+        onSuccess={(oldName, newName) => {
+          setRenameRuleDialogShown(false);
+          rulesAPI.renameRule(oldName, newName, () => {
+            if (oldName in unsavedRuleContents) {
+              const rContent = unsavedRuleContents[oldName];
+              unsavedRuleContentsChanged(extend(omit(unsavedRuleContents, oldName), { [newName]: rContent }));
+            }
+            onSelectionChanged(newName, selectedTemplateName);
+            onRefresh();
+          });
+        }}
+        intention="rename"
+      />
+      <RenameCopyDialog
+        name={selectedRuleName}
+        reservedNames={rules && rules.map((r) => r.id)}
+        visible={isCopyRuleDialogShown}
+        onHide={() => setCopyRuleDialogShown(false)}
+        text={'Copy alerting rule:'}
+        onSuccess={(oldName, newName) => {
+          setCopyRuleDialogShown(false);
+          rulesAPI.copyRule(oldName, newName, () => {
+            onSelectionChanged(newName, selectedTemplateName);
+            onRefresh();
+          });
+        }}
+        intention="copy"
+      />
       <DeleteDialog
         visible={isDeleteRuleDialogShown}
         onHide={() => setDeleteRuleDialogShown(false)}
         name={selectedRuleName}
         text="Delete Rule"
-        onSuccess={(ruleName) => rulesAPI.deleteRule(ruleName, (deletedRule) => ruleDeleted(deletedRule))}
+        onSuccess={(ruleName) =>
+          rulesAPI.deleteRule(ruleName, (deletedRuleName) => {
+            onRefresh();
+            if (deletedRuleName === selectedRuleName) {
+              onSelectionChanged(undefined, selectedTemplateName);
+            }
+          })
+        }
       />
     </div>
   );
 };
 
 AlertingRulesTreeContainer.propTypes = {
+  /** List of available rules */
+  rules: PropTypes.array.isRequired,
+  /** List of available templates */
+  templates: PropTypes.array.isRequired,
+  /** Recent update time */
+  updateDate: PropTypes.object.isRequired,
   /**  Name of the selected rule */
   selectedRuleName: PropTypes.string.isRequired,
   /**  Name of the selected template (template in the current context) */
   selectedTemplateName: PropTypes.string.isRequired,
   /**  Whether the contents are read only */
   readOnly: PropTypes.bool,
-  /**  List of rules that are unsaved */
-  unsavedRules: PropTypes.array.isRequired,
+  /**  Mapping of rules that are unsaved */
+  unsavedRuleContents: PropTypes.array.isRequired,
   /**  Callback on changed selection */
   onSelectionChanged: PropTypes.func,
+  /** Callback on refresh */
+  onRefresh: PropTypes.func,
+  /** Function to manipulate the global state of the unsaved rules */
+  unsavedRuleContentsChanged: PropTypes.func,
 };
 
 AlertingRulesTreeContainer.defaultProps = {
   readOnly: false,
   onSelectionChanged: () => {},
+  onRefresh: () => {},
 };
 
-export default AlertingRulesTreeContainer;
+const mapStateToProps = (state) => {
+  const { unsavedRuleContents } = state.alerting;
+
+  return {
+    unsavedRuleContents,
+  };
+};
+
+const mapDispatchToProps = {
+  unsavedRuleContentsChanged: alertingActions.ruleContentsChanged,
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(AlertingRulesTreeContainer);
