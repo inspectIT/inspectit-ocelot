@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.security.userdetails;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.springframework.ldap.core.DirContextOperations;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -41,7 +42,8 @@ public class CustomLdapUserDetailsMapper extends LdapUserDetailsMapper {
      *
      * @return The highest level of access role the user's authorities could be resolved to.
      */
-    public Collection<? extends GrantedAuthority> mapAuthorities(Collection<? extends GrantedAuthority> authorities) {
+    @VisibleForTesting
+    Collection<? extends GrantedAuthority> mapAuthorities(Collection<? extends GrantedAuthority> authorities) {
         LdapRoleResolveSettings role_settings = settings.getRoles();
         if (containsAuthority(authorities, role_settings.getAdmin()) || hasAdminGroup(authorities)) {
             return UserRoleConfiguration.ADMIN_ROLE_PERMISSION_SET;

@@ -16,7 +16,7 @@ import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
  * The user details service used for authentication against the configured LDAP system.
  */
 @Component
-@Order(1)
+@Order(1) // ensure that this service has a higher priority than the LocalUserDetailsService, thus is called first
 @ConditionalOnLdap
 public class CustomLdapUserDetailsService extends LdapUserDetailsService {
 
