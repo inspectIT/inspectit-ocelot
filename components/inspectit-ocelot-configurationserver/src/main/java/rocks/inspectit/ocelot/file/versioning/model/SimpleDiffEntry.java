@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import org.eclipse.jgit.diff.DiffEntry;
 
+import java.util.Collections;
+import java.util.List;
+
 /**
  * This class represents a single file diff including all information about it.
  */
@@ -17,6 +20,7 @@ public class SimpleDiffEntry {
      * Creates a {@link SimpleDiffEntry} based an a given {@link DiffEntry}.
      *
      * @param entry the {@link DiffEntry} to use as basis
+     *
      * @return the created {@link SimpleDiffEntry}
      */
     public static SimpleDiffEntry of(DiffEntry entry) {
@@ -28,7 +32,6 @@ public class SimpleDiffEntry {
         } else {
             simpleEntry.setFile(entry.getNewPath());
         }
-
 
         return simpleEntry;
     }
@@ -56,4 +59,7 @@ public class SimpleDiffEntry {
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String newContent;
+
+    @Builder.Default
+    private List<String> authors = Collections.emptyList();
 }

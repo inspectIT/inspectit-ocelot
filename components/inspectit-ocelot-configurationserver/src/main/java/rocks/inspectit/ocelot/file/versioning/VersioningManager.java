@@ -11,6 +11,7 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.merge.MergeStrategy;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
@@ -31,10 +32,7 @@ import rocks.inspectit.ocelot.file.versioning.model.WorkspaceDiff;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.util.ConcurrentModificationException;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -412,12 +410,93 @@ public class VersioningManager {
 
             simpleDiffEntries.forEach(entry -> fillFileContent(entry, liveRevision, workspaceRevision));
         }
+        simpleDiffEntries.forEach(entry -> fillInAuthors(entry, oldCommit, newCommit));
 
         return WorkspaceDiff.builder()
                 .entries(simpleDiffEntries)
                 .liveCommitId(oldCommit.name())
                 .workspaceCommitId(newCommit.name())
                 .build();
+    }
+
+    @VisibleForTesting
+    void fillInAuthors(SimpleDiffEntry entry, ObjectId baseCommitId, ObjectId newCommitId) {
+        RevCommit baseCommit = getCommit(baseCommitId);
+        RevCommit newCommit = getCommit(newCommitId);
+        switch (entry.getType()) {
+            case ADD:
+                entry.setAuthors(findAuthorsSinceAddition(entry.getFile(), newCommit));
+                break;
+            case MODIFY:
+                entry.setAuthors(findModifyingAuthors(entry.getFile(), baseCommit, newCommit));
+                break;
+            case DELETE:
+                entry.setAuthors(Collections.singletonList(findDeletingAuthor(entry.getFile(), baseCommit, newCommit)));
+                break;
+            default:
+                log.warn("Unsupported change type for author lookup encountered: {}", entry.getType());
+                break;
+        }
+    }
+
+    private List<String> findModifyingAuthors(String file, RevCommit baseCommit, RevCommit newCommit) {
+        RevisionAccess newRevision = new RevisionAccess(git.getRepository(), newCommit);
+        RevisionAccess baseRevision = new RevisionAccess(git.getRepository(), baseCommit);
+        //move "baseRevision" to the last commit where this file was touched (potentially the root commit).
+        while (!baseRevision.wasConfigurationFileAdded(file) && !baseRevision.wasConfigurationFileModified(file)) {
+            baseRevision = baseRevision.getPreviousRevision()
+                    .orElseThrow(() -> new IllegalStateException("Expected parent to exist"));
+        }
+
+        Set<String> authors = new HashSet<>();
+        //Find all persons who added or modified the file since the last promotion.
+        RevisionAccess commonAncestor = newRevision.getCommonAncestor(baseRevision);
+        while (!newRevision.getRevisionID().equals(commonAncestor.getRevisionID())) {
+            if (newRevision.wasConfigurationFileModified(file) || newRevision.wasConfigurationFileAdded(file)) {
+                authors.add(newRevision.getAuthorName());
+            }
+            newRevision = newRevision.getPreviousRevision()
+                    .orElseThrow(() -> new IllegalStateException("Expected parent to exist"));
+        }
+        return new ArrayList<>(authors);
+    }
+
+    private List<String> findAuthorsSinceAddition(String file, RevCommit newCommit) {
+        RevisionAccess newRevision = new RevisionAccess(git.getRepository(), newCommit);
+        Set<String> authors = new HashSet<>();
+        //Find all persons who edited the file since it was added
+        while (!newRevision.wasConfigurationFileAdded(file)) {
+            if (newRevision.wasConfigurationFileModified(file)) {
+                authors.add(newRevision.getAuthorName());
+            }
+            newRevision = newRevision.getPreviousRevision()
+                    .orElseThrow(() -> new IllegalStateException("Expected parent to exist"));
+        }
+        authors.add(newRevision.getAuthorName()); //Also add the name of the person who added the file
+        return new ArrayList<>(authors);
+    }
+
+    private String findDeletingAuthor(String file, RevCommit baseCommit, RevCommit newCommit) {
+        RevisionAccess newRevision = new RevisionAccess(git.getRepository(), newCommit);
+        RevisionAccess baseRevision = new RevisionAccess(git.getRepository(), baseCommit);
+        //move "baseRevision" to the last commit where this file was touched (potentially the root commit).
+        while (!baseRevision.wasConfigurationFileAdded(file) && !baseRevision.wasConfigurationFileModified(file)) {
+            baseRevision = baseRevision.getPreviousRevision()
+                    .orElseThrow(() -> new IllegalStateException("Expected parent to exist"));
+        }
+
+        RevisionAccess commonAncestor = baseRevision.getCommonAncestor(newRevision);
+        RevisionAccess previous = commonAncestor;
+        //find the person who deleted the file most recently
+        while (!newRevision.getRevisionID().equals(commonAncestor.getRevisionID())) {
+            if (newRevision.wasConfigurationFileDeleted(file)) {
+                return newRevision.getAuthorName();
+            }
+            previous = newRevision;
+            newRevision = newRevision.getPreviousRevision()
+                    .orElseThrow(() -> new IllegalStateException("Expected parent to exist"));
+        }
+        return previous.getAuthorName(); //in case an amend happened, this will be the correct user
     }
 
     /**
@@ -508,6 +587,14 @@ public class VersioningManager {
 
             // checkout live branch
             git.checkout().setName(Branch.LIVE.getBranchName()).call();
+
+            // create an empty merge-commit
+            git.merge()
+                    .include(workspaceCommitId)
+                    .setCommit(false)
+                    .setFastForward(MergeCommand.FastForwardMode.NO_FF)
+                    .setStrategy(MergeStrategy.OURS)
+                    .call();
 
             // remove all deleted files
             if (!removeFiles.isEmpty()) {
