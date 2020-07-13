@@ -19,3 +19,13 @@ export const changeRuleGroupingOptions = (groupingOptions) => ({
     groupingOptions,
   },
 });
+
+/**
+ * Persists unsaved changes for the given alert handler in the browser if required.
+ */
+export const handlerContentsChanged = (unsavedHandlerContentsMap) => ({
+  type: types.UNSAVED_HANDLER_CONTENTS_CHANGED,
+  payload: {
+    unsavedHandlerContentsMap,
+  },
+});

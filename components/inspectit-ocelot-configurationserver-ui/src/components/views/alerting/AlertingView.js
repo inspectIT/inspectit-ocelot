@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import _ from 'lodash';
 import { TabMenu } from 'primereact/tabmenu';
 import AlertingRulesView from './rules/AlertingRulesView';
+import AlertingChannelsView from './topics/AlertingChannelsView.js';
 import * as topicsAPI from './topics/TopicsAPI';
 import * as rulesAPI from './rules/RulesAPI';
 import useDeepEffect from '../../../hooks/use-deep-effect';
@@ -43,6 +44,7 @@ const AlertingView = () => {
 
     setReferencedTopics(topics);
   }, [rules]);
+
 
   const refreshRules = () =>
     rulesAPI.fetchAlertingRules(
@@ -112,7 +114,6 @@ const AlertingView = () => {
           color: #555;
         }
       `}</style>
-
       <div className="this">
         <TabMenu className="menu" model={items} activeItem={activeTab} onTabChange={(e) => setActiveTab(e.value)} />
 

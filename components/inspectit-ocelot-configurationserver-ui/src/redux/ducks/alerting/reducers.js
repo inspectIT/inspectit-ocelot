@@ -19,6 +19,14 @@ const alertingReducer = createReducer(initialState)({
       ruleGrouping: groupingOptions,
     };
   },
+  [types.UNSAVED_HANDLER_CONTENTS_CHANGED]: (state, action) => {
+    const { unsavedHandlerContentsMap } = action.payload;
+
+    return {
+      ...state,
+      unsavedHandlerContents: unsavedHandlerContentsMap,
+    };
+  },
 });
 
 export default alertingReducer;
