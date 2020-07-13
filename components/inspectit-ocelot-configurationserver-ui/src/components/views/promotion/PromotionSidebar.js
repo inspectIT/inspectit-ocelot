@@ -82,7 +82,7 @@ const PromotionSidebar = ({ selection, onSelectionChange, promotionFiles, update
             border-right: 1px solid #dddddd;
           }
           .this :global(.p-listbox) {
-            width: 20rem;
+            width: 22rem;
             height: 100%;
             border: none;
           }
