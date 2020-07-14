@@ -50,7 +50,6 @@ class EditSources extends React.Component {
   };
 
   handleChangeSources = (sources = []) => {
-
     const prevSources = this.props.sources || [];
     /** uniqWith removes 'equal' entries of the given array using the given function to compare elements */
     const filteredSourceArray = uniqWith(sources.slice().sort(), treeUtils.isSubfile);
