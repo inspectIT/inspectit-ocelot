@@ -122,7 +122,7 @@ class StatusView extends React.Component {
   };
 
   render() {
-    const { agents} = this.props;
+    const { agents } = this.props;
     const { filter, filteredAgents, useRegexFilter, error, readOnly } = this.state;
 
     return (
