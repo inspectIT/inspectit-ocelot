@@ -153,7 +153,7 @@ class StatusView extends React.Component {
             <StatusTable data={filteredAgents} />
           </div>
           <div>
-            <StatusFooterToolbar data={filteredAgents} />
+            <StatusFooterToolbar data={this.props.agents} filteredData={filteredAgents} />
           </div>
         </div>
       </>
