@@ -122,6 +122,7 @@ class StatusView extends React.Component {
   };
 
   render() {
+    const { agents} = this.props;
     const { filter, filteredAgents, useRegexFilter, error, readOnly } = this.state;
 
     return (
@@ -153,7 +154,7 @@ class StatusView extends React.Component {
             <StatusTable data={filteredAgents} />
           </div>
           <div>
-            <StatusFooterToolbar data={this.props.agents} filteredData={filteredAgents} />
+            <StatusFooterToolbar fullData={agents} filteredData={filteredAgents} />
           </div>
         </div>
       </>

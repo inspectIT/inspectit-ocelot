@@ -1,11 +1,13 @@
 import React from 'react';
 import { filter } from 'lodash';
 
-const StatusFooterToolbar = ({ filteredData, data }) => {
-  const filteredTotalCount = filteredData.length;
-  const filteredAgentCount = filter(filteredData, (f) => f.metaInformation).length;
-  const totalCount = data.length;
-  const agentCount = filter(data, (d) => d.metaInformation).length;
+const StatusFooterToolbar = ({ fullData, filteredData }) => {
+  const shownTotalCount = filteredData.length;
+  const shownAgentCount = filter(filteredData, (f) => f.metaInformation).length;
+  const totalCount = fullData.length;
+  const agentCount = filter(fullData, (d) => d.metaInformation).length;
+
+  const showFilterDetails = shownTotalCount != totalCount;
 
   return (
     <>
@@ -25,9 +27,12 @@ const StatusFooterToolbar = ({ filteredData, data }) => {
         `}
       </style>
       <div className="this">
-        inspectIT Ocelot Agents: {filteredAgentCount} / {agentCount} <span className="separator">|</span> Generic Clients:{' '}
-        {filteredTotalCount - filteredAgentCount} / {totalCount - agentCount}
-        <span className="separator">|</span> Total: {filteredTotalCount} / {totalCount}
+        inspectIT Ocelot Agents: {showFilterDetails && <span>{shownAgentCount} / </span>}
+        {agentCount} <span className="separator">|</span> Generic Clients:{' '}
+        {showFilterDetails && <span>{shownTotalCount - shownAgentCount} / </span>}
+        {totalCount - agentCount}
+        <span className="separator">|</span> Total: {showFilterDetails && <span>{shownTotalCount} / </span>}
+        {totalCount}
       </div>
     </>
   );
