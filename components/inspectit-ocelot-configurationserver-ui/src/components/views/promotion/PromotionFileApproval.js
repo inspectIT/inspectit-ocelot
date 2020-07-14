@@ -7,8 +7,8 @@ import React from 'react';
 /**
  * The footer bar used by users to approve the currently selected promotion file.
  */
-const PromotionFileApproval = ({ currentUser, users, useFourEyesPrinicple, approved, onApproveFile }) => {
-  const canApprove = !useFourEyesPrinicple || !users.includes(currentUser);
+const PromotionFileApproval = ({ currentUser, authors, useFourEyesPrinicple, approved, onApproveFile }) => {
+  const canApprove = !useFourEyesPrinicple || !authors.includes(currentUser);
   const tooltip = canApprove ? null : 'You cannot transport files that contain changes made by yourself.';
 
   return (
@@ -60,12 +60,12 @@ const PromotionFileApproval = ({ currentUser, users, useFourEyesPrinicple, appro
           <div>You cannot promote files that contain changes made by yourself.</div>
         )}
 
-        {!_.isEmpty(users) && (
+        {!_.isEmpty(authors) && (
           <div className="users">
             <span className="description">File has been modified by users:</span>
-            {users.map((user) => (
-              <span key={user} className={classnames('user', { 'current-user': user.toLowerCase() === currentUser.toLowerCase() })}>
-                {user}
+            {authors.map((author) => (
+              <span key={author} className={classnames('user', { 'current-user': author.toLowerCase() === currentUser.toLowerCase() })}>
+                {author}
               </span>
             ))}
           </div>
@@ -79,7 +79,7 @@ PromotionFileApproval.propTypes = {
   /** The name of the currently logged in user */
   currentUser: PropTypes.string,
   /** Array of users which modified the currently selected file */
-  users: PropTypes.arrayOf(PropTypes.string),
+  authors: PropTypes.arrayOf(PropTypes.string),
   /** Whether the four-eyes princible is enabled. The user itself cannot promote own changes */
   useFourEyesPrinicple: PropTypes.bool,
   /** Whether the current file is approved */

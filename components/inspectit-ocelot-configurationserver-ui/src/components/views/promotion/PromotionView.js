@@ -35,10 +35,10 @@ const PromotionView = () => {
   const [{ data, isLoading, lastUpdate }, refreshData] = useFetchData('/configuration/promotions', { 'include-content': 'true' });
 
   // derived variables
-  const isFourEyesPrinicple = _.get(data, '_dummy_', false);
+  const isFourEyesPrinicple = _.get(data, 'canPromoteOwnChanges', false); // whether the 4-eyes-principle is used
   const entries = _.get(data, 'entries', []); // all modified files
   const currentSelectionFile = currentSelection ? _.find(entries, { file: currentSelection }) : null; // the current selected file object
-  const users = _.get(currentSelectionFile, 'users', []);
+  const authors = _.get(currentSelectionFile, 'authors', []); // list of users which modified the selected file
   const hasApprovals = !_.isEmpty(currentApprovals); // if more at least one file is approved and waiting for promotion
   const isCurrentSelectionApproved = currentApprovals.includes(currentSelection); // whether the current selected file is approved
   const entriesWithApproval = _.map(entries, (element) => {
@@ -163,7 +163,7 @@ const PromotionView = () => {
                     {canPromote && (
                       <PromotionFileApproval
                         currentUser={currentUser}
-                        users={users}
+                        authors={authors}
                         useFourEyesPrinicple={isFourEyesPrinicple}
                         approved={isCurrentSelectionApproved}
                         onApproveFile={toggleFileApproval}
