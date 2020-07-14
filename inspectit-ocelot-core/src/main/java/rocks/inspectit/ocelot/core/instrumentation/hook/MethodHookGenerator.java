@@ -9,14 +9,17 @@ import net.bytebuddy.description.method.MethodDescription;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import rocks.inspectit.ocelot.config.model.instrumentation.rules.EventRecordingSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.MetricRecordingSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.RuleTracingSettings;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.ActionCallConfig;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.MethodHookConfiguration;
 import rocks.inspectit.ocelot.core.instrumentation.context.ContextManager;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.ConditionalHookAction;
+import rocks.inspectit.ocelot.core.instrumentation.hook.actions.EventRecorder;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.MetricsRecorder;
+import rocks.inspectit.ocelot.core.instrumentation.hook.actions.model.EventAccessor;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.model.MetricAccessor;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.*;
 import rocks.inspectit.ocelot.core.instrumentation.hook.tags.CommonTagsToAttributesManager;
@@ -88,6 +91,7 @@ public class MethodHookGenerator {
             builder.exitActions(buildTracingExitActions(tracingSettings));
         }
         buildMetricsRecorder(config).ifPresent(builder::exitAction);
+        buildEventRecorder(config).ifPresent(builder::exitAction);
         builder.exitActions(buildActionCalls(config.getPostExitActions(), methodInfo));
 
         return builder.build();
@@ -203,6 +207,55 @@ public class MethodHookGenerator {
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> variableAccessorFactory.getVariableAccessor(entry.getValue())));
 
         return new MetricAccessor(metricSettings.getMetric(), valueAccessor, metricSettings.getConstantTags(), tagAccessors);
+    }
+
+    private Optional<IHookAction> buildEventRecorder(MethodHookConfiguration config) {
+        Collection<EventRecordingSettings> events = config.getEvents();
+        if(events.isEmpty()) {
+            return Optional.empty();
+        }
+
+        List<EventAccessor> eventAccessors = new ArrayList<>();
+        for(EventRecordingSettings event : events) {
+            List<String> dataKeys = new ArrayList<>();
+            dataKeys.add(event.getName());
+            for (Object attribute : event.getAttributes().values()) {
+                getEventDataKey(attribute, dataKeys);
+            }
+
+            Map<String, VariableAccessor> valueAccessors = getVariableAccessors(dataKeys);
+            EventAccessor res = new EventAccessor(event.getName(), event.getAttributes(), event.getConstantTags(), valueAccessors);
+            eventAccessors.add(res);
+        }
+
+        EventRecorder recorder = new EventRecorder(eventAccessors);
+        return Optional.of(recorder);
+    }
+
+    /**
+     * Recursive function to traverse a map and find each ending data key.
+     */
+    private void getEventDataKey (Object obj, List<String> dataKeys) {
+        if(obj instanceof Map){
+            for (Object entry : ((Map) obj).values()) {
+                getEventDataKey(entry, dataKeys);
+            }
+        } else {
+            try {
+                String value = (String) obj;
+                dataKeys.add(value);
+            } catch (Throwable t) {
+                log.error("Resolving data keys of event attributes failed", t);
+            }
+        }
+    }
+
+    private Map<String, VariableAccessor> getVariableAccessors (List<String> dataKeys) {
+        Map<String, VariableAccessor> res = new HashMap<>();
+        for(String dataKey : dataKeys) {
+            res.put(dataKey, variableAccessorFactory.getVariableAccessor(dataKey));
+        }
+        return res;
     }
 
     private List<IHookAction> buildActionCalls(List<ActionCallConfig> calls, MethodReflectionInformation methodInfo) {
