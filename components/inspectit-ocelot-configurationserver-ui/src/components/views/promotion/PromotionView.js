@@ -29,6 +29,7 @@ const PromotionView = () => {
   const workspaceCommitId = useSelector((state) => state.promotion.workspaceCommitId);
   const liveCommitId = useSelector((state) => state.promotion.liveCommitId);
   const canPromote = useSelector((state) => state.authentication.permissions.promote);
+  const isAdmin = useSelector((state) => state.authentication.permissions.admin);
   const currentUser = useSelector((state) => state.authentication.username);
 
   // fetching promotion data
@@ -47,6 +48,7 @@ const PromotionView = () => {
       isApproved: currentApprovals.includes(element.file),
     };
   }); // copy of the entries array including the data whether a file is approved or not.
+  const canApprove = isAdmin || !isFourEyesPrinicple || !authors.includes(currentUser);
 
   // updating commit ids in the global state using the latest data
   useEffect(() => {
@@ -164,7 +166,7 @@ const PromotionView = () => {
                       <PromotionFileApproval
                         currentUser={currentUser}
                         authors={authors}
-                        useFourEyesPrinicple={isFourEyesPrinicple}
+                        canApprove={canApprove}
                         approved={isCurrentSelectionApproved}
                         onApproveFile={toggleFileApproval}
                       />

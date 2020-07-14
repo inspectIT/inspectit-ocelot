@@ -7,8 +7,7 @@ import React from 'react';
 /**
  * The footer bar used by users to approve the currently selected promotion file.
  */
-const PromotionFileApproval = ({ currentUser, authors, useFourEyesPrinicple, approved, onApproveFile }) => {
-  const canApprove = !useFourEyesPrinicple || !authors.includes(currentUser);
+const PromotionFileApproval = ({ currentUser, authors, canApprove, approved, onApproveFile }) => {
   const tooltip = canApprove ? null : 'You cannot transport files that contain changes made by yourself.';
 
   return (
