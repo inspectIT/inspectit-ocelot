@@ -1,5 +1,5 @@
 
-import { type, interfaces, superclass , method } from './definitions';
+import { type, interfaces, superclass , methods } from './definitions';
 import deepCopy from 'json-deep-copy';
 
 const splitButtonItemsObject = {
@@ -13,8 +13,8 @@ const splitButtonItemsObject = {
   superclass: {
     splitButtonItems: superclass
   },
-  method: {
-    splitButtonItems: method
+  methods: {
+    splitButtonItems: methods
   }
 
 }

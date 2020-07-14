@@ -16,7 +16,7 @@ export const helper_invalidActions = [
     affectedAttributes: [
       'method',
     ],
-    invalidLabelText: 'visibility specification does already exist for this selector',
+    invalidLabelText: 'only 1  visibility option allowed',
   },
   {
     invalidActionId: 'adding arguments',
@@ -24,7 +24,7 @@ export const helper_invalidActions = [
     affectedAttributes: [
       'method',
     ],
-    invalidLabelText: 'arguments specification does already exist for this selector',
+    invalidLabelText: 'only 1  arguments option allowed',
   },
   {
     invalidActionId: 'adding is-synchronized',
@@ -32,7 +32,7 @@ export const helper_invalidActions = [
     affectedAttributes: [
       'method',
     ],
-    invalidLabelText: 'is-synchronized specification does already exist for this selector',
+    invalidLabelText: 'only 1 is-synchronized option allowed',
   },
   {
     invalidActionId: 'adding is-constructor',
@@ -40,7 +40,7 @@ export const helper_invalidActions = [
     affectedAttributes: [
       'method',
     ],
-    invalidLabelText: 'is-constructor specification does already exist for this selector',
+    invalidLabelText: 'only 1  is-constructor option allowed',
   },
 ]
 

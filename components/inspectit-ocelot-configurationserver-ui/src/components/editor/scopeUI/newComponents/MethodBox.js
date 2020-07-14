@@ -8,7 +8,7 @@ import { getSplitButtonsItems , enableCreateAttributeWithinSplitItemEntries} fro
 import { splittButtonItemIsInvalid, adjustInvalidSplitButtonItem } from './utils/splitButtonItems/invalidLabelsTopDown';
 import UpperHeader from "./UpperHeader";
 
-class Item extends React.Component {
+class MethodBox extends React.Component {
   state = { splitMenuItems: [] }
 
   // reference for red highlighting over remove icon hover
@@ -29,42 +29,6 @@ class Item extends React.Component {
     // element.style.border = '1px solid black';
     element.style.boxShadow = '';
   }
-
-
-  onGenericUpdate = ( updatedValue, optionType ) => {
-    let { onUpdate, item } = this.props;
-    let updatedItem = deepCopy(item);
-    
-    if(Array.isArray(updatedValue) === true) {
-      if( updatedValue.length === 0 ) {
-        delete updatedItem[optionType];
-      } else {
-        updatedItem[optionType] = updatedValue;
-      }
-    } else {  // assumption, the updateValue is a json thus Object.keys
-      if ( Object.keys(updatedValue).length === 0) {
-        delete updatedItem[optionType];
-      } else {
-        updatedItem[optionType] = updatedValue;
-      }
-    }
-    onUpdate(updatedItem);
-  }
-
-  // eigene information an mich, kann übersprungen werden beim review
-  // // Objekt transformieren und zurück transformieren 
-  // // generische Schnittstelle 
-  // // TODO: obsolete wenn keine generische schnittstelle
-  // onUpdateNameSelector = (updatedNameSelector) => {
-  //   // Änderungen müssen hier getan werden, name
-  //   // name - matcher-mode , annotations unberührt 
-  //   // superclass { }   ,  { name, matcher-mode } 
-  //   const { item , onItemUpdate } = this.props;
-  //   const updated_item = deepCopy(item);
-  //   updated_item 
-
-  //   onItemUpdate(updatedItem);
-  // }
 
   createSplitButtonItems = () => {
     const { parentAttribute, item, onUpdate } = this.props; 
@@ -93,15 +57,9 @@ class Item extends React.Component {
         {/* <button> {optionText} </button> */}
         { !isNaN(index) && <UpperHeader attributeText={'interface, that'} connectionTypeAndOr={'and'} count={index} /> }
         <div ref={this.componentBorderRef} style={{ marginBottom: '',  position:'relative', height: '', padding: '25px', background: background_bigDiv, borderRadius: '10px' }}>
-          {parentAttribute !== 'interfaces' && parentAttribute !== 'methods' && <LowerHeader optionType={parentAttribute} />}
-          <NameSelector optionText={`has a name`}  onUpdate={onUpdate} style={{background: 'yellow'}} item={item} index={index}  />
-          {item.annotations && <AnnotationContainer onUpdate={(updatedValue) => this.onGenericUpdate(updatedValue, 'annotations')} items={item.annotations} optionType={parentAttribute} />}
-          <SplitButton tooltip="TODO: tooltip? or not" style={{position:'absolute', top:'10px' , right:'10px'}} label="add " icon="pi pi-plus" onClick={this.save} model={splitButtonItems}></SplitButton>
-        </div>
-        
-        <div style={{ position: 'relative', height: '20px' , display: 'flex', marginBottom: '5px',}}>
-          <p style={{ visibility: 'hidden' , color:'red', position:'absolute', right:'35px', marginTop:'-3px'}}> remove this option </p>
-          <i data-tobehighlighted={parentAttribute} onClick={this.removeOption} onMouseOver={this.handleMouseOver} onMouseLeave={this.handleMouseLeave} style={{ position: 'absolute', right: '5px', bottom:'-5px', fontSize:'30px',  color: 'red', opacity:'0.8'}} className="pi pi-times-circle"></i>
+        <SplitButton tooltip="TODO: tooltip? or not" style={{position:'absolute', top:'10px' , right:'10px'}} label="add " icon="pi pi-plus" onClick={this.save} model={splitButtonItems}></SplitButton>
+          
+        { this.props.children}
         </div>
       </div>
     )
@@ -109,4 +67,4 @@ class Item extends React.Component {
 
 }
 
-export default Item;
+export default MethodBox;

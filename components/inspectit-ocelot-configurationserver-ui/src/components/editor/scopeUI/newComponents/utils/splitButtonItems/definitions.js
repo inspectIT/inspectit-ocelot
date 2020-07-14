@@ -91,10 +91,10 @@ export const superclass = [
   },
 ]
 
-export const method = [
+export const methods = [
   {
     actionId: 'adding name',
-    label: 'specify the method by its name',
+    label: 'add name',
     icon: 'pi pi-refresh',
     createAttribute: (item) => {
       if (!item.name) {
@@ -106,7 +106,7 @@ export const method = [
   },
   {
     actionId: 'adding annotation',
-    label: 'specify the method by the annotations, which are attached to it',
+    label: 'add annotation',
     icon: 'pi pi-times',
     createAttribute: (item) => {
       item.annotations = item.annotations || [];
@@ -114,40 +114,41 @@ export const method = [
       return item;
     },
   },
-  // {
-  //   label: 'specify the method by its visibilites',
-  //   icon: 'pi pi-external-link',
-  //   createAttribute: (item) => {
-  //     item.annotations = item.annotations || [];
-  //     item.annotations.push({ name:'', 'matcher-mode': 'EQUALS_FULLY'})
-  //     return item;
-  //   },
-  // },
-  // {   
-  //   label: 'specify the methods by its arguments',
-  //   icon: 'pi pi-upload',
-  //   createAttribute: (item) => {
-  //     item.annotations = item.annotations || [];
-  //     item.annotations.push({ name:'', 'matcher-mode': 'EQUALS_FULLY'})
-  //     return item;
-  //   },
-  // },
-  // {   
-  //   label: 'specify the methods, wether it is synchronized',
-  //   icon: 'pi pi-upload',
-  //   createAttribute: (item) => {
-  //     item.annotations = item.annotations || [];
-  //     item.annotations.push({ name:'', 'matcher-mode': 'EQUALS_FULLY'})
-  //     return item;
-  //   },
-  // },
-  // {   
-  //   label: 'specify the methods, wether it is a constructor',
-  //   icon: 'pi pi-upload',
-  //   createAttribute: (item) => {
-  //     item.annotations = item.annotations || [];
-  //     item.annotations.push({ name:'', 'matcher-mode': 'EQUALS_FULLY'})
-  //     return item;
-    // },
-  // }
+  {
+    actionId: 'adding visibility',
+    label: 'add visibility option',
+    icon: 'pi pi-external-link',
+    createAttribute: (item) => {
+      item.visibility = [];
+      return item;
+    },
+  },
+  {   
+    actionId: 'adding arguments',
+    label: 'add arguments option',
+    icon: 'pi pi-upload',
+    createAttribute: (item) => {
+      item.arguments = item.arguments || [];
+      item.arguments.push('')
+      return item;
+    },
+  },
+  {   
+    actionId: 'adding is-synchronized',
+    label: 'add      is-synchronized option',
+    icon: 'pi pi-upload',
+    createAttribute: (item) => {
+      item['is-synchronized'] = true;
+      return item;
+    },
+  },
+  {   
+    actionId: 'adding is-constructor',
+    label: 'add     is-constructor option',
+    icon: 'pi pi-upload',
+    createAttribute: (item) => {
+      item['is-constructor'] = true;
+      return item;
+    },
+  }
 ]

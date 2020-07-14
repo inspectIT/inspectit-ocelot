@@ -8,7 +8,8 @@ import { getSplitButtonsItems , enableCreateAttributeWithinSplitItemEntries} fro
 import { splittButtonItemIsInvalid, adjustInvalidSplitButtonItem } from './utils/splitButtonItems/invalidLabelsTopDown';
 import UpperHeader from "./UpperHeader";
 
-class Item extends React.Component {
+class MethodItem extends React.Component {
+  // WITHOUT ANNOTATIONS, only diffrence 
   state = { splitMenuItems: [] }
 
   // reference for red highlighting over remove icon hover
@@ -90,23 +91,11 @@ class Item extends React.Component {
 
     return (
       <div >
-        {/* <button> {optionText} </button> */}
-        { !isNaN(index) && <UpperHeader attributeText={'interface, that'} connectionTypeAndOr={'and'} count={index} /> }
-        <div ref={this.componentBorderRef} style={{ marginBottom: '',  position:'relative', height: '', padding: '25px', background: background_bigDiv, borderRadius: '10px' }}>
-          {parentAttribute !== 'interfaces' && parentAttribute !== 'methods' && <LowerHeader optionType={parentAttribute} />}
-          <NameSelector optionText={`has a name`}  onUpdate={onUpdate} style={{background: 'yellow'}} item={item} index={index}  />
-          {item.annotations && <AnnotationContainer onUpdate={(updatedValue) => this.onGenericUpdate(updatedValue, 'annotations')} items={item.annotations} optionType={parentAttribute} />}
-          <SplitButton tooltip="TODO: tooltip? or not" style={{position:'absolute', top:'10px' , right:'10px'}} label="add " icon="pi pi-plus" onClick={this.save} model={splitButtonItems}></SplitButton>
-        </div>
-        
-        <div style={{ position: 'relative', height: '20px' , display: 'flex', marginBottom: '5px',}}>
-          <p style={{ visibility: 'hidden' , color:'red', position:'absolute', right:'35px', marginTop:'-3px'}}> remove this option </p>
-          <i data-tobehighlighted={parentAttribute} onClick={this.removeOption} onMouseOver={this.handleMouseOver} onMouseLeave={this.handleMouseLeave} style={{ position: 'absolute', right: '5px', bottom:'-5px', fontSize:'30px',  color: 'red', opacity:'0.8'}} className="pi pi-times-circle"></i>
-        </div>
+        <NameSelector optionText={`has a name`}  onUpdate={onUpdate} style={{background: 'yellow'}} item={item} index={index}  />
       </div>
     )
   }
 
 }
 
-export default Item;
+export default MethodItem;

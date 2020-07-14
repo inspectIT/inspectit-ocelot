@@ -1,14 +1,8 @@
 import {InputText} from 'primereact/inputtext';
-import {ListBox} from 'primereact/listbox';
 import React from 'react';
-
-import SelectorContainer from './newComponents/SelectorContainer';
 import deepCopy from 'json-deep-copy';
-import GenericListContainer from './newComponents/genericListContainer';
-import ClassSelector from './newComponents/ClassSelector';
-import UpperHeader from './newComponents/UpperHeader';
-import InterfaceListContainer from './newComponents/InterfaceListContainer';
-import Item from './newComponents/Item';
+import MethodsContainerList from './newComponents/Methods';
+import ClassSelectorContainer from './newComponents/ClassSelectorContainer';
 
 
 class Scope extends React.Component {
@@ -59,64 +53,6 @@ class Scope extends React.Component {
         element.addEventListener('click', this.handleBreadCrumbClick);
       }
     })
-  }
-
-  // TODO: do not read, this function is not used
-  // this part must still be transformed, probably deleting most part
-  methodSelectorListTemplate = (methodSelector) => {
-
-    const firstRow = { paddingRight: '15px', width: '125px'}
-
-    return (
-      <React.Fragment>
-        <div style={{display: 'inline-flex'}}> 
-          <p style={{fontWeight: 'bold', width:'125px'}}> method selector: </p>
-          <p>returns the methods, which fullfill all of the options within this list item</p>
-        </div>
-        {Object.keys(methodSelector).map( key =>
-          <React.Fragment>
-          <div>
-            {Array.isArray(methodSelector[key]) && (
-              <div style={{display: '-webkit-box', marginBottom: '10px'}}>
-                <p style={{ ...firstRow}}> {key} </p>
-                { methodSelector[key].map(entry => 
-                  <React.Fragment>
-                    {typeof (entry) === 'object' && (
-                      <div style={{display: '', border: '1px solid black', padding: '7px', marginRight: '10px'}} >
-                        <p style={{margin: '0 0 5px 0'}}> {entry['matcher-mode']}</p>
-                        <p style={{margin: '0 0 0 0'}}> {entry.name} </p>
-                      </div>
-                    )}
-
-                    {typeof (entry) !== 'object' && (
-                      <div style={{ border: '1px solid black', padding: '7px', marginRight: '10px'}}>
-                        <p style={{margin: '0 0 0 0'}}> {entry} </p> 
-                      </div>
-                    )}
-                    
-                  </React.Fragment>
-                )}
-                
-              </div>
-            )}
-          </div>
-
-          <div>
-            {!Array.isArray(methodSelector[key]) && (
-              <div style={{display: 'inline-flex'}}>
-                <p style={{...firstRow}}> {key} </p>
-                <p> {methodSelector[key]} </p>
-                {/* true boolean cant be displayed, so we write it out */}
-                {methodSelector[key] === true && <p> true</p>} 
-                {methodSelector[key] === false && <p> false </p>} 
-              </div>
-            )}
-          </div>
-
-          </React.Fragment>
-        )}
-      </React.Fragment>
-    )
   }
 
   onGenericUpdate = ( updatedValue, optionType ) => {
@@ -224,7 +160,6 @@ class Scope extends React.Component {
     const alignItems = 'center';
     const descriptionTextMaxWidth = '300px' // selector description max length, else the row expends to much
 
-    const classSelectorAttributes=['type','superclass','interfaces'];
 
     return (
       <div className="this">
@@ -234,17 +169,17 @@ class Scope extends React.Component {
             <div style={{ ...boxStyle}}>
               {/* scopename */}
               <div style={{display:'flex', alignItems}}>
-              <h3 style={{marginTop: '0px'}} >scopename</h3>
-              <InputText style={{marginLeft: '50px', width: '375px'}} value={currentlyDisplayScopeName} onChange={(e) => this.setState({value1: e.target.value})} />
-              <span style={{marginLeft:'.5em'}}>{this.state.value1}</span>
-             
-              {/* checkIcon for scopeName*/}
-                { !icon_scopeName && (
-                  <i style={{...invalidCheckIcon, marginLeft: '5px' }}className="pi pi-check"></i>
-                )}
-                { icon_scopeName && (
-                  <i style={{...validCheckIcon}}className="pi pi-check"></i>
-                )}
+                <h3 style={{marginTop: '0px'}} >scopename</h3>
+                <InputText style={{marginLeft: '50px', width: '375px'}} value={currentlyDisplayScopeName} onChange={(e) => this.setState({value1: e.target.value})} />
+                <span style={{marginLeft:'.5em'}}>{this.state.value1}</span>
+              
+                {/* checkIcon for scopeName*/}
+                  { !icon_scopeName && (
+                    <i style={{...invalidCheckIcon, marginLeft: '5px' }}className="pi pi-check"></i>
+                  )}
+                  { icon_scopeName && (
+                    <i style={{...validCheckIcon}}className="pi pi-check"></i>
+                  )}
               </div>
             </div>
 
@@ -283,19 +218,9 @@ class Scope extends React.Component {
               {/* The keys of the scopeObject are [interface, type, superclass, method, advanced ]
               we filter out method and advanced
               we use map on the filteredAttributeArray and get an index. The index is used to know display wether 'the class'  or '... and the class'  */}
-              {Object.keys(scopeObject).filter( filteredAttribute =>  classSelectorAttributes.includes(filteredAttribute) ).map( (attribute, count) => 
-                
-                <React.Fragment>
-                  <UpperHeader attributeText={'class'} connectionTypeAndOr={'and'} count={count} />
-                  { 
-                    Array.isArray(scopeObject[attribute]) &&
-                    <InterfaceListContainer backgroundColor='#EEEEEE' onUpdate={(updatedValue) => this.onGenericUpdate(updatedValue, attribute)} items={scopeObject[attribute]} parentAttribute={attribute} />} 
-                  { 
-                   !Array.isArray(scopeObject[attribute]) && <Item backgroundColor='#EEEEEE' item={scopeObject[attribute]} parentAttribute={attribute} onUpdate={(updatedValue) => this.onGenericUpdate(updatedValue, attribute)}/> 
-                   }
-                </React.Fragment>
-              )}
-               <SelectorContainer scopeObject={scopeObject} onUpdate={(updatedValue) => this.onGroupUpdate} />  
+                <ClassSelectorContainer scopeObject={scopeObject} onUpdate={updatedValue => this.onUpdate(updatedValue)} />
+
+
                {/* selectorType should be removed, i use it here to not duplicate selectorContainer, because only the "heading" changes.  */}
                {/* <GenericListContainer items={groupedClassItems} onUpdate={(updatedValue) => this.onGroupUpdate(updatedValue, usedClassAttributes)} selectorType='Class' />  selectorType should be removed, i use it here to not duplicate selectorContainer, because only the "heading" changes.  */}
               
@@ -324,7 +249,6 @@ class Scope extends React.Component {
                   <i style={{...validCheckIcon}}className="pi pi-check"></i>
                 )}
               </div>
-              <div style={{width:'', background:'white', minHeight: '200px',  padding:'35px'}}>
                   {/* <React.Fragment>
                     <UpperHeader attributeText={'class'} connectionTypeAndOr={'and'} count={count} />
                     { 
@@ -334,10 +258,10 @@ class Scope extends React.Component {
                     !Array.isArray(scopeObject[attribute]) && <Item backgroundColor='#EEEEEE' item={scopeObject[attribute]} parentAttribute={attribute} onUpdate={(updatedValue) => this.onGenericUpdate(updatedValue, attribute)}/> 
                     }
                   </React.Fragment> */}
+                <div style={{  minHeight: '200px'}}>
+                  { scopeObject.methods && <MethodsContainerList items={scopeObject.methods} parentAttribute={'methods'} onUpdate={(updatedValue) => this.onGenericUpdate(updatedValue, 'methods')} /> }
 
-
-                <SelectorContainer doNotFilter_maybeAsVariable={['methods']} scopeObject={scopeObject} onUpdate={onUpdate} contextAlias_maybeAsVariable={'methods'}/>  {/* selectorType should be removed, i use it here to not duplicate selectorContainer, because only the "heading" changes.  */}
-              </div>
+                </div>
               {/* obsolete, do not read , this will be removed */}
               {/* <ListBox value={scopeObject.methods} style={{ witdh: '800px' }} options={scopeObject.methods} onChange={(e) => this.setState({selectedCity: e.value})} 
               optionLabel="name" itemTemplate={this.methodSelectorListTemplate} /> */}

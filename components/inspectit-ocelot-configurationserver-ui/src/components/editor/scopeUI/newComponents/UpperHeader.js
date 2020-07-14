@@ -1,11 +1,11 @@
 // andIndex display an AND-Connection between the Attributes
 // orIndex to display an OR-Connection between the Attributes
 // attribute
-function UpperHeader ({ attributeText, count, connectionTypeAndOr })  {
+function UpperHeader ({ attributeText, count, connectionTypeAndOr,style })  {
 
     const background_uberSchriftDiv = "white";
 
-    const divStyle = { padding: '5px 10px 0 10px' ,height:'30px',  background: background_uberSchriftDiv, width: 'fit-content', outline:'', marginBottom: '10px', marginTop: '30px', borderRadius: '10px' };
+    const divStyle = { padding: '5px 10px 0 10px' ,height:'30px',  ...style, background: background_uberSchriftDiv, width: 'fit-content', outline:'', marginBottom: '10px', marginTop: '30px', borderRadius: '10px' };
     const pStyle = { fontWeight: 'bold', marginTop: '0px' };
     
     return (

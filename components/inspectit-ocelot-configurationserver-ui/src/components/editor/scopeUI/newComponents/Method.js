@@ -6,9 +6,14 @@ import deepCopy from 'json-deep-copy';
 import {SplitButton} from 'primereact/splitbutton';
 import { getSplitButtonsItems , enableCreateAttributeWithinSplitItemEntries} from './utils/splitButtonItems/getSplitButtonItems';
 import { splittButtonItemIsInvalid, adjustInvalidSplitButtonItem } from './utils/splitButtonItems/invalidLabelsTopDown';
-import UpperHeader from "./UpperHeader";
+import MethodVisibility from "./MethodVisibility";
+import MethodName from "./MethodName";
+import MethodItemBox from "./MethodItemBox";
+import BooleanItem from "./BooleanItem";
+import MethodBox from "./MethodBox";
+import MethodAnnotations from "./MethodAnnotations";
 
-class Item extends React.Component {
+class GenericJsonWrapper extends React.Component {
   state = { splitMenuItems: [] }
 
   // reference for red highlighting over remove icon hover
@@ -81,32 +86,27 @@ class Item extends React.Component {
   }
 
   render() {
-    const background_bigDiv = "#EEEEEE";   
-    const { item, parentAttribute, index, onUpdate } = this.props;
+    const { item } = this.props;
 
-    const splitButtonItems = this.createSplitButtonItems();
-
-    console.log('item', this.props)
-
+    console.log('genericJsonWrapper', this.props)
+    // mehrere attribute method visiblity annotaions x y bz e 
     return (
-      <div >
-        {/* <button> {optionText} </button> */}
-        { !isNaN(index) && <UpperHeader attributeText={'interface, that'} connectionTypeAndOr={'and'} count={index} /> }
-        <div ref={this.componentBorderRef} style={{ marginBottom: '',  position:'relative', height: '', padding: '25px', background: background_bigDiv, borderRadius: '10px' }}>
-          {parentAttribute !== 'interfaces' && parentAttribute !== 'methods' && <LowerHeader optionType={parentAttribute} />}
-          <NameSelector optionText={`has a name`}  onUpdate={onUpdate} style={{background: 'yellow'}} item={item} index={index}  />
-          {item.annotations && <AnnotationContainer onUpdate={(updatedValue) => this.onGenericUpdate(updatedValue, 'annotations')} items={item.annotations} optionType={parentAttribute} />}
-          <SplitButton tooltip="TODO: tooltip? or not" style={{position:'absolute', top:'10px' , right:'10px'}} label="add " icon="pi pi-plus" onClick={this.save} model={splitButtonItems}></SplitButton>
-        </div>
-        
-        <div style={{ position: 'relative', height: '20px' , display: 'flex', marginBottom: '5px',}}>
-          <p style={{ visibility: 'hidden' , color:'red', position:'absolute', right:'35px', marginTop:'-3px'}}> remove this option </p>
-          <i data-tobehighlighted={parentAttribute} onClick={this.removeOption} onMouseOver={this.handleMouseOver} onMouseLeave={this.handleMouseLeave} style={{ position: 'absolute', right: '5px', bottom:'-5px', fontSize:'30px',  color: 'red', opacity:'0.8'}} className="pi pi-times-circle"></i>
-        </div>
-      </div>
+      <MethodBox parentAttribute='methods'  item={item} onUpdate={(updatedValue) => this.props.onUpdate(updatedValue)}>
+        {Object.keys(item).map( attribute => 
+          <React.Fragment>
+            
+            { attribute === 'name' && <MethodItemBox  onUpdate={(updatedValue) => this.onGenericUpdate(updatedValue, attribute)} ><MethodName text={' ... has a name, that ' } onUpdate={(updatedValue) => this.props.onUpdate(updatedValue)} item={item} /> </MethodItemBox> }
+            { attribute === 'visibility' && <MethodItemBox  onUpdate={(updatedValue) => this.onGenericUpdate(updatedValue, attribute)} ><MethodVisibility onUpdate={(updateObj) => this.onGenericUpdate(updateObj, 'visibility')} item={item[attribute]}  /> </MethodItemBox> }
+            { attribute === 'annotations' && <MethodItemBox  onUpdate={(updatedValue) => this.onGenericUpdate(updatedValue, attribute)} ><MethodAnnotations onUpdate={(updateObj) => this.onGenericUpdate(updateObj, 'annotations')} items={item[attribute]} optionType={'Biene '} /> </MethodItemBox>}
+            {/* { attribute === 'arguments' && <MethodItemBox  onUpdate={(updatedValue) => this.props.onUpdate(updatedValue, attribute)} ><MethodItem onUpdate={(updateObj) => this.onGenericUpdate(updateObj, 'name')} item={item} /> </MethodItemBox> } */}
+            { attribute === 'is-constructor' && attribute && <MethodItemBox  onUpdate={(updatedValue) => this.onGenericUpdate(updatedValue, attribute)} ><BooleanItem onUpdate={(updateObj) => this.onGenericUpdate(updateObj, 'is-constructor')} text={'is a constructor'} item={item[attribute]} /> </MethodItemBox> }
+            { attribute === 'is-synchronized' && attribute && <MethodItemBox  onUpdate={(updatedValue) => this.onGenericUpdate(updatedValue, attribute)} ><BooleanItem onUpdate={(updateObj) => this.onGenericUpdate(updateObj, 'is-synchronized')} text={'is synchronized'} item={item[attribute]} /> </MethodItemBox> }
+          </React.Fragment>
+        )}
+      </MethodBox>
     )
   }
 
 }
 
-export default Item;
+export default GenericJsonWrapper;
