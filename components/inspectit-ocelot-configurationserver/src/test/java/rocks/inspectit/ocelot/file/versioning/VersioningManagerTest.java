@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
@@ -385,9 +386,12 @@ class VersioningManagerTest extends FileTestBase {
             WorkspaceDiff result = versioningManager.getWorkspaceDiffWithoutContent();
 
             assertThat(result.getEntries()).containsExactlyInAnyOrder(
-                    SimpleDiffEntry.builder().file("/file_added.yml").type(DiffEntry.ChangeType.ADD).build(),
-                    SimpleDiffEntry.builder().file("/file_modified.yml").type(DiffEntry.ChangeType.MODIFY).build(),
-                    SimpleDiffEntry.builder().file("/file_removed.yml").type(DiffEntry.ChangeType.DELETE).build()
+                    SimpleDiffEntry.builder().file("/file_added.yml").type(DiffEntry.ChangeType.ADD)
+                            .authors(Collections.singletonList("user")).build(),
+                    SimpleDiffEntry.builder().file("/file_modified.yml").type(DiffEntry.ChangeType.MODIFY)
+                            .authors(Collections.singletonList("user")).build(),
+                    SimpleDiffEntry.builder().file("/file_removed.yml").type(DiffEntry.ChangeType.DELETE)
+                            .authors(Collections.singletonList("user")).build()
             );
             assertThat(result.getLiveCommitId()).isNotEqualTo(result.getWorkspaceCommitId());
         }
@@ -410,17 +414,20 @@ class VersioningManagerTest extends FileTestBase {
                             .file("/file_added.yml")
                             .type(DiffEntry.ChangeType.ADD)
                             .newContent("")
+                            .authors(Collections.singletonList("user"))
                             .build(),
                     SimpleDiffEntry.builder()
                             .file("/file_modified.yml")
                             .type(DiffEntry.ChangeType.MODIFY)
                             .oldContent("")
                             .newContent("new content")
+                            .authors(Collections.singletonList("user"))
                             .build(),
                     SimpleDiffEntry.builder()
                             .file("/file_removed.yml")
                             .type(DiffEntry.ChangeType.DELETE)
                             .oldContent("content")
+                            .authors(Collections.singletonList("user"))
                             .build()
             );
             assertThat(result.getLiveCommitId()).isNotEqualTo(result.getWorkspaceCommitId());
@@ -450,6 +457,7 @@ class VersioningManagerTest extends FileTestBase {
                             .type(DiffEntry.ChangeType.MODIFY)
                             .oldContent("")
                             .newContent("new content")
+                            .authors(Collections.singletonList("user"))
                             .build()
             );
             assertThat(resultFirst.getLiveCommitId()).isEqualTo(liveId.name());
@@ -461,6 +469,7 @@ class VersioningManagerTest extends FileTestBase {
                             .type(DiffEntry.ChangeType.MODIFY)
                             .oldContent("")
                             .newContent("another content")
+                            .authors(Collections.singletonList("user"))
                             .build()
             );
             assertThat(resultSecond.getLiveCommitId()).isEqualTo(liveId.name());
@@ -528,7 +537,8 @@ class VersioningManagerTest extends FileTestBase {
             WorkspaceDiff diff = versioningManager.getWorkspaceDiffWithoutContent();
 
             assertThat(diff.getEntries()).containsExactlyInAnyOrder(
-                    SimpleDiffEntry.builder().file("/file_added.yml").type(DiffEntry.ChangeType.ADD).build()
+                    SimpleDiffEntry.builder().file("/file_added.yml").type(DiffEntry.ChangeType.ADD)
+                            .authors(Collections.singletonList("user")).build()
             );
         }
 
@@ -577,8 +587,10 @@ class VersioningManagerTest extends FileTestBase {
             WorkspaceDiff diff = versioningManager.getWorkspaceDiffWithoutContent();
 
             assertThat(diff.getEntries()).containsExactlyInAnyOrder(
-                    SimpleDiffEntry.builder().file("/file_added.yml").type(DiffEntry.ChangeType.ADD).build(),
-                    SimpleDiffEntry.builder().file("/file_removed.yml").type(DiffEntry.ChangeType.DELETE).build()
+                    SimpleDiffEntry.builder().file("/file_added.yml").type(DiffEntry.ChangeType.ADD)
+                            .authors(Collections.singletonList("user")).build(),
+                    SimpleDiffEntry.builder().file("/file_removed.yml").type(DiffEntry.ChangeType.DELETE)
+                            .authors(Collections.singletonList("user")).build()
             );
         }
 
@@ -618,7 +630,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void promotionWithModifictaion() throws GitAPIException, IOException {
+        public void promotionWithModification() throws GitAPIException, IOException {
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml");
             versioningManager.initialize();
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml=content_A");
@@ -643,7 +655,8 @@ class VersioningManagerTest extends FileTestBase {
             WorkspaceDiff diff = versioningManager.getWorkspaceDiffWithoutContent();
 
             assertThat(diff.getEntries()).containsExactlyInAnyOrder(
-                    SimpleDiffEntry.builder().file("/file_modified.yml").type(DiffEntry.ChangeType.MODIFY).build()
+                    SimpleDiffEntry.builder().file("/file_modified.yml").type(DiffEntry.ChangeType.MODIFY)
+                            .authors(Collections.singletonList("user")).build()
             );
             assertThat(versioningManager.getLiveRevision()
                     .readConfigurationFile("file_modified.yml")).hasValue("content_A");

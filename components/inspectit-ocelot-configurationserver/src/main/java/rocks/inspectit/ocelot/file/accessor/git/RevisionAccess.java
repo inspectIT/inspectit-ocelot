@@ -38,16 +38,32 @@ public class RevisionAccess extends AbstractFileAccessor {
 
     /**
      * Constructor.
+     * Always resolves the commit.
      *
      * @param repository the repository to use
      * @param revCommit  the commit which will be used for the operations
      */
     public RevisionAccess(Repository repository, RevCommit revCommit) {
+        this(repository, revCommit, true);
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param repository  the repository to use
+     * @param revCommit   the commit which will be used for the operations
+     * @param resolveTree if true, the partial commit revCommit will be resolved using a RevWalk.
+     */
+    public RevisionAccess(Repository repository, RevCommit revCommit, boolean resolveTree) {
         this.repository = repository;
-        try (RevWalk revWalk = new RevWalk(repository)) {
-            this.revCommit = revWalk.parseCommit(revCommit.getId()); //reparse in case of incomplete revCommits
-        } catch (Exception e) {
-            throw new IllegalStateException(e);
+        if (resolveTree) {
+            try (RevWalk revWalk = new RevWalk(repository)) {
+                this.revCommit = revWalk.parseCommit(revCommit.getId()); //reparse in case of incomplete revCommits
+            } catch (Exception e) {
+                throw new IllegalStateException(e);
+            }
+        } else {
+            this.revCommit = revCommit;
         }
     }
 
