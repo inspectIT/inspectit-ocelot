@@ -1,8 +1,13 @@
 
 
 // eigene information an mich, kann übersprungen werden beim review
+
+import UpperHeader from "./UpperHeader";
+import InterfaceListContainer from "./InterfaceListContainer";
+import Item from "./Item";
+
 // diese Komponente soll die abstrakteste Form eines listenContainer sein, Sie kümmert sich um das updateden und beachtet dabei den index. (mein Gedanken zu dieser Komponente)
-function GenericListContainer( {items, parentAttribute, onUpdate,} ) {
+function GenericListContainer( {items, parentAttribute, onUpdate, selectorType} ) {
 
   const onUpdateListItem = ( updatedValue , index ) => {
     let updatedItems = items;
@@ -18,11 +23,31 @@ function GenericListContainer( {items, parentAttribute, onUpdate,} ) {
     }
     onUpdate(updatedItems);
   }
+  console.log('888', items)
 
   return (
     <React.Fragment>
-      { this.children}
-    </React.Fragment>
+      { items && (
+        <React.Fragment>
+          {/* <UpperHeader selectorType={selectorType} optionType={optionType} selectorContainerIndex={selectorContainerIndex} /> */}
+          <h4> ... and the class </h4>
+          {items.map( (item, index) => 
+            <React.Fragment>
+              {/* list of items */}
+              { 
+                Array.isArray(item) && <InterfaceListContainer onUpdate={(updatedValue) => onUpdateListItem(updatedValue, index)} index={index} items={item} parentAttribute={'aaa optiontype'} />
+              }
+      
+              {/* TODO: extract the optionType out of the json. Is that needed? */}
+              {/* single item */}
+              { 
+                !Array.isArray(item) && <Item item={item} parentAttribute={'bbb optionType'} onUpdate={(updatedValue) => onUpdateListItem(updatedValue, index)}/>
+              }
+            </React.Fragment>
+            )}
+        </React.Fragment>
+      )}
+  </React.Fragment>     
   )
 }
 

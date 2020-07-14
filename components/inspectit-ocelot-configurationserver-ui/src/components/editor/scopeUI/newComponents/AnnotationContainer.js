@@ -1,4 +1,5 @@
 import NameSelector from "./NameSelector";
+import deepCopy from "json-deep-copy";
 
 class AnnotationContainer extends React.Component {
   state = { optionTypeText: undefined };
@@ -37,13 +38,15 @@ class AnnotationContainer extends React.Component {
 
   onUpdateListItem = ( updatedValue , index ) => {
     let { onUpdate, items } = this.props;
-    let updatedItems = items;
+    const updatedItems = deepCopy(items);
+    // let updatedItems = items;
 
     if ( Object.keys(updatedValue).length == 0) { // the { } updatedValue is empty, thus it can be removed from the array 
       updatedItems = updatedItems.filter( (item, filterIndex ) => {
         if (filterIndex !== index ) return item;
       })
     } else { // updatedValue is not empty, and must be modified within the index postion in the array
+      updatedItems[index] = updatedValue;
     }
     onUpdate(updatedItems);
   }
@@ -57,7 +60,9 @@ class AnnotationContainer extends React.Component {
     return (
       <React.Fragment>
         {items.map( (annotationItem, index) => 
-          <NameSelector onUpdate={(updateObj) => this.onUpdateListItem(updateObj, index) } item={annotationItem}  optionText={`${optionTypeText} has an annotation`}  optionType={optionType} />
+          <React.Fragment>
+            <NameSelector onUpdate={(updateObj) => this.onUpdateListItem(updateObj, index) } item={annotationItem}  optionText={`has an annotation`}  optionType={optionType} />
+          </React.Fragment>
         )}
       </React.Fragment>
     )

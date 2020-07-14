@@ -6,7 +6,7 @@ import deepCopy from "json-deep-copy";
 // Either the container displays a single <Item> or an List of <Item>
 function ClassSelector({item, optionType, selectorType, selectorContainerIndex, onUpdate  }) {
 
-  console.log('classSelector',item);
+  console.log('optionType from ClassSelector',optionType);
   // updatedValue can be generic, a json {} , or an array [] - we can handle it
   // Following question is to be answered, on how this method can be generic. The goal of this function is (here) to fit in the updatedValue into the scopeObject { interfaces: ..., type: ..., superclass: ..., genericAttribute, ..., )
   // Following operation is to work in a generic way.  item[optionType] - because the updatedValue does not include the optionType we solve this by using Jonas his recursion onUpdate={(updatedValue) => this.onItemUpdate(updatedValue, optionType)} 

@@ -129,7 +129,8 @@ class EditorView extends React.Component {
             {children}
           </EditorToolbar>
         </div>
-        { showEditor && !showScopeView && !showTreeTableView && (
+        {/* TODO: remove deactivting view on ace per default  */}
+        {/* { showEditor && !showScopeView && !showTreeTableView && (
           <div className="p-col editor-container">
             <AceEditor
               editorRef={(editor) => (this.editor = editor)}
@@ -144,9 +145,10 @@ class EditorView extends React.Component {
               readOnly={readOnly}
             />
           </div>
-        )}
-        {  showEditor && 
-          <div style={{display: displayScopeEditor}}>
+        )} */}
+        {/* TODO: remove default view on scopeEditor */}
+        {/* {  showEditor &&  */}
+          {/* <div style={{display: displayScopeEditor}}> */}
             <div className="p-col visual-editor-container">
               <YamlParser yamlConfig={value} onUpdate={onChange}>
                 {(onUpdate, config) => (
@@ -154,8 +156,8 @@ class EditorView extends React.Component {
                 )}
               </YamlParser>
             </div >
-          </div>
-        }
+          {/* </div> */}
+        {/* } */}
         {
           showEditor && showTreeTableView &&
             <div className="p-col visual-editor-container">

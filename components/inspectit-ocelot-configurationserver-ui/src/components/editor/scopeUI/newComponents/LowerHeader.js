@@ -57,7 +57,7 @@ class LowerHeader extends React.Component {
       <React.Fragment>
         { !disableFor.includes(optionType) && (
           <div style={{...divStyle}}>
-            <h4 style={{ ...pStyle}}>... {upperText} - {optionType} </h4>
+            <h4 style={{ ...pStyle}}>{upperText} </h4>
           </div>  
         )}
       </React.Fragment>

@@ -13,6 +13,11 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import Scope from './scopeUI/Scope';
 import { BreadCrumb } from 'primereact/breadcrumb';
+// import './scopeUI/newComponents/attribute_explanations/scope9001.scoped.css';  // scoped ? 
+
+// import { descriptionScope } from './scopeUI/newComponents/attribute_explanations/scope.js';
+
+import {Dialog} from 'primereact/dialog';
 
 // Faster deep-copy for json style object.
 
@@ -81,14 +86,14 @@ class ScopeEditor extends React.Component {
   // TODO: c-important. Please do not use limited time on less important code for the month goal.
   // <BreadCrumb> elements nagivate to other urls. example     { label: 'Lionel Messi', url: 'https://en.wikipedia.org/wiki/Lionel_Messi' }
   // <BreadCrumb> does not enable onClick listener on the elements, this manually adding.
-  addEventListenerToBreadCrumbs = () => {
-    // Array.from(htmlCollection)
-    let breadCrumbArray = Array.from(document.getElementsByClassName('p-breadcrumb p-component')[0].getElementsByClassName('p-menuitem-link'));
-    breadCrumbArray.map(element => {
-      if( element.innerText === 'Scope Overview' ) {
-        element.addEventListener('click', this.handleBreadCrumbClick);
-      }
-    })
+  addEventListenerToBreadCrumbs = () => {   
+  //   // Array.from(htmlCollection)
+  //   let breadCrumbArray = Array.from(document.getElementsByclassNameName('p-breadcrumb p-component')[0].getElementsByclassNameName('p-menuitem-link'));
+  //   breadCrumbArray.map(element => {
+  //     if( element.innerText === 'Scope Overview' ) {
+  //       element.addEventListener('click', this.handleBreadCrumbClick);
+  //     }
+  //   })TODO: reaktivieren noch breamcrumbs
   }
 
   updateBreadCrumbs = breadCrumbItems => this.setState({ breadCrumbItems});
@@ -115,6 +120,38 @@ class ScopeEditor extends React.Component {
     onUpdate(copyConfig);
   }
 
+  onClick(name, position) {
+    let state = {
+        [`${name}`]: true
+    };
+
+    if (position) {
+        state = {
+            ...state,
+            position
+        }
+    }
+
+    this.setState(state);
+  }
+
+  onHide(name) {
+      this.setState({
+          [`${name}`]: false
+      });
+  }
+
+    renderFooter(name) {
+      return (
+          <div>
+              <Button label="Yes" icon="pi pi-check" onClick={() => this.onHide(name)} />
+              <Button label="No" icon="pi pi-times" onClick={() => this.onHide(name)} classNameName="p-button-secondary"/>
+          </div>
+      );
+  }
+
+  
+
   render() {
     const { config, ...rest } = this.props;
     const { scopeNameList, showOverview, scopeObject, breadCrumbItems, currentlyDisplayScopeName } = this.state;
@@ -123,7 +160,7 @@ class ScopeEditor extends React.Component {
     const toolbarButtonStyle = {padding: '5px' , background: 'rgb(139, 172, 189)', margin: '5px'};
 
     return (
-      <div className="this">
+      <div classNameName="this">
         {/* the style here was copied from i believe tree table, it gives good indications about how the page should look like, so i used it */}
         <style jsx>{`
           .this {
@@ -178,7 +215,11 @@ class ScopeEditor extends React.Component {
           <BreadCrumb model={breadCrumbItems} />
           {
             showOverview && (
-              <div style={{ marginLeft: '50px', marginTop: '25px'}} className="content-section implementation">
+              <div style={{ marginLeft: '50px', marginTop: '25px'}} classNameName="content-section implementation">
+                <Button label="Long Content" icon="pi pi-external-link" onClick={() => this.onClick('displayBasic2')} />
+                <Dialog header="Godfather Casting" visible={this.state.displayBasic2} style={{width: '50vw'}} onHide={() => this.onHide('displayBasic2')} blockScroll footer={this.renderFooter('displayBasic2')}>
+                 {/* { descriptionScope()} */}
+                </Dialog>
                 <h4 >The following scopes exist within the selected file</h4>
                 <ListBox filter={true} filterPlaceholder="Search" options={scopeNameList} itemTemplate={this.itemTemplate}
                   style={{width:'500px'}} listStyle={{}}/>

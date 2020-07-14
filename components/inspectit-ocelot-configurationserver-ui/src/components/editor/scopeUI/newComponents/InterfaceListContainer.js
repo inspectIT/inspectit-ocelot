@@ -22,10 +22,10 @@ function InterfaceListContainer( {items, parentAttribute, onUpdate,} ) {
 
   return (
     <React.Fragment>
-      <div data-optiontype={parentAttribute} style={{  marginBottom: '',  position:'relative', height: '', padding: '25px', background: '#EEEEE', borderRadius: '10px' , border: '1px solid black'}}>
+      <div data-optiontype={parentAttribute} style={{  marginBottom: '',  position:'relative', height: '', padding: '25px', background: 'white', border: '1px solid lightgrey' , borderRadius: '10px'}}>
         <LowerHeader optionType={parentAttribute} />
         { items.map( (element, index) => 
-          <Item onUpdate={(updateObj) => onUpdateListItem(updateObj, index)} item={element} parentAttribute={parentAttribute} />
+          <Item onUpdate={(updateObj) => onUpdateListItem(updateObj, index)} index={index } item={element} parentAttribute={parentAttribute} />
         )}
 
       </div>

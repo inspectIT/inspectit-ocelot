@@ -4,11 +4,37 @@ import React from 'react';
 
 import SelectorContainer from './newComponents/SelectorContainer';
 import deepCopy from 'json-deep-copy';
+import GenericListContainer from './newComponents/genericListContainer';
+import ClassSelector from './newComponents/ClassSelector';
+import UpperHeader from './newComponents/UpperHeader';
+import InterfaceListContainer from './newComponents/InterfaceListContainer';
+import Item from './newComponents/Item';
 
 
 class Scope extends React.Component {
   // the specific icon is set to green, when for e.x scopename, a classSelector, a methodSelector exist
   state = { icon_scopeName: false, icon_classSelector: false , icon_methodSelector: false}
+  
+  // Distribution of responsibility.
+  // the following variables are required to be split from the item. This approach can be used within every other component. 
+  // [json,json,array]
+  // [type,superclass,interface]
+  // splitting up the attributes and letting a component handle the onUpdate of the single items. Distribution of responsibility.
+  createGroupedItemsForClassSelector = () => {
+    const { scopeObject } = this.props;
+    const item = scopeObject;
+    
+    let groupedClassItems = [];
+    let usedClassAttributes = [];
+    let classAttributes = ['type', 'interfaces', 'superclass'];
+    Object.keys(item).map( attribute => {
+      if (classAttributes.includes(attribute)) { 
+        groupedClassItems.push(item[attribute])
+        usedClassAttributes.push(attribute);
+      }
+    })
+    this.setState({groupedClassItems, usedClassAttributes})
+  }
 
   componentDidMount(){
     this.addEventListenerToBreadCrumbs();
@@ -94,7 +120,8 @@ class Scope extends React.Component {
   }
 
   onGenericUpdate = ( updatedValue, optionType ) => {
-    let { onUpdate, item } = this.props;
+    let { onUpdate, scopeObject } = this.props;
+    const item = scopeObject;
     let updatedItem = deepCopy(item);
     
     if(Array.isArray(updatedValue) === true) {
@@ -171,10 +198,23 @@ class Scope extends React.Component {
 
   componentWillMount(){
     // this.groupAttributesFromItemUnderAnAlias();
+    this.createGroupedItemsForClassSelector();
+  }
+
+  onGroupUpdate = (updatedValues, group) => {
+    const { scopeObject, onUpdate } = this.props;
+    const item = scopeObject;
+    const updatedItem = deepCopy(item);
+    group.map( attribute => {
+      updatedItem[attribute] = updatedValues[attribute];
+    })
+    onUpdate(updatedItem);
   }
 
   render() {
-    const { icon_scopeName, icon_classSelector , icon_methodSelector} = this.state;
+    const { icon_scopeName, icon_classSelector , icon_methodSelector, groupedClassItems, usedClassAttributes} = this.state;
+
+
     const { scopeObject, onUpdate, currentlyDisplayScopeName } = this.props;
 
     const boxStyle = {background:'#EEEEEE', borderBottom: '1.5px solid white', padding: '25px'};
@@ -183,6 +223,8 @@ class Scope extends React.Component {
     const marginBottom = '15px';
     const alignItems = 'center';
     const descriptionTextMaxWidth = '300px' // selector description max length, else the row expends to much
+
+    const classSelectorAttributes=['type','superclass','interfaces'];
 
     return (
       <div className="this">
@@ -232,7 +274,31 @@ class Scope extends React.Component {
 
               {/* classSelector here */}
               <div style={{width:'', background:'white', minHeight: '200px',  padding:'35px'}}>
-               <SelectorContainer doNotFilter_maybeAsVariable={['type','superclass','interfaces']} scopeObject={scopeObject} onUpdate={onUpdate} contextAlias_maybeAsVariable={'classes'}/>  {/* selectorType should be removed, i use it here to not duplicate selectorContainer, because only the "heading" changes.  */}
+              {/* TODO: Hint nicht wie die nächsten 3 Zeilen. Keine Information darüber, der wie vielte Class Selector gechained wurde 
+               <Item item={scopeObject.type} />
+               <Item item={scopeObject.superclass} />
+               <Item item={scopeObject.annotations} />
+              */}
+
+              {/* The keys of the scopeObject are [interface, type, superclass, method, advanced ]
+              we filter out method and advanced
+              we use map on the filteredAttributeArray and get an index. The index is used to know display wether 'the class'  or '... and the class'  */}
+              {Object.keys(scopeObject).filter( filteredAttribute =>  classSelectorAttributes.includes(filteredAttribute) ).map( (attribute, count) => 
+                
+                <React.Fragment>
+                  <UpperHeader attributeText={'class'} connectionTypeAndOr={'and'} count={count} />
+                  { 
+                    Array.isArray(scopeObject[attribute]) &&
+                    <InterfaceListContainer backgroundColor='#EEEEEE' onUpdate={(updatedValue) => this.onGenericUpdate(updatedValue, attribute)} items={scopeObject[attribute]} parentAttribute={attribute} />} 
+                  { 
+                   !Array.isArray(scopeObject[attribute]) && <Item backgroundColor='#EEEEEE' item={scopeObject[attribute]} parentAttribute={attribute} onUpdate={(updatedValue) => this.onGenericUpdate(updatedValue, attribute)}/> 
+                   }
+                </React.Fragment>
+              )}
+               <SelectorContainer scopeObject={scopeObject} onUpdate={(updatedValue) => this.onGroupUpdate} />  
+               {/* selectorType should be removed, i use it here to not duplicate selectorContainer, because only the "heading" changes.  */}
+               {/* <GenericListContainer items={groupedClassItems} onUpdate={(updatedValue) => this.onGroupUpdate(updatedValue, usedClassAttributes)} selectorType='Class' />  selectorType should be removed, i use it here to not duplicate selectorContainer, because only the "heading" changes.  */}
+              
               </div>
             </div>
 
@@ -259,6 +325,17 @@ class Scope extends React.Component {
                 )}
               </div>
               <div style={{width:'', background:'white', minHeight: '200px',  padding:'35px'}}>
+                  {/* <React.Fragment>
+                    <UpperHeader attributeText={'class'} connectionTypeAndOr={'and'} count={count} />
+                    { 
+                      Array.isArray(scopeObject[attribute]) &&
+                      <InterfaceListContainer backgroundColor='#EEEEEE' onUpdate={(updatedValue) => this.onGenericUpdate(updatedValue, attribute)} items={scopeObject[attribute]} parentAttribute={attribute} />} 
+                    { 
+                    !Array.isArray(scopeObject[attribute]) && <Item backgroundColor='#EEEEEE' item={scopeObject[attribute]} parentAttribute={attribute} onUpdate={(updatedValue) => this.onGenericUpdate(updatedValue, attribute)}/> 
+                    }
+                  </React.Fragment> */}
+
+
                 <SelectorContainer doNotFilter_maybeAsVariable={['methods']} scopeObject={scopeObject} onUpdate={onUpdate} contextAlias_maybeAsVariable={'methods'}/>  {/* selectorType should be removed, i use it here to not duplicate selectorContainer, because only the "heading" changes.  */}
               </div>
               {/* obsolete, do not read , this will be removed */}

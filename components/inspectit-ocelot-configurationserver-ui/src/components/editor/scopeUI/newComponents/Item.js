@@ -6,6 +6,7 @@ import deepCopy from 'json-deep-copy';
 import {SplitButton} from 'primereact/splitbutton';
 import { getSplitButtonsItems , enableCreateAttributeWithinSplitItemEntries} from './utils/splitButtonItems/getSplitButtonItems';
 import { splittButtonItemIsInvalid, adjustInvalidSplitButtonItem } from './utils/splitButtonItems/invalidLabelsTopDown';
+import UpperHeader from "./UpperHeader";
 
 class Item extends React.Component {
   state = { splitMenuItems: [] }
@@ -17,7 +18,7 @@ class Item extends React.Component {
     let tooltip = e.target.previousSibling;
     tooltip.style.visibility = 'visible'
     const element = this.componentBorderRef.current
-    element.style.border = '1px solid transparent';
+    // element.style.border = '1px solid transparent';
     element.style.boxShadow = '0 0 0 3px red';
   } 
 
@@ -25,7 +26,7 @@ class Item extends React.Component {
     let tooltip = e.target.previousSibling;
     tooltip.style.visibility = 'hidden';
     const element = this.componentBorderRef.current
-    element.style.border = '1px solid black';
+    // element.style.border = '1px solid black';
     element.style.boxShadow = '';
   }
 
@@ -87,9 +88,10 @@ class Item extends React.Component {
 
     return (
       <div>
-        <div ref={this.componentBorderRef} style={{ marginBottom: '',  position:'relative', height: '', padding: '25px', background: background_bigDiv, borderRadius: '10px' , border: '1px solid black'}}>
+        { !isNaN(index) && <UpperHeader attributeText={'interface, that'} connectionTypeAndOr={'and'} count={index} /> }
+        <div ref={this.componentBorderRef} style={{ marginBottom: '',  position:'relative', height: '', padding: '25px', background: background_bigDiv, borderRadius: '10px' }}>
           {parentAttribute !== 'interfaces' && <LowerHeader optionType={parentAttribute} />}
-          <NameSelector onUpdate={onUpdate} style={{background: 'yellow'}} item={item} index={index} optionType={parentAttribute} />
+          <NameSelector optionText={`has a name`}  onUpdate={onUpdate} style={{background: 'yellow'}} item={item} index={index} optionType={parentAttribute} />
           {item.annotations && <AnnotationContainer onUpdate={(updatedValue) => this.onGenericUpdate(updatedValue, 'annotations')} items={item.annotations} optionType={parentAttribute} />}
           <SplitButton tooltip="TODO: tooltip? or not" style={{position:'absolute', top:'10px' , right:'10px'}} label="add " icon="pi pi-plus" onClick={this.save} model={splitButtonItems}></SplitButton>
         </div>
