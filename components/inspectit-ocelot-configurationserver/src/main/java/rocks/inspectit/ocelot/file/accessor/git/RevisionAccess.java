@@ -58,7 +58,8 @@ public class RevisionAccess extends AbstractFileAccessor {
         this.repository = repository;
         if (resolveTree) {
             try (RevWalk revWalk = new RevWalk(repository)) {
-                this.revCommit = revWalk.parseCommit(revCommit.getId()); //reparse in case of incomplete revCommits
+                //reparse in case of incomplete revCommits, e.g if the RevCommit was received as a parent from another
+                this.revCommit = revWalk.parseCommit(revCommit.getId());
             } catch (Exception e) {
                 throw new IllegalStateException(e);
             }
@@ -70,12 +71,15 @@ public class RevisionAccess extends AbstractFileAccessor {
     /**
      * @return a unique ID for this revision
      */
-    public String getRevisionID() {
+    public String getRevisionId() {
         return ObjectId.toString(revCommit.getId());
     }
 
     /**
-     * @return the main parent of this revision or an empty optional if this is a root commit.
+     * Returns the main parent of this Revision.
+     * For merge-commits the main parent is the Revision into which the other changes have been merged.
+     *
+     * @return the primary parent of this revision or an empty optional if this is a root commit.
      */
     public Optional<RevisionAccess> getPreviousRevision() {
         if (revCommit.getParentCount() >= 1) {
@@ -85,6 +89,9 @@ public class RevisionAccess extends AbstractFileAccessor {
         }
     }
 
+    /**
+     * @return the name of the author of this revision.
+     */
     public String getAuthorName() {
         return revCommit.getAuthorIdent().getName();
     }
@@ -100,7 +107,7 @@ public class RevisionAccess extends AbstractFileAccessor {
      * @return the Revision which is a parent of both revisions.
      */
     public RevisionAccess getCommonAncestor(RevisionAccess other) {
-        //unfortunately RevFilter.MERGE_BASE does not return the best ancenstor,
+        // unfortunately RevFilter.MERGE_BASE does not return the best ancestor,
         // therefore we perform a BFS ourselves.
         Set<String> ownVisited = new HashSet<>();
         Set<String> otherVisited = new HashSet<>();
@@ -109,21 +116,21 @@ public class RevisionAccess extends AbstractFileAccessor {
         openList.addLast(new Node(false, other));
         while (!openList.isEmpty()) {
             Node current = openList.removeFirst();
-            String hash = current.revAccess.getRevisionID();
-            if (current.isFromOwn) {
-                if (otherVisited.contains(hash)) {
+            String id = current.revAccess.getRevisionId();
+            if (current.isReachableFromOwn) {
+                if (otherVisited.contains(id)) {
                     return current.revAccess;
                 }
-                ownVisited.add(hash);
+                ownVisited.add(id);
             } else {
-                if (ownVisited.contains(hash)) {
+                if (ownVisited.contains(id)) {
                     return current.revAccess;
                 }
-                otherVisited.add(hash);
+                otherVisited.add(id);
             }
             for (int i = 0; i < current.revAccess.revCommit.getParentCount(); i++) {
                 RevCommit parent = current.revAccess.revCommit.getParent(i);
-                openList.addLast(new Node(current.isFromOwn, new RevisionAccess(repository, parent)));
+                openList.addLast(new Node(current.isReachableFromOwn, new RevisionAccess(repository, parent)));
             }
         }
         throw new IllegalStateException("No common ancestor!");
@@ -136,16 +143,12 @@ public class RevisionAccess extends AbstractFileAccessor {
      *
      * @return true, if the file was added in this revision.
      */
-    public boolean wasConfigurationFileAdded(String path) {
-        Optional<RevisionAccess> parent = getPreviousRevision();
-        boolean existsInCurrentRevision = configurationFileExists(path);
-        if (!existsInCurrentRevision) {
+    public boolean isConfigurationFileAdded(String path) {
+        if (!configurationFileExists(path)) {
             return false;
         }
-        if (!parent.isPresent()) {
-            return true;
-        }
-        return !parent.get().configurationFileExists(path);
+        Optional<RevisionAccess> parent = getPreviousRevision();
+        return !parent.isPresent() || !parent.get().configurationFileExists(path);
     }
 
     /**
@@ -156,14 +159,18 @@ public class RevisionAccess extends AbstractFileAccessor {
      *
      * @return true, if the file exists both in this and the parent revision but with different contents.
      */
-    public boolean wasConfigurationFileModified(String path) {
-        Optional<RevisionAccess> parent = getPreviousRevision();
-        boolean existsInCurrentRevision = configurationFileExists(path);
-        if (!existsInCurrentRevision || !parent.isPresent() || !parent.get().configurationFileExists(path)) {
+    public boolean isConfigurationFileModified(String path) {
+        if (!configurationFileExists(path)) {
             return false;
         }
-        String currentContent = readConfigurationFile(path).orElse("");
-        String previousContent = parent.get().readConfigurationFile(path).orElse("");
+        Optional<RevisionAccess> parent = getPreviousRevision();
+        if (!parent.isPresent() || !parent.get().configurationFileExists(path)) {
+            return false;
+        }
+        String currentContent = readConfigurationFile(path)
+                .orElseThrow(() -> new IllegalStateException("Expected file to exist"));
+        String previousContent = parent.get().readConfigurationFile(path)
+                .orElseThrow(() -> new IllegalStateException("Expected file to exist"));
         return !currentContent.equals(previousContent);
     }
 
@@ -174,11 +181,12 @@ public class RevisionAccess extends AbstractFileAccessor {
      *
      * @return true, if the file was deleted in this revision.
      */
-    public boolean wasConfigurationFileDeleted(String path) {
+    public boolean isConfigurationFileDeleted(String path) {
+        if (configurationFileExists(path)) {
+            return false;
+        }
         Optional<RevisionAccess> parent = getPreviousRevision();
-        boolean existsInCurrentRevision = configurationFileExists(path);
-        boolean existsInParenRevision = parent.isPresent() && parent.get().configurationFileExists(path);
-        return !existsInCurrentRevision && existsInParenRevision;
+        return parent.isPresent() && parent.get().configurationFileExists(path);
     }
 
     @Override
@@ -328,7 +336,7 @@ public class RevisionAccess extends AbstractFileAccessor {
     @Value
     private static class Node {
 
-        boolean isFromOwn;
+        boolean isReachableFromOwn;
 
         RevisionAccess revAccess;
     }

@@ -425,10 +425,10 @@ public class VersioningManager {
         RevCommit newCommit = getCommit(newCommitId);
         switch (entry.getType()) {
             case ADD:
-                entry.setAuthors(findAuthorsSinceAddition(entry.getFile(), newCommit));
+                entry.setAuthors(new ArrayList<>(findAuthorsSinceAddition(entry.getFile(), newCommit)));
                 break;
             case MODIFY:
-                entry.setAuthors(findModifyingAuthors(entry.getFile(), baseCommit, newCommit));
+                entry.setAuthors(new ArrayList<>(findModifyingAuthors(entry.getFile(), baseCommit, newCommit)));
                 break;
             case DELETE:
                 entry.setAuthors(Collections.singletonList(findDeletingAuthor(entry.getFile(), baseCommit, newCommit)));
@@ -439,22 +439,31 @@ public class VersioningManager {
         }
     }
 
-    private List<String> findModifyingAuthors(String file, RevCommit baseCommit, RevCommit newCommit) {
+    /**
+     * Finds all authors who have modified a file since a certain base revision.
+     *
+     * @param file       the name of the file to check.
+     * @param baseCommit A commit on the live branch onto which the newCommit will be merged
+     * @param newCommit  A commit on the workspace branch containing file modifications
+     *
+     * @return A list of authors who have modified the file.
+     */
+    private Collection<String> findModifyingAuthors(String file, RevCommit baseCommit, RevCommit newCommit) {
         RevisionAccess newRevision = new RevisionAccess(git.getRepository(), newCommit);
         RevisionAccess baseRevision = new RevisionAccess(git.getRepository(), baseCommit);
         //move "baseRevision" to the last commit where this file was touched (potentially the root commit).
-        while (!baseRevision.wasConfigurationFileAdded(file) && !baseRevision.wasConfigurationFileModified(file)) {
-            baseRevision = baseRevision.getPreviousRevision()
-                    .orElseThrow(() -> new IllegalStateException("Expected parent to exist"));
-        }
+        baseRevision = findLastChangingRevision(file, baseRevision);
 
         Set<String> authors = new HashSet<>();
         String baseContent = baseRevision.readConfigurationFile(file).get();
         //Find all persons who added or modified the file since the last promotion.
         RevisionAccess commonAncestor = newRevision.getCommonAncestor(baseRevision);
-        while (!newRevision.getRevisionID().equals(commonAncestor.getRevisionID())) {
-            if (newRevision.wasConfigurationFileModified(file) || newRevision.wasConfigurationFileAdded(file)) {
+        while (!newRevision.getRevisionId().equals(commonAncestor.getRevisionId())) {
+            if (newRevision.isConfigurationFileModified(file)) {
                 authors.add(newRevision.getAuthorName());
+            } else if (newRevision.isConfigurationFileAdded(file)) {
+                authors.add(newRevision.getAuthorName());
+                break; //THe file has been added, no need to take previous changes into account
             }
             newRevision = newRevision.getPreviousRevision()
                     .orElseThrow(() -> new IllegalStateException("Expected parent to exist"));
@@ -463,38 +472,56 @@ public class VersioningManager {
                 break; // we have reached a revision where the content is in the original state, no need to look further
             }
         }
-        return new ArrayList<>(authors);
+        return authors;
     }
 
-    private List<String> findAuthorsSinceAddition(String file, RevCommit newCommit) {
+    /**
+     * Walks back in history to the point where the given file was added.
+     * On the way, all authors which have modifies the file are remembered.
+     *
+     * @param file      the file to check
+     * @param newCommit the commit to start looking from, usually on the workspace
+     *
+     * @return the list of authors who have modified the file since it's addition including the author adding the file
+     */
+    private Collection<String> findAuthorsSinceAddition(String file, RevCommit newCommit) {
         RevisionAccess newRevision = new RevisionAccess(git.getRepository(), newCommit);
         Set<String> authors = new HashSet<>();
         //Find all persons who edited the file since it was added
-        while (!newRevision.wasConfigurationFileAdded(file)) {
-            if (newRevision.wasConfigurationFileModified(file)) {
+        while (!newRevision.isConfigurationFileAdded(file)) {
+            if (newRevision.isConfigurationFileModified(file)) {
                 authors.add(newRevision.getAuthorName());
             }
             newRevision = newRevision.getPreviousRevision()
                     .orElseThrow(() -> new IllegalStateException("Expected parent to exist"));
         }
         authors.add(newRevision.getAuthorName()); //Also add the name of the person who added the file
-        return new ArrayList<>(authors);
+        return authors;
     }
 
+    /**
+     * Finds the most recent revision originating from "newCommit" in which the given file was deleted.
+     * Does not walk past the common ancestor of "newCommit" and "baseCommit".
+     * <p>
+     * Returns the author of this revision.
+     *
+     * @param file       the file to check
+     * @param baseCommit the commit to comapre agains, usually the live branch
+     * @param newCommit  the commit in which the provided file does not exist anymore, usually on the workspace
+     *
+     * @return the author of the revision which is responsible for the deletion.
+     */
     private String findDeletingAuthor(String file, RevCommit baseCommit, RevCommit newCommit) {
         RevisionAccess newRevision = new RevisionAccess(git.getRepository(), newCommit);
         RevisionAccess baseRevision = new RevisionAccess(git.getRepository(), baseCommit);
         //move "baseRevision" to the last commit where this file was touched (potentially the root commit).
-        while (!baseRevision.wasConfigurationFileAdded(file) && !baseRevision.wasConfigurationFileModified(file)) {
-            baseRevision = baseRevision.getPreviousRevision()
-                    .orElseThrow(() -> new IllegalStateException("Expected parent to exist"));
-        }
+        baseRevision = findLastChangingRevision(file, baseRevision);
 
         RevisionAccess commonAncestor = baseRevision.getCommonAncestor(newRevision);
         RevisionAccess previous = commonAncestor;
         //find the person who deleted the file most recently
-        while (!newRevision.getRevisionID().equals(commonAncestor.getRevisionID())) {
-            if (newRevision.wasConfigurationFileDeleted(file)) {
+        while (!newRevision.getRevisionId().equals(commonAncestor.getRevisionId())) {
+            if (newRevision.isConfigurationFileDeleted(file)) {
                 return newRevision.getAuthorName();
             }
             previous = newRevision;
@@ -502,6 +529,25 @@ public class VersioningManager {
                     .orElseThrow(() -> new IllegalStateException("Expected parent to exist"));
         }
         return previous.getAuthorName(); //in case an amend happened, this will be the correct user
+    }
+
+    /**
+     * Walks backwards in history starting at the given revision.
+     * Stops at the first revision which either adds or modifies the given file.
+     * <p>
+     * If the provided revision already modified/adds the given file, it is returned unchanged.
+     *
+     * @param file         the file to look for
+     * @param baseRevision the starting revision to walk backwards from
+     *
+     * @return a revision which either modifies or adds the given file.
+     */
+    private RevisionAccess findLastChangingRevision(String file, RevisionAccess baseRevision) {
+        while (!baseRevision.isConfigurationFileAdded(file) && !baseRevision.isConfigurationFileModified(file)) {
+            baseRevision = baseRevision.getPreviousRevision()
+                    .orElseThrow(() -> new IllegalStateException("Expected parent to exist"));
+        }
+        return baseRevision;
     }
 
     /**

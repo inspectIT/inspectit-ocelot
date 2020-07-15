@@ -808,18 +808,22 @@ class VersioningManagerTest extends FileTestBase {
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/new_file.yml=content_modified");
             versioningManager.commitAllChanges("com2");
 
-            doReturn("independent_user").when(authentication).getName();
-            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/independent_file.yml=modified");
-            versioningManager.commitAllChanges("com3");
-            promote("/independent_file.yml");
-
             doReturn("deleting_user").when(authentication).getName();
             Files.delete(tempDirectory.resolve(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/new_file.yml"));
-            versioningManager.commitAllChanges("com4");
+            versioningManager.commitAllChanges("com3");
 
             doReturn("creating_user").when(authentication).getName();
-            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/new_file.yml");
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/new_file.yml=new_initial_content");
+            versioningManager.commitAllChanges("com4");
+
+            doReturn("independent_user").when(authentication).getName();
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/independent_file.yml=modified");
             versioningManager.commitAllChanges("com5");
+            promote("/independent_file.yml");
+
+            doReturn("second_editing_user").when(authentication).getName();
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/new_file.yml=content_modified");
+            versioningManager.commitAllChanges("com6");
 
             SimpleDiffEntry diff = SimpleDiffEntry.builder()
                     .file("new_file.yml")
@@ -831,7 +835,7 @@ class VersioningManagerTest extends FileTestBase {
                     versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId());
 
             assertThat(diff.getAuthors())
-                    .containsExactlyInAnyOrder("creating_user", "editing_user");
+                    .containsExactlyInAnyOrder("creating_user", "second_editing_user");
         }
 
         @Test

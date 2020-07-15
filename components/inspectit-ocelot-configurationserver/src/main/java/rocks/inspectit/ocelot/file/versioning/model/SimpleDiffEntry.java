@@ -60,6 +60,9 @@ public class SimpleDiffEntry {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String newContent;
 
+    /**
+     * The list of authors who have modified this file since it was last promoted.
+     */
     @Builder.Default
     private List<String> authors = Collections.emptyList();
 }
