@@ -4,6 +4,8 @@ import { cloneDeep, remove, extend } from 'lodash';
 import Notificationbar from '../../../../editor/Notificationbar';
 import DescriptionSection from './DescriptionSection';
 import VariableView from './VariableView';
+import SelectionInformation from '../../../../editor/SelectionInformation';
+import Section from '../../Section';
 
 /**
  * The RulesEditor component views alerting rules and templates and provides means to edit the content of an alerting rule.
@@ -21,27 +23,17 @@ const RulesEditor = ({ availableTopics, content, isRule, mappedVars, readOnly, o
   }
 
   return (
-    <>
+    <div className='this'>
       <style jsx>{`
-        .error.p-col-fixed {
-          padding: 0.5rem 0 0;
-        }
-        .scroll-vars {
+        .this {
+          display: flex;
+          flex-direction: column;
           overflow-y: auto;
         }
-        .section-container {
-          margin: 0 1rem 0;
-          border: 1px solid #c8c8c8;
-          flex-grow: 1;
+        .this :global(.error.p-col-fixed) {
+          padding: 0.5rem 0 0;
         }
-        .var-header {
-          margin: 0 1rem 0;
-          padding: 0.5rem 1rem 0.5rem;
-          background-color: #eee;
-          border: 1px solid #c8c8c8;
-          font-weight: bold;
-        }
-        .time-details {
+        .this :global(.time-details) {
           display: flex;
           flex-direction: row;
           justify-content: space-between;
@@ -59,8 +51,7 @@ const RulesEditor = ({ availableTopics, content, isRule, mappedVars, readOnly, o
         updateValue={(value) => updateDescription(content, onContentChanged, value)}
         readOnly={readOnly}
       />
-      <div className="var-header">Variables</div>
-      <div className="scroll-vars section-container">
+      <Section title='Variables' scrollable={true}>
         {isRule && (
           <VariableView
             options={!availableTopics ? [] : availableTopics.map((t) => t.id)}
@@ -84,42 +75,12 @@ const RulesEditor = ({ availableTopics, content, isRule, mappedVars, readOnly, o
             onErrorStatusUpdate(Object.entries(errornuousVariables).filter((keyValPair) => keyValPair[1] === true).length);
           }}
         />
-      </div>
+      </Section>
       {content.error && (
         <div className="error p-col-fixed">
           <Notificationbar text={content.error} isError={true} icon={'pi-exclamation-triangle'} />
         </div>
       )}
-    </>
-  );
-};
-
-/**
- * Placeholder component for the case that no content is selected.
- */
-const SelectionInformation = ({ hint }) => {
-  return (
-    <div className="p-col">
-      <style jsx>{`
-        .this {
-          flex-grow: 1;
-          align-items: stretch;
-          display: flex;
-          flex-direction: column;
-          justify-content: flex-start;
-          min-width: 760px;
-        }
-        .selection-information {
-          display: flex;
-          height: 100%;
-          align-items: center;
-          justify-content: center;
-          color: #bbb;
-        }
-      `}</style>
-      <div className="selection-information">
-        <div>{hint}</div>
-      </div>
     </div>
   );
 };
@@ -194,8 +155,8 @@ RulesEditor.defaultProps = {
   availableTopics: [],
   isRule: false,
   readOnly: false,
-  onContentChanged: () => {},
-  onErrorStatusUpdate: () => {},
+  onContentChanged: () => { },
+  onErrorStatusUpdate: () => { },
 };
 
 export default RulesEditor;

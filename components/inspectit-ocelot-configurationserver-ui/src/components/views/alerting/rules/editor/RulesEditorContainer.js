@@ -23,9 +23,9 @@ const RulesEditorContainer = ({
 
   const onContentChanged = (ruleName, changedContent) => {
     if (isEqual(ruleContent, changedContent)) {
-      unsavedRuleContentsChanged(omit(unsavedRuleContents, ruleName));
+      unsavedRuleContentsChanged(omit(cloneDeep(unsavedRuleContents), ruleName));
     } else {
-      unsavedRuleContentsChanged(extend(unsavedRuleContents, { [ruleName]: changedContent }));
+      unsavedRuleContentsChanged(extend(cloneDeep(unsavedRuleContents), { [ruleName]: changedContent }));
     }
   };
 
@@ -174,7 +174,7 @@ RulesEditorContainer.defaultProps = {
   availableTopics: [],
   unsavedRuleContents: {},
   readOnly: false,
-  unsavedRuleContentsChanged: () => {},
+  unsavedRuleContentsChanged: () => { },
 };
 
 const mapStateToProps = (state) => {

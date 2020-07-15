@@ -31,6 +31,7 @@ const VariableView = ({ name, value, type, description, options, readOnly, onVar
           .this {
             margin: 1rem;
             border-bottom: 1px solid #c8c8c8;
+            flex-grow: 1;
           }
           .this :global(.varHeaderContainer) {
             display: flex;

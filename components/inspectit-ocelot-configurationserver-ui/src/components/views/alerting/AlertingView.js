@@ -31,22 +31,15 @@ const AlertingView = () => {
   useEffect(() => {
     if (rules) {
       const topics = uniq(
-        rules.map((r) => r.topic).filter((t) => t !== undefined && (!existingTopics || !existingTopics.some((topic) => topic.id === t)))
-      ).map((topicName) => ({ id: topicName, referencedOnly: true }));
+        rules.map(r => r.topic)
+          .filter(t => t !== undefined && (!existingTopics || !existingTopics.some(topic => topic.id === t))))
+        .map(topicName => ({ id: topicName, referencedOnly: true }));
       setReferencedTopics(topics);
     }
   }, [JSON.stringify(rules)]);
 
-  const refreshRules = () =>
-    rulesAPI.fetchAlertingRules(
-      (rules) => setRules(rules),
-      () => setRules([])
-    );
-  const refreshTemplates = () =>
-    rulesAPI.fetchAlertingTemplates(
-      (templates) => setTemplates(templates),
-      () => setTemplates([])
-    );
+  const refreshRules = () => rulesAPI.fetchAlertingRules((rules) => setRules(rules), () => setRules([]));
+  const refreshTemplates = () => rulesAPI.fetchAlertingTemplates((templates) => setTemplates(templates), () => setTemplates([]));
   const refreshTopics = () => topicsAPI.fetchTopics((topics) => setExistingTopics(topics));
 
   const refreshAll = () => {
@@ -82,18 +75,12 @@ const AlertingView = () => {
           display: flex;
           flex-direction: column;
           height: 100%;
-          width: 100%;
+          flex-grow: 1;
         }
       `}</style>
       <TabView className="tabView" activeIndex={activeIndex} onTabChange={(e) => setActiveIndex(e.index)}>
         <TabPanel header="Alerting Rules">
-          <AlertingRulesView
-            updateDate={updateDate}
-            availableTopics={availableTopics}
-            rules={rules}
-            templates={templates}
-            onRefresh={refreshAll}
-          />
+          <AlertingRulesView updateDate={updateDate} availableTopics={availableTopics} rules={rules} templates={templates} onRefresh={refreshAll} />
         </TabPanel>
       </TabView>
     </div>
