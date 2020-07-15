@@ -449,6 +449,7 @@ public class VersioningManager {
         }
 
         Set<String> authors = new HashSet<>();
+        String baseContent = baseRevision.readConfigurationFile(file).get();
         //Find all persons who added or modified the file since the last promotion.
         RevisionAccess commonAncestor = newRevision.getCommonAncestor(baseRevision);
         while (!newRevision.getRevisionID().equals(commonAncestor.getRevisionID())) {
@@ -457,6 +458,10 @@ public class VersioningManager {
             }
             newRevision = newRevision.getPreviousRevision()
                     .orElseThrow(() -> new IllegalStateException("Expected parent to exist"));
+            if (newRevision.configurationFileExists(file) &&
+                    newRevision.readConfigurationFile(file).get().equals(baseContent)) {
+                break; // we have reached a revision where the content is in the original state, no need to look further
+            }
         }
         return new ArrayList<>(authors);
     }

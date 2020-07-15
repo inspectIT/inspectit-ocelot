@@ -835,6 +835,41 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
+        void fileModifiedWithChangesUndone() throws Exception {
+            buildDummyHistory();
+
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/new_file.yml=initialContent");
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/independent_file.yml");
+            doReturn("initial_creating_user").when(authentication).getName();
+            versioningManager.commitAllChanges("com1");
+            promote("/independent_file.yml", "/new_file.yml");
+
+            doReturn("editing_user").when(authentication).getName();
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/new_file.yml=newContent");
+            versioningManager.commitAllChanges("com2");
+
+            doReturn("undoing_user").when(authentication).getName();
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/new_file.yml=initialContent");
+            versioningManager.commitAllChanges("com3");
+
+            doReturn("last_editing_user").when(authentication).getName();
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/new_file.yml=superNewContent");
+            versioningManager.commitAllChanges("com4");
+
+            SimpleDiffEntry diff = SimpleDiffEntry.builder()
+                    .file("new_file.yml")
+                    .type(DiffEntry.ChangeType.MODIFY)
+                    .build();
+
+            versioningManager.fillInAuthors(diff,
+                    versioningManager.getLatestCommit(Branch.LIVE).get().getId(),
+                    versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId());
+
+            assertThat(diff.getAuthors())
+                    .containsExactlyInAnyOrder("last_editing_user");
+        }
+
+        @Test
         void fileDeleted() throws Exception {
             buildDummyHistory();
 
