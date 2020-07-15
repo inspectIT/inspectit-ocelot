@@ -1,7 +1,7 @@
 // andIndex display an AND-Connection between the Attributes
 // orIndex to display an OR-Connection between the Attributes
 // attribute
-function UpperHeader ({ attributeText, count, connectionTypeAndOr,style })  {
+function UpperHeader ({ upperHeaderText, count, semantic,style })  {
 
     const background_uberSchriftDiv = "white";
 
@@ -10,8 +10,8 @@ function UpperHeader ({ attributeText, count, connectionTypeAndOr,style })  {
     
     return (
       <div style={{...divStyle}}>
-        {count === 0 && <h4 style={{ ...pStyle}}>The {attributeText} ...</h4>}
-        {count >0 && <h4 style={{ ...pStyle}}>{connectionTypeAndOr} the {attributeText} ...</h4> }
+        {count === 0 && <h4 style={{ ...pStyle}}>The {upperHeaderText} ...</h4>}
+        {count >0 && <h4 style={{ ...pStyle}}>{semantic} the {upperHeaderText} ...</h4> }
       </div>  
     )
 }

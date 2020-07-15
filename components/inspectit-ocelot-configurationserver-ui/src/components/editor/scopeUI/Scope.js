@@ -218,7 +218,7 @@ class Scope extends React.Component {
               {/* The keys of the scopeObject are [interface, type, superclass, method, advanced ]
               we filter out method and advanced
               we use map on the filteredAttributeArray and get an index. The index is used to know display wether 'the class'  or '... and the class'  */}
-                <ClassSelectorContainer scopeObject={scopeObject} onUpdate={updatedValue => this.onUpdate(updatedValue)} />
+                <ClassSelectorContainer scopeObject={scopeObject} onUpdate={updatedValue => this.onGenericUpdate(updatedValue)} />
 
 
                {/* selectorType should be removed, i use it here to not duplicate selectorContainer, because only the "heading" changes.  */}

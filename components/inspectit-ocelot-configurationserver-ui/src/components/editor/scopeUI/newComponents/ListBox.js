@@ -8,7 +8,7 @@ import { getSplitButtonsItems , enableCreateAttributeWithinSplitItemEntries} fro
 import { splittButtonItemIsInvalid, adjustInvalidSplitButtonItem } from './utils/splitButtonItems/invalidLabelsTopDown';
 import UpperHeader from "./UpperHeader";
 
-class MethodBox extends React.Component {
+class ContainerBox extends React.Component {
   state = { splitMenuItems: [] }
 
   // reference for red highlighting over remove icon hover
@@ -57,7 +57,7 @@ class MethodBox extends React.Component {
         {/* <button> {optionText} </button> */}
         { !isNaN(index) && <UpperHeader attributeText={'interface, that'} connectionTypeAndOr={'and'} count={index} /> }
         <div ref={this.componentBorderRef} style={{ marginBottom: '',  position:'relative', height: '', padding: '25px', background: background_bigDiv, borderRadius: '10px' }}>
-        <SplitButton tooltip="TODO: tooltip? or not" style={{position:'absolute', top:'10px' , right:'10px'}} label="add " icon="pi pi-plus" onClick={this.save} model={splitButtonItems}></SplitButton>
+        <SplitButton tooltip="TODO: tooltip? or not" style={{position:'absolute', top:'10px' , right:'10px', zIndex: 9001}} label="add " icon="pi pi-plus" onClick={this.save} model={splitButtonItems}></SplitButton>
           
         { this.props.children}
         </div>
@@ -67,4 +67,4 @@ class MethodBox extends React.Component {
 
 }
 
-export default MethodBox;
+export default ContainerBox;

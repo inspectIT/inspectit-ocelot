@@ -8,9 +8,9 @@ import { getSplitButtonsItems , enableCreateAttributeWithinSplitItemEntries} fro
 import { splittButtonItemIsInvalid, adjustInvalidSplitButtonItem } from './utils/splitButtonItems/invalidLabelsTopDown';
 import MethodVisibility from "./MethodVisibility";
 import MethodName from "./MethodName";
-import MethodItemBox from "./MethodItemBox";
+import MethodItemBox from "./ValueBox";
 import BooleanItem from "./BooleanItem";
-import MethodBox from "./MethodBox";
+import MethodBox from "./ContainerBox";
 import MethodAnnotations from "./MethodAnnotations";
 
 class GenericJsonWrapper extends React.Component {

@@ -5,7 +5,6 @@ import { cloneDeep } from 'lodash';
 import deepCopy from 'json-deep-copy';
 
 class MethodName extends React.Component {
-  state = { optionTypeText: undefined, }
 
   onUpdate = (attribute, newValue) => {
     const { item, onUpdate } = this.props;

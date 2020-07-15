@@ -1,6 +1,9 @@
-import UpperHeader from "./UpperHeader";
-import Item from "./Item";
+import MethodName from "./MethodName";
+import MethodItemBox from "./ValueBox";
 import LowerHeader from "./LowerHeader";
+import AnnotationContainer from "./AnnotationContainer";
+import MultipleMethodItemBox from "./MultipleMethodItemBox";
+import ContainerBox from "./ContainerBox";
 
 // parent attribute = 'interfaces'
 function InterfaceListContainer( {items, parentAttribute, onUpdate,} ) {
@@ -24,8 +27,18 @@ function InterfaceListContainer( {items, parentAttribute, onUpdate,} ) {
     <React.Fragment>
       <div data-optiontype={parentAttribute} style={{  marginBottom: '',  position:'relative', height: '', padding: '25px', background: 'white', border: '1px solid lightgrey' , borderRadius: '10px'}}>
         <LowerHeader optionType={parentAttribute} />
-        { items.map( (element, index) => 
-          <Item onUpdate={(updateObj) => onUpdateListItem(updateObj, index)} index={index } item={element} parentAttribute={parentAttribute} />
+        { items.map( item => 
+        <MultipleMethodItemBox>
+          <ContainerBox  parentAttribute={'interfaces'} item={items} onUpdate={ updatedValue => onUpdateListItem(updatedValue, index)}>
+            <MethodItemBox  onUpdate={(updatedValue) => onGenericUpdate(updatedValue, attribute)} > 
+              <MethodName text={`has a name`}  onUpdate={onUpdate} style={{background: 'yellow'}} item={item} />
+            </MethodItemBox>
+
+            <MethodItemBox  onUpdate={(updatedValue) => onGenericUpdate(updatedValue, attribute)} > 
+              {item.annotations && <AnnotationContainer onUpdate={(updatedValue) => onUpdateListItem(updatedValue, 'annotations')} items={item.annotations} optionType={parentAttribute} />}
+            </MethodItemBox>
+          </ContainerBox>
+        </MultipleMethodItemBox>
         )}
 
       </div>
