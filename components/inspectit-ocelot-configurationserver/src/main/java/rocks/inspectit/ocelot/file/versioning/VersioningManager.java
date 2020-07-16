@@ -624,9 +624,11 @@ public class VersioningManager {
 
             // get modified files between the specified diff - we only consider files which exists in the diff
             WorkspaceDiff diff = getWorkspaceDiff(false, liveCommitId, workspaceCommitId);
+
             if (!allowSelfPromotion && containsSelfPromotion(promotion, diff)) {
                 throw new SelfPromotionNotAllowedException("The promotion request contains a file which was edited by the same user");
             }
+
             Map<String, DiffEntry.ChangeType> changeIndex = diff.getEntries().stream()
                     .collect(Collectors.toMap(SimpleDiffEntry::getFile, SimpleDiffEntry::getType));
 

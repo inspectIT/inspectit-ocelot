@@ -46,7 +46,7 @@ public class PromotionController extends AbstractBaseController {
     @GetMapping(value = "configuration/promotions")
     public WorkspaceDiff getPromotions(@ApiParam("Specifies whether the old and new content of each files should also be returned.") @RequestParam(defaultValue = "false", name = "include-content") boolean includeContent, Authentication authentication) throws IOException, GitAPIException {
         WorkspaceDiff workspaceDiff = fileManager.getWorkspaceDiff(includeContent);
-        workspaceDiff.setCanPromoteOwnChanges(canSelfPromote(authentication));
+        workspaceDiff.setCanPromoteOwnChanges(allowSelfPromotion(authentication));
         return workspaceDiff;
     }
 
@@ -54,19 +54,20 @@ public class PromotionController extends AbstractBaseController {
     @ApiOperation(value = "Promote configurations", notes = "Promotes the specified configuration files.")
     @PostMapping(value = "configuration/promote")
     public ResponseEntity promoteConfiguration(@ApiParam("The definition that contains the information about which files to promote.") @RequestBody ConfigurationPromotion promotion, Authentication authentication) throws GitAPIException {
-        boolean canSelfPromote = canSelfPromote(authentication);
+        boolean allowSelfPromotion = allowSelfPromotion(authentication);
         try {
-            fileManager.promoteConfiguration(promotion, canSelfPromote);
+            fileManager.promoteConfiguration(promotion, allowSelfPromotion);
             return ResponseEntity.ok().build();
         } catch (ConcurrentModificationException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
     }
 
-    private boolean canSelfPromote(Authentication authentication) {
-        boolean hasAdminRights = authentication.getAuthorities().stream()
+    private boolean allowSelfPromotion(Authentication authentication) {
+        if (!settings.getSecurity().isFourEyesPromotion()) {
+            return true;
+        }
+        return authentication.getAuthorities().stream()
                 .anyMatch(auth -> auth.getAuthority().equals(UserRoleConfiguration.ADMIN_ACCESS_ROLE));
-        boolean fourEyesPromotionEnabled = settings.getSecurity().isFourEyesPromotion();
-        return !fourEyesPromotionEnabled || hasAdminRights;
     }
 }

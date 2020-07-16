@@ -666,7 +666,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void selfPromotionProtectionEnabled() throws GitAPIException, IOException {
+        public void selfPromotionProtectionEnabled() throws GitAPIException {
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml");
             versioningManager.initialize();
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml=content_A");
@@ -695,7 +695,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void selfPromotionPrevented() throws GitAPIException, IOException {
+        public void selfPromotionPrevented() throws GitAPIException {
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml");
             versioningManager.initialize();
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml=content_A");
@@ -711,11 +711,13 @@ class VersioningManagerTest extends FileTestBase {
                     "/file_modified.yml"
             ));
 
-            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml=content_B");
-            versioningManager.commitAllChanges("commit");
+            RevisionAccess live = versioningManager.getLiveRevision();
 
             assertThatThrownBy(() -> versioningManager.promoteConfiguration(promotion, false))
                     .isInstanceOf(SelfPromotionNotAllowedException.class);
+
+            assertThat(versioningManager.getLiveRevision().getRevisionId())
+                    .isEqualTo(live.getRevisionId());
         }
     }
 
