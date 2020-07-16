@@ -49,6 +49,7 @@
       "version-1.4-config-server/log-config"
     ],
     "Breaking Changes": [
+      "version-1.4-breaking-changes/1-4",
       "version-1.4-breaking-changes/1-3",
       "version-1.4-breaking-changes/1-2",
       "version-1.4-breaking-changes/1-1",

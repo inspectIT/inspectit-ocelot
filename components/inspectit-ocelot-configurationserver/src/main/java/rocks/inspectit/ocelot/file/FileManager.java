@@ -88,7 +88,7 @@ public class FileManager {
      */
     public RevisionAccess getLiveRevision() {
         CachingRevisionAccess currentRev = versioningManager.getLiveRevision();
-        if (cachedLiveRevision == null || !currentRev.getRevisionID().equals(cachedLiveRevision.getRevisionID())) {
+        if (cachedLiveRevision == null || !currentRev.getRevisionId().equals(cachedLiveRevision.getRevisionId())) {
             cachedLiveRevision = currentRev;
         }
         return cachedLiveRevision;
@@ -105,7 +105,7 @@ public class FileManager {
     public RevisionAccess getWorkspaceRevision() {
         CachingRevisionAccess currentRev = versioningManager.getWorkspaceRevision();
         if (cachedWorkspaceRevision == null
-                || !currentRev.getRevisionID().equals(cachedWorkspaceRevision.getRevisionID())) {
+                || !currentRev.getRevisionId().equals(cachedWorkspaceRevision.getRevisionId())) {
             cachedWorkspaceRevision = currentRev;
         }
         return cachedWorkspaceRevision;
