@@ -20,6 +20,7 @@ import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.CollectionUtils;
+import rocks.inspectit.ocelot.error.exceptions.SelfPromotionNotAllowedException;
 import rocks.inspectit.ocelot.events.ConfigurationPromotionEvent;
 import rocks.inspectit.ocelot.events.WorkspaceChangedEvent;
 import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
@@ -604,7 +605,7 @@ public class VersioningManager {
      *
      * @param promotion the promotion definition
      */
-    public void promoteConfiguration(ConfigurationPromotion promotion) throws GitAPIException {
+    public void promoteConfiguration(ConfigurationPromotion promotion, boolean allowSelfPromotion) throws GitAPIException {
         if (promotion == null || CollectionUtils.isEmpty(promotion.getFiles())) {
             throw new IllegalArgumentException("ConfigurationPromotion must not be null and has to promote at least one file!");
         }
@@ -623,6 +624,11 @@ public class VersioningManager {
 
             // get modified files between the specified diff - we only consider files which exists in the diff
             WorkspaceDiff diff = getWorkspaceDiff(false, liveCommitId, workspaceCommitId);
+
+            if (!allowSelfPromotion && containsSelfPromotion(promotion, diff)) {
+                throw new SelfPromotionNotAllowedException("The promotion request contains a file which was edited by the same user");
+            }
+
             Map<String, DiffEntry.ChangeType> changeIndex = diff.getEntries().stream()
                     .collect(Collectors.toMap(SimpleDiffEntry::getFile, SimpleDiffEntry::getType));
 
@@ -671,6 +677,20 @@ public class VersioningManager {
 
             eventPublisher.publishEvent(new ConfigurationPromotionEvent(this));
         }
+    }
+
+    private boolean containsSelfPromotion(ConfigurationPromotion promotion, WorkspaceDiff diff) {
+        PersonIdent currentAuthor = getCurrentAuthor();
+        if (currentAuthor == GIT_SYSTEM_AUTHOR) {
+            return false;
+        }
+        Set<String> promotedFiles = promotion.getFiles()
+                .stream()
+                .map(this::prefixRelativeFile) //use prefixRelativeFile to normalize the file names
+                .collect(Collectors.toSet());
+        return diff.getEntries().stream()
+                .filter(entry -> promotedFiles.contains(prefixRelativeFile(entry.getFile())))
+                .anyMatch(entry -> entry.getAuthors().contains(currentAuthor.getName()));
     }
 
     /**
