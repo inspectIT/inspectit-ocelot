@@ -49,7 +49,7 @@ const PromotionView = () => {
       isApproved: currentApprovals.includes(element.file),
       canSelfApprove,
       currentUser,
-      canPromote
+      canPromote,
     };
   }); // copy of the entries array including the data whether a file is approved or not.
 
@@ -166,7 +166,7 @@ const PromotionView = () => {
                 {currentSelectionFile ? (
                   <>
                     <PromotionFileViewer oldValue={currentSelectionFile.oldContent} newValue={currentSelectionFile.newContent} />
-                    
+
                     <PromotionFileApproval
                       currentUser={currentUser}
                       authors={authors}

@@ -21,7 +21,7 @@ const selectionTemplate = ({ file, type, authors, isApproved, canSelfApprove, cu
     approved: isApproved,
   });
 
-  const preventApproval = !canPromote || !canSelfApprove && authors.includes(currentUser);
+  const preventApproval = !canPromote || (!canSelfApprove && authors.includes(currentUser));
 
   return (
     <>
