@@ -29,15 +29,13 @@ const PromotionView = () => {
   const workspaceCommitId = useSelector((state) => state.promotion.workspaceCommitId);
   const liveCommitId = useSelector((state) => state.promotion.liveCommitId);
   const canPromote = useSelector((state) => state.authentication.permissions.promote);
-  const isAdmin = useSelector((state) => state.authentication.permissions.admin);
   const currentUser = useSelector((state) => state.authentication.username);
 
   // fetching promotion data
   const [{ data, isLoading, lastUpdate }, refreshData] = useFetchData('/configuration/promotions', { 'include-content': 'true' });
 
   // derived variables
-  const isFourEyesPrinicple = _.get(data, 'canPromoteOwnChanges', false); // whether the 4-eyes-principle is used
-  const canSelfApprove = isAdmin || !isFourEyesPrinicple; // whether the user can approve self-made changes
+  const canSelfApprove = _.get(data, 'canPromoteOwnChanges', false); // whether the user can approve self-made changes
   const entries = _.get(data, 'entries', []); // all modified files
   const currentSelectionFile = currentSelection ? _.find(entries, { file: currentSelection }) : null; // the current selected file object
   const authors = _.get(currentSelectionFile, 'authors', []); // list of users which modified the selected file

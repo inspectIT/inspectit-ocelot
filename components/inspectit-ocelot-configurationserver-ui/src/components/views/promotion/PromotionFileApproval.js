@@ -83,6 +83,8 @@ PromotionFileApproval.propTypes = {
   approved: PropTypes.bool,
   /** Callback when the approve the approval state should be toggled */
   onApproveFile: PropTypes.func,
+  /** Whether the user can approve its own changes */
+  allowSelfApproval: PropTypes.bool,
 };
 
 export default PromotionFileApproval;
