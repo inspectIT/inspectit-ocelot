@@ -36,3 +36,21 @@ In the following screenshot, the configuration server's promotion user interface
 4. The current version of the file on the `WORKSPACE` branch.
 5. Button to promote the approved files.
 6. The selected file can be approved with this button.
+
+## Four-Eyes Promoting Restriction
+
+By default, any user with promotion rights can promote any changes.
+In some setups it can be beneficial to enforce peer-reviews before promoting configuration changes.
+The configuration server offers a mechanism to enforce a four eyes principle for configuration changes which can be enabled using the following setting:
+
+```YAML
+inspectit-config-server:
+  security:
+    four-eyes-promotion: true
+```
+
+When this setting is enabled, users with promotion rights will no longer be able to promote their own configuration changes.
+
+:::note
+This restriction is only applied to non-admin users! Users with admin rights will still be able to promote their own changes.
+:::
