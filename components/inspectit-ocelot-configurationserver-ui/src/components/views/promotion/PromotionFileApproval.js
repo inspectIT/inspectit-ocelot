@@ -77,8 +77,8 @@ PromotionFileApproval.propTypes = {
   currentUser: PropTypes.string,
   /** Array of users which modified the currently selected file */
   authors: PropTypes.arrayOf(PropTypes.string),
-  /** Whether the four-eyes princible is enabled. The user itself cannot promote own changes */
-  useFourEyesPrinicple: PropTypes.bool,
+  /** Whether the use can approve files */
+  canApprove: PropTypes.bool,
   /** Whether the current file is approved */
   approved: PropTypes.bool,
   /** Callback when the approve the approval state should be toggled */
