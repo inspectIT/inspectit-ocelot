@@ -1,6 +1,7 @@
 import Heading from "./Heading";
 import Item from "./Item";
-import GenericJsonWrapper from "./Method";
+import Method from "./Method";
+import { Button } from "primereact/button";
 
 // parent attribute = 'interfaces'
 function Methods( {items, parentAttribute, onUpdate,} ) {
@@ -20,22 +21,16 @@ function Methods( {items, parentAttribute, onUpdate,} ) {
     onUpdate(updatedItems);
   }
 
-  console.log('itemsK', items)
+
 
   return (
     <React.Fragment>
-      <div data-optiontype={parentAttribute} style={{  marginBottom: '',  position:'relative', height: '', padding: '0 25px 0 25px' , background: 'white', border: '1px solid lightgrey' , borderRadius: '10px'}}>
-        { items.map( (method, index) => 
-          <React.Fragment>
-            <Heading style={{ color: 'red' }} attributeText={'Methods must fullfill all the the following options'} connectionTypeAndOr={'or'} count={index} /> 
-            <div style={{width:'', background:'white', minHeight: '200px',  padding:'35px', border: '1px solid lightgrey', borderRadius:'10px', marginBottom: '25px'}}>
-              <h4 style={{marginBottom:'5px'}}> The Method...</h4>
-              <GenericJsonWrapper  item={method}  onUpdate={(updateObj) => onUpdateListItem(updateObj, index)}   optionText={'Apfel'} /> 
-              </div>
-          </React.Fragment>
-        )}
-
-      </div>
+      { items.map( (method, index) => 
+        <React.Fragment>
+          <Heading style={{ color: 'red' }} text={'Methods must fullfill all the the following options'} semantic={'or'} count={index} /> 
+          <Method  item={method}  onUpdate={(updateObj) => onUpdateListItem(updateObj, index)}   optionText={'Apfel'} /> 
+        </React.Fragment>
+      )}
     </React.Fragment>
   )
 }

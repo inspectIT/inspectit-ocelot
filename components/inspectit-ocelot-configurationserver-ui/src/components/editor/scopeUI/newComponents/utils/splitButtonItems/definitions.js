@@ -89,6 +89,38 @@ export const superclass = [
       item.annotations.push({ name:'', 'matcher-mode': 'EQUALS_FULLY'})
       return item;
     },
+      
+  },
+]
+
+export const _class = [
+  {
+    actionId: 'adding interfaces',
+    label: 'specify classes by implemented interfaces',
+    icon: 'pi pi-refresh',
+    createAttribute: (item) => {
+      item.interfaces = item.interfaces || [];
+      item.interfaces.push({ name:'', 'matcher-mode': 'EQUALS_FULLY'})
+      return item;
+    },
+  },
+  {
+    actionId: 'adding superclass',
+    label: 'specify classes by their superclass',
+    icon: 'pi pi-times',
+    createAttribute: (item) => {
+      item.superclass =  { name:'', 'matcher-mode': 'EQUALS_FULLY'};
+      return item;
+    },
+  },
+  {
+    actionId: 'adding type',
+    label: 'specify the class by its name',
+    icon: 'pi pi-times',
+    createAttribute: (item) => {
+      item.type =  { name:'', 'matcher-mode': 'EQUALS_FULLY', annotations:[ { name:'', 'matcher-mode': 'EQUALS_FULLY'}]};
+      return item;
+    },
   },
 ]
 

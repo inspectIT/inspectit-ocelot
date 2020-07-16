@@ -38,6 +38,7 @@ class ScopeEditor extends React.Component {
       { label: 'Scope Overview' },
     ],
     currentlyDisplayScopeName: '',
+    History: [],
   }
 
   componentDidMount(){
@@ -119,6 +120,8 @@ class ScopeEditor extends React.Component {
     copyConfig.inspectit.instrumentation.scopes[scopeName] = updatedValue;
     onUpdate(copyConfig);
   }
+
+  addToHistory = () 
 
   onClick(name, position) {
     let state = {

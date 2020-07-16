@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import { Growl } from 'primereact/growl';
+import {Growl} from 'primereact/growl';
 
 /** ID of the last show notification */
 let lastNotificationId = -1;

@@ -59,7 +59,7 @@ function ClassSelectorContainer({ scopeObject, onUpdate}) {
                 <Name text={`has a name`}  onUpdate={updatedValue => onGenericUpdate(updatedValue, attribute)} style={{background: 'yellow'}} item={scopeObject[attribute]} />
               </ ValueBox>
               {/* <ValueBox  onUpdate={(updatedValue) => this.onGenericUpdate(updatedValue, attribute)} > */}
-                { scopeObject[attribute].annotations.length > 0  && scopeObject[attribute].annotations &&
+                { scopeObject[attribute].annotations && scopeObject[attribute].annotations.length > 0  && scopeObject[attribute].annotations &&
                   <ValueBox  item={scopeObject[attribute]} attributesToDelete={['annotations']} onUpdate={(updatedValue) => updateAnnotationsInItem(scopeObject[attribute], updatedValue, attribute)} >
                     <Annotations onUpdate={(updatedValue) => updateAnnotationsInItem( scopeObject[attribute], updatedValue, [attribute])} items={scopeObject[attribute].annotations} parentAttribute={attribute} /> 
                   </ValueBox>}

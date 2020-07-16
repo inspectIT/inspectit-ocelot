@@ -3,7 +3,11 @@ import React from 'react';
 import deepCopy from 'json-deep-copy';
 import MethodsContainerList from './newComponents/Methods';
 import ClassSelectorContainer from './newComponents/ClassSelectorContainer';
-
+import { Button } from 'primereact/button';
+import { splittButtonItemIsInvalid, adjustInvalidSplitButtonItem } from './newComponents/utils/splitButtonItems/invalidLabelsTopDown';
+import { SplitButton } from 'primereact/splitbutton';
+import { getSplitButtonsItems, enableCreateAttributeWithinSplitItemEntries } from './newComponents/utils/splitButtonItems/getSplitButtonItems';
+var SimpleUndo = require('simple-undo');
 
 class Scope extends React.Component {
   // the specific icon is set to green, when for e.x scopename, a classSelector, a methodSelector exist
@@ -32,7 +36,7 @@ class Scope extends React.Component {
 
   componentDidMount(){
     this.addEventListenerToBreadCrumbs();
-
+ 
     // do not read! Obsolete information and is not in use
     // TODO: manually styling, this must be set through a <style> for the classNames [p-listbox p-inputtext p-component] and [p-listbox-item]
     // const anotherArray = Array.from(document.getElementsByClassName('p-listbox p-inputtext p-component'));
@@ -55,12 +59,26 @@ class Scope extends React.Component {
     })
   }
 
+
   onGenericUpdate = ( updatedValue, optionType ) => {
     let { onUpdate, scopeObject } = this.props;
-    const item = scopeObject;
-    let updatedItem = deepCopy(item);
+    let updatedItem = deepCopy(scopeObject);
     
+    if(Array.isArray(updatedValue) === true) {
+      if( updatedValue.length === 0 ) {
+        delete updatedItem[optionType];
+      } else {
+        updatedItem[optionType] = updatedValue;
+      }
+    } else {  // assumption, the updateValue is a json thus Object.keys
+      if ( Object.keys(updatedValue).length === 0) {
+        delete updatedItem[optionType];
+      } else {
+        updatedItem[optionType] = updatedValue;
+      }
+    }
 
+    // undo redo functionality
     onUpdate(updatedItem);
   }
 
@@ -135,6 +153,34 @@ class Scope extends React.Component {
     onUpdate(updatedItem);
   }
 
+
+  addMethod = () => {
+    const { scopeObject, onUpdate } = this.props;
+    const updatedItem = deepCopy(scopeObject);
+    if( updatedItem.methods ) {
+      updatedItem.methods.push({name: '', 'matcher-mode': 'EQUALS_FULLY'})
+    } else {
+      updatedItem.methods = [{name: '', 'matcher-mode': 'EQUALS_FULLY'}]
+    }
+    onUpdate(updatedItem);
+  }
+
+  createSplitButtonItems = (attribute) => {
+    const { scopeObject, onUpdate } = this.props;
+    const updatedItem = deepCopy(scopeObject);
+
+    let splittButtonItems = getSplitButtonsItems(attribute, updatedItem); 
+    // .command key must be added + item must be passed to createAttribute(item), since the function does not have the context to access item
+    splittButtonItems = enableCreateAttributeWithinSplitItemEntries(splittButtonItems, updatedItem, onUpdate);
+    
+    // adjusting the items
+    splittButtonItems.map(splittButtonItem => {
+      const invalidActionJson = splittButtonItemIsInvalid(updatedItem, splittButtonItem)  // returns object with required information for the following actions or simply false
+      if(invalidActionJson) splittButtonItem = adjustInvalidSplitButtonItem(splittButtonItem, invalidActionJson);
+    })
+    return splittButtonItems;
+  }
+
   render() {
     const { icon_scopeName, icon_classSelector , icon_methodSelector, groupedClassItems, usedClassAttributes} = this.state;
 
@@ -148,10 +194,17 @@ class Scope extends React.Component {
     const alignItems = 'center';
     const descriptionTextMaxWidth = '300px' // selector description max length, else the row expends to much
 
+    const splitButtonItemsClass = this.createSplitButtonItems('_class', scopeObject);
+
 
     return (
       <div className="this">
-        <div >
+        <div style={{width:'1121px'}}>
+        <Button label='add history' onClick={this.addHistory}> </Button>
+        <Button label='add history 2' onClick={this.addHistory}> </Button>
+        <Button label='redo' onClick={this.redo}> </Button>
+        <Button label='undo' onClick={this.undo}> </Button>
+        <Button label='log' onClick={this.logHistory}> </Button>
           <div >
             {/* scopenameBox */}
             <div style={{ ...boxStyle}}>
@@ -196,7 +249,7 @@ class Scope extends React.Component {
               </div>
 
               {/* classSelector here */}
-              <div style={{width:'', background:'white', minHeight: '200px',  padding:'35px'}}>
+              <div id='classSelectorContainer' style={{width:'', background:'white', minHeight: '200px',  padding:'35px'}}>
               {/* TODO: Hint nicht wie die nächsten 3 Zeilen. Keine Information darüber, der wie vielte Class Selector gechained wurde 
                <Item item={scopeObject.type} />
                <Item item={scopeObject.superclass} />
@@ -206,6 +259,8 @@ class Scope extends React.Component {
               {/* The keys of the scopeObject are [interface, type, superclass, method, advanced ]
               we filter out method and advanced
               we use map on the filteredAttributeArray and get an index. The index is used to know display wether 'the class'  or '... and the class'  */}
+                { splitButtonItemsClass.length >0  && <SplitButton tooltip="specify classes by their implemented interfaces, superclass, or by the class name (and its attached annotations) " label="add " icon="pi pi-plus" model={splitButtonItemsClass}></SplitButton> }
+
                 <ClassSelectorContainer scopeObject={scopeObject} onUpdate={onUpdate} />
 
 
@@ -246,7 +301,9 @@ class Scope extends React.Component {
                     !Array.isArray(scopeObject[attribute]) && <Item backgroundColor='#EEEEEE' item={scopeObject[attribute]} parentAttribute={attribute} onUpdate={(updatedValue) => this.onGenericUpdate(updatedValue, attribute)}/> 
                     }
                   </React.Fragment> */}
-                <div style={{  minHeight: '200px'}}>
+                <div style={{width:'', background:'white', minHeight: '200px',  padding:'35px'}}>
+                  <Button onClick={this.addMethod} tooltip='add a method selector. Describe with the + button, which option the methods must fullfill' icon="pi pi-plus" style={{left:'50%', top:'10px'}}></Button>
+
                   { scopeObject.methods && <MethodsContainerList items={scopeObject.methods} parentAttribute={'methods'} onUpdate={(updatedValue) => this.onGenericUpdate(updatedValue, 'methods')} /> }
 
                 </div>

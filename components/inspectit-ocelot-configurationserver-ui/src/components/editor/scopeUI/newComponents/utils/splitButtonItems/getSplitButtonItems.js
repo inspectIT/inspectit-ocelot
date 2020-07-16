@@ -1,5 +1,5 @@
 
-import { type, interfaces, superclass , methods } from './definitions';
+import { type, interfaces, superclass , methods, _class } from './definitions';
 import deepCopy from 'json-deep-copy';
 
 const splitButtonItemsObject = {
@@ -15,6 +15,10 @@ const splitButtonItemsObject = {
   },
   methods: {
     splitButtonItems: methods
+  },
+
+  ['_class']: {
+    splitButtonItems: _class
   }
 
 }
@@ -52,6 +56,7 @@ export const enableCreateAttributeWithinSplitItemEntries = (splittButtonItems, i
           let updatedItem = deepCopy(item);
           updatedItem = splittItem.createAttribute(updatedItem); // passing the required item to createAttribute
           onUpdate(updatedItem)
+          console.log('uuu', document.getElementById('classSelectorContainer'))
         }
       } else { // copy
         updatedSplitItem[key] = splittItem[key];

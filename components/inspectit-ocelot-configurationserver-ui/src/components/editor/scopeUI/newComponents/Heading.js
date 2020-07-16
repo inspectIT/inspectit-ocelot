@@ -1,7 +1,7 @@
 // andIndex display an AND-Connection between the Attributes
 // orIndex to display an OR-Connection between the Attributes
 // attribute
-function Heading ({ attribute, text, count, semantic,style })  {
+function Heading ({ attribute, text, count, semantic, style })  {
 
     const background_uberSchriftDiv = "white";
 

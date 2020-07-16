@@ -12,6 +12,9 @@ import ValueBox from "./ValueBox";
 import BooleanItem from "./BooleanItem";
 import SelectorBox from "./SelectorBox";
 import Annotations from "./Annotations";
+import Arguments from "./Arguments";
+
+// ValueBox onUpdate is for removing the whole attribute via remove icon and for adding attribute 
 
 class Method extends React.Component {
   state = { splitMenuItems: [] }
@@ -86,21 +89,19 @@ class Method extends React.Component {
   }
 
   render() {
-    const { item } = this.props;
+    const { item, onUpdate } = this.props;
 
-    console.log('genericJsonWrapper', this.props)
     // mehrere attribute method visiblity annotaions x y bz e 
     return (
-      <SelectorBox parentAttribute='methods'  item={item} onUpdate={(updatedValue) => this.props.onUpdate(updatedValue)}>
+      <SelectorBox style={{background: '#EEEEEE'}} item={item} attribute={'methods'} text={'Method'} onUpdate={(updatedValue) => this.props.onUpdate(updatedValue)}>
         {Object.keys(item).map( attribute => 
           <React.Fragment>
-            
-            { attribute === 'name' && <ValueBox  item={item} attributesToDelete={[attribute]} onUpdate={(updatedValue) => this.onGenericUpdate(updatedValue, attribute)} ><Name text={' ... has a name, that ' } onUpdate={(updatedValue) => this.props.onUpdate(updatedValue)} item={item} /> </ValueBox> }
-            { attribute === 'visibility' && <ValueBox  item={item} attributesToDelete={[attribute]} onUpdate={(updatedValue) => this.onGenericUpdate(updatedValue, attribute)} ><MethodVisibility onUpdate={(updateObj) => this.onGenericUpdate(updateObj, 'visibility')} item={item[attribute]}  /> </ValueBox> }
-            { attribute === 'annotations' && <ValueBox  item={item} attributesToDelete={[attribute]} onUpdate={(updatedValue) => this.onGenericUpdate(updatedValue, attribute)} ><Annotations onUpdate={(updateObj) => this.onGenericUpdate(updateObj, 'annotations')} items={item[attribute]} optionType={'Biene '} /> </ValueBox>}
-            {/* { attribute === 'arguments' && <ValueBox  item={item} attributesToDelete={[attribute]} onUpdate={(updatedValue) => this.props.onUpdate(updatedValue, attribute)} ><MethodItem onUpdate={(updateObj) => this.onGenericUpdate(updateObj, 'name')} item={item} /> </ValueBox> } */}
-            { attribute === 'is-constructor' && attribute && <ValueBox  item={item} attributesToDelete={[attribute]} onUpdate={(updatedValue) => this.onGenericUpdate(updatedValue, attribute)} ><BooleanItem onUpdate={(updateObj) => this.onGenericUpdate(updateObj, 'is-constructor')} text={'is a constructor'} item={item[attribute]} /> </ValueBox> }
-            { attribute === 'is-synchronized' && attribute && <ValueBox  item={item} attributesToDelete={[attribute]} onUpdate={(updatedValue) => this.onGenericUpdate(updatedValue, attribute)} ><BooleanItem onUpdate={(updateObj) => this.onGenericUpdate(updateObj, 'is-synchronized')} text={'is synchronized'} item={item[attribute]} /> </ValueBox> }
+            { attribute === 'name' && <ValueBox  item={item} attributesToDelete={['name','matcher-mode']} onUpdate={onUpdate} ><Name text={' ... has a name, that ' } onUpdate={(updatedValue) => this.props.onUpdate(updatedValue)} item={item} /> </ValueBox> }
+            { attribute === 'visibility' && item[attribute] && <ValueBox  item={item} attributesToDelete={[attribute]} onUpdate={onUpdate} ><MethodVisibility onUpdate={(updateObj) => this.onGenericUpdate(updateObj, 'visibility')} item={item[attribute]}  /> </ValueBox> }
+            { attribute === 'annotations' &&  item[attribute] && <ValueBox  item={item} attributesToDelete={[attribute]} onUpdate={onUpdate} ><Annotations onUpdate={(updateObj) => this.onGenericUpdate(updateObj, 'annotations')} items={item[attribute]} /> </ValueBox>}
+            { attribute === 'arguments' && <ValueBox  item={item} attributesToDelete={[attribute]} onUpdate={(updatedValue) => this.props.onUpdate(updatedValue, attribute)} ><Arguments onUpdate={(updateObj) => this.onGenericUpdate(updateObj, 'arguments')} items={item[attribute]} /> </ValueBox> }
+            { attribute === 'is-constructor' && attribute && <ValueBox  item={item} attributesToDelete={[attribute]} onUpdate={onUpdate} ><BooleanItem onUpdate={(updateObj) => this.onGenericUpdate(updateObj, 'is-constructor')} text={'is a constructor'} item={item[attribute]} /> </ValueBox> }
+            { attribute === 'is-synchronized' && attribute && <ValueBox  item={item} attributesToDelete={[attribute]} onUpdate={onUpdate} ><BooleanItem onUpdate={(updateObj) => this.onGenericUpdate(updateObj, 'is-synchronized')} text={'is synchronized'} item={item[attribute]} /> </ValueBox> }
           </React.Fragment>
         )}
       </SelectorBox>

@@ -10,6 +10,23 @@ export const helper_invalidActions = [
     ],
     invalidLabelText: 'only 1 name specification',
   },
+
+  {
+    invalidActionId: 'adding type',
+    invalidAttributes: 'type',
+    affectedAttributes: [
+      '_class'
+    ],
+    invalidLabelText: 'only 1 class name specification',
+  },
+  {
+    invalidActionId: 'adding superclass',
+    invalidAttributes: 'superclass',
+    affectedAttributes: [
+      '_class'
+    ],
+    invalidLabelText: 'only 1 superclass specification',
+  },
   {
     invalidActionId: 'adding visibility',
     invalidAttributes: 'visibility',
