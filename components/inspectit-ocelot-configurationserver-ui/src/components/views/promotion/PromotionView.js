@@ -28,20 +28,26 @@ const PromotionView = () => {
   const currentApprovals = useSelector((state) => state.promotion.approvals);
   const workspaceCommitId = useSelector((state) => state.promotion.workspaceCommitId);
   const liveCommitId = useSelector((state) => state.promotion.liveCommitId);
-  const canCommit = useSelector((state) => state.authentication.permissions.commit);
+  const canPromote = useSelector((state) => state.authentication.permissions.promote);
+  const currentUser = useSelector((state) => state.authentication.username);
 
   // fetching promotion data
   const [{ data, isLoading, lastUpdate }, refreshData] = useFetchData('/configuration/promotions', { 'include-content': 'true' });
 
   // derived variables
-  const entries = data && Array.isArray(data.entries) ? data.entries : []; // all modified files
+  const canSelfApprove = _.get(data, 'canPromoteOwnChanges', false); // whether the user can approve self-made changes
+  const entries = _.get(data, 'entries', []); // all modified files
   const currentSelectionFile = currentSelection ? _.find(entries, { file: currentSelection }) : null; // the current selected file object
+  const authors = _.get(currentSelectionFile, 'authors', []); // list of users which modified the selected file
   const hasApprovals = !_.isEmpty(currentApprovals); // if more at least one file is approved and waiting for promotion
   const isCurrentSelectionApproved = currentApprovals.includes(currentSelection); // whether the current selected file is approved
   const entriesWithApproval = _.map(entries, (element) => {
     return {
       ...element,
       isApproved: currentApprovals.includes(element.file),
+      canSelfApprove,
+      currentUser,
+      canPromote,
     };
   }); // copy of the entries array including the data whether a file is approved or not.
 
@@ -140,7 +146,8 @@ const PromotionView = () => {
             onRefresh={refreshData}
             onPromote={() => setShowPromotionDialog(true)}
             loading={isLoading}
-            enabled={canCommit && hasApprovals}
+            enabled={hasApprovals}
+            canPromote={canPromote}
           />
         </div>
         <div className="content">
@@ -157,7 +164,15 @@ const PromotionView = () => {
                 {currentSelectionFile ? (
                   <>
                     <PromotionFileViewer oldValue={currentSelectionFile.oldContent} newValue={currentSelectionFile.newContent} />
-                    {canCommit && <PromotionFileApproval approved={isCurrentSelectionApproved} onApproveFile={toggleFileApproval} />}
+
+                    <PromotionFileApproval
+                      currentUser={currentUser}
+                      authors={authors}
+                      canApprove={canPromote}
+                      approved={isCurrentSelectionApproved}
+                      onApproveFile={toggleFileApproval}
+                      allowSelfApproval={canSelfApprove}
+                    />
                   </>
                 ) : (
                   <div className="selection-information">

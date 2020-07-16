@@ -33,14 +33,14 @@ The LDAP related configuration properties have to be specified using the propert
 
 ### Authorization
 
-There are four different access roles available: read, write, commit and admin. These access roles are hierarchical.
-A user with write access also has read access, a user with commit access also has both read and write access and so on.
+There are four different access roles available: read, write, promote and admin. These access roles are hierarchical.
+A user with write access also has read access, a user with promote access also has both read and write access and so on.
 The exact permissions of the roles are the following:
 
 * *Read*: may only read files on the server.
 * *Write*: may read and edit files on the server.
-* *Commit*: may read, write and commit files (This feature is not implemented yet).
-* *Admin*: may read, write and commit files. Can also edit user accounts.
+* *Promote*: may read, write and promote files.
+* *Admin*: may read, write and promote files. Can also edit user accounts.
 
 #### Configuration
 
@@ -59,7 +59,7 @@ Each property is located below the property `inspectit-config-server.security.ld
 | `group-search-filter` | The LDAP filter to search for groups. |
 | `roles.read` | A list of LDAP-Groups which will gain read-access. |
 | `roles.write` | A list of LDAP-Groups which will gain write-access. |
-| `roles.commit` | A list of LDAP-Groups which will gain commit-access. |
+| `roles.promote` | A list of LDAP-Groups which will gain promote-access. |
 | `roles.admin` | A list of LDAP-Groups which will gain admin-access. |
 
 The following configuration snippet shows an example LDAP configuration (this configuration was created for [this](https://github.com/rroemhild/docker-test-openldap) LDAP server).
@@ -80,7 +80,7 @@ inspectit-config-server:
             roles:
               read: []
               write: []
-              commit: []
+              promote: []
               admin:
                 - SHIP_CREW
 ```

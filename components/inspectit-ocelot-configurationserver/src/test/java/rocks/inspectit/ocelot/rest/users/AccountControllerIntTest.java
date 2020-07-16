@@ -114,7 +114,7 @@ public class AccountControllerIntTest extends IntegrationTestBase {
             assertThat(result.getBody())
                     .isEqualTo(UserPermissions.builder()
                             .write(true)
-                            .commit(true)
+                            .promote(true)
                             .admin(true)
                             .build());
         }

@@ -30,10 +30,10 @@ public class LdapRoleResolveSettings {
     private List<String> write = new ArrayList<>();
 
     /**
-     * Roles defined in this list are granted read, write and commit access.
+     * Roles defined in this list are granted read, write and promotion access.
      */
     @Builder.Default
-    private List<String> commit = new ArrayList<>();
+    private List<String> promote = new ArrayList<>();
 
     /**
      * Roles defined in this list are granted read, write, commit and admin access.

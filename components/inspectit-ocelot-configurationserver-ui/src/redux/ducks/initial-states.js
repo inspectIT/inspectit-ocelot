@@ -4,7 +4,7 @@ const authentication = {
   /** The authorization permissions the user has*/
   permissions: {
     write: false,
-    commit: false,
+    promote: false,
     admin: false,
   },
   /** Specifying whether a login request is currently be executed */

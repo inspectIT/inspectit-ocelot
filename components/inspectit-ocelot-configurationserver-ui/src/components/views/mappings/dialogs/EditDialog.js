@@ -7,6 +7,7 @@ import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { Fieldset } from 'primereact/fieldset';
+import { Dropdown } from 'primereact/dropdown';
 
 import EditSources from '../editComponents/EditSources';
 import KeyValueEditor from '../editComponents/KeyValueEditor';
@@ -16,7 +17,9 @@ const defaultState = {
   name: '',
   sources: [],
   attributes: [],
-  isNewMapping: null,
+  isNewMapping: true,
+  currentMapping: null,
+  sourceBranch: 'WORKSPACE',
 };
 
 /**
@@ -34,8 +37,14 @@ class EditMappingDialog extends React.Component {
   };
 
   render() {
-    const { name, sources, attributes, isNewMapping } = this.state;
+    const { name, sources, attributes, isNewMapping, sourceBranch } = this.state;
     const heightFieldset = window.innerHeight * 0.35;
+
+    const branchOptions = [
+      { label: 'Workspace', value: 'WORKSPACE' },
+      { label: 'Live', value: 'LIVE' },
+    ];
+
     return (
       <div className="this">
         <style jsx>{`
@@ -43,7 +52,27 @@ class EditMappingDialog extends React.Component {
             border-left: 1px solid #ddd;
             border-right: 1px solid #ddd;
           }
+          .row-center {
+            display: flex;
+            align-items: center;
+          }
+          .fill {
+            flex-grow: 1;
+          }
+          .meta-row label {
+            margin-right: 1rem;
+          }
+          .meta-row label:not(:first-child) {
+            margin-left: 2rem;
+          }
+          .this :global(.dd-branch) {
+            width: 10rem;
+          }
+          .this :global(.in-name) {
+            width: 100%;
+          }
         `}</style>
+
         <Dialog
           header={isNewMapping ? 'Add Mapping' : 'Edit Mapping'}
           modal={true}
@@ -57,18 +86,31 @@ class EditMappingDialog extends React.Component {
             </div>
           }
         >
-          <span style={{ display: 'flex', alignItems: 'center' }}>
-            <p style={{ width: '9rem' }}>Mapping Name: </p>
-            <div className="p-inputgroup" style={{ display: 'inline-flex', verticalAlign: 'middle', width: '100%' }}>
+          <div className="row-center meta-row">
+            <label htmlFor="mappingName">Mapping Name: </label>
+            <div className="p-inputgroup fill">
               <InputText
+                id="mappingName"
+                className="in-name"
                 placeholder="Enter new name"
                 value={name ? name : ''}
                 onChange={(e) => this.setState({ name: e.target.value })}
-                style={{ width: '100%' }}
               />
               <span className="pi p-inputgroup-addon pi-pencil" style={{ background: 'inherit', borderColor: '#656565' }} />
             </div>
-          </span>
+
+            <label htmlFor="sourceBranch">Source Branch:</label>
+            <Dropdown
+              id="sourceBranch"
+              className="dd-branch"
+              value={sourceBranch}
+              options={branchOptions}
+              onChange={(e) => {
+                this.setState({ sourceBranch: e.value });
+              }}
+            />
+          </div>
+
           <Fieldset legend="Sources" style={{ paddingTop: 0, height: heightFieldset, overflow: 'hidden' }}>
             <EditSources
               visible={this.props.visible}
@@ -95,11 +137,16 @@ class EditMappingDialog extends React.Component {
    *
    * @param {*} nextProps
    */
-  componentWillReceiveProps(nextProps) {
-    if (!nextProps.mapping) {
-      this.setState({ isNewMapping: true });
-    } else {
-      this.setState(buildStateObject(nextProps.mapping));
+  componentDidUpdate() {
+    const { currentMapping } = this.state;
+    const { mapping } = this.props;
+
+    if (currentMapping !== mapping) {
+      if (!this.props.mapping) {
+        this.setState({ ...defaultState });
+      } else {
+        this.setState({ ...buildStateObject(this.props.mapping), currentMapping: mapping });
+      }
     }
   }
 
@@ -235,6 +282,7 @@ const buildMappingObject = (obj) => {
     name: obj.name,
     sources: cloneDeep(obj.sources) || [],
     attributes: {},
+    sourceBranch: obj.sourceBranch,
   };
 
   obj.attributes.forEach((pair) => {

@@ -10,7 +10,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.file.FileInfo;
 import rocks.inspectit.ocelot.file.FileManager;
-import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
+import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
+import rocks.inspectit.ocelot.file.versioning.Branch;
+import rocks.inspectit.ocelot.mappings.AgentMappingSerializer;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 
 import java.io.IOException;
@@ -33,14 +35,21 @@ public class AgentConfigurationReloadTaskTest {
     AgentConfigurationReloadTask reloadTask;
 
     @Mock
+    AgentMappingSerializer serializer;
+
+    @Mock
     FileManager fileManager;
 
     @Mock
-    AbstractFileAccessor fileAccessor;
+    RevisionAccess liveAccessor;
+
+    @Mock
+    RevisionAccess workspaceAccessor;
 
     @BeforeEach
     public void beforeEach() {
-        lenient().when(fileManager.getLiveRevision()).thenReturn(fileAccessor);
+        lenient().when(fileManager.getWorkspaceRevision()).thenReturn(workspaceAccessor);
+        lenient().when(fileManager.getLiveRevision()).thenReturn(liveAccessor);
     }
 
     @Nested
@@ -50,19 +59,29 @@ public class AgentConfigurationReloadTaskTest {
         public void loadWithException() {
             FileInfo fileInfo = mock(FileInfo.class);
             when(fileInfo.getAbsoluteFilePaths(any())).thenReturn(Stream.of("/test.yml"), Stream.of("/test.yml"));
-            when(fileAccessor.configurationFileExists(anyString())).thenReturn(true);
-            when(fileAccessor.configurationFileIsDirectory(anyString())).thenReturn(true);
-            when(fileAccessor.listConfigurationFiles(anyString())).thenReturn(Collections.singletonList(fileInfo));
+            when(workspaceAccessor.agentMappingsExist()).thenReturn(true);
+            when(workspaceAccessor.configurationFileExists(anyString())).thenReturn(true);
+            when(workspaceAccessor.configurationFileIsDirectory(anyString())).thenReturn(true);
+            when(workspaceAccessor.listConfigurationFiles(anyString())).thenReturn(Collections.singletonList(fileInfo));
             // the first call will return a broken file
-            when(fileAccessor.readConfigurationFile(anyString())).thenReturn(Optional.of("key:\tbroken"), Optional.of("key: valid"));
+            when(workspaceAccessor.readConfigurationFile(anyString())).thenReturn(Optional.of("key:\tbroken"), Optional.of("key: valid"));
 
-            AgentMapping mapping = AgentMapping.builder().name("test").source("/test").build();
-            AgentMapping mapping2 = AgentMapping.builder().name("test2").source("/test2").build();
+            AgentMapping mapping = AgentMapping.builder()
+                    .name("test")
+                    .source("/test")
+                    .sourceBranch(Branch.WORKSPACE)
+                    .build();
+            AgentMapping mapping2 = AgentMapping.builder()
+                    .name("test2")
+                    .source("/test2")
+                    .sourceBranch(Branch.WORKSPACE)
+                    .build();
+            doReturn(Arrays.asList(mapping, mapping2)).when(serializer).readAgentMappings(any());
 
-            final MutableObject<List<AgentConfiguration>> configurations = new MutableObject<>();
+            MutableObject<List<AgentConfiguration>> configurations = new MutableObject<>();
             Consumer<List<AgentConfiguration>> consumer = configurations::setValue;
 
-            AgentConfigurationReloadTask task = new AgentConfigurationReloadTask(Arrays.asList(mapping, mapping2), fileManager, consumer);
+            AgentConfigurationReloadTask task = new AgentConfigurationReloadTask(serializer, fileManager, consumer);
 
             task.run();
 
@@ -82,12 +101,16 @@ public class AgentConfigurationReloadTaskTest {
         public void loadYaml() throws IOException {
             FileInfo fileInfo = mock(FileInfo.class);
             when(fileInfo.getAbsoluteFilePaths(any())).thenReturn(Stream.of("/test.yml"));
-            when(fileAccessor.configurationFileExists("test")).thenReturn(true);
-            when(fileAccessor.configurationFileIsDirectory("test")).thenReturn(true);
-            when(fileAccessor.listConfigurationFiles(anyString())).thenReturn(Collections.singletonList(fileInfo));
-            when(fileAccessor.readConfigurationFile("/test.yml")).thenReturn(Optional.of("key: value"));
+            when(workspaceAccessor.configurationFileExists("test")).thenReturn(true);
+            when(workspaceAccessor.configurationFileIsDirectory("test")).thenReturn(true);
+            when(workspaceAccessor.listConfigurationFiles(anyString())).thenReturn(Collections.singletonList(fileInfo));
+            when(workspaceAccessor.readConfigurationFile("/test.yml")).thenReturn(Optional.of("key: value"));
 
-            AgentMapping mapping = AgentMapping.builder().name("test").source("/test").build();
+            AgentMapping mapping = AgentMapping.builder()
+                    .name("test")
+                    .source("/test")
+                    .sourceBranch(Branch.WORKSPACE)
+                    .build();
             String string = reloadTask.loadConfigForMapping(mapping);
 
             assertThat(string).isEqualTo("{key: value}\n");
@@ -97,12 +120,16 @@ public class AgentConfigurationReloadTaskTest {
         public void yamlWithTab() {
             FileInfo fileInfo = mock(FileInfo.class);
             when(fileInfo.getAbsoluteFilePaths(any())).thenReturn(Stream.of("/test.yml"));
-            when(fileAccessor.configurationFileExists("test")).thenReturn(true);
-            when(fileAccessor.configurationFileIsDirectory("test")).thenReturn(true);
-            when(fileAccessor.listConfigurationFiles(anyString())).thenReturn(Collections.singletonList(fileInfo));
-            when(fileAccessor.readConfigurationFile("/test.yml")).thenReturn(Optional.of("key:\tvalue"));
+            when(workspaceAccessor.configurationFileExists("test")).thenReturn(true);
+            when(workspaceAccessor.configurationFileIsDirectory("test")).thenReturn(true);
+            when(workspaceAccessor.listConfigurationFiles(anyString())).thenReturn(Collections.singletonList(fileInfo));
+            when(workspaceAccessor.readConfigurationFile("/test.yml")).thenReturn(Optional.of("key:\tvalue"));
 
-            AgentMapping mapping = AgentMapping.builder().name("test").source("/test").build();
+            AgentMapping mapping = AgentMapping.builder()
+                    .name("test")
+                    .source("/test")
+                    .sourceBranch(Branch.WORKSPACE)
+                    .build();
 
             assertThatExceptionOfType(AgentConfigurationReloadTask.InvalidConfigurationFileException.class)
                     .isThrownBy(() -> reloadTask.loadConfigForMapping(mapping))
@@ -122,27 +149,42 @@ public class AgentConfigurationReloadTaskTest {
             assertThat(result).isEmpty();
         }
 
+        @Test
+        void liveBranchSpecified() throws IOException {
+            AgentMapping mapping = AgentMapping.builder()
+                    .source("a.yml")
+                    .sourceBranch(Branch.LIVE)
+                    .build();
+
+            doReturn(true).when(liveAccessor).configurationFileExists("a.yml");
+            doReturn(false).when(liveAccessor).configurationFileIsDirectory("a.yml");
+            doReturn(Optional.of("key: value")).when(liveAccessor).readConfigurationFile("a.yml");
+
+            String result = reloadTask.loadConfigForMapping(mapping);
+
+            assertThat(result).isEqualToIgnoringWhitespace("{key: value}");
+        }
 
         @Test
         void nonExistingSourcesSpecified() throws IOException {
-            doReturn(false).when(fileAccessor).configurationFileExists("a.yml");
-            doReturn(false).when(fileAccessor).configurationFileExists("some/folder");
+            doReturn(false).when(workspaceAccessor).configurationFileExists("a.yml");
+            doReturn(false).when(workspaceAccessor).configurationFileExists("some/folder");
 
             String result = reloadTask.loadConfigForMapping(
                     AgentMapping.builder()
                             .source("a.yml")
                             .source("/some/folder")
+                            .sourceBranch(Branch.WORKSPACE)
                             .build());
 
             assertThat(result).isEmpty();
         }
 
-
         @Test
         void nonYamlIgnored() throws IOException {
-            doReturn(true).when(fileAccessor).configurationFileExists(any());
-            doReturn(false).when(fileAccessor).configurationFileIsDirectory(any());
-            doReturn(Optional.of("")).when(fileAccessor).readConfigurationFile(any());
+            doReturn(true).when(workspaceAccessor).configurationFileExists(any());
+            doReturn(false).when(workspaceAccessor).configurationFileIsDirectory(any());
+            doReturn(Optional.of("")).when(workspaceAccessor).readConfigurationFile(any());
 
             String result = reloadTask.loadConfigForMapping(
                     AgentMapping.builder()
@@ -150,39 +192,39 @@ public class AgentConfigurationReloadTaskTest {
                             .source("b.YmL")
                             .source("c.yaml")
                             .source("d.txt")
+                            .sourceBranch(Branch.WORKSPACE)
                             .build());
 
             assertThat(result).isEmpty();
-            verify(fileAccessor).readConfigurationFile("a.yml");
-            verify(fileAccessor).readConfigurationFile("b.YmL");
-            verify(fileAccessor).readConfigurationFile("c.yaml");
+            verify(workspaceAccessor).readConfigurationFile("a.yml");
+            verify(workspaceAccessor).readConfigurationFile("b.YmL");
+            verify(workspaceAccessor).readConfigurationFile("c.yaml");
 
-            verify(fileAccessor, never()).readConfigurationFile("d.txt");
+            verify(workspaceAccessor, never()).readConfigurationFile("d.txt");
         }
-
 
         @Test
         void leadingSlashesInSourcesRemoved() throws IOException {
-            doReturn(false).when(fileAccessor).configurationFileExists("a.yml");
+            doReturn(false).when(workspaceAccessor).configurationFileExists("a.yml");
 
-            lenient().doThrow(new RuntimeException()).when(fileAccessor).configurationFileExists(startsWith("/"));
+            lenient().doThrow(new RuntimeException()).when(workspaceAccessor).configurationFileExists(startsWith("/"));
 
             reloadTask.loadConfigForMapping(
                     AgentMapping.builder()
                             .source("/a.yml")
+                            .sourceBranch(Branch.WORKSPACE)
                             .build());
 
-            verify(fileAccessor).configurationFileExists(eq("a.yml"));
+            verify(workspaceAccessor).configurationFileExists(eq("a.yml"));
         }
-
 
         @Test
         void priorityRespected() throws IOException {
 
-            when(fileAccessor.configurationFileExists(any())).thenReturn(true);
+            when(workspaceAccessor.configurationFileExists(any())).thenReturn(true);
 
-            doReturn(true).when(fileAccessor).configurationFileIsDirectory("folder");
-            doReturn(false).when(fileAccessor).configurationFileIsDirectory("z.yml");
+            doReturn(true).when(workspaceAccessor).configurationFileIsDirectory("folder");
+            doReturn(false).when(workspaceAccessor).configurationFileIsDirectory("z.yml");
 
             List<FileInfo> fileInfos = Arrays.asList(
                     FileInfo.builder()
@@ -199,21 +241,22 @@ public class AgentConfigurationReloadTaskTest {
                             .build()
             );
 
-            when(fileAccessor.listConfigurationFiles("folder")).thenReturn(fileInfos);
+            when(workspaceAccessor.listConfigurationFiles("folder")).thenReturn(fileInfos);
 
-            doReturn(Optional.of("{ val1: z}")).when(fileAccessor).readConfigurationFile("z.yml");
-            doReturn(Optional.of("{ val1: a, val2: a}")).when(fileAccessor).readConfigurationFile("folder/a.yml");
-            doReturn(Optional.of("{ val1: b, val2: b, val3: b}")).when(fileAccessor).readConfigurationFile("folder/b.yml");
+            doReturn(Optional.of("{ val1: z}")).when(workspaceAccessor).readConfigurationFile("z.yml");
+            doReturn(Optional.of("{ val1: a, val2: a}")).when(workspaceAccessor).readConfigurationFile("folder/a.yml");
+            doReturn(Optional.of("{ val1: b, val2: b, val3: b}")).when(workspaceAccessor)
+                    .readConfigurationFile("folder/b.yml");
 
             String result = reloadTask.loadConfigForMapping(
                     AgentMapping.builder()
                             .source("/z.yml")
                             .source("/folder")
+                            .sourceBranch(Branch.WORKSPACE)
                             .build());
 
-
             assertThat(result).isEqualTo("{val1: z, val2: a, val3: b}\n");
-            verify(fileAccessor, never()).readConfigurationFile("folder/somethingelse");
+            verify(workspaceAccessor, never()).readConfigurationFile("folder/somethingelse");
         }
     }
 }
