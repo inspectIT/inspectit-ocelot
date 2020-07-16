@@ -2,10 +2,10 @@ package rocks.inspectit.ocelot.file.accessor.git;
 
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -15,7 +15,6 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 @ExtendWith(MockitoExtension.class)
 class RevisionAccessTest {
 
-    @InjectMocks
     private RevisionAccess revisionAccess;
 
     @Mock
@@ -23,6 +22,11 @@ class RevisionAccessTest {
 
     @Mock
     private RevCommit revCommit;
+
+    @BeforeEach
+    void init() {
+        revisionAccess = new RevisionAccess(repository, revCommit, false);
+    }
 
     @Nested
     class VerifyPath {
