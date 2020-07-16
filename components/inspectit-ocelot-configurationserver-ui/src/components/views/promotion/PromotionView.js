@@ -37,6 +37,7 @@ const PromotionView = () => {
 
   // derived variables
   const isFourEyesPrinicple = _.get(data, 'canPromoteOwnChanges', false); // whether the 4-eyes-principle is used
+  const canSelfApprove = isAdmin || !isFourEyesPrinicple; // whether the user can approve self-made changes
   const entries = _.get(data, 'entries', []); // all modified files
   const currentSelectionFile = currentSelection ? _.find(entries, { file: currentSelection }) : null; // the current selected file object
   const authors = _.get(currentSelectionFile, 'authors', []); // list of users which modified the selected file
@@ -46,9 +47,11 @@ const PromotionView = () => {
     return {
       ...element,
       isApproved: currentApprovals.includes(element.file),
+      canSelfApprove,
+      currentUser,
+      canPromote
     };
   }); // copy of the entries array including the data whether a file is approved or not.
-  const canApprove = isAdmin || !isFourEyesPrinicple || !authors.includes(currentUser);
 
   // updating commit ids in the global state using the latest data
   useEffect(() => {
@@ -145,7 +148,8 @@ const PromotionView = () => {
             onRefresh={refreshData}
             onPromote={() => setShowPromotionDialog(true)}
             loading={isLoading}
-            enabled={canPromote && hasApprovals}
+            enabled={hasApprovals}
+            canPromote={canPromote}
           />
         </div>
         <div className="content">
@@ -162,15 +166,15 @@ const PromotionView = () => {
                 {currentSelectionFile ? (
                   <>
                     <PromotionFileViewer oldValue={currentSelectionFile.oldContent} newValue={currentSelectionFile.newContent} />
-                    {canPromote && (
-                      <PromotionFileApproval
-                        currentUser={currentUser}
-                        authors={authors}
-                        canApprove={canApprove}
-                        approved={isCurrentSelectionApproved}
-                        onApproveFile={toggleFileApproval}
-                      />
-                    )}
+                    
+                    <PromotionFileApproval
+                      currentUser={currentUser}
+                      authors={authors}
+                      canApprove={canPromote}
+                      approved={isCurrentSelectionApproved}
+                      onApproveFile={toggleFileApproval}
+                      allowSelfApproval={canSelfApprove}
+                    />
                   </>
                 ) : (
                   <div className="selection-information">

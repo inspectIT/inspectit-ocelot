@@ -7,8 +7,8 @@ import React from 'react';
 /**
  * The footer bar used by users to approve the currently selected promotion file.
  */
-const PromotionFileApproval = ({ currentUser, authors, canApprove, approved, onApproveFile }) => {
-  const tooltip = canApprove ? null : 'You cannot transport files that contain changes made by yourself.';
+const PromotionFileApproval = ({ currentUser, authors, canApprove, approved, onApproveFile, allowSelfApproval }) => {
+  const preventApproval = !allowSelfApproval && authors.includes(currentUser);
 
   return (
     <>
@@ -43,21 +43,19 @@ const PromotionFileApproval = ({ currentUser, authors, canApprove, approved, onA
       </style>
 
       <div className="this p-component">
-        {canApprove ? (
-          <ToggleButton
-            onLabel="Approved"
-            offLabel="Not Approved"
-            onIcon="pi pi-check"
-            offIcon="pi pi-times"
-            checked={approved}
-            onChange={onApproveFile}
-            disabled={!canApprove}
-            tooltip={tooltip}
-            tooltipOptions={{ position: 'left' }}
-          />
-        ) : (
-          <div>You cannot promote files that contain changes made by yourself.</div>
-        )}
+        {canApprove &&
+          (!preventApproval ? (
+            <ToggleButton
+              onLabel="Approved"
+              offLabel="Not Approved"
+              onIcon="pi pi-check"
+              offIcon="pi pi-times"
+              checked={approved}
+              onChange={onApproveFile}
+            />
+          ) : (
+            <div>You cannot promote files that contain changes made by yourself.</div>
+          ))}
 
         {!_.isEmpty(authors) && (
           <div className="users">
