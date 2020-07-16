@@ -60,19 +60,7 @@ class Scope extends React.Component {
     const item = scopeObject;
     let updatedItem = deepCopy(item);
     
-    if(Array.isArray(updatedValue) === true) {
-      if( updatedValue.length === 0 ) {
-        delete updatedItem[optionType];
-      } else {
-        updatedItem[optionType] = updatedValue;
-      }
-    } else {  // assumption, the updateValue is a json thus Object.keys
-      if ( Object.keys(updatedValue).length === 0) {
-        delete updatedItem[optionType];
-      } else {
-        updatedItem[optionType] = updatedValue;
-      }
-    }
+
     onUpdate(updatedItem);
   }
 
@@ -218,7 +206,7 @@ class Scope extends React.Component {
               {/* The keys of the scopeObject are [interface, type, superclass, method, advanced ]
               we filter out method and advanced
               we use map on the filteredAttributeArray and get an index. The index is used to know display wether 'the class'  or '... and the class'  */}
-                <ClassSelectorContainer scopeObject={scopeObject} onUpdate={updatedValue => this.onGenericUpdate(updatedValue)} />
+                <ClassSelectorContainer scopeObject={scopeObject} onUpdate={onUpdate} />
 
 
                {/* selectorType should be removed, i use it here to not duplicate selectorContainer, because only the "heading" changes.  */}
@@ -250,7 +238,7 @@ class Scope extends React.Component {
                 )}
               </div>
                   {/* <React.Fragment>
-                    <UpperHeader attributeText={'class'} connectionTypeAndOr={'and'} count={count} />
+                    <Heading attributeText={'class'} connectionTypeAndOr={'and'} count={count} />
                     { 
                       Array.isArray(scopeObject[attribute]) &&
                       <InterfaceListContainer backgroundColor='#EEEEEE' onUpdate={(updatedValue) => this.onGenericUpdate(updatedValue, attribute)} items={scopeObject[attribute]} parentAttribute={attribute} />} 

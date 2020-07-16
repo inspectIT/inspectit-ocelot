@@ -7,31 +7,33 @@ import React, { useRef } from 'react'
 import {SplitButton} from 'primereact/splitbutton';
 import { getSplitButtonsItems , enableCreateAttributeWithinSplitItemEntries} from './utils/splitButtonItems/getSplitButtonItems';
 import { splittButtonItemIsInvalid, adjustInvalidSplitButtonItem } from './utils/splitButtonItems/invalidLabelsTopDown';
-import UpperHeader from "./UpperHeader";
+import Heading from "./Heading";
 
-function ContainerBox ( props){
-  const { parentAttribute, item, onUpdate, upperHeaderText, count, semantic, children } = props;
+// add attributes into item
+// remove item from parentItem
+function SelectorBox ( props){
+  const { attribute, item, onUpdate, text, count, semantic, children , style ,indexOnDelete} = props;
   const componentBorderRef = useRef(null);
   // reference for red highlighting over remove icon hover
 
   const handleMouseOver = (e) => {
-    let tooltip = e.target.previousSibling;
-    tooltip.style.visibility = 'visible'
-    const element = this.componentBorderRef.current
+    // let tooltip = e.target.previousSibling;
+    // tooltip.style.visibility = 'visible'
+    const element = componentBorderRef.current
     // element.style.border = '1px solid transparent';
     element.style.boxShadow = '0 0 0 3px red';
   } 
 
   const handleMouseLeave = (e) => {
-    let tooltip = e.target.previousSibling;
-    tooltip.style.visibility = 'hidden';
-    const element = this.componentBorderRef.current
+    // let tooltip = e.target.previousSibling;
+    // tooltip.style.visibility = 'hidden';
+    const element = componentBorderRef.current
     // element.style.border = '1px solid black';
     element.style.boxShadow = '';
   }
 
   const createSplitButtonItems = () => {
-    let splittButtonItems = getSplitButtonsItems(parentAttribute, item); 
+    let splittButtonItems = getSplitButtonsItems(attribute, item); 
     // .command key must be added + item must be passed to createAttribute(item), since the function does not have the context to access item
     splittButtonItems = enableCreateAttributeWithinSplitItemEntries(splittButtonItems, item, onUpdate);
     
@@ -43,21 +45,28 @@ function ContainerBox ( props){
     return splittButtonItems;
   }
 
-
+  const deleteItem = () => {
+    onUpdate({});
+  }
+ 
   const splitButtonItems = createSplitButtonItems();
 
+  console.log(item)
   return (
-    <div ref={componentBorderRef}>
-      {/* { !isNaN(index) && <UpperHeader attributeText={'interface, that'} connectionTypeAndOr={'and'} count={index} /> } */}
-      <UpperHeader upperHeaderText={upperHeaderText} semantic={semantic} count={count} />
-      <div ref={componentBorderRef} style={{ marginBottom: '',  position:'relative', height: '', padding: '25px', background: 'red', borderRadius: '10px' }}>
-      { splitButtonItems.length <0 && <SplitButton tooltip="TODO: tooltip? or not" style={{position:'absolute', top:'10px' , right:'10px', zIndex: 9001}} label="add " icon="pi pi-plus" model={splitButtonItems}></SplitButton> }
+
+      <div >
+      {/* { !isNaN(index) && <Heading attributeText={'interface, that'} connectionTypeAndOr={'and'} count={index} /> } */}
+      <Heading  attribute={attribute} text={text} semantic={semantic} count={count} />
+      <div ref={componentBorderRef} style={{ ...style, width: '1005px', position:'relative', height: '', padding: '25px', background: '#EEEEEE' , borderRadius: '10px', marginTop: '25px', marginBottom: '25px' }}>
+      { splitButtonItems.length >0  && <SplitButton tooltip="TODO: tooltip? or not" style={{position:'absolute', top:'10px' , right:'10px', zIndex: 9001}} label="add " icon="pi pi-plus" model={splitButtonItems}></SplitButton> }
+      <i onMouseOver={handleMouseOver} onMouseLeave={handleMouseLeave} onClick={deleteItem} style={{ position: 'absolute', bottom:'0px', right: '0px', fontSize:'30px',  color: 'red', opacity:'0.8'}} className="pi pi-times-circle"/>
         
       { children}
       </div>
     </div>
-  )
 
+
+  )
 }
 
-export default ContainerBox;
+export default SelectorBox;

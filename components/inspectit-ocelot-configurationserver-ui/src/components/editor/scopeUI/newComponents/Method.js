@@ -7,13 +7,13 @@ import {SplitButton} from 'primereact/splitbutton';
 import { getSplitButtonsItems , enableCreateAttributeWithinSplitItemEntries} from './utils/splitButtonItems/getSplitButtonItems';
 import { splittButtonItemIsInvalid, adjustInvalidSplitButtonItem } from './utils/splitButtonItems/invalidLabelsTopDown';
 import MethodVisibility from "./MethodVisibility";
-import MethodName from "./MethodName";
-import MethodItemBox from "./ValueBox";
+import Name from "./Name";
+import ValueBox from "./ValueBox";
 import BooleanItem from "./BooleanItem";
-import MethodBox from "./ContainerBox";
-import MethodAnnotations from "./MethodAnnotations";
+import SelectorBox from "./SelectorBox";
+import Annotations from "./Annotations";
 
-class GenericJsonWrapper extends React.Component {
+class Method extends React.Component {
   state = { splitMenuItems: [] }
 
   // reference for red highlighting over remove icon hover
@@ -91,22 +91,22 @@ class GenericJsonWrapper extends React.Component {
     console.log('genericJsonWrapper', this.props)
     // mehrere attribute method visiblity annotaions x y bz e 
     return (
-      <MethodBox parentAttribute='methods'  item={item} onUpdate={(updatedValue) => this.props.onUpdate(updatedValue)}>
+      <SelectorBox parentAttribute='methods'  item={item} onUpdate={(updatedValue) => this.props.onUpdate(updatedValue)}>
         {Object.keys(item).map( attribute => 
           <React.Fragment>
             
-            { attribute === 'name' && <MethodItemBox  onUpdate={(updatedValue) => this.onGenericUpdate(updatedValue, attribute)} ><MethodName text={' ... has a name, that ' } onUpdate={(updatedValue) => this.props.onUpdate(updatedValue)} item={item} /> </MethodItemBox> }
-            { attribute === 'visibility' && <MethodItemBox  onUpdate={(updatedValue) => this.onGenericUpdate(updatedValue, attribute)} ><MethodVisibility onUpdate={(updateObj) => this.onGenericUpdate(updateObj, 'visibility')} item={item[attribute]}  /> </MethodItemBox> }
-            { attribute === 'annotations' && <MethodItemBox  onUpdate={(updatedValue) => this.onGenericUpdate(updatedValue, attribute)} ><MethodAnnotations onUpdate={(updateObj) => this.onGenericUpdate(updateObj, 'annotations')} items={item[attribute]} optionType={'Biene '} /> </MethodItemBox>}
-            {/* { attribute === 'arguments' && <MethodItemBox  onUpdate={(updatedValue) => this.props.onUpdate(updatedValue, attribute)} ><MethodItem onUpdate={(updateObj) => this.onGenericUpdate(updateObj, 'name')} item={item} /> </MethodItemBox> } */}
-            { attribute === 'is-constructor' && attribute && <MethodItemBox  onUpdate={(updatedValue) => this.onGenericUpdate(updatedValue, attribute)} ><BooleanItem onUpdate={(updateObj) => this.onGenericUpdate(updateObj, 'is-constructor')} text={'is a constructor'} item={item[attribute]} /> </MethodItemBox> }
-            { attribute === 'is-synchronized' && attribute && <MethodItemBox  onUpdate={(updatedValue) => this.onGenericUpdate(updatedValue, attribute)} ><BooleanItem onUpdate={(updateObj) => this.onGenericUpdate(updateObj, 'is-synchronized')} text={'is synchronized'} item={item[attribute]} /> </MethodItemBox> }
+            { attribute === 'name' && <ValueBox  item={item} attributesToDelete={[attribute]} onUpdate={(updatedValue) => this.onGenericUpdate(updatedValue, attribute)} ><Name text={' ... has a name, that ' } onUpdate={(updatedValue) => this.props.onUpdate(updatedValue)} item={item} /> </ValueBox> }
+            { attribute === 'visibility' && <ValueBox  item={item} attributesToDelete={[attribute]} onUpdate={(updatedValue) => this.onGenericUpdate(updatedValue, attribute)} ><MethodVisibility onUpdate={(updateObj) => this.onGenericUpdate(updateObj, 'visibility')} item={item[attribute]}  /> </ValueBox> }
+            { attribute === 'annotations' && <ValueBox  item={item} attributesToDelete={[attribute]} onUpdate={(updatedValue) => this.onGenericUpdate(updatedValue, attribute)} ><Annotations onUpdate={(updateObj) => this.onGenericUpdate(updateObj, 'annotations')} items={item[attribute]} optionType={'Biene '} /> </ValueBox>}
+            {/* { attribute === 'arguments' && <ValueBox  item={item} attributesToDelete={[attribute]} onUpdate={(updatedValue) => this.props.onUpdate(updatedValue, attribute)} ><MethodItem onUpdate={(updateObj) => this.onGenericUpdate(updateObj, 'name')} item={item} /> </ValueBox> } */}
+            { attribute === 'is-constructor' && attribute && <ValueBox  item={item} attributesToDelete={[attribute]} onUpdate={(updatedValue) => this.onGenericUpdate(updatedValue, attribute)} ><BooleanItem onUpdate={(updateObj) => this.onGenericUpdate(updateObj, 'is-constructor')} text={'is a constructor'} item={item[attribute]} /> </ValueBox> }
+            { attribute === 'is-synchronized' && attribute && <ValueBox  item={item} attributesToDelete={[attribute]} onUpdate={(updatedValue) => this.onGenericUpdate(updatedValue, attribute)} ><BooleanItem onUpdate={(updateObj) => this.onGenericUpdate(updateObj, 'is-synchronized')} text={'is synchronized'} item={item[attribute]} /> </ValueBox> }
           </React.Fragment>
         )}
-      </MethodBox>
+      </SelectorBox>
     )
   }
 
 }
 
-export default GenericJsonWrapper;
+export default Method;

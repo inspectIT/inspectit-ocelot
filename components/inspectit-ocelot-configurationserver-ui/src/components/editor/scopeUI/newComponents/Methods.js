@@ -1,4 +1,4 @@
-import UpperHeader from "./UpperHeader";
+import Heading from "./Heading";
 import Item from "./Item";
 import GenericJsonWrapper from "./Method";
 
@@ -27,7 +27,7 @@ function Methods( {items, parentAttribute, onUpdate,} ) {
       <div data-optiontype={parentAttribute} style={{  marginBottom: '',  position:'relative', height: '', padding: '0 25px 0 25px' , background: 'white', border: '1px solid lightgrey' , borderRadius: '10px'}}>
         { items.map( (method, index) => 
           <React.Fragment>
-            <UpperHeader style={{ color: 'red' }} attributeText={'Methods must fullfill all the the following options'} connectionTypeAndOr={'or'} count={index} /> 
+            <Heading style={{ color: 'red' }} attributeText={'Methods must fullfill all the the following options'} connectionTypeAndOr={'or'} count={index} /> 
             <div style={{width:'', background:'white', minHeight: '200px',  padding:'35px', border: '1px solid lightgrey', borderRadius:'10px', marginBottom: '25px'}}>
               <h4 style={{marginBottom:'5px'}}> The Method...</h4>
               <GenericJsonWrapper  item={method}  onUpdate={(updateObj) => onUpdateListItem(updateObj, index)}   optionText={'Apfel'} /> 

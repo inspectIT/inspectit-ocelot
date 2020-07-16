@@ -6,7 +6,7 @@ import deepCopy from 'json-deep-copy';
 import {SplitButton} from 'primereact/splitbutton';
 import { getSplitButtonsItems , enableCreateAttributeWithinSplitItemEntries} from './utils/splitButtonItems/getSplitButtonItems';
 import { splittButtonItemIsInvalid, adjustInvalidSplitButtonItem } from './utils/splitButtonItems/invalidLabelsTopDown';
-import UpperHeader from "./UpperHeader";
+import Heading from "./Heading";
 
 class ValueBox extends React.Component {
   state = { splitMenuItems: [] }
@@ -26,9 +26,13 @@ class ValueBox extends React.Component {
     element.style.boxShadow = '';
   }
 
-  deleteItem = (e) => {
-    const { onUpdate } = this.props;
-    onUpdate({})
+  deleteItem = () => {
+    const { onUpdate, attributesToDelete, item  } = this.props;
+    const updatedItem = deepCopy(item);
+    attributesToDelete.map( attribute => {
+      delete updatedItem[attribute];
+    })
+    onUpdate(updatedItem)
   }
  
   render() {

@@ -1,4 +1,4 @@
-// import MethodItemBox from "./MethodItemBox";
+// import ValueBox from "./ValueBox";
 // import LowerHeader from "./LowerHeader";
 // import AnnotationContainer from './AnnotationContainer';
 // import deepCopy from 'json-deep-copy';
@@ -6,8 +6,8 @@
 // import {SplitButton} from 'primereact/splitbutton';
 // import { getSplitButtonsItems , enableCreateAttributeWithinSplitItemEntries} from './utils/splitButtonItems/getSplitButtonItems';
 // import { splittButtonItemIsInvalid, adjustInvalidSplitButtonItem } from './utils/splitButtonItems/invalidLabelsTopDown';
-// import UpperHeader from "./UpperHeader";
-// import MethodName from "./MethodName";
+// import Heading from "./Heading";
+// import Name from "./Name";
 
 // class Item extends React.Component {
 //   state = { splitMenuItems: [] }
@@ -92,12 +92,12 @@
 //     return (
 //       <div >
 //         {/* <button> {optionText} </button> */}
-//         { !isNaN(index) && <UpperHeader attributeText={'interface, that'} connectionTypeAndOr={'and'} count={index} /> }
+//         { !isNaN(index) && <Heading attributeText={'interface, that'} connectionTypeAndOr={'and'} count={index} /> }
 //         <div ref={this.componentBorderRef} style={{ marginBottom: '',  position:'relative', height: '', padding: '25px', background: background_bigDiv, borderRadius: '10px' }}>
 //           {parentAttribute !== 'interfaces' && parentAttribute !== 'methods' && <LowerHeader optionType={parentAttribute} />}
-//           <MethodItemBox  onUpdate={(updatedValue) => this.onGenericUpdate(updatedValue, attribute)} >
-//            <MethodName text={`has a name`}  onUpdate={onUpdate} style={{background: 'yellow'}} item={item} index={index}  />
-//           </MethodItemBox> 
+//           <ValueBox  onUpdate={(updatedValue) => this.onGenericUpdate(updatedValue, attribute)} >
+//            <Name text={`has a name`}  onUpdate={onUpdate} style={{background: 'yellow'}} item={item} index={index}  />
+//           </ValueBox> 
 //           {item.annotations && <AnnotationContainer onUpdate={(updatedValue) => this.onGenericUpdate(updatedValue, 'annotations')} items={item.annotations} optionType={parentAttribute} />}
 //           <SplitButton tooltip="TODO: tooltip? or not" style={{position:'absolute', top:'10px' , right:'10px'}} label="add " icon="pi pi-plus" onClick={this.save} model={splitButtonItems}></SplitButton>
 //         </div>

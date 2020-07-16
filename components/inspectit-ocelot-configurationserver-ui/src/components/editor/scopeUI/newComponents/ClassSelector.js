@@ -1,4 +1,4 @@
-import UpperHeader from "./UpperHeader";
+import Heading from "./Heading";
 import Item from "./Item";
 import InterfaceListContainer from "./InterfaceListContainer"
 import deepCopy from "json-deep-copy";
@@ -33,7 +33,7 @@ function ClassSelector({item, optionType, selectorType, selectorContainerIndex, 
   return (
     item[optionType] && (
       <React.Fragment> 
-        <UpperHeader selectorType={selectorType} optionType={optionType} selectorContainerIndex={selectorContainerIndex} />
+        <Heading selectorType={selectorType} optionType={optionType} selectorContainerIndex={selectorContainerIndex} />
         {/* list of items */}
         { Array.isArray(item[optionType]) && <InterfaceListContainer onUpdate={(updatedValue) => onGenericUpdate(updatedValue, optionType)} index={selectorContainerIndex} items={item[optionType]} parentAttribute={optionType} />}
 

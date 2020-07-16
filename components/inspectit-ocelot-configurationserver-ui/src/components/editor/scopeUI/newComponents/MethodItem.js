@@ -6,7 +6,7 @@ import deepCopy from 'json-deep-copy';
 import {SplitButton} from 'primereact/splitbutton';
 import { getSplitButtonsItems , enableCreateAttributeWithinSplitItemEntries} from './utils/splitButtonItems/getSplitButtonItems';
 import { splittButtonItemIsInvalid, adjustInvalidSplitButtonItem } from './utils/splitButtonItems/invalidLabelsTopDown';
-import UpperHeader from "./UpperHeader";
+import Heading from "./Heading";
 
 class MethodItem extends React.Component {
   // WITHOUT ANNOTATIONS, only diffrence 

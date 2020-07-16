@@ -118,7 +118,7 @@ class YamlParser extends React.Component {
             text-align: center;
           }
         `}</style>
-        <Dialog
+        {/* <Dialog
           header="Config file overwrite"
           footer={
             <div>
@@ -134,7 +134,7 @@ class YamlParser extends React.Component {
         >
           Your configuration file has comments or other non-yaml data. These will be overwritten if you apply the given update. Do you want
           to continue?
-        </Dialog>
+        </Dialog> */}
         {!isError && this.props.children(this.onUpdate, config)}
         {isError && (
           <div className="errorBox">

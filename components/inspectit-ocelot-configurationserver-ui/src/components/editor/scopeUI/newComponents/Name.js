@@ -4,7 +4,7 @@ import {Dropdown} from 'primereact/dropdown';
 import { cloneDeep } from 'lodash';
 import deepCopy from 'json-deep-copy';
 
-class MethodName extends React.Component {
+class Name extends React.Component {
 
   onUpdate = (attribute, newValue) => {
     const { item, onUpdate } = this.props;
@@ -58,4 +58,4 @@ class MethodName extends React.Component {
 
 }
 
-export default MethodName;
+export default Name;

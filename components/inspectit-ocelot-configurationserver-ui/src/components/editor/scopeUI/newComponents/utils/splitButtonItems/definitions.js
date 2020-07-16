@@ -84,6 +84,7 @@ export const superclass = [
     label: 'specify the superclass by the annotations, which are attached to it.',
     icon: 'pi pi-times',
     createAttribute: (item) => {
+      console.log('xxxx', item);
       item.annotations = item.annotations || [];
       item.annotations.push({ name:'', 'matcher-mode': 'EQUALS_FULLY'})
       return item;

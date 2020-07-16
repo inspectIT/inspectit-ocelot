@@ -1,11 +1,11 @@
-import MethodName from "./MethodName";
+import Name from "./Name";
 import deepCopy from "json-deep-copy";
 
-class MethodAnnotations extends React.Component {
+class Annotations extends React.Component {
 
   onUpdateListItem = ( updatedValue , index ) => {
     let { onUpdate, items } = this.props;
-    const updatedItems = deepCopy(items);
+    const updatedItems = items;
     // let updatedItems = items;
 
     if ( Object.keys(updatedValue).length == 0) {  
@@ -24,7 +24,7 @@ class MethodAnnotations extends React.Component {
     return (
       <div style={{display: 'inline-block'}}> 
         {items.map( (annotationItem, index) => 
-            <MethodName text={'... has an anotation' } onUpdate={(updateObj) => this.onUpdateListItem(updateObj, index) } item={annotationItem}  optionType={optionType} />
+            <Name text={'... has an anotation' } onUpdate={(updateObj) => this.onUpdateListItem(updateObj, index) } item={annotationItem}  optionType={optionType} />
             )}
       </div>  
     )
@@ -32,4 +32,4 @@ class MethodAnnotations extends React.Component {
 
 }
 
-export default MethodAnnotations;
+export default Annotations;

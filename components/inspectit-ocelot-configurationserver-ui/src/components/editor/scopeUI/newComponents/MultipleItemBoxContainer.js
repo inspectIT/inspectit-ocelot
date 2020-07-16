@@ -1,5 +1,5 @@
 
-function MultipleMethodItemBox ( props) {
+function MultipleItemBoxContainer ( props) {
   return (
     <div style={{display:'inline-grid'}}>
       {props.children}
@@ -7,4 +7,4 @@ function MultipleMethodItemBox ( props) {
   )
 }
 
-export default MultipleMethodItemBox;
+export default MultipleItemBoxContainer;
