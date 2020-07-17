@@ -30,7 +30,7 @@
     "dateformat": "^3.0.3",
     "js-yaml": "^3.13.1",
     "jwt-decode": "^2.2.0",
-    "lodash": "^4.17.14",
+    "lodash": "^4.17.19",
     "next": "^9.3.2",
     "primeflex": "^1.0.0-rc.1",
     "primeicons": "^1.0.0",
