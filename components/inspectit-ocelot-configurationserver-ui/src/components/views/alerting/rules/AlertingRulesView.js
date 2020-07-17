@@ -8,7 +8,7 @@ import RulesEditorContainer from './editor/RulesEditorContainer';
  * The component for managing alerting rules.
  */
 const AlertingRulesView = ({ updateDate, topics, rules, templates, onRefresh }) => {
-  const [currentSelection, setCurrentSelection] = useState({rule: null, template: null});
+  const [currentSelection, setCurrentSelection] = useState({ rule: null, template: null });
 
   const readOnly = useSelector((state) => !state.authentication.permissions.write);
 
@@ -30,16 +30,10 @@ const AlertingRulesView = ({ updateDate, topics, rules, templates, onRefresh }) 
           rules={rules}
           templates={templates}
           onRefresh={onRefresh}
-
           selection={currentSelection}
         />
 
-        <RulesEditorContainer
-          readOnly={readOnly}
-          availableTopics={topics}
-          selectedRuleName={currentSelection.rule}
-          selectedTemplateName={currentSelection.template}
-        />
+        <RulesEditorContainer readOnly={readOnly} availableTopics={topics} selection={currentSelection} />
       </div>
     </>
   );
@@ -60,8 +54,8 @@ AlertingRulesView.propTypes = {
 
 AlertingRulesView.defaultProps = {
   topics: [],
-  onSelectionChanged: () => { },
-  onRefresh: () => { },
+  onSelectionChanged: () => {},
+  onRefresh: () => {},
 };
 
 export default AlertingRulesView;

@@ -1,32 +1,58 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
-import { omit, isEqual, extend, cloneDeep } from 'lodash';
+import { useSelector, useDispatch } from 'react-redux';
+import _, { omit, isEqual, extend, cloneDeep } from 'lodash';
 import RulesEditor from './RulesEditor';
 import RulesEditorToolbar from './RulesEditorToolbar';
 import * as rulesAPI from '../RulesAPI';
 import { alertingActions } from '../../../../../redux/ducks/alerting';
+import DefaultToolbar from './DefaultToolbar';
 
-const RulesEditorContainer = ({
-  selectedRuleName,
-  selectedTemplateName,
-  readOnly,
-  availableTopics,
-  unsavedRuleContents,
-  unsavedRuleContentsChanged,
-}) => {
+const RulesEditorContainer = ({ readOnly, availableTopics, selection }) => {
+  const dispatch = useDispatch();
+
+  // state variables
   const [numVariableErrors, setNumVariableErrors] = useState(0);
   const [ruleContent, setRuleContent] = useState(undefined);
   const [templateContent, setTemplateContent] = useState(undefined);
 
-  useContentFetch(selectedRuleName, selectedTemplateName, setRuleContent, setTemplateContent);
+  // global state variables
+  const unsavedRuleContents = useSelector((state) => state.alerting.unsavedRuleContents);
 
-  const onContentChanged = (ruleName, changedContent) => {
-    if (isEqual(ruleContent, changedContent)) {
-      unsavedRuleContentsChanged(omit(cloneDeep(unsavedRuleContents), ruleName));
+  //useContentFetch(selection.rule, selection.template, setRuleContent, setTemplateContent);
+  useEffect(() => {
+    if (!selection.template) {
+      setTemplateContent(undefined);
     } else {
-      unsavedRuleContentsChanged(extend(cloneDeep(unsavedRuleContents), { [ruleName]: changedContent }));
+      rulesAPI.fetchTemplate(
+        selection.template,
+        (content) => setTemplateContent(content),
+        () => setTemplateContent(undefined)
+      );
     }
+  }, [selection.template]);
+
+  useEffect(() => {
+    if (!selection.rule) {
+      setRuleContent(undefined);
+    } else {
+      rulesAPI.fetchRule(
+        selection.rule,
+        (content) => setRuleContent(content),
+        () => setRuleContent(undefined)
+      );
+    }
+  }, [selection.rule]);
+
+  // stores the given rule content as unsaved chagnes
+  const onContentChanged = (ruleName, changedContent) => {
+    let data;
+    if (isEqual(ruleContent, changedContent)) {
+      data = omit(cloneDeep(unsavedRuleContents), ruleName);
+    } else {
+      data = extend(cloneDeep(unsavedRuleContents), { [ruleName]: changedContent });
+    }
+    dispatch(alertingActions.ruleContentsChanged(data));
   };
 
   const updateEnabledState = (value) => {
@@ -35,12 +61,30 @@ const RulesEditorContainer = ({
     onContentChanged(newContent.id, newContent);
   };
 
+  // callback when the user hits the save button
+  const onSave = () => {
+    if (selection.rule in unsavedRuleContents) {
+      rulesAPI.updateRule(
+        unsavedRuleContents[selection.rule],
+        (ruleContent) => {
+          const unsavedRuleData = omit(unsavedRuleContents, selection.rule);
+          dispatch(alertingActions.ruleContentsChanged(unsavedRuleData));
+
+          setRuleContent(ruleContent);
+        },
+        () => setRuleContent(undefined)
+      );
+    }
+  };
+
   let { content, isUnsaved, isRule } = getContentWrapper(ruleContent, templateContent, unsavedRuleContents);
 
-  const mappedVars = getMappedVars(content, templateContent);
-  const selectionNameAddition = isRule ? 'Base-Template: ' + selectedTemplateName + '' : undefined;
+  const mappedVars = getVariablesWithDefaults(content, templateContent);
+
+  const currentName = _.get(content, 'id');
+
   return (
-    <div className="this">
+    <>
       <style jsx>{`
         .this {
           height: 100%;
@@ -52,68 +96,35 @@ const RulesEditorContainer = ({
           min-width: 760px;
         }
       `}</style>
-      <RulesEditorToolbar
-        selectionName={content ? content.id : undefined}
-        selectionNameAddition={selectionNameAddition}
-        isRule={isRule}
-        ruleEnabled={content && content.status === 'enabled'}
-        savedRuleIsEnabled={ruleContent && ruleContent.status === 'enabled'}
-        savedRuleHasError={ruleContent && !!ruleContent.error}
-        isUnsaved={isUnsaved}
-        readOnly={readOnly || !isRule}
-        onEnabledStateChanged={updateEnabledState}
-        variablesHaveErrors
-        numErrors={numVariableErrors}
-        onSave={() => {
-          if (selectedRuleName in unsavedRuleContents) {
-            rulesAPI.updateRule(
-              unsavedRuleContents[selectedRuleName],
-              (ruleContent) => {
-                unsavedRuleContentsChanged(omit(unsavedRuleContents, selectedRuleName));
-                setRuleContent(ruleContent);
-              },
-              () => setRuleContent(undefined)
-            );
-          }
-        }}
-      />
-      <RulesEditor
-        availableTopics={availableTopics}
-        readOnly={readOnly || !isRule}
-        content={content}
-        mappedVars={mappedVars}
-        isRule={isRule}
-        onErrorStatusUpdate={(value) => setNumVariableErrors(value)}
-        onContentChanged={onContentChanged}
-      />
-    </div>
+
+      <div className="this">
+        {content && isRule ? (
+          <RulesEditorToolbar
+            ruleName={currentName}
+            templateName={selection.template}
+            ruleEnabled={content.status === 'enabled'}
+            isUnsaved={isUnsaved}
+            readOnly={readOnly}
+            onEnabledStateChanged={updateEnabledState}
+            numErrors={numVariableErrors}
+            onSave={onSave}
+          />
+        ) : (
+          <DefaultToolbar name={currentName} icon={currentName ? 'pi-briefcase' : ''} />
+        )}
+
+        <RulesEditor
+          availableTopics={availableTopics}
+          readOnly={readOnly || !isRule}
+          content={content}
+          mappedVars={mappedVars}
+          isRule={isRule}
+          onErrorStatusUpdate={(value) => setNumVariableErrors(value)}
+          onContentChanged={onContentChanged}
+        />
+      </div>
+    </>
   );
-};
-
-const useContentFetch = (selectedRuleName, selectedTemplateName, setRuleContent, setTemplateContent) => {
-  useEffect(() => {
-    if (!selectedTemplateName) {
-      setTemplateContent(undefined);
-    } else {
-      rulesAPI.fetchTemplate(
-        selectedTemplateName,
-        (content) => setTemplateContent(content),
-        () => setTemplateContent(undefined)
-      );
-    }
-  }, [selectedTemplateName]);
-
-  useEffect(() => {
-    if (!selectedRuleName) {
-      setRuleContent(undefined);
-    } else {
-      rulesAPI.fetchRule(
-        selectedRuleName,
-        (content) => setRuleContent(content),
-        () => setRuleContent(undefined)
-      );
-    }
-  }, [selectedRuleName]);
 };
 
 const getContentWrapper = (ruleContent, templateContent, unsavedRuleContents) => {
@@ -131,62 +142,43 @@ const getContentWrapper = (ruleContent, templateContent, unsavedRuleContents) =>
   }
 };
 
-const getMappedVars = (ruleContent, templateContent) => {
-  if (!templateContent) {
-    return undefined;
+const getVariablesWithDefaults = (ruleContent, templateContent) => {
+  if (!templateContent || !templateContent.vars) {
+    return null;
   }
 
-  const defaultVars = templateContent.vars;
-  var ruleVariables = undefined;
+  const varsWithDefault = _.map(templateContent.vars, (defaultVar) => {
+    const result = {
+      ...defaultVar,
+      defaultValue: defaultVar.value,
+    };
 
-  // map values from template content to default value properties and set assigned variable values
-  if (defaultVars) {
-    ruleVariables = defaultVars.map((defVar) => {
-      var newVarObj = { ...defVar, ...{ defaultValue: defVar.value } };
-      if (ruleContent && ruleContent.vars && ruleContent.vars.some((v) => v.name === defVar.name)) {
-        newVarObj.value = ruleContent.vars.find((v) => v.name === defVar.name).value;
-      } else {
-        delete newVarObj.value;
-      }
-      return newVarObj;
-    });
-  }
+    const ruleVariable = _.find(ruleContent.vars, { name: defaultVar.name });
+    if (ruleVariable) {
+      result.value = ruleVariable.value;
+    } else {
+      delete result.value;
+    }
 
-  return ruleVariables;
+    return result;
+  });
+
+  return varsWithDefault;
 };
 
 RulesEditorContainer.propTypes = {
   /** An array of strings denoting the available notification topics */
   availableTopics: PropTypes.array,
-  /** The name of the selected rule */
-  selectedRuleName: PropTypes.string.isRequired,
-  /** The name of the template currently in the context */
-  selectedTemplateName: PropTypes.string.isRequired,
   /** Whether the content is read only */
   readOnly: PropTypes.bool,
-  /** A map of rule names to corresponding unsaved contents */
-  unsavedRuleContents: PropTypes.object,
-  /** Callback on content update */
-  unsavedRuleContentsChanged: PropTypes.func,
+
+  selection: PropTypes.object,
 };
 
 RulesEditorContainer.defaultProps = {
   availableTopics: [],
   unsavedRuleContents: {},
   readOnly: false,
-  unsavedRuleContentsChanged: () => { },
 };
 
-const mapStateToProps = (state) => {
-  const { unsavedRuleContents } = state.alerting;
-
-  return {
-    unsavedRuleContents,
-  };
-};
-
-const mapDispatchToProps = {
-  unsavedRuleContentsChanged: alertingActions.ruleContentsChanged,
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(RulesEditorContainer);
+export default RulesEditorContainer;

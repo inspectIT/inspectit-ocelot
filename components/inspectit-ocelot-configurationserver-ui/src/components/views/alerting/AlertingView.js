@@ -6,6 +6,9 @@ import * as topicsAPI from './topics/TopicsAPI';
 import * as rulesAPI from './rules/RulesAPI';
 import useDeepEffect from '../../../hooks/use-deep-effect'
 
+/**
+ * Existing tabs for the alerting view tab menu
+ */
 const items = [
   { label: 'Alerting Rules', icon: 'pi pi-fw pi-globe' },
   { label: 'Calendar', icon: 'pi pi-fw pi-calendar' }
@@ -15,36 +18,37 @@ const items = [
  * Tab layout for the alerting view. This view provides a navigation between alerting rules and alerting channels.
  */
 const AlertingView = () => {
+  // state variables
   const [updateDate, setUpdateDate] = useState(Date.now());
-  const [activeIndex, setActiveIndex] = useState(0);
   const [activeTab, setActiveTab] = useState(items[0]);
   const [rules, setRules] = useState([]);
   const [templates, setTemplates] = useState([]);
   const [existingTopics, setExistingTopics] = useState([]);
   const [referencedTopics, setReferencedTopics] = useState([]);
 
+  // refreshing the data when the view is mounted
   useEffect(() => {
     refreshAll();
   }, []);
 
+  // collects all topics referenced by any rule
   useDeepEffect(() => {
-    if (rules) {
-      const topics = _(rules)
-        .map(rule => rule.topic)
-        .filter()
-        .filter(topicId => !existingTopics.some(topic => topic.id === topicId))
-        .map(topicId => ({ id: topicId, referencedOnly: true }))
-        .uniq()
-        .value();
+    const topics = _(rules)
+      .map(rule => rule.topic)
+      .filter()
+      .filter(topicId => !existingTopics.some(topic => topic.id === topicId))
+      .map(topicId => ({ id: topicId, referencedOnly: true }))
+      .uniq()
+      .value();
 
-      setReferencedTopics(topics);
-    }
+    setReferencedTopics(topics);
   }, [rules]);
 
   const refreshRules = () => rulesAPI.fetchAlertingRules((rules) => setRules(rules), () => setRules([]));
   const refreshTemplates = () => rulesAPI.fetchAlertingTemplates((templates) => setTemplates(templates), () => setTemplates([]));
   const refreshTopics = () => topicsAPI.fetchTopics((topics) => setExistingTopics(topics));
 
+  // reloads all the alerting data - rules, topics, templates...
   const refreshAll = () => {
     refreshRules();
     refreshTemplates();

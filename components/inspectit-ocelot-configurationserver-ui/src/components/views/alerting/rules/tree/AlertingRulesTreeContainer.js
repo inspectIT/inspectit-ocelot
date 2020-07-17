@@ -20,7 +20,7 @@ const AlertingRulesTreeContainer = ({
   readOnly,
   onSelectionChanged,
   onRefresh,
-  
+
   selection
 }) => {
   const dispatch = useDispatch();
@@ -41,8 +41,8 @@ const AlertingRulesTreeContainer = ({
       ruleName,
       templateName,
       description,
-      (rule) => onSelectionChanged(rule.id, rule.template),
-      () => onSelectionChanged(undefined, undefined)
+      (rule) => onSelectionChanged({ rule: rule.id, template: rule.template }),
+      () => onSelectionChanged({ rule: null, template: null })
     );
   };
 
@@ -53,7 +53,7 @@ const AlertingRulesTreeContainer = ({
         const rContent = unsavedRuleContents[oldName];
         dispatch(alertingActions.ruleContentsChanged(extend(omit(unsavedRuleContents, oldName), { [newName]: rContent })));
       }
-      onSelectionChanged(newName, selection.template);
+      onSelectionChanged({ rule: newName, template: selection.template });
       onRefresh();
     });
   };
@@ -61,7 +61,7 @@ const AlertingRulesTreeContainer = ({
   const copyRule = (oldName, newName) => {
     setCopyRuleDialogShown(false);
     rulesAPI.copyRule(oldName, newName, () => {
-      onSelectionChanged(newName, selection.template);
+      onSelectionChanged({ rule: newName, template: selection.template });
       onRefresh();
     });
   };
@@ -70,7 +70,7 @@ const AlertingRulesTreeContainer = ({
     rulesAPI.deleteRule(ruleName, (deletedRuleName) => {
       onRefresh();
       if (deletedRuleName === selection.rule) {
-        onSelectionChanged(undefined, selection.template);
+        onSelectionChanged({ rule: null, template: selection.template });
       }
     })
   };

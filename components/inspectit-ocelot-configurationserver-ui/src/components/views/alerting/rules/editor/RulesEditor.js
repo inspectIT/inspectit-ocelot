@@ -19,7 +19,7 @@ const RulesEditor = ({ availableTopics, content, isRule, mappedVars, readOnly, o
   }, [content]);
 
   if (!content) {
-    return <SelectionInformation hint="Select a rule to start editing." />;
+    return <SelectionInformation hint="Select a rule or template to start editing." />;
   }
 
   return (
