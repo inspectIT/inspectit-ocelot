@@ -1,31 +1,25 @@
 import React from 'react';
-import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { Toolbar } from 'primereact/toolbar';
 import { Button } from 'primereact/button';
-import { alertingActions } from '../../../../../redux/ducks/alerting';
 
 /**
  * The toolbar used in the alerting view's rules list.
  */
 const AlertingRulesToolbar = ({
   loading,
-  selectedRuleName,
   readOnly,
-  groupingOptions,
   onShowCreateRuleDialog,
   onShowDeleteRuleDialog,
   onShowRenameRuleDialog,
   onShowCopyRuleDialog,
-  onGroupingChanged,
   onRefresh,
+  ruleSelected
 }) => {
   const tooltipOptions = {
     showDelay: 500,
     position: 'top',
   };
-
-  const { groupByTemplates, groupByTopics } = groupingOptions;
 
   return (
     <div className="this">
@@ -57,21 +51,21 @@ const AlertingRulesToolbar = ({
             onClick={() => onShowCreateRuleDialog()}
           />
           <Button
-            disabled={readOnly || loading || !selectedRuleName}
+            disabled={readOnly || loading || !ruleSelected}
             tooltip="Rename rule"
             icon="pi pi-pencil"
             tooltipOptions={tooltipOptions}
             onClick={() => onShowRenameRuleDialog()}
           />
           <Button
-            disabled={readOnly || loading || !selectedRuleName}
+            disabled={readOnly || loading || !ruleSelected}
             tooltip="Copy rule"
             icon="pi pi-copy"
             tooltipOptions={tooltipOptions}
             onClick={() => onShowCopyRuleDialog()}
           />
           <Button
-            disabled={readOnly || loading || !selectedRuleName}
+            disabled={readOnly || loading || !ruleSelected}
             tooltip="Delete rule"
             icon="pi pi-trash"
             tooltipOptions={tooltipOptions}
@@ -79,18 +73,6 @@ const AlertingRulesToolbar = ({
           />
         </div>
         <div className="p-toolbar-group-right">
-          <Button
-            icon="pi pi-briefcase"
-            className={!groupByTemplates && 'p-button-outlined'}
-            tooltip="Toggle Template Grouping"
-            onClick={() => onGroupingChanged({ groupByTemplates: !groupByTemplates, groupByTopics })}
-          />
-          <Button
-            icon="pi pi-bars"
-            className={!groupByTopics && 'p-button-outlined'}
-            tooltip="Toggle Notification Channel Grouping"
-            onClick={() => onGroupingChanged({ groupByTemplates, groupByTopics: !groupByTopics })}
-          />
           <Button
             disabled={loading}
             onClick={() => onRefresh()}
@@ -105,14 +87,12 @@ const AlertingRulesToolbar = ({
 };
 
 AlertingRulesToolbar.propTypes = {
-  /**  Name of the selected rule */
-  selectedRuleName: PropTypes.string.isRequired,
+  /**  whether a rule is selected or not */
+  isRuleSelected: PropTypes.bool,
   /** If the toolbar is in loading mode */
   loading: PropTypes.bool,
   /**  Whether the contents are read only */
   readOnly: PropTypes.bool,
-  /**  Whether to group by templates and/or topics */
-  groupingOptions: PropTypes.object,
   /**  Callback on triggering create rule dialog */
   onShowCreateRuleDialog: PropTypes.func,
   /**  Callback on triggering delete rule dialog */
@@ -123,32 +103,17 @@ AlertingRulesToolbar.propTypes = {
   onShowCopyRuleDialog: PropTypes.func,
   /**  Callback on triggering refresh */
   onRefresh: PropTypes.func,
-  /** Global state update callback when rule grouping options change */
-  onGroupingChanged: PropTypes.func,
 };
 
 AlertingRulesToolbar.defaultProps = {
+  isRuleSelected: false,
   loading: false,
   readOnly: false,
-  groupingOptions: {
-    groupByTemplates: true,
-    groupByTopics: false,
-  },
-  onShowCreateRuleDialog: () => {},
-  onShowDeleteRuleDialog: () => {},
-  onShowRenameRuleDialog: () => {},
-  onShowCopyRuleDialog: () => {},
-  onRefresh: () => {},
+  onShowCreateRuleDialog: () => { },
+  onShowDeleteRuleDialog: () => { },
+  onShowRenameRuleDialog: () => { },
+  onShowCopyRuleDialog: () => { },
+  onRefresh: () => { },
 };
 
-const mapStateToProps = (state) => {
-  return {
-    groupingOptions: state.alerting.ruleGrouping,
-  };
-};
-
-const mapDispatchToProps = {
-  onGroupingChanged: alertingActions.ruleGroupingOptionsChanged,
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(AlertingRulesToolbar);
+export default AlertingRulesToolbar;

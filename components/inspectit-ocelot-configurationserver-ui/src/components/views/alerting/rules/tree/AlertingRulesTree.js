@@ -1,44 +1,75 @@
 import React, { useState, useEffect } from 'react';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import classNames from 'classnames';
-import { uniq } from 'lodash';
+import { uniq, find } from 'lodash';
 import PropTypes from 'prop-types';
 import { Tree } from 'primereact/tree';
+import { ContextMenu } from 'primereact/contextmenu';
+import { alertingActions } from '../../../../../redux/ducks/alerting';
+import classnames from 'classnames';
 
 /**
  * The alerting rules tree.
  */
-const AlertingRulesTree = ({
-  rules,
-  templates,
-  unsavedRules,
-  selectedRuleName,
-  selectedTemplateName,
-  onSelectionChanged,
-  groupingOptions,
-}) => {
-  const [expandedKeys, setExpandedKeys] = useState({});
-  const selectedRule = selectedRuleName && rules.find((r) => r.id === selectedRuleName);
-  const selectedTopic = selectedRule && selectedRule.topic;
+const AlertingRulesTree = ({ rules, templates, unsavedRules, onSelectionChanged, selection }) => {
+  const dispatch = useDispatch();
 
+  // state variables
+  const [contextMenu, setContextMenu] = useState(null);
+  const [treeIndex, setTreeIndex] = useState({});
+  const [treeData, setTreeData] = useState(null);
+
+  // global state variables
+  const { groupByTemplates, groupByTopics } = useSelector((state) => state.alerting.ruleGrouping);
+
+  // derived variables
+  let currentSelectionKey;
+  if (selection.rule) {
+    currentSelectionKey = 'rule_' + selection.rule;
+  } else if (selection.template) {
+    currentSelectionKey = 'template_' + selection.template;
+  }
+
+  // updating the tree index
   useEffect(() => {
-    var keysToAdd = undefined;
-    if (selectedRuleName && !(selectedTemplateName in expandedKeys)) {
-      keysToAdd = { [selectedTemplateName]: true };
-    }
-    const rule = selectedRuleName ? rules.find((r) => r.id === selectedRuleName) : undefined;
-    const topicName = rule && rule.topic ? rule.topic : 'UNDEFINED TOPIC';
-    if (rule && !(topicName in expandedKeys)) {
-      keysToAdd = { ...keysToAdd, ...{ [topicName]: true } };
-    }
-    if (keysToAdd) {
-      setExpandedKeys({ ...expandedKeys, ...keysToAdd });
-    }
-  }, [selectedRuleName, selectedTemplateName, groupingOptions, selectedTopic]);
+    const rulesTree = getRulesTree(rules, templates, unsavedRules, groupByTemplates, groupByTopics, setTreeIndex);
+    setTreeData(rulesTree);
+  }, [rules, templates, unsavedRules, groupByTemplates, groupByTopics]);
 
-  const rulesTree = getRulesTree(rules, templates, unsavedRules, groupingOptions.groupByTemplates, groupingOptions.groupByTopics);
+  // menu items for the tree's context menu
+  const contextMenuItems = [
+    {
+      label: 'Group by Notification Channel',
+      icon: 'pi pi-fw ' + (groupByTopics ? 'pi-check' : ''),
+      command: () => dispatch(alertingActions.changeRuleGroupingOptions({ groupByTemplates, groupByTopics: !groupByTopics }))
+    },
+    {
+      label: 'Group by Templates',
+      icon: 'pi pi-fw ' + (groupByTemplates ? 'pi-check' : ''),
+      command: () => dispatch(alertingActions.changeRuleGroupingOptions({ groupByTemplates: !groupByTemplates, groupByTopics }))
+    }
+  ];
+
+  // callback when the tree selection is changing
+  const onTreeSelection = (event) => {
+    const itemKey = event.value;
+
+    const newSelection = { rule: null, template: null };
+
+    const metaData = treeIndex[itemKey];
+    if (metaData.type === 'rule') {
+      const rule = rules.find((r) => r.id === metaData.label);
+      newSelection.rule = metaData.label;
+      newSelection.template = rule.template;
+    } else if (metaData.type === 'template') {
+      newSelection.template = metaData.label;
+    }
+
+    onSelectionChanged(newSelection);
+  };
+
   return (
-    <div className="this">
+    <>
       <style jsx>{`
         .this {
           overflow: auto;
@@ -47,42 +78,43 @@ const AlertingRulesTree = ({
         .this :global(.p-treenode-label) {
           width: 80%;
         }
-        .this :global(.green) {
-          color: green;
+        .this :global(.p-treenode-content:not(.p-highlight) .green) {
+          color: #4caf50;
         }
-        .this :global(.grey) {
-          color: grey;
+        .this :global(.p-treenode-content:not(.p-highlight) .grey) {
+          color: #9e9e9e;
         }
-        .this :global(.red) {
-          color: red;
+        .this :global(.p-treenode-content:not(.p-highlight) .red) {
+          color: #f44336;
         }
         .this :global(.rule-label) {
           display: flex;
           flex-direction: row;
           justify-content: space-between;
           width: 100%;
+          align-items: center;
+        }
+
+        .this :global(.context-menu.p-contextmenu) {
+          width: 20rem;
         }
       `}</style>
-      <Tree
-        filter={true}
-        filterBy="label"
-        value={rulesTree}
-        nodeTemplate={nodeTemplate}
-        selectionMode="single"
-        selectionKeys={selectedRuleName || selectedTemplateName}
-        onSelectionChange={(e) => {
-          const selectedValue = e.value;
-          const rule = rules.find((r) => r.id === selectedValue);
-          if (rule) {
-            onSelectionChanged(selectedValue, rule.template);
-          } else if (templates.some((t) => t.id === selectedValue)) {
-            onSelectionChanged(undefined, selectedValue);
-          }
-        }}
-        expandedKeys={expandedKeys}
-        onToggle={(e) => setExpandedKeys(e.value)}
-      />
-    </div>
+
+      <div className="this">
+        <ContextMenu className="context-menu" model={contextMenuItems} ref={el => setContextMenu(el)} />
+
+        <Tree
+          onContextMenu={event => contextMenu.show(event.originalEvent)}
+          filter={true}
+          filterBy="label"
+          value={treeData}
+          nodeTemplate={nodeTemplate}
+          selectionMode="single"
+          selectionKeys={currentSelectionKey}
+          onSelectionChange={onTreeSelection}
+        />
+      </div>
+    </>
   );
 };
 
@@ -95,30 +127,34 @@ const nodeTemplate = (node) => {
     if (node.data.status === 'enabled' && !node.data.error) {
       classNames = classNames + 'pi-circle-on green';
     } else if (node.data.status === 'enabled' && node.data.error) {
-      classNames = classNames + 'pi-circle-off red';
+      classNames = classNames + 'pi-times-circle red';
     } else {
       classNames = classNames + 'pi-circle-off grey';
     }
 
     return (
-      <div className="rule-label">
+      <div className={classnames('rule-label', { 'undefined-element': node.isUndefinedName })}>
         {node.label + (node.unsaved ? ' *' : '')}
         <i className={classNames} />
       </div>
     );
   } else {
-    return <b>{node.label + (node.unsaved ? ' *' : '')}</b>;
+    const style = node.isUndefinedName ? { fontStyle: 'italic', color: '#BDBDBD', fontWeight: 'normal' } : {};
+    return <b style={style}>{node.label + (node.unsaved ? ' *' : '')}</b>;
   }
 };
 
 /**
  * Returns the loaded rules in a tree structure used by the tree component.
  */
-const getRulesTree = (rules, templates, unsavedRules, groupByTemplates, groupByTopics) => {
-  if (!rules || !templates) {
+const getRulesTree = (rules, templates, unsavedRules, groupByTemplates, groupByTopics, setTreeIndex) => {
+  if (_.isEmpty(rules) || _.isEmpty(templates)) {
     return [];
   }
 
+  const newTreeIndex = {};
+
+  // generate rule nodes
   var treeNodes = rules.map((rule) =>
     toTreeBranch(
       rule.id,
@@ -127,7 +163,8 @@ const getRulesTree = (rules, templates, unsavedRules, groupByTemplates, groupByT
       rule.topic,
       rule.template,
       undefined,
-      unsavedRules.some((usRuleName) => usRuleName === rule.id)
+      unsavedRules.some((usRuleName) => usRuleName === rule.id),
+      newTreeIndex
     )
   );
   const activeTopics = uniq(rules.map((r) => r.topic));
@@ -144,7 +181,8 @@ const getRulesTree = (rules, templates, unsavedRules, groupByTemplates, groupByT
           topicName,
           templateName,
           leafNodesFilteredByTemplate,
-          leafNodesFilteredByTemplate.some((child) => child.unsaved === true)
+          leafNodesFilteredByTemplate.some((child) => child.unsaved === true),
+          newTreeIndex
         );
       });
       return toTreeBranch(
@@ -154,7 +192,8 @@ const getRulesTree = (rules, templates, unsavedRules, groupByTemplates, groupByT
         topicName,
         undefined,
         templateNodes,
-        templateNodes.some((child) => child.unsaved === true)
+        templateNodes.some((child) => child.unsaved === true),
+        newTreeIndex
       );
     });
   } else if (groupByTopics) {
@@ -167,7 +206,8 @@ const getRulesTree = (rules, templates, unsavedRules, groupByTemplates, groupByT
         topicName,
         undefined,
         children,
-        children.some((child) => child.unsaved === true)
+        children.some((child) => child.unsaved === true),
+        newTreeIndex
       );
     });
   } else if (groupByTemplates) {
@@ -182,15 +222,19 @@ const getRulesTree = (rules, templates, unsavedRules, groupByTemplates, groupByT
           undefined,
           templateName,
           children,
-          children.some((child) => child.unsaved === true)
+          children.some((child) => child.unsaved === true),
+          newTreeIndex
         );
       });
   }
   treeNodes.sort((t1, t2) => t1.key.localeCompare(t2.key));
+
+  setTreeIndex(newTreeIndex);
+
   return treeNodes;
 };
 
-const toTreeBranch = (name, type, data, topic, template, children, hasUnsaved) => {
+const toTreeBranch = (name, type, data, topic, template, children, hasUnsaved, newTreeIndex) => {
   const iconClassNames = classNames('pi', 'pi-fw', {
     'pi-bars': type === 'topic',
     'pi-briefcase': type === 'template',
@@ -199,11 +243,21 @@ const toTreeBranch = (name, type, data, topic, template, children, hasUnsaved) =
   if (children && children.length > 0) {
     children.sort((r1, r2) => r1.key.localeCompare(r2.key));
   }
-  const key = name ? name : 'UNDEFINED ' + type.toUpperCase();
+
+  const isUndefinedName = !name;
+
+  const label = isUndefinedName ? 'UNDEFINED ' + type.toUpperCase() : name;
+  const key = type + '_' + label;
+
+  newTreeIndex[key] = {
+    label,
+    type
+  };
+
   return {
     key: key,
     type: type,
-    label: key,
+    label,
     data: data,
     topic: topic,
     template,
@@ -211,20 +265,15 @@ const toTreeBranch = (name, type, data, topic, template, children, hasUnsaved) =
     leaf: !children || children.length <= 0,
     children,
     unsaved: hasUnsaved,
+    isUndefinedName
   };
 };
 
 AlertingRulesTree.propTypes = {
-  /**  Name of the selected rule */
-  selectedRuleName: PropTypes.string.isRequired,
-  /**  Name of the selected template (template in the current context) */
-  selectedTemplateName: PropTypes.string.isRequired,
   /** List of all rules */
   rules: PropTypes.array.isRequired,
   /**  List of all templates */
   templates: PropTypes.array.isRequired,
-  /**  Whether to group by templates and / or topics */
-  groupingOptions: PropTypes.object,
   /**  List of rules that are unsaved */
   unsavedRules: PropTypes.array.isRequired,
   /**  Callback on changed selection */
@@ -232,17 +281,11 @@ AlertingRulesTree.propTypes = {
 };
 
 AlertingRulesTree.defaultProps = {
-  onSelectionChanged: () => {},
+  onSelectionChanged: () => { },
   groupingOptions: {
     groupByTemplates: true,
     groupByTopics: false,
   },
 };
 
-const mapStateToProps = (state) => {
-  return {
-    groupingOptions: state.alerting.ruleGrouping,
-  };
-};
-
-export default connect(mapStateToProps, {})(AlertingRulesTree);
+export default AlertingRulesTree;

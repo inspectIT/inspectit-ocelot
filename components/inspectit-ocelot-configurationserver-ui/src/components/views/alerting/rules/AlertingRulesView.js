@@ -7,13 +7,13 @@ import RulesEditorContainer from './editor/RulesEditorContainer';
 /**
  * The component for managing alerting rules.
  */
-const AlertingRulesView = ({ updateDate, availableTopics, rules, templates, onRefresh }) => {
-  const readOnly = useSelector((state) => !state.authentication.permissions.write).readOnly;
-  const [selectedRuleName, setSelectedRuleName] = useState(undefined);
-  const [selectedTemplateName, setSelectedTemplateName] = useState(undefined);
+const AlertingRulesView = ({ updateDate, topics, rules, templates, onRefresh }) => {
+  const [currentSelection, setCurrentSelection] = useState({rule: null, template: null});
+
+  const readOnly = useSelector((state) => !state.authentication.permissions.write);
 
   return (
-    <div className="this">
+    <>
       <style jsx>{`
         .this {
           height: 100%;
@@ -21,32 +21,33 @@ const AlertingRulesView = ({ updateDate, availableTopics, rules, templates, onRe
           flex-grow: 1;
         }
       `}</style>
-      <AlertingRulesTreeContainer
-        readOnly={readOnly}
-        onSelectionChanged={(ruleName, templateName) => {
-          setSelectedRuleName(ruleName);
-          setSelectedTemplateName(templateName);
-        }}
-        selectedRuleName={selectedRuleName}
-        selectedTemplateName={selectedTemplateName}
-        updateDate={updateDate}
-        rules={rules}
-        templates={templates}
-        onRefresh={onRefresh}
-      />
-      <RulesEditorContainer
-        readOnly={readOnly}
-        availableTopics={availableTopics}
-        selectedRuleName={selectedRuleName}
-        selectedTemplateName={selectedTemplateName}
-      />
-    </div>
+
+      <div className="this">
+        <AlertingRulesTreeContainer
+          readOnly={readOnly}
+          onSelectionChanged={setCurrentSelection}
+          updateDate={updateDate}
+          rules={rules}
+          templates={templates}
+          onRefresh={onRefresh}
+
+          selection={currentSelection}
+        />
+
+        <RulesEditorContainer
+          readOnly={readOnly}
+          availableTopics={topics}
+          selectedRuleName={currentSelection.rule}
+          selectedTemplateName={currentSelection.template}
+        />
+      </div>
+    </>
   );
 };
 
 AlertingRulesView.propTypes = {
   /** An array of strings denoting the available notification topics */
-  availableTopics: PropTypes.array,
+  topics: PropTypes.array,
   /** Recent update date */
   updateDate: PropTypes.object,
   /** List of available rules */
@@ -58,9 +59,9 @@ AlertingRulesView.propTypes = {
 };
 
 AlertingRulesView.defaultProps = {
-  availableTopics: [],
-  onSelectionChanged: () => {},
-  onRefresh: () => {},
+  topics: [],
+  onSelectionChanged: () => { },
+  onRefresh: () => { },
 };
 
 export default AlertingRulesView;

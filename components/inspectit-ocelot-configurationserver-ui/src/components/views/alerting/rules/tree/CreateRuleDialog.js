@@ -10,7 +10,7 @@ import { InputTextarea } from 'primereact/inputtextarea';
 /**
  * A dialog for creating new alerting rules.
  */
-const CreateDialog = ({ templates, initialTemplate, visible, onHide, reservedNames, onSuccess }) => {
+const CreateRuleDialog = ({ templates, initialTemplate, visible, onHide, reservedNames, onSuccess }) => {
   const [name, setName] = useState('');
   const [template, setTemplate] = useState(undefined);
   const [description, setDescription] = useState('');
@@ -36,7 +36,7 @@ const CreateDialog = ({ templates, initialTemplate, visible, onHide, reservedNam
   return (
     <Dialog
       className="this"
-      style={{ width: '400px' }}
+      style={{ maxWidth: '40rem' }}
       header={'Create Alerting Rule'}
       modal={true}
       visible={visible}
@@ -107,7 +107,7 @@ const CreateDialog = ({ templates, initialTemplate, visible, onHide, reservedNam
   );
 };
 
-CreateDialog.propTypes = {
+CreateRuleDialog.propTypes = {
   /** List of template options */
   templates: PropTypes.array,
   /** Initially selected template */
@@ -122,7 +122,7 @@ CreateDialog.propTypes = {
   onHide: PropTypes.func,
 };
 
-CreateDialog.defaultProps = {
+CreateRuleDialog.defaultProps = {
   templates: [],
   initialTemplate: '',
   visible: true,
@@ -131,4 +131,4 @@ CreateDialog.defaultProps = {
   onHide: () => {},
 };
 
-export default CreateDialog;
+export default CreateRuleDialog;
