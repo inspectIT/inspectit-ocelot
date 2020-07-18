@@ -38,7 +38,7 @@ const DescriptionSection = ({ value, readOnly, updateValue }) => {
           .this :global(.inplace) {
             white-space: pre-wrap;
           }
-          .placeholder {
+          .this :global(.placeholder) {
             color: #9e9e9e;
             font-style: italic;
           }

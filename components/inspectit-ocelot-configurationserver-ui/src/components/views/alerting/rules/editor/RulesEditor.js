@@ -58,6 +58,23 @@ const RulesEditor = ({ availableTopics, content, isRule, mappedVars, readOnly, o
     onErrorStatusUpdate(Object.entries(errornuousVariables).filter((keyValPair) => keyValPair[1] === true).length);
   };  
 
+  let statusText;
+  let statusIconClass;
+  if (isRule) {
+    if (content.status === 'enabled') {
+      if (hasExecutionError) {
+        statusText = 'Execution Error';
+        statusIconClass = 'pi-times-circle red';
+      } else {
+        statusText = 'Enabled';
+        statusIconClass = 'pi-circle-on green';
+      }
+    } else {
+      statusText = 'Disabled';
+      statusIconClass = 'pi-circle-off grey';
+    }
+  }
+
   return (
     <>
       <style jsx>{`
@@ -70,6 +87,10 @@ const RulesEditor = ({ availableTopics, content, isRule, mappedVars, readOnly, o
         .this :global(.error.p-col-fixed) {
           padding: 0.5rem 0 0;
         }
+        .detail-row {
+          display: flex;
+          align-items: center;
+        }
         .detail-row:not(:first-child) {
           margin-top: 0.25rem;
         }
@@ -78,8 +99,20 @@ const RulesEditor = ({ availableTopics, content, isRule, mappedVars, readOnly, o
           display: inline-block;
           color: #333;
         }
+        .detail-row .pi {
+          margin-right: .5rem;
+        }
         .error {
           font-family: monospace;
+        }
+        .green {
+          color: #4caf50;
+        }
+        .grey {
+          color: #9e9e9e;
+        }
+        .red {
+          color: #f44336;
         }
       `}</style>
 
@@ -91,6 +124,9 @@ const RulesEditor = ({ availableTopics, content, isRule, mappedVars, readOnly, o
         )}
 
         <Section title={(isRule ? 'Rule' : 'Template') + ' Details'}>
+          {isRule && <div className="detail-row">
+            <span>Status:</span> <i className={'pi ' + statusIconClass} /> {statusText}
+          </div>}
           <div className="detail-row">
             <span>Creation Date:</span> {creationDate}
           </div>
