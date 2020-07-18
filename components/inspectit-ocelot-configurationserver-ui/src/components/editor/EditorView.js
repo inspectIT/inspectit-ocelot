@@ -112,7 +112,7 @@ class EditorView extends React.Component {
             </YamlParser>
           </div>
         )}
-        {!showEditor && (<SelectionInformation hint={hint} />)}
+        {!showEditor && <SelectionInformation hint={hint} />}
         {loading && (
           <div className="p-col">
             <div className="loading-overlay">

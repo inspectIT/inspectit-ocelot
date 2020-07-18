@@ -46,7 +46,7 @@ const DescriptionSection = ({ value, readOnly, updateValue }) => {
             display: block;
           }
           .simple-content {
-            margin-left: .5rem;
+            margin-left: 0.5rem;
           }
         `}
       </style>

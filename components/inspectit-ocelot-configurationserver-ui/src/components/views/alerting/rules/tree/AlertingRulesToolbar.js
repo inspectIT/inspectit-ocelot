@@ -14,7 +14,7 @@ const AlertingRulesToolbar = ({
   onShowRenameRuleDialog,
   onShowCopyRuleDialog,
   onRefresh,
-  ruleSelected
+  ruleSelected,
 }) => {
   const tooltipOptions = {
     showDelay: 500,
@@ -109,11 +109,11 @@ AlertingRulesToolbar.defaultProps = {
   isRuleSelected: false,
   loading: false,
   readOnly: false,
-  onShowCreateRuleDialog: () => { },
-  onShowDeleteRuleDialog: () => { },
-  onShowRenameRuleDialog: () => { },
-  onShowCopyRuleDialog: () => { },
-  onRefresh: () => { },
+  onShowCreateRuleDialog: () => {},
+  onShowDeleteRuleDialog: () => {},
+  onShowRenameRuleDialog: () => {},
+  onShowCopyRuleDialog: () => {},
+  onRefresh: () => {},
 };
 
 export default AlertingRulesToolbar;

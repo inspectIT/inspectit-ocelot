@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import classNames from 'classnames';
-import { uniq, find } from 'lodash';
+import _, { uniq } from 'lodash';
 import PropTypes from 'prop-types';
 import { Tree } from 'primereact/tree';
 import { ContextMenu } from 'primereact/contextmenu';
@@ -41,13 +41,13 @@ const AlertingRulesTree = ({ rules, templates, unsavedRules, onSelectionChanged,
     {
       label: 'Group by Notification Channel',
       icon: 'pi pi-fw ' + (groupByTopics ? 'pi-check' : ''),
-      command: () => dispatch(alertingActions.changeRuleGroupingOptions({ groupByTemplates, groupByTopics: !groupByTopics }))
+      command: () => dispatch(alertingActions.changeRuleGroupingOptions({ groupByTemplates, groupByTopics: !groupByTopics })),
     },
     {
       label: 'Group by Templates',
       icon: 'pi pi-fw ' + (groupByTemplates ? 'pi-check' : ''),
-      command: () => dispatch(alertingActions.changeRuleGroupingOptions({ groupByTemplates: !groupByTemplates, groupByTopics }))
-    }
+      command: () => dispatch(alertingActions.changeRuleGroupingOptions({ groupByTemplates: !groupByTemplates, groupByTopics })),
+    },
   ];
 
   // callback when the tree selection is changing
@@ -101,10 +101,10 @@ const AlertingRulesTree = ({ rules, templates, unsavedRules, onSelectionChanged,
       `}</style>
 
       <div className="this">
-        <ContextMenu className="context-menu" model={contextMenuItems} ref={el => setContextMenu(el)} />
+        <ContextMenu className="context-menu" model={contextMenuItems} ref={(el) => setContextMenu(el)} />
 
         <Tree
-          onContextMenu={event => contextMenu.show(event.originalEvent)}
+          onContextMenu={(event) => contextMenu.show(event.originalEvent)}
           filter={true}
           filterBy="label"
           value={treeData}
@@ -251,7 +251,7 @@ const toTreeBranch = (name, type, data, topic, template, children, hasUnsaved, n
 
   newTreeIndex[key] = {
     label,
-    type
+    type,
   };
 
   return {
@@ -265,7 +265,7 @@ const toTreeBranch = (name, type, data, topic, template, children, hasUnsaved, n
     leaf: !children || children.length <= 0,
     children,
     unsaved: hasUnsaved,
-    isUndefinedName
+    isUndefinedName,
   };
 };
 
@@ -281,7 +281,7 @@ AlertingRulesTree.propTypes = {
 };
 
 AlertingRulesTree.defaultProps = {
-  onSelectionChanged: () => { },
+  onSelectionChanged: () => {},
   groupingOptions: {
     groupByTemplates: true,
     groupByTopics: false,

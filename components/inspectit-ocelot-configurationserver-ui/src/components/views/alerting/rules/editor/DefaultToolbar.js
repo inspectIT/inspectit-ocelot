@@ -7,10 +7,10 @@ const DefaultToolbar = ({ name, icon }) => {
     <>
       <style jsx>{`
         .this :global(.p-toolbar) {
-           border: 0;
-           background-color: #eee;
-           border-bottom: 1px solid #ddd;
-           border-radius: 0;
+          border: 0;
+          background-color: #eee;
+          border-bottom: 1px solid #ddd;
+          border-radius: 0;
         }
         .header {
           display: flex;

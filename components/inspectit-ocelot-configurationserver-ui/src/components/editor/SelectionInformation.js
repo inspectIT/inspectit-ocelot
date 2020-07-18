@@ -8,14 +8,14 @@ const SelectionInformation = ({ hint }) => {
   return (
     <div className="p-col">
       <style jsx>{`
-          .selection-information {
-            display: flex;
-            height: 100%;
-            align-items: center;
-            justify-content: center;
-            color: #bbb;
-          }
-        `}</style>
+        .selection-information {
+          display: flex;
+          height: 100%;
+          align-items: center;
+          justify-content: center;
+          color: #bbb;
+        }
+      `}</style>
       <div className="selection-information">
         <div>{hint}</div>
       </div>

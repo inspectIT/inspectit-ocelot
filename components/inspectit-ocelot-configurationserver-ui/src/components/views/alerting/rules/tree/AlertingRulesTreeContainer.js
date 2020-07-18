@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import _, { omit, extend } from 'lodash';
+import { omit, extend } from 'lodash';
 import PropTypes from 'prop-types';
 import * as rulesAPI from '../RulesAPI';
 import AlertingRulesToolbar from './AlertingRulesToolbar';
@@ -21,7 +21,7 @@ const AlertingRulesTreeContainer = ({
   onSelectionChanged,
   onRefresh,
 
-  selection
+  selection,
 }) => {
   const dispatch = useDispatch();
 
@@ -72,7 +72,7 @@ const AlertingRulesTreeContainer = ({
       if (deletedRuleName === selection.rule) {
         onSelectionChanged({ rule: null, template: selection.template });
       }
-    })
+    });
   };
 
   return (
@@ -109,7 +109,6 @@ const AlertingRulesTreeContainer = ({
           onRefresh={onRefresh}
           readOnly={readOnly}
           ruleSelected={isRuleSelected}
-
         />
         <AlertingRulesTree
           rules={rules}
@@ -175,8 +174,8 @@ AlertingRulesTreeContainer.propTypes = {
 
 AlertingRulesTreeContainer.defaultProps = {
   readOnly: false,
-  onSelectionChanged: () => { },
-  onRefresh: () => { },
+  onSelectionChanged: () => {},
+  onRefresh: () => {},
 };
 
 export default AlertingRulesTreeContainer;

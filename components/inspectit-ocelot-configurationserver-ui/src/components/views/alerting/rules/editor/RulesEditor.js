@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { cloneDeep, remove, extend } from 'lodash';
-import Notificationbar from '../../../../editor/Notificationbar';
 import DescriptionSection from './DescriptionSection';
 import VariableView from './VariableView';
 import SelectionInformation from '../../../../editor/SelectionInformation';
@@ -56,7 +55,7 @@ const RulesEditor = ({ availableTopics, content, isRule, mappedVars, readOnly, o
   const updateErrorStatus = (name, value) => {
     setErrornuousVariables(extend(errornuousVariables, { [name]: value }));
     onErrorStatusUpdate(Object.entries(errornuousVariables).filter((keyValPair) => keyValPair[1] === true).length);
-  };  
+  };
 
   let statusText;
   let statusIconClass;
@@ -100,7 +99,7 @@ const RulesEditor = ({ availableTopics, content, isRule, mappedVars, readOnly, o
           color: #333;
         }
         .detail-row .pi {
-          margin-right: .5rem;
+          margin-right: 0.5rem;
         }
         .error {
           font-family: monospace;
@@ -124,9 +123,11 @@ const RulesEditor = ({ availableTopics, content, isRule, mappedVars, readOnly, o
         )}
 
         <Section title={(isRule ? 'Rule' : 'Template') + ' Details'}>
-          {isRule && <div className="detail-row">
-            <span>Status:</span> <i className={'pi ' + statusIconClass} /> {statusText}
-          </div>}
+          {isRule && (
+            <div className="detail-row">
+              <span>Status:</span> <i className={'pi ' + statusIconClass} /> {statusText}
+            </div>
+          )}
           <div className="detail-row">
             <span>Creation Date:</span> {creationDate}
           </div>

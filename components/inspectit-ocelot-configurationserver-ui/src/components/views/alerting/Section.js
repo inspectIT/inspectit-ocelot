@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {Card} from 'primereact/card';
+import { Card } from 'primereact/card';
 
 const Section = ({ title, children, backgroundColor }) => {
   return (
@@ -14,7 +14,7 @@ const Section = ({ title, children, backgroundColor }) => {
         }
       `}</style>
 
-      <Card className="section" title={title} style={{backgroundColor: backgroundColor}}>
+      <Card className="section" title={title} style={{ backgroundColor: backgroundColor }}>
         {children}
       </Card>
     </>
@@ -27,7 +27,7 @@ Section.propTypes = {
   /**  List of child elements */
   children: PropTypes.object,
 
-  backgroundColor: PropTypes.string
+  backgroundColor: PropTypes.string,
 };
 
 Section.defaultProps = {

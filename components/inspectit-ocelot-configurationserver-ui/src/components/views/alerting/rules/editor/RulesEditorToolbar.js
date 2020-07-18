@@ -57,7 +57,7 @@ const RulesEditorToolbar = ({
         .text-addition {
           font-style: italic;
           color: #8a8a8a;
-          margin-left: .5rem;
+          margin-left: 0.5rem;
         }
       `}</style>
 
@@ -109,8 +109,8 @@ RulesEditorToolbar.defaultProps = {
   readOnly: false,
   isUnsaved: false,
   numErrors: 0,
-  onEnabledStateChanged: () => { },
-  onSave: () => { },
+  onEnabledStateChanged: () => {},
+  onSave: () => {},
 };
 
 export default RulesEditorToolbar;

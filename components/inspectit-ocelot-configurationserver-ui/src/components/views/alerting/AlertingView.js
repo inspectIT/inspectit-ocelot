@@ -4,14 +4,14 @@ import { TabMenu } from 'primereact/tabmenu';
 import AlertingRulesView from './rules/AlertingRulesView';
 import * as topicsAPI from './topics/TopicsAPI';
 import * as rulesAPI from './rules/RulesAPI';
-import useDeepEffect from '../../../hooks/use-deep-effect'
+import useDeepEffect from '../../../hooks/use-deep-effect';
 
 /**
  * Existing tabs for the alerting view tab menu
  */
 const items = [
   { label: 'Alerting Rules', icon: 'pi pi-fw pi-globe' },
-  { label: 'Calendar', icon: 'pi pi-fw pi-calendar' }
+  { label: 'Calendar', icon: 'pi pi-fw pi-calendar' },
 ];
 
 /**
@@ -34,18 +34,26 @@ const AlertingView = () => {
   // collects all topics referenced by any rule
   useDeepEffect(() => {
     const topics = _(rules)
-      .map(rule => rule.topic)
+      .map((rule) => rule.topic)
       .filter()
-      .filter(topicId => !existingTopics.some(topic => topic.id === topicId))
-      .map(topicId => ({ id: topicId, referencedOnly: true }))
+      .filter((topicId) => !existingTopics.some((topic) => topic.id === topicId))
+      .map((topicId) => ({ id: topicId, referencedOnly: true }))
       .uniq()
       .value();
 
     setReferencedTopics(topics);
   }, [rules]);
 
-  const refreshRules = () => rulesAPI.fetchAlertingRules((rules) => setRules(rules), () => setRules([]));
-  const refreshTemplates = () => rulesAPI.fetchAlertingTemplates((templates) => setTemplates(templates), () => setTemplates([]));
+  const refreshRules = () =>
+    rulesAPI.fetchAlertingRules(
+      (rules) => setRules(rules),
+      () => setRules([])
+    );
+  const refreshTemplates = () =>
+    rulesAPI.fetchAlertingTemplates(
+      (templates) => setTemplates(templates),
+      () => setTemplates([])
+    );
   const refreshTopics = () => topicsAPI.fetchTopics((topics) => setExistingTopics(topics));
 
   // reloads all the alerting data - rules, topics, templates...
@@ -108,7 +116,9 @@ const AlertingView = () => {
       <div className="this">
         <TabMenu className="menu" model={items} activeItem={activeTab} onTabChange={(e) => setActiveTab(e.value)} />
 
-        {activeTab == items[0] && <AlertingRulesView updateDate={updateDate} topics={availableTopics} rules={rules} templates={templates} onRefresh={refreshAll} />}
+        {activeTab == items[0] && (
+          <AlertingRulesView updateDate={updateDate} topics={availableTopics} rules={rules} templates={templates} onRefresh={refreshAll} />
+        )}
       </div>
     </>
   );
