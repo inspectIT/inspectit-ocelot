@@ -6,6 +6,7 @@ import NumberEditor from '../../../../common/value-editors/NumberEditor';
 import TextEditor from '../../../../common/value-editors/TextEditor';
 import BoolEditor from '../../../../common/value-editors/BoolEditor';
 import SelectionEditor from '../../../../common/value-editors/SelectionEditor';
+import _ from 'lodash';
 
 /**
  * The VariableView component encapsulates displaying and editing of values of different type.
@@ -20,7 +21,7 @@ const VariableView = ({ name, value, type, description, options, readOnly, onVar
       if (onErrorStatusUpdate !== undefined) {
         onErrorStatusUpdate(name, validate(type, newValue));
       }
-      onVarUpdate(name, !newValue ? null : newValue);
+      onVarUpdate(name, _.isNil(newValue) ? null : newValue);
     }
   };
 
@@ -109,18 +110,12 @@ const VariableView = ({ name, value, type, description, options, readOnly, onVar
 const ValueView = ({ value, type, options, readOnly, isDefault, onDataChanged, error }) => {
   const [inplaceActive, setInplaceState] = useState(false);
 
-  const valueEditor = (
-    <ValueEditor
-      type={type}
-      value={value}
-      readOnly={readOnly}
-      options={options}
-      onDataChanged={(value) => {
-        setInplaceState(false);
-        onDataChanged(value);
-      }}
-    />
-  );
+  const updateData = (value) => {
+    setInplaceState(false);
+    onDataChanged(value);
+  };
+
+  const valueEditor = <ValueEditor type={type} value={value} readOnly={readOnly} options={options} onDataChanged={updateData} />;
 
   const dataView = <SimpleDataView value={value} isDefault={isDefault} error={error} />;
 

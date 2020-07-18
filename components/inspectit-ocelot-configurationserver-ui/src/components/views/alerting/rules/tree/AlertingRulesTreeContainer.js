@@ -164,7 +164,7 @@ AlertingRulesTreeContainer.propTypes = {
   /** List of available templates */
   templates: PropTypes.array.isRequired,
   /** Recent update time */
-  updateDate: PropTypes.object.isRequired,
+  updateDate: PropTypes.number,
   /**  Whether the contents are read only */
   readOnly: PropTypes.bool,
   /**  Callback on changed selection */

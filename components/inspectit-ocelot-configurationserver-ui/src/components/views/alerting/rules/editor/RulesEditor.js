@@ -15,8 +15,6 @@ const RulesEditor = ({ availableTopics, content, isRule, mappedVars, readOnly, o
   // state variables
   const [errornuousVariables, setErrornuousVariables] = useState({});
 
-  console.log(errornuousVariables);
-
   useEffect(() => {
     onErrorStatusUpdate(0);
     setErrornuousVariables({});
@@ -29,8 +27,8 @@ const RulesEditor = ({ availableTopics, content, isRule, mappedVars, readOnly, o
   const contentName = content.id;
   const hasExecutionError = !!content.error;
   const format = 'yyyy-mm-dd HH:MM:ss';
-  const creationDate = dateformat(content.created, format);
-  const modificationDate = dateformat(content.modified, format);
+  const creationDate = content.created ? dateformat(content.created, format) : '-';
+  const modificationDate = content.modified ? dateformat(content.modified, format) : '-';
 
   const updateAttribute = (attribute, newValue) => {
     const newContent = cloneDeep(content);
@@ -58,7 +56,7 @@ const RulesEditor = ({ availableTopics, content, isRule, mappedVars, readOnly, o
   const updateErrorStatus = (name, value) => {
     setErrornuousVariables(extend(errornuousVariables, { [name]: value }));
     onErrorStatusUpdate(Object.entries(errornuousVariables).filter((keyValPair) => keyValPair[1] === true).length);
-  };
+  };  
 
   return (
     <>
@@ -145,11 +143,11 @@ RulesEditor.propTypes = {
   /** An array of strings denoting the available notification topics */
   availableTopics: PropTypes.array,
   /** The rule or template content to show (and edit) in this editor */
-  content: PropTypes.object.isRequired,
+  content: PropTypes.object,
   /** Whether the content is a rule content */
   isRule: PropTypes.bool,
   /** An array of variables mapped with default values from the template. */
-  mappedVars: PropTypes.array.isRequired,
+  mappedVars: PropTypes.array,
   /** Whether the content is read only */
   readOnly: PropTypes.bool,
   /** Callback on content update */

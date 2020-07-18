@@ -43,7 +43,7 @@ AlertingRulesView.propTypes = {
   /** An array of strings denoting the available notification topics */
   topics: PropTypes.array,
   /** Recent update date */
-  updateDate: PropTypes.object,
+  updateDate: PropTypes.number,
   /** List of available rules */
   rules: PropTypes.array,
   /** List of available templates */

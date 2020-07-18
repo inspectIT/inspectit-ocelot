@@ -90,7 +90,7 @@ const RulesEditorToolbar = ({
 
 RulesEditorToolbar.propTypes = {
   /** The name of the current selection */
-  selectionName: PropTypes.string.isRequired,
+  ruleName: PropTypes.string,
   /** Additional info to show in the tool bar */
   templateName: PropTypes.string.isRequired,
   /** Whether selection is unsaved */
@@ -98,8 +98,7 @@ RulesEditorToolbar.propTypes = {
   /** Whether the content is read only */
   readOnly: PropTypes.bool,
   /** Whether the selected rule is enabled */
-  ruleEnabled: PropTypes.bool.isReuiqred,
-
+  ruleEnabled: PropTypes.bool,
   /** Callback on enabled state change */
   onEnabledStateChanged: PropTypes.func,
   /** Callback on save */

@@ -44,7 +44,7 @@ const DefaultToolbar = ({ name, icon }) => {
 
 DefaultToolbar.propTypes = {
   /** The name of the current selection */
-  name: PropTypes.string.isRequired,
+  name: PropTypes.string,
 
   icon: PropTypes.string,
 };

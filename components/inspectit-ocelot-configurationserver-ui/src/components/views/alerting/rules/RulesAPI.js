@@ -192,35 +192,31 @@ export const fetchAlertingRules = (onSuccess, onFailed) => {
 /**
  * Fetches the content of the given rule.
  */
-export const fetchRule = (ruleName, onSuccess, onFailed) => {
-  const success = true;
-  if (success) {
-    const content = ruleContents.find((r) => r.id === ruleName);
-    if (onSuccess) {
-      setTimeout(() => onSuccess(content), 200);
+export const fetchRule = (ruleName) => {
+  return new Promise((resolve, reject) => {
+    const success = true;
+    if (success) {
+      const content = ruleContents.find((r) => r.id === ruleName);
+      setTimeout(() => resolve(content), 200);
+    } else {
+      reject();
     }
-  } else {
-    if (onFailed) {
-      onFailed();
-    }
-  }
+  });
 };
 
 /**
  * Fetches the content of the given template.
  */
-export const fetchTemplate = (templateName, onSuccess, onFailed) => {
-  const success = true;
-  if (success) {
-    var content = templateContents.find((t) => t.id === templateName);
-    if (onSuccess) {
-      onSuccess(content);
+export const fetchTemplate = (templateName) => {
+  return new Promise((resolve, reject) => {
+    const success = true;
+    if (success) {
+      var content = templateContents.find((t) => t.id === templateName);
+      resolve(content);
+    } else {
+      reject();
     }
-  } else {
-    if (onFailed) {
-      onFailed();
-    }
-  }
+  });
 };
 
 /**

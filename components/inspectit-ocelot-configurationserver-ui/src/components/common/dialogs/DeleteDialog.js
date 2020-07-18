@@ -41,7 +41,7 @@ const DeleteDialog = ({ name, visible, onHide, text, onSuccess }) => {
 
 DeleteDialog.propTypes = {
   /** The name of the element to delete */
-  name: PropTypes.string.isRequired,
+  name: PropTypes.string,
   /** The text to show in the dialog */
   text: PropTypes.string,
   /** Whether the dialog is visible */

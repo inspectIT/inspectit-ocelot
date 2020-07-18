@@ -15,8 +15,8 @@ const DescriptionSection = ({ value, readOnly, updateValue }) => {
 
   const descriptionRef = React.createRef();
 
-  const toggleInplace = (show) => {
-    setInplaceState(show);
+  const toggleInplace = (event) => {
+    setInplaceState(event.value);
     setInplaceHeight(Math.max(descriptionRef.current.clientHeight, 80));
   };
 
@@ -35,7 +35,7 @@ const DescriptionSection = ({ value, readOnly, updateValue }) => {
     <>
       <style jsx>
         {`
-          .inplace {
+          .this :global(.inplace) {
             white-space: pre-wrap;
           }
           .placeholder {

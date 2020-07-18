@@ -81,7 +81,7 @@ const RenameCopyDialog = ({ name, reservedNames, retrieveReservedNames, visible,
 
 RenameCopyDialog.propTypes = {
   /** The name of the element to delete */
-  name: PropTypes.string.isRequired,
+  name: PropTypes.string,
   /** A list of reserved name (optional) */
   reservedNames: PropTypes.array,
   /** A function returning a list of reserved names as alternative to passing the reserved names. */

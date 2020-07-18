@@ -8,6 +8,7 @@ import * as rulesAPI from '../RulesAPI';
 import { alertingActions } from '../../../../../redux/ducks/alerting';
 import DefaultToolbar from './DefaultToolbar';
 import Notificationbar from '../../../../editor/Notificationbar';
+import useDeepEffect from '../../../../../hooks/use-deep-effect';
 
 const RulesEditorContainer = ({ readOnly, availableTopics, selection }) => {
   const dispatch = useDispatch();
@@ -20,30 +21,34 @@ const RulesEditorContainer = ({ readOnly, availableTopics, selection }) => {
   // global state variables
   const unsavedRuleContents = useSelector((state) => state.alerting.unsavedRuleContents);
 
-  //useContentFetch(selection.rule, selection.template, setRuleContent, setTemplateContent);
-  useEffect(() => {
-    if (!selection.template) {
-      setTemplateContent(undefined);
-    } else {
-      rulesAPI.fetchTemplate(
-        selection.template,
-        (content) => setTemplateContent(content),
-        () => setTemplateContent(undefined)
-      );
-    }
-  }, [selection.template]);
+  // fetching data - its done in a single effect to prevent "flickering", otherwise in case a rule
+  // is selected, it can happen that the screen first renders the template because the
+  // rule data is not loaded, yet
+  useDeepEffect(() => {
+    const fetchData = async () => {
+      let newRuleContent;
+      let newTemplateContent;
 
-  useEffect(() => {
-    if (!selection.rule) {
-      setRuleContent(undefined);
-    } else {
-      rulesAPI.fetchRule(
-        selection.rule,
-        (content) => setRuleContent(content),
-        () => setRuleContent(undefined)
-      );
-    }
-  }, [selection.rule]);
+      if (selection.template) {
+        try {
+          newTemplateContent = await rulesAPI.fetchTemplate(selection.template);
+        } catch (error) {
+          console.log(error);
+        }
+      }
+      if (selection.rule) {
+        try {
+          newRuleContent = await rulesAPI.fetchRule(selection.rule);
+        } catch (error) {
+          console.log(error);
+        }
+      }
+      setTemplateContent(newTemplateContent);
+      setRuleContent(newRuleContent);
+    };
+
+    fetchData();
+  }, [selection]);
 
   // stores the given rule content as unsaved chagnes
   const onContentChanged = (newContent) => {
@@ -80,11 +85,10 @@ const RulesEditorContainer = ({ readOnly, availableTopics, selection }) => {
     }
   };
 
-  let { content, isUnsaved, isRule } = getContentWrapper(ruleContent, templateContent, unsavedRuleContents);
+  const { content, isUnsaved, isRule } = getContentWrapper(ruleContent, templateContent, unsavedRuleContents);
+  const currentName = _.get(content, 'id');
 
   const mappedVars = getVariablesWithDefaults(content, templateContent);
-
-  const currentName = _.get(content, 'id');
 
   return (
     <>
@@ -113,8 +117,8 @@ const RulesEditorContainer = ({ readOnly, availableTopics, selection }) => {
             onSave={onSave}
           />
         ) : (
-            <DefaultToolbar name={currentName} icon={currentName ? 'pi-briefcase' : ''} />
-          )}
+          <DefaultToolbar name={currentName} icon={currentName ? 'pi-briefcase' : ''} />
+        )}
 
         <RulesEditor
           availableTopics={availableTopics}
@@ -126,7 +130,13 @@ const RulesEditorContainer = ({ readOnly, availableTopics, selection }) => {
           onContentChanged={onContentChanged}
         />
 
-        {errorCount > 0 && <Notificationbar text={'You have ' + errorCount + ' error(s) in your variable specification!'} isError={true} icon={'pi-exclamation-triangle'} />}
+        {errorCount > 0 && (
+          <Notificationbar
+            text={'You have ' + errorCount + ' error(s) in your variable specification!'}
+            isError={true}
+            icon={'pi-exclamation-triangle'}
+          />
+        )}
       </div>
     </>
   );
