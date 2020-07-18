@@ -54,6 +54,11 @@ const RulesEditorToolbar = ({
         .enable-switch span {
           margin-right: 0.5rem;
         }
+        .text-addition {
+          font-style: italic;
+          color: #8a8a8a;
+          margin-left: .5rem;
+        }
       `}</style>
 
       <div className="this">
@@ -75,7 +80,7 @@ const RulesEditorToolbar = ({
               <InputSwitch disabled={readOnly} checked={ruleEnabled} onChange={(e) => onEnabledStateChanged(e.value)} />
             </div>
 
-            <Button disabled={numErrors > 0 || readOnly || !isUnsaved} label="Save" icon="pi pi-save" onClick={onSave} />
+            {!readOnly && <Button disabled={numErrors > 0 || !isUnsaved} label="Save" icon="pi pi-save" onClick={onSave} />}
           </div>
         </Toolbar>
       </div>
@@ -105,8 +110,8 @@ RulesEditorToolbar.defaultProps = {
   readOnly: false,
   isUnsaved: false,
   numErrors: 0,
-  onEnabledStateChanged: () => {},
-  onSave: () => {},
+  onEnabledStateChanged: () => { },
+  onSave: () => { },
 };
 
 export default RulesEditorToolbar;

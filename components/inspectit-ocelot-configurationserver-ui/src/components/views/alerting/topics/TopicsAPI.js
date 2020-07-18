@@ -23,9 +23,6 @@ const topics = [
     id: 'XY-Team',
     level: 'CRITICAL',
   },
-  {
-    id: 'VHV-Team',
-  },
 ];
 
 const handlers = {

@@ -2,69 +2,68 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Inplace, InplaceDisplay, InplaceContent } from 'primereact/inplace';
 import TextAreaEditor from '../../../../common/value-editors/TextAreaEditor';
+import Section from '../../Section';
+import classnames from 'classnames';
 
 /**
  * This component combines displaying and editing of a description text.
  */
 const DescriptionSection = ({ value, readOnly, updateValue }) => {
+  // state variables
   const [inplaceActive, setInplaceState] = useState(false);
+  const [inplaceHeight, setInplaceHeight] = useState(80);
+
   const descriptionRef = React.createRef();
+
+  const toggleInplace = (show) => {
+    setInplaceState(show);
+    setInplaceHeight(Math.max(descriptionRef.current.clientHeight, 80));
+  };
+
+  const updateDescription = (value) => {
+    updateValue(value);
+    setInplaceState(false);
+  };
+
+  const content = (
+    <div className={classnames('inplace', { placeholder: !value })} ref={descriptionRef}>
+      {value || 'no description'}
+    </div>
+  );
 
   return (
     <>
       <style jsx>
         {`
-          .this :global(.descr-content) {
-            max-height: 5rem;
-            margin: 0 1rem 1rem;
-            padding: 0.5rem 1rem 0.5rem;
-            border: 1px solid #c8c8c8;
+          .inplace {
+            white-space: pre-wrap;
           }
-          .this :global(.descr-scrolled-content) {
-            max-height: 3.8rem;
-            overflow-y: auto;
-          }
-          .this :global(.descr-header) {
-            margin: 0 1rem 0;
-            padding: 0.5rem 1rem 0.5rem;
-            background-color: #eee;
-            border: 1px solid #c8c8c8;
-            font-weight: bold;
+          .placeholder {
+            color: #9e9e9e;
+            font-style: italic;
           }
           .this :global(.p-inplace-display) {
-            padding: 0;
+            display: block;
+          }
+          .simple-content {
+            margin-left: .5rem;
           }
         `}
       </style>
+
       <div className="this">
-        <div className="descr-header">Description</div>
-        <div className="descr-content">
-          <div className="descr-scrolled-content">
-            {readOnly ? (
-              <div className="descriptionContent" ref={descriptionRef}>
-                {value}
-              </div>
-            ) : (
-              <Inplace active={inplaceActive} onToggle={() => setInplaceState(true)}>
-                <InplaceDisplay>
-                  <div className="descriptionContent" ref={descriptionRef}>
-                    {value}
-                  </div>
-                </InplaceDisplay>
-                <InplaceContent>
-                  <TextAreaEditor
-                    height={descriptionRef.current ? descriptionRef.current.clientHeight + 20 : 0}
-                    value={value}
-                    updateValue={(value) => {
-                      updateValue(value);
-                      setInplaceState(false);
-                    }}
-                  />
-                </InplaceContent>
-              </Inplace>
-            )}
-          </div>
-        </div>
+        <Section title="Description">
+          {readOnly ? (
+            <div className="simple-content">content</div>
+          ) : (
+            <Inplace active={inplaceActive} onToggle={toggleInplace}>
+              <InplaceDisplay>{content}</InplaceDisplay>
+              <InplaceContent>
+                <TextAreaEditor height={inplaceHeight} value={value} updateValue={updateDescription} />
+              </InplaceContent>
+            </Inplace>
+          )}
+        </Section>
       </div>
     </>
   );

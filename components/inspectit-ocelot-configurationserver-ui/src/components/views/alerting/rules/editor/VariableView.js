@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Inplace, InplaceDisplay, InplaceContent } from 'primereact/inplace';
-import classNames from 'classnames';
+import classnames from 'classnames';
 import NumberEditor from '../../../../common/value-editors/NumberEditor';
 import TextEditor from '../../../../common/value-editors/TextEditor';
 import BoolEditor from '../../../../common/value-editors/BoolEditor';
@@ -29,57 +29,74 @@ const VariableView = ({ name, value, type, description, options, readOnly, onVar
       <style jsx>
         {`
           .this {
-            margin: 1rem;
-            border-bottom: 1px solid #c8c8c8;
+            padding: 1rem 0.5rem 1rem 0.5rem;
             flex-grow: 1;
-          }
-          .this :global(.varHeaderContainer) {
             display: flex;
-            flex-direction: row;
-            align-items: center;
+            transition: background-color 0.25s;
           }
-          .this :global(.varHeader) {
+          .this:not(:last-child) {
+            border-bottom: 1px solid #c8c8c8;
+          }
+          .this:hover {
+            background-color: #f5f5f5;
+          }
+          .name-container {
+            display: flex;
+            align-items: baseline;
+          }
+          .name {
             font-weight: bold;
-            font-size: larger;
           }
-          .this :global(.varHeaderType) {
+          .type {
             margin-left: 1rem;
             color: #888;
-            font-size: smaller;
+            font-style: italic;
+            font-family: monospace;
           }
-          .this :global(.varDescription) {
-            color: #888;
-            margin: 0.5rem 0 0.5rem;
+          .description {
+            color: #616161;
+            margin-top: 0.5rem;
           }
-          .this :global(.defaultValue) {
-            color: #aaa;
+          .pi-exclamation-triangle {
+            color: #f44336;
           }
-          .this :global(.pi-exclamation-triangle) {
-            color: red;
+          .meta-col {
+            flex-grow: 6;
+            flex-basis: 0;
           }
-          .this :global(.error-col) {
-            display: flex;
-            font-size: larger;
-            flex-direction: row;
-            justify-content: flex-end;
+          .error-col {
+            flex-grow: 1;
+            flex-basis: 0;
+            text-align: right;
+            padding: 0.4rem 0.5rem 0 0;
           }
-          .this :global(.p-inplace-display .pi-pencil) {
-            margin-right: 0.5rem;
+          .value-col {
+            flex-grow: 5;
+            flex-basis: 0;
           }
         `}
       </style>
-      <div className="this p-grid">
-        <div className="p-col-6">
-          <div className="varHeaderContainer">
-            <div className="varHeader">{name}</div>
-            <div className="varHeaderType">{type}</div>
+
+      <div className="this">
+        <div className="meta-col">
+          <div className="name-container">
+            <div className="name">{name}</div>
+            <div className="type">{type}</div>
           </div>
-          <div className="varDescription">{description}</div>
+          <div className="description">{description}</div>
         </div>
 
-        <div className="p-col-1 error-col">{hasError && <i className="pi pi-exclamation-triangle" />}</div>
-        <div className="p-col-5">
-          <ValueView value={value} type={type} options={options} readOnly={readOnly} isDefault={isDefault} onDataChanged={onDataChanged} />
+        <div className="error-col">{hasError && <i className="pi pi-exclamation-triangle" />}</div>
+        <div className="value-col">
+          <ValueView
+            value={value}
+            type={type}
+            options={options}
+            readOnly={readOnly}
+            isDefault={isDefault}
+            error={hasError}
+            onDataChanged={onDataChanged}
+          />
         </div>
       </div>
     </>
@@ -89,36 +106,49 @@ const VariableView = ({ name, value, type, description, options, readOnly, onVar
 /**
  * View that allows switching between value display and value edit mode.
  */
-const ValueView = ({ value, type, options, readOnly, isDefault, onDataChanged }) => {
+const ValueView = ({ value, type, options, readOnly, isDefault, onDataChanged, error }) => {
   const [inplaceActive, setInplaceState] = useState(false);
 
-  const valueEditor =
-    type === 'bool' || !readOnly ? (
-      <ValueEditor
-        type={type}
-        value={value}
-        readOnly={readOnly}
-        options={options}
-        onDataChanged={(value) => {
-          setInplaceState(false);
-          onDataChanged(value);
-        }}
-      />
-    ) : undefined;
+  const valueEditor = (
+    <ValueEditor
+      type={type}
+      value={value}
+      readOnly={readOnly}
+      options={options}
+      onDataChanged={(value) => {
+        setInplaceState(false);
+        onDataChanged(value);
+      }}
+    />
+  );
+
+  const dataView = <SimpleDataView value={value} isDefault={isDefault} error={error} />;
 
   if (type === 'bool') {
     return valueEditor;
   } else if (readOnly) {
-    return <SimpleDataView value={value} isDefault={isDefault} />;
+    return dataView;
   } else {
     return (
-      <Inplace active={inplaceActive} onToggle={() => setInplaceState(true)}>
-        <InplaceDisplay>
-          <i className="pi pi-pencil" />
-          <SimpleDataView value={value} isDefault={isDefault} />
-        </InplaceDisplay>
-        <InplaceContent>{valueEditor}</InplaceContent>
-      </Inplace>
+      <>
+        <style jsx>{`
+          :global(.value-view-editor .p-inplace-display) {
+            display: flex;
+          }
+          .pi-pencil {
+            margin-right: 0.5rem;
+            color: #616161;
+          }
+        `}</style>
+
+        <Inplace className="value-view-editor" active={inplaceActive} onToggle={() => setInplaceState(true)}>
+          <InplaceDisplay>
+            <i className="pi pi-pencil" />
+            {dataView}
+          </InplaceDisplay>
+          <InplaceContent>{valueEditor}</InplaceContent>
+        </Inplace>
+      </>
     );
   }
 };
@@ -143,12 +173,24 @@ const ValueEditor = ({ type, value, options, readOnly, onDataChanged }) => {
 /**
  * Simple value display component.
  */
-const SimpleDataView = ({ value, isDefault }) => {
-  const className = classNames({ defaultValue: isDefault });
+const SimpleDataView = ({ value, isDefault, error }) => {
+  const style = {};
   return (
-    <span className={className} style={{ width: '100%' }}>
-      {'' + value}
-    </span>
+    <>
+      <style jsx>{`
+        .value {
+          font-family: monospace;
+        }
+        .default {
+          color: #9e9e9e;
+          font-style: italic;
+        }
+        .error {
+          color: #f44336;
+        }
+      `}</style>
+      <div className={classnames('value', { default: isDefault, error: error })}>{new String(value)}</div>
+    </>
   );
 };
 

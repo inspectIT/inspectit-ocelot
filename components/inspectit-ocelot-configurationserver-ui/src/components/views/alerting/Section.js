@@ -1,37 +1,23 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
+import {Card} from 'primereact/card';
 
-const Section = ({ title, children, scrollable }) => {
+const Section = ({ title, children, backgroundColor }) => {
   return (
-    <div className={classNames("this", { 'scrollable': scrollable })}>
+    <>
       <style jsx>{`
-          .this {
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            margin: 1rem;
-          }
-          .this :global(.section-container) {
-            border: 1px solid #c8c8c8;
-            display: flex;
-            flex-direction: column;
-          }
-          .this :global(.section-header) {
-            padding: 0.5rem 1rem 0.5rem;
-            background-color: #eee;
-            border: 1px solid #c8c8c8;
-            font-weight: bold;
-          }
-          .scrollable {
-            overflow-y: auto;
-          }
+        :global(.section.p-card) {
+          margin: 1rem;
+        }
+        :global(.section .p-card-title) {
+          font-size: 1.1rem;
+        }
       `}</style>
-      <div className="section-header">{title}</div>
-      <div className={classNames("section-container", { 'scrollable': scrollable })}>
+
+      <Card className="section" title={title} style={{backgroundColor: backgroundColor}}>
         {children}
-      </div>
-    </div>
+      </Card>
+    </>
   );
 };
 
@@ -40,13 +26,12 @@ Section.propTypes = {
   title: PropTypes.string.isRequired,
   /**  List of child elements */
   children: PropTypes.object,
-  /** Whether the section should be scrollable */
-  scrollable: PropTypes.bool
+
+  backgroundColor: PropTypes.string
 };
 
 Section.defaultProps = {
   children: [],
-  scrollable: false,
 };
 
 export default Section;

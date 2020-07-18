@@ -7,12 +7,13 @@ import RulesEditorToolbar from './RulesEditorToolbar';
 import * as rulesAPI from '../RulesAPI';
 import { alertingActions } from '../../../../../redux/ducks/alerting';
 import DefaultToolbar from './DefaultToolbar';
+import Notificationbar from '../../../../editor/Notificationbar';
 
 const RulesEditorContainer = ({ readOnly, availableTopics, selection }) => {
   const dispatch = useDispatch();
 
   // state variables
-  const [numVariableErrors, setNumVariableErrors] = useState(0);
+  const [errorCount, setErrorCount] = useState(0);
   const [ruleContent, setRuleContent] = useState(undefined);
   const [templateContent, setTemplateContent] = useState(undefined);
 
@@ -45,12 +46,14 @@ const RulesEditorContainer = ({ readOnly, availableTopics, selection }) => {
   }, [selection.rule]);
 
   // stores the given rule content as unsaved chagnes
-  const onContentChanged = (ruleName, changedContent) => {
+  const onContentChanged = (newContent) => {
+    const contentId = newContent.id;
+
     let data;
-    if (isEqual(ruleContent, changedContent)) {
-      data = omit(cloneDeep(unsavedRuleContents), ruleName);
+    if (isEqual(ruleContent, newContent)) {
+      data = omit(cloneDeep(unsavedRuleContents), contentId);
     } else {
-      data = extend(cloneDeep(unsavedRuleContents), { [ruleName]: changedContent });
+      data = extend(cloneDeep(unsavedRuleContents), { [contentId]: newContent });
     }
     dispatch(alertingActions.ruleContentsChanged(data));
   };
@@ -58,7 +61,7 @@ const RulesEditorContainer = ({ readOnly, availableTopics, selection }) => {
   const updateEnabledState = (value) => {
     var newContent = cloneDeep(content);
     newContent.status = value ? 'enabled' : 'disabled';
-    onContentChanged(newContent.id, newContent);
+    onContentChanged(newContent);
   };
 
   // callback when the user hits the save button
@@ -87,7 +90,7 @@ const RulesEditorContainer = ({ readOnly, availableTopics, selection }) => {
     <>
       <style jsx>{`
         .this {
-          height: 100%;
+          height: calc(100vh - 7rem);
           flex-grow: 1;
           align-items: stretch;
           display: flex;
@@ -106,12 +109,12 @@ const RulesEditorContainer = ({ readOnly, availableTopics, selection }) => {
             isUnsaved={isUnsaved}
             readOnly={readOnly}
             onEnabledStateChanged={updateEnabledState}
-            numErrors={numVariableErrors}
+            numErrors={errorCount}
             onSave={onSave}
           />
         ) : (
-          <DefaultToolbar name={currentName} icon={currentName ? 'pi-briefcase' : ''} />
-        )}
+            <DefaultToolbar name={currentName} icon={currentName ? 'pi-briefcase' : ''} />
+          )}
 
         <RulesEditor
           availableTopics={availableTopics}
@@ -119,9 +122,11 @@ const RulesEditorContainer = ({ readOnly, availableTopics, selection }) => {
           content={content}
           mappedVars={mappedVars}
           isRule={isRule}
-          onErrorStatusUpdate={(value) => setNumVariableErrors(value)}
+          onErrorStatusUpdate={setErrorCount}
           onContentChanged={onContentChanged}
         />
+
+        {errorCount > 0 && <Notificationbar text={'You have ' + errorCount + ' error(s) in your variable specification!'} isError={true} icon={'pi-exclamation-triangle'} />}
       </div>
     </>
   );
