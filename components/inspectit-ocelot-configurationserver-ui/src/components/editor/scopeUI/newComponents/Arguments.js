@@ -67,7 +67,7 @@ class Arguments extends React.Component {
           <Button style={{marginLeft:'20px' }} onClick={this.addArgument} label="add argument"></Button>
         </div>
         { items && items.length > 0 && 
-          <OrderList style={{ display: 'content' , marginBottom: '20px', overflow: 'hidden'}} listStyle={{display: 'content', minWidth:'600px' ,  overflow: 'hidden', height: '250px'}} value={items} itemTemplate={this.itemTemplate} dragdrop={true} onChange={(e) => onUpdate(e.value)}></OrderList>
+          <OrderList style={{ display: 'content' , marginBottom: '20px', overflow: 'hidden'}} listStyle={{display: 'content', minWidth:'600px' ,  overflow: 'hidden', height: '250px'}} value={items} itemTemplate={this.itemTemplate} dragdrop={true} ></OrderList>
         }
       </div>
     )

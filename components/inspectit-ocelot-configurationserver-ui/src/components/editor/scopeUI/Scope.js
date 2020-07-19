@@ -181,6 +181,12 @@ class Scope extends React.Component {
     return splittButtonItems;
   }
 
+  handleScopeNameChange = e => {
+
+  }
+
+  
+
   render() {
     const { icon_scopeName, icon_classSelector , icon_methodSelector, groupedClassItems, usedClassAttributes} = this.state;
 
@@ -200,18 +206,15 @@ class Scope extends React.Component {
     return (
       <div className="this">
         <div style={{width:'1121px'}}>
-        <Button label='add history' onClick={this.addHistory}> </Button>
-        <Button label='add history 2' onClick={this.addHistory}> </Button>
-        <Button label='redo' onClick={this.redo}> </Button>
-        <Button label='undo' onClick={this.undo}> </Button>
-        <Button label='log' onClick={this.logHistory}> </Button>
           <div >
             {/* scopenameBox */}
             <div style={{ ...boxStyle}}>
               {/* scopename */}
               <div style={{display:'flex', alignItems}}>
                 <h3 style={{marginTop: '0px'}} >scopename</h3>
-                <InputText style={{marginLeft: '50px', width: '375px'}} value={currentlyDisplayScopeName} onChange={(e) => this.setState({value1: e.target.value})} />
+                <InputText style={{marginLeft: '50px', width: '375px'}} value={currentlyDisplayScopeName} onChange={(e) => this.handleScopeNameChange(e)} />
+
+
                 <span style={{marginLeft:'.5em'}}>{this.state.value1}</span>
               
                 {/* checkIcon for scopeName*/}
@@ -226,27 +229,37 @@ class Scope extends React.Component {
 
             {/* classSelectorBox */}
             <div style={{ ...boxStyle}}>
-              <h3>class selector</h3> 
+              <div style={{display:'flex', alignItems}}>
+                <h3>class matcher</h3> 
+                  {/* checkIcon for classSelector */}
+                  { !icon_classSelector && (
+                    <i style={{...invalidCheckIcon, marginLeft: '15px' }}className="pi pi-check"></i>
+                  )}
+                  { icon_classSelector && (
+                    <i style={{...validCheckIcon}}className="pi pi-check"></i>
+                  )}
+
+              </div>
               <div style={{display:'flex', alignItems, marginBottom}}>
 
                 {/* descriptionText */}
-                <div  style={{maxWidth: descriptionTextMaxWidth}}>
+                <div  style={{}}>
                   <span style={{display: 'inline-block'}}> 
-                    create a selector on a single class or a set of classes. 
-                    Only the classes, which fullfill all option's within your class selector will be utilized.
+                  In order to determine which methods should be instrumented all classes are checked against the defined interface, superclass and type matchers. If and only if a class matches on all matchers, each of their methods is checked against the defined method matchers below #
+                  in order to determine the target methods. Minimum 1 class matcher must exist.
+                  <span style={{color:'red'}}> Keep the diffrence in mind that while all of the type matchers have to match to determine a class, only one of the method matchers below has to match!</span>
                   </span>
                 </div>
 
                 {/* placeholder for adding attributes via splitbutton or placeholder */}
 
-                {/* checkIcon for classSelector */}
-                { !icon_classSelector && (
-                  <i style={{...invalidCheckIcon, marginLeft: '15px' }}className="pi pi-check"></i>
-                )}
-                { icon_classSelector && (
-                  <i style={{...validCheckIcon}}className="pi pi-check"></i>
-                )}
               </div>
+
+              {this.props.text.classText && 
+                    <div style={{padding:'10px', borderRadius:'10px', border: '1px solid red', marginBottom: '15px'}}>
+                     <p> { this.props.text.classText } </p>
+                    </div>
+                  }
 
               {/* classSelector here */}
               <div id='classSelectorContainer' style={{width:'', background:'white', minHeight: '200px',  padding:'35px'}}>
@@ -260,7 +273,7 @@ class Scope extends React.Component {
               we filter out method and advanced
               we use map on the filteredAttributeArray and get an index. The index is used to know display wether 'the class'  or '... and the class'  */}
                 { splitButtonItemsClass.length >0  && <SplitButton tooltip="specify classes by their implemented interfaces, superclass, or by the class name (and its attached annotations) " label="add " icon="pi pi-plus" model={splitButtonItemsClass}></SplitButton> }
-
+                <div style={{ height: '50px'}}></div>
                 <ClassSelectorContainer scopeObject={scopeObject} onUpdate={onUpdate} />
 
 
@@ -280,6 +293,7 @@ class Scope extends React.Component {
                   <span style={{display: 'inline-block'}}> 
                     hand-pick a method or group of methods by using a selector. Use the options to specify the selector. Each list-item wields a specific selector.
                   </span>
+
                 </div>
 
                  {/* placeholder for adding attributes via splitbutton or placeholder */}
@@ -287,11 +301,16 @@ class Scope extends React.Component {
                 {/* checkIcon for methodSelector */}
                 { !icon_methodSelector && (
                   <i style={{...invalidCheckIcon , marginLeft: '15px'}}className="pi pi-check"></i>
-                )}
+                  )}
                 { icon_methodSelector && (
                   <i style={{...validCheckIcon}}className="pi pi-check"></i>
-                )}
+                  )}
               </div>
+                  {this.props.text.methodText && 
+                    <div style={{padding:'10px', borderRadius:'10px', border: '1px solid red', marginBottom: '15px'}}>
+                     <p> { this.props.text.methodText } </p>
+                    </div>
+                  }
                   {/* <React.Fragment>
                     <Heading attributeText={'class'} connectionTypeAndOr={'and'} count={count} />
                     { 
@@ -304,8 +323,8 @@ class Scope extends React.Component {
                 <div style={{width:'', background:'white', minHeight: '200px',  padding:'35px'}}>
                   <Button onClick={this.addMethod} tooltip='add a method selector. Describe with the + button, which option the methods must fullfill' icon="pi pi-plus" style={{left:'50%', top:'10px'}}></Button>
 
-                  { scopeObject.methods && <MethodsContainerList items={scopeObject.methods} parentAttribute={'methods'} onUpdate={(updatedValue) => this.onGenericUpdate(updatedValue, 'methods')} /> }
 
+                  { scopeObject.methods && <MethodsContainerList items={scopeObject.methods} parentAttribute={'methods'} onUpdate={(updatedValue) => this.onGenericUpdate(updatedValue, 'methods')} /> }
                 </div>
               {/* obsolete, do not read , this will be removed */}
               {/* <ListBox value={scopeObject.methods} style={{ witdh: '800px' }} options={scopeObject.methods} onChange={(e) => this.setState({selectedCity: e.value})} 

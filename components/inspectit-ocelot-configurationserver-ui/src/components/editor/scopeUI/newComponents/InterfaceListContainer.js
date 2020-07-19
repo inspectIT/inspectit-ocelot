@@ -30,7 +30,7 @@ function InterfaceListContainer( {items, parentAttribute, onUpdate,} ) {
     <React.Fragment>
       <h4 style={{marginBottom:'5px'}}> The class must implement all of the following interfaces:</h4>
       <div data-optiontype={parentAttribute} style={{  marginBottom: '',  position:'relative', height: '', padding: '25px', background: '#EEEEEE' , borderRadius: '10px'}}>
-        <Button tooltip='add another interface, that the class must implement' icon="pi pi-plus" style={{left:'50%'}}></Button>
+        {/* <Button tooltip='add another interface, that the class must implement' icon="pi pi-plus" style={{left:'50%'}}></Button> */}
         { items.map( (item, index) => 
         
         <MultipleValueBox>
@@ -38,7 +38,7 @@ function InterfaceListContainer( {items, parentAttribute, onUpdate,} ) {
           <SelectorBox  style={{border: '1px solid grey'}} attribute={'interfaces'} item={item} onUpdate={ updatedValue => onUpdateListItem(updatedValue, index)}>
           { item['matcher-mode'] && 
             <ValueBox item={item} attributesToDelete={['name','matcher-mode']} onUpdate={(updatedValue) => onUpdateListItem(updatedValue, index)} > 
-              <Name text={`has a name`}  onUpdate={(updatedValue) => onUpdateListItem(updatedValue, index) } style={{background: 'yellow'}} item={item} />
+              <Name text={`... has a name`}  onUpdate={(updatedValue) => onUpdateListItem(updatedValue, index) } style={{background: 'yellow'}} item={item} />
             </ValueBox>
           }
 

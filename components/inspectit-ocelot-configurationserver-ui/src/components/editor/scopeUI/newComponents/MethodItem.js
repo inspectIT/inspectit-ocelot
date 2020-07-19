@@ -91,7 +91,7 @@ class MethodItem extends React.Component {
 
     return (
       <div >
-        <NameSelector optionText={`has a name`}  onUpdate={onUpdate} style={{background: 'yellow'}} item={item} index={index}  />
+        <NameSelector optionText={`... has a name`}  onUpdate={onUpdate} style={{background: 'yellow'}} item={item} index={index}  />
       </div>
     )
   }

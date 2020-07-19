@@ -35,5 +35,6 @@
   adjustInvalidSplitButtonItem = (splittButtonItem) => {
     splittButtonItem.disabled = true,
     splittButtonItem.label = splittButtonItem.invalidLabelText;
+    splittButtonItem.icon = 'pi pi-ban';  // not working, nothing happening,
     return splittButtonItem;
   }

@@ -41,7 +41,7 @@ class ValueBox extends React.Component {
  
 
     return (
-        <div  ref={this.componentBorderRef}  style={{display: 'inline-flex',  marginBottom: '5px', position:'relative', background: 'white', padding: '10px 30px 0px 10px', borderRadius:'10px'}}>
+        <div  ref={this.componentBorderRef}  style={{display: 'inline-flex', width:'100%', marginBottom: '5px', position:'relative', background: 'white', padding: '10px 30px 0px 10px', borderRadius:'10px'}}>
           {/* Wird keine addAttribute Möglichkeit eingeholt, soll auch kein SplittButton angezeigt werden */}
 
           <i onMouseOver={this.handleMouseOver} onMouseLeave={this.handleMouseLeave} onClick={this.deleteItem} style={{ position: 'absolute', bottom:'0px', right: '0px', fontSize:'30px',  color: 'red', opacity:'0.8'}} className="pi pi-times-circle"/>

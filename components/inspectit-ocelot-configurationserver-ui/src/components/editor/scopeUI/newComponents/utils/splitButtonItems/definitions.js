@@ -19,7 +19,7 @@ export const type = [
   {
     actionId: 'adding name',
     label: 'specify the class name by its name.',
-    icon: 'pi pi-refresh',
+    icon: 'pi pi-plus',
     createAttribute: (item) => {
       if (!item.name) {
         item.name = '',
@@ -31,7 +31,7 @@ export const type = [
   {
     actionId: 'adding annotation',
     label: 'specify the class by the annotations, which are attached to it.',
-    icon: 'pi pi-times',
+    icon: 'pi pi-plus',
     createAttribute: (item) => {
       item.annotations = item.annotations || [];
       item.annotations.push({ name:'', 'matcher-mode': 'EQUALS_FULLY'})
@@ -44,7 +44,7 @@ export const interfaces = [
   {
     actionId: 'adding name',
     label: 'specify this interface by its name',
-    icon: 'pi pi-refresh',
+    icon: 'pi pi-plus',
     createAttribute: (item) => {
       if (!item.name) {
         item.name = '',
@@ -55,8 +55,8 @@ export const interfaces = [
    },
    { 
     actionId: 'adding annotation',
-    label: 'specify this interface by the anotations, that is attached to it',
-    icon: 'pi pi-refresh',
+    label: 'specify this interface by the annotations, that is attached to it',
+    icon: 'pi pi-plus',
     createAttribute: (item) => {
       item.annotations = item.annotations || [];
       item.annotations.push({ name:'', 'matcher-mode': 'EQUALS_FULLY'})
@@ -70,7 +70,7 @@ export const superclass = [
   {
     actionId: 'adding name',
     label: 'specify the superclass by its name.',
-    icon: 'pi pi-refresh',
+    icon: 'pi pi-plus',
     createAttribute: (item) => {
       if (!item.name) {
         item.name = '',
@@ -82,7 +82,7 @@ export const superclass = [
   {
     actionId: 'adding annotation',
     label: 'specify the superclass by the annotations, which are attached to it.',
-    icon: 'pi pi-times',
+    icon: 'pi pi-plus',
     createAttribute: (item) => {
       console.log('xxxx', item);
       item.annotations = item.annotations || [];
@@ -97,7 +97,7 @@ export const _class = [
   {
     actionId: 'adding interfaces',
     label: 'specify classes by implemented interfaces',
-    icon: 'pi pi-refresh',
+    icon: 'pi pi-plus',
     createAttribute: (item) => {
       item.interfaces = item.interfaces || [];
       item.interfaces.push({ name:'', 'matcher-mode': 'EQUALS_FULLY'})
@@ -107,7 +107,7 @@ export const _class = [
   {
     actionId: 'adding superclass',
     label: 'specify classes by their superclass',
-    icon: 'pi pi-times',
+    icon: 'pi pi-plus',
     createAttribute: (item) => {
       item.superclass =  { name:'', 'matcher-mode': 'EQUALS_FULLY'};
       return item;
@@ -116,7 +116,7 @@ export const _class = [
   {
     actionId: 'adding type',
     label: 'specify the class by its name',
-    icon: 'pi pi-times',
+    icon: 'pi pi-plus',
     createAttribute: (item) => {
       item.type =  { name:'', 'matcher-mode': 'EQUALS_FULLY', annotations:[ { name:'', 'matcher-mode': 'EQUALS_FULLY'}]};
       return item;
@@ -128,7 +128,7 @@ export const methods = [
   {
     actionId: 'adding name',
     label: 'add name',
-    icon: 'pi pi-refresh',
+    icon: 'pi pi-plus',
     createAttribute: (item) => {
       if (!item.name) {
         item.name = '',
@@ -140,7 +140,7 @@ export const methods = [
   {
     actionId: 'adding annotation',
     label: 'add annotation',
-    icon: 'pi pi-times',
+    icon: 'pi pi-plus',
     createAttribute: (item) => {
       item.annotations = item.annotations || [];
       item.annotations.push({ name:'', 'matcher-mode': 'EQUALS_FULLY'})

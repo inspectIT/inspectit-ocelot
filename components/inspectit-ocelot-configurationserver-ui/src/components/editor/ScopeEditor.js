@@ -1,6 +1,6 @@
 import {ListBox} from 'primereact/listbox';
 
-import { cloneDeep, isEqual, set, unset } from 'lodash';
+import { cloneDeep, isEqual, set, unset, create } from 'lodash';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
 import { ColumnGroup } from 'primereact/columngroup';
@@ -39,6 +39,7 @@ class ScopeEditor extends React.Component {
     ],
     currentlyDisplayScopeName: '',
     History: [],
+    text: {}
   }
 
   componentDidMount(){
@@ -121,7 +122,6 @@ class ScopeEditor extends React.Component {
     onUpdate(copyConfig);
   }
 
-  addToHistory = () 
 
   onClick(name, position) {
     let state = {
@@ -153,14 +153,48 @@ class ScopeEditor extends React.Component {
       );
   }
 
-  
+  onClick = (e) => {
+    const { config, onUpdate } = this.props;
+    let updatedConfig = deepCopy(config);
+    const scopeName = 'insert here a name for your scope'
+
+    console.log('hierx', updatedConfig);
+
+    const createType = e.target.parentElement.dataset.createtype;
+    if ( createType === 'a' ) {
+      updatedConfig.inspectit.instrumentation.scopes[scopeName] = { 
+        type: {'name': 'insert here the class name', 'matcher-mode': 'EQUALS_FULLY'}, 
+        methods: [{name: 'insert here method name', 'matcher-mode': 'EQUALS_FULLY'}]
+      }
+    } else if (createType === 'b') {
+      updatedConfig.inspectit.instrumentation.scopes[scopeName] = { 
+        type: {'name': 'use dropdown', 'matcher-mode': 'STARTS_WITH', 
+        annotations: [{'name': 'or use a common annotation', 'matcher-mode': 'EQUALS_FULLY'}]
+      }, 
+        methods: [{name: 'insert here method name', 'matcher-mode': 'EQUALS_FULLY'}]
+      }
+      this.setState({text: {classText:'To target multiple classes, you can use their common name, their common annotation, their common interface, their common superclass. Be aware having multiple options, restricts the targeted classes, because all options must be fullfilled'}})
+    } else if (createType === 'c') {
+      updatedConfig.inspectit.instrumentation.scopes[scopeName] = { 
+        type: {'name': 'insert here the class name', 'matcher-mode': 'EQUALS_FULLY'}, 
+        methods: [{name: 'use dropdown, add common option, add new method matcher option set', 'matcher-mode': 'EQUALS_FULLY',}]
+      }
+      this.setState({text: {methodText: 'You can describe multiple methods, by their their common visibility property, their common annotations, their common arguments, their common method name for example'}})
+    }
+    const breadCrumbItems = [{'label': 'Scope Overview'}, {'label': scopeName }];
+    this.setState({ scopeObject: updatedConfig.inspectit.instrumentation.scopes[scopeName], showOverview: false, breadCrumbItems, currentlyDisplayScopeName: scopeName})
+    onUpdate(updatedConfig);
+  }
+
+  changeName = value => this.setState({currentlyDisplayScopeName: value})
 
   render() {
     const { config, ...rest } = this.props;
-    const { scopeNameList, showOverview, scopeObject, breadCrumbItems, currentlyDisplayScopeName } = this.state;
+    const { scopeNameList, showOverview, scopeObject, breadCrumbItems, currentlyDisplayScopeName ,text } = this.state;
 
     // TODO: consistent styling of all toolbarButtonStyles?
     const toolbarButtonStyle = {padding: '5px' , background: 'rgb(139, 172, 189)', margin: '5px'};
+    const itemStyle = { background: 'white', padding: '15px', borderRadius:'10px', marginBottom: '15px'};
 
     return (
       <div classNameName="this">
@@ -218,23 +252,50 @@ class ScopeEditor extends React.Component {
           <BreadCrumb model={breadCrumbItems} />
           {
             showOverview && (
-              <div style={{ marginLeft: '50px', marginTop: '25px'}} classNameName="content-section implementation">
-                <Button label="Long Content" icon="pi pi-external-link" onClick={() => this.onClick('displayBasic2')} />
-                <Dialog header="Godfather Casting" visible={this.state.displayBasic2} style={{width: '50vw'}} onHide={() => this.onHide('displayBasic2')} blockScroll footer={this.renderFooter('displayBasic2')}>
-                 {/* { descriptionScope()} */}
-                </Dialog>
-                <h4 >The following scopes exist within the selected file</h4>
+              <div style={{ padding: '25px', borderRadius: '10px' , marginLeft: '15px', marginTop: '25px', background:'#EEEEEE '}} classNameName="content-section implementation">
+
+                <h4>The following scopes exist within the selected file</h4>
+                <p> A single scope can be considered as a set of methods and is used by rules to determine which instrumentation should apply to which method.</p>
+              <div style={{...itemStyle}}>
                 <ListBox filter={true} filterPlaceholder="Search" options={scopeNameList} itemTemplate={this.itemTemplate}
                   style={{width:'500px'}} listStyle={{}}/>
-                <div style={{ margin: '25px'}}>
+                {/* <div style={{ margin: '25px'}}>
                   <Button onClick={this.createOption} label="create new" style={{ ...toolbarButtonStyle}}> </Button>
                   <Button onClick={this.handleOnEdit} label="edit" style={{ ...toolbarButtonStyle}}> </Button>
                   <Button onDoubleClick={this.deleteOption} label="delete" style={{ ...toolbarButtonStyle}}> </Button>
+                </div> */}
+
+              </div>
+                <div style={{marginTop:'25px'}}>
+                  <div >
+                    <h4>I want to trace a method invocation. Therefore i create a scope</h4>
+                    <p> Following example scopes are possible to model that use case</p>
+                  </div>
+
+                  <div style={{...itemStyle}}>
+                    <p> The scope should trace 1 method, within 1 class</p>
+                    <p> The method and class name are known to me</p>
+                    <Button data-createtype='a' onClick={this.onClick} label='create'></Button>
+                  </div>
+
+                  <div style={{...itemStyle}}>
+                    <p> The scope should trace 1 method, within multiple classes</p>
+                    <p> The method name is known to me</p>
+                    <Button data-createtype='b' onClick={this.onClick} label='create'></Button>
+                  </div>
+
+                  <div style={{...itemStyle}}>
+                    <p> The scope should trace multiple methods, within 1 class</p>
+                    <p> The class name is known to me</p>
+                    <Button data-createtype='c' onClick={this.onClick } label='create'></Button>
+                  </div>
+
+          
                 </div>
               </div>
           )}
           { !showOverview && (
-            <Scope currentlyDisplayScopeName={currentlyDisplayScopeName} scopeObject={scopeObject} updateBreadCrumbs={this.updateBreadCrumbs} onUpdate={(updatedValue) => this.onUpdate(updatedValue, currentlyDisplayScopeName)} />
+            <Scope changeName={this.changeName} text={text} currentlyDisplayScopeName={currentlyDisplayScopeName} scopeObject={scopeObject} updateBreadCrumbs={this.updateBreadCrumbs} onUpdate={(updatedValue) => this.onUpdate(updatedValue, currentlyDisplayScopeName)} />
             )} 
         </div>
       </div>

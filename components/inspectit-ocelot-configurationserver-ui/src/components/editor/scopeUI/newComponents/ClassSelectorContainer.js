@@ -56,7 +56,7 @@ function ClassSelectorContainer({ scopeObject, onUpdate}) {
           <MultipleItemBoxContainer >
             <SelectorBox item={scopeObject[attribute]} attribute={attribute} text={'class'} count={count} semantic='and'  onUpdate={updatedValue => onGenericUpdate(updatedValue, attribute)}>
               <ValueBox item={scopeObject[attribute]} attributesToDelete={['name', 'matcher-mode']} onUpdate={(updatedValue) => onGenericUpdate(updatedValue, attribute)} >
-                <Name text={`has a name`}  onUpdate={updatedValue => onGenericUpdate(updatedValue, attribute)} style={{background: 'yellow'}} item={scopeObject[attribute]} />
+                <Name text={`... has a name`}  onUpdate={updatedValue => onGenericUpdate(updatedValue, attribute)} style={{background: 'yellow'}} item={scopeObject[attribute]} />
               </ ValueBox>
               {/* <ValueBox  onUpdate={(updatedValue) => this.onGenericUpdate(updatedValue, attribute)} > */}
                 { scopeObject[attribute].annotations && scopeObject[attribute].annotations.length > 0  && scopeObject[attribute].annotations &&
