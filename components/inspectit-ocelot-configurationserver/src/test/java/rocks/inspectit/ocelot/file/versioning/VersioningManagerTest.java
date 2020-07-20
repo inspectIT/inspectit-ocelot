@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.util.ReflectionTestUtils;
+import rocks.inspectit.ocelot.error.exceptions.SelfPromotionNotAllowedException;
 import rocks.inspectit.ocelot.events.WorkspaceChangedEvent;
 import rocks.inspectit.ocelot.file.FileTestBase;
 import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
@@ -503,7 +504,7 @@ class VersioningManagerTest extends FileTestBase {
                     "/file_removed.yml"
             ));
 
-            versioningManager.promoteConfiguration(promotion);
+            versioningManager.promoteConfiguration(promotion, true);
 
             WorkspaceDiff diff = versioningManager.getWorkspaceDiffWithoutContent();
 
@@ -532,7 +533,7 @@ class VersioningManagerTest extends FileTestBase {
                     "/file_removed.yml"
             ));
 
-            versioningManager.promoteConfiguration(promotion);
+            versioningManager.promoteConfiguration(promotion, true);
 
             WorkspaceDiff diff = versioningManager.getWorkspaceDiffWithoutContent();
 
@@ -564,7 +565,7 @@ class VersioningManagerTest extends FileTestBase {
             ));
 
             // first promotion
-            versioningManager.promoteConfiguration(promotion);
+            versioningManager.promoteConfiguration(promotion, true);
 
             // second
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml=new_content");
@@ -581,7 +582,7 @@ class VersioningManagerTest extends FileTestBase {
             ));
 
             // second promotion
-            versioningManager.promoteConfiguration(promotion);
+            versioningManager.promoteConfiguration(promotion, true);
 
             // diff
             WorkspaceDiff diff = versioningManager.getWorkspaceDiffWithoutContent();
@@ -615,7 +616,7 @@ class VersioningManagerTest extends FileTestBase {
                     "/file_modified.yml"
             ));
 
-            versioningManager.promoteConfiguration(promotion);
+            versioningManager.promoteConfiguration(promotion, true);
 
             ConfigurationPromotion secondPromotion = new ConfigurationPromotion();
             secondPromotion.setLiveCommitId(liveId);
@@ -625,7 +626,7 @@ class VersioningManagerTest extends FileTestBase {
             ));
 
             assertThatExceptionOfType(RuntimeException.class)
-                    .isThrownBy(() -> versioningManager.promoteConfiguration(secondPromotion))
+                    .isThrownBy(() -> versioningManager.promoteConfiguration(secondPromotion, true))
                     .withMessage("Live branch has been modified. The provided promotion definition is out of sync.");
         }
 
@@ -649,7 +650,7 @@ class VersioningManagerTest extends FileTestBase {
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml=content_B");
             versioningManager.commitAllChanges("commit");
 
-            versioningManager.promoteConfiguration(promotion);
+            versioningManager.promoteConfiguration(promotion, true);
 
             // diff live -> workspace
             WorkspaceDiff diff = versioningManager.getWorkspaceDiffWithoutContent();
@@ -662,6 +663,61 @@ class VersioningManagerTest extends FileTestBase {
                     .readConfigurationFile("file_modified.yml")).hasValue("content_A");
             assertThat(versioningManager.getWorkspaceRevision()
                     .readConfigurationFile("file_modified.yml")).hasValue("content_B");
+        }
+
+        @Test
+        public void selfPromotionProtectionEnabled() throws GitAPIException {
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml");
+            versioningManager.initialize();
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml=content_A");
+            versioningManager.commitAllChanges("commit");
+
+            String liveId = versioningManager.getLatestCommit(Branch.LIVE).get().getId().name();
+            String workspaceId = versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId().name();
+
+            ConfigurationPromotion promotion = new ConfigurationPromotion();
+            promotion.setLiveCommitId(liveId);
+            promotion.setWorkspaceCommitId(workspaceId);
+            promotion.setFiles(Arrays.asList(
+                    "/file_modified.yml"
+            ));
+
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml=content_B");
+            versioningManager.commitAllChanges("commit");
+
+            doReturn("promoter").when(authentication).getName();
+            versioningManager.promoteConfiguration(promotion, false);
+
+            assertThat(versioningManager.getLiveRevision()
+                    .readConfigurationFile("file_modified.yml")).hasValue("content_A");
+            assertThat(versioningManager.getWorkspaceRevision()
+                    .readConfigurationFile("file_modified.yml")).hasValue("content_B");
+        }
+
+        @Test
+        public void selfPromotionPrevented() throws GitAPIException {
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml");
+            versioningManager.initialize();
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml=content_A");
+            versioningManager.commitAllChanges("commit");
+
+            String liveId = versioningManager.getLatestCommit(Branch.LIVE).get().getId().name();
+            String workspaceId = versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId().name();
+
+            ConfigurationPromotion promotion = new ConfigurationPromotion();
+            promotion.setLiveCommitId(liveId);
+            promotion.setWorkspaceCommitId(workspaceId);
+            promotion.setFiles(Arrays.asList(
+                    "/file_modified.yml"
+            ));
+
+            RevisionAccess live = versioningManager.getLiveRevision();
+
+            assertThatThrownBy(() -> versioningManager.promoteConfiguration(promotion, false))
+                    .isInstanceOf(SelfPromotionNotAllowedException.class);
+
+            assertThat(versioningManager.getLiveRevision().getRevisionId())
+                    .isEqualTo(live.getRevisionId());
         }
     }
 
@@ -714,7 +770,7 @@ class VersioningManagerTest extends FileTestBase {
             promotion.setLiveCommitId(liveId);
             promotion.setWorkspaceCommitId(workspaceId);
             promotion.setFiles(Arrays.asList(files));
-            versioningManager.promoteConfiguration(promotion);
+            versioningManager.promoteConfiguration(promotion, true);
         }
 
         private void buildDummyHistory() throws Exception {

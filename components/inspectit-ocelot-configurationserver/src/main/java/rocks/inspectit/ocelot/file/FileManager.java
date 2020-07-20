@@ -125,13 +125,13 @@ public class FileManager {
     /**
      * Executes a file promotion according to the specified {@link ConfigurationPromotion} definition.
      *
-     * @param promotion the definition what to promote
+     * @param promotion          the definition what to promote
+     * @param allowSelfPromotion if true, the current user will be allowed to promote his own changes.
      */
-    public void promoteConfiguration(ConfigurationPromotion promotion) throws GitAPIException {
+    public void promoteConfiguration(ConfigurationPromotion promotion, boolean allowSelfPromotion) throws GitAPIException {
         workingDirectoryLock.writeLock().lock();
-
         try {
-            versioningManager.promoteConfiguration(promotion);
+            versioningManager.promoteConfiguration(promotion, allowSelfPromotion);
         } finally {
             workingDirectoryLock.writeLock().unlock();
         }
