@@ -110,7 +110,18 @@ The configuration server offers a mechanism to enforce a four eyes principle for
       </div>
       <div class="admonition-content">
     <p>This restriction is only applied to non-admin users! Users with admin rights will still be able to promote their own changes.</p>
-</div></div></span></div></article></div><div class="docLastUpdate"><em>Last updated on 2020-7-16 by Jonas Kunz</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/next/config-server/cs-configuration"><span class="arrow-prev">← </span><span>Server Configuration</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/next/config-server/agent-mappings"><span>Agent Mappings</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#promoting-configuration-files">Promoting Configuration Files</a></li><li><a href="#four-eyes-promoting-restriction">Four-Eyes Promoting Restriction</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2020 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</div></div><h2><a class="anchor" aria-hidden="true" id="git-authors"></a><a href="#git-authors" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Git-Authors</h2>
+<p>Every change has an author consisting of the login and an e-mail address of the user who made the change. For
+ldap-users the login and e-mail address of the ldap account is used.
+<br>
+For internal users however, an e-mail address is generated. This address consists of the user's login and an e-mail
+suffix. The default suffix is <code>@inspectit.rocks</code>.
+<br>
+You can provide a custom mail suffix in the following settings:</p>
+<pre><code class="hljs css language-YAML"><span class="hljs-attr">inspectit-config-server:</span>
+  <span class="hljs-attr">mail-suffix:</span> <span class="hljs-string">@my_mail.com</span>
+</code></pre>
+</span></div></article></div><div class="docLastUpdate"><em>Last updated on 2020-7-20 by Marius Brill</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/next/config-server/cs-configuration"><span class="arrow-prev">← </span><span>Server Configuration</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/next/config-server/agent-mappings"><span>Agent Mappings</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#promoting-configuration-files">Promoting Configuration Files</a></li><li><a href="#four-eyes-promoting-restriction">Four-Eyes Promoting Restriction</a></li><li><a href="#git-authors">Git-Authors</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2020 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
