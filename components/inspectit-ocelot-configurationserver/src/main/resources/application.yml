@@ -29,7 +29,7 @@ inspectit-config-server:
   # the expiration duration of JWT tokens
   token-lifespan: 60m
   # the e-mail suffix used for internal users
-  mail-suffix: @inspectit.rocks
+  mail-suffix: '@inspectit.rocks'
   # the default admin user
   default-user:
     name: admin
