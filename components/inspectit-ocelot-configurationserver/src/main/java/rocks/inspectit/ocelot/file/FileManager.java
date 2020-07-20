@@ -136,4 +136,19 @@ public class FileManager {
             workingDirectoryLock.writeLock().unlock();
         }
     }
+
+    /**
+     * Can be called to commit external changes to the working directory.
+     * This will cause the workspace revision to be in sync with the file system.
+     * <p>
+     * The changes will be commit as the currently logged in user.
+     */
+    public void commitWorkingDirectory() throws GitAPIException {
+        workingDirectoryLock.writeLock().lock();
+        try {
+            versioningManager.commitAllChanges("Committing external changes.");
+        } finally {
+            workingDirectoryLock.writeLock().unlock();
+        }
+    }
 }

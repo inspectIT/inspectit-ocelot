@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.rest.configuration;
 
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,22 +11,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import rocks.inspectit.ocelot.agentconfiguration.AgentConfiguration;
 import rocks.inspectit.ocelot.agentconfiguration.AgentConfigurationManager;
-import rocks.inspectit.ocelot.agentstatus.AgentStatus;
-import rocks.inspectit.ocelot.agentstatus.AgentStatusManager;
-import rocks.inspectit.ocelot.rest.agentstatus.AgentStatusController;
-
-import java.util.Collection;
+import rocks.inspectit.ocelot.file.FileManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import org.springframework.context.ApplicationEventPublisher;
-import rocks.inspectit.ocelot.file.FileChangedEvent;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ConfigurationControllerTest {
@@ -37,7 +28,7 @@ public class ConfigurationControllerTest {
     AgentConfigurationManager agentConfigurationManager;
 
     @Mock
-    ApplicationEventPublisher applicationEventPublisher;
+    FileManager fileManager;
 
     @Nested
     public class FetchConfiguration {
@@ -67,10 +58,10 @@ public class ConfigurationControllerTest {
     public class ReloadConfiguration {
 
         @Test
-        public void firesFileChangedEvent() {
+        public void initiatesCommit() throws GitAPIException {
             configurationController.reloadConfiguration();
 
-            verify(applicationEventPublisher).publishEvent(any(FileChangedEvent.class));
+            verify(fileManager).commitWorkingDirectory();
         }
     }
 }

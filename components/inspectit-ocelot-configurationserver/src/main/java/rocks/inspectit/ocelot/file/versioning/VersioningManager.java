@@ -176,7 +176,7 @@ public class VersioningManager {
         stageFiles();
 
         if (commitFiles(author, message, true)) {
-            eventPublisher.publishEvent(new WorkspaceChangedEvent(this));
+            eventPublisher.publishEvent(new WorkspaceChangedEvent(this, getWorkspaceRevision()));
         }
     }
 
@@ -669,7 +669,7 @@ public class VersioningManager {
             // checkout workspace branch
             git.checkout().setName(Branch.WORKSPACE.getBranchName()).call();
 
-            eventPublisher.publishEvent(new ConfigurationPromotionEvent(this));
+            eventPublisher.publishEvent(new ConfigurationPromotionEvent(this, getLiveRevision()));
         }
     }
 
