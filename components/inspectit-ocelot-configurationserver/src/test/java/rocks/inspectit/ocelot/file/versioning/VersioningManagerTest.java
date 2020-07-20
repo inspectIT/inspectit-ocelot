@@ -12,7 +12,10 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.ldap.userdetails.InetOrgPerson;
 import org.springframework.test.util.ReflectionTestUtils;
+import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
+import rocks.inspectit.ocelot.config.model.SecuritySettings;
 import rocks.inspectit.ocelot.error.exceptions.SelfPromotionNotAllowedException;
 import rocks.inspectit.ocelot.events.WorkspaceChangedEvent;
 import rocks.inspectit.ocelot.file.FileTestBase;
@@ -46,6 +49,8 @@ class VersioningManagerTest extends FileTestBase {
 
     private ApplicationEventPublisher eventPublisher;
 
+    private InspectitServerSettings inspectitServerSettings;
+
     @BeforeEach
     public void beforeEach() throws IOException {
         if (TEST_DIRECTORY == null) {
@@ -58,7 +63,13 @@ class VersioningManagerTest extends FileTestBase {
         authentication = mock(Authentication.class);
         when(authentication.getName()).thenReturn("user");
         eventPublisher = mock(ApplicationEventPublisher.class);
-        versioningManager = new VersioningManager(tempDirectory, () -> authentication, eventPublisher);
+        inspectitServerSettings = mock(InspectitServerSettings.class);
+        when(inspectitServerSettings.getMailSuffix()).thenReturn("test.com");
+        SecuritySettings securitySettings = mock(SecuritySettings.class);
+        when(securitySettings.isLdapAuthentication()).thenReturn(false);
+        when(inspectitServerSettings.getSecurity()).thenReturn(securitySettings);
+
+        versioningManager = new VersioningManager(tempDirectory, () -> authentication, eventPublisher, inspectitServerSettings);
 
         System.out.println("Test data in: " + tempDirectory.toString());
     }
@@ -747,15 +758,36 @@ class VersioningManagerTest extends FileTestBase {
         @Test
         void systemUserOnSystemOperationUsed() {
             VersioningManager vm = new VersioningManager(Paths.get(""), () -> null, (event) -> {
-            });
+            }, inspectitServerSettings);
             assertThat(vm.getCurrentAuthor()).isEqualTo(VersioningManager.GIT_SYSTEM_AUTHOR);
         }
 
         @Test
         void activeUserUsed() {
             VersioningManager vm = new VersioningManager(Paths.get(""), () -> authentication, (event) -> {
-            });
+            }, inspectitServerSettings);
             assertThat(vm.getCurrentAuthor().getName()).isEqualTo(authentication.getName());
+        }
+
+        @Test
+        void mailCreatedFromConfig() {
+            VersioningManager vm = new VersioningManager(Paths.get(""), () -> authentication, (event) -> {
+            }, inspectitServerSettings);
+            assertThat(vm.getCurrentAuthor().getEmailAddress()).isEqualTo(authentication.getName() + "@" + "test.com");
+        }
+
+        @Test
+        void mailReadFromLdap() {
+            InetOrgPerson mockInetOrgPerson = mock(InetOrgPerson.class);
+            when(mockInetOrgPerson.getMail()).thenReturn("foo@bar.com");
+            when(authentication.getPrincipal()).thenReturn(mockInetOrgPerson);
+            SecuritySettings mockSecuritySettings = mock(SecuritySettings.class);
+            when(mockSecuritySettings.isLdapAuthentication()).thenReturn(true);
+            when(inspectitServerSettings.getSecurity()).thenReturn(mockSecuritySettings);
+
+            VersioningManager vm = new VersioningManager(Paths.get(""), () -> authentication, (event) -> {
+            }, inspectitServerSettings);
+            assertThat(vm.getCurrentAuthor().getEmailAddress()).isEqualTo("foo@bar.com");
         }
     }
 

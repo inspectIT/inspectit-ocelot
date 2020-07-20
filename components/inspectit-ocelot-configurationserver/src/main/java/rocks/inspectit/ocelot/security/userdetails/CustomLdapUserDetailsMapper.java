@@ -4,6 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import org.springframework.ldap.core.DirContextOperations;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.ldap.userdetails.InetOrgPersonContextMapper;
 import org.springframework.security.ldap.userdetails.LdapUserDetailsMapper;
 import rocks.inspectit.ocelot.config.model.LdapRoleResolveSettings;
 import rocks.inspectit.ocelot.config.model.LdapSettings;
@@ -23,14 +24,17 @@ public class CustomLdapUserDetailsMapper extends LdapUserDetailsMapper {
 
     private LdapSettings settings;
 
+    private InetOrgPersonContextMapper inetOrgPersonContectMapper;
+
     public CustomLdapUserDetailsMapper(LdapSettings settings) {
         this.settings = settings;
+        inetOrgPersonContectMapper = new InetOrgPersonContextMapper();
     }
 
     @Override
     public UserDetails mapUserFromContext(DirContextOperations ctx, String username, Collection<? extends GrantedAuthority> authorities) {
         Collection<? extends GrantedAuthority> ocelotAuthorities = mapAuthorities(authorities);
-        return super.mapUserFromContext(ctx, username, ocelotAuthorities);
+        return inetOrgPersonContectMapper.mapUserFromContext(ctx, username, ocelotAuthorities);
     }
 
     /**
@@ -39,7 +43,6 @@ public class CustomLdapUserDetailsMapper extends LdapUserDetailsMapper {
      * matching authorities.
      *
      * @param authorities A List of GrantedAuthority-Objects that should be mapped.
-     *
      * @return The highest level of access role the user's authorities could be resolved to.
      */
     @VisibleForTesting
@@ -66,7 +69,6 @@ public class CustomLdapUserDetailsMapper extends LdapUserDetailsMapper {
      *
      * @param authorities A Collection containing GrantedAuthority objects.
      * @param roleList    The List of Strings the authorities are checked with.
-     *
      * @return Returns true if at least one element of authorities is contained in roleList or vice versa.
      */
     private boolean containsAuthority(Collection<? extends GrantedAuthority> authorities, List<String> roleList) {
@@ -82,10 +84,8 @@ public class CustomLdapUserDetailsMapper extends LdapUserDetailsMapper {
      * ensures backwards compatibility for the old configuration standard.
      *
      * @param authorities A collection of authorities the admin group should be contained in.
-     *
      * @return True if the given admin group is contained in the authorities. Otherwise false.
      */
-    @SuppressWarnings("deprecation")
     private boolean hasAdminGroup(Collection<? extends GrantedAuthority> authorities) {
         String ldapAdminGroup = settings.getAdminGroup();
         return authorities.stream()

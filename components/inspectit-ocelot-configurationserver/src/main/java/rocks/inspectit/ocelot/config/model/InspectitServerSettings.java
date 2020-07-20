@@ -29,6 +29,11 @@ public class InspectitServerSettings {
     private String workingDirectory;
 
     /**
+     * The mail suffix used for internal users.
+     */
+    private String mailSuffix;
+
+    /**
      * The duration until an authentication token generated via /api/v1/account/token is valid.
      * After the token has expired, a new one has to be acquired.
      */

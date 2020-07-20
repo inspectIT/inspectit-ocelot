@@ -66,7 +66,7 @@ public class FileManager {
                 .writeLock(), workingDirectory);
 
         Supplier<Authentication> authenticationSupplier = () -> SecurityContextHolder.getContext().getAuthentication();
-        versioningManager = new VersioningManager(workingDirectory, authenticationSupplier, asyncPublisher);
+        versioningManager = new VersioningManager(workingDirectory, authenticationSupplier, asyncPublisher, settings);
         versioningManager.initialize();
 
         workingDirectoryAccessor = new AutoCommitWorkingDirectoryProxy(workingDirectoryLock.writeLock(), workingDirectoryAccessorImpl, versioningManager);
@@ -115,7 +115,6 @@ public class FileManager {
      * Returns the diff between the current live branch and the current workspace branch.
      *
      * @param includeContent whether the file difference (old and new content) is included
-     *
      * @return the diff between the live and workspace branch
      */
     public WorkspaceDiff getWorkspaceDiff(boolean includeContent) throws IOException, GitAPIException {

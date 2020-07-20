@@ -17,9 +17,12 @@ import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.AbstractTreeIterator;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.ldap.userdetails.InetOrgPerson;
 import org.springframework.util.CollectionUtils;
+import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.error.exceptions.SelfPromotionNotAllowedException;
 import rocks.inspectit.ocelot.events.ConfigurationPromotionEvent;
 import rocks.inspectit.ocelot.events.WorkspaceChangedEvent;
@@ -51,6 +54,12 @@ public class VersioningManager {
     static final PersonIdent GIT_SYSTEM_AUTHOR = new PersonIdent("System", "info@inspectit.rocks");
 
     /**
+     * Provided server settings.
+     */
+    @Autowired
+    private InspectitServerSettings inspectitServerSettings;
+
+    /**
      * Path of the current working directory.
      */
     private Path workingDirectory;
@@ -79,14 +88,19 @@ public class VersioningManager {
     /**
      * Constructor.
      *
-     * @param workingDirectory       the working directory to use
-     * @param authenticationSupplier the supplier to user for accessing the current user
-     * @param eventPublisher         the event publisher to use
+     * @param workingDirectory        the working directory to use
+     * @param authenticationSupplier  the supplier to user for accessing the current user
+     * @param eventPublisher          the event publisher to use
+     * @param inspectitServerSettings the serverSettings to use
      */
-    public VersioningManager(Path workingDirectory, Supplier<Authentication> authenticationSupplier, ApplicationEventPublisher eventPublisher) {
+    public VersioningManager(Path workingDirectory,
+                             Supplier<Authentication> authenticationSupplier,
+                             ApplicationEventPublisher eventPublisher,
+                             InspectitServerSettings inspectitServerSettings) {
         this.workingDirectory = workingDirectory;
         this.authenticationSupplier = authenticationSupplier;
         this.eventPublisher = eventPublisher;
+        this.inspectitServerSettings = inspectitServerSettings;
     }
 
     /**
@@ -164,7 +178,6 @@ public class VersioningManager {
      * The commit will be against the workspace branch!
      *
      * @param message the commit message to use
-     *
      * @throws IllegalStateException in case the workspace branch is not the currently checked out branch
      */
     public void commitAllChanges(String message) throws GitAPIException {
@@ -188,7 +201,6 @@ public class VersioningManager {
      * @param author     the author to use
      * @param message    the commit message to use
      * @param allowAmend whether commits should be amended if possible (same user and below timeout)
-     *
      * @return true, if a commit was created. False, if there was no change to commit.
      */
     private boolean commitFiles(PersonIdent author, String message, boolean allowAmend) throws GitAPIException {
@@ -278,7 +290,13 @@ public class VersioningManager {
         Authentication authentication = authenticationSupplier.get();
         if (authentication != null) {
             String username = authentication.getName();
-            return new PersonIdent(username, "info@inspectit.rocks");
+            String mail;
+            if (inspectitServerSettings.getSecurity().isLdapAuthentication()) {
+                mail = ((InetOrgPerson) authentication.getPrincipal()).getMail();
+            } else {
+                mail = username + "@" + inspectitServerSettings.getMailSuffix();
+            }
+            return new PersonIdent(username, mail);
         } else {
             return GIT_SYSTEM_AUTHOR;
         }
@@ -304,7 +322,6 @@ public class VersioningManager {
      * of error, <code>null</code> will be returned.
      *
      * @param commitId the id of the desired commit
-     *
      * @return the commit object or null if the commit could not be loaded
      */
     private RevCommit getCommit(ObjectId commitId) {
@@ -361,7 +378,6 @@ public class VersioningManager {
      * Returns the diff between the current live branch and the current workspace branch.
      *
      * @param includeFileContent whether the file difference (old and new content) is included
-     *
      * @return the diff between the live and workspace branch
      */
     public WorkspaceDiff getWorkspaceDiff(boolean includeFileContent) throws IOException, GitAPIException {
@@ -381,7 +397,6 @@ public class VersioningManager {
      * @param includeFileContent whether the file difference (old and new content) is included
      * @param oldCommit          the commit id of the base (old) commit
      * @param newCommit          the commit id of the target (new) commit
-     *
      * @return the diff between the specified branches
      */
     @VisibleForTesting
@@ -446,7 +461,6 @@ public class VersioningManager {
      * @param file       the name of the file to check.
      * @param baseCommit A commit on the live branch onto which the newCommit will be merged
      * @param newCommit  A commit on the workspace branch containing file modifications
-     *
      * @return A list of authors who have modified the file.
      */
     private Collection<String> findModifyingAuthors(String file, RevCommit baseCommit, RevCommit newCommit) {
@@ -482,7 +496,6 @@ public class VersioningManager {
      *
      * @param file      the file to check
      * @param newCommit the commit to start looking from, usually on the workspace
-     *
      * @return the list of authors who have modified the file since it's addition including the author adding the file
      */
     private Collection<String> findAuthorsSinceAddition(String file, RevCommit newCommit) {
@@ -509,7 +522,6 @@ public class VersioningManager {
      * @param file       the file to check
      * @param baseCommit the commit to comapre agains, usually the live branch
      * @param newCommit  the commit in which the provided file does not exist anymore, usually on the workspace
-     *
      * @return the author of the revision which is responsible for the deletion.
      */
     private String findDeletingAuthor(String file, RevCommit baseCommit, RevCommit newCommit) {
@@ -540,7 +552,6 @@ public class VersioningManager {
      *
      * @param file         the file to look for
      * @param baseRevision the starting revision to walk backwards from
-     *
      * @return a revision which either modifies or adds the given file.
      */
     private RevisionAccess findLastChangingRevision(String file, RevisionAccess baseRevision) {
@@ -580,7 +591,6 @@ public class VersioningManager {
      * Creates an {@link AbstractTreeIterator} for the specified commit.
      *
      * @param commitId the commit which is used as basis for the tree iterator
-     *
      * @return the created {@link AbstractTreeIterator}
      */
     private AbstractTreeIterator prepareTreeParser(ObjectId commitId) throws IOException {
@@ -699,7 +709,6 @@ public class VersioningManager {
      * Example, the input `/my_file.yml` will result in `files/my_file.yml` if `files` is the files subfolder.
      *
      * @param file the relative file path
-     *
      * @return the file path including the files directory
      */
     private String prefixRelativeFile(String file) {
