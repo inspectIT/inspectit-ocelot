@@ -14,7 +14,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.ldap.userdetails.InetOrgPerson;
 import org.springframework.test.util.ReflectionTestUtils;
-import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.error.exceptions.SelfPromotionNotAllowedException;
 import rocks.inspectit.ocelot.events.WorkspaceChangedEvent;
 import rocks.inspectit.ocelot.file.FileTestBase;
@@ -47,8 +46,6 @@ class VersioningManagerTest extends FileTestBase {
     private Authentication authentication;
 
     private ApplicationEventPublisher eventPublisher;
-
-    private InspectitServerSettings inspectitServerSettings;
 
     @BeforeEach
     public void beforeEach() throws IOException {
