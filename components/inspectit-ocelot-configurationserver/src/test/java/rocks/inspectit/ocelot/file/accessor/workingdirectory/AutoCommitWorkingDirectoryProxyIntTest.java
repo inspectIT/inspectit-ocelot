@@ -58,7 +58,7 @@ class AutoCommitWorkingDirectoryProxyIntTest extends FileTestBase {
         when(securitySettings.isLdapAuthentication()).thenReturn(false);
         when(inspectitServerSettings.getSecurity()).thenReturn(securitySettings);
         when(inspectitServerSettings.getMailSuffix()).thenReturn("foo.com");
-        versioningManager = new VersioningManager(tempDirectory, () -> authentication, eventPublisher, inspectitServerSettings);
+        versioningManager = new VersioningManager(tempDirectory, () -> authentication, eventPublisher, "@test.com");
         versioningManager.initialize();
 
         accessor = new AutoCommitWorkingDirectoryProxy(writeLock, workingDirectoryAccessor, versioningManager);

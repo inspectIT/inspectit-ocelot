@@ -31,7 +31,8 @@ public class InspectitServerSettings {
     /**
      * The mail suffix used for internal users.
      */
-    private String mailSuffix;
+    @Builder.Default
+    private String mailSuffix = "@inspectit.rocks";
 
     /**
      * The duration until an authentication token generated via /api/v1/account/token is valid.
