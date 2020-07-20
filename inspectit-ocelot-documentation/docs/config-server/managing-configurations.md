@@ -54,3 +54,17 @@ When this setting is enabled, users with promotion rights will no longer be able
 :::note
 This restriction is only applied to non-admin users! Users with admin rights will still be able to promote their own changes.
 :::
+
+
+## External Changes
+
+While it is not recommended, it is possible to directly change the configuration files in the filesystem instead of via the
+configuration server's UI or REST-API.
+
+In order for your changes in the file-system to become active, you need to let the configuration server know about the external changes.
+This can be done by sending an HTTP GET request to the `/api/v1/configuration/reload` endpoint. This request needs to include your credentials via basic auth.
+A request to this endpoint causes all external changes to be committed to the `WORKSPACE` branch and the server to be updated accordingly.
+
+Alternatively, you can also manually commit to the `WORKSPACE` branch in the working directory of the configuration server.
+However, you need to make sure that the server is either shut down or you need to have the guarantee that no other users are currently editing files via the UI,
+otherwise your repository might get corrupted.
