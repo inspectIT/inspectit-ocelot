@@ -54,3 +54,16 @@ When this setting is enabled, users with promotion rights will no longer be able
 :::note
 This restriction is only applied to non-admin users! Users with admin rights will still be able to promote their own changes.
 :::
+
+## Git-Authors
+Every change has an author consisting of the login and an e-mail address of the user who made the change. For 
+ldap-users the login and e-mail address of the ldap account is used. 
+<br>
+For internal users however, an e-mail address is generated. This address consists of the user's login and an e-mail
+suffix. The default suffix is `@inspectit.rocks`.
+<br>
+You can provide a custom mail suffix in the following settings: 
+```YAML
+inspectit-config-server:
+  mail-suffix: @my_mail.com
+```

@@ -19,6 +19,7 @@ import org.eclipse.jgit.treewalk.AbstractTreeIterator;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.ldap.userdetails.InetOrgPerson;
 import org.springframework.util.CollectionUtils;
 import rocks.inspectit.ocelot.error.exceptions.SelfPromotionNotAllowedException;
 import rocks.inspectit.ocelot.events.ConfigurationPromotionEvent;
@@ -49,6 +50,11 @@ public class VersioningManager {
      */
     @VisibleForTesting
     static final PersonIdent GIT_SYSTEM_AUTHOR = new PersonIdent("System", "info@inspectit.rocks");
+
+    /**
+     * The mail suffix used to generate mail addresses for internal users.
+     */
+    private String mailSuffix;
 
     /**
      * Path of the current working directory.
@@ -82,11 +88,13 @@ public class VersioningManager {
      * @param workingDirectory       the working directory to use
      * @param authenticationSupplier the supplier to user for accessing the current user
      * @param eventPublisher         the event publisher to use
+     * @param mailSuffix             The mail suffix used to generate mail addresses for internal users.
      */
-    public VersioningManager(Path workingDirectory, Supplier<Authentication> authenticationSupplier, ApplicationEventPublisher eventPublisher) {
+    public VersioningManager(Path workingDirectory, Supplier<Authentication> authenticationSupplier, ApplicationEventPublisher eventPublisher, String mailSuffix) {
         this.workingDirectory = workingDirectory;
         this.authenticationSupplier = authenticationSupplier;
         this.eventPublisher = eventPublisher;
+        this.mailSuffix = mailSuffix;
     }
 
     /**
@@ -199,10 +207,8 @@ public class VersioningManager {
             log.debug("Committing staged changes.");
         }
 
-        CommitCommand commitCommand = git.commit()
-                .setAll(true) // in order to remove deleted files from index
-                .setMessage(message)
-                .setAuthor(author);
+        CommitCommand commitCommand = git.commit().setAll(true) // in order to remove deleted files from index
+                .setMessage(message).setAuthor(author);
 
         Optional<RevCommit> latestCommit = getLatestCommit(Branch.WORKSPACE);
         if (allowAmend && latestCommit.isPresent()) {
@@ -278,7 +284,13 @@ public class VersioningManager {
         Authentication authentication = authenticationSupplier.get();
         if (authentication != null) {
             String username = authentication.getName();
-            return new PersonIdent(username, "info@inspectit.rocks");
+            String mail;
+            if (authentication.getPrincipal() instanceof InetOrgPerson) {
+                mail = ((InetOrgPerson) authentication.getPrincipal()).getMail();
+            } else {
+                mail = username + mailSuffix;
+            }
+            return new PersonIdent(username, mail);
         } else {
             return GIT_SYSTEM_AUTHOR;
         }
@@ -468,8 +480,9 @@ public class VersioningManager {
             }
             newRevision = newRevision.getPreviousRevision()
                     .orElseThrow(() -> new IllegalStateException("Expected parent to exist"));
-            if (newRevision.configurationFileExists(file) &&
-                    newRevision.readConfigurationFile(file).get().equals(baseContent)) {
+            if (newRevision.configurationFileExists(file) && newRevision.readConfigurationFile(file)
+                    .get()
+                    .equals(baseContent)) {
                 break; // we have reached a revision where the content is in the original state, no need to look further
             }
         }
@@ -629,15 +642,18 @@ public class VersioningManager {
                 throw new SelfPromotionNotAllowedException("The promotion request contains a file which was edited by the same user");
             }
 
-            Map<String, DiffEntry.ChangeType> changeIndex = diff.getEntries().stream()
+            Map<String, DiffEntry.ChangeType> changeIndex = diff.getEntries()
+                    .stream()
                     .collect(Collectors.toMap(SimpleDiffEntry::getFile, SimpleDiffEntry::getType));
 
-            List<String> removeFiles = promotion.getFiles().stream()
+            List<String> removeFiles = promotion.getFiles()
+                    .stream()
                     .filter(file -> changeIndex.get(file) == DiffEntry.ChangeType.DELETE)
                     .map(this::prefixRelativeFile)
                     .collect(Collectors.toList());
 
-            List<String> checkoutFiles = promotion.getFiles().stream()
+            List<String> checkoutFiles = promotion.getFiles()
+                    .stream()
                     .filter(file -> changeIndex.get(file) != DiffEntry.ChangeType.DELETE)
                     .map(this::prefixRelativeFile)
                     .collect(Collectors.toList());
@@ -688,7 +704,8 @@ public class VersioningManager {
                 .stream()
                 .map(this::prefixRelativeFile) //use prefixRelativeFile to normalize the file names
                 .collect(Collectors.toSet());
-        return diff.getEntries().stream()
+        return diff.getEntries()
+                .stream()
                 .filter(entry -> promotedFiles.contains(prefixRelativeFile(entry.getFile())))
                 .anyMatch(entry -> entry.getAuthors().contains(currentAuthor.getName()));
     }
