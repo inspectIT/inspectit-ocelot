@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.EventRecordingSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.MetricRecordingSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.RuleTracingSettings;
+import rocks.inspectit.ocelot.core.exporter.EventExporterService;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.ActionCallConfig;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.MethodHookConfiguration;
 import rocks.inspectit.ocelot.core.instrumentation.context.ContextManager;
@@ -58,6 +59,9 @@ public class MethodHookGenerator {
 
     @Autowired
     private CommonTagsToAttributesManager commonTagsToAttributesManager;
+
+    @Autowired
+    private EventExporterService eventExporterService;
 
     /**
      * Builds a executable method hook based on the given configuration.
@@ -228,7 +232,7 @@ public class MethodHookGenerator {
             eventAccessors.add(res);
         }
 
-        EventRecorder recorder = new EventRecorder(eventAccessors);
+        EventRecorder recorder = new EventRecorder(eventAccessors, eventExporterService);
         return Optional.of(recorder);
     }
 
