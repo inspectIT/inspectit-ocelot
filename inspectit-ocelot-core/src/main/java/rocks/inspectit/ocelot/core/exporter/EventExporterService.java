@@ -7,6 +7,7 @@ import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.events.EventSettings;
 import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 import rocks.inspectit.ocelot.sdk.events.Event;
+import rocks.inspectit.ocelot.sdk.events.EventRegistryService;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
@@ -28,6 +29,8 @@ public class EventExporterService  extends DynamicallyActivatableService {
     /** The future for the scheduled task. Will be closed during doDisable instead of calling executor.shudown(). */
     private ScheduledFuture<?> schedule;
 
+    private EventRegistryService registryService = new EventRegistryService();
+
     public EventExporterService() {
         super("events");
     }
@@ -46,7 +49,7 @@ public class EventExporterService  extends DynamicallyActivatableService {
         if(eventQueue.isEmpty()) {
             return;
         }
-        // Call to exporting events
+        registryService.sendEventsToExporters(eventQueue);
         eventQueue.clear();
     }
 
