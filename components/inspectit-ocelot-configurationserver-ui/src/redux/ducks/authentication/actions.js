@@ -58,7 +58,7 @@ export const renewToken = () => {
       .then(
         axios.spread((...responses) => {
           const token = responses[0].data;
-          const permissions = responses[0].data;
+          const permissions = responses[1].data;
           dispatch({ type: types.RENEW_TOKEN_SUCCESS, payload: { token, permissions } });
         })
       )
