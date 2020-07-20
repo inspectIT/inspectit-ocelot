@@ -1,26 +1,19 @@
 package rocks.inspectit.ocelot.autocomplete.util;
 
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.*;
-
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ConfigurationQueryHelperTest {
+
     @Mock
     private ConfigurationFilesCache configurationFilesCache;
 
     @InjectMocks
     private ConfigurationQueryHelper autoCompleter;
-
+    /*
     @Nested
     public class GetKeysForPath {
 
@@ -209,5 +202,5 @@ public class ConfigurationQueryHelperTest {
 
             assertThat(output).hasSize(0);
         }
-    }
+}*/
 }

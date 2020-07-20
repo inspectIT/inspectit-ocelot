@@ -23,13 +23,16 @@ public class ConfigurationQueryHelper {
      * The method returns a list containing "to".
      *
      * @param path A path parsed to a List.
+     *
      * @return The attributes which could be found in the given path.
      */
     public List<String> getKeysForPath(List<String> path) {
+        return Collections.emptyList();
+        /*
         return configurationFilesCache.getParsedContents()
                 .stream()
                 .flatMap(root -> extractKeys(root, path).stream())
-                .collect(Collectors.toList());
+                .collect(Collectors.toList());*/
     }
 
     /**
@@ -42,6 +45,7 @@ public class ConfigurationQueryHelper {
      *
      * @param o       The object the keys should be returned from.
      * @param mapPath The path leading to the keys that should be retrieved.
+     *
      * @return
      */
     private List<String> extractKeys(Object o, List<String> mapPath) {
@@ -65,6 +69,7 @@ public class ConfigurationQueryHelper {
      * Then the list is returned.
      *
      * @param collection The collection which should be parsed.
+     *
      * @return A List containing all Strings found in the given Collection.
      */
     private List<String> toStringList(Collection<?> collection) {
@@ -82,6 +87,7 @@ public class ConfigurationQueryHelper {
      *
      * @param list    The list which contents should be searched.
      * @param mapPath The path which should be checked.
+     *
      * @return a list of strings containing the attributes that could found in the mapPath.
      */
     private List<String> extractKeysFromList(List<?> list, List<String> mapPath) {
@@ -120,6 +126,7 @@ public class ConfigurationQueryHelper {
      *
      * @param map     The list which contents should be searched.
      * @param mapPath The path which should be checked.
+     *
      * @return a list of strings containing the attributes that could found in the mapPath.
      */
     private List<String> extractKeysFromMap(Map<?, ?> map, List<String> mapPath) {
@@ -129,7 +136,8 @@ public class ConfigurationQueryHelper {
         String currentLiteral = mapPath.get(0);
         List<String> subPath = mapPath.subList(1, mapPath.size());
         if (currentLiteral.equals("*")) {
-            return map.values().stream()
+            return map.values()
+                    .stream()
                     .flatMap(value -> extractKeys(value, subPath).stream())
                     .collect(Collectors.toList());
         } else {
