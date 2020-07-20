@@ -3,6 +3,7 @@ package rocks.inspectit.ocelot.security.config;
 import com.google.common.annotations.VisibleForTesting;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -10,14 +11,14 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.password.LdapShaPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
+import rocks.inspectit.ocelot.config.model.LdapSettings;
 import rocks.inspectit.ocelot.filters.AccessLogFilter;
 import rocks.inspectit.ocelot.security.jwt.JwtTokenFilter;
 import rocks.inspectit.ocelot.security.jwt.JwtTokenManager;
-import rocks.inspectit.ocelot.security.userdetails.CustomLdapUserDetailsService;
+import rocks.inspectit.ocelot.security.userdetails.CustomLdapUserDetailsMapper;
 import rocks.inspectit.ocelot.security.userdetails.LocalUserDetailsService;
 
 import javax.servlet.http.HttpServletResponse;
@@ -46,7 +47,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     private LocalUserDetailsService localUserDetailsService;
 
     @Autowired(required = false)
-    private CustomLdapUserDetailsService customLdapUserDetailsService;
+    private LdapContextSource contextSource;
 
     @Autowired
     @VisibleForTesting
@@ -68,8 +69,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http
-                .csrf()
+        http.csrf()
                 .disable()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -92,10 +92,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .and()
                 //TODO: The "correct" way of selectively enabling token based would be to have multiple spring security configs.
                 //However, previous attempts of doing so were unsuccessful, therefore we simply exclude them manually in the filter
-                .addFilterBefore(
-                        new JwtTokenFilter(tokenManager, eventPublisher, Collections.singletonList("/api/v1/account/password")),
-                        BasicAuthenticationFilter.class
-                )
+                .addFilterBefore(new JwtTokenFilter(tokenManager, eventPublisher, Collections.singletonList("/api/v1/account/password")), BasicAuthenticationFilter.class)
                 .addFilterBefore(accessLogFilter.getFilter(), JwtTokenFilter.class);
     }
 
@@ -112,17 +109,21 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
      */
     @SuppressWarnings("deprecation")
     private void configureLdapAuthentication(AuthenticationManagerBuilder auth) throws Exception {
-        auth
-                .userDetailsService(customLdapUserDetailsService)
-                .passwordEncoder(new LdapShaPasswordEncoder());
+        LdapSettings ldapSettings = serverSettings.getSecurity().getLdap();
+
+        auth.ldapAuthentication()
+                .userDetailsContextMapper(new CustomLdapUserDetailsMapper(ldapSettings))
+                .userSearchFilter(ldapSettings.getUserSearchFilter())
+                .userSearchBase(ldapSettings.getUserSearchBase())
+                .groupSearchFilter(ldapSettings.getGroupSearchFilter())
+                .groupSearchBase(ldapSettings.getGroupSearchBase())
+                .contextSource(contextSource);
     }
 
     /**
      * Configures the user authentication to use the local and embedded database for user management and authentication.
      */
     private void configureLocalAuthentication(AuthenticationManagerBuilder auth) throws Exception {
-        auth
-                .userDetailsService(localUserDetailsService)
-                .passwordEncoder(passwordEncoder);
+        auth.userDetailsService(localUserDetailsService).passwordEncoder(passwordEncoder);
     }
 }

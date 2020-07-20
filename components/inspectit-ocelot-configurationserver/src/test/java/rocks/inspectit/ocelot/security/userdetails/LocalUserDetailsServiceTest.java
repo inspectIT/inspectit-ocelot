@@ -39,7 +39,7 @@ public class LocalUserDetailsServiceTest {
             assertThat(result.getPassword()).isEqualTo("hash");
             assertThat(result.getAuthorities())
                     .extracting(object -> object.toString().substring("ROLE_".length()))
-                    .containsExactlyInAnyOrder("OCELOT_WRITE", "OCELOT_READ", "OCELOT_COMMIT", "OCELOT_ADMIN");
+                    .containsExactlyInAnyOrder("OCELOT_WRITE", "OCELOT_READ", "OCELOT_PROMOTE", "OCELOT_ADMIN");
             verify(userService).getUserByName(anyString());
             verifyNoMoreInteractions(userService);
         }

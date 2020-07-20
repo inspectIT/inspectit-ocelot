@@ -2,9 +2,7 @@ package rocks.inspectit.ocelot.file.accessor.workingdirectory;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.util.StringUtils;
-import rocks.inspectit.ocelot.file.FileChangedEvent;
 import rocks.inspectit.ocelot.file.FileInfo;
 import rocks.inspectit.ocelot.file.FileInfoVisitor;
 
@@ -23,11 +21,6 @@ import java.util.concurrent.locks.Lock;
 public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
 
     /**
-     * Event publisher to trigger events when files are being modified.
-     */
-    private ApplicationEventPublisher eventPublisher;
-
-    /**
      * Lock used when reading from the working directory.
      */
     private Lock readLock;
@@ -42,11 +35,10 @@ public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
      */
     private Path workingDirectory;
 
-    public WorkingDirectoryAccessor(Lock readLock, Lock writeLock, Path workingDirectory, ApplicationEventPublisher eventPublisher) {
+    public WorkingDirectoryAccessor(Lock readLock, Lock writeLock, Path workingDirectory) {
         this.readLock = readLock;
         this.writeLock = writeLock;
         this.workingDirectory = workingDirectory;
-        this.eventPublisher = eventPublisher;
     }
 
     @PostConstruct
@@ -55,17 +47,10 @@ public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
     }
 
     /**
-     * Fires a new {@link FileChangedEvent}.
-     */
-    private void fireFileChangeEvent() {
-        FileChangedEvent event = new FileChangedEvent(this);
-        eventPublisher.publishEvent(event);
-    }
-
-    /**
      * Resolve the given path in relation to the current working directory.
      *
      * @param path the relative path
+     *
      * @return {@link Path} representing the given path string
      */
     private Path resolve(String path) {
@@ -130,8 +115,6 @@ public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
             }
 
             Files.createDirectories(targetDirectory);
-
-            fireFileChangeEvent();
         } finally {
             writeLock.unlock();
         }
@@ -149,8 +132,6 @@ public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
 
             Files.createDirectories(targetFile.getParent());
             Files.write(targetFile, content.getBytes(FILE_ENCODING));
-
-            fireFileChangeEvent();
         } finally {
             writeLock.unlock();
         }
@@ -170,8 +151,6 @@ public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
             } else {
                 FileUtils.moveFile(source.toFile(), target.toFile());
             }
-
-            fireFileChangeEvent();
         } finally {
             writeLock.unlock();
         }
@@ -192,8 +171,6 @@ public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
             } else {
                 throw new AccessDeniedException("'" + targetPath + "' could not be deleted.");
             }
-
-            fireFileChangeEvent();
         } finally {
             writeLock.unlock();
         }

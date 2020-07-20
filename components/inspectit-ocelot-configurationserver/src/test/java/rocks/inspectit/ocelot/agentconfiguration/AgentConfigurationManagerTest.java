@@ -10,8 +10,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.file.FileManager;
-import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
-import rocks.inspectit.ocelot.mappings.AgentMappingManager;
+import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
+import rocks.inspectit.ocelot.mappings.AgentMappingSerializer;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 
 import java.time.Duration;
@@ -32,17 +32,17 @@ public class AgentConfigurationManagerTest {
     FileManager fileManager;
 
     @Mock
-    AgentMappingManager mappingManager;
+    AgentMappingSerializer serializer;
 
     @Mock
     ExecutorService executor;
 
     @Mock
-    AbstractFileAccessor fileAccessor;
+    RevisionAccess fileAccessor;
 
     @BeforeEach
     public void beforeEach() {
-        lenient().when(fileManager.getLiveRevision()).thenReturn(fileAccessor);
+        lenient().when(fileManager.getWorkspaceRevision()).thenReturn(fileAccessor);
     }
 
     void init() {
@@ -58,17 +58,18 @@ public class AgentConfigurationManagerTest {
         configManager.init();
     }
 
-
     @Nested
     class GetConfiguration {
 
         @Test
         void noMatchingMapping() {
+
+            doReturn(true).when(fileAccessor).agentMappingsExist();
             doReturn(Arrays.asList(
                     AgentMapping.builder()
                             .attribute("service", "test-\\d+")
                             .build()))
-                    .when(mappingManager).getAgentMappings();
+                    .when(serializer).readAgentMappings(any());
 
             init();
 
@@ -88,8 +89,9 @@ public class AgentConfigurationManagerTest {
                             .attribute("service", ".*")
                             .source("default.yml")
                             .build()))
-                    .when(mappingManager).getAgentMappings();
+                    .when(serializer).readAgentMappings(any());
 
+            doReturn(true).when(fileAccessor).agentMappingsExist();
             doReturn(true).when(fileAccessor).configurationFileExists(any());
             doReturn(false).when(fileAccessor).configurationFileIsDirectory(any());
             doReturn(Optional.of("a: test")).when(fileAccessor).readConfigurationFile("test.yml");
@@ -104,7 +106,6 @@ public class AgentConfigurationManagerTest {
             assertThat(resultB.getConfigYaml()).isEqualTo("{a: default}\n");
         }
 
-
         @Test
         void multipleAttributesChecked() {
             doReturn(Arrays.asList(
@@ -113,8 +114,9 @@ public class AgentConfigurationManagerTest {
                             .attribute("application", "myApp")
                             .source("test.yml")
                             .build()))
-                    .when(mappingManager).getAgentMappings();
+                    .when(serializer).readAgentMappings(any());
 
+            doReturn(true).when(fileAccessor).agentMappingsExist();
             doReturn(true).when(fileAccessor).configurationFileExists(any());
             doReturn(false).when(fileAccessor).configurationFileIsDirectory(any());
             doReturn(Optional.of("a: test")).when(fileAccessor).readConfigurationFile("test.yml");
