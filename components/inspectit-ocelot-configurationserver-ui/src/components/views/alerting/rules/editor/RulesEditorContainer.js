@@ -9,6 +9,7 @@ import { alertingActions } from '../../../../../redux/ducks/alerting';
 import DefaultToolbar from './DefaultToolbar';
 import Notificationbar from '../../../../editor/Notificationbar';
 import useDeepEffect from '../../../../../hooks/use-deep-effect';
+import { templateIcon } from '../../constants';
 
 const RulesEditorContainer = ({ readOnly, availableTopics, selection }) => {
   const dispatch = useDispatch();
@@ -117,7 +118,7 @@ const RulesEditorContainer = ({ readOnly, availableTopics, selection }) => {
             onSave={onSave}
           />
         ) : (
-          <DefaultToolbar name={currentName} icon={currentName ? 'pi-briefcase' : ''} />
+          <DefaultToolbar name={currentName} icon={currentName ? templateIcon : ''} />
         )}
 
         <RulesEditor

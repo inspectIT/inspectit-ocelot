@@ -7,6 +7,7 @@ import { Tree } from 'primereact/tree';
 import { ContextMenu } from 'primereact/contextmenu';
 import { alertingActions } from '../../../../../redux/ducks/alerting';
 import classnames from 'classnames';
+import { ruleIcon, templateIcon, topicIcon } from '../../constants';
 
 /**
  * The alerting rules tree.
@@ -236,9 +237,9 @@ const getRulesTree = (rules, templates, unsavedRules, groupByTemplates, groupByT
 
 const toTreeBranch = (name, type, data, topic, template, children, hasUnsaved, newTreeIndex) => {
   const iconClassNames = classNames('pi', 'pi-fw', {
-    'pi-bars': type === 'topic',
-    'pi-briefcase': type === 'template',
-    'pi-bell': type === 'rule',
+    [topicIcon]: type === 'topic',
+    [templateIcon]: type === 'template',
+    [ruleIcon]: type === 'rule',
   });
   if (children && children.length > 0) {
     children.sort((r1, r2) => r1.key.localeCompare(r2.key));
@@ -281,7 +282,7 @@ AlertingRulesTree.propTypes = {
 };
 
 AlertingRulesTree.defaultProps = {
-  onSelectionChanged: () => {},
+  onSelectionChanged: () => { },
   groupingOptions: {
     groupByTemplates: true,
     groupByTopics: false,

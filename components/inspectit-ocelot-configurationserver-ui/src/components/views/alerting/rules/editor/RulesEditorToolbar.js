@@ -1,9 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import { Button } from 'primereact/button';
 import { Toolbar } from 'primereact/toolbar';
 import { InputSwitch } from 'primereact/inputswitch';
-
+import { ruleIcon } from '../../constants';
 const RulesEditorToolbar = ({
   ruleName,
   templateName,
@@ -64,7 +65,7 @@ const RulesEditorToolbar = ({
       <div className="this">
         <Toolbar>
           <div className="p-toolbar-group-left">
-            <i className={'pi pi-bell'}></i>
+            <i className={classNames('pi', ruleIcon)}></i>
             <h4>
               <span className="template-details">{templateName}</span>
               <span className="template-details spacer">{'>'}</span>
@@ -109,8 +110,8 @@ RulesEditorToolbar.defaultProps = {
   readOnly: false,
   isUnsaved: false,
   numErrors: 0,
-  onEnabledStateChanged: () => {},
-  onSave: () => {},
+  onEnabledStateChanged: () => { },
+  onSave: () => { },
 };
 
 export default RulesEditorToolbar;

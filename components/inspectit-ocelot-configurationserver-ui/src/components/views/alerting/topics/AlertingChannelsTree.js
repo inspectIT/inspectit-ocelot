@@ -7,7 +7,7 @@ import { Tree } from 'primereact/tree';
 import { Toolbar } from 'primereact/toolbar';
 import { Button } from 'primereact/button';
 
-import CreateRenameCopyDialog from './CreateRenameCopyDialog';
+import CreateRenameCopyHandlerDialog from './CreateRenameCopyHandlerDialog';
 import DeleteDialog from '../../../common/dialogs/DeleteDialog';
 
 import * as topicsAPI from './TopicsAPI';
@@ -153,7 +153,7 @@ const AlertingChannelsTree = ({
         onToggle={(e) => setExpandedKeys(e.value)}
       />
       <div className="details">Last refresh: {updateDate ? new Date(updateDate).toLocaleString() : '-'}</div>
-      <CreateRenameCopyDialog
+      <CreateRenameCopyHandlerDialog
         visible={isCreateDialogShown}
         intention="create"
         onHide={() => setCreateDialogShown(false)}
@@ -172,7 +172,7 @@ const AlertingChannelsTree = ({
           setCreateDialogShown(false);
         }}
       />
-      <CreateRenameCopyDialog
+      <CreateRenameCopyHandlerDialog
         visible={isCopyDialogShown}
         intention="copy"
         onHide={() => setCopyDialogShown(false)}
@@ -197,7 +197,7 @@ const AlertingChannelsTree = ({
           setCopyDialogShown(false);
         }}
       />
-      <CreateRenameCopyDialog
+      <CreateRenameCopyHandlerDialog
         visible={isRenameDialogShown}
         intention="rename"
         onHide={() => setRenameDialogShown(false)}

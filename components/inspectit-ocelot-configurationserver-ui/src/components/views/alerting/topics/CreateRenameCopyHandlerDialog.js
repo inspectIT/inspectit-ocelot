@@ -5,11 +5,13 @@ import { Dialog } from 'primereact/dialog';
 import { Message } from 'primereact/message';
 import { InputText } from 'primereact/inputtext';
 import { Dropdown } from 'primereact/dropdown';
+import classnames from 'classnames';
+import { topicIcon } from '../constants';
 
 /**
  * A dialog that can be used for creating, renaming or copying an alert handler.
  */
-const CreateRenameCopyDialog = ({
+const CreateRenameCopyHandlerDialog = ({
   topics,
   intention,
   initialTopic,
@@ -98,7 +100,7 @@ const CreateRenameCopyDialog = ({
         )}
         <div className="p-inputgroup p-col-12" style={{ width: '100%' }}>
           <span className="p-inputgroup-addon">
-            <i className="pi pi-bars"></i>
+            <i className={classnames('pi', topicIcon)}></i>
           </span>
           <Dropdown
             style={{ width: '100%' }}
@@ -135,7 +137,7 @@ const CreateRenameCopyDialog = ({
   );
 };
 
-CreateRenameCopyDialog.propTypes = {
+CreateRenameCopyHandlerDialog.propTypes = {
   /** List of available topics */
   topics: PropTypes.array,
   /** The intention of this dialog. One of create, rename or copy */
@@ -157,7 +159,7 @@ CreateRenameCopyDialog.propTypes = {
   onHide: PropTypes.func,
 };
 
-CreateRenameCopyDialog.defaultProps = {
+CreateRenameCopyHandlerDialog.defaultProps = {
   topics: [],
   handlerTypes: [],
   initialTopic: '',
@@ -169,4 +171,4 @@ CreateRenameCopyDialog.defaultProps = {
   onHide: () => {},
 };
 
-export default CreateRenameCopyDialog;
+export default CreateRenameCopyHandlerDialog;

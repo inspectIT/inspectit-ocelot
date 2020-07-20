@@ -8,7 +8,7 @@ import HandlerEditor from './editor/HandlerEditor';
 /**
  * The component for managing alerting topics and handlers.
  */
-const AlertingChannelsView = ({ availableTopics, updateDate, onRefresh }) => {
+const AlertingChannelsView = ({ topics, updateDate, onRefresh }) => {
   const readOnly = useSelector((state) => !state.authentication.permissions.write).readOnly;
 
   const [selectedTopicName, setSelectedTopicName] = useState(undefined);
@@ -47,12 +47,12 @@ const AlertingChannelsView = ({ availableTopics, updateDate, onRefresh }) => {
         }}
         onRefresh={onRefresh}
         updateDate={updateDate}
-        availableTopics={availableTopics}
+        availableTopics={topics}
       />
       <HandlerEditor
         selectedTopicName={selectedTopicName}
         selectedHandlerName={selectedHandlerName}
-        availableTopics={availableTopics}
+        availableTopics={topics}
         readOnly={readOnly}
       />
     </div>
@@ -61,7 +61,7 @@ const AlertingChannelsView = ({ availableTopics, updateDate, onRefresh }) => {
 
 AlertingChannelsView.propTypes = {
   /** An array of strings denoting the available notification topics */
-  availableTopics: PropTypes.array,
+  topics: PropTypes.array,
   /**  Last date the list of topics was loaded. */
   updateDate: PropTypes.array.isRequired,
   /** Callback on topic refresh */
@@ -69,7 +69,7 @@ AlertingChannelsView.propTypes = {
 };
 
 AlertingChannelsView.defaultProps = {
-  availableTopics: [],
+  topics: [],
   onSelectionChanged: () => {},
 };
 

@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import _ from 'lodash';
+import classnames from 'classnames';
 import { TabMenu } from 'primereact/tabmenu';
 import AlertingRulesView from './rules/AlertingRulesView';
 import AlertingChannelsView from './topics/AlertingChannelsView.js';
 import * as topicsAPI from './topics/TopicsAPI';
 import * as rulesAPI from './rules/RulesAPI';
 import useDeepEffect from '../../../hooks/use-deep-effect';
+import { ruleIcon, topicIcon } from './constants';
 
 /**
  * Existing tabs for the alerting view tab menu
  */
 const items = [
-  { label: 'Alerting Rules', icon: 'pi pi-fw pi-globe' },
-  { label: 'Calendar', icon: 'pi pi-fw pi-calendar' },
+  { label: 'Alerting Rules', icon: classnames('pi', 'pi-fw', ruleIcon) },
+  { label: 'Notification Channels', icon: classnames('pi', 'pi-fw', topicIcon) },
 ];
 
 /**
@@ -119,6 +121,10 @@ const AlertingView = () => {
 
         {activeTab == items[0] && (
           <AlertingRulesView updateDate={updateDate} topics={availableTopics} rules={rules} templates={templates} onRefresh={refreshAll} />
+        )}
+
+        {activeTab == items[1] && (
+          <AlertingChannelsView updateDate={updateDate} topics={availableTopics} onRefresh={refreshAll} />
         )}
       </div>
     </>

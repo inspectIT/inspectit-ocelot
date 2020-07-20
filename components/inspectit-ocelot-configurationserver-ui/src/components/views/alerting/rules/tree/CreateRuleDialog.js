@@ -6,6 +6,8 @@ import { Message } from 'primereact/message';
 import { InputText } from 'primereact/inputtext';
 import { Dropdown } from 'primereact/dropdown';
 import { InputTextarea } from 'primereact/inputtextarea';
+import classnames from 'classnames';
+import { ruleIcon, templateIcon } from '../../constants';
 
 /**
  * A dialog for creating new alerting rules.
@@ -58,7 +60,7 @@ const CreateRuleDialog = ({ templates, initialTemplate, visible, onHide, reserve
       <div className="p-grid">
         <div className="p-inputgroup p-col-12" style={{ width: '100%' }}>
           <span className="p-inputgroup-addon">
-            <i className="pi pi-briefcase"></i>
+            <i className={classnames('pi', templateIcon)}></i>
           </span>
           <Dropdown
             style={{ width: '100%' }}
@@ -72,7 +74,7 @@ const CreateRuleDialog = ({ templates, initialTemplate, visible, onHide, reserve
         </div>
         <div className="p-inputgroup p-col-12" style={{ width: '100%' }}>
           <span className="p-inputgroup-addon">
-            <i className="pi pi-bell"></i>
+            <i className={classnames('pi', ruleIcon)}></i>
           </span>
           <InputText
             style={{ width: '100%' }}
@@ -127,8 +129,8 @@ CreateRuleDialog.defaultProps = {
   initialTemplate: '',
   visible: true,
   reservedNames: [],
-  onSuccess: () => {},
-  onHide: () => {},
+  onSuccess: () => { },
+  onHide: () => { },
 };
 
 export default CreateRuleDialog;
