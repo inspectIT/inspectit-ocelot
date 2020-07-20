@@ -5,71 +5,61 @@ import { Button } from 'primereact/button';
 import { Toolbar } from 'primereact/toolbar';
 import * as alertingConstants from '../../constants';
 
-const HandlerEditorToolbar = ({ selectedHandlerName, selectedHandlerKind, selectedTopicName, readOnly, isUnsaved, onSave }) => {
-  const headerIconClassNames = classNames({
-    pi: true,
-    [alertingConstants.handlerIcons(selectedHandlerKind)]: !!selectedHandlerName,
-    [alertingConstants.topicIcon]: !selectedHandlerName && selectedTopicName,
-    'pi-info': !selectedHandlerName && !selectedHandlerKind,
-  });
-
-  const selectionName = selectedHandlerName || selectedTopicName;
+const HandlerEditorToolbar = ({ handlerName, handlerKind, topicName, readOnly, isUnsaved, onSave }) => {
+  const icon = alertingConstants.handlerIcons(handlerKind);
 
   return (
     <div className="this">
       <style jsx>{`
         .this :global(.p-toolbar) {
           border: 0;
-          border-radius: 0;
           background-color: #eee;
           border-bottom: 1px solid #ddd;
+          border-radius: 0;
         }
-        .p-toolbar-group-right > :global(*) {
-          margin-left: 0.25rem;
-        }
-        .this :global(.p-button-outlined) {
-          color: #005b9f;
-          background-color: rgba(0, 0, 0, 0);
-        }
-        .this :global(.p-toolbar div) {
-          vertical-align: middle;
-        }
-        .this :global(.header) {
-          font-size: 1rem;
+        .p-toolbar-group-left,
+        .p-toolbar-group-right {
           display: flex;
-          align-items: center;
           height: 2rem;
+          align-items: center;
         }
-        .this :global(.header .pi) {
+        .p-toolbar-group-left :global(.pi) {
           font-size: 1.75rem;
           color: #aaa;
           margin-right: 1rem;
         }
-        .this :global(.text-addition) {
-          margin-left: 1rem;
-          color: #999;
+        .h4 {
+          font-weight: normal;
+          margin-right: 1rem;
         }
-        .this :global(.text-addition) {
-          margin-left: 1rem;
-          color: #999;
+        .topic-details {
+          color: #9e9e9e;
+          font-weight: normal;
+        }
+        .topic-details.spacer {
+          margin: 0 0.5rem;
+        }
+        .text-addition {
+          font-style: italic;
+          color: #8a8a8a;
+          margin-left: 0.5rem;
         }
       `}</style>
       <Toolbar>
         <div className="p-toolbar-group-left">
-          <div className="header">
-            <i className={headerIconClassNames}></i>
-            <span>{'' + (selectionName || 'Select Alerting Handler')}</span>
-            {isUnsaved && <div className="text-addition">*</div>}
-            {selectionName && readOnly && <div className="text-addition">(read only)</div>}
-            {!!selectedHandlerName && !!selectedTopicName && <div className="text-addition">|</div>}
-            {!!selectedHandlerName && !!selectedTopicName && <div className="text-addition">{'Topic: ' + selectedTopicName}</div>}
-          </div>
+          <i className={classNames('pi', icon)}></i>
+          <h4>
+            <span className="topic-details">{topicName}</span>
+            <span className="topic-details spacer">{'>'}</span>
+            {handlerName}
+          </h4>
+          {isUnsaved && <div className="text-addition">*</div>}
+          {readOnly && <div className="text-addition">(read only)</div>}
         </div>
-        {!!selectedHandlerName && (
-          <div className="p-toolbar-group-right button-not-active">
-            <Button disabled={readOnly || !isUnsaved} label="Save" icon="pi pi-save" onClick={onSave} />
-          </div>
-        )}
+
+        <div className="p-toolbar-group-right button-not-active">
+          <Button disabled={readOnly || !isUnsaved} label="Save" icon="pi pi-save" onClick={onSave} />
+        </div>
       </Toolbar>
     </div>
   );
@@ -77,11 +67,11 @@ const HandlerEditorToolbar = ({ selectedHandlerName, selectedHandlerKind, select
 
 HandlerEditorToolbar.propTypes = {
   /** name of the selected handler */
-  selectedHandlerName: PropTypes.string,
+  handlerName: PropTypes.string.isRequired,
   /** the type of the selected handler */
-  selectedHandlerKind: PropTypes.string,
+  handlerKind: PropTypes.string,
   /** name of the selected topic*/
-  selectedTopicName: PropTypes.string,
+  topicName: PropTypes.string.isRequired,
   /** Whether selection is unsaved */
   isUnsaved: PropTypes.bool,
   /** Whether the content is read only */
@@ -91,9 +81,7 @@ HandlerEditorToolbar.propTypes = {
 };
 
 HandlerEditorToolbar.defaultProps = {
-  selectedHandlerName: undefined,
-  selectedHandlerKind: undefined,
-  selectedTopicName: undefined,
+  handlerKind: undefined,
   readOnly: false,
   isUnsaved: false,
   onSave: () => {},

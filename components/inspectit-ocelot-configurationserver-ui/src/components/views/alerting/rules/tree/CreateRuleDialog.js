@@ -129,8 +129,8 @@ CreateRuleDialog.defaultProps = {
   initialTemplate: '',
   visible: true,
   reservedNames: [],
-  onSuccess: () => { },
-  onHide: () => { },
+  onSuccess: () => {},
+  onHide: () => {},
 };
 
 export default CreateRuleDialog;

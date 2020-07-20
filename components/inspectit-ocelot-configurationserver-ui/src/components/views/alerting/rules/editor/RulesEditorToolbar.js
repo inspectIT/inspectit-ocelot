@@ -110,8 +110,8 @@ RulesEditorToolbar.defaultProps = {
   readOnly: false,
   isUnsaved: false,
   numErrors: 0,
-  onEnabledStateChanged: () => { },
-  onSave: () => { },
+  onEnabledStateChanged: () => {},
+  onSave: () => {},
 };
 
 export default RulesEditorToolbar;

@@ -110,17 +110,19 @@ export const fetchHandler = (topicName, handlerName, onSuccess, onFailed) => {
   }
 };
 
-export const fetchHandlers = (topicName, onSuccess, onFailed) => {
-  const success = true;
-  if (success) {
-    if (onSuccess) {
-      setTimeout(() => onSuccess(topicName in handlers ? handlers[topicName] : []), 200);
+/**
+ * Fetches the child handlers of the given topic.
+ */
+export const fetchHandlers = (topicName) => {
+  return new Promise((resolve, reject) => {
+    const success = true;
+    if (success) {
+      const content = topicName in handlers ? handlers[topicName] : [];
+      setTimeout(() => resolve(content), 200);
+    } else {
+      reject();
     }
-  } else {
-    if (onFailed) {
-      onFailed();
-    }
-  }
+  });
 };
 
 export const fetchSupportedHandlerTypes = (onSuccess, onFailed) => {

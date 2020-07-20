@@ -1,18 +1,16 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
-import AlertingChannelsTree from './AlertingChannelsTree';
-import HandlerEditor from './editor/HandlerEditor';
-
+import AlertingChannelsTreeContainer from './tree/AlertingChannelsTreeContainer';
+import HandlerEditorContainer from './editor/HandlerEditorContainer';
 
 /**
  * The component for managing alerting topics and handlers.
  */
 const AlertingChannelsView = ({ topics, updateDate, onRefresh }) => {
-  const readOnly = useSelector((state) => !state.authentication.permissions.write).readOnly;
+  const readOnly = useSelector((state) => !state.authentication.permissions.write);
 
-  const [selectedTopicName, setSelectedTopicName] = useState(undefined);
-  const [selectedHandlerName, setSelectedHandlerName] = useState(undefined);
+  const [currentSelection, setCurrentSelection] = useState({ topic: null, handler: null });
 
   return (
     <div className="this">
@@ -22,39 +20,18 @@ const AlertingChannelsView = ({ topics, updateDate, onRefresh }) => {
           display: flex;
           flex-grow: 1;
         }
-        .this :global(.green) {
-          color: green;
-        }
-        .this :global(.orange) {
-          color: orange;
-        }
-        .this :global(.red) {
-          color: red;
-        }
-        .this :global(.blue) {
-          color: blue;
-        }
-        .this :global(.grey) {
-          color: grey;
-        }
       `}</style>
-      <AlertingChannelsTree
-        selectedTopicName={selectedTopicName}
-        selectedHandlerName={selectedHandlerName}
-        onSelectionChanged={(topic, handler) => {
-          setSelectedTopicName(topic);
-          setSelectedHandlerName(handler);
+      <AlertingChannelsTreeContainer
+        selection={currentSelection}
+        onSelectionChanged={(selection) => {
+          setCurrentSelection(selection);
         }}
         onRefresh={onRefresh}
         updateDate={updateDate}
-        availableTopics={topics}
-      />
-      <HandlerEditor
-        selectedTopicName={selectedTopicName}
-        selectedHandlerName={selectedHandlerName}
-        availableTopics={topics}
+        topics={topics}
         readOnly={readOnly}
       />
+      <HandlerEditorContainer selection={currentSelection} availableTopics={topics} readOnly={readOnly} />
     </div>
   );
 };

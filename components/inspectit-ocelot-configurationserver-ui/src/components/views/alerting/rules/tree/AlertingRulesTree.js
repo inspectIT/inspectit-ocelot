@@ -282,7 +282,7 @@ AlertingRulesTree.propTypes = {
 };
 
 AlertingRulesTree.defaultProps = {
-  onSelectionChanged: () => { },
+  onSelectionChanged: () => {},
   groupingOptions: {
     groupByTemplates: true,
     groupByTopics: false,

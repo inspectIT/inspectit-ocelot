@@ -63,7 +63,7 @@ const CreateRenameCopyHandlerDialog = ({
   return (
     <Dialog
       className="this"
-      style={{ width: '400px' }}
+      style={{ width: '40rem' }}
       header={intentionText + ' Alert Handler'}
       modal={true}
       visible={visible}
@@ -110,7 +110,7 @@ const CreateRenameCopyHandlerDialog = ({
               setTopic(e.value);
             }}
             editable={true}
-            placeholder={'Select topic'}
+            placeholder={'Select notification channel'}
           />
         </div>
         <div className="p-inputgroup p-col-12" style={{ width: '100%' }}>
@@ -121,7 +121,7 @@ const CreateRenameCopyHandlerDialog = ({
             style={{ width: '100%' }}
             onKeyPress={(e) => e.key === 'Enter' && isValid && onSuccess(name, topic, handlerType)}
             value={name}
-            placeholder={'Alert handler name'}
+            placeholder={'Alerting handler name'}
             onChange={(e) => {
               setName(e.target.value);
             }}

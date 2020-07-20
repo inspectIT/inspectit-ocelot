@@ -120,7 +120,6 @@ const RulesEditor = ({ availableTopics, content, isRule, mappedVars, readOnly, o
           <Section title={'Execution Error'} backgroundColor="#ff8181">
             <div className="error">{content.error}</div>
           </Section>
-
         )}
 
         <Section title={(isRule ? 'Rule' : 'Template') + ' Details'}>

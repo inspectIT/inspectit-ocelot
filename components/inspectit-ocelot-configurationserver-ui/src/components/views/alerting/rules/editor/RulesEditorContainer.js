@@ -6,7 +6,7 @@ import RulesEditor from './RulesEditor';
 import RulesEditorToolbar from './RulesEditorToolbar';
 import * as rulesAPI from '../RulesAPI';
 import { alertingActions } from '../../../../../redux/ducks/alerting';
-import DefaultToolbar from './DefaultToolbar';
+import DefaultToolbar from '../../DefaultToolbar';
 import Notificationbar from '../../../../editor/Notificationbar';
 import useDeepEffect from '../../../../../hooks/use-deep-effect';
 import { templateIcon } from '../../constants';

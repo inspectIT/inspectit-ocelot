@@ -42,11 +42,11 @@ const AlertingView = () => {
       .filter((topicId) => !existingTopics.some((topic) => topic.id === topicId))
       .map((topicId) => ({ id: topicId, referencedOnly: true }))
       .uniq()
+      .sortBy(['id'])
       .value();
 
     setReferencedTopics(topics);
   }, [rules]);
-
 
   const refreshRules = () =>
     rulesAPI.fetchAlertingRules(
@@ -58,7 +58,7 @@ const AlertingView = () => {
       (templates) => setTemplates(templates),
       () => setTemplates([])
     );
-  const refreshTopics = () => topicsAPI.fetchTopics((topics) => setExistingTopics(topics));
+  const refreshTopics = () => topicsAPI.fetchTopics((topics) => setExistingTopics(_(topics).sortBy(['id']).value()));
 
   // reloads all the alerting data - rules, topics, templates...
   const refreshAll = () => {
@@ -119,13 +119,11 @@ const AlertingView = () => {
       <div className="this">
         <TabMenu className="menu" model={items} activeItem={activeTab} onTabChange={(e) => setActiveTab(e.value)} />
 
-        {activeTab == items[0] && (
+        {activeTab === items[0] && (
           <AlertingRulesView updateDate={updateDate} topics={availableTopics} rules={rules} templates={templates} onRefresh={refreshAll} />
         )}
 
-        {activeTab == items[1] && (
-          <AlertingChannelsView updateDate={updateDate} topics={availableTopics} onRefresh={refreshAll} />
-        )}
+        {activeTab === items[1] && <AlertingChannelsView updateDate={updateDate} topics={availableTopics} onRefresh={refreshAll} />}
       </div>
     </>
   );
