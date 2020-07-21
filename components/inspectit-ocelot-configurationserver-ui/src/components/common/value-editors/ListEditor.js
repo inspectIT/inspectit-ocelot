@@ -158,10 +158,10 @@ const ListEditor = ({ value, options, disabled, entryWidth, updateValue, entryIc
               <div className="remove-button">
                 <i
                   className="pi pi-times"
-                  entryId={entry}
+                  entryid={entry}
                   onClick={(e) => {
-                    if (e && e.target && e.target.attributes && e.target.attributes.entryId) {
-                      const entryId = e.target.attributes.entryId.value;
+                    if (e && e.target && e.target.attributes && e.target.attributes.entryid) {
+                      const entryId = e.target.attributes.entryid.value;
                       const newEntries = entries.filter((ent) => ent !== entryId);
                       setEntries(newEntries);
                       updateValue(newEntries);
@@ -189,7 +189,7 @@ ListEditor.propTypes = {
   /** Whether the editor is disabled or not */
   disabled: PropTypes.bool,
   /** Regular expression or string denoting the element separators */
-  separators: PropTypes.object,
+  separators: PropTypes.any,
   /** Callback on value change */
   updateValue: PropTypes.func,
   /** Function used to validate element entries */

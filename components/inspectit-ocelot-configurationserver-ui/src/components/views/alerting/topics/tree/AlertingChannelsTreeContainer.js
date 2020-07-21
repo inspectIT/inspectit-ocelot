@@ -132,7 +132,7 @@ AlertingChannelsTreeContainer.propTypes = {
   /** read only mode */
   readOnly: PropTypes.bool,
   /** last update date */
-  updateDate: PropTypes.object,
+  updateDate: PropTypes.number,
   /** Callback on selection change */
   onSelectionChanged: PropTypes.func,
   /** Callback on refresh */

@@ -40,7 +40,7 @@ AlertingChannelsView.propTypes = {
   /** An array of strings denoting the available notification topics */
   topics: PropTypes.array,
   /**  Last date the list of topics was loaded. */
-  updateDate: PropTypes.array.isRequired,
+  updateDate: PropTypes.number.isRequired,
   /** Callback on topic refresh */
   onRefresh: PropTypes.func,
 };

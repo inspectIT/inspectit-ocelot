@@ -223,11 +223,11 @@ VariableView.propTypes = {
   /**  Name of the variable */
   name: PropTypes.string.isRequired,
   /**  Value of the variable */
-  value: PropTypes.string.isRequired,
+  value: PropTypes.any.isRequired,
   /**  Type of the variable */
   type: PropTypes.string.isRequired,
   /**  Description of the variable */
-  description: PropTypes.string,
+  description: PropTypes.any,
   /**  Options in case it's a selection variable */
   options: PropTypes.array,
   /**  Whether content is read only */
