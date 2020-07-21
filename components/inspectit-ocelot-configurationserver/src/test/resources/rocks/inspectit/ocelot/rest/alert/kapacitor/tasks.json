@@ -1,0 +1,130 @@
+{
+  "tasks": [
+    {
+      "created": "2020-07-22T08:21:47.324303054Z",
+      "dbrps": [
+        {
+          "db": "test",
+          "rp": "autogen"
+        }
+      ],
+      "error": "",
+      "executing": true,
+      "id": "var_types",
+      "last-enabled": "2020-07-22T08:21:47.324303055Z",
+      "link": {
+        "rel": "self",
+        "href": "/kapacitor/v1/tasks/var_types"
+      },
+      "modified": "2020-07-22T08:21:47.324303056Z",
+      "status": "enabled",
+      "type": "batch",
+      "vars": {
+        "some_string": {
+          "type": "string",
+          "value": "test",
+          "description": ""
+        },
+        "some_float": {
+          "type": "float",
+          "value": 4242.0,
+          "description": ""
+        },
+        "some_int": {
+          "type": "int",
+          "value": 42,
+          "description": ""
+        },
+        "some_dur": {
+          "type": "duration",
+          "value": 7200000000000,
+          "description": ""
+        },
+        "inspectit_template_reference": {
+          "type": "string",
+          "value": "my_template",
+          "description": ""
+        }
+      }
+    },
+    {
+      "created": "2020-07-22T08:21:47.324303054Z",
+      "dbrps": [
+        {
+          "db": "test",
+          "rp": "autogen"
+        }
+      ],
+      "error": "Some error",
+      "executing": false,
+      "id": "special_vars",
+      "last-enabled": "2020-07-22T08:21:47.324303055Z",
+      "link": {
+        "rel": "self",
+        "href": "/kapacitor/v1/tasks/special_vars"
+      },
+      "modified": "2020-07-22T08:21:47.324303056Z",
+      "status": "disabled",
+      "type": "batch",
+      "vars": {
+        "some_string": {
+          "type": "string",
+          "value": "test",
+          "description": ""
+        },
+        "topic": {
+          "type": "string",
+          "value": "my_topic",
+          "description": ""
+        },
+        "inspectit_template_description": {
+          "type": "string",
+          "value": "My task description",
+          "description": ""
+        },
+        "inspectit_template_reference": {
+          "type": "string",
+          "value": "some_template",
+          "description": ""
+        }
+      }
+    },
+    {
+      "created": "2020-07-22T08:21:47.324303054Z",
+      "dbrps": [
+        {
+          "db": "test",
+          "rp": "autogen"
+        }
+      ],
+      "error": "Some error",
+      "executing": false,
+      "id": "without_template",
+      "last-enabled": "2020-07-22T08:21:47.324303055Z",
+      "link": {
+        "rel": "self",
+        "href": "/kapacitor/v1/tasks/without_template"
+      },
+      "modified": "2020-07-22T08:21:47.324303056Z",
+      "status": "disabled",
+      "type": "batch",
+      "vars": {
+        "some_string": {
+          "type": "string",
+          "value": "test",
+          "description": ""
+        },
+        "topic": {
+          "type": "string",
+          "value": "my_topic",
+          "description": ""
+        },
+        "inspectit_template_description": {
+          "type": "string",
+          "value": "My task description",
+          "description": ""
+        }
+      }
+    }
+  ]
+}
