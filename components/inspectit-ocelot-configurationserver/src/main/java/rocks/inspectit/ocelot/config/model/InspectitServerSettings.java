@@ -60,6 +60,9 @@ public class InspectitServerSettings {
      */
     private Duration agentEvictionDelay;
 
+    @Builder.Default
+    private KapacitorSettings kapacitor = new KapacitorSettings();
+
     /**
      * The security settings of the configuration server.
      */

@@ -1,0 +1,46 @@
+{
+  "link": {
+    "rel": "self",
+    "href": "/kapacitor/v1/templates/baseline"
+  },
+  "id": "baseline",
+  "type": "batch",
+  "script" : "tick goes here",
+  "vars": {
+    "database": {
+      "type": "string",
+      "value": "test"
+    },
+    "inputMeasurement": {
+      "type": "string",
+      "value": null,
+      "description": "The input measurement for which the baseline should be computed"
+    },
+    "inspectit_template_description": {
+      "type": "string",
+      "value": "",
+      "description": "Bli Bla Blub description"
+    },
+    "interval": {
+      "type": "duration",
+      "value": 900000000000
+    },
+    "float_val": {
+      "type": "float",
+      "value": -42.42,
+      "description": ""
+    },
+    "retention": {
+      "type": "string",
+      "value": null
+    },
+    "topic": {
+      "type": "string",
+      "value": null
+    }
+  },
+  "dot": "something",
+  "error": "",
+  "created": "2020-07-07T08:41:38.64538964Z",
+  "modified": "2020-07-07T08:41:38.64538964Z"
+}
