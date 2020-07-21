@@ -1,96 +1,57 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { useSelector } from 'react-redux';
-import { sortBy, includes, findIndex } from 'lodash';
+import { includes } from 'lodash';
 import { Tree } from 'primereact/tree';
 import useDeepEffect from '../../../../../hooks/use-deep-effect';
-
-import * as topicsAPI from '../TopicsAPI';
 import * as alertingConstants from '../../constants';
 import { uniqueHandlerId, resolveSelection } from '../handlerUtils';
 import { supportedHandlerTypes } from '../../constants';
 
-const AlertingChannelsTree = ({ topics, selection, onSelectionChanged }) => {
+const AlertingChannelsTree = ({ topicNodes, selection, onSelectionChanged }) => {
   // local state variables
-  const [treeNodes, setTreeNodes] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [expandedKeys, setExpandedKeys] = useState({});
 
   // global state variables
   const unsavedHandlers = useSelector((state) => Object.keys(state.alerting.unsavedHandlerContents));
 
-  const prevTopicContext = useRef(null);
-
-  // load tree nodes on topic or selection change
   useDeepEffect(() => {
-    const reloadTree = async () => {
-      let newNodes = [];
-
-      for (let index = 0; index < topics.length; index++) {
-        const topic = topics[index];
-        let topicNode = {
-          key: topic.id,
-          label: topic.id,
-          leaf: !!topic.referencedOnly,
-          type: 'topic',
-          level: topic.level,
-          referencedOnly: topic.referencedOnly,
-          icon: classNames('pi pi-fw', alertingConstants.topicIcon),
-        };
-
-        if (topic.id === prevTopicContext.current || topic.id === selection.topic) {
-          topicNode.children = await loadTopicChildren(topic.id);
-        } else {
-          const existingNode = treeNodes.find((treeNode) => treeNode.key === topic.id);
-          topicNode.children = existingNode ? existingNode.children : [];
-        }
-
-        newNodes.push(topicNode);
+    if (topicNodes) {
+      let newExpandedKeys = {};
+      Object.keys(expandedKeys)
+        .filter((key) => topicNodes.some((topic) => topic.id === key))
+        .forEach((key) => {
+          newExpandedKeys = { ...newExpandedKeys, ...{ [key]: expandedKeys[key] } };
+        });
+      if (selection.handler && !(selection.topic in expandedKeys)) {
+        newExpandedKeys = { ...newExpandedKeys, ...{ [selection.topic]: true } };
       }
-
-      setTreeNodes(newNodes);
-    };
-    reloadTree();
-
-    if (selection.handler && !(selection.topic in expandedKeys)) {
-      setExpandedKeys({ ...expandedKeys, ...{ [selection.topic]: true } });
+      setExpandedKeys(newExpandedKeys);
     }
-  }, [topics, selection]);
+  }, [topicNodes]);
 
-  prevTopicContext.current = selection.topic;
-
-  const loadSubTreeOnExpand = async (topicId) => {
-    setLoading(true);
-
-    let nodes = [...treeNodes];
-
-    const topicNode = nodes.find((tNode) => tNode.key === topicId);
-    if (topicNode) {
-      let node = { ...topicNode };
-      node.children = await loadTopicChildren(topicId);
-      const idx = findIndex(nodes, { key: topicId });
-      nodes[idx] = node;
-    }
-
-    setTreeNodes(nodes);
-    setLoading(false);
-  };
-
-  const loadTopicChildren = async (topicId) => {
-    const handlers = await topicsAPI.fetchHandlers(topicId);
-
-    return !handlers
-      ? []
-      : sortBy(handlers, ['id']).map((handler) => ({
-          key: uniqueHandlerId(handler.id, topicId),
-          label: handler.id,
-          leaf: true,
-          type: 'handler',
-          kind: handler.kind,
-          icon: classNames('pi pi-fw', alertingConstants.handlerIcons(handler.kind)),
-        }));
-  };
+  const treeNodes = !topicNodes
+    ? []
+    : topicNodes.map((topic) => ({
+        key: topic.id,
+        label: topic.id,
+        leaf: !!topic.referencedOnly,
+        type: 'topic',
+        level: topic.level,
+        referencedOnly: topic.referencedOnly,
+        icon: classNames('pi pi-fw', alertingConstants.topicIcon),
+        children: topic.handlers
+          ? topic.handlers.map((handler) => ({
+              key: uniqueHandlerId(handler.id, topic.id),
+              label: handler.id,
+              leaf: true,
+              type: 'handler',
+              kind: handler.kind,
+              icon: classNames('pi pi-fw', alertingConstants.handlerIcons(handler.kind)),
+            }))
+          : [],
+      }));
 
   return (
     <div className="this">
@@ -141,8 +102,7 @@ const AlertingChannelsTree = ({ topics, selection, onSelectionChanged }) => {
         value={treeNodes}
         nodeTemplate={(node) => nodeTemplate(node, unsavedHandlers)}
         selectionMode="single"
-        onExpand={(event) => loadSubTreeOnExpand(event.node.key)}
-        loading={loading}
+        onExpand={(event) => onSelectionChanged(selection, [event.node.key])}
         expandedKeys={expandedKeys}
         selectionKeys={selection.handler ? uniqueHandlerId(selection.handler, selection.topic) : selection.topic}
         onSelectionChange={(e) => {
@@ -185,8 +145,8 @@ const nodeTemplate = (node, unsavedHandlers) => {
 };
 
 AlertingChannelsTree.propTypes = {
-  /** An array of strings denoting the available notification topics */
-  topics: PropTypes.array,
+  /** An array of objects denoting the topics tree */
+  topicNodes: PropTypes.array,
   /** Current selection */
   selection: PropTypes.object.isRequired,
   /** Callback on selection change */
@@ -194,7 +154,7 @@ AlertingChannelsTree.propTypes = {
 };
 
 AlertingChannelsTree.defaultProps = {
-  topics: [],
+  topicNodes: [],
   onSelectionChanged: () => {},
 };
 

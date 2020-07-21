@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-
 import CreateEditCopyHandlerDialog from '../CreateEditCopyHandlerDialog';
 import AlertingChannelsTree from './AlertingChannelsTree';
 import AlertingChannelsTreeToolbar from './AlertingChannelsTreeToolbar';
 import DeleteDialog from '../../../../common/dialogs/DeleteDialog';
-
-import * as topicsAPI from '../TopicsAPI';
+import { fetchHandlers, createHandler, editHandler, copyHandler, deleteHandler } from '../../alerting-api';
 import * as alertingConstants from '../../constants';
+import { notificationActions } from '../../../../../redux/ducks/notification';
+import { useDispatch } from 'react-redux';
 
-const AlertingChannelsTreeContainer = ({ topics, selection, readOnly, updateDate, onSelectionChanged, onRefresh }) => {
+const AlertingChannelsTreeContainer = ({ topicNodes, selection, readOnly, updateDate, onSelectionChanged, onRefresh }) => {
+  const dispatch = useDispatch();
+
   const [isDeleteDialogShown, setDeleteDialogShown] = useState(false);
   const [isCreateDialogShown, setCreateDialogShown] = useState(false);
   const [isEditDialogShown, setEditDialogShown] = useState(false);
@@ -53,23 +55,30 @@ const AlertingChannelsTreeContainer = ({ topics, selection, readOnly, updateDate
         onRefresh={onRefresh}
         handlerSelected={!!selection.handler && selection.isSupportedHandlerKind}
       />
-      <AlertingChannelsTree topics={topics} selection={selection} onSelectionChanged={onSelectionChanged} />
+      <AlertingChannelsTree topicNodes={topicNodes} selection={selection} onSelectionChanged={onSelectionChanged} />
       <div className="details">Last refresh: {updateDate ? new Date(updateDate).toLocaleString() : '-'}</div>
       <CreateEditCopyHandlerDialog
         visible={isCreateDialogShown}
         intention="create"
         onHide={() => setCreateDialogShown(false)}
         initialTopic={selection.topic || ''}
-        topics={topics.map((t) => t.id)}
+        topics={topicNodes.map((t) => t.id)}
         handlerTypes={alertingConstants.supportedHandlerTypes}
-        retrieveReservedNames={(topicName, callback) => {
-          topicsAPI.fetchHandlers(topicName, (handlers) => callback(handlers.map((h) => h.id)));
+        retrieveReservedNames={async (topicName, callback) => {
+          try {
+            const handlers = await fetchHandlers(topicName);
+            callback(handlers.map((h) => h.id));
+          } catch (error) {
+            callback([]);
+          }
         }}
-        onSuccess={(handler, topic, handlerType) => {
-          topicsAPI.createHandler({ id: handler, topic: topic, kind: handlerType }, () => {
-            onSelectionChanged({ topic, handler });
-            onRefresh();
-          });
+        onSuccess={async (handler, topic, handlerType) => {
+          try {
+            await createHandler(handler, topic, handlerType);
+          } catch (error) {
+            dispatch(notificationActions.showErrorMessage('Failed creating alerting handler', ''));
+          }
+          onSelectionChanged({ topic, handler, isSupportedHandlerKind: true }, [topic]);
           setCreateDialogShown(false);
         }}
       />
@@ -78,15 +87,22 @@ const AlertingChannelsTreeContainer = ({ topics, selection, readOnly, updateDate
         intention="copy"
         onHide={() => setCopyDialogShown(false)}
         initialTopic={selection.topic || ''}
-        topics={topics.map((t) => t.id)}
-        retrieveReservedNames={(topicName, callback) => {
-          topicsAPI.fetchHandlers(topicName, (handlers) => callback(handlers.map((h) => h.id)));
+        topics={topicNodes.map((t) => t.id)}
+        retrieveReservedNames={async (topicName, callback) => {
+          try {
+            const handlers = await fetchHandlers(topicName);
+            callback(handlers.map((h) => h.id));
+          } catch (error) {
+            callback([]);
+          }
         }}
-        onSuccess={(handler, topic, kind) => {
-          topicsAPI.createHandler({ id: handler, topic, kind }, () => {
-            onSelectionChanged({ topic, handler });
-            onRefresh();
-          });
+        onSuccess={async (handler, topic) => {
+          try {
+            await copyHandler(selection.handler, handler, selection.topic, topic);
+            onSelectionChanged({ topic, handler, isSupportedHandlerKind: true }, [topic]);
+          } catch (error) {
+            dispatch(notificationActions.showErrorMessage('Failed copying alerting handler', ''));
+          }
           setCopyDialogShown(false);
         }}
       />
@@ -96,17 +112,22 @@ const AlertingChannelsTreeContainer = ({ topics, selection, readOnly, updateDate
         oldName={selection.handler}
         onHide={() => setEditDialogShown(false)}
         initialTopic={selection.topic || ''}
-        topics={topics.map((t) => t.id)}
+        topics={topicNodes.map((t) => t.id)}
         retrieveReservedNames={async (topicName, callback) => {
-          const handlers = await topicsAPI.fetchHandlers(topicName);
-          callback(handlers.map((h) => h.id));
+          try {
+            const handlers = await fetchHandlers(topicName);
+            callback(handlers.map((h) => h.id));
+          } catch (error) {
+            callback([]);
+          }
         }}
-        onSuccess={(handler, topic) => {
-          topicsAPI.renameHandler(selection.handler, handler, selection.topic, topic, () => {
-            onSelectionChanged({ topic, handler });
-            onRefresh();
-          });
-
+        onSuccess={async (handler, topic) => {
+          try {
+            await editHandler(selection.handler, handler, selection.topic, topic);
+            onSelectionChanged({ topic, handler, isSupportedHandlerKind: true }, [selection.topic, topic]);
+          } catch (error) {
+            dispatch(notificationActions.showErrorMessage('Failed editing alerting handler', ''));
+          }
           setEditDialogShown(false);
         }}
       />
@@ -115,20 +136,22 @@ const AlertingChannelsTreeContainer = ({ topics, selection, readOnly, updateDate
         onHide={() => setDeleteDialogShown(false)}
         name={selection.handler}
         text="Delete Alert Handler"
-        onSuccess={(handlerName) =>
-          topicsAPI.deleteHandler(handlerName, selection.topic, () => {
-            onSelectionChanged({ topic: selection.topic, handler: null });
-            onRefresh();
-          })
-        }
+        onSuccess={async (handlerName) => {
+          try {
+            await deleteHandler(handlerName, selection.topic);
+            onSelectionChanged({ topic: selection.topic, handler: null, isSupportedHandlerKind: false }, [selection.topic]);
+          } catch (error) {
+            dispatch(notificationActions.showErrorMessage('Failed deleting alerting handler', ''));
+          }
+        }}
       />
     </div>
   );
 };
 
 AlertingChannelsTreeContainer.propTypes = {
-  /** An array of strings denoting the available notification topics */
-  topics: PropTypes.array,
+  /** An array of objects denoting the topics tree */
+  topicNodes: PropTypes.array,
   /** Current selection */
   selection: PropTypes.object.isRequired,
   /** read only mode */
@@ -142,7 +165,7 @@ AlertingChannelsTreeContainer.propTypes = {
 };
 
 AlertingChannelsTreeContainer.defaultProps = {
-  topics: [],
+  topicNodes: [],
   readOnly: false,
   updateDate: undefined,
   onSelectionChanged: () => {},

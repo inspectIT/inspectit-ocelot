@@ -38,10 +38,12 @@ const CreateEditCopyHandlerDialog = ({
   }, [initialTopic]);
 
   useDeepEffect(() => {
-    if (reservedNames) {
-      setInvalidNames(reservedNames);
-    } else if (retrieveReservedNames && topic) {
-      retrieveReservedNames(topic, (names) => setInvalidNames(names));
+    if (visible) {
+      if (reservedNames) {
+        setInvalidNames(reservedNames);
+      } else if (retrieveReservedNames && topic) {
+        retrieveReservedNames(topic, (names) => setInvalidNames(names));
+      }
     }
   }, [reservedNames, retrieveReservedNames, topic]);
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, isNil } from 'lodash';
 import SelectionInformation from '../../../../editor/SelectionInformation';
 import ListEditor from '../../../../common/value-editors/ListEditor';
 import Section from '../../Section';
@@ -41,7 +41,7 @@ const HandlerEditor = ({ content, onContentChanged, readOnly, availableTopics })
           isDefault={!content.match}
           onVarUpdate={(name, newValue) => {
             const newObject = cloneDeep(content);
-            newObject.match = newValue ? newValue : undefined;
+            newObject.match = newValue ? newValue : '';
             onContentChanged(newObject);
           }}
         />
@@ -72,7 +72,7 @@ const HandlerSpecificOptions = ({ content, readOnly, availableTopics, onContentC
             }}
             updateValue={(newValue) => {
               const newObject = cloneDeep(content);
-              if (newObject.options === undefined) {
+              if (isNil(newObject.options)) {
                 newObject.options = {};
               }
               newObject.options.to = newValue;
@@ -87,14 +87,14 @@ const HandlerSpecificOptions = ({ content, readOnly, availableTopics, onContentC
           <ListEditor
             compId={content.topic + '-' + content.id}
             value={content.options && content.options.topics ? content.options.topics : []}
-            options={availableTopics ? availableTopics.map((t) => t.id) : undefined}
+            options={availableTopics ? availableTopics.map((t) => t.id) : null}
             disabled={readOnly}
             entryIcon={alertingConstants.handlerIcons(handlerKind)}
             entryWidth="20rem"
             separators={/;|,/}
             updateValue={(newValue) => {
               const newObject = cloneDeep(content);
-              if (newObject.options === undefined) {
+              if (isNil(newObject.options)) {
                 newObject.options = {};
               }
               newObject.options.topics = newValue;

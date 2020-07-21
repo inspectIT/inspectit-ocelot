@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { cloneDeep, remove, extend } from 'lodash';
+import _, { cloneDeep, remove, extend } from 'lodash';
 import DescriptionSection from './DescriptionSection';
 import VariableView from './VariableView';
 import SelectionInformation from '../../../../editor/SelectionInformation';
@@ -61,9 +61,9 @@ const RulesEditor = ({
     onContentChanged(newContent);
   };
 
-  const updateErrorStatus = (name, value) => {
-    setErrornuousVariables(extend(errornuousVariables, { [name]: value }));
-    onErrorStatusUpdate(Object.entries(errornuousVariables).filter((keyValPair) => keyValPair[1] === true).length);
+  const updateErrorStatus = (name, errorMessage) => {
+    setErrornuousVariables(extend(errornuousVariables, { [name]: errorMessage }));
+    onErrorStatusUpdate(Object.entries(errornuousVariables).filter((keyValPair) => !_.isNil(keyValPair[1])).length);
   };
 
   let statusText;
@@ -157,11 +157,21 @@ const RulesEditor = ({
               options={!availableTopics ? [] : availableTopics.map((topic) => topic.id)}
               name={'Notification Channel'}
               description={'The destination channel where notifications should be sent to when an alert is triggered by this rule.'}
+              isNullValueValid={false}
               value={content.topic || 'Not defined'}
               type={'selection'}
               readOnly={readOnly}
+              error={errornuousVariables['Notification Channel']}
+              onErrorStatusUpdate={updateErrorStatus}
               onVarUpdate={(name, value) => updateAttribute('topic', value)}
               isDefault={!content.topic}
+              customErrorCheck={(value) => {
+                const matchResult = value.match(/[\w\-.]*/);
+                const hasError = !matchResult || matchResult[0] !== value;
+                return hasError
+                  ? 'Notification channel names may only contain the following charaters: letters, numbers, dot, - or _'
+                  : null;
+              }}
             />
           )}
 
@@ -171,9 +181,10 @@ const RulesEditor = ({
               name={variable.name}
               description={variable.description}
               value={variable.value !== undefined ? variable.value : variable.defaultValue}
+              isNullValueValid={!_.isNil(variable.defaultValue)}
               type={variable.type}
               readOnly={readOnly}
-              hasError={errornuousVariables[variable.name]}
+              error={isRule ? errornuousVariables[variable.name] : null}
               onVarUpdate={updateVariable}
               onErrorStatusUpdate={updateErrorStatus}
               isDefault={variable.value === undefined}

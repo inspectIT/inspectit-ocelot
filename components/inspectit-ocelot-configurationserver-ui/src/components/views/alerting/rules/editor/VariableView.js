@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Inplace, InplaceDisplay, InplaceContent } from 'primereact/inplace';
+import { Button } from 'primereact/button';
 import classnames from 'classnames';
 import NumberEditor from '../../../../common/value-editors/NumberEditor';
 import TextEditor from '../../../../common/value-editors/TextEditor';
@@ -11,16 +12,37 @@ import _ from 'lodash';
 /**
  * The VariableView component encapsulates displaying and editing of values of different type.
  */
-const VariableView = ({ name, value, type, description, options, readOnly, onVarUpdate, onErrorStatusUpdate, hasError, isDefault }) => {
-  if (onErrorStatusUpdate !== undefined) {
-    onErrorStatusUpdate(name, validate(type, value));
-  }
+const VariableView = ({
+  name,
+  value,
+  type,
+  description,
+  options,
+  isNullValueValid,
+  readOnly,
+  onVarUpdate,
+  onErrorStatusUpdate,
+  error,
+  isDefault,
+  customErrorCheck,
+}) => {
+  useEffect(() => {
+    checkForError(value);
+  });
+
+  const checkForError = (val) => {
+    if (onErrorStatusUpdate !== undefined) {
+      let errorMessage = customErrorCheck ? customErrorCheck(val) : false;
+      if (!errorMessage) {
+        errorMessage = isValueErrornuous(type, val, isNullValueValid);
+      }
+      onErrorStatusUpdate(name, errorMessage);
+    }
+  };
 
   const onDataChanged = (newValue) => {
     if (value !== newValue) {
-      if (onErrorStatusUpdate !== undefined) {
-        onErrorStatusUpdate(name, validate(type, newValue));
-      }
+      checkForError(newValue);
       onVarUpdate(name, _.isNil(newValue) ? null : newValue);
     }
   };
@@ -58,8 +80,14 @@ const VariableView = ({ name, value, type, description, options, readOnly, onVar
             color: #616161;
             margin-top: 0.5rem;
           }
-          .pi-exclamation-triangle {
+          .this :global(.error-col .p-button) {
+            background-color: unset;
+            border: unset;
             color: #f44336;
+            cursor: help;
+          }
+          .this :global(.error-col .p-button-text) {
+            padding: 0;
           }
           .meta-col {
             flex-grow: 6;
@@ -86,8 +114,7 @@ const VariableView = ({ name, value, type, description, options, readOnly, onVar
           </div>
           <div className="description">{description}</div>
         </div>
-
-        <div className="error-col">{hasError && <i className="pi pi-exclamation-triangle" />}</div>
+        <div className="error-col">{error && <Button icon="pi pi-exclamation-triangle" tooltip={error} />}</div>
         <div className="value-col">
           <ValueView
             value={value}
@@ -95,7 +122,7 @@ const VariableView = ({ name, value, type, description, options, readOnly, onVar
             options={options}
             readOnly={readOnly}
             isDefault={isDefault}
-            error={hasError}
+            error={!!error}
             onDataChanged={onDataChanged}
           />
         </div>
@@ -192,13 +219,16 @@ const SimpleDataView = ({ value, isDefault, error }) => {
 /**
  * Validates the given value of the given type.
  */
-const validate = (type, value) => {
-  const strValue = '' + value;
-  var error = false;
-  if (validators[type] !== undefined) {
-    error = !validators[type](strValue);
+const isValueErrornuous = (type, value, isNullValueValid) => {
+  if (!isNullValueValid && _.isNil(value)) {
+    return 'Value must not be null!';
   }
-  return error;
+  const strValue = '' + value;
+  if (!_.isNil(validators[type])) {
+    return validators[type](strValue);
+  } else {
+    return null;
+  }
 };
 
 /**
@@ -207,15 +237,17 @@ const validate = (type, value) => {
 const validators = {
   duration: (value) => {
     const matchResult = value.match(/\d+[smhdw]/);
-    return matchResult && matchResult[0] === value;
+    const hasError = !matchResult || matchResult[0] !== value;
+    return hasError ? 'Duration variables must follow the following pattern:  1234[s|m|h|d|w]  Examples: 10s, 7d, ...' : null;
   },
   regex: (value) => {
     try {
       new RegExp(value);
     } catch (e) {
-      return false;
+      return 'This is not a valid regular expression!';
     }
-    return true;
+
+    return null;
   },
 };
 
@@ -223,30 +255,35 @@ VariableView.propTypes = {
   /**  Name of the variable */
   name: PropTypes.string.isRequired,
   /**  Value of the variable */
-  value: PropTypes.any.isRequired,
+  value: PropTypes.any,
   /**  Type of the variable */
   type: PropTypes.string.isRequired,
   /**  Description of the variable */
   description: PropTypes.any,
+  /** Indicates whether a null value is treated as valid or not */
+  isNullValueValid: PropTypes.bool,
   /**  Options in case it's a selection variable */
   options: PropTypes.array,
   /**  Whether content is read only */
   readOnly: PropTypes.bool,
-  /**  Whether content has errors */
-  hasError: PropTypes.bool,
+  /**  An error message if existent */
+  error: PropTypes.string,
   /**  Whether value is a default value*/
   isDefault: PropTypes.bool,
   /**  Callback on variable update */
   onVarUpdate: PropTypes.func,
   /**  Callback on content error status changed */
   onErrorStatusUpdate: PropTypes.func,
+  /** Custom value validator function */
+  customErrorCheck: PropTypes.func,
 };
 
 VariableView.defaultProps = {
   description: '',
+  isNullValueValid: true,
   options: [],
   readOnly: false,
-  hasError: false,
+  hasError: undefined,
   isDefault: false,
   onVarUpdate: () => {},
   onErrorStatusUpdate: () => {},
