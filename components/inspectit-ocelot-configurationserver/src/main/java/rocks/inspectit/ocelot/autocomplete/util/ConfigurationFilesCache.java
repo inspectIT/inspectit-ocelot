@@ -34,7 +34,7 @@ public class ConfigurationFilesCache {
     /**
      * The current parsed contents of all configuration files.
      */
-    private Collection<Object> currentParsedFiles = Collections.emptyList();
+    private Collection<Object> parsedContents = Collections.emptyList();
 
     /**
      * Returns the most recently loaded .yaml and .yml files as a list of Objects. Each Object resembles the corresponding
@@ -53,8 +53,8 @@ public class ConfigurationFilesCache {
      *
      * @return A Collection containing all loaded .yaml and .yml files root elements as Maps or Lists.
      */
-    public Collection<Object> getParsedConfigurationFiles() {
-        return currentParsedFiles;
+    public Collection<Object> getParsedContents() {
+        return parsedContents;
     }
 
     /**
@@ -68,7 +68,7 @@ public class ConfigurationFilesCache {
         if (activeReloadTask != null) {
             activeReloadTask.cancel();
         }
-        activeReloadTask = new ConfigurationFilesCacheReloadTask(fileAccess, (configs) -> currentParsedFiles = configs);
+        activeReloadTask = new ConfigurationFilesCacheReloadTask(fileAccess, (configs) -> parsedContents = configs);
         executor.submit(activeReloadTask);
     }
 

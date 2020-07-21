@@ -27,12 +27,10 @@ public class ConfigurationQueryHelper {
      * @return The attributes which could be found in the given path.
      */
     public List<String> getKeysForPath(List<String> path) {
-        return Collections.emptyList();
-        /*
         return configurationFilesCache.getParsedContents()
                 .stream()
                 .flatMap(root -> extractKeys(root, path).stream())
-                .collect(Collectors.toList());*/
+                .collect(Collectors.toList());
     }
 
     /**
