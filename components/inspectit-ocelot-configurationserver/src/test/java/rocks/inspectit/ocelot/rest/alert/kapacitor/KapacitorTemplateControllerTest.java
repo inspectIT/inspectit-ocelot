@@ -89,7 +89,7 @@ public class KapacitorTemplateControllerTest extends KapacitorControllerTestBase
                                             .name("interval")
                                             .description("")
                                             .type("duration")
-                                            .value(900000000000L)
+                                            .value("15m")
                                             .build()
                                     )
                                     .add(TemplateVariable.builder()

@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Builder;
 import lombok.Value;
+import rocks.inspectit.ocelot.rest.util.DurationUtil;
+
+import java.time.Duration;
 
 /**
  * Structure representing a Kapacitor Variable or Variable Definition.
@@ -26,6 +29,8 @@ public class TemplateVariable {
      */
     public static final String TOPIC_VARIABLE = "topic";
 
+    private static final String DURATION_TYPE = "duration";
+
     String name;
 
     String description;
@@ -39,21 +44,26 @@ public class TemplateVariable {
     Object value;
 
     public static TemplateVariable fromKapacitorResponse(String name, JsonNode variable) {
+        String type = variable.path("type").asText(null);
         return TemplateVariable.builder()
                 .name(name)
-                .type(variable.path("type").asText(null))
+                .type(type)
                 .description(variable.path("description").asText(""))
-                .value(toValue(variable.path("value")))
+                .value(toValue(variable.path("value"), type))
                 .build();
     }
 
-    private static Object toValue(JsonNode value) {
+    private static Object toValue(JsonNode value, String type) {
         if (value.isNull()) {
             return null;
         } else if (value.isBoolean()) {
             return value.booleanValue();
         } else if (value.isLong()) {
-            return value.longValue();
+            if (DURATION_TYPE.equals(type)) {
+                return DurationUtil.prettyPrintDuration(Duration.ofNanos(value.longValue()));
+            } else {
+                return value.longValue();
+            }
         } else if (value.isNumber()) {
             return value.doubleValue();
         } else if (value.isTextual()) {
@@ -61,4 +71,5 @@ public class TemplateVariable {
         }
         throw new IllegalArgumentException("Unexpected type: " + value);
     }
+
 }
