@@ -65,6 +65,7 @@ var templateContents = [
     description: 'This the Great Template description!',
     created: '2006-01-02T15:04:05+07:00',
     modified: '2006-01-02T15:04:05+07:00',
+    hasTopicVariable: true,
     vars: [
       {
         name: 'x',
@@ -110,6 +111,7 @@ var templateContents = [
     description: 'This the Error Rate Template description!',
     created: '2006-01-02T15:04:05+07:00',
     modified: '2006-01-02T15:04:05+07:00',
+    hasTopicVariable: true,
     vars: [
       {
         name: 'interval',
@@ -162,7 +164,7 @@ export const fetchAlertingTemplates = (onSuccess, onFailed) => {
   const success = true;
   if (success) {
     if (onSuccess) {
-      setTimeout(() => onSuccess(templates), 200);
+      setTimeout(() => onSuccess([...templates]), 200);
     }
   } else {
     if (onFailed) {
@@ -180,7 +182,7 @@ export const fetchAlertingRules = (onSuccess, onFailed) => {
   const success = true;
   if (success) {
     if (onSuccess) {
-      setTimeout(() => onSuccess(rules), 200);
+      setTimeout(() => onSuccess([...rules]), 200);
     }
   } else {
     if (onFailed) {

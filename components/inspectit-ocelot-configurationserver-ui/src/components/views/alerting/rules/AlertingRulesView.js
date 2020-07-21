@@ -33,7 +33,7 @@ const AlertingRulesView = ({ updateDate, topics, rules, templates, onRefresh }) 
           selection={currentSelection}
         />
 
-        <RulesEditorContainer readOnly={readOnly} availableTopics={topics} selection={currentSelection} />
+        <RulesEditorContainer readOnly={readOnly} availableTopics={topics} selection={currentSelection} onSaved={onRefresh} />
       </div>
     </>
   );

@@ -11,7 +11,7 @@ import Notificationbar from '../../../../editor/Notificationbar';
 import useDeepEffect from '../../../../../hooks/use-deep-effect';
 import { templateIcon } from '../../constants';
 
-const RulesEditorContainer = ({ readOnly, availableTopics, selection }) => {
+const RulesEditorContainer = ({ readOnly, availableTopics, selection, onSaved }) => {
   const dispatch = useDispatch();
 
   // state variables
@@ -78,8 +78,8 @@ const RulesEditorContainer = ({ readOnly, availableTopics, selection }) => {
         (ruleContent) => {
           const unsavedRuleData = omit(unsavedRuleContents, selection.rule);
           dispatch(alertingActions.ruleContentsChanged(unsavedRuleData));
-
           setRuleContent(ruleContent);
+          onSaved();
         },
         () => setRuleContent(undefined)
       );
@@ -125,6 +125,7 @@ const RulesEditorContainer = ({ readOnly, availableTopics, selection }) => {
           availableTopics={availableTopics}
           readOnly={readOnly || !isRule}
           content={content}
+          hasTopicVariable={templateContent && templateContent.hasTopicVariable === true}
           mappedVars={mappedVars}
           isRule={isRule}
           onErrorStatusUpdate={setErrorCount}
@@ -187,14 +188,15 @@ RulesEditorContainer.propTypes = {
   availableTopics: PropTypes.array,
   /** Whether the content is read only */
   readOnly: PropTypes.bool,
-
   selection: PropTypes.object,
+  onSaved: PropTypes.func,
 };
 
 RulesEditorContainer.defaultProps = {
   availableTopics: [],
   unsavedRuleContents: {},
   readOnly: false,
+  onSaved: () => {},
 };
 
 export default RulesEditorContainer;

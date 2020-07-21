@@ -2,7 +2,7 @@ import classNames from 'classnames';
 
 export const templateIcon = 'pi-briefcase';
 export const ruleIcon = 'pi-bell';
-export const topicIcon = 'pi-bars';
+export const topicIcon = 'pi-sign-out';
 
 /** prime icon names for different handler kinds */
 export const handlerIcons = (kind) => {

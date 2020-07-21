@@ -42,7 +42,7 @@ const AlertingView = () => {
       .filter((topicId) => !existingTopics.some((topic) => topic.id === topicId))
       .map((topicId) => ({ id: topicId, referencedOnly: true }))
       .uniq()
-      .sortBy(['id'])
+      .sortBy([(topic) => topic.id.toLowerCase()])
       .value();
 
     setReferencedTopics(topics);
@@ -58,7 +58,14 @@ const AlertingView = () => {
       (templates) => setTemplates(templates),
       () => setTemplates([])
     );
-  const refreshTopics = () => topicsAPI.fetchTopics((topics) => setExistingTopics(_(topics).sortBy(['id']).value()));
+  const refreshTopics = () =>
+    topicsAPI.fetchTopics((topics) =>
+      setExistingTopics(
+        _(topics)
+          .sortBy([(topic) => topic.id.toLowerCase()])
+          .value()
+      )
+    );
 
   // reloads all the alerting data - rules, topics, templates...
   const refreshAll = () => {
