@@ -1,24 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import classNames from 'classnames';
+import { useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
 import { isEqual, uniq } from 'lodash';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 import { AutoComplete } from 'primereact/autocomplete';
+import { notificationActions } from '../../../redux/ducks/notification';
 
 /**
  * Editor for string lists.
  */
-const ListEditor = ({ value, options, disabled, entryWidth, updateValue, entryIcon, separators, validateEntryFunc }) => {
-  const [entries, setEntries] = useState([]);
-  const [newEntry, setNewEntry] = useState('');
+const ListEditor = ({ compId, value, options, disabled, entryWidth, updateValue, entryIcon, separators, validateEntryFunc }) => {
+  const dispatch = useDispatch();
+  const [inputText, setInputText] = useState('');
   const [suggestions, setSuggestions] = useState([]);
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
-    if (!isEqual(entries, value) && value) {
-      setEntries([...value]);
+    setInputText('');
+  }, [compId]);
+
+  useEffect(() => {
+    if (hasError) {
+      setHasError(false);
     }
-  }, [value]);
+  }, [inputText]);
 
   useEffect(() => {
     if (options && !isEqual(suggestions, options)) {
@@ -26,28 +33,37 @@ const ListEditor = ({ value, options, disabled, entryWidth, updateValue, entryIc
     }
   }, [options]);
 
+  const entries = value ? [...value] : [];
+
   const addEntries = () => {
-    if (newEntry) {
-      let newEntries = newEntry
+    if (inputText) {
+      const seperatorMatch = inputText.match(separators);
+      const validSeparator = seperatorMatch ? seperatorMatch[0] : ' ';
+
+      let newEntries = inputText
         .split(separators)
         .map((s) => s.trim())
         .filter((s) => s !== '');
 
       newEntries = uniq(newEntries);
 
-      newEntries = newEntries
-        .filter((s) => !entries || !entries.some((other) => other === s))
-        .filter((s) => !validateEntryFunc || validateEntryFunc(s) === true);
+      newEntries = newEntries.filter((s) => !entries || !entries.some((other) => other === s));
+
+      const malformedEntries = validateEntryFunc ? newEntries.filter((s) => !validateEntryFunc(s)) : [];
+
+      newEntries = newEntries.filter((s) => !validateEntryFunc || validateEntryFunc(s) === true);
 
       newEntries = [...entries, ...newEntries];
 
-      setEntries(newEntries);
-      setNewEntry('');
+      setInputText(malformedEntries.join(validSeparator));
+      if (malformedEntries.length > 0) {
+        setHasError(true);
+        dispatch(notificationActions.showWarningMessage('Invalid input', 'Your input contains invalid entries.'));
+      }
+
       updateValue(newEntries);
     }
   };
-
-  const entryIconClassNames = classNames('pi', entryIcon);
 
   const tooltipOptions = {
     showDelay: 500,
@@ -118,13 +134,16 @@ const ListEditor = ({ value, options, disabled, entryWidth, updateValue, entryIc
         .this :global(.remove-button) {
           cursor: pointer;
         }
+        .this :global(.input-error .p-inputtext) {
+          background-color: #ffe6e6;
+        }
       `}</style>
-      <div className="input-row">
+      <div className={classNames('input-row', { 'input-error': hasError })}>
         {!options && (
           <InputText
             disabled={disabled}
-            value={newEntry}
-            onChange={(e) => setNewEntry(e.target.value)}
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
             autoFocus
             onKeyPress={(e) => e.key === 'Enter' && addEntries()}
           />
@@ -133,8 +152,8 @@ const ListEditor = ({ value, options, disabled, entryWidth, updateValue, entryIc
         {!!options && (
           <span className="p-fluid autocomplete-span">
             <AutoComplete
-              value={newEntry}
-              onChange={(e) => setNewEntry(e.target.value)}
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
               dropdown
               suggestions={suggestions}
               completeMethod={(event) => {
@@ -152,23 +171,23 @@ const ListEditor = ({ value, options, disabled, entryWidth, updateValue, entryIc
           {entries.map((entry) => (
             <div key={entry} className="p-col-fixed entry-row" style={{ width: entryWidth }}>
               <div className="entry">
-                <i className={entryIconClassNames}></i>
+                <i className={classNames('pi', entryIcon)}></i>
                 {entry}
               </div>
-              <div className="remove-button">
-                <i
-                  className="pi pi-times"
-                  entryid={entry}
-                  onClick={(e) => {
-                    if (e && e.target && e.target.attributes && e.target.attributes.entryid) {
-                      const entryId = e.target.attributes.entryid.value;
-                      const newEntries = entries.filter((ent) => ent !== entryId);
-                      setEntries(newEntries);
-                      updateValue(newEntries);
-                    }
-                  }}
-                ></i>
-              </div>
+              {!disabled && (
+                <div className="remove-button">
+                  <i
+                    className="pi pi-times"
+                    entryid={entry}
+                    onClick={(e) => {
+                      if (e && e.target && e.target.attributes && e.target.attributes.entryid) {
+                        const newEntries = entries.filter((ent) => ent !== entry);
+                        updateValue(newEntries);
+                      }
+                    }}
+                  ></i>
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -178,6 +197,9 @@ const ListEditor = ({ value, options, disabled, entryWidth, updateValue, entryIc
 };
 
 ListEditor.propTypes = {
+  /** The id of this component instance.
+   * Needed to reset values on parent change when no other props are changing. */
+  compId: PropTypes.any.isRequired,
   /** An array of current values in the list. */
   value: PropTypes.array.isRequired,
   /** Optional list of options */
@@ -189,7 +211,7 @@ ListEditor.propTypes = {
   /** Whether the editor is disabled or not */
   disabled: PropTypes.bool,
   /** Regular expression or string denoting the element separators */
-  separators: PropTypes.any,
+  separators: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
   /** Callback on value change */
   updateValue: PropTypes.func,
   /** Function used to validate element entries */

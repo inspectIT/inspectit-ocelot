@@ -41,7 +41,7 @@ const AlertingView = () => {
       .filter()
       .filter((topicId) => !existingTopics.some((topic) => topic.id === topicId))
       .map((topicId) => ({ id: topicId, referencedOnly: true }))
-      .uniq()
+      .uniqBy('id')
       .sortBy([(topic) => topic.id.toLowerCase()])
       .value();
 
@@ -75,7 +75,9 @@ const AlertingView = () => {
     setUpdateDate(Date.now());
   };
 
-  const availableTopics = [...existingTopics, ...referencedTopics];
+  const availableTopics = _([...existingTopics, ...referencedTopics])
+    .uniqBy('id')
+    .value();
 
   return (
     <>

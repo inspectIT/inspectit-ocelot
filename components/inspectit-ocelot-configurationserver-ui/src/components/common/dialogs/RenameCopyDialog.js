@@ -33,49 +33,56 @@ const RenameCopyDialog = ({ name, reservedNames, retrieveReservedNames, visible,
   }, [newName]);
 
   return (
-    <Dialog
-      className="this"
-      style={{ width: '400px' }}
-      header={(intention === 'copy' ? 'Copy' : 'Rename') + ' Element'}
-      modal={true}
-      visible={visible}
-      onHide={onHide}
-      onShow={() => {
-        setName(name);
-        setValidState(false);
-        setError(undefined);
-      }}
-      footer={
-        <div>
-          <Button label={intention === 'copy' ? 'Copy' : 'Rename'} disabled={!isValid} onClick={() => onSuccess(name, newName)} />
-          <Button label="Cancel" className="p-button-secondary" onClick={onHide} />
+    <div className="this">
+      <style jsx>{`
+        .this :global(.p-dialog-content) {
+          overflow-y: visible;
+        }
+      `}</style>
+      <Dialog
+        className="this"
+        style={{ width: '400px' }}
+        header={(intention === 'copy' ? 'Copy' : 'Rename') + ' Element'}
+        modal={true}
+        visible={visible}
+        onHide={onHide}
+        onShow={() => {
+          setName(name);
+          setValidState(false);
+          setError(undefined);
+        }}
+        footer={
+          <div>
+            <Button label={intention === 'copy' ? 'Copy' : 'Rename'} disabled={!isValid} onClick={() => onSuccess(name, newName)} />
+            <Button label="Cancel" className="p-button-secondary" onClick={onHide} />
+          </div>
+        }
+      >
+        <div style={{ width: '100%', paddingBottom: '0.5em' }}>{text}</div>
+        <div className="p-grid">
+          <div className="p-inputgroup p-col-12" style={{ width: '100%' }}>
+            <span className="p-inputgroup-addon">
+              <i className="pi pi-pencil"></i>
+            </span>
+            <InputText
+              style={{ width: '100%' }}
+              onKeyPress={(e) => e.key === 'Enter' && isValid && onSuccess(name, newName)}
+              value={newName}
+              autoFocus
+              placeholder="New Name"
+              onChange={(e) => {
+                setName(e.target.value);
+              }}
+            />
+          </div>
         </div>
-      }
-    >
-      <div style={{ width: '100%', paddingBottom: '0.5em' }}>{text}</div>
-      <div className="p-grid">
-        <div className="p-inputgroup p-col-12" style={{ width: '100%' }}>
-          <span className="p-inputgroup-addon">
-            <i className="pi pi-pencil"></i>
-          </span>
-          <InputText
-            style={{ width: '100%' }}
-            onKeyPress={(e) => e.key === 'Enter' && isValid && onSuccess(name, newName)}
-            value={newName}
-            autoFocus
-            placeholder="New Name"
-            onChange={(e) => {
-              setName(e.target.value);
-            }}
-          />
-        </div>
-      </div>
-      {error && (
-        <div style={{ width: '100%', paddingTop: '0.5em' }}>
-          <Message style={{ width: '100%' }} severity="error" text={error}></Message>
-        </div>
-      )}
-    </Dialog>
+        {error && (
+          <div style={{ width: '100%', paddingTop: '0.5em' }}>
+            <Message style={{ width: '100%' }} severity="error" text={error}></Message>
+          </div>
+        )}
+      </Dialog>
+    </div>
   );
 };
 

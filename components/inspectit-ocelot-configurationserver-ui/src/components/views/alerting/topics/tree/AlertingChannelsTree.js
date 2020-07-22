@@ -9,6 +9,7 @@ import useDeepEffect from '../../../../../hooks/use-deep-effect';
 import * as topicsAPI from '../TopicsAPI';
 import * as alertingConstants from '../../constants';
 import { uniqueHandlerId, resolveSelection } from '../handlerUtils';
+import { supportedHandlerTypes } from '../../constants';
 
 const AlertingChannelsTree = ({ topics, selection, onSelectionChanged }) => {
   // local state variables
@@ -144,7 +145,13 @@ const AlertingChannelsTree = ({ topics, selection, onSelectionChanged }) => {
         loading={loading}
         expandedKeys={expandedKeys}
         selectionKeys={selection.handler ? uniqueHandlerId(selection.handler, selection.topic) : selection.topic}
-        onSelectionChange={(e) => onSelectionChanged(resolveSelection(e.value))}
+        onSelectionChange={(e) => {
+          const { topic, handler } = resolveSelection(e.value);
+          const topicNode = treeNodes.find((tNode) => tNode.key === topic);
+          const handlerNode = topicNode && topicNode.children ? topicNode.children.find((hNode) => hNode.label === handler) : null;
+          const isSupportedHandlerKind = handlerNode ? includes(supportedHandlerTypes, handlerNode.kind) : false;
+          onSelectionChanged({ topic, handler, isSupportedHandlerKind });
+        }}
         onToggle={(e) => setExpandedKeys(e.value)}
       />
     </div>

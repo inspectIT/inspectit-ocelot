@@ -5,6 +5,9 @@ const HANDLER_ID_SEPARATOR = ':*:';
  */
 export const uniqueHandlerId = (handlerId, topicId) => topicId + HANDLER_ID_SEPARATOR + handlerId;
 
+/**
+ * Resolves a unique handler id into a selection object with topic and handler component.
+ */
 export const resolveSelection = (selectionKey) => {
   if (!selectionKey) {
     return { topic: null, handler: null };

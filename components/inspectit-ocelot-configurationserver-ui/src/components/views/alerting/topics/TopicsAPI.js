@@ -53,6 +53,11 @@ const handlers = {
       topic: 'Some Topic',
       kind: 'publish',
     },
+    {
+      id: 'Handler V',
+      topic: 'Some Topic',
+      kind: 'unsupportedHandler',
+    },
   ],
   'XY-Team': [
     {

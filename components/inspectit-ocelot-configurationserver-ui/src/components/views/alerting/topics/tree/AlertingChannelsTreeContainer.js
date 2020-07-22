@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 
-import CreateRenameCopyHandlerDialog from '../CreateRenameCopyHandlerDialog';
+import CreateEditCopyHandlerDialog from '../CreateEditCopyHandlerDialog';
 import AlertingChannelsTree from './AlertingChannelsTree';
 import AlertingChannelsTreeToolbar from './AlertingChannelsTreeToolbar';
 import DeleteDialog from '../../../../common/dialogs/DeleteDialog';
@@ -12,7 +12,7 @@ import * as alertingConstants from '../../constants';
 const AlertingChannelsTreeContainer = ({ topics, selection, readOnly, updateDate, onSelectionChanged, onRefresh }) => {
   const [isDeleteDialogShown, setDeleteDialogShown] = useState(false);
   const [isCreateDialogShown, setCreateDialogShown] = useState(false);
-  const [isRenameDialogShown, setRenameDialogShown] = useState(false);
+  const [isEditDialogShown, setEditDialogShown] = useState(false);
   const [isCopyDialogShown, setCopyDialogShown] = useState(false);
 
   return (
@@ -48,14 +48,14 @@ const AlertingChannelsTreeContainer = ({ topics, selection, readOnly, updateDate
         readOnly={readOnly}
         onShowDeleteDialog={() => setDeleteDialogShown(true)}
         onShowCreateDialog={() => setCreateDialogShown(true)}
-        onShowRenameDialog={() => setRenameDialogShown(true)}
+        onShowRenameDialog={() => setEditDialogShown(true)}
         onShowCopyDialog={() => setCopyDialogShown(true)}
         onRefresh={onRefresh}
-        handlerSelected={!!selection.handler}
+        handlerSelected={!!selection.handler && selection.isSupportedHandlerKind}
       />
       <AlertingChannelsTree topics={topics} selection={selection} onSelectionChanged={onSelectionChanged} />
       <div className="details">Last refresh: {updateDate ? new Date(updateDate).toLocaleString() : '-'}</div>
-      <CreateRenameCopyHandlerDialog
+      <CreateEditCopyHandlerDialog
         visible={isCreateDialogShown}
         intention="create"
         onHide={() => setCreateDialogShown(false)}
@@ -73,7 +73,7 @@ const AlertingChannelsTreeContainer = ({ topics, selection, readOnly, updateDate
           setCreateDialogShown(false);
         }}
       />
-      <CreateRenameCopyHandlerDialog
+      <CreateEditCopyHandlerDialog
         visible={isCopyDialogShown}
         intention="copy"
         onHide={() => setCopyDialogShown(false)}
@@ -90,14 +90,16 @@ const AlertingChannelsTreeContainer = ({ topics, selection, readOnly, updateDate
           setCopyDialogShown(false);
         }}
       />
-      <CreateRenameCopyHandlerDialog
-        visible={isRenameDialogShown}
-        intention="rename"
-        onHide={() => setRenameDialogShown(false)}
+      <CreateEditCopyHandlerDialog
+        visible={isEditDialogShown}
+        intention="edit"
+        oldName={selection.handler}
+        onHide={() => setEditDialogShown(false)}
         initialTopic={selection.topic || ''}
         topics={topics.map((t) => t.id)}
-        retrieveReservedNames={(topicName, callback) => {
-          topicsAPI.fetchHandlers(topicName, (handlers) => callback(handlers.map((h) => h.id)));
+        retrieveReservedNames={async (topicName, callback) => {
+          const handlers = await topicsAPI.fetchHandlers(topicName);
+          callback(handlers.map((h) => h.id));
         }}
         onSuccess={(handler, topic) => {
           topicsAPI.renameHandler(selection.handler, handler, selection.topic, topic, () => {
@@ -105,7 +107,7 @@ const AlertingChannelsTreeContainer = ({ topics, selection, readOnly, updateDate
             onRefresh();
           });
 
-          setRenameDialogShown(false);
+          setEditDialogShown(false);
         }}
       />
       <DeleteDialog

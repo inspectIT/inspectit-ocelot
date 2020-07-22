@@ -9,6 +9,7 @@ import * as handlerUtils from '../handlerUtils';
 import DefaultToolbar from '../../DefaultToolbar';
 import useDeepEffect from '../../../../../hooks/use-deep-effect';
 import HandlerEditor from './HandlerEditor';
+import SelectionInformation from '../../../../editor/SelectionInformation';
 
 const HandlerEditorContainer = ({ selection, readOnly, availableTopics }) => {
   const dispatch = useDispatch();
@@ -19,7 +20,7 @@ const HandlerEditorContainer = ({ selection, readOnly, availableTopics }) => {
 
   // load saved version of the handler when selection changes
   useDeepEffect(() => {
-    if (selection.handler) {
+    if (selection.handler && selection.isSupportedHandlerKind) {
       topicsAPI.fetchHandler(selection.topic, selection.handler, (handler) => setSavedHandlerContent(handler));
     } else {
       setSavedHandlerContent(undefined);
@@ -29,6 +30,7 @@ const HandlerEditorContainer = ({ selection, readOnly, availableTopics }) => {
   const uniqueHandlerId = handlerUtils.uniqueHandlerId(selection.handler, selection.topic);
   const selectedHandlerIsUnsaved = unsavedHandlerContents && uniqueHandlerId && uniqueHandlerId in unsavedHandlerContents;
   const handlerContent = selectedHandlerIsUnsaved ? unsavedHandlerContents[uniqueHandlerId] : savedHandlerContent;
+  const unsupportedHandlerIsSelected = selection.handler && !selection.isSupportedHandlerKind;
 
   const onContentChanged = (changedContent) => {
     if (selection.handler) {
@@ -47,6 +49,22 @@ const HandlerEditorContainer = ({ selection, readOnly, availableTopics }) => {
     });
   };
 
+  let toolbar = <DefaultToolbar />;
+
+  if (unsupportedHandlerIsSelected) {
+    toolbar = <HandlerEditorToolbar handlerName={selection.handler} topicName={selection.topic} readOnly={true} isUnsaved={false} />;
+  } else if (handlerContent) {
+    toolbar = (
+      <HandlerEditorToolbar
+        handlerName={handlerContent.id}
+        handlerKind={handlerContent.kind}
+        topicName={handlerContent.topic}
+        readOnly={readOnly}
+        isUnsaved={selectedHandlerIsUnsaved}
+        onSave={onSave}
+      />
+    );
+  }
   return (
     <div className="this">
       <style jsx>{`
@@ -60,19 +78,12 @@ const HandlerEditorContainer = ({ selection, readOnly, availableTopics }) => {
           min-width: 760px;
         }
       `}</style>
-      {handlerContent ? (
-        <HandlerEditorToolbar
-          handlerName={handlerContent.id}
-          handlerKind={handlerContent.kind}
-          topicName={handlerContent.topic}
-          readOnly={readOnly}
-          isUnsaved={selectedHandlerIsUnsaved}
-          onSave={onSave}
-        />
+      {toolbar}
+      {unsupportedHandlerIsSelected ? (
+        <SelectionInformation hint="Selected handler is of an unsupported kind!" />
       ) : (
-        <DefaultToolbar />
+        <HandlerEditor content={handlerContent} onContentChanged={onContentChanged} readOnly={readOnly} availableTopics={availableTopics} />
       )}
-      <HandlerEditor content={handlerContent} onContentChanged={onContentChanged} readOnly={readOnly} availableTopics={availableTopics} />
     </div>
   );
 };

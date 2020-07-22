@@ -60,6 +60,7 @@ const HandlerSpecificOptions = ({ content, readOnly, availableTopics, onContentC
       return (
         <Section title="Receipients">
           <ListEditor
+            compId={content.topic + '-' + content.id}
             value={content.options && content.options.to ? content.options.to : []}
             disabled={readOnly}
             entryIcon={alertingConstants.handlerIcons(handlerKind)}
@@ -84,6 +85,7 @@ const HandlerSpecificOptions = ({ content, readOnly, availableTopics, onContentC
       return (
         <Section title="Target Topics">
           <ListEditor
+            compId={content.topic + '-' + content.id}
             value={content.options && content.options.topics ? content.options.topics : []}
             options={availableTopics ? availableTopics.map((t) => t.id) : undefined}
             disabled={readOnly}

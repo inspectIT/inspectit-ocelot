@@ -23,9 +23,7 @@ const AlertingChannelsView = ({ topics, updateDate, onRefresh }) => {
       `}</style>
       <AlertingChannelsTreeContainer
         selection={currentSelection}
-        onSelectionChanged={(selection) => {
-          setCurrentSelection(selection);
-        }}
+        onSelectionChanged={setCurrentSelection}
         onRefresh={onRefresh}
         updateDate={updateDate}
         topics={topics}
