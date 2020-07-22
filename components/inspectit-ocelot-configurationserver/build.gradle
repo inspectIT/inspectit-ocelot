@@ -121,6 +121,8 @@ dependencies {
             "org.springframework.security:spring-security-ldap",
             'org.springframework.boot:spring-boot-starter-actuator',
 
+            'org.apache.httpcomponents:httpclient:4.5.12', //Required for PATCH-Requests
+
             "org.xerial:sqlite-jdbc:3.28.0",
             "com.github.gwenn:sqlite-dialect:0.1.0",
 

@@ -35,9 +35,8 @@ public class KapacitorTemplateController extends KapacitorBaseController {
     }
 
     @ApiOperation(value = "Provides detailed information about a given kapacitor template")
-    @ApiParam(name = "templateId", value = "The id of the template to query")
     @GetMapping("/alert/kapacitor/templates/{templateId}")
-    public Template getTemplate(@PathVariable String templateId) {
+    public Template getTemplate(@PathVariable @ApiParam("The id of the template to query") String templateId) {
         ObjectNode response = kapacitor()
                 .getForEntity("/kapacitor/v1/templates/{templateId}", ObjectNode.class, templateId)
                 .getBody();
