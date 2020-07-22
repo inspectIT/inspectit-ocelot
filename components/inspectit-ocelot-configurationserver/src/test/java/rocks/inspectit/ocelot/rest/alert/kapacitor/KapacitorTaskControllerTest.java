@@ -324,4 +324,18 @@ public class KapacitorTaskControllerTest extends KapacitorControllerTestBase {
         }
     }
 
+    @Nested
+    class RemoveTask {
+
+        @Test
+        void deleteHandler() {
+            mockKapacitor.expect(requestTo("/kapacitor/v1/tasks/my_task"))
+                    .andExpect(method(HttpMethod.DELETE))
+                    .andRespond(withSuccess());
+
+            controller.removeTask("my_task");
+            mockKapacitor.verify();
+        }
+    }
+
 }

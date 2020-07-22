@@ -36,9 +36,9 @@ public class KapacitorTaskController extends KapacitorBaseController {
     }
 
     @ApiOperation(value = "Provides detailed information about a given kapacitor task")
-    @ApiParam(name = "taskId", value = "The id of the task to query")
+
     @GetMapping("/alert/kapacitor/tasks/{taskId}")
-    public Task getTask(@PathVariable String taskId) {
+    public Task getTask(@PathVariable @ApiParam("The id of the task to query") String taskId) {
         ObjectNode response = kapacitor()
                 .getForEntity("/kapacitor/v1/tasks/{taskId}", ObjectNode.class, taskId)
                 .getBody();
@@ -59,13 +59,20 @@ public class KapacitorTaskController extends KapacitorBaseController {
 
     @Secured(UserRoleConfiguration.WRITE_ACCESS_ROLE)
     @ApiOperation(value = "Updates one or more settings of a kapacitor task")
-    @ApiParam(name = "taskId", value = "The id of the task to query")
     @PatchMapping("/alert/kapacitor/tasks/{taskId}")
-    public Task updateTask(@PathVariable String taskId, @RequestBody Task task) {
+    public Task updateTask(@PathVariable @ApiParam("The id of the task to update") String taskId,
+                           @RequestBody Task task) {
         ObjectNode response = kapacitor()
                 .patchForObject("/kapacitor/v1/tasks/{taskId}", task.toKapacitorRequest(), ObjectNode.class, taskId);
 
         return Task.fromKapacitorResponse(response);
+    }
+
+    @Secured(UserRoleConfiguration.WRITE_ACCESS_ROLE)
+    @ApiOperation(value = "Removes a task")
+    @DeleteMapping("/alert/kapacitor/tasks/{taskId}")
+    public void removeTask(@PathVariable @ApiParam("The id of the task to delete") String taskId) {
+        kapacitorRestTemplate.delete("/kapacitor/v1/tasks/{taskId}", taskId);
     }
 
 }

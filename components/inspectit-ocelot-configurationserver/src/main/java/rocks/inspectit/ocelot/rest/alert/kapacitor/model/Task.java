@@ -61,7 +61,7 @@ public class Task {
     List<TemplateVariable> vars;
 
     /**
-     * @return a JSON-Obejct which can be used for adding or updating this task in POST/PATCH request to kapacitor
+     * @return a JSON-Object which can be used for adding or updating this task in POST/PATCH request to kapacitor
      */
     public ObjectNode toKapacitorRequest() {
         ObjectMapper mapper = new ObjectMapper();
