@@ -1,0 +1,14 @@
+{
+  "link": {
+    "rel": "self",
+    "href": "/kapacitor/v1/alerts/topics/system/handlers/some_other_smtp"
+  },
+  "id": "some_smtp",
+  "kind": "smtp",
+  "match": "some lambda",
+  "options": {
+    "to": [
+      "my.mail@web.com"
+    ]
+  }
+}
