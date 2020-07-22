@@ -20,10 +20,9 @@ const HandlerEditorContainer = ({ selection, readOnly, availableTopics }) => {
 
   // load saved version of the handler when selection changes
   useDeepEffect(() => {
+    setSavedHandlerContent(undefined);
     if (selection.handler && selection.isSupportedHandlerKind) {
       topicsAPI.fetchHandler(selection.topic, selection.handler, (handler) => setSavedHandlerContent(handler));
-    } else {
-      setSavedHandlerContent(undefined);
     }
   }, [selection]);
 

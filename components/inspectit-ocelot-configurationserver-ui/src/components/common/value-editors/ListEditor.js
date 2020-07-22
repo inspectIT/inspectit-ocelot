@@ -176,16 +176,7 @@ const ListEditor = ({ compId, value, options, disabled, entryWidth, updateValue,
               </div>
               {!disabled && (
                 <div className="remove-button">
-                  <i
-                    className="pi pi-times"
-                    entryid={entry}
-                    onClick={(e) => {
-                      if (e && e.target && e.target.attributes && e.target.attributes.entryid) {
-                        const newEntries = entries.filter((ent) => ent !== entry);
-                        updateValue(newEntries);
-                      }
-                    }}
-                  ></i>
+                  <i className="pi pi-times" onClick={() => updateValue(entries.filter((ent) => ent !== entry))}></i>
                 </div>
               )}
             </div>

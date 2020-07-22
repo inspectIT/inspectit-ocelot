@@ -7,7 +7,7 @@ const AlertingChannelsTreeToolbar = ({
   readOnly,
   onShowDeleteDialog,
   onShowCreateDialog,
-  onShowRenameDialog,
+  onShowEditDialog,
   onShowCopyDialog,
   onRefresh,
   handlerSelected,
@@ -48,10 +48,10 @@ const AlertingChannelsTreeToolbar = ({
           />
           <Button
             disabled={readOnly || !handlerSelected}
-            tooltip="Rename handler"
+            tooltip="Edit handler"
             icon="pi pi-pencil"
             tooltipOptions={tooltipOptions}
-            onClick={onShowRenameDialog}
+            onClick={onShowEditDialog}
           />
           <Button
             disabled={readOnly || !handlerSelected}
@@ -81,7 +81,7 @@ AlertingChannelsTreeToolbar.propTypes = {
   readOnly: PropTypes.bool,
   onShowDeleteDialog: PropTypes.func.isRequired,
   onShowCreateDialog: PropTypes.func.isRequired,
-  onShowRenameDialog: PropTypes.func.isRequired,
+  onShowEditDialog: PropTypes.func.isRequired,
   onShowCopyDialog: PropTypes.func.isRequired,
   onRefresh: PropTypes.func.isRequired,
   handlerSelected: PropTypes.bool.isRequired,

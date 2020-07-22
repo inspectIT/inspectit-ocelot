@@ -48,7 +48,7 @@ const AlertingChannelsTreeContainer = ({ topics, selection, readOnly, updateDate
         readOnly={readOnly}
         onShowDeleteDialog={() => setDeleteDialogShown(true)}
         onShowCreateDialog={() => setCreateDialogShown(true)}
-        onShowRenameDialog={() => setEditDialogShown(true)}
+        onShowEditDialog={() => setEditDialogShown(true)}
         onShowCopyDialog={() => setCopyDialogShown(true)}
         onRefresh={onRefresh}
         handlerSelected={!!selection.handler && selection.isSupportedHandlerKind}
