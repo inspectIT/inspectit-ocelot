@@ -140,47 +140,51 @@ public class KapacitorTopicControllerTest extends KapacitorControllerTestBase {
     }
 
     @Nested
-    class UpdateHandler {
+    class ReplaceHandler {
 
         @Test
-        void updateMatch() {
+        void configureOnlyMatch() {
             Handler toUpdate = Handler.builder()
+                    .kind("somekind")
                     .match("whatever")
                     .build();
 
             mockKapacitor.expect(requestTo("/kapacitor/v1/alerts/topics/system/handlers/my_handler"))
-                    .andExpect(method(HttpMethod.PATCH))
+                    .andExpect(method(HttpMethod.PUT))
                     .andExpect(content().json(
                             "{" +
+                                    "\"id\" : \"my_handler\"," +
+                                    "\"kind\" : \"somekind\"," +
                                     "\"match\" : \"whatever\"" +
                                     "}"
                             , true))
-                    .andRespond(withSuccess(getTestJson("topic_system_handlers_some_smtp.json"), MediaType.APPLICATION_JSON));
+                    .andRespond(withSuccess());
 
-            Handler result = controller.updateHandler("system", "my_handler", toUpdate);
+            controller.replaceHandler("system", "my_handler", toUpdate);
 
-            assertThat(result).isNotNull();
             mockKapacitor.verify();
         }
 
         @Test
         void updateOptions() {
             Handler toUpdate = Handler.builder()
+                    .kind("somekind")
                     .options(Collections.singletonMap("hello", Collections.singletonList("world")))
                     .build();
 
             mockKapacitor.expect(requestTo("/kapacitor/v1/alerts/topics/system/handlers/my_handler"))
-                    .andExpect(method(HttpMethod.PATCH))
+                    .andExpect(method(HttpMethod.PUT))
                     .andExpect(content().json(
                             "{" +
+                                    "\"id\" : \"my_handler\"," +
+                                    "\"kind\" : \"somekind\"," +
                                     "\"options\" : {\"hello\" : [\"world\"]}" +
                                     "}"
                             , true))
-                    .andRespond(withSuccess(getTestJson("topic_system_handlers_some_smtp.json"), MediaType.APPLICATION_JSON));
+                    .andRespond(withSuccess());
 
-            Handler result = controller.updateHandler("system", "my_handler", toUpdate);
+            controller.replaceHandler("system", "my_handler", toUpdate);
 
-            assertThat(result).isNotNull();
             mockKapacitor.verify();
         }
 
@@ -192,18 +196,17 @@ public class KapacitorTopicControllerTest extends KapacitorControllerTestBase {
                     .build();
 
             mockKapacitor.expect(requestTo("/kapacitor/v1/alerts/topics/system/handlers/my_handler"))
-                    .andExpect(method(HttpMethod.PATCH))
+                    .andExpect(method(HttpMethod.PUT))
                     .andExpect(content().json(
                             "{" +
                                     "\"id\" : \"new_id\" ," +
                                     "\"kind\" : \"new_kind\" " +
                                     "}"
                             , true))
-                    .andRespond(withSuccess(getTestJson("topic_system_handlers_some_smtp.json"), MediaType.APPLICATION_JSON));
+                    .andRespond(withSuccess());
 
-            Handler result = controller.updateHandler("system", "my_handler", toUpdate);
+            controller.replaceHandler("system", "my_handler", toUpdate);
 
-            assertThat(result).isNotNull();
             mockKapacitor.verify();
         }
 

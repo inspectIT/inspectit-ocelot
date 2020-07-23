@@ -60,16 +60,16 @@ public class KapacitorTopicController extends KapacitorBaseController {
     }
 
     @Secured(UserRoleConfiguration.WRITE_ACCESS_ROLE)
-    @ApiOperation(value = "Updates a handler of a given topic")
-    @PatchMapping("/alert/kapacitor/topics/{topicId}/handlers/{handlerId}")
-    public Handler updateHandler(@PathVariable @ApiParam("The id of the topic which owns the handler") String topicId,
-                                 @PathVariable @ApiParam("The id of the handler") String handlerId,
-                                 @RequestBody Handler handler) {
-        ObjectNode response = kapacitor()
-                .patchForObject("/kapacitor/v1/alerts/topics/{topicId}/handlers/{handlerId}",
-                        handler.toKapacitorRequest(), ObjectNode.class, topicId, handlerId);
-
-        return Handler.fromKapacitorResponse(response);
+    @ApiOperation(value = "Replaced a handler of a given topic")
+    @PutMapping("/alert/kapacitor/topics/{topicId}/handlers/{handlerId}")
+    public void replaceHandler(@PathVariable @ApiParam("The id of the topic which owns the handler") String topicId,
+                               @PathVariable @ApiParam("The id of the handler to update") String handlerId,
+                               @RequestBody Handler handler) {
+        if (handler.getId() == null) {
+            handler.setId(handlerId);
+        }
+        kapacitor().put("/kapacitor/v1/alerts/topics/{topicId}/handlers/{handlerId}",
+                handler.toKapacitorRequest(), topicId, handlerId);
     }
 
     @Secured(UserRoleConfiguration.WRITE_ACCESS_ROLE)
