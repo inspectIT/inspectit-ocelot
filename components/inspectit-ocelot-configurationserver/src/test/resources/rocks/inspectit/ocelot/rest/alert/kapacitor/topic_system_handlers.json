@@ -1,0 +1,42 @@
+{
+  "link": {
+    "rel": "self",
+    "href": "/kapacitor/v1/alerts/topics/system/handlers"
+  },
+  "topic": "system",
+  "handlers": [
+    {
+      "link": {
+        "rel": "self",
+        "href": "/kapacitor/v1/alerts/topics/system/handlers/some_slack"
+      },
+      "id": "some_slack",
+      "kind": "slack",
+      "options": {
+        "channel": "#alerts"
+      }
+    },
+    {
+      "link": {
+        "rel": "self",
+        "href": "/kapacitor/v1/alerts/topics/system/handlers/some_smtp"
+      },
+      "id": "empty_smtp",
+      "kind": "smtp"
+    },
+    {
+      "link": {
+        "rel": "self",
+        "href": "/kapacitor/v1/alerts/topics/system/handlers/some_other_smtp"
+      },
+      "id": "some_smtp",
+      "kind": "smtp",
+      "match": "some lambda",
+      "options": {
+        "to": [
+          "my.mail@web.com"
+        ]
+      }
+    }
+  ]
+}
