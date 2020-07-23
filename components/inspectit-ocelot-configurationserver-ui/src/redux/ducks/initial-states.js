@@ -70,6 +70,8 @@ const mappings = {
 const alerting = {
   /** A mapping of rule names and corresponding unsaved contents.*/
   unsavedRuleContents: {},
+  /** A mapping of handler ids and corresponding unsaved contents. */
+  unsavedHandlerContents: {},
   ruleGrouping: {
     groupByTemplates: true,
     groupByTopics: false,

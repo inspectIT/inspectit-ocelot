@@ -6,6 +6,8 @@ import { Message } from 'primereact/message';
 import { InputText } from 'primereact/inputtext';
 import { Dropdown } from 'primereact/dropdown';
 import { InputTextarea } from 'primereact/inputtextarea';
+import classnames from 'classnames';
+import { ruleIcon, templateIcon } from '../../constants';
 
 /**
  * A dialog for creating new alerting rules.
@@ -34,76 +36,82 @@ const CreateRuleDialog = ({ templates, initialTemplate, visible, onHide, reserve
   }, [name, template, JSON.stringify(reservedNames)]);
 
   return (
-    <Dialog
-      className="this"
-      style={{ maxWidth: '40rem' }}
-      header={'Create Alerting Rule'}
-      modal={true}
-      visible={visible}
-      onHide={onHide}
-      onShow={() => {
-        setName('');
-        setDescription('');
-        setValidState(false);
-        setError(undefined);
-      }}
-      footer={
-        <div>
-          <Button label="Create" disabled={!isValid} onClick={() => onSuccess(name, template, description)} />
-          <Button label="Cancel" className="p-button-secondary" onClick={onHide} />
+    <div className="this">
+      <style jsx>{`
+        .this :global(.p-dialog-content) {
+          overflow-y: visible;
+        }
+      `}</style>
+      <Dialog
+        style={{ maxWidth: '40rem' }}
+        header={'Create Alerting Rule'}
+        modal={true}
+        visible={visible}
+        onHide={onHide}
+        onShow={() => {
+          setName('');
+          setDescription('');
+          setValidState(false);
+          setError(undefined);
+        }}
+        footer={
+          <div>
+            <Button label="Create" disabled={!isValid} onClick={() => onSuccess(name, template, description)} />
+            <Button label="Cancel" className="p-button-secondary" onClick={onHide} />
+          </div>
+        }
+      >
+        <div style={{ width: '100%', paddingBottom: '0.5em' }}>Create alerting rule:</div>
+        <div className="p-grid">
+          <div className="p-inputgroup p-col-12" style={{ width: '100%' }}>
+            <span className="p-inputgroup-addon">
+              <i className={classnames('pi', templateIcon)}></i>
+            </span>
+            <Dropdown
+              style={{ width: '100%' }}
+              value={template}
+              options={templates.map((c) => ({ label: c, value: c }))}
+              onChange={(e) => {
+                setTemplate(e.value);
+              }}
+              placeholder={'Template'}
+            />
+          </div>
+          <div className="p-inputgroup p-col-12" style={{ width: '100%' }}>
+            <span className="p-inputgroup-addon">
+              <i className={classnames('pi', ruleIcon)}></i>
+            </span>
+            <InputText
+              style={{ width: '100%' }}
+              onKeyPress={(e) => e.key === 'Enter' && isValid && onSuccess(name, template, description)}
+              value={name}
+              placeholder={'Rule name'}
+              onChange={(e) => {
+                setName(e.target.value);
+              }}
+            />
+          </div>
+          <div className="p-inputgroup p-col-12" style={{ width: '100%' }}>
+            <span className="p-inputgroup-addon">
+              <i className="pi pi-align-left"></i>
+            </span>
+            <InputTextarea
+              style={{ width: '100%', height: '8rem' }}
+              value={description}
+              onKeyPress={(e) => e.key === 'Enter' && isValid && onSuccess(name, template, description)}
+              autoResize={false}
+              placeholder={'Description'}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+          </div>
         </div>
-      }
-    >
-      <div style={{ width: '100%', paddingBottom: '0.5em' }}>Create alerting rule:</div>
-      <div className="p-grid">
-        <div className="p-inputgroup p-col-12" style={{ width: '100%' }}>
-          <span className="p-inputgroup-addon">
-            <i className="pi pi-briefcase"></i>
-          </span>
-          <Dropdown
-            style={{ width: '100%' }}
-            value={template}
-            options={templates.map((c) => ({ label: c, value: c }))}
-            onChange={(e) => {
-              setTemplate(e.value);
-            }}
-            placeholder={'Template'}
-          />
-        </div>
-        <div className="p-inputgroup p-col-12" style={{ width: '100%' }}>
-          <span className="p-inputgroup-addon">
-            <i className="pi pi-bell"></i>
-          </span>
-          <InputText
-            style={{ width: '100%' }}
-            onKeyPress={(e) => e.key === 'Enter' && isValid && onSuccess(name, template, description)}
-            value={name}
-            placeholder={'Rule name'}
-            onChange={(e) => {
-              setName(e.target.value);
-            }}
-          />
-        </div>
-        <div className="p-inputgroup p-col-12" style={{ width: '100%' }}>
-          <span className="p-inputgroup-addon">
-            <i className="pi pi-align-left"></i>
-          </span>
-          <InputTextarea
-            style={{ width: '100%', height: '8rem' }}
-            value={description}
-            onKeyPress={(e) => e.key === 'Enter' && isValid && onSuccess(name, template, description)}
-            autoResize={false}
-            placeholder={'Description'}
-            onChange={(e) => setDescription(e.target.value)}
-          />
-        </div>
-      </div>
-      {error && (
-        <div style={{ width: '100%', paddingTop: '0.5em' }}>
-          <Message style={{ width: '100%' }} severity="error" text={error}></Message>
-        </div>
-      )}
-    </Dialog>
+        {error && (
+          <div style={{ width: '100%', paddingTop: '0.5em' }}>
+            <Message style={{ width: '100%' }} severity="error" text={error}></Message>
+          </div>
+        )}
+      </Dialog>
+    </div>
   );
 };
 
@@ -127,8 +135,8 @@ CreateRuleDialog.defaultProps = {
   initialTemplate: '',
   visible: true,
   reservedNames: [],
-  onSuccess: () => {},
-  onHide: () => {},
+  onSuccess: () => { },
+  onHide: () => { },
 };
 
 export default CreateRuleDialog;

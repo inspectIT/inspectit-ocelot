@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import _ from 'lodash';
+import classnames from 'classnames';
 import { TabMenu } from 'primereact/tabmenu';
 import AlertingRulesView from './rules/AlertingRulesView';
+import AlertingChannelsView from './topics/AlertingChannelsView.js';
 import * as topicsAPI from './topics/TopicsAPI';
 import * as rulesAPI from './rules/RulesAPI';
 import useDeepEffect from '../../../hooks/use-deep-effect';
+import { ruleIcon, topicIcon } from './constants';
 
 /**
  * Existing tabs for the alerting view tab menu
  */
 const items = [
-  { label: 'Alerting Rules', icon: 'pi pi-fw pi-globe' },
-  { label: 'Calendar', icon: 'pi pi-fw pi-calendar' },
+  { label: 'Alerting Rules', icon: classnames('pi', 'pi-fw', ruleIcon) },
+  { label: 'Notification Channels', icon: classnames('pi', 'pi-fw', topicIcon) },
 ];
 
 /**
@@ -38,7 +41,8 @@ const AlertingView = () => {
       .filter()
       .filter((topicId) => !existingTopics.some((topic) => topic.id === topicId))
       .map((topicId) => ({ id: topicId, referencedOnly: true }))
-      .uniq()
+      .uniqBy('id')
+      .sortBy([(topic) => topic.id.toLowerCase()])
       .value();
 
     setReferencedTopics(topics);
@@ -54,7 +58,14 @@ const AlertingView = () => {
       (templates) => setTemplates(templates),
       () => setTemplates([])
     );
-  const refreshTopics = () => topicsAPI.fetchTopics((topics) => setExistingTopics(topics));
+  const refreshTopics = () =>
+    topicsAPI.fetchTopics((topics) =>
+      setExistingTopics(
+        _(topics)
+          .sortBy([(topic) => topic.id.toLowerCase()])
+          .value()
+      )
+    );
 
   // reloads all the alerting data - rules, topics, templates...
   const refreshAll = () => {
@@ -64,7 +75,9 @@ const AlertingView = () => {
     setUpdateDate(Date.now());
   };
 
-  const availableTopics = [...existingTopics, ...referencedTopics];
+  const availableTopics = _([...existingTopics, ...referencedTopics])
+    .uniqBy('id')
+    .value();
 
   return (
     <>
@@ -112,13 +125,14 @@ const AlertingView = () => {
           color: #555;
         }
       `}</style>
-
       <div className="this">
         <TabMenu className="menu" model={items} activeItem={activeTab} onTabChange={(e) => setActiveTab(e.value)} />
 
-        {activeTab == items[0] && (
+        {activeTab === items[0] && (
           <AlertingRulesView updateDate={updateDate} topics={availableTopics} rules={rules} templates={templates} onRefresh={refreshAll} />
         )}
+
+        {activeTab === items[1] && <AlertingChannelsView updateDate={updateDate} topics={availableTopics} onRefresh={refreshAll} />}
       </div>
     </>
   );

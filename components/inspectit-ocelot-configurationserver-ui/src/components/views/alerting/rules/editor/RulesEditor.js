@@ -10,7 +10,16 @@ import dateformat from 'dateformat';
 /**
  * The RulesEditor component views alerting rules and templates and provides means to edit the content of an alerting rule.
  */
-const RulesEditor = ({ availableTopics, content, isRule, mappedVars, readOnly, onContentChanged, onErrorStatusUpdate }) => {
+const RulesEditor = ({
+  availableTopics,
+  content,
+  isRule,
+  hasTopicVariable,
+  mappedVars,
+  readOnly,
+  onContentChanged,
+  onErrorStatusUpdate,
+}) => {
   // state variables
   const [errornuousVariables, setErrornuousVariables] = useState({});
 
@@ -143,7 +152,7 @@ const RulesEditor = ({ availableTopics, content, isRule, mappedVars, readOnly, o
         />
 
         <Section title="Variables">
-          {isRule && (
+          {isRule && hasTopicVariable && (
             <VariableView
               options={!availableTopics ? [] : availableTopics.map((topic) => topic.id)}
               name={'Notification Channel'}
@@ -181,6 +190,8 @@ RulesEditor.propTypes = {
   availableTopics: PropTypes.array,
   /** The rule or template content to show (and edit) in this editor */
   content: PropTypes.object,
+  /** Whether the given content has a topic variable */
+  hasTopicVariable: PropTypes.bool,
   /** Whether the content is a rule content */
   isRule: PropTypes.bool,
   /** An array of variables mapped with default values from the template. */

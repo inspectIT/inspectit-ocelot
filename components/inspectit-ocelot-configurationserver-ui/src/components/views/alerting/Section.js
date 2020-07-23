@@ -25,8 +25,7 @@ Section.propTypes = {
   /** Title of the section */
   title: PropTypes.string.isRequired,
   /**  List of child elements */
-  children: PropTypes.object,
-
+  children: PropTypes.any,
   backgroundColor: PropTypes.string,
 };
 

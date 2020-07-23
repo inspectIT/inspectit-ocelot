@@ -101,8 +101,8 @@ RenameCopyDialog.propTypes = {
 RenameCopyDialog.defaultProps = {
   text: 'Delete element',
   visible: true,
-  onSuccess: () => {},
-  onHide: () => {},
+  onSuccess: () => { },
+  onHide: () => { },
 };
 
 export default RenameCopyDialog;

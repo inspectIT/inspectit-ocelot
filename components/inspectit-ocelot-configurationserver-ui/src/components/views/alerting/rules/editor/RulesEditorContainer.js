@@ -6,11 +6,12 @@ import RulesEditor from './RulesEditor';
 import RulesEditorToolbar from './RulesEditorToolbar';
 import * as rulesAPI from '../RulesAPI';
 import { alertingActions } from '../../../../../redux/ducks/alerting';
-import DefaultToolbar from './DefaultToolbar';
+import DefaultToolbar from '../../DefaultToolbar';
 import Notificationbar from '../../../../editor/Notificationbar';
 import useDeepEffect from '../../../../../hooks/use-deep-effect';
+import { templateIcon } from '../../constants';
 
-const RulesEditorContainer = ({ readOnly, availableTopics, selection }) => {
+const RulesEditorContainer = ({ readOnly, availableTopics, selection, onSaved }) => {
   const dispatch = useDispatch();
 
   // state variables
@@ -77,8 +78,8 @@ const RulesEditorContainer = ({ readOnly, availableTopics, selection }) => {
         (ruleContent) => {
           const unsavedRuleData = omit(unsavedRuleContents, selection.rule);
           dispatch(alertingActions.ruleContentsChanged(unsavedRuleData));
-
           setRuleContent(ruleContent);
+          onSaved();
         },
         () => setRuleContent(undefined)
       );
@@ -117,13 +118,14 @@ const RulesEditorContainer = ({ readOnly, availableTopics, selection }) => {
             onSave={onSave}
           />
         ) : (
-          <DefaultToolbar name={currentName} icon={currentName ? 'pi-briefcase' : ''} />
+          <DefaultToolbar name={currentName} icon={currentName ? templateIcon : ''} />
         )}
 
         <RulesEditor
           availableTopics={availableTopics}
           readOnly={readOnly || !isRule}
           content={content}
+          hasTopicVariable={templateContent && templateContent.hasTopicVariable === true}
           mappedVars={mappedVars}
           isRule={isRule}
           onErrorStatusUpdate={setErrorCount}
@@ -186,14 +188,15 @@ RulesEditorContainer.propTypes = {
   availableTopics: PropTypes.array,
   /** Whether the content is read only */
   readOnly: PropTypes.bool,
-
   selection: PropTypes.object,
+  onSaved: PropTypes.func,
 };
 
 RulesEditorContainer.defaultProps = {
   availableTopics: [],
   unsavedRuleContents: {},
   readOnly: false,
+  onSaved: () => {},
 };
 
 export default RulesEditorContainer;
