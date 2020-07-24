@@ -10,63 +10,66 @@ import { InputText } from 'primereact/inputtext';
 class PromotionApprovalDialog extends React.Component {
   state = {
     /** The promotion message to be send to the backend. */
-    promotionMessage: "",
+    promotionMessage: '',
+    /** If true, the promotion button is disabled. Is true when either the promotion message is empty or isLoading is true. */
+    promotionDisabled: true,
   };
   input = React.createRef();
   render() {
-    const { visible, onHide, isLoading, approvedFiles = [] } = this.props
+    const { visible, onHide, isLoading, approvedFiles = [] } = this.props;
     const { promotionMessage } = this.state;
     const footer = (
       <div>
-        <Button label="Promote" onClick={this.promote} disabled={isLoading} />
+        <Button label="Promote" onClick={this.promote} disabled={this.state.promotionDisabled} />
         <Button label="Cancel" className="p-button-secondary" onClick={onHide} disabled={isLoading} />
       </div>
     );
-    
+
     return (
-    <>
-      <style jsx>
-        {`
-          .list li {
-            font-family: monospace;
-          }
+      <>
+        <style jsx>
+          {`
+            .list li {
+              font-family: monospace;
+            }
 
-          .content :global(.p-progressbar) {
-            height: 0.5rem;
-          }
-        `}
-      </style>
+            .content :global(.p-progressbar) {
+              height: 0.5rem;
+            }
+          `}
+        </style>
 
-      <Dialog header="Promote Configurations" visible={visible} style={{ width: '50vw' }} modal={true} onHide={onHide} footer={footer}>
-        <div className="content">
-          <span>The following files have been approved and will be promoted:</span>
-          <ul className="list">
-            {approvedFiles.map((file) => (
-              <li key={file}>{file}</li>
-            ))}
-          </ul>
+        <Dialog header="Promote Configurations" visible={visible} style={{ width: '50vw' }} modal={true} onHide={onHide} footer={footer}>
+          <div className="content">
+            <span>The following files have been approved and will be promoted:</span>
+            <ul className="list">
+              {approvedFiles.map((file) => (
+                <li key={file}>{file}</li>
+              ))}
+            </ul>
 
-          {isLoading && <ProgressBar mode="indeterminate" />}
-        </div>
-        <InputText
+            {isLoading && <ProgressBar mode="indeterminate" />}
+          </div>
+          <InputText
             ref={this.input}
             style={{ width: '100%' }}
             placeholder="Promotion Message"
             onKeyPress={this.onKeyPress}
             value={promotionMessage}
             onChange={(e) => this.setState({ promotionMessage: e.target.value })}
+            onKeyUp={() => this.setState({ promotionDisabled: promotionMessage >= 0 && !this.props.isLoading })}
           />
-      </Dialog>
-    </>
-  );
+        </Dialog>
+      </>
+    );
   }
 
   componentDidUpdate() {
     if (this.state.resetSelection) {
-        const { promotionMessage } = this.state;
-        const inputElem = this.input.current.element;
-        inputElem.focus();
-        this.setState({ resetSelection: false });
+      const { promotionMessage } = this.state;
+      const inputElem = this.input.current.element;
+      inputElem.focus();
+      this.setState({ resetSelection: false });
     }
   }
 
@@ -77,17 +80,17 @@ class PromotionApprovalDialog extends React.Component {
   };
 
   promote = () => {
-    this.props.onPromote(this.state.promotionMessage)
-  }
+    this.props.onPromote(this.state.promotionMessage);
+  };
 
   onShow = () => {
-    const promotionMessage = ""
+    const promotionMessage = '';
 
     this.setState({
       promotionMessage,
-      resetSelection: true
+      resetSelection: true,
     });
   };
-};
+}
 
 export default PromotionApprovalDialog;
