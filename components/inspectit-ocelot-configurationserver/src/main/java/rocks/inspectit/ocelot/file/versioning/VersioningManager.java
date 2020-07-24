@@ -683,7 +683,7 @@ public class VersioningManager {
             }
 
             // commit changes
-            commitFiles(getCurrentAuthor(), "Promoting configuration files", false);
+            commitFiles(getCurrentAuthor(), promotion.getCommitMessage(), false);
 
         } catch (IOException | GitAPIException ex) {
             throw new PromotionFailedException("Configuration promotion has failed.", ex);

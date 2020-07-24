@@ -72,11 +72,12 @@ const PromotionView = () => {
   /**
    * Promotes the currently approved files.
    */
-  const promoteConfigurations = async () => {
+  const promoteConfigurations = async (commitMessage) => {
     const payload = {
       files: currentApprovals,
       workspaceCommitId,
       liveCommitId,
+      commitMessage,
     };
 
     setIsPromoting(true);
