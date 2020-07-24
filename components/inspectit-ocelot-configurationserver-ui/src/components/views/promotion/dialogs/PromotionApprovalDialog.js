@@ -66,7 +66,6 @@ class PromotionApprovalDialog extends React.Component {
 
   componentDidUpdate() {
     if (this.state.resetSelection) {
-      const { promotionMessage } = this.state;
       const inputElem = this.input.current.element;
       inputElem.focus();
       this.setState({ resetSelection: false });
