@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.util.Collections;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -52,4 +54,10 @@ public class BeaconTagSettings {
      */
     @Builder.Default
     private boolean nullAsEmpty = false;
+
+    /**
+     * After the tag value has been extracted, these replacements will be applied in order to the tag value.
+     */
+    @Builder.Default
+    private List<PatternAndReplacement> additionalReplacements = Collections.emptyList();
 }

@@ -9,6 +9,7 @@ import org.springframework.util.StringUtils;
 import rocks.inspectit.oce.eum.server.beacon.Beacon;
 import rocks.inspectit.oce.eum.server.configuration.model.BeaconTagSettings;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
+import rocks.inspectit.oce.eum.server.configuration.model.PatternAndReplacement;
 
 import java.util.*;
 import java.util.function.Function;
@@ -68,7 +69,23 @@ public class RegexReplacementBeaconProcessor implements BeaconProcessor {
                 return null;
             }
         }
+        String result = performRegexExtraction(tag, value);
+        return applyReplacements(result, tag.getReplaceAll());
+    }
 
+    private String applyReplacements(String input, List<PatternAndReplacement> replacements) {
+        String result = input;
+        for (PatternAndReplacement setting : replacements) {
+            try {
+                result = result.replaceAll(setting.getPattern(), setting.getReplacement());
+            } catch (Exception e) {
+                log.error("Error applying replacement regex <{}> with replacement <{}>!", setting.getPattern(), setting.getReplacement());
+            }
+        }
+        return result;
+    }
+
+    private String performRegexExtraction(RegexDerivedTag tag, String value) {
         Pattern regex = tag.getRegex();
         if (regex != null) {
             try {
@@ -99,6 +116,7 @@ public class RegexReplacementBeaconProcessor implements BeaconProcessor {
      * @param elements        the elements to sort
      * @param getDependencies a function given an element returning its dependencies
      * @param <T>             the element types, should have proper hashcode /equals implementation
+     *
      * @return the sorted list of all elements
      */
     private <T> List<T> getInTopologicalOrder(Collection<T> elements, Function<T, Collection<T>> getDependencies) {
@@ -127,6 +145,7 @@ public class RegexReplacementBeaconProcessor implements BeaconProcessor {
     @Value
     @Builder
     private static class RegexDerivedTag {
+
         /**
          * The name of the resulting tag / beacon field under which the result is stored
          */
@@ -159,6 +178,8 @@ public class RegexReplacementBeaconProcessor implements BeaconProcessor {
          */
         boolean nullAsEmpty;
 
+        List<PatternAndReplacement> replaceAll;
+
         private static RegexDerivedTag fromSettings(String tagName, BeaconTagSettings settings) {
             Pattern pattern = null;
             String regex = settings.getRegex();
@@ -172,6 +193,7 @@ public class RegexReplacementBeaconProcessor implements BeaconProcessor {
                     .replacement(settings.getReplacement())
                     .keepIfNoMatch(settings.isKeepNoMatch())
                     .nullAsEmpty(settings.isNullAsEmpty())
+                    .replaceAll(settings.getAdditionalReplacements())
                     .build();
         }
     }

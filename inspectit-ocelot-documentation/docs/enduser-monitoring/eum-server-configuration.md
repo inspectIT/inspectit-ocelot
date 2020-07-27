@@ -221,8 +221,29 @@ The `regex` property defines the regex to use for the replacement.
 All matches of the `regex` in the input value are replaced with the string defined by `replacement`.
 The `keep-no-match` options defines what to do if the given input does not match the given regex at any place.
 If it is set to `true`, the original value will be kept. If it is set to `false`, the given tag won't be created in case no match is found.
-
 Note that capture groups are supported and can be referenced in the replacement string using `$1`, `$2`, etc.
+
+If multiple regular replacements should be applied, the `additional-replacements` property can be used:
+
+```YAML
+inspectit-eum-server:
+  tags:
+    beacon:
+      URL_USER_ERASED: 
+        input: u
+        regex: "\\/user\\/\d+"
+        replacement: "\\/user\\/{id}"
+        keep-no-match: true
+        additional-replacements:
+         - pattern: "\\/document\\/\d+"
+           replacement: "\\/document\\/{docid}"
+         - pattern: "\\/case\\/\d+"
+           replacement: "\\/case\\/{caseid}"
+```
+
+With these settings, the tag will be extracted from `u` just like in the previous example.
+However, the additional replacements will also be applied in the order they are specified, causing document and case-ids to be erased in this example.
+
 Using this mechanism, the EUM server provides the following tags out of the box:
 
 | Tag | Description |
