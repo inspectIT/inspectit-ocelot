@@ -53,7 +53,7 @@ class PromotionApprovalDialog extends React.Component {
           <InputText
             ref={this.input}
             style={{ width: '100%' }}
-            placeholder="Promotion Message"
+            placeholder="Enter description..."
             onKeyPress={this.onKeyPress}
             value={promotionMessage}
             onChange={(e) => this.setState({ promotionMessage: e.target.value })}
