@@ -11,8 +11,6 @@ class PromotionApprovalDialog extends React.Component {
   state = {
     /** The promotion message to be send to the backend. */
     promotionMessage: '',
-    /** If true, the promotion button is disabled. Is true when either the promotion message is empty or isLoading is true. */
-    promotionDisabled: true,
   };
   input = React.createRef();
   render() {
@@ -20,7 +18,7 @@ class PromotionApprovalDialog extends React.Component {
     const { promotionMessage } = this.state;
     const footer = (
       <div>
-        <Button label="Promote" onClick={this.promote} disabled={this.state.promotionDisabled} />
+        <Button label="Promote" onClick={this.promote} disabled={isLoading || !promotionMessage} />
         <Button label="Cancel" className="p-button-secondary" onClick={onHide} disabled={isLoading} />
       </div>
     );
@@ -39,56 +37,52 @@ class PromotionApprovalDialog extends React.Component {
           `}
         </style>
 
-        <Dialog header="Promote Configurations" visible={visible} style={{ width: '50vw' }} modal={true} onHide={onHide} footer={footer}>
-          <div className="content">
-            <span>The following files have been approved and will be promoted:</span>
-            <ul className="list">
-              {approvedFiles.map((file) => (
-                <li key={file}>{file}</li>
-              ))}
-            </ul>
+        <Dialog 
+          header="Promote Configurations" 
+          focusOnShow={false} 
+          visible={visible} 
+          style={{ width: '50vw' }}
+          modal={true} onHide={onHide} 
+          footer={footer}>
+            <div className="content">
+              <span>The following files have been approved and will be promoted:</span>
+              <ul className="list">
+                {approvedFiles.map((file) => (
+                  <li key={file}>{file}</li>
+                ))}
+              </ul>
 
-            {isLoading && <ProgressBar mode="indeterminate" />}
-          </div>
+              {isLoading && <ProgressBar mode="indeterminate" />}
+            </div>
           <InputText
             ref={this.input}
             style={{ width: '100%' }}
-            placeholder="Enter description..."
+            placeholder="Describe change..."
             onKeyPress={this.onKeyPress}
             value={promotionMessage}
             onChange={(e) => this.setState({ promotionMessage: e.target.value })}
-            onKeyUp={() => this.setState({ promotionDisabled: promotionMessage >= 0 && !this.props.isLoading })}
           />
         </Dialog>
       </>
     );
   }
 
-  componentDidUpdate() {
-    if (this.state.resetSelection) {
-      const inputElem = this.input.current.element;
-      inputElem.focus();
-      this.setState({ resetSelection: false });
+  componentDidUpdate(prevProps) {
+    if (!prevProps.visible && this.props.visible) {
+      /**Timeout is needed for .focus() to be triggered correctly. */
+      setTimeout(() => {  this.input.current.element.focus(); }, 0);
+      this.setState({ promotionMessage: '' });
     }
   }
 
   onKeyPress = (e) => {
-    if (e.key === 'Enter' && !this.state.promotionDisabled) {
+    if (e.key === 'Enter' && !this.props.isLoading && this.state.promotionMessage) {
       this.promote();
     }
   };
 
   promote = () => {
     this.props.onPromote(this.state.promotionMessage);
-  };
-
-  onShow = () => {
-    const promotionMessage = '';
-
-    this.setState({
-      promotionMessage,
-      resetSelection: true,
-    });
   };
 }
 

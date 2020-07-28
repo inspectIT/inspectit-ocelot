@@ -80,5 +80,39 @@ class PromotionControllerIntTest extends IntegrationTestBase {
 
             assertThat(result.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
         }
+
+        @Test
+        public void emptyPromotionMessage() {
+            authRest.exchange("/api/v1/files/src/file.yml", HttpMethod.PUT, null, Void.class);
+
+            ResponseEntity<WorkspaceDiff> diff = authRest.getForEntity("/api/v1/configuration/promotions", WorkspaceDiff.class);
+
+            ConfigurationPromotion promotion = new ConfigurationPromotion();
+            promotion.setFiles(Collections.emptyList());
+            promotion.setLiveCommitId(diff.getBody().getLiveCommitId());
+            promotion.setWorkspaceCommitId(diff.getBody().getWorkspaceCommitId());
+            promotion.setCommitMessage("");
+
+            ResponseEntity<Void> result = authRest.exchange("/api/v1/configuration/promote", HttpMethod.POST, new HttpEntity<>(promotion), Void.class);
+
+            assertThat(result.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        }
+
+        @Test
+        public void nullPromotionMessage() {
+            authRest.exchange("/api/v1/files/src/file.yml", HttpMethod.PUT, null, Void.class);
+
+            ResponseEntity<WorkspaceDiff> diff = authRest.getForEntity("/api/v1/configuration/promotions", WorkspaceDiff.class);
+
+            ConfigurationPromotion promotion = new ConfigurationPromotion();
+            promotion.setFiles(Collections.emptyList());
+            promotion.setLiveCommitId(diff.getBody().getLiveCommitId());
+            promotion.setWorkspaceCommitId(diff.getBody().getWorkspaceCommitId());
+            promotion.setCommitMessage(null);
+
+            ResponseEntity<Void> result = authRest.exchange("/api/v1/configuration/promote", HttpMethod.POST, new HttpEntity<>(promotion), Void.class);
+
+            assertThat(result.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        }
     }
 }
