@@ -37,23 +37,25 @@ class PromotionApprovalDialog extends React.Component {
           `}
         </style>
 
-        <Dialog 
-          header="Promote Configurations" 
-          focusOnShow={false} 
-          visible={visible} 
+        <Dialog
+          header="Promote Configurations"
+          focusOnShow={false}
+          visible={visible}
           style={{ width: '50vw' }}
-          modal={true} onHide={onHide} 
-          footer={footer}>
-            <div className="content">
-              <span>The following files have been approved and will be promoted:</span>
-              <ul className="list">
-                {approvedFiles.map((file) => (
-                  <li key={file}>{file}</li>
-                ))}
-              </ul>
+          modal={true}
+          onHide={onHide}
+          footer={footer}
+        >
+          <div className="content">
+            <span>The following files have been approved and will be promoted:</span>
+            <ul className="list">
+              {approvedFiles.map((file) => (
+                <li key={file}>{file}</li>
+              ))}
+            </ul>
 
-              {isLoading && <ProgressBar mode="indeterminate" />}
-            </div>
+            {isLoading && <ProgressBar mode="indeterminate" />}
+          </div>
           <InputText
             ref={this.input}
             style={{ width: '100%' }}
@@ -70,7 +72,9 @@ class PromotionApprovalDialog extends React.Component {
   componentDidUpdate(prevProps) {
     if (!prevProps.visible && this.props.visible) {
       /**Timeout is needed for .focus() to be triggered correctly. */
-      setTimeout(() => {  this.input.current.element.focus(); }, 0);
+      setTimeout(() => {
+        this.input.current.element.focus();
+      }, 0);
       this.setState({ promotionMessage: '' });
     }
   }
