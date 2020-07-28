@@ -246,7 +246,7 @@ const validators = {
   duration: (value) => {
     const matchResult = value.match(/\d+(ms|ns|s|m|h|d)/);
     const hasError = !matchResult || matchResult[0] !== value;
-    return hasError ? 'Duration variables must follow the following pattern:  1234[s|m|h|d|w]  Examples: 10s, 7d, ...' : null;
+    return hasError ? 'Duration variables must follow the following pattern:  1234[ns|ms|s|m|h|d]  Examples: 10s, 7d, ...' : null;
   },
   int: (value) => {
     const matchResult = value.match(/-?\d+/);
