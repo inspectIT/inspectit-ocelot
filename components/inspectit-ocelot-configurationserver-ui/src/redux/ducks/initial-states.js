@@ -67,6 +67,17 @@ const mappings = {
   updateDate: null,
 };
 
+const alerting = {
+  /** A mapping of rule names and corresponding unsaved contents.*/
+  unsavedRuleContents: {},
+  /** A mapping of handler ids and corresponding unsaved contents. */
+  unsavedHandlerContents: {},
+  ruleGrouping: {
+    groupByTemplates: true,
+    groupByTopics: false,
+  },
+};
+
 const agentStatus = {
   /**
    * The list of connected agents, each agent is an object with the following structure:
@@ -95,4 +106,4 @@ const promotion = {
   liveCommitId: null,
 };
 
-export { authentication, configuration, notification, mappings, agentStatus, settings, promotion };
+export { authentication, configuration, notification, mappings, agentStatus, settings, promotion, alerting };

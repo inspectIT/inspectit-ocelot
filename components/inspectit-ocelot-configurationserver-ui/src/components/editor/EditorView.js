@@ -5,6 +5,7 @@ import editorConfig from '../../data/yaml-editor-config.json';
 import EditorToolbar from './EditorToolbar';
 import Notificationbar from './Notificationbar';
 import YamlParser from './YamlParser';
+import SelectionInformation from './SelectionInformation';
 
 const AceEditor = dynamic(() => import('./AceEditor'), { ssr: false });
 const TreeTableEditor = dynamic(() => import('./TreeTableEditor'), { ssr: false });
@@ -111,13 +112,7 @@ class EditorView extends React.Component {
             </YamlParser>
           </div>
         )}
-        {!showEditor && (
-          <div className="p-col">
-            <div className="selection-information">
-              <div>{hint}</div>
-            </div>
-          </div>
-        )}
+        {!showEditor && <SelectionInformation hint={hint} />}
         {loading && (
           <div className="p-col">
             <div className="loading-overlay">
