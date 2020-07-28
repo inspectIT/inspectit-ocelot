@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { Inplace, InplaceDisplay, InplaceContent } from 'primereact/inplace';
 import { Button } from 'primereact/button';
 import classnames from 'classnames';
-import NumberEditor from '../../../../common/value-editors/NumberEditor';
 import TextEditor from '../../../../common/value-editors/TextEditor';
 import BoolEditor from '../../../../common/value-editors/BoolEditor';
 import SelectionEditor from '../../../../common/value-editors/SelectionEditor';
@@ -31,7 +30,7 @@ const VariableView = ({
   });
 
   const checkForError = (val) => {
-    if (onErrorStatusUpdate !== undefined) {
+    if (!_.isNil(onErrorStatusUpdate)) {
       let errorMessage = customErrorCheck ? customErrorCheck(val) : false;
       if (!errorMessage) {
         errorMessage = isValueErrornuous(type, val, isNullValueValid);
@@ -43,7 +42,14 @@ const VariableView = ({
   const onDataChanged = (newValue) => {
     if (value !== newValue) {
       checkForError(newValue);
-      onVarUpdate(name, _.isNil(newValue) ? null : newValue);
+
+      let val = newValue;
+      if (type === 'int') {
+        val = parseInt(newValue);
+      } else if (type === 'float') {
+        val = parseFloat(newValue);
+      }
+      onVarUpdate(name, _.isNil(newValue) ? null : val);
     }
   };
 
@@ -181,12 +187,14 @@ const ValueView = ({ value, type, options, readOnly, isDefault, onDataChanged, e
 const ValueEditor = ({ type, value, options, readOnly, onDataChanged }) => {
   if (type === 'bool') {
     return <BoolEditor type={type} value={value} disabled={readOnly} updateValue={onDataChanged} />;
-  } else if (type === 'int' || type === 'float') {
-    return <NumberEditor type={type} value={value} disabled={readOnly} updateValue={onDataChanged} />;
+  } else if (type === 'int') {
+    return <TextEditor type={type} value={value} keyfilter={/^[\d-]+$/} disabled={readOnly} updateValue={onDataChanged} />;
+  } else if (type === 'float') {
+    return <TextEditor type={type} value={value} keyfilter={/^[\d-.]+$/} disabled={readOnly} updateValue={onDataChanged} />;
   } else if (type === 'string' || type === 'regex') {
     return <TextEditor type={type} value={value} disabled={readOnly} updateValue={onDataChanged} />;
   } else if (type === 'duration') {
-    return <TextEditor type={type} value={value} keyfilter={/^[\dsmhdw]+$/} disabled={readOnly} updateValue={onDataChanged} />;
+    return <TextEditor type={type} value={value} keyfilter={/^[\dsmhdn]+$/} disabled={readOnly} updateValue={onDataChanged} />;
   } else if (type === 'selection') {
     return <SelectionEditor options={options} value={value} editable={true} disabled={readOnly} updateValue={onDataChanged} />;
   }
@@ -211,7 +219,7 @@ const SimpleDataView = ({ value, isDefault, error }) => {
           color: #f44336;
         }
       `}</style>
-      <div className={classnames('value', { default: isDefault, error: error })}>{new String(value)}</div>
+      <div className={classnames('value', { default: isDefault || !value, error: error })}>{new String(value || 'Empty Value')}</div>
     </>
   );
 };
@@ -236,9 +244,19 @@ const isValueErrornuous = (type, value, isNullValueValid) => {
  */
 const validators = {
   duration: (value) => {
-    const matchResult = value.match(/\d+[smhdw]/);
+    const matchResult = value.match(/\d+(ms|ns|s|m|h|d)/);
     const hasError = !matchResult || matchResult[0] !== value;
     return hasError ? 'Duration variables must follow the following pattern:  1234[s|m|h|d|w]  Examples: 10s, 7d, ...' : null;
+  },
+  int: (value) => {
+    const matchResult = value.match(/-?\d+/);
+    const hasError = !matchResult || matchResult[0] !== value;
+    return hasError ? 'Invalid integer value' : null;
+  },
+  float: (value) => {
+    const matchResult = value.match(/-?\d+(\.\d*)?/);
+    const hasError = !matchResult || matchResult[0] !== value;
+    return hasError ? 'Invalid float value. Must be of the form: 1.2' : null;
   },
   regex: (value) => {
     try {

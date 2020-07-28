@@ -54,7 +54,7 @@ const DescriptionSection = ({ value, readOnly, updateValue }) => {
       <div className="this">
         <Section title="Description">
           {readOnly ? (
-            <div className="simple-content">content</div>
+            <div className="simple-content">{content}</div>
           ) : (
             <Inplace active={inplaceActive} onToggle={toggleInplace}>
               <InplaceDisplay>{content}</InplaceDisplay>

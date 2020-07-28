@@ -152,6 +152,10 @@ const AlertingRulesTreeContainer = ({
         text={'Rename alerting rule:'}
         onSuccess={doRename}
         intention="rename"
+        validateName={(value) => {
+          const matchResult = value.match(/[\w\-.]*/);
+          return matchResult && matchResult[0] === value;
+        }}
       />
       <RenameCopyDialog
         name={selection.rule}
@@ -161,6 +165,10 @@ const AlertingRulesTreeContainer = ({
         text={'Copy alerting rule:'}
         onSuccess={doCopy}
         intention="copy"
+        validateName={(value) => {
+          const matchResult = value.match(/[\w\-.]*/);
+          return matchResult && matchResult[0] === value;
+        }}
       />
       <DeleteDialog
         visible={isDeleteRuleDialogShown}

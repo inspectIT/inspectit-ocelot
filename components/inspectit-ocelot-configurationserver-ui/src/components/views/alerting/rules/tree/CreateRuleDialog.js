@@ -17,7 +17,7 @@ const CreateRuleDialog = ({ templates, initialTemplate, visible, onHide, reserve
   const [template, setTemplate] = useState(undefined);
   const [description, setDescription] = useState('');
   const [isValid, setValidState] = useState(false);
-  const [error, setError] = useState(undefined);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     if (template !== initialTemplate) {
@@ -29,11 +29,24 @@ const CreateRuleDialog = ({ templates, initialTemplate, visible, onHide, reserve
     const reservedName = reservedNames.some((n) => n === name);
     if (reservedName) {
       setError('An alerting rule with the given name already exists');
-    } else {
-      setError(undefined);
     }
-    setValidState(!reservedName && !!name && !!template);
+
+    const validName = !!name && validId(name);
+    if (!error && !validName) {
+      setError('Invalid name! Name must only contain letter, number, _, - or . characters.');
+    }
+
+    if (!reservedName && validName && error !== null) {
+      setError(null);
+    }
+
+    setValidState(!reservedName && validName && !!template);
   }, [name, template, JSON.stringify(reservedNames)]);
+
+  const validId = (str) => {
+    const matchResult = str.match(/[\w\-.]*/);
+    return matchResult && matchResult[0] === str;
+  };
 
   return (
     <div className="this">

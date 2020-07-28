@@ -3,23 +3,14 @@ import { cloneDeep } from 'lodash';
 import { fetchTemplate } from './templates-api';
 import { fetch } from './common';
 
-/**
- * Fetches all existing alerting rules.
- */
 export const fetchRules = () => {
   return fetch('/alert/kapacitor/tasks');
 };
 
-/**
- * Fetches the given rule.
- */
 export const fetchRule = (ruleName) => {
   return fetch(`/alert/kapacitor/tasks/${ruleName}`);
 };
 
-/**
- * Attempts to create a new alerting rule for the selected template.
- */
 export const createRule = (ruleName, templateName, description) => {
   return fetchTemplate(templateName)
     .then((template) => {
@@ -68,24 +59,15 @@ const varWithDefaultValue = (variable) => {
   return newVar;
 };
 
-/**
- * Updates the given rule.
- */
 export const updateRule = (ruleObject, oldId) => {
   const ruleId = oldId ? oldId : ruleObject.id;
   return axiosBearer.patch(`/alert/kapacitor/tasks/${ruleId}`, ruleObject).then((res) => res.data);
 };
 
-/**
- * Deletes the given rule.
- */
 export const deleteRule = (ruleName) => {
   return axiosBearer.delete(`/alert/kapacitor/tasks/${ruleName}`);
 };
 
-/**
- * Renames the given rule.
- */
 export const copyRule = (sourceName, targetName) => {
   return fetchRule(sourceName)
     .then((rule) => {
@@ -93,12 +75,9 @@ export const copyRule = (sourceName, targetName) => {
       newRule.id = targetName;
       return newRule;
     })
-    .then((newRule) => createRule(newRule.id, newRule.template, newRule.description).then(() => updateRule(newRule)));
+    .then((newRule) => axiosBearer.post('/alert/kapacitor/tasks/', newRule));
 };
 
-/**
- * Copys the given rule.
- */
 export const renameRule = (oldName, newName) => {
   return fetchRule(oldName)
     .then((rule) => {

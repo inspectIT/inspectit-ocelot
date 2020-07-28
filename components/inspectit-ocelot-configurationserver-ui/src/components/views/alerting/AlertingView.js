@@ -29,30 +29,34 @@ const AlertingView = () => {
     refreshAll();
   }, []);
 
+  const fetchData = async () => {
+    const templatePromise = fetchTemplates();
+    const rulesPromise = fetchRules();
+    const topicsPromise = fetchTopics();
+
+    return {
+      templates: await templatePromise,
+      rules: await rulesPromise,
+      fetchedTopics: await topicsPromise,
+    };
+  };
   // reloads all the alerting data - rules, topics, templates...
   const refreshAll = async () => {
     try {
-      const templates = await fetchTemplates();
-      console.log('TEMPLATES: ' + JSON.stringify(templates));
-      const rules = await fetchRules();
-      console.log('RULES: ' + JSON.stringify(rules));
-      const fetchedTopics = await fetchTopics();
-      console.log('TOPICS: ' + JSON.stringify(topics));
+      const { templates, rules, fetchedTopics } = await fetchData();
 
-      const existingTopics = _(fetchedTopics)
-        .sortBy([(topic) => topic.id.toLowerCase()])
-        .value();
+      const existingTopics = _(fetchedTopics).value();
       const referencedTopics = _(rules)
         .map((rule) => rule.topic)
-        .filter()
+        .filter((topicName) => !!topicName)
         .filter((topicId) => !existingTopics.some((topic) => topic.id === topicId))
         .map((topicId) => ({ id: topicId, referencedOnly: true }))
         .uniqBy('id')
-        .sortBy([(topic) => topic.id.toLowerCase()])
         .value();
 
       const topics = _([...existingTopics, ...referencedTopics])
         .uniqBy('id')
+        .sortBy([(topic) => topic.id.toLowerCase()])
         .value();
 
       setData({ templates, rules, topics });
@@ -121,9 +125,7 @@ const AlertingView = () => {
           />
         )}
 
-        {activeTab === items[1] && (
-          <AlertingChannelsView updateDate={updateDate} topics={{ data: data.topics, updateDate: updateDate }} onRefresh={refreshAll} />
-        )}
+        {activeTab === items[1] && <AlertingChannelsView updateDate={updateDate} topics={data.topics} onRefresh={refreshAll} />}
       </div>
     </>
   );

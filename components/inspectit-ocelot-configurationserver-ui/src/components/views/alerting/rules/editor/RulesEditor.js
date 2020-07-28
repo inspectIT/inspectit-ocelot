@@ -158,7 +158,7 @@ const RulesEditor = ({
               name={'Notification Channel'}
               description={'The destination channel where notifications should be sent to when an alert is triggered by this rule.'}
               isNullValueValid={false}
-              value={content.topic || 'Not defined'}
+              value={content.topic}
               type={'selection'}
               readOnly={readOnly}
               error={errornuousVariables['Notification Channel']}
@@ -186,7 +186,7 @@ const RulesEditor = ({
               readOnly={readOnly}
               error={isRule ? errornuousVariables[variable.name] : null}
               onVarUpdate={updateVariable}
-              onErrorStatusUpdate={updateErrorStatus}
+              onErrorStatusUpdate={isRule ? updateErrorStatus : null}
               isDefault={variable.value === undefined}
             />
           ))}
