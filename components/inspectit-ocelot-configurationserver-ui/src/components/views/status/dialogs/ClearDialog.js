@@ -16,6 +16,7 @@ class ClearDialog extends React.Component {
       <Dialog
         header={'Clear History of all Agents' + this.props.type}
         modal={true}
+        focusOnShow={false}
         visible={this.props.visible}
         onHide={this.props.onHide}
         footer={
@@ -37,7 +38,10 @@ class ClearDialog extends React.Component {
 
   componentDidUpdate(prevProps) {
     if (!prevProps.visible && this.props.visible) {
-      this.clearButton.current.element.focus();
+      /**Timeout is needed for .focus() to be triggered correctly. */
+      setTimeout(() => {
+        this.clearButton.current.element.focus();
+      }, 0);
     }
   }
 }
