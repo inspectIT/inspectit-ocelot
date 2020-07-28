@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import _, { omit, isEqual, extend, cloneDeep } from 'lodash';
 import RulesEditor from './RulesEditor';
 import RulesEditorToolbar from './RulesEditorToolbar';
-import * as rulesAPI from '../RulesAPI';
+import { fetchTemplate, fetchRule, updateRule } from '../../alerting-api';
 import { alertingActions } from '../../../../../redux/ducks/alerting';
 import DefaultToolbar from '../../DefaultToolbar';
 import Notificationbar from '../../../../editor/Notificationbar';
@@ -32,14 +32,14 @@ const RulesEditorContainer = ({ readOnly, availableTopics, selection, onSaved })
 
       if (selection.template) {
         try {
-          newTemplateContent = await rulesAPI.fetchTemplate(selection.template);
+          newTemplateContent = await fetchTemplate(selection.template);
         } catch (error) {
           console.log(error);
         }
       }
       if (selection.rule) {
         try {
-          newRuleContent = await rulesAPI.fetchRule(selection.rule);
+          newRuleContent = await fetchRule(selection.rule);
         } catch (error) {
           console.log(error);
         }
@@ -71,18 +71,17 @@ const RulesEditorContainer = ({ readOnly, availableTopics, selection, onSaved })
   };
 
   // callback when the user hits the save button
-  const onSave = () => {
+  const onSave = async () => {
     if (selection.rule in unsavedRuleContents) {
-      rulesAPI.updateRule(
-        unsavedRuleContents[selection.rule],
-        (ruleContent) => {
-          const unsavedRuleData = omit(unsavedRuleContents, selection.rule);
-          dispatch(alertingActions.ruleContentsChanged(unsavedRuleData));
-          setRuleContent(ruleContent);
-          onSaved();
-        },
-        () => setRuleContent(undefined)
-      );
+      try {
+        const newRule = await updateRule(unsavedRuleContents[selection.rule]);
+        const unsavedRuleData = omit(unsavedRuleContents, selection.rule);
+        dispatch(alertingActions.ruleContentsChanged(unsavedRuleData));
+        setRuleContent(newRule);
+        onSaved();
+      } catch (error) {
+        setRuleContent(undefined);
+      }
     }
   };
 

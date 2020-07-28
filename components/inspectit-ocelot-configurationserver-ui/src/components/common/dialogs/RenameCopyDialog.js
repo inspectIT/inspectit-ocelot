@@ -8,10 +8,10 @@ import { Message } from 'primereact/message';
 /**
  * A generic Dialog for renaming or copying the given element.
  */
-const RenameCopyDialog = ({ name, reservedNames, retrieveReservedNames, visible, onHide, text, onSuccess, intention }) => {
+const RenameCopyDialog = ({ name, reservedNames, retrieveReservedNames, visible, onHide, text, onSuccess, intention, validateName }) => {
   const [newName, setName] = useState('');
   const [isValid, setValidState] = useState(false);
-  const [error, setError] = useState(undefined);
+  const [error, setError] = useState(null);
   const [invalidNames, setInvalidNames] = useState([]);
 
   useEffect(() => {
@@ -26,10 +26,17 @@ const RenameCopyDialog = ({ name, reservedNames, retrieveReservedNames, visible,
     const reservedName = invalidNames.some((n) => n === newName);
     if (reservedName) {
       setError('An element with the given name already exists!');
-    } else {
-      setError(undefined);
     }
-    setValidState(!reservedName && !!name && name !== newName);
+
+    const validName = !!newName && validateName(newName);
+    if (!validName) {
+      setError('Name contains invalid characters!');
+    }
+
+    if (!reservedName && validName && error !== null) {
+      setError(null);
+    }
+    setValidState(!reservedName && validName && name !== newName);
   }, [newName]);
 
   return (
@@ -96,13 +103,15 @@ RenameCopyDialog.propTypes = {
   onSuccess: PropTypes.func,
   /** Callback on dialog hide */
   onHide: PropTypes.func,
+  validateName: PropTypes.func,
 };
 
 RenameCopyDialog.defaultProps = {
   text: 'Delete element',
   visible: true,
-  onSuccess: () => { },
-  onHide: () => { },
+  onSuccess: () => {},
+  onHide: () => {},
+  validateName: () => true,
 };
 
 export default RenameCopyDialog;

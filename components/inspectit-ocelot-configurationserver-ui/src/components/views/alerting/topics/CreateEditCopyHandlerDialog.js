@@ -38,10 +38,12 @@ const CreateEditCopyHandlerDialog = ({
   }, [initialTopic]);
 
   useDeepEffect(() => {
-    if (reservedNames) {
-      setInvalidNames(reservedNames);
-    } else if (retrieveReservedNames && topic) {
-      retrieveReservedNames(topic, (names) => setInvalidNames(names));
+    if (visible) {
+      if (reservedNames) {
+        setInvalidNames(reservedNames);
+      } else if (retrieveReservedNames && topic) {
+        retrieveReservedNames(topic, (names) => setInvalidNames(names));
+      }
     }
   }, [reservedNames, retrieveReservedNames, topic]);
 
@@ -55,13 +57,31 @@ const CreateEditCopyHandlerDialog = ({
     const reservedName = invalidNames.some((n) => n === name);
     if (reservedName) {
       setError('An alerting rule with the given name already exists');
-    } else {
+    }
+
+    const validName = !!name && validId(name);
+    if (!error && !validName) {
+      setError('Invalid name! Name must only contain letter, number, _, - or . characters.');
+    }
+
+    const validTopic = !!topic && validId(topic);
+    if (!error && !validTopic) {
+      setError('Invalid topic name! Topic name must only contain letter, number, _, - or . characters.');
+    }
+
+    if (!reservedName && validName && validTopic && error !== null) {
       setError(null);
     }
+
     const validRenameCondition = !oldName || name !== oldName || initialTopic !== topic;
     const validHandlerTypeCondition = intention !== 'create' || !!handlerType;
-    setValidState(!reservedName && !!name && !!topic && validRenameCondition && validHandlerTypeCondition);
+    setValidState(!reservedName && validName && validTopic && validRenameCondition && validHandlerTypeCondition);
   }, [name, topic, handlerType, invalidNames]);
+
+  const validId = (str) => {
+    const matchResult = str.match(/[\w\-.]*/);
+    return matchResult && matchResult[0] === str;
+  };
 
   const intentionText = intention === 'create' ? 'Create' : intention === 'copy' ? 'Copy' : 'Rename';
   return (
@@ -89,7 +109,7 @@ const CreateEditCopyHandlerDialog = ({
           </div>
         }
       >
-        <div style={{ width: '100%', paddingBottom: '0.5em' }}>{intentionText + 'handler'}:</div>
+        <div style={{ width: '100%', paddingBottom: '0.5em' }}>{intentionText + ' handler'}:</div>
         <div className="p-grid">
           {intention === 'create' && (
             <div className="p-inputgroup p-col-12" style={{ width: '100%' }}>

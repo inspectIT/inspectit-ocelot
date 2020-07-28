@@ -4,9 +4,7 @@ import classnames from 'classnames';
 import { TabMenu } from 'primereact/tabmenu';
 import AlertingRulesView from './rules/AlertingRulesView';
 import AlertingChannelsView from './topics/AlertingChannelsView.js';
-import * as topicsAPI from './topics/TopicsAPI';
-import * as rulesAPI from './rules/RulesAPI';
-import useDeepEffect from '../../../hooks/use-deep-effect';
+import { fetchTemplates, fetchRules, fetchTopics } from './alerting-api';
 import { ruleIcon, topicIcon } from './constants';
 
 /**
@@ -24,60 +22,49 @@ const AlertingView = () => {
   // state variables
   const [updateDate, setUpdateDate] = useState(Date.now());
   const [activeTab, setActiveTab] = useState(items[0]);
-  const [rules, setRules] = useState([]);
-  const [templates, setTemplates] = useState([]);
-  const [existingTopics, setExistingTopics] = useState([]);
-  const [referencedTopics, setReferencedTopics] = useState([]);
+  const [data, setData] = useState({ templates: [], rules: [], topics: [] });
 
   // refreshing the data when the view is mounted
   useEffect(() => {
     refreshAll();
   }, []);
 
-  // collects all topics referenced by any rule
-  useDeepEffect(() => {
-    const topics = _(rules)
-      .map((rule) => rule.topic)
-      .filter()
-      .filter((topicId) => !existingTopics.some((topic) => topic.id === topicId))
-      .map((topicId) => ({ id: topicId, referencedOnly: true }))
-      .uniqBy('id')
-      .sortBy([(topic) => topic.id.toLowerCase()])
-      .value();
+  const fetchData = async () => {
+    const templatePromise = fetchTemplates();
+    const rulesPromise = fetchRules();
+    const topicsPromise = fetchTopics();
 
-    setReferencedTopics(topics);
-  }, [rules]);
-
-  const refreshRules = () =>
-    rulesAPI.fetchAlertingRules(
-      (rules) => setRules(rules),
-      () => setRules([])
-    );
-  const refreshTemplates = () =>
-    rulesAPI.fetchAlertingTemplates(
-      (templates) => setTemplates(templates),
-      () => setTemplates([])
-    );
-  const refreshTopics = () =>
-    topicsAPI.fetchTopics((topics) =>
-      setExistingTopics(
-        _(topics)
-          .sortBy([(topic) => topic.id.toLowerCase()])
-          .value()
-      )
-    );
-
-  // reloads all the alerting data - rules, topics, templates...
-  const refreshAll = () => {
-    refreshRules();
-    refreshTemplates();
-    refreshTopics();
-    setUpdateDate(Date.now());
+    return {
+      templates: await templatePromise,
+      rules: await rulesPromise,
+      fetchedTopics: await topicsPromise,
+    };
   };
+  // reloads all the alerting data - rules, topics, templates...
+  const refreshAll = async () => {
+    try {
+      const { templates, rules, fetchedTopics } = await fetchData();
 
-  const availableTopics = _([...existingTopics, ...referencedTopics])
-    .uniqBy('id')
-    .value();
+      const existingTopics = _(fetchedTopics).value();
+      const referencedTopics = _(rules)
+        .map((rule) => rule.topic)
+        .filter((topicName) => !!topicName)
+        .filter((topicId) => !existingTopics.some((topic) => topic.id === topicId))
+        .map((topicId) => ({ id: topicId, referencedOnly: true }))
+        .uniqBy('id')
+        .value();
+
+      const topics = _([...existingTopics, ...referencedTopics])
+        .uniqBy('id')
+        .sortBy([(topic) => topic.id.toLowerCase()])
+        .value();
+
+      setData({ templates, rules, topics });
+      setUpdateDate(Date.now());
+    } catch (error) {
+      setData({ templates: [], rules: [], topics: [] });
+    }
+  };
 
   return (
     <>
@@ -129,10 +116,16 @@ const AlertingView = () => {
         <TabMenu className="menu" model={items} activeItem={activeTab} onTabChange={(e) => setActiveTab(e.value)} />
 
         {activeTab === items[0] && (
-          <AlertingRulesView updateDate={updateDate} topics={availableTopics} rules={rules} templates={templates} onRefresh={refreshAll} />
+          <AlertingRulesView
+            updateDate={updateDate}
+            topics={data.topics}
+            rules={data.rules}
+            templates={data.templates}
+            onRefresh={refreshAll}
+          />
         )}
 
-        {activeTab === items[1] && <AlertingChannelsView updateDate={updateDate} topics={availableTopics} onRefresh={refreshAll} />}
+        {activeTab === items[1] && <AlertingChannelsView updateDate={updateDate} topics={data.topics} onRefresh={refreshAll} />}
       </div>
     </>
   );

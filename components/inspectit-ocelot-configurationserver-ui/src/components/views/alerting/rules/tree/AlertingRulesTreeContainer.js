@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { omit, extend } from 'lodash';
+import { omit, extend, cloneDeep } from 'lodash';
 import PropTypes from 'prop-types';
-import * as rulesAPI from '../RulesAPI';
+import { createRule, renameRule, copyRule, deleteRule } from '../../alerting-api';
 import AlertingRulesToolbar from './AlertingRulesToolbar';
 import AlertingRulesTree from './AlertingRulesTree';
 import CreateRuleDialog from './CreateRuleDialog';
 import DeleteDialog from '../../../../common/dialogs/DeleteDialog';
 import RenameCopyDialog from '../../../../common/dialogs/RenameCopyDialog';
 import { alertingActions } from '../../../../../redux/ducks/alerting';
+import { notificationActions } from '../../../../../redux/ducks/notification';
 
 /**
  * The container element of the alerting rules tree, the corresponding toolbar and the action dialogs.
@@ -35,47 +36,59 @@ const AlertingRulesTreeContainer = ({
 
   const isRuleSelected = !!selection.rule;
 
-  const createRule = (ruleName, templateName, description) => {
+  const doCreate = async (ruleName, templateName, description) => {
     setCreateRuleDialogShown(false);
-    rulesAPI.createRule(
-      ruleName,
-      templateName,
-      description,
-      (rule) => {
-        onRefresh();
-        onSelectionChanged({ rule: rule.id, template: rule.template });
-      },
-      () => onSelectionChanged({ rule: null, template: null })
-    );
+    try {
+      const newRule = await createRule(ruleName, templateName, description);
+      onRefresh();
+      onSelectionChanged({ rule: newRule.id, template: newRule.template });
+    } catch (error) {
+      dispatch(notificationActions.showErrorMessage('Failed creating rule', ''));
+      onSelectionChanged({ rule: null, template: null });
+    }
   };
 
-  const renameRule = (oldName, newName) => {
+  const doRename = async (oldName, newName) => {
     setRenameRuleDialogShown(false);
-    rulesAPI.renameRule(oldName, newName, () => {
+
+    try {
+      await renameRule(oldName, newName);
       if (oldName in unsavedRuleContents) {
         const rContent = unsavedRuleContents[oldName];
         dispatch(alertingActions.ruleContentsChanged(extend(omit(unsavedRuleContents, oldName), { [newName]: rContent })));
       }
       onRefresh();
       onSelectionChanged({ rule: newName, template: selection.template });
-    });
+    } catch (error) {
+      dispatch(notificationActions.showErrorMessage('Failed renaming rule', ''));
+    }
   };
 
-  const copyRule = (oldName, newName) => {
+  const doCopy = async (srcName, targetName) => {
     setCopyRuleDialogShown(false);
-    rulesAPI.copyRule(oldName, newName, () => {
+    try {
+      await copyRule(srcName, targetName);
+      if (srcName in unsavedRuleContents) {
+        let rContent = cloneDeep(unsavedRuleContents[srcName]);
+        rContent.id = targetName;
+        dispatch(alertingActions.ruleContentsChanged(extend({ ...unsavedRuleContents }, { [targetName]: rContent })));
+      }
       onRefresh();
-      onSelectionChanged({ rule: newName, template: selection.template });
-    });
+      onSelectionChanged({ rule: targetName, template: selection.template });
+    } catch (error) {
+      dispatch(notificationActions.showErrorMessage('Failed copying rule', ''));
+    }
   };
 
-  const deleteRule = (ruleName) => {
-    rulesAPI.deleteRule(ruleName, (deletedRuleName) => {
+  const doDelete = async (ruleName) => {
+    setDeleteRuleDialogShown(false);
+    try {
+      await deleteRule(ruleName);
       onRefresh();
-      if (deletedRuleName === selection.rule) {
-        onSelectionChanged({ rule: null, template: selection.template });
-      }
-    });
+      onSelectionChanged({ rule: null, template: selection.template });
+    } catch (error) {
+      dispatch(notificationActions.showErrorMessage('Failed deleting rule', ''));
+    }
   };
 
   return (
@@ -129,7 +142,7 @@ const AlertingRulesTreeContainer = ({
         reservedNames={rules && rules.map((r) => r.id)}
         visible={isCreateRuleDialogShown}
         onHide={() => setCreateRuleDialogShown(false)}
-        onSuccess={createRule}
+        onSuccess={doCreate}
       />
       <RenameCopyDialog
         name={selection.rule}
@@ -137,8 +150,12 @@ const AlertingRulesTreeContainer = ({
         visible={isRenameRuleDialogShown}
         onHide={() => setRenameRuleDialogShown(false)}
         text={'Rename alerting rule:'}
-        onSuccess={renameRule}
+        onSuccess={doRename}
         intention="rename"
+        validateName={(value) => {
+          const matchResult = value.match(/[\w\-.]*/);
+          return matchResult && matchResult[0] === value;
+        }}
       />
       <RenameCopyDialog
         name={selection.rule}
@@ -146,15 +163,19 @@ const AlertingRulesTreeContainer = ({
         visible={isCopyRuleDialogShown}
         onHide={() => setCopyRuleDialogShown(false)}
         text={'Copy alerting rule:'}
-        onSuccess={copyRule}
+        onSuccess={doCopy}
         intention="copy"
+        validateName={(value) => {
+          const matchResult = value.match(/[\w\-.]*/);
+          return matchResult && matchResult[0] === value;
+        }}
       />
       <DeleteDialog
         visible={isDeleteRuleDialogShown}
         onHide={() => setDeleteRuleDialogShown(false)}
         name={selection.rule}
         text="Delete Rule"
-        onSuccess={deleteRule}
+        onSuccess={doDelete}
       />
     </>
   );

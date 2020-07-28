@@ -1,30 +1,21 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { omit, isEqual, extend } from 'lodash';
 import { useSelector, useDispatch } from 'react-redux';
 import HandlerEditorToolbar from './HandlerEditorToolbar';
-import * as topicsAPI from '../TopicsAPI';
+import { updateHandler } from '../../alerting-api';
 import { alertingActions } from '../../../../../redux/ducks/alerting';
 import * as handlerUtils from '../handlerUtils';
 import DefaultToolbar from '../../DefaultToolbar';
-import useDeepEffect from '../../../../../hooks/use-deep-effect';
 import HandlerEditor from './HandlerEditor';
 import SelectionInformation from '../../../../editor/SelectionInformation';
+import { notificationActions } from '../../../../../redux/ducks/notification';
 
-const HandlerEditorContainer = ({ selection, readOnly, availableTopics }) => {
+const HandlerEditorContainer = ({ selection, savedHandlerContent, readOnly, availableTopics, onSaved }) => {
   const dispatch = useDispatch();
-  const [savedHandlerContent, setSavedHandlerContent] = useState(undefined);
 
   // global state variables
   const unsavedHandlerContents = useSelector((state) => state.alerting.unsavedHandlerContents);
-
-  // load saved version of the handler when selection changes
-  useDeepEffect(() => {
-    setSavedHandlerContent(undefined);
-    if (selection.handler && selection.isSupportedHandlerKind) {
-      topicsAPI.fetchHandler(selection.topic, selection.handler, (handler) => setSavedHandlerContent(handler));
-    }
-  }, [selection]);
 
   const uniqueHandlerId = handlerUtils.uniqueHandlerId(selection.handler, selection.topic);
   const selectedHandlerIsUnsaved = unsavedHandlerContents && uniqueHandlerId && uniqueHandlerId in unsavedHandlerContents;
@@ -41,11 +32,14 @@ const HandlerEditorContainer = ({ selection, readOnly, availableTopics }) => {
     }
   };
 
-  const onSave = () => {
-    topicsAPI.updateHandler(handlerContent, (savedHandlerObj) => {
+  const onSave = async () => {
+    try {
+      await updateHandler(handlerContent.topic, handlerContent);
+      await onSaved();
       dispatch(alertingActions.handlerContentsChanged(omit({ ...unsavedHandlerContents }, uniqueHandlerId)));
-      setSavedHandlerContent(savedHandlerObj);
-    });
+    } catch (error) {
+      dispatch(notificationActions.showErrorMessage('Failed saving alerting handler', ''));
+    }
   };
 
   let toolbar = <DefaultToolbar />;
@@ -90,6 +84,8 @@ const HandlerEditorContainer = ({ selection, readOnly, availableTopics }) => {
 HandlerEditorContainer.propTypes = {
   /** Selection object */
   selection: PropTypes.object.isRequired,
+  /** saved handler content */
+  savedHandlerContent: PropTypes.object,
   /** Array of available topics */
   availableTopics: PropTypes.array,
   /** Whether the content is read only */

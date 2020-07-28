@@ -149,7 +149,7 @@ const nodeTemplate = (node) => {
  * Returns the loaded rules in a tree structure used by the tree component.
  */
 const getRulesTree = (rules, templates, unsavedRules, groupByTemplates, groupByTopics, setTreeIndex) => {
-  if (_.isEmpty(rules) || _.isEmpty(templates)) {
+  if (_.isEmpty(templates)) {
     return [];
   }
 
