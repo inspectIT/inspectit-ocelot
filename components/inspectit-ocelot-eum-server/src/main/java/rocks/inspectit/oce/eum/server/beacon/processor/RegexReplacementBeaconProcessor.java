@@ -5,7 +5,6 @@ import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 import rocks.inspectit.oce.eum.server.beacon.Beacon;
 import rocks.inspectit.oce.eum.server.configuration.model.BeaconTagSettings;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
@@ -69,44 +68,36 @@ public class RegexReplacementBeaconProcessor implements BeaconProcessor {
                 return null;
             }
         }
-        String result = performRegexExtraction(tag, value);
-        return applyReplacements(result, tag.getReplaceAll());
+        return applyAllReplacements(value, tag.getReplacements());
     }
 
-    private String applyReplacements(String input, List<PatternAndReplacement> replacements) {
+    private String applyAllReplacements(String input, List<PatternAndReplacement> replacements) {
         String result = input;
         for (PatternAndReplacement setting : replacements) {
-            try {
-                result = result.replaceAll(setting.getPattern(), setting.getReplacement());
-            } catch (Exception e) {
-                log.error("Error applying replacement regex <{}> with replacement <{}>!", setting.getPattern(), setting.getReplacement());
+            if (result == null) {
+                return null;
             }
+            result = applyReplacement(setting, result);
         }
         return result;
     }
 
-    private String performRegexExtraction(RegexDerivedTag tag, String value) {
-        Pattern regex = tag.getRegex();
-        if (regex != null) {
-            try {
-                return regexReplaceAll(value, regex, tag.getReplacement(), tag.isKeepIfNoMatch());
-            } catch (Exception ex) {
-                log.error("Could not derive beacon tag value <{}> of input string <{}>!", tag.getTagName(), value, tag.getReplacement(), ex);
-                return null;
+    private String applyReplacement(PatternAndReplacement replacement, String value) {
+        Pattern regex = Pattern.compile(replacement.getPattern());
+        try {
+            boolean anyRegexMatch = regex.matcher(value).find();
+            if (anyRegexMatch) {
+                return regex.matcher(value).replaceAll(replacement.getReplacement());
             }
-        } else {
+        } catch (Exception ex) {
+            log.error("Error applying replacement regex <{}> with replacement <{}>!", replacement.getPattern(), replacement
+                    .getReplacement());
+        }
+        if (replacement.isKeepNoMatch()) {
             return value;
+        } else {
+            return null;
         }
-    }
-
-    private String regexReplaceAll(String input, Pattern regex, String replacement, boolean keepIfNoMatch) {
-        boolean anyRegexMatch = regex.matcher(input).find();
-        if (anyRegexMatch) {
-            return regex.matcher(input).replaceAll(replacement);
-        } else if (keepIfNoMatch) {
-            return input;
-        }
-        return null;
     }
 
     /**
@@ -157,43 +148,18 @@ public class RegexReplacementBeaconProcessor implements BeaconProcessor {
         String inputBeaconField;
 
         /**
-         * The regular expression to use for the "replace-all" operation.
-         * Can be null in case the value should simply be copied.
-         */
-        Pattern regex;
-
-        /**
-         * The replacement pattern to use for each match.
-         */
-        String replacement;
-
-        /**
-         * If true, the original input value will be kept if no regex match is found.
-         * Otherwise no value for {@link #tagName} will be set in the beacon.
-         */
-        boolean keepIfNoMatch;
-
-        /**
          * Specify whether the input field should be considered as an empty string if it does not exists.
          */
         boolean nullAsEmpty;
 
-        List<PatternAndReplacement> replaceAll;
+        List<PatternAndReplacement> replacements;
 
         private static RegexDerivedTag fromSettings(String tagName, BeaconTagSettings settings) {
-            Pattern pattern = null;
-            String regex = settings.getRegex();
-            if (!StringUtils.isEmpty(regex)) {
-                pattern = Pattern.compile(regex);
-            }
             return RegexDerivedTag.builder()
                     .tagName(tagName)
                     .inputBeaconField(settings.getInput())
-                    .regex(pattern)
-                    .replacement(settings.getReplacement())
-                    .keepIfNoMatch(settings.isKeepNoMatch())
                     .nullAsEmpty(settings.isNullAsEmpty())
-                    .replaceAll(settings.getAdditionalReplacements())
+                    .replacements(settings.getAllReplacements())
                     .build();
         }
     }

@@ -201,48 +201,52 @@ inspectit-eum-server:
         input: u
 ```
 
-Tags configured via `beacon` offer some additional flexibility: In addition to simply copying the input value, it is possible to perform a RegEx replacement.
+Tags configured via `beacon` offer some additional flexibility: In addition to simply copying the input value, 
+it is possible to perform one or multiple regular expression replacements.
 
 **Example:** in case the `u` attribute contains a URL which is: `http://server/user/100`.
-The following configuration can be used to erases the path segment after `/user/` which represents a user ID and replaces it with the constant text `{id}`.
+The following configuration can be used to extract the HTTP-Path from it.
 
 ```YAML
 inspectit-eum-server:
   tags:
     beacon:
-      URL_USER_ERASED: 
+      MY_PATH: 
         input: u
-        regex: "\\/user\\/\d+"
-        replacement: "\\/user\\/{id}"
-        keep-no-match: true
+        replacements:
+         -  pattern:  '^.*\/\/([^\/]*)([^?]*).*$'
+            replacement: "$2"
+            keep-no-match: false
 ```
+The `replacements` property defines a lsit of regualr expressions and corresponding replacements to apply.
+They will be applied in the order they are listed.
+For each list element, the `pattern` property defines the regex to use for the replacement.
+All matches of the `pattern` in the input value are replaced with the string defined by `replacement`.
+The `keep-no-match` option of each entry defines what to do if the given input does not match the given regex at any place.
+If it is set to `true`, the previous value is kept unchanged. If it is set to `false`, the given tag won't be created in case no match is found.
+Note that capture groups are supported and can be referenced in the replacement string using `$1`, `$2`, etc. as shown in the example.
 
-The `regex` property defines the regex to use for the replacement.
-All matches of the `regex` in the input value are replaced with the string defined by `replacement`.
-The `keep-no-match` options defines what to do if the given input does not match the given regex at any place.
-If it is set to `true`, the original value will be kept. If it is set to `false`, the given tag won't be created in case no match is found.
-Note that capture groups are supported and can be referenced in the replacement string using `$1`, `$2`, etc.
+The following example extends the previous one by additionally replacing all user-IDs within the path:
 
-If multiple regular replacements should be applied, the `additional-replacements` property can be used:
 
 ```YAML
 inspectit-eum-server:
   tags:
     beacon:
-      URL_USER_ERASED: 
+      MY_PATH: 
         input: u
-        regex: "\\/user\\/\d+"
-        replacement: "\\/user\\/{id}"
-        keep-no-match: true
-        additional-replacements:
-         - pattern: "\\/document\\/\d+"
-           replacement: "\\/document\\/{docid}"
-         - pattern: "\\/case\\/\d+"
-           replacement: "\\/case\\/{caseid}"
+        replacements:
+         -  pattern:  '^.*\/\/([^\/]*)([^?]*).*$'
+            replacement: "$2"
+            keep-no-match: false
+         -  pattern:  '\/user\/\d+'
+            replacement: '/user/{id}'
 ```
 
 With these settings, the tag will be extracted from `u` just like in the previous example.
-However, the additional replacements will also be applied in the order they are specified, causing document and case-ids to be erased in this example.
+However, an additional replacement will be applied afterwards causing user-IDs to be erased from the path.
+Note that we did not specify `keep-no-match` for the second replacement. `keep-no-match` default to `true`,
+meaning that the path will be preserved without any changes in case it does not contain any user-IDs.
 
 Using this mechanism, the EUM server provides the following tags out of the box:
 
