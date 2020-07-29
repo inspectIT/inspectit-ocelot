@@ -10,6 +10,7 @@ import DefaultToolbar from '../../DefaultToolbar';
 import Notificationbar from '../../../../editor/Notificationbar';
 import useDeepEffect from '../../../../../hooks/use-deep-effect';
 import { templateIcon } from '../../constants';
+import { notificationActions } from '../../../../../redux/ducks/notification';
 
 const RulesEditorContainer = ({ readOnly, availableTopics, selection, onSaved }) => {
   const dispatch = useDispatch();
@@ -30,22 +31,19 @@ const RulesEditorContainer = ({ readOnly, availableTopics, selection, onSaved })
       let newRuleContent;
       let newTemplateContent;
 
-      if (selection.template) {
-        try {
-          newTemplateContent = await fetchTemplate(selection.template);
-        } catch (error) {
-          console.log(error);
-        }
+      try {
+        const templatePromise = selection.template ? fetchTemplate(selection.template) : null;
+        const rulePromise = selection.rule ? fetchRule(selection.rule) : null;
+
+        newTemplateContent = !!templatePromise ? await templatePromise : undefined;
+        newRuleContent = !!rulePromise ? await rulePromise : undefined;
+        setTemplateContent(newTemplateContent);
+        setRuleContent(newRuleContent);
+      } catch (error) {
+        dispatch(notificationActions.showErrorMessage('Failed fetching rule / template contents', ''));
+        setTemplateContent(undefined);
+        setRuleContent(undefined);
       }
-      if (selection.rule) {
-        try {
-          newRuleContent = await fetchRule(selection.rule);
-        } catch (error) {
-          console.log(error);
-        }
-      }
-      setTemplateContent(newTemplateContent);
-      setRuleContent(newRuleContent);
     };
 
     fetchData();
@@ -117,8 +115,8 @@ const RulesEditorContainer = ({ readOnly, availableTopics, selection, onSaved })
             onSave={onSave}
           />
         ) : (
-          <DefaultToolbar name={currentName} icon={currentName ? templateIcon : ''} />
-        )}
+            <DefaultToolbar name={currentName} icon={currentName ? templateIcon : ''} />
+          )}
 
         <RulesEditor
           availableTopics={availableTopics}
@@ -195,7 +193,7 @@ RulesEditorContainer.defaultProps = {
   availableTopics: [],
   unsavedRuleContents: {},
   readOnly: false,
-  onSaved: () => {},
+  onSaved: () => { },
 };
 
 export default RulesEditorContainer;
