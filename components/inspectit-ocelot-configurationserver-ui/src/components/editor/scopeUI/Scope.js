@@ -7,6 +7,7 @@ import { Button } from 'primereact/button';
 import { splittButtonItemIsInvalid, adjustInvalidSplitButtonItem } from './newComponents/utils/splitButtonItems/invalidLabelsTopDown';
 import { SplitButton } from 'primereact/splitbutton';
 import { getSplitButtonsItems, enableCreateAttributeWithinSplitItemEntries } from './newComponents/utils/splitButtonItems/getSplitButtonItems';
+import ScopeEditor from '../ScopeEditor';
 var SimpleUndo = require('simple-undo');
 
 class Scope extends React.Component {
@@ -182,7 +183,7 @@ class Scope extends React.Component {
   }
 
   handleScopeNameChange = e => {
-
+    this.props.changeName(e.target.value);
   }
 
   
@@ -206,6 +207,7 @@ class Scope extends React.Component {
     return (
       <div className="this">
         <div style={{width:'1121px'}}>
+
           <div >
             {/* scopenameBox */}
             <div style={{ ...boxStyle}}>
@@ -243,7 +245,7 @@ class Scope extends React.Component {
               <div style={{display:'flex', alignItems, marginBottom}}>
 
                 {/* descriptionText */}
-                <div  style={{}}>
+                <div style={{display:'inline-block', marginRight: '15px', alignContent: 'center', marginTop: '25px', border:'1px solid grey', background:'white', borderRadius:10, padding:15}}>
                   <span style={{display: 'inline-block'}}> 
                   In order to determine which methods should be instrumented all classes are checked against the defined interface, superclass and type matchers. If and only if a class matches on all matchers, each of their methods is checked against the defined method matchers below #
                   in order to determine the target methods. Minimum 1 class matcher must exist.
@@ -272,8 +274,9 @@ class Scope extends React.Component {
               {/* The keys of the scopeObject are [interface, type, superclass, method, advanced ]
               we filter out method and advanced
               we use map on the filteredAttributeArray and get an index. The index is used to know display wether 'the class'  or '... and the class'  */}
-                { splitButtonItemsClass.length >0  && <SplitButton tooltip="specify classes by their implemented interfaces, superclass, or by the class name (and its attached annotations) " label="add " icon="pi pi-plus" model={splitButtonItemsClass}></SplitButton> }
-                <div style={{ height: '50px'}}></div>
+                { splitButtonItemsClass.length >0  && <SplitButton style={{position:'relative', left:'50%' }} tooltip="specify classes by their implemented interfaces, superclass, or by the class name (and its attached annotations) " label='more options'  model={splitButtonItemsClass}></SplitButton> }
+                <h4>To pick through the methods of a class, it must fullfill all of the following options </h4>
+                { !scopeObject.interfaces && !scopeObject.type && !scopeObject.superclass && <p> no class matcher choosen, please specify the class by 1 option</p>} 
                 <ClassSelectorContainer scopeObject={scopeObject} onUpdate={onUpdate} />
 
 
@@ -289,7 +292,7 @@ class Scope extends React.Component {
 
               {/* descriptionText */}
               <div style={{display:'flex', alignItems, marginBottom}}>
-                <div  style={{maxWidth: descriptionTextMaxWidth}}>
+                <div style={{display:'inline-block', marginRight: '15px', alignContent: 'center', marginTop: '25px', border:'1px solid grey', background:'white', borderRadius:10, padding:15}} >
                   <span style={{display: 'inline-block'}}> 
                     hand-pick a method or group of methods by using a selector. Use the options to specify the selector. Each list-item wields a specific selector.
                   </span>
@@ -321,17 +324,17 @@ class Scope extends React.Component {
                     }
                   </React.Fragment> */}
                 <div style={{width:'', background:'white', minHeight: '200px',  padding:'35px'}}>
-                  <Button onClick={this.addMethod} tooltip='add a method selector. Describe with the + button, which option the methods must fullfill' icon="pi pi-plus" style={{left:'50%', top:'10px'}}></Button>
+                  <Button onClick={this.addMethod} label="add new method matcher" tooltip='add a method selector. Describe with the + button, which option the methods must fullfill' icon="pi pi-plus" style={{left:'50%', top:'10px'}}></Button>
 
-
+                  { !scopeObject.methods && <p> No method matcher, please specify the method you want by using the add new matcher</p>}
                   { scopeObject.methods && <MethodsContainerList items={scopeObject.methods} parentAttribute={'methods'} onUpdate={(updatedValue) => this.onGenericUpdate(updatedValue, 'methods')} /> }
                 </div>
               {/* obsolete, do not read , this will be removed */}
               {/* <ListBox value={scopeObject.methods} style={{ witdh: '800px' }} options={scopeObject.methods} onChange={(e) => this.setState({selectedCity: e.value})} 
               optionLabel="name" itemTemplate={this.methodSelectorListTemplate} /> */}
               
+              <Button onClick={this.props.showOverview} style={{position:'relative', left:'90%', marginTop:'20px'}} label="display result"></Button>
             </div>
-
           </div>
         </div>
            

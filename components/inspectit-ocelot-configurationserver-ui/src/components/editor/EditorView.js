@@ -50,6 +50,10 @@ class EditorView extends React.Component {
     }
   }
 
+  showAceEditor = () => {
+    this.setState({showScopeView: false, showEditor: true , showTreeTableView: false, displayScopeEditor: 'none' })
+  }
+
   render() {
     const {
       value,
@@ -75,7 +79,7 @@ class EditorView extends React.Component {
 
     const { showScopeView, showTreeTableView, showBusinessTransactionView, displayScopeEditor } = this.state;
 
-
+    console.log('updated state', this.state)
     return (
       <div className="this p-grid p-dir-col p-nogutter">
         <style jsx>{`
@@ -129,7 +133,6 @@ class EditorView extends React.Component {
             {children}
           </EditorToolbar>
         </div>
-        {/* TODO: remove deactivting view on ace per default  */}
         { showEditor && !showScopeView && !showTreeTableView && (
           <div className="p-col editor-container">
             <AceEditor
@@ -146,13 +149,12 @@ class EditorView extends React.Component {
             />
           </div>
         )}
-        {/* TODO: remove default view on scopeEditor */}
         {  showEditor && 
           <div style={{display: displayScopeEditor}}> 
             <div className="p-col visual-editor-container">
               <YamlParser yamlConfig={value} onUpdate={onChange}>
                 {(onUpdate, config) => (
-                  <ScopeEditor config={config} schema={schema} loading={loading} readOnly={readOnly} onUpdate={onUpdate} />
+                  <ScopeEditor showAceEditor={this.showAceEditor} config={config} schema={schema} loading={loading} readOnly={readOnly} onUpdate={onUpdate} />
                 )}
               </YamlParser>
             </div >

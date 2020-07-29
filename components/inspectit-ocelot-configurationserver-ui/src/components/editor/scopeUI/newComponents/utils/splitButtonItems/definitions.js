@@ -150,7 +150,7 @@ export const methods = [
   {
     actionId: 'adding visibility',
     label: 'add visibility option',
-    icon: 'pi pi-external-link',
+    icon: 'pi pi-plus',
     createAttribute: (item) => {
       item.visibility = [];
       return item;
@@ -159,7 +159,7 @@ export const methods = [
   {   
     actionId: 'adding arguments',
     label: 'add arguments option',
-    icon: 'pi pi-upload',
+    icon: 'pi pi-plus',
     createAttribute: (item) => {
       item.arguments = item.arguments || [];
       item.arguments.push('')
@@ -169,7 +169,7 @@ export const methods = [
   {   
     actionId: 'adding is-synchronized',
     label: 'add      is-synchronized option',
-    icon: 'pi pi-upload',
+    icon: 'pi pi-plus',
     createAttribute: (item) => {
       item['is-synchronized'] = true;
       return item;
@@ -178,7 +178,7 @@ export const methods = [
   {   
     actionId: 'adding is-constructor',
     label: 'add     is-constructor option',
-    icon: 'pi pi-upload',
+    icon: 'pi pi-plus',
     createAttribute: (item) => {
       item['is-constructor'] = true;
       return item;

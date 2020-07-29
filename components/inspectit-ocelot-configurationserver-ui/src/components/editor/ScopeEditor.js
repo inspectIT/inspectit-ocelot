@@ -1,6 +1,6 @@
 import {ListBox} from 'primereact/listbox';
 
-import { cloneDeep, isEqual, set, unset, create } from 'lodash';
+import { cloneDeep, isEqual, set, unset, create, update } from 'lodash';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
 import { ColumnGroup } from 'primereact/columngroup';
@@ -89,13 +89,13 @@ class ScopeEditor extends React.Component {
   // <BreadCrumb> elements nagivate to other urls. example     { label: 'Lionel Messi', url: 'https://en.wikipedia.org/wiki/Lionel_Messi' }
   // <BreadCrumb> does not enable onClick listener on the elements, this manually adding.
   addEventListenerToBreadCrumbs = () => {   
-  //   // Array.from(htmlCollection)
-  //   let breadCrumbArray = Array.from(document.getElementsByclassNameName('p-breadcrumb p-component')[0].getElementsByclassNameName('p-menuitem-link'));
-  //   breadCrumbArray.map(element => {
-  //     if( element.innerText === 'Scope Overview' ) {
-  //       element.addEventListener('click', this.handleBreadCrumbClick);
-  //     }
-  //   })TODO: reaktivieren noch breamcrumbs
+    // Array.from(htmlCollection)
+    // let breadCrumbArray = Array.from(document.getElementsByclassNameName('p-breadcrumb p-component')[0].getElementsByclassNameName('p-menuitem-link'));
+    // breadCrumbArray.map(element => {
+    //   if( element.innerText === 'Scope Overview' ) {
+    //     element.addEventListener('click', this.handleBreadCrumbClick);
+    //   }
+    // })
   }
 
   updateBreadCrumbs = breadCrumbItems => this.setState({ breadCrumbItems});
@@ -158,14 +158,27 @@ class ScopeEditor extends React.Component {
     let updatedConfig = deepCopy(config);
     const scopeName = 'insert here a name for your scope'
 
+    console.log(updatedConfig);
+    if(!updatedConfig) {
+      updatedConfig = { inspectit : { instrumentation : { scopes: { }}}};
+    } else if ( !updatedConfig.inspectit) {
+      updatedConfig.inspectit = { instrumentation : { scopes: {}}}
+    }
+
     console.log('hierx', updatedConfig);
 
     const createType = e.target.parentElement.dataset.createtype;
-    if ( createType === 'a' ) {
+    if ( createType === 'createNew') {
+      updatedConfig.inspectit.instrumentation.scopes[scopeName] = { 
+
+      }
+    }
+    else if ( createType === 'a' ) {
       updatedConfig.inspectit.instrumentation.scopes[scopeName] = { 
         type: {'name': 'insert here the class name', 'matcher-mode': 'EQUALS_FULLY'}, 
         methods: [{name: 'insert here method name', 'matcher-mode': 'EQUALS_FULLY'}]
       }
+      this.setState({text:{classText:' HEEEEEEEEEEEEEEEEEEEEEEEEEELO'}})
     } else if (createType === 'b') {
       updatedConfig.inspectit.instrumentation.scopes[scopeName] = { 
         type: {'name': 'use dropdown', 'matcher-mode': 'STARTS_WITH', 
@@ -180,13 +193,52 @@ class ScopeEditor extends React.Component {
         methods: [{name: 'use dropdown, add common option, add new method matcher option set', 'matcher-mode': 'EQUALS_FULLY',}]
       }
       this.setState({text: {methodText: 'You can describe multiple methods, by their their common visibility property, their common annotations, their common arguments, their common method name for example'}})
+    } else if (createType === 'd') {
+      updatedConfig.inspectit.instrumentation.scopes[scopeName] = { 
+        interfaces: [{'name': 'insert here the class name', 'matcher-mode': 'EQUALS_FULLY'}], 
+        methods: [{name: 'insert here method name', 'matcher-mode': 'EQUALS_FULLY',}]
+      }
+      this.setState({text: {methodText: 'If you know the names of multiple methods, you can name each in another selector box. Click "add method selector" '}})
+    } else if (createType === 'e') {
+      updatedConfig.inspectit.instrumentation.scopes[scopeName] = { 
+        type: { annotations: [{'name': 'insert here the class name', 'matcher-mode': 'EQUALS_FULLY'}] }, 
+        methods: [{name: 'insert here method name', 'matcher-mode': 'EQUALS_FULLY',}]
+      }
+      this.setState({text: {methodText: 'If you know the names of multiple methods, you can name each in another selector box. Click "add method selector" '}})
+    } else if (createType === 'f') {
+      updatedConfig.inspectit.instrumentation.scopes[scopeName] = { 
+        superclass: {'name': 'insert here the class name', 'matcher-mode': 'EQUALS_FULLY'}, 
+        methods: [{name: 'insert here method name', 'matcher-mode': 'EQUALS_FULLY',}]
+      }
+      this.setState({text: {methodText: 'If you know the names of multiple methods, you can name each in another selector box. Click "add method selector" '}})
     }
+    
     const breadCrumbItems = [{'label': 'Scope Overview'}, {'label': scopeName }];
     this.setState({ scopeObject: updatedConfig.inspectit.instrumentation.scopes[scopeName], showOverview: false, breadCrumbItems, currentlyDisplayScopeName: scopeName})
+
+    console.log('xxa', updatedConfig);
     onUpdate(updatedConfig);
   }
 
-  changeName = value => this.setState({currentlyDisplayScopeName: value})
+  changeName = value => {
+    const { config, onUpdate } = this.props;
+    const copiedScope = deepCopy(config.inspectit.instrumentation.scopes[this.state.currentlyDisplayScopeName])
+    const copiedScopes = deepCopy(config.inspectit.instrumentation.scopes)
+    const updatedConfig = deepCopy(config);
+
+    delete copiedScopes[this.state.currentlyDisplayScopeName];
+    copiedScopes[value] = copiedScope;
+
+    updatedConfig.inspectit.instrumentation.scopes = copiedScopes;
+    const breadCrumbItems = [{'label': 'Scope Overview'}, {'label': value }];
+    this.setState({currentlyDisplayScopeName: value, breadCrumbItems})
+    onUpdate(updatedConfig);
+  }
+
+  showOverview = () => {
+    this.setState({showOverview: true})
+    this.props.showAceEditor();
+  }
 
   render() {
     const { config, ...rest } = this.props;
@@ -254,8 +306,7 @@ class ScopeEditor extends React.Component {
             showOverview && (
               <div style={{ padding: '25px', borderRadius: '10px' , marginLeft: '15px', marginTop: '25px', background:'#EEEEEE '}} classNameName="content-section implementation">
 
-                <h4>The following scopes exist within the selected file</h4>
-                <p> A single scope can be considered as a set of methods and is used by rules to determine which instrumentation should apply to which method.</p>
+              <h4>The following scopes exist within the selected file</h4>
               <div style={{...itemStyle}}>
                 <ListBox filter={true} filterPlaceholder="Search" options={scopeNameList} itemTemplate={this.itemTemplate}
                   style={{width:'500px'}} listStyle={{}}/>
@@ -268,26 +319,52 @@ class ScopeEditor extends React.Component {
               </div>
                 <div style={{marginTop:'25px'}}>
                   <div >
-                    <h4>I want to trace a method invocation. Therefore i create a scope</h4>
-                    <p> Following example scopes are possible to model that use case</p>
+                    <div style={{display:'inline-block', marginRight: '15px', alignContent: 'center', marginTop: '25px', border:'1px solid grey', background:'white', borderRadius:10, padding:15}} >
+                      <p>create new scope</p>
+                      <Button style={{marginBottom: '15px', marginLeft: '15px' }} data-createtype='createNew' onClick={this.onClick} label='create ' ></Button>
+                    </div>
+
+                    <div style={{display:'inline-block', height:'135px', marginRight: '15px', alignContent: 'center', marginTop: '25px', border:'1px solid grey', background:'white', borderRadius:10, padding:15}} >
+                    <p> What is a scope</p> 
+                    <Button style={{marginLeft:'15px'}} icon="pi pi-question"  tooltip=" A single scope can be considered as a set of methods within a set of class or classes and is used by rules to determine which instrumentation should apply to which method."></Button>
+                    </div>
                   </div>
 
-                  <div style={{...itemStyle}}>
-                    <p> The scope should trace 1 method, within 1 class</p>
+                    <h4 style={{marginBottom:0}}> Quick start</h4>
+                  <div style={{...itemStyle, marginRight:'15px', display:'inline-block', alignContent: 'center', borderRadius:10, padding:15}}>
+                    <p> The scope should trace <span style={{color:'red'}}>1 method, within 1 class </span></p>
                     <p> The method and class name are known to me</p>
                     <Button data-createtype='a' onClick={this.onClick} label='create'></Button>
                   </div>
 
-                  <div style={{...itemStyle}}>
-                    <p> The scope should trace 1 method, within multiple classes</p>
+                  <div style={{...itemStyle, marginRight:'15px', display:'inline-block', alignContent: 'center', borderRadius:10, padding:15}}>
+                    <p> The scope should trace <span style={{color:'red'}}> 1 method, within multiple classes </span></p>
                     <p> The method name is known to me</p>
                     <Button data-createtype='b' onClick={this.onClick} label='create'></Button>
                   </div>
 
-                  <div style={{...itemStyle}}>
-                    <p> The scope should trace multiple methods, within 1 class</p>
+                  <div style={{...itemStyle, marginRight:'15px', display:'inline-block', alignContent: 'center', borderRadius:10, padding:15}}>
+                    <p> The scope should trace <span style={{color:'red'}}>multiple methods, within 1 class</span></p>
                     <p> The class name is known to me</p>
                     <Button data-createtype='c' onClick={this.onClick } label='create'></Button>
+                  </div>
+
+                  <div style={{...itemStyle, marginRight:'15px', display:'inline-block', alignContent: 'center', borderRadius:10, padding:15}}>
+                    <p> The scope should trace <span style={{color:'red'}}>a class, which implements an interface</span></p>
+                    <p> The interface name is known to me</p>
+                    <Button data-createtype='d' onClick={this.onClick } label='create'></Button>
+                  </div>
+
+                  <div style={{...itemStyle, marginRight:'15px', display:'inline-block', alignContent: 'center', borderRadius:10, padding:15}}>
+                    <p> The scope should trace <span style={{color:'red'}}>a class, which has an specific annotation</span></p>
+                    <p> The annotation is known to me</p>
+                    <Button data-createtype='e' onClick={this.onClick } label='create'></Button>
+                  </div>
+
+                  <div style={{...itemStyle, marginRight:'15px', display:'inline-block', alignContent: 'center', borderRadius:10, padding:15}}>
+                    <p> The scope should trace <span style={{color:'red'}}>a class, that inherits from a superclass</span></p>
+                    <p> The superclass name is known to me</p>
+                    <Button data-createtype='f' onClick={this.onClick } label='create'></Button>
                   </div>
 
           
@@ -295,7 +372,7 @@ class ScopeEditor extends React.Component {
               </div>
           )}
           { !showOverview && (
-            <Scope changeName={this.changeName} text={text} currentlyDisplayScopeName={currentlyDisplayScopeName} scopeObject={scopeObject} updateBreadCrumbs={this.updateBreadCrumbs} onUpdate={(updatedValue) => this.onUpdate(updatedValue, currentlyDisplayScopeName)} />
+            <Scope showOverview={this.props.showAceEditor} changeName={this.changeName} text={text} currentlyDisplayScopeName={currentlyDisplayScopeName} scopeObject={scopeObject} updateBreadCrumbs={this.updateBreadCrumbs} onUpdate={(updatedValue) => this.onUpdate(updatedValue, currentlyDisplayScopeName)} />
             )} 
         </div>
       </div>

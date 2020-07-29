@@ -1,13 +1,10 @@
-import Heading from "./Heading";
 import InterfaceListContainer from "./InterfaceListContainer"
 import Name from "./Name"
 import ValueBox from "./ValueBox";
-import AnnotationContainer from "./AnnotationContainer";
-import deepCopy from "json-deep-copy";
-import MultipleValueBox from "./MultipleItemBoxContainer";
 import Annotations from "./Annotations";
 import SelectorBox from "./SelectorBox";
 import MultipleItemBoxContainer from "./MultipleItemBoxContainer";
+import deepCopy from "json-deep-copy";
 
 
 function ClassSelectorContainer({ scopeObject, onUpdate}) {

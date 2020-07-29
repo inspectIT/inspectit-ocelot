@@ -2,7 +2,7 @@ import { cloneDeep } from 'lodash';
 import deepCopy from 'json-deep-copy';
 import {Checkbox} from 'primereact/checkbox';
 
-class MethodVisibility extends React.Component {
+class VisibilityDisplay extends React.Component {
   componentBorderRef= React.createRef();
 
   onUpdate = (value,e) => {
@@ -57,4 +57,4 @@ class MethodVisibility extends React.Component {
 
 }
 
-export default MethodVisibility;
+export default VisibilityDisplay;

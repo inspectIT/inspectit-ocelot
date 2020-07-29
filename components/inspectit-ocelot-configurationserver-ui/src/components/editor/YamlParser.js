@@ -68,15 +68,16 @@ class YamlParser extends React.Component {
   onUpdate = (newConfig) => {
     const updatedYamlConfig = this.parser.dump(newConfig);
     const configNormalized = this.isNormalized();
-
-    if (configNormalized) {
-      this.props.onUpdate(updatedYamlConfig);
-    } else {
-      this.setState({
-        showWarn: true,
-        pendingConfigUpdate: updatedYamlConfig,
-      });
-    }
+    this.props.onUpdate(updatedYamlConfig);
+    // if (configNormalized) {
+    //   this.props.onUpdate(updatedYamlConfig);
+    // }
+    // else {
+    //   this.setState({
+    //     showWarn: true,
+    //     pendingConfigUpdate: updatedYamlConfig,
+    //   });
+    // }
   };
 
   onAcceptNormalization = () => {
@@ -118,7 +119,7 @@ class YamlParser extends React.Component {
             text-align: center;
           }
         `}</style>
-        {/* <Dialog
+        <Dialog
           header="Config file overwrite"
           footer={
             <div>
@@ -134,7 +135,9 @@ class YamlParser extends React.Component {
         >
           Your configuration file has comments or other non-yaml data. These will be overwritten if you apply the given update. Do you want
           to continue?
-        </Dialog> */}
+        </Dialog>
+
+        { this.onAcceptNormalization} 
         {!isError && this.props.children(this.onUpdate, config)}
         {isError && (
           <div className="errorBox">

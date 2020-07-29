@@ -1,5 +1,5 @@
 import ClassSelector from "./ClassSelector";
-import MethodSelectorListContainer from "./MethodSelectorListContainer";
+import MethodSelectorListContainer from "./MethodContainerSelectorListContainer";
 import deepCopy from "json-deep-copy";
 
 // obsolete solution, delete component

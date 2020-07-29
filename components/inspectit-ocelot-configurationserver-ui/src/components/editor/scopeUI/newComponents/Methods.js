@@ -1,6 +1,6 @@
 import Heading from "./Heading";
 import Item from "./Item";
-import Method from "./Method";
+import Method from "./MethodContainer";
 import { Button } from "primereact/button";
 
 // parent attribute = 'interfaces'

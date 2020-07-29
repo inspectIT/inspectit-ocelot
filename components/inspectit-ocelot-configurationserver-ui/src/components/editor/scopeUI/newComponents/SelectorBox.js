@@ -59,7 +59,7 @@ function SelectorBox ( props){
         
       <div ref={componentBorderRef} style={{ ...style, width: '100%', position:'relative', height: '', padding: '25px', background: '#EEEEEE' , borderRadius: '10px', marginTop: '25px', marginBottom: '25px' }}>
       <Heading  attribute={attribute} text={text} semantic={semantic} count={count} />
-      { splitButtonItems.length >0  && <SplitButton tooltip="TODO: tooltip? or not" style={{position:'absolute', top:'10px' , right:'10px', zIndex: 9001}} label="add " icon="pi pi-plus" model={splitButtonItems}></SplitButton> }
+      { splitButtonItems.length >0  && <SplitButton tooltip="TODO: tooltip? or not" style={{position:'absolute', top:'10px' , right:'10px', zIndex: 9001}}  label='more options'  model={splitButtonItems}></SplitButton> }
       <i onMouseOver={handleMouseOver} onMouseLeave={handleMouseLeave} onClick={deleteItem} style={{ position: 'absolute', bottom:'-30px', right: '0px', fontSize:'30px',  color: 'red', opacity:'0.8'}} className="pi pi-times-circle"/>
         
       { children}

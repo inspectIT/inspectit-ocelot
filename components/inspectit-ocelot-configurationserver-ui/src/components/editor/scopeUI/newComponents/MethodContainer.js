@@ -6,7 +6,7 @@ import deepCopy from 'json-deep-copy';
 import {SplitButton} from 'primereact/splitbutton';
 import { getSplitButtonsItems , enableCreateAttributeWithinSplitItemEntries} from './utils/splitButtonItems/getSplitButtonItems';
 import { splittButtonItemIsInvalid, adjustInvalidSplitButtonItem } from './utils/splitButtonItems/invalidLabelsTopDown';
-import MethodVisibility from "./MethodVisibility";
+import VisibilityDisplay from "./VisibilityDisplay";
 import Name from "./Name";
 import ValueBox from "./ValueBox";
 import BooleanItem from "./BooleanItem";
@@ -16,7 +16,7 @@ import Arguments from "./Arguments";
 
 // ValueBox onUpdate is for removing the whole attribute via remove icon and for adding attribute 
 
-class Method extends React.Component {
+class MethodContainer extends React.Component {
   state = { splitMenuItems: [] }
 
   // reference for red highlighting over remove icon hover
@@ -97,7 +97,7 @@ class Method extends React.Component {
         {Object.keys(item).map( attribute => 
           <React.Fragment>
             { attribute === 'name' && <ValueBox  item={item} attributesToDelete={['name','matcher-mode']} onUpdate={onUpdate} ><Name text={' ... has a name, that ' } onUpdate={(updatedValue) => this.props.onUpdate(updatedValue)} item={item} /> </ValueBox> }
-            { attribute === 'visibility' && item[attribute] && <ValueBox  item={item} attributesToDelete={[attribute]} onUpdate={onUpdate} ><MethodVisibility onUpdate={(updateObj) => this.onGenericUpdate(updateObj, 'visibility')} item={item[attribute]}  /> </ValueBox> }
+            { attribute === 'visibility' && item[attribute] && <ValueBox  item={item} attributesToDelete={[attribute]} onUpdate={onUpdate} ><VisibilityDisplay onUpdate={(updateObj) => this.onGenericUpdate(updateObj, 'visibility')} item={item[attribute]}  /> </ValueBox> }
             { attribute === 'annotations' &&  item[attribute] && <ValueBox  item={item} attributesToDelete={[attribute]} onUpdate={onUpdate} ><Annotations onUpdate={(updateObj) => this.onGenericUpdate(updateObj, 'annotations')} items={item[attribute]} /> </ValueBox>}
             { attribute === 'arguments' && <ValueBox  item={item} attributesToDelete={[attribute]} onUpdate={(updatedValue) => this.props.onUpdate(updatedValue, attribute)} ><Arguments onUpdate={(updateObj) => this.onGenericUpdate(updateObj, 'arguments')} items={item[attribute]} /> </ValueBox> }
             { attribute === 'is-constructor' && attribute && <ValueBox  item={item} attributesToDelete={[attribute]} onUpdate={onUpdate} ><BooleanItem onUpdate={(updateObj) => this.onGenericUpdate(updateObj, 'is-constructor')} text={'is a constructor'} item={item[attribute]} /> </ValueBox> }
@@ -110,4 +110,4 @@ class Method extends React.Component {
 
 }
 
-export default Method;
+export default MethodContainer;
