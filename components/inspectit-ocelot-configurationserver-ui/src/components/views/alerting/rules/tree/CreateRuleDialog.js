@@ -27,16 +27,19 @@ const CreateRuleDialog = ({ templates, initialTemplate, visible, onHide, reserve
 
   useEffect(() => {
     const reservedName = reservedNames.some((n) => n === name);
+    let errorMessage;
     if (reservedName) {
-      setError('An alerting rule with the given name already exists');
+      errorMessage = 'An alerting rule with the given name already exists';
     }
 
     const validName = !!name && validId(name);
     if (!error && !validName) {
-      setError('Invalid name! Name must only contain letter, number, _, - or . characters.');
+      errorMessage = !name ? 'Name must not be empty!' : 'Invalid name! Name must only contain letter, number, _, - or . characters.';
     }
 
-    if (!reservedName && validName && error !== null) {
+    if (errorMessage) {
+      setError(errorMessage);
+    } else if (error !== null) {
       setError(null);
     }
 

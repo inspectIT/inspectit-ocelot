@@ -55,21 +55,26 @@ const CreateEditCopyHandlerDialog = ({
 
   useDeepEffect(() => {
     const reservedName = invalidNames.some((n) => n === name);
+    let errorMessage;
     if (reservedName) {
-      setError('An alerting rule with the given name already exists');
+      errorMessage = 'An alerting rule with the given name already exists';
     }
 
     const validName = !!name && validId(name);
-    if (!error && !validName) {
-      setError('Invalid name! Name must only contain letter, number, _, - or . characters.');
+    if (!validName) {
+      errorMessage = !name ? 'Name must not be empty!' : 'Invalid name! Name must only contain letter, number, _, - or . characters.';
     }
 
     const validTopic = !!topic && validId(topic);
-    if (!error && !validTopic) {
-      setError('Invalid topic name! Topic name must only contain letter, number, _, - or . characters.');
+    if (!validTopic) {
+      errorMessage = !topic
+        ? 'Topic must not be empty!'
+        : 'Invalid topic name! Topic name must only contain letter, number, _, - or . characters.';
     }
 
-    if (!reservedName && validName && validTopic && error !== null) {
+    if (errorMessage) {
+      setError(errorMessage);
+    } else if (error !== null) {
       setError(null);
     }
 

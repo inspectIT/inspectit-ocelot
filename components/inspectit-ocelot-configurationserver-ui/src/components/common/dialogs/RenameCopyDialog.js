@@ -24,16 +24,19 @@ const RenameCopyDialog = ({ name, reservedNames, retrieveReservedNames, visible,
 
   useEffect(() => {
     const reservedName = invalidNames.some((n) => n === newName);
+    let errorMessage;
     if (reservedName) {
-      setError('An element with the given name already exists!');
+      errorMessage = 'An element with the given name already exists!';
     }
 
     const validName = !!newName && validateName(newName);
     if (!validName) {
-      setError('Name contains invalid characters!');
+      errorMessage = !newName ? 'Name must not be empty!' : 'Name contains invalid characters!';
     }
 
-    if (!reservedName && validName && error !== null) {
+    if (errorMessage) {
+      setError(errorMessage);
+    } else if (error !== null) {
       setError(null);
     }
     setValidState(!reservedName && validName && name !== newName);
