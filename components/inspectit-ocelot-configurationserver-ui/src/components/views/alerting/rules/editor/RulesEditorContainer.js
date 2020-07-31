@@ -35,8 +35,8 @@ const RulesEditorContainer = ({ readOnly, availableTopics, selection, onSaved })
         const templatePromise = selection.template ? fetchTemplate(selection.template) : null;
         const rulePromise = selection.rule ? fetchRule(selection.rule) : null;
 
-        newTemplateContent = !!templatePromise ? await templatePromise : undefined;
-        newRuleContent = !!rulePromise ? await rulePromise : undefined;
+        newTemplateContent = templatePromise ? await templatePromise : undefined;
+        newRuleContent = rulePromise ? await rulePromise : undefined;
         setTemplateContent(newTemplateContent);
         setRuleContent(newRuleContent);
       } catch (error) {
@@ -115,8 +115,8 @@ const RulesEditorContainer = ({ readOnly, availableTopics, selection, onSaved })
             onSave={onSave}
           />
         ) : (
-            <DefaultToolbar name={currentName} icon={currentName ? templateIcon : ''} />
-          )}
+          <DefaultToolbar name={currentName} icon={currentName ? templateIcon : ''} />
+        )}
 
         <RulesEditor
           availableTopics={availableTopics}
@@ -193,7 +193,7 @@ RulesEditorContainer.defaultProps = {
   availableTopics: [],
   unsavedRuleContents: {},
   readOnly: false,
-  onSaved: () => { },
+  onSaved: () => {},
 };
 
 export default RulesEditorContainer;
