@@ -43,8 +43,6 @@ public class PrometheusExporterServiceIntTest {
 
     private static String SUT_URL = "http://test.com/login";
 
-    private static String METRIC_NAME = "page_ready_time";
-
     private static String BEACON_KEY_NAME = "t_page";
 
     private static String FAKE_BEACON_KEY_NAME = "does_not_exist";
@@ -113,8 +111,8 @@ public class PrometheusExporterServiceIntTest {
         await().atMost(15, TimeUnit.SECONDS).untilAsserted(() -> {
             HttpResponse response = testClient.execute(new HttpGet("http://localhost:8888/metrics)"));
             ResponseHandler responseHandler = new BasicResponseHandler();
+            assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
             assertThat(responseHandler.handleResponse(response).toString()).doesNotContain("Fake Value");
-            assertGet200("http://localhost:8888/metrics");
         });
     }
 
@@ -133,9 +131,8 @@ public class PrometheusExporterServiceIntTest {
         await().atMost(15, TimeUnit.SECONDS).untilAsserted(() -> {
             HttpResponse response = testClient.execute(new HttpGet("http://localhost:8888/metrics)"));
             ResponseHandler responseHandler = new BasicResponseHandler();
-            assertThat(responseHandler.handleResponse(response).toString()).contains(METRIC_NAME)
-                    .contains(SUT_URL)
-                    .contains("12");
+            assertThat(responseHandler.handleResponse(response).toString())
+                    .contains("page_ready_time_SUM{COUNTRY_CODE=\"\",OS=\"\",URL=\"http://test.com/login\",} 12.0");
         });
     }
 }
