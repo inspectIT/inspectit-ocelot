@@ -208,7 +208,7 @@ class StatusTable extends React.Component {
     if (rowData.sourceBranch) {
       branch = rowData.sourceBranch;
     }
-    const isLiveBranch = branch === 'LIVE';
+    const isLiveBranch = branch === 'live';
     const iconClass = classnames('pi', {
       'pi-circle-on': isLiveBranch,
       'pi-circle-off': !isLiveBranch,
@@ -268,7 +268,7 @@ class StatusTable extends React.Component {
       <div className="this">
         <style jsx>{`
           .this :global(.p-datatable) {
-            min-width: 1280px;
+            min-width: 1430px;
           }
 
           .this :global(.p-datatable) :global(th) {
