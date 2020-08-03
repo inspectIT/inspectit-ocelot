@@ -204,7 +204,7 @@ class StatusTable extends React.Component {
   };
 
   sourceBranchTemplate = (rowData) => {
-    let branch = 'Unknown Branch'
+    let branch = 'Unknown Branch';
     if (rowData.sourceBranch) {
       branch = rowData.sourceBranch;
     }
@@ -215,7 +215,7 @@ class StatusTable extends React.Component {
       live: isLiveBranch,
       workspace: !isLiveBranch,
     });
-  
+
     return (
       <>
         <style jsx>{`
@@ -233,7 +233,7 @@ class StatusTable extends React.Component {
             color: #616161;
           }
         `}</style>
-  
+
         <div className="this">
           <i className={iconClass}></i>
           <span>{branch}</span>
