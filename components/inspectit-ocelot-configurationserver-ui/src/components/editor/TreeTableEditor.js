@@ -336,8 +336,8 @@ class TreeTableEditor extends React.Component {
       case schemaType.ENUM:
         if (!this.state.enumOptions.length || this.state.oldNode.key != node.key) {
           this.fetchDropdownOptions(node.key, type);
-          this.state.oldNode = node;
-          this.state.enumOptions = [];
+          this.setState({ oldNode: node });
+          this.setState({ enumOptions: [] });
         }
         return (
           <EnumEditor
@@ -511,6 +511,7 @@ var StringEditor = ({ node, onPropValueChange, onPropValueRemove, wrapWithExtras
 
 /** Editor for Enums */
 var EnumEditor = ({ node, options, loadingMessage, onPropValueChange, onPropValueRemove, wrapWithExtras }) => {
+  const defaultValue = loadingMessage;
   let disable = !options.length;
   let currentValue = node.value;
   if (disable) {
