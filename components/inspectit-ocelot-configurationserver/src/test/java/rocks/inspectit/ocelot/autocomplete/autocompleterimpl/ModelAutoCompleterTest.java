@@ -28,16 +28,7 @@ public class ModelAutoCompleterTest {
 
             List<String> result = completer.getSuggestions(input);
 
-            assertThat(result).containsExactlyInAnyOrder(
-                    "actions",
-                    "data",
-                    "exclude-lambdas",
-                    "ignored-bootstrap-packages",
-                    "ignored-packages",
-                    "internal",
-                    "rules",
-                    "scopes",
-                    "special");
+            assertThat(result).containsExactlyInAnyOrder("actions", "data", "exclude-lambdas", "ignored-bootstrap-packages", "ignored-packages", "internal", "rules", "scopes", "special");
         }
 
         @Test
@@ -46,12 +37,7 @@ public class ModelAutoCompleterTest {
 
             List<String> result = completer.getSuggestions(input);
 
-            assertThat(result).containsExactlyInAnyOrder(
-                    "advanced",
-                    "interfaces",
-                    "methods",
-                    "superclass",
-                    "type");
+            assertThat(result).containsExactlyInAnyOrder("advanced", "interfaces", "methods", "superclass", "type");
         }
 
         @Test
@@ -60,21 +46,7 @@ public class ModelAutoCompleterTest {
 
             List<String> result = completer.getSuggestions(input);
 
-            assertThat(result).containsExactlyInAnyOrder(
-                    "config",
-                    "env",
-                    "exporters",
-                    "instrumentation",
-                    "logging",
-                    "metrics",
-                    "plugins",
-                    "privacy",
-                    "publish-open-census-to-bootstrap",
-                    "self-monitoring",
-                    "service-name",
-                    "tags",
-                    "thread-pool-size",
-                    "tracing");
+            assertThat(result).containsExactlyInAnyOrder("config", "env", "exporters", "instrumentation", "logging", "metrics", "plugins", "privacy", "publish-open-census-to-bootstrap", "self-monitoring", "service-name", "tags", "thread-pool-size", "tracing");
         }
 
         @Test
@@ -84,6 +56,19 @@ public class ModelAutoCompleterTest {
             List<String> result = completer.getSuggestions(input);
 
             assertThat(result).isEmpty();
+        }
+
+        @Test
+        void endsInEnum() {
+            List<String> input = Arrays.asList("inspectit", "tracing", "add-common-tags");
+
+            List<String> result = completer.getSuggestions(input);
+
+            assertThat(result).hasSize(4);
+            assertThat(result).contains("NEVER");
+            assertThat(result).contains("ON_GLOBAL_ROOT");
+            assertThat(result).contains("ON_LOCAL_ROOT");
+            assertThat(result).contains("ALWAYS");
         }
 
         @Test
@@ -148,21 +133,7 @@ public class ModelAutoCompleterTest {
         void getPropertiesInspectit() {
             List<String> result = completer.getProperties(InspectitConfig.class);
 
-            assertThat(result).containsExactlyInAnyOrder(
-                    "config",
-                    "env",
-                    "exporters",
-                    "instrumentation",
-                    "logging",
-                    "metrics",
-                    "plugins",
-                    "privacy",
-                    "publish-open-census-to-bootstrap",
-                    "self-monitoring",
-                    "service-name",
-                    "tags",
-                    "thread-pool-size",
-                    "tracing");
+            assertThat(result).containsExactlyInAnyOrder("config", "env", "exporters", "instrumentation", "logging", "metrics", "plugins", "privacy", "publish-open-census-to-bootstrap", "self-monitoring", "service-name", "tags", "thread-pool-size", "tracing");
         }
     }
 }

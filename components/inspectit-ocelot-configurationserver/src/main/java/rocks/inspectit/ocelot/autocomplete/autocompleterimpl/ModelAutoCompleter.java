@@ -33,12 +33,18 @@ public class ModelAutoCompleter implements AutoCompleter {
      * Returns the names of the properties in a given path
      *
      * @param propertyPath The path to a property one wants to recieve the properties of
+     *
      * @return The names of the properties of the given path as list
      */
     private List<String> collectProperties(List<String> propertyPath) {
         Type endType = PropertyPathHelper.getPathEndType(propertyPath, InspectitConfig.class);
         if (CollectionUtils.isEmpty(propertyPath) || ((propertyPath.size() == 1) && propertyPath.get(0).equals(""))) {
             return getProperties(InspectitConfig.class);
+        }
+        if (endType instanceof Class<?> && ((Class<?>) endType).isEnum()) {
+            return Arrays.stream(((Class<?>) endType).getEnumConstants())
+                    .map(Object::toString)
+                    .collect(Collectors.toList());
         }
         if (endType == null || PropertyPathHelper.isTerminal(endType) || PropertyPathHelper.isListOfTerminalTypes(endType) || !(endType instanceof Class<?>)) {
             return Collections.emptyList();
@@ -50,6 +56,7 @@ public class ModelAutoCompleter implements AutoCompleter {
      * Return the properties of a given class
      *
      * @param beanClass the class one wants the properties of
+     *
      * @return the properties of the given class
      */
     @VisibleForTesting

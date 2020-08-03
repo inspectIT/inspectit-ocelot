@@ -7,8 +7,10 @@ import { Menubar } from 'primereact/menubar';
 import { Message } from 'primereact/message';
 import { Row } from 'primereact/row';
 import { TreeTable } from 'primereact/treetable';
+import { Dropdown } from 'primereact/dropdown';
 import PropTypes from 'prop-types';
 import React from 'react';
+import axios from '../../lib/axios-api';
 
 // helper for a schema property type constants
 const schemaType = {
@@ -49,6 +51,8 @@ class TreeTableEditor extends React.Component {
       data: undefined,
       expandedKeys: DEFAULT_EXPANDED_KEYS,
       showAll: true,
+      enumOptions: [],
+      oldNode: '',
     };
   }
 
@@ -329,6 +333,22 @@ class TreeTableEditor extends React.Component {
             wrapWithExtras={this.wrapWithExtras}
           />
         );
+      case schemaType.ENUM:
+        if (!this.state.enumOptions.length || this.state.oldNode.key != node.key) {
+          this.fetchDropdownOptions(node.key, type);
+          this.state.oldNode = node;
+          this.state.enumOptions = [];
+        }
+        return (
+          <EnumEditor
+            node={node}
+            options={this.state.enumOptions}
+            loadingMessage={'loading...'}
+            onPropValueChange={this.onPropValueChange}
+            onPropValueRemove={this.onPropValueRemove}
+            wrapWithExtras={this.wrapWithExtras}
+          />
+        );
       case schemaType.INTEGER:
         return (
           <NumberEditor
@@ -359,6 +379,31 @@ class TreeTableEditor extends React.Component {
         );
       default:
         return noEditor;
+    }
+  };
+
+  fetchDropdownOptions = (configPath, schemaType) => {
+    if (schemaType == 'ENUM') {
+      axios
+        .post('/autocomplete', {
+          path: configPath,
+        })
+        .then((response) => {
+          const suggestions = response.data;
+          if (suggestions) {
+            const result = suggestions.map((suggestion) => {
+              return {
+                key: suggestion,
+                value: suggestion,
+              };
+            });
+
+            this.setState({ enumOptions: result });
+          }
+        })
+        .catch((error) => {
+          console.warn('Could not fetch autocompletion results.', error);
+        });
     }
   };
 
@@ -458,6 +503,54 @@ var StringEditor = ({ node, onPropValueChange, onPropValueRemove, wrapWithExtras
     return wrapWithExtras(component, {
       node,
       defaultSupplier: () => (defaultValue && defaultValue) || '',
+      onPropValueChange,
+      onPropValueRemove,
+    });
+  }
+};
+
+/** Editor for Enums */
+var EnumEditor = ({ node, options, loadingMessage, onPropValueChange, onPropValueRemove, wrapWithExtras }) => {
+  let disable = !options.length;
+  let currentValue = node.value;
+  if (disable) {
+    options.push({
+      key: loadingMessage,
+      value: loadingMessage,
+    });
+    currentValue = loadingMessage;
+  }
+
+  const onChange = (e) => {
+    onPropValueChange(node.key, e.value);
+  };
+  // component to render
+  const component = () => (
+    <Dropdown
+      value={currentValue}
+      options={options}
+      optionLabel={'key'}
+      optionValue={'value'}
+      onChange={onChange}
+      disabled={
+        disable ||
+        JSON.stringify(options) ===
+          JSON.stringify([
+            {
+              key: loadingMessage,
+              value: loadingMessage,
+            },
+          ])
+      }
+    />
+  );
+
+  if (!wrapWithExtras) {
+    return component();
+  } else {
+    return wrapWithExtras(component, {
+      node,
+      defaultSupplier: () => (defaultValue && defaultValue) || 0,
       onPropValueChange,
       onPropValueRemove,
     });
