@@ -58,7 +58,7 @@ public class AgentStatusManager {
                 .attributes(agentAttributes)
                 .lastConfigFetch(new Date())
                 .mappingName(resultConfiguration == null ? null : resultConfiguration.getMapping().getName())
-                .branchUsed(resultConfiguration == null ? null : resultConfiguration.getMapping()
+                .sourceBranch(resultConfiguration == null ? null : resultConfiguration.getMapping()
                         .getSourceBranch()
                         .getBranchName())
                 .build();

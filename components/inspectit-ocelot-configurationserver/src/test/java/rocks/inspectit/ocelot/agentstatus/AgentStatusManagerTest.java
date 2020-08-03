@@ -52,7 +52,7 @@ public class AgentStatusManagerTest {
                 assertThat(status.getAttributes()).isEqualTo(attributes);
                 assertThat(status.getMappingName()).isEqualTo("test-conf");
                 assertThat(status.getMetaInformation().getAgentId()).isEqualTo("aid");
-                assertThat(status.getBranchUsed()).isEqualTo("workspace");
+                assertThat(status.getSourceBranch()).isEqualTo("workspace");
                 assertThat(status.getLastConfigFetch()).isNotNull();
             });
         }
@@ -66,7 +66,7 @@ public class AgentStatusManagerTest {
                 assertThat(status.getAttributes()).isEqualTo(attributes);
                 assertThat(status.getMappingName()).isNull();
                 assertThat(status.getMetaInformation()).isNull();
-                assertThat(status.getBranchUsed()).isNull();
+                assertThat(status.getSourceBranch()).isNull();
                 assertThat(status.getLastConfigFetch()).isNotNull();
             });
         }
@@ -83,7 +83,7 @@ public class AgentStatusManagerTest {
             assertThat(manager.getAgentStatuses()).hasSize(1).anySatisfy(status -> {
                 assertThat(status.getAttributes()).isEqualTo(attributes);
                 assertThat(status.getMappingName()).isEqualTo("test-conf");
-                assertThat(status.getBranchUsed()).isEqualTo("workspace");
+                assertThat(status.getSourceBranch()).isEqualTo("workspace");
                 assertThat(status.getLastConfigFetch()).isNotNull();
             });
         }
@@ -112,7 +112,7 @@ public class AgentStatusManagerTest {
             assertThat(manager.getAgentStatuses()).hasSize(1).anySatisfy(status -> {
                 assertThat(status.getAttributes()).isEqualTo(attributes);
                 assertThat(status.getMappingName()).isEqualTo("test-conf");
-                assertThat(status.getBranchUsed()).isEqualTo("workspace");
+                assertThat(status.getSourceBranch()).isEqualTo("workspace");
                 assertThat(status.getLastConfigFetch()).isAfter(firstFetch);
             });
         }

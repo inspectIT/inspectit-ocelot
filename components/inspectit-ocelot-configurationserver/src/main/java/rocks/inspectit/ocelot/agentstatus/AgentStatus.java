@@ -41,5 +41,5 @@ public class AgentStatus {
     /**
      * The branch of which the mapping delivered to the agent originates.
      */
-    private String branchUsed;
+    private String sourceBranch;
 }
