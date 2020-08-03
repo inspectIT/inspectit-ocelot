@@ -36,9 +36,9 @@ jobs:
       - name: assemble
         run: ./gradlew assemble
       - name: test
-        run: ./gradlew test
+        run: ./gradlew test --info
       - name: systemTest
-        run: ./gradlew systemTest
+        run: ./gradlew systemTest --info
       - name: codeCoverage if oracle-jdk8
         if: matrix.dockerimage == 'sgrio/java:jdk_8_ubuntu' && github.event_name == 'pull_request'
         run: |
