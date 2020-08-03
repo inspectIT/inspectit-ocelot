@@ -109,7 +109,6 @@ public class PrometheusExporterServiceIntTest {
         beacon.put(FAKE_BEACON_KEY_NAME, "Fake Value");
 
         await().atMost(15, TimeUnit.SECONDS).untilAsserted(() -> {
-            assertGet200("http://localhost:8888/metrics");
             HttpResponse response = testClient.execute(new HttpGet("http://localhost:8888/metrics)"));
             ResponseHandler responseHandler = new BasicResponseHandler();
             assertThat(responseHandler.handleResponse(response).toString()).isNotEmpty();
