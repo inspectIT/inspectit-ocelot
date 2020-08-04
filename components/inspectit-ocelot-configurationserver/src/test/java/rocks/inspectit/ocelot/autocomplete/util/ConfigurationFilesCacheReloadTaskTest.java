@@ -7,6 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.yaml.snakeyaml.error.YAMLException;
 import rocks.inspectit.ocelot.file.FileInfo;
 import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
 
@@ -16,8 +17,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ConfigurationFilesCacheReloadTaskTest {
@@ -38,7 +38,6 @@ public class ConfigurationFilesCacheReloadTaskTest {
     public class LoadYamlFile {
 
         @Test
-        @SuppressWarnings("unchecked")
         public void testLoadYaml() {
             String testPath = "mockPath";
             String yamlContent = "i am a:\n        - test\n        - yaml";
@@ -46,19 +45,29 @@ public class ConfigurationFilesCacheReloadTaskTest {
 
             Object output = reloadTask.loadYamlFile(testPath);
 
-            assertThat(output)
-                    .isInstanceOf(Map.class);
-            assertThat((Map<Object, Object>) output)
-                    .hasSize(1)
-                    .containsEntry("i am a", Arrays.asList("test", "yaml"));
+            assertThat(output).isInstanceOf(Map.class);
+            assertThat((Map<Object, Object>) output).hasSize(1).containsEntry("i am a", Arrays.asList("test", "yaml"));
         }
 
         @Test
-        public void fileManagerReturnsNull() throws IOException {
+        public void fileManagerReturnsNull() {
             String testPath = "mockPath";
             when(fileAccessor.readConfigurationFile(any())).thenReturn(Optional.empty());
 
             Object output = reloadTask.loadYamlFile(testPath);
+
+            assertThat(output).isEqualTo(null);
+        }
+
+        @Test
+        public void exceptionOnYamlParsing() {
+            String testPath = "mockPath";
+            String yamlContent = "foo:bar";
+            when(fileAccessor.readConfigurationFile(any())).thenReturn(Optional.of(yamlContent));
+            ConfigurationFilesCacheReloadTask spyReloadTask = spy(reloadTask);
+            when(spyReloadTask.parseYaml("mockPath")).thenThrow(new YAMLException("test"));
+
+            Object output = spyReloadTask.loadYamlFile(testPath);
 
             assertThat(output).isEqualTo(null);
         }

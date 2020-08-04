@@ -1,0 +1,12 @@
+{
+  "link": {
+    "rel": "self",
+    "href": "/kapacitor/v1/templates/windowed_baseline"
+  },
+  "id": "windowed_baseline",
+  "type": "batch",
+  "vars": {},
+  "error": "",
+  "created": "2020-07-07T08:41:38.725505818Z",
+  "modified": "2020-07-07T08:41:38.725505818Z"
+}

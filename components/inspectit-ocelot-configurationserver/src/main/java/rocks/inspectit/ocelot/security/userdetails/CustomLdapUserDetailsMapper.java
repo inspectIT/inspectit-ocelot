@@ -4,7 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import org.springframework.ldap.core.DirContextOperations;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.ldap.userdetails.LdapUserDetailsMapper;
+import org.springframework.security.ldap.userdetails.InetOrgPersonContextMapper;
 import rocks.inspectit.ocelot.config.model.LdapRoleResolveSettings;
 import rocks.inspectit.ocelot.config.model.LdapSettings;
 import rocks.inspectit.ocelot.security.config.UserRoleConfiguration;
@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
  * This class is used to populate user object with roles upon basic authentication when they are
  * authenticated by a ldap server.
  */
-public class CustomLdapUserDetailsMapper extends LdapUserDetailsMapper {
+public class CustomLdapUserDetailsMapper extends InetOrgPersonContextMapper {
 
     private LdapSettings settings;
 
@@ -85,7 +85,6 @@ public class CustomLdapUserDetailsMapper extends LdapUserDetailsMapper {
      *
      * @return True if the given admin group is contained in the authorities. Otherwise false.
      */
-    @SuppressWarnings("deprecation")
     private boolean hasAdminGroup(Collection<? extends GrantedAuthority> authorities) {
         String ldapAdminGroup = settings.getAdminGroup();
         return authorities.stream()

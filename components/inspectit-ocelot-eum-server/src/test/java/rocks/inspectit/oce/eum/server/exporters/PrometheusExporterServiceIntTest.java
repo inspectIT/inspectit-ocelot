@@ -23,9 +23,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -38,9 +40,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class PrometheusExporterServiceIntTest {
 
     private static String URL_KEY = "u";
+
     private static String SUT_URL = "http://test.com/login";
-    private static String METRIC_NAME = "page_ready_time";
+
     private static String BEACON_KEY_NAME = "t_page";
+
     private static String FAKE_BEACON_KEY_NAME = "does_not_exist";
 
     @Autowired
@@ -58,11 +62,16 @@ public class PrometheusExporterServiceIntTest {
      * Sends beacon to mocked endpoint /beacon
      *
      * @param beacon
+     *
      * @throws Exception
      */
     private void sendBeacon(Map<String, String> beacon) throws Exception {
-        List<NameValuePair> params = beacon.entrySet().stream().map(entry -> new BasicNameValuePair(entry.getKey(), entry.getValue())).collect(Collectors.toList());
-        mockMvc.perform(post("/beacon").contentType(MediaType.APPLICATION_FORM_URLENCODED).content(EntityUtils.toString(new UrlEncodedFormEntity(params)))).andExpect(status().isOk());
+        List<NameValuePair> params = beacon.entrySet()
+                .stream()
+                .map(entry -> new BasicNameValuePair(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList());
+        mockMvc.perform(post("/beacon").contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .content(EntityUtils.toString(new UrlEncodedFormEntity(params)))).andExpect(status().isOk());
     }
 
     private Map<String, String> getBasicBeacon() {
@@ -96,12 +105,15 @@ public class PrometheusExporterServiceIntTest {
     public void expectNoViews() throws Exception {
         Map<String, String> beacon = getBasicBeacon();
         beacon.put(FAKE_BEACON_KEY_NAME, "Fake Value");
+
         sendBeacon(beacon);
 
-        HttpResponse response = testClient.execute(new HttpGet("http://localhost:8888/metrics)"));
-        ResponseHandler responseHandler = new BasicResponseHandler();
-        assertThat(responseHandler.handleResponse(response).toString()).doesNotContain("Fake Value");
-        assertGet200("http://localhost:8888/metrics");
+        await().atMost(15, TimeUnit.SECONDS).untilAsserted(() -> {
+            HttpResponse response = testClient.execute(new HttpGet("http://localhost:8888/metrics)"));
+            ResponseHandler responseHandler = new BasicResponseHandler();
+            assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+            assertThat(responseHandler.handleResponse(response).toString()).doesNotContain("Fake Value");
+        });
     }
 
     /**
@@ -116,8 +128,11 @@ public class PrometheusExporterServiceIntTest {
 
         sendBeacon(beacon);
 
-        HttpResponse response = testClient.execute(new HttpGet("http://localhost:8888/metrics)"));
-        ResponseHandler responseHandler = new BasicResponseHandler();
-        assertThat(responseHandler.handleResponse(response).toString()).contains(METRIC_NAME).contains(SUT_URL).contains("12");
+        await().atMost(15, TimeUnit.SECONDS).untilAsserted(() -> {
+            HttpResponse response = testClient.execute(new HttpGet("http://localhost:8888/metrics)"));
+            ResponseHandler responseHandler = new BasicResponseHandler();
+            assertThat(responseHandler.handleResponse(response).toString())
+                    .contains("page_ready_time_SUM{COUNTRY_CODE=\"\",OS=\"\",URL=\"http://test.com/login\",} 12.0");
+        });
     }
 }

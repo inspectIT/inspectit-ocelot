@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.ldap.userdetails.InetOrgPerson;
 import org.springframework.test.util.ReflectionTestUtils;
 import rocks.inspectit.ocelot.error.exceptions.SelfPromotionNotAllowedException;
 import rocks.inspectit.ocelot.events.WorkspaceChangedEvent;
@@ -58,7 +59,8 @@ class VersioningManagerTest extends FileTestBase {
         authentication = mock(Authentication.class);
         when(authentication.getName()).thenReturn("user");
         eventPublisher = mock(ApplicationEventPublisher.class);
-        versioningManager = new VersioningManager(tempDirectory, () -> authentication, eventPublisher);
+
+        versioningManager = new VersioningManager(tempDirectory, () -> authentication, eventPublisher, "test.com");
 
         System.out.println("Test data in: " + tempDirectory.toString());
     }
@@ -235,8 +237,7 @@ class VersioningManagerTest extends FileTestBase {
             Git git = (Git) ReflectionTestUtils.getField(versioningManager, "git");
             git.checkout().setName(Branch.LIVE.getBranchName()).call();
 
-            assertThatIllegalStateException()
-                    .isThrownBy(() -> versioningManager.commitAllChanges("test"))
+            assertThatIllegalStateException().isThrownBy(() -> versioningManager.commitAllChanges("test"))
                     .withMessage("The workspace branch is currently not checked out. Ensure your working directory is in a correct state!");
 
             assertThat(versioningManager.getCommitCount()).isOne();
@@ -386,14 +387,19 @@ class VersioningManagerTest extends FileTestBase {
 
             WorkspaceDiff result = versioningManager.getWorkspaceDiffWithoutContent();
 
-            assertThat(result.getEntries()).containsExactlyInAnyOrder(
-                    SimpleDiffEntry.builder().file("/file_added.yml").type(DiffEntry.ChangeType.ADD)
-                            .authors(Collections.singletonList("user")).build(),
-                    SimpleDiffEntry.builder().file("/file_modified.yml").type(DiffEntry.ChangeType.MODIFY)
-                            .authors(Collections.singletonList("user")).build(),
-                    SimpleDiffEntry.builder().file("/file_removed.yml").type(DiffEntry.ChangeType.DELETE)
-                            .authors(Collections.singletonList("user")).build()
-            );
+            assertThat(result.getEntries()).containsExactlyInAnyOrder(SimpleDiffEntry.builder()
+                    .file("/file_added.yml")
+                    .type(DiffEntry.ChangeType.ADD)
+                    .authors(Collections.singletonList("user"))
+                    .build(), SimpleDiffEntry.builder()
+                    .file("/file_modified.yml")
+                    .type(DiffEntry.ChangeType.MODIFY)
+                    .authors(Collections.singletonList("user"))
+                    .build(), SimpleDiffEntry.builder()
+                    .file("/file_removed.yml")
+                    .type(DiffEntry.ChangeType.DELETE)
+                    .authors(Collections.singletonList("user"))
+                    .build());
             assertThat(result.getLiveCommitId()).isNotEqualTo(result.getWorkspaceCommitId());
         }
 
@@ -410,27 +416,23 @@ class VersioningManagerTest extends FileTestBase {
 
             WorkspaceDiff result = versioningManager.getWorkspaceDiff(true);
 
-            assertThat(result.getEntries()).containsExactlyInAnyOrder(
-                    SimpleDiffEntry.builder()
-                            .file("/file_added.yml")
-                            .type(DiffEntry.ChangeType.ADD)
-                            .newContent("")
-                            .authors(Collections.singletonList("user"))
-                            .build(),
-                    SimpleDiffEntry.builder()
-                            .file("/file_modified.yml")
-                            .type(DiffEntry.ChangeType.MODIFY)
-                            .oldContent("")
-                            .newContent("new content")
-                            .authors(Collections.singletonList("user"))
-                            .build(),
-                    SimpleDiffEntry.builder()
-                            .file("/file_removed.yml")
-                            .type(DiffEntry.ChangeType.DELETE)
-                            .oldContent("content")
-                            .authors(Collections.singletonList("user"))
-                            .build()
-            );
+            assertThat(result.getEntries()).containsExactlyInAnyOrder(SimpleDiffEntry.builder()
+                    .file("/file_added.yml")
+                    .type(DiffEntry.ChangeType.ADD)
+                    .newContent("")
+                    .authors(Collections.singletonList("user"))
+                    .build(), SimpleDiffEntry.builder()
+                    .file("/file_modified.yml")
+                    .type(DiffEntry.ChangeType.MODIFY)
+                    .oldContent("")
+                    .newContent("new content")
+                    .authors(Collections.singletonList("user"))
+                    .build(), SimpleDiffEntry.builder()
+                    .file("/file_removed.yml")
+                    .type(DiffEntry.ChangeType.DELETE)
+                    .oldContent("content")
+                    .authors(Collections.singletonList("user"))
+                    .build());
             assertThat(result.getLiveCommitId()).isNotEqualTo(result.getWorkspaceCommitId());
         }
 
@@ -452,27 +454,23 @@ class VersioningManagerTest extends FileTestBase {
             WorkspaceDiff resultFirst = versioningManager.getWorkspaceDiff(true, liveId, workspaceId);
             WorkspaceDiff resultSecond = versioningManager.getWorkspaceDiff(true, liveId, latestWorkspaceId);
 
-            assertThat(resultFirst.getEntries()).containsExactlyInAnyOrder(
-                    SimpleDiffEntry.builder()
-                            .file("/file_modified.yml")
-                            .type(DiffEntry.ChangeType.MODIFY)
-                            .oldContent("")
-                            .newContent("new content")
-                            .authors(Collections.singletonList("user"))
-                            .build()
-            );
+            assertThat(resultFirst.getEntries()).containsExactlyInAnyOrder(SimpleDiffEntry.builder()
+                    .file("/file_modified.yml")
+                    .type(DiffEntry.ChangeType.MODIFY)
+                    .oldContent("")
+                    .newContent("new content")
+                    .authors(Collections.singletonList("user"))
+                    .build());
             assertThat(resultFirst.getLiveCommitId()).isEqualTo(liveId.name());
             assertThat(resultFirst.getWorkspaceCommitId()).isEqualTo(workspaceId.name());
 
-            assertThat(resultSecond.getEntries()).containsExactlyInAnyOrder(
-                    SimpleDiffEntry.builder()
-                            .file("/file_modified.yml")
-                            .type(DiffEntry.ChangeType.MODIFY)
-                            .oldContent("")
-                            .newContent("another content")
-                            .authors(Collections.singletonList("user"))
-                            .build()
-            );
+            assertThat(resultSecond.getEntries()).containsExactlyInAnyOrder(SimpleDiffEntry.builder()
+                    .file("/file_modified.yml")
+                    .type(DiffEntry.ChangeType.MODIFY)
+                    .oldContent("")
+                    .newContent("another content")
+                    .authors(Collections.singletonList("user"))
+                    .build());
             assertThat(resultSecond.getLiveCommitId()).isEqualTo(liveId.name());
             assertThat(resultSecond.getWorkspaceCommitId()).isEqualTo(latestWorkspaceId.name());
         }
@@ -498,11 +496,7 @@ class VersioningManagerTest extends FileTestBase {
             ConfigurationPromotion promotion = new ConfigurationPromotion();
             promotion.setLiveCommitId(liveId);
             promotion.setWorkspaceCommitId(workspaceId);
-            promotion.setFiles(Arrays.asList(
-                    "/file_added.yml",
-                    "/file_modified.yml",
-                    "/file_removed.yml"
-            ));
+            promotion.setFiles(Arrays.asList("/file_added.yml", "/file_modified.yml", "/file_removed.yml"));
 
             versioningManager.promoteConfiguration(promotion, true);
 
@@ -528,19 +522,17 @@ class VersioningManagerTest extends FileTestBase {
             ConfigurationPromotion promotion = new ConfigurationPromotion();
             promotion.setLiveCommitId(liveId);
             promotion.setWorkspaceCommitId(workspaceId);
-            promotion.setFiles(Arrays.asList(
-                    "/file_modified.yml",
-                    "/file_removed.yml"
-            ));
+            promotion.setFiles(Arrays.asList("/file_modified.yml", "/file_removed.yml"));
 
             versioningManager.promoteConfiguration(promotion, true);
 
             WorkspaceDiff diff = versioningManager.getWorkspaceDiffWithoutContent();
 
-            assertThat(diff.getEntries()).containsExactlyInAnyOrder(
-                    SimpleDiffEntry.builder().file("/file_added.yml").type(DiffEntry.ChangeType.ADD)
-                            .authors(Collections.singletonList("user")).build()
-            );
+            assertThat(diff.getEntries()).containsExactlyInAnyOrder(SimpleDiffEntry.builder()
+                    .file("/file_added.yml")
+                    .type(DiffEntry.ChangeType.ADD)
+                    .authors(Collections.singletonList("user"))
+                    .build());
         }
 
         @Test
@@ -560,9 +552,7 @@ class VersioningManagerTest extends FileTestBase {
             ConfigurationPromotion promotion = new ConfigurationPromotion();
             promotion.setLiveCommitId(liveId);
             promotion.setWorkspaceCommitId(workspaceId);
-            promotion.setFiles(Arrays.asList(
-                    "/file_modified.yml"
-            ));
+            promotion.setFiles(Arrays.asList("/file_modified.yml"));
 
             // first promotion
             versioningManager.promoteConfiguration(promotion, true);
@@ -577,9 +567,7 @@ class VersioningManagerTest extends FileTestBase {
             promotion = new ConfigurationPromotion();
             promotion.setLiveCommitId(liveId);
             promotion.setWorkspaceCommitId(workspaceId);
-            promotion.setFiles(Arrays.asList(
-                    "/file_modified.yml"
-            ));
+            promotion.setFiles(Arrays.asList("/file_modified.yml"));
 
             // second promotion
             versioningManager.promoteConfiguration(promotion, true);
@@ -587,12 +575,15 @@ class VersioningManagerTest extends FileTestBase {
             // diff
             WorkspaceDiff diff = versioningManager.getWorkspaceDiffWithoutContent();
 
-            assertThat(diff.getEntries()).containsExactlyInAnyOrder(
-                    SimpleDiffEntry.builder().file("/file_added.yml").type(DiffEntry.ChangeType.ADD)
-                            .authors(Collections.singletonList("user")).build(),
-                    SimpleDiffEntry.builder().file("/file_removed.yml").type(DiffEntry.ChangeType.DELETE)
-                            .authors(Collections.singletonList("user")).build()
-            );
+            assertThat(diff.getEntries()).containsExactlyInAnyOrder(SimpleDiffEntry.builder()
+                    .file("/file_added.yml")
+                    .type(DiffEntry.ChangeType.ADD)
+                    .authors(Collections.singletonList("user"))
+                    .build(), SimpleDiffEntry.builder()
+                    .file("/file_removed.yml")
+                    .type(DiffEntry.ChangeType.DELETE)
+                    .authors(Collections.singletonList("user"))
+                    .build());
         }
 
         @Test
@@ -612,21 +603,16 @@ class VersioningManagerTest extends FileTestBase {
             ConfigurationPromotion promotion = new ConfigurationPromotion();
             promotion.setLiveCommitId(liveId);
             promotion.setWorkspaceCommitId(workspaceId);
-            promotion.setFiles(Arrays.asList(
-                    "/file_modified.yml"
-            ));
+            promotion.setFiles(Arrays.asList("/file_modified.yml"));
 
             versioningManager.promoteConfiguration(promotion, true);
 
             ConfigurationPromotion secondPromotion = new ConfigurationPromotion();
             secondPromotion.setLiveCommitId(liveId);
             secondPromotion.setWorkspaceCommitId(workspaceId);
-            secondPromotion.setFiles(Arrays.asList(
-                    "/file_added.yml"
-            ));
+            secondPromotion.setFiles(Arrays.asList("/file_added.yml"));
 
-            assertThatExceptionOfType(RuntimeException.class)
-                    .isThrownBy(() -> versioningManager.promoteConfiguration(secondPromotion, true))
+            assertThatExceptionOfType(RuntimeException.class).isThrownBy(() -> versioningManager.promoteConfiguration(secondPromotion, true))
                     .withMessage("Live branch has been modified. The provided promotion definition is out of sync.");
         }
 
@@ -643,9 +629,7 @@ class VersioningManagerTest extends FileTestBase {
             ConfigurationPromotion promotion = new ConfigurationPromotion();
             promotion.setLiveCommitId(liveId);
             promotion.setWorkspaceCommitId(workspaceId);
-            promotion.setFiles(Arrays.asList(
-                    "/file_modified.yml"
-            ));
+            promotion.setFiles(Arrays.asList("/file_modified.yml"));
 
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml=content_B");
             versioningManager.commitAllChanges("commit");
@@ -655,10 +639,11 @@ class VersioningManagerTest extends FileTestBase {
             // diff live -> workspace
             WorkspaceDiff diff = versioningManager.getWorkspaceDiffWithoutContent();
 
-            assertThat(diff.getEntries()).containsExactlyInAnyOrder(
-                    SimpleDiffEntry.builder().file("/file_modified.yml").type(DiffEntry.ChangeType.MODIFY)
-                            .authors(Collections.singletonList("user")).build()
-            );
+            assertThat(diff.getEntries()).containsExactlyInAnyOrder(SimpleDiffEntry.builder()
+                    .file("/file_modified.yml")
+                    .type(DiffEntry.ChangeType.MODIFY)
+                    .authors(Collections.singletonList("user"))
+                    .build());
             assertThat(versioningManager.getLiveRevision()
                     .readConfigurationFile("file_modified.yml")).hasValue("content_A");
             assertThat(versioningManager.getWorkspaceRevision()
@@ -678,9 +663,7 @@ class VersioningManagerTest extends FileTestBase {
             ConfigurationPromotion promotion = new ConfigurationPromotion();
             promotion.setLiveCommitId(liveId);
             promotion.setWorkspaceCommitId(workspaceId);
-            promotion.setFiles(Arrays.asList(
-                    "/file_modified.yml"
-            ));
+            promotion.setFiles(Arrays.asList("/file_modified.yml"));
 
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml=content_B");
             versioningManager.commitAllChanges("commit");
@@ -707,17 +690,13 @@ class VersioningManagerTest extends FileTestBase {
             ConfigurationPromotion promotion = new ConfigurationPromotion();
             promotion.setLiveCommitId(liveId);
             promotion.setWorkspaceCommitId(workspaceId);
-            promotion.setFiles(Arrays.asList(
-                    "/file_modified.yml"
-            ));
+            promotion.setFiles(Arrays.asList("/file_modified.yml"));
 
             RevisionAccess live = versioningManager.getLiveRevision();
 
-            assertThatThrownBy(() -> versioningManager.promoteConfiguration(promotion, false))
-                    .isInstanceOf(SelfPromotionNotAllowedException.class);
+            assertThatThrownBy(() -> versioningManager.promoteConfiguration(promotion, false)).isInstanceOf(SelfPromotionNotAllowedException.class);
 
-            assertThat(versioningManager.getLiveRevision().getRevisionId())
-                    .isEqualTo(live.getRevisionId());
+            assertThat(versioningManager.getLiveRevision().getRevisionId()).isEqualTo(live.getRevisionId());
         }
     }
 
@@ -747,15 +726,34 @@ class VersioningManagerTest extends FileTestBase {
         @Test
         void systemUserOnSystemOperationUsed() {
             VersioningManager vm = new VersioningManager(Paths.get(""), () -> null, (event) -> {
-            });
+            }, "@test.com");
             assertThat(vm.getCurrentAuthor()).isEqualTo(VersioningManager.GIT_SYSTEM_AUTHOR);
         }
 
         @Test
         void activeUserUsed() {
             VersioningManager vm = new VersioningManager(Paths.get(""), () -> authentication, (event) -> {
-            });
+            }, "@test.com");
             assertThat(vm.getCurrentAuthor().getName()).isEqualTo(authentication.getName());
+        }
+
+        @Test
+        void mailCreatedFromConfig() {
+            VersioningManager vm = new VersioningManager(Paths.get(""), () -> authentication, (event) -> {
+            }, "@test.com");
+            assertThat(vm.getCurrentAuthor().getEmailAddress()).isEqualTo(authentication.getName() + "@" + "test.com");
+        }
+
+        @Test
+        void mailReadFromLdap() {
+            InetOrgPerson mockInetOrgPerson = mock(InetOrgPerson.class);
+            when(mockInetOrgPerson.getMail()).thenReturn("foo@bar.com");
+            when(authentication.getPrincipal()).thenReturn(mockInetOrgPerson);
+
+            VersioningManager vm = new VersioningManager(Paths.get(""), () -> authentication, (event) -> {
+            }, "@test.com");
+
+            assertThat(vm.getCurrentAuthor().getEmailAddress()).isEqualTo("foo@bar.com");
         }
     }
 
@@ -780,21 +778,14 @@ class VersioningManagerTest extends FileTestBase {
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/c1_file_a.yml=content");
             doReturn("user_a").when(authentication).getName();
             versioningManager.commitAllChanges("new commit");
-            promote(
-                    "/c0_file_a.yml",
-                    "/c0_file_b.yml",
-                    "/c1_file_a.yml"
-            );
+            promote("/c0_file_a.yml", "/c0_file_b.yml", "/c1_file_a.yml");
 
             Files.delete(tempDirectory.resolve(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/c0_file_b.yml"));
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/c1_file_a.yml=newFileContent");
 
             doReturn("user_b").when(authentication).getName();
             versioningManager.commitAllChanges("new commit");
-            promote(
-                    "/c0_file_b.yml",
-                    "/c1_file_a.yml"
-            );
+            promote("/c0_file_b.yml", "/c1_file_a.yml");
         }
 
         @Test
@@ -810,12 +801,11 @@ class VersioningManagerTest extends FileTestBase {
                     .type(DiffEntry.ChangeType.ADD)
                     .build();
 
-            versioningManager.fillInAuthors(diff,
-                    versioningManager.getLatestCommit(Branch.LIVE).get().getId(),
-                    versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId());
+            versioningManager.fillInAuthors(diff, versioningManager.getLatestCommit(Branch.LIVE)
+                    .get()
+                    .getId(), versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId());
 
-            assertThat(diff.getAuthors())
-                    .containsExactlyInAnyOrder("creating_user");
+            assertThat(diff.getAuthors()).containsExactlyInAnyOrder("creating_user");
         }
 
         @Test
@@ -842,12 +832,11 @@ class VersioningManagerTest extends FileTestBase {
                     .type(DiffEntry.ChangeType.ADD)
                     .build();
 
-            versioningManager.fillInAuthors(diff,
-                    versioningManager.getLatestCommit(Branch.LIVE).get().getId(),
-                    versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId());
+            versioningManager.fillInAuthors(diff, versioningManager.getLatestCommit(Branch.LIVE)
+                    .get()
+                    .getId(), versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId());
 
-            assertThat(diff.getAuthors())
-                    .containsExactlyInAnyOrder("creating_user", "editing_user");
+            assertThat(diff.getAuthors()).containsExactlyInAnyOrder("creating_user", "editing_user");
         }
 
         @Test
@@ -886,12 +875,11 @@ class VersioningManagerTest extends FileTestBase {
                     .type(DiffEntry.ChangeType.MODIFY)
                     .build();
 
-            versioningManager.fillInAuthors(diff,
-                    versioningManager.getLatestCommit(Branch.LIVE).get().getId(),
-                    versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId());
+            versioningManager.fillInAuthors(diff, versioningManager.getLatestCommit(Branch.LIVE)
+                    .get()
+                    .getId(), versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId());
 
-            assertThat(diff.getAuthors())
-                    .containsExactlyInAnyOrder("creating_user", "second_editing_user");
+            assertThat(diff.getAuthors()).containsExactlyInAnyOrder("creating_user", "second_editing_user");
         }
 
         @Test
@@ -921,12 +909,11 @@ class VersioningManagerTest extends FileTestBase {
                     .type(DiffEntry.ChangeType.MODIFY)
                     .build();
 
-            versioningManager.fillInAuthors(diff,
-                    versioningManager.getLatestCommit(Branch.LIVE).get().getId(),
-                    versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId());
+            versioningManager.fillInAuthors(diff, versioningManager.getLatestCommit(Branch.LIVE)
+                    .get()
+                    .getId(), versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId());
 
-            assertThat(diff.getAuthors())
-                    .containsExactlyInAnyOrder("last_editing_user");
+            assertThat(diff.getAuthors()).containsExactlyInAnyOrder("last_editing_user");
         }
 
         @Test
@@ -958,12 +945,11 @@ class VersioningManagerTest extends FileTestBase {
                     .type(DiffEntry.ChangeType.DELETE)
                     .build();
 
-            versioningManager.fillInAuthors(diff,
-                    versioningManager.getLatestCommit(Branch.LIVE).get().getId(),
-                    versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId());
+            versioningManager.fillInAuthors(diff, versioningManager.getLatestCommit(Branch.LIVE)
+                    .get()
+                    .getId(), versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId());
 
-            assertThat(diff.getAuthors())
-                    .containsExactlyInAnyOrder("deleting_user");
+            assertThat(diff.getAuthors()).containsExactlyInAnyOrder("deleting_user");
         }
 
         @Test
@@ -990,12 +976,11 @@ class VersioningManagerTest extends FileTestBase {
                     .type(DiffEntry.ChangeType.DELETE)
                     .build();
 
-            versioningManager.fillInAuthors(diff,
-                    versioningManager.getLatestCommit(Branch.LIVE).get().getId(),
-                    versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId());
+            versioningManager.fillInAuthors(diff, versioningManager.getLatestCommit(Branch.LIVE)
+                    .get()
+                    .getId(), versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId());
 
-            assertThat(diff.getAuthors())
-                    .containsExactlyInAnyOrder("deleting_user");
+            assertThat(diff.getAuthors()).containsExactlyInAnyOrder("deleting_user");
         }
     }
 }

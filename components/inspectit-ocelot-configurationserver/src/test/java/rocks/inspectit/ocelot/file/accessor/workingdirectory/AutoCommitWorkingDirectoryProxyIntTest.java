@@ -51,7 +51,7 @@ class AutoCommitWorkingDirectoryProxyIntTest extends FileTestBase {
 
         Authentication authentication = mock(Authentication.class);
         when(authentication.getName()).thenReturn("user");
-        versioningManager = new VersioningManager(tempDirectory, () -> authentication, eventPublisher);
+        versioningManager = new VersioningManager(tempDirectory, () -> authentication, eventPublisher, "@test.com");
         versioningManager.initialize();
 
         accessor = new AutoCommitWorkingDirectoryProxy(writeLock, workingDirectoryAccessor, versioningManager);

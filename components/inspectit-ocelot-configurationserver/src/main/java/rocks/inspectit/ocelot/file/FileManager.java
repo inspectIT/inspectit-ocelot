@@ -66,7 +66,7 @@ public class FileManager {
                 .writeLock(), workingDirectory);
 
         Supplier<Authentication> authenticationSupplier = () -> SecurityContextHolder.getContext().getAuthentication();
-        versioningManager = new VersioningManager(workingDirectory, authenticationSupplier, asyncPublisher);
+        versioningManager = new VersioningManager(workingDirectory, authenticationSupplier, asyncPublisher, settings.getMailSuffix());
         versioningManager.initialize();
 
         workingDirectoryAccessor = new AutoCommitWorkingDirectoryProxy(workingDirectoryLock.writeLock(), workingDirectoryAccessorImpl, versioningManager);
@@ -104,8 +104,8 @@ public class FileManager {
      */
     public RevisionAccess getWorkspaceRevision() {
         CachingRevisionAccess currentRev = versioningManager.getWorkspaceRevision();
-        if (cachedWorkspaceRevision == null
-                || !currentRev.getRevisionId().equals(cachedWorkspaceRevision.getRevisionId())) {
+        if (cachedWorkspaceRevision == null || !currentRev.getRevisionId()
+                .equals(cachedWorkspaceRevision.getRevisionId())) {
             cachedWorkspaceRevision = currentRev;
         }
         return cachedWorkspaceRevision;

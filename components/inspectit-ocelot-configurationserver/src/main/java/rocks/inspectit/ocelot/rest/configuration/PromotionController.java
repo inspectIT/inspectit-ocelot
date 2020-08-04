@@ -44,7 +44,10 @@ public class PromotionController extends AbstractBaseController {
 
     @ApiOperation(value = "Fetch promotion files", notes = "Fetches all configuration files which are ready for promotion.")
     @GetMapping(value = "configuration/promotions")
-    public WorkspaceDiff getPromotions(@ApiParam("Specifies whether the old and new content of each files should also be returned.") @RequestParam(defaultValue = "false", name = "include-content") boolean includeContent, Authentication authentication) throws IOException, GitAPIException {
+    public WorkspaceDiff getPromotions(
+            @ApiParam("Specifies whether the old and new content of each files should also be returned.")
+            @RequestParam(defaultValue = "false", name = "include-content")
+                    boolean includeContent, Authentication authentication) throws IOException, GitAPIException {
         WorkspaceDiff workspaceDiff = fileManager.getWorkspaceDiff(includeContent);
         workspaceDiff.setCanPromoteOwnChanges(allowSelfPromotion(authentication));
         return workspaceDiff;
@@ -53,8 +56,14 @@ public class PromotionController extends AbstractBaseController {
     @Secured(UserRoleConfiguration.PROMOTE_ACCESS_ROLE)
     @ApiOperation(value = "Promote configurations", notes = "Promotes the specified configuration files.")
     @PostMapping(value = "configuration/promote")
-    public ResponseEntity promoteConfiguration(@ApiParam("The definition that contains the information about which files to promote.") @RequestBody ConfigurationPromotion promotion, Authentication authentication) throws GitAPIException {
+    public ResponseEntity promoteConfiguration(
+            @ApiParam("The definition that contains the information about which files to promote.")
+            @RequestBody
+                    ConfigurationPromotion promotion, Authentication authentication) throws GitAPIException {
         boolean allowSelfPromotion = allowSelfPromotion(authentication);
+        if (promotion.getCommitMessage() == null || promotion.getCommitMessage().isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
         try {
             fileManager.promoteConfiguration(promotion, allowSelfPromotion);
             return ResponseEntity.ok().build();
@@ -67,7 +76,8 @@ public class PromotionController extends AbstractBaseController {
         if (!settings.getSecurity().isFourEyesPromotion()) {
             return true;
         }
-        return authentication.getAuthorities().stream()
+        return authentication.getAuthorities()
+                .stream()
                 .anyMatch(auth -> auth.getAuthority().equals(UserRoleConfiguration.ADMIN_ACCESS_ROLE));
     }
 }

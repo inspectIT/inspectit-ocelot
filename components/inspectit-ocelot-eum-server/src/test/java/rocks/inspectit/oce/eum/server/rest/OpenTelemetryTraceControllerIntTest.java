@@ -16,6 +16,7 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.InputStreamReader;
@@ -27,7 +28,8 @@ import static org.mockito.Mockito.verify;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ExtendWith(SpringExtension.class)
-class OpenTelemetryTraceControllerTest {
+@DirtiesContext
+class OpenTelemetryTraceControllerIntTest {
 
     @Autowired
     TestRestTemplate restTemplate;
@@ -38,13 +40,11 @@ class OpenTelemetryTraceControllerTest {
     @MockBean
     SpanExporter spanExporter;
 
-
     @Nested
     class Spans {
 
         @Captor
         ArgumentCaptor<Collection<SpanData>> spanCaptor;
-
 
         @Test
         public void empty() {
@@ -62,7 +62,7 @@ class OpenTelemetryTraceControllerTest {
 
         @Test
         public void happyPath() throws Exception {
-            try (final Reader reader = new InputStreamReader(resource.getInputStream())) {
+            try (Reader reader = new InputStreamReader(resource.getInputStream())) {
                 String json = CharStreams.toString(reader);
 
                 ResponseEntity<Void> result = restTemplate.postForEntity("/spans", json, Void.class);

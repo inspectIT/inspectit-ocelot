@@ -128,9 +128,11 @@ if (!project.hasProperty("systemTestJavaHomes")) {
 def agentJarPath = jar.archivePath.toString()
 
 task systemTest {
-
     group = 'Verification'
     description = "Runs system tests with the agent attached as javaagent for all JDKs configured via the 'systemTestJavaHomes' property."
+
+    // Always run this task when its executed
+    outputs.upToDateWhen { false }
 
     def javaExecutables = ("${systemTestJavaHomes}")
             .tokenize(File.pathSeparator)

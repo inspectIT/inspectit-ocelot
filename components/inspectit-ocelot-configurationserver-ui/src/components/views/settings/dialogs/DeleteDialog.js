@@ -16,6 +16,7 @@ class DeleteDialog extends React.Component {
     return (
       <Dialog
         header={'Delete User'}
+        focusOnShow={false}
         modal={true}
         visible={this.props.visible}
         onHide={this.props.onHide}
@@ -50,7 +51,10 @@ class DeleteDialog extends React.Component {
 
   componentDidUpdate(prevProps) {
     if (!prevProps.visible && this.props.visible) {
-      this.deleteButton.current.element.focus();
+      /**Timeout is needed for .focus() to be triggered correctly. */
+      setTimeout(() => {
+        this.deleteButton.current.element.focus();
+      }, 0);
     }
   }
 }
