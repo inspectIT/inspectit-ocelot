@@ -13,16 +13,11 @@ import rocks.inspectit.ocelot.events.WorkspaceChangedEvent;
 import rocks.inspectit.ocelot.file.FileManager;
 import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
 
-import java.util.concurrent.ScheduledExecutorService;
-
 import static org.assertj.core.api.Java6Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ExternalChangeDetectorTest {
-
-    @Mock
-    ScheduledExecutorService executor;
 
     @Mock
     FileManager fileManager;
@@ -45,7 +40,7 @@ public class ExternalChangeDetectorTest {
         when(liveRevision.getRevisionId()).thenReturn("initialLive");
         when(workspaceRevision.getRevisionId()).thenReturn("initialWork");
 
-        detector = new ExternalChangeDetector(fileManager, executor, publisher);
+        detector = new ExternalChangeDetector(fileManager, publisher);
         detector.init();
     }
 
