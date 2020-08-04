@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 import { ProgressBar } from 'primereact/progressbar';
@@ -7,87 +7,87 @@ import { InputText } from 'primereact/inputtext';
 /**
  * Dialog for showing the currently approved files before promoting them.
  */
-class PromotionApprovalDialog extends React.Component {
-  state = {
-    /** The promotion message to be send to the backend. */
-    promotionMessage: '',
+const PromotionApprovalDialog = ({ visible, onHide, onPromote, isLoading, approvedFiles = [] }) => {
+  // state variables
+  const [message, setMessage] = useState('');
+
+  // derived variables
+  const isValidMessage = !_.isEmpty(message);
+
+  // clear message when dialog gets visible
+  useEffect(() => {
+    if (visible) {
+      setMessage('');
+    }
+  }, [visible]);
+
+  // invoke the promotion
+  const promote = () => onPromote(message);
+
+  // promote when enter is pressed
+  const onKeyPress = (event) => {
+    if (event.key === 'Enter' && !isLoading && isValidMessage) {
+      promote();
+    }
   };
-  input = React.createRef();
-  render() {
-    const { visible, onHide, isLoading, approvedFiles = [] } = this.props;
-    const { promotionMessage } = this.state;
-    const footer = (
-      <div>
-        <Button label="Promote" onClick={this.promote} disabled={isLoading || !promotionMessage} />
-        <Button label="Cancel" className="p-button-secondary" onClick={onHide} disabled={isLoading} />
-      </div>
-    );
 
-    return (
-      <>
-        <style jsx>
-          {`
-            .list li {
-              font-family: monospace;
-            }
+  const footer = (
+    <div>
+      <Button label="Promote" onClick={promote} disabled={isLoading || !isValidMessage} />
+      <Button label="Cancel" className="p-button-secondary" onClick={onHide} disabled={isLoading} />
+    </div>
+  );
 
-            .content :global(.p-progressbar) {
-              height: 0.5rem;
-            }
-          `}
-        </style>
+  return (
+    <>
+      <style jsx>
+        {`
+          .list li {
+            font-family: monospace;
+          }
+          .content :global(.p-progressbar) {
+            height: 0.5rem;
+          }
+          .content :global(.message-input) {
+            width: 100%;
+            margin: 0.5rem 0 1rem;
+          }
+        `}
+      </style>
 
-        <Dialog
-          header="Promote Configurations"
-          focusOnShow={false}
-          visible={visible}
-          style={{ width: '50vw' }}
-          modal={true}
-          onHide={onHide}
-          footer={footer}
-        >
-          <div className="content">
-            <span>The following files have been approved and will be promoted:</span>
-            <ul className="list">
-              {approvedFiles.map((file) => (
-                <li key={file}>{file}</li>
-              ))}
-            </ul>
+      <Dialog
+        header="Promote Configurations"
+        focusOnShow={false}
+        visible={visible}
+        style={{ width: '50vw' }}
+        modal={true}
+        onHide={onHide}
+        footer={footer}
+      >
+        <div className="content">
+          <span>The following files have been approved and will be promoted:</span>
+          <ul className="list">
+            {approvedFiles.map((file) => (
+              <li key={file}>{file}</li>
+            ))}
+          </ul>
 
-            {isLoading && <ProgressBar mode="indeterminate" />}
-          </div>
+          <span>Please add a message to describe the configuration promotion:</span>
+
           <InputText
-            ref={this.input}
-            style={{ width: '100%' }}
-            placeholder="Describe change..."
-            onKeyPress={this.onKeyPress}
-            value={promotionMessage}
-            onChange={(e) => this.setState({ promotionMessage: e.target.value })}
+            className="message-input"
+            placeholder="Promotion message..."
+            onKeyPress={onKeyPress}
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            disabled={isLoading}
           />
-        </Dialog>
-      </>
-    );
-  }
 
-  componentDidUpdate(prevProps) {
-    if (!prevProps.visible && this.props.visible) {
-      /**Timeout is needed for .focus() to be triggered correctly. */
-      setTimeout(() => {
-        this.input.current.element.focus();
-      }, 0);
-      this.setState({ promotionMessage: '' });
-    }
-  }
-
-  onKeyPress = (e) => {
-    if (e.key === 'Enter' && !this.props.isLoading && this.state.promotionMessage) {
-      this.promote();
-    }
-  };
-
-  promote = () => {
-    this.props.onPromote(this.state.promotionMessage);
-  };
-}
+          {isLoading && <ProgressBar mode="indeterminate" />}
+        </div>
+      </Dialog>
+    </>
+  );
+};
 
 export default PromotionApprovalDialog;
