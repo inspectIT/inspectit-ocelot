@@ -5,10 +5,11 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class CaseUtilTest {
+public class CaseUtilsTest {
 
     @Nested
     public class CamelCaseToKebabCase {
+
         @Test
         void twoLiteralTest() {
             assertThat(CaseUtils.camelCaseToKebabCase("testName")).isEqualTo("test-name");
@@ -28,10 +29,16 @@ public class CaseUtilTest {
         void dividedByFullStop() {
             assertThat(CaseUtils.camelCaseToKebabCase("myPath.exampleClass")).isEqualTo("my-path.example-class");
         }
+
+        @Test
+        void nonAlphabeticalBeforeUpperCase() {
+            assertThat(CaseUtils.camelCaseToKebabCase("my1Path")).isEqualTo("my1-path");
+        }
     }
 
     @Nested
-    public class KebebCaseToCamelCase {
+    public class KebabCaseToCamelCase {
+
         @Test
         void twoLiteralTest() {
             assertThat(CaseUtils.kebabCaseToCamelCase("test-name")).isEqualTo("testName");
@@ -55,6 +62,7 @@ public class CaseUtilTest {
 
     @Nested
     public class CompareIgnoreCamelOrKebabCase {
+
         @Test
         void twoLiteralTest() {
             assertThat(CaseUtils.compareIgnoreCamelOrKebabCase("test-name", "testName")).isEqualTo(true);

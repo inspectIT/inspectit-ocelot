@@ -27,6 +27,7 @@ class CreateDialog extends React.Component {
     return (
       <Dialog
         header={'Create User'}
+        focusOnShow={false}
         modal={true}
         visible={this.props.visible}
         onHide={this.props.onHide}
@@ -99,7 +100,10 @@ class CreateDialog extends React.Component {
 
   componentDidUpdate(prevProps) {
     if (!prevProps.visible && this.props.visible) {
-      this.input.current.element.focus();
+      /**Timeout is needed for .focus() to be triggered correctly. */
+      setTimeout(() => {
+        this.input.current.element.focus();
+      }, 0);
       this.setState({ ...initialState });
     }
   }

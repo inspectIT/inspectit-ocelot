@@ -12,6 +12,12 @@ import java.util.List;
 public class ConfigurationPromotion {
 
     /**
+     * A short message describing the commit.
+     */
+    @ApiModelProperty(example = "Added rules for connection tracing")
+    private String commitMessage;
+
+    /**
      * Represents the id of the commit which holds the files to promote.
      */
     @ApiModelProperty(example = "93af736e5b46450789a0ddd39a708f1a815b1ddc")

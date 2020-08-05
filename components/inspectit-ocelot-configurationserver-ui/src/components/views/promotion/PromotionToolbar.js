@@ -5,7 +5,7 @@ import { Button } from 'primereact/button';
 /**
  * The toolbar of the promotion view.
  */
-const PromotionToolbar = ({ onRefresh, onPromote, loading, enabled }) => {
+const PromotionToolbar = ({ onRefresh, onPromote, loading, enabled, canPromote }) => {
   const tooltipOptions = {
     showDelay: 500,
     position: 'top',
@@ -50,7 +50,7 @@ const PromotionToolbar = ({ onRefresh, onPromote, loading, enabled }) => {
             icon={'pi pi-refresh' + (loading ? ' pi-spin' : '')}
             onClick={onRefresh}
           />
-          <Button disabled={!enabled} icon="pi pi-cloud-upload" label="Promote Configurations" onClick={onPromote} />
+          {canPromote && <Button disabled={!enabled} icon="pi pi-cloud-upload" label="Promote Configurations" onClick={onPromote} />}
         </div>
       </Toolbar>
     </>

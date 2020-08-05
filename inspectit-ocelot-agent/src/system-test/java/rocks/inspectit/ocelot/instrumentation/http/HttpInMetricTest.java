@@ -26,10 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class HttpInMetricTest {
 
-    public static final int PORT = 9999;
-
     private Server server;
-
 
     void fireRequest(String url) {
         try {
@@ -48,7 +45,6 @@ public class HttpInMetricTest {
         protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
             resp.setStatus(123);
         }
-
     }
 
     @Nested
@@ -56,8 +52,7 @@ public class HttpInMetricTest {
 
         @Test
         void testRequestRecorded() throws Exception {
-
-            server = new Server(PORT);
+            server = new Server(0);
             ServletHandler servletHandler = new ServletHandler();
             server.setHandler(servletHandler);
             servletHandler.addServletWithMapping(TestServlet.class, "/*");
@@ -66,9 +61,10 @@ public class HttpInMetricTest {
             TestUtils.waitForClassInstrumentations(Arrays.asList(HttpServlet.class,
                     Class.forName("sun.net.www.protocol.http.HttpURLConnection")), 10, TimeUnit.SECONDS);
 
-            fireRequest("http://localhost:" + PORT + "/servletapi");
+            fireRequest("http://localhost:" + server.getURI().getPort() + "/servletapi");
             server.stop();
 
+            TestUtils.waitForOpenCensusQueueToBeProcessed();
 
             Map<String, String> tags = new HashMap<>();
             tags.put("http_path", "/servletapi");

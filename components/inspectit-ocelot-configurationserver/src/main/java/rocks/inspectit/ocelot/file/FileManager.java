@@ -66,7 +66,7 @@ public class FileManager {
                 .writeLock(), workingDirectory);
 
         Supplier<Authentication> authenticationSupplier = () -> SecurityContextHolder.getContext().getAuthentication();
-        versioningManager = new VersioningManager(workingDirectory, authenticationSupplier, asyncPublisher);
+        versioningManager = new VersioningManager(workingDirectory, authenticationSupplier, asyncPublisher, settings.getMailSuffix());
         versioningManager.initialize();
 
         workingDirectoryAccessor = new AutoCommitWorkingDirectoryProxy(workingDirectoryLock.writeLock(), workingDirectoryAccessorImpl, versioningManager);
@@ -88,7 +88,7 @@ public class FileManager {
      */
     public RevisionAccess getLiveRevision() {
         CachingRevisionAccess currentRev = versioningManager.getLiveRevision();
-        if (cachedLiveRevision == null || !currentRev.getRevisionID().equals(cachedLiveRevision.getRevisionID())) {
+        if (cachedLiveRevision == null || !currentRev.getRevisionId().equals(cachedLiveRevision.getRevisionId())) {
             cachedLiveRevision = currentRev;
         }
         return cachedLiveRevision;
@@ -104,8 +104,8 @@ public class FileManager {
      */
     public RevisionAccess getWorkspaceRevision() {
         CachingRevisionAccess currentRev = versioningManager.getWorkspaceRevision();
-        if (cachedWorkspaceRevision == null
-                || !currentRev.getRevisionID().equals(cachedWorkspaceRevision.getRevisionID())) {
+        if (cachedWorkspaceRevision == null || !currentRev.getRevisionId()
+                .equals(cachedWorkspaceRevision.getRevisionId())) {
             cachedWorkspaceRevision = currentRev;
         }
         return cachedWorkspaceRevision;
@@ -125,13 +125,28 @@ public class FileManager {
     /**
      * Executes a file promotion according to the specified {@link ConfigurationPromotion} definition.
      *
-     * @param promotion the definition what to promote
+     * @param promotion          the definition what to promote
+     * @param allowSelfPromotion if true, the current user will be allowed to promote his own changes.
      */
-    public void promoteConfiguration(ConfigurationPromotion promotion) throws GitAPIException {
+    public void promoteConfiguration(ConfigurationPromotion promotion, boolean allowSelfPromotion) throws GitAPIException {
         workingDirectoryLock.writeLock().lock();
-
         try {
-            versioningManager.promoteConfiguration(promotion);
+            versioningManager.promoteConfiguration(promotion, allowSelfPromotion);
+        } finally {
+            workingDirectoryLock.writeLock().unlock();
+        }
+    }
+
+    /**
+     * Can be called to commit external changes to the working directory.
+     * This will cause the workspace revision to be in sync with the file system.
+     * <p>
+     * The changes will be commit as the currently logged in user.
+     */
+    public void commitWorkingDirectory() throws GitAPIException {
+        workingDirectoryLock.writeLock().lock();
+        try {
+            versioningManager.commitAllChanges("Committing external changes.");
         } finally {
             workingDirectoryLock.writeLock().unlock();
         }

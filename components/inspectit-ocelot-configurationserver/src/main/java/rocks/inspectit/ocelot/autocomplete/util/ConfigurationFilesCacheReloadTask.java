@@ -50,7 +50,8 @@ public class ConfigurationFilesCacheReloadTask extends CancellableTask<Collectio
                 }
             }
             ConfigFileLoader.getDefaultConfigFiles()
-                    .values().stream()
+                    .values()
+                    .stream()
                     .map(this::parseYaml)
                     .forEach(parsedFileContents::add);
             onTaskSuccess(parsedFileContents);
@@ -71,7 +72,8 @@ public class ConfigurationFilesCacheReloadTask extends CancellableTask<Collectio
      *
      * @return The String parsed into a nested Lists or Map.
      */
-    private Object parseYaml(String content) {
+    @VisibleForTesting
+    Object parseYaml(String content) {
         Yaml yaml = new Yaml();
         return yaml.load(content);
     }
@@ -87,12 +89,13 @@ public class ConfigurationFilesCacheReloadTask extends CancellableTask<Collectio
      */
     @VisibleForTesting
     Object loadYamlFile(String path) {
-        Optional<String> src = fileAccess.readConfigurationFile(path);
-
-        return src.map(this::parseYaml).orElseGet(() -> {
+        try {
+            Optional<String> src = fileAccess.readConfigurationFile(path);
+            return src.map(this::parseYaml).orElse(null);
+        } catch (Exception e) {
             log.warn("Unable to load file with path {}", path);
             return null;
-        });
+        }
     }
 
     /**

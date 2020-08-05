@@ -28,6 +28,8 @@ inspectit-config-server:
   working-directory: working_directory
   # the expiration duration of JWT tokens
   token-lifespan: 60m
+  # the e-mail suffix used for internal users
+  mail-suffix: '@inspectit.rocks'
   # the default admin user
   default-user:
     name: admin
@@ -44,6 +46,9 @@ inspectit-config-server:
     # Whether LDAP authentication should be used
     # See the documentation on how to configure LDAP correctly: https://inspectit.github.io/inspectit-ocelot/docs/config-server/user-authentication
     ldap-authentication: false
+    # If enabled, non-admin users cannot promote their own changes.
+    # The writing of the configuration and the promotion needs to be done by two separate persons.
+    four-eyes-promotion: false
 
 # ACTUATOR PROPERTIES
 management:

@@ -36,3 +36,47 @@ In the following screenshot, the configuration server's promotion user interface
 4. The current version of the file on the `WORKSPACE` branch.
 5. Button to promote the approved files.
 6. The selected file can be approved with this button.
+
+## Four-Eyes Promoting Restriction
+
+By default, any user with promotion rights can promote any changes.
+In some setups it can be beneficial to enforce peer-reviews before promoting configuration changes.
+The configuration server offers a mechanism to enforce a four eyes principle for configuration changes which can be enabled using the following setting:
+
+```YAML
+inspectit-config-server:
+  security:
+    four-eyes-promotion: true
+```
+
+When this setting is enabled, users with promotion rights will no longer be able to promote their own configuration changes.
+
+:::note
+This restriction is only applied to non-admin users! Users with admin rights will still be able to promote their own changes.
+:::
+
+## Git-Authors
+Every change has an author consisting of the login and an e-mail address of the user who made the change. For 
+ldap-users the login and e-mail address of the ldap account is used. 
+<br>
+For internal users however, an e-mail address is generated. This address consists of the user's login and an e-mail
+suffix. The default suffix is `@inspectit.rocks`.
+<br>
+You can provide a custom mail suffix in the following settings: 
+```YAML
+inspectit-config-server:
+  mail-suffix: @my_mail.com
+```
+
+## External Changes
+
+While it is not recommended, it is possible to directly change the configuration files in the filesystem instead of via the
+configuration server's UI or REST-API.
+
+In order for your changes in the file-system to become active, you need to let the configuration server know about the external changes.
+This can be done by sending an HTTP GET request to the `/api/v1/configuration/reload` endpoint. This request needs to include your credentials via basic auth.
+A request to this endpoint causes all external changes to be committed to the `WORKSPACE` branch and the server to be updated accordingly.
+
+Alternatively, you can also manually commit to the `WORKSPACE` branch in the working directory of the configuration server.
+However, you need to make sure that the server is either shut down or you need to have the guarantee that no other users are currently editing files via the UI,
+otherwise your repository might get corrupted.
