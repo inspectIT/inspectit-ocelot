@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 import { ProgressBar } from 'primereact/progressbar';
 import { InputText } from 'primereact/inputtext';
+import _ from 'lodash';
 
 /**
  * Dialog for showing the currently approved files before promoting them.
@@ -10,6 +11,9 @@ import { InputText } from 'primereact/inputtext';
 const PromotionApprovalDialog = ({ visible, onHide, onPromote, isLoading, approvedFiles = [] }) => {
   // state variables
   const [message, setMessage] = useState('');
+
+  // ref variables
+  const messageInput = useRef(null);
 
   // derived variables
   const isValidMessage = !_.isEmpty(message);
@@ -29,6 +33,11 @@ const PromotionApprovalDialog = ({ visible, onHide, onPromote, isLoading, approv
     if (event.key === 'Enter' && !isLoading && isValidMessage) {
       promote();
     }
+  };
+
+  // set the focus to the input field after the dialog is shown
+  const onShow = () => {
+    messageInput.current.element.focus();
   };
 
   const footer = (
@@ -62,6 +71,7 @@ const PromotionApprovalDialog = ({ visible, onHide, onPromote, isLoading, approv
         style={{ width: '50vw' }}
         modal={true}
         onHide={onHide}
+        onShow={onShow}
         footer={footer}
       >
         <div className="content">
@@ -75,6 +85,7 @@ const PromotionApprovalDialog = ({ visible, onHide, onPromote, isLoading, approv
           <span>Please add a message to describe the configuration promotion:</span>
 
           <InputText
+            ref={messageInput}
             className="message-input"
             placeholder="Promotion message..."
             onKeyPress={onKeyPress}
