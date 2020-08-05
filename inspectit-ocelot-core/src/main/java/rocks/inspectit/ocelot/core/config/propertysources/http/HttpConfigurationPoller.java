@@ -3,6 +3,7 @@ package rocks.inspectit.ocelot.core.config.propertysources.http;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import rocks.inspectit.ocelot.bootstrap.AgentManager;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.config.HttpConfigSettings;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
@@ -73,6 +74,11 @@ public class HttpConfigurationPoller extends DynamicallyActivatableService imple
      */
     @Override
     public void run() {
+        if (!AgentManager.isInitialized()) {
+            log.debug("Skipping update of HTTP property source because the agent is not initialized, yet.");
+            return;
+        }
+
         log.debug("Updating HTTP property source.");
         boolean wasUpdated = currentState.update(false);
         if (wasUpdated) {

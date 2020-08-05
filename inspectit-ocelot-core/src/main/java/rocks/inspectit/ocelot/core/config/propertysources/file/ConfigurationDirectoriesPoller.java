@@ -6,6 +6,7 @@ import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
 import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import rocks.inspectit.ocelot.bootstrap.AgentManager;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.config.FileBasedConfigSettings;
@@ -70,6 +71,11 @@ public class ConfigurationDirectoriesPoller extends DynamicallyActivatableServic
     }
 
     private void pollDirectories() {
+        if (!AgentManager.isInitialized()) {
+            log.debug("Skipping update of directory property sources because the agent is not initialized, yet.");
+            return;
+        }
+
         for (val poller : filePollers) {
             poller.checkForChangesAndReloadIfRequired();
         }

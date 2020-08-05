@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.core.config.propertysources.http;
 
+import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -8,6 +9,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
+import rocks.inspectit.ocelot.bootstrap.AgentManager;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.config.ConfigSettings;
 import rocks.inspectit.ocelot.config.model.config.HttpConfigSettings;
@@ -98,6 +101,7 @@ class HttpConfigurationPollerTest {
 
         @Test
         public void stateNotUpdated() {
+            ReflectionTestUtils.setField(AgentManager.class, "initialized", true);
             doReturn(false).when(currentState).update(anyBoolean());
 
             poller.run();
@@ -109,6 +113,7 @@ class HttpConfigurationPollerTest {
 
         @Test
         public void stateUpdated() {
+            ReflectionTestUtils.setField(AgentManager.class, "initialized", true);
             doReturn(true).when(currentState).update(anyBoolean());
 
             poller.run();
@@ -116,6 +121,15 @@ class HttpConfigurationPollerTest {
             verify(currentState).update(eq(false));
             verify(env).updatePropertySources(any());
             verifyNoMoreInteractions(currentState, env);
+        }
+
+        @Test
+        public void agentNotInitialized() {
+            ReflectionTestUtils.setField(AgentManager.class, "initialized", false);
+
+            poller.run();
+
+            verifyZeroInteractions(currentState, env);
         }
     }
 }
