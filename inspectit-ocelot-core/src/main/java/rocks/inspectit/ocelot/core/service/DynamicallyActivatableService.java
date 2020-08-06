@@ -2,6 +2,7 @@ package rocks.inspectit.ocelot.core.service;
 
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
@@ -51,7 +52,7 @@ public abstract class DynamicallyActivatableService {
                 .collect(Collectors.toList());
     }
 
-    @PostConstruct
+    @EventListener(ContextRefreshedEvent.class)
     void initialize() {
         init();
         if (checkEnabledForConfig(env.getCurrentConfig())) {

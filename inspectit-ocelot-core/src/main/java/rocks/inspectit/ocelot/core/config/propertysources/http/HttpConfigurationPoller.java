@@ -74,11 +74,6 @@ public class HttpConfigurationPoller extends DynamicallyActivatableService imple
      */
     @Override
     public void run() {
-        if (!AgentManager.isInitialized()) {
-            log.debug("Skipping update of HTTP property source because the agent is not initialized, yet.");
-            return;
-        }
-
         log.debug("Updating HTTP property source.");
         boolean wasUpdated = currentState.update(false);
         if (wasUpdated) {

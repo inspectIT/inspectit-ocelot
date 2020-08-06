@@ -93,15 +93,12 @@ class HttpConfigurationPollerTest {
         private HttpPropertySourceState currentState;
 
         @BeforeEach
-        public void beforeEach() throws Exception {
-            Field field = poller.getClass().getDeclaredField("currentState");
-            field.setAccessible(true);
-            field.set(poller, currentState);
+        public void beforeEach()  {
+            ReflectionTestUtils.setField(poller, "currentState", currentState);
         }
 
         @Test
         public void stateNotUpdated() {
-            ReflectionTestUtils.setField(AgentManager.class, "initialized", true);
             doReturn(false).when(currentState).update(anyBoolean());
 
             poller.run();
@@ -113,7 +110,6 @@ class HttpConfigurationPollerTest {
 
         @Test
         public void stateUpdated() {
-            ReflectionTestUtils.setField(AgentManager.class, "initialized", true);
             doReturn(true).when(currentState).update(anyBoolean());
 
             poller.run();
@@ -121,15 +117,6 @@ class HttpConfigurationPollerTest {
             verify(currentState).update(eq(false));
             verify(env).updatePropertySources(any());
             verifyNoMoreInteractions(currentState, env);
-        }
-
-        @Test
-        public void agentNotInitialized() {
-            ReflectionTestUtils.setField(AgentManager.class, "initialized", false);
-
-            poller.run();
-
-            verifyZeroInteractions(currentState, env);
         }
     }
 }

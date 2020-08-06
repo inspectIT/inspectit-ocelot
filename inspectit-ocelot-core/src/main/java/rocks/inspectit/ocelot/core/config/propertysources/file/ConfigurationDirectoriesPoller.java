@@ -71,11 +71,6 @@ public class ConfigurationDirectoriesPoller extends DynamicallyActivatableServic
     }
 
     private void pollDirectories() {
-        if (!AgentManager.isInitialized()) {
-            log.debug("Skipping update of directory property sources because the agent is not initialized, yet.");
-            return;
-        }
-
         for (val poller : filePollers) {
             poller.checkForChangesAndReloadIfRequired();
         }
