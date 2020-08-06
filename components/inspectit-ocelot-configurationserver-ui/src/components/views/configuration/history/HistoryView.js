@@ -49,8 +49,9 @@ const contentItem = (item, fileTreeSelected) => {
             font-style: italic;
           }
           .date {
-            padding-left: 1em;
             padding-right: 1em;
+            display: block;
+            text-align: right;
             font-weight: bold;
           }
           .author {
