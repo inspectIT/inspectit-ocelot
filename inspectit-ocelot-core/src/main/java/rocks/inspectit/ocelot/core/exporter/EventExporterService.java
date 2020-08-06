@@ -74,9 +74,9 @@ public class EventExporterService  extends DynamicallyActivatableService {
              */
             schedule = executor.scheduleAtFixedRate(
                     () -> sendToHandlers(),
-                    settings.getFrequency().getSeconds(),
-                    settings.getFrequency().getSeconds(),
-                    TimeUnit.SECONDS
+                    settings.getFrequency().getNano(),
+                    settings.getFrequency().getNano(),
+                    TimeUnit.NANOSECONDS
             );
         } catch (Throwable t) {
             log.error("EventExporter Service could not be started.", t);
