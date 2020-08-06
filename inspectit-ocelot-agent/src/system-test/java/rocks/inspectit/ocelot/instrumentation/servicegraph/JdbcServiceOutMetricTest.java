@@ -34,6 +34,8 @@ public class JdbcServiceOutMetricTest {
 
     @BeforeAll
     static void setupInMemoryDB() throws Exception {
+        TestUtils.waitForAgentInitialization();
+
         Class.forName("org.h2.Driver");
         conn = DriverManager.getConnection(DB_URL + ";DB_CLOSE_DELAY=-1", "", "");
         conn.setAutoCommit(true);
@@ -60,7 +62,6 @@ public class JdbcServiceOutMetricTest {
         ctx.makeActive();
 
         preparedSelect.execute();
-
 
         TestUtils.waitForOpenCensusQueueToBeProcessed();
 
