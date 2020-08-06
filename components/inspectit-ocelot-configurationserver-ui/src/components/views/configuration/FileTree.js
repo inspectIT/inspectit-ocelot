@@ -6,7 +6,7 @@ import { configurationActions, configurationSelectors } from '../../../redux/duc
 import { linkPrefix } from '../../../lib/configuration';
 
 import { DEFAULT_CONFIG_TREE_KEY } from '../../../data/constants';
-import { filter, find } from 'lodash';
+import { filter } from 'lodash';
 
 /**
  * The file tree used in the configuration view.
@@ -39,6 +39,7 @@ class FileTree extends React.Component {
     if (newSelection) {
       if (newSelection !== selection && newSelection !== selectedDefaultConfigFile) {
         this.props.selectFile(newSelection);
+        this.props.selectedFile(newSelection);
       }
     } else {
       if (selection || selectedDefaultConfigFile) {
@@ -112,46 +113,8 @@ class FileTree extends React.Component {
     return null;
   };
 
-
-  clearAll(files) {
-
-    for (let i = 0; i < files.length; i++) {
-      if (files[i].children != null) {
-        this.clearAll(files[i].children);
-      } else {
-        files[i].label = files[i].label.replace('!', '');
-      }
-    }
-    return files;
-  }
-
-
-  compareChanges(files) {
-
-    const commitChanges = this.props.commitChanges;
-    if(commitChanges!= null){
-      for (let i = 0; i < files.length; i++) {
-        if (files[i].children != null) {
-          this.compareChanges(files[i].children);
-        } else {
-          for (let l = 0; l < commitChanges.length; l++) {
-            if (files[i].key === commitChanges[l]) {
-              files[i].label = files[i].label + " !";
-            }
-          }
-        }
-      }
-    }
-    return files;
-  }
-
-
   render() {
-    const { className, defaultTree, selection, selectedDefaultConfigFile, readOnly } = this.props;
-    let files = this.props.files;
-    files = this.clearAll(files);
-    files = this.compareChanges(files);
-
+    const { className, defaultTree, selection, selectedDefaultConfigFile, readOnly, files } = this.props;
     return (
       <div className="this" onContextMenu={readOnly ? undefined : this.showContextMenu} onKeyDown={readOnly ? undefined : this.onKeyDown}>
         <style jsx>{`

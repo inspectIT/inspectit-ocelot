@@ -11,7 +11,7 @@ import MoveDialog from './dialogs/MoveDialog';
 import FileToolbar from './FileToolbar';
 import FileTree from './FileTree';
 import { enableOcelotAutocompletion } from './OcelotAutocompleter';
-import HistoryView from './gitHistory/HistoryView';
+import HistoryView from './history/HistoryView';
 /**
  * The header component of the editor view.
  */
@@ -47,73 +47,43 @@ const EditorHeader = ({ icon, path, name, isContentModified, readOnly }) => (
   </>
 );
 
-
-// Rest Data (only Test)
-const restData = [
+// Test Data
+const testData = [
   {
-    name: 'Master',
-    id: '-',
+    name: 'Version 11',
+    id: '346123zw',
     date: 13456789,
     author: 'admin',
-    changes:[],
+    changes: ['/aaaa.yml'],
   },
   {
     name: 'Version 10',
-    id: 'xxxxxx',
+    id: '1283ad294',
     date: 13456789,
     author: 'admin',
-    changes: [
-      '/aaaa.yml',
-    ]
+    changes: ['/hello.yml'],
   },
   {
     name: 'Version 9',
-    id: 'xxxxxx',
-    date: 13456789,
-    author: 'admin',
-    changes: [
-      '/hello.yml',
-    ]
-  },
-  {
-    name: 'Version 8',
-    id: 'xyxyxyx',
+    id: '6623ad212',
     date: 13456789,
     author: 'philip',
-    changes:[
-      '/test/myFolder/myAAAAA.yml',
-      '/hello.yml',
-      '/aaaa.yml',
-    ]
-  }
-]
+    changes: ['/test/myFolder/myAAAAA.yml', '/hello.yml', '/aaaa.yml'],
+  },
+];
 
 /**
  * The configuration view component used for managing the agent configurations.
  */
 class ConfigurationView extends React.Component {
-
   state = {
     isDeleteFileDialogShown: false,
     isCreateFileDialogShown: false,
     isCreateDirectoryDialogShown: false,
     isMoveDialogShown: false,
     filePath: null,
-    commitChanges: [],
+    fileTreeSelected: '',
   };
-
-  commitChangesFunction = (data) => {
-
-    if (data != null) {
-      this.setState({
-        commitChanges: data.changes,
-      })
-    } else {
-      this.setState({
-        commitChanges: null,
-      })
-    }
-  }
 
   parsePath = (filePath, defaultConfigFilePath) => {
     if (filePath) {
@@ -147,6 +117,12 @@ class ConfigurationView extends React.Component {
 
   onRefresh = () => {
     this.props.selectedFileContentsChanged(null);
+  };
+
+  selctedFile = (value) => {
+    this.setState({
+      fileTreeSelected: value,
+    });
   };
 
   showDeleteFileDialog = (filePath) => this.setState({ isDeleteFileDialogShown: true, filePath });
@@ -184,7 +160,6 @@ class ConfigurationView extends React.Component {
     const { path, name } = this.parsePath(selection, selectedDefaultConfigFile);
     const icon = 'pi-' + (isDirectory ? 'folder' : 'file');
     const showHeader = !!name;
-    const commitChanges = this.state.commitChanges;
 
     return (
       <div className="this">
@@ -229,7 +204,7 @@ class ConfigurationView extends React.Component {
             showCreateDirectoryDialog={this.showCreateDirectoryDialog}
             showMoveDialog={this.showMoveDialog}
             readOnly={readOnly}
-            commitChanges={commitChanges}
+            selectedFile={this.selctedFile}
           />
           <div className="details">Last refresh: {this.props.updateDate ? new Date(this.props.updateDate).toLocaleString() : '-'}</div>
         </div>
@@ -262,10 +237,7 @@ class ConfigurationView extends React.Component {
             />
           ) : null}
         </EditorView>
-        <HistoryView
-          data={restData}
-          commitChangesFunction={this.commitChangesFunction}
-        ></HistoryView>
+        <HistoryView data={testData} fileTreeSelected={this.state.fileTreeSelected}></HistoryView>
         <DeleteDialog visible={this.state.isDeleteFileDialogShown} onHide={this.hideDeleteFileDialog} filePath={this.state.filePath} />
         <CreateDialog
           directoryMode={false}

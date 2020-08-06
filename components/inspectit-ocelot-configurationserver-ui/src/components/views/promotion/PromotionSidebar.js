@@ -7,7 +7,7 @@ import classnames from 'classnames';
  *
  * @param {object} option current list option
  */
-const selectionTemplate = ({ file, type, authors, isApproved, canSelfApprove, currentUser, canPromote }) => {
+const selectionTemplate = ({ file, type, isApproved }) => {
   const iconClassNames = classnames('pi', {
     green: type === 'ADD',
     yellow: type === 'MODIFY',
@@ -20,8 +20,6 @@ const selectionTemplate = ({ file, type, authors, isApproved, canSelfApprove, cu
   const itemClassNames = classnames('p-clearfix', 'item', {
     approved: isApproved,
   });
-
-  const preventApproval = !canPromote || (!canSelfApprove && authors.includes(currentUser));
 
   return (
     <>
@@ -54,9 +52,6 @@ const selectionTemplate = ({ file, type, authors, isApproved, canSelfApprove, cu
           :global(.p-highlight) .approved {
             background-color: inherit;
           }
-          .pi-lock {
-            color: #9e9e9e;
-          }
         `}
       </style>
 
@@ -65,7 +60,6 @@ const selectionTemplate = ({ file, type, authors, isApproved, canSelfApprove, cu
           <i className={iconClassNames}></i>
           <span className="label">{file}</span>
           {isApproved && <i className="pi pi-check-circle green"></i>}
-          {preventApproval && <i className="pi pi-lock"></i>}
         </div>
       </div>
     </>
@@ -88,7 +82,7 @@ const PromotionSidebar = ({ selection, onSelectionChange, promotionFiles, update
             border-right: 1px solid #dddddd;
           }
           .this :global(.p-listbox) {
-            width: 22rem;
+            width: 20rem;
             height: 100%;
             border: none;
           }
