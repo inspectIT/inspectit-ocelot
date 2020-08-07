@@ -1,6 +1,5 @@
 package rocks.inspectit.ocelot.instrumentation.correlation.log;
 
-
 import io.opencensus.trace.Tracing;
 import org.apache.logging.log4j.ThreadContext;
 import org.junit.jupiter.api.BeforeAll;
@@ -25,8 +24,9 @@ public class LogCorrelationTest {
         MDC.get("test");
         org.apache.log4j.MDC.get("test");
         ThreadContext.get("test");
-        TestUtils.waitForClassInstrumentations(Arrays.asList(LogCorrelationTest.class, Thread.class, AbstractExecutorService.class, ScheduledThreadPoolExecutor.class),
-                15, TimeUnit.SECONDS);
+        TestUtils.waitForClassInstrumentation(LogCorrelationTest.class, true, 15, TimeUnit.SECONDS);
+        TestUtils.waitForClassInstrumentations(Arrays.asList(Thread.class, AbstractExecutorService.class, ScheduledThreadPoolExecutor.class),
+                false, 15, TimeUnit.SECONDS);
     }
 
     /**
@@ -107,7 +107,6 @@ public class LogCorrelationTest {
         }
     }
 
-
     @Nested
     class ExecutorServiceCorrel {
 
@@ -138,7 +137,6 @@ public class LogCorrelationTest {
 
             future.get().get();
         }
-
 
         @Test
         void verifyCallableCorrelation() throws InterruptedException, ExecutionException {
@@ -171,7 +169,6 @@ public class LogCorrelationTest {
         }
     }
 
-
     @Nested
     class ScheduledExecutorService {
 
@@ -202,7 +199,6 @@ public class LogCorrelationTest {
 
             future.get().get();
         }
-
 
         @Test
         void verifyCallableCorrelation() throws InterruptedException, ExecutionException {
@@ -272,6 +268,5 @@ public class LogCorrelationTest {
             es.shutdown();
         }
     }
-
 
 }

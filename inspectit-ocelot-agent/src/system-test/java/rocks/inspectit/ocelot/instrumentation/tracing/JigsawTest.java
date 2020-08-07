@@ -14,7 +14,7 @@ public class JigsawTest extends TraceTestBase {
 
     @BeforeAll
     static void setup() throws ClassNotFoundException {
-        TestUtils.waitForClassInstrumentation(DriverManager.class, 15, TimeUnit.SECONDS);
+        TestUtils.waitForClassInstrumentation(DriverManager.class, true, 15, TimeUnit.SECONDS);
     }
 
     @Test

@@ -59,7 +59,7 @@ public class HttpInMetricTest {
             server.start();
 
             TestUtils.waitForClassInstrumentations(Arrays.asList(HttpServlet.class,
-                    Class.forName("sun.net.www.protocol.http.HttpURLConnection")), 10, TimeUnit.SECONDS);
+                    Class.forName("sun.net.www.protocol.http.HttpURLConnection")), true, 10, TimeUnit.SECONDS);
 
             fireRequest("http://localhost:" + server.getURI().getPort() + "/servletapi");
             server.stop();
@@ -71,7 +71,8 @@ public class HttpInMetricTest {
             tags.put("http_status", "123");
 
             long cnt = ((AggregationData.CountData) TestUtils.getDataForView("http/in/count", tags)).getCount();
-            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/in/responsetime/sum", tags)).getSum();
+            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/in/responsetime/sum", tags))
+                    .getSum();
 
             assertThat(cnt).isEqualTo(1);
             assertThat(respSum).isGreaterThan(0);

@@ -56,7 +56,7 @@ public class JdbcServiceOutMetricTest {
     @Test
     void checkPreparedStatementCounted() throws Exception {
         String service = "jdbc_prep";
-        TestUtils.waitForClassInstrumentations(Arrays.asList(JdbcPreparedStatement.class), 30, TimeUnit.SECONDS);
+        TestUtils.waitForClassInstrumentations(Arrays.asList(JdbcPreparedStatement.class), true, 30, TimeUnit.SECONDS);
 
         InternalInspectitContext ctx = Instances.contextManager.enterNewContext();
         ctx.setData("service", service);
@@ -84,7 +84,7 @@ public class JdbcServiceOutMetricTest {
     @Test
     void checkDirectStatementCounted() throws Exception {
         String service = "jdbc_non_prep";
-        TestUtils.waitForClassInstrumentations(Arrays.asList(JdbcPreparedStatement.class), 30, TimeUnit.SECONDS);
+        TestUtils.waitForClassInstrumentations(Arrays.asList(JdbcPreparedStatement.class), true, 30, TimeUnit.SECONDS);
 
         InternalInspectitContext ctx = Instances.contextManager.enterNewContext();
         ctx.setData("service", service);
