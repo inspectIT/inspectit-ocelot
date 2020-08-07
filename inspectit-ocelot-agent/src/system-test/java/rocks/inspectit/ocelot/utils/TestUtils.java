@@ -118,10 +118,10 @@ public class TestUtils {
         for (Class clazz : clazzes) {
             Long timeStamp = instrumentationTimeStamp.get(clazz);
             long delta = System.currentTimeMillis() - timeStamp;
-            if (delta < 5000) {
+            if (delta < 30000) {
                 try {
                     //make sure that the instrumentation was performed at least 5 seconds ago.
-                    Thread.sleep(5000 - delta);
+                    Thread.sleep(30000 - delta);
                 } catch (Exception e) {
                 }
             }
