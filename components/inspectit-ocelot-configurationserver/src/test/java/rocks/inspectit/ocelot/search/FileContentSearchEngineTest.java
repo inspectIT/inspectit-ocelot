@@ -42,7 +42,7 @@ public class FileContentSearchEngineTest {
             doReturn(java.util.Optional.of("i am the test1 content"), java.util.Optional.of("i am the test2 content")).when(mockAccess)
                     .readConfigurationFile(any());
 
-            List<SearchResult> output = fileContentSearchEngine.searchInFiles("test1", -1);
+            List<SearchResult> output = fileContentSearchEngine.searchInFiles("test1", 100);
 
             assertThat(output).hasSize(1);
             SearchResult result = output.get(0);
@@ -63,7 +63,7 @@ public class FileContentSearchEngineTest {
             when(mockAccess.listConfigurationFiles("")).thenReturn(testFiles);
             when(mockAccess.readConfigurationFile(any())).thenReturn(java.util.Optional.of("test1test1test1"));
 
-            List<SearchResult> output = fileContentSearchEngine.searchInFiles("test1", -1);
+            List<SearchResult> output = fileContentSearchEngine.searchInFiles("test1", 100);
 
             assertThat(output).hasSize(3);
             SearchResult result = output.get(0);
@@ -96,7 +96,7 @@ public class FileContentSearchEngineTest {
             when(mockAccess.listConfigurationFiles("")).thenReturn(testFiles);
             when(mockAccess.readConfigurationFile(any())).thenReturn(java.util.Optional.of("foo\nbar"));
 
-            List<SearchResult> output = fileContentSearchEngine.searchInFiles("foo\nbar", -1);
+            List<SearchResult> output = fileContentSearchEngine.searchInFiles("foo\nbar", 100);
 
             assertThat(output).hasSize(1);
             SearchResult result = output.get(0);
@@ -139,14 +139,36 @@ public class FileContentSearchEngineTest {
             when(mockAccess.listConfigurationFiles("")).thenReturn(testFiles);
             when(mockAccess.readConfigurationFile(any())).thenReturn(java.util.Optional.of("test1 \n abc \n test1"));
 
-            List<SearchResult> output = fileContentSearchEngine.searchInFiles("foo", -1);
+            List<SearchResult> output = fileContentSearchEngine.searchInFiles("foo", 100);
 
             assertThat(output).isEmpty();
         }
 
         @Test
+        void matchingStringNotInFirstLine() {
+            RevisionAccess mockAccess = mock(RevisionAccess.class);
+            when(fileManager.getWorkspaceRevision()).thenReturn(mockAccess);
+            FileInfo mockFileInfo1 = mock(FileInfo.class);
+            when(mockFileInfo1.getName()).thenReturn("file_test1");
+            List<FileInfo> testFiles = Collections.singletonList(mockFileInfo1);
+            when(mockAccess.listConfigurationFiles("")).thenReturn(testFiles);
+            when(mockAccess.readConfigurationFile(any())).thenReturn(java.util.Optional.of("test1 \ntest2"));
+
+            List<SearchResult> output = fileContentSearchEngine.searchInFiles("test2", 100);
+
+            assertThat(output).hasSize(1);
+            SearchResult result = output.get(0);
+            assertThat(result.getFile()).isEqualTo("file_test1");
+            assertThat(result.getStartLine()).isEqualTo(1);
+            assertThat(result.getEndLine()).isEqualTo(1);
+            assertThat(result.getStartColumn()).isEqualTo(0);
+            assertThat(result.getEndColumn()).isEqualTo(5);
+
+        }
+
+        @Test
         void emptyQuery() {
-            List<SearchResult> output = fileContentSearchEngine.searchInFiles("", -1);
+            List<SearchResult> output = fileContentSearchEngine.searchInFiles("", 100);
 
             assertThat(output).hasSize(0);
         }

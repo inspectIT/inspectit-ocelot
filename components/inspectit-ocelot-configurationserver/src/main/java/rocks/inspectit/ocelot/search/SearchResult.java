@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.search;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 /**
@@ -7,6 +8,7 @@ import lombok.Data;
  * query was found in. The start variables provide information on in which line and on which column in this line a
  * searched substring was found. The end variable does alike for the end of the query.
  */
+@AllArgsConstructor
 @Data
 public class SearchResult {
 
@@ -35,11 +37,4 @@ public class SearchResult {
      */
     private int endColumn;
 
-    public SearchResult(String file, int startLine, int startColumn, int endLine, int endColumn) {
-        this.file = file;
-        this.startLine = startLine;
-        this.startColumn = startColumn;
-        this.endLine = endLine;
-        this.endColumn = endColumn;
-    }
 }
