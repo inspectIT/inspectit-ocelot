@@ -2,6 +2,7 @@ package rocks.inspectit.ocelot.file;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.Authentication;
@@ -79,6 +80,17 @@ public class FileManager {
      */
     public AbstractWorkingDirectoryAccessor getWorkingDirectory() {
         return workingDirectoryAccessor;
+    }
+
+    /**
+     * Returns the commit with the given id.
+     * @param commitId the id of the desired commit
+     * @return the commit object
+     */
+    public RevisionAccess getCommitWithId(String commitId){
+        ObjectId id = ObjectId.fromString(commitId);
+        RevisionAccess revisionById = versioningManager.getRevisionById(id);
+        return revisionById;
     }
 
     /**
