@@ -1,0 +1,30 @@
+{
+  "templates": [
+    {
+      "created": "2020-07-07T08:41:38.64538964Z",
+      "dot": "dot here",
+      "error": "",
+      "id": "baseline",
+      "link": {
+        "rel": "self",
+        "href": "/kapacitor/v1/templates/baseline"
+      },
+      "modified": "2020-07-07T08:41:38.64538964Z",
+      "script": "tick script here please",
+      "type": "batch"
+    },
+    {
+      "created": "2020-07-07T08:41:38.725505818Z",
+      "dot": "dot here",
+      "error": "",
+      "id": "windowed_baseline",
+      "link": {
+        "rel": "self",
+        "href": "/kapacitor/v1/templates/windowed_baseline"
+      },
+      "modified": "2020-07-07T08:41:38.725505818Z",
+      "script": "tick script here please",
+      "type": "batch"
+    }
+  ]
+}

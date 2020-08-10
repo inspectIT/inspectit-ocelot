@@ -37,4 +37,9 @@ public class AgentStatus {
      * If null, this means that no matching mapping was found.
      */
     private String mappingName;
+
+    /**
+     * The branch of which the mapping delivered to the agent originates.
+     */
+    private String sourceBranch;
 }

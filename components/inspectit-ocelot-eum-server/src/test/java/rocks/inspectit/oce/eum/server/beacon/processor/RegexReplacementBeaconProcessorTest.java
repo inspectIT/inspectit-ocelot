@@ -7,7 +7,9 @@ import rocks.inspectit.oce.eum.server.beacon.Beacon;
 import rocks.inspectit.oce.eum.server.configuration.model.BeaconTagSettings;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
 import rocks.inspectit.oce.eum.server.configuration.model.EumTagsSettings;
+import rocks.inspectit.oce.eum.server.configuration.model.PatternAndReplacement;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -20,9 +22,9 @@ public class RegexReplacementBeaconProcessorTest {
 
         @Test
         void errorOnCyclicDependency() {
-            BeaconTagSettings first = BeaconTagSettings.builder().input("second").regex(".*").replacement("").build();
-            BeaconTagSettings second = BeaconTagSettings.builder().input("third").regex(".*").replacement("").build();
-            BeaconTagSettings third = BeaconTagSettings.builder().input("first").regex(".*").replacement("").build();
+            BeaconTagSettings first = BeaconTagSettings.builder().input("second").build();
+            BeaconTagSettings second = BeaconTagSettings.builder().input("third").build();
+            BeaconTagSettings third = BeaconTagSettings.builder().input("first").build();
 
             Map<String, BeaconTagSettings> regexSettings = new LinkedHashMap<>();
             regexSettings.put("first", first);
@@ -38,8 +40,20 @@ public class RegexReplacementBeaconProcessorTest {
 
         @Test
         void dependenciesRespected() {
-            BeaconTagSettings first = BeaconTagSettings.builder().input("in").regex("Hello World").replacement("Bye World").build();
-            BeaconTagSettings second = BeaconTagSettings.builder().input("first").regex("Bye World").replacement("Bye Earth").build();
+            BeaconTagSettings first = BeaconTagSettings.builder()
+                    .input("in")
+                    .replacements(Arrays.asList(PatternAndReplacement.builder()
+                            .pattern("Hello World")
+                            .replacement("Bye World")
+                            .build()))
+                    .build();
+            BeaconTagSettings second = BeaconTagSettings.builder()
+                    .input("first")
+                    .replacements(Arrays.asList(PatternAndReplacement.builder()
+                            .pattern("Bye World")
+                            .replacement("Bye Earth")
+                            .build()))
+                    .build();
 
             Map<String, BeaconTagSettings> invalidOrder = new LinkedHashMap<>();
             invalidOrder.put("second", second);
@@ -78,7 +92,13 @@ public class RegexReplacementBeaconProcessorTest {
 
         @Test
         void inplaceChangeSupported() {
-            BeaconTagSettings first = BeaconTagSettings.builder().input("value").regex("Hello World").replacement("Goodbye").build();
+            BeaconTagSettings first = BeaconTagSettings.builder()
+                    .input("value")
+                    .replacements(Arrays.asList(PatternAndReplacement.builder()
+                            .pattern("Hello World")
+                            .replacement("Goodbye")
+                            .build()))
+                    .build();
 
             Map<String, BeaconTagSettings> beaconTags = new LinkedHashMap<>();
             beaconTags.put("value", first);
@@ -96,9 +116,28 @@ public class RegexReplacementBeaconProcessorTest {
 
         @Test
         void handleBrokenReplacementStrings() {
-            BeaconTagSettings first = BeaconTagSettings.builder().input("value").regex("Hello World").replacement("one").build();
-            BeaconTagSettings second = BeaconTagSettings.builder().input("value").regex("Hello World").replacement("$5").build();
-            BeaconTagSettings third = BeaconTagSettings.builder().input("value").regex("Hello World").replacement("three").build();
+            BeaconTagSettings first = BeaconTagSettings.builder()
+                    .input("value")
+                    .replacements(Arrays.asList(PatternAndReplacement.builder()
+                            .pattern("Hello World")
+                            .replacement("one")
+                            .build()))
+                    .build();
+            BeaconTagSettings second = BeaconTagSettings.builder()
+                    .input("value")
+                    .replacements(Arrays.asList(PatternAndReplacement.builder()
+                            .pattern("Hello World")
+                            .replacement("$5")
+                            .keepNoMatch(false)
+                            .build()))
+                    .build();
+            BeaconTagSettings third = BeaconTagSettings.builder()
+                    .input("value")
+                    .replacements(Arrays.asList(PatternAndReplacement.builder()
+                            .pattern("Hello World")
+                            .replacement("three")
+                            .build()))
+                    .build();
 
             Map<String, BeaconTagSettings> beaconTags = new LinkedHashMap<>();
             beaconTags.put("first", first);
@@ -122,7 +161,13 @@ public class RegexReplacementBeaconProcessorTest {
 
         @Test
         void nullAttribute() {
-            BeaconTagSettings first = BeaconTagSettings.builder().input("not-existing").regex("Hello World").replacement("one").build();
+            BeaconTagSettings first = BeaconTagSettings.builder()
+                    .input("not-existing")
+                    .replacements(Arrays.asList(PatternAndReplacement.builder()
+                            .pattern("Hello World")
+                            .replacement("Bye World")
+                            .build()))
+                    .build();
 
             Map<String, BeaconTagSettings> beaconTags = new LinkedHashMap<>();
             beaconTags.put("first", first);
@@ -137,6 +182,153 @@ public class RegexReplacementBeaconProcessorTest {
 
             assertThat(result.toMap()).containsOnly(
                     entry("value", "Hello World")
+            );
+        }
+
+        @Test
+        void nullAttributeAsEmpty() {
+            BeaconTagSettings first = BeaconTagSettings.builder()
+                    .input("not-existing")
+                    .replacements(Arrays.asList(PatternAndReplacement.builder()
+                            .pattern("^$")
+                            .replacement("one")
+                            .build()))
+                    .nullAsEmpty(true)
+                    .build();
+
+            Map<String, BeaconTagSettings> beaconTags = new LinkedHashMap<>();
+            beaconTags.put("first", first);
+
+            EumServerConfiguration conf = new EumServerConfiguration();
+            conf.setTags(new EumTagsSettings());
+            conf.getTags().setBeacon(beaconTags);
+
+            RegexReplacementBeaconProcessor processor = new RegexReplacementBeaconProcessor(conf);
+
+            Beacon result = processor.process(Beacon.of(ImmutableMap.of("value", "Hello World")));
+
+            assertThat(result.toMap()).containsOnly(
+                    entry("value", "Hello World"),
+                    entry("first", "one")
+            );
+        }
+
+        @Test
+        void multipleReplacementsWithDeprecation() {
+            BeaconTagSettings first = BeaconTagSettings.builder().input("source")
+                    .regex("Hello")
+                    .replacement("Bye")
+                    .replacements(Arrays.asList(
+                            PatternAndReplacement.builder().pattern("Bye").replacement("test").build(),
+                            PatternAndReplacement.builder().pattern("World").replacement("universe").build()
+                    ))
+                    .build();
+
+            Map<String, BeaconTagSettings> beaconTags = new LinkedHashMap<>();
+            beaconTags.put("first", first);
+
+            EumServerConfiguration conf = new EumServerConfiguration();
+            conf.setTags(new EumTagsSettings());
+            conf.getTags().setBeacon(beaconTags);
+
+            RegexReplacementBeaconProcessor processor = new RegexReplacementBeaconProcessor(conf);
+
+            Beacon result = processor.process(Beacon.of(ImmutableMap.of("source", "Hello Hello World")));
+
+            assertThat(result.toMap()).containsOnly(
+                    entry("source", "Hello Hello World"),
+                    entry("first", "test test universe")
+            );
+        }
+
+        @Test
+        void brokenAdditionalReplacements() {
+            BeaconTagSettings first = BeaconTagSettings.builder().input("source")
+                    .regex("Hello")
+                    .replacement("Bye")
+                    .replacements(Arrays.asList(
+                            PatternAndReplacement.builder().pattern("Bye").replacement("test").build(),
+                            PatternAndReplacement.builder().pattern("World").replacement("universe").build(),
+                            PatternAndReplacement.builder().pattern(".*").replacement("$5").build()
+                    ))
+                    .build();
+
+            Map<String, BeaconTagSettings> beaconTags = new LinkedHashMap<>();
+            beaconTags.put("first", first);
+
+            EumServerConfiguration conf = new EumServerConfiguration();
+            conf.setTags(new EumTagsSettings());
+            conf.getTags().setBeacon(beaconTags);
+
+            RegexReplacementBeaconProcessor processor = new RegexReplacementBeaconProcessor(conf);
+
+            Beacon result = processor.process(Beacon.of(ImmutableMap.of("source", "Hello Hello World")));
+
+            assertThat(result.toMap()).containsOnly(
+                    entry("source", "Hello Hello World"),
+                    entry("first", "test test universe")
+            );
+        }
+
+        @Test
+        void keepNoMatchByDefault() {
+            BeaconTagSettings first = BeaconTagSettings.builder()
+                    .input("value")
+                    .replacements(Arrays.asList(PatternAndReplacement.builder()
+                                    .pattern("Hello World")
+                                    .replacement("something")
+                                    .build(),
+                            PatternAndReplacement.builder()
+                                    .pattern("Hello")
+                                    .replacement("Bye")
+                                    .build()))
+                    .build();
+
+            Map<String, BeaconTagSettings> beaconTags = new LinkedHashMap<>();
+            beaconTags.put("output", first);
+
+            EumServerConfiguration conf = new EumServerConfiguration();
+            conf.setTags(new EumTagsSettings());
+            conf.getTags().setBeacon(beaconTags);
+
+            RegexReplacementBeaconProcessor processor = new RegexReplacementBeaconProcessor(conf);
+
+            Beacon result = processor.process(Beacon.of(ImmutableMap.of("value", "Hello Earth")));
+
+            assertThat(result.toMap()).containsOnly(
+                    entry("value", "Hello Earth"),
+                    entry("output", "Bye Earth")
+            );
+        }
+
+        @Test
+        void discardNoMatch() {
+            BeaconTagSettings first = BeaconTagSettings.builder()
+                    .input("value")
+                    .replacements(Arrays.asList(PatternAndReplacement.builder()
+                                    .pattern("Hello World")
+                                    .replacement("something")
+                                    .keepNoMatch(false)
+                                    .build(),
+                            PatternAndReplacement.builder()
+                                    .pattern("Hello")
+                                    .replacement("Bye")
+                                    .build()))
+                    .build();
+
+            Map<String, BeaconTagSettings> beaconTags = new LinkedHashMap<>();
+            beaconTags.put("output", first);
+
+            EumServerConfiguration conf = new EumServerConfiguration();
+            conf.setTags(new EumTagsSettings());
+            conf.getTags().setBeacon(beaconTags);
+
+            RegexReplacementBeaconProcessor processor = new RegexReplacementBeaconProcessor(conf);
+
+            Beacon result = processor.process(Beacon.of(ImmutableMap.of("value", "Hello Earth")));
+
+            assertThat(result.toMap()).containsOnly(
+                    entry("value", "Hello Earth")
             );
         }
     }

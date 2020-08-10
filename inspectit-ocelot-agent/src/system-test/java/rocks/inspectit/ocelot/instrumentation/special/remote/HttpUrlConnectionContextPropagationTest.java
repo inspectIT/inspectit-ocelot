@@ -27,7 +27,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class HttpUrlConnectionContextPropagationTest {
 
     public static final int PORT = 9999;
+
     public static final String TEST_URL = "http://localhost:" + PORT + "/test";
+
     private WireMockServer wireMockServer;
 
     private final Map<String, Object> dataToPropagate = new HashMap<>();
@@ -38,7 +40,7 @@ public class HttpUrlConnectionContextPropagationTest {
         HttpURLConnection urlConnection = (HttpURLConnection) new URL("http://google.com").openConnection();
         urlConnection.getResponseCode();
 
-        TestUtils.waitForClassInstrumentations(Arrays.asList(Class.forName("sun.net.www.protocol.http.HttpURLConnection")),
+        TestUtils.waitForClassInstrumentations(Arrays.asList(Class.forName("sun.net.www.protocol.http.HttpURLConnection")), true,
                 10, TimeUnit.SECONDS);
 
     }
@@ -131,7 +133,6 @@ public class HttpUrlConnectionContextPropagationTest {
                     .withHeader("Correlation-Context", containing("down_propagated=myvalue")));
         }
 
-
     }
 
     @Nested
@@ -223,8 +224,6 @@ public class HttpUrlConnectionContextPropagationTest {
             assertThat(myCtx.getData("up_propagated2")).isEqualTo("Hello World");
         }
 
-
     }
-
 
 }

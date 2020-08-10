@@ -4,7 +4,7 @@ inspectit:
   self-monitoring:
     enabled: true
   logging:
-    debug: true
+    debug: false
   instrumentation:
     internal:
       # defines how often the agent should check if new classes have been defined.

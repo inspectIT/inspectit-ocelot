@@ -29,6 +29,9 @@ public class AgentMapping implements Auditable {
      */
     private String name;
 
+    /**
+     * The branch which is used by this mapping.
+     */
     private Branch sourceBranch;
 
     /**
@@ -46,7 +49,7 @@ public class AgentMapping implements Auditable {
     @JsonCreator
     public AgentMapping(
             @JsonProperty("name") String name,
-            @JsonProperty("branch") Branch sourceBranch,
+            @JsonProperty("sourceBranch") Branch sourceBranch,
             @JsonProperty("sources") List<@NotBlank String> sources,
             @JsonProperty("attributes") Map<@NotBlank String, @NotBlank String> attributes) {
         this.name = name;

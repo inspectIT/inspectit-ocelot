@@ -11,6 +11,7 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.merge.MergeStrategy;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
@@ -18,7 +19,9 @@ import org.eclipse.jgit.treewalk.AbstractTreeIterator;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.ldap.userdetails.InetOrgPerson;
 import org.springframework.util.CollectionUtils;
+import rocks.inspectit.ocelot.error.exceptions.SelfPromotionNotAllowedException;
 import rocks.inspectit.ocelot.events.ConfigurationPromotionEvent;
 import rocks.inspectit.ocelot.events.WorkspaceChangedEvent;
 import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
@@ -31,10 +34,7 @@ import rocks.inspectit.ocelot.file.versioning.model.WorkspaceDiff;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.util.ConcurrentModificationException;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -50,6 +50,11 @@ public class VersioningManager {
      */
     @VisibleForTesting
     static final PersonIdent GIT_SYSTEM_AUTHOR = new PersonIdent("System", "info@inspectit.rocks");
+
+    /**
+     * The mail suffix used to generate mail addresses for internal users.
+     */
+    private String mailSuffix;
 
     /**
      * Path of the current working directory.
@@ -83,11 +88,13 @@ public class VersioningManager {
      * @param workingDirectory       the working directory to use
      * @param authenticationSupplier the supplier to user for accessing the current user
      * @param eventPublisher         the event publisher to use
+     * @param mailSuffix             The mail suffix used to generate mail addresses for internal users.
      */
-    public VersioningManager(Path workingDirectory, Supplier<Authentication> authenticationSupplier, ApplicationEventPublisher eventPublisher) {
+    public VersioningManager(Path workingDirectory, Supplier<Authentication> authenticationSupplier, ApplicationEventPublisher eventPublisher, String mailSuffix) {
         this.workingDirectory = workingDirectory;
         this.authenticationSupplier = authenticationSupplier;
         this.eventPublisher = eventPublisher;
+        this.mailSuffix = mailSuffix;
     }
 
     /**
@@ -178,7 +185,7 @@ public class VersioningManager {
         stageFiles();
 
         if (commitFiles(author, message, true)) {
-            eventPublisher.publishEvent(new WorkspaceChangedEvent(this));
+            eventPublisher.publishEvent(new WorkspaceChangedEvent(this, getWorkspaceRevision()));
         }
     }
 
@@ -200,10 +207,8 @@ public class VersioningManager {
             log.debug("Committing staged changes.");
         }
 
-        CommitCommand commitCommand = git.commit()
-                .setAll(true) // in order to remove deleted files from index
-                .setMessage(message)
-                .setAuthor(author);
+        CommitCommand commitCommand = git.commit().setAll(true) // in order to remove deleted files from index
+                .setMessage(message).setAuthor(author);
 
         Optional<RevCommit> latestCommit = getLatestCommit(Branch.WORKSPACE);
         if (allowAmend && latestCommit.isPresent()) {
@@ -279,7 +284,13 @@ public class VersioningManager {
         Authentication authentication = authenticationSupplier.get();
         if (authentication != null) {
             String username = authentication.getName();
-            return new PersonIdent(username, "info@inspectit.rocks");
+            String mail;
+            if (authentication.getPrincipal() instanceof InetOrgPerson) {
+                mail = ((InetOrgPerson) authentication.getPrincipal()).getMail();
+            } else {
+                mail = username + mailSuffix;
+            }
+            return new PersonIdent(username, mail);
         } else {
             return GIT_SYSTEM_AUTHOR;
         }
@@ -412,12 +423,145 @@ public class VersioningManager {
 
             simpleDiffEntries.forEach(entry -> fillFileContent(entry, liveRevision, workspaceRevision));
         }
+        simpleDiffEntries.forEach(entry -> fillInAuthors(entry, oldCommit, newCommit));
 
         return WorkspaceDiff.builder()
                 .entries(simpleDiffEntries)
                 .liveCommitId(oldCommit.name())
                 .workspaceCommitId(newCommit.name())
                 .build();
+    }
+
+    @VisibleForTesting
+    void fillInAuthors(SimpleDiffEntry entry, ObjectId baseCommitId, ObjectId newCommitId) {
+        RevCommit baseCommit = getCommit(baseCommitId);
+        RevCommit newCommit = getCommit(newCommitId);
+        switch (entry.getType()) {
+            case ADD:
+                entry.setAuthors(new ArrayList<>(findAuthorsSinceAddition(entry.getFile(), newCommit)));
+                break;
+            case MODIFY:
+                entry.setAuthors(new ArrayList<>(findModifyingAuthors(entry.getFile(), baseCommit, newCommit)));
+                break;
+            case DELETE:
+                entry.setAuthors(Collections.singletonList(findDeletingAuthor(entry.getFile(), baseCommit, newCommit)));
+                break;
+            default:
+                log.warn("Unsupported change type for author lookup encountered: {}", entry.getType());
+                break;
+        }
+    }
+
+    /**
+     * Finds all authors who have modified a file since a certain base revision.
+     *
+     * @param file       the name of the file to check.
+     * @param baseCommit A commit on the live branch onto which the newCommit will be merged
+     * @param newCommit  A commit on the workspace branch containing file modifications
+     *
+     * @return A list of authors who have modified the file.
+     */
+    private Collection<String> findModifyingAuthors(String file, RevCommit baseCommit, RevCommit newCommit) {
+        RevisionAccess newRevision = new RevisionAccess(git.getRepository(), newCommit);
+        RevisionAccess baseRevision = new RevisionAccess(git.getRepository(), baseCommit);
+        //move "baseRevision" to the last commit where this file was touched (potentially the root commit).
+        baseRevision = findLastChangingRevision(file, baseRevision);
+
+        Set<String> authors = new HashSet<>();
+        String baseContent = baseRevision.readConfigurationFile(file).get();
+        //Find all persons who added or modified the file since the last promotion.
+        RevisionAccess commonAncestor = newRevision.getCommonAncestor(baseRevision);
+        while (!newRevision.getRevisionId().equals(commonAncestor.getRevisionId())) {
+            if (newRevision.isConfigurationFileModified(file)) {
+                authors.add(newRevision.getAuthorName());
+            } else if (newRevision.isConfigurationFileAdded(file)) {
+                authors.add(newRevision.getAuthorName());
+                break; //THe file has been added, no need to take previous changes into account
+            }
+            newRevision = newRevision.getPreviousRevision()
+                    .orElseThrow(() -> new IllegalStateException("Expected parent to exist"));
+            if (newRevision.configurationFileExists(file) && newRevision.readConfigurationFile(file)
+                    .get()
+                    .equals(baseContent)) {
+                break; // we have reached a revision where the content is in the original state, no need to look further
+            }
+        }
+        return authors;
+    }
+
+    /**
+     * Walks back in history to the point where the given file was added.
+     * On the way, all authors which have modifies the file are remembered.
+     *
+     * @param file      the file to check
+     * @param newCommit the commit to start looking from, usually on the workspace
+     *
+     * @return the list of authors who have modified the file since it's addition including the author adding the file
+     */
+    private Collection<String> findAuthorsSinceAddition(String file, RevCommit newCommit) {
+        RevisionAccess newRevision = new RevisionAccess(git.getRepository(), newCommit);
+        Set<String> authors = new HashSet<>();
+        //Find all persons who edited the file since it was added
+        while (!newRevision.isConfigurationFileAdded(file)) {
+            if (newRevision.isConfigurationFileModified(file)) {
+                authors.add(newRevision.getAuthorName());
+            }
+            newRevision = newRevision.getPreviousRevision()
+                    .orElseThrow(() -> new IllegalStateException("Expected parent to exist"));
+        }
+        authors.add(newRevision.getAuthorName()); //Also add the name of the person who added the file
+        return authors;
+    }
+
+    /**
+     * Finds the most recent revision originating from "newCommit" in which the given file was deleted.
+     * Does not walk past the common ancestor of "newCommit" and "baseCommit".
+     * <p>
+     * Returns the author of this revision.
+     *
+     * @param file       the file to check
+     * @param baseCommit the commit to comapre agains, usually the live branch
+     * @param newCommit  the commit in which the provided file does not exist anymore, usually on the workspace
+     *
+     * @return the author of the revision which is responsible for the deletion.
+     */
+    private String findDeletingAuthor(String file, RevCommit baseCommit, RevCommit newCommit) {
+        RevisionAccess newRevision = new RevisionAccess(git.getRepository(), newCommit);
+        RevisionAccess baseRevision = new RevisionAccess(git.getRepository(), baseCommit);
+        //move "baseRevision" to the last commit where this file was touched (potentially the root commit).
+        baseRevision = findLastChangingRevision(file, baseRevision);
+
+        RevisionAccess commonAncestor = baseRevision.getCommonAncestor(newRevision);
+        RevisionAccess previous = commonAncestor;
+        //find the person who deleted the file most recently
+        while (!newRevision.getRevisionId().equals(commonAncestor.getRevisionId())) {
+            if (newRevision.isConfigurationFileDeleted(file)) {
+                return newRevision.getAuthorName();
+            }
+            previous = newRevision;
+            newRevision = newRevision.getPreviousRevision()
+                    .orElseThrow(() -> new IllegalStateException("Expected parent to exist"));
+        }
+        return previous.getAuthorName(); //in case an amend happened, this will be the correct user
+    }
+
+    /**
+     * Walks backwards in history starting at the given revision.
+     * Stops at the first revision which either adds or modifies the given file.
+     * <p>
+     * If the provided revision already modified/adds the given file, it is returned unchanged.
+     *
+     * @param file         the file to look for
+     * @param baseRevision the starting revision to walk backwards from
+     *
+     * @return a revision which either modifies or adds the given file.
+     */
+    private RevisionAccess findLastChangingRevision(String file, RevisionAccess baseRevision) {
+        while (!baseRevision.isConfigurationFileAdded(file) && !baseRevision.isConfigurationFileModified(file)) {
+            baseRevision = baseRevision.getPreviousRevision()
+                    .orElseThrow(() -> new IllegalStateException("Expected parent to exist"));
+        }
+        return baseRevision;
     }
 
     /**
@@ -474,7 +618,7 @@ public class VersioningManager {
      *
      * @param promotion the promotion definition
      */
-    public void promoteConfiguration(ConfigurationPromotion promotion) throws GitAPIException {
+    public void promoteConfiguration(ConfigurationPromotion promotion, boolean allowSelfPromotion) throws GitAPIException {
         if (promotion == null || CollectionUtils.isEmpty(promotion.getFiles())) {
             throw new IllegalArgumentException("ConfigurationPromotion must not be null and has to promote at least one file!");
         }
@@ -493,21 +637,37 @@ public class VersioningManager {
 
             // get modified files between the specified diff - we only consider files which exists in the diff
             WorkspaceDiff diff = getWorkspaceDiff(false, liveCommitId, workspaceCommitId);
-            Map<String, DiffEntry.ChangeType> changeIndex = diff.getEntries().stream()
+
+            if (!allowSelfPromotion && containsSelfPromotion(promotion, diff)) {
+                throw new SelfPromotionNotAllowedException("The promotion request contains a file which was edited by the same user");
+            }
+
+            Map<String, DiffEntry.ChangeType> changeIndex = diff.getEntries()
+                    .stream()
                     .collect(Collectors.toMap(SimpleDiffEntry::getFile, SimpleDiffEntry::getType));
 
-            List<String> removeFiles = promotion.getFiles().stream()
+            List<String> removeFiles = promotion.getFiles()
+                    .stream()
                     .filter(file -> changeIndex.get(file) == DiffEntry.ChangeType.DELETE)
                     .map(this::prefixRelativeFile)
                     .collect(Collectors.toList());
 
-            List<String> checkoutFiles = promotion.getFiles().stream()
+            List<String> checkoutFiles = promotion.getFiles()
+                    .stream()
                     .filter(file -> changeIndex.get(file) != DiffEntry.ChangeType.DELETE)
                     .map(this::prefixRelativeFile)
                     .collect(Collectors.toList());
 
             // checkout live branch
             git.checkout().setName(Branch.LIVE.getBranchName()).call();
+
+            // create an empty merge-commit
+            git.merge()
+                    .include(workspaceCommitId)
+                    .setCommit(false)
+                    .setFastForward(MergeCommand.FastForwardMode.NO_FF)
+                    .setStrategy(MergeStrategy.OURS)
+                    .call();
 
             // remove all deleted files
             if (!removeFiles.isEmpty()) {
@@ -523,7 +683,7 @@ public class VersioningManager {
             }
 
             // commit changes
-            commitFiles(getCurrentAuthor(), "Promoting configuration files", false);
+            commitFiles(getCurrentAuthor(), promotion.getCommitMessage(), false);
 
         } catch (IOException | GitAPIException ex) {
             throw new PromotionFailedException("Configuration promotion has failed.", ex);
@@ -531,8 +691,23 @@ public class VersioningManager {
             // checkout workspace branch
             git.checkout().setName(Branch.WORKSPACE.getBranchName()).call();
 
-            eventPublisher.publishEvent(new ConfigurationPromotionEvent(this));
+            eventPublisher.publishEvent(new ConfigurationPromotionEvent(this, getLiveRevision()));
         }
+    }
+
+    private boolean containsSelfPromotion(ConfigurationPromotion promotion, WorkspaceDiff diff) {
+        PersonIdent currentAuthor = getCurrentAuthor();
+        if (currentAuthor == GIT_SYSTEM_AUTHOR) {
+            return false;
+        }
+        Set<String> promotedFiles = promotion.getFiles()
+                .stream()
+                .map(this::prefixRelativeFile) //use prefixRelativeFile to normalize the file names
+                .collect(Collectors.toSet());
+        return diff.getEntries()
+                .stream()
+                .filter(entry -> promotedFiles.contains(prefixRelativeFile(entry.getFile())))
+                .anyMatch(entry -> entry.getAuthors().contains(currentAuthor.getName()));
     }
 
     /**

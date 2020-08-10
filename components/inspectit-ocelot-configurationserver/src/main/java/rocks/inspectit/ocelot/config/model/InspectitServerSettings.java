@@ -29,6 +29,11 @@ public class InspectitServerSettings {
     private String workingDirectory;
 
     /**
+     * The mail suffix used for internal users.
+     */
+    private String mailSuffix;
+
+    /**
      * The duration until an authentication token generated via /api/v1/account/token is valid.
      * After the token has expired, a new one has to be acquired.
      */
@@ -54,6 +59,9 @@ public class InspectitServerSettings {
      * After the given amount of inactivity from an agent, it is evicted from all caches.
      */
     private Duration agentEvictionDelay;
+
+    @Builder.Default
+    private KapacitorSettings kapacitor = new KapacitorSettings();
 
     /**
      * The security settings of the configuration server.

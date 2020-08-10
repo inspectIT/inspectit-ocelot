@@ -38,7 +38,7 @@ public class UserRoleConfiguration {
     /**
      * Permission required for commit access.
      */
-    public static final String COMMIT_ACCESS_ROLE = ROLE_PREFIX + "OCELOT_COMMIT";
+    public static final String PROMOTE_ACCESS_ROLE = ROLE_PREFIX + "OCELOT_PROMOTE";
 
     /**
      * Permission required for admin access.
@@ -63,10 +63,10 @@ public class UserRoleConfiguration {
     /**
      * Permission set for the committer-role.
      */
-    public static final List<? extends GrantedAuthority> COMMIT_ROLE_PERMISSION_SET = Arrays.asList(
+    public static final List<? extends GrantedAuthority> PROMOTE_ROLE_PERMISSION_SET = Arrays.asList(
             new SimpleGrantedAuthority(READ_ACCESS_ROLE),
             new SimpleGrantedAuthority(WRITE_ACCESS_ROLE),
-            new SimpleGrantedAuthority(COMMIT_ACCESS_ROLE)
+            new SimpleGrantedAuthority(PROMOTE_ACCESS_ROLE)
     );
 
     /**
@@ -75,7 +75,7 @@ public class UserRoleConfiguration {
     public static final List<? extends GrantedAuthority> ADMIN_ROLE_PERMISSION_SET = Arrays.asList(
             new SimpleGrantedAuthority(READ_ACCESS_ROLE),
             new SimpleGrantedAuthority(WRITE_ACCESS_ROLE),
-            new SimpleGrantedAuthority(COMMIT_ACCESS_ROLE),
+            new SimpleGrantedAuthority(PROMOTE_ACCESS_ROLE),
             new SimpleGrantedAuthority(ADMIN_ACCESS_ROLE)
     );
 }

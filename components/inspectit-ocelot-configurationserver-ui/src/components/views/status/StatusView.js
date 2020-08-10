@@ -127,6 +127,7 @@ class StatusView extends React.Component {
   };
 
   render() {
+    const { agents } = this.props;
     const { filter, filteredAgents, useRegexFilter, error, readOnly } = this.state;
 
     return (
@@ -158,7 +159,7 @@ class StatusView extends React.Component {
             <StatusTable data={filteredAgents} filter={filter} onShowConfiguration={this.showAgentConfigurationForAttributes} />
           </div>
           <div>
-            <StatusFooterToolbar data={filteredAgents} />
+            <StatusFooterToolbar fullData={agents} filteredData={filteredAgents} />
           </div>
           <AgentConfigurationDialog
             visible={this.state.isAgentConfigurationShown}

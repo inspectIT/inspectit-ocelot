@@ -5,6 +5,9 @@ import { Button } from 'primereact/button';
 import dateformat from 'dateformat';
 import TimeAgo from 'react-timeago';
 import { map } from 'lodash';
+import classnames from 'classnames';
+
+import ConfigurationDownload from '../mappings/ConfigurationDownload';
 import { linkPrefix } from '../../../lib/configuration';
 
 const timeFormatter = (time, unit, suffix) => {
@@ -195,6 +198,45 @@ class StatusTable extends React.Component {
     return <AgentMappingCell data={rowData} />;
   };
 
+  sourceBranchTemplate = (rowData) => {
+    let branch = 'Unknown Branch';
+    if (rowData.sourceBranch) {
+      branch = rowData.sourceBranch;
+    }
+    const isLiveBranch = branch === 'live';
+    const iconClass = classnames('pi', {
+      'pi-circle-on': isLiveBranch,
+      'pi-circle-off': !isLiveBranch,
+      live: isLiveBranch,
+      workspace: !isLiveBranch,
+    });
+
+    return (
+      <>
+        <style jsx>{`
+          .this {
+            display: flex;
+            align-items: center;
+          }
+          .pi {
+            margin-right: 0.5rem;
+          }
+          .pi.live {
+            color: #ef5350;
+          }
+          .pi.workspace {
+            color: #616161;
+          }
+        `}</style>
+
+        <div className="this">
+          <i className={iconClass}></i>
+          <span>{branch}</span>
+        </div>
+      </>
+    );
+  };
+
   lastFetchTemplate = ({ lastConfigFetch }) => {
     return <TimeAgo date={lastConfigFetch} formatter={timeFormatter} />;
   };
@@ -233,7 +275,7 @@ class StatusTable extends React.Component {
       <div className="this">
         <style jsx>{`
           .this :global(.p-datatable) {
-            min-width: 1280px;
+            min-width: 1430px;
           }
 
           .this :global(.p-datatable) :global(th) {
@@ -275,6 +317,7 @@ class StatusTable extends React.Component {
             sortable
             style={{ width: '175px' }}
           />
+          <Column header="Source Branch" field="sourceBranch" body={this.sourceBranchTemplate} style={{ width: '150px' }} sortable />
           <Column header="Agent Mapping" field="mappingFilter" body={this.agentMappingTemplate} sortable />
           <Column header="Last Fetch" field="lastConfigFetch" body={this.lastFetchTemplate} sortable style={{ width: '200px' }} />
         </DataTable>

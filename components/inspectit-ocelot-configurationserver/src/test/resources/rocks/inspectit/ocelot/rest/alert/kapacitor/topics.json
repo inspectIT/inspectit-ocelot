@@ -1,0 +1,19 @@
+{
+  "link": {"rel":"self","href":"/kapacitor/v1/alerts/topics"},
+  "topics": [
+    {
+      "link": {"rel":"self","href":"/kapacitor/v/alerts/topics/system"},
+      "events-link" : {"rel":"events","href":"/kapacitor/v1/alerts/topics/system/events"},
+      "handlers-link": {"rel":"handlers","href":"/kapacitor/v1/alerts/topics/system/handlers"},
+      "id": "system",
+      "level":"CRITICAL"
+    },
+    {
+      "link": {"rel":"self","href":"/kapacitor/v1/alerts/topics/app"},
+      "events-link" : {"rel":"events","href":"/kapacitor/v1/alerts/topics/app/events"},
+      "handlers-link": {"rel":"handlers","href":"/kapacitor/v1/alerts/topics/app/handlers"},
+      "id": "app",
+      "level":"OK"
+    }
+  ]
+}

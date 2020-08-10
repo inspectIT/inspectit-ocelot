@@ -70,8 +70,8 @@ dependencies {
             "rocks.inspectit:opencensus-influxdb-exporter:1.1",
 			"org.influxdb:influxdb-java:2.15"
 	)
-	compileOnly "org.projectlombok:lombok:1.18.4"
-	annotationProcessor "org.projectlombok:lombok:1.18.4"
+	compileOnly "org.projectlombok:lombok:1.18.12"
+	annotationProcessor "org.projectlombok:lombok:1.18.12"
 	testImplementation(
 			project(':inspectit-ocelot-config'),
 			"org.springframework.boot:spring-boot-starter-test",
@@ -80,6 +80,7 @@ dependencies {
 			'org.apache.httpcomponents:httpclient:4.5.6',
 			'org.mockito:mockito-core:2.23.4',
 			'org.junit.jupiter:junit-jupiter-api:5.3.1',
+			'org.awaitility:awaitility:3.1.5',
 			'org.mockito:mockito-junit-jupiter:2.23.0'
 	)
 	testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.3.1"

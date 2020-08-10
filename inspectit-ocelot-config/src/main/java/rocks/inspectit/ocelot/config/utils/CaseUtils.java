@@ -2,7 +2,6 @@ package rocks.inspectit.ocelot.config.utils;
 
 import lombok.experimental.UtilityClass;
 
-
 @UtilityClass
 public class CaseUtils {
 
@@ -10,15 +9,15 @@ public class CaseUtils {
      * Converts the given camelCase String to kebab-case.
      * Any other separator characters are note affected.
      *
-     * @param str the string in camelCase
-     * @return the string in kebab-case
+     * @param str the string in camelCase.
+     *
+     * @return the string in kebab-case.
      */
     public String camelCaseToKebabCase(String str) {
-        int position = 0;
         for (int i = 0; i < str.length() - 1; i++) {
             char first = str.charAt(i);
             char second = str.charAt(i + 1);
-            if (Character.isLowerCase(first) && Character.isUpperCase(second)) {
+            if ((Character.isLowerCase(first) || !Character.isAlphabetic(first)) && Character.isUpperCase(second)) {
                 str = str.substring(0, i + 1) + "-" + Character.toLowerCase(second) + str.substring(i + 2);
             }
         }
@@ -26,10 +25,11 @@ public class CaseUtils {
     }
 
     /**
-     * Converts the given kebab-case String into camelCase
+     * Converts the given kebab-case String into camelCase.
      *
-     * @param name The string in kebab-case
-     * @return the string in camel-case
+     * @param name The string in kebab-case.
+     *
+     * @return the string in camel-case.
      */
     public String kebabCaseToCamelCase(String name) {
         StringBuilder builder = new StringBuilder();
@@ -49,11 +49,12 @@ public class CaseUtils {
     }
 
     /**
-     * Compares two given Strings and checks if they are the same, ignores if the strings are written in different case-styles
+     * Compares two given Strings and checks if they are the same, ignores if the strings are written in different case-styles.
      *
-     * @param a the first string to be compared
-     * @param b the second string to be compared
-     * @return
+     * @param a the first string to be compared.
+     * @param b the second string to be compared.
+     *
+     * @return True if the strings are equal irregardless of their case type. Otherwise false is returned.
      */
     public boolean compareIgnoreCamelOrKebabCase(String a, String b) {
         a = CaseUtils.kebabCaseToCamelCase(a);
