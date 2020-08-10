@@ -22,12 +22,14 @@ import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
 import rocks.inspectit.ocelot.file.versioning.model.ConfigurationPromotion;
 import rocks.inspectit.ocelot.file.versioning.model.SimpleDiffEntry;
 import rocks.inspectit.ocelot.file.versioning.model.WorkspaceDiff;
+import rocks.inspectit.ocelot.file.versioning.model.WorkspaceVersion;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
@@ -982,5 +984,36 @@ class VersioningManagerTest extends FileTestBase {
 
             assertThat(diff.getAuthors()).containsExactlyInAnyOrder("deleting_user");
         }
+    }
+
+    @Nested
+    class ListVersions {
+
+        private String prevCommitId;
+
+        @BeforeEach
+        private void createCommits() throws GitAPIException {
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml=1", AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_b.yml=1");
+            versioningManager.initialize();
+            prevCommitId = versioningManager.getWorkspaceRevision().getRevisionId();
+
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml=2");
+            versioningManager.commitAsExternalChange();
+
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_b.yml=3");
+            versioningManager.commitAllChanges("second commit");
+        }
+
+        @Test
+        public void test() throws GitAPIException, IOException {
+            List<WorkspaceVersion> result = versioningManager.listVersions();
+
+            assertThat(result).flatExtracting(WorkspaceVersion::getMessage)
+                    .containsExactly("second commit", "Staging and committing of external changes", "Initializing Git repository using existing working directory");
+            assertThat(result).flatExtracting(WorkspaceVersion::getAuthor)
+                    .containsExactly("user", "System", "System");
+
+        }
+
     }
 }
