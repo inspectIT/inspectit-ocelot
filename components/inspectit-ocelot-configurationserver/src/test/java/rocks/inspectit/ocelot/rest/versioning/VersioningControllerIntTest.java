@@ -38,9 +38,9 @@ class VersioningControllerIntTest extends IntegrationTestBase {
 
             assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
             WorkspaceVersion[] resultBody = result.getBody();
-            assertThat(resultBody).hasSize(2)
+            assertThat(resultBody).hasSize(3)
                     .extracting(WorkspaceVersion::getAuthor, WorkspaceVersion::getMessage)
-                    .contains(tuple("admin", "Commit configuration file and agent mapping changes"), tuple("System", "Commit configuration file and agent mapping changes"));
+                    .contains(tuple("admin", "Commit configuration file and agent mapping changes"), tuple("System", "Commit configuration file and agent mapping changes"), tuple("System", "Initializing Git repository"));
             assertThat(resultBody).allMatch(version -> ObjectId.isId(version.getId()));
         }
     }
