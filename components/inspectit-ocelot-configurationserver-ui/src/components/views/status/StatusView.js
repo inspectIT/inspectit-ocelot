@@ -155,7 +155,7 @@ class StatusView extends React.Component {
             />
           </div>
           <div className="data-table">
-            <StatusTable data={filteredAgents} filter={filter} onShowConfiguration={this.getAgentConfigAttributes} />
+            <StatusTable data={filteredAgents} filter={filter} onShowConfiguration={this.showAgentConfigurationForAttributes} />
           </div>
           <div>
             <StatusFooterToolbar data={filteredAgents} />
@@ -192,15 +192,16 @@ class StatusView extends React.Component {
     });
   };
 
-  getAgentConfigAttributes = (attributes) => {
+  showAgentConfigurationForAttributes = (attributes) => {
     this.setAgentConfigurationShown(true);
-    this.getConfiguration(attributes);
+    this.fetchConfiguration(attributes);
     this.setState({
       attributes,
+      configurationValue: '',
     });
   };
 
-  getConfiguration = (attributes) => {
+  fetchConfiguration = (attributes) => {
     const requestParams = attributes;
     if (!requestParams) {
       return;

@@ -8,16 +8,6 @@ import { tomorrowNightBlue } from 'react-syntax-highlighter/dist/cjs/styles/hljs
  * Dialog shows the agent configuration.
  */
 class AgentConfigurationDialog extends React.Component {
-  state = {
-    configurationValue: '',
-  };
-
-  componentDidUpdate(prevProps) {
-    if (prevProps.attributes !== this.props.attributes) {
-      this.getConfiguration(this.props.attributes);
-    }
-  }
-
   /**
    * Downloading agent configuration.
    */
@@ -27,36 +17,37 @@ class AgentConfigurationDialog extends React.Component {
     return this.url;
   };
 
-  /**
-   * Closing dialog.
-   */
-  handleClose = (success = true) => {
-    if (success) {
-      this.props.onHide();
-    }
-  };
-
   render() {
     return (
-      <Dialog
-        style={{ width: '50vw' }}
-        header={'Agent Configuration'}
-        modal={true}
-        visible={this.props.visible}
-        onHide={this.props.onHide}
-        footer={
-          <div>
-            <a href={this.download()} download="agent-config.yml">
-              <Button label="Download" className="p-button-primary" />
-            </a>
-            <Button label="Cancel" className="p-button-secondary" onClick={this.handleClose} />
-          </div>
-        }
-      >
-        <SyntaxHighlighter language="yaml" style={tomorrowNightBlue}>
-          {this.props.configurationValue}
-        </SyntaxHighlighter>
-      </Dialog>
+      <>
+        <style jsx>
+          {`
+            .highlighter {
+              overflow-y: hidden !important;
+              overflow-x: hidden !important;
+            }
+          `}
+        </style>
+        <Dialog
+          style={{ width: '50vw', overflow: 'auto' }}
+          header={'Agent Configuration'}
+          modal={true}
+          visible={this.props.visible}
+          onHide={this.props.onHide}
+          footer={
+            <div>
+              <a href={this.download()} download="agent-config.yml">
+                <Button icon="pi pi-download" label="Download" className="p-button-primary" />
+              </a>
+              <Button label="Cancel" className="p-button-secondary" onClick={this.props.onHide} />
+            </div>
+          }
+        >
+          <SyntaxHighlighter className="highlighter" language="yaml" style={tomorrowNightBlue}>
+            {this.props.configurationValue}
+          </SyntaxHighlighter>
+        </Dialog>
+      </>
     );
   }
 }
