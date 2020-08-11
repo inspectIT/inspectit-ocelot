@@ -1,5 +1,8 @@
 package rocks.inspectit.ocelot;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.jupiter.api.AfterEach;
@@ -17,12 +20,18 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.file.FileManager;
+import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
 import rocks.inspectit.ocelot.file.versioning.VersioningManager;
+import rocks.inspectit.ocelot.mappings.AgentMappingManager;
+import rocks.inspectit.ocelot.mappings.AgentMappingSerializer;
+import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Collections;
 
 @ExtendWith(SpringExtension.class)
 @TestPropertySource(properties = {"spring.datasource.url=jdbc:h2:mem:userdb;DB_CLOSE_DELAY=-1", "spring.datasource.driver-class-name=org.h2.Driver", "spring.datasource.username=sa", "spring.datasource.password=", "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect", "spring.jpa.hibernate.ddl-auto=create",})
@@ -55,29 +64,36 @@ public class IntegrationTestBase {
     @Autowired
     protected FileManager fileManager;
 
-    private static boolean firstRun = true;
-
     /**
      * Authenticated restTemplate;
      */
     protected TestRestTemplate authRest;
 
     @BeforeEach
-    void setup() throws GitAPIException {
+    void setup() throws GitAPIException, IOException {
+        // enforce a the same state for each test
+        FileUtils.cleanDirectory(new File(settings.getWorkingDirectory()));
+
         authRest = rest.withBasicAuth(settings.getDefaultUser().getName(), settings.getDefaultUser().getPassword());
 
         // we clean the working directory after each test, thus, we have to reinitialize the working directory, otherwise
         // it is not a git repository anymore
-        if (!firstRun) {
-            VersioningManager versioningManager = (VersioningManager) ReflectionTestUtils.getField(fileManager, "versioningManager");
-            versioningManager.initialize();
-        }
+
+        // recreate the default agent mappings - the AgentMappingSerializer is not used because its depending on the version manager
+        AgentMapping defaultMapping = (AgentMapping) ReflectionTestUtils.getField(AgentMappingManager.class, "DEFAULT_MAPPING");
+        ObjectMapper ymlMapper = new ObjectMapper(new YAMLFactory().disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER));
+        ymlMapper.findAndRegisterModules();
+        Path agentMappingsFile = Paths.get(settings.getWorkingDirectory(), AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME);
+        String mappingsAsYaml = ymlMapper.writeValueAsString(Collections.singletonList(defaultMapping));
+        Files.write(agentMappingsFile, mappingsAsYaml.getBytes());
+
+        // init the version manager
+        VersioningManager versioningManager = (VersioningManager) ReflectionTestUtils.getField(fileManager, "versioningManager");
+        versioningManager.initialize();
     }
 
     @AfterEach
     void afterEach() throws IOException {
         FileUtils.cleanDirectory(new File(settings.getWorkingDirectory()));
-
-        firstRun = false;
     }
 }
