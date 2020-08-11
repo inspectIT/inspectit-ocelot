@@ -1,5 +1,7 @@
 package rocks.inspectit.ocelot.search;
 
+import lombok.Value;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.file.FileInfo;
@@ -7,9 +9,14 @@ import rocks.inspectit.ocelot.file.FileManager;
 import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
+/**
+ * Component to search for a specific pattern in the configuration files.
+ */
 @Component
 public class FileContentSearchEngine {
 
@@ -30,121 +37,133 @@ public class FileContentSearchEngine {
      *
      * @return A List containing {@link SearchResult} instances for each found match.
      */
-    public List<SearchResult> searchInFiles(String query, int limit) {
-        if (!query.isEmpty()) {
-            return searchForQuery(query, fileManager.getWorkspaceRevision(), limit);
+    public List<SearchResult> search(String query, int limit) {
+        if (query.isEmpty()) {
+            return Collections.emptyList();
         }
-        return Collections.emptyList();
+
+        return search(query, limit, fileManager.getWorkspaceRevision());
     }
 
     /**
-     * Takes a String resembling a search-query, a {@link RevisionAccess} instance resembling the current workspace-revision,
-     * aswell as a search-limit. ALl files present in the workspace-revision are searched for the given query.
-     * Returns a List containing {@link SearchResult} instances. Each of these instances resembles one occurrence of the
-     * given query.
-     * The maximum amount of SearchResults is defined by the limit parameter.
+     * Searches in all configuration files which can be accessed by the given {@link RevisionAccess} for the specified
+     * query string. The amount of results can be limited using the limit argument.
      *
-     * @param query          The String that should be searched.
-     * @param revisionAccess The {@link RevisionAccess} instance of the current Workspace.
-     * @param limit          The maximum amount of entries that should be searched.
+     * @param query          the query string to look for
+     * @param limit          the maximum amount of results
+     * @param revisionAccess the accessor for fetching the files
      *
-     * @return A List containing {@link SearchResult} for each found match.
+     * @return a list of {@link SearchResult} representing the matches
      */
-    private List<SearchResult> searchForQuery(String query, RevisionAccess revisionAccess, int limit) {
-        List<SearchResult> filesMatched = new ArrayList<>();
-        for (FileInfo file : revisionAccess.listConfigurationFiles("")) {
-            if (filesMatched.size() == limit) {
-                return filesMatched;
-            }
-            filesMatched.addAll(findMatchingSubStringsInContent(revisionAccess.readConfigurationFile(file.getName())
-                    .get(), query, file.getName(), limit + filesMatched.size()));
+    private List<SearchResult> search(String query, int limit, RevisionAccess revisionAccess) {
+        Pattern queryPattern = Pattern.compile(Pattern.quote(query));
+        List<FileInfo> files = revisionAccess.listConfigurationFiles("");
 
-        }
-        return filesMatched;
-    }
+        AtomicInteger limitCounter = new AtomicInteger(limit);
 
-    /**
-     * Takes a String resembling a files content, a String that resembles a query that should be searched in the files
-     * content, a String that resembles the name of the file the content is from and an integer resembling the search-limit.
-     * Returns a list of {@link SearchResult} instances of which each resembles a found query match.
-     * The maximum amount of SearchResult instances is defined by the limit parameter.
-     *
-     * @param content  The content that should be searched through.
-     * @param query    The query that should be searched in the content.
-     * @param fileName The name of the file the currently searched content is from.
-     * @param limit    The maximum amount of entries that should be searched.
-     *
-     * @return A list of {@link SearchResult} instances. Each instance resembles one match.
-     */
-    private List<SearchResult> findMatchingSubStringsInContent(String content, String query, String fileName, int limit) {
-        List<SearchResult> result = new ArrayList<>();
-        List<Integer> startIndices = new ArrayList<>();
-        List<Integer> endIndices = new ArrayList<>();
+        List<SearchResult> result = files.stream().map(FileInfo::getName).map(fileName -> {
+            Optional<String> content = revisionAccess.readConfigurationFile(fileName);
+            return content.map(fileContent -> findQuery(fileName, fileContent, queryPattern, limitCounter));
+        }).filter(Optional::isPresent).map(Optional::get).flatMap(Collection::stream).collect(Collectors.toList());
 
-        collectMatchingIndices(content, query, limit, startIndices, endIndices);
-
-        Map<Integer, List<Integer>> matchesStart = resolveLineNumbersAndColumns(content, startIndices);
-        Map<Integer, List<Integer>> matchesEnd = resolveLineNumbersAndColumns(content, endIndices);
-        Integer[] startKeySet = matchesStart.keySet().toArray(new Integer[0]);
-        Integer[] endKeySet = matchesEnd.keySet().toArray(new Integer[0]);
-
-        for (int i = 0; i < matchesStart.size(); i++) {
-            for (int j = 0; j < matchesStart.get(startKeySet[i]).size(); j++) {
-                int startLine = startKeySet[i];
-                int startColumn = matchesStart.get(startLine).get(j);
-                int endLine = endKeySet[i];
-                int endColumn = matchesEnd.get(endLine).get(j);
-                result.add(new SearchResult(fileName, startLine, startColumn, endLine, endColumn));
-            }
-        }
         return result;
     }
 
     /**
-     * Takes a String resembling a files content, a String resembling a query to search and an integer resembling
-     * a limit. All indices where a match was found are added to the list given in the startIndices parameter. All
-     * corresponding end indices are added to the list given in the endIndices parameter.
-     * The maximum amount of searched starting indices can be defined by the limit-parameter.
+     * Searches in the specified content for the specified query pattern. The passed content represents the content of the
+     * file with the specified name.
      *
-     * @param content      The content that should be searched through.
-     * @param query        The query that should be searched in the content.
-     * @param limit        The maximum amount of entries that should be searched.
-     * @param startIndices The List in which all start indices of the matches should be saved in.
-     * @param endIndices   The List in which all end indices of the matches should be saved in.
+     * @param fileName     the filename of the current file
+     * @param content      the file's content
+     * @param queryPattern the pattern to search for
+     * @param limitCounter the amount of results to add
+     *
+     * @return a list of {@link SearchResult} representing the matches
      */
-    private void collectMatchingIndices(String content, String query, int limit, List<Integer> startIndices, List<Integer> endIndices) {
-        Pattern searchPattern = Pattern.compile(Pattern.quote(query));
-        Matcher matcher = searchPattern.matcher(content);
-        while (matcher.find() && limit > startIndices.size()) {
-            startIndices.add(matcher.start());
-            endIndices.add(matcher.end());
+    private List<SearchResult> findQuery(String fileName, String content, Pattern queryPattern, AtomicInteger limitCounter) {
+        List<SearchResult> results = new ArrayList<>();
+
+        List<Line> lines = getLines(content);
+
+        ListIterator<Line> listIterator = lines.listIterator();
+        Line currentLine = listIterator.next();
+
+        Matcher matcher = queryPattern.matcher(content);
+        while (matcher.find() && limitCounter.decrementAndGet() >= 0) {
+            int start = matcher.start();
+            int end = matcher.end();
+
+            while (start >= currentLine.getEndIndex()) {
+                currentLine = listIterator.next();
+            }
+            int startLine = currentLine.getLineNumber();
+            int relativeStart = start - currentLine.getStartIndex();
+
+            while (end > currentLine.getEndIndex()) {
+                currentLine = listIterator.next();
+            }
+            int endLine = currentLine.getLineNumber();
+            int relativeEnd = end - currentLine.getStartIndex();
+
+            System.out.println(startLine + "(" + start + "/" + relativeStart + ")\t" + endLine + "(" + end + "/" + relativeEnd + ")");
+            SearchResult result = new SearchResult(fileName, startLine, relativeStart, endLine, relativeEnd);
+            results.add(result);
         }
+
+        return results;
     }
 
     /**
-     * Takes a String resembling a files content and an ascending ordered List of integers resembling indices in the
-     * content parameter. For each given index, the line number as well as the column number is determined.
+     * Extracts a list of {@link Line}s of the given content.
      *
-     * @param content         The content of the current file.
-     * @param matchingIndices An ascending ordered List of integers resembling indices in the content parameter.
+     * @param content the content used as basis
      *
-     * @return A map consisting of the line numbers as keys and a list of integers as the values. Each integer in the list
-     * resembles the start column of a match of the searched query.
+     * @return list of {@link Line}s representing the content
      */
-    private Map<Integer, List<Integer>> resolveLineNumbersAndColumns(String content, List<Integer> matchingIndices) {
-        Map<Integer, List<Integer>> lineNumbers = new TreeMap<>();
-        Pattern searchPattern = Pattern.compile(Pattern.quote("\n"));
-        Matcher matcher = searchPattern.matcher(content);
-        int lineNumber = 0;
-        for (Integer index : matchingIndices) {
-            matcher.region(0, index);
-            while (matcher.find()) {
-                lineNumber++;
-            }
-            int lineOffset = content.lastIndexOf("\n", index) + 1;
-            lineNumbers.computeIfAbsent(lineNumber, k -> new ArrayList<>());
-            lineNumbers.get(lineNumber).add(index - lineOffset);
+    private List<Line> getLines(String content) {
+        if (StringUtils.isEmpty(content)) {
+            return Collections.emptyList();
         }
-        return lineNumbers;
+
+        List<Line> result = new LinkedList<>();
+        int lineNumber = 0;
+        int startIndex = 0;
+        do {
+            int nextIndex = content.indexOf("\n", startIndex) + 1;
+
+            // in case there are no further line breaks
+            if (nextIndex == 0) {
+                nextIndex = content.length();
+            }
+
+            Line line = new Line(lineNumber++, startIndex, nextIndex);
+            result.add(line);
+
+            startIndex = nextIndex;
+        } while (startIndex < content.length());
+
+        return result;
+    }
+
+    /**
+     * Class for representing a line in a string.
+     */
+    @Value
+    private class Line {
+
+        /**
+         * The line number.
+         */
+        int lineNumber;
+
+        /**
+         * The absolute index where the line is starting.
+         */
+        int startIndex;
+
+        /**
+         * The absolute end index where the line is ending.
+         */
+        int endIndex;
     }
 }

@@ -23,7 +23,7 @@ public class SearchResult {
     private int startLine;
 
     /**
-     * The start column of the match.
+     * The start column of the match in the starting line.
      */
     private int startColumn;
 
@@ -33,7 +33,7 @@ public class SearchResult {
     private int endLine;
 
     /**
-     * The end column of the match.
+     * The end column of the match in the ending line.
      */
     private int endColumn;
 

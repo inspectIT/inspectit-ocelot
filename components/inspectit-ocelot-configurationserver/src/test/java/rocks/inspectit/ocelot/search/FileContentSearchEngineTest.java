@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -27,7 +28,7 @@ public class FileContentSearchEngineTest {
     FileManager fileManager;
 
     @Nested
-    public class searchLines {
+    class SearchLines {
 
         @Test
         void findSingleStringPerLine() {
@@ -42,15 +43,10 @@ public class FileContentSearchEngineTest {
             doReturn(java.util.Optional.of("i am the test1 content"), java.util.Optional.of("i am the test2 content")).when(mockAccess)
                     .readConfigurationFile(any());
 
-            List<SearchResult> output = fileContentSearchEngine.searchInFiles("test1", 100);
+            List<SearchResult> output = fileContentSearchEngine.search("test1", 100);
 
-            assertThat(output).hasSize(1);
-            SearchResult result = output.get(0);
-            assertThat(result.getFile()).isEqualTo("file_test1");
-            assertThat(result.getStartLine()).isEqualTo(0);
-            assertThat(result.getEndLine()).isEqualTo(0);
-            assertThat(result.getStartColumn()).isEqualTo(9);
-            assertThat(result.getEndColumn()).isEqualTo(14);
+            assertThat(output).extracting(SearchResult::getFile, SearchResult::getStartLine, SearchResult::getStartColumn, SearchResult::getEndLine, SearchResult::getEndColumn)
+                    .containsExactly(tuple("file_test1", 0, 9, 0, 14));
         }
 
         @Test
@@ -63,27 +59,10 @@ public class FileContentSearchEngineTest {
             when(mockAccess.listConfigurationFiles("")).thenReturn(testFiles);
             when(mockAccess.readConfigurationFile(any())).thenReturn(java.util.Optional.of("test1test1test1"));
 
-            List<SearchResult> output = fileContentSearchEngine.searchInFiles("test1", 100);
+            List<SearchResult> output = fileContentSearchEngine.search("test1", 100);
 
-            assertThat(output).hasSize(3);
-            SearchResult result = output.get(0);
-            assertThat(result.getFile()).isEqualTo("file_test1");
-            assertThat(result.getStartLine()).isEqualTo(0);
-            assertThat(result.getEndLine()).isEqualTo(0);
-            assertThat(result.getStartColumn()).isEqualTo(0);
-            assertThat(result.getEndColumn()).isEqualTo(5);
-            result = output.get(1);
-            assertThat(result.getFile()).isEqualTo("file_test1");
-            assertThat(result.getStartLine()).isEqualTo(0);
-            assertThat(result.getEndLine()).isEqualTo(0);
-            assertThat(result.getStartColumn()).isEqualTo(5);
-            assertThat(result.getEndColumn()).isEqualTo(10);
-            result = output.get(2);
-            assertThat(result.getFile()).isEqualTo("file_test1");
-            assertThat(result.getStartLine()).isEqualTo(0);
-            assertThat(result.getEndLine()).isEqualTo(0);
-            assertThat(result.getStartColumn()).isEqualTo(10);
-            assertThat(result.getEndColumn()).isEqualTo(15);
+            assertThat(output).extracting(SearchResult::getFile, SearchResult::getStartLine, SearchResult::getStartColumn, SearchResult::getEndLine, SearchResult::getEndColumn)
+                    .containsExactly(tuple("file_test1", 0, 0, 0, 5), tuple("file_test1", 0, 5, 0, 10), tuple("file_test1", 0, 10, 0, 15));
         }
 
         @Test
@@ -96,16 +75,10 @@ public class FileContentSearchEngineTest {
             when(mockAccess.listConfigurationFiles("")).thenReturn(testFiles);
             when(mockAccess.readConfigurationFile(any())).thenReturn(java.util.Optional.of("foo\nbar"));
 
-            List<SearchResult> output = fileContentSearchEngine.searchInFiles("foo\nbar", 100);
+            List<SearchResult> output = fileContentSearchEngine.search("foo\nbar", 100);
 
-            assertThat(output).hasSize(1);
-            SearchResult result = output.get(0);
-            assertThat(result.getFile()).isEqualTo("file_test1");
-            assertThat(result.getStartLine()).isEqualTo(0);
-            assertThat(result.getEndLine()).isEqualTo(1);
-            assertThat(result.getStartColumn()).isEqualTo(0);
-            assertThat(result.getEndColumn()).isEqualTo(3);
-
+            assertThat(output).extracting(SearchResult::getFile, SearchResult::getStartLine, SearchResult::getStartColumn, SearchResult::getEndLine, SearchResult::getEndColumn)
+                    .containsExactly(tuple("file_test1", 0, 0, 1, 3));
         }
 
         @Test
@@ -118,15 +91,10 @@ public class FileContentSearchEngineTest {
             when(mockAccess.listConfigurationFiles("")).thenReturn(testFiles);
             when(mockAccess.readConfigurationFile(any())).thenReturn(java.util.Optional.of("testtesttest"));
 
-            List<SearchResult> output = fileContentSearchEngine.searchInFiles("test", 1);
+            List<SearchResult> output = fileContentSearchEngine.search("test", 1);
 
-            assertThat(output).hasSize(1);
-            SearchResult result = output.get(0);
-            assertThat(result.getFile()).isEqualTo("file_test1");
-            assertThat(result.getStartLine()).isEqualTo(0);
-            assertThat(result.getEndLine()).isEqualTo(0);
-            assertThat(result.getStartColumn()).isEqualTo(0);
-            assertThat(result.getEndColumn()).isEqualTo(4);
+            assertThat(output).extracting(SearchResult::getFile, SearchResult::getStartLine, SearchResult::getStartColumn, SearchResult::getEndLine, SearchResult::getEndColumn)
+                    .containsExactly(tuple("file_test1", 0, 0, 0, 4));
         }
 
         @Test
@@ -139,7 +107,7 @@ public class FileContentSearchEngineTest {
             when(mockAccess.listConfigurationFiles("")).thenReturn(testFiles);
             when(mockAccess.readConfigurationFile(any())).thenReturn(java.util.Optional.of("test1 \n abc \n test1"));
 
-            List<SearchResult> output = fileContentSearchEngine.searchInFiles("foo", 100);
+            List<SearchResult> output = fileContentSearchEngine.search("foo", 100);
 
             assertThat(output).isEmpty();
         }
@@ -152,25 +120,19 @@ public class FileContentSearchEngineTest {
             when(mockFileInfo1.getName()).thenReturn("file_test1");
             List<FileInfo> testFiles = Collections.singletonList(mockFileInfo1);
             when(mockAccess.listConfigurationFiles("")).thenReturn(testFiles);
-            when(mockAccess.readConfigurationFile(any())).thenReturn(java.util.Optional.of("test1 \ntest2"));
+            when(mockAccess.readConfigurationFile(any())).thenReturn(java.util.Optional.of("test2\ntest1\ntest2 next line\nand another one\nits here: test2"));
 
-            List<SearchResult> output = fileContentSearchEngine.searchInFiles("test2", 100);
+            List<SearchResult> output = fileContentSearchEngine.search("test2", 100);
 
-            assertThat(output).hasSize(1);
-            SearchResult result = output.get(0);
-            assertThat(result.getFile()).isEqualTo("file_test1");
-            assertThat(result.getStartLine()).isEqualTo(1);
-            assertThat(result.getEndLine()).isEqualTo(1);
-            assertThat(result.getStartColumn()).isEqualTo(0);
-            assertThat(result.getEndColumn()).isEqualTo(5);
-
+            assertThat(output).extracting(SearchResult::getFile, SearchResult::getStartLine, SearchResult::getStartColumn, SearchResult::getEndLine, SearchResult::getEndColumn)
+                    .containsExactly(tuple("file_test1", 0, 0, 0, 5), tuple("file_test1", 2, 0, 2, 5), tuple("file_test1", 4, 10, 4, 15));
         }
 
         @Test
         void emptyQuery() {
-            List<SearchResult> output = fileContentSearchEngine.searchInFiles("", 100);
+            List<SearchResult> output = fileContentSearchEngine.search("", 100);
 
-            assertThat(output).hasSize(0);
+            assertThat(output).isEmpty();
         }
     }
 
