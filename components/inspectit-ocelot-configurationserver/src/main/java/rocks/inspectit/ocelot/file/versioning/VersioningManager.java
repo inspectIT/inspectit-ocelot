@@ -732,7 +732,7 @@ public class VersioningManager {
     /**
      * @return returning a list of {@link WorkspaceVersion} existing in the workspace branch.
      */
-    public List<WorkspaceVersion> listVersions() throws IOException, GitAPIException {
+    public List<WorkspaceVersion> listWorkspaceVersions() throws IOException, GitAPIException {
         ObjectId branch = git.getRepository().resolve("refs/heads/" + Branch.WORKSPACE.getBranchName());
 
         Iterable<RevCommit> workspaceCommits = git.log().add(branch).call();

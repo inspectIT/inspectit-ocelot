@@ -7,6 +7,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.file.accessor.git.CachingRevisionAccess;
 import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
@@ -58,7 +59,7 @@ public class FileManager {
 
     /**
      * The currently existing workspace versions. This field may not reflect the versions which actual exist in the
-     * server's repository because it is only refreshed if a user accesses it via the {@link #listVersions()} method.
+     * server's repository because it is only refreshed if a user accesses it via the {@link #listWorkspaceVersions()} method.
      */
     private List<WorkspaceVersion> workspaceVersions;
 
@@ -166,13 +167,13 @@ public class FileManager {
      *
      * @return a list of {@link WorkspaceVersion} existing in the workspace branch.
      */
-    public List<WorkspaceVersion> listVersions() throws IOException, GitAPIException {
-        if (workspaceVersions == null || workspaceVersions.size() <= 0) {
-            workspaceVersions = versioningManager.listVersions();
+    public List<WorkspaceVersion> listWorkspaceVersions() throws IOException, GitAPIException {
+        if (CollectionUtils.isEmpty(workspaceVersions)) {
+            workspaceVersions = versioningManager.listWorkspaceVersions();
         } else {
             String latestId = workspaceVersions.get(0).getId();
             if (!latestId.equals(getWorkspaceRevision().getRevisionId())) {
-                workspaceVersions = versioningManager.listVersions();
+                workspaceVersions = versioningManager.listWorkspaceVersions();
             }
         }
         return workspaceVersions;

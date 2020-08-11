@@ -1006,7 +1006,7 @@ class VersioningManagerTest extends FileTestBase {
 
         @Test
         public void test() throws GitAPIException, IOException {
-            List<WorkspaceVersion> result = versioningManager.listVersions();
+            List<WorkspaceVersion> result = versioningManager.listWorkspaceVersions();
 
             assertThat(result).flatExtracting(WorkspaceVersion::getMessage)
                     .containsExactly("second commit", "Staging and committing of external changes", "Initializing Git repository using existing working directory");
