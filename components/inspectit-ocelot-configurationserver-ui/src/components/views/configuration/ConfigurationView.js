@@ -54,7 +54,7 @@ const testData = [
     id: '346123zw',
     date: 13456789,
     author: 'admin',
-    changes: ['/aaaa.yml'],
+    changes: ['/a.yml'],
   },
   {
     name: 'Version 10',
@@ -82,7 +82,6 @@ class ConfigurationView extends React.Component {
     isCreateDirectoryDialogShown: false,
     isMoveDialogShown: false,
     filePath: null,
-    fileTreeSelected: '',
   };
 
   parsePath = (filePath, defaultConfigFilePath) => {
@@ -117,12 +116,6 @@ class ConfigurationView extends React.Component {
 
   onRefresh = () => {
     this.props.selectedFileContentsChanged(null);
-  };
-
-  selctedFile = (value) => {
-    this.setState({
-      fileTreeSelected: value,
-    });
   };
 
   showDeleteFileDialog = (filePath) => this.setState({ isDeleteFileDialogShown: true, filePath });
@@ -204,7 +197,6 @@ class ConfigurationView extends React.Component {
             showCreateDirectoryDialog={this.showCreateDirectoryDialog}
             showMoveDialog={this.showMoveDialog}
             readOnly={readOnly}
-            selectedFile={this.selctedFile}
           />
           <div className="details">Last refresh: {this.props.updateDate ? new Date(this.props.updateDate).toLocaleString() : '-'}</div>
         </div>
@@ -226,6 +218,7 @@ class ConfigurationView extends React.Component {
           readOnly={readOnly || !!selectedDefaultConfigFile}
           showVisualConfigurationView={showVisualConfigurationView}
           onToggleVisualConfigurationView={toggleVisualConfigurationView}
+          sidebar={<HistoryView data={testData}></HistoryView>}
         >
           {showHeader ? (
             <EditorHeader
@@ -237,7 +230,7 @@ class ConfigurationView extends React.Component {
             />
           ) : null}
         </EditorView>
-        <HistoryView data={testData} fileTreeSelected={this.state.fileTreeSelected}></HistoryView>
+
         <DeleteDialog visible={this.state.isDeleteFileDialogShown} onHide={this.hideDeleteFileDialog} filePath={this.state.filePath} />
         <CreateDialog
           directoryMode={false}

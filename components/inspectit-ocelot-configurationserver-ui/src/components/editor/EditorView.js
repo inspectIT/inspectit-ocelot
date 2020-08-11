@@ -36,6 +36,7 @@ class EditorView extends React.Component {
       readOnly,
       showVisualConfigurationView,
       onToggleVisualConfigurationView,
+      sidebar,
     } = this.props;
 
     return (
@@ -54,9 +55,11 @@ class EditorView extends React.Component {
           }
           .editor-container {
             position: relative;
+            flex-grow: 1;
           }
           .visual-editor-container {
-            display: flex;
+            position: relative;
+            flex-grow: 1;
           }
           .loading-overlay {
             position: absolute;
@@ -67,9 +70,15 @@ class EditorView extends React.Component {
             background-color: #00000080;
             color: white;
             z-index: 100;
-            display: flex;
             justify-content: center;
             align-items: center;
+          }
+          .editor-row {
+            display: flex;
+            flex-grow: 1;
+          }
+          .sidebar {
+            display: flex;
           }
         `}</style>
         <div className="p-col-fixed">
@@ -88,40 +97,59 @@ class EditorView extends React.Component {
           </EditorToolbar>
         </div>
         {showEditor && !showVisualConfigurationView && (
-          <div className="p-col editor-container">
-            <AceEditor
-              editorRef={(editor) => (this.editor = editor)}
-              onCreate={onCreate}
-              mode="yaml"
-              theme="cobalt"
-              options={editorConfig}
-              value={value}
-              onChange={onChange}
-              canSave={canSave}
-              onSave={onSave}
-              readOnly={readOnly}
-            />
+          <div className="editor-row">
+            <div className="editor-container">
+              <AceEditor
+                editorRef={(editor) => (this.editor = editor)}
+                onCreate={onCreate}
+                mode="yaml"
+                theme="cobalt"
+                options={editorConfig}
+                value={value}
+                onChange={onChange}
+                canSave={canSave}
+                onSave={onSave}
+                readOnly={readOnly}
+              />
+            </div>
+            <div className="sidebar">{sidebar}</div>
           </div>
         )}
         {showEditor && showVisualConfigurationView && (
-          <div className="p-col visual-editor-container">
-            <YamlParser yamlConfig={value} onUpdate={onChange}>
-              {(onUpdate, config) => (
-                <TreeTableEditor config={config} schema={schema} loading={loading} readOnly={readOnly} onUpdate={onUpdate} />
-              )}
-            </YamlParser>
-          </div>
-        )}
-        {!showEditor && <SelectionInformation hint={hint} />}
-        {loading && (
-          <div className="p-col">
-            <div className="loading-overlay">
-              <i className="pi pi-spin pi-spinner" style={{ fontSize: '2em' }}></i>
+          <div className="editor-row">
+            <div className="visual-editor-container">
+              <YamlParser yamlConfig={value} onUpdate={onChange}>
+                {(onUpdate, config) => (
+                  <TreeTableEditor config={config} schema={schema} loading={loading} readOnly={readOnly} onUpdate={onUpdate} />
+                )}
+              </YamlParser>
             </div>
+            <div className="sidebar">{sidebar}</div>
           </div>
         )}
-        <div className="p-col-fixed">
-          {notificationText ? <Notificationbar text={notificationText} isError={isErrorNotification} icon={notificationIcon} /> : null}
+        {!showEditor && (
+          <div className="editor-row">
+            <div className="editor-container">
+              {' '}
+              <SelectionInformation hint={hint} />{' '}
+            </div>
+            <div className="sidebar">{sidebar}</div>
+          </div>
+        )}
+        {loading && (
+          <div className="loading-overlay">
+            <i className="pi pi-spin pi-spinner" style={{ fontSize: '2em' }}></i>
+          </div>
+        )}
+        <div>
+          {notificationText ? (
+            <div className="editor-row">
+              <div className="editor-container">
+                <Notificationbar text={notificationText} isError={isErrorNotification} icon={notificationIcon} />
+              </div>
+              <div className="sidebar">{sidebar}</div>
+            </div>
+          ) : null}
         </div>
       </div>
     );
