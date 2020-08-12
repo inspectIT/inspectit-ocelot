@@ -138,8 +138,9 @@ class StatusView extends React.Component {
       readOnly,
       isAgentConfigurationShown,
       configurationValue,
-      errorConfig,
+      configurationLoadingFailed,
       isLoading,
+      agentId,
     } = this.state;
 
     return (
@@ -177,9 +178,9 @@ class StatusView extends React.Component {
             visible={isAgentConfigurationShown}
             onHide={() => this.setAgentConfigurationShown(false)}
             configurationValue={configurationValue}
-            loading={configurationValue === ''}
-            error={errorConfig}
-            isLoading={isLoading}
+            error={configurationLoadingFailed}
+            loading={isLoading}
+            agentName={agentId}
           />
         </div>
       </>
@@ -208,10 +209,11 @@ class StatusView extends React.Component {
     });
   };
 
-  showAgentConfigurationForAttributes = (attributes) => {
+  showAgentConfigurationForAttributes = (agentId, attributes) => {
     this.setAgentConfigurationShown(true);
     this.setState(
       {
+        agentId,
         attributes,
         configurationValue: '',
       },
@@ -238,16 +240,16 @@ class StatusView extends React.Component {
           .then((res) => {
             this.setState({
               configurationValue: res.data,
-              errorConfig: false,
+              configurationLoadingFailed: false,
               isLoading: false,
             });
           })
           .catch(() => {
             this.setState({
-              errorConfig: true,
+              configurationValue: null,
+              configurationLoadingFailed: true,
               isLoading: false,
             });
-            console.log('fetch configuration error');
           });
       }
     );

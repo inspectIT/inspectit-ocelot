@@ -108,11 +108,12 @@ class StatusTable extends React.Component {
 
     let name = '-';
     let agentIdElement;
+    let agentId = null;
     if (metaInformation) {
       if (service) {
         name = service;
       }
-      const agentId = metaInformation.agentId;
+      agentId = metaInformation.agentId;
       agentIdElement = <span style={{ color: 'gray' }}>({agentId})</span>;
     }
     return (
@@ -134,8 +135,8 @@ class StatusTable extends React.Component {
         {name} {agentIdElement}
         <Button
           className="config-info-button"
-          icon="pi pi-info"
-          onClick={() => onShowConfiguration(attributes)}
+          icon="pi pi-cog"
+          onClick={() => onShowConfiguration(agentId, attributes)}
           tooltip="Show Configuration"
           tooltipOptions={{ showDelay: 500 }}
         />
