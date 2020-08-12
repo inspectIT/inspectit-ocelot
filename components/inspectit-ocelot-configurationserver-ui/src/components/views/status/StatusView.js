@@ -4,6 +4,8 @@ import { agentStatusActions } from '../../../redux/ducks/agent-status';
 import StatusTable from './StatusTable';
 import StatusToolbar from './StatusToolbar';
 import StatusFooterToolbar from './StatusFooterToolbar';
+import AgentConfigurationDialog from './dialogs/AgentConfigurationDialog';
+import axios from '../../../lib/axios-api';
 import { map, isEqual } from 'lodash';
 
 /**
@@ -19,6 +21,11 @@ class StatusView extends React.Component {
       useRegexFilter: false,
       error: false,
       filteredAgents: props.agents,
+      isAgentConfigurationShown: false,
+      attributes: '',
+      configurationValue: '',
+      errorConifg: false,
+      isLoading: false,
     };
   }
 
@@ -123,7 +130,18 @@ class StatusView extends React.Component {
 
   render() {
     const { agents } = this.props;
-    const { filter, filteredAgents, useRegexFilter, error, readOnly } = this.state;
+    const {
+      filter,
+      filteredAgents,
+      useRegexFilter,
+      error,
+      readOnly,
+      isAgentConfigurationShown,
+      configurationValue,
+      configurationLoadingFailed,
+      isLoading,
+      agentId,
+    } = this.state;
 
     return (
       <>
@@ -151,11 +169,19 @@ class StatusView extends React.Component {
             />
           </div>
           <div className="data-table">
-            <StatusTable data={filteredAgents} />
+            <StatusTable data={filteredAgents} filter={filter} onShowConfiguration={this.showAgentConfigurationForAttributes} />
           </div>
           <div>
             <StatusFooterToolbar fullData={agents} filteredData={filteredAgents} />
           </div>
+          <AgentConfigurationDialog
+            visible={isAgentConfigurationShown}
+            onHide={() => this.setAgentConfigurationShown(false)}
+            configurationValue={configurationValue}
+            error={configurationLoadingFailed}
+            loading={isLoading}
+            agentName={agentId}
+          />
         </div>
       </>
     );
@@ -175,6 +201,58 @@ class StatusView extends React.Component {
     if (!loading) {
       fetchStatus();
     }
+  };
+
+  setAgentConfigurationShown = (showDialog) => {
+    this.setState({
+      isAgentConfigurationShown: showDialog,
+    });
+  };
+
+  showAgentConfigurationForAttributes = (agentId, attributes) => {
+    this.setAgentConfigurationShown(true);
+    this.setState(
+      {
+        agentId,
+        attributes,
+        configurationValue: '',
+      },
+      () => {
+        this.fetchConfiguration(attributes);
+      }
+    );
+  };
+
+  fetchConfiguration = (attributes) => {
+    const requestParams = attributes;
+    if (!requestParams) {
+      return;
+    }
+    this.setState(
+      {
+        isLoading: true,
+      },
+      () => {
+        axios
+          .get('/configuration/agent-configuration', {
+            params: { ...requestParams },
+          })
+          .then((res) => {
+            this.setState({
+              configurationValue: res.data,
+              configurationLoadingFailed: false,
+              isLoading: false,
+            });
+          })
+          .catch(() => {
+            this.setState({
+              configurationValue: null,
+              configurationLoadingFailed: true,
+              isLoading: false,
+            });
+          });
+      }
+    );
   };
 }
 
