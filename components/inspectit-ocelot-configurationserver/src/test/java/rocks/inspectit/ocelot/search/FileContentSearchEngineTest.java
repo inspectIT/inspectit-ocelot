@@ -13,9 +13,9 @@ import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,11 +34,9 @@ public class FileContentSearchEngineTest {
         void findSingleStringPerLine() {
             RevisionAccess mockAccess = mock(RevisionAccess.class);
             when(fileManager.getWorkspaceRevision()).thenReturn(mockAccess);
-            FileInfo mockFileInfo1 = mock(FileInfo.class);
-            FileInfo mockFileInfo2 = mock(FileInfo.class);
-            when(mockFileInfo1.getName()).thenReturn("file_test1");
-            when(mockFileInfo2.getName()).thenReturn("file_test2");
-            List<FileInfo> testFiles = Arrays.asList(mockFileInfo1, mockFileInfo2);
+            FileInfo fileInfo1 = FileInfo.builder().name("file_test1").type(FileInfo.Type.FILE).build();
+            FileInfo fileInfo2 = FileInfo.builder().name("file_test2").type(FileInfo.Type.FILE).build();
+            List<FileInfo> testFiles = Arrays.asList(fileInfo1, fileInfo2);
             when(mockAccess.listConfigurationFiles("")).thenReturn(testFiles);
             doReturn(java.util.Optional.of("i am the test1 content"), java.util.Optional.of("i am the test2 content")).when(mockAccess)
                     .readConfigurationFile(any());
@@ -53,9 +51,8 @@ public class FileContentSearchEngineTest {
         void findMultipleStringsInLine() {
             RevisionAccess mockAccess = mock(RevisionAccess.class);
             when(fileManager.getWorkspaceRevision()).thenReturn(mockAccess);
-            FileInfo mockFileInfo1 = mock(FileInfo.class);
-            when(mockFileInfo1.getName()).thenReturn("file_test1");
-            List<FileInfo> testFiles = Collections.singletonList(mockFileInfo1);
+            FileInfo fileInfo = FileInfo.builder().name("file_test1").type(FileInfo.Type.FILE).build();
+            List<FileInfo> testFiles = Collections.singletonList(fileInfo);
             when(mockAccess.listConfigurationFiles("")).thenReturn(testFiles);
             when(mockAccess.readConfigurationFile(any())).thenReturn(java.util.Optional.of("test1test1test1"));
 
@@ -69,9 +66,8 @@ public class FileContentSearchEngineTest {
         void queryOverLine() {
             RevisionAccess mockAccess = mock(RevisionAccess.class);
             when(fileManager.getWorkspaceRevision()).thenReturn(mockAccess);
-            FileInfo mockFileInfo1 = mock(FileInfo.class);
-            when(mockFileInfo1.getName()).thenReturn("file_test1");
-            List<FileInfo> testFiles = Collections.singletonList(mockFileInfo1);
+            FileInfo fileInfo = FileInfo.builder().name("file_test1").type(FileInfo.Type.FILE).build();
+            List<FileInfo> testFiles = Collections.singletonList(fileInfo);
             when(mockAccess.listConfigurationFiles("")).thenReturn(testFiles);
             when(mockAccess.readConfigurationFile(any())).thenReturn(java.util.Optional.of("foo\nbar"));
 
@@ -85,9 +81,8 @@ public class FileContentSearchEngineTest {
         void withLimit() {
             RevisionAccess mockAccess = mock(RevisionAccess.class);
             when(fileManager.getWorkspaceRevision()).thenReturn(mockAccess);
-            FileInfo mockFileInfo1 = mock(FileInfo.class);
-            when(mockFileInfo1.getName()).thenReturn("file_test1");
-            List<FileInfo> testFiles = Collections.singletonList(mockFileInfo1);
+            FileInfo fileInfo = FileInfo.builder().name("file_test1").type(FileInfo.Type.FILE).build();
+            List<FileInfo> testFiles = Collections.singletonList(fileInfo);
             when(mockAccess.listConfigurationFiles("")).thenReturn(testFiles);
             when(mockAccess.readConfigurationFile(any())).thenReturn(java.util.Optional.of("testtesttest"));
 
@@ -101,9 +96,8 @@ public class FileContentSearchEngineTest {
         void stringNotPresent() {
             RevisionAccess mockAccess = mock(RevisionAccess.class);
             when(fileManager.getWorkspaceRevision()).thenReturn(mockAccess);
-            FileInfo mockFileInfo1 = mock(FileInfo.class);
-            when(mockFileInfo1.getName()).thenReturn("file_test1");
-            List<FileInfo> testFiles = Collections.singletonList(mockFileInfo1);
+            FileInfo fileInfo = FileInfo.builder().name("file_test1").type(FileInfo.Type.FILE).build();
+            List<FileInfo> testFiles = Collections.singletonList(fileInfo);
             when(mockAccess.listConfigurationFiles("")).thenReturn(testFiles);
             when(mockAccess.readConfigurationFile(any())).thenReturn(java.util.Optional.of("test1 \n abc \n test1"));
 
@@ -116,9 +110,8 @@ public class FileContentSearchEngineTest {
         void matchingStringNotInFirstLine() {
             RevisionAccess mockAccess = mock(RevisionAccess.class);
             when(fileManager.getWorkspaceRevision()).thenReturn(mockAccess);
-            FileInfo mockFileInfo1 = mock(FileInfo.class);
-            when(mockFileInfo1.getName()).thenReturn("file_test1");
-            List<FileInfo> testFiles = Collections.singletonList(mockFileInfo1);
+            FileInfo fileInfo = FileInfo.builder().name("file_test1").type(FileInfo.Type.FILE).build();
+            List<FileInfo> testFiles = Collections.singletonList(fileInfo);
             when(mockAccess.listConfigurationFiles("")).thenReturn(testFiles);
             when(mockAccess.readConfigurationFile(any())).thenReturn(java.util.Optional.of("test2\ntest1\ntest2 next line\nand another one\nits here: test2"));
 
