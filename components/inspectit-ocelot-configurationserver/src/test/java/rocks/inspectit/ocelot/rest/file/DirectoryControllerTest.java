@@ -1,6 +1,5 @@
 package rocks.inspectit.ocelot.rest.file;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,7 +26,7 @@ class DirectoryControllerTest {
     private FileManager fileManager;
 
     @Mock
-    private WorkingDirectoryAccessor accessor;
+    private WorkingDirectoryAccessor wdAccessor;
 
     @Mock
     private RevisionAccess revisionAccess;
@@ -76,13 +75,14 @@ class DirectoryControllerTest {
 
             Collection<FileInfo> result = controller.listContents(null, request);
 
+            verify(fileManager).getWorkspaceRevision();
             verify(revisionAccess).listConfigurationFiles("target");
-            verifyNoMoreInteractions(revisionAccess);
+            verifyNoMoreInteractions(fileManager, revisionAccess);
             assertThat(result).containsExactly(fileInfo);
         }
 
         @Test
-        public void liveResponse() {
+        public void listLiveVersion() {
             when(fileManager.getLiveRevision()).thenReturn(revisionAccess);
             HttpServletRequest request = mock(HttpServletRequest.class);
             when(request.getAttribute(anyString())).thenReturn("/api/target", "/api/**");
@@ -91,14 +91,14 @@ class DirectoryControllerTest {
 
             Collection<FileInfo> result = controller.listContents("live", request);
 
+            verify(fileManager).getLiveRevision();
             verify(revisionAccess).listConfigurationFiles("target");
-            verifyNoMoreInteractions(revisionAccess);
+            verifyNoMoreInteractions(fileManager, revisionAccess);
             assertThat(result).containsExactly(fileInfo);
         }
 
         @Test
-        public void idResponse(){
-
+        public void idResponse() {
             when(fileManager.getCommitWithId("123")).thenReturn(revisionAccess);
             HttpServletRequest request = mock(HttpServletRequest.class);
             when(request.getAttribute(anyString())).thenReturn("/api/target", "/api/**");
@@ -107,11 +107,10 @@ class DirectoryControllerTest {
 
             Collection<FileInfo> result = controller.listContents("123", request);
 
+            verify(fileManager).getCommitWithId("123");
             verify(revisionAccess).listConfigurationFiles("target");
-            verifyNoMoreInteractions(revisionAccess);
+            verifyNoMoreInteractions(fileManager, revisionAccess);
             assertThat(result).containsExactly(fileInfo);
-
-
 
         }
     }
@@ -121,14 +120,14 @@ class DirectoryControllerTest {
 
         @Test
         public void successful() throws IOException {
-            when(fileManager.getWorkingDirectory()).thenReturn(accessor);
+            when(fileManager.getWorkingDirectory()).thenReturn(wdAccessor);
             HttpServletRequest request = mock(HttpServletRequest.class);
             when(request.getAttribute(anyString())).thenReturn("/api/target", "/api/**");
 
             controller.createNewDirectory(request);
 
-            verify(accessor).createConfigurationDirectory("target");
-            verifyNoMoreInteractions(accessor);
+            verify(wdAccessor).createConfigurationDirectory("target");
+            verifyNoMoreInteractions(wdAccessor);
         }
     }
 
@@ -137,14 +136,14 @@ class DirectoryControllerTest {
 
         @Test
         public void successful() throws IOException {
-            when(fileManager.getWorkingDirectory()).thenReturn(accessor);
+            when(fileManager.getWorkingDirectory()).thenReturn(wdAccessor);
             HttpServletRequest request = mock(HttpServletRequest.class);
             when(request.getAttribute(anyString())).thenReturn("/api/target", "/api/**");
 
             controller.deleteDirectory(request);
 
-            verify(accessor).deleteConfiguration("target");
-            verifyNoMoreInteractions(accessor);
+            verify(wdAccessor).deleteConfiguration("target");
+            verifyNoMoreInteractions(wdAccessor);
         }
     }
 }

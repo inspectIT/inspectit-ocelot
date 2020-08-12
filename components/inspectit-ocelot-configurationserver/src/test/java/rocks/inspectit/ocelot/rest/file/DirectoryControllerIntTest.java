@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import rocks.inspectit.ocelot.IntegrationTestBase;
 import rocks.inspectit.ocelot.file.FileInfo;
+import rocks.inspectit.ocelot.file.versioning.model.WorkspaceDiff;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -43,8 +44,7 @@ class DirectoryControllerIntTest extends IntegrationTestBase {
 
 
         @Test
-        public void liveWorkspaceResponse() {
-
+        public void listLiveWorkspace() {
             authRest.exchange("/api/v1/files/file.yml", HttpMethod.PUT, null, Void.class);
 
             ResponseEntity<FileInfo[]> result = authRest.getForEntity("/api/v1/directories/", FileInfo[].class);

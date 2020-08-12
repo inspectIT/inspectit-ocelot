@@ -99,8 +99,7 @@ public class FileManager {
      */
     public RevisionAccess getCommitWithId(String commitId) {
         ObjectId id = ObjectId.fromString(commitId);
-        RevisionAccess revisionById = versioningManager.getRevisionById(id);
-        return revisionById;
+        return versioningManager.getRevisionById(id);
     }
 
     /**

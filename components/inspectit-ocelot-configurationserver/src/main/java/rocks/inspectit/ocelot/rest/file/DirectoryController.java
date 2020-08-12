@@ -2,6 +2,7 @@ package rocks.inspectit.ocelot.rest.file;
 
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 import rocks.inspectit.ocelot.file.FileInfo;
@@ -19,11 +20,12 @@ import java.util.Collection;
 @RestController
 public class DirectoryController extends FileBaseController {
 
-    @ApiOperation(value = "List directory contents", notes = "Can be used to get a list of the contents of a given directory.")
+    @ApiOperation(value = "List directory contents", notes = "Can be used to get a list of the contents of a given directory. In addition, the branch can be specified which will be used as basis for the listing.")
     @ApiImplicitParam(name = "Path", value = "The part of the url after /directories/ define the path to the directory whose contents shall be read.")
     @GetMapping(value = "directories/**")
-    public Collection<FileInfo> listContents(@RequestParam(value = "version", required = false) String commitId, HttpServletRequest request) {
+    public Collection<FileInfo> listContents(@ApiParam("The id of the version which should be listed. If it is empty, the lastest workspace version is used. Can be 'live' fir listing the latest live version.") @RequestParam(value = "version", required = false) String commitId, HttpServletRequest request) {
         String path = RequestUtil.getRequestSubPath(request);
+
         RevisionAccess revision;
         if (commitId == null) {
             revision = fileManager.getWorkspaceRevision();
@@ -32,6 +34,7 @@ public class DirectoryController extends FileBaseController {
         } else {
             revision = fileManager.getCommitWithId(commitId);
         }
+
         return revision.listConfigurationFiles(path);
     }
 
