@@ -13,6 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Component to search for a specific pattern in the configuration files.
@@ -61,10 +62,17 @@ public class FileContentSearchEngine {
 
         AtomicInteger limitCounter = new AtomicInteger(limit);
 
-        List<SearchResult> result = files.stream().map(FileInfo::getName).map(fileName -> {
-            Optional<String> content = revisionAccess.readConfigurationFile(fileName);
-            return content.map(fileContent -> findQuery(fileName, fileContent, queryPattern, limitCounter));
-        }).filter(Optional::isPresent).map(Optional::get).flatMap(Collection::stream).collect(Collectors.toList());
+        List<SearchResult> result = files.stream()
+                .map(fileInfo -> fileInfo.getAbsoluteFilePaths(""))
+                .reduce(Stream.empty(), Stream::concat)
+                .map(filename -> {
+                    Optional<String> content = revisionAccess.readConfigurationFile(filename);
+                    return content.map(fileContent -> findQuery(filename, fileContent, queryPattern, limitCounter));
+                })
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
 
         return result;
     }
@@ -81,6 +89,10 @@ public class FileContentSearchEngine {
      * @return a list of {@link SearchResult} representing the matches
      */
     private List<SearchResult> findQuery(String fileName, String content, Pattern queryPattern, AtomicInteger limitCounter) {
+        if (StringUtils.isEmpty(content)) {
+            return Collections.emptyList();
+        }
+
         List<SearchResult> results = new ArrayList<>();
 
         List<Line> lines = getLines(content);
@@ -105,7 +117,6 @@ public class FileContentSearchEngine {
             int endLine = currentLine.getLineNumber();
             int relativeEnd = end - currentLine.getStartIndex();
 
-            System.out.println(startLine + "(" + start + "/" + relativeStart + ")\t" + endLine + "(" + end + "/" + relativeEnd + ")");
             SearchResult result = new SearchResult(fileName, startLine, relativeStart, endLine, relativeEnd);
             results.add(result);
         }
