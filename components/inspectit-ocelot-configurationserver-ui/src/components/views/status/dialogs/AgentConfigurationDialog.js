@@ -3,53 +3,54 @@ import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { tomorrowNightBlue } from 'react-syntax-highlighter/dist/cjs/styles/hljs';
-
+import { ProgressBar } from 'primereact/progressbar';
 /**
  * Dialog shows the agent configuration.
  */
-class AgentConfigurationDialog extends React.Component {
+const AgentConfigurationDialog = ({ visible, onHide, configurationValue, error, isLoading }) => {
   /**
    * Downloading agent configuration.
    */
-  download = () => {
-    var blob = new Blob([this.props.configurationValue], { type: 'text/x-yaml' });
-    this.url = window.URL.createObjectURL(blob);
-    return this.url;
+  const download = () => {
+    const blob = new Blob([configurationValue], { type: 'text/x-yaml' });
+    const url = window.URL.createObjectURL(blob);
+    return url;
   };
-
-  render() {
-    return (
-      <>
-        <style jsx>
-          {`
-            .highlighter {
-              overflow-y: hidden !important;
-              overflow-x: hidden !important;
-            }
-          `}
-        </style>
-        <Dialog
-          style={{ width: '50vw', overflow: 'auto' }}
-          header={'Agent Configuration'}
-          modal={true}
-          visible={this.props.visible}
-          onHide={this.props.onHide}
-          footer={
-            <div>
-              <a href={this.download()} download="agent-config.yml">
-                <Button icon="pi pi-download" label="Download" className="p-button-primary" />
-              </a>
-              <Button label="Cancel" className="p-button-secondary" onClick={this.props.onHide} />
-            </div>
+  return (
+    <>
+      <style jsx>
+        {`
+          .highlighter {
+            overflow-y: hidden !important;
+            overflow-x: hidden !important;
           }
-        >
+        `}
+      </style>
+      <Dialog
+        style={{ width: '50vw', overflow: 'auto' }}
+        header={'Agent Configuration'}
+        modal={true}
+        visible={visible}
+        onHide={onHide}
+        footer={
+          <div>
+            <a href={!error ? download() : null} download="agent-config.yml">
+              <Button icon="pi pi-download" label="Download" className="p-button-primary" disabled={error} />
+            </a>
+            <Button label="Cancel" className="p-button-secondary" onClick={onHide} />
+          </div>
+        }
+      >
+        {isLoading ? (
+          <ProgressBar mode="indeterminate" />
+        ) : (
           <SyntaxHighlighter className="highlighter" language="yaml" style={tomorrowNightBlue}>
-            {this.props.configurationValue}
+            {!error ? configurationValue : 'error'}
           </SyntaxHighlighter>
-        </Dialog>
-      </>
-    );
-  }
-}
+        )}
+      </Dialog>
+    </>
+  );
+};
 
 export default AgentConfigurationDialog;

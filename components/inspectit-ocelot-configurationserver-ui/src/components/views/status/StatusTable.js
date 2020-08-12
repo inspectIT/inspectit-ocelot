@@ -6,8 +6,6 @@ import dateformat from 'dateformat';
 import TimeAgo from 'react-timeago';
 import { map } from 'lodash';
 import classnames from 'classnames';
-
-import ConfigurationDownload from '../mappings/ConfigurationDownload';
 import { linkPrefix } from '../../../lib/configuration';
 
 const timeFormatter = (time, unit, suffix) => {
@@ -101,6 +99,7 @@ class StatusTable extends React.Component {
   };
 
   nameTemplate = (rowData) => {
+    const { onShowConfiguration } = this.props;
     const {
       metaInformation,
       attributes,
@@ -136,8 +135,9 @@ class StatusTable extends React.Component {
         <Button
           className="config-info-button"
           icon="pi pi-info"
-          onClick={() => this.props.onShowConfiguration(attributes)}
-          tooltip="Show Agent Configuration"
+          onClick={() => onShowConfiguration(attributes)}
+          tooltip="Show Configuration"
+          tooltipOptions={{ showDelay: 500 }}
         />
       </div>
     );

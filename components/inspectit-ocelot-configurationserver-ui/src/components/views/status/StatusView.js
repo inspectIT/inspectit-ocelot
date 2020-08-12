@@ -24,6 +24,8 @@ class StatusView extends React.Component {
       isAgentConfigurationShown: false,
       attributes: '',
       configurationValue: '',
+      errorConifg: false,
+      isLoading: false,
     };
   }
 
@@ -128,7 +130,17 @@ class StatusView extends React.Component {
 
   render() {
     const { agents } = this.props;
-    const { filter, filteredAgents, useRegexFilter, error, readOnly } = this.state;
+    const {
+      filter,
+      filteredAgents,
+      useRegexFilter,
+      error,
+      readOnly,
+      isAgentConfigurationShown,
+      configurationValue,
+      errorConfig,
+      isLoading,
+    } = this.state;
 
     return (
       <>
@@ -162,9 +174,12 @@ class StatusView extends React.Component {
             <StatusFooterToolbar fullData={agents} filteredData={filteredAgents} />
           </div>
           <AgentConfigurationDialog
-            visible={this.state.isAgentConfigurationShown}
+            visible={isAgentConfigurationShown}
             onHide={() => this.setAgentConfigurationShown(false)}
-            configurationValue={this.state.configurationValue}
+            configurationValue={configurationValue}
+            loading={configurationValue === ''}
+            error={errorConfig}
+            isLoading={isLoading}
           />
         </div>
       </>
@@ -187,19 +202,23 @@ class StatusView extends React.Component {
     }
   };
 
-  setAgentConfigurationShown = (isShown) => {
+  setAgentConfigurationShown = (showDialog) => {
     this.setState({
-      isAgentConfigurationShown: isShown,
+      isAgentConfigurationShown: showDialog,
     });
   };
 
   showAgentConfigurationForAttributes = (attributes) => {
     this.setAgentConfigurationShown(true);
-    this.fetchConfiguration(attributes);
-    this.setState({
-      attributes,
-      configurationValue: '',
-    });
+    this.setState(
+      {
+        attributes,
+        configurationValue: '',
+      },
+      () => {
+        this.fetchConfiguration(attributes);
+      }
+    );
   };
 
   fetchConfiguration = (attributes) => {
@@ -207,18 +226,31 @@ class StatusView extends React.Component {
     if (!requestParams) {
       return;
     }
-    axios
-      .get('/configuration/agent-configuration', {
-        params: { ...requestParams },
-      })
-      .then((res) => {
-        this.setState({
-          configurationValue: res.data,
-        });
-      })
-      .catch(() => {
-        return 'error';
-      });
+    this.setState(
+      {
+        isLoading: true,
+      },
+      () => {
+        axios
+          .get('/configuration/agent-configuration', {
+            params: { ...requestParams },
+          })
+          .then((res) => {
+            this.setState({
+              configurationValue: res.data,
+              errorConfig: false,
+              isLoading: false,
+            });
+          })
+          .catch(() => {
+            this.setState({
+              errorConfig: true,
+              isLoading: false,
+            });
+            console.log('fetch configuration error');
+          });
+      }
+    );
   };
 }
 
