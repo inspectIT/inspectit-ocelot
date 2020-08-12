@@ -72,7 +72,7 @@ const fetchAutocompletions = (prefix, configPath, callback) => {
     });
 };
 
-const initialized = false;
+let initialized = false;
 
 /**
  * Enables the Ocelot autocompletion on the given editor.
@@ -83,6 +83,7 @@ export const enableOcelotAutocompletion = (aceEditor) => {
   if (!initialized) {
     const langTools = ace.require('ace/ext/language_tools'); // eslint-disable-line no-undef
     langTools.addCompleter(completer);
+    initialized = true;
   }
   aceEditor.configAutoCompleteEnabled = true;
 };

@@ -22,7 +22,7 @@ jobs:
       matrix:
         dockerimage:
           - 'openjdk:8-jdk'
-          - 'openjdk:9-jdk'
+          - 'openjdk:13-jdk'
           - 'openjdk:11-jdk'
           - 'ibmcom/ibmjava:8-sdk'
           - 'sgrio/java:jdk_8_ubuntu'

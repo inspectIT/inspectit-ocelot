@@ -8,6 +8,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.file.accessor.git.CachingRevisionAccess;
 import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
@@ -17,10 +18,12 @@ import rocks.inspectit.ocelot.file.accessor.workingdirectory.WorkingDirectoryAcc
 import rocks.inspectit.ocelot.file.versioning.VersioningManager;
 import rocks.inspectit.ocelot.file.versioning.model.ConfigurationPromotion;
 import rocks.inspectit.ocelot.file.versioning.model.WorkspaceDiff;
+import rocks.inspectit.ocelot.file.versioning.model.WorkspaceVersion;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -54,6 +57,12 @@ public class FileManager {
      * Caches the current workspace-revision to make sure the same instance is returned if no new changes were committed.
      */
     private CachingRevisionAccess cachedWorkspaceRevision;
+
+    /**
+     * The currently existing workspace versions. This field may not reflect the versions which actual exist in the
+     * server's repository because it is only refreshed if a user accesses it via the {@link #listWorkspaceVersions()} method.
+     */
+    private List<WorkspaceVersion> workspaceVersions;
 
     @Autowired
     public FileManager(InspectitServerSettings settings, ApplicationEventPublisher eventPublisher, Executor executor) throws GitAPIException {
@@ -162,5 +171,23 @@ public class FileManager {
         } finally {
             workingDirectoryLock.writeLock().unlock();
         }
+    }
+
+    /**
+     * A list of {@link WorkspaceVersion} existing in the workspace branch is returned. In case the workspace branch does
+     * not change, the list is cached in the {@link #workspaceVersions} field to prevent expensive recreation of it.
+     *
+     * @return a list of {@link WorkspaceVersion} existing in the workspace branch.
+     */
+    public List<WorkspaceVersion> listWorkspaceVersions() throws IOException, GitAPIException {
+        if (CollectionUtils.isEmpty(workspaceVersions)) {
+            workspaceVersions = versioningManager.listWorkspaceVersions();
+        } else {
+            String latestId = workspaceVersions.get(0).getId();
+            if (!latestId.equals(getWorkspaceRevision().getRevisionId())) {
+                workspaceVersions = versioningManager.listWorkspaceVersions();
+            }
+        }
+        return workspaceVersions;
     }
 }

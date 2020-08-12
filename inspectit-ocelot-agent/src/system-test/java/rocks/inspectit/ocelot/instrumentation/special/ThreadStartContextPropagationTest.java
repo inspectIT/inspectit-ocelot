@@ -45,18 +45,17 @@ public class ThreadStartContextPropagationTest extends InstrumentationSysTestBas
     }
 
     private class SubThread extends AbstractThread {
+
         public SubThread(Runnable runnable) {
             super(runnable);
             setName("dummy-thread");
         }
     }
 
-
     @BeforeAll
     static void waitForInstrumentation() {
-        TestUtils.waitForClassInstrumentations(Arrays.asList(AbstractThread.class, Thread.class), 15, TimeUnit.SECONDS);
+        TestUtils.waitForClassInstrumentations(Arrays.asList(AbstractThread.class, Thread.class), false, 15, TimeUnit.SECONDS);
     }
-
 
     @Test
     public void verifyContextPropagationViaAbstractThreads() throws InterruptedException {

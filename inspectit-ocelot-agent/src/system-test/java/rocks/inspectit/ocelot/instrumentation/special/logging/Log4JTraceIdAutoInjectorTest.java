@@ -21,7 +21,7 @@ public class Log4JTraceIdAutoInjectorTest extends InstrumentationSysTestBase {
 
     @BeforeAll
     public static void waitForInstrumentation() {
-        TestUtils.waitForClassInstrumentation(Category.class, 15, TimeUnit.SECONDS);
+        TestUtils.waitForClassInstrumentation(Category.class, false, 15, TimeUnit.SECONDS);
     }
 
     @Test
