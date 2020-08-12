@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 import rocks.inspectit.ocelot.file.FileInfo;
+import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
 import rocks.inspectit.ocelot.rest.util.RequestUtil;
 import rocks.inspectit.ocelot.security.config.UserRoleConfiguration;
 
@@ -21,16 +22,17 @@ public class DirectoryController extends FileBaseController {
     @ApiOperation(value = "List directory contents", notes = "Can be used to get a list of the contents of a given directory.")
     @ApiImplicitParam(name = "Path", value = "The part of the url after /directories/ define the path to the directory whose contents shall be read.")
     @GetMapping(value = "directories/**")
-    public Collection<FileInfo> listContents(@RequestParam(value="version", required = false) String commitId,  HttpServletRequest request) {
+    public Collection<FileInfo> listContents(@RequestParam(value = "version", required = false) String commitId, HttpServletRequest request) {
         String path = RequestUtil.getRequestSubPath(request);
-        if(commitId == null){
-            return fileManager.getWorkingDirectory().listConfigurationFiles(path);
-        }else if(commitId.equals("live")){
-            return fileManager.getLiveRevision().listConfigurationFiles(path);
+        RevisionAccess revision;
+        if (commitId == null) {
+            revision = fileManager.getWorkspaceRevision();
+        } else if (commitId.equals("live")) {
+            revision = fileManager.getLiveRevision();
+        } else {
+            revision = fileManager.getCommitWithId(commitId);
         }
-        else{
-            return fileManager.getCommitWithId(commitId).listConfigurationFiles(path);
-        }
+        return revision.listConfigurationFiles(path);
     }
 
     @Secured(UserRoleConfiguration.WRITE_ACCESS_ROLE)

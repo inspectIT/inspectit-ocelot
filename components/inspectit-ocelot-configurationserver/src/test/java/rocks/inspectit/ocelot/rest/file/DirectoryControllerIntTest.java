@@ -40,6 +40,27 @@ class DirectoryControllerIntTest extends IntegrationTestBase {
                     .extracting(FileInfo::getName, FileInfo::getType, FileInfo::getChildren)
                     .contains(tuple("file.yml", FileInfo.Type.FILE, null));
         }
+
+
+        @Test
+        public void liveWorkspaceResponse() {
+
+            authRest.exchange("/api/v1/files/file.yml", HttpMethod.PUT, null, Void.class);
+
+            ResponseEntity<FileInfo[]> result = authRest.getForEntity("/api/v1/directories/", FileInfo[].class);
+
+            FileInfo[] resultBody = result.getBody();
+            assertThat(resultBody)
+                    .hasSize(1)
+                    .extracting(FileInfo::getName, FileInfo::getType, FileInfo::getChildren)
+                    .contains(tuple("file.yml", FileInfo.Type.FILE, null));
+
+            ResponseEntity<FileInfo[]> resultLive = authRest.getForEntity("/api/v1/directories?version=live", FileInfo[].class);
+
+            FileInfo[] resultBodyLive = resultLive.getBody();
+            assertThat(resultBodyLive)
+                    .hasSize(0);
+        }
     }
 
     @Nested

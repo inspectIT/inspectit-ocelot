@@ -84,10 +84,11 @@ public class FileManager {
 
     /**
      * Returns the commit with the given id.
+     *
      * @param commitId the id of the desired commit
      * @return the commit object
      */
-    public RevisionAccess getCommitWithId(String commitId){
+    public RevisionAccess getCommitWithId(String commitId) {
         ObjectId id = ObjectId.fromString(commitId);
         RevisionAccess revisionById = versioningManager.getRevisionById(id);
         return revisionById;
@@ -127,7 +128,6 @@ public class FileManager {
      * Returns the diff between the current live branch and the current workspace branch.
      *
      * @param includeContent whether the file difference (old and new content) is included
-     *
      * @return the diff between the live and workspace branch
      */
     public WorkspaceDiff getWorkspaceDiff(boolean includeContent) throws IOException, GitAPIException {
