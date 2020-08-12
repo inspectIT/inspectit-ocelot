@@ -19,7 +19,7 @@ class VersioningControllerIntTest extends IntegrationTestBase {
 
         @Test
         public void emptyResponse() {
-            ResponseEntity<WorkspaceVersion[]> result = authRest.getForEntity("/api/v1/versioning/list", WorkspaceVersion[].class);
+            ResponseEntity<WorkspaceVersion[]> result = authRest.getForEntity("/api/v1/versions", WorkspaceVersion[].class);
 
             assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
             WorkspaceVersion[] resultBody = result.getBody();
@@ -34,7 +34,7 @@ class VersioningControllerIntTest extends IntegrationTestBase {
             // create test files
             authRest.exchange("/api/v1/files/file.yml", HttpMethod.PUT, null, Void.class);
 
-            ResponseEntity<WorkspaceVersion[]> result = authRest.getForEntity("/api/v1/versioning/list", WorkspaceVersion[].class);
+            ResponseEntity<WorkspaceVersion[]> result = authRest.getForEntity("/api/v1/versions", WorkspaceVersion[].class);
 
             assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
             WorkspaceVersion[] resultBody = result.getBody();

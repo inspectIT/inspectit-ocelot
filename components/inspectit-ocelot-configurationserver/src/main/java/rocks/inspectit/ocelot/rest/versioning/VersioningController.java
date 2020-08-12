@@ -27,7 +27,7 @@ public class VersioningController extends AbstractBaseController {
 
     @Secured(UserRoleConfiguration.READ_ACCESS_ROLE)
     @ApiOperation(value = "List versions", notes = "Lists all versions which are existing in the configuration server. By default, only versions in the workspace branch will be considered.")
-    @GetMapping(value = "versioning/list")
+    @GetMapping(value = "versions")
     public List<WorkspaceVersion> listVersions() throws IOException, GitAPIException {
         return fileManager.listWorkspaceVersions();
     }
