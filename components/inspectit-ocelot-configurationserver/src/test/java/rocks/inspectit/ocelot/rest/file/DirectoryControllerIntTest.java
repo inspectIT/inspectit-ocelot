@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import rocks.inspectit.ocelot.IntegrationTestBase;
 import rocks.inspectit.ocelot.file.FileInfo;
+import rocks.inspectit.ocelot.file.versioning.model.WorkspaceDiff;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -39,6 +40,26 @@ class DirectoryControllerIntTest extends IntegrationTestBase {
                     .hasSize(1)
                     .extracting(FileInfo::getName, FileInfo::getType, FileInfo::getChildren)
                     .contains(tuple("file.yml", FileInfo.Type.FILE, null));
+        }
+
+
+        @Test
+        public void listLiveWorkspace() {
+            authRest.exchange("/api/v1/files/file.yml", HttpMethod.PUT, null, Void.class);
+
+            ResponseEntity<FileInfo[]> result = authRest.getForEntity("/api/v1/directories/", FileInfo[].class);
+
+            FileInfo[] resultBody = result.getBody();
+            assertThat(resultBody)
+                    .hasSize(1)
+                    .extracting(FileInfo::getName, FileInfo::getType, FileInfo::getChildren)
+                    .contains(tuple("file.yml", FileInfo.Type.FILE, null));
+
+            ResponseEntity<FileInfo[]> resultLive = authRest.getForEntity("/api/v1/directories?version=live", FileInfo[].class);
+
+            FileInfo[] resultBodyLive = resultLive.getBody();
+            assertThat(resultBodyLive)
+                    .hasSize(0);
         }
     }
 

@@ -2,6 +2,7 @@ package rocks.inspectit.ocelot.file;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.Authentication;
@@ -91,6 +92,17 @@ public class FileManager {
     }
 
     /**
+     * Returns the commit with the given id.
+     *
+     * @param commitId the id of the desired commit
+     * @return the commit object
+     */
+    public RevisionAccess getCommitWithId(String commitId) {
+        ObjectId id = ObjectId.fromString(commitId);
+        return versioningManager.getRevisionById(id);
+    }
+
+    /**
      * Returns access to the latest commit of the live branch.
      *
      * @return accessor to access the current live branch
@@ -124,7 +136,6 @@ public class FileManager {
      * Returns the diff between the current live branch and the current workspace branch.
      *
      * @param includeContent whether the file difference (old and new content) is included
-     *
      * @return the diff between the live and workspace branch
      */
     public WorkspaceDiff getWorkspaceDiff(boolean includeContent) throws IOException, GitAPIException {
