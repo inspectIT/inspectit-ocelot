@@ -111,7 +111,6 @@ class DirectoryControllerTest {
             verify(revisionAccess).listConfigurationFiles("target");
             verifyNoMoreInteractions(fileManager, revisionAccess);
             assertThat(result).containsExactly(fileInfo);
-
         }
     }
 
