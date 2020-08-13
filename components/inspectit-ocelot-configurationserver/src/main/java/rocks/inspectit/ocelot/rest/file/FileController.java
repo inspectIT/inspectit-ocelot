@@ -93,7 +93,13 @@ public class FileController extends FileBaseController {
     @ApiOperation(value = "Search the given query in all present files.", notes = "Searches the given query in all present files. " + "Searches for as many matches as defined by the limit parameter. If the the limit is set " + "to -1, the query is searched for all occurrences in all files. All found matches are " + "returned in a list of SearchResult instances. Each of these instances contains the " + "following variables:" + "<p>" + "<b>file:</b> a String resembling the name of the file the match was found in." + "<p>" + "<b>startLine:</b> the number of the line in this file where the found match starts as " + "integer." + "<p>" + "<b>endLine:</b> the number of the line in this file where the found match ends as integer." + "<p>" + "<b>startColumn:</b> the number of the column where the found found match starts as " + "integer." + "<p>" + "<b>endColumn:</b> the number of the column where the found match ends as integer.")
     @ApiImplicitParams({@ApiImplicitParam(name = "query", value = "The query string that should be searched in the files."), @ApiImplicitParam(name = "limit", value = "The limit for the returned values. Use '-1' for no limit.")})
     @GetMapping(value = "search")
-    public List<SearchResult> searchForContent(@RequestParam String query, @RequestParam(defaultValue = "100") int limit) {
-        return fileContentSearchEngine.search(query, limit);
+    public List<SearchResult> searchForContent(
+            @RequestParam
+                    String query,
+            @RequestParam(defaultValue = "100")
+                    int limit,
+            @RequestParam(defaultValue = "false")
+                    boolean retrieveFirstLine) {
+        return fileContentSearchEngine.search(query, limit, retrieveFirstLine);
     }
 }

@@ -3,6 +3,8 @@ package rocks.inspectit.ocelot.search;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.util.Optional;
+
 /**
  * This class resembles a query matched by the FileContentSearchEngine. The file variable contains the file name the
  * query was found in. The start variables provide information on in which line and on which column in this line a
@@ -16,6 +18,11 @@ public class SearchResult {
      * The name of the file the match was found in.
      */
     private String file;
+
+    /**
+     * The first line of the match.
+     */
+    private Optional<String> firstLine;
 
     /**
      * The start line of the match.
