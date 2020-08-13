@@ -105,30 +105,27 @@ public class FileContentSearchEngine {
 
         Matcher matcher = queryPattern.matcher(content);
         while (matcher.find() && limitCounter.decrementAndGet() >= 0) {
-
+            SearchResult.SearchResultBuilder searchResultBuilder = SearchResult.builder().file(fileName);
             int start = matcher.start();
             int end = matcher.end();
 
             while (start >= currentLine.getEndIndex()) {
                 currentLine = listIterator.next();
             }
-
-            Line startLine = currentLine;
-            int startLineNumber = startLine.getLineNumber();
-            int relativeStart = start - startLine.getStartIndex();
+            searchResultBuilder.startLine(currentLine.getLineNumber());
+            searchResultBuilder.startColumn(start - currentLine.getStartIndex());
+            if (retrieveFirstLine) {
+                String firstLine = content.substring(currentLine.getStartIndex(), currentLine.getEndIndex());
+                searchResultBuilder.firstLine(firstLine.replace("\n", ""));
+            }
 
             while (end > currentLine.getEndIndex()) {
                 currentLine = listIterator.next();
             }
-            int endLine = currentLine.getLineNumber();
-            int relativeEnd = end - currentLine.getStartIndex();
-            Optional<String> firstLine = Optional.empty();
-            if (retrieveFirstLine) {
-                firstLine = Optional.of(content.substring(startLine.getStartIndex(), startLine.getEndIndex())
-                        .replace("\n", ""));
-            }
-            SearchResult result = new SearchResult(fileName, firstLine, startLineNumber, relativeStart, endLine, relativeEnd);
-            results.add(result);
+            searchResultBuilder.endLine(currentLine.getLineNumber());
+            searchResultBuilder.endColumn(end - currentLine.getStartIndex());
+
+            results.add(searchResultBuilder.build());
         }
 
         return results;

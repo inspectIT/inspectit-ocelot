@@ -13,7 +13,6 @@ import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
@@ -45,7 +44,7 @@ public class FileContentSearchEngineTest {
             List<SearchResult> output = searchEngine.search("test1", 100, false);
 
             assertThat(output).extracting(SearchResult::getFile, SearchResult::getFirstLine, SearchResult::getStartLine, SearchResult::getStartColumn, SearchResult::getEndLine, SearchResult::getEndColumn)
-                    .containsExactly(tuple("file_test1", Optional.empty(), 0, 9, 0, 14));
+                    .containsExactly(tuple("file_test1", null, 0, 9, 0, 14));
         }
 
         @Test
@@ -60,8 +59,7 @@ public class FileContentSearchEngineTest {
             List<SearchResult> output = searchEngine.search("test1", 100, false);
 
             assertThat(output).extracting(SearchResult::getFile, SearchResult::getFirstLine, SearchResult::getStartLine, SearchResult::getStartColumn, SearchResult::getEndLine, SearchResult::getEndColumn)
-                    .containsExactly(tuple("file_test1", Optional.empty(), 0, 0, 0, 5), tuple("file_test1", Optional.empty(), 0, 5, 0, 10), tuple("file_test1", Optional
-                            .empty(), 0, 10, 0, 15));
+                    .containsExactly(tuple("file_test1", null, 0, 0, 0, 5), tuple("file_test1", null, 0, 5, 0, 10), tuple("file_test1", null, 0, 10, 0, 15));
         }
 
         @Test
@@ -76,7 +74,7 @@ public class FileContentSearchEngineTest {
             List<SearchResult> output = searchEngine.search("foo\nbar", 100, false);
 
             assertThat(output).extracting(SearchResult::getFile, SearchResult::getFirstLine, SearchResult::getStartLine, SearchResult::getStartColumn, SearchResult::getEndLine, SearchResult::getEndColumn)
-                    .containsExactly(tuple("file_test1", Optional.empty(), 0, 0, 1, 3));
+                    .containsExactly(tuple("file_test1", null, 0, 0, 1, 3));
         }
 
         @Test
@@ -91,7 +89,7 @@ public class FileContentSearchEngineTest {
             List<SearchResult> output = searchEngine.search("test", 1, false);
 
             assertThat(output).extracting(SearchResult::getFile, SearchResult::getFirstLine, SearchResult::getStartLine, SearchResult::getStartColumn, SearchResult::getEndLine, SearchResult::getEndColumn)
-                    .containsExactly(tuple("file_test1", Optional.empty(), 0, 0, 0, 4));
+                    .containsExactly(tuple("file_test1", null, 0, 0, 0, 4));
         }
 
         @Test
@@ -120,8 +118,7 @@ public class FileContentSearchEngineTest {
             List<SearchResult> output = searchEngine.search("test2", 100, false);
 
             assertThat(output).extracting(SearchResult::getFile, SearchResult::getFirstLine, SearchResult::getStartLine, SearchResult::getStartColumn, SearchResult::getEndLine, SearchResult::getEndColumn)
-                    .containsExactly(tuple("file_test1", Optional.empty(), 0, 0, 0, 5), tuple("file_test1", Optional.empty(), 2, 0, 2, 5), tuple("file_test1", Optional
-                            .empty(), 4, 10, 4, 15));
+                    .containsExactly(tuple("file_test1", null, 0, 0, 0, 5), tuple("file_test1", null, 2, 0, 2, 5), tuple("file_test1", null, 4, 10, 4, 15));
         }
 
         @Test
@@ -143,7 +140,7 @@ public class FileContentSearchEngineTest {
             List<SearchResult> output = searchEngine.search("test1", 100, true);
 
             assertThat(output).extracting(SearchResult::getFile, SearchResult::getFirstLine, SearchResult::getStartLine, SearchResult::getStartColumn, SearchResult::getEndLine, SearchResult::getEndColumn)
-                    .containsExactly(tuple("file_test1", Optional.of("i am the test1 content"), 0, 9, 0, 14));
+                    .containsExactly(tuple("file_test1", "i am the test1 content", 0, 9, 0, 14));
         }
 
         @Test
@@ -159,7 +156,7 @@ public class FileContentSearchEngineTest {
             List<SearchResult> output = searchEngine.search("test1", 100, true);
 
             assertThat(output).extracting(SearchResult::getFile, SearchResult::getFirstLine, SearchResult::getStartLine, SearchResult::getStartColumn, SearchResult::getEndLine, SearchResult::getEndColumn)
-                    .containsExactly(tuple("file_test1", Optional.of(" the test1 "), 2, 5, 2, 10));
+                    .containsExactly(tuple("file_test1", " the test1 ", 2, 5, 2, 10));
         }
     }
 }
