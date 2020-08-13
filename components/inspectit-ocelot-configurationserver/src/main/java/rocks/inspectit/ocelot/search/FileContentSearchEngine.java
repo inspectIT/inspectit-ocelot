@@ -83,10 +83,11 @@ public class FileContentSearchEngine {
      * Searches in the specified content for the specified query pattern. The passed content represents the content of the
      * file with the specified name.
      *
-     * @param fileName     the filename of the current file
-     * @param content      the file's content
-     * @param queryPattern the pattern to search for
-     * @param limitCounter the amount of results to add
+     * @param fileName          the filename of the current file
+     * @param content           the file's content
+     * @param queryPattern      the pattern to search for
+     * @param limitCounter      the amount of results to add
+     * @param retrieveFirstLine If true, the first line of a match is added to the SearchResult
      *
      * @return a list of {@link SearchResult} representing the matches
      */
