@@ -11,6 +11,7 @@ import MoveDialog from './dialogs/MoveDialog';
 import FileToolbar from './FileToolbar';
 import FileTree from './FileTree';
 import { enableOcelotAutocompletion } from './OcelotAutocompleter';
+import SearchDialog from './dialogs/SearchDialog';
 
 /**
  * The header component of the editor view.
@@ -218,6 +219,8 @@ class ConfigurationView extends React.Component {
           filePath={this.state.filePath}
         />
         <MoveDialog visible={this.state.isMoveDialogShown} onHide={this.hideMoveDialog} filePath={this.state.filePath} />
+
+        <SearchDialog />
       </div>
     );
   }
