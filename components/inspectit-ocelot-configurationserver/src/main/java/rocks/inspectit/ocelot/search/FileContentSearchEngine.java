@@ -59,7 +59,7 @@ public class FileContentSearchEngine {
      * @return a list of {@link SearchResult} representing the matches
      */
     private List<SearchResult> search(String query, int limit, RevisionAccess revisionAccess, boolean retrieveFirstLine) {
-        Pattern queryPattern = Pattern.compile(Pattern.quote(query));
+        Pattern queryPattern = Pattern.compile(Pattern.quote(query), Pattern.CASE_INSENSITIVE);
         List<FileInfo> files = revisionAccess.listConfigurationFiles("");
 
         AtomicInteger limitCounter = new AtomicInteger(limit);
