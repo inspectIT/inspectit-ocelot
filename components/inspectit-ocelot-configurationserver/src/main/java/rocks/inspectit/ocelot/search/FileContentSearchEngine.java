@@ -114,9 +114,11 @@ public class FileContentSearchEngine {
             }
             searchResultBuilder.startLine(currentLine.getLineNumber());
             searchResultBuilder.startColumn(start - currentLine.getStartIndex());
+
             if (retrieveFirstLine) {
                 String firstLine = content.substring(currentLine.getStartIndex(), currentLine.getEndIndex());
-                searchResultBuilder.firstLine(firstLine.replace("\n", ""));
+                firstLine = firstLine.replace("\n", "").replace("\r", "");
+                searchResultBuilder.firstLine(firstLine);
             }
 
             while (end > currentLine.getEndIndex()) {
