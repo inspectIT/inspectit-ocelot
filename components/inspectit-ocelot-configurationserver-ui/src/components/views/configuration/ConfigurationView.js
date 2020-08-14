@@ -58,7 +58,7 @@ class ConfigurationView extends React.Component {
     isCreateDirectoryDialogShown: false,
     isMoveDialogShown: false,
     filePath: null,
-    isSearchDialogShown: false
+    isSearchDialogShown: false,
   };
 
   parsePath = (filePath, defaultConfigFilePath) => {
@@ -111,9 +111,13 @@ class ConfigurationView extends React.Component {
 
   hideMoveDialog = () => this.setState({ isMoveDialogShown: false, filePath: null });
 
-  showSearchDialog = () => this.setState({isSearchDialogShown: true});
+  showSearchDialog = () => this.setState({ isSearchDialogShown: true });
 
-  hideSearchDialog = () => this.setState({isSearchDialogShown: false});
+  hideSearchDialog = () => this.setState({ isSearchDialogShown: false });
+
+  openFile = (filename) => {
+    this.props.selectFile(filename);
+  };
 
   render() {
     const {
@@ -226,7 +230,7 @@ class ConfigurationView extends React.Component {
         />
         <MoveDialog visible={this.state.isMoveDialogShown} onHide={this.hideMoveDialog} filePath={this.state.filePath} />
 
-        <SearchDialog visible={this.state.isSearchDialogShown} onHide={this.hideSearchDialog} />
+        <SearchDialog visible={this.state.isSearchDialogShown} onHide={this.hideSearchDialog} openFile={this.openFile} />
       </div>
     );
   }
@@ -278,6 +282,7 @@ const mapDispatchToProps = {
   writeFile: configurationActions.writeFile,
   selectedFileContentsChanged: configurationActions.selectedFileContentsChanged,
   toggleVisualConfigurationView: configurationActions.toggleVisualConfigurationView,
+  selectFile: configurationActions.selectFile,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(ConfigurationView);

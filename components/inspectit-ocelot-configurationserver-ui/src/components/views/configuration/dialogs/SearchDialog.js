@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import useFetchData from '../../../../hooks/use-fetch-data';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
@@ -83,7 +83,7 @@ const SearchResultTemplate = ({ filename, lineNumber, line, matches }) => {
   );
 };
 
-const SearchDialog = ({visible, onHide}) => {
+const SearchDialog = ({ visible, onHide, openFile }) => {
   // constants
   const searchLimit = 100;
 
@@ -92,6 +92,9 @@ const SearchDialog = ({visible, onHide}) => {
   const [resultSelection, setResultSelection] = useState(null);
   const [searchResults, setSearchResults] = useState([]);
   const [query, setQuery] = useState('');
+
+  // refs
+  const queryInputRef = useRef(null);
 
   const [{ data, isLoading, lastUpdate }, refreshData] = useFetchData('/search', {
     query: query,
@@ -102,11 +105,28 @@ const SearchDialog = ({visible, onHide}) => {
   const showDataLimit = data && data.length >= searchLimit;
 
   const executeSearch = () => {
-    if (query) {
+    if (query && !isLoading) {
       setResultSelection(null);
       refreshData();
     }
   };
+
+  const onOpenFile = () => {
+    openFile(resultSelection.filename);
+    onHide();
+  };
+
+  const selectQueryInput = () => {
+    queryInputRef.current.element.focus();
+  };
+
+  useEffect(() => {
+    if (queryInputRef.current) {
+      if (!isLoading) {
+        selectQueryInput();
+      }
+    }
+  }, [isLoading]);
 
   useEffect(() => {
     const result = _(data)
@@ -135,7 +155,7 @@ const SearchDialog = ({visible, onHide}) => {
 
   const footer = (
     <div>
-      <Button label="Open File" icon="pi pi-external-link" /*onClick={this.onHide}*/ disabled={!resultSelection} />
+      <Button label="Open File" icon="pi pi-external-link" onClick={onOpenFile} disabled={!resultSelection} />
     </div>
   );
 
@@ -152,8 +172,17 @@ const SearchDialog = ({visible, onHide}) => {
         .input-container {
           margin: 0.5rem;
         }
+        .target {
+          display: flex;
+        }
         .target :global(.p-togglebutton) {
           margin-right: 0.5rem;
+        }
+        .target-details {
+          flex-grow: 1;
+        }
+        .target-details :global(.target-direcotry) {
+          width: 100%;
         }
         .query {
           margin-bottom: 0.5rem;
@@ -183,6 +212,12 @@ const SearchDialog = ({visible, onHide}) => {
           padding-top: 0.5rem;
           padding-bottom: 0.5rem;
         }
+        .limit-information span {
+          background-color: #90a4ae;
+          padding: 0.25rem 1.5rem;
+          border-radius: 0.5rem;
+          color: white;
+        }
         .loading-indicator {
           height: 100%;
           align-items: center;
@@ -199,6 +234,8 @@ const SearchDialog = ({visible, onHide}) => {
           onHide={onHide}
           blockScroll
           footer={footer}
+          onShow={selectQueryInput}
+          focusOnShow={false}
         >
           <div className="input-container">
             <div className="query p-inputgroup">
@@ -206,12 +243,14 @@ const SearchDialog = ({visible, onHide}) => {
                 <i className="pi pi-search"></i>
               </span>
               <InputText
+                ref={queryInputRef}
                 className="query-input"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && executeSearch()}
+                disabled={isLoading}
               />
-              <Button icon="pi pi-search" onClick={executeSearch} disabled={!query} />
+              <Button icon="pi pi-search" onClick={executeSearch} disabled={!query || isLoading} />
             </div>
 
             <div className="target">
@@ -235,6 +274,8 @@ const SearchDialog = ({visible, onHide}) => {
                 onChange={() => setSearchTarget(2)}
                 disabled={true}
               />
+
+              <div className="target-details">{searchTarget === 1 && <InputText className="target-direcotry" placeholder="/" />}</div>
             </div>
           </div>
 
@@ -256,7 +297,11 @@ const SearchDialog = ({visible, onHide}) => {
             )}
           </div>
 
-          {showDataLimit && <div className="limit-information">Please refine your search. Showing only the first {searchLimit} hits.</div>}
+          {showDataLimit && (
+            <div className="limit-information">
+              <span>Please refine your search. Showing only the first {searchLimit} hits.</span>
+            </div>
+          )}
         </Dialog>
       </div>
     </>
