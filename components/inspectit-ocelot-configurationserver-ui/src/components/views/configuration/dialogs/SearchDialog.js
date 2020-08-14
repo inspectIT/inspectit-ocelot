@@ -58,7 +58,8 @@ const SearchResultTemplate = ({ filename, lineNumber, line, matches }) => {
         }
         .highlight {
           background-color: #ffa726;
-          padding: 0 0.25rem;
+          padding: 0 0.1rem;
+          margin: 0 1px;
           border-radius: 4px;
         }
       `}</style>
