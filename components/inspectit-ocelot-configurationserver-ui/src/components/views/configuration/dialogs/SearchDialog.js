@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import PropTypes from 'prop-types';
 import useFetchData from '../../../../hooks/use-fetch-data';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
@@ -84,6 +85,17 @@ const SearchResultTemplate = ({ filename, lineNumber, line, matches }) => {
   );
 };
 
+SearchResultTemplate.propTypes = {
+  /** The filename containing the matches */
+  filename: PropTypes.string,
+  /** The line number where the matches are starting */
+  lineNumber: PropTypes.number,
+  /** The file's content on the current lin */
+  line: PropTypes.string,
+  /** The matches of the search query */
+  matches: PropTypes.arrayOf(PropTypes.object),
+};
+
 const SearchDialog = ({ visible, onHide, openFile }) => {
   // constants
   const searchLimit = 100;
@@ -97,7 +109,7 @@ const SearchDialog = ({ visible, onHide, openFile }) => {
   // refs
   const queryInputRef = useRef(null);
 
-  const [{ data, isLoading, lastUpdate }, refreshData] = useFetchData('/search', {
+  const [{ data, isLoading }, refreshData] = useFetchData('/search', {
     query: query,
     'include-first-line': true,
     limit: searchLimit,
@@ -258,20 +270,20 @@ const SearchDialog = ({ visible, onHide, openFile }) => {
               <ToggleButton
                 onLabel="In Workspace"
                 offLabel="In Workspace"
-                checked={searchTarget == 0}
+                checked={searchTarget === 0}
                 onChange={() => setSearchTarget(0)}
               />
               <ToggleButton
                 onLabel="In Directory"
                 offLabel="In Directory"
-                checked={searchTarget == 1}
+                checked={searchTarget === 1}
                 onChange={() => setSearchTarget(1)}
                 disabled={true}
               />
               <ToggleButton
                 onLabel="In Agent Mapping"
                 offLabel="In Agent Mapping"
-                checked={searchTarget == 2}
+                checked={searchTarget === 2}
                 onChange={() => setSearchTarget(2)}
                 disabled={true}
               />
@@ -307,6 +319,15 @@ const SearchDialog = ({ visible, onHide, openFile }) => {
       </div>
     </>
   );
+};
+
+SearchDialog.propTypes = {
+  /** Whether this dialog is shown */
+  visible: PropTypes.bool,
+  /** Is called when the dialog should disappear */
+  onHide: PropTypes.func,
+  /** Is called when a specific file should be opened due to a user interaction */
+  openFile: PropTypes.func,
 };
 
 export default SearchDialog;
