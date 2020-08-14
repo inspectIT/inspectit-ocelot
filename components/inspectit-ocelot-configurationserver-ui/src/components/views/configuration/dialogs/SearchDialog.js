@@ -5,6 +5,8 @@ import { InputText } from 'primereact/inputtext';
 import { ToggleButton } from 'primereact/togglebutton';
 import { Button } from 'primereact/button';
 import { ListBox } from 'primereact/listbox';
+import { ProgressSpinner } from 'primereact/progressspinner';
+
 import _ from 'lodash';
 
 const SearchResultTemplate = ({ filename, lineNumber, line, matches }) => {
@@ -81,23 +83,32 @@ const SearchResultTemplate = ({ filename, lineNumber, line, matches }) => {
   );
 };
 
-const SearchDialog = () => {
+const SearchDialog = ({visible, onHide}) => {
+  // constants
+  const searchLimit = 100;
+
   // state variables
   const [searchTarget, setSearchTarget] = useState(0); // the current selected file name
   const [resultSelection, setResultSelection] = useState(null);
   const [searchResults, setSearchResults] = useState([]);
   const [query, setQuery] = useState('');
 
-  const [{ data, isLoading, lastUpdate }, refreshData] = useFetchData('/search', { query: query, 'include-first-line': true });
+  const [{ data, isLoading, lastUpdate }, refreshData] = useFetchData('/search', {
+    query: query,
+    'include-first-line': true,
+    limit: searchLimit,
+  });
+
+  const showDataLimit = data && data.length >= searchLimit;
 
   const executeSearch = () => {
     if (query) {
+      setResultSelection(null);
       refreshData();
     }
   };
 
   useEffect(() => {
-    console.log('eff');
     const result = _(data)
       .groupBy((element) => element.file + ':' + element.startLine)
       .map((elements, key) => {
@@ -118,14 +129,13 @@ const SearchDialog = () => {
       })
 
       .value();
-    console.log(result);
 
     setSearchResults(result);
   }, [data]);
 
   const footer = (
     <div>
-      <Button label="Open File" icon="pi pi-external-link" /*onClick={this.onHide}*/ />
+      <Button label="Open File" icon="pi pi-external-link" /*onClick={this.onHide}*/ disabled={!resultSelection} />
     </div>
   );
 
@@ -155,17 +165,38 @@ const SearchDialog = () => {
           width: 100%;
           border: 0;
           border-radius: 0;
+        }
+        .content {
+          flex-grow: 1;
           overflow-y: auto;
+        }
+        .no-data {
+          color: #9e9e9e;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          height: 100%;
+        }
+        .limit-information {
+          text-align: center;
+          color: #9e9e9e;
+          padding-top: 0.5rem;
+          padding-bottom: 0.5rem;
+        }
+        .loading-indicator {
+          height: 100%;
+          align-items: center;
+          display: flex;
         }
       `}</style>
 
       <div className="this">
         <Dialog
           className="search-dialog"
-          header="Search in Configuration Files"
-          visible={true}
+          header="Find in Configuration Files"
+          visible={visible}
           style={{ width: '50vw', minWidth: '50rem' }}
-          //onHide={() => this.onHide('displayBlockScroll')}
+          onHide={onHide}
           blockScroll
           footer={footer}
         >
@@ -207,13 +238,25 @@ const SearchDialog = () => {
             </div>
           </div>
 
-          <ListBox
-            optionLabel="key"
-            value={resultSelection}
-            options={searchResults}
-            onChange={(e) => setResultSelection(e.value)}
-            itemTemplate={SearchResultTemplate}
-          />
+          <div className="content">
+            {isLoading ? (
+              <div className="loading-indicator">
+                <ProgressSpinner />
+              </div>
+            ) : searchResults && searchResults.length > 0 ? (
+              <ListBox
+                optionLabel="key"
+                value={resultSelection}
+                options={searchResults}
+                onChange={(e) => setResultSelection(e.value)}
+                itemTemplate={SearchResultTemplate}
+              />
+            ) : (
+              <span className="no-data">Nothing to show</span>
+            )}
+          </div>
+
+          {showDataLimit && <div className="limit-information">Please refine your search. Showing only the first {searchLimit} hits.</div>}
         </Dialog>
       </div>
     </>

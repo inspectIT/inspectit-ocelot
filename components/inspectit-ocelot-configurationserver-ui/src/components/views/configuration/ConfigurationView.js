@@ -58,6 +58,7 @@ class ConfigurationView extends React.Component {
     isCreateDirectoryDialogShown: false,
     isMoveDialogShown: false,
     filePath: null,
+    isSearchDialogShown: false
   };
 
   parsePath = (filePath, defaultConfigFilePath) => {
@@ -109,6 +110,10 @@ class ConfigurationView extends React.Component {
   showMoveDialog = (filePath) => this.setState({ isMoveDialogShown: true, filePath });
 
   hideMoveDialog = () => this.setState({ isMoveDialogShown: false, filePath: null });
+
+  showSearchDialog = () => this.setState({isSearchDialogShown: true});
+
+  hideSearchDialog = () => this.setState({isSearchDialogShown: false});
 
   render() {
     const {
@@ -164,6 +169,7 @@ class ConfigurationView extends React.Component {
             showCreateFileDialog={this.showCreateFileDialog}
             showCreateDirectoryDialog={this.showCreateDirectoryDialog}
             showMoveDialog={this.showMoveDialog}
+            showSearchDialog={this.showSearchDialog}
             readOnly={readOnly}
           />
           <FileTree
@@ -220,7 +226,7 @@ class ConfigurationView extends React.Component {
         />
         <MoveDialog visible={this.state.isMoveDialogShown} onHide={this.hideMoveDialog} filePath={this.state.filePath} />
 
-        <SearchDialog />
+        <SearchDialog visible={this.state.isSearchDialogShown} onHide={this.hideSearchDialog} />
       </div>
     );
   }
