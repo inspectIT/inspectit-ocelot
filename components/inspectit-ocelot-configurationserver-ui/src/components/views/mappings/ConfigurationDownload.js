@@ -31,7 +31,7 @@ class ConfigurationDownload extends React.Component {
     }
 
     axios
-      .get('/agent/configuration', {
+      .get('/configuration/agent-configuration', {
         params: { ...requestParams },
       })
       .then((res) => {

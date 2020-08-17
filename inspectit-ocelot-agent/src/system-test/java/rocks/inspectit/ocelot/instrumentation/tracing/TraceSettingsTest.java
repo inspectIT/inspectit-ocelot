@@ -16,7 +16,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class TraceSettingsTest extends TraceTestBase {
 
-
     String attributesSetter() {
         return "Hello A!";
     }
@@ -24,7 +23,7 @@ public class TraceSettingsTest extends TraceTestBase {
     @Test
     void testAttributeWritingToParentSpan() {
 
-        TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, 15, TimeUnit.SECONDS);
+        TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, true, 15, TimeUnit.SECONDS);
         attributesSetter();
 
         assertTraceExported((spans) ->
@@ -54,7 +53,7 @@ public class TraceSettingsTest extends TraceTestBase {
     @Test
     void testConditionalAttributeWriting() {
 
-        TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, 15, TimeUnit.SECONDS);
+        TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, true, 15, TimeUnit.SECONDS);
         attributesSetterWithConditions(false);
         attributesSetterWithConditions(true);
 
@@ -86,7 +85,6 @@ public class TraceSettingsTest extends TraceTestBase {
 
     }
 
-
     void conditionalRoot(boolean startSpan) {
         nestedC();
     }
@@ -97,7 +95,7 @@ public class TraceSettingsTest extends TraceTestBase {
     @Test
     void testConditionalSpanCreation() {
 
-        TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, 15, TimeUnit.SECONDS);
+        TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, true, 15, TimeUnit.SECONDS);
         conditionalRoot(false);
         conditionalRoot(true);
 
@@ -126,7 +124,6 @@ public class TraceSettingsTest extends TraceTestBase {
 
     }
 
-
     void namedA(String name) {
         namedB("second");
     }
@@ -137,7 +134,7 @@ public class TraceSettingsTest extends TraceTestBase {
     @Test
     void testSpanNameCustomization() {
 
-        TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, 15, TimeUnit.SECONDS);
+        TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, true, 15, TimeUnit.SECONDS);
         namedA("first");
 
         assertTraceExported((spans) ->
@@ -158,7 +155,7 @@ public class TraceSettingsTest extends TraceTestBase {
 
     @Test
     void testNoCommonTagsOnChild() {
-        TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, 15, TimeUnit.SECONDS);
+        TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, true, 15, TimeUnit.SECONDS);
 
         namedA("whatever");
 
@@ -179,6 +176,7 @@ public class TraceSettingsTest extends TraceTestBase {
     }
 
     static class AsyncTask {
+
         void doAsync(String att1, String att2, String att3, boolean isFinished) {
         }
     }
@@ -186,7 +184,7 @@ public class TraceSettingsTest extends TraceTestBase {
     @Test
     void testInterleavedAsyncSpans() throws Exception {
 
-        TestUtils.waitForClassInstrumentation(AsyncTask.class, 15, TimeUnit.SECONDS);
+        TestUtils.waitForClassInstrumentation(AsyncTask.class, true, 15, TimeUnit.SECONDS);
 
         //all method calls of each task will result in a single span
         AsyncTask first = new AsyncTask();
@@ -265,7 +263,7 @@ public class TraceSettingsTest extends TraceTestBase {
 
         @Test
         void testFixedSpanSamplingRate() {
-            TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, 15, TimeUnit.SECONDS);
+            TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, true, 15, TimeUnit.SECONDS);
             for (int i = 0; i < 10000; i++) {
                 fixedSamplingRateTest("fixed");
             }
@@ -284,10 +282,9 @@ public class TraceSettingsTest extends TraceTestBase {
             assertThat(numSpans).isGreaterThan(4700).isLessThan(5300);
         }
 
-
         @Test
         void dynamicSampleRate_low() {
-            TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, 15, TimeUnit.SECONDS);
+            TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, true, 15, TimeUnit.SECONDS);
             for (int i = 0; i < 10000; i++) {
                 dynamicSamplingRateTest("dynamic_0.2", 0.2);
             }
@@ -308,7 +305,7 @@ public class TraceSettingsTest extends TraceTestBase {
 
         @Test
         void dynamicSampleRate_high() {
-            TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, 15, TimeUnit.SECONDS);
+            TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, true, 15, TimeUnit.SECONDS);
             for (int i = 0; i < 10000; i++) {
                 dynamicSamplingRateTest("dynamic_0.7", 0.7);
             }
@@ -327,10 +324,9 @@ public class TraceSettingsTest extends TraceTestBase {
             assertThat(numSpans07).isGreaterThan(6700).isLessThan(7300);
         }
 
-
         @Test
         void dynamicSampleRate_invalidRate() {
-            TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, 15, TimeUnit.SECONDS);
+            TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, true, 15, TimeUnit.SECONDS);
             for (int i = 0; i < 10000; i++) {
                 dynamicSamplingRateTest("invalid", "not a number! haha!");
             }
@@ -349,10 +345,9 @@ public class TraceSettingsTest extends TraceTestBase {
             assertThat(numSpansInvalid).isEqualTo(10000L);
         }
 
-
         @Test
         void dynamicSampleRate_null() {
-            TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, 15, TimeUnit.SECONDS);
+            TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, true, 15, TimeUnit.SECONDS);
             for (int i = 0; i < 10000; i++) {
                 dynamicSamplingRateTest("null", null);
             }
@@ -373,7 +368,7 @@ public class TraceSettingsTest extends TraceTestBase {
 
         @Test
         void testNestedZeroSamplingProbability() {
-            TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, 15, TimeUnit.SECONDS);
+            TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, true, 15, TimeUnit.SECONDS);
 
             nestedSamplingTestRoot(1.0, 0.0);
 
@@ -408,7 +403,7 @@ public class TraceSettingsTest extends TraceTestBase {
 
         @Test
         void testNestedOneSamplingProbability() {
-            TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, 15, TimeUnit.SECONDS);
+            TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, true, 15, TimeUnit.SECONDS);
 
             nestedSamplingTestRoot(0.0, 1.0);
 
@@ -428,10 +423,9 @@ public class TraceSettingsTest extends TraceTestBase {
                     .anySatisfy(sp -> assertThat(sp.getName()).isEqualTo("TraceSettingsTest.nestedSamplingTestNested"));
         }
 
-
         @Test
         void testNestedNullSamplingProbability() {
-            TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, 15, TimeUnit.SECONDS);
+            TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, true, 15, TimeUnit.SECONDS);
 
             nestedSamplingTestRoot(0.0, null);
 
@@ -464,7 +458,7 @@ public class TraceSettingsTest extends TraceTestBase {
 
         @BeforeEach
         void waitForInstrumentation() {
-            TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, 15, TimeUnit.SECONDS);
+            TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, true, 15, TimeUnit.SECONDS);
         }
 
         @Test
@@ -511,7 +505,6 @@ public class TraceSettingsTest extends TraceTestBase {
                             })
             );
         }
-
 
         @Test
         void testNonNullErrorStatus() {
