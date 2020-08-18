@@ -18,6 +18,8 @@ const authentication = {
 const configuration = {
   /** Specifies how many requests are currently loading in the background */
   pendingRequests: 0,
+  /** The existing versions. */
+  versions: [],
   /** The existing configuration files. */
   files: [],
   /**

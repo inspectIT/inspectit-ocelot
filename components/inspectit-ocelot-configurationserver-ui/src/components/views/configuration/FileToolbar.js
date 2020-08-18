@@ -10,6 +10,13 @@ import { Button } from 'primereact/button';
  */
 class FileToolbar extends React.Component {
   fetchFiles = () => this.props.fetchFiles();
+  fetchVersions = () => this.props.fetchVersions();
+
+  fetchFilesAndVersions = () => {
+    this.fetchFiles();
+    this.fetchVersions();
+    this.props.versionSelectionChange(0, null);
+  }
 
   render() {
     const { loading, selection, readOnly } = this.props;
@@ -66,7 +73,7 @@ class FileToolbar extends React.Component {
           <div className="p-toolbar-group-right">
             <Button
               disabled={loading}
-              onClick={this.fetchFiles}
+              onClick={this.fetchFilesAndVersions}
               tooltip="Reload"
               icon={'pi pi-refresh' + (loading ? ' pi-spin' : '')}
               tooltipOptions={tooltipOptions}
@@ -88,6 +95,7 @@ function mapStateToProps(state) {
 
 const mapDispatchToProps = {
   fetchFiles: configurationActions.fetchFiles,
+  fetchVersions: configurationActions.fetchVersions,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(FileToolbar);

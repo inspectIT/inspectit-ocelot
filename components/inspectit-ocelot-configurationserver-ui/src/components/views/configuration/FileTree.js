@@ -7,6 +7,7 @@ import { linkPrefix } from '../../../lib/configuration';
 
 import { DEFAULT_CONFIG_TREE_KEY } from '../../../data/constants';
 import { filter } from 'lodash';
+import { configuration } from '../../../redux/ducks/initial-states';
 
 /**
  * The file tree used in the configuration view.
@@ -199,6 +200,7 @@ function mapStateToProps(state) {
 const mapDispatchToProps = {
   fetchDefaultConfig: configurationActions.fetchDefaultConfig,
   fetchFiles: configurationActions.fetchFiles,
+  fetchFilesWithId: configurationActions.fetchFilesWithId,
   selectFile: configurationActions.selectFile,
   move: configurationActions.move,
 };

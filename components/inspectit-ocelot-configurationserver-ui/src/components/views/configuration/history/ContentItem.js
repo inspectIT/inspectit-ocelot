@@ -1,8 +1,11 @@
 import React from 'react';
 import dateformat from 'dateformat';
 
-const contentItem = (item, fileTreeSelected) => {
+const contentItem = (item, version, fileTreeSelected) => {
+
+  // Is needed to display changes of the selected file in the different versions.
   let containsChanges = false;
+  /*
   if (fileTreeSelected != null) {
     for (let i = 0; i < item.changes.length; i++) {
       const itemChanges = item.changes[i].slice(0, fileTreeSelected.length);
@@ -11,6 +14,7 @@ const contentItem = (item, fileTreeSelected) => {
       }
     }
   }
+*/
 
   return (
     <>
@@ -19,7 +23,6 @@ const contentItem = (item, fileTreeSelected) => {
           .this {
             border-bottom: 1px solid #dddddd;
             background: transparent;
-            color: black;
             height: 4.5em;
           }
           .container {
@@ -45,7 +48,7 @@ const contentItem = (item, fileTreeSelected) => {
             padding-left: 0.2em;
             font-size: 0.78em;
             font-style: italic;
-            color: #333333;
+            
           }
           .date {
             padding-right: 1em;
@@ -64,13 +67,14 @@ const contentItem = (item, fileTreeSelected) => {
             <div className="section1">
               <label className="name">
                 {containsChanges ? '* ' : null}
-                {item.name}
+                Version {version}
               </label>
-              <label className="id">{item.id}</label>
+              <label className="id">{item.id.substring(0, 6)}</label>
             </div>
             <div className="section2">
               <label className="date">
-                <label>{dateformat(item.date, 'yyyy-mm-dd HH:MM')}</label>
+                <label>
+                  {dateformat((item.date * 1000), 'yyyy-mm-dd HH:MM:ss')}</label>
               </label>
             </div>
           </div>

@@ -1,6 +1,10 @@
 export const SELECT_FILE = 'configuration/SELECT_FILE';
 export const RESET = 'configuration/RESET';
 
+export const FETCH_VERSIONS_STARTED = 'configuration/FETCH_VERSIONS_STARTED';
+export const FETCH_VERSIONS_FAILURE = 'configuration/FETCH_VERSIONS_FAILURE';
+export const FETCH_VERSIONS_SUCCESS = 'configuration/FETCH_VERSIONS_SUCCESS';
+
 export const FETCH_FILES_STARTED = 'configuration/FETCH_FILES_STARTED';
 export const FETCH_FILES_FAILURE = 'configuration/FETCH_FILES_FAILURE';
 export const FETCH_FILES_SUCCESS = 'configuration/FETCH_FILES_SUCCESS';

@@ -4,15 +4,33 @@ import { configurationUtils } from '.';
 import { notificationActions } from '../notification';
 import * as types from './types';
 
+
+/**
+ * Fetches all existing versions.
+ */
+export const fetchVersions = () => {
+  return (dispatch) => {
+    dispatch({ type: types.FETCH_VERSIONS_STARTED });
+    axios('/versions')
+      .then((res) => {
+        const versions = res.data;
+        dispatch({ type: types.FETCH_VERSIONS_SUCCESS, payload: { versions } })
+      })
+      .catch(() => {
+        dispatch({ type: types.FETCH_VERSIONS_FAILURE });
+      })
+  };
+}
+
 /**
  * Fetches all existing configuration files and directories.
  *
  * @param {string} newSelectionOnSuccess - If not empty, this path will be selected on successful fetch.
  */
 export const fetchFiles = (newSelectionOnSuccess) => {
+
   return (dispatch) => {
     dispatch({ type: types.FETCH_FILES_STARTED });
-
     axios
       .get('/directories/')
       .then((res) => {
@@ -25,6 +43,27 @@ export const fetchFiles = (newSelectionOnSuccess) => {
       })
       .catch(() => {
         dispatch({ type: types.FETCH_FILES_FAILURE });
+      });
+  };
+};
+
+/**
+ * Fetch all existing configuration files and directories with this id.
+ * @param {string} id - Fetch all with this id.
+ */
+export const fetchFilesWithId = (id) => {
+
+  return (dispatch) => {
+    dispatch({ type: types.FETCH_FILES_STARTED });
+    axios
+      .get('/directories?version=' + id)
+      .then((res) => {
+        const files = res.data;
+        sortFiles(files);
+        dispatch({ type: types.FETCH_FILES_SUCCESS, payload: { files } })
+      })
+      .catch(() => {
+        dispatch({ type: type.FETCH_FILES_FAILURE });
       });
   };
 };

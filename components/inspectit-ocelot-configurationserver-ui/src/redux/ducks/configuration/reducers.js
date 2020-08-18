@@ -36,6 +36,24 @@ const movePathIfRequired = (path, moveHistory) => {
 };
 
 const configurationReducer = createReducer(initialState)({
+  [types.FETCH_VERSIONS_STARTED]: (state) => {
+    return {
+      ...state,
+    }
+  },
+  [types.FETCH_VERSIONS_FAILURE]: (state) => {
+    return {
+      ...state,
+      versions: [],
+    }
+  },
+  [types.FETCH_VERSIONS_SUCCESS]: (state, action) => {
+    const { versions } = action.payload;
+    return {
+      ...state,
+      versions,
+    };
+  },
   [types.FETCH_FILES_STARTED]: (state) => {
     return {
       ...incrementPendingRequests(state),

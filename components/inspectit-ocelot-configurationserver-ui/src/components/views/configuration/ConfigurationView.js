@@ -47,31 +47,6 @@ const EditorHeader = ({ icon, path, name, isContentModified, readOnly }) => (
   </>
 );
 
-// Test Data
-const testData = [
-  {
-    name: 'Version 11',
-    id: '346123zw',
-    date: 13456789,
-    author: 'admin',
-    changes: ['/a.yml'],
-  },
-  {
-    name: 'Version 10',
-    id: '1283ad294',
-    date: 13456789,
-    author: 'admin',
-    changes: ['/hello.yml'],
-  },
-  {
-    name: 'Version 9',
-    id: '6623ad212',
-    date: 13456789,
-    author: 'philip',
-    changes: ['/test/myFolder/myAAAAA.yml', '/hello.yml', '/aaaa.yml'],
-  },
-];
-
 /**
  * The configuration view component used for managing the agent configurations.
  */
@@ -82,6 +57,8 @@ class ConfigurationView extends React.Component {
     isCreateDirectoryDialogShown: false,
     isMoveDialogShown: false,
     filePath: null,
+    versionSelection: 0,
+    versionId: null,
   };
 
   parsePath = (filePath, defaultConfigFilePath) => {
@@ -134,6 +111,14 @@ class ConfigurationView extends React.Component {
 
   hideMoveDialog = () => this.setState({ isMoveDialogShown: false, filePath: null });
 
+  versionSelectionChange = (versionIndex, versionId) => {
+    this.setState({
+      versionSelection: versionIndex,
+      versionId
+    })
+  }
+
+
   render() {
     const {
       selection,
@@ -148,6 +133,7 @@ class ConfigurationView extends React.Component {
       toggleVisualConfigurationView,
       readOnly,
     } = this.props;
+    const {versionId, versionSelection} = this.state;
     const showEditor = (selection || selectedDefaultConfigFile) && !isDirectory;
 
     const { path, name } = this.parsePath(selection, selectedDefaultConfigFile);
@@ -189,6 +175,7 @@ class ConfigurationView extends React.Component {
             showCreateDirectoryDialog={this.showCreateDirectoryDialog}
             showMoveDialog={this.showMoveDialog}
             readOnly={readOnly}
+            versionSelectionChange={this.versionSelectionChange}
           />
           <FileTree
             className="fileTree"
@@ -218,7 +205,7 @@ class ConfigurationView extends React.Component {
           readOnly={readOnly || !!selectedDefaultConfigFile}
           showVisualConfigurationView={showVisualConfigurationView}
           onToggleVisualConfigurationView={toggleVisualConfigurationView}
-          sidebar={<HistoryView data={testData}></HistoryView>}
+          sidebar={<HistoryView versionSelection={versionSelection} versionSelectionChange={this.versionSelectionChange}></HistoryView>}
         >
           {showHeader ? (
             <EditorHeader
