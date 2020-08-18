@@ -1,17 +1,19 @@
-import React, { useState, useEffect, useRef } from 'react';
-import PropTypes from 'prop-types';
-import useFetchData from '../../../../hooks/use-fetch-data';
+import _ from 'lodash';
+import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
-import { ToggleButton } from 'primereact/togglebutton';
-import { Button } from 'primereact/button';
 import { ListBox } from 'primereact/listbox';
 import { ProgressSpinner } from 'primereact/progressspinner';
+import { ToggleButton } from 'primereact/togglebutton';
+import PropTypes from 'prop-types';
+import React, { useEffect, useRef, useState } from 'react';
+import useFetchData from '../../../../hooks/use-fetch-data';
 
-import _ from 'lodash';
-
+/**
+ * Template for the individual serach result items.
+ */
 const SearchResultTemplate = ({ filename, lineNumber, line, matches }) => {
-  // split matches
+  // tokenization of the result line into separate elements (matching part and non matching part) for highlighting
   let index = 0;
   const split = [];
   _.each(matches, (match) => {
@@ -96,6 +98,9 @@ SearchResultTemplate.propTypes = {
   matches: PropTypes.arrayOf(PropTypes.object),
 };
 
+/**
+ * The search dialog itself.
+ */
 const SearchDialog = ({ visible, onHide, openFile }) => {
   // constants
   const searchLimit = 100;
@@ -109,14 +114,17 @@ const SearchDialog = ({ visible, onHide, openFile }) => {
   // refs
   const queryInputRef = useRef(null);
 
+  // fetching the search results
   const [{ data, isLoading }, refreshData] = useFetchData('/search', {
     query: query,
     'include-first-line': true,
     limit: searchLimit,
   });
 
+  // derived variables
   const showDataLimit = data && data.length >= searchLimit;
 
+  // executing the search request if possible
   const executeSearch = () => {
     if (query && !isLoading) {
       setResultSelection(null);
@@ -124,23 +132,27 @@ const SearchDialog = ({ visible, onHide, openFile }) => {
     }
   };
 
+  // open the currently selected file in the config editor
   const onOpenFile = () => {
     openFile(resultSelection.filename);
     onHide();
   };
 
-  const selectQueryInput = () => {
+  // sets the focus on the query input
+  const focusQueryInput = () => {
     queryInputRef.current.element.focus();
   };
 
+  // focus the query input if the loading state of the request is changing. necessary because the focus is lost during loading
   useEffect(() => {
     if (queryInputRef.current) {
       if (!isLoading) {
-        selectQueryInput();
+        focusQueryInput();
       }
     }
   }, [isLoading]);
 
+  // updating the result list in case the data (raw data of the search request) is changing
   useEffect(() => {
     const result = _(data)
       .groupBy((element) => element.file + ':' + element.startLine)
@@ -160,12 +172,12 @@ const SearchDialog = ({ visible, onHide, openFile }) => {
           matches,
         };
       })
-
       .value();
 
     setSearchResults(result);
   }, [data]);
 
+  // the dialogs footer
   const footer = (
     <div>
       <Button label="Open File" icon="pi pi-external-link" onClick={onOpenFile} disabled={!resultSelection} />
@@ -247,7 +259,7 @@ const SearchDialog = ({ visible, onHide, openFile }) => {
           onHide={onHide}
           blockScroll
           footer={footer}
-          onShow={selectQueryInput}
+          onShow={focusQueryInput}
           focusOnShow={false}
         >
           <div className="input-container">
