@@ -15,7 +15,7 @@ class FileToolbar extends React.Component {
   fetchFilesAndVersions = () => {
     this.fetchFiles();
     this.fetchVersions();
-    this.props.versionSelectionChange(0, null);
+    this.props.versionSelectionChange(0);
   }
 
   render() {

@@ -27,8 +27,8 @@ const HistoryView = ({ versionSelection, versionSelectionChange }) => {
     }
   }, [show])
 
-  const onClickTest = (item, index) => {
-    versionSelectionChange(index, item.id);
+  const selectVersion = (item, index) => {
+    versionSelectionChange(index);
     dispatch(configurationActions.fetchFilesWithId(item.id));
   }
 
@@ -66,7 +66,7 @@ const HistoryView = ({ versionSelection, versionSelectionChange }) => {
         {show ? (
           <div className="content">
             {versions.map((item, index) => (
-              <div className={versionSelection == index ? "version-selected" : null} key={index} onClick={() => onClickTest(item, index)} >
+              <div className={versionSelection == index ? "version-selected" : null} key={index} onClick={() => selectVersion(item, index)} >
                 {contentItem(item, (versions.length - index), selection)}
               </div>
             ))}

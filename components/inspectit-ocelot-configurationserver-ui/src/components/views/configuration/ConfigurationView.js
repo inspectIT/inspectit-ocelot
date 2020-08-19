@@ -58,7 +58,6 @@ class ConfigurationView extends React.Component {
     isMoveDialogShown: false,
     filePath: null,
     versionSelection: 0,
-    versionId: null,
   };
 
   parsePath = (filePath, defaultConfigFilePath) => {
@@ -111,10 +110,9 @@ class ConfigurationView extends React.Component {
 
   hideMoveDialog = () => this.setState({ isMoveDialogShown: false, filePath: null });
 
-  versionSelectionChange = (versionIndex, versionId) => {
+  versionSelectionChange = (versionIndex) => {
     this.setState({
       versionSelection: versionIndex,
-      versionId
     })
   }
 
@@ -133,7 +131,7 @@ class ConfigurationView extends React.Component {
       toggleVisualConfigurationView,
       readOnly,
     } = this.props;
-    const {versionId, versionSelection} = this.state;
+    const { versionSelection } = this.state;
     const showEditor = (selection || selectedDefaultConfigFile) && !isDirectory;
 
     const { path, name } = this.parsePath(selection, selectedDefaultConfigFile);

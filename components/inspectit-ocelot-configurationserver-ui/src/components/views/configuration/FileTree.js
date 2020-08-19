@@ -200,7 +200,6 @@ function mapStateToProps(state) {
 const mapDispatchToProps = {
   fetchDefaultConfig: configurationActions.fetchDefaultConfig,
   fetchFiles: configurationActions.fetchFiles,
-  fetchFilesWithId: configurationActions.fetchFilesWithId,
   selectFile: configurationActions.selectFile,
   move: configurationActions.move,
 };
