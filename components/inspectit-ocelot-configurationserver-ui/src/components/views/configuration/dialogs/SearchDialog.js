@@ -92,7 +92,7 @@ SearchResultTemplate.propTypes = {
   filename: PropTypes.string,
   /** The line number where the matches are starting */
   lineNumber: PropTypes.number,
-  /** The file's content on the current lin */
+  /** The file's content on the current line */
   line: PropTypes.string,
   /** The matches of the search query */
   matches: PropTypes.arrayOf(PropTypes.object),
