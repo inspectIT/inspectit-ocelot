@@ -26,7 +26,6 @@ public class DirectoryController extends FileBaseController {
     public Collection<FileInfo> listContents(@ApiParam("The id of the version which should be listed. If it is empty, the lastest workspace version is used. Can be 'live' fir listing the latest live version.") @RequestParam(value = "version", required = false) String commitId, HttpServletRequest request) {
         String path = RequestUtil.getRequestSubPath(request);
 
-        RevisionAccess revision;
         if (commitId == null) {
             return fileManager.getWorkingDirectory().listConfigurationFiles(path);
         } else if (commitId.equals("live")) {
