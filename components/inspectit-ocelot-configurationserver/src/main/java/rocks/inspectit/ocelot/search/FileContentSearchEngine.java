@@ -33,31 +33,33 @@ public class FileContentSearchEngine {
      * <p>
      * If the given query is an empty String, an empty Map is returned.
      *
-     * @param query The String that is searched for.
-     * @param limit The maximum amount of entries that should be searched. Set to -1 to get all entries returned.
+     * @param query             The String that is searched for.
+     * @param limit             The maximum amount of entries that should be searched. Set to -1 to get all entries returned.
+     * @param retrieveFirstLine If true, the first line of a match is added to the SearchResult
      *
      * @return A List containing {@link SearchResult} instances for each found match.
      */
-    public List<SearchResult> search(String query, int limit) {
+    public List<SearchResult> search(String query, int limit, boolean retrieveFirstLine) {
         if (query.isEmpty()) {
             return Collections.emptyList();
         }
 
-        return search(query, limit, fileManager.getWorkspaceRevision());
+        return search(query, limit, fileManager.getWorkspaceRevision(), retrieveFirstLine);
     }
 
     /**
      * Searches in all configuration files which can be accessed by the given {@link RevisionAccess} for the specified
      * query string. The amount of results can be limited using the limit argument.
      *
-     * @param query          the query string to look for
-     * @param limit          the maximum amount of results
-     * @param revisionAccess the accessor for fetching the files
+     * @param query             the query string to look for
+     * @param limit             the maximum amount of results
+     * @param revisionAccess    the accessor for fetching the files
+     * @param retrieveFirstLine If true, the first line of a match is added to the SearchResult
      *
      * @return a list of {@link SearchResult} representing the matches
      */
-    private List<SearchResult> search(String query, int limit, RevisionAccess revisionAccess) {
-        Pattern queryPattern = Pattern.compile(Pattern.quote(query));
+    private List<SearchResult> search(String query, int limit, RevisionAccess revisionAccess, boolean retrieveFirstLine) {
+        Pattern queryPattern = Pattern.compile(Pattern.quote(query), Pattern.CASE_INSENSITIVE);
         List<FileInfo> files = revisionAccess.listConfigurationFiles("");
 
         AtomicInteger limitCounter = new AtomicInteger(limit);
@@ -67,7 +69,7 @@ public class FileContentSearchEngine {
                 .reduce(Stream.empty(), Stream::concat)
                 .map(filename -> {
                     Optional<String> content = revisionAccess.readConfigurationFile(filename);
-                    return content.map(fileContent -> findQuery(filename, fileContent, queryPattern, limitCounter));
+                    return content.map(fileContent -> findQuery(filename, fileContent, queryPattern, limitCounter, retrieveFirstLine));
                 })
                 .filter(Optional::isPresent)
                 .map(Optional::get)
@@ -81,14 +83,15 @@ public class FileContentSearchEngine {
      * Searches in the specified content for the specified query pattern. The passed content represents the content of the
      * file with the specified name.
      *
-     * @param fileName     the filename of the current file
-     * @param content      the file's content
-     * @param queryPattern the pattern to search for
-     * @param limitCounter the amount of results to add
+     * @param fileName          the filename of the current file
+     * @param content           the file's content
+     * @param queryPattern      the pattern to search for
+     * @param limitCounter      the amount of results to add
+     * @param retrieveFirstLine If true, the first line of a match is added to the SearchResult
      *
      * @return a list of {@link SearchResult} representing the matches
      */
-    private List<SearchResult> findQuery(String fileName, String content, Pattern queryPattern, AtomicInteger limitCounter) {
+    private List<SearchResult> findQuery(String fileName, String content, Pattern queryPattern, AtomicInteger limitCounter, boolean retrieveFirstLine) {
         if (StringUtils.isEmpty(content)) {
             return Collections.emptyList();
         }
@@ -102,23 +105,29 @@ public class FileContentSearchEngine {
 
         Matcher matcher = queryPattern.matcher(content);
         while (matcher.find() && limitCounter.decrementAndGet() >= 0) {
+            SearchResult.SearchResultBuilder searchResultBuilder = SearchResult.builder().file(fileName);
             int start = matcher.start();
             int end = matcher.end();
 
             while (start >= currentLine.getEndIndex()) {
                 currentLine = listIterator.next();
             }
-            int startLine = currentLine.getLineNumber();
-            int relativeStart = start - currentLine.getStartIndex();
+            searchResultBuilder.startLine(currentLine.getLineNumber());
+            searchResultBuilder.startColumn(start - currentLine.getStartIndex());
+
+            if (retrieveFirstLine) {
+                String firstLine = content.substring(currentLine.getStartIndex(), currentLine.getEndIndex());
+                firstLine = firstLine.replace("\n", "").replace("\r", "");
+                searchResultBuilder.firstLine(firstLine);
+            }
 
             while (end > currentLine.getEndIndex()) {
                 currentLine = listIterator.next();
             }
-            int endLine = currentLine.getLineNumber();
-            int relativeEnd = end - currentLine.getStartIndex();
+            searchResultBuilder.endLine(currentLine.getLineNumber());
+            searchResultBuilder.endColumn(end - currentLine.getStartIndex());
 
-            SearchResult result = new SearchResult(fileName, startLine, relativeStart, endLine, relativeEnd);
-            results.add(result);
+            results.add(searchResultBuilder.build());
         }
 
         return results;

@@ -52,6 +52,9 @@ const PromotionView = () => {
     };
   }); // copy of the entries array including the data whether a file is approved or not.
 
+  // initially load data
+  useEffect(() => refreshData(), []);
+
   // updating commit ids in the global state using the latest data
   useEffect(() => {
     if (data) {
