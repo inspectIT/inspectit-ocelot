@@ -11,7 +11,6 @@ import * as types from './types';
 export const fetchVersions = () => {
 
   return (dispatch) => {
-    console.log("fetch version");
     dispatch({ type: types.FETCH_VERSIONS_STARTED });
     axios('/versions')
       .then((res) => {
@@ -54,18 +53,23 @@ export const fetchFiles = (newSelectionOnSuccess) => {
  * @param {string} id - Fetch all with this id.
  */
 export const fetchFilesWithId = (id) => {
-
+  let url;
+  if(id === null){
+    url = '/directories/'
+  } else {
+    url = '/directories?version=' +id;
+  }
   return (dispatch) => {
     dispatch({ type: types.FETCH_FILES_STARTED });
     axios
-      .get('/directories?version=' + id)
+      .get(url)
       .then((res) => {
         const files = res.data;
         sortFiles(files);
         dispatch({ type: types.FETCH_FILES_SUCCESS, payload: { files } })
       })
       .catch(() => {
-        dispatch({ type: type.FETCH_FILES_FAILURE });
+        dispatch({ type: types.FETCH_FILES_FAILURE });
       });
   };
 };
@@ -102,6 +106,7 @@ export const fetchSelectedFileWithId = (id) => {
 
   return (dispatch, getState) => {
     const { selection } = getState().configuration;
+
     let url = '/files' + selection;
     if (id) {
       url = '/files' + selection + '?version=' + id
@@ -110,7 +115,6 @@ export const fetchSelectedFileWithId = (id) => {
     if (selection) {
       const file = configurationUtils.getFile(getState().configuration.files, selection);
       const isDirectory = configurationUtils.isDirectory(file);
-
       if (!isDirectory) {
         dispatch({ type: types.FETCH_FILE_STARTED });
 
@@ -186,7 +190,7 @@ export const deleteSelection = (fetchFilesOnSuccess, selectedFile = null) => {
       .then(() => {
         dispatch({ type: types.DELETE_SELECTION_SUCCESS });
         if (fetchFilesOnSuccess) {
-          dispatch(fetchFiles());
+          dispatch(fetchFilesWithId(null));
           dispatch(fetchVersions());
         }
       })
@@ -221,13 +225,13 @@ export const writeFile = (file, content, fetchFilesOnSuccess, selectFileOnSucces
           content,
         };
         dispatch({ type: types.WRITE_FILE_SUCCESS, payload });
-        dispatch(fetchFiles());
+        dispatch(fetchFilesWithId(null));
         dispatch(fetchVersions());
         if (fetchFilesOnSuccess) {
           if (selectFileOnSuccess) {
             dispatch(('/' + filePath));
           } else {
-            dispatch(fetchFiles());
+            dispatch(fetchFilesWithId(null));
           }
         }
         dispatch(notificationActions.showSuccessMessage('Configuration Saved', 'The configuration has been successfully saved.'));

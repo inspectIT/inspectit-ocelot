@@ -84,7 +84,7 @@ class ConfigurationView extends React.Component {
   onSave = () => {
     const { selection, fileContent } = this.props;
     this.props.writeFile(selection, fileContent, false);
-  
+
   };
 
   onChange = (value) => {
@@ -114,22 +114,20 @@ class ConfigurationView extends React.Component {
   hideMoveDialog = () => this.setState({ isMoveDialogShown: false, filePath: null });
 
   versionSelectionChange = (versionIndex, id) => {
-    const {selection} = this.props;
+    const { selection } = this.props;
     this.setState({
       versionSelection: versionIndex,
       versionId: id,
     })
-    this.props.selectFile(selection,id);
-    
-  }
+    this.props.selectFile(selection, id);
 
+  }
 
   showHistoryView = () => {
     this.setState({
       showHistory: !this.state.showHistory
     })
   }
-
 
   render() {
     const {
@@ -186,7 +184,7 @@ class ConfigurationView extends React.Component {
             showCreateFileDialog={this.showCreateFileDialog}
             showCreateDirectoryDialog={this.showCreateDirectoryDialog}
             showMoveDialog={this.showMoveDialog}
-            readOnly={readOnly}
+            readOnly={versionSelection === 0 ? readOnly : true}
             versionSelectionChange={this.versionSelectionChange}
           />
           <FileTree
@@ -195,7 +193,7 @@ class ConfigurationView extends React.Component {
             showCreateFileDialog={this.showCreateFileDialog}
             showCreateDirectoryDialog={this.showCreateDirectoryDialog}
             showMoveDialog={this.showMoveDialog}
-            readOnly={readOnly}
+            readOnly={versionSelection === 0 ? readOnly : true}
             versionId={this.state.versionId}
           />
           <div className="details">Last refresh: {this.props.updateDate ? new Date(this.props.updateDate).toLocaleString() : '-'}</div>
@@ -215,7 +213,7 @@ class ConfigurationView extends React.Component {
           notificationIcon="pi-exclamation-triangle"
           notificationText={yamlError}
           loading={loading}
-          readOnly={readOnly || !!selectedDefaultConfigFile}
+          readOnly={versionSelection === 0 ? (readOnly || !!selectedDefaultConfigFile) : true}
           showVisualConfigurationView={showVisualConfigurationView}
           onToggleVisualConfigurationView={toggleVisualConfigurationView}
           sidebar={
@@ -233,7 +231,7 @@ class ConfigurationView extends React.Component {
               path={path}
               name={name}
               isContentModified={isContentModified}
-              readOnly={readOnly || !!selectedDefaultConfigFile}
+              readOnly={versionSelection === 0 ? (readOnly || !!selectedDefaultConfigFile) : true}
             />
           ) : null}
         </EditorView>

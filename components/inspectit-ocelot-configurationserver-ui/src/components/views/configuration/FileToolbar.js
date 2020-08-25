@@ -9,12 +9,12 @@ import { Button } from 'primereact/button';
  * The toolbar used in the configuration view's file tree.
  */
 class FileToolbar extends React.Component {
-  fetchFiles = () => this.props.fetchFiles();
+  fetchFilesWithId = (id) => this.props.fetchFilesWithId(id);
   fetchVersions = () => this.props.fetchVersions();
   selectFile = () => this.props.selectFile();
 
   fetchFilesAndVersions = () => {
-    this.fetchFiles();
+    this.fetchFilesWithId(null);
     this.fetchVersions();
     this.props.versionSelectionChange(0, null);
   }
@@ -95,7 +95,7 @@ function mapStateToProps(state) {
 }
 
 const mapDispatchToProps = {
-  fetchFiles: configurationActions.fetchFiles,
+  fetchFilesWithId: configurationActions.fetchFilesWithId,
   fetchVersions: configurationActions.fetchVersions,
   selectFile: configurationActions.selectFile,
 };

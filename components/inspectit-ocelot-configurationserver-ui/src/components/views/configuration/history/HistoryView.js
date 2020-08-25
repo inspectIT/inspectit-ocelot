@@ -8,9 +8,6 @@ const HistoryView = ({ versionSelection, versionSelectionChange, showHistory, sh
 
   const dispatch = useDispatch();
 
-  // state variables
-  let [show, setShow] = useState(true);
-
   // global state variables
   const selection = useSelector((state) => state.configuration.selection);
   const versions = useSelector((state) => state.configuration.versions)
@@ -26,7 +23,13 @@ const HistoryView = ({ versionSelection, versionSelectionChange, showHistory, sh
   const selectVersion = (item, index) => {
     const id = item.id;
     versionSelectionChange(index, id);
-    dispatch(configurationActions.fetchFilesWithId(id));
+
+    if (index == 0) {
+      dispatch(configurationActions.fetchFilesWithId(null));
+    } else {
+      dispatch(configurationActions.fetchFilesWithId(id));
+    }
+
   }
 
   return (
