@@ -4,32 +4,29 @@ import { configurationActions } from '../../../../redux/ducks/configuration'
 import Navigationbar from './Navigationbar';
 import contentItem from './ContentItem';
 
-const HistoryView = ({ versionSelection, versionSelectionChange }) => {
+const HistoryView = ({ versionSelection, versionSelectionChange, showHistory, showHistoryView }) => {
 
   const dispatch = useDispatch();
 
   // state variables
-  let [show, setShow] = useState(false);
+  let [show, setShow] = useState(true);
 
   // global state variables
   const selection = useSelector((state) => state.configuration.selection);
   const versions = useSelector((state) => state.configuration.versions)
 
-  const showHistoryView = () => {
-    setShow(!show);
-  };
-
   useEffect(() => {
-    if (show) {
+    if (showHistory) {
       if (versions.length == 0) {
         dispatch(configurationActions.fetchVersions());
       }
     }
-  }, [show])
+  }, [showHistory])
 
   const selectVersion = (item, index) => {
-    versionSelectionChange(index);
-    dispatch(configurationActions.fetchFilesWithId(item.id));
+    const id = item.id;
+    versionSelectionChange(index, id);
+    dispatch(configurationActions.fetchFilesWithId(id));
   }
 
   return (
@@ -63,7 +60,7 @@ const HistoryView = ({ versionSelection, versionSelectionChange }) => {
       </style>
 
       <div className="this">
-        {show ? (
+        {showHistory ? (
           <div className="content">
             {versions.map((item, index) => (
               <div className={versionSelection == index ? "version-selected" : null} key={index} onClick={() => selectVersion(item, index)} >
@@ -73,7 +70,7 @@ const HistoryView = ({ versionSelection, versionSelectionChange }) => {
           </div>
         ) : null}
         <div className="navigationbar">
-          <Navigationbar showHistoryView={showHistoryView} show={show} />
+          <Navigationbar showHistoryView={showHistoryView} show={showHistory} />
         </div>
       </div>
     </>

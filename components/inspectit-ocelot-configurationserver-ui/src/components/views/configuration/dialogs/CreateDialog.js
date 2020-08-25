@@ -123,6 +123,7 @@ class CreateDialog extends React.Component {
   createFileOrFolder = () => {
     const fullPath = this.getAbsolutePath(this.state.filename);
     if (this.props.directoryMode) {
+      console.log("createFileOrFolder");
       this.props.createDirectory(fullPath, true, true);
     } else {
       this.props.writeFile(fullPath, '', true, true);

@@ -58,6 +58,8 @@ class ConfigurationView extends React.Component {
     isMoveDialogShown: false,
     filePath: null,
     versionSelection: 0,
+    versionId: null,
+    showHistory: false,
   };
 
   parsePath = (filePath, defaultConfigFilePath) => {
@@ -82,6 +84,7 @@ class ConfigurationView extends React.Component {
   onSave = () => {
     const { selection, fileContent } = this.props;
     this.props.writeFile(selection, fileContent, false);
+  
   };
 
   onChange = (value) => {
@@ -110,9 +113,20 @@ class ConfigurationView extends React.Component {
 
   hideMoveDialog = () => this.setState({ isMoveDialogShown: false, filePath: null });
 
-  versionSelectionChange = (versionIndex) => {
+  versionSelectionChange = (versionIndex, id) => {
+    const {selection} = this.props;
     this.setState({
       versionSelection: versionIndex,
+      versionId: id,
+    })
+    this.props.selectFile(selection,id);
+    
+  }
+
+
+  showHistoryView = () => {
+    this.setState({
+      showHistory: !this.state.showHistory
     })
   }
 
@@ -182,6 +196,7 @@ class ConfigurationView extends React.Component {
             showCreateDirectoryDialog={this.showCreateDirectoryDialog}
             showMoveDialog={this.showMoveDialog}
             readOnly={readOnly}
+            versionId={this.state.versionId}
           />
           <div className="details">Last refresh: {this.props.updateDate ? new Date(this.props.updateDate).toLocaleString() : '-'}</div>
         </div>
@@ -203,7 +218,14 @@ class ConfigurationView extends React.Component {
           readOnly={readOnly || !!selectedDefaultConfigFile}
           showVisualConfigurationView={showVisualConfigurationView}
           onToggleVisualConfigurationView={toggleVisualConfigurationView}
-          sidebar={<HistoryView versionSelection={versionSelection} versionSelectionChange={this.versionSelectionChange}></HistoryView>}
+          sidebar={
+            <HistoryView
+              showHistory={this.state.showHistory}
+              showHistoryView={this.showHistoryView}
+              versionSelection={versionSelection}
+              versionSelectionChange={this.versionSelectionChange}>
+            </HistoryView>
+          }
         >
           {showHeader ? (
             <EditorHeader
@@ -281,6 +303,8 @@ const mapDispatchToProps = {
   writeFile: configurationActions.writeFile,
   selectedFileContentsChanged: configurationActions.selectedFileContentsChanged,
   toggleVisualConfigurationView: configurationActions.toggleVisualConfigurationView,
+  selectFile: configurationActions.selectFile,
+  fetchVersions: configurationActions.fetchVersions,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(ConfigurationView);

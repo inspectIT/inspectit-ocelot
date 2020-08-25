@@ -7,7 +7,6 @@ import { linkPrefix } from '../../../lib/configuration';
 
 import { DEFAULT_CONFIG_TREE_KEY } from '../../../data/constants';
 import { filter } from 'lodash';
-import { configuration } from '../../../redux/ducks/initial-states';
 
 /**
  * The file tree used in the configuration view.
@@ -35,15 +34,15 @@ class FileTree extends React.Component {
    * Handle tree selection changes.
    */
   onSelectionChange = (event) => {
-    const { selection, selectedDefaultConfigFile } = this.props;
+    const { selection, selectedDefaultConfigFile, versionId } = this.props;
     const newSelection = event.value;
     if (newSelection) {
       if (newSelection !== selection && newSelection !== selectedDefaultConfigFile) {
-        this.props.selectFile(newSelection);
+        this.props.selectFile(newSelection, versionId);
       }
     } else {
       if (selection || selectedDefaultConfigFile) {
-        this.props.selectFile(null);
+        this.props.selectFile(null, versionId);
       }
     }
   };

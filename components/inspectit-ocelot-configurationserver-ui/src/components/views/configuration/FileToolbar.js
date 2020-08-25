@@ -11,11 +11,12 @@ import { Button } from 'primereact/button';
 class FileToolbar extends React.Component {
   fetchFiles = () => this.props.fetchFiles();
   fetchVersions = () => this.props.fetchVersions();
+  selectFile = () => this.props.selectFile();
 
   fetchFilesAndVersions = () => {
     this.fetchFiles();
     this.fetchVersions();
-    this.props.versionSelectionChange(0);
+    this.props.versionSelectionChange(0, null);
   }
 
   render() {
@@ -96,6 +97,7 @@ function mapStateToProps(state) {
 const mapDispatchToProps = {
   fetchFiles: configurationActions.fetchFiles,
   fetchVersions: configurationActions.fetchVersions,
+  selectFile: configurationActions.selectFile,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(FileToolbar);

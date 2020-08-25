@@ -9,7 +9,9 @@ import * as types from './types';
  * Fetches all existing versions.
  */
 export const fetchVersions = () => {
+
   return (dispatch) => {
+    console.log("fetch version");
     dispatch({ type: types.FETCH_VERSIONS_STARTED });
     axios('/versions')
       .then((res) => {
@@ -94,11 +96,16 @@ const sortFiles = (allFiles) => {
 };
 
 /**
- * Fetches the content of the selected file.
+ * Fetch the content of the selected file from version with selected id.
  */
-export const fetchSelectedFile = () => {
+export const fetchSelectedFileWithId = (id) => {
+
   return (dispatch, getState) => {
     const { selection } = getState().configuration;
+    let url = '/files' + selection;
+    if (id) {
+      url = '/files' + selection + '?version=' + id
+    }
 
     if (selection) {
       const file = configurationUtils.getFile(getState().configuration.files, selection);
@@ -108,7 +115,7 @@ export const fetchSelectedFile = () => {
         dispatch({ type: types.FETCH_FILE_STARTED });
 
         axios
-          .get('/files' + selection)
+          .get(url)
           .then((res) => {
             const fileContent = res.data.content;
             dispatch({ type: types.FETCH_FILE_SUCCESS, payload: { fileContent } });
@@ -126,7 +133,7 @@ export const fetchSelectedFile = () => {
  *
  * @param {string} selection - absolute path of the selected file (e.g. /configs/prod/interfaces.yml)
  */
-export const selectFile = (selection) => {
+export const selectFile = (selection, id) => {
   return (dispatch, getState) => {
     if (selection && selection.startsWith(DEFAULT_CONFIG_TREE_KEY)) {
       const content = configurationUtils.getDefaultFileContent(getState().configuration.defaultConfig, selection);
@@ -144,8 +151,7 @@ export const selectFile = (selection) => {
           selection,
         },
       });
-
-      dispatch(fetchSelectedFile(selection));
+     dispatch(fetchSelectedFileWithId(id));
     }
   };
 };
@@ -181,6 +187,7 @@ export const deleteSelection = (fetchFilesOnSuccess, selectedFile = null) => {
         dispatch({ type: types.DELETE_SELECTION_SUCCESS });
         if (fetchFilesOnSuccess) {
           dispatch(fetchFiles());
+          dispatch(fetchVersions());
         }
       })
       .catch(() => {
@@ -213,17 +220,16 @@ export const writeFile = (file, content, fetchFilesOnSuccess, selectFileOnSucces
           file,
           content,
         };
-
         dispatch({ type: types.WRITE_FILE_SUCCESS, payload });
-
+        dispatch(fetchFiles());
+        dispatch(fetchVersions());
         if (fetchFilesOnSuccess) {
           if (selectFileOnSuccess) {
-            dispatch(fetchFiles('/' + filePath));
+            dispatch(('/' + filePath));
           } else {
             dispatch(fetchFiles());
           }
         }
-
         dispatch(notificationActions.showSuccessMessage('Configuration Saved', 'The configuration has been successfully saved.'));
       })
       .catch(() => {
@@ -257,6 +263,7 @@ export const createDirectory = (path, fetchFilesOnSuccess, selectFolderOnSuccess
             dispatch(fetchFiles());
           }
         }
+        dispatch(fetchSelectedFileWithId(null));
       })
       .catch(() => {
         dispatch({ type: types.CREATE_DIRECTORY_FAILURE });
