@@ -28,14 +28,13 @@ public class DirectoryController extends FileBaseController {
 
         RevisionAccess revision;
         if (commitId == null) {
-            revision = fileManager.getWorkspaceRevision();
+            return fileManager.getWorkingDirectory().listConfigurationFiles(path);
         } else if (commitId.equals("live")) {
-            revision = fileManager.getLiveRevision();
-        } else {
-            revision = fileManager.getCommitWithId(commitId);
-        }
+            return fileManager.getLiveRevision().listConfigurationFiles(path);
 
-        return revision.listConfigurationFiles(path);
+        } else {
+            return  fileManager.getCommitWithId(commitId).listConfigurationFiles(path);
+        }
     }
 
     @Secured(UserRoleConfiguration.WRITE_ACCESS_ROLE)
