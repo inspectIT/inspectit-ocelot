@@ -72,7 +72,7 @@ public class FileController extends FileBaseController {
         }
 
         if (!contentOptional.isPresent()) {
-            return ResponseEntity.notFound();
+            return null;
         }
 
         return contentOptional.map(content -> {
