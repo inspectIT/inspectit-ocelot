@@ -53,6 +53,8 @@ const configuration = {
   schema: null,
   /** If the config view should be in the visual mode */
   showVisualConfigurationView: false,
+  /** Specifies the selected git version. The latest version always has the number 0. */
+  selectedVersion: 0,
 };
 
 const notification = {

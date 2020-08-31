@@ -4,7 +4,6 @@ import { ContextMenu } from 'primereact/contextmenu';
 import { connect } from 'react-redux';
 import { configurationActions, configurationSelectors } from '../../../redux/ducks/configuration';
 import { linkPrefix } from '../../../lib/configuration';
-
 import { DEFAULT_CONFIG_TREE_KEY } from '../../../data/constants';
 import { filter } from 'lodash';
 
@@ -23,7 +22,7 @@ class FileTree extends React.Component {
    */
   componentDidMount = () => {
     const { defaultConfig } = this.props;
-    this.props.fetchFiles();
+    this.props.fetchFiles(null);
 
     if (Object.entries(defaultConfig).length === 0) {
       this.props.fetchDefaultConfig();
@@ -186,6 +185,8 @@ class FileTree extends React.Component {
 
 function mapStateToProps(state) {
   const { pendingRequests, selection, defaultConfig, selectedDefaultConfigFile } = state.configuration;
+  // console.log("test 1");
+  // console.log(state)
   return {
     files: configurationSelectors.getFileTree(state),
     loading: pendingRequests > 0,

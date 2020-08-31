@@ -136,8 +136,8 @@ const configurationReducer = createReducer(initialState)({
   },
   [types.MOVE_FAILURE]: decrementPendingRequests,
   [types.SELECTED_FILE_CONTENTS_CHANGED]: (state, action) => {
-    const { selection } = state;
-    if (selection) {
+    const { selection , selectedVersion } = state;
+    if (selection && selectedVersion === 0) {
       const { selectedFileContent, unsavedFileContents } = state;
       const { content } = action.payload;
       const newUnsavedFileContents = { ...unsavedFileContents };
@@ -147,13 +147,19 @@ const configurationReducer = createReducer(initialState)({
       } else {
         newUnsavedFileContents[selection] = content;
       }
-
       return {
         ...state,
         unsavedFileContents: newUnsavedFileContents,
       };
     } else {
       return state;
+    }
+  },
+  [types.SELECTED_VERSION_CHANGED]: (state, action) => {
+    const { selectedVersion } = action.payload;
+    return {
+      ...state,
+      selectedVersion,
     }
   },
   [types.FETCH_DEFAULT_CONFIG_STARTED]: incrementPendingRequests,

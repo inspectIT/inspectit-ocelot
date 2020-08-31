@@ -11,21 +11,21 @@ const configurationSelector = (state) => state.configuration;
  * @param {*} parentKey the key (absolute path) of the node's parent
  * @param {*} node the current node (file)
  */
-const _asTreeNode = (parentKey, node, unsavedFileContents) => {
+const _asTreeNode = (parentKey, node, unsavedFileContents, selectedVersion) => {
   const { type, name } = node;
   const key = parentKey + name;
 
   if (type === 'directory') {
     const hasUnsavedChanges = Object.keys(unsavedFileContents).find((path) => path.startsWith(key + '/'));
-    const labelValue = name + (hasUnsavedChanges ? ' *' : '');
+    const labelValue = name + (hasUnsavedChanges && selectedVersion === 0 ? ' *' : '');
     return {
       key,
       label: labelValue,
       icon: 'pi pi-fw pi-folder',
-      children: map(node.children, (child) => _asTreeNode(key + '/', child, unsavedFileContents)),
+      children: map(node.children, (child) => _asTreeNode(key + '/', child, unsavedFileContents, selectedVersion)),
     };
   } else {
-    const labelValue = name + (key in unsavedFileContents ? ' *' : '');
+    const labelValue = name + ((key in unsavedFileContents) && selectedVersion === 0 ? ' *' : '');
     return {
       key,
       label: labelValue,
@@ -38,9 +38,9 @@ const _asTreeNode = (parentKey, node, unsavedFileContents) => {
  * Returns the loaded configuration files and directories in a tree structure used by the FileTree component.
  */
 export const getFileTree = createSelector(configurationSelector, (configuration) => {
-  const { files, unsavedFileContents } = configuration;
+  const { files, unsavedFileContents, selectedVersion } = configuration;
 
-  const fileTree = map(files, (file) => _asTreeNode('/', file, unsavedFileContents));
+  const fileTree = map(files, (file) => _asTreeNode('/', file, unsavedFileContents, selectedVersion));
   return fileTree;
 });
 

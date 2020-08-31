@@ -1,7 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { configurationActions } from '../../../redux/ducks/configuration';
-
 import { Toolbar } from 'primereact/toolbar';
 import { Button } from 'primereact/button';
 
@@ -9,14 +8,14 @@ import { Button } from 'primereact/button';
  * The toolbar used in the configuration view's file tree.
  */
 class FileToolbar extends React.Component {
-  fetchFilesWithId = (id) => this.props.fetchFilesWithId(id);
+  fetchFiles = (id) => this.props.fetchFiles(id);
   fetchVersions = () => this.props.fetchVersions();
   selectFile = () => this.props.selectFile();
 
   fetchFilesAndVersions = () => {
-    this.fetchFilesWithId(null);
+    this.fetchFiles(null);
     this.fetchVersions();
-    this.props.versionSelectionChange(0, null);
+    this.props.selectedVersionChange(0, null);
   }
 
   render() {
@@ -95,7 +94,7 @@ function mapStateToProps(state) {
 }
 
 const mapDispatchToProps = {
-  fetchFilesWithId: configurationActions.fetchFilesWithId,
+  fetchFiles: configurationActions.fetchFiles,
   fetchVersions: configurationActions.fetchVersions,
   selectFile: configurationActions.selectFile,
 };

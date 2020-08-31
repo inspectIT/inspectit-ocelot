@@ -12,6 +12,7 @@ import FileToolbar from './FileToolbar';
 import FileTree from './FileTree';
 import { enableOcelotAutocompletion } from './OcelotAutocompleter';
 import HistoryView from './history/HistoryView';
+
 /**
  * The header component of the editor view.
  */
@@ -57,7 +58,6 @@ class ConfigurationView extends React.Component {
     isCreateDirectoryDialogShown: false,
     isMoveDialogShown: false,
     filePath: null,
-    versionSelection: 0,
     versionId: null,
     showHistory: false,
   };
@@ -113,13 +113,13 @@ class ConfigurationView extends React.Component {
 
   hideMoveDialog = () => this.setState({ isMoveDialogShown: false, filePath: null });
 
-  versionSelectionChange = (versionIndex, id) => {
+  selectedVersionChange = (versionIndex, id) => {
     const { selection } = this.props;
     this.setState({
-      versionSelection: versionIndex,
       versionId: id,
     })
     this.props.selectFile(selection, id);
+    this.props.selectedVersionChanged(versionIndex);
 
   }
 
@@ -142,8 +142,8 @@ class ConfigurationView extends React.Component {
       showVisualConfigurationView,
       toggleVisualConfigurationView,
       readOnly,
+      selectedVersion
     } = this.props;
-    const { versionSelection } = this.state;
     const showEditor = (selection || selectedDefaultConfigFile) && !isDirectory;
 
     const { path, name } = this.parsePath(selection, selectedDefaultConfigFile);
@@ -184,8 +184,8 @@ class ConfigurationView extends React.Component {
             showCreateFileDialog={this.showCreateFileDialog}
             showCreateDirectoryDialog={this.showCreateDirectoryDialog}
             showMoveDialog={this.showMoveDialog}
-            readOnly={versionSelection === 0 ? readOnly : true}
-            versionSelectionChange={this.versionSelectionChange}
+            readOnly={selectedVersion === 0 ? readOnly : true}
+            selectedVersionChange={this.selectedVersionChange}
           />
           <FileTree
             className="fileTree"
@@ -193,7 +193,7 @@ class ConfigurationView extends React.Component {
             showCreateFileDialog={this.showCreateFileDialog}
             showCreateDirectoryDialog={this.showCreateDirectoryDialog}
             showMoveDialog={this.showMoveDialog}
-            readOnly={versionSelection === 0 ? readOnly : true}
+            readOnly={selectedVersion === 0 ? readOnly : true}
             versionId={this.state.versionId}
           />
           <div className="details">Last refresh: {this.props.updateDate ? new Date(this.props.updateDate).toLocaleString() : '-'}</div>
@@ -213,25 +213,26 @@ class ConfigurationView extends React.Component {
           notificationIcon="pi-exclamation-triangle"
           notificationText={yamlError}
           loading={loading}
-          readOnly={versionSelection === 0 ? (readOnly || !!selectedDefaultConfigFile) : true}
+          readOnly={selectedVersion === 0 ? (readOnly || !!selectedDefaultConfigFile) : true}
           showVisualConfigurationView={showVisualConfigurationView}
           onToggleVisualConfigurationView={toggleVisualConfigurationView}
           sidebar={
             <HistoryView
               showHistory={this.state.showHistory}
               showHistoryView={this.showHistoryView}
-              versionSelection={versionSelection}
-              versionSelectionChange={this.versionSelectionChange}>
+              selectedVersion={selectedVersion}
+              selectedVersionChange={this.selectedVersionChange}>
             </HistoryView>
           }
+          selectedVersion={selectedVersion}
         >
           {showHeader ? (
             <EditorHeader
               icon={icon}
               path={path}
               name={name}
-              isContentModified={isContentModified}
-              readOnly={versionSelection === 0 ? (readOnly || !!selectedDefaultConfigFile) : true}
+              isContentModified={isContentModified && selectedVersion === 0 ? true : false}
+              readOnly={selectedVersion === 0 ? (readOnly || !!selectedDefaultConfigFile) : true}
             />
           ) : null}
         </EditorView>
@@ -277,9 +278,10 @@ function mapStateToProps(state) {
     selectedDefaultConfigFile,
     schema,
     showVisualConfigurationView,
+    selectedVersion
   } = state.configuration;
   const unsavedFileContent = selection ? configurationSelectors.getSelectedFileUnsavedContents(state) : null;
-  const fileContent = unsavedFileContent !== null ? unsavedFileContent : selectedFileContent;
+  const fileContent = unsavedFileContent !== null && selectedVersion === 0 ? unsavedFileContent : selectedFileContent;
 
   return {
     updateDate,
@@ -293,6 +295,7 @@ function mapStateToProps(state) {
     schema,
     showVisualConfigurationView,
     readOnly: !state.authentication.permissions.write,
+    selectedVersion,
   };
 }
 
@@ -300,6 +303,7 @@ const mapDispatchToProps = {
   showWarning: notificationActions.showWarningMessage,
   writeFile: configurationActions.writeFile,
   selectedFileContentsChanged: configurationActions.selectedFileContentsChanged,
+  selectedVersionChanged: configurationActions.selectedVersionChanged,
   toggleVisualConfigurationView: configurationActions.toggleVisualConfigurationView,
   selectFile: configurationActions.selectFile,
   fetchVersions: configurationActions.fetchVersions,

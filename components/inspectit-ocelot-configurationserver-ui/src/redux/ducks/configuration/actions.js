@@ -25,34 +25,10 @@ export const fetchVersions = () => {
 
 /**
  * Fetches all existing configuration files and directories.
- *
  * @param {string} newSelectionOnSuccess - If not empty, this path will be selected on successful fetch.
+ * @param  {string} id - Fetch all with this id.
  */
-export const fetchFiles = (newSelectionOnSuccess) => {
-
-  return (dispatch) => {
-    dispatch({ type: types.FETCH_FILES_STARTED });
-    axios
-      .get('/directories/')
-      .then((res) => {
-        const files = res.data;
-        sortFiles(files);
-        dispatch({ type: types.FETCH_FILES_SUCCESS, payload: { files } });
-        if (newSelectionOnSuccess) {
-          dispatch(selectFile(newSelectionOnSuccess));
-        }
-      })
-      .catch(() => {
-        dispatch({ type: types.FETCH_FILES_FAILURE });
-      });
-  };
-};
-
-/**
- * Fetch all existing configuration files and directories with this id.
- * @param {string} id - Fetch all with this id.
- */
-export const fetchFilesWithId = (id) => {
+export const fetchFiles = (id, newSelectionOnSuccess) => {
   let url;
   if(id === null){
     url = '/directories/'
@@ -67,6 +43,9 @@ export const fetchFilesWithId = (id) => {
         const files = res.data;
         sortFiles(files);
         dispatch({ type: types.FETCH_FILES_SUCCESS, payload: { files } })
+        if(newSelectionOnSuccess){
+          dispatch(selectFile(newSelectionOnSuccess))
+        }
       })
       .catch(() => {
         dispatch({ type: types.FETCH_FILES_FAILURE });
@@ -117,7 +96,6 @@ export const fetchSelectedFileWithId = (id) => {
       const isDirectory = configurationUtils.isDirectory(file);
       if (!isDirectory) {
         dispatch({ type: types.FETCH_FILE_STARTED });
-
         axios
           .get(url)
           .then((res) => {
@@ -190,7 +168,7 @@ export const deleteSelection = (fetchFilesOnSuccess, selectedFile = null) => {
       .then(() => {
         dispatch({ type: types.DELETE_SELECTION_SUCCESS });
         if (fetchFilesOnSuccess) {
-          dispatch(fetchFilesWithId(null));
+          dispatch(fetchFiles(null));
           dispatch(fetchVersions());
         }
       })
@@ -225,13 +203,13 @@ export const writeFile = (file, content, fetchFilesOnSuccess, selectFileOnSucces
           content,
         };
         dispatch({ type: types.WRITE_FILE_SUCCESS, payload });
-        dispatch(fetchFilesWithId(null));
+        dispatch(fetchFiles(null));
         dispatch(fetchVersions());
         if (fetchFilesOnSuccess) {
           if (selectFileOnSuccess) {
             dispatch(('/' + filePath));
           } else {
-            dispatch(fetchFilesWithId(null));
+            dispatch(fetchFiles(null));
           }
         }
         dispatch(notificationActions.showSuccessMessage('Configuration Saved', 'The configuration has been successfully saved.'));
@@ -262,9 +240,9 @@ export const createDirectory = (path, fetchFilesOnSuccess, selectFolderOnSuccess
         dispatch({ type: types.CREATE_DIRECTORY_SUCCESS });
         if (fetchFilesOnSuccess) {
           if (selectFolderOnSuccess) {
-            dispatch(fetchFiles('/' + dirPath));
+            dispatch(fetchFiles(null,'/' + dirPath));
           } else {
-            dispatch(fetchFiles());
+            dispatch(fetchFiles(null));
           }
         }
         dispatch(fetchSelectedFileWithId(null));
@@ -293,7 +271,8 @@ export const move = (path, targetPath, fetchFilesOnSuccess) => {
           payload,
         });
         if (fetchFilesOnSuccess) {
-          dispatch(fetchFiles());
+          dispatch(fetchFiles(null));
+          dispatch(fetchVersions());
         }
       })
       .catch(() => {
@@ -312,11 +291,19 @@ export const selectedFileContentsChanged = (content) => ({
   },
 });
 
+export const selectedVersionChanged = (selectedVersion) => ({
+  type: types.SELECTED_VERSION_CHANGED,
+  payload: {
+    selectedVersion,
+  },
+});
+
 /**
  * Fetches the default configuration of the Ocelot agents.
  */
 export const fetchDefaultConfig = () => {
   return (dispatch) => {
+
     dispatch({ type: types.FETCH_DEFAULT_CONFIG_STARTED });
 
     axios
@@ -336,6 +323,7 @@ export const fetchDefaultConfig = () => {
  */
 export const fetchConfigurationSchema = () => {
   return (dispatch) => {
+    
     dispatch({ type: types.FETCH_SCHEMA_STARTED });
 
     axios
