@@ -25,7 +25,7 @@ const _asTreeNode = (parentKey, node, unsavedFileContents, selectedVersion) => {
       children: map(node.children, (child) => _asTreeNode(key + '/', child, unsavedFileContents, selectedVersion)),
     };
   } else {
-    const labelValue = name + ((key in unsavedFileContents) && selectedVersion === 0 ? ' *' : '');
+    const labelValue = name + (key in unsavedFileContents && selectedVersion === 0 ? ' *' : '');
     return {
       key,
       label: labelValue,

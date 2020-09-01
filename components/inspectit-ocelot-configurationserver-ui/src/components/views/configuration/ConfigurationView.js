@@ -84,7 +84,6 @@ class ConfigurationView extends React.Component {
   onSave = () => {
     const { selection, fileContent } = this.props;
     this.props.writeFile(selection, fileContent, false);
-
   };
 
   onChange = (value) => {
@@ -117,17 +116,16 @@ class ConfigurationView extends React.Component {
     const { selection } = this.props;
     this.setState({
       versionId: id,
-    })
+    });
     this.props.selectFile(selection, id);
     this.props.selectedVersionChanged(versionIndex);
-
-  }
+  };
 
   showHistoryView = () => {
     this.setState({
-      showHistory: !this.state.showHistory
-    })
-  }
+      showHistory: !this.state.showHistory,
+    });
+  };
 
   render() {
     const {
@@ -142,7 +140,7 @@ class ConfigurationView extends React.Component {
       showVisualConfigurationView,
       toggleVisualConfigurationView,
       readOnly,
-      selectedVersion
+      selectedVersion,
     } = this.props;
     const showEditor = (selection || selectedDefaultConfigFile) && !isDirectory;
 
@@ -213,7 +211,7 @@ class ConfigurationView extends React.Component {
           notificationIcon="pi-exclamation-triangle"
           notificationText={yamlError}
           loading={loading}
-          readOnly={selectedVersion === 0 ? (readOnly || !!selectedDefaultConfigFile) : true}
+          readOnly={selectedVersion === 0 ? readOnly || !!selectedDefaultConfigFile : true}
           showVisualConfigurationView={showVisualConfigurationView}
           onToggleVisualConfigurationView={toggleVisualConfigurationView}
           sidebar={
@@ -221,8 +219,8 @@ class ConfigurationView extends React.Component {
               showHistory={this.state.showHistory}
               showHistoryView={this.showHistoryView}
               selectedVersion={selectedVersion}
-              selectedVersionChange={this.selectedVersionChange}>
-            </HistoryView>
+              selectedVersionChange={this.selectedVersionChange}
+            ></HistoryView>
           }
           selectedVersion={selectedVersion}
         >
@@ -232,7 +230,7 @@ class ConfigurationView extends React.Component {
               path={path}
               name={name}
               isContentModified={isContentModified && selectedVersion === 0 ? true : false}
-              readOnly={selectedVersion === 0 ? (readOnly || !!selectedDefaultConfigFile) : true}
+              readOnly={selectedVersion === 0 ? readOnly || !!selectedDefaultConfigFile : true}
             />
           ) : null}
         </EditorView>
@@ -278,7 +276,7 @@ function mapStateToProps(state) {
     selectedDefaultConfigFile,
     schema,
     showVisualConfigurationView,
-    selectedVersion
+    selectedVersion,
   } = state.configuration;
   const unsavedFileContent = selection ? configurationSelectors.getSelectedFileUnsavedContents(state) : null;
   const fileContent = unsavedFileContent !== null && selectedVersion === 0 ? unsavedFileContent : selectedFileContent;

@@ -39,13 +39,13 @@ const configurationReducer = createReducer(initialState)({
   [types.FETCH_VERSIONS_STARTED]: (state) => {
     return {
       ...state,
-    }
+    };
   },
   [types.FETCH_VERSIONS_FAILURE]: (state) => {
     return {
       ...state,
       versions: [],
-    }
+    };
   },
   [types.FETCH_VERSIONS_SUCCESS]: (state, action) => {
     const { versions } = action.payload;
@@ -136,7 +136,7 @@ const configurationReducer = createReducer(initialState)({
   },
   [types.MOVE_FAILURE]: decrementPendingRequests,
   [types.SELECTED_FILE_CONTENTS_CHANGED]: (state, action) => {
-    const { selection , selectedVersion } = state;
+    const { selection, selectedVersion } = state;
     if (selection && selectedVersion === 0) {
       const { selectedFileContent, unsavedFileContents } = state;
       const { content } = action.payload;
@@ -160,7 +160,7 @@ const configurationReducer = createReducer(initialState)({
     return {
       ...state,
       selectedVersion,
-    }
+    };
   },
   [types.FETCH_DEFAULT_CONFIG_STARTED]: incrementPendingRequests,
   [types.FETCH_DEFAULT_CONFIG_SUCCESS]: (state, action) => {

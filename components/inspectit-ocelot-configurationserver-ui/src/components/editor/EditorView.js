@@ -37,7 +37,7 @@ class EditorView extends React.Component {
       showVisualConfigurationView,
       onToggleVisualConfigurationView,
       sidebar,
-      selectedVersion
+      selectedVersion,
     } = this.props;
     return (
       <div className="this p-grid p-dir-col p-nogutter">

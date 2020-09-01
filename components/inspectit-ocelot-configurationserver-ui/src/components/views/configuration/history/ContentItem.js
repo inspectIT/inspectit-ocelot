@@ -2,7 +2,6 @@ import React from 'react';
 import dateformat from 'dateformat';
 
 const contentItem = (item) => {
-
   return (
     <>
       <style jsx>
@@ -48,14 +47,11 @@ const contentItem = (item) => {
         <div>
           <div className="container">
             <div className="section1">
-              <label className="id">
-                {item.id.substring(0, 6)}
-              </label>
+              <label className="id">{item.id.substring(0, 6)}</label>
             </div>
             <div className="section2">
               <label className="date">
-                <label>
-                  {dateformat((item.date * 1000), 'yyyy-mm-dd HH:MM:ss')}</label>
+                <label>{dateformat(item.date * 1000, 'yyyy-mm-dd HH:MM:ss')}</label>
               </label>
             </div>
           </div>

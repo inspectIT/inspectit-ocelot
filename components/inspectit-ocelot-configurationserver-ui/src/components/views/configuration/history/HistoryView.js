@@ -1,15 +1,14 @@
-import React, { useEffect} from 'react';
+import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { configurationActions } from '../../../../redux/ducks/configuration'
+import { configurationActions } from '../../../../redux/ducks/configuration';
 import Navigationbar from './Navigationbar';
 import contentItem from './ContentItem';
 
 const HistoryView = ({ selectedVersion, selectedVersionChange, showHistory, showHistoryView }) => {
-
   const dispatch = useDispatch();
 
   // global state variables
-  const versions = useSelector((state) => state.configuration.versions)
+  const versions = useSelector((state) => state.configuration.versions);
 
   useEffect(() => {
     if (showHistory) {
@@ -17,7 +16,7 @@ const HistoryView = ({ selectedVersion, selectedVersionChange, showHistory, show
         dispatch(configurationActions.fetchVersions());
       }
     }
-  }, [showHistory])
+  }, [showHistory]);
 
   const selectVersion = (item, index) => {
     const id = item.id;
@@ -28,8 +27,7 @@ const HistoryView = ({ selectedVersion, selectedVersionChange, showHistory, show
     } else {
       dispatch(configurationActions.fetchFiles(id));
     }
-
-  }
+  };
 
   return (
     <>
@@ -45,7 +43,6 @@ const HistoryView = ({ selectedVersion, selectedVersionChange, showHistory, show
             background-color: white;
           }
           .content {
-           
             border-bottom: 1px solid #dddddd;
             border-left: 1px solid #dddddd;
             overflow-x: hidden;
@@ -54,7 +51,7 @@ const HistoryView = ({ selectedVersion, selectedVersionChange, showHistory, show
           }
           .version-selected {
             color: white;
-            background: #007AD9;
+            background: #007ad9;
           }
           .navigationbar {
             background-color: #eeeeee;
@@ -67,7 +64,7 @@ const HistoryView = ({ selectedVersion, selectedVersionChange, showHistory, show
         {showHistory ? (
           <div className="content">
             {versions.map((item, index) => (
-              <div className={selectedVersion == index ? "version-selected" : null} key={index} onClick={() => selectVersion(item, index)} >
+              <div className={selectedVersion == index ? 'version-selected' : null} key={index} onClick={() => selectVersion(item, index)}>
                 {contentItem(item)}
               </div>
             ))}

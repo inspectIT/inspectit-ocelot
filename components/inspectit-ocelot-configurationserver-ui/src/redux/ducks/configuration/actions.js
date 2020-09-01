@@ -4,24 +4,22 @@ import { configurationUtils } from '.';
 import { notificationActions } from '../notification';
 import * as types from './types';
 
-
 /**
  * Fetches all existing versions.
  */
 export const fetchVersions = () => {
-
   return (dispatch) => {
     dispatch({ type: types.FETCH_VERSIONS_STARTED });
     axios('/versions')
       .then((res) => {
         const versions = res.data;
-        dispatch({ type: types.FETCH_VERSIONS_SUCCESS, payload: { versions } })
+        dispatch({ type: types.FETCH_VERSIONS_SUCCESS, payload: { versions } });
       })
       .catch(() => {
         dispatch({ type: types.FETCH_VERSIONS_FAILURE });
-      })
+      });
   };
-}
+};
 
 /**
  * Fetches all existing configuration files and directories.
@@ -30,10 +28,10 @@ export const fetchVersions = () => {
  */
 export const fetchFiles = (id, newSelectionOnSuccess) => {
   let url;
-  if(id === null){
-    url = '/directories/'
+  if (id === null) {
+    url = '/directories/';
   } else {
-    url = '/directories?version=' +id;
+    url = '/directories?version=' + id;
   }
   return (dispatch) => {
     dispatch({ type: types.FETCH_FILES_STARTED });
@@ -42,9 +40,9 @@ export const fetchFiles = (id, newSelectionOnSuccess) => {
       .then((res) => {
         const files = res.data;
         sortFiles(files);
-        dispatch({ type: types.FETCH_FILES_SUCCESS, payload: { files } })
-        if(newSelectionOnSuccess){
-          dispatch(selectFile(newSelectionOnSuccess))
+        dispatch({ type: types.FETCH_FILES_SUCCESS, payload: { files } });
+        if (newSelectionOnSuccess) {
+          dispatch(selectFile(newSelectionOnSuccess));
         }
       })
       .catch(() => {
@@ -82,13 +80,12 @@ const sortFiles = (allFiles) => {
  * Fetch the content of the selected file from version with selected id.
  */
 export const fetchSelectedFileWithId = (id) => {
-
   return (dispatch, getState) => {
     const { selection } = getState().configuration;
 
     let url = '/files' + selection;
     if (id) {
-      url = '/files' + selection + '?version=' + id
+      url = '/files' + selection + '?version=' + id;
     }
 
     if (selection) {
@@ -133,7 +130,7 @@ export const selectFile = (selection, id) => {
           selection,
         },
       });
-     dispatch(fetchSelectedFileWithId(id));
+      dispatch(fetchSelectedFileWithId(id));
     }
   };
 };
@@ -207,7 +204,7 @@ export const writeFile = (file, content, fetchFilesOnSuccess, selectFileOnSucces
         dispatch(fetchVersions());
         if (fetchFilesOnSuccess) {
           if (selectFileOnSuccess) {
-            dispatch(('/' + filePath));
+            dispatch('/' + filePath);
           } else {
             dispatch(fetchFiles(null));
           }
@@ -240,7 +237,7 @@ export const createDirectory = (path, fetchFilesOnSuccess, selectFolderOnSuccess
         dispatch({ type: types.CREATE_DIRECTORY_SUCCESS });
         if (fetchFilesOnSuccess) {
           if (selectFolderOnSuccess) {
-            dispatch(fetchFiles(null,'/' + dirPath));
+            dispatch(fetchFiles(null, '/' + dirPath));
           } else {
             dispatch(fetchFiles(null));
           }
@@ -303,7 +300,6 @@ export const selectedVersionChanged = (selectedVersion) => ({
  */
 export const fetchDefaultConfig = () => {
   return (dispatch) => {
-
     dispatch({ type: types.FETCH_DEFAULT_CONFIG_STARTED });
 
     axios
@@ -323,7 +319,6 @@ export const fetchDefaultConfig = () => {
  */
 export const fetchConfigurationSchema = () => {
   return (dispatch) => {
-    
     dispatch({ type: types.FETCH_SCHEMA_STARTED });
 
     axios
