@@ -14,7 +14,6 @@ import { enableOcelotAutocompletion } from './OcelotAutocompleter';
 import HistoryView from './history/HistoryView';
 import SearchDialog from './dialogs/SearchDialog';
 
-
 /**
  * The header component of the editor view.
  */
