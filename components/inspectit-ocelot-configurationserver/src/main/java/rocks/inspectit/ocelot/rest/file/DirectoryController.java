@@ -26,16 +26,14 @@ public class DirectoryController extends FileBaseController {
     public Collection<FileInfo> listContents(@ApiParam("The id of the version which should be listed. If it is empty, the lastest workspace version is used. Can be 'live' fir listing the latest live version.") @RequestParam(value = "version", required = false) String commitId, HttpServletRequest request) {
         String path = RequestUtil.getRequestSubPath(request);
 
-        Collection<FileInfo> collection;
         if (commitId == null) {
-            collection = fileManager.getWorkingDirectory().listConfigurationFiles(path);
+            // Is used to display empty directories.
+            return fileManager.getWorkingDirectory().listConfigurationFiles(path);
         } else if (commitId.equals("live")) {
-            collection = fileManager.getLiveRevision().listConfigurationFiles(path);
-
+            return fileManager.getLiveRevision().listConfigurationFiles(path);
         } else {
-            collection =  fileManager.getCommitWithId(commitId).listConfigurationFiles(path);
+            return fileManager.getCommitWithId(commitId).listConfigurationFiles(path);
         }
-        return collection;
     }
 
     @Secured(UserRoleConfiguration.WRITE_ACCESS_ROLE)

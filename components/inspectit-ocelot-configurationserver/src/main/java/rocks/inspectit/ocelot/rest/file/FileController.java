@@ -60,8 +60,8 @@ public class FileController extends FileBaseController {
                            @RequestParam(defaultValue = "false")
                                    boolean raw,
                            @RequestParam(value = "version", required = false) String commitId) {
-
         String path = RequestUtil.getRequestSubPath(request);
+
         Optional<String> contentOptional;
         if (commitId == null) {
             contentOptional = fileManager.getWorkingDirectory().readConfigurationFile(path);
