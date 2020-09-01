@@ -12,6 +12,7 @@ import FileToolbar from './FileToolbar';
 import FileTree from './FileTree';
 import { enableOcelotAutocompletion } from './OcelotAutocompleter';
 import HistoryView from './history/HistoryView';
+import SearchDialog from './dialogs/SearchDialog';
 
 /**
  * The header component of the editor view.
@@ -60,6 +61,7 @@ class ConfigurationView extends React.Component {
     filePath: null,
     versionId: null,
     showHistory: false,
+    isSearchDialogShown: false,
   };
 
   parsePath = (filePath, defaultConfigFilePath) => {
@@ -127,6 +129,15 @@ class ConfigurationView extends React.Component {
     });
   };
 
+  showSearchDialog = () => this.setState({ isSearchDialogShown: true });
+
+  hideSearchDialog = () => this.setState({ isSearchDialogShown: false });
+
+  openFile = (filename) => {
+    this.props.selectFile(filename);
+
+  };
+
   render() {
     const {
       selection,
@@ -184,6 +195,9 @@ class ConfigurationView extends React.Component {
             showMoveDialog={this.showMoveDialog}
             readOnly={selectedVersion === 0 ? readOnly : true}
             selectedVersionChange={this.selectedVersionChange}
+            showSearchDialog={this.showSearchDialog}
+           
+
           />
           <FileTree
             className="fileTree"
@@ -249,6 +263,8 @@ class ConfigurationView extends React.Component {
           filePath={this.state.filePath}
         />
         <MoveDialog visible={this.state.isMoveDialogShown} onHide={this.hideMoveDialog} filePath={this.state.filePath} />
+
+        <SearchDialog visible={this.state.isSearchDialogShown} onHide={this.hideSearchDialog} openFile={this.openFile} />
       </div>
     );
   }
@@ -305,6 +321,7 @@ const mapDispatchToProps = {
   toggleVisualConfigurationView: configurationActions.toggleVisualConfigurationView,
   selectFile: configurationActions.selectFile,
   fetchVersions: configurationActions.fetchVersions,
+
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(ConfigurationView);

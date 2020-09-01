@@ -1,6 +1,6 @@
 import dynamic from 'next/dynamic';
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { useRef } from 'react';
 import editorConfig from '../../data/yaml-editor-config.json';
 import EditorToolbar from './EditorToolbar';
 import Notificationbar from './Notificationbar';
@@ -14,148 +14,148 @@ const TreeTableEditor = dynamic(() => import('./TreeTableEditor'), { ssr: false 
  * Editor view consisting of the AceEditor and a toolbar.
  *
  */
-class EditorView extends React.Component {
-  render() {
-    const {
-      value,
-      schema,
-      showEditor,
-      hint,
-      onRefresh,
-      onChange,
-      onCreate,
-      onSave,
-      isRefreshing,
-      enableButtons,
-      isErrorNotification,
-      notificationIcon,
-      notificationText,
-      canSave,
-      loading,
-      children,
-      readOnly,
-      showVisualConfigurationView,
-      onToggleVisualConfigurationView,
-      sidebar,
-      selectedVersion,
-    } = this.props;
-    return (
-      <div className="this p-grid p-dir-col p-nogutter">
-        <style jsx>{`
-          .this {
-            flex: 1;
-            flex-wrap: nowrap;
-          }
-          .selection-information {
-            display: flex;
-            height: 100%;
-            align-items: center;
-            justify-content: center;
-            color: #bbb;
-          }
-          .editor-container {
-            position: relative;
-            flex-grow: 1;
-          }
-          .visual-editor-container {
-            position: relative;
-            flex-grow: 1;
-          }
-          .loading-overlay {
-            position: absolute;
-            left: 0;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #00000080;
-            color: white;
-            z-index: 100;
-            justify-content: center;
-            align-items: center;
-          }
-          .editor-row {
-            display: flex;
-            flex-grow: 1;
-          }
-          .sidebar {
-            display: flex;
-          }
-        `}</style>
-        <div className="p-col-fixed">
-          <EditorToolbar
-            enableButtons={enableButtons}
-            canSave={canSave}
-            onRefresh={onRefresh}
-            isRefreshing={isRefreshing}
-            onSave={onSave}
-            onSearch={() => this.editor.executeCommand('find')}
-            onHelp={() => this.editor.showShortcuts()}
-            visualConfig={showVisualConfigurationView}
-            onVisualConfigChange={onToggleVisualConfigurationView}
-            selectedVersion={selectedVersion}
-          >
-            {children}
-          </EditorToolbar>
-        </div>
-        {showEditor && !showVisualConfigurationView && (
-          <div className="editor-row">
-            <div className="editor-container">
-              <AceEditor
-                editorRef={(editor) => (this.editor = editor)}
-                onCreate={onCreate}
-                mode="yaml"
-                theme="cobalt"
-                options={editorConfig}
-                value={value}
-                onChange={onChange}
-                canSave={canSave}
-                onSave={onSave}
-                readOnly={readOnly}
-              />
-            </div>
-            <div className="sidebar">{sidebar}</div>
-          </div>
-        )}
-        {showEditor && showVisualConfigurationView && (
-          <div className="editor-row">
-            <div className="visual-editor-container">
-              <YamlParser yamlConfig={value} onUpdate={onChange}>
-                {(onUpdate, config) => (
-                  <TreeTableEditor config={config} schema={schema} loading={loading} readOnly={readOnly} onUpdate={onUpdate} />
-                )}
-              </YamlParser>
-            </div>
-            <div className="sidebar">{sidebar}</div>
-          </div>
-        )}
-        {!showEditor && (
-          <div className="editor-row">
-            <div className="editor-container">
-              {' '}
-              <SelectionInformation hint={hint} />{' '}
-            </div>
-            <div className="sidebar">{sidebar}</div>
-          </div>
-        )}
-        {loading && (
-          <div className="loading-overlay">
-            <i className="pi pi-spin pi-spinner" style={{ fontSize: '2em' }}></i>
-          </div>
-        )}
-        <div>
-          {notificationText ? (
-            <div className="editor-row">
-              <div className="editor-container">
-                <Notificationbar text={notificationText} isError={isErrorNotification} icon={notificationIcon} />
-              </div>
-              <div className="sidebar">{sidebar}</div>
-            </div>
-          ) : null}
-        </div>
+const EditorView = ({
+  value,
+  schema,
+  showEditor,
+  hint,
+  onRefresh,
+  onChange,
+  onCreate,
+  onSave,
+  isRefreshing,
+  enableButtons,
+  isErrorNotification,
+  notificationIcon,
+  notificationText,
+  canSave,
+  loading,
+  children,
+  readOnly,
+  showVisualConfigurationView,
+  onToggleVisualConfigurationView,
+  sidebar,
+  selectedVersion,
+}) => {
+  const editorRef = useRef(null);
+
+  return (
+    <div className="this p-grid p-dir-col p-nogutter">
+      <style jsx>{`
+        .this {
+          flex: 1;
+          flex-wrap: nowrap;
+        }
+        .selection-information {
+          display: flex;
+          height: 100%;
+          align-items: center;
+          justify-content: center;
+          color: #bbb;
+        }
+        .editor-container {
+          position: relative;
+          flex-grow: 1;
+        }
+        .visual-editor-container {
+          position: relative;
+          flex-grow: 1;
+        }
+        .loading-overlay {
+          position: absolute;
+          left: 0;
+          top: 0;
+          right: 0;
+          bottom: 0;
+          background-color: #00000080;
+          color: white;
+          z-index: 100;
+          justify-content: center;
+          align-items: center;
+        }
+        .editor-row {
+          display: flex;
+          flex-grow: 1;
+        }
+        .sidebar {
+          display: flex;
+        }
+      `}</style>
+      <div className="p-col-fixed">
+        <EditorToolbar
+          enableButtons={enableButtons}
+          canSave={canSave}
+          onRefresh={onRefresh}
+          isRefreshing={isRefreshing}
+          onSave={onSave}
+          onSearch={() => editorRef.current.executeCommand('find')}
+          onHelp={() => editorRef.current.showShortcuts()}
+          visualConfig={showVisualConfigurationView}
+          onVisualConfigChange={onToggleVisualConfigurationView}
+        >
+          {children}
+        </EditorToolbar>
       </div>
-    );
-  }
-}
+      {showEditor && !showVisualConfigurationView && (
+        <div className="editor-row">
+          <div className="editor-container">
+            <AceEditor
+              editorRef={(editor) => (editorRef.current = editor)}
+              onCreate={onCreate}
+              mode="yaml"
+              theme="cobalt"
+              options={editorConfig}
+              value={value}
+              onChange={onChange}
+              history-view
+              canSave={canSave}
+              onSave={onSave}
+              readOnly={readOnly}
+              selectedVersion={selectedVersion}
+            />
+          </div>
+          <div className="sidebar">{sidebar}</div>
+        </div>
+      )}
+      {showEditor && showVisualConfigurationView && (
+        <div className="editor-row">
+          <div className="visual-editor-container">
+            <YamlParser yamlConfig={value} onUpdate={onChange}>
+              {(onUpdate, config) => (
+                <TreeTableEditor config={config} schema={schema} loading={loading} readOnly={readOnly} onUpdate={onUpdate} />
+              )}
+            </YamlParser>
+          </div>
+          <div className="sidebar"> {sidebar}</div>
+        </div>
+      )}
+      {!showEditor && (
+        <div className="editor-row">
+          <div className="editor-container">
+            {''}
+            <SelectionInformation hint={hint} /> {''}
+          </div>
+          <div className="sidebar">{sidebar} </div>
+        </div>
+      )}
+      {loading && (
+        <div className="loading-overlay">
+          <i className="pi pi-spin pi-spinner" style={{ fontSize: '2em' }}></i>
+        </div>
+      )}
+      <div>
+        {notificationText ? (
+          <div className="editor-row">
+            <div className="editor-container">
+              <Notificationbar text={notificationText} isError={isErrorNotification} icon={notificationIcon} />
+            </div>
+            <div className="sidebar">{sidebar} </div>
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+};
 
 EditorView.propTypes = {
   /** The value of the editor */

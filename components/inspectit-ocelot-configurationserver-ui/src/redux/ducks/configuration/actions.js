@@ -114,6 +114,10 @@ export const fetchSelectedFileWithId = (id) => {
  */
 export const selectFile = (selection, id) => {
   return (dispatch, getState) => {
+    if (!selection.startsWith('/')) {
+      selection = '/' + selection;
+    }
+
     if (selection && selection.startsWith(DEFAULT_CONFIG_TREE_KEY)) {
       const content = configurationUtils.getDefaultFileContent(getState().configuration.defaultConfig, selection);
       dispatch({

@@ -38,6 +38,9 @@ class FileToolbar extends React.Component {
           .this :global(.p-toolbar-group-left) :global(.p-button) {
             margin-right: 0.25rem;
           }
+          .this :global(.p-toolbar-group-right) :global(.p-button) {
+            margin-left: 0.25rem;
+          }
         `}</style>
         <Toolbar>
           <div className="p-toolbar-group-left">
@@ -71,12 +74,18 @@ class FileToolbar extends React.Component {
             />
           </div>
           <div className="p-toolbar-group-right">
+           <Button 
+            disabled={loading}
+            onClick={this.props.showSearchDialog}
+            tooltip="Find in File"
+            icon={'pi pi-search'}
+            tooltipOptions={tooltipOptions}
+           />
             <Button
-              disabled={loading}
-              onClick={this.fetchFilesAndVersions}
-              tooltip="Reload"
-              icon={'pi pi-refresh' + (loading ? ' pi-spin' : '')}
-              tooltipOptions={tooltipOptions}
+            onClick={this.fetchFilesAndVersions}
+            tooltip="Reload"
+            icon={'pi pi-refresh' + (loading ? 'pi-spin':'')}
+            tooltipOptions={tooltipOptions}
             />
           </div>
         </Toolbar>
