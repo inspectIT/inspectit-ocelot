@@ -14,6 +14,9 @@ export default (url, params, initialData = null) => {
 
   useEffect(() => {
     const fetchData = async () => {
+      if (counter === 0) {
+        return;
+      }
       setIsError(false);
       setIsLoading(true);
 

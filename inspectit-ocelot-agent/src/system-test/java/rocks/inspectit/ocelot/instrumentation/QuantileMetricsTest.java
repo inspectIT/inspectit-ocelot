@@ -24,7 +24,7 @@ public class QuantileMetricsTest extends InstrumentationSysTestBase {
 
     @BeforeAll
     static void waitForInstrumentation() {
-        TestUtils.waitForClassInstrumentation(QuantileMetricsTest.class, 30, TimeUnit.SECONDS);
+        TestUtils.waitForClassInstrumentation(QuantileMetricsTest.class, true, 30, TimeUnit.SECONDS);
     }
 
     @Test
