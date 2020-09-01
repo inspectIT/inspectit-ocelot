@@ -135,7 +135,6 @@ class ConfigurationView extends React.Component {
 
   openFile = (filename) => {
     this.props.selectFile(filename);
-
   };
 
   render() {
@@ -196,8 +195,6 @@ class ConfigurationView extends React.Component {
             readOnly={selectedVersion === 0 ? readOnly : true}
             selectedVersionChange={this.selectedVersionChange}
             showSearchDialog={this.showSearchDialog}
-           
-
           />
           <FileTree
             className="fileTree"
@@ -321,7 +318,6 @@ const mapDispatchToProps = {
   toggleVisualConfigurationView: configurationActions.toggleVisualConfigurationView,
   selectFile: configurationActions.selectFile,
   fetchVersions: configurationActions.fetchVersions,
-
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(ConfigurationView);

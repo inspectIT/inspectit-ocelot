@@ -74,18 +74,18 @@ class FileToolbar extends React.Component {
             />
           </div>
           <div className="p-toolbar-group-right">
-           <Button 
-            disabled={loading}
-            onClick={this.props.showSearchDialog}
-            tooltip="Find in File"
-            icon={'pi pi-search'}
-            tooltipOptions={tooltipOptions}
-           />
             <Button
-            onClick={this.fetchFilesAndVersions}
-            tooltip="Reload"
-            icon={'pi pi-refresh' + (loading ? 'pi-spin':'')}
-            tooltipOptions={tooltipOptions}
+              disabled={loading}
+              onClick={this.props.showSearchDialog}
+              tooltip="Find in File"
+              icon={'pi pi-search'}
+              tooltipOptions={tooltipOptions}
+            />
+            <Button
+              onClick={this.fetchFilesAndVersions}
+              tooltip="Reload"
+              icon={'pi pi-refresh' + (loading ? 'pi-spin' : '')}
+              tooltipOptions={tooltipOptions}
             />
           </div>
         </Toolbar>
