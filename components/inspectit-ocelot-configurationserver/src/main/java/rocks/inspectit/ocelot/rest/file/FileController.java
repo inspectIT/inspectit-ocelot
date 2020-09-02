@@ -55,12 +55,24 @@ public class FileController extends FileBaseController {
 
             @ExampleProperty(mediaType = "text/plain", value = "This is the file content")}))
     @GetMapping(value = "files/**")
-    public Object readFile(HttpServletRequest request, @ApiParam("If true, the response body is not formatted as json and is instead the plain text" + " content of the file.") @RequestParam(defaultValue = "false") boolean raw) {
+    public Object readFile(HttpServletRequest request,
+                           @ApiParam("If true, the response body is not formatted as json and is instead the plain text" + " content of the file.")
+                           @RequestParam(defaultValue = "false")
+                                   boolean raw,
+                           @RequestParam(value = "version", required = false) String commitId) {
         String path = RequestUtil.getRequestSubPath(request);
-        Optional<String> contentOptional = fileManager.getWorkingDirectory().readConfigurationFile(path);
+
+        Optional<String> contentOptional;
+        if (commitId == null) {
+            contentOptional = fileManager.getWorkingDirectory().readConfigurationFile(path);
+        } else if (commitId.equals("live")) {
+            contentOptional = fileManager.getLiveRevision().readConfigurationFile(path);
+        } else {
+            contentOptional = fileManager.getCommitWithId(commitId).readConfigurationFile(path);
+        }
 
         if (!contentOptional.isPresent()) {
-            return ResponseEntity.notFound();
+            return null;
         }
 
         return contentOptional.map(content -> {

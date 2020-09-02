@@ -31,6 +31,9 @@ class DirectoryControllerTest {
     @Mock
     private RevisionAccess revisionAccess;
 
+    @Mock
+    private WorkingDirectoryAccessor accessor;
+
     @InjectMocks
     private DirectoryController controller;
 
@@ -39,45 +42,45 @@ class DirectoryControllerTest {
 
         @Test
         public void nullResult() {
-            when(fileManager.getWorkspaceRevision()).thenReturn(revisionAccess);
+            when(fileManager.getWorkingDirectory()).thenReturn(accessor);
             HttpServletRequest request = mock(HttpServletRequest.class);
             when(request.getAttribute(anyString())).thenReturn("/api/target", "/api/**");
-            when(revisionAccess.listConfigurationFiles(any())).thenReturn(Collections.emptyList());
+            when(accessor.listConfigurationFiles(any())).thenReturn(Collections.emptyList());
 
             Collection<FileInfo> result = controller.listContents(null, request);
 
-            verify(revisionAccess).listConfigurationFiles("target");
-            verifyNoMoreInteractions(revisionAccess);
+            verify(accessor).listConfigurationFiles("target");
+            verifyNoMoreInteractions(accessor);
             assertThat(result).isEmpty();
         }
 
         @Test
         public void emptyResult() {
-            when(fileManager.getWorkspaceRevision()).thenReturn(revisionAccess);
+            when(fileManager.getWorkingDirectory()).thenReturn(accessor);
             HttpServletRequest request = mock(HttpServletRequest.class);
             when(request.getAttribute(anyString())).thenReturn("/api/target", "/api/**");
-            when(revisionAccess.listConfigurationFiles("target")).thenReturn(Collections.emptyList());
+            when(accessor.listConfigurationFiles("target")).thenReturn(Collections.emptyList());
 
             Collection<FileInfo> result = controller.listContents(null, request);
 
-            verify(revisionAccess).listConfigurationFiles("target");
-            verifyNoMoreInteractions(revisionAccess);
+            verify(accessor).listConfigurationFiles("target");
+            verifyNoMoreInteractions(accessor);
             assertThat(result).isEmpty();
         }
 
         @Test
         public void validResponse() {
-            when(fileManager.getWorkspaceRevision()).thenReturn(revisionAccess);
+            when(fileManager.getWorkingDirectory()).thenReturn(accessor);
             HttpServletRequest request = mock(HttpServletRequest.class);
             when(request.getAttribute(anyString())).thenReturn("/api/target", "/api/**");
             FileInfo fileInfo = mock(FileInfo.class);
-            when(revisionAccess.listConfigurationFiles("target")).thenReturn(Collections.singletonList(fileInfo));
+            when(accessor.listConfigurationFiles("target")).thenReturn(Collections.singletonList(fileInfo));
 
             Collection<FileInfo> result = controller.listContents(null, request);
 
-            verify(fileManager).getWorkspaceRevision();
-            verify(revisionAccess).listConfigurationFiles("target");
-            verifyNoMoreInteractions(fileManager, revisionAccess);
+            verify(fileManager).getWorkingDirectory();
+            verify(accessor).listConfigurationFiles("target");
+            verifyNoMoreInteractions(fileManager, accessor);
             assertThat(result).containsExactly(fileInfo);
         }
 
@@ -111,7 +114,6 @@ class DirectoryControllerTest {
             verify(revisionAccess).listConfigurationFiles("target");
             verifyNoMoreInteractions(fileManager, revisionAccess);
             assertThat(result).containsExactly(fileInfo);
-
         }
     }
 
