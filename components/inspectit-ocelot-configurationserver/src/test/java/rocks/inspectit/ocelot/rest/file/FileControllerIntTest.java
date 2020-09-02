@@ -2,9 +2,12 @@ package rocks.inspectit.ocelot.rest.file;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.platform.engine.TestExecutionResult;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import rocks.inspectit.ocelot.IntegrationTestBase;
+import rocks.inspectit.ocelot.error.ApiError;
 import rocks.inspectit.ocelot.file.FileData;
 import rocks.inspectit.ocelot.file.FileInfo;
 import java.util.Optional;
@@ -48,11 +51,11 @@ public class FileControllerIntTest extends IntegrationTestBase {
                     .extracting(FileInfo::getName, FileInfo::getType, FileInfo::getChildren)
                     .contains(tuple("file.yml", FileInfo.Type.FILE, null));
 
-            ResponseEntity<FileData> result1 = authRest.getForEntity("/api/v1/files/file.yml?version=live/", FileData.class);
-
-            FileData resultBodyLive = result1.getBody();
+            ResponseEntity<Error> result1 = authRest.getForEntity("/api/v1/files/file.yml?version=live/",Error.class);
+            
+            String resultBodyLive = result1.getStatusCode().toString();
             assertThat(resultBodyLive).isNotNull();
-            assertThat(resultBodyLive.getContent()).isBlank();
+            assertThat(resultBodyLive).isEqualTo("500 INTERNAL_SERVER_ERROR");
         }
     }
 }
