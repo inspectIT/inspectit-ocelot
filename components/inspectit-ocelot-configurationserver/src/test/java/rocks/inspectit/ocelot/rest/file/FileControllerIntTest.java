@@ -31,7 +31,8 @@ public class FileControllerIntTest extends IntegrationTestBase {
             ResponseEntity<FileData> result2 = authRest.getForEntity("/api/v1/files/file.yml", FileData.class);
 
             FileData resultBody2 = result2.getBody();
-            assertThat(resultBody2.toString()).contains("content=");
+            assertThat(resultBody2).isNotNull();
+            assertThat(resultBody2.getContent()).isBlank();
         }
 
         @Test
@@ -47,10 +48,11 @@ public class FileControllerIntTest extends IntegrationTestBase {
                     .extracting(FileInfo::getName, FileInfo::getType, FileInfo::getChildren)
                     .contains(tuple("file.yml", FileInfo.Type.FILE, null));
 
-            ResponseEntity<Optional> result1 = authRest.getForEntity("/api/v1/files/file.yml?version=live/", Optional.class);
+            ResponseEntity<FileData> result1 = authRest.getForEntity("/api/v1/files/file.yml?version=live/", FileData.class);
 
-            Optional<String> resultBodyLive = result1.getBody();
-            assertThat(resultBodyLive.toString()).contains("status=INTERNAL_SERVER_ERROR");
+            FileData resultBodyLive = result1.getBody();
+            assertThat(resultBodyLive).isNotNull();
+            assertThat(resultBodyLive.getContent()).isBlank();
         }
     }
 }
