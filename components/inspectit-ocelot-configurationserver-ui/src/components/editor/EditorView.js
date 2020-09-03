@@ -40,11 +40,13 @@ const EditorView = ({
   const editorRef = useRef(null);
 
   return (
-    <div className="this p-grid p-dir-col p-nogutter">
+    <div className="this">
       <style jsx>{`
         .this {
           flex: 1;
-          flex-wrap: nowrap;
+          display: flex;
+          flex-direction: column;
+          overflow-y: hidden;
         }
         .selection-information {
           display: flex;
@@ -52,6 +54,13 @@ const EditorView = ({
           align-items: center;
           justify-content: center;
           color: #bbb;
+        }
+        .editor-menu {
+        }
+        .editor-content {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
         }
         .editor-container {
           position: relative;
@@ -72,16 +81,28 @@ const EditorView = ({
           z-index: 100;
           justify-content: center;
           align-items: center;
+          display: flex;
         }
         .editor-row {
           display: flex;
-          flex-grow: 1;
+          flex: 1 1 auto;
+          overflow: hidden;
+          position: relative;
         }
-        .sidebar {
+        .version-notice {
+          background-color: #ffcc80;
           display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0.5rem 1rem;
+          border-bottom: 1px solid #dddddd;
+        }
+        .version-notice i {
+          margin-right: 1rem;
+          color: #212121;
         }
       `}</style>
-      <div className="p-col-fixed">
+      <div className="editor-menu">
         <EditorToolbar
           enableButtons={enableButtons}
           canSave={canSave}
@@ -96,63 +117,55 @@ const EditorView = ({
           {children}
         </EditorToolbar>
       </div>
-      {showEditor && !showVisualConfigurationView && (
-        <div className="editor-row">
-          <div className="editor-container">
-            <AceEditor
-              editorRef={(editor) => (editorRef.current = editor)}
-              onCreate={onCreate}
-              mode="yaml"
-              theme="cobalt"
-              options={editorConfig}
-              value={value}
-              onChange={onChange}
-              history-view
-              canSave={canSave}
-              onSave={onSave}
-              readOnly={readOnly}
-              selectedVersion={selectedVersion}
-            />
-          </div>
-          <div className="sidebar">{sidebar}</div>
-        </div>
-      )}
-      {showEditor && showVisualConfigurationView && (
-        <div className="editor-row">
-          <div className="visual-editor-container">
-            <YamlParser yamlConfig={value} onUpdate={onChange}>
-              {(onUpdate, config) => (
-                <TreeTableEditor config={config} schema={schema} loading={loading} readOnly={readOnly} onUpdate={onUpdate} />
-              )}
-            </YamlParser>
-          </div>
-          <div className="sidebar"> {sidebar}</div>
-        </div>
-      )}
-      {!showEditor && (
-        <div className="editor-row">
-          <div className="editor-container">
-            {''}
-            <SelectionInformation hint={hint} /> {''}
-          </div>
-          <div className="sidebar">{sidebar} </div>
-        </div>
-      )}
-      {loading && (
-        <div className="loading-overlay">
-          <i className="pi pi-spin pi-spinner" style={{ fontSize: '2em' }}></i>
-        </div>
-      )}
-      <div>
-        {notificationText ? (
-          <div className="editor-row">
-            <div className="editor-container">
-              <Notificationbar text={notificationText} isError={isErrorNotification} icon={notificationIcon} />
+
+      <div className="editor-row">
+        <div className="editor-content">
+          {selectedVersion !== 0 && (
+            <div className="version-notice">
+              <i className="pi pi-info-circle" /> You are currently not working on the latest version. Modifications are not possible.
             </div>
-            <div className="sidebar">{sidebar} </div>
+          )}
+
+          {showEditor && !showVisualConfigurationView && (
+            <div className="editor-container">
+              <AceEditor
+                editorRef={(editor) => (editorRef.current = editor)}
+                onCreate={onCreate}
+                mode="yaml"
+                theme="cobalt"
+                options={editorConfig}
+                value={value}
+                onChange={onChange}
+                history-view
+                canSave={canSave}
+                onSave={onSave}
+                readOnly={readOnly}
+                selectedVersion={selectedVersion}
+              />
+            </div>
+          )}
+          {showEditor && showVisualConfigurationView && (
+            <div className="visual-editor-container">
+              <YamlParser yamlConfig={value} onUpdate={onChange}>
+                {(onUpdate, config) => (
+                  <TreeTableEditor config={config} schema={schema} loading={loading} readOnly={readOnly} onUpdate={onUpdate} />
+                )}
+              </YamlParser>
+            </div>
+          )}
+          {!showEditor && <SelectionInformation hint={hint} />}
+        </div>
+
+        {sidebar}
+
+        {loading && (
+          <div className="loading-overlay">
+            <i className="pi pi-spin pi-spinner" style={{ fontSize: '2em' }}></i>
           </div>
-        ) : null}
+        )}
       </div>
+
+      {notificationText ? <Notificationbar text={notificationText} isError={isErrorNotification} icon={notificationIcon} /> : null}
     </div>
   );
 };

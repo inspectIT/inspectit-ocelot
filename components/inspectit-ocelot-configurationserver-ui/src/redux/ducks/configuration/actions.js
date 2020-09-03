@@ -28,11 +28,12 @@ export const fetchVersions = () => {
  */
 export const fetchFiles = (id, newSelectionOnSuccess) => {
   let url;
-  if (id === null) {
-    url = '/directories/';
-  } else {
+  if (id) {
     url = '/directories?version=' + id;
+  } else {
+    url = '/directories/';
   }
+
   return (dispatch) => {
     dispatch({ type: types.FETCH_FILES_STARTED });
     axios
@@ -114,7 +115,7 @@ export const fetchSelectedFileWithId = (id) => {
  */
 export const selectFile = (selection, id) => {
   return (dispatch, getState) => {
-    if (!selection.startsWith('/')) {
+    if (selection && !selection.startsWith('/')) {
       selection = '/' + selection;
     }
 

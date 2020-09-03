@@ -18,7 +18,6 @@ const EditorToolbar = ({
   visualConfig,
   onVisualConfigChange,
   children,
-  selectedVersion,
 }) => (
   <div className="this">
     <style jsx>
@@ -48,19 +47,15 @@ const EditorToolbar = ({
           onClick={onVisualConfigChange}
         />
         {onRefresh && (
-          <Button
-            disabled={!enableButtons || isRefreshing || selectedVersion !== 0}
-            icon={'pi pi-refresh' + (isRefreshing ? ' pi-spin' : '')}
-            onClick={onRefresh}
-          />
+          <Button disabled={!enableButtons || isRefreshing} icon={'pi pi-refresh' + (isRefreshing ? ' pi-spin' : '')} onClick={onRefresh} />
         )}
         {!visualConfig && (
           <>
-            <Button disabled={!enableButtons || selectedVersion !== 0} icon="pi pi-question" onClick={onHelp} />
-            <Button disabled={!enableButtons || selectedVersion !== 0} icon="pi pi-search" onClick={onSearch} />
+            <Button disabled={!enableButtons} icon="pi pi-question" onClick={onHelp} />
+            <Button disabled={!enableButtons} icon="pi pi-search" onClick={onSearch} />
           </>
         )}
-        <Button disabled={!enableButtons || !canSave || selectedVersion !== 0} onClick={onSave} label="Save" icon="pi pi-save" />
+        <Button disabled={!enableButtons || !canSave} onClick={onSave} label="Save" icon="pi pi-save" />
       </div>
     </Toolbar>
   </div>

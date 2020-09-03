@@ -13,6 +13,7 @@ import FileTree from './FileTree';
 import { enableOcelotAutocompletion } from './OcelotAutocompleter';
 import HistoryView from './history/HistoryView';
 import SearchDialog from './dialogs/SearchDialog';
+import ConfigurationSidebar from './ConfigurationSidebar';
 
 /**
  * The header component of the editor view.
@@ -149,14 +150,26 @@ class ConfigurationView extends React.Component {
       schema,
       showVisualConfigurationView,
       toggleVisualConfigurationView,
-      readOnly,
       selectedVersion,
+      isLatestVersion,
+      canWrite,
     } = this.props;
     const showEditor = (selection || selectedDefaultConfigFile) && !isDirectory;
 
     const { path, name } = this.parsePath(selection, selectedDefaultConfigFile);
     const icon = 'pi-' + (isDirectory ? 'folder' : 'file');
     const showHeader = !!name;
+
+    const readOnly = !canWrite || !!selectedDefaultConfigFile || !isLatestVersion;
+
+    const sidebar = (
+      <ConfigurationSidebar
+        showHistory={this.state.showHistory}
+        showHistoryView={this.showHistoryView}
+        selectedVersion={selectedVersion}
+        selectedVersionChange={this.selectedVersionChange}
+      ></ConfigurationSidebar>
+    );
 
     return (
       <div className="this">
@@ -192,7 +205,7 @@ class ConfigurationView extends React.Component {
             showCreateFileDialog={this.showCreateFileDialog}
             showCreateDirectoryDialog={this.showCreateDirectoryDialog}
             showMoveDialog={this.showMoveDialog}
-            readOnly={selectedVersion === 0 ? readOnly : true}
+            readOnly={readOnly}
             selectedVersionChange={this.selectedVersionChange}
             showSearchDialog={this.showSearchDialog}
           />
@@ -202,7 +215,7 @@ class ConfigurationView extends React.Component {
             showCreateFileDialog={this.showCreateFileDialog}
             showCreateDirectoryDialog={this.showCreateDirectoryDialog}
             showMoveDialog={this.showMoveDialog}
-            readOnly={selectedVersion === 0 ? readOnly : true}
+            readOnly={readOnly}
             versionId={this.state.versionId}
           />
           <div className="details">Last refresh: {this.props.updateDate ? new Date(this.props.updateDate).toLocaleString() : '-'}</div>
@@ -222,27 +235,14 @@ class ConfigurationView extends React.Component {
           notificationIcon="pi-exclamation-triangle"
           notificationText={yamlError}
           loading={loading}
-          readOnly={selectedVersion === 0 ? readOnly || !!selectedDefaultConfigFile : true}
+          readOnly={readOnly}
           showVisualConfigurationView={showVisualConfigurationView}
           onToggleVisualConfigurationView={toggleVisualConfigurationView}
-          sidebar={
-            <HistoryView
-              showHistory={this.state.showHistory}
-              showHistoryView={this.showHistoryView}
-              selectedVersion={selectedVersion}
-              selectedVersionChange={this.selectedVersionChange}
-            ></HistoryView>
-          }
+          sidebar={sidebar}
           selectedVersion={selectedVersion}
         >
           {showHeader ? (
-            <EditorHeader
-              icon={icon}
-              path={path}
-              name={name}
-              isContentModified={isContentModified && selectedVersion === 0 ? true : false}
-              readOnly={selectedVersion === 0 ? readOnly || !!selectedDefaultConfigFile : true}
-            />
+            <EditorHeader icon={icon} path={path} name={name} isContentModified={isContentModified} readOnly={readOnly} />
           ) : null}
         </EditorView>
 
@@ -291,22 +291,25 @@ function mapStateToProps(state) {
     showVisualConfigurationView,
     selectedVersion,
   } = state.configuration;
+  const isLatestVersion = selectedVersion === 0;
   const unsavedFileContent = selection ? configurationSelectors.getSelectedFileUnsavedContents(state) : null;
-  const fileContent = unsavedFileContent !== null && selectedVersion === 0 ? unsavedFileContent : selectedFileContent;
+  const isContentModified = unsavedFileContent !== null && isLatestVersion;
+  const fileContent = isContentModified ? unsavedFileContent : selectedFileContent;
 
   return {
     updateDate,
     selection,
     isDirectory: configurationSelectors.isSelectionDirectory(state) || !!(selectedDefaultConfigFile && !fileContent),
-    isContentModified: unsavedFileContent !== null,
+    isContentModified,
     fileContent,
     yamlError: getYamlError(fileContent),
     loading: pendingRequests > 0,
     selectedDefaultConfigFile,
     schema,
     showVisualConfigurationView,
-    readOnly: !state.authentication.permissions.write,
+    canWrite: state.authentication.permissions.write,
     selectedVersion,
+    isLatestVersion,
   };
 }
 
