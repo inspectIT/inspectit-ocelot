@@ -38,19 +38,18 @@ const movePathIfRequired = (path, moveHistory) => {
 const configurationReducer = createReducer(initialState)({
   [types.FETCH_VERSIONS_STARTED]: (state) => {
     return {
-      ...state,
+      ...incrementPendingRequests(state),
     };
   },
   [types.FETCH_VERSIONS_FAILURE]: (state) => {
     return {
-      ...state,
-      versions: [],
+      ...decrementPendingRequests(state),
     };
   },
   [types.FETCH_VERSIONS_SUCCESS]: (state, action) => {
     const { versions } = action.payload;
     return {
-      ...state,
+      ...decrementPendingRequests(state),
       versions,
     };
   },
@@ -136,8 +135,9 @@ const configurationReducer = createReducer(initialState)({
   },
   [types.MOVE_FAILURE]: decrementPendingRequests,
   [types.SELECTED_FILE_CONTENTS_CHANGED]: (state, action) => {
-    const { selection, selectedVersion } = state;
-    if (selection && selectedVersion === 0) {
+    const { selection, selectedVersion, versions } = state;
+
+    if (selection && (selectedVersion === null || selectedVersion === versions[0].id)) {
       const { selectedFileContent, unsavedFileContents } = state;
       const { content } = action.payload;
       const newUnsavedFileContents = { ...unsavedFileContents };
@@ -155,11 +155,11 @@ const configurationReducer = createReducer(initialState)({
       return state;
     }
   },
-  [types.SELECTED_VERSION_CHANGED]: (state, action) => {
-    const { selectedVersion } = action.payload;
+  [types.SELECT_VERSION]: (state, action) => {
+    const { version } = action.payload;
     return {
       ...state,
-      selectedVersion,
+      selectedVersion: version,
     };
   },
   [types.FETCH_DEFAULT_CONFIG_STARTED]: incrementPendingRequests,

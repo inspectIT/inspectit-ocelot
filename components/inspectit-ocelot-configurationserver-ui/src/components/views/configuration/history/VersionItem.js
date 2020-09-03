@@ -67,6 +67,7 @@ const VersionItem = ({ item, isSelected, onClick, isLatest }) => {
             background-color: #007ad9;
             padding: 0 0.25rem;
             border-radius: 0.2rem;
+            font-size: .9rem;
           }
           .lower-line {
             font-size: 0.75rem;

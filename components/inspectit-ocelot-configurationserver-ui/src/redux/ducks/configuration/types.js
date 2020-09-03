@@ -1,4 +1,5 @@
 export const SELECT_FILE = 'configuration/SELECT_FILE';
+export const SELECT_VERSION = 'configuration/SELECT_VERSION';
 export const RESET = 'configuration/RESET';
 
 export const FETCH_VERSIONS_STARTED = 'configuration/FETCH_VERSIONS_STARTED';
@@ -30,8 +31,6 @@ export const FETCH_FILE_FAILURE = 'configuration/FETCH_FILE_FAILURE';
 export const FETCH_FILE_SUCCESS = 'configuration/FETCH_FILE_SUCCESS';
 
 export const SELECTED_FILE_CONTENTS_CHANGED = 'configuration/SELECTED_FILE_CONTENTS_CHANGED';
-
-export const SELECTED_VERSION_CHANGED = 'configuration/SELECTED_VERSION_CHANGED';
 
 export const FETCH_DEFAULT_CONFIG_STARTED = 'configuration/FETCH_DEFAULT_CONFIG_STARTED';
 export const FETCH_DEFAULT_CONFIG_FAILURE = 'configuration/FETCH_DEFAULT_CONFIG_FAILURE';

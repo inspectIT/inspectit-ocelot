@@ -23,21 +23,21 @@ export const fetchVersions = () => {
 
 /**
  * Fetches all existing configuration files and directories.
+ *
  * @param {string} newSelectionOnSuccess - If not empty, this path will be selected on successful fetch.
- * @param  {string} id - Fetch all with this id.
  */
-export const fetchFiles = (id, newSelectionOnSuccess) => {
-  let url;
-  if (id) {
-    url = '/directories?version=' + id;
-  } else {
-    url = '/directories/';
-  }
+export const fetchFiles = (newSelectionOnSuccess) => {
+  return (dispatch, getState) => {
+    const { selectedVersion } = getState().configuration;
 
-  return (dispatch) => {
+    const params = {};
+    if (selectedVersion) {
+      params.version = selectedVersion;
+    }
+
     dispatch({ type: types.FETCH_FILES_STARTED });
     axios
-      .get(url)
+      .get('/directories', { params })
       .then((res) => {
         const files = res.data;
         sortFiles(files);
@@ -80,22 +80,26 @@ const sortFiles = (allFiles) => {
 /**
  * Fetch the content of the selected file from version with selected id.
  */
-export const fetchSelectedFileWithId = (id) => {
+export const fetchSelectedFile = (id) => {
   return (dispatch, getState) => {
     const { selection } = getState().configuration;
 
-    let url = '/files' + selection;
-    if (id) {
-      url = '/files' + selection + '?version=' + id;
-    }
-
     if (selection) {
-      const file = configurationUtils.getFile(getState().configuration.files, selection);
+      const { selectedVersion, files } = getState().configuration;
+
+      const url = '/files' + selection;
+      const file = configurationUtils.getFile(files, selection);
       const isDirectory = configurationUtils.isDirectory(file);
+
+      const params = {};
+      if (selectedVersion) {
+        params.version = selectedVersion;
+      }
+
       if (!isDirectory) {
         dispatch({ type: types.FETCH_FILE_STARTED });
         axios
-          .get(url)
+          .get(url, { params })
           .then((res) => {
             const fileContent = res.data.content;
             dispatch({ type: types.FETCH_FILE_SUCCESS, payload: { fileContent } });
@@ -135,7 +139,7 @@ export const selectFile = (selection, id) => {
           selection,
         },
       });
-      dispatch(fetchSelectedFileWithId(id));
+      dispatch(fetchSelectedFile());
     }
   };
 };
@@ -170,7 +174,7 @@ export const deleteSelection = (fetchFilesOnSuccess, selectedFile = null) => {
       .then(() => {
         dispatch({ type: types.DELETE_SELECTION_SUCCESS });
         if (fetchFilesOnSuccess) {
-          dispatch(fetchFiles(null));
+          dispatch(fetchFiles());
           dispatch(fetchVersions());
         }
       })
@@ -204,14 +208,16 @@ export const writeFile = (file, content, fetchFilesOnSuccess, selectFileOnSucces
           file,
           content,
         };
+
         dispatch({ type: types.WRITE_FILE_SUCCESS, payload });
-        dispatch(fetchFiles(null));
+        dispatch(fetchFiles());
         dispatch(fetchVersions());
+
         if (fetchFilesOnSuccess) {
           if (selectFileOnSuccess) {
             dispatch('/' + filePath);
           } else {
-            dispatch(fetchFiles(null));
+            dispatch(fetchFiles());
           }
         }
         dispatch(notificationActions.showSuccessMessage('Configuration Saved', 'The configuration has been successfully saved.'));
@@ -242,12 +248,12 @@ export const createDirectory = (path, fetchFilesOnSuccess, selectFolderOnSuccess
         dispatch({ type: types.CREATE_DIRECTORY_SUCCESS });
         if (fetchFilesOnSuccess) {
           if (selectFolderOnSuccess) {
-            dispatch(fetchFiles(null, '/' + dirPath));
+            dispatch(fetchFiles('/' + dirPath));
           } else {
-            dispatch(fetchFiles(null));
+            dispatch(fetchFiles());
           }
         }
-        dispatch(fetchSelectedFileWithId(null));
+        dispatch(fetchSelectedFile());
       })
       .catch(() => {
         dispatch({ type: types.CREATE_DIRECTORY_FAILURE });
@@ -273,7 +279,7 @@ export const move = (path, targetPath, fetchFilesOnSuccess) => {
           payload,
         });
         if (fetchFilesOnSuccess) {
-          dispatch(fetchFiles(null));
+          dispatch(fetchFiles());
           dispatch(fetchVersions());
         }
       })
@@ -293,12 +299,24 @@ export const selectedFileContentsChanged = (content) => ({
   },
 });
 
-export const selectedVersionChanged = (selectedVersion) => ({
-  type: types.SELECTED_VERSION_CHANGED,
-  payload: {
-    selectedVersion,
-  },
-});
+/**
+ * Selects the version with the given id.
+ */
+export const selectVersion = (version) => {
+  return (dispatch) => {
+    // chaning the selected version
+    dispatch({
+      type: types.SELECT_VERSION,
+      payload: {
+        version,
+      },
+    });
+
+    // fetching the content of the selected version
+    dispatch(fetchFiles());
+    dispatch(fetchSelectedFile());
+  };
+};
 
 /**
  * Fetches the default configuration of the Ocelot agents.

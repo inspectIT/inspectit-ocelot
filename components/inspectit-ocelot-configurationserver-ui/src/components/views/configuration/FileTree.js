@@ -22,7 +22,7 @@ class FileTree extends React.Component {
    */
   componentDidMount = () => {
     const { defaultConfig } = this.props;
-    this.props.fetchFiles(null);
+    this.props.fetchFiles();
 
     if (Object.entries(defaultConfig).length === 0) {
       this.props.fetchDefaultConfig();

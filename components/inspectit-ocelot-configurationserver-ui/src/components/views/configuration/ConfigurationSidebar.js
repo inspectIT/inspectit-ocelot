@@ -1,7 +1,11 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import HistoryView from './history/HistoryView';
 
-const ConfigurationSidebar = ({ selectedVersion, selectedVersionChange, showHistory, showHistoryView }) => {
+/**
+ * The sidebar of the configuration view.
+ */
+const ConfigurationSidebar = ({ showHistory, toggleHistoryView }) => {
   return (
     <>
       <style jsx>
@@ -34,12 +38,10 @@ const ConfigurationSidebar = ({ selectedVersion, selectedVersionChange, showHist
       </style>
 
       <div className="sidebar">
-        <div className="content-container">
-          {showHistory && <HistoryView selectedVersion={selectedVersion} selectedVersionChange={selectedVersionChange} />}
-        </div>
+        <div className="content-container">{showHistory && <HistoryView />}</div>
 
         <div>
-          <button className={'vert-button p-button p-togglebutton' + (showHistory ? 'p-highlight' : '')} onClick={showHistoryView}>
+          <button className={'vert-button p-button p-togglebutton' + (showHistory ? 'p-highlight' : '')} onClick={toggleHistoryView}>
             <i className={'pi pi-chevron-' + (showHistory ? 'right' : 'left')} />
             <span>Versioning</span>
           </button>
@@ -47,6 +49,13 @@ const ConfigurationSidebar = ({ selectedVersion, selectedVersionChange, showHist
       </div>
     </>
   );
+};
+
+ConfigurationSidebar.propTypes = {
+  /** whether the history view should be shown */
+  showHistory: PropTypes.bool,
+  /** function when the user clicks on the history view button to toggle its state */
+  toggleHistoryView: PropTypes.func,
 };
 
 export default ConfigurationSidebar;

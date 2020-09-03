@@ -11,7 +11,6 @@ import MoveDialog from './dialogs/MoveDialog';
 import FileToolbar from './FileToolbar';
 import FileTree from './FileTree';
 import { enableOcelotAutocompletion } from './OcelotAutocompleter';
-import HistoryView from './history/HistoryView';
 import SearchDialog from './dialogs/SearchDialog';
 import ConfigurationSidebar from './ConfigurationSidebar';
 
@@ -90,7 +89,7 @@ class ConfigurationView extends React.Component {
   };
 
   onChange = (value) => {
-    if (!this.props.loading) {
+    if (!this.props.loading && this.props.isLatestVersion) {
       this.props.selectedFileContentsChanged(value);
     }
   };
@@ -115,16 +114,7 @@ class ConfigurationView extends React.Component {
 
   hideMoveDialog = () => this.setState({ isMoveDialogShown: false, filePath: null });
 
-  selectedVersionChange = (versionIndex, id) => {
-    const { selection } = this.props;
-    this.setState({
-      versionId: id,
-    });
-    this.props.selectFile(selection, id);
-    this.props.selectedVersionChanged(versionIndex);
-  };
-
-  showHistoryView = () => {
+  toggleHistoryView = () => {
     this.setState({
       showHistory: !this.state.showHistory,
     });
@@ -150,7 +140,6 @@ class ConfigurationView extends React.Component {
       schema,
       showVisualConfigurationView,
       toggleVisualConfigurationView,
-      selectedVersion,
       isLatestVersion,
       canWrite,
     } = this.props;
@@ -165,9 +154,7 @@ class ConfigurationView extends React.Component {
     const sidebar = (
       <ConfigurationSidebar
         showHistory={this.state.showHistory}
-        showHistoryView={this.showHistoryView}
-        selectedVersion={selectedVersion}
-        selectedVersionChange={this.selectedVersionChange}
+        toggleHistoryView={this.toggleHistoryView}
       ></ConfigurationSidebar>
     );
 
@@ -201,11 +188,11 @@ class ConfigurationView extends React.Component {
         `}</style>
         <div className="treeContainer">
           <FileToolbar
+            readOnly={readOnly}
             showDeleteFileDialog={this.showDeleteFileDialog}
             showCreateFileDialog={this.showCreateFileDialog}
             showCreateDirectoryDialog={this.showCreateDirectoryDialog}
             showMoveDialog={this.showMoveDialog}
-            readOnly={readOnly}
             selectedVersionChange={this.selectedVersionChange}
             showSearchDialog={this.showSearchDialog}
           />
@@ -239,7 +226,6 @@ class ConfigurationView extends React.Component {
           showVisualConfigurationView={showVisualConfigurationView}
           onToggleVisualConfigurationView={toggleVisualConfigurationView}
           sidebar={sidebar}
-          selectedVersion={selectedVersion}
         >
           {showHeader ? (
             <EditorHeader icon={icon} path={path} name={name} isContentModified={isContentModified} readOnly={readOnly} />
@@ -290,8 +276,9 @@ function mapStateToProps(state) {
     schema,
     showVisualConfigurationView,
     selectedVersion,
+    versions
   } = state.configuration;
-  const isLatestVersion = selectedVersion === 0;
+  const isLatestVersion = selectedVersion === null || selectedVersion === versions[0].id;
   const unsavedFileContent = selection ? configurationSelectors.getSelectedFileUnsavedContents(state) : null;
   const isContentModified = unsavedFileContent !== null && isLatestVersion;
   const fileContent = isContentModified ? unsavedFileContent : selectedFileContent;
@@ -308,7 +295,6 @@ function mapStateToProps(state) {
     schema,
     showVisualConfigurationView,
     canWrite: state.authentication.permissions.write,
-    selectedVersion,
     isLatestVersion,
   };
 }
@@ -317,7 +303,7 @@ const mapDispatchToProps = {
   showWarning: notificationActions.showWarningMessage,
   writeFile: configurationActions.writeFile,
   selectedFileContentsChanged: configurationActions.selectedFileContentsChanged,
-  selectedVersionChanged: configurationActions.selectedVersionChanged,
+  selectVersion: configurationActions.selectVersion,
   toggleVisualConfigurationView: configurationActions.toggleVisualConfigurationView,
   selectFile: configurationActions.selectFile,
   fetchVersions: configurationActions.fetchVersions,

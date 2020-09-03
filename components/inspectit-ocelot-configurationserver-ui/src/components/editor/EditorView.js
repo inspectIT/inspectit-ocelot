@@ -1,11 +1,13 @@
 import dynamic from 'next/dynamic';
 import PropTypes from 'prop-types';
 import React, { useRef } from 'react';
+import {useSelector} from 'react-redux';
 import editorConfig from '../../data/yaml-editor-config.json';
 import EditorToolbar from './EditorToolbar';
 import Notificationbar from './Notificationbar';
 import YamlParser from './YamlParser';
 import SelectionInformation from './SelectionInformation';
+import {configurationSelectors} from '../../redux/ducks/configuration';
 
 const AceEditor = dynamic(() => import('./AceEditor'), { ssr: false });
 const TreeTableEditor = dynamic(() => import('./TreeTableEditor'), { ssr: false });
@@ -35,9 +37,11 @@ const EditorView = ({
   showVisualConfigurationView,
   onToggleVisualConfigurationView,
   sidebar,
-  selectedVersion,
 }) => {
   const editorRef = useRef(null);
+
+  // global variables
+  const isLatest = useSelector(configurationSelectors.isLatestVersion);
 
   return (
     <div className="this">
@@ -120,7 +124,7 @@ const EditorView = ({
 
       <div className="editor-row">
         <div className="editor-content">
-          {selectedVersion !== 0 && (
+          {!isLatest && (
             <div className="version-notice">
               <i className="pi pi-info-circle" /> You are currently not working on the latest version. Modifications are not possible.
             </div>
@@ -140,7 +144,6 @@ const EditorView = ({
                 canSave={canSave}
                 onSave={onSave}
                 readOnly={readOnly}
-                selectedVersion={selectedVersion}
               />
             </div>
           )}

@@ -5,27 +5,37 @@ import { DEFAULT_CONFIG_TREE_KEY } from '../../../data/constants';
 
 const configurationSelector = (state) => state.configuration;
 
+const _isLatestVersion = (versions, selectedVersion) => {
+  return selectedVersion === null || versions.length === 0 || selectedVersion === versions[0].id;
+};
+
+export const isLatestVersion = createSelector(configurationSelector, (configuration) => {
+  const { versions, selectedVersion } = configuration;
+
+  return _isLatestVersion(versions, selectedVersion);
+});
+
 /**
  * Recoursivly building a tree representation based on the given file objects.
  *
  * @param {*} parentKey the key (absolute path) of the node's parent
  * @param {*} node the current node (file)
  */
-const _asTreeNode = (parentKey, node, unsavedFileContents, selectedVersion) => {
+const _asTreeNode = (parentKey, node, unsavedFileContents, isLatest) => {
   const { type, name } = node;
   const key = parentKey + name;
 
   if (type === 'directory') {
     const hasUnsavedChanges = Object.keys(unsavedFileContents).find((path) => path.startsWith(key + '/'));
-    const labelValue = name + (hasUnsavedChanges && selectedVersion === 0 ? ' *' : '');
+    const labelValue = name + (hasUnsavedChanges && isLatest ? ' *' : '');
     return {
       key,
       label: labelValue,
       icon: 'pi pi-fw pi-folder',
-      children: map(node.children, (child) => _asTreeNode(key + '/', child, unsavedFileContents, selectedVersion)),
+      children: map(node.children, (child) => _asTreeNode(key + '/', child, unsavedFileContents, isLatest)),
     };
   } else {
-    const labelValue = name + (key in unsavedFileContents && selectedVersion === 0 ? ' *' : '');
+    const labelValue = name + (key in unsavedFileContents && isLatest ? ' *' : '');
     return {
       key,
       label: labelValue,
@@ -38,9 +48,11 @@ const _asTreeNode = (parentKey, node, unsavedFileContents, selectedVersion) => {
  * Returns the loaded configuration files and directories in a tree structure used by the FileTree component.
  */
 export const getFileTree = createSelector(configurationSelector, (configuration) => {
-  const { files, unsavedFileContents, selectedVersion } = configuration;
+  const { files, unsavedFileContents, versions, selectedVersion } = configuration;
 
-  const fileTree = map(files, (file) => _asTreeNode('/', file, unsavedFileContents, selectedVersion));
+  const isLatest = _isLatestVersion(versions, selectedVersion);
+
+  const fileTree = map(files, (file) => _asTreeNode('/', file, unsavedFileContents, isLatest));
   return fileTree;
 });
 
