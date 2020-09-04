@@ -56,7 +56,7 @@ const configuration = {
   /** Specifies the selected git version. The latest version always has the number 0. */
   selectedVersion: null,
   /** Whether the history view should be shown */
-  showHistoryView: false
+  showHistoryView: false,
 };
 
 const notification = {

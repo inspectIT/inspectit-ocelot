@@ -1,13 +1,13 @@
 import dynamic from 'next/dynamic';
 import PropTypes from 'prop-types';
 import React, { useRef } from 'react';
-import {useSelector} from 'react-redux';
+import { useSelector } from 'react-redux';
 import editorConfig from '../../data/yaml-editor-config.json';
 import EditorToolbar from './EditorToolbar';
 import Notificationbar from './Notificationbar';
 import YamlParser from './YamlParser';
 import SelectionInformation from './SelectionInformation';
-import {configurationSelectors} from '../../redux/ducks/configuration';
+import { configurationSelectors } from '../../redux/ducks/configuration';
 
 const AceEditor = dynamic(() => import('./AceEditor'), { ssr: false });
 const TreeTableEditor = dynamic(() => import('./TreeTableEditor'), { ssr: false });
@@ -126,7 +126,8 @@ const EditorView = ({
         <div className="editor-content">
           {!isLatest && (
             <div className="version-notice">
-              <i className="pi pi-info-circle" /> You are currently not working on the latest workspace version. Modifications are not possible.
+              <i className="pi pi-info-circle" /> You are currently not working on the latest workspace version. Modifications are not
+              possible.
             </div>
           )}
 

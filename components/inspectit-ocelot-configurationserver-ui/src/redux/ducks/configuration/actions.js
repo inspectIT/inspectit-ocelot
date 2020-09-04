@@ -80,7 +80,7 @@ const sortFiles = (allFiles) => {
 /**
  * Fetch the content of the selected file from version with selected id.
  */
-export const fetchSelectedFile = (id) => {
+export const fetchSelectedFile = () => {
   return (dispatch, getState) => {
     const { selection } = getState().configuration;
 
@@ -117,7 +117,7 @@ export const fetchSelectedFile = (id) => {
  *
  * @param {string} selection - absolute path of the selected file (e.g. /configs/prod/interfaces.yml)
  */
-export const selectFile = (selection, id) => {
+export const selectFile = (selection) => {
   return (dispatch, getState) => {
     if (selection && !selection.startsWith('/')) {
       selection = '/' + selection;

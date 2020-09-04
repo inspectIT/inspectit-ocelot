@@ -7,7 +7,14 @@ import { Button } from 'primereact/button';
 /**
  * The toolbar used in the configuration view's file tree.
  */
-const FileToolbar = ({ readOnly, showCreateFileDialog, showCreateDirectoryDialog, showMoveDialog, showDeleteFileDialog, showSearchDialog }) => {
+const FileToolbar = ({
+  readOnly,
+  showCreateFileDialog,
+  showCreateDirectoryDialog,
+  showMoveDialog,
+  showDeleteFileDialog,
+  showSearchDialog,
+}) => {
   const dispatch = useDispatch();
 
   // global state variables
@@ -79,7 +86,12 @@ const FileToolbar = ({ readOnly, showCreateFileDialog, showCreateDirectoryDialog
             icon={'pi pi-search'}
             tooltipOptions={tooltipOptions}
           />
-          <Button onClick={reloadFiles} tooltip="Reload" icon={'pi pi-refresh' + (loading ? 'pi-spin' : '')} tooltipOptions={tooltipOptions} />
+          <Button
+            onClick={reloadFiles}
+            tooltip="Reload"
+            icon={'pi pi-refresh' + (loading ? 'pi-spin' : '')}
+            tooltipOptions={tooltipOptions}
+          />
         </div>
       </Toolbar>
     </div>

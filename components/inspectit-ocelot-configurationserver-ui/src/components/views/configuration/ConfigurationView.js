@@ -59,7 +59,6 @@ class ConfigurationView extends React.Component {
     isCreateDirectoryDialogShown: false,
     isMoveDialogShown: false,
     filePath: null,
-    versionId: null,
     isSearchDialogShown: false,
   };
 
@@ -151,9 +150,7 @@ class ConfigurationView extends React.Component {
 
     const readOnly = !canWrite || !!selectedDefaultConfigFile || !isLatestVersion;
 
-    const sidebar = (
-      <ConfigurationSidebar />
-    );
+    const sidebar = <ConfigurationSidebar />;
 
     return (
       <div className="this">
@@ -200,7 +197,6 @@ class ConfigurationView extends React.Component {
             showCreateDirectoryDialog={this.showCreateDirectoryDialog}
             showMoveDialog={this.showMoveDialog}
             readOnly={readOnly}
-            versionId={this.state.versionId}
           />
           <div className="details">Last refresh: {this.props.updateDate ? new Date(this.props.updateDate).toLocaleString() : '-'}</div>
         </div>
@@ -293,7 +289,7 @@ function mapStateToProps(state) {
     showVisualConfigurationView,
     canWrite: state.authentication.permissions.write,
     isLatestVersion,
-    selectedVersion
+    selectedVersion,
   };
 }
 

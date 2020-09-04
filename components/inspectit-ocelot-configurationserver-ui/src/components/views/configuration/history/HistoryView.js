@@ -24,7 +24,7 @@ const HistoryView = () => {
   };
 
   const createVersionItem = (item, index) => {
-    const {id, author, date} = item;
+    const { id, author, date } = item;
     const isLatest = index === 0;
     const isSelected = currentVersion === item.id || (currentVersion === null && isLatest);
     return (
@@ -65,7 +65,12 @@ const HistoryView = () => {
 
       <div className="items">
         <div className="branch">Live</div>
-        <VersionItem versionName="Current Live" isSelected={currentVersion === 'live'} onClick={() => selectVersion('live')} isLatest={false} />
+        <VersionItem
+          versionName="Current Live"
+          isSelected={currentVersion === 'live'}
+          onClick={() => selectVersion('live')}
+          isLatest={false}
+        />
 
         <div className="branch">Workspace</div>
 
