@@ -302,7 +302,7 @@ export const selectedFileContentsChanged = (content) => ({
 /**
  * Selects the version with the given id.
  */
-export const selectVersion = (version) => {
+export const selectVersion = (version, reloadFiles = true) => {
   return (dispatch) => {
     // chaning the selected version
     dispatch({
@@ -312,9 +312,11 @@ export const selectVersion = (version) => {
       },
     });
 
-    // fetching the content of the selected version
-    dispatch(fetchFiles());
-    dispatch(fetchSelectedFile());
+    if (reloadFiles) {
+      // fetching the content of the selected version
+      dispatch(fetchFiles());
+      dispatch(fetchSelectedFile());
+    }
   };
 };
 

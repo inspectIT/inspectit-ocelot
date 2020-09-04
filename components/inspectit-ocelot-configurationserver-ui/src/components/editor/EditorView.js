@@ -126,7 +126,7 @@ const EditorView = ({
         <div className="editor-content">
           {!isLatest && (
             <div className="version-notice">
-              <i className="pi pi-info-circle" /> You are currently not working on the latest version. Modifications are not possible.
+              <i className="pi pi-info-circle" /> You are currently not working on the latest workspace version. Modifications are not possible.
             </div>
           )}
 

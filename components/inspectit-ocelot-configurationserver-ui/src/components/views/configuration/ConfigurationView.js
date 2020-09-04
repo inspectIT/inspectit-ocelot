@@ -124,7 +124,14 @@ class ConfigurationView extends React.Component {
 
   hideSearchDialog = () => this.setState({ isSearchDialogShown: false });
 
-  openFile = (filename) => {
+  /**
+   * Opens the specified file in the specified version. The version is only changed if it differs from the current one.
+   * If no version is specified, the latest version will be selected.
+   */
+  openFile = (filename, versionId = null) => {
+    if (this.props.selectedVersion != versionId) {
+      this.props.selectVersion(versionId, false);
+    }
     this.props.selectFile(filename);
   };
 
@@ -152,10 +159,7 @@ class ConfigurationView extends React.Component {
     const readOnly = !canWrite || !!selectedDefaultConfigFile || !isLatestVersion;
 
     const sidebar = (
-      <ConfigurationSidebar
-        showHistory={this.state.showHistory}
-        toggleHistoryView={this.toggleHistoryView}
-      ></ConfigurationSidebar>
+      <ConfigurationSidebar showHistory={this.state.showHistory} toggleHistoryView={this.toggleHistoryView}></ConfigurationSidebar>
     );
 
     return (
@@ -276,7 +280,7 @@ function mapStateToProps(state) {
     schema,
     showVisualConfigurationView,
     selectedVersion,
-    versions
+    versions,
   } = state.configuration;
   const isLatestVersion = selectedVersion === null || selectedVersion === versions[0].id;
   const unsavedFileContent = selection ? configurationSelectors.getSelectedFileUnsavedContents(state) : null;
@@ -296,6 +300,7 @@ function mapStateToProps(state) {
     showVisualConfigurationView,
     canWrite: state.authentication.permissions.write,
     isLatestVersion,
+    selectedVersion
   };
 }
 

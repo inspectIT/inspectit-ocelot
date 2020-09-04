@@ -7,15 +7,12 @@ import { RadioButton } from 'primereact/radiobutton';
 /**
  * Single item representing a version in the version history panel.
  */
-const VersionItem = ({ item, isSelected, onClick, isLatest }) => {
+const VersionItem = ({ isSelected, onClick, isLatest, versionName, author, timestamp }) => {
   const classes = classnames('item', {
     selected: isSelected,
-    latest: isLatest
+    latest: isLatest,
   });
 
-  const { id, author, date: timestamp } = item;
-
-  const shortId = id.substring(0, 6);
   const modDate = dateformat(timestamp * 1000, 'yyyy-mm-dd');
   const modTime = dateformat(timestamp * 1000, 'HH:MM');
 
@@ -67,7 +64,7 @@ const VersionItem = ({ item, isSelected, onClick, isLatest }) => {
             background-color: #007ad9;
             padding: 0 0.25rem;
             border-radius: 0.2rem;
-            font-size: .9rem;
+            font-size: 0.9rem;
           }
           .lower-line {
             font-size: 0.75rem;
@@ -83,13 +80,15 @@ const VersionItem = ({ item, isSelected, onClick, isLatest }) => {
         <div className="details">
           <div className="upper-line">
             <div className="version">
-              <span className="version-id">{shortId}</span> {isLatest && <span className="latest-marker">&lt;Latest&gt;</span>}
+              <span className="version-id">{versionName}</span> {isLatest && <span className="latest-marker">&lt;Latest&gt;</span>}
             </div>
-            <div className="author">{author}</div>
+            {author && <div className="author">{author}</div>}
           </div>
-          <div className="lower-line">
-            <span>authored</span> {modDate} @ {modTime}
-          </div>
+          {timestamp && (
+            <div className="lower-line">
+              <span>authored</span> {modDate} @ {modTime}
+            </div>
+          )}
         </div>
       </div>
     </>
@@ -104,7 +103,7 @@ VersionItem.propTypes = {
   /** callback when on the element is clicked */
   onClick: PropTypes.func,
   /** whether this version is the latest version */
-  isLatest: PropTypes.bool
+  isLatest: PropTypes.bool,
 };
 
 export default VersionItem;
