@@ -82,24 +82,21 @@ const sortFiles = (allFiles) => {
  */
 export const fetchSelectedFile = () => {
   return (dispatch, getState) => {
-    const { selection } = getState().configuration;
+    const { selection, files, selectedVersion } = getState().configuration;
 
     if (selection) {
-      const { selectedVersion, files } = getState().configuration;
-
-      const url = '/files' + selection;
       const file = configurationUtils.getFile(files, selection);
       const isDirectory = configurationUtils.isDirectory(file);
 
-      const params = {};
-      if (selectedVersion) {
-        params.version = selectedVersion;
-      }
-
       if (!isDirectory) {
+        const params = {};
+        if (selectedVersion) {
+          params.version = selectedVersion;
+        }
+
         dispatch({ type: types.FETCH_FILE_STARTED });
         axios
-          .get(url, { params })
+          .get('/files' + selection, { params })
           .then((res) => {
             const fileContent = res.data.content;
             dispatch({ type: types.FETCH_FILE_SUCCESS, payload: { fileContent } });

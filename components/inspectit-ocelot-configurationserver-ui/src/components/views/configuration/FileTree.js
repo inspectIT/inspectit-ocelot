@@ -185,8 +185,6 @@ class FileTree extends React.Component {
 
 function mapStateToProps(state) {
   const { pendingRequests, selection, defaultConfig, selectedDefaultConfigFile } = state.configuration;
-  // console.log("test 1");
-  // console.log(state)
   return {
     files: configurationSelectors.getFileTree(state),
     loading: pendingRequests > 0,

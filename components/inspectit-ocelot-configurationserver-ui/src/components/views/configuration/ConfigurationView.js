@@ -150,8 +150,6 @@ class ConfigurationView extends React.Component {
 
     const readOnly = !canWrite || !!selectedDefaultConfigFile || !isLatestVersion;
 
-    const sidebar = <ConfigurationSidebar />;
-
     return (
       <div className="this">
         <style jsx>{`
@@ -218,7 +216,7 @@ class ConfigurationView extends React.Component {
           readOnly={readOnly}
           showVisualConfigurationView={showVisualConfigurationView}
           onToggleVisualConfigurationView={toggleVisualConfigurationView}
-          sidebar={sidebar}
+          sidebar={<ConfigurationSidebar />}
         >
           {showHeader ? (
             <EditorHeader icon={icon} path={path} name={name} isContentModified={isContentModified} readOnly={readOnly} />
