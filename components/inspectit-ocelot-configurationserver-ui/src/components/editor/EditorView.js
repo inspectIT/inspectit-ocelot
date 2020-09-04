@@ -1,11 +1,13 @@
 import dynamic from 'next/dynamic';
 import PropTypes from 'prop-types';
 import React, { useRef } from 'react';
+import { useSelector } from 'react-redux';
 import editorConfig from '../../data/yaml-editor-config.json';
 import EditorToolbar from './EditorToolbar';
 import Notificationbar from './Notificationbar';
 import YamlParser from './YamlParser';
 import SelectionInformation from './SelectionInformation';
+import { configurationSelectors } from '../../redux/ducks/configuration';
 
 const AceEditor = dynamic(() => import('./AceEditor'), { ssr: false });
 const TreeTableEditor = dynamic(() => import('./TreeTableEditor'), { ssr: false });
@@ -34,16 +36,21 @@ const EditorView = ({
   readOnly,
   showVisualConfigurationView,
   onToggleVisualConfigurationView,
+  sidebar,
 }) => {
-  // refs
   const editorRef = useRef(null);
 
+  // global variables
+  const isLatest = useSelector(configurationSelectors.isLatestVersion);
+
   return (
-    <div className="this p-grid p-dir-col p-nogutter">
+    <div className="this">
       <style jsx>{`
         .this {
           flex: 1;
-          flex-wrap: nowrap;
+          display: flex;
+          flex-direction: column;
+          overflow-y: hidden;
         }
         .selection-information {
           display: flex;
@@ -52,11 +59,20 @@ const EditorView = ({
           justify-content: center;
           color: #bbb;
         }
+        .editor-menu {
+        }
+        .editor-content {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+        }
         .editor-container {
           position: relative;
+          flex-grow: 1;
         }
         .visual-editor-container {
-          display: flex;
+          position: relative;
+          flex-grow: 1;
         }
         .loading-overlay {
           position: absolute;
@@ -67,12 +83,30 @@ const EditorView = ({
           background-color: #00000080;
           color: white;
           z-index: 100;
-          display: flex;
           justify-content: center;
           align-items: center;
+          display: flex;
+        }
+        .editor-row {
+          display: flex;
+          flex: 1 1 auto;
+          overflow: hidden;
+          position: relative;
+        }
+        .version-notice {
+          background-color: #ffcc80;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0.5rem 1rem;
+          border-bottom: 1px solid #dddddd;
+        }
+        .version-notice i {
+          margin-right: 1rem;
+          color: #212121;
         }
       `}</style>
-      <div className="p-col-fixed">
+      <div className="editor-menu">
         <EditorToolbar
           enableButtons={enableButtons}
           canSave={canSave}
@@ -87,42 +121,55 @@ const EditorView = ({
           {children}
         </EditorToolbar>
       </div>
-      {showEditor && !showVisualConfigurationView && (
-        <div className="p-col editor-container">
-          <AceEditor
-            editorRef={(editor) => (editorRef.current = editor)}
-            onCreate={onCreate}
-            mode="yaml"
-            theme="cobalt"
-            options={editorConfig}
-            value={value}
-            onChange={onChange}
-            canSave={canSave}
-            onSave={onSave}
-            readOnly={readOnly}
-          />
+
+      <div className="editor-row">
+        <div className="editor-content">
+          {!isLatest && (
+            <div className="version-notice">
+              <i className="pi pi-info-circle" /> You are currently not working on the latest workspace version. Modifications are not
+              possible.
+            </div>
+          )}
+
+          {showEditor && !showVisualConfigurationView && (
+            <div className="editor-container">
+              <AceEditor
+                editorRef={(editor) => (editorRef.current = editor)}
+                onCreate={onCreate}
+                mode="yaml"
+                theme="cobalt"
+                options={editorConfig}
+                value={value}
+                onChange={onChange}
+                history-view
+                canSave={canSave}
+                onSave={onSave}
+                readOnly={readOnly}
+              />
+            </div>
+          )}
+          {showEditor && showVisualConfigurationView && (
+            <div className="visual-editor-container">
+              <YamlParser yamlConfig={value} onUpdate={onChange}>
+                {(onUpdate, config) => (
+                  <TreeTableEditor config={config} schema={schema} loading={loading} readOnly={readOnly} onUpdate={onUpdate} />
+                )}
+              </YamlParser>
+            </div>
+          )}
+          {!showEditor && <SelectionInformation hint={hint} />}
         </div>
-      )}
-      {showEditor && showVisualConfigurationView && (
-        <div className="p-col visual-editor-container">
-          <YamlParser yamlConfig={value} onUpdate={onChange}>
-            {(onUpdate, config) => (
-              <TreeTableEditor config={config} schema={schema} loading={loading} readOnly={readOnly} onUpdate={onUpdate} />
-            )}
-          </YamlParser>
-        </div>
-      )}
-      {!showEditor && <SelectionInformation hint={hint} />}
-      {loading && (
-        <div className="p-col">
+
+        {sidebar}
+
+        {loading && (
           <div className="loading-overlay">
             <i className="pi pi-spin pi-spinner" style={{ fontSize: '2em' }}></i>
           </div>
-        </div>
-      )}
-      <div className="p-col-fixed">
-        {notificationText ? <Notificationbar text={notificationText} isError={isErrorNotification} icon={notificationIcon} /> : null}
+        )}
       </div>
+
+      {notificationText ? <Notificationbar text={notificationText} isError={isErrorNotification} icon={notificationIcon} /> : null}
     </div>
   );
 };

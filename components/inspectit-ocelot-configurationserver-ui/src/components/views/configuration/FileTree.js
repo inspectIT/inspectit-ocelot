@@ -4,7 +4,6 @@ import { ContextMenu } from 'primereact/contextmenu';
 import { connect } from 'react-redux';
 import { configurationActions, configurationSelectors } from '../../../redux/ducks/configuration';
 import { linkPrefix } from '../../../lib/configuration';
-
 import { DEFAULT_CONFIG_TREE_KEY } from '../../../data/constants';
 import { filter } from 'lodash';
 
@@ -113,7 +112,7 @@ class FileTree extends React.Component {
   };
 
   render() {
-    const { className, defaultTree, files, selection, selectedDefaultConfigFile, readOnly } = this.props;
+    const { className, defaultTree, selection, selectedDefaultConfigFile, readOnly, files } = this.props;
     return (
       <div className="this" onContextMenu={readOnly ? undefined : this.showContextMenu} onKeyDown={readOnly ? undefined : this.onKeyDown}>
         <style jsx>{`
