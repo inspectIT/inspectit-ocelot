@@ -60,7 +60,6 @@ class ConfigurationView extends React.Component {
     isMoveDialogShown: false,
     filePath: null,
     versionId: null,
-    showHistory: false,
     isSearchDialogShown: false,
   };
 
@@ -114,12 +113,6 @@ class ConfigurationView extends React.Component {
 
   hideMoveDialog = () => this.setState({ isMoveDialogShown: false, filePath: null });
 
-  toggleHistoryView = () => {
-    this.setState({
-      showHistory: !this.state.showHistory,
-    });
-  };
-
   showSearchDialog = () => this.setState({ isSearchDialogShown: true });
 
   hideSearchDialog = () => this.setState({ isSearchDialogShown: false });
@@ -159,7 +152,7 @@ class ConfigurationView extends React.Component {
     const readOnly = !canWrite || !!selectedDefaultConfigFile || !isLatestVersion;
 
     const sidebar = (
-      <ConfigurationSidebar showHistory={this.state.showHistory} toggleHistoryView={this.toggleHistoryView}></ConfigurationSidebar>
+      <ConfigurationSidebar />
     );
 
     return (

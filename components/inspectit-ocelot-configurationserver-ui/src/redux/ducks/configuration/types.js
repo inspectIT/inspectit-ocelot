@@ -43,3 +43,5 @@ export const FETCH_SCHEMA_FAILURE = 'configuration/FETCH_SCHEMA_FAILURE';
 export const FETCH_SCHEMA_SUCCESS = 'configuration/FETCH_SCHEMA_SUCCESS';
 
 export const TOGGLE_VISUAL_CONFIGURATION_VIEW = 'configuration/TOGGLE_VISUAL_CONFIGURATION_VIEW';
+
+export const TOGGLE_HISTORY_VIEW = 'configuration/TOGGLE_HISTORY_VIEW';

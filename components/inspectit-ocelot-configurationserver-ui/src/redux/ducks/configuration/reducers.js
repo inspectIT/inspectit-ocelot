@@ -189,10 +189,18 @@ const configurationReducer = createReducer(initialState)({
     };
   },
   [types.FETCH_SCHEMA_FAILURE]: decrementPendingRequests,
+
   [types.TOGGLE_VISUAL_CONFIGURATION_VIEW]: (state) => {
     return {
       ...state,
       showVisualConfigurationView: !state.showVisualConfigurationView,
+    };
+  },
+
+  [types.TOGGLE_HISTORY_VIEW]: (state) => {
+    return {
+      ...state,
+      showHistoryView: !state.showHistoryView,
     };
   },
 });

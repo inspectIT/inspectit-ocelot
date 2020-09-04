@@ -364,3 +364,10 @@ export const fetchConfigurationSchema = () => {
 export const toggleVisualConfigurationView = () => ({
   type: types.TOGGLE_VISUAL_CONFIGURATION_VIEW,
 });
+
+/**
+ * Shows or hides the history voiew.
+ */
+export const toggleHistoryView = () => ({
+  type: types.TOGGLE_HISTORY_VIEW,
+});

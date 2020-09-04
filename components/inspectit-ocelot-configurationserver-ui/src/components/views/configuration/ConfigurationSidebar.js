@@ -1,11 +1,21 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+import { useSelector, useDispatch } from 'react-redux';
 import HistoryView from './history/HistoryView';
+import { configurationActions } from '../../../redux/ducks/configuration';
 
 /**
  * The sidebar of the configuration view.
  */
-const ConfigurationSidebar = ({ showHistory, toggleHistoryView }) => {
+const ConfigurationSidebar = () => {
+  const dispatch = useDispatch();
+
+  // global state variables
+  const showHistoryView = useSelector((state) => state.configuration.showHistoryView);
+
+  const toggleHistoryView = () => {
+    dispatch(configurationActions.toggleHistoryView());
+  };
+
   return (
     <>
       <style jsx>
@@ -38,11 +48,11 @@ const ConfigurationSidebar = ({ showHistory, toggleHistoryView }) => {
       </style>
 
       <div className="sidebar">
-        <div className="content-container">{showHistory && <HistoryView />}</div>
+        <div className="content-container">{showHistoryView && <HistoryView />}</div>
 
         <div>
-          <button className={'vert-button p-button p-togglebutton' + (showHistory ? 'p-highlight' : '')} onClick={toggleHistoryView}>
-            <i className={'pi pi-chevron-' + (showHistory ? 'right' : 'left')} />
+          <button className={'vert-button p-button p-togglebutton' + (showHistoryView ? 'p-highlight' : '')} onClick={toggleHistoryView}>
+            <i className={'pi pi-chevron-' + (showHistoryView ? 'right' : 'left')} />
             <span>Versioning</span>
           </button>
         </div>
@@ -51,11 +61,6 @@ const ConfigurationSidebar = ({ showHistory, toggleHistoryView }) => {
   );
 };
 
-ConfigurationSidebar.propTypes = {
-  /** whether the history view should be shown */
-  showHistory: PropTypes.bool,
-  /** function when the user clicks on the history view button to toggle its state */
-  toggleHistoryView: PropTypes.func,
-};
+ConfigurationSidebar.propTypes = {};
 
 export default ConfigurationSidebar;
