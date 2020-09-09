@@ -142,7 +142,7 @@ Using the operations above, complex calculations can be done, for example:
 The `beacon-requirements` field can be used to specify requirements which have to be fulfilled by the beacons in order to be evaluated by a certain metric.
 If any requirement does not fit a beacon, the beacon is ignored by the metric.
 
-Beacon requirements consist of two attributes `field` and `requirement`. `field` specified the beacon's field which is validated using the requirement type specified in `NOT_EXISTS`.
+Firstly, you can specify that the metric expects a field to exist or not exist in the beacon:
 
 ```YAML
   ...
@@ -152,13 +152,22 @@ Beacon requirements consist of two attributes `field` and `requirement`. `field`
         - field: rt.quit
           requirement: NOT_EXISTS
 ```
+In this example, `my-metric` will only be recorded if the field `rt.quit` does not exist in the beacon.
+Alternatively you can use the `requirement` `EXISTS` to make sure the metric is only recorded if the given field is present.
 
-The following requirement types are currently be supported:
+Additionally you can specify that you only want to record the metric if the received beacon has a specific initiator:
 
-| Type | Note |
-| --- | --- |
-| `EXISTS` | The targeted field must exist. |
-| `NOT_EXISTS` | The targeted field must not exist. |
+```YAML
+  ...
+    my-metric:
+      ...
+      beacon-requirements:
+        - initiators: [SPA_SOFT, SPA_HARD]
+          requirement: HAS_INITIATOR
+```
+
+The available initiators are `DOCUMENT` for the initial pageload beacons, `XHR` for Ajax-Beacons and `SPA_SOFT` and `SPA_HARD` for soft and hard SPA navigation beacons.
+The metric will only be recorded for beacons whose `http.initiator` field matches any of the elements provided in the `initiators` list.
 
 ### Additional Beacon Fields
 
