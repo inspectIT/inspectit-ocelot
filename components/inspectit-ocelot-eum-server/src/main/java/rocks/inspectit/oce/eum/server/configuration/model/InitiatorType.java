@@ -9,33 +9,40 @@ import rocks.inspectit.oce.eum.server.beacon.Beacon;
 public enum InitiatorType {
     DOCUMENT {
         @Override
-        boolean hasType(String httpInitiatorValue) {
+        boolean isEqualToBeaconHttpInitiator(String httpInitiatorValue) {
             return httpInitiatorValue == null || "".equals(httpInitiatorValue);
         }
     },
     XHR {
         @Override
-        boolean hasType(String httpInitiatorValue) {
+        boolean isEqualToBeaconHttpInitiator(String httpInitiatorValue) {
             return "xhr".equalsIgnoreCase(httpInitiatorValue);
         }
     },
     SPA_SOFT {
         @Override
-        boolean hasType(String httpInitiatorValue) {
+        boolean isEqualToBeaconHttpInitiator(String httpInitiatorValue) {
             return "spa".equalsIgnoreCase(httpInitiatorValue);
         }
     },
     SPA_HARD {
         @Override
-        boolean hasType(String httpInitiatorValue) {
+        boolean isEqualToBeaconHttpInitiator(String httpInitiatorValue) {
             return "spa_hard".equalsIgnoreCase(httpInitiatorValue);
         }
     };
 
-    abstract boolean hasType(String httpInitiatorValue);
+    abstract boolean isEqualToBeaconHttpInitiator(String httpInitiatorValue);
 
+    /**
+     * Checks if the given beacon has an initiator matching this {@link InitiatorType}.
+     *
+     * @param beacon the beacon to check
+     *
+     * @return true, if the initiator matches
+     */
     public boolean hasInitiator(Beacon beacon) {
-        return hasType(beacon.get("http.initiator"));
+        return isEqualToBeaconHttpInitiator(beacon.get("http.initiator"));
     }
 
 }

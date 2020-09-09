@@ -142,6 +142,14 @@ Using the operations above, complex calculations can be done, for example:
 The `beacon-requirements` field can be used to specify requirements which have to be fulfilled by the beacons in order to be evaluated by a certain metric.
 If any requirement does not fit a beacon, the beacon is ignored by the metric.
 
+The following requirements are available:
+
+| Type | Note |
+| --- | --- |
+| `EXISTS` | The targeted field must exist. |
+| `NOT_EXISTS` | The targeted field must not exist. |
+| `HAS_INITIATOR` | The beacon must have one of the specified initiators. |
+
 Firstly, you can specify that the metric expects a field to exist or not exist in the beacon:
 
 ```YAML

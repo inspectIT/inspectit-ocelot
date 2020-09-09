@@ -3,10 +3,11 @@ package rocks.inspectit.oce.eum.server.configuration.model;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import rocks.inspectit.oce.eum.server.beacon.Beacon;
 
+import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.NotNull;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -60,11 +61,14 @@ public class BeaconRequirement {
     @NotNull
     private RequirementType requirement;
 
-    private List<InitiatorType> initiators = Arrays.asList(InitiatorType.values());
+    /**
+     * The list of allowed initiators for the {@link RequirementType#HAS_INITIATOR} requirement.
+     */
+    private List<InitiatorType> initiators;
 
     /**
      * The field which is targeted.
-     * Used for the "EXISTS" and "NOT_EXISTS" requirement types.
+     * Used for the {@link RequirementType#EXISTS} and {@link RequirementType#NOT_EXISTS} requirement types.
      */
     private String field;
 
@@ -83,6 +87,20 @@ public class BeaconRequirement {
                 return !beacon.contains(field);
             case HAS_INITIATOR:
                 return initiators.stream().anyMatch(initiatorType -> initiatorType.hasInitiator(beacon));
+            default:
+                log.error("Requirement of type {} is not supported.", requirement);
+                return false;
+        }
+    }
+
+    @AssertTrue
+    public boolean isValid() {
+        switch (requirement) {
+            case EXISTS:
+            case NOT_EXISTS:
+                return !StringUtils.isEmpty(field);
+            case HAS_INITIATOR:
+                return !CollectionUtils.isEmpty(initiators);
             default:
                 log.error("Requirement of type {} is not supported.", requirement);
                 return false;
