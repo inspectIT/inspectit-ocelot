@@ -57,7 +57,8 @@ const AlertingChannelsTree = ({ topicNodes, selection, onSelectionChanged }) => 
     <div className="this">
       <style jsx>{`
         .this {
-          height: 100%;
+          overflow: auto;
+          flex-grow: 1;
           display: flex;
           flex-direction: column;
           border-right: 1px solid #ddd;
