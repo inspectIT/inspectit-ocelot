@@ -79,3 +79,4 @@ The following properties are nested properties below the `inspectit.exporters.me
 |`.create-database`|`true`| If enabled, the database defined by the `database` property is automatically created on startup with an `autogen` retention policy if it does not exist yet.
 |`.export-interval`|refers to `inspectit.metrics.frequency`|Defines how often metrics are pushed to the influxDB.
 |<nobr>`.counters-as-differences`</nobr>|`true`|Defines whether counters are exported using their absolute value or as the increase between exports
+|`buffer-size`| `40` | In case the influxDB is not reachable, failed writes will be buffered and written on the next export. This value defines the maximum number of batches to buffer.
