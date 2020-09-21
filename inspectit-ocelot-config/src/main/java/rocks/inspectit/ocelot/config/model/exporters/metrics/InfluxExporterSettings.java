@@ -66,7 +66,7 @@ public class InfluxExporterSettings {
 
     /**
      * The size of the buffer for failed batches.
-     * E.g. if the exportInterval is 15s and the buffer-is is 4, The export will keep up to one minute of data in memory.
+     * E.g. if the exportInterval is 15s and the buffer-size is 4, the export will keep up to one minute of data in memory.
      */
     @Min(1)
     private int bufferSize;
