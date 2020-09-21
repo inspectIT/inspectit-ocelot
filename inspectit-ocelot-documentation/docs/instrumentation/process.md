@@ -23,6 +23,9 @@ inspectit:
       new-class-discovery-interval: 10s
       # defines how often the new class discovery is performed after a new class has been loaded
       num-class-discovery-trials: 2
+      
+      # defines whether orphan action classes are recycled or new classes should be injected instead
+      recyclingOldActionClasses: true
 ```
 
 In addition, the size of the instrumentation queue can be used as an indicator for the instrumentation progress.
