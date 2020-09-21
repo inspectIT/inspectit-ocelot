@@ -65,6 +65,7 @@ public class InfluxExporterService extends DynamicallyActivatableService {
                 .createDatabase(influx.isCreateDatabase())
                 .exportDifference(influx.isCountersAsDifferences())
                 .measurementNameProvider(percentileViewManager::getMeasureNameForSeries)
+                .bufferSize(influx.getBufferSize())
                 .build();
         exporterTask = executor.scheduleAtFixedRate(activeExporter::export, 0, influx.getExportInterval()
                 .toMillis(), TimeUnit.MILLISECONDS);

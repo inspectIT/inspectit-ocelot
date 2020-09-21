@@ -60,6 +60,7 @@ public class InfluxExporterService {
                     .password(influx.getPassword())
                     .createDatabase(influx.isCreateDatabase())
                     .exportDifference(influx.isCountersAsDifferences())
+                    .bufferSize(influx.getBufferSize())
                     .build();
             exporterTask = executor.scheduleAtFixedRate(activeExporter::export, 0, influx.getExportInterval()
                     .toMillis(), TimeUnit.MILLISECONDS);
