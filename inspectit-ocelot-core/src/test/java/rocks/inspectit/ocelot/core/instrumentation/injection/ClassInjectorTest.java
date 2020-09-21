@@ -23,8 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.same;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ClassInjectorTest {
@@ -71,6 +70,7 @@ public class ClassInjectorTest {
 
         @Test
         public void testBootstrapReuseForSameIdentifier() throws Exception {
+            when(env.getCurrentConfig().getInstrumentation().getInternal().isRecyclingOldActionClasses()).thenReturn(true);
 
             AtomicReference<byte[]> bytecodeFor7 = new AtomicReference<>();
             InjectedClass<?> clazz42 = injector.inject("id", java.lang.String.class, (name) -> getByteCodeAndRename(ClassToInject42.class, name));
@@ -88,6 +88,28 @@ public class ClassInjectorTest {
 
             assertThat(clazz7.getInjectedClassObject().get()).isSameAs(injectedClass);
             verify(instrumentation, times(1)).redefineClasses(any());
+        }
+
+        @Test
+        public void testBootstrapNoReuseForSameIdentifier() throws Exception {
+            when(env.getCurrentConfig().getInstrumentation().getInternal().isRecyclingOldActionClasses()).thenReturn(false);
+
+            AtomicReference<byte[]> bytecodeFor7 = new AtomicReference<>();
+            InjectedClass<?> clazz42 = injector.inject("id", java.lang.String.class, (name) -> getByteCodeAndRename(ClassToInject42.class, name));
+            assertThat(clazz42.getInjectedClassObject().get().getMethod("getValue").invoke(null)).isEqualTo(42);
+
+            Class<?> injectedClass = clazz42.getInjectedClassObject().get();
+            WeakReference<InjectedClass<?>> weakClazz42 = new WeakReference<>(clazz42);
+            clazz42 = null;
+            GcUtils.waitUntilCleared(weakClazz42);
+
+            InjectedClass<?> clazz7 = injector.inject("id", java.lang.String.class, (name) -> {
+                bytecodeFor7.set(getByteCodeAndRename(ClassToInject7.class, name));
+                return bytecodeFor7.get();
+            });
+
+            assertThat(clazz7.getInjectedClassObject().get()).isNotSameAs(injectedClass);
+            verify(instrumentation, times(0)).redefineClasses(any());
         }
 
         @Test
@@ -117,6 +139,8 @@ public class ClassInjectorTest {
 
         @Test
         public void testReuseWithExceptionPassThrough() throws Exception {
+            when(env.getCurrentConfig().getInstrumentation().getInternal().isRecyclingOldActionClasses()).thenReturn(true);
+
             DummyClassLoader dummy = new DummyClassLoader(ClassToInject7.class);
             Class<?> neighbor = Class.forName(ClassToInject7.class.getName(), false, dummy);
 
@@ -143,6 +167,8 @@ public class ClassInjectorTest {
 
         @Test
         public void testNormalClassloaderReuseForSameIdentifier() throws Exception {
+            when(env.getCurrentConfig().getInstrumentation().getInternal().isRecyclingOldActionClasses()).thenReturn(true);
+
             DummyClassLoader dummy = new DummyClassLoader(ClassToInject7.class);
             Class<?> neighbor = Class.forName(ClassToInject7.class.getName(), false, dummy);
 
