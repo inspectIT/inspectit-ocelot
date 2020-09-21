@@ -53,7 +53,7 @@ public class InternalSettings {
     private boolean useInspectitProtectionDomain;
 
     /**
-     * Defines whether orphan action classes are recyclecd or new classes should be injected instead.
+     * Defines whether orphan action classes are recycled or new classes should be injected instead.
      */
     private boolean recyclingOldActionClasses = true;
 

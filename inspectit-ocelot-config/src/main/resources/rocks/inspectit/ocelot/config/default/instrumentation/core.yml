@@ -33,6 +33,10 @@ inspectit:
       # When a security manager is enabled, it is important that these classes have a ProtectionDomain configured.
       # Depending on the security needs, this can be either the PD of inspectit or of a neighbor-class in the Classloader.
       use-inspectit-protection-domain: true
+
+      # Defines whether orphan action classes are recycled or new classes should be injected instead.
+      recyclingOldActionClasses: true
+
     data:
       # used for storing a received remote span id
       remote_parent_span_context:

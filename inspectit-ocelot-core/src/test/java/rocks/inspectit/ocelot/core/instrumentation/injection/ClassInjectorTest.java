@@ -91,7 +91,7 @@ public class ClassInjectorTest {
         }
 
         @Test
-        public void testBootstrapNoReuseForSameIdentifier() throws Exception {
+        public void testRecyclingDisabled() throws Exception {
             when(env.getCurrentConfig().getInstrumentation().getInternal().isRecyclingOldActionClasses()).thenReturn(false);
 
             AtomicReference<byte[]> bytecodeFor7 = new AtomicReference<>();

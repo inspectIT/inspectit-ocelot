@@ -188,7 +188,6 @@ public class ClassInjector {
     }
 
     private Optional<Class<?>> tryReusingClassInLoader(String classStructureIdentifier, ClassLoader loader) {
-        //If isRecyclingOldActionClasses() is wrong, a new action class is created instead of trying to reuse an existing orphan class.
         if (!inspectitEnv.getCurrentConfig().getInstrumentation().getInternal().isRecyclingOldActionClasses()) {
             return Optional.empty();
         }
