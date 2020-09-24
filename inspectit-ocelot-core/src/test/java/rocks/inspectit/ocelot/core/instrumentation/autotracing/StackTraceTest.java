@@ -15,7 +15,7 @@ public class StackTraceTest {
             StackTraceElement rootFrame = new StackTraceElement("Root", "rootMethod", "", -1);
             StackTraceElement calleeFrame = new StackTraceElement("Callee", "callee", "", -1);
             StackTraceElement[] input = {
-                    new StackTraceElement("java.lang.Thread", "getStackTrace", "", -1),
+                    new StackTraceElement("rocks.inspectit.ocelot.bootstrap.Instances", "getSome", "", -1),
                     new StackTraceElement("rocks.inspectit.ocelot.core.SomeClass", "doStuff", "", -1),
                     calleeFrame,
                     rootFrame,
@@ -28,7 +28,6 @@ public class StackTraceTest {
             assertThat(st.get(1)).isSameAs(calleeFrame);
         }
 
-
         @Test
         void verifyLambdaRemoved() {
             Runnable r1 = () -> {
@@ -36,7 +35,7 @@ public class StackTraceTest {
             StackTraceElement rootFrame = new StackTraceElement("Root", "rootMethod", "", -1);
             StackTraceElement calleeFrame = new StackTraceElement("Callee", "callee", "", -1);
             StackTraceElement[] input = {
-                    new StackTraceElement("java.lang.Thread", "getStackTrace", "", -1),
+                    new StackTraceElement("rocks.inspectit.ocelot.bootstrap.Instances", "getSome", "", -1),
                     calleeFrame,
                     new StackTraceElement("not." + r1.getClass().getName(), "run", "", -1),
                     rootFrame,

@@ -137,7 +137,7 @@ public class HighPrecisionTimer {
      */
     public synchronized void destroy() {
         isDestroyed = true;
-        if (timer != null) {
+        if (timer != null && timer.runnerThread != null) {
             timer.runnerThread.interrupt(); //interrupt sleeping
         }
     }
@@ -175,7 +175,7 @@ public class HighPrecisionTimer {
 
                 sleepUntil(entryTimestamp + periodNanos);
             }
-            log.info("Stopping Timer {}", name);
+            log.debug("Stopping Timer {}", name);
         }
 
         private void sleepUntil(long nanoTimestamp) {
