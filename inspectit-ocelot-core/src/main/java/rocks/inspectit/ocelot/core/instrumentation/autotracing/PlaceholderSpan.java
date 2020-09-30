@@ -24,7 +24,7 @@ public class PlaceholderSpan extends Span {
     private static final Random RANDOM = new Random();
 
     /**
-     * Stores teh attributes added to this span.
+     * Stores the attributes added to this span.
      */
     private Map<String, AttributeValue> attributes = new HashMap<>();
 

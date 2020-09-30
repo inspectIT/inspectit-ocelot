@@ -58,7 +58,7 @@ public class Invocation {
     /**
      * Stored the invocation which happened directly after this invocation.
      * This implies that nextSibling has the same parent.
-     * This field acts as a single linked lsit pointer for the list of children of the parent.
+     * This field acts as a single linked list pointer for the list of children of the parent.
      */
     private Invocation nextSibling = null;
 

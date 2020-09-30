@@ -48,9 +48,9 @@ public class SampledTrace {
     private volatile boolean isPaused;
 
     /**
-     * In order to recosntruct the stack trace, we need to know how many frames on the stack trace should be ignored.
+     * In order to reconstruct the stack trace, we need to know how many frames on the stack trace should be ignored.
      * For this purpose we need a stack trace of the method which started the stack-trace sampling.
-     * We capture the stack-trace by creating a new Throwable isntance (the constructor captures the stack trace).
+     * We capture the stack-trace by creating a new Throwable instance (the constructor captures the stack trace).
      * While capturing the stack-trace is expensive, it is even more expensive to load it from the JVM-native structure into java
      * via {@link Throwable#getStackTrace()}. For this reason we "Delay" the loading until it is actually needed.
      */
@@ -63,7 +63,7 @@ public class SampledTrace {
 
     /**
      * The list storing the sequence of events.
-     * E.g. whenever a stack-trace sample is recorded, an isntrumented is entered or exited,
+     * E.g. whenever a stack-trace sample is recorded or an instrumented method is entered or exited,
      * a corresponding event is appended to this list.
      * <p>
      * This means that the order of the events in this List corresponds to the order in time in which the events occurred!

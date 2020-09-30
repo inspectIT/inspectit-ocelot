@@ -28,7 +28,7 @@ public class InvocationResolver {
             throw new IllegalStateException("Something went wrong!");
         }
 
-        Invocation rootInvocation = new Invocation(null, null, null); //dummy object, just used as a lsit
+        Invocation rootInvocation = new Invocation(null, null, null); //dummy object, just used as a list
         resolveChildInvocations(enhancedEvents, rootStackTraceDepth + 1, rootInvocation);
         return rootInvocation.getChildren();
     }
@@ -46,7 +46,7 @@ public class InvocationResolver {
      * @param events     the input events to analyze
      * @param durations  an index for the method durations (computed via {@link #getMethodDurations(List)}
      * @param startDepth the depth at which we start looking for the methods within the stack traces.
-     * @param output     All events from the "events" argument will be appended to this output list, but possibly ienhanced with better stack traces.
+     * @param output     All events from the "events" argument will be appended to this output list, but possibly enhanced with better stack traces.
      */
     private static void assignStackTracesToMethodEntries(List<TraceEvent> events, Map<MethodEntryEvent, Integer> durations, int startDepth, List<TraceEvent> output) {
         int offset = 0;
@@ -137,7 +137,7 @@ public class InvocationResolver {
             if (current.getStackTraceElementAt(depth) != null) {
                 int endIndex = findLastEqualEvent(events, offset, depth);
                 endIndex = extendEndToIncludeInstrumentations(events, offset, endIndex);
-                if (offset != endIndex) { //at least to events have fallen into the range
+                if (offset != endIndex) { //at least two events have fallen into the range
                     resolveSampledInvocation(events.subList(offset, endIndex + 1), depth, parent);
                 }
                 offset = endIndex + 1; //continue with all unprocessed events
@@ -256,7 +256,7 @@ public class InvocationResolver {
         StackTraceElement element = startEvent.getStackTrace().get(depth);
         Invocation sampledMethod = new Invocation(startEvent, endEvent, element);
         parent.addChild(sampledMethod);
-        
+
         resolveChildInvocations(events, depth + 1, sampledMethod);
     }
 

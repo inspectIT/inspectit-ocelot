@@ -31,7 +31,7 @@ public class CustomSpanBuilder {
     private static final Field SPANBUILDEROPTIONS_STARTENDHANDLER;
 
     /**
-     * The startEndHandler member of {@link io.opencensus.implcore.trace.SpanBuilderImpl.Options}.
+     * The timestampConverter member of {@link io.opencensus.implcore.trace.RecordEventsSpanImpl}.
      */
     private static final Field RECORDEVENTSSPANIMPL_TIMESTAMPCONVERTER;
 
