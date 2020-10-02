@@ -67,7 +67,12 @@ public class InvocationResolver {
                     int currentDepth = startDepth;
                     while (currentDepth < trace.size() && !isSameMethod(trace.get(currentDepth), entryEvent)) {
                         currentDepth++;
-                    } //after the loop, currentDepth is bigger than the trace OR points at the found span
+                    }
+                    // After the loop, currentDepth is bigger than the trace OR points at the found span
+                    // if currentDepth is bigger than the trace, this means that no matching method has been found
+                    // This can happen because the timings of stack trace samples are inaccurate, leading to samples "sliding" in
+                    // ATM, we just accept this and use the invalid stack trace as parent, leading to potential inaccuracies
+                    // In the future, we should remove such "invalid" samples from the list of events to prevent this.
                     StackTrace cutTrace = trace.createSubTrace(currentDepth);
                     MethodEntryEvent newEntry = entryEvent.copyWithNewStackTrace(cutTrace);
                     MethodExitEvent newExit = new MethodExitEvent(newEntry, exitEvent.getTimestamp());
