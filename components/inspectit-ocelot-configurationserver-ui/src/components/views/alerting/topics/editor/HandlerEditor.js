@@ -30,7 +30,7 @@ const HandlerEditor = ({ content, onContentChanged, readOnly, availableTopics })
               <br />
               {'Options are: level(), changed() and tag matching.'}
               <br />
-              {'Example: (level() >= WARNING) AND ("\"host\" == \'s001.example.com\'")'}
+              {'Example: (level() >= WARNING) AND ("\'host\' == \'s001.example.com\'")'}
               <br />
               {"In this example only events affecting the host 's001.example.com' with severity level WARNING or higher will be sent."}
             </span>
