@@ -23,6 +23,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 /**
+ * COPIED FROM THE OCELOT CORE PROJECT!
+ * <p>
  * Holds the data for a given measurement splitted by a provided set of tags over a given time window.
  * For the data within this window, percentiles and min / max values can be computed.
  */

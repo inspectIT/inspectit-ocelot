@@ -8,6 +8,8 @@ import java.util.Collection;
 import java.util.function.Supplier;
 
 /**
+ * COPIED FROM THE OCELOT CORE PROJECT!
+ * <p>
  * A metric producer which caches the metrics for a specified amount of time.
  */
 public class CachingMetricProducer extends MetricProducer {

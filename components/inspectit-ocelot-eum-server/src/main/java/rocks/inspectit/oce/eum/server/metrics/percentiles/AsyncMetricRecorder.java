@@ -9,6 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.concurrent.ArrayBlockingQueue;
 
 /**
+ * COPIED FROM THE OCELOT CORE PROJECT!
+ * <p>
  * Consumer thread for asynchronously processing measurement observations.
  */
 @Slf4j

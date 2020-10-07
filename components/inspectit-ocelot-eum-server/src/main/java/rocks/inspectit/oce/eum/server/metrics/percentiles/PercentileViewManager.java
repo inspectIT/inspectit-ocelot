@@ -20,6 +20,8 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
+ * COPIED FROM THE OCELOT CORE PROJECT!
+ * <p>
  * Allows the creation, update and removal of percentile views on metrics.
  * Note that these views coexist to opencensus {@link io.opencensus.stats.View}s.
  * For this reason observation must be reported via {@link #recordMeasurement(String, double)}

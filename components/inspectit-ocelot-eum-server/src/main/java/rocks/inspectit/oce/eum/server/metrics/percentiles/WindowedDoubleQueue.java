@@ -3,6 +3,8 @@ package rocks.inspectit.oce.eum.server.metrics.percentiles;
 import com.google.common.annotations.VisibleForTesting;
 
 /**
+ * COPIED FROM THE OCELOT CORE PROJECT!
+ * <p>
  * A circular, array based FIFO-queue for remembering measurement values in a sliding window over time.
  * <p>
  * A queue covers a fixed time range (e.g. 15 seconds).
