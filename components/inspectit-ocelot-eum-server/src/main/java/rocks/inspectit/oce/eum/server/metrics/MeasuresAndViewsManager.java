@@ -110,7 +110,7 @@ public class MeasuresAndViewsManager {
                 Measure measure = metrics.get(metricName);
 
                 if (percentileViewManager.isViewRegistered(metricName, viewName) || viewDefinitionSettings.getAggregation() == ViewDefinitionSettings.Aggregation.QUANTILES) {
-                    addOrUpdatePercentileView(measure, viewName, viewDefinitionSettings);
+                    addPercentileView(measure, viewName, viewDefinitionSettings);
                 } else {
                     registerNewView(measure, viewName, viewDefinitionSettings);
                 }
@@ -118,11 +118,7 @@ public class MeasuresAndViewsManager {
         }
     }
 
-    private void addOrUpdatePercentileView(Measure measure, String viewName, ViewDefinitionSettings def) {
-        if (def.getAggregation() != ViewDefinitionSettings.Aggregation.QUANTILES) {
-            log.info("Cannot switch aggregation type for View '{}' from QUANTILES to {}", viewName, def.getAggregation());
-            return;
-        }
+    private void addPercentileView(Measure measure, String viewName, ViewDefinitionSettings def) {
         List<TagKey> viewTags = getTagKeysForView(def);
         Set<String> tagsAsStrings = viewTags.stream().map(TagKey::getName).collect(Collectors.toSet());
         boolean minEnabled = def.getQuantiles().contains(0.0);
