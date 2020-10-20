@@ -14,9 +14,10 @@ Furthermore, please import the `/codequality/idea/code_style.xml` file into the 
 ## Process
 
 The first step in order to contribute is to fork this repository into your account.
-You can develop your changes on a separate branch there and open a pull request in the main repository as soon as you are done.
+You can develop your changes on a separate branch there and open a [pull request](https://github.com/inspectIT/inspectit-ocelot/pulls)
+in the main repository as soon as you are done.
 
-Usually, a pull request should correspond to an open issue in this repository.
+Usually, a pull request should correspond to an open [issue](https://github.com/inspectIT/inspectit-ocelot/issues) in this repository.
 Therefore make sure that an issue exists which your pull request attempts to resolve. If none exists, you should create one.
 There is an exemption to this rule: For very small fixes (e.g. Typo-Fixes), your pull request does not need to have a corresponding issue.
 If your PR corresponds to an issue, the issue should be correctly labeled (e.g. `enhancement`, `bug`, etc.) because the release notes will be generated based on these labels.
@@ -28,5 +29,5 @@ When you open your pull request, you should use the following format for the tit
 Members from the inspectIT team will then review your changes and either request changes or approve your PR.
 In case changed were requested, please fix them (or discuss the changes) and then your PR will be reviewed again.
 
-As soon as everythin is approved, the inspectIT admins will merge your pull request.
+As soon as everything is approved, the inspectIT admins will merge your pull request.
 Your change will become a single commit with the title of the PR as commit message.
