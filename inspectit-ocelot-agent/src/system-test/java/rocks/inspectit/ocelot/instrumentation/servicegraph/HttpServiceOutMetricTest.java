@@ -56,7 +56,7 @@ public class HttpServiceOutMetricTest {
                         .withBody("body")
                         .withStatus(200)));
 
-        TestUtils.waitForClassInstrumentation(HttpServlet.class, true, 10, TimeUnit.SECONDS);
+        TestUtils.waitForClassInstrumentation(HttpServlet.class, true, 30, TimeUnit.SECONDS);
     }
 
     @AfterEach

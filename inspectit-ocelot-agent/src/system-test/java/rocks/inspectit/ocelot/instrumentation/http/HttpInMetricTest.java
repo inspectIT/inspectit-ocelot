@@ -59,7 +59,7 @@ public class HttpInMetricTest {
             server.start();
 
             TestUtils.waitForClassInstrumentations(Arrays.asList(HttpServlet.class,
-                    Class.forName("sun.net.www.protocol.http.HttpURLConnection")), true, 10, TimeUnit.SECONDS);
+                    Class.forName("sun.net.www.protocol.http.HttpURLConnection")), true, 30, TimeUnit.SECONDS);
 
             fireRequest("http://localhost:" + server.getURI().getPort() + "/servletapi");
             server.stop();

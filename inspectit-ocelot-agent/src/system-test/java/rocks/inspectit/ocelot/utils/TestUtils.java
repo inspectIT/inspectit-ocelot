@@ -146,7 +146,7 @@ public class TestUtils {
         CountDownLatch latch = new CountDownLatch(1);
         DisruptorEventQueue.getInstance().enqueue(latch::countDown);
         try {
-            latch.await(10, TimeUnit.SECONDS);
+            latch.await(30, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
