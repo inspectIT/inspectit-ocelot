@@ -174,7 +174,7 @@ public class HttpOutMetricTest {
 
         @BeforeEach
         void setupClient() throws Exception {
-            TestUtils.waitForClassInstrumentation(Class.forName("sun.net.www.protocol.http.HttpURLConnection"), true, 10, TimeUnit.SECONDS);
+            TestUtils.waitForClassInstrumentation(Class.forName("sun.net.www.protocol.http.HttpURLConnection"), true, 30, TimeUnit.SECONDS);
         }
 
         @Test

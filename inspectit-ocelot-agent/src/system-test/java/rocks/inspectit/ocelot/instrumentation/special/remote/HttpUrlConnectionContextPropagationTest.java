@@ -41,7 +41,7 @@ public class HttpUrlConnectionContextPropagationTest {
         urlConnection.getResponseCode();
 
         TestUtils.waitForClassInstrumentations(Arrays.asList(Class.forName("sun.net.www.protocol.http.HttpURLConnection")), true,
-                10, TimeUnit.SECONDS);
+                30, TimeUnit.SECONDS);
 
     }
 
