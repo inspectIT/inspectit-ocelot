@@ -10,11 +10,12 @@ import org.springframework.boot.context.properties.source.ConfigurationPropertyS
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.expression.StandardBeanExpressionResolver;
+import org.springframework.context.support.LiveBeansView;
 import org.springframework.core.env.*;
 import org.springframework.core.io.Resource;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
-import rocks.inspectit.ocelot.config.loaders.ConfigFileLoader;
 import rocks.inspectit.ocelot.config.conversion.InspectitConfigConversionService;
+import rocks.inspectit.ocelot.config.loaders.ConfigFileLoader;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.config.ConfigSettings;
 import rocks.inspectit.ocelot.config.utils.CaseUtils;
@@ -90,7 +91,6 @@ public class InspectitEnvironment extends StandardEnvironment {
      * The variable under which {@link #currentConfig)} is available in bean expressions, such as @Value annotations
      */
     private static final String INSPECTIT_CONFIG_BEAN_EXPRESSION_VARIABLE = "inspectit";
-
 
     /**
      * Sorted list of all configuration sources.
@@ -231,6 +231,7 @@ public class InspectitEnvironment extends StandardEnvironment {
      * @param prefix      the prefix to use, e.g. "inspectit" for the root config object
      * @param configClazz the class of the config to load
      * @param <T>         the type of configClazz
+     *
      * @return the loaded object in case of success or an empty optional otherwise
      */
     public synchronized <T> Optional<T> loadAndValidateFromProperties(String prefix, Class<T> configClazz) {
@@ -308,7 +309,6 @@ public class InspectitEnvironment extends StandardEnvironment {
         };
     }
 
-
     private static void addFileBasedConfiguration(MutablePropertySources propsList, ConfigSettings currentConfig) {
         String path = currentConfig.getFileBased().getPath();
         Path dirPath = Paths.get(path);
@@ -332,7 +332,8 @@ public class InspectitEnvironment extends StandardEnvironment {
 
         if (httpEnabled) {
 
-            HttpPropertySourceState httpSourceState = new HttpPropertySourceState(HTTP_BASED_CONFIGURATION, currentConfig.getHttp());
+            HttpPropertySourceState httpSourceState = new HttpPropertySourceState(HTTP_BASED_CONFIGURATION, currentConfig
+                    .getHttp());
             try {
                 log.info("Initializing HTTP based configuration from URL: {}", httpSourceState.getEffectiveRequestUri());
             } catch (URISyntaxException e) {
@@ -341,5 +342,28 @@ public class InspectitEnvironment extends StandardEnvironment {
             httpSourceState.update(true);
             propsList.addBefore(InspectitEnvironment.DEFAULT_CONFIG_PROPERTYSOURCE_NAME, httpSourceState.getCurrentPropertySource());
         }
+    }
+
+    /**
+     * This is a workaround to fix Issue https://github.com/inspectIT/inspectit-ocelot/issues/942.
+     * <p>
+     * The root cause of this issue is that Spring automatically calls
+     * {@link LiveBeansView#registerApplicationContext(ConfigurableApplicationContext)} when a context is refreshed.
+     * <p>
+     * This call checks for the property with the name {@link LiveBeansView#MBEAN_DOMAIN_PROPERTY_NAME} and if it is present,
+     * an MBean will be registered.
+     * <p>
+     * For this reason, with this override we ensure that the {@link LiveBeansView} of our spring will never be started.
+     *
+     * @param key the key of the property
+     *
+     * @return the property value
+     */
+    @Override
+    public String getProperty(String key) {
+        if (key.equalsIgnoreCase(LiveBeansView.MBEAN_DOMAIN_PROPERTY_NAME)) {
+            return null; //This forces the LiveBeanView to be disabled.
+        }
+        return super.getProperty(key);
     }
 }
