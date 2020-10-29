@@ -211,6 +211,16 @@ class InstrumentationScopeResolverTest {
 
             Map<String, InstrumentationScope> result = scopeResolver.resolve(settings);
 
+            ElementMatcher.Junction<TypeDescription> typeMatcher = named("class.ClassA");
+
+            ElementMatcher.Junction<MethodDescription> methodMatcher = not(isConstructor())
+                    .and(named("methodA"))
+                    .and(not(isDeclaredBy(named("class.ClassB")
+                            .and(declaresMethod(not(isConstructor())
+                                    .and(named("methodB")))))
+                            .and(not(isConstructor())
+                                    .and(named("methodB")))));
+
             assertThat(result).containsOnlyKeys(scopeKeyA, scopeKeyB);
             assertThat(result.get(scopeKeyB))
                     .extracting(InstrumentationScope::getTypeMatcher, InstrumentationScope::getMethodMatcher)
@@ -219,9 +229,7 @@ class InstrumentationScopeResolverTest {
                             not(isConstructor()).and(named("methodB")));
             assertThat(result.get(scopeKeyA))
                     .extracting(InstrumentationScope::getTypeMatcher, InstrumentationScope::getMethodMatcher)
-                    .containsExactly(
-                            named("class.ClassA").and(declaresMethod(not(isConstructor()).and(named("methodA")).and(not(isDeclaredBy(named("class.ClassB").and(declaresMethod(not(isConstructor()).and(named("methodB"))))).and(not(isConstructor()).and(named("methodB"))))))),
-                            not(isConstructor()).and(named("methodA")).and(not(isDeclaredBy(named("class.ClassB").and(declaresMethod(not(isConstructor()).and(named("methodB"))))).and(not(isConstructor()).and(named("methodB"))))));
+                    .containsExactly(typeMatcher.and(declaresMethod(methodMatcher)), methodMatcher);
         }
 
         @Test
