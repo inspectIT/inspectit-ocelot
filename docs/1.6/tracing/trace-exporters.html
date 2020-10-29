@@ -1,0 +1,127 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Trace Exporters · inspectIT Ocelot Documentation</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="Metrics exporters are responsible for passing the recorded tracing data to a corresponding storage."/><meta name="docsearch:version" content="1.6"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Trace Exporters · inspectIT Ocelot Documentation"/><meta property="og:type" content="website"/><meta property="og:url" content="https://inspectit.github.io/inspectit-ocelot/"/><meta property="og:description" content="Metrics exporters are responsible for passing the recorded tracing data to a corresponding storage."/><meta property="og:image" content="https://inspectit.github.io/inspectit-ocelot/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://inspectit.github.io/inspectit-ocelot/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/inspectit-ocelot/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/atom-one-dark.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="https://unpkg.com/vanilla-back-to-top@7.1.14/dist/vanilla-back-to-top.min.js"></script><script>
+        document.addEventListener('DOMContentLoaded', function() {
+          addBackToTop(
+            {"zIndex":100}
+          )
+        });
+        </script><script src="/inspectit-ocelot/js/scrollSpy.js"></script><link rel="stylesheet" href="/inspectit-ocelot/css/main.css"/><script src="/inspectit-ocelot/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/inspectit-ocelot/"><img class="logo" src="/inspectit-ocelot/img/ocelot_head_sil_logo.svg" alt="inspectIT Ocelot Documentation"/><h2 class="headerTitleWithLogo">inspectIT Ocelot Documentation</h2></a><a href="/inspectit-ocelot/versions"><h3>1.6</h3></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="https://inspectit.rocks/" target="_self">inspectIT Ocelot Website</a></li><li class=""><a href="https://github.com/inspectIT/inspectit-ocelot" target="_self">GitHub Repository</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Tracing</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Getting Started<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6/doc1">Hello World</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6/getting-started/quick-start">Quick Start</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6/getting-started/docker-examples">Demo Application</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6/getting-started/installation">Installation</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Configuration<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6/configuration/configuration-sources">Configuration Sources</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6/configuration/external-configuration-sources">External Configuration Sources</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6/configuration/logging-configuration">Logging Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6/configuration/open-census-configuration">OpenCensus Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6/configuration/plugin-configuration">Plugin Configuration</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Metrics<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6/metrics/metrics">Metrics</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6/metrics/metric-recorders">Metrics Recorders</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6/metrics/metric-exporters">Metrics Exporters</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6/metrics/common-tags">Common Tags</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6/metrics/custom-metrics">Custom Metrics</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6/metrics/self-monitoring">Self-Monitoring</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Tracing<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6/tracing/tracing">Tracing</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/inspectit-ocelot/docs/1.6/tracing/trace-exporters">Trace Exporters</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6/tracing/log-correlation">Log Correlation</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6/tracing/privacy">Data Privacy</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Instrumentation<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6/instrumentation/instrumentation">Instrumentation</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6/instrumentation/scopes">Scopes</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6/instrumentation/rules">Rules</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6/instrumentation/special-sensors">Special Sensors</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6/instrumentation/process">Instrumentation Process</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">End User Monitoring<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6/enduser-monitoring/enduser-monitoring-server">Overview</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6/enduser-monitoring/eum-server-setup">Server Setup</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6/enduser-monitoring/eum-server-configuration">Server and Metrics Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6/enduser-monitoring/install-eum-agent">Install EUM Agent</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Configuration Server<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6/config-server/overview">Overview</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6/config-server/cs-configuration">Server Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6/config-server/managing-configurations">Managing Configuration Files</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6/config-server/agent-mappings">Agent Mappings</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6/config-server/user-authentication">User Authentication</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6/config-server/log-config">Server Logging Configuration</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Breaking Changes<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6/breaking-changes/1-6">Breaking changes in 1.6</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6/breaking-changes/1-5">Breaking changes in 1.5</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6/breaking-changes/1-4">Breaking changes in 1.4</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6/breaking-changes/1-3">Breaking changes in 1.3</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6/breaking-changes/1-2">Breaking changes in 1.2</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6/breaking-changes/1-1">Breaking changes in 1.1</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6/breaking-changes/1-0">Breaking changes in 1.0</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6/breaking-changes/0-6">Breaking changes in 0.6</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6/breaking-changes/0-5">Breaking changes in 0.5</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6/breaking-changes/0-4">Breaking changes in 0.4</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/inspectit/inspectit-ocelot-documentation/edit/master/docs/tracing/trace-exporters.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">Trace Exporters</h1></header><article><div><span><p>Metrics exporters are responsible for passing the recorded tracing data to a corresponding storage.</p>
+<p>inspectIT Ocelot currently supports the following OpenCensus trace exporters:</p>
+<ul>
+<li><a href="#zipkin-exporter">ZipKin</a> [<a href="https://zipkin.io/">Homepage</a>]</li>
+<li><a href="#jaeger-exporter">Jaeger</a> [<a href="https://www.jaegertracing.io/">Homepage</a>]</li>
+<li><a href="#opencensus-agent-trace-exporter">OpenCensus Agent</a> [<a href="https://opencensus.io/exporters/supported-exporters/java/ocagent/">Homepage</a>]</li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="zipkin-exporter"></a><a href="#zipkin-exporter" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>ZipKin Exporter</h2>
+<p>The ZipKin exporter exports Traces in ZipKin v2 format to a ZipKin server or other compatible servers.
+It can be enabled and disabled via the <code>inspectit.exporters.tracing.zipkin.enabled</code> property. By default, the ZipKin exporter is enabled. It however does not have an URL configured. The exporter will start up as soon as you define the <code>inspectit.exporters.tracing.zipkin.url</code> property.</p>
+<p>For example, when adding the following property to your <code>-javaagent</code> options, traces will be sent to a zipkin server running on your localhost with the default port:</p>
+<pre><code class="hljs">-Dinspectit<span class="hljs-selector-class">.exporters</span><span class="hljs-selector-class">.tracing</span><span class="hljs-selector-class">.zipkin</span>.url=http:<span class="hljs-comment">//127.0.0.1:9411/api/v2/spans</span>
+</code></pre>
+<p>When sending spans, ZipKin expects you to give a name of the service where the spans have been recorded. This name can be set using the <code>inspectit.exporters.tracing.zipkin.service-name</code> property. This property defaults to <code>inspectit.service-name</code>.</p>
+<h2><a class="anchor" aria-hidden="true" id="jaeger-exporter"></a><a href="#jaeger-exporter" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Jaeger Exporter</h2>
+<p>The Jaeger exports works exactly the same way as the <a href="#zipkin-exporter">ZipKin Exporter</a>.
+The corresponding properties are the following:</p>
+<ul>
+<li><code>inspectit.exporters.tracing.jaeger.enabled</code>: enables / disables the Jaeger exporter</li>
+<li><code>inspectit.exporters.tracing.jaeger.url</code>: defines the URL where the spans will be pushed</li>
+<li><code>inspectit.exporters.tracing.jaeger.service-name</code>: defines the service name under which the spans will be published</li>
+</ul>
+<p>By default, the Jaeger exporter is enabled but has no URL configured.
+The service name defaults to <code>inspectit.service-name</code>.</p>
+<p>To make inspectIT Ocelot push the spans to a Jaeger server running on the same machine as the agent, the following JVM property can be used:</p>
+<pre><code class="hljs">-Dinspectit<span class="hljs-selector-class">.exporters</span><span class="hljs-selector-class">.tracing</span><span class="hljs-selector-class">.jaeger</span>.url=http:<span class="hljs-comment">//127.0.0.1:14268/api/traces</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="opencensus-agent-trace-exporter"></a><a href="#opencensus-agent-trace-exporter" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>OpenCensus Agent Trace Exporter</h2>
+<p>Spans can be additionally exported to the <a href="https://opencensus.io/service/components/agent/">OpenCensus Agent</a>.
+When enabled, all Spans are sent via gRCP to the OpenCensus Agent. By default, the exporter is enabled, but the agent address is set to <code>null</code>.</p>
+<table>
+<thead>
+<tr><th>Property</th><th>Default</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><code>inspectit.exporters.tracing.open-census-agent.enabled</code></td><td><code>true</code></td><td>If true, the agent will try to start the OpenCensus Agent Trace exporter.</td></tr>
+<tr><td><code>inspectit.exporters.tracing.open-census-agent.address</code></td><td><code>null</code></td><td>Address of the open-census agent (e.g. localhost:1234).</td></tr>
+<tr><td><code>inspectit.exporters.tracing.open-census-agent.use-insecure</code></td><td><code>false</code></td><td>If true, SSL is disabled.</td></tr>
+<tr><td><code>inspectit.exporters.tracing.open-census-agent.service-name</code></td><td>refers to <code>inspectit.service-name</code></td><td>The service-name which will be used to publish the spans.</td></tr>
+<tr><td><code>inspectit.exporters.tracing.open-census-agent.reconnection-period</code></td><td><code>5</code></td><td>The time at which the exporter tries to reconnect to the OpenCensus agent.</td></tr>
+</tbody>
+</table>
+<blockquote>
+<p>Don't forget to check <a href="https://opencensus.io/exporters/supported-exporters/java/ocagent/">the official OpenCensus Agent exporter documentation</a>.</p>
+</blockquote>
+</span></div></article></div><div class="docLastUpdate"><em>Last updated on 2019-12-16 by Ariane Kraus</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/1.6/tracing/tracing"><span class="arrow-prev">← </span><span>Tracing</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/1.6/tracing/log-correlation"><span>Log Correlation</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#zipkin-exporter">ZipKin Exporter</a></li><li><a href="#jaeger-exporter">Jaeger Exporter</a></li><li><a href="#opencensus-agent-trace-exporter">OpenCensus Agent Trace Exporter</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2020 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                
+                apiKey: 'ce332dcee733a92cefacc3195edd83dd',
+                indexName: 'inspectit-ocelot',
+                inputSelector: '#search_input_react',
+                algoliaOptions: {"facetFilters":["version:1.6"]}
+              });
+            </script></body></html>
