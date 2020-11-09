@@ -3,7 +3,6 @@ package rocks.inspectit.ocelot.config.model.instrumentation.scope;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.Spy;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.InternalSettings;
@@ -26,9 +25,6 @@ public class InstrumentationScopeSettingsTest {
     MetricsSettings metrics;
 
     InstrumentationScopeSettings scope;
-
-    @Spy
-    ViolationBuilder vios;
 
     @BeforeEach
     void setupDefaultSettings() {
@@ -103,8 +99,8 @@ public class InstrumentationScopeSettingsTest {
                     .containsIgnoringCase("cyclical")
                     .containsIgnoringCase("dependence");
             assertThat(violations.get(0).getParameters())
-                    .containsValue("scope-a")
-                    .containsValue("scope-b");
+                    .containsValue("scope-b")
+                    .containsValue("scope-a -> scope-b -> scope-a");
         }
 
         @Test
@@ -144,8 +140,8 @@ public class InstrumentationScopeSettingsTest {
                     .containsIgnoringCase("cyclical")
                     .containsIgnoringCase("dependence");
             assertThat(violations.get(0).getParameters())
-                    .containsValue("scope-a")
-                    .containsValue("scope-c");
+                    .containsValue("scope-c")
+                    .containsValue("scope-a -> scope-b -> scope-c -> scope-a");
         }
 
         @Test

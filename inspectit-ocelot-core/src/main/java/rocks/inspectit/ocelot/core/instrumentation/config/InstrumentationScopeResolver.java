@@ -54,9 +54,11 @@ public class InstrumentationScopeResolver {
     }
 
     /**
-     * Resolving the {@link InstrumentationScope} for the given parameters.
+     * Resolving the {@link InstrumentationScope} for the given parameters and extending the {@param cache} map.
      *
-     * @return The resolve {@link InstrumentationScope}.
+     * @param name of scope to be resolved
+     * @param settings a map containing the {@link InstrumentationSettings} scopes
+     * @param cache a map containing the resolved scopes, which will be extended
      */
     private void resolveScope(String name, Map<String, InstrumentationScopeSettings> settings, Map<String, InstrumentationScope> cache) {
 
@@ -86,7 +88,7 @@ public class InstrumentationScopeResolver {
             }
         }
 
-        //we ensure that we only match types which contain at least one matched method
+        // we ensure that we only match types which contain at least one matched method
         typeMatcher = typeMatcher.and(declaresMethod(methodMatcher));
 
         cache.put(name, new InstrumentationScope(typeMatcher, methodMatcher));

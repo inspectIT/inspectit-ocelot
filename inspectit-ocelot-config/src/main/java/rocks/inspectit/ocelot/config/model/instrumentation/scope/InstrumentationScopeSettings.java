@@ -45,7 +45,7 @@ public class InstrumentationScopeSettings {
     private ElementDescriptionMatcherSettings type;
 
     /**
-     * Scopes which are to be excluded
+     * The keys of the map are the names of scopes, whose methods will be excluded from being matches by this scope.
      */
     @Valid
     private Map<String, Boolean> exclude = Collections.emptyMap();
@@ -81,8 +81,10 @@ public class InstrumentationScopeSettings {
     /**
      * Validates this scope, invoked by {@link InstrumentationSettings#performValidation(InspectitConfig, ViolationBuilder)}
      *
-     * @param container      the root config containing this rule
-     * @param vios           the violation builder
+     * @param name          name of the scope, which will be verified
+     * @param container     the root config containing this scope
+     * @param vios          the violation builder
+     * @param verified      a set containing already verified scopes, verified means that this scope is guaranteed to not be part of a cyclic dependency.
      */
     public void performValidation(String name, InstrumentationSettings container, ViolationBuilder vios, Set<String> verified) {
         // Verify that the excluded scopes have also been defined.
@@ -97,7 +99,7 @@ public class InstrumentationScopeSettings {
 
         ArrayList<String> visitedParents = new ArrayList<>();
         visitedParents.add(name);
-        verifyCyclicalDependence(name, container.getScopes(), verified, visitedParents, vios);
+        verifyNoCyclicalDependence(name, container.getScopes(), verified, visitedParents, vios);
 
     }
 
@@ -106,11 +108,11 @@ public class InstrumentationScopeSettings {
      *
      * @param parentScope the scope, which holds the exclude-scopes
      * @param scopes map of scopes
-     * @param verified a list containing already verified scopes
-     * @param visitedParents temp list for verified parentScopes
+     * @param verified a set containing already verified scopes, verified means that this scope is guaranteed to not be part of a cyclic dependency
+     * @param visitedScopes temp list for visited scopes, represents the current path in the depth-first search. The last element in the list must be {@param parentScope}
      * @param vios the violation output
      */
-    private static void verifyCyclicalDependence(String parentScope, Map<String, InstrumentationScopeSettings> scopes, Set<String> verified, List<String> visitedParents, ViolationBuilder vios) {
+    private static void verifyNoCyclicalDependence(String parentScope, Map<String, InstrumentationScopeSettings> scopes, Set<String> verified, List<String> visitedScopes, ViolationBuilder vios) {
         if(verified.contains(parentScope)){
             return;
         }
@@ -119,19 +121,19 @@ public class InstrumentationScopeSettings {
                 .filter(Map.Entry::getValue)
                 .map(Map.Entry::getKey)
                 .forEach(excludeScope -> {
-                    if (visitedParents.contains(excludeScope)) {
-                        vios.message("Specified excluded Scope in '{scope}' has cyclical dependence with other Scope -> '{excludeScope}'") // verifiedParens ausgeben
+                    if (visitedScopes.contains(excludeScope)) {
+                        vios.message("Specified excluded Scope in '{scope}' has cyclical dependence with other Scope: '{scopeDependencies}'")
                                 .atProperty("scopes")
                                 .parameter("scope", parentScope)
-                                .parameter("excludeScope", excludeScope)
+                                .parameter("scopeDependencies", String.join(" -> ", visitedScopes) + " -> " + excludeScope)
                                 .buildAndPublish();
                     }
                     else {
-                        visitedParents.add(excludeScope);
+                        visitedScopes.add(excludeScope);
                         if (scopes.containsKey(excludeScope)) {
-                            verifyCyclicalDependence(excludeScope, scopes, verified, visitedParents, vios);
+                            verifyNoCyclicalDependence(excludeScope, scopes, verified, visitedScopes, vios);
                         }
-                        visitedParents.remove(visitedParents.size() - 1);
+                        visitedScopes.remove(visitedScopes.size() - 1);
                     }
                 });
         verified.add(parentScope);
