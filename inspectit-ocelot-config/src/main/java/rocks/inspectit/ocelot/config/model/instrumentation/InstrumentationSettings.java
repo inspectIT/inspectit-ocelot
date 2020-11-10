@@ -15,6 +15,7 @@ import javax.validation.constraints.NotNull;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+import java.util.HashSet;
 
 /**
  * Configuration object for all settings regarding the instrumentation.
@@ -94,6 +95,11 @@ public class InstrumentationSettings {
         Set<String> declaredMetrics = container.getMetrics().getDefinitions().keySet();
         rules.forEach((name, r) ->
                 r.performValidation(this, declaredMetrics, vios.atProperty("rules").atProperty(name)));
+
+        HashSet<String> verified = new HashSet<>();
+        // Verifies that scopes that are defined as Exclude also exist
+        scopes.forEach((name, s) ->
+                s.performValidation(name, this, vios.atProperty("scopes").atProperty(name), verified));
     }
 
 }
