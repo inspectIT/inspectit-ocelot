@@ -24,7 +24,7 @@ public final class TagUtils {
         if (isTagValueValid(v)) {
             return TagValue.create(v);
         }
-        printWarningOnce();
+        printWarningOnce(v);
         return TagValue.create("<invalid>");
     }
 
@@ -32,9 +32,9 @@ public final class TagUtils {
         return value.length() <= TagValue.MAX_LENGTH && StringUtils.isPrintableString(value);
     }
 
-    private static void printWarningOnce() {
+    private static void printWarningOnce(String v) {
         if (!isWarningPrinted) {
-            log.warn("illegal tag value converted to <invalid>");
+            log.warn("illegal tag value: <" + v + "> converted to <invalid>");
             isWarningPrinted = true;
         }
     }
