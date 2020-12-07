@@ -67,12 +67,12 @@ public class ViewDefinitionSettings {
     private List<@NotNull Double> quantiles = Arrays.asList(0.0, 0.5, 0.9, 0.95, 0.99, 1.0);
 
     @Min(0)
-    @Max(50)
+    @Max(100)
     @Builder.Default
     private Integer cutTop = 0;
 
     @Min(0)
-    @Max(50)
+    @Max(100)
     @Builder.Default
     private Integer cutBottom = 0;
 
@@ -146,6 +146,12 @@ public class ViewDefinitionSettings {
     boolean isQuantilesInRange() {
         return !enabled || aggregation != Aggregation.QUANTILES ||
                 quantiles.stream().noneMatch(q -> q < 0 || q > 1);
+    }
+
+    @AssertTrue(message = "Either cutTop or cutBottom must be greater than 0")
+    boolean isSmoothedAverageNotZero() {
+        return !enabled || aggregation != Aggregation.SMOOTHED_AVERAGE ||
+                (cutTop != 0 && cutBottom != 0);
     }
 
 }

@@ -51,6 +51,11 @@ public class PercentileView {
     private static final String MAX_METRIC_SUFFIX = "_max";
 
     /**
+     * The tag value to use for {@link #PERCENTILE_TAG_KEY} for the "smoothed average" series.
+     */
+    private static final String SMOOTHED_AVERAGE_METRIC_SUFFIX = "_smoothed_average";
+
+    /**
      * The formatter used to print percentiles to tags.
      */
     private static final DecimalFormat PERCENTILE_TAG_FORMATTER = new DecimalFormat("#.#####", DecimalFormatSymbols.getInstance(Locale.ENGLISH));
@@ -168,12 +173,13 @@ public class PercentileView {
         this.viewName = viewName;
         this.unit = unit;
         this.description = description;
+        this.percentiles = Collections.emptySet();
         this.bufferLimit = bufferLimit;
         numberOfPoints = new AtomicInteger(0);
         lastCleanupTimeMs = new AtomicLong(0);
 
         List<LabelKey> smoothedAverageLabelKeys = getLabelKeysInOrderForMinMax();
-        smoothedAverageMetricDescriptor = MetricDescriptor.create(viewName, description, unit, MetricDescriptor.Type.GAUGE_DOUBLE, smoothedAverageLabelKeys);
+        smoothedAverageMetricDescriptor = MetricDescriptor.create(viewName + SMOOTHED_AVERAGE_METRIC_SUFFIX, description, unit, MetricDescriptor.Type.GAUGE_DOUBLE, smoothedAverageLabelKeys);
     }
 
     /**
@@ -216,10 +222,10 @@ public class PercentileView {
     }
 
     private void validateConfiguration(int cutTop, int cutBottom, long timeWindowMillis, String baseViewName, String unit, String description, int bufferLimit) {
-        if (cutTop < 0 || cutTop > 50) {
+        if (cutTop < 0 || cutTop > 100) {
             throw new IllegalArgumentException("cutTop must be greater than 0 and smaller than 50!");
         }
-        if (cutBottom < 0 || cutBottom > 50) {
+        if (cutBottom < 0 || cutBottom > 100) {
             throw new IllegalArgumentException("cutBottom must be greater than 0 and smaller than 50!");
         }
         if (StringUtils.isBlank(baseViewName)) {
@@ -320,6 +326,9 @@ public class PercentileView {
         if (!percentiles.isEmpty()) {
             result.add(percentileMetricDescriptor.getName());
         }
+        if (cutTop != 0 || cutBottom != 0) {
+            result.add(smoothedAverageMetricDescriptor.getName());
+        }
         return result;
     }
 
@@ -396,7 +405,7 @@ public class PercentileView {
         if (isMaxEnabled()) {
             resultMetrics.add(Metric.create(maxMetricDescriptor, resultSeries.maxSeries));
         }
-        if (cutTop != 0 && cutBottom != 0) {
+        if (cutTop != 0 || cutBottom != 0) {
             resultMetrics.add(Metric.create(smoothedAverageMetricDescriptor, resultSeries.smoothedAverageSeries));
         }
         return resultMetrics;
@@ -432,7 +441,8 @@ public class PercentileView {
                 double percentileValue = percentileComputer.evaluate(percentile * 100);
                 resultSeries.addPercentile(percentileValue, time, tagValues, percentile);
             }
-        } else {
+        }
+        if (cutTop != 0 || cutBottom != 0) {
             double queueLength = data.length;
             double base = queueLength / 100;
 
@@ -442,7 +452,7 @@ public class PercentileView {
             int endIndex = (cutTop == 0) ? (int) queueLength - 1 : Math.max((ratioTop <= 0) ? (int) queueLength - 2 : (int) queueLength - 1 - ratioTop, startIndex);
 
             // Note: Can also return sum and count
-            double smoothedAverage = Arrays.stream(data).sorted().skip(startIndex).limit(endIndex - startIndex + 1).average().orElse(0.0);
+            double smoothedAverage = round((Arrays.stream(data).sorted().skip(startIndex).limit(endIndex - startIndex + 1).average().orElse(0.0)) * 100.0) / 100.0;
             resultSeries.addSmoothedAverage(smoothedAverage, time, tagValues);
         }
     }

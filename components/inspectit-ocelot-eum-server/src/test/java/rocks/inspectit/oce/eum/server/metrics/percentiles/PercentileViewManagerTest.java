@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import sun.security.x509.InvalidityDateExtension;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -101,13 +102,25 @@ public class PercentileViewManagerTest {
         }
 
         @Test
-        void singleViewRegistered() {
+        void singleViewRegisteredPercentiles() {
             viewManager.createOrUpdateView("my/measure", "my/view", "ms", "foo",
                     true, false, Arrays.asList(0.5, 0.95), 15000, Collections.emptyList(), 1);
 
             assertThat(viewManager.getMeasureNameForSeries("my/view")).isEqualTo("my/measure");
+            assertThat(viewManager.getMeasureNameForSeries("my/view_smoothed_average")).isNull();
             assertThat(viewManager.getMeasureNameForSeries("my/view_min")).isEqualTo("my/measure");
             assertThat(viewManager.getMeasureNameForSeries("my/view_max")).isNull();
+        }
+
+        @Test
+        void singleViewRegisteredSmoothedAverage() {
+            viewManager.createOrUpdateView("my/measure", "my/view", "ms", "foo",
+                    5, 5, 15000, Collections.emptyList(), 1);
+
+            assertThat(viewManager.getMeasureNameForSeries("my/view")).isNull();
+            assertThat(viewManager.getMeasureNameForSeries("my/view_smoothed_average")).isEqualTo("my/measure");
+            assertThat(viewManager.getMeasureNameForSeries("my/view_max")).isNull();
+            assertThat(viewManager.getMeasureNameForSeries("my/view_min")).isNull();
         }
 
         @Test
@@ -128,6 +141,22 @@ public class PercentileViewManagerTest {
             assertThat(viewManager.getMeasureNameForSeries("my/other_view")).isNull();
             assertThat(viewManager.getMeasureNameForSeries("my/other_view_min")).isNull();
             assertThat(viewManager.getMeasureNameForSeries("my/other_view_max")).isEqualTo("my/other_measure");
+
+            viewManager.createOrUpdateView("my/further_measure", "my/further_view", "ms", "foo",
+                    5, 10, 15000, Collections.emptyList(), 1);
+
+            assertThat(viewManager.getMeasureNameForSeries("my/view")).isEqualTo("my/measure");
+            assertThat(viewManager.getMeasureNameForSeries("my/view_smoothed_average")).isNull();
+            assertThat(viewManager.getMeasureNameForSeries("my/view_min")).isEqualTo("my/measure");
+            assertThat(viewManager.getMeasureNameForSeries("my/view_max")).isNull();
+            assertThat(viewManager.getMeasureNameForSeries("my/other_view")).isNull();
+            assertThat(viewManager.getMeasureNameForSeries("my/other_view_smoothed_average")).isNull();
+            assertThat(viewManager.getMeasureNameForSeries("my/other_view_min")).isNull();
+            assertThat(viewManager.getMeasureNameForSeries("my/other_view_max")).isEqualTo("my/other_measure");
+            assertThat(viewManager.getMeasureNameForSeries("my/further_view")).isNull();
+            assertThat(viewManager.getMeasureNameForSeries("my/further_view_smoothed_average")).isEqualTo("my/further_measure");
+            assertThat(viewManager.getMeasureNameForSeries("my/further_view_min")).isNull();
+            assertThat(viewManager.getMeasureNameForSeries("my/further_view_max")).isNull();
         }
 
         @Test
@@ -136,15 +165,24 @@ public class PercentileViewManagerTest {
                     true, false, Arrays.asList(0.5, 0.95), 15000, Collections.emptyList(), 1);
             viewManager.createOrUpdateView("my/other_measure", "my/other_view", "ms", "foo",
                     false, true, Collections.emptySet(), 15000, Collections.emptyList(), 1);
+            viewManager.createOrUpdateView("my/measure", "my/further_view", "ms", "foo",
+                    7, 50, 15000, Collections.emptyList(), 1);
 
             assertThat(viewManager.getMeasureNameForSeries("my/view")).isEqualTo("my/measure");
+            assertThat(viewManager.getMeasureNameForSeries("my/view_smoothed_average")).isNull();
             assertThat(viewManager.getMeasureNameForSeries("my/view_min")).isEqualTo("my/measure");
             assertThat(viewManager.getMeasureNameForSeries("my/view_max")).isNull();
             assertThat(viewManager.getMeasureNameForSeries("my/other_view")).isNull();
+            assertThat(viewManager.getMeasureNameForSeries("my/other_view_smoothed_average")).isNull();
             assertThat(viewManager.getMeasureNameForSeries("my/other_view_min")).isNull();
             assertThat(viewManager.getMeasureNameForSeries("my/other_view_max")).isEqualTo("my/other_measure");
+            assertThat(viewManager.getMeasureNameForSeries("my/further_view")).isNull();
+            assertThat(viewManager.getMeasureNameForSeries("my/further_view_smoothed_average")).isEqualTo("my/measure");
+            assertThat(viewManager.getMeasureNameForSeries("my/further_view_min")).isNull();
+            assertThat(viewManager.getMeasureNameForSeries("my/further_view_max")).isNull();
 
             viewManager.removeView("my/measure", "my/view");
+            viewManager.removeView("my/measure", "my/further_view");
 
             assertThat(viewManager.getMeasureNameForSeries("my/view")).isNull();
             assertThat(viewManager.getMeasureNameForSeries("my/view_min")).isNull();
@@ -152,6 +190,10 @@ public class PercentileViewManagerTest {
             assertThat(viewManager.getMeasureNameForSeries("my/other_view")).isNull();
             assertThat(viewManager.getMeasureNameForSeries("my/other_view_min")).isNull();
             assertThat(viewManager.getMeasureNameForSeries("my/other_view_max")).isEqualTo("my/other_measure");
+            assertThat(viewManager.getMeasureNameForSeries("my/further_view")).isNull();
+            assertThat(viewManager.getMeasureNameForSeries("my/further_view_smoothed_average")).isNull();
+            assertThat(viewManager.getMeasureNameForSeries("my/further_view_min")).isNull();
+            assertThat(viewManager.getMeasureNameForSeries("my/further_view_max")).isNull();
         }
     }
 
@@ -162,17 +204,22 @@ public class PercentileViewManagerTest {
         void testNoData() {
             viewManager.createOrUpdateView("my/measure", "my/view", "ms", "foo",
                     true, true, Arrays.asList(0.5, 0.95), 15000, Collections.emptyList(), 1);
+            viewManager.createOrUpdateView("my/measure", "my/further_view", "ms", "foo",
+                    7, 50, 15000, Collections.emptyList(), 1);
 
             Collection<Metric> result = viewManager.computeMetrics();
 
-            assertThat(result).hasSize(3);
+            assertThat(result).hasSize(4);
             assertTotalSeriesCount(result, 0);
         }
+
 
         @Test
         void testWithData() {
             viewManager.createOrUpdateView("my/measure", "my/view", "ms", "foo",
                     true, true, Arrays.asList(0.5, 0.95), 15000, Collections.emptyList(), 100);
+            viewManager.createOrUpdateView("my/measure", "my/further_view", "ms", "foo",
+                    20, 20, 15000, Collections.emptyList(), 100);
 
             for (int i = 1; i < 100; i++) {
                 doReturn((long) i).when(clock).get();
@@ -183,10 +230,11 @@ public class PercentileViewManagerTest {
             doReturn(10000L).when(clock).get();
             Collection<Metric> result = viewManager.computeMetrics();
 
-            assertThat(result).hasSize(3);
-            assertTotalSeriesCount(result, 4);
+            assertThat(result).hasSize(4);
+            assertTotalSeriesCount(result, 5);
             assertContainsMetric(result, "my/view_min", 1);
             assertContainsMetric(result, "my/view_max", 99);
+            assertContainsMetric(result, "my/further_view_smoothed_average", 50.0);
             assertContainsMetric(result, "my/view", 50, "quantile", "0.5");
             assertContainsMetric(result, "my/view", 95, "quantile", "0.95");
         }
@@ -195,6 +243,8 @@ public class PercentileViewManagerTest {
         void testMultiSeriesData() {
             viewManager.createOrUpdateView("my/measure", "my/view", "ms", "foo",
                     true, true, Arrays.asList(0.5, 0.95), 15000, Arrays.asList("tag1", "tag2"), 198);
+            viewManager.createOrUpdateView("my/measure", "my/further_view", "ms", "foo",
+                    20, 20, 15000, Arrays.asList("tag1", "tag2"), 198);
 
             for (int i = 1; i < 100; i++) {
                 doReturn((long) i).when(clock).get();
@@ -210,14 +260,16 @@ public class PercentileViewManagerTest {
             doReturn(10000L).when(clock).get();
             Collection<Metric> result = viewManager.computeMetrics();
 
-            assertThat(result).hasSize(3);
-            assertTotalSeriesCount(result, 8);
+            assertThat(result).hasSize(4);
+            assertTotalSeriesCount(result, 10);
             assertContainsMetric(result, "my/view_min", 1, "tag1", "", "tag2", "");
             assertContainsMetric(result, "my/view_max", 99, "tag1", "", "tag2", "");
+            assertContainsMetric(result, "my/further_view_smoothed_average", 50.0, "tag1", "", "tag2", "");
             assertContainsMetric(result, "my/view", 50, "tag1", "", "tag2", "", "quantile", "0.5");
             assertContainsMetric(result, "my/view", 95, "tag1", "", "tag2", "", "quantile", "0.95");
             assertContainsMetric(result, "my/view_min", 1001, "tag1", "foo", "tag2", "bar");
             assertContainsMetric(result, "my/view_max", 1099, "tag1", "foo", "tag2", "bar");
+            assertContainsMetric(result, "my/further_view_smoothed_average", 1050.0, "tag1", "foo", "tag2", "bar");
             assertContainsMetric(result, "my/view", 1050, "tag1", "foo", "tag2", "bar", "quantile", "0.5");
             assertContainsMetric(result, "my/view", 1095, "tag1", "foo", "tag2", "bar", "quantile", "0.95");
         }
@@ -228,22 +280,27 @@ public class PercentileViewManagerTest {
                     true, false, Collections.emptyList(), 1, Collections.emptyList(), 1);
             viewManager.createOrUpdateView("my/measure", "viewB", "ms", "foo",
                     true, false, Collections.emptyList(), 1, Arrays.asList("tag1"), 1);
+            viewManager.createOrUpdateView("my/measure", "viewC", "ms", "foo",
+                    15, 45, 1, Arrays.asList("tag2"), 1);
 
             viewManager.recordMeasurement("my/measure", 1);
             awaitMetricsProcessing();
 
             Collection<Metric> result = viewManager.computeMetrics();
 
-            assertThat(result).hasSize(2);
-            assertTotalSeriesCount(result, 2);
+            assertThat(result).hasSize(3);
+            assertTotalSeriesCount(result, 3);
             assertContainsMetric(result, "viewA_min", 1);
             assertContainsMetric(result, "viewB_min", 1, "tag1", "");
+            assertContainsMetric(result, "viewC_smoothed_average", 1, "tag2", "");
         }
 
         @Test
         void testWithStaleData() {
             viewManager.createOrUpdateView("my/measure", "my/view", "ms", "foo",
                     true, true, Arrays.asList(0.5, 0.95), 15000, Collections.emptyList(), 99);
+            viewManager.createOrUpdateView("my/measure", "my/further_view", "ms", "foo",
+                    5, 5, 15000, Collections.emptyList(), 99);
 
             for (int i = 1; i < 100; i++) {
                 doReturn((long) i).when(clock).get();
@@ -254,7 +311,7 @@ public class PercentileViewManagerTest {
 
             Collection<Metric> result = viewManager.computeMetrics();
 
-            assertThat(result).hasSize(3);
+            assertThat(result).hasSize(4);
             assertTotalSeriesCount(result, 0);
         }
 
@@ -262,6 +319,8 @@ public class PercentileViewManagerTest {
         void testDroppingBecauseBufferIsFull() {
             viewManager.createOrUpdateView("my/measure", "my/view", "ms", "foo",
                     true, false, Collections.emptyList(), 1, Arrays.asList("tag"), 10);
+            viewManager.createOrUpdateView("my/measure", "my/further_view", "ms", "foo",
+                    5, 5, 1, Arrays.asList("tag"), 10);
 
             doReturn(0L).when(clock).get();
             try (Scope s = Tags.getTagger().emptyBuilder()
@@ -274,16 +333,18 @@ public class PercentileViewManagerTest {
             awaitMetricsProcessing();
 
             Collection<Metric> result = viewManager.computeMetrics();
-
-            assertThat(result).hasSize(1);
-            assertTotalSeriesCount(result, 1);
+            assertThat(result).hasSize(2);
+            assertTotalSeriesCount(result, 2);
             assertContainsMetric(result, "my/view_min", 11.0, "tag", "foo");
+            assertContainsMetric(result, "my/further_view_smoothed_average", 15.5, "tag", "foo");
         }
 
         @Test
         void testDroppingPreventedThroughCleanupTask() {
             viewManager.createOrUpdateView("my/measure", "my/view", "ms", "foo",
                     true, false, Collections.emptyList(), 1, Arrays.asList("tag"), 10);
+            viewManager.createOrUpdateView("my/measure", "my/further_view", "ms", "foo",
+                    5, 5, 1, Arrays.asList("tag"), 10);
 
             doReturn(0L).when(clock).get();
             try (Scope s = Tags.getTagger().emptyBuilder()
@@ -304,9 +365,10 @@ public class PercentileViewManagerTest {
 
             Collection<Metric> result = viewManager.computeMetrics();
 
-            assertThat(result).hasSize(1);
-            assertTotalSeriesCount(result, 1);
+            assertThat(result).hasSize(2);
+            assertTotalSeriesCount(result, 2);
             assertContainsMetric(result, "my/view_min", 1000, "tag", "bar");
+            assertContainsMetric(result, "my/further_view_smoothed_average", 1000, "tag", "bar");
         }
     }
 
@@ -346,6 +408,28 @@ public class PercentileViewManagerTest {
             assertThat(result).hasSize(2);
             assertContainsMetric(result, "my/view_max", 42);
             assertContainsMetric(result, "my/view", 42, "quantile", "0.5");
+        }
+
+        @Test
+        void updateSmoothedAverage() {
+            viewManager.createOrUpdateView("my/measure", "my/view", "ms", "foo",
+                    20, 20, 1, Collections.emptyList(), 100);
+            viewManager.createOrUpdateView("my/measure", "my/view", "s", "bar",
+                    0, 5, 1, Arrays.asList("tag1", "tag2"), 100);
+
+            try (Scope s = Tags.getTagger().emptyBuilder()
+                    .putLocal(TagKey.create("tag1"), TagValue.create("foo"))
+                    .putLocal(TagKey.create("tag2"), TagValue.create("bar")).buildScoped()) {
+                viewManager.recordMeasurement("my/measure", 42);
+                viewManager.recordMeasurement("my/measure", 43);
+                viewManager.recordMeasurement("my/measure", 44);
+                viewManager.recordMeasurement("my/measure", 45);
+            }
+            awaitMetricsProcessing();
+
+            Collection<Metric> result = viewManager.computeMetrics();
+            assertThat(result).hasSize(1);
+            assertContainsMetric(result, "my/view_smoothed_average", 44, "tag1", "foo", "tag2", "bar");
         }
 
         @Test
@@ -406,11 +490,40 @@ public class PercentileViewManagerTest {
         void updateWithValueRecorded() {
             viewManager.createOrUpdateView("my/measure", "my/view", "ms", "foo",
                     true, false, Collections.emptyList(), 1, Collections.emptyList(), 100);
+            viewManager.createOrUpdateView("my/measure", "my/further_view", "ms", "foo",
+                    20, 20, 1, Collections.emptyList(), 100);
+
             viewManager.recordMeasurement("my/measure", 42);
             awaitMetricsProcessing();
 
             viewManager.createOrUpdateView("my/measure", "my/view", "ms", "foo",
                     true, false, Collections.emptyList(), 1, Arrays.asList("tag1", "tag2"), 100);
+            viewManager.createOrUpdateView("my/measure", "my/further_view", "s", "bar",
+                    0, 5, 1, Arrays.asList("tag1", "tag2"), 100);
+
+            try (Scope s = Tags.getTagger().emptyBuilder()
+                    .putLocal(TagKey.create("tag1"), TagValue.create("foo"))
+                    .putLocal(TagKey.create("tag2"), TagValue.create("bar")).buildScoped()) {
+                viewManager.recordMeasurement("my/measure", 42);
+            }
+            awaitMetricsProcessing();
+
+            Collection<Metric> result = viewManager.computeMetrics();
+            assertThat(result).hasSize(2);
+            assertContainsMetric(result, "my/view_min", 42, "tag1", "foo", "tag2", "bar");
+            assertContainsMetric(result, "my/further_view_smoothed_average", 42, "tag1", "foo", "tag2", "bar");
+        }
+
+        @Test
+        void updatePercentileToSmoothedAverage() {
+            viewManager.createOrUpdateView("my/measure", "my/view", "ms", "foo",
+                    true, false, Collections.emptyList(), 1, Collections.emptyList(), 100);
+
+            viewManager.recordMeasurement("my/measure", 42);
+            awaitMetricsProcessing();
+
+            viewManager.createOrUpdateView("my/measure", "my/view", "s", "bar",
+                    0, 5, 1, Arrays.asList("tag1", "tag2"), 100);
 
             try (Scope s = Tags.getTagger().emptyBuilder()
                     .putLocal(TagKey.create("tag1"), TagValue.create("foo"))
@@ -421,7 +534,7 @@ public class PercentileViewManagerTest {
 
             Collection<Metric> result = viewManager.computeMetrics();
             assertThat(result).hasSize(1);
-            assertContainsMetric(result, "my/view_min", 42, "tag1", "foo", "tag2", "bar");
+            assertContainsMetric(result, "my/view_smoothed_average", 42, "tag1", "foo", "tag2", "bar");
         }
     }
 
@@ -432,15 +545,19 @@ public class PercentileViewManagerTest {
         void checkViewRemoved() {
             viewManager.createOrUpdateView("my/measure", "my/view", "ms", "foo",
                     true, false, Collections.emptyList(), 100, Collections.emptyList(), 100);
+            viewManager.createOrUpdateView("my/measure", "my/further_view", "ms", "foo",
+                    20, 20, 1, Collections.emptyList(), 100);
 
             viewManager.recordMeasurement("my/measure", 42);
             awaitMetricsProcessing();
 
             boolean removed = viewManager.removeView("my/measure", "my/view");
+            boolean removed_smoothed_average = viewManager.removeView("my/measure", "my/further_view");
 
             Collection<Metric> result = viewManager.computeMetrics();
             assertThat(viewManager.areAnyViewsRegisteredForMeasure("my/measure")).isFalse();
             assertThat(removed).isTrue();
+            assertThat(removed_smoothed_average).isTrue();
             assertThat(result).isEmpty();
 
         }

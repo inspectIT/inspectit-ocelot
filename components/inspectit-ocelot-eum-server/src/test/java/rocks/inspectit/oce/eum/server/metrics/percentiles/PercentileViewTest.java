@@ -38,6 +38,21 @@ public class PercentileViewTest {
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
+
+        @Test
+        void invalidCutTop() {
+            assertThatThrownBy(() -> new PercentileView(-1, 0,
+                    Collections.emptySet(), 1000, "name", "unit", "description", 1))
+                    .isInstanceOf(IllegalArgumentException.class);
+        }
+
+        @Test
+        void invalidCutBottom() {
+            assertThatThrownBy(() -> new PercentileView(5, 101,
+                    Collections.emptySet(), 1000, "name", "unit", "description", 1))
+                    .isInstanceOf(IllegalArgumentException.class);
+        }
+
         @Test
         void blankName() {
             assertThatThrownBy(() -> new PercentileView(true, true, Collections.emptySet(),
@@ -132,6 +147,14 @@ public class PercentileViewTest {
             assertThat(view.getSeriesNames()).containsExactlyInAnyOrder("name", "name_min", "name_max");
         }
 
+        @Test
+        void checkSmoothedAverageSeries() {
+            PercentileView view = new PercentileView(0, 5, Collections.emptySet(), 10,
+                    "name", "unit", "description", 1);
+
+            assertThat(view.getSeriesNames()).containsExactly("name_smoothed_average");
+        }
+
     }
 
     @Nested
@@ -194,6 +217,273 @@ public class PercentileViewTest {
             assertThat(descriptor.getLabelKeys()).containsExactly(LabelKey.create("my_tag", ""));
             assertThat(descriptor.getUnit()).isEqualTo("unit");
             assertThat(descriptor.getType()).isEqualTo(MetricDescriptor.Type.GAUGE_DOUBLE);
+        }
+
+        @Test
+        void checkSmoothedAverageMetricDescriptor() {
+            PercentileView view = new PercentileView(5, 5, ImmutableSet.of("my_tag"),
+                    10, "name", "unit", "description", 1);
+
+            Timestamp queryTime = Timestamp.fromMillis(10);
+            Collection<Metric> result = view.computeMetrics(queryTime);
+            assertThat(result).hasSize(1);
+            MetricDescriptor descriptor = result.iterator().next().getMetricDescriptor();
+
+            assertThat(descriptor.getName()).isEqualTo("name_smoothed_average");
+            assertThat(descriptor.getDescription()).isEqualTo("description");
+            assertThat(descriptor.getLabelKeys()).containsExactly(LabelKey.create("my_tag", ""));
+            assertThat(descriptor.getUnit()).isEqualTo("unit");
+            assertThat(descriptor.getType()).isEqualTo(MetricDescriptor.Type.GAUGE_DOUBLE);
+        }
+
+        @Test
+        void checkSmoothedAverageMetric() {
+            PercentileView view = new PercentileView(5, 5, ImmutableSet.of("my_tag"),
+                    10, "name", "unit", "description", 12);
+
+            view.insertValue(42, Timestamp.fromMillis(1), createTagContext("my_tag", "foo"));
+            view.insertValue(99, Timestamp.fromMillis(2), createTagContext("my_tag", "foo"));
+            view.insertValue(101, Timestamp.fromMillis(2), createTagContext("my_tag", "foo"));
+            view.insertValue(50, Timestamp.fromMillis(2), createTagContext("my_tag", "foo"));
+            view.insertValue(68, Timestamp.fromMillis(2), createTagContext("my_tag", "foo"));
+            view.insertValue(70, Timestamp.fromMillis(3), createTagContext("my_tag", "foo"));
+
+            view.insertValue(101, Timestamp.fromMillis(3), createTagContext("my_tag", "bar"));
+            view.insertValue(150, Timestamp.fromMillis(4), createTagContext("my_tag", "bar"));
+            view.insertValue(171, Timestamp.fromMillis(4), createTagContext("my_tag", "bar"));
+            view.insertValue(250, Timestamp.fromMillis(5), createTagContext("my_tag", "bar"));
+            view.insertValue(99, Timestamp.fromMillis(5), createTagContext("my_tag", "bar"));
+            view.insertValue(101, Timestamp.fromMillis(6), createTagContext("my_tag", "bar"));
+
+            Timestamp queryTime = Timestamp.fromMillis(10);
+            Collection<Metric> results = view.computeMetrics(queryTime);
+            assertThat(results).hasSize(1);
+            Metric result = results.iterator().next();
+
+            assertThat(result.getTimeSeriesList())
+                    .hasSize(2)
+                    .anySatisfy(series -> {
+                        assertThat(series.getLabelValues()).containsExactly(LabelValue.create("foo"));
+                        assertThat(series.getPoints())
+                                .hasSize(1)
+                                .anySatisfy(pt -> {
+                                    assertThat(pt.getTimestamp()).isEqualTo(queryTime);
+                                    assertThat(pt.getValue()).isEqualTo(Value.doubleValue(71.75));
+                                });
+                    }).anySatisfy(series -> {
+                assertThat(series.getLabelValues()).containsExactly(LabelValue.create("bar"));
+                assertThat(series.getPoints())
+                        .hasSize(1)
+                        .anySatisfy(pt -> {
+                            assertThat(pt.getTimestamp()).isEqualTo(queryTime);
+                            assertThat(pt.getValue()).isEqualTo(Value.doubleValue(130.75));
+                        });
+            });
+        }
+
+        @Test
+        void checkSmoothedAverageMetricGreatIndex() {
+            PercentileView view = new PercentileView(20, 20, ImmutableSet.of("my_tag"),
+                    10, "name", "unit", "description", 24);
+
+            view.insertValue(42, Timestamp.fromMillis(1), createTagContext("my_tag" , "foo"));
+            view.insertValue(99, Timestamp.fromMillis(2), createTagContext("my_tag" , "foo"));
+            view.insertValue(101, Timestamp.fromMillis(2), createTagContext("my_tag", "foo"));
+            view.insertValue(50, Timestamp.fromMillis(2), createTagContext("my_tag" , "foo"));
+            view.insertValue(68, Timestamp.fromMillis(2), createTagContext("my_tag" , "foo"));
+            view.insertValue(70, Timestamp.fromMillis(2), createTagContext("my_tag" , "foo"));
+            view.insertValue(42, Timestamp.fromMillis(2), createTagContext("my_tag" , "foo"));
+            view.insertValue(99, Timestamp.fromMillis(2), createTagContext("my_tag" , "foo"));
+            view.insertValue(101, Timestamp.fromMillis(2), createTagContext("my_tag", "foo"));
+            view.insertValue(50, Timestamp.fromMillis(2), createTagContext("my_tag" , "foo"));
+            view.insertValue(68, Timestamp.fromMillis(2), createTagContext("my_tag" , "foo"));
+            view.insertValue(70, Timestamp.fromMillis(3), createTagContext("my_tag" , "foo"));
+            view.insertValue(101, Timestamp.fromMillis(3), createTagContext("my_tag", "foo"));
+            view.insertValue(150, Timestamp.fromMillis(4), createTagContext("my_tag", "foo"));
+            view.insertValue(171, Timestamp.fromMillis(4), createTagContext("my_tag", "foo"));
+            view.insertValue(250, Timestamp.fromMillis(5), createTagContext("my_tag", "foo"));
+            view.insertValue(99, Timestamp.fromMillis(5), createTagContext("my_tag" , "foo"));
+            view.insertValue(101, Timestamp.fromMillis(6), createTagContext("my_tag", "foo"));
+            view.insertValue(101, Timestamp.fromMillis(6), createTagContext("my_tag", "foo"));
+            view.insertValue(150, Timestamp.fromMillis(6), createTagContext("my_tag", "foo"));
+            view.insertValue(171, Timestamp.fromMillis(7), createTagContext("my_tag", "foo"));
+            view.insertValue(250, Timestamp.fromMillis(7), createTagContext("my_tag", "foo"));
+            view.insertValue(99, Timestamp.fromMillis(7), createTagContext("my_tag" , "foo"));
+            view.insertValue(101, Timestamp.fromMillis(8), createTagContext("my_tag", "foo"));
+
+            Timestamp queryTime = Timestamp.fromMillis(10);
+            Collection<Metric> results = view.computeMetrics(queryTime);
+            assertThat(results).hasSize(1);
+            Metric result = results.iterator().next();
+
+            assertThat(result.getTimeSeriesList())
+                    .hasSize(1)
+                    .anySatisfy(series -> {
+                        assertThat(series.getLabelValues()).containsExactly(LabelValue.create("foo"));
+                        assertThat(series.getPoints())
+                                .hasSize(1)
+                                .anySatisfy(pt -> {
+                                    assertThat(pt.getTimestamp()).isEqualTo(queryTime);
+                                    assertThat(pt.getValue()).isEqualTo(Value.doubleValue(97.14));
+                                });
+            });
+        }
+
+        @Test
+        void checkSmoothedAverageMetricCutOnlyBottom() {
+            PercentileView view = new PercentileView(0, 20, ImmutableSet.of("my_tag"),
+                    10, "name", "unit", "description", 24);
+
+            view.insertValue(42, Timestamp.fromMillis(1), createTagContext("my_tag" , "foo"));
+            view.insertValue(99, Timestamp.fromMillis(2), createTagContext("my_tag" , "foo"));
+            view.insertValue(101, Timestamp.fromMillis(2), createTagContext("my_tag", "foo"));
+            view.insertValue(50, Timestamp.fromMillis(2), createTagContext("my_tag" , "foo"));
+            view.insertValue(68, Timestamp.fromMillis(2), createTagContext("my_tag" , "foo"));
+            view.insertValue(70, Timestamp.fromMillis(2), createTagContext("my_tag" , "foo"));
+            view.insertValue(42, Timestamp.fromMillis(2), createTagContext("my_tag" , "foo"));
+            view.insertValue(99, Timestamp.fromMillis(2), createTagContext("my_tag" , "foo"));
+            view.insertValue(101, Timestamp.fromMillis(2), createTagContext("my_tag", "foo"));
+            view.insertValue(50, Timestamp.fromMillis(2), createTagContext("my_tag" , "foo"));
+            view.insertValue(68, Timestamp.fromMillis(2), createTagContext("my_tag" , "foo"));
+            view.insertValue(70, Timestamp.fromMillis(3), createTagContext("my_tag" , "foo"));
+            view.insertValue(101, Timestamp.fromMillis(3), createTagContext("my_tag", "foo"));
+            view.insertValue(150, Timestamp.fromMillis(4), createTagContext("my_tag", "foo"));
+            view.insertValue(171, Timestamp.fromMillis(4), createTagContext("my_tag", "foo"));
+            view.insertValue(250, Timestamp.fromMillis(5), createTagContext("my_tag", "foo"));
+            view.insertValue(99, Timestamp.fromMillis(5), createTagContext("my_tag" , "foo"));
+            view.insertValue(101, Timestamp.fromMillis(6), createTagContext("my_tag", "foo"));
+            view.insertValue(101, Timestamp.fromMillis(6), createTagContext("my_tag", "foo"));
+            view.insertValue(150, Timestamp.fromMillis(6), createTagContext("my_tag", "foo"));
+            view.insertValue(171, Timestamp.fromMillis(7), createTagContext("my_tag", "foo"));
+            view.insertValue(250, Timestamp.fromMillis(7), createTagContext("my_tag", "foo"));
+            view.insertValue(99, Timestamp.fromMillis(7), createTagContext("my_tag" , "foo"));
+            view.insertValue(101, Timestamp.fromMillis(8), createTagContext("my_tag", "foo"));
+
+            Timestamp queryTime = Timestamp.fromMillis(10);
+            Collection<Metric> results = view.computeMetrics(queryTime);
+            assertThat(results).hasSize(1);
+            Metric result = results.iterator().next();
+
+            assertThat(result.getTimeSeriesList())
+                    .hasSize(1)
+                    .anySatisfy(series -> {
+                        assertThat(series.getLabelValues()).containsExactly(LabelValue.create("foo"));
+                        assertThat(series.getPoints())
+                                .hasSize(1)
+                                .anySatisfy(pt -> {
+                                    assertThat(pt.getTimestamp()).isEqualTo(queryTime);
+                                    assertThat(pt.getValue()).isEqualTo(Value.doubleValue(123.79));
+                                });
+                    });
+        }
+
+        @Test
+        void checkSmoothedAverageMetricCutOnlyTop() {
+            PercentileView view = new PercentileView(11, 0, ImmutableSet.of("my_tag"),
+                    10, "name", "unit", "description", 24);
+
+            view.insertValue(42, Timestamp.fromMillis(1), createTagContext("my_tag" , "foo"));
+            view.insertValue(99, Timestamp.fromMillis(2), createTagContext("my_tag" , "foo"));
+            view.insertValue(101, Timestamp.fromMillis(2), createTagContext("my_tag", "foo"));
+            view.insertValue(50, Timestamp.fromMillis(2), createTagContext("my_tag" , "foo"));
+            view.insertValue(68, Timestamp.fromMillis(2), createTagContext("my_tag" , "foo"));
+            view.insertValue(70, Timestamp.fromMillis(2), createTagContext("my_tag" , "foo"));
+            view.insertValue(42, Timestamp.fromMillis(2), createTagContext("my_tag" , "foo"));
+            view.insertValue(99, Timestamp.fromMillis(2), createTagContext("my_tag" , "foo"));
+            view.insertValue(101, Timestamp.fromMillis(2), createTagContext("my_tag", "foo"));
+            view.insertValue(50, Timestamp.fromMillis(2), createTagContext("my_tag" , "foo"));
+            view.insertValue(68, Timestamp.fromMillis(2), createTagContext("my_tag" , "foo"));
+            view.insertValue(70, Timestamp.fromMillis(3), createTagContext("my_tag" , "foo"));
+            view.insertValue(101, Timestamp.fromMillis(3), createTagContext("my_tag", "foo"));
+            view.insertValue(150, Timestamp.fromMillis(4), createTagContext("my_tag", "foo"));
+            view.insertValue(171, Timestamp.fromMillis(4), createTagContext("my_tag", "foo"));
+            view.insertValue(250, Timestamp.fromMillis(5), createTagContext("my_tag", "foo"));
+            view.insertValue(99, Timestamp.fromMillis(5), createTagContext("my_tag" , "foo"));
+            view.insertValue(101, Timestamp.fromMillis(6), createTagContext("my_tag", "foo"));
+            view.insertValue(101, Timestamp.fromMillis(6), createTagContext("my_tag", "foo"));
+            view.insertValue(150, Timestamp.fromMillis(6), createTagContext("my_tag", "foo"));
+            view.insertValue(171, Timestamp.fromMillis(7), createTagContext("my_tag", "foo"));
+            view.insertValue(250, Timestamp.fromMillis(7), createTagContext("my_tag", "foo"));
+            view.insertValue(99, Timestamp.fromMillis(7), createTagContext("my_tag" , "foo"));
+            view.insertValue(101, Timestamp.fromMillis(8), createTagContext("my_tag", "foo"));
+
+            Timestamp queryTime = Timestamp.fromMillis(10);
+            Collection<Metric> results = view.computeMetrics(queryTime);
+            assertThat(results).hasSize(1);
+            Metric result = results.iterator().next();
+
+            assertThat(result.getTimeSeriesList())
+                    .hasSize(1)
+                    .anySatisfy(series -> {
+                        assertThat(series.getLabelValues()).containsExactly(LabelValue.create("foo"));
+                        assertThat(series.getPoints())
+                                .hasSize(1)
+                                .anySatisfy(pt -> {
+                                    assertThat(pt.getTimestamp()).isEqualTo(queryTime);
+                                    assertThat(pt.getValue()).isEqualTo(Value.doubleValue(92.05));
+                                });
+                    });
+        }
+
+        @Test
+        void checkSmoothedAverageMetricCutGreaterTopIndex() {
+            PercentileView view = new PercentileView(90, 20, ImmutableSet.of("my_tag"),
+                    10, "name", "unit", "description", 24);
+
+            view.insertValue(42, Timestamp.fromMillis(1), createTagContext("my_tag" , "foo"));
+            view.insertValue(99, Timestamp.fromMillis(2), createTagContext("my_tag" , "foo"));
+            view.insertValue(101, Timestamp.fromMillis(2), createTagContext("my_tag", "foo"));
+            view.insertValue(50, Timestamp.fromMillis(2), createTagContext("my_tag" , "foo"));
+            view.insertValue(68, Timestamp.fromMillis(2), createTagContext("my_tag" , "foo"));
+            view.insertValue(70, Timestamp.fromMillis(2), createTagContext("my_tag" , "foo"));
+            view.insertValue(42, Timestamp.fromMillis(2), createTagContext("my_tag" , "foo"));
+            view.insertValue(99, Timestamp.fromMillis(2), createTagContext("my_tag" , "foo"));
+            view.insertValue(101, Timestamp.fromMillis(2), createTagContext("my_tag", "foo"));
+            view.insertValue(50, Timestamp.fromMillis(2), createTagContext("my_tag" , "foo"));
+            view.insertValue(68, Timestamp.fromMillis(2), createTagContext("my_tag" , "foo"));
+            view.insertValue(70, Timestamp.fromMillis(3), createTagContext("my_tag" , "foo"));
+            view.insertValue(101, Timestamp.fromMillis(3), createTagContext("my_tag", "foo"));
+            view.insertValue(150, Timestamp.fromMillis(4), createTagContext("my_tag", "foo"));
+            view.insertValue(171, Timestamp.fromMillis(4), createTagContext("my_tag", "foo"));
+            view.insertValue(250, Timestamp.fromMillis(5), createTagContext("my_tag", "foo"));
+            view.insertValue(99, Timestamp.fromMillis(5), createTagContext("my_tag" , "foo"));
+            view.insertValue(101, Timestamp.fromMillis(6), createTagContext("my_tag", "foo"));
+            view.insertValue(101, Timestamp.fromMillis(6), createTagContext("my_tag", "foo"));
+            view.insertValue(150, Timestamp.fromMillis(6), createTagContext("my_tag", "foo"));
+            view.insertValue(171, Timestamp.fromMillis(7), createTagContext("my_tag", "foo"));
+            view.insertValue(250, Timestamp.fromMillis(7), createTagContext("my_tag", "foo"));
+            view.insertValue(99, Timestamp.fromMillis(7), createTagContext("my_tag" , "foo"));
+            view.insertValue(101, Timestamp.fromMillis(8), createTagContext("my_tag", "foo"));
+
+            Timestamp queryTime = Timestamp.fromMillis(10);
+            Collection<Metric> results = view.computeMetrics(queryTime);
+            assertThat(results).hasSize(1);
+            Metric result = results.iterator().next();
+
+            assertThat(result.getTimeSeriesList())
+                    .hasSize(1)
+                    .anySatisfy(series -> {
+                        assertThat(series.getLabelValues()).containsExactly(LabelValue.create("foo"));
+                        assertThat(series.getPoints())
+                                .hasSize(1)
+                                .anySatisfy(pt -> {
+                                    assertThat(pt.getTimestamp()).isEqualTo(queryTime);
+                                    assertThat(pt.getValue()).isEqualTo(Value.doubleValue(68.0));
+                                });
+                    });
+        }
+
+        @Test
+        void checkSmoothedAverageMetricCutNothing() {
+            PercentileView view = new PercentileView(0, 0, ImmutableSet.of("my_tag"),
+                    10, "name", "unit", "description", 2);
+
+            view.insertValue(42, Timestamp.fromMillis(1), createTagContext("my_tag" , "foo"));
+            view.insertValue(99, Timestamp.fromMillis(2), createTagContext("my_tag" , "foo"));
+
+            Timestamp queryTime = Timestamp.fromMillis(10);
+            Collection<Metric> results = view.computeMetrics(queryTime);
+            assertThat(results).hasSize(0);
         }
 
         @Test
