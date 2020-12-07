@@ -22,6 +22,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
+import static java.lang.Math.round;
+
 /**
  * COPIED FROM THE OCELOT CORE PROJECT!
  * <p>
@@ -54,7 +56,12 @@ public class PercentileView {
     private static final DecimalFormat PERCENTILE_TAG_FORMATTER = new DecimalFormat("#.#####", DecimalFormatSymbols.getInstance(Locale.ENGLISH));
 
     /**
-     * The descriptor of the metric for this view.
+     * The descriptor of the metric for this view, if smoothed average.
+     */
+    private MetricDescriptor smoothedAverageMetricDescriptor;
+
+    /**
+     * The descriptor of the metric for this view, if percentile.
      */
     private MetricDescriptor percentileMetricDescriptor;
 
@@ -96,6 +103,12 @@ public class PercentileView {
     @Getter
     private long timeWindowMillis;
 
+    @Getter
+    private int cutTop;
+
+    @Getter
+    private int cutBottom;
+
     /**
      * The name of the view, used as prefix for all individual metrics.
      */
@@ -136,6 +149,36 @@ public class PercentileView {
     /**
      * Constructor.
      *
+     * @param cutTop           TODO
+     * @param cutBottom        TODO
+     * @param tags             the tags to use for this view
+     * @param timeWindowMillis the time range in milliseconds to use for computing minimum / maximum and percentile values
+     * @param viewName         the prefix to use for the names of all exposed metrics
+     * @param unit             the unit of the measure
+     * @param description      the description of this view
+     * @param bufferLimit      the maximum number of measurements to be buffered by this view
+     */
+    PercentileView(int cutTop, int cutBottom, Set<String> tags, long timeWindowMillis, String viewName, String unit, String description, int bufferLimit) {
+        validateConfiguration(cutTop, cutBottom, timeWindowMillis, viewName, unit, description, bufferLimit);
+        assignTagIndices(tags);
+        seriesValues = new ConcurrentHashMap<>();
+        this.cutTop = cutTop;
+        this.cutBottom = cutBottom;
+        this.timeWindowMillis = timeWindowMillis;
+        this.viewName = viewName;
+        this.unit = unit;
+        this.description = description;
+        this.bufferLimit = bufferLimit;
+        numberOfPoints = new AtomicInteger(0);
+        lastCleanupTimeMs = new AtomicLong(0);
+
+        List<LabelKey> smoothedAverageLabelKeys = getLabelKeysInOrderForMinMax();
+        smoothedAverageMetricDescriptor = MetricDescriptor.create(viewName, description, unit, MetricDescriptor.Type.GAUGE_DOUBLE, smoothedAverageLabelKeys);
+    }
+
+    /**
+     * Constructor.
+     *
      * @param includeMin       true, if the minimum value should be exposed as metric
      * @param includeMax       true, if the maximum value should be exposed as metric
      * @param percentiles      the set of percentiles in the range (0,1) which shall be provided as metrics
@@ -169,6 +212,30 @@ public class PercentileView {
         }
         if (includeMax) {
             maxMetricDescriptor = MetricDescriptor.create(viewName + MAX_METRIC_SUFFIX, description, unit, MetricDescriptor.Type.GAUGE_DOUBLE, minMaxLabelKeys);
+        }
+    }
+
+    private void validateConfiguration(int cutTop, int cutBottom, long timeWindowMillis, String baseViewName, String unit, String description, int bufferLimit) {
+        if (cutTop < 0 || cutTop > 50) {
+            throw new IllegalArgumentException("cutTop must be greater than 0 and smaller than 50!");
+        }
+        if (cutBottom < 0 || cutBottom > 50) {
+            throw new IllegalArgumentException("cutBottom must be greater than 0 and smaller than 50!");
+        }
+        if (StringUtils.isBlank(baseViewName)) {
+            throw new IllegalArgumentException("View name must not be blank!");
+        }
+        if (StringUtils.isBlank(description)) {
+            throw new IllegalArgumentException("Description must not be blank!");
+        }
+        if (StringUtils.isBlank(unit)) {
+            throw new IllegalArgumentException("Unit must not be blank!");
+        }
+        if (timeWindowMillis <= 0) {
+            throw new IllegalArgumentException("Time window must not be positive!");
+        }
+        if (bufferLimit < 1) {
+            throw new IllegalArgumentException("The buffer limit must be greater than or equal to 1!");
         }
     }
 
@@ -329,6 +396,9 @@ public class PercentileView {
         if (isMaxEnabled()) {
             resultMetrics.add(Metric.create(maxMetricDescriptor, resultSeries.maxSeries));
         }
+        if (cutTop != 0 && cutBottom != 0) {
+            resultMetrics.add(Metric.create(smoothedAverageMetricDescriptor, resultSeries.smoothedAverageSeries));
+        }
         return resultMetrics;
     }
 
@@ -362,8 +432,22 @@ public class PercentileView {
                 double percentileValue = percentileComputer.evaluate(percentile * 100);
                 resultSeries.addPercentile(percentileValue, time, tagValues, percentile);
             }
+        } else {
+            double queueLength = data.length;
+            double base = queueLength / 100;
+
+            int ratioBottom = (int) round(base * cutBottom);
+            int startIndex = (cutBottom == 0) ? 0 : Math.min((ratioBottom <= 0) ? 1 : ratioBottom, (int) queueLength - 1);
+            int ratioTop = (int) round(base * cutTop);
+            int endIndex = (cutTop == 0) ? (int) queueLength - 1 : Math.max((ratioTop <= 0) ? (int) queueLength - 2 : (int) queueLength - 1 - ratioTop, startIndex);
+
+            // Note: Can also return sum and count
+            double smoothedAverage = Arrays.stream(data).sorted().skip(startIndex).limit(endIndex - startIndex + 1).average().orElse(0.0);
+            resultSeries.addSmoothedAverage(smoothedAverage, time, tagValues);
         }
     }
+
+
 
     @VisibleForTesting
     static String getPercentileTag(double percentile) {
@@ -413,6 +497,8 @@ public class PercentileView {
 
     private class ResultSeriesCollector {
 
+        private List<TimeSeries> smoothedAverageSeries = new ArrayList<>();
+
         private List<TimeSeries> minSeries = new ArrayList<>();
 
         private List<TimeSeries> maxSeries = new ArrayList<>();
@@ -432,6 +518,11 @@ public class PercentileView {
         void addPercentile(double value, Timestamp time, List<String> tags, double percentile) {
             Point pt = Point.create(Value.doubleValue(value), time);
             percentileSeries.add(TimeSeries.createWithOnePoint(toLabelValuesWithPercentile(tags, percentile), pt, time));
+        }
+
+        void addSmoothedAverage(double value, Timestamp time, List<String> tags) {
+            Point pt = Point.create(Value.doubleValue(value), time);
+            smoothedAverageSeries.add(TimeSeries.createWithOnePoint(toLabelValues(tags), pt, time));
         }
     }
 

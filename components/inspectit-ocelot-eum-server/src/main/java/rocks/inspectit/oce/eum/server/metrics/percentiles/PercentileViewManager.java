@@ -106,6 +106,41 @@ public class PercentileViewManager {
     }
 
     /**
+     * TODO
+     * Creates a new percentile view if no view with the given name exists for the given measure.
+     * If a view with the given name already exists for the given measure, it is updated instead.
+     * When a view is updated, all buffered observation are lost.
+     *
+     * @param measureName      the name of the measure, e.g. "http/responsetime"
+     * @param viewName         the name of the view, e.g. "http/responsetime/distribution"
+     * @param unit             the unit of the view
+     * @param description      the description for the view
+     * @param cutTop           TODO
+     * @param cutBottom        TODO
+     * @param timeWindowMillis the length of the sliding time window to use for computing min / max and the percentiles
+     * @param tags             the tags to use for the view
+     * @param bufferLimit      the maximum number of points this view is allowed to buffer
+     */
+    public synchronized void createOrUpdateView(String measureName, String viewName, String unit, String description, int cutTop, int cutBottom, long timeWindowMillis, Collection<String> tags, int bufferLimit) {
+
+        List<PercentileView> views = measuresToViewsMap.computeIfAbsent(measureName, (name) -> new CopyOnWriteArrayList<>());
+        Optional<PercentileView> existingView = views.stream()
+                .filter(view -> view.getViewName().equalsIgnoreCase(viewName))
+                .findFirst();
+        Optional<PercentileView> updatedView;
+        if (existingView.isPresent()) {
+            updatedView = updateView(existingView.get(), unit, description, cutTop, cutBottom, timeWindowMillis, tags, bufferLimit);
+        } else {
+            updatedView = Optional.of(createView(viewName, unit, description, cutTop, cutBottom, timeWindowMillis, tags, bufferLimit));
+        }
+        if (updatedView.isPresent()) {
+            existingView.ifPresent(views::remove);
+            views.add(updatedView.get());
+        }
+        seriesToMeasuresCache = null;
+    }
+
+    /**
      * Creates a new percentile view if no view with the given name exists for the given measure.
      * If a view with the given name already exists for the given measure, it is updated instead.
      * When a view is updated, all buffered observation are lost.
@@ -230,6 +265,32 @@ public class PercentileViewManager {
         return Timestamp.fromMillis(clock.get());
     }
 
+    private Optional<PercentileView> updateView(PercentileView existingView, String unit, String description, int cutTop, int cutBottom, long timeWindowMillis, Collection<String> tags, int bufferLimit) {
+        Supplier<PercentileView> creator = () -> createView(existingView.getViewName(), unit, description, cutTop, cutBottom, timeWindowMillis, tags, bufferLimit);
+        if (!unit.equals(existingView.getUnit())) {
+            return Optional.of(creator.get());
+        }
+        if (!description.equals(existingView.getDescription())) {
+            return Optional.of(creator.get());
+        }
+        if (cutTop != existingView.getCutTop()) {
+            return Optional.of(creator.get());
+        }
+        if (cutBottom != existingView.getCutBottom()) {
+            return Optional.of(creator.get());
+        }
+        if (timeWindowMillis != existingView.getTimeWindowMillis()) {
+            return Optional.of(creator.get());
+        }
+        if (!existingView.getTagKeys().equals(new HashSet<>(tags))) {
+            return Optional.of(creator.get());
+        }
+        if (existingView.getBufferLimit() != bufferLimit) {
+            return Optional.of(creator.get());
+        }
+        return Optional.empty();
+    }
+
     private Optional<PercentileView> updateView(PercentileView existingView, String unit, String description, boolean minEnabled, boolean maxEnabled, Collection<Double> percentiles, long timeWindowMillis, Collection<String> tags, int bufferLimit) {
         Supplier<PercentileView> creator = () -> createView(existingView.getViewName(), unit, description, minEnabled, maxEnabled, percentiles, timeWindowMillis, tags, bufferLimit);
         if (!unit.equals(existingView.getUnit())) {
@@ -257,6 +318,10 @@ public class PercentileViewManager {
             return Optional.of(creator.get());
         }
         return Optional.empty();
+    }
+
+    private PercentileView createView(String viewName, String unit, String description, int cutTop, int cutBottom, long timeWindowMillis, Collection<String> tags, int bufferLimit) {
+        return new PercentileView(cutTop, cutBottom, new HashSet<>(tags), timeWindowMillis, viewName, unit, description, bufferLimit);
     }
 
     private PercentileView createView(String viewName, String unit, String description, boolean minEnabled, boolean maxEnabled, Collection<Double> percentiles, long timeWindowMillis, Collection<String> tags, int bufferLimit) {
