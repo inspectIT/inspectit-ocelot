@@ -130,11 +130,11 @@ public class MeasuresAndViewsManager {
                     .stream()
                     .filter(p -> p > 0 && p < 1)
                     .collect(Collectors.toList());
-            percentileViewManager.createOrUpdateView(measure.getName(), viewName, measure.getUnit(), def.getDescription(), minEnabled, maxEnabled, percentilesFiltered, def
+            percentileViewManager.createOrUpdatePercentileView(measure.getName(), viewName, measure.getUnit(), def.getDescription(), minEnabled, maxEnabled, percentilesFiltered, def
                     .getTimeWindow()
                     .toMillis(), tagsAsStrings, def.getMaxBufferedPoints());
         } else {
-            percentileViewManager.createOrUpdateView(measure.getName(), viewName, measure.getUnit(), def.getDescription(), def.getCutTop(), def.getCutBottom(), def
+            percentileViewManager.createOrUpdateSmoothedAverageView(measure.getName(), viewName, measure.getUnit(), def.getDescription(), def.getDropUpper(), def.getDropLower(), def
                     .getTimeWindow()
                     .toMillis(), tagsAsStrings, def.getMaxBufferedPoints());
         }

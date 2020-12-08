@@ -109,10 +109,10 @@ public class PercentileView {
     private long timeWindowMillis;
 
     @Getter
-    private int cutTop;
+    private double dropUpper;
 
     @Getter
-    private int cutBottom;
+    private double dropLower;
 
     /**
      * The name of the view, used as prefix for all individual metrics.
@@ -154,8 +154,8 @@ public class PercentileView {
     /**
      * Constructor.
      *
-     * @param cutTop           TODO
-     * @param cutBottom        TODO
+     * @param dropUpper           TODO
+     * @param dropLower        TODO
      * @param tags             the tags to use for this view
      * @param timeWindowMillis the time range in milliseconds to use for computing minimum / maximum and percentile values
      * @param viewName         the prefix to use for the names of all exposed metrics
@@ -163,12 +163,12 @@ public class PercentileView {
      * @param description      the description of this view
      * @param bufferLimit      the maximum number of measurements to be buffered by this view
      */
-    PercentileView(int cutTop, int cutBottom, Set<String> tags, long timeWindowMillis, String viewName, String unit, String description, int bufferLimit) {
-        validateConfiguration(cutTop, cutBottom, timeWindowMillis, viewName, unit, description, bufferLimit);
+    PercentileView(double dropUpper, double dropLower, Set<String> tags, long timeWindowMillis, String viewName, String unit, String description, int bufferLimit) {
+        validateConfiguration(dropUpper, dropLower, timeWindowMillis, viewName, unit, description, bufferLimit);
         assignTagIndices(tags);
         seriesValues = new ConcurrentHashMap<>();
-        this.cutTop = cutTop;
-        this.cutBottom = cutBottom;
+        this.dropUpper = dropUpper;
+        this.dropLower = dropLower;
         this.timeWindowMillis = timeWindowMillis;
         this.viewName = viewName;
         this.unit = unit;
@@ -221,12 +221,12 @@ public class PercentileView {
         }
     }
 
-    private void validateConfiguration(int cutTop, int cutBottom, long timeWindowMillis, String baseViewName, String unit, String description, int bufferLimit) {
-        if (cutTop < 0 || cutTop > 100) {
-            throw new IllegalArgumentException("cutTop must be greater than 0 and smaller than 50!");
+    private void validateConfiguration(double dropUpper, double dropLower, long timeWindowMillis, String baseViewName, String unit, String description, int bufferLimit) {
+        if (dropUpper < 0.0 || dropUpper > 1.0) {
+            throw new IllegalArgumentException("dropUpper (" + dropUpper + ") must be greater than 0.0 and smaller than 1.0!");
         }
-        if (cutBottom < 0 || cutBottom > 100) {
-            throw new IllegalArgumentException("cutBottom must be greater than 0 and smaller than 50!");
+        if (dropLower < 0.0 || dropLower > 1.0) {
+            throw new IllegalArgumentException("dropLower (" + dropLower + ") must be greater than 0.0 and smaller than 1.0!");
         }
         if (StringUtils.isBlank(baseViewName)) {
             throw new IllegalArgumentException("View name must not be blank!");
@@ -326,7 +326,7 @@ public class PercentileView {
         if (!percentiles.isEmpty()) {
             result.add(percentileMetricDescriptor.getName());
         }
-        if (cutTop != 0 || cutBottom != 0) {
+        if (dropUpper != 0 || dropLower != 0) {
             result.add(smoothedAverageMetricDescriptor.getName());
         }
         return result;
@@ -405,7 +405,7 @@ public class PercentileView {
         if (isMaxEnabled()) {
             resultMetrics.add(Metric.create(maxMetricDescriptor, resultSeries.maxSeries));
         }
-        if (cutTop != 0 || cutBottom != 0) {
+        if (dropUpper != 0 || dropLower != 0) {
             resultMetrics.add(Metric.create(smoothedAverageMetricDescriptor, resultSeries.smoothedAverageSeries));
         }
         return resultMetrics;
@@ -442,17 +442,15 @@ public class PercentileView {
                 resultSeries.addPercentile(percentileValue, time, tagValues, percentile);
             }
         }
-        if (cutTop != 0 || cutBottom != 0) {
+        if (dropUpper != 0 || dropLower != 0) {
             double queueLength = data.length;
-            double base = queueLength / 100;
 
-            int ratioBottom = (int) round(base * cutBottom);
-            int startIndex = (cutBottom == 0) ? 0 : Math.min((ratioBottom <= 0) ? 1 : ratioBottom, (int) queueLength - 1);
-            int ratioTop = (int) round(base * cutTop);
-            int endIndex = (cutTop == 0) ? (int) queueLength - 1 : Math.max((ratioTop <= 0) ? (int) queueLength - 2 : (int) queueLength - 1 - ratioTop, startIndex);
+            int ratioBottom = (int) round(queueLength * dropLower);
+            int startIndex = (dropLower == 0) ? 0 : Math.min((ratioBottom <= 0) ? 1 : ratioBottom, (int) queueLength - 1);
+            int ratioTop = (int) round(queueLength * dropUpper);
+            int endIndex = (dropUpper == 0) ? (int) queueLength - 1 : Math.max((ratioTop <= 0) ? (int) queueLength - 2 : (int) queueLength - 1 - ratioTop, startIndex);
 
-            // Note: Can also return sum and count
-            double smoothedAverage = round((Arrays.stream(data).sorted().skip(startIndex).limit(endIndex - startIndex + 1).average().orElse(0.0)) * 100.0) / 100.0;
+            double smoothedAverage = Arrays.stream(data).sorted().skip(startIndex).limit(endIndex - startIndex + 1).average().orElse(0.0);
             resultSeries.addSmoothedAverage(smoothedAverage, time, tagValues);
         }
     }

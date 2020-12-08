@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.config.model.metrics.definition;
 
+import jdk.jfr.Percentage;
 import lombok.*;
 import org.hibernate.validator.constraints.time.DurationMin;
 import org.springframework.util.CollectionUtils;
@@ -66,15 +67,11 @@ public class ViewDefinitionSettings {
     @Builder.Default
     private List<@NotNull Double> quantiles = Arrays.asList(0.0, 0.5, 0.9, 0.95, 0.99, 1.0);
 
-    @Min(0)
-    @Max(100)
     @Builder.Default
-    private Integer cutTop = 0;
+    private Double dropUpper = 0.0;
 
-    @Min(0)
-    @Max(100)
     @Builder.Default
-    private Integer cutBottom = 0;
+    private Double dropLower = 0.0;
 
     /**
      * The time window to use for windowed metrics (currently only quantiles).
@@ -148,10 +145,10 @@ public class ViewDefinitionSettings {
                 quantiles.stream().noneMatch(q -> q < 0 || q > 1);
     }
 
-    @AssertTrue(message = "Either cutTop or cutBottom must be greater than 0")
+    @AssertTrue(message = "Either dropUpper or dropLower must be greater than 0")
     boolean isSmoothedAverageNotZero() {
         return !enabled || aggregation != Aggregation.SMOOTHED_AVERAGE ||
-                (cutTop != 0 && cutBottom != 0);
+                (dropUpper != 0 && dropLower != 0);
     }
 
 }

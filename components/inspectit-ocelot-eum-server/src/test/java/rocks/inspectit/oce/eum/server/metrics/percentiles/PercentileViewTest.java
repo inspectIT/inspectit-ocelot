@@ -40,15 +40,15 @@ public class PercentileViewTest {
 
 
         @Test
-        void invalidCutTop() {
+        void invalidDropUpper() {
             assertThatThrownBy(() -> new PercentileView(-1, 0,
                     Collections.emptySet(), 1000, "name", "unit", "description", 1))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
         @Test
-        void invalidCutBottom() {
-            assertThatThrownBy(() -> new PercentileView(5, 101,
+        void invalidDropLower() {
+            assertThatThrownBy(() -> new PercentileView(0.05, 1.1,
                     Collections.emptySet(), 1000, "name", "unit", "description", 1))
                     .isInstanceOf(IllegalArgumentException.class);
         }
@@ -149,7 +149,7 @@ public class PercentileViewTest {
 
         @Test
         void checkSmoothedAverageSeries() {
-            PercentileView view = new PercentileView(0, 5, Collections.emptySet(), 10,
+            PercentileView view = new PercentileView(0.0, 0.05, Collections.emptySet(), 10,
                     "name", "unit", "description", 1);
 
             assertThat(view.getSeriesNames()).containsExactly("name_smoothed_average");
@@ -221,7 +221,7 @@ public class PercentileViewTest {
 
         @Test
         void checkSmoothedAverageMetricDescriptor() {
-            PercentileView view = new PercentileView(5, 5, ImmutableSet.of("my_tag"),
+            PercentileView view = new PercentileView(0.05, 0.05, ImmutableSet.of("my_tag"),
                     10, "name", "unit", "description", 1);
 
             Timestamp queryTime = Timestamp.fromMillis(10);
@@ -238,7 +238,7 @@ public class PercentileViewTest {
 
         @Test
         void checkSmoothedAverageMetric() {
-            PercentileView view = new PercentileView(5, 5, ImmutableSet.of("my_tag"),
+            PercentileView view = new PercentileView(0.05, 0.05, ImmutableSet.of("my_tag"),
                     10, "name", "unit", "description", 12);
 
             view.insertValue(42, Timestamp.fromMillis(1), createTagContext("my_tag", "foo"));
@@ -283,7 +283,7 @@ public class PercentileViewTest {
 
         @Test
         void checkSmoothedAverageMetricGreatIndex() {
-            PercentileView view = new PercentileView(20, 20, ImmutableSet.of("my_tag"),
+            PercentileView view = new PercentileView(0.2, 0.2, ImmutableSet.of("my_tag"),
                     10, "name", "unit", "description", 24);
 
             view.insertValue(42, Timestamp.fromMillis(1), createTagContext("my_tag" , "foo"));
@@ -324,14 +324,14 @@ public class PercentileViewTest {
                                 .hasSize(1)
                                 .anySatisfy(pt -> {
                                     assertThat(pt.getTimestamp()).isEqualTo(queryTime);
-                                    assertThat(pt.getValue()).isEqualTo(Value.doubleValue(97.14));
+                                    assertThat(pt.getValue()).isEqualTo(Value.doubleValue(97.14285714285714));
                                 });
             });
         }
 
         @Test
-        void checkSmoothedAverageMetricCutOnlyBottom() {
-            PercentileView view = new PercentileView(0, 20, ImmutableSet.of("my_tag"),
+        void checkSmoothedAverageMetricDropOnlyLower() {
+            PercentileView view = new PercentileView(0.0, 0.2, ImmutableSet.of("my_tag"),
                     10, "name", "unit", "description", 24);
 
             view.insertValue(42, Timestamp.fromMillis(1), createTagContext("my_tag" , "foo"));
@@ -372,14 +372,14 @@ public class PercentileViewTest {
                                 .hasSize(1)
                                 .anySatisfy(pt -> {
                                     assertThat(pt.getTimestamp()).isEqualTo(queryTime);
-                                    assertThat(pt.getValue()).isEqualTo(Value.doubleValue(123.79));
+                                    assertThat(pt.getValue()).isEqualTo(Value.doubleValue(123.78947368421052));
                                 });
                     });
         }
 
         @Test
-        void checkSmoothedAverageMetricCutOnlyTop() {
-            PercentileView view = new PercentileView(11, 0, ImmutableSet.of("my_tag"),
+        void checkSmoothedAverageMetricDropOnlyUpper() {
+            PercentileView view = new PercentileView(0.11, 0.0, ImmutableSet.of("my_tag"),
                     10, "name", "unit", "description", 24);
 
             view.insertValue(42, Timestamp.fromMillis(1), createTagContext("my_tag" , "foo"));
@@ -420,14 +420,14 @@ public class PercentileViewTest {
                                 .hasSize(1)
                                 .anySatisfy(pt -> {
                                     assertThat(pt.getTimestamp()).isEqualTo(queryTime);
-                                    assertThat(pt.getValue()).isEqualTo(Value.doubleValue(92.05));
+                                    assertThat(pt.getValue()).isEqualTo(Value.doubleValue(92.04761904761905));
                                 });
                     });
         }
 
         @Test
-        void checkSmoothedAverageMetricCutGreaterTopIndex() {
-            PercentileView view = new PercentileView(90, 20, ImmutableSet.of("my_tag"),
+        void checkSmoothedAverageMetricDropGreaterUpperIndex() {
+            PercentileView view = new PercentileView(0.9, 0.2, ImmutableSet.of("my_tag"),
                     10, "name", "unit", "description", 24);
 
             view.insertValue(42, Timestamp.fromMillis(1), createTagContext("my_tag" , "foo"));
@@ -474,8 +474,9 @@ public class PercentileViewTest {
         }
 
         @Test
-        void checkSmoothedAverageMetricCutNothing() {
-            PercentileView view = new PercentileView(0, 0, ImmutableSet.of("my_tag"),
+        void checkSmoothedAverageMetricDropNothing() {
+
+            PercentileView view = new PercentileView(0.0, 0.0, ImmutableSet.of("my_tag"),
                     10, "name", "unit", "description", 2);
 
             view.insertValue(42, Timestamp.fromMillis(1), createTagContext("my_tag" , "foo"));
