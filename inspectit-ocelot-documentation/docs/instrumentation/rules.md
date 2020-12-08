@@ -528,7 +528,7 @@ If no sample probability is defined for a rule, the [default probability](tracin
 #### Adding Attributes
 
 Another useful property of spans is that you can attach any additional information in form of attributes.
-In most tracing backends such as ZipKin and Jaeger, you can search your traces based on attributes.
+In most tracing backends such as Zipkin and Jaeger, you can search your traces based on attributes.
 The example below shows how you can define attributes:
 
 ```yaml

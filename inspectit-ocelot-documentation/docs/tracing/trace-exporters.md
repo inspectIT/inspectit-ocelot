@@ -7,14 +7,14 @@ Metrics exporters are responsible for passing the recorded tracing data to a cor
 
 inspectIT Ocelot currently supports the following OpenCensus trace exporters:
 
-* [ZipKin](#zipkin-exporter) [[Homepage](https://zipkin.io/)]
+* [Zipkin](#zipkin-exporter) [[Homepage](https://zipkin.io/)]
 * [Jaeger](#jaeger-exporter) [[Homepage](https://www.jaegertracing.io/)]
 * [OpenCensus Agent](#opencensus-agent-trace-exporter) [[Homepage](https://opencensus.io/exporters/supported-exporters/java/ocagent/)]
 
-## ZipKin Exporter
+## Zipkin Exporter
 
-The ZipKin exporter exports Traces in ZipKin v2 format to a ZipKin server or other compatible servers.
-It can be enabled and disabled via the `inspectit.exporters.tracing.zipkin.enabled` property. By default, the ZipKin exporter is enabled. It however does not have an URL configured. The exporter will start up as soon as you define the `inspectit.exporters.tracing.zipkin.url` property.
+The Zipkin exporter exports Traces in Zipkin v2 format to a Zipkin server or other compatible servers.
+It can be enabled and disabled via the `inspectit.exporters.tracing.zipkin.enabled` property. By default, the Zipkin exporter is enabled. It however does not have an URL configured. The exporter will start up as soon as you define the `inspectit.exporters.tracing.zipkin.url` property.
 
 For example, when adding the following property to your `-javaagent` options, traces will be sent to a zipkin server running on your localhost with the default port:
 
@@ -22,12 +22,12 @@ For example, when adding the following property to your `-javaagent` options, tr
 -Dinspectit.exporters.tracing.zipkin.url=http://127.0.0.1:9411/api/v2/spans
 ```
 
-When sending spans, ZipKin expects you to give a name of the service where the spans have been recorded. This name can be set using the `inspectit.exporters.tracing.zipkin.service-name` property. This property defaults to `inspectit.service-name`.
+When sending spans, Zipkin expects you to give a name of the service where the spans have been recorded. This name can be set using the `inspectit.exporters.tracing.zipkin.service-name` property. This property defaults to `inspectit.service-name`.
 
 
 ## Jaeger Exporter
 
-The Jaeger exports works exactly the same way as the [ZipKin Exporter](#zipkin-exporter).
+The Jaeger exports works exactly the same way as the [Zipkin Exporter](#zipkin-exporter).
 The corresponding properties are the following:
 
 * `inspectit.exporters.tracing.jaeger.enabled`: enables / disables the Jaeger exporter
