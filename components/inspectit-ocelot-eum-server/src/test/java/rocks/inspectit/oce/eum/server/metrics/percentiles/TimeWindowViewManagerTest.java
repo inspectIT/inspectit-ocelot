@@ -27,9 +27,9 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 
 @ExtendWith(MockitoExtension.class)
-public class PercentileViewManagerTest {
+public class TimeWindowViewManagerTest {
 
-    private PercentileViewManager viewManager;
+    private TimeWindowViewManager viewManager;
 
     private Supplier<Long> clock;
 
@@ -38,7 +38,7 @@ public class PercentileViewManagerTest {
     void init() {
         clock = Mockito.mock(Supplier.class);
         lenient().doReturn(0L).when(clock).get();
-        viewManager = new PercentileViewManager(clock);
+        viewManager = new TimeWindowViewManager(clock);
         viewManager.init();
     }
 
@@ -113,7 +113,7 @@ public class PercentileViewManagerTest {
 
         @Test
         void singleViewRegisteredSmoothedAverage() {
-            viewManager.createOrUpdateSmoothedAverageView("my/measure", "my/view", "ms", "foo",
+            viewManager.createOrUpdateSmoothedAverageView("my/measure", "my/view_smoothed_average", "ms", "foo",
                     0.05, 0.05, 15000, Collections.emptyList(), 1);
 
             assertThat(viewManager.getMeasureNameForSeries("my/view")).isNull();
@@ -141,7 +141,7 @@ public class PercentileViewManagerTest {
             assertThat(viewManager.getMeasureNameForSeries("my/other_view_min")).isNull();
             assertThat(viewManager.getMeasureNameForSeries("my/other_view_max")).isEqualTo("my/other_measure");
 
-            viewManager.createOrUpdateSmoothedAverageView("my/further_measure", "my/further_view", "ms", "foo",
+            viewManager.createOrUpdateSmoothedAverageView("my/further_measure", "my/further_view_smoothed_average", "ms", "foo",
                     0.05, 0.1, 15000, Collections.emptyList(), 1);
 
             assertThat(viewManager.getMeasureNameForSeries("my/view")).isEqualTo("my/measure");
@@ -164,7 +164,7 @@ public class PercentileViewManagerTest {
                     true, false, Arrays.asList(0.5, 0.95), 15000, Collections.emptyList(), 1);
             viewManager.createOrUpdatePercentileView("my/other_measure", "my/other_view", "ms", "foo",
                     false, true, Collections.emptySet(), 15000, Collections.emptyList(), 1);
-            viewManager.createOrUpdateSmoothedAverageView("my/measure", "my/further_view", "ms", "foo",
+            viewManager.createOrUpdateSmoothedAverageView("my/measure", "my/further_view_smoothed_average", "ms", "foo",
                     0.07, 0.5, 15000, Collections.emptyList(), 1);
 
             assertThat(viewManager.getMeasureNameForSeries("my/view")).isEqualTo("my/measure");
@@ -181,7 +181,7 @@ public class PercentileViewManagerTest {
             assertThat(viewManager.getMeasureNameForSeries("my/further_view_max")).isNull();
 
             viewManager.removeView("my/measure", "my/view");
-            viewManager.removeView("my/measure", "my/further_view");
+            viewManager.removeView("my/measure", "my/further_view_smoothed_average");
 
             assertThat(viewManager.getMeasureNameForSeries("my/view")).isNull();
             assertThat(viewManager.getMeasureNameForSeries("my/view_min")).isNull();
@@ -203,7 +203,7 @@ public class PercentileViewManagerTest {
         void testNoData() {
             viewManager.createOrUpdatePercentileView("my/measure", "my/view", "ms", "foo",
                     true, true, Arrays.asList(0.5, 0.95), 15000, Collections.emptyList(), 1);
-            viewManager.createOrUpdateSmoothedAverageView("my/measure", "my/further_view", "ms", "foo",
+            viewManager.createOrUpdateSmoothedAverageView("my/measure", "my/further_view_smoothed_average", "ms", "foo",
                     0.07, 0.5, 15000, Collections.emptyList(), 1);
 
             Collection<Metric> result = viewManager.computeMetrics();
@@ -217,7 +217,7 @@ public class PercentileViewManagerTest {
         void testWithData() {
             viewManager.createOrUpdatePercentileView("my/measure", "my/view", "ms", "foo",
                     true, true, Arrays.asList(0.5, 0.95), 15000, Collections.emptyList(), 100);
-            viewManager.createOrUpdateSmoothedAverageView("my/measure", "my/further_view", "ms", "foo",
+            viewManager.createOrUpdateSmoothedAverageView("my/measure", "my/further_view_smoothed_average", "ms", "foo",
                     0.2, 0.2, 15000, Collections.emptyList(), 100);
 
             for (int i = 1; i < 100; i++) {
@@ -242,7 +242,7 @@ public class PercentileViewManagerTest {
         void testMultiSeriesData() {
             viewManager.createOrUpdatePercentileView("my/measure", "my/view", "ms", "foo",
                     true, true, Arrays.asList(0.5, 0.95), 15000, Arrays.asList("tag1", "tag2"), 198);
-            viewManager.createOrUpdateSmoothedAverageView("my/measure", "my/further_view", "ms", "foo",
+            viewManager.createOrUpdateSmoothedAverageView("my/measure", "my/further_view_smoothed_average", "ms", "foo",
                     0.2, 0.2, 15000, Arrays.asList("tag1", "tag2"), 198);
 
             for (int i = 1; i < 100; i++) {
@@ -279,7 +279,7 @@ public class PercentileViewManagerTest {
                     true, false, Collections.emptyList(), 1, Collections.emptyList(), 1);
             viewManager.createOrUpdatePercentileView("my/measure", "viewB", "ms", "foo",
                     true, false, Collections.emptyList(), 1, Arrays.asList("tag1"), 1);
-            viewManager.createOrUpdateSmoothedAverageView("my/measure", "viewC", "ms", "foo",
+            viewManager.createOrUpdateSmoothedAverageView("my/measure", "viewC_smoothed_average", "ms", "foo",
                     0.15, 0.45, 1, Arrays.asList("tag2"), 1);
 
             viewManager.recordMeasurement("my/measure", 1);
@@ -298,7 +298,7 @@ public class PercentileViewManagerTest {
         void testWithStaleData() {
             viewManager.createOrUpdatePercentileView("my/measure", "my/view", "ms", "foo",
                     true, true, Arrays.asList(0.5, 0.95), 15000, Collections.emptyList(), 99);
-            viewManager.createOrUpdateSmoothedAverageView("my/measure", "my/further_view", "ms", "foo",
+            viewManager.createOrUpdateSmoothedAverageView("my/measure", "my/further_view_smoothed_average", "ms", "foo",
                     0.05, 0.05, 15000, Collections.emptyList(), 99);
 
             for (int i = 1; i < 100; i++) {
@@ -318,7 +318,7 @@ public class PercentileViewManagerTest {
         void testDroppingBecauseBufferIsFull() {
             viewManager.createOrUpdatePercentileView("my/measure", "my/view", "ms", "foo",
                     true, false, Collections.emptyList(), 1, Arrays.asList("tag"), 10);
-            viewManager.createOrUpdateSmoothedAverageView("my/measure", "my/further_view", "ms", "foo",
+            viewManager.createOrUpdateSmoothedAverageView("my/measure", "my/further_view_smoothed_average", "ms", "foo",
                     0.05, 0.05, 1, Arrays.asList("tag"), 10);
 
             doReturn(0L).when(clock).get();
@@ -342,7 +342,7 @@ public class PercentileViewManagerTest {
         void testDroppingPreventedThroughCleanupTask() {
             viewManager.createOrUpdatePercentileView("my/measure", "my/view", "ms", "foo",
                     true, false, Collections.emptyList(), 1, Arrays.asList("tag"), 10);
-            viewManager.createOrUpdateSmoothedAverageView("my/measure", "my/further_view", "ms", "foo",
+            viewManager.createOrUpdateSmoothedAverageView("my/measure", "my/further_view_smoothed_average", "ms", "foo",
                     0.05, 0.05, 1, Arrays.asList("tag"), 10);
 
             doReturn(0L).when(clock).get();
@@ -411,9 +411,9 @@ public class PercentileViewManagerTest {
 
         @Test
         void updateSmoothedAverage() {
-            viewManager.createOrUpdateSmoothedAverageView("my/measure", "my/view", "ms", "foo",
+            viewManager.createOrUpdateSmoothedAverageView("my/measure", "my/view_smoothed_average", "ms", "foo",
                     0.2, 0.2, 1, Collections.emptyList(), 100);
-            viewManager.createOrUpdateSmoothedAverageView("my/measure", "my/view", "s", "bar",
+            viewManager.createOrUpdateSmoothedAverageView("my/measure", "my/view_smoothed_average", "s", "bar",
                     0.0, 0.05, 1, Arrays.asList("tag1", "tag2"), 100);
 
             try (Scope s = Tags.getTagger().emptyBuilder()
@@ -489,7 +489,7 @@ public class PercentileViewManagerTest {
         void updateWithValueRecorded() {
             viewManager.createOrUpdatePercentileView("my/measure", "my/view", "ms", "foo",
                     true, false, Collections.emptyList(), 1, Collections.emptyList(), 100);
-            viewManager.createOrUpdateSmoothedAverageView("my/measure", "my/further_view", "ms", "foo",
+            viewManager.createOrUpdateSmoothedAverageView("my/measure", "my/further_view_smoothed_average", "ms", "foo",
                     0.2, 0.2, 1, Collections.emptyList(), 100);
 
             viewManager.recordMeasurement("my/measure", 42);
@@ -497,7 +497,7 @@ public class PercentileViewManagerTest {
 
             viewManager.createOrUpdatePercentileView("my/measure", "my/view", "ms", "foo",
                     true, false, Collections.emptyList(), 1, Arrays.asList("tag1", "tag2"), 100);
-            viewManager.createOrUpdateSmoothedAverageView("my/measure", "my/further_view", "s", "bar",
+            viewManager.createOrUpdateSmoothedAverageView("my/measure", "my/further_view_smoothed_average", "s", "bar",
                     0.0, 0.05, 1, Arrays.asList("tag1", "tag2"), 100);
 
             try (Scope s = Tags.getTagger().emptyBuilder()
@@ -533,7 +533,7 @@ public class PercentileViewManagerTest {
 
             Collection<Metric> result = viewManager.computeMetrics();
             assertThat(result).hasSize(1);
-            assertContainsMetric(result, "my/view_smoothed_average", 42, "tag1", "foo", "tag2", "bar");
+            assertContainsMetric(result, "my/view", 42, "tag1", "foo", "tag2", "bar");
         }
     }
 
@@ -544,14 +544,14 @@ public class PercentileViewManagerTest {
         void checkViewRemoved() {
             viewManager.createOrUpdatePercentileView("my/measure", "my/view", "ms", "foo",
                     true, false, Collections.emptyList(), 100, Collections.emptyList(), 100);
-            viewManager.createOrUpdateSmoothedAverageView("my/measure", "my/further_view", "ms", "foo",
+            viewManager.createOrUpdateSmoothedAverageView("my/measure", "my/further_view_smoothed_average", "ms", "foo",
                     0.2, 0.2, 1, Collections.emptyList(), 100);
 
             viewManager.recordMeasurement("my/measure", 42);
             awaitMetricsProcessing();
 
             boolean removed = viewManager.removeView("my/measure", "my/view");
-            boolean removed_smoothed_average = viewManager.removeView("my/measure", "my/further_view");
+            boolean removed_smoothed_average = viewManager.removeView("my/measure", "my/further_view_smoothed_average");
 
             Collection<Metric> result = viewManager.computeMetrics();
             assertThat(viewManager.areAnyViewsRegisteredForMeasure("my/measure")).isFalse();

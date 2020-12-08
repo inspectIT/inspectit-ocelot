@@ -1,6 +1,5 @@
 package rocks.inspectit.ocelot.config.model.metrics.definition;
 
-import jdk.jfr.Percentage;
 import lombok.*;
 import org.hibernate.validator.constraints.time.DurationMin;
 import org.springframework.util.CollectionUtils;
@@ -67,9 +66,19 @@ public class ViewDefinitionSettings {
     @Builder.Default
     private List<@NotNull Double> quantiles = Arrays.asList(0.0, 0.5, 0.9, 0.95, 0.99, 1.0);
 
+    /**
+     * In case the view is a smoothed_average, this value (in percentage in the range (0,1)) defines, how many metrics in the upper range shall be dropped.
+     */
+    @DecimalMax("1.0")
+    @DecimalMin("0.0")
     @Builder.Default
     private Double dropUpper = 0.0;
 
+    /**
+     * In case the view is a smoothed_average, this value (in percentage in the range (0,1)) defines, how many metrics in the lower range shall be dropped.
+     */
+    @DecimalMax("1.0")
+    @DecimalMin("0.0")
     @Builder.Default
     private Double dropLower = 0.0;
 
@@ -143,12 +152,6 @@ public class ViewDefinitionSettings {
     boolean isQuantilesInRange() {
         return !enabled || aggregation != Aggregation.QUANTILES ||
                 quantiles.stream().noneMatch(q -> q < 0 || q > 1);
-    }
-
-    @AssertTrue(message = "Either dropUpper or dropLower must be greater than 0")
-    boolean isSmoothedAverageNotZero() {
-        return !enabled || aggregation != Aggregation.SMOOTHED_AVERAGE ||
-                (dropUpper != 0 && dropLower != 0);
     }
 
 }
