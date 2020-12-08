@@ -41,7 +41,7 @@ Thus, the process of determine whether the methods of a class `X` should be inst
 2. Check if the superclass matcher matches any superclass of class `X` (if defined)
 3. Check if the type matcher matches the type of class `X` (if defined)
 4. For each method: check if the method is matching *any* of the defined method matchers (if defined)
-5. For each excluded scope: exlude the corresponding methods from the method matcher (if defined)
+5. For each excluded scope: exclude the corresponding methods from the method matcher (if defined)
 
 > Keep in mind that all of the type matchers have to match whereas only one of the method matchers have to match!
 

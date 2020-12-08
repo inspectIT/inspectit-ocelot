@@ -16,7 +16,7 @@ Long story short: actions allow you to specify _Java snippets in your configurat
 
 ## Naming Convention
 Differentiating between rules, actions and scopes as well as differentiating between keys and values
-in teh configuration can be tricky from time to time.
+in the configuration can be tricky from time to time.
 Therefore, to increase readability of your configuration files the following naming convention is recommended:
 
 * Scope names always start with "s_", e.g. `s_my_scope`.

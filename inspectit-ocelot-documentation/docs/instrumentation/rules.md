@@ -167,7 +167,7 @@ The most important ones are that neither Autoboxing, Generics, Anonymous Classes
 
 After actions have been compiled, they are placed in the same class loader as the class you instrument with them. This means that they can access any class that your application class could also access.
 
-> Even if your action terminates with an exception or error, inspectIT will make sure that this does not affect your application. InspectIT will print information about the error and the faulting action. The execution of the action in the rule where the failure occured will be disabled until you update your configuration.
+> Even if your action terminates with an exception or error, inspectIT will make sure that this does not affect your application. InspectIT will print information about the error and the faulting action. The execution of the action in the rule where the failure occurred will be disabled until you update your configuration.
 
 ### Input Parameters
 
