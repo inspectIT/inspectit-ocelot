@@ -73,17 +73,16 @@ public class SmoothedAverageView extends TimeWindowView {
 
     @Override
     protected void computeSeries(List<String> tagValues, double[] data, Timestamp time, ResultSeriesCollector resultSeries) {
-        double queueLength = data.length;
+        int queueLength = data.length;
 
-        int ratioBottom = (int) round(queueLength * dropLower);
-        int startIndex = (dropLower == 0.0) ? 0 : Math.min((ratioBottom <= 0) ? 1 : ratioBottom, (int) queueLength - 1);
-        int ratioTop = (int) round(queueLength * dropUpper);
-        int endIndex = (dropUpper == 0.0) ? (int) queueLength - 1 : Math.max((ratioTop <= 0) ? (int) queueLength - 2 : (int) queueLength - 1 - ratioTop, startIndex);
+        int skipAtBottom = Math.min((int) Math.ceil(dropLower * queueLength), queueLength - 1);
+        int skipAtTop = Math.min((int) Math.ceil(dropUpper * queueLength), queueLength - 1);
+        int limit = Math.max(queueLength - skipAtBottom - skipAtTop, 1);
 
         double smoothedAverage = Arrays.stream(data)
                 .sorted()
-                .skip(startIndex)
-                .limit(endIndex - startIndex + 1)
+                .skip(skipAtBottom)
+                .limit(limit)
                 .average()
                 .orElse(0.0);
         resultSeries.add(metricDescriptor, smoothedAverage, time, tagValues);
