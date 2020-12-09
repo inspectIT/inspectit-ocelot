@@ -1,0 +1,399 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>EUM Server and Metrics Configuration · inspectIT Ocelot Documentation</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="The configuration file defines the mapping between the concrete Boomerang metric and a OpenCensus metric, as the following sample configuration file shows:"/><meta name="docsearch:version" content="1.6.1"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="EUM Server and Metrics Configuration · inspectIT Ocelot Documentation"/><meta property="og:type" content="website"/><meta property="og:url" content="https://inspectit.github.io/inspectit-ocelot/"/><meta property="og:description" content="The configuration file defines the mapping between the concrete Boomerang metric and a OpenCensus metric, as the following sample configuration file shows:"/><meta property="og:image" content="https://inspectit.github.io/inspectit-ocelot/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://inspectit.github.io/inspectit-ocelot/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/inspectit-ocelot/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/atom-one-dark.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="https://unpkg.com/vanilla-back-to-top@7.1.14/dist/vanilla-back-to-top.min.js"></script><script>
+        document.addEventListener('DOMContentLoaded', function() {
+          addBackToTop(
+            {"zIndex":100}
+          )
+        });
+        </script><script src="/inspectit-ocelot/js/scrollSpy.js"></script><link rel="stylesheet" href="/inspectit-ocelot/css/main.css"/><script src="/inspectit-ocelot/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/inspectit-ocelot/"><img class="logo" src="/inspectit-ocelot/img/ocelot_head_sil_logo.svg" alt="inspectIT Ocelot Documentation"/><h2 class="headerTitleWithLogo">inspectIT Ocelot Documentation</h2></a><a href="/inspectit-ocelot/versions"><h3>1.6.1</h3></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="https://inspectit.rocks/" target="_self">inspectIT Ocelot Website</a></li><li class=""><a href="https://github.com/inspectIT/inspectit-ocelot" target="_self">GitHub Repository</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>End User Monitoring</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Getting Started<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6.1/doc1">Hello World</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6.1/getting-started/quick-start">Quick Start</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6.1/getting-started/docker-examples">Demo Application</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6.1/getting-started/installation">Installation</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Configuration<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6.1/configuration/configuration-sources">Configuration Sources</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6.1/configuration/external-configuration-sources">External Configuration Sources</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6.1/configuration/logging-configuration">Logging Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6.1/configuration/open-census-configuration">OpenCensus Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6.1/configuration/plugin-configuration">Plugin Configuration</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Metrics<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6.1/metrics/metrics">Metrics</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6.1/metrics/metric-recorders">Metrics Recorders</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6.1/metrics/metric-exporters">Metrics Exporters</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6.1/metrics/common-tags">Common Tags</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6.1/metrics/custom-metrics">Custom Metrics</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6.1/metrics/self-monitoring">Self-Monitoring</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Tracing<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6.1/tracing/tracing">Tracing</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6.1/tracing/trace-exporters">Trace Exporters</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6.1/tracing/log-correlation">Log Correlation</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6.1/tracing/privacy">Data Privacy</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Instrumentation<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6.1/instrumentation/instrumentation">Instrumentation</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6.1/instrumentation/scopes">Scopes</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6.1/instrumentation/rules">Rules</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6.1/instrumentation/special-sensors">Special Sensors</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6.1/instrumentation/process">Instrumentation Process</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">End User Monitoring<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6.1/enduser-monitoring/enduser-monitoring-server">Overview</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6.1/enduser-monitoring/eum-server-setup">Server Setup</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/inspectit-ocelot/docs/1.6.1/enduser-monitoring/eum-server-configuration">Server and Metrics Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6.1/enduser-monitoring/install-eum-agent">Install EUM Agent</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Configuration Server<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6.1/config-server/overview">Overview</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6.1/config-server/cs-configuration">Server Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6.1/config-server/managing-configurations">Managing Configuration Files</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6.1/config-server/agent-mappings">Agent Mappings</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6.1/config-server/user-authentication">User Authentication</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6.1/config-server/log-config">Server Logging Configuration</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Breaking Changes<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6.1/breaking-changes/1-6">Breaking changes in 1.6</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6.1/breaking-changes/1-5">Breaking changes in 1.5</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6.1/breaking-changes/1-4">Breaking changes in 1.4</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6.1/breaking-changes/1-3">Breaking changes in 1.3</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6.1/breaking-changes/1-2">Breaking changes in 1.2</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6.1/breaking-changes/1-1">Breaking changes in 1.1</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6.1/breaking-changes/1-0">Breaking changes in 1.0</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6.1/breaking-changes/0-6">Breaking changes in 0.6</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6.1/breaking-changes/0-5">Breaking changes in 0.5</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.6.1/breaking-changes/0-4">Breaking changes in 0.4</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/inspectit/inspectit-ocelot-documentation/edit/master/docs/enduser-monitoring/eum-server-configuration.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">EUM Server and Metrics Configuration</h1></header><article><div><span><p>The configuration file defines the mapping between the concrete Boomerang metric and a OpenCensus metric, as the following sample configuration file shows:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">inspectit-eum-server:</span>
+  <span class="hljs-attr">definitions:</span>
+     <span class="hljs-attr">page_ready_time:</span>
+      <span class="hljs-attr">measure-type:</span> <span class="hljs-string">LONG</span>
+      <span class="hljs-attr">value-expression:</span> <span class="hljs-string">"{t_page}"</span>
+      <span class="hljs-attr">unit:</span> <span class="hljs-string">ms</span>
+      <span class="hljs-attr">views:</span>
+        <span class="hljs-string">'[page_ready_time/SUM]'</span><span class="hljs-string">:</span> <span class="hljs-string">{aggregation:</span> <span class="hljs-string">SUM}</span>
+        <span class="hljs-string">'[page_ready_time/COUNT]'</span><span class="hljs-string">:</span> <span class="hljs-string">{aggregation:</span> <span class="hljs-string">COUNT}</span>
+
+    <span class="hljs-attr">load_time:</span>
+      <span class="hljs-attr">measure-type:</span> <span class="hljs-string">LONG</span>
+      <span class="hljs-attr">value-expression:</span> <span class="hljs-string">"{t_done}"</span>
+      <span class="hljs-attr">beacon-requirements:</span>
+        <span class="hljs-bullet">-</span> <span class="hljs-attr">field:</span> <span class="hljs-string">rt.quit</span>
+          <span class="hljs-attr">requirement:</span> <span class="hljs-string">NOT_EXISTS</span>
+      <span class="hljs-attr">unit:</span> <span class="hljs-string">ms</span>
+      <span class="hljs-attr">views:</span>
+        <span class="hljs-string">'[load_time/SUM]'</span><span class="hljs-string">:</span> <span class="hljs-string">{aggregation:</span> <span class="hljs-string">SUM}</span>
+        <span class="hljs-string">'[load_time/COUNT]'</span><span class="hljs-string">:</span> <span class="hljs-string">{aggregation:</span> <span class="hljs-string">COUNT}</span>
+
+    <span class="hljs-attr">calc_load_time:</span>
+      <span class="hljs-attr">measure-type:</span> <span class="hljs-string">LONG</span>
+      <span class="hljs-attr">value-expression:</span> <span class="hljs-string">"{rt.end} - {rt.tstart}"</span>
+      <span class="hljs-attr">beacon-requirements:</span>
+        <span class="hljs-bullet">-</span> <span class="hljs-attr">field:</span> <span class="hljs-string">rt.quit</span>
+          <span class="hljs-attr">requirement:</span> <span class="hljs-string">NOT_EXISTS</span>
+      <span class="hljs-attr">unit:</span> <span class="hljs-string">ms</span>
+      <span class="hljs-attr">views:</span>
+        <span class="hljs-string">'[calc_load_time/SUM]'</span><span class="hljs-string">:</span> <span class="hljs-string">{aggregation:</span> <span class="hljs-string">SUM}</span>
+        <span class="hljs-string">'[calc_load_time/COUNT]'</span><span class="hljs-string">:</span> <span class="hljs-string">{aggregation:</span> <span class="hljs-string">COUNT}</span>
+
+    <span class="hljs-attr">start_timestamp:</span>
+      <span class="hljs-attr">measure-type:</span> <span class="hljs-string">LONG</span>
+      <span class="hljs-attr">value-expression:</span> <span class="hljs-string">"{rt.tstart}"</span>
+      <span class="hljs-attr">unit:</span> <span class="hljs-string">ms</span>
+
+    <span class="hljs-attr">navigation_start_timestamp:</span>
+      <span class="hljs-attr">measure-type:</span> <span class="hljs-string">LONG</span>
+      <span class="hljs-attr">value-expression:</span> <span class="hljs-string">"{rt.nstart}"</span>
+      <span class="hljs-attr">unit:</span> <span class="hljs-string">ms</span>
+
+    <span class="hljs-attr">end_timestamp:</span>
+      <span class="hljs-attr">measure-type:</span> <span class="hljs-string">LONG</span>
+      <span class="hljs-attr">value-expression:</span> <span class="hljs-string">"{rt.end}"</span>
+      <span class="hljs-attr">unit:</span> <span class="hljs-string">ms</span>
+      <span class="hljs-attr">views:</span>
+        <span class="hljs-attr">end_timestamp:</span>
+          <span class="hljs-attr">aggregation:</span> <span class="hljs-string">LAST_VALUE</span>
+          <span class="hljs-attr">tags:</span> <span class="hljs-string">{APPLICATION:</span> <span class="hljs-literal">true</span><span class="hljs-string">}</span>
+
+  <span class="hljs-attr">tags:</span>
+    <span class="hljs-attr">extra:</span>
+      <span class="hljs-attr">APPLICATION:</span> <span class="hljs-string">my-application</span>
+    
+    <span class="hljs-attr">beacon:</span>
+      <span class="hljs-attr">URL:</span> <span class="hljs-string">u</span>
+      <span class="hljs-attr">OS:</span> <span class="hljs-string">ua.plt</span>
+    
+    <span class="hljs-attr">define-as-global:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">URL</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">OS</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">COUNTRY_CODE</span>
+    
+    <span class="hljs-attr">custom-ip-mapping:</span>
+      <span class="hljs-attr">department-1:</span>
+        <span class="hljs-bullet">-</span> <span class="hljs-number">10.10</span><span class="hljs-number">.0</span><span class="hljs-number">.0</span><span class="hljs-string">/16</span>
+        <span class="hljs-bullet">-</span> <span class="hljs-number">11.11</span><span class="hljs-number">.0</span><span class="hljs-number">.3</span>
+      <span class="hljs-attr">department-2:</span>
+        <span class="hljs-bullet">-</span> <span class="hljs-number">14.14</span><span class="hljs-number">.0</span><span class="hljs-number">.0</span><span class="hljs-string">/16</span>
+        <span class="hljs-bullet">-</span> <span class="hljs-number">14.15</span><span class="hljs-number">.0</span><span class="hljs-number">.1</span>
+  <span class="hljs-attr">exporters:</span>
+    <span class="hljs-attr">metrics:</span>
+      <span class="hljs-attr">prometheus:</span>
+        <span class="hljs-attr">enabled:</span> <span class="hljs-literal">true</span>
+        <span class="hljs-attr">host:</span> <span class="hljs-string">localhost</span>
+        <span class="hljs-attr">port:</span> <span class="hljs-number">8888</span>
+    <span class="hljs-attr">tracing:</span>
+      <span class="hljs-attr">jaeger:</span>
+        <span class="hljs-attr">enabled:</span> <span class="hljs-literal">true</span>
+        <span class="hljs-attr">grpc:</span> <span class="hljs-string">localhost:14250</span>
+        <span class="hljs-attr">service-name:</span> <span class="hljs-string">browser-js</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="metrics-definition"></a><a href="#metrics-definition" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Metrics Definition</h2>
+<p>A metric is defined the same way as in the inspectIT Ocelot Java agent. Please see the section <a href="/inspectit-ocelot/docs/1.6.1/metrics/custom-metrics">Metrics / Custom Metrics</a> for detailed information.</p>
+<p>In contrast to the agent's metric definition, the EUM server's metric definition contains additional fields.
+These additional fields are the following:</p>
+<table>
+<thead>
+<tr><th>Attributes</th><th>Note</th></tr>
+</thead>
+<tbody>
+<tr><td><code>value-expression</code></td><td>An expression used to calculate the measure's value from a beacon.</td></tr>
+<tr><td><code>beacon-requirements</code></td><td>Requirements which have to be fulfilled by Beacons. Beacons which do not match all requirements will be ignored by this metric definition.</td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" id="value-expressions"></a><a href="#value-expressions" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Value Expressions</h3>
+<p>The <code>value-expression</code> field can be used to specify a field which value is used for the specified metrics.
+In order to reference a field, the following pattern is used: <code>{FIELD_KEY}</code>.
+For example, a valid expression, used to extract the value of a field <code>t_load</code>, would be <code>{t_load}</code>.</p>
+<blockquote>
+<p>Note that a beacon has to contain all fields referenced by the expression in order to be evaluated and recorded.</p>
+</blockquote>
+<p>Value expressions also support operations for basic arithmetic operations. Thus, to calculate a difference of two beacon fields, the following expression can be used:</p>
+<pre><code class="hljs css language-YAML">  <span class="hljs-string">...</span>
+    <span class="hljs-attr">my-metric:</span>
+      <span class="hljs-string">...</span>
+      <span class="hljs-attr">value-expression:</span> <span class="hljs-string">"{field.a} - {field.b}"</span>
+      <span class="hljs-string">...</span>
+</code></pre>
+<p>Value expression are supporting the following operations:</p>
+<ul>
+<li>addition</li>
+<li>subtraction</li>
+<li>multiplication</li>
+<li>division</li>
+<li>unary plus/minus</li>
+<li>parentheses</li>
+</ul>
+<p>Using the operations above, complex calculations can be done, for example:</p>
+<pre><code class="hljs css language-YAML">  <span class="hljs-string">...</span>
+    <span class="hljs-attr">my-metric:</span>
+      <span class="hljs-string">...</span>
+      <span class="hljs-attr">value-expression:</span> <span class="hljs-string">"- {field.c} * ({field.a} - {field.b}) / {field.a}"</span>
+      <span class="hljs-string">...</span>
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="beacon-requirements"></a><a href="#beacon-requirements" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Beacon Requirements</h3>
+<p>The <code>beacon-requirements</code> field can be used to specify requirements which have to be fulfilled by the beacons in order to be evaluated by a certain metric.
+If any requirement does not fit a beacon, the beacon is ignored by the metric.</p>
+<p>The following requirements are available:</p>
+<table>
+<thead>
+<tr><th>Type</th><th>Note</th></tr>
+</thead>
+<tbody>
+<tr><td><code>EXISTS</code></td><td>The targeted field must exist.</td></tr>
+<tr><td><code>NOT_EXISTS</code></td><td>The targeted field must not exist.</td></tr>
+<tr><td><code>HAS_INITIATOR</code></td><td>The beacon must have one of the specified initiators.</td></tr>
+</tbody>
+</table>
+<p>Firstly, you can specify that the metric expects a field to exist or not exist in the beacon:</p>
+<pre><code class="hljs css language-YAML">  <span class="hljs-string">...</span>
+    <span class="hljs-attr">my-metric:</span>
+      <span class="hljs-string">...</span>
+      <span class="hljs-attr">beacon-requirements:</span>
+        <span class="hljs-bullet">-</span> <span class="hljs-attr">field:</span> <span class="hljs-string">rt.quit</span>
+          <span class="hljs-attr">requirement:</span> <span class="hljs-string">NOT_EXISTS</span>
+</code></pre>
+<p>In this example, <code>my-metric</code> will only be recorded if the field <code>rt.quit</code> does not exist in the beacon.
+Alternatively you can use the <code>requirement</code> <code>EXISTS</code> to make sure the metric is only recorded if the given field is present.</p>
+<p>Additionally you can specify that you only want to record the metric if the received beacon has a specific initiator:</p>
+<pre><code class="hljs css language-YAML">  <span class="hljs-string">...</span>
+    <span class="hljs-attr">my-metric:</span>
+      <span class="hljs-string">...</span>
+      <span class="hljs-attr">beacon-requirements:</span>
+        <span class="hljs-bullet">-</span> <span class="hljs-attr">initiators:</span> <span class="hljs-string">[SPA_SOFT,</span> <span class="hljs-string">SPA_HARD]</span>
+          <span class="hljs-attr">requirement:</span> <span class="hljs-string">HAS_INITIATOR</span>
+</code></pre>
+<p>The available initiators are <code>DOCUMENT</code> for the initial pageload beacons, <code>XHR</code> for Ajax-Beacons and <code>SPA_SOFT</code> and <code>SPA_HARD</code> for soft and hard SPA navigation beacons.
+The metric will only be recorded for beacons whose <code>http.initiator</code> field matches any of the elements provided in the <code>initiators</code> list.</p>
+<h3><a class="anchor" aria-hidden="true" id="additional-beacon-fields"></a><a href="#additional-beacon-fields" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Additional Beacon Fields</h3>
+<h4><a class="anchor" aria-hidden="true" id="t_other"></a><a href="#t_other" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>T_OTHER.*</h4>
+<p>The <code>t_other.*</code> fields are a special set of fields which are resolved based on the content of the beacon's <code>t_other</code> field.</p>
+<p>The Boomerang agent allows to set custom-timer data, which represents a arbitrary key-value pair. The key represents the name of the timer and the value the timer's value which may be a duration or any number. This can be used by applications to measure custom durations or events. See the <a href="https://developer.akamai.com/tools/boomerang/#BOOMR.sendTimer(name,value)">Boomerang's documentation</a> for more information.</p>
+<p>When using custom timers, Boomerang combines their values as a comma-separated list and sends them in the <code>t_other</code> attribute. For example, a beacon can be structured as follows: <code>t_other=t_domloaded|437,boomerang|420,boomr_fb|252</code></p>
+<p>In order to use the custom-timer data for metrics or tags, the EUM server will split the timer data contained in the <code>t_other</code> field into separate fields. The syntax of the resulting fields is: <code>t_other.[CUSTOM_TIMTER_NAME]</code>. These resulting fields can be used, for example, as a value input for metrics.</p>
+<h5><a class="anchor" aria-hidden="true" id="example"></a><a href="#example" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example</h5>
+<p>A <code>t_other</code> field containing <code>t_domloaded|437,boomr_fb|252</code> will produce the following results:</p>
+<ul>
+<li><code>t_other.t_domloaded</code> = <code>437</code></li>
+<li><code>t_other.boomr_fb</code> = <code>252</code></li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="tags-definition"></a><a href="#tags-definition" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Tags Definition</h2>
+<p>We distinguish between to different types of tags:</p>
+<table>
+<thead>
+<tr><th>Attributes</th><th>Note</th></tr>
+</thead>
+<tbody>
+<tr><td><code>extra</code></td><td>Extra tags define tags, which are manually set in the configuration and can be considered as constants.</td></tr>
+<tr><td><code>beacon</code></td><td>Beacon tags define tags, whose value is resolved by an incoming beacon entry.</td></tr>
+</tbody>
+</table>
+<p>For example, the following configuration specifies the two tags <code>APP</code> and <code>URL</code>.
+The tag <code>APP</code> will always be resolved to the value <code>my-application</code>, where the tag <code>URL</code> will be resolved to the value of the field <code>u</code> of a received beacon.</p>
+<pre><code class="hljs css language-YAML"><span class="hljs-attr">inspectit-eum-server:</span>
+  <span class="hljs-attr">tags:</span>
+    <span class="hljs-attr">extra:</span>
+      <span class="hljs-attr">APP:</span> <span class="hljs-string">my-application</span>
+    <span class="hljs-attr">beacon:</span>
+      <span class="hljs-attr">URL:</span> 
+        <span class="hljs-attr">input:</span> <span class="hljs-string">u</span>
+</code></pre>
+<p>Tags configured via <code>beacon</code> offer some additional flexibility: In addition to simply copying the input value,
+it is possible to perform one or multiple regular expression replacements.</p>
+<p><strong>Example:</strong> in case the <code>u</code> attribute contains a URL which is: <code>http://server/user/100</code>.
+The following configuration can be used to extract the HTTP-Path from it.</p>
+<pre><code class="hljs css language-YAML"><span class="hljs-attr">inspectit-eum-server:</span>
+  <span class="hljs-attr">tags:</span>
+    <span class="hljs-attr">beacon:</span>
+      <span class="hljs-attr">MY_PATH:</span> 
+        <span class="hljs-attr">input:</span> <span class="hljs-string">u</span>
+        <span class="hljs-attr">replacements:</span>
+         <span class="hljs-bullet">-</span>  <span class="hljs-attr">pattern:</span>  <span class="hljs-string">'^.*\/\/([^\/]*)([^?]*).*$'</span>
+            <span class="hljs-attr">replacement:</span> <span class="hljs-string">"$2"</span>
+            <span class="hljs-attr">keep-no-match:</span> <span class="hljs-literal">false</span>
+</code></pre>
+<p>The <code>replacements</code> property defines a list of regular expressions and corresponding replacements to apply.
+They will be applied in the order they are listed.
+For each list element, the <code>pattern</code> property defines the regex to use for the replacement.
+All matches of the <code>pattern</code> in the input value are replaced with the string defined by <code>replacement</code>.
+The <code>keep-no-match</code> option of each entry defines what to do if the given input does not match the given regex at any place.
+If it is set to <code>true</code>, the previous value is kept unchanged. If it is set to <code>false</code>, the given tag won't be created in case no match is found.
+Note that capture groups are supported and can be referenced in the replacement string using <code>$1</code>, <code>$2</code>, etc. as shown in the example.</p>
+<p>The following example extends the previous one by additionally replacing all user-IDs within the path:</p>
+<pre><code class="hljs css language-YAML"><span class="hljs-attr">inspectit-eum-server:</span>
+  <span class="hljs-attr">tags:</span>
+    <span class="hljs-attr">beacon:</span>
+      <span class="hljs-attr">MY_PATH:</span> 
+        <span class="hljs-attr">input:</span> <span class="hljs-string">u</span>
+        <span class="hljs-attr">replacements:</span>
+         <span class="hljs-bullet">-</span>  <span class="hljs-attr">pattern:</span>  <span class="hljs-string">'^.*\/\/([^\/]*)([^?]*).*$'</span>
+            <span class="hljs-attr">replacement:</span> <span class="hljs-string">"$2"</span>
+            <span class="hljs-attr">keep-no-match:</span> <span class="hljs-literal">false</span>
+         <span class="hljs-bullet">-</span>  <span class="hljs-attr">pattern:</span>  <span class="hljs-string">'\/user\/\d+'</span>
+            <span class="hljs-attr">replacement:</span> <span class="hljs-string">'/user/{id}'</span>
+</code></pre>
+<p>With these settings, the tag will be extracted from <code>u</code> just like in the previous example.
+However, an additional replacement will be applied afterwards causing user-IDs to be erased from the path.
+Note that we did not specify <code>keep-no-match</code> for the second replacement. <code>keep-no-match</code> default to <code>true</code>,
+meaning that the path will be preserved without any changes in case it does not contain any user-IDs.</p>
+<p>Using this mechanism, the EUM server provides the following tags out of the box:</p>
+<table>
+<thead>
+<tr><th>Tag</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><code>U_NO_QUERY</code></td><td>The Boomerang <em>u</em> property but without query parameters. Check out <a href="https://developer.akamai.com/tools/boomerang/docs/BOOMR.html">Boomerang</a>.</td></tr>
+<tr><td><code>U_HOST</code></td><td>The host specified in the <em>u</em> property. Check out <a href="https://developer.akamai.com/tools/boomerang/docs/BOOMR.html">Boomerang</a>.</td></tr>
+<tr><td><code>U_PORT</code></td><td>The port specified in the <em>u</em> property. Check out <a href="https://developer.akamai.com/tools/boomerang/docs/BOOMR.html">Boomerang</a>.</td></tr>
+<tr><td><code>U_PATH</code></td><td>The http path specified in the <em>u</em> property. Check out <a href="https://developer.akamai.com/tools/boomerang/docs/BOOMR.html">Boomerang</a>.</td></tr>
+<tr><td><code>PGU_NO_QUERY</code></td><td>The Boomerang <em>pgu</em> property but without query parameters. Check out <a href="https://developer.akamai.com/tools/boomerang/docs/BOOMR.html">Boomerang</a>.</td></tr>
+<tr><td><code>PGU_HOST</code></td><td>The host specified in the <em>pgu</em> property. Check out <a href="https://developer.akamai.com/tools/boomerang/docs/BOOMR.html">Boomerang</a>.</td></tr>
+<tr><td><code>PGU_PORT</code></td><td>The port specified in the <em>pgu</em> property. Check out <a href="https://developer.akamai.com/tools/boomerang/docs/BOOMR.html">Boomerang</a>.</td></tr>
+<tr><td><code>PGU_PATH</code></td><td>The http path specified in the <em>pgu</em> property. Check out <a href="https://developer.akamai.com/tools/boomerang/docs/BOOMR.html">Boomerang</a>.</td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" id="additional-tags"></a><a href="#additional-tags" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Additional Tags</h3>
+<p>The EUM server provides a set of additional tags which can be used like all other tag.
+See the following sections for a detailed description of the existing additional tags.</p>
+<h4><a class="anchor" aria-hidden="true" id="country_code"></a><a href="#country_code" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>COUNTRY_CODE</h4>
+<p>The <code>COUNTRY_CODE</code> tag contains the geolocation of the beacon's origin. It is resolved by using the client IP and the <a href="https://www.maxmind.com">GeoLite2 database</a>. If the IP cannot be resolved, the tag value will be empty.</p>
+<h5><a class="anchor" aria-hidden="true" id="custom-country_code-mapping"></a><a href="#custom-country_code-mapping" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Custom COUNTRY_CODE Mapping</h5>
+<p>Besides using the internal GeoLite2 database, it is possible to define custom IP mappings.
+The property <code>custom-ip-mapping</code> holds a map of possible tag values, which are mapped to certain IPs or CIDRs.
+The tag values are published with the tag <code>COUNTRY_CODE</code> and have a higher priority than the results of the GeoLite2 database.
+If the IP cannot be resolved with the custom mapping, the mapping of the GeoLite2 database will be used.</p>
+<pre><code class="hljs css language-YAML"><span class="hljs-attr">inspectit-eum-server:</span>
+  <span class="hljs-attr">tags:</span>
+    <span class="hljs-attr">custom-ip-mapping:</span>
+      <span class="hljs-attr">department-1:</span>
+        <span class="hljs-bullet">-</span> <span class="hljs-number">10.10</span><span class="hljs-number">.0</span><span class="hljs-number">.0</span><span class="hljs-string">/16</span>
+        <span class="hljs-bullet">-</span> <span class="hljs-number">11.11</span><span class="hljs-number">.0</span><span class="hljs-number">.3</span>
+      <span class="hljs-attr">department-2:</span>
+        <span class="hljs-bullet">-</span> <span class="hljs-number">14.14</span><span class="hljs-number">.0</span><span class="hljs-number">.0</span><span class="hljs-string">/16</span>
+        <span class="hljs-bullet">-</span> <span class="hljs-number">14.15</span><span class="hljs-number">.0</span><span class="hljs-number">.1</span>
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="global-tags"></a><a href="#global-tags" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Global Tags</h3>
+<p>Tags will not be attached to metrics unless a metric explicitly defines to use a certain tag.</p>
+<p>In order to simplify the configuration, it is possible to define tags which are <em>always</em> attached to metrics, even a metric does not explicitly specifies it.
+This can be achieved by adding a tag's name to the <code>define-as-global</code> property.
+Each tag which is listed under this property will be added to each registered metric.</p>
+<p>For example, the following configuration causes that each metric will be enriched by a tag called <code>COUNTRY_CODE</code>.</p>
+<pre><code class="hljs css language-YAML"><span class="hljs-attr">inspectit-eum-server:</span>
+  <span class="hljs-attr">tags:</span>
+    <span class="hljs-attr">define-as-global:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">COUNTRY_CODE</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="resource-timings"></a><a href="#resource-timings" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Resource Timings</h2>
+<p>The EUM server can extract information about the resources timings which are reported as part of the Boomerang beacon field <code>restiming</code>.
+The resource timing information is decompressed from the beacon and exposed as part of the <code>resource_time</code> metric.
+This metric contains following tags:</p>
+<table>
+<thead>
+<tr><th>Tag</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><code>initiatorType</code></td><td>The type of the element initiating the loading of the resource. See <a href="https://developer.akamai.com/tools/boomerang/docs/BOOMR.plugins.ResourceTiming.html#.INITIATOR_TYPES">all initiator types</a>.</td></tr>
+<tr><td><code>crossOrigin</code></td><td>If a resource loading is considered as cross-origin request. See <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS">more information about CORS</a>.</td></tr>
+<tr><td><code>cached</code></td><td>If a resource was cached and loaded from the browser disk or memory storage. Note that cached tag will only be set for same-origin requests, as some resource timing  metrics are restricted and will not be provided cross-origin unless the Timing-Allow-Origin header permits.</td></tr>
+</tbody>
+</table>
+<p>The resource timing processing is enabled by default and can be disabled by setting the property <code>inspectit-eum-server.resource-timing.enabled</code> to <code>false.</code></p>
+<h2><a class="anchor" aria-hidden="true" id="exporters"></a><a href="#exporters" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Exporters</h2>
+<h3><a class="anchor" aria-hidden="true" id="metrics"></a><a href="#metrics" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Metrics</h3>
+<p>The EUM server comes with the same Prometheus and InfluxDB exporter as the Ocelot agent.
+The exporter's configurations options are the same as for the <a href="/inspectit-ocelot/docs/1.6.1/metrics/metric-exporters">agent</a>.
+However, they are located under the <code>inspectit-eum-server.exporters.metrics</code> configuration path.</p>
+<p>By default, the prometheus exporter is enabled and available on port <code>8888</code>.
+The InfluxDB exporter is disabled by default and can be enabled by setting the URL via <code>inspectit-eum-server.exporters.metrics.influx.url</code>.</p>
+<h3><a class="anchor" aria-hidden="true" id="tracing"></a><a href="#tracing" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Tracing</h3>
+<p>The EUM server supports trace data forwarding to the Jaeger exporter.
+The exporter is using the <a href="https://www.jaegertracing.io/docs/1.16/apis/#protobuf-via-grpc-stable">Jaeger Protobuf via gRPC API</a> in order to forward trace data.
+By default, the Jaeger exporter is disabled.</p>
+<h2><a class="anchor" aria-hidden="true" id="self-monitoring"></a><a href="#self-monitoring" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Self-Monitoring</h2>
+<p>For the purpose of self-monitoring, the EUM server offers a set of metrics that reflect its state.
+These metrics are exposed using its Prometheus endpoint which also is used for the EUM beacon data.
+Currently, the following self monitoring metrics are available.</p>
+<table>
+<thead>
+<tr><th>Metric name</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><code>beacons_received</code></td><td>Counts the number of received beacons</td></tr>
+</tbody>
+</table>
+</span></div></article></div><div class="docLastUpdate"><em>Last updated on 2020-9-9 by Jonas Kunz</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/1.6.1/enduser-monitoring/eum-server-setup"><span class="arrow-prev">← </span><span>Server Setup</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/1.6.1/enduser-monitoring/install-eum-agent"><span>Install EUM Agent</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#metrics-definition">Metrics Definition</a><ul class="toc-headings"><li><a href="#value-expressions">Value Expressions</a></li><li><a href="#beacon-requirements">Beacon Requirements</a></li><li><a href="#additional-beacon-fields">Additional Beacon Fields</a></li></ul></li><li><a href="#tags-definition">Tags Definition</a><ul class="toc-headings"><li><a href="#additional-tags">Additional Tags</a></li><li><a href="#global-tags">Global Tags</a></li></ul></li><li><a href="#resource-timings">Resource Timings</a></li><li><a href="#exporters">Exporters</a><ul class="toc-headings"><li><a href="#metrics">Metrics</a></li><li><a href="#tracing">Tracing</a></li></ul></li><li><a href="#self-monitoring">Self-Monitoring</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2020 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                
+                apiKey: 'ce332dcee733a92cefacc3195edd83dd',
+                indexName: 'inspectit-ocelot',
+                inputSelector: '#search_input_react',
+                algoliaOptions: {"facetFilters":["version:1.6.1"]}
+              });
+            </script></body></html>
