@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
-import rocks.inspectit.oce.eum.server.metrics.percentiles.PercentileViewManager;
+import rocks.inspectit.oce.eum.server.metrics.percentiles.TimeWindowViewManager;
 import rocks.inspectit.ocelot.config.model.exporters.metrics.InfluxExporterSettings;
 import rocks.inspectit.opencensus.influx.InfluxExporter;
 
@@ -27,7 +27,7 @@ public class InfluxExporterService {
     private ScheduledExecutorService executor;
 
     @Autowired
-    private PercentileViewManager percentileViewManager;
+    private TimeWindowViewManager timeWindowViewManager;
 
     @Autowired
     private EumServerConfiguration config;
@@ -64,7 +64,7 @@ public class InfluxExporterService {
                     .password(influx.getPassword())
                     .createDatabase(influx.isCreateDatabase())
                     .exportDifference(influx.isCountersAsDifferences())
-                    .measurementNameProvider(percentileViewManager::getMeasureNameForSeries)
+                    .measurementNameProvider(timeWindowViewManager::getMeasureNameForSeries)
                     .bufferSize(influx.getBufferSize())
                     .build();
             exporterTask = executor.scheduleAtFixedRate(activeExporter::export, 0, influx.getExportInterval()

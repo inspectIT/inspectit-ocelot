@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
-import rocks.inspectit.oce.eum.server.metrics.percentiles.PercentileViewManager;
+import rocks.inspectit.oce.eum.server.metrics.percentiles.TimeWindowViewManager;
 import rocks.inspectit.oce.eum.server.utils.TagUtils;
 import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings;
 import rocks.inspectit.ocelot.config.model.metrics.definition.ViewDefinitionSettings;
@@ -39,7 +39,7 @@ public class MeasuresAndViewsManager {
     private ViewManager viewManager;
 
     @Autowired
-    private PercentileViewManager percentileViewManager;
+    private TimeWindowViewManager timeWindowViewManager;
 
     /**
      * Records the measure.
@@ -66,7 +66,7 @@ public class MeasuresAndViewsManager {
                 break;
         }
 
-        percentileViewManager.recordMeasurement(measureName, value.doubleValue(), Tags.getTagger()
+        timeWindowViewManager.recordMeasurement(measureName, value.doubleValue(), Tags.getTagger()
                 .getCurrentTagContext());
     }
 
@@ -109,8 +109,10 @@ public class MeasuresAndViewsManager {
             if (viewManager.getAllExportedViews().stream().noneMatch(v -> v.getName().asString().equals(viewName))) {
                 Measure measure = metrics.get(metricName);
 
-                if (percentileViewManager.isViewRegistered(metricName, viewName) || viewDefinitionSettings.getAggregation() == ViewDefinitionSettings.Aggregation.QUANTILES) {
-                    addPercentileView(measure, viewName, viewDefinitionSettings);
+                if (timeWindowViewManager.isViewRegistered(metricName, viewName) ||
+                        viewDefinitionSettings.getAggregation() == ViewDefinitionSettings.Aggregation.QUANTILES ||
+                        viewDefinitionSettings.getAggregation() == ViewDefinitionSettings.Aggregation.SMOOTHED_AVERAGE) {
+                    addTimeWindowView(measure, viewName, viewDefinitionSettings);
                 } else {
                     registerNewView(measure, viewName, viewDefinitionSettings);
                 }
@@ -118,18 +120,25 @@ public class MeasuresAndViewsManager {
         }
     }
 
-    private void addPercentileView(Measure measure, String viewName, ViewDefinitionSettings def) {
+    private void addTimeWindowView(Measure measure, String viewName, ViewDefinitionSettings def) {
         List<TagKey> viewTags = getTagKeysForView(def);
         Set<String> tagsAsStrings = viewTags.stream().map(TagKey::getName).collect(Collectors.toSet());
-        boolean minEnabled = def.getQuantiles().contains(0.0);
-        boolean maxEnabled = def.getQuantiles().contains(1.0);
-        List<Double> percentilesFiltered = def.getQuantiles()
-                .stream()
-                .filter(p -> p > 0 && p < 1)
-                .collect(Collectors.toList());
-        percentileViewManager.createOrUpdateView(measure.getName(), viewName, measure.getUnit(), def.getDescription(), minEnabled, maxEnabled, percentilesFiltered, def
-                .getTimeWindow()
-                .toMillis(), tagsAsStrings, def.getMaxBufferedPoints());
+        if (def.getAggregation() == ViewDefinitionSettings.Aggregation.QUANTILES) {
+            boolean minEnabled = def.getQuantiles().contains(0.0);
+            boolean maxEnabled = def.getQuantiles().contains(1.0);
+            List<Double> percentilesFiltered = def.getQuantiles()
+                    .stream()
+                    .filter(p -> p > 0 && p < 1)
+                    .collect(Collectors.toList());
+            timeWindowViewManager.createOrUpdatePercentileView(measure.getName(), viewName, measure.getUnit(), def.getDescription(), minEnabled, maxEnabled, percentilesFiltered, def
+                    .getTimeWindow()
+                    .toMillis(), tagsAsStrings, def.getMaxBufferedPoints());
+        } else {
+            timeWindowViewManager.createOrUpdateSmoothedAverageView(measure.getName(), viewName, measure.getUnit(), def.getDescription(), def.getDropUpper(), def.getDropLower(), def
+                    .getTimeWindow()
+                    .toMillis(), tagsAsStrings, def.getMaxBufferedPoints());
+        }
+
     }
 
     private void registerNewView(Measure measure, String viewName, ViewDefinitionSettings def) {
