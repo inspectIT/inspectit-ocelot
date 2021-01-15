@@ -93,9 +93,7 @@ public class InspectitContextImplTest {
             InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(new HashMap<>(), propagation, false);
             assertThat(ctx.hasEnteredSpan()).isFalse();
 
-            ctx.enterSpan(mySpan);
-
-            verify(traceCorrelator).startCorrelatedSpanScope(any());
+            ctx.setSpanScope(Tracing.getTracer().withSpan(mySpan));
 
             ctx.makeActive();
 
@@ -946,7 +944,7 @@ public class InspectitContextImplTest {
         void verifySpanAttachedAndDetached() {
             InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
             Span sp = Tracing.getTracer().spanBuilder("blub").startSpan();
-            ctx.enterSpan(sp);
+            ctx.setSpanScope(Tracing.getTracer().withSpan(sp));
             ctx.makeActive();
 
             Span span = Tracing.getTracer().getCurrentSpan();

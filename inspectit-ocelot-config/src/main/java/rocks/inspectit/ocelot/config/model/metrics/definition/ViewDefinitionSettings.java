@@ -26,6 +26,7 @@ public class ViewDefinitionSettings {
         SUM("sum"),
         COUNT("count"),
         QUANTILES("quantiles"),
+        SMOOTHED_AVERAGE("smoothed average"),
         /**
          * Corresponds to OpenCensus "Distribution" aggregation
          */
@@ -64,6 +65,22 @@ public class ViewDefinitionSettings {
      */
     @Builder.Default
     private List<@NotNull Double> quantiles = Arrays.asList(0.0, 0.5, 0.9, 0.95, 0.99, 1.0);
+
+    /**
+     * In case the view is a smoothed_average, this value (in percentage in the range (0,1)) defines, how many metrics in the upper range shall be dropped.
+     */
+    @DecimalMax("1.0")
+    @DecimalMin("0.0")
+    @Builder.Default
+    private Double dropUpper = 0.0;
+
+    /**
+     * In case the view is a smoothed_average, this value (in percentage in the range (0,1)) defines, how many metrics in the lower range shall be dropped.
+     */
+    @DecimalMax("1.0")
+    @DecimalMin("0.0")
+    @Builder.Default
+    private Double dropLower = 0.0;
 
     /**
      * The time window to use for windowed metrics (currently only quantiles).

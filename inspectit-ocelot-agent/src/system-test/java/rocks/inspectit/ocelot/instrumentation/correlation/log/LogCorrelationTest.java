@@ -180,7 +180,7 @@ public class LogCorrelationTest {
                 String trace = Tracing.getTracer().getCurrentSpan().getContext().getTraceId().toLowerBase16();
                 future.set(es.schedule(() -> {
                     assertMDCContainTraceId(trace);
-                }, 10, TimeUnit.MILLISECONDS));
+                }, 30, TimeUnit.MILLISECONDS));
             }, 1.0);
             future.get().get();
             es.shutdown();
@@ -194,7 +194,7 @@ public class LogCorrelationTest {
                 future.set(es.schedule(() -> {
                     assertThat(Tracing.getTracer().getCurrentSpan().getContext().isValid()).isTrue();
                     assertMDCContainTraceId(null);
-                }, 10, TimeUnit.MILLISECONDS));
+                }, 30, TimeUnit.MILLISECONDS));
             }, 0.0);
 
             future.get().get();
@@ -209,7 +209,7 @@ public class LogCorrelationTest {
                 future.set(es.schedule(() -> {
                     assertMDCContainTraceId(trace);
                     return "I'm a callable";
-                }, 10, TimeUnit.MILLISECONDS));
+                }, 30, TimeUnit.MILLISECONDS));
             }, 1.0);
             future.get().get();
             es.shutdown();
@@ -224,7 +224,7 @@ public class LogCorrelationTest {
                     assertThat(Tracing.getTracer().getCurrentSpan().getContext().isValid()).isTrue();
                     assertMDCContainTraceId(null);
                     return "I'm a callable";
-                }, 10, TimeUnit.MILLISECONDS));
+                }, 30, TimeUnit.MILLISECONDS));
             }, 0.0);
 
             future.get().get();

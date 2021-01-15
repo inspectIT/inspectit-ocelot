@@ -188,6 +188,9 @@ public class ClassInjector {
     }
 
     private Optional<Class<?>> tryReusingClassInLoader(String classStructureIdentifier, ClassLoader loader) {
+        if (!inspectitEnv.getCurrentConfig().getInstrumentation().getInternal().isRecyclingOldActionClasses()) {
+            return Optional.empty();
+        }
         if (loader == null) {
             loader = bootstrapChildLoader;
         }

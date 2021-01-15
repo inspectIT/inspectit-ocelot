@@ -56,7 +56,7 @@ public class HttpServiceOutMetricTest {
                         .withBody("body")
                         .withStatus(200)));
 
-        TestUtils.waitForClassInstrumentation(HttpServlet.class, true, 10, TimeUnit.SECONDS);
+        TestUtils.waitForClassInstrumentation(HttpServlet.class, true, 30, TimeUnit.SECONDS);
     }
 
     @AfterEach
@@ -76,7 +76,7 @@ public class HttpServiceOutMetricTest {
 
             TestUtils.waitForClassInstrumentations(Arrays.asList(
                     CloseableHttpClient.class,
-                    Class.forName("org.apache.http.impl.client.InternalHttpClient")), true, 10, TimeUnit.SECONDS);
+                    Class.forName("org.apache.http.impl.client.InternalHttpClient")), true, 30, TimeUnit.SECONDS);
 
             InternalInspectitContext serviceOverride = Instances.contextManager.enterNewContext();
             serviceOverride.setData("service", "apache_sg_test");
@@ -108,7 +108,7 @@ public class HttpServiceOutMetricTest {
         void testInternalCallRecording() throws Exception {
             targetName = "urlconn_test";
 
-            TestUtils.waitForClassInstrumentation(Class.forName("sun.net.www.protocol.http.HttpURLConnection"), true, 10, TimeUnit.SECONDS);
+            TestUtils.waitForClassInstrumentation(Class.forName("sun.net.www.protocol.http.HttpURLConnection"), true, 30, TimeUnit.SECONDS);
 
             InternalInspectitContext serviceOverride = Instances.contextManager.enterNewContext();
             serviceOverride.setData("service", "httpurlconn_sg_test");
