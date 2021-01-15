@@ -13,8 +13,8 @@ const VersionItem = ({ isSelected, onClick, isLatest, versionName, author, times
     latest: isLatest,
   });
 
-  const modDate = dateformat(timestamp * 1000, 'yyyy-mm-dd');
-  const modTime = dateformat(timestamp * 1000, 'HH:MM');
+  const modDate = dateformat(timestamp, 'yyyy-mm-dd');
+  const modTime = dateformat(timestamp, 'HH:MM');
 
   return (
     <>
