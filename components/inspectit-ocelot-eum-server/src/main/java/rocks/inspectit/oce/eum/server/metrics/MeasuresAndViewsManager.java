@@ -86,11 +86,9 @@ public class MeasuresAndViewsManager {
     private Measure createMeasure(String name, MetricDefinitionSettings metricDefinition) {
         switch (metricDefinition.getType()) {
             case LONG:
-                return Measure.MeasureLong.create(name,
-                        metricDefinition.getDescription(), metricDefinition.getUnit());
+                return Measure.MeasureLong.create(name, metricDefinition.getDescription(), metricDefinition.getUnit());
             case DOUBLE:
-                return Measure.MeasureDouble.create(name,
-                        metricDefinition.getDescription(), metricDefinition.getUnit());
+                return Measure.MeasureDouble.create(name, metricDefinition.getDescription(), metricDefinition.getUnit());
             default:
                 throw new RuntimeException("Used measurement type is not supported");
         }
@@ -109,9 +107,8 @@ public class MeasuresAndViewsManager {
             if (viewManager.getAllExportedViews().stream().noneMatch(v -> v.getName().asString().equals(viewName))) {
                 Measure measure = metrics.get(metricName);
 
-                if (timeWindowViewManager.isViewRegistered(metricName, viewName) ||
-                        viewDefinitionSettings.getAggregation() == ViewDefinitionSettings.Aggregation.QUANTILES ||
-                        viewDefinitionSettings.getAggregation() == ViewDefinitionSettings.Aggregation.SMOOTHED_AVERAGE) {
+                if (timeWindowViewManager.isViewRegistered(metricName, viewName) || viewDefinitionSettings.getAggregation() == ViewDefinitionSettings.Aggregation.QUANTILES || viewDefinitionSettings
+                        .getAggregation() == ViewDefinitionSettings.Aggregation.SMOOTHED_AVERAGE) {
                     addTimeWindowView(measure, viewName, viewDefinitionSettings);
                 } else {
                     registerNewView(measure, viewName, viewDefinitionSettings);
@@ -134,8 +131,8 @@ public class MeasuresAndViewsManager {
                     .getTimeWindow()
                     .toMillis(), tagsAsStrings, def.getMaxBufferedPoints());
         } else {
-            timeWindowViewManager.createOrUpdateSmoothedAverageView(measure.getName(), viewName, measure.getUnit(), def.getDescription(), def.getDropUpper(), def.getDropLower(), def
-                    .getTimeWindow()
+            timeWindowViewManager.createOrUpdateSmoothedAverageView(measure.getName(), viewName, measure.getUnit(), def.getDescription(), def
+                    .getDropUpper(), def.getDropLower(), def.getTimeWindow()
                     .toMillis(), tagsAsStrings, def.getMaxBufferedPoints());
         }
 
@@ -169,7 +166,8 @@ public class MeasuresAndViewsManager {
         TagContextBuilder tagContextBuilder = Tags.getTagger().currentBuilder();
 
         for (Map.Entry<String, String> extraTag : configuration.getTags().getExtra().entrySet()) {
-            tagContextBuilder.putLocal(TagKey.create(extraTag.getKey()), TagUtils.createTagValue(extraTag.getValue()));
+            tagContextBuilder.putLocal(TagKey.create(extraTag.getKey()), TagUtils.createTagValue(extraTag.getKey(), extraTag
+                    .getValue()));
         }
 
         return tagContextBuilder;
@@ -186,7 +184,8 @@ public class MeasuresAndViewsManager {
         TagContextBuilder tagContextBuilder = getTagContext();
 
         for (Map.Entry<String, String> customTag : customTags.entrySet()) {
-            tagContextBuilder.putLocal(TagKey.create(customTag.getKey()), TagUtils.createTagValue(customTag.getValue()));
+            tagContextBuilder.putLocal(TagKey.create(customTag.getKey()), TagUtils.createTagValue(customTag.getKey(), customTag
+                    .getValue()));
         }
 
         return tagContextBuilder;
