@@ -1,5 +1,7 @@
 package rocks.inspectit.oce.eum.server.beacon.processor;
 
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.oce.eum.server.beacon.Beacon;
 
@@ -12,6 +14,7 @@ import java.util.Collections;
  * Example: The attribute <code>rt.bmr=37,5</code> will result in <code>rt.bmr.0: 37</code>, <code>rt.bmr.1: 5</code>
  * and <code>rt.bmr.sum: 42</code>
  */
+@Slf4j
 @Component
 public class CsvExpanderBeaconProcessor implements BeaconProcessor {
 
@@ -29,17 +32,23 @@ public class CsvExpanderBeaconProcessor implements BeaconProcessor {
     public Beacon process(Beacon beacon) {
         String targetAttribute = beacon.get(ATTRIBUTE_KEY);
 
-        if (targetAttribute != null && !targetAttribute.equals("")) {
+        if (StringUtils.isNoneBlank(targetAttribute)) {
             int sum = 0;
             String[] attributes = targetAttribute.split(GROUP_SEPARATOR);
 
             for (int i = 0; i < attributes.length; i++) {
                 String resultKey = ATTRIBUTE_KEY + "." + i;
-                beacon = beacon.merge(Collections.singletonMap(resultKey, attributes[i]));
 
-                sum += Integer.parseInt(attributes[i]);
+                try {
+                    sum += Integer.parseInt(attributes[i]);
+                    beacon = beacon.merge(Collections.singletonMap(resultKey, attributes[i]));
+                } catch (Exception e) {
+                    log.error("Error parsing the value <'{}'>: invalid number.", attributes[i]);
+                }
             }
-            beacon = beacon.merge(Collections.singletonMap(ATTRIBUTE_KEY + ".sum", String.valueOf(sum)));
+            if (sum != 0) {
+                beacon = beacon.merge(Collections.singletonMap(ATTRIBUTE_KEY + ".sum", String.valueOf(sum)));
+            }
         }
 
         return beacon;

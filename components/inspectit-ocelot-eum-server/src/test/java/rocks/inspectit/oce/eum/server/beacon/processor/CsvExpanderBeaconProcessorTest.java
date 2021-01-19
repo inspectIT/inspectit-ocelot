@@ -31,7 +31,7 @@ class CsvExpanderBeaconProcessorTest {
         }
 
         @Test
-        public void rtBmrWithoutPatternAttribute() {
+        public void rtBmrWithoutValues() {
             Beacon beacon = Beacon.of(Collections.singletonMap("rt.bmr", ""));
 
             Beacon result = processor.process(beacon);
@@ -40,7 +40,7 @@ class CsvExpanderBeaconProcessorTest {
         }
 
         @Test
-        public void rtBmrWithPatternAttribute() {
+        public void rtBmrWithValue() {
             Beacon beacon = Beacon.of(Collections.singletonMap("rt.bmr", "123"));
 
             Beacon result = processor.process(beacon);
@@ -49,12 +49,39 @@ class CsvExpanderBeaconProcessorTest {
         }
 
         @Test
-        public void tOtherWithMultiplePatternAttributes() {
+        public void rtBmrWithInvalidValue() {
+            Beacon beacon = Beacon.of(Collections.singletonMap("rt.bmr", "foo"));
+
+            Beacon result = processor.process(beacon);
+
+            assertThat(result.toMap()).containsOnly(entry("rt.bmr", "foo"));
+        }
+
+        @Test
+        public void rtBmrWithMultipleValues() {
             Beacon beacon = Beacon.of(Collections.singletonMap("rt.bmr", "123,321"));
 
             Beacon result = processor.process(beacon);
 
             assertThat(result.toMap()).containsOnly(entry("rt.bmr", "123,321"), entry("rt.bmr.0", "123"), entry("rt.bmr.1", "321"), entry("rt.bmr.sum", "444"));
+        }
+
+        @Test
+        public void rtBmrMultipleValuesWithOneEmptyValue() {
+            Beacon beacon = Beacon.of(Collections.singletonMap("rt.bmr", "123,,321"));
+
+            Beacon result = processor.process(beacon);
+
+            assertThat(result.toMap()).containsOnly(entry("rt.bmr", "123,,321"), entry("rt.bmr.0", "123"), entry("rt.bmr.2", "321"), entry("rt.bmr.sum", "444"));
+        }
+
+        @Test
+        public void rtBmrMultipleValuesWithOneInvalidValue() {
+            Beacon beacon = Beacon.of(Collections.singletonMap("rt.bmr", "123,bar,321"));
+
+            Beacon result = processor.process(beacon);
+
+            assertThat(result.toMap()).containsOnly(entry("rt.bmr", "123,bar,321"), entry("rt.bmr.0", "123"), entry("rt.bmr.2", "321"), entry("rt.bmr.sum", "444"));
         }
     }
 }
