@@ -17,9 +17,10 @@ public final class TagUtils {
      * Constructs a {@code io.opencensus.tags.TagValue} from the given string.
      * If String is not valid an <code>&lt;invalid&gt;</code> TagName is created.
      *
-     * @param value the tag value
+     * @param tagKey the tag name
+     * @param value  the tag value
      *
-     * @return the created TagValue with 'v' or '&lt;invalid&gt;'
+     * @return the created TagValue with 'value' or '&lt;invalid&gt;'
      */
     public static TagValue createTagValue(String tagKey, String value) {
         if (isTagValueValid(value)) {
@@ -35,7 +36,7 @@ public final class TagUtils {
 
     private static void printWarningOnce(String tagKey, String value) {
         if (!isWarningPrinted) {
-            log.warn("Error creating value for tag <" + tagKey + ">: illegal tag value <" + value + "> converted to <invalid>");
+            log.warn("Error creating value for tag <{}>: illegal tag value <{}> converted to <invalid>", tagKey, value);
             isWarningPrinted = true;
         }
     }

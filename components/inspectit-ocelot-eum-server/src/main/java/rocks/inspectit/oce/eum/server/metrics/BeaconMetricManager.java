@@ -50,16 +50,21 @@ public class BeaconMetricManager {
     public boolean processBeacon(Beacon beacon) {
         boolean successful = false;
 
-        for (Map.Entry<String, BeaconMetricDefinitionSettings> metricDefinitionEntry : configuration.getDefinitions()
-                .entrySet()) {
-            String metricName = metricDefinitionEntry.getKey();
-            BeaconMetricDefinitionSettings metricDefinition = metricDefinitionEntry.getValue();
+        Map<String, BeaconMetricDefinitionSettings> definitions = configuration.getDefinitions();
+        if (CollectionUtils.isEmpty(definitions)) {
+            successful = true;
+        } else {
+            for (Map.Entry<String, BeaconMetricDefinitionSettings> metricDefinitionEntry : configuration.getDefinitions()
+                    .entrySet()) {
+                String metricName = metricDefinitionEntry.getKey();
+                BeaconMetricDefinitionSettings metricDefinition = metricDefinitionEntry.getValue();
 
-            if (BeaconRequirement.validate(beacon, metricDefinition.getBeaconRequirements())) {
-                recordMetric(metricName, metricDefinition, beacon);
-                successful = true;
-            } else {
-                log.debug("Skipping beacon because requirements are not fulfilled.");
+                if (BeaconRequirement.validate(beacon, metricDefinition.getBeaconRequirements())) {
+                    recordMetric(metricName, metricDefinition, beacon);
+                    successful = true;
+                } else {
+                    log.debug("Skipping beacon because requirements are not fulfilled.");
+                }
             }
         }
 

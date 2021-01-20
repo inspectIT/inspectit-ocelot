@@ -107,8 +107,10 @@ public class MeasuresAndViewsManager {
             if (viewManager.getAllExportedViews().stream().noneMatch(v -> v.getName().asString().equals(viewName))) {
                 Measure measure = metrics.get(metricName);
 
-                if (timeWindowViewManager.isViewRegistered(metricName, viewName) || viewDefinitionSettings.getAggregation() == ViewDefinitionSettings.Aggregation.QUANTILES || viewDefinitionSettings
-                        .getAggregation() == ViewDefinitionSettings.Aggregation.SMOOTHED_AVERAGE) {
+                boolean isRegistered = timeWindowViewManager.isViewRegistered(metricName, viewName);
+                boolean isQuantileAggregation = viewDefinitionSettings.getAggregation() == ViewDefinitionSettings.Aggregation.QUANTILES;
+                boolean isSmoothedAverageAggregation = viewDefinitionSettings.getAggregation() == ViewDefinitionSettings.Aggregation.SMOOTHED_AVERAGE;
+                if (isRegistered || isQuantileAggregation || isSmoothedAverageAggregation) {
                     addTimeWindowView(measure, viewName, viewDefinitionSettings);
                 } else {
                     registerNewView(measure, viewName, viewDefinitionSettings);
