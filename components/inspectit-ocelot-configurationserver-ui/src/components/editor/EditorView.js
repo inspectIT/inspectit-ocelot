@@ -1,13 +1,13 @@
 import dynamic from 'next/dynamic';
 import PropTypes from 'prop-types';
 import React, { useRef } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import editorConfig from '../../data/yaml-editor-config.json';
 import EditorToolbar from './EditorToolbar';
 import Notificationbar from './Notificationbar';
 import YamlParser from './YamlParser';
 import SelectionInformation from './SelectionInformation';
-import { configurationSelectors } from '../../redux/ducks/configuration';
+import { configurationSelectors, configurationActions } from '../../redux/ducks/configuration';
 
 const AceEditor = dynamic(() => import('./AceEditor'), { ssr: false });
 const TreeTableEditor = dynamic(() => import('./TreeTableEditor'), { ssr: false });
@@ -38,10 +38,20 @@ const EditorView = ({
   onToggleVisualConfigurationView,
   sidebar,
 }) => {
+  const dispatch = useDispatch();
+
   const editorRef = useRef(null);
 
-  // global variables
+  // global state variables
+  const currentVersion = useSelector((state) => state.configuration.selectedVersion);
   const isLatest = useSelector(configurationSelectors.isLatestVersion);
+
+  // derived variables
+  const isLiveSelected = currentVersion === 'live';
+
+  const selectlatestVersion = () => {
+    dispatch(configurationActions.selectVersion(null));
+  };
 
   return (
     <div className="this">
@@ -105,6 +115,13 @@ const EditorView = ({
           margin-right: 1rem;
           color: #212121;
         }
+        .gotoLatest {
+          margin-left: 1rem;
+          color: #007ad9;
+          text-decoration: underline;
+          cursor: pointer;
+          white-space: nowrap;
+        }
       `}</style>
       <div className="editor-menu">
         <EditorToolbar
@@ -126,8 +143,19 @@ const EditorView = ({
         <div className="editor-content">
           {!isLatest && (
             <div className="version-notice">
-              <i className="pi pi-info-circle" /> You are currently not working on the latest workspace version. Modifications are not
-              possible.
+              <i className="pi pi-info-circle" />
+              {isLiveSelected ? (
+                <div>
+                  You are viewing the latest <b>live</b> configuration. Modifications are only possible on the <b>latest workspace</b>{' '}
+                  configuration.
+                </div>
+              ) : (
+                <div>
+                  You are viewing not the latest workspace configuration. Modifications are only possible on the <b>latest workspace</b>{' '}
+                  configuration.
+                </div>
+              )}
+              <div className="gotoLatest" onClick={selectlatestVersion}>Go to latest workspace</div>
             </div>
           )}
 

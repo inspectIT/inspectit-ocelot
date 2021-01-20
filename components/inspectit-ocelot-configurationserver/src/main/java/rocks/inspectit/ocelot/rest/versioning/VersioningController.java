@@ -6,6 +6,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import rocks.inspectit.ocelot.file.FileManager;
 import rocks.inspectit.ocelot.file.versioning.model.WorkspaceVersion;
@@ -14,6 +15,7 @@ import rocks.inspectit.ocelot.security.config.UserRoleConfiguration;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Controller for accessing version information.
@@ -28,8 +30,12 @@ public class VersioningController extends AbstractBaseController {
     @Secured(UserRoleConfiguration.READ_ACCESS_ROLE)
     @ApiOperation(value = "List versions", notes = "Lists all versions which are existing in the configuration server. By default, only versions in the workspace branch will be considered.")
     @GetMapping(value = "versions")
-    public List<WorkspaceVersion> listVersions() throws IOException, GitAPIException {
-        return fileManager.listWorkspaceVersions();
+    public List<WorkspaceVersion> listVersions(@RequestParam(name = "limit", required = false) Integer limit) throws IOException, GitAPIException {
+        if (limit == null || limit < 0) {
+            return fileManager.listWorkspaceVersions();
+        }
+
+        return fileManager.listWorkspaceVersions().stream().limit(limit).collect(Collectors.toList());
     }
 
 }

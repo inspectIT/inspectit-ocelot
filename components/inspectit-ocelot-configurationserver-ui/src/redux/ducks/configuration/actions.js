@@ -1,4 +1,4 @@
-import { DEFAULT_CONFIG_TREE_KEY } from '../../../data/constants';
+import { DEFAULT_CONFIG_TREE_KEY, VERSION_LIMIT } from '../../../data/constants';
 import axios from '../../../lib/axios-api';
 import { configurationUtils } from '.';
 import { notificationActions } from '../notification';
@@ -10,7 +10,12 @@ import * as types from './types';
 export const fetchVersions = () => {
   return (dispatch) => {
     dispatch({ type: types.FETCH_VERSIONS_STARTED });
-    axios('/versions')
+
+    const params = {
+      limit: VERSION_LIMIT
+    }
+
+    axios('/versions',  { params })
       .then((res) => {
         const versions = res.data;
         dispatch({ type: types.FETCH_VERSIONS_SUCCESS, payload: { versions } });
