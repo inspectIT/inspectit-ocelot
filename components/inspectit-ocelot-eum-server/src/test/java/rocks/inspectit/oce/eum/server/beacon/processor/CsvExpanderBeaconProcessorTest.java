@@ -58,6 +58,24 @@ class CsvExpanderBeaconProcessorTest {
         }
 
         @Test
+        public void rtBmrWithZeroValue() {
+            Beacon beacon = Beacon.of(Collections.singletonMap("rt.bmr", "0"));
+
+            Beacon result = processor.process(beacon);
+
+            assertThat(result.toMap()).containsOnly(entry("rt.bmr", "0"), entry("rt.bmr.0", "0"), entry("rt.bmr.sum", "0"));
+        }
+
+        @Test
+        public void rtBmrWithZeroSum() {
+            Beacon beacon = Beacon.of(Collections.singletonMap("rt.bmr", "0,0"));
+
+            Beacon result = processor.process(beacon);
+
+            assertThat(result.toMap()).containsOnly(entry("rt.bmr", "0,0"), entry("rt.bmr.0", "0"), entry("rt.bmr.1", "0"), entry("rt.bmr.sum", "0"));
+        }
+
+        @Test
         public void rtBmrWithMultipleValues() {
             Beacon beacon = Beacon.of(Collections.singletonMap("rt.bmr", "123,321"));
 
