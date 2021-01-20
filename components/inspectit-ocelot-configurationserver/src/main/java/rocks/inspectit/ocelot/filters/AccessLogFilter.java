@@ -74,7 +74,7 @@ public class AccessLogFilter {
         if (url != null) {
             requestIdentifier.remove();
             if (config.getSecurity().isAccessLog()) {
-                log.info("Authentication ({}) failed for '{}': {}", authentication.getName(), url, exception.getMessage());
+                log.warn("Authentication ({}) failed for '{}': {}", authentication.getName(), url, exception.getMessage());
             }
         }
     }
