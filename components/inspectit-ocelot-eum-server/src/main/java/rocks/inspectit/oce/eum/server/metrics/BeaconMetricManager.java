@@ -54,8 +54,7 @@ public class BeaconMetricManager {
         if (CollectionUtils.isEmpty(definitions)) {
             successful = true;
         } else {
-            for (Map.Entry<String, BeaconMetricDefinitionSettings> metricDefinitionEntry : configuration.getDefinitions()
-                    .entrySet()) {
+            for (Map.Entry<String, BeaconMetricDefinitionSettings> metricDefinitionEntry : definitions.entrySet()) {
                 String metricName = metricDefinitionEntry.getKey();
                 BeaconMetricDefinitionSettings metricDefinition = metricDefinitionEntry.getValue();
 
