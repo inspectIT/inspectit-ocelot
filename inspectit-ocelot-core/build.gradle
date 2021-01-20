@@ -11,6 +11,8 @@ configurations {
 test {
     useJUnitPlatform()
 
+    jvmArgs '-Xmx512m', '-XX:+HeapDumpOnOutOfMemoryError', '-XX:HeapDumpPath=/__w/inspectit-ocelot/inspectit-ocelot/test_heapdump.bin'
+
     testLogging {
         exceptionFormat = 'full'
     }
