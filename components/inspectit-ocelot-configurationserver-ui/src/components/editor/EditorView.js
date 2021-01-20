@@ -155,7 +155,9 @@ const EditorView = ({
                   configuration.
                 </div>
               )}
-              <div className="gotoLatest" onClick={selectlatestVersion}>Go to latest workspace</div>
+              <div className="gotoLatest" onClick={selectlatestVersion}>
+                Go to latest workspace
+              </div>
             </div>
           )}
 

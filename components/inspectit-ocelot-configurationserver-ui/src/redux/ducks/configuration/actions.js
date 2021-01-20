@@ -12,10 +12,10 @@ export const fetchVersions = () => {
     dispatch({ type: types.FETCH_VERSIONS_STARTED });
 
     const params = {
-      limit: VERSION_LIMIT
-    }
+      limit: VERSION_LIMIT,
+    };
 
-    axios('/versions',  { params })
+    axios('/versions', { params })
       .then((res) => {
         const versions = res.data;
         dispatch({ type: types.FETCH_VERSIONS_SUCCESS, payload: { versions } });
