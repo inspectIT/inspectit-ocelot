@@ -25,7 +25,6 @@ public class DiskMetricsRecorderConfigTest extends SpringTestBase {
     }
 
     @Nested
-    @Disabled("Disabled due to OOM errors!")
     class CheckConfigChanges extends SpringTestBase {
 
         @Test
