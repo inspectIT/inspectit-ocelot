@@ -18,6 +18,8 @@ const authentication = {
 const configuration = {
   /** Specifies how many requests are currently loading in the background */
   pendingRequests: 0,
+  /** The existing versions. */
+  versions: [],
   /** The existing configuration files. */
   files: [],
   /**
@@ -51,6 +53,10 @@ const configuration = {
   schema: null,
   /** If the config view should be in the visual mode */
   showVisualConfigurationView: false,
+  /** Specifies the selected git version. The latest version always has the number 0. */
+  selectedVersion: null,
+  /** Whether the history view should be shown */
+  showHistoryView: false,
 };
 
 const notification = {

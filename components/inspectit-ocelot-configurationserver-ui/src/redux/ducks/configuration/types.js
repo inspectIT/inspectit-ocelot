@@ -1,5 +1,10 @@
 export const SELECT_FILE = 'configuration/SELECT_FILE';
+export const SELECT_VERSION = 'configuration/SELECT_VERSION';
 export const RESET = 'configuration/RESET';
+
+export const FETCH_VERSIONS_STARTED = 'configuration/FETCH_VERSIONS_STARTED';
+export const FETCH_VERSIONS_FAILURE = 'configuration/FETCH_VERSIONS_FAILURE';
+export const FETCH_VERSIONS_SUCCESS = 'configuration/FETCH_VERSIONS_SUCCESS';
 
 export const FETCH_FILES_STARTED = 'configuration/FETCH_FILES_STARTED';
 export const FETCH_FILES_FAILURE = 'configuration/FETCH_FILES_FAILURE';
@@ -38,3 +43,5 @@ export const FETCH_SCHEMA_FAILURE = 'configuration/FETCH_SCHEMA_FAILURE';
 export const FETCH_SCHEMA_SUCCESS = 'configuration/FETCH_SCHEMA_SUCCESS';
 
 export const TOGGLE_VISUAL_CONFIGURATION_VIEW = 'configuration/TOGGLE_VISUAL_CONFIGURATION_VIEW';
+
+export const TOGGLE_HISTORY_VIEW = 'configuration/TOGGLE_HISTORY_VIEW';
