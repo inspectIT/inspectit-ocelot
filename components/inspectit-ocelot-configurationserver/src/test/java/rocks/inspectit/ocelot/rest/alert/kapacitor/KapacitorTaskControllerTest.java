@@ -47,32 +47,27 @@ public class KapacitorTaskControllerTest extends KapacitorControllerTestBase {
                 assertThat(task.getTemplate()).isEqualTo("my_template");
                 assertThat(task.getDescription()).isNull();
                 assertThat(task.getTopic()).isNull();
-                assertThat(task.getVars()).containsExactlyInAnyOrder(
-                        TemplateVariable.builder()
-                                .name("some_string")
-                                .type("string")
-                                .value("test")
-                                .description("")
-                                .build(),
-                        TemplateVariable.builder()
-                                .name("some_float")
-                                .type("float")
-                                .value(4242.0)
-                                .description("")
-                                .build(),
-                        TemplateVariable.builder()
-                                .name("some_int")
-                                .type("int")
-                                .value(42.0)
-                                .description("")
-                                .build(),
-                        TemplateVariable.builder()
-                                .name("some_dur")
-                                .type("duration")
-                                .value("2h")
-                                .description("")
-                                .build()
-                );
+                assertThat(task.getVars()).containsExactlyInAnyOrder(TemplateVariable.builder()
+                        .name("some_string")
+                        .type("string")
+                        .value("test")
+                        .description("")
+                        .build(), TemplateVariable.builder()
+                        .name("some_float")
+                        .type("float")
+                        .value(4242.0)
+                        .description("")
+                        .build(), TemplateVariable.builder()
+                        .name("some_int")
+                        .type("int")
+                        .value(42.0)
+                        .description("")
+                        .build(), TemplateVariable.builder()
+                        .name("some_dur")
+                        .type("duration")
+                        .value("2h")
+                        .description("")
+                        .build());
 
             });
             assertThat(result).anySatisfy(task -> {
@@ -86,14 +81,12 @@ public class KapacitorTaskControllerTest extends KapacitorControllerTestBase {
                 assertThat(task.getTemplate()).isEqualTo("some_template");
                 assertThat(task.getDescription()).isEqualTo("My task description");
                 assertThat(task.getTopic()).isEqualTo("my_topic");
-                assertThat(task.getVars()).containsExactlyInAnyOrder(
-                        TemplateVariable.builder()
-                                .name("some_string")
-                                .type("string")
-                                .value("test")
-                                .description("")
-                                .build()
-                );
+                assertThat(task.getVars()).containsExactlyInAnyOrder(TemplateVariable.builder()
+                        .name("some_string")
+                        .type("string")
+                        .value("test")
+                        .description("")
+                        .build());
 
             });
 
@@ -122,14 +115,12 @@ public class KapacitorTaskControllerTest extends KapacitorControllerTestBase {
             assertThat(task.getTemplate()).isEqualTo("other_template");
             assertThat(task.getDescription()).isEqualTo("My task description");
             assertThat(task.getTopic()).isEqualTo("my_topic");
-            assertThat(task.getVars()).containsExactlyInAnyOrder(
-                    TemplateVariable.builder()
-                            .name("some_string")
-                            .type("string")
-                            .value("test")
-                            .description("")
-                            .build()
-            );
+            assertThat(task.getVars()).containsExactlyInAnyOrder(TemplateVariable.builder()
+                    .name("some_string")
+                    .type("string")
+                    .value("test")
+                    .description("")
+                    .build());
 
             mockKapacitor.verify();
         }
@@ -140,20 +131,11 @@ public class KapacitorTaskControllerTest extends KapacitorControllerTestBase {
 
         @Test
         void addWithTemplate() {
-            Task toAdd = Task.builder()
-                    .id("my_task")
-                    .template("blub")
-                    .build();
+            Task toAdd = Task.builder().id("my_task").template("blub").build();
 
             mockKapacitor.expect(requestTo("/kapacitor/v1/tasks"))
                     .andExpect(method(HttpMethod.POST))
-                    .andExpect(content().json(
-                            "{" +
-                                    "\"id\" : \"my_task\"," +
-                                    "\"template-id\" : \"blub\"," +
-                                    "\"vars\" : { \"inspectit_template_reference\" : {\"type\" : \"string\", \"value\" : \"blub\"} }" +
-                                    "}"
-                            , true))
+                    .andExpect(content().json("{" + "\"id\" : \"my_task\"," + "\"template-id\" : \"blub\"," + "\"vars\" : { \"inspectit_template_reference\" : {\"type\" : \"string\", \"value\" : \"blub\"} }" + "}", true))
                     .andRespond(withSuccess(getTestJson("tasks_conflicting_template.json"), MediaType.APPLICATION_JSON));
 
             Task result = controller.addTask(toAdd);
@@ -177,15 +159,7 @@ public class KapacitorTaskControllerTest extends KapacitorControllerTestBase {
 
             mockKapacitor.expect(requestTo("/kapacitor/v1/tasks"))
                     .andExpect(method(HttpMethod.POST))
-                    .andExpect(content().json(
-                            "{" +
-                                    "\"id\" : \"my_task\"," +
-                                    "\"vars\" : { " +
-                                    "\"inspectit_template_description\" : {\"type\" : \"string\", \"value\" : \"blub\"}, " +
-                                    "\"my_dur\" : {\"type\" : \"duration\", \"value\" : 7000000000} " +
-                                    "}" +
-                                    "}"
-                            , true))
+                    .andExpect(content().json("{" + "\"id\" : \"my_task\"," + "\"vars\" : { " + "\"inspectit_template_description\" : {\"type\" : \"string\", \"value\" : \"blub\"}, " + "\"my_dur\" : {\"type\" : \"duration\", \"value\" : 7000000000} " + "}" + "}", true))
                     .andRespond(withSuccess(getTestJson("tasks_conflicting_template.json"), MediaType.APPLICATION_JSON));
 
             Task result = controller.addTask(toAdd);
@@ -197,23 +171,11 @@ public class KapacitorTaskControllerTest extends KapacitorControllerTestBase {
 
         @Test
         void addWithTopicAndStatus() {
-            Task toAdd = Task.builder()
-                    .id("my_task")
-                    .topic("blub")
-                    .status("disabled")
-                    .build();
+            Task toAdd = Task.builder().id("my_task").topic("blub").status("disabled").build();
 
             mockKapacitor.expect(requestTo("/kapacitor/v1/tasks"))
                     .andExpect(method(HttpMethod.POST))
-                    .andExpect(content().json(
-                            "{" +
-                                    "\"id\" : \"my_task\"," +
-                                    "\"status\" : \"disabled\"," +
-                                    "\"vars\" : { " +
-                                    "\"topic\" : {\"type\" : \"string\", \"value\" : \"blub\"} " +
-                                    "}" +
-                                    "}"
-                            , true))
+                    .andExpect(content().json("{" + "\"id\" : \"my_task\"," + "\"status\" : \"disabled\"," + "\"vars\" : { " + "\"topic\" : {\"type\" : \"string\", \"value\" : \"blub\"} " + "}" + "}", true))
                     .andRespond(withSuccess(getTestJson("tasks_conflicting_template.json"), MediaType.APPLICATION_JSON));
 
             Task result = controller.addTask(toAdd);
@@ -228,17 +190,16 @@ public class KapacitorTaskControllerTest extends KapacitorControllerTestBase {
 
         @Test
         void changeId() {
-            Task toAdd = Task.builder()
-                    .id("new_id")
-                    .build();
+            Task toAdd = Task.builder().id("new_id").build();
 
             mockKapacitor.expect(requestTo("/kapacitor/v1/tasks/my_task"))
                     .andExpect(method(HttpMethod.PATCH))
-                    .andExpect(content().json(
-                            "{" +
-                                    "\"id\" : \"new_id\"" +
-                                    "}"
-                            , true))
+                    .andExpect(content().json("{" + "\"id\" : \"new_id\"" + "}", true))
+                    .andRespond(withSuccess(getTestJson("tasks_conflicting_template.json"), MediaType.APPLICATION_JSON));
+
+            mockKapacitor.expect(requestTo("/kapacitor/v1/templates/"))
+                    .andExpect(content().json("{}"))
+                    .andExpect(method(HttpMethod.PATCH))
                     .andRespond(withSuccess(getTestJson("tasks_conflicting_template.json"), MediaType.APPLICATION_JSON));
 
             Task result = controller.updateTask("my_task", toAdd);
@@ -249,18 +210,16 @@ public class KapacitorTaskControllerTest extends KapacitorControllerTestBase {
 
         @Test
         void changeTemplate() {
-            Task toAdd = Task.builder()
-                    .template("blub")
-                    .build();
+            Task toAdd = Task.builder().template("blub").build();
 
             mockKapacitor.expect(requestTo("/kapacitor/v1/tasks/my_task"))
                     .andExpect(method(HttpMethod.PATCH))
-                    .andExpect(content().json(
-                            "{" +
-                                    "\"template-id\" : \"blub\"," +
-                                    "\"vars\" : { \"inspectit_template_reference\" : {\"type\" : \"string\", \"value\" : \"blub\"} }" +
-                                    "}"
-                            , true))
+                    .andExpect(content().json("{" + "\"template-id\" : \"blub\"," + "\"vars\" : { \"inspectit_template_reference\" : {\"type\" : \"string\", \"value\" : \"blub\"} }" + "}", true))
+                    .andRespond(withSuccess(getTestJson("tasks_conflicting_template.json"), MediaType.APPLICATION_JSON));
+
+            mockKapacitor.expect(requestTo("/kapacitor/v1/templates/blub"))
+                    .andExpect(content().json("{" + "\"id\" : \"blub\"}"))
+                    .andExpect(method(HttpMethod.PATCH))
                     .andRespond(withSuccess(getTestJson("tasks_conflicting_template.json"), MediaType.APPLICATION_JSON));
 
             Task result = controller.updateTask("my_task", toAdd);
@@ -282,14 +241,12 @@ public class KapacitorTaskControllerTest extends KapacitorControllerTestBase {
 
             mockKapacitor.expect(requestTo("/kapacitor/v1/tasks/my_task"))
                     .andExpect(method(HttpMethod.PATCH))
-                    .andExpect(content().json(
-                            "{" +
-                                    "\"vars\" : { " +
-                                    "\"inspectit_template_description\" : {\"type\" : \"string\", \"value\" : \"blub\"}, " +
-                                    "\"my_dur\" : {\"type\" : \"duration\", \"value\" : 7000000000} " +
-                                    "}" +
-                                    "}"
-                            , true))
+                    .andExpect(content().json("{" + "\"vars\" : { " + "\"inspectit_template_description\" : {\"type\" : \"string\", \"value\" : \"blub\"}, " + "\"my_dur\" : {\"type\" : \"duration\", \"value\" : 7000000000} " + "}" + "}", true))
+                    .andRespond(withSuccess(getTestJson("tasks_conflicting_template.json"), MediaType.APPLICATION_JSON));
+
+            mockKapacitor.expect(requestTo("/kapacitor/v1/templates/"))
+                    .andExpect(content().json("{}"))
+                    .andExpect(method(HttpMethod.PATCH))
                     .andRespond(withSuccess(getTestJson("tasks_conflicting_template.json"), MediaType.APPLICATION_JSON));
 
             Task result = controller.updateTask("my_task", toAdd);
@@ -300,21 +257,16 @@ public class KapacitorTaskControllerTest extends KapacitorControllerTestBase {
 
         @Test
         void changeTopicAndStatus() {
-            Task toAdd = Task.builder()
-                    .topic("blub")
-                    .status("disabled")
-                    .build();
+            Task toAdd = Task.builder().topic("blub").status("disabled").build();
 
             mockKapacitor.expect(requestTo("/kapacitor/v1/tasks/my_task"))
                     .andExpect(method(HttpMethod.PATCH))
-                    .andExpect(content().json(
-                            "{" +
-                                    "\"status\" : \"disabled\"," +
-                                    "\"vars\" : { " +
-                                    "\"topic\" : {\"type\" : \"string\", \"value\" : \"blub\"} " +
-                                    "}" +
-                                    "}"
-                            , true))
+                    .andExpect(content().json("{" + "\"status\" : \"disabled\"," + "\"vars\" : { " + "\"topic\" : {\"type\" : \"string\", \"value\" : \"blub\"} " + "}" + "}", true))
+                    .andRespond(withSuccess(getTestJson("tasks_conflicting_template.json"), MediaType.APPLICATION_JSON));
+
+            mockKapacitor.expect(requestTo("/kapacitor/v1/templates/"))
+                    .andExpect(content().json("{}"))
+                    .andExpect(method(HttpMethod.PATCH))
                     .andRespond(withSuccess(getTestJson("tasks_conflicting_template.json"), MediaType.APPLICATION_JSON));
 
             Task result = controller.updateTask("my_task", toAdd);

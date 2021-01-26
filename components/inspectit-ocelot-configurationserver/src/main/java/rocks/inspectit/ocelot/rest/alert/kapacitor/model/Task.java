@@ -108,6 +108,18 @@ public class Task {
 
     }
 
+    /**
+     * @return a JSON-Object which can be used for updating the template in PATCH request to kapacitor
+     */
+    public ObjectNode toKapacitorRequestTemplateUpdate() {
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode result = mapper.createObjectNode();
+        result.put("id", template);
+        
+        return result;
+
+    }
+
     public static Task fromKapacitorResponse(JsonNode task) {
         Task.TaskBuilder builder = Task.builder()
                 .id(task.path("id").asText())
