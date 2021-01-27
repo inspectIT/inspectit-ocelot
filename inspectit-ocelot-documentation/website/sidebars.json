@@ -43,12 +43,14 @@
     "Configuration Server": [
       "config-server/overview",
       "config-server/cs-configuration",
-	  "config-server/managing-configurations",
+	    "config-server/managing-configurations",
       "config-server/agent-mappings",
       "config-server/user-authentication",
       "config-server/log-config"
     ],
     "Breaking Changes": [
+      "breaking-changes/1-8",
+      "breaking-changes/1-7",
       "breaking-changes/1-6",
       "breaking-changes/1-5",
       "breaking-changes/1-4",

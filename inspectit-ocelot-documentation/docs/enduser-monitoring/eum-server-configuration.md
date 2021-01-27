@@ -355,6 +355,32 @@ The EUM server supports trace data forwarding to the Jaeger exporter.
 The exporter is using the [Jaeger Protobuf via gRPC API](https://www.jaegertracing.io/docs/1.16/apis/#protobuf-via-grpc-stable) in order to forward trace data.
 By default, the Jaeger exporter is disabled.
 
+### Beacons
+
+The EUM Server supports that received beacons can be exported or sent to other systems.
+Currently only export via HTTP is supported.
+In this case, the beacons are sent in JSON format.
+This allows the received beacons to be sent to an HTTP endpoint (e.g. Logstash).
+
+The following configuration snippet can be used in the EUM server for enabling beacon exportation via HTTP.
+
+```YAML
+inspectit-eum-server:
+  exporters:
+    beacons:
+      http:
+        # Whether beacons should be exported via HTTP
+        enabled: true
+        # The endpoint to which the beacons are to be sent
+        endpoint-url: https://localhost:8080
+        # The max. amount of threads exporting beacons (min. 1)
+        worker-threads: 2
+        # The maximum number of beacons to be exported using a single HTTP request (min. 1)
+        max-batch-size: 100
+        # The flush interval to export beacons in case the 'max-batch-size' has not been reached (min. 1 second)
+        flush-interval: 5s
+```
+
 ## Self-Monitoring
 
 For the purpose of self-monitoring, the EUM server offers a set of metrics that reflect its state.
@@ -363,4 +389,7 @@ Currently, the following self monitoring metrics are available.
 
 | Metric name | Description |
 | --- | --- |
-| `beacons_received` | Counts the number of received beacons | 
+| `inspectit_eum_self_beacons_received_count` | Counts the number of received beacons | 
+| `inspectit_eum_self_beacons_export_COUNT` | Counts the number of beacons exportations | 
+| `inspectit_eum_self_beacons_export_duration_sum` | The total duration needed for beacon exportations | 
+| `inspectit_eum_self_beacons_export_batch_sum` | The number of exported beacons per exportation | 
