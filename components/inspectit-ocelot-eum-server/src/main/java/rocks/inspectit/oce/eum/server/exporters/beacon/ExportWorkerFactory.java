@@ -1,18 +1,23 @@
 package rocks.inspectit.oce.eum.server.exporters.beacon;
 
+import com.google.common.base.Stopwatch;
+import com.google.common.collect.ImmutableMap;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import rocks.inspectit.oce.eum.server.beacon.Beacon;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
+import rocks.inspectit.oce.eum.server.metrics.SelfMonitoringMetricManager;
 
 import javax.annotation.PostConstruct;
 import java.net.URI;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Factory class for creating and managing {@link ExportWorker}s. In future, workers may be reused instead of created
@@ -34,6 +39,9 @@ public class ExportWorkerFactory {
 
     @Autowired
     private EumServerConfiguration configuration;
+
+    @Autowired
+    private SelfMonitoringMetricManager selfMonitoring;
 
     /**
      * Initializes the required fields.
@@ -78,11 +86,26 @@ public class ExportWorkerFactory {
         @Override
         public void run() {
             log.debug("Exporting {} beacons via HTTP.", buffer.size());
-            ResponseEntity<Void> response = restTemplate.postForEntity(exportTargetUrl, buffer, Void.class);
 
-            if (response.getStatusCode() != HttpStatus.OK) {
-                log.warn("Exporting HTTP beacons failed with status {}.", response.getStatusCode());
+            boolean successful = true;
+            Stopwatch stopwatch = Stopwatch.createUnstarted();
+            try {
+                stopwatch.start();
+                ResponseEntity<Void> response = restTemplate.postForEntity(exportTargetUrl, buffer, Void.class);
+                stopwatch.stop();
+
+                if (response.getStatusCode() != HttpStatus.OK) {
+                    successful = false;
+                    log.warn("Exporting HTTP beacons failed with status {}.", response.getStatusCode());
+                }
+            } catch (RestClientException e) {
+                successful = false;
+                log.error("Exporting HTTP beacons failed.", e);
             }
+
+            ImmutableMap<String, String> tagMap = ImmutableMap.of("exporter", "http", "is_error", String.valueOf(!successful));
+            selfMonitoring.record("beacons_export_batch", buffer.size(), tagMap);
+            selfMonitoring.record("beacons_export", stopwatch.elapsed(TimeUnit.MILLISECONDS), tagMap);
         }
     }
 }

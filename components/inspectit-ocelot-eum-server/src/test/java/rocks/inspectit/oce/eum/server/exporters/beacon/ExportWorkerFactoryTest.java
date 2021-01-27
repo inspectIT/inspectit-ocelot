@@ -14,6 +14,7 @@ import org.springframework.web.client.RestTemplate;
 import rocks.inspectit.oce.eum.server.beacon.Beacon;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
 import rocks.inspectit.oce.eum.server.exporters.beacon.ExportWorkerFactory.ExportWorker;
+import rocks.inspectit.oce.eum.server.metrics.SelfMonitoringMetricManager;
 
 import java.net.URI;
 import java.util.concurrent.BlockingQueue;
@@ -34,6 +35,9 @@ class ExportWorkerFactoryTest {
 
     @Mock
     private BlockingQueue<Beacon> buffer;
+
+    @Mock
+    private SelfMonitoringMetricManager selfMonitoring;
 
     @Nested
     public class Initialize {

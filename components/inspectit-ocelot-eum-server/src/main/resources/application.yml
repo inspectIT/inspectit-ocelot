@@ -178,6 +178,34 @@ inspectit-eum-server:
             tags:
               is_error: true
 
+      beacons_export:
+        measure-type: LONG
+        unit: amount
+        views:
+          # the amount of beacon exports
+          '[inspectit-eum/self/beacons_export/COUNT]':
+            aggregation: COUNT
+            tags:
+              exporter: true
+              is_error: true
+          # the export duration
+          '[inspectit-eum/self/beacons_export/duration/sum]':
+            aggregation: SUM
+            tags:
+              exporter: true
+              is_error: true
+
+      beacons_export_batch:
+        measure-type: LONG
+        unit: amount
+        views:
+          # the amount of elements in a single export execution
+          '[inspectit-eum/self/beacons_export/batch/sum]':
+            aggregation: SUM
+            tags:
+              exporter: true
+              is_error: true
+
   # settings for exposing resource timing metrics
   resource-timing:
     enabled: true

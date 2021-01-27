@@ -60,7 +60,10 @@ public class BeaconHttpExporter {
 
             long flushInterval = settings.getFlushInterval().toMillis();
             executor.scheduleWithFixedDelay(() -> {
-                executor.submit(workerFactory.getWorker(swapBuffer()));
+                BlockingQueue<Beacon> beacons = swapBuffer();
+                if (!beacons.isEmpty()) {
+                    executor.submit(workerFactory.getWorker(beacons));
+                }
             }, flushInterval, flushInterval, TimeUnit.MILLISECONDS);
 
             beaconBuffer = new ArrayBlockingQueue<>(settings.getMaxBatchSize());
@@ -89,7 +92,7 @@ public class BeaconHttpExporter {
      *
      * @return the previously used buffer
      */
-    private BlockingQueue<Beacon> swapBuffer() {
+    private synchronized BlockingQueue<Beacon> swapBuffer() {
         int maxBatchSize = configuration.getExporters().getBeacons().getHttp().getMaxBatchSize();
 
         BlockingQueue<Beacon> currentBuffer = beaconBuffer;
@@ -108,7 +111,6 @@ public class BeaconHttpExporter {
             return;
         }
 
-        log.info("offer");
         boolean success = beaconBuffer.offer(beacon);
 
         if (!success) {
