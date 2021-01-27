@@ -44,7 +44,7 @@ public class EumServerConfiguration {
      * The exporters settings
      */
     @Valid
-    private ExportersSettings exporters;
+    private EumExportersSettings exporters;
 
     /**
      * The resource timing settings.
