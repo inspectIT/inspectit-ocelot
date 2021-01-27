@@ -390,6 +390,6 @@ Currently, the following self monitoring metrics are available.
 | Metric name | Description |
 | --- | --- |
 | `inspectit_eum_self_beacons_received_count` | Counts the number of received beacons | 
-| `inspectit_eum_self_beacons_export_COUNT` | Counts the number of beacons exportations | 
+| `inspectit_eum_self_beacons_export_count` | Counts the number of beacons exportations | 
 | `inspectit_eum_self_beacons_export_duration_sum` | The total duration needed for beacon exportations | 
 | `inspectit_eum_self_beacons_export_batch_sum` | The number of exported beacons per exportation | 
