@@ -13,6 +13,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import rocks.inspectit.oce.eum.server.beacon.Beacon;
 import rocks.inspectit.oce.eum.server.beacon.processor.CompositeBeaconProcessor;
+import rocks.inspectit.oce.eum.server.exporters.beacon.BeaconHttpExporter;
 import rocks.inspectit.oce.eum.server.metrics.BeaconMetricManager;
 import rocks.inspectit.oce.eum.server.metrics.SelfMonitoringMetricManager;
 
@@ -37,6 +38,9 @@ class BeaconControllerTest {
 
     @Mock
     private SelfMonitoringMetricManager selfMonitoringService;
+
+    @Mock
+    private BeaconHttpExporter beaconHttpExporter;
 
     @Nested
     public class BeaconPost {

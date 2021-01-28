@@ -147,6 +147,18 @@ inspectit-eum-server:
         grpc:
         # service name for all exported spans
         service-name: browser-js
+    beacons:
+      http:
+        # Whether beacons should be exported via HTTP
+        enabled: false
+        # The endpoint to which the beacons are to be sent
+        endpoint-url: http://localhost:8080
+        # The max. amount of threads exporting beacons (min. 1)
+        worker-threads: 2
+        # The maximum number of beacons to be exported using a single HTTP request (min. 1)
+        max-batch-size: 100
+        # The flush interval to export beacons in case the 'max-batch-size' has not been reached (min. 1 second)
+        flush-interval: 5s
 
   # settings for the EUM server's self-monitoring
   self-monitoring:
@@ -164,6 +176,34 @@ inspectit-eum-server:
           '[inspectit-eum/self/beacons_received/COUNT]':
             aggregation: COUNT
             tags:
+              is_error: true
+
+      beacons_export:
+        measure-type: LONG
+        unit: amount
+        views:
+          # the amount of beacon exports
+          '[inspectit-eum/self/beacons_export/COUNT]':
+            aggregation: COUNT
+            tags:
+              exporter: true
+              is_error: true
+          # the export duration
+          '[inspectit-eum/self/beacons_export/duration/sum]':
+            aggregation: SUM
+            tags:
+              exporter: true
+              is_error: true
+
+      beacons_export_batch:
+        measure-type: LONG
+        unit: amount
+        views:
+          # the amount of elements in a single export execution
+          '[inspectit-eum/self/beacons_export/batch/sum]':
+            aggregation: SUM
+            tags:
+              exporter: true
               is_error: true
 
   # settings for exposing resource timing metrics

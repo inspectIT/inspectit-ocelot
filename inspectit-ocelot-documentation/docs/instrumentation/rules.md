@@ -607,15 +607,18 @@ The conditions that can be defined are equal to the ones of actions, thus, pleas
 
 #### Auto-Tracing
 
+:::warning Experimental Feature
+Please note that this is an experimental feature.
+This feature is currently experimental and can potentially have a high performance impact. We do **not** recommend using it for production environments yet!
+:::
+
 With the shown approach traces will only contain exactly the methods you instrumented.
 Often however, one observes certain methods taking a long time without knowing where exactly the time is spent.
 The "auto-tracing" feature can be used to solve this problem.
 
-When auto-tracing is enabled, inspectIT uses a profiler-like approach for recording traces.
-With auto-tracing, stack traces of threads are collected periodically. Based on these samples, inspectIT will reconstruct
+When auto-tracing is enabled, inspectIT Ocelot uses a profiler-like approach for recording traces.
+With auto-tracing, stack traces of threads are collected periodically. Based on these samples, inspectIT Ocelot will reconstruct
 an approximate trace showing where the time was spent.
-
-> This feature is currently experimental and can potentially have a high performance impact. We do not recommend using it for production environments yet!
 
 Auto-tracing can be enabled on methods which are traced using either the `start-span` or `continue-span` options.
 To enable it you can simply add the `auto-tracing` setting:
