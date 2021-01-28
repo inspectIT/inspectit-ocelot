@@ -58,8 +58,7 @@ public class KapacitorTaskController extends KapacitorBaseController {
     @PatchMapping("/alert/kapacitor/tasks/{taskId}")
     public Task updateTask(@PathVariable @ApiParam("The id of the task to update") String taskId, @RequestBody Task task) {
         ObjectNode response = kapacitor().patchForObject("/kapacitor/v1/tasks/{taskId}", task.toKapacitorRequest(), ObjectNode.class, taskId);
-        ObjectNode responseReload = kapacitor().patchForObject("/kapacitor/v1/templates/{templateID}", task.toKapacitorRequestTemplateUpdate(), ObjectNode.class, task
-                .getTemplate());
+        triggerTaskReload(task);
 
         return Task.fromKapacitorResponse(response);
     }
@@ -69,6 +68,11 @@ public class KapacitorTaskController extends KapacitorBaseController {
     @DeleteMapping("/alert/kapacitor/tasks/{taskId}")
     public void removeTask(@PathVariable @ApiParam("The id of the task to delete") String taskId) {
         kapacitorRestTemplate.delete("/kapacitor/v1/tasks/{taskId}", taskId);
+    }
+
+    private void triggerTaskReload(Task task) {
+        String taskTemplateId = task.getTemplate();
+        kapacitor().patchForObject("/kapacitor/v1/templates/{templateID}", task.toKapacitorRequestTemplateUpdate(), ObjectNode.class, taskTemplateId);
     }
 
 }
