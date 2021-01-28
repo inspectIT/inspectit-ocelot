@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestTemplate;
 import rocks.inspectit.oce.eum.server.beacon.Beacon;
@@ -20,6 +21,7 @@ import java.net.URI;
 import java.util.concurrent.BlockingQueue;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -43,13 +45,31 @@ class ExportWorkerFactoryTest {
     public class Initialize {
 
         @Test
-        public void successful() {
+        public void successfulWithoutAuthentication() {
             when(configuration.getExporters().getBeacons().getHttp().getEndpointUrl()).thenReturn("http://target:8080");
 
             factory.initialize();
 
             URI targetUrl = (URI) ReflectionTestUtils.getField(factory, "exportTargetUrl");
             assertThat(targetUrl).isEqualTo(URI.create("http://target:8080"));
+            RestTemplate restTemplate = (RestTemplate) ReflectionTestUtils.getField(factory, "restTemplate");
+            assertThat(restTemplate.getInterceptors()).isEmpty();
+        }
+
+        @Test
+        public void successfulWithAuthentication() {
+            when(configuration.getExporters().getBeacons().getHttp().getEndpointUrl()).thenReturn("http://target:8080");
+            when(configuration.getExporters().getBeacons().getHttp().getUsername()).thenReturn("user");
+            when(configuration.getExporters().getBeacons().getHttp().getPassword()).thenReturn("passwd");
+
+            factory.initialize();
+
+            URI targetUrl = (URI) ReflectionTestUtils.getField(factory, "exportTargetUrl");
+            assertThat(targetUrl).isEqualTo(URI.create("http://target:8080"));
+            RestTemplate restTemplate = (RestTemplate) ReflectionTestUtils.getField(factory, "restTemplate");
+            assertThat(restTemplate.getInterceptors()).hasOnlyElementsOfType(BasicAuthenticationInterceptor.class);
+            assertThat(restTemplate.getInterceptors()).extracting("username", "password")
+                    .contains(tuple("user", "passwd"));
         }
     }
 

@@ -379,7 +379,13 @@ inspectit-eum-server:
         max-batch-size: 100
         # The flush interval to export beacons in case the 'max-batch-size' has not been reached (min. 1 second)
         flush-interval: 5s
+        # When specified, the request will be using this username for Basic authentication
+        username: user
+        # The password used for Basic authentication
+        password: 123
 ```
+
+The EUM server uses Basic Authentication for the request if a username is specified. Otherwise no authentication is used.
 
 ## Self-Monitoring
 

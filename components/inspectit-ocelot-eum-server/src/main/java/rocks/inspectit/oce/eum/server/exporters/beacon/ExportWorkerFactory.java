@@ -3,6 +3,7 @@ package rocks.inspectit.oce.eum.server.exporters.beacon;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableMap;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpStatus;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import rocks.inspectit.oce.eum.server.beacon.Beacon;
+import rocks.inspectit.oce.eum.server.configuration.model.BeaconHttpExporterSettings;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
 import rocks.inspectit.oce.eum.server.metrics.SelfMonitoringMetricManager;
 
@@ -48,9 +50,16 @@ public class ExportWorkerFactory {
      */
     @PostConstruct
     public void initialize() {
-        restTemplate = new RestTemplateBuilder().build();
+        BeaconHttpExporterSettings settings = configuration.getExporters().getBeacons().getHttp();
 
-        exportTargetUrl = URI.create(configuration.getExporters().getBeacons().getHttp().getEndpointUrl());
+        RestTemplateBuilder restTemplateBuilder = new RestTemplateBuilder();
+
+        if (StringUtils.isNotBlank(settings.getUsername())) {
+            restTemplateBuilder = restTemplateBuilder.basicAuthentication(settings.getUsername(), settings.getPassword());
+        }
+
+        restTemplate = restTemplateBuilder.build();
+        exportTargetUrl = URI.create(settings.getEndpointUrl());
     }
 
     /**
