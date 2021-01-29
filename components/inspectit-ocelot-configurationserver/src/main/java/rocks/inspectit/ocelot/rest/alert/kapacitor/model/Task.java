@@ -25,6 +25,8 @@ import java.util.List;
 @NoArgsConstructor
 public class Task {
 
+    private static final ObjectMapper mapper = new ObjectMapper();
+
     String id;
 
     /**
@@ -59,8 +61,6 @@ public class Task {
     Boolean executing;
 
     List<TemplateVariable> vars;
-
-    private static final ObjectMapper mapper = new ObjectMapper();
 
     /**
      * @return a JSON-Object which can be used for adding or updating this task in POST/PATCH request to kapacitor

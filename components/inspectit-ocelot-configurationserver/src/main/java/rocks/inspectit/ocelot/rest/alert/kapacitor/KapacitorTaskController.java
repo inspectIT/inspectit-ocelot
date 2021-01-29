@@ -70,6 +70,11 @@ public class KapacitorTaskController extends KapacitorBaseController {
         kapacitorRestTemplate.delete("/kapacitor/v1/tasks/{taskId}", taskId);
     }
 
+    /**
+     * Required to reload kapacitor tasks during runtime.
+     *
+     * @param task kapacitor task
+     */
     private void triggerTaskReload(Task task) {
         String taskTemplateId = task.getTemplate();
         kapacitor().patchForObject("/kapacitor/v1/templates/{templateID}", task.toKapacitorRequestTemplateUpdate(), ObjectNode.class, taskTemplateId);
