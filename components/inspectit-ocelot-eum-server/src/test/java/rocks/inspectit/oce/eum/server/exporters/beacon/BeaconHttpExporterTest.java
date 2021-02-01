@@ -51,17 +51,7 @@ class BeaconHttpExporterTest {
     public class Initialize {
 
         @Test
-        public void isDisabled() {
-            exporterSettings.setEnabled(false);
-
-            exporter.initialize();
-
-            ScheduledExecutorService executor = (ScheduledExecutorService) ReflectionTestUtils.getField(exporter, "executor");
-            assertThat(executor).isNull();
-        }
-
-        @Test
-        public void isEnabled() {
+        public void initialize() {
             exporter.initialize();
 
             ScheduledThreadPoolExecutor executor = (ScheduledThreadPoolExecutor) ReflectionTestUtils.getField(exporter, "executor");
@@ -76,15 +66,7 @@ class BeaconHttpExporterTest {
     public class Destroy {
 
         @Test
-        public void wasDisabled() throws InterruptedException {
-            exporterSettings.setEnabled(false);
-            exporter.initialize();
-
-            exporter.destroy();
-        }
-
-        @Test
-        public void wasEnabled() throws InterruptedException {
+        public void destroyExporter() throws InterruptedException {
             exporter.initialize();
 
             ScheduledThreadPoolExecutor executor = (ScheduledThreadPoolExecutor) ReflectionTestUtils.getField(exporter, "executor");
