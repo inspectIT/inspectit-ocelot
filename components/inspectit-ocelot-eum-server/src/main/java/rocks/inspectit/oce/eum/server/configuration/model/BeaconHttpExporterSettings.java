@@ -41,6 +41,16 @@ public class BeaconHttpExporterSettings {
     private int maxBatchSize;
 
     /**
+     * The username used for Basic authentication
+     */
+    private String username;
+
+    /**
+     * The password used for Basic authentication
+     */
+    private String password;
+
+    /**
      * The flush interval to export beacons in case the 'max-batch-size' has not been reached
      */
     @NotNull

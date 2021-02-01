@@ -159,6 +159,10 @@ inspectit-eum-server:
         max-batch-size: 100
         # The flush interval to export beacons in case the 'max-batch-size' has not been reached (min. 1 second)
         flush-interval: 5s
+        # When specified, the request will be using this username for Basic authentication
+        username:
+        # The password used for Basic authentication
+        password: 
 
   # settings for the EUM server's self-monitoring
   self-monitoring:
@@ -173,7 +177,7 @@ inspectit-eum-server:
         measure-type: LONG
         unit: amount
         views:
-          '[inspectit-eum/self/beacons_received/COUNT]':
+          '[inspectit-eum/self/beacons_received/count]':
             aggregation: COUNT
             tags:
               is_error: true
@@ -183,7 +187,7 @@ inspectit-eum-server:
         unit: amount
         views:
           # the amount of beacon exports
-          '[inspectit-eum/self/beacons_export/COUNT]':
+          '[inspectit-eum/self/beacons_export/count]':
             aggregation: COUNT
             tags:
               exporter: true
