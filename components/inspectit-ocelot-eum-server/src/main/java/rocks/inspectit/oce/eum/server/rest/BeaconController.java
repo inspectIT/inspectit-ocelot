@@ -2,7 +2,6 @@ package rocks.inspectit.oce.eum.server.rest;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +27,7 @@ public class BeaconController {
     @Autowired
     private SelfMonitoringMetricManager selfMonitoringService;
 
-    @Autowired
+    @Autowired(required = false)
     private BeaconHttpExporter beaconHttpExporter;
 
     @ExceptionHandler({Exception.class})
@@ -53,13 +52,16 @@ public class BeaconController {
      * Processes the incoming beacon data.
      *
      * @param beaconData the received EUM data
+     *
      * @return the response used as result for the request
      */
     private ResponseEntity<Object> processBeacon(MultiValueMap<String, String> beaconData) {
         Beacon beacon = beaconProcessor.process(Beacon.of(beaconData.toSingleValueMap()));
 
         // export beacon
-        beaconHttpExporter.export(beacon);
+        if (beaconHttpExporter != null) {
+            beaconHttpExporter.export(beacon);
+        }
 
         // record metrics based on beacon data
         boolean successful = beaconMetricManager.processBeacon(beacon);

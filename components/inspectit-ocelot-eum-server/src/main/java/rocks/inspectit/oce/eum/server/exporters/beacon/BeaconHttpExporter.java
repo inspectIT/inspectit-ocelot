@@ -2,6 +2,7 @@ package rocks.inspectit.oce.eum.server.exporters.beacon;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.oce.eum.server.beacon.Beacon;
 import rocks.inspectit.oce.eum.server.configuration.model.BeaconHttpExporterSettings;
@@ -16,6 +17,7 @@ import java.util.concurrent.*;
  */
 @Component
 @Slf4j
+@ConditionalOnProperty(value = "inspectit-eum-server.beacons.http.enabled", havingValue = "true")
 public class BeaconHttpExporter {
 
     /**
@@ -50,24 +52,21 @@ public class BeaconHttpExporter {
     @PostConstruct
     public void initialize() {
         BeaconHttpExporterSettings settings = configuration.getExporters().getBeacons().getHttp();
+        log.info("Starting beacon export via HTTP to endpoint: {}", settings.getEndpointUrl());
 
-        if (settings.isEnabled()) {
-            log.info("Starting beacon export via HTTP to endpoint: {}", settings.getEndpointUrl());
+        flushThreshold = (int) (settings.getMaxBatchSize() * 0.8D);
 
-            flushThreshold = (int) (settings.getMaxBatchSize() * 0.8D);
+        executor = Executors.newScheduledThreadPool(settings.getWorkerThreads());
 
-            executor = Executors.newScheduledThreadPool(settings.getWorkerThreads());
+        long flushInterval = settings.getFlushInterval().toMillis();
+        executor.scheduleWithFixedDelay(() -> {
+            BlockingQueue<Beacon> beacons = swapBuffer();
+            if (!beacons.isEmpty()) {
+                executor.submit(workerFactory.getWorker(beacons));
+            }
+        }, flushInterval, flushInterval, TimeUnit.MILLISECONDS);
 
-            long flushInterval = settings.getFlushInterval().toMillis();
-            executor.scheduleWithFixedDelay(() -> {
-                BlockingQueue<Beacon> beacons = swapBuffer();
-                if (!beacons.isEmpty()) {
-                    executor.submit(workerFactory.getWorker(beacons));
-                }
-            }, flushInterval, flushInterval, TimeUnit.MILLISECONDS);
-
-            beaconBuffer = new ArrayBlockingQueue<>(settings.getMaxBatchSize());
-        }
+        beaconBuffer = new ArrayBlockingQueue<>(settings.getMaxBatchSize());
     }
 
     /**
@@ -75,14 +74,12 @@ public class BeaconHttpExporter {
      */
     @PreDestroy
     public void destroy() throws InterruptedException {
-        if (executor != null) {
-            log.info("Shutting down HTTP beacon exporter..");
+        log.info("Shutting down HTTP beacon exporter..");
 
-            executor.shutdown();
+        executor.shutdown();
 
-            if (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
-                log.warn("Couldn't shut down HTTP beacon exporter correctly..");
-            }
+        if (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
+            log.warn("Couldn't shut down HTTP beacon exporter correctly..");
         }
     }
 
@@ -107,10 +104,6 @@ public class BeaconHttpExporter {
      * @param beacon the beacon to export
      */
     public void export(Beacon beacon) {
-        if (!configuration.getExporters().getBeacons().getHttp().isEnabled()) {
-            return;
-        }
-
         boolean success = beaconBuffer.offer(beacon);
 
         if (!success) {
