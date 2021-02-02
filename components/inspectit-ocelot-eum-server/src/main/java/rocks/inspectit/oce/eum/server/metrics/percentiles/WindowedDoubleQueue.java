@@ -77,11 +77,8 @@ public class WindowedDoubleQueue {
      * <p>
      * In addition, this method is guaranteed to not alter the queue in case it throws an exception.
      *
-     * @param value       the value of the new observation to insert
-     * @param timeStamp   the timestamp of the point to insert
-     * @param allowGrowth if true, the queue is allowed to increase in size
-     *
-     * @return the number of points which have been added to the queue, can be negative if more were added than removed
+     * @param value     the value of the new observation to insert
+     * @param timeStamp the timestamp of the point to insert
      */
     public void insert(double value, long timeStamp) {
         if (size > 0 && timeStamps[normalizeIndex(startIndex + size - 1)] > timeStamp) {
