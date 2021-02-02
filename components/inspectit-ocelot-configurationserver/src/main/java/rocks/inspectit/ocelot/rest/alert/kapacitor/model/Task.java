@@ -25,6 +25,8 @@ import java.util.List;
 @NoArgsConstructor
 public class Task {
 
+    private static final ObjectMapper mapper = new ObjectMapper();
+
     String id;
 
     /**
@@ -64,7 +66,6 @@ public class Task {
      * @return a JSON-Object which can be used for adding or updating this task in POST/PATCH request to kapacitor
      */
     public ObjectNode toKapacitorRequest() {
-        ObjectMapper mapper = new ObjectMapper();
         ObjectNode result = mapper.createObjectNode();
         ObjectNode varsNode = mapper.createObjectNode();
         if (id != null) {
@@ -104,6 +105,17 @@ public class Task {
         if (varsNode.size() > 0) {
             result.set("vars", varsNode);
         }
+        return result;
+
+    }
+
+    /**
+     * @return a JSON-Object which can be used for updating the template in PATCH request to kapacitor
+     */
+    public ObjectNode toKapacitorRequestTemplateUpdate() {
+        ObjectNode result = mapper.createObjectNode();
+        result.put("id", template);
+
         return result;
 
     }
