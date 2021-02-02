@@ -72,6 +72,9 @@ public class KapacitorTaskController extends KapacitorBaseController {
 
     /**
      * Required to reload kapacitor tasks during runtime.
+     * A task cannot be reloaded and just doing patch request against the template API - without changing it -
+     * triggers kapacitor to reload the previously changed task.
+     * Note that all tasks created from this template will be reloaded.
      *
      * @param task kapacitor task
      */
