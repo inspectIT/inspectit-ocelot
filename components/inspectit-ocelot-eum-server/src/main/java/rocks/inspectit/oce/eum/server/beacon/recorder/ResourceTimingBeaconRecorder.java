@@ -22,6 +22,7 @@ import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSe
 import rocks.inspectit.ocelot.config.model.metrics.definition.ViewDefinitionSettings;
 
 import javax.annotation.PostConstruct;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.util.*;
@@ -74,7 +75,10 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
      */
     @PostConstruct
     public void initMetric() {
-        Map<String, Boolean> tags = configuration.getResourceTiming().getTags();
+        Map<String, Boolean> tags = new HashMap<>();
+        if (configuration.getResourceTiming().getTags() != null) {
+            tags.putAll(configuration.getResourceTiming().getTags());
+        }
         tags.put("initiatorType", true);
         tags.put("cached", true);
         tags.put("crossOrigin", true);
