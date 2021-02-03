@@ -42,7 +42,7 @@ class AsyncMetricRecorder {
         boolean success = recordsQueue.offer(new MetricRecord(value, measureName, time, tags));
         if (!success && !overflowLogged) {
             overflowLogged = true;
-            log.warn("Measurement for percentiles has been dropped because queue is full. This message will not be shown for further drops!");
+            log.warn("Measurement for time-window views has been dropped because queue is full. This message will not be shown for further drops!");
         }
     }
 

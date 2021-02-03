@@ -59,7 +59,7 @@ public class TimeWindowViewManager {
      * This worker maintains a fixed-size queue of observations which are then added via {@link #recordSynchronous(String, double, Timestamp, TagContext)}.
      */
     @VisibleForTesting
-    final AsyncMetricRecorder worker = new AsyncMetricRecorder(this::recordSynchronous);
+    AsyncMetricRecorder worker = new AsyncMetricRecorder(this::recordSynchronous);
 
     public TimeWindowViewManager() {
         this(System::currentTimeMillis);
@@ -101,7 +101,9 @@ public class TimeWindowViewManager {
      */
     public void recordMeasurement(String measureName, double value, TagContext tags) {
         if (areAnyViewsRegisteredForMeasure(measureName)) {
-            worker.record(measureName, value, getCurrentTime(), tags);
+            synchronized (this) {
+                worker.record(measureName, value, getCurrentTime(), tags);
+            }
         }
     }
 
@@ -140,13 +142,11 @@ public class TimeWindowViewManager {
      * @param tags             the tags to use for the view
      * @param bufferLimit      the maximum number of points this view is allowed to buffer
      */
-    public void createOrUpdatePercentileView(String measureName, String viewName, String unit, String description, boolean minEnabled, boolean maxEnabled, Collection<Double> percentiles,
-                                             long timeWindowMillis, Collection<String> tags, int bufferLimit) {
+    public void createOrUpdatePercentileView(String measureName, String viewName, String unit, String description, boolean minEnabled, boolean maxEnabled, Collection<Double> percentiles, long timeWindowMillis, Collection<String> tags, int bufferLimit) {
         createOrUpdateView(PercentileView.class, measureName, viewName, unit, description, minEnabled, maxEnabled, percentiles, -1, -1, timeWindowMillis, tags, bufferLimit);
     }
 
-    private synchronized <T extends TimeWindowView> void createOrUpdateView(Class<T> viewType, String measureName, String viewName, String unit, String description, boolean minEnabled, boolean maxEnabled,
-                                                                            Collection<Double> percentiles, double dropUpper, double dropLower, long timeWindowMillis, Collection<String> tags, int bufferLimit) {
+    private synchronized <T extends TimeWindowView> void createOrUpdateView(Class<T> viewType, String measureName, String viewName, String unit, String description, boolean minEnabled, boolean maxEnabled, Collection<Double> percentiles, double dropUpper, double dropLower, long timeWindowMillis, Collection<String> tags, int bufferLimit) {
         List<TimeWindowView> views = measuresToViewsMap.computeIfAbsent(measureName, (name) -> new CopyOnWriteArrayList<>());
         Optional<TimeWindowView> existingView = views.stream()
                 .filter(view -> view.getViewName().equalsIgnoreCase(viewName))
@@ -254,8 +254,7 @@ public class TimeWindowViewManager {
         return Timestamp.fromMillis(clock.get());
     }
 
-    private <T extends TimeWindowView> Optional<T> updateView(Class<T> viewType, TimeWindowView existingView, String unit, String description, boolean minEnabled, boolean maxEnabled,
-                                                              Collection<Double> percentiles, double dropUpper, double dropLower, long timeWindowMillis, Collection<String> tags, int bufferLimit) {
+    private <T extends TimeWindowView> Optional<T> updateView(Class<T> viewType, TimeWindowView existingView, String unit, String description, boolean minEnabled, boolean maxEnabled, Collection<Double> percentiles, double dropUpper, double dropLower, long timeWindowMillis, Collection<String> tags, int bufferLimit) {
         Supplier<T> creator = () -> createView(viewType, existingView.getViewName(), unit, description, minEnabled, maxEnabled, percentiles, dropUpper, dropLower, timeWindowMillis, tags, bufferLimit);
 
         if (!unit.equals(existingView.getUnit())) {
@@ -301,8 +300,7 @@ public class TimeWindowViewManager {
         return Optional.empty();
     }
 
-    private <T extends TimeWindowView> T createView(Class<T> viewType, String viewName, String unit, String description, boolean minEnabled, boolean maxEnabled, Collection<Double> percentiles,
-                                                    double dropUpper, double dropLower, long timeWindowMillis, Collection<String> tags, int bufferLimit) {
+    private <T extends TimeWindowView> T createView(Class<T> viewType, String viewName, String unit, String description, boolean minEnabled, boolean maxEnabled, Collection<Double> percentiles, double dropUpper, double dropLower, long timeWindowMillis, Collection<String> tags, int bufferLimit) {
         if (PercentileView.class.equals(viewType)) {
             return (T) new PercentileView(minEnabled, maxEnabled, new HashSet<>(percentiles), new HashSet<>(tags), timeWindowMillis, viewName, unit, description, bufferLimit);
         } else {
