@@ -32,7 +32,7 @@ public class WindowedDoubleQueue {
 
     /**
      * Holds the timestamps for the points stored in {@link #values}.
-     * E.g. the timestamp of value[42] is found at timeStamps[15];
+     * E.g. the timestamp of value[42] is found at timeStamps[42];
      */
     private long[] timeStamps;
 
