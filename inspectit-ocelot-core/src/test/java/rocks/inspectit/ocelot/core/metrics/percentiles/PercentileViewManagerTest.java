@@ -469,7 +469,9 @@ public class PercentileViewManagerTest {
             viewManager.createOrUpdateView("my/measure", "my/view", "ms", "foo", true, false, Collections.emptyList(), 1, Collections
                     .emptyList(), 100);
 
-            int threadCount = 100, recordCount = 10, valueCount = threadCount * recordCount;
+            int threadCount = 10;
+            int recordCount = 1000;
+            int valueCount = threadCount * recordCount;
 
             final ArrayBlockingQueue<Timestamp> testRecordsQueue = new ArrayBlockingQueue<>(valueCount);
             viewManager.worker = new AsyncMetricRecorder(null) {
