@@ -22,8 +22,6 @@ import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSe
 import rocks.inspectit.ocelot.config.model.metrics.definition.ViewDefinitionSettings;
 
 import javax.annotation.PostConstruct;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.util.*;
 import java.util.function.Function;
