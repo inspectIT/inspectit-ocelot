@@ -20,7 +20,9 @@ public class ResourceTimingSettings {
      */
     private boolean enabled;
 
-    @Singular
+    /**
+     * Specifies which tags should be used for this view.
+     */
     private Map<@NotBlank String, @NotNull Boolean> tags;
 
 }
