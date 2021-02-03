@@ -103,13 +103,59 @@ These additional fields are the following:
 | `value-expression` | An expression used to calculate the measure's value from a beacon. |
 | `beacon-requirements` | Requirements which have to be fulfilled by Beacons. Beacons which do not match all requirements will be ignored by this metric definition. |
 
+### Smoothed Average View
+:::note
+The Smoothed Average View is currently only available in the EUM server.
+:::
+
+In addition to the [Quantile View](../metrics/custom-metrics#quantile-views), which is already described in the inspectIT Ocelot Java agent configuration, the EUM Server provides a Smoothed Average View.
+In contrast to the quantiles, it is possible to drop values of a certain time window. This can be useful to deliberately remove outliers before averaging.
+
+:::note
+Please read the section on [Quantile Views](../metrics/custom-metrics#quantile-views) to get an insight into the data collection. The Smoothed Average View is based on the same principle.
+:::
+
+The actual configurations are extended in the EUM server by the following properties:
+|Config Property|Default| Description
+|---|---|---|
+|`aggregation`|`LAST_VALUE`|Specifies how the measurement data is aggregated in this view. Possible values are `LAST_VALUE`, `COUNT`, `SUM`, `HISTOGRAM` `QUANTILES` and `SMOOTHED_AVERAGE`. Except for `QUANTILES` and `SMOOTHED_AVERAGE`, these correspond to the [OpenCensus Aggregations](https://opencensus.io/stats/view/#aggregations).
+|`drop-upper`|`0.0`| *Required if aggregation is `SMOOTHED_AVERAGE`.* Specifies the percentage of the highest values to be dropped before calculating the average.
+|`drop-lower`|`0.0`| *Required if aggregation is `SMOOTHED_AVERAGE`.* Specifies the percentage of the lowest values to be dropped before calculating the average.
+|`time-window`|`${inspectit.metrics.frequency}`| *Required if aggregation is `QUANTILES` or `SMOOTHED_AVERAGE`.* The time window over which the quantiles or the smoothed average are captured.
+|`max-buffered-points`|`16384`| *Required if aggregation is `QUANTILES` or `SMOOTHED_AVERAGE`.* A safety limit defining the maximum number of points to be buffered.
+
+As an example, the following snippet defines a metric with the name `load_time` and a view `loadtime/SMOOTHED_AVERAGE`:
+
+```YAML
+inspectit:
+  metrics:
+    definitions:
+      load_time:
+        measure-type: LONG
+        value-expression: "{t_done}"
+        beacon-requirements:
+          - field: rt.quit
+            requirement: NOT_EXISTS
+        unit: ms
+        views:
+          '[load_time/SMOOTHED_AVERAGE]':
+              aggregation: SMOOTHED_AVERAGE
+              time-window: 1m
+              drop-upper: 0.1
+              drop-lower: 0.0
+```
+
+The `loadtime/SMOOTHED_AVERAGE` view has the effect of ordering the values in a 1-minute time window by size and dropping the upper 10 percent before calculating the average.
+
 ### Value Expressions
 
 The `value-expression` field can be used to specify a field which value is used for the specified metrics.
 In order to reference a field, the following pattern is used: `{FIELD_KEY}`.
 For example, a valid expression, used to extract the value of a field `t_load`, would be `{t_load}`.
 
-> Note that a beacon has to contain all fields referenced by the expression in order to be evaluated and recorded.
+:::note
+Note that a beacon has to contain all fields referenced by the expression in order to be evaluated and recorded.
+:::
 
 Value expressions also support operations for basic arithmetic operations. Thus, to calculate a difference of two beacon fields, the following expression can be used:
 ```YAML
@@ -336,7 +382,23 @@ This metric contains following tags:
 | `crossOrigin` | If a resource loading is considered as cross-origin request. See [more information about CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS). |
 | `cached` | If a resource was cached and loaded from the browser disk or memory storage. Note that cached tag will only be set for same-origin requests, as some resource timing  metrics are restricted and will not be provided cross-origin unless the Timing-Allow-Origin header permits. |
 
+:::note
+Please note that all [global tags](#global-tags) will be attached as well. Attaching custom tags works in the same way as [defining metrics](#metrics-definition).
+:::
+
+:::important
 The resource timing processing is enabled by default and can be disabled by setting the property `inspectit-eum-server.resource-timing.enabled` to `false.`
+:::
+
+For example, the following configuration causes that the resource timing processing is enabled and will be enriched by a tag called `U_HOST`.
+
+```YAML
+inspectit-eum-server:
+  resource-timing:
+    enabled: true
+    tags: 
+      U_HOST: true
+```
 
 ## Exporters
 

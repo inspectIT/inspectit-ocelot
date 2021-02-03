@@ -1,6 +1,6 @@
 ---
 id: rules
-title: Rules
+title: Rules & Actions
 ---
 
 Rules define (a) how data should be extracted when the instrumented
@@ -167,7 +167,9 @@ The most important ones are that neither Autoboxing, Generics, Anonymous Classes
 
 After actions have been compiled, they are placed in the same class loader as the class you instrument with them. This means that they can access any class that your application class could also access.
 
-> Even if your action terminates with an exception or error, inspectIT will make sure that this does not affect your application. InspectIT will print information about the error and the faulting action. The execution of the action in the rule where the failure occurred will be disabled until you update your configuration.
+:::note
+Even if your action terminates with an exception or error, inspectIT will make sure that this does not affect your application. InspectIT will print information about the error and the faulting action. The execution of the action in the rule where the failure occurred will be disabled until you update your configuration.
+:::
 
 ### Input Parameters
 
@@ -434,7 +436,9 @@ The data tags try to resolve value from the data key, which is previously wrote 
 If data key for the data tag can not be found, then corresponding tag is omitted.
 Note that `data-tags` have higher priority than the `constant-tags`, thus if both section define a tag with same key, the data tag will overwrite the constant one if it can be resolved.
 
-> All [common tags](metrics/common-tags.md) are always included in the metric recording and do not need explicit specification.
+:::note
+All [common tags](metrics/common-tags.md) are always included in the metric recording and do not need explicit specification.
+:::
 
 :::warning Short notation is deprecated
 The default way to specify metric collection in Ocelot versions up to and including v1.0 was a so called short notation, which is now deprecated and will be invalid in future Ocelot releases:
@@ -501,7 +505,9 @@ inspectit:
            #... action call to fetch the http path here
 ```
 
-> The name must exist at the end of the entry section and cannot be set in the exit section.
+:::note
+The name must exist at the end of the entry section and cannot be set in the exit section.
+:::
 
 #### Trace Sampling
 
@@ -619,6 +625,10 @@ The "auto-tracing" feature can be used to solve this problem.
 When auto-tracing is enabled, inspectIT Ocelot uses a profiler-like approach for recording traces.
 With auto-tracing, stack traces of threads are collected periodically. Based on these samples, inspectIT Ocelot will reconstruct
 an approximate trace showing where the time was spent.
+
+:::warning Experimental Feature
+This feature is currently experimental and can potentially have a high performance impact. We do not recommend using it for production environments yet!
+:::
 
 Auto-tracing can be enabled on methods which are traced using either the `start-span` or `continue-span` options.
 To enable it you can simply add the `auto-tracing` setting:
