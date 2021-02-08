@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.bootstrap.context.noop;
 
+import rocks.inspectit.ocelot.bootstrap.context.ContextTuple;
 import rocks.inspectit.ocelot.bootstrap.context.IContextManager;
 import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 
@@ -13,6 +14,19 @@ public class NoopContextManager implements IContextManager {
     public static final IContextManager INSTANCE = new NoopContextManager();
 
     private NoopContextManager() {
+    }
+
+    @Override
+    public void storeContext(Object target, boolean invalidate) {
+    }
+
+    @Override
+    public ContextTuple attachContext(Object target) {
+        return null;
+    }
+
+    @Override
+    public void detachContext(ContextTuple contextTuple) {
     }
 
     @Override

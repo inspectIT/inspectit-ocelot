@@ -10,6 +10,12 @@ import java.util.concurrent.Callable;
  */
 public interface IContextManager {
 
+    void storeContext(Object target, boolean invalidateAfterRestore);
+
+    ContextTuple attachContext(Object target);
+
+    void detachContext(ContextTuple contextTuple);
+
     /**
      * Wraps the given runnable so that current context is used when the runnable is invoked.
      *

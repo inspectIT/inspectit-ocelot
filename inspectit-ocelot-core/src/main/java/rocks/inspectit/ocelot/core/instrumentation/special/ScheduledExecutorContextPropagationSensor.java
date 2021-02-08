@@ -60,8 +60,14 @@ public class ScheduledExecutorContextPropagationSensor implements SpecialSensor 
 
         @Advice.OnMethodEnter
         public static void onMethodEnter(@Advice.Argument(value = 0, readOnly = false) Runnable runnable) {
-            runnable = Instances.logTraceCorrelator.wrap(runnable);
-            runnable = Instances.contextManager.wrap(runnable);
+            if (runnable.getClass().isAnonymousClass() || runnable.getClass().getName().contains("$$Lambda$")) {
+                System.out.println("wrap run: " + runnable.getClass());
+                runnable = Instances.logTraceCorrelator.wrap(runnable);
+                runnable = Instances.contextManager.wrap(runnable);
+            } else {
+                System.out.println("instr run: " + runnable.getClass());
+                Instances.contextManager.storeContext(runnable, true);
+            }
         }
     }
 
@@ -76,8 +82,14 @@ public class ScheduledExecutorContextPropagationSensor implements SpecialSensor 
 
         @Advice.OnMethodEnter
         public static void onMethodEnter(@Advice.Argument(value = 0, readOnly = false) Callable callable) {
-            callable = Instances.logTraceCorrelator.wrap(callable);
-            callable = Instances.contextManager.wrap(callable);
+            if (callable.getClass().isAnonymousClass() || callable.getClass().getName().contains("$$Lambda$")) {
+                System.out.println("wrap call: " + callable.getClass());
+                callable = Instances.logTraceCorrelator.wrap(callable);
+                callable = Instances.contextManager.wrap(callable);
+            } else {
+                System.out.println("instr call: " + callable.getClass());
+                Instances.contextManager.storeContext(callable, true);
+            }
         }
     }
 }

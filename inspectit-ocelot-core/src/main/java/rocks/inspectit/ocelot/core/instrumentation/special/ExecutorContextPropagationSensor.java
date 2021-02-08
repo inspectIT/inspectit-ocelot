@@ -25,7 +25,7 @@ public class ExecutorContextPropagationSensor implements SpecialSensor {
 
     @Override
     public boolean shouldInstrument(Class<?> clazz, InstrumentationConfiguration settings) {
-        val type = TypeDescription.ForLoadedType.of(clazz);
+        TypeDescription type = TypeDescription.ForLoadedType.of(clazz);
         return settings.getSource().getSpecial().isExecutorContextPropagation() &&
                 EXECUTER_CLASSES_MATCHER.matches(type);
     }
@@ -50,8 +50,7 @@ public class ExecutorContextPropagationSensor implements SpecialSensor {
          */
         @Advice.OnMethodEnter
         public static void enter(@Advice.Argument(value = 0, readOnly = false) Runnable runnable) {
-            runnable = Instances.logTraceCorrelator.wrap(runnable);
-            runnable = Instances.contextManager.wrap(runnable);
+            Instances.contextManager.storeContext(runnable, true);
         }
     }
 }

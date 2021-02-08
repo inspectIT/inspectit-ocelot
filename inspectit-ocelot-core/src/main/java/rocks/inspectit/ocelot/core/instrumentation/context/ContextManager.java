@@ -4,6 +4,10 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import io.grpc.Context;
 import io.opencensus.tags.Tags;
+import lombok.AllArgsConstructor;
+import lombok.NonNull;
+import lombok.Value;
+import rocks.inspectit.ocelot.bootstrap.context.ContextTuple;
 import rocks.inspectit.ocelot.bootstrap.context.IContextManager;
 import rocks.inspectit.ocelot.core.config.spring.BootstrapInitializerConfiguration;
 import rocks.inspectit.ocelot.core.instrumentation.config.InstrumentationConfigurationResolver;
@@ -33,6 +37,8 @@ public class ContextManager implements IContextManager {
      * Cache for storing the context objects.
      */
     private final Cache<Thread, Context> storedContexts = CacheBuilder.newBuilder().weakKeys().build();
+
+    private final Cache<Object, InvalidationContext> contextCache = CacheBuilder.newBuilder().weakKeys().build();
 
     public ContextManager(CommonTagsManager commonTagsManager, InstrumentationConfigurationResolver configProvider) {
         this.commonTagsManager = commonTagsManager;
@@ -68,4 +74,49 @@ public class ContextManager implements IContextManager {
         return InspectitContextImpl.createFromCurrent(commonTagsManager.getCommonTagValueMap(), configProvider.getCurrentConfig().getPropagationMetaData(), IS_OPEN_CENSUS_ON_BOOTSTRAP);
     }
 
+    @Override
+    public void storeContext(Object target, boolean invalidateAfterRestoring) {
+        InvalidationContext invalidationContext = new InvalidationContext(invalidateAfterRestoring, Context.current());
+        contextCache.put(target, invalidationContext);
+    }
+
+    @Override
+    public ContextTuple attachContext(Object target) {
+        InvalidationContext invalidationContext = contextCache.getIfPresent(target);
+        if (invalidationContext != null) {
+            if (invalidationContext.invalidate) {
+                contextCache.invalidate(target);
+            }
+            Context previous = invalidationContext.context.attach();
+            return new ContextTupleImpl(previous, invalidationContext.context);
+        }
+        return null;
+    }
+
+    @Override
+    public void detachContext(ContextTuple contextTuple) {
+        if (contextTuple != null) {
+            ContextTupleImpl tuple = (ContextTupleImpl) contextTuple;
+            tuple.current.detach(tuple.previous);
+        }
+    }
+
+    @AllArgsConstructor
+    private class InvalidationContext {
+
+        private final boolean invalidate;
+
+        @NonNull
+        private final Context context;
+    }
+
+    @AllArgsConstructor
+    private class ContextTupleImpl implements ContextTuple {
+
+        @NonNull
+        private final Context previous;
+
+        @NonNull
+        private final Context current;
+    }
 }
