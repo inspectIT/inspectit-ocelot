@@ -25,7 +25,7 @@
   "dependencies": {
     "@zeit/next-css": "^1.0.1",
     "ace-builds": "^1.4.5",
-    "axios": "^0.19.0",
+    "axios": "^0.21.1",
     "classnames": "^2.2.6",
     "dateformat": "^3.0.3",
     "js-yaml": "^3.13.1",
