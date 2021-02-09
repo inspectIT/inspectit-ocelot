@@ -22,7 +22,7 @@ jobs:
       matrix:
         dockerimage:
           - 'openjdk:8-jdk'
-          - 'openjdk:9-jdk'
+          - 'openjdk:13-jdk'
           - 'openjdk:11-jdk'
           - 'ibmcom/ibmjava:8-sdk'
           - 'sgrio/java:jdk_8_ubuntu'
@@ -34,11 +34,11 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: assemble
-        run: ./gradlew assemble
+        run: ./gradlew :inspectit-ocelot-core:assemble
       - name: test
-        run: ./gradlew test
+        run: ./gradlew :inspectit-ocelot-core:test --no-daemon -i
       - name: systemTest
-        run: ./gradlew systemTest
+        run: ./gradlew :inspectit-ocelot-agent:systemTest
       - name: codeCoverage if oracle-jdk8
         if: matrix.dockerimage == 'sgrio/java:jdk_8_ubuntu' && github.event_name == 'pull_request'
         run: |
@@ -49,6 +49,23 @@ jobs:
         with:
           file: ./build/reports/jacoco/report.xml
           fail_ci_if_error: true
+      - name: upload test results
+        uses: actions/upload-artifact@v2
+        if: ${{ failure() }}
+        with:
+          name: 'test-results'
+          path: |
+            inspectit-ocelot-agent/build/test-results
+            inspectit-ocelot-core/build/test-results
+            inspectit-ocelot-core/build/reports
+            inspectit-ocelot-config/build/test-results
+      - name: upload heapdump
+        uses: actions/upload-artifact@v2
+        if: ${{ failure() }}
+        with:
+          name: 'heapdump'
+          path: |
+            /__w/inspectit-ocelot/inspectit-ocelot/test_heapdump.bin
   jmh-compile:
     name: Compile JMH Tests
     runs-on: ubuntu-latest

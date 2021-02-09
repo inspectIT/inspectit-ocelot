@@ -28,9 +28,16 @@ inspectit:
     # global sample probability used to decide if a trace shall be sampled or not
     # this value can be overridden by the tracing settings of individual instrumentation rules.
     sample-probability: 1.0
+    # the format for propagating correlation headers.
+    # options are: B3, TRACE_CONTEXT, DATADOG
+    propagation-format: B3
     # defines when to add common tags as attributes to spans
     # options are: NEVER, ON_GLOBAL_ROOT, ON_LOCAL_ROOT, ALWAYS
     add-common-tags: ON_LOCAL_ROOT
+    # settings regarding automatic tracing (stack-trace-sampling)
+    auto-tracing:
+      frequency: 50ms
+      shutdown-delay: 30s
     # settings regarding log correlation
     log-correlation:
       trace-id-mdc-injection:
@@ -38,6 +45,14 @@ inspectit:
         enabled: false
         # the key which is used to store the trace id in the MDC
         key: "traceid"
+        # Opt-out option for slf4J
+        slf4j-enabled: true
+        # Opt-out option for Log4J1
+        log4j1-enabled: true
+        # Opt-out option for Log4J2
+        log4j2-enabled: true
+        # Opt-out option for JBoss Logmanager
+        jboss-logmanager-enabled: true
       trace-id-auto-injection:
         # whether the trace id should automatically injected into log statements
         enabled: false

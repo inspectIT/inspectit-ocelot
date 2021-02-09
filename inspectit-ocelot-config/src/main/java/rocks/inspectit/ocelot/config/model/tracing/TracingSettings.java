@@ -44,11 +44,21 @@ public class TracingSettings {
     @Valid
     private LogCorrelationSettings logCorrelation = new LogCorrelationSettings();
 
-
     /**
      * Generically defines behavior of adding common tags to spans.
      */
     @NotNull
     private AddCommonTags addCommonTags;
 
+    /**
+     * Settings for automatic tracing (stack trace sampling)
+     */
+    @Valid
+    private AutoTracingSettings autoTracing;
+
+    /**
+     * The propagation format to use.
+     */
+    @NotNull
+    private PropagationFormat propagationFormat = PropagationFormat.B3;
 }

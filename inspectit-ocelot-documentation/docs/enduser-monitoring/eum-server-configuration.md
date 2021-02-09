@@ -142,7 +142,15 @@ Using the operations above, complex calculations can be done, for example:
 The `beacon-requirements` field can be used to specify requirements which have to be fulfilled by the beacons in order to be evaluated by a certain metric.
 If any requirement does not fit a beacon, the beacon is ignored by the metric.
 
-Beacon requirements consist of two attributes `field` and `requirement`. `field` specified the beacon's field which is validated using the requirement type specified in `NOT_EXISTS`.
+The following requirements are available:
+
+| Type | Note |
+| --- | --- |
+| `EXISTS` | The targeted field must exist. |
+| `NOT_EXISTS` | The targeted field must not exist. |
+| `HAS_INITIATOR` | The beacon must have one of the specified initiators. |
+
+Firstly, you can specify that the metric expects a field to exist or not exist in the beacon:
 
 ```YAML
   ...
@@ -152,13 +160,22 @@ Beacon requirements consist of two attributes `field` and `requirement`. `field`
         - field: rt.quit
           requirement: NOT_EXISTS
 ```
+In this example, `my-metric` will only be recorded if the field `rt.quit` does not exist in the beacon.
+Alternatively you can use the `requirement` `EXISTS` to make sure the metric is only recorded if the given field is present.
 
-The following requirement types are currently be supported:
+Additionally you can specify that you only want to record the metric if the received beacon has a specific initiator:
 
-| Type | Note |
-| --- | --- |
-| `EXISTS` | The targeted field must exist. |
-| `NOT_EXISTS` | The targeted field must not exist. |
+```YAML
+  ...
+    my-metric:
+      ...
+      beacon-requirements:
+        - initiators: [SPA_SOFT, SPA_HARD]
+          requirement: HAS_INITIATOR
+```
+
+The available initiators are `DOCUMENT` for the initial pageload beacons, `XHR` for Ajax-Beacons and `SPA_SOFT` and `SPA_HARD` for soft and hard SPA navigation beacons.
+The metric will only be recorded for beacons whose `http.initiator` field matches any of the elements provided in the `initiators` list.
 
 ### Additional Beacon Fields
 
@@ -166,7 +183,7 @@ The following requirement types are currently be supported:
 
 The `t_other.*` fields are a special set of fields which are resolved based on the content of the beacon's `t_other` field.
 
-The Boomerage agent allows to set custom-timer data, which represents a arbitrary key-value pair. The key represents the name of the timer and the value the timer's value which may be a duration or any number. This can be used by applications to measure custom durations or events. See the [Boomerang's documentation](https://developer.akamai.com/tools/boomerang/#BOOMR.sendTimer(name,value)) for more information.
+The Boomerang agent allows to set custom-timer data, which represents a arbitrary key-value pair. The key represents the name of the timer and the value the timer's value which may be a duration or any number. This can be used by applications to measure custom durations or events. See the [Boomerang's documentation](https://developer.akamai.com/tools/boomerang/#BOOMR.sendTimer(name,value)) for more information.
 
 When using custom timers, Boomerang combines their values as a comma-separated list and sends them in the `t_other` attribute. For example, a beacon can be structured as follows: `t_other=t_domloaded|437,boomerang|420,boomr_fb|252`
 
@@ -201,28 +218,53 @@ inspectit-eum-server:
         input: u
 ```
 
-Tags configured via `beacon` offer some additional flexibility: In addition to simply copying the input value, it is possible to perform a RegEx replacement.
+Tags configured via `beacon` offer some additional flexibility: In addition to simply copying the input value, 
+it is possible to perform one or multiple regular expression replacements.
 
 **Example:** in case the `u` attribute contains a URL which is: `http://server/user/100`.
-The following configuration can be used to erases the path segment after `/user/` which represents a user ID and replaces it with the constant text `{id}`.
+The following configuration can be used to extract the HTTP-Path from it.
 
 ```YAML
 inspectit-eum-server:
   tags:
     beacon:
-      URL_USER_ERASED: 
+      MY_PATH: 
         input: u
-        regex: "\\/user\\/\d+"
-        replacement: "\\/user\\/{id}"
-        keep-no-match: true
+        replacements:
+         -  pattern:  '^.*\/\/([^\/]*)([^?]*).*$'
+            replacement: "$2"
+            keep-no-match: false
+```
+The `replacements` property defines a list of regular expressions and corresponding replacements to apply.
+They will be applied in the order they are listed.
+For each list element, the `pattern` property defines the regex to use for the replacement.
+All matches of the `pattern` in the input value are replaced with the string defined by `replacement`.
+The `keep-no-match` option of each entry defines what to do if the given input does not match the given regex at any place.
+If it is set to `true`, the previous value is kept unchanged. If it is set to `false`, the given tag won't be created in case no match is found.
+Note that capture groups are supported and can be referenced in the replacement string using `$1`, `$2`, etc. as shown in the example.
+
+The following example extends the previous one by additionally replacing all user-IDs within the path:
+
+
+```YAML
+inspectit-eum-server:
+  tags:
+    beacon:
+      MY_PATH: 
+        input: u
+        replacements:
+         -  pattern:  '^.*\/\/([^\/]*)([^?]*).*$'
+            replacement: "$2"
+            keep-no-match: false
+         -  pattern:  '\/user\/\d+'
+            replacement: '/user/{id}'
 ```
 
-The `regex` property defines the regex to use for the replacement.
-All matches of the `regex` in the input value are replaced with the string defined by `replacement`.
-The `keep-no-match` options defines what to do if the given input does not match the given regex at any place.
-If it is set to `true`, the original value will be kept. If it is set to `false`, the given tag won't be created in case no match is found.
+With these settings, the tag will be extracted from `u` just like in the previous example.
+However, an additional replacement will be applied afterwards causing user-IDs to be erased from the path.
+Note that we did not specify `keep-no-match` for the second replacement. `keep-no-match` default to `true`,
+meaning that the path will be preserved without any changes in case it does not contain any user-IDs.
 
-Note that capture groups are supported and can be referenced in the replacement string using `$1`, `$2`, etc.
 Using this mechanism, the EUM server provides the following tags out of the box:
 
 | Tag | Description |
@@ -313,6 +355,38 @@ The EUM server supports trace data forwarding to the Jaeger exporter.
 The exporter is using the [Jaeger Protobuf via gRPC API](https://www.jaegertracing.io/docs/1.16/apis/#protobuf-via-grpc-stable) in order to forward trace data.
 By default, the Jaeger exporter is disabled.
 
+### Beacons
+
+The EUM Server supports that received beacons can be exported or sent to other systems.
+Currently only export via HTTP is supported.
+In this case, the beacons are sent in JSON format.
+This allows the received beacons to be sent to an HTTP endpoint (e.g. Logstash).
+
+The following configuration snippet can be used in the EUM server for enabling beacon exportation via HTTP.
+
+```YAML
+inspectit-eum-server:
+  exporters:
+    beacons:
+      http:
+        # Whether beacons should be exported via HTTP
+        enabled: true
+        # The endpoint to which the beacons are to be sent
+        endpoint-url: https://localhost:8080
+        # The max. amount of threads exporting beacons (min. 1)
+        worker-threads: 2
+        # The maximum number of beacons to be exported using a single HTTP request (min. 1)
+        max-batch-size: 100
+        # The flush interval to export beacons in case the 'max-batch-size' has not been reached (min. 1 second)
+        flush-interval: 5s
+        # When specified, the request will be using this username for Basic authentication
+        username: user
+        # The password used for Basic authentication
+        password: 123
+```
+
+The EUM server uses Basic Authentication for the request if a username is specified. Otherwise no authentication is used.
+
 ## Self-Monitoring
 
 For the purpose of self-monitoring, the EUM server offers a set of metrics that reflect its state.
@@ -321,4 +395,7 @@ Currently, the following self monitoring metrics are available.
 
 | Metric name | Description |
 | --- | --- |
-| `beacons_received` | Counts the number of received beacons | 
+| `inspectit_eum_self_beacons_received_count` | Counts the number of received beacons | 
+| `inspectit_eum_self_beacons_export_count` | Counts the number of beacons exportations | 
+| `inspectit_eum_self_beacons_export_duration_sum` | The total duration needed for beacon exportations | 
+| `inspectit_eum_self_beacons_export_batch_sum` | The number of exported beacons per exportation | 

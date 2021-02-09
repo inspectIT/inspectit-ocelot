@@ -51,7 +51,8 @@ public class ModelAutoCompleterTest {
                     "interfaces",
                     "methods",
                     "superclass",
-                    "type");
+                    "type",
+                    "exclude");
         }
 
         @Test

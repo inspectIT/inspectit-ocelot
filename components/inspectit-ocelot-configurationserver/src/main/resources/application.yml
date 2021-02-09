@@ -19,27 +19,36 @@ spring:
     baselineOnMigrate: true
     baselineVersion: 1
 
+# server properties - see https://docs.spring.io/spring-boot/docs/current/reference/html/appendix-application-properties.html#server-properties
 server:
   port: 8090
 
 inspectit-config-server:
+  # the directory which is used as working directory
   working-directory: working_directory
+  # the expiration duration of JWT tokens
   token-lifespan: 60m
+  # the e-mail suffix used for internal users
+  mail-suffix: '@inspectit.rocks'
+  # the default admin user
   default-user:
     name: admin
     password: admin
-
+  # size of the internal thread pool
   thread-pool-size: 4
-
   # the maximum number of active agents connected to this server
   # only used to limit the sizes of internal caches
   max-agents: 10000
   # If an agent didn't fetched its configuration for this duration, it is forgotten and evicted from all caches
   agent-eviction-delay: 1h
-
+  # security settings
   security:
     # Whether LDAP authentication should be used
+    # See the documentation on how to configure LDAP correctly: https://inspectit.github.io/inspectit-ocelot/docs/config-server/user-authentication
     ldap-authentication: false
+    # If enabled, non-admin users cannot promote their own changes.
+    # The writing of the configuration and the promotion needs to be done by two separate persons.
+    four-eyes-promotion: false
 
 # ACTUATOR PROPERTIES
 management:

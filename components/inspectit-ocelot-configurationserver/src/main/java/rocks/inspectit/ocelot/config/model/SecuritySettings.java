@@ -36,6 +36,13 @@ public class SecuritySettings {
     private boolean accessLog = true;
 
     /**
+     * If enabled, non-admin users cannot promote their own changes.
+     * The writing of the configuration and the promotion needs to be done by two separate persons.
+     */
+    @Builder.Default
+    private boolean fourEyesPromotion = false;
+
+    /**
      * Verify that LDAP settings exist if LDAP is enabled.
      */
     @AssertFalse(message = "LDAP setting must not be null when LDAP authentication is enabled.")

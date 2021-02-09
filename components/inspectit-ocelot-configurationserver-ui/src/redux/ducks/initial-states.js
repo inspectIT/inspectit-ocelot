@@ -4,7 +4,7 @@ const authentication = {
   /** The authorization permissions the user has*/
   permissions: {
     write: false,
-    commit: false,
+    promote: false,
     admin: false,
   },
   /** Specifying whether a login request is currently be executed */
@@ -18,6 +18,8 @@ const authentication = {
 const configuration = {
   /** Specifies how many requests are currently loading in the background */
   pendingRequests: 0,
+  /** The existing versions. */
+  versions: [],
   /** The existing configuration files. */
   files: [],
   /**
@@ -51,6 +53,10 @@ const configuration = {
   schema: null,
   /** If the config view should be in the visual mode */
   showVisualConfigurationView: false,
+  /** Specifies the selected git version. The latest version always has the number 0. */
+  selectedVersion: null,
+  /** Whether the history view should be shown */
+  showHistoryView: false,
 };
 
 const notification = {
@@ -65,6 +71,17 @@ const mappings = {
   mappings: [],
   /** The date when the agent mappings have been fetched. */
   updateDate: null,
+};
+
+const alerting = {
+  /** A mapping of rule names and corresponding unsaved contents.*/
+  unsavedRuleContents: {},
+  /** A mapping of handler ids and corresponding unsaved contents. */
+  unsavedHandlerContents: {},
+  ruleGrouping: {
+    groupByTemplates: true,
+    groupByTopics: false,
+  },
 };
 
 const agentStatus = {
@@ -86,4 +103,13 @@ const settings = {
   pendingRequests: 0,
 };
 
-export { authentication, configuration, notification, mappings, agentStatus, settings };
+const promotion = {
+  /** The names of the files which are currently be approved */
+  approvals: [],
+  /** The commit id of the working directory related to the currently changed files */
+  workspaceCommitId: null,
+  /** The commit id of the live directory related to the currently changed files */
+  liveCommitId: null,
+};
+
+export { authentication, configuration, notification, mappings, agentStatus, settings, promotion, alerting };

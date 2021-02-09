@@ -30,15 +30,18 @@ The definition of a scope contains the following five attributes:
 |`type`| A matcher which defines the required type of the target method's class.
 |`methods`| A list of matchers which defines the target methods itself.
 |`advanced`| Advanced settings.
+|`exclude`| A map of scopes. This map is used to exclude the specified scopes methods.
 
 In order to determine which methods should be instrumented all classes are checked against the defined `interface`, `superclass` and `type` matchers.
 If and only if a class matches on *all* matchers, each of their methods is checked against the defined method matchers in order to determine the target methods.
+Finally, the methods of the excluded scopes are excluded from the matcher.
 Thus, the process of determine whether the methods of a class `X` should be instrumented can be represented as:
 
 1. Check if all interface matcher matches the interface of class `X` (if any is defined)
 2. Check if the superclass matcher matches any superclass of class `X` (if defined)
 3. Check if the type matcher matches the type of class `X` (if defined)
 4. For each method: check if the method is matching *any* of the defined method matchers (if defined)
+5. For each excluded scope: exclude the corresponding methods from the method matcher (if defined)
 
 > Keep in mind that all of the type matchers have to match whereas only one of the method matchers have to match!
 
@@ -59,6 +62,9 @@ type:
 methods:
   - # METHOD_MATCHER_A
   - # METHOD_MATCHER_B
+# the scopes which have to be excluded
+exclude:
+  # SCOPE_A: true
 ```
 
 ## Type Matcher
@@ -171,4 +177,7 @@ inspectit:
             advanced:
               instrument-only-inherited-methods: false
               disable-safety-mechanisms: false
+            # exclude the methods from the specified scope
+            exclude:
+              's_to_be_exclude': true
 ```

@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.core.metrics;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +11,6 @@ import rocks.inspectit.ocelot.core.metrics.system.DiskMetricsRecorder;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class DiskMetricsRecorderConfigTest extends SpringTestBase {
-
 
     @Autowired
     DiskMetricsRecorder recorder;

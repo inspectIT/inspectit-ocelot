@@ -25,6 +25,7 @@ class SourceTree extends React.Component {
         selectionKeys={this.state.selectedSources}
         onSelectionChange={(e) => this.handleSelectionChange(e.value)}
         expandedKeys={{ '/': true }}
+        filter={true}
       />
     );
   }

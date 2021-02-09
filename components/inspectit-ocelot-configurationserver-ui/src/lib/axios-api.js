@@ -8,7 +8,7 @@ const BASE_API_URL_V1 = isProduction ? '/api/v1' : 'http://localhost:8090/api/v1
 
 const commonConfiguration = {
   baseURL: BASE_API_URL_V1,
-  timeout: 5000,
+  timeout: 15000,
 };
 
 const axiosPlain = axios.create(commonConfiguration);

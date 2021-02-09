@@ -11,6 +11,8 @@ configurations {
 test {
     useJUnitPlatform()
 
+    jvmArgs '-Xmx512m', '-XX:+HeapDumpOnOutOfMemoryError', '-XX:HeapDumpPath=/__w/inspectit-ocelot/inspectit-ocelot/test_heapdump.bin'
+
     testLogging {
         exceptionFormat = 'full'
     }
@@ -22,12 +24,13 @@ dependencies {
     compileOnly(
             project(':inspectit-ocelot-bootstrap'),
             "io.opencensus:opencensus-api:${openCensusVersion}",
-            'org.projectlombok:lombok:1.18.4'
+            "io.opencensus:opencensus-impl:${openCensusVersion}",
+            'org.projectlombok:lombok:1.18.12'
     )
     buildTools(
             'jarcheck:jarcheck:1.5'
     )
-    annotationProcessor 'org.projectlombok:lombok:1.18.4'
+    annotationProcessor 'org.projectlombok:lombok:1.18.12'
     testImplementation(
             'org.junit.jupiter:junit-jupiter-api:5.3.1',
             'org.mockito:mockito-junit-jupiter:2.23.0'
@@ -67,11 +70,17 @@ dependencies {
             "io.opencensus:opencensus-exporter-trace-zipkin:${openCensusVersion}",
             "io.opencensus:opencensus-exporter-trace-jaeger:${openCensusVersion}",
             "io.opencensus:opencensus-exporter-metrics-ocagent:${openCensusVersion}",
+
             "io.opencensus:opencensus-exporter-trace-ocagent:${openCensusVersion}",
-            "rocks.inspectit:opencensus-influxdb-exporter:1.1",
+            // The following dependecy is required for the OC-exporter to work correctly and must be matched against the grpc version
+            // See https://github.com/census-instrumentation/opencensus-java/blob/master/exporters/trace/ocagent/README.md
+            'io.netty:netty-tcnative-boringssl-static:2.0.20.Final',
+
+
+            "rocks.inspectit:opencensus-influxdb-exporter:1.2",
             
             // bytecode manipulation
-            "net.bytebuddy:byte-buddy:1.9.2"
+            "net.bytebuddy:byte-buddy:1.10.14"
     )
 
     testImplementation(

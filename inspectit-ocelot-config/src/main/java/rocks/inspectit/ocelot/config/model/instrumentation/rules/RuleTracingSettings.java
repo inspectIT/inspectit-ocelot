@@ -47,6 +47,20 @@ public class RuleTracingSettings {
     private String continueSpan;
 
     /**
+     * Enables or disables auto-tracing (=stack trace sampling).
+     * If this field is set to true, all sub-invocations of the instrumented method will be traced via stack-trace sampling.
+     * This only takes effect if either {@link #startSpan} or {@link #continueSpan} is configured and the current method is actually traced.
+     * <p>
+     * In addition this field can be set to false. In this case if any parent method has started a stack-trace sampling session,
+     * it will be paused for the duration of this method.
+     * This means effectively children of this method will be excluded from being traced using stack trace sampling.
+     * <p>
+     * If this field is null (the default value), no changes will be made to the current threads sampling session:
+     * If a parent has started a sampling session, it will be continued. If no sampling has been activated, none will be started.
+     */
+    private Boolean autoTracing;
+
+    /**
      * If not null, the span started or continued by this rule will be stored under the given data key.
      */
     private String storeSpan;

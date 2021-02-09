@@ -167,7 +167,7 @@ The most important ones are that neither Autoboxing, Generics, Anonymous Classes
 
 After actions have been compiled, they are placed in the same class loader as the class you instrument with them. This means that they can access any class that your application class could also access.
 
-> Even if your action terminates with an exception or error, inspectIT will make sure that this does not affect your application. InspectIT will print information about the error and the faulting action. The execution of the action in the rule where the failure occured will be disabled until you update your configuration.
+> Even if your action terminates with an exception or error, inspectIT will make sure that this does not affect your application. InspectIT will print information about the error and the faulting action. The execution of the action in the rule where the failure occurred will be disabled until you update your configuration.
 
 ### Input Parameters
 
@@ -528,7 +528,7 @@ If no sample probability is defined for a rule, the [default probability](tracin
 #### Adding Attributes
 
 Another useful property of spans is that you can attach any additional information in form of attributes.
-In most tracing backends such as ZipKin and Jaeger, you can search your traces based on attributes.
+In most tracing backends such as Zipkin and Jaeger, you can search your traces based on attributes.
 The example below shows how you can define attributes:
 
 ```yaml
@@ -564,7 +564,7 @@ This is done via the `error-status` configuration property of a rule's tracing s
 inspectit:
   instrumentation:
     rules:
-      'r_example_rule"':
+      'r_example_rule':
         tracing:
           start-span: true
           error-status: _thrown
@@ -604,6 +604,52 @@ inspectit:
 If any `start-span-conditions` are defined, a span will only be created when all conditions are met.
 Analogous to this, attributes will only be written if each condition defined in `attribute-conditions` is fulfilled.
 The conditions that can be defined are equal to the ones of actions, thus, please see the [action conditions description](#adding-conditions) for detailed information.
+
+#### Auto-Tracing
+
+:::warning Experimental Feature
+Please note that this is an experimental feature.
+This feature is currently experimental and can potentially have a high performance impact. We do **not** recommend using it for production environments yet!
+:::
+
+With the shown approach traces will only contain exactly the methods you instrumented.
+Often however, one observes certain methods taking a long time without knowing where exactly the time is spent.
+The "auto-tracing" feature can be used to solve this problem.
+
+When auto-tracing is enabled, inspectIT Ocelot uses a profiler-like approach for recording traces.
+With auto-tracing, stack traces of threads are collected periodically. Based on these samples, inspectIT Ocelot will reconstruct
+an approximate trace showing where the time was spent.
+
+Auto-tracing can be enabled on methods which are traced using either the `start-span` or `continue-span` options.
+To enable it you can simply add the `auto-tracing` setting:
+
+```yaml
+inspectit:
+  instrumentation:
+    rules:
+      'r_example_rule':
+        tracing:
+          start-span: true
+          auto-tracing: true
+```
+
+When auto-tracing is enabled, callees of the method will be traced by periodically capturing stack traces.
+Methods recorded via auto-tracing will be marked in the traces by a leading asterisk.
+
+You can also set the `auto-tracing` option to `false`, which disables auto-tracing for the methods affected by this rule.
+In this case any active `auto-traces` will be paused for the duration of the method, no samples will be recorded.
+
+The frequency at which stack trace samples are captured is defined globally:
+```yaml
+inspectit:
+  tracing:
+    auto-tracing:
+      frequency: 50ms
+```
+
+This setting specifies that each thread for which auto-tracing is enabled will be stopped every 50ms in order to capture a stack trace.
+It also implicitly defines the granularity of your traces: Only methods with at least this duration will appear in your traces.
+
 
 #### Tracing Asynchronous Invocations
 

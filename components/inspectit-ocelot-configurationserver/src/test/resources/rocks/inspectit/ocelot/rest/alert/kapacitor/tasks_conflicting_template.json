@@ -1,0 +1,43 @@
+{
+  "created": "2020-07-22T08:21:47.324303054Z",
+  "dbrps": [
+    {
+      "db": "test",
+      "rp": "autogen"
+    }
+  ],
+  "error": "Some error",
+  "executing": false,
+  "id": "conflicting_template",
+  "template-id": "other_template",
+  "last-enabled": "2020-07-22T08:21:47.324303055Z",
+  "link": {
+    "rel": "self",
+    "href": "/kapacitor/v1/tasks/special_vars"
+  },
+  "modified": "2020-07-22T08:21:47.324303056Z",
+  "status": "disabled",
+  "type": "batch",
+  "vars": {
+    "some_string": {
+      "type": "string",
+      "value": "test",
+      "description": ""
+    },
+    "topic": {
+      "type": "string",
+      "value": "my_topic",
+      "description": ""
+    },
+    "inspectit_template_description": {
+      "type": "string",
+      "value": "My task description",
+      "description": ""
+    },
+    "inspectit_template_reference": {
+      "type": "string",
+      "value": "some_template",
+      "description": ""
+    }
+  }
+}

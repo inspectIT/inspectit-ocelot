@@ -45,6 +45,11 @@ class AceEditor extends React.Component {
     this.editor.session.on('change', this.onChange);
     this.editor.commands.addCommand(saveCommand(this.doSave));
     this.editor.setReadOnly(readOnly);
+    // the following deactivates the cursor and line selection in read only mode.
+    // See: https://stackoverflow.com/questions/32806060/is-there-a-programmatic-way-to-hide-the-cursor-in-ace-editor
+    this.editor.setHighlightGutterLine(!readOnly);
+    this.editor.setHighlightActiveLine(!readOnly);
+    this.editor.renderer.$cursorLayer.element.style.display = readOnly ? 'none' : '';
 
     if (options) {
       this.editor.setOptions(options);

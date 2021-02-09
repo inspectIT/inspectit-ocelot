@@ -55,7 +55,7 @@ The following properties are nested properties below the `inspectit.exporters.me
 
 ## InfluxDB Exporter
 
-If enabled, metrics are pushed at a specified interval directly to a given influxDB v1.x instance.
+If enabled, metrics are pushed at a specified interval directly to a given InfluxDB v1.x instance.
 To enable the InfluxDB Exporters, it is only required to specify the `url`.
 
 The InfluxDB exporter provides a special handling for counter and sum metrics which is enabled by default and can be disabled using the `counters-as-differences` option.
@@ -71,11 +71,12 @@ The following properties are nested properties below the `inspectit.exporters.me
 |Property |Default| Description
 |---|---|---|
 |`.enabled`|`true`|If true, the agent will try to start the Influx exporter, if also the `url` is not empty.
-|`.url`|`null`|The HTTP url of the influxDB, e.g. `http://localhost:8086`.
-|`.user`|`null`| The user to use for connecting to the influxDB, can be empty if the influxDB is configured for unauthorized access.
-|`.password`|`null`|The password to use for connecting to the influxDB, can be empty if the influxDB is configured for unauthorized access.
-|`.database`|`inspectit`| The influxDB database to which the metrics are pushed.
+|`.url`|`null`|The HTTP url of the InfluxDB, e.g. `http://localhost:8086`.
+|`.user`|`null`| The user to use for connecting to the InfluxDB, can be empty if the InfluxDB is configured for unauthorized access.
+|`.password`|`null`|The password to use for connecting to the InfluxDB, can be empty if the InfluxDB is configured for unauthorized access.
+|`.database`|`inspectit`| The InfluxDB database to which the metrics are pushed.
 |`.retention-policy`|`autogen`| The retention policy of the database to use for writing metrics.
 |`.create-database`|`true`| If enabled, the database defined by the `database` property is automatically created on startup with an `autogen` retention policy if it does not exist yet.
-|`.export-interval`|refers to `inspectit.metrics.frequency`|Defines how often metrics are pushed to the influxDB.
+|`.export-interval`|refers to `inspectit.metrics.frequency`|Defines how often metrics are pushed to the InfluxDB.
 |<nobr>`.counters-as-differences`</nobr>|`true`|Defines whether counters are exported using their absolute value or as the increase between exports
+|`buffer-size`| `40` | In case the InfluxDB is not reachable, failed writes will be buffered and written on the next export. This value defines the maximum number of batches to buffer.

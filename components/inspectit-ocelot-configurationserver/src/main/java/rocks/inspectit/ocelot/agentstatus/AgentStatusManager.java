@@ -37,8 +37,7 @@ public class AgentStatusManager {
      */
     @PostConstruct
     public void reset() {
-        attributesToAgentStatusCache = CacheBuilder
-                .newBuilder()
+        attributesToAgentStatusCache = CacheBuilder.newBuilder()
                 .maximumSize(config.getMaxAgents())
                 .expireAfterWrite(config.getAgentEvictionDelay().toMillis(), TimeUnit.MILLISECONDS)
                 .build();
@@ -59,6 +58,9 @@ public class AgentStatusManager {
                 .attributes(agentAttributes)
                 .lastConfigFetch(new Date())
                 .mappingName(resultConfiguration == null ? null : resultConfiguration.getMapping().getName())
+                .sourceBranch(resultConfiguration == null ? null : resultConfiguration.getMapping()
+                        .getSourceBranch()
+                        .getBranchName())
                 .build();
 
         Object statusKey;

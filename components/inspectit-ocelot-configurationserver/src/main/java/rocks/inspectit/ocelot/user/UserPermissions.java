@@ -20,9 +20,9 @@ public class UserPermissions {
     private boolean write;
 
     /**
-     * True, if the user has commit access.
+     * True, if the user has promote access.
      */
-    private boolean commit;
+    private boolean promote;
 
     /**
      * True, if the user has admin access.

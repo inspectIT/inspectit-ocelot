@@ -3,24 +3,40 @@
     {
       "name": "Configuration",
       "icon": "pi-cog",
-      "href": "/configuration"
+      "href": "/configuration",
+      "alwaysEnabled": true
     },
     {
       "name": "Agent Mappings",
       "icon": "pi-sitemap",
-      "href": "/mappings"
+      "href": "/mappings",
+      "alwaysEnabled": true
     },
     {
       "name": "Agent Status",
       "icon": "pi-list",
-      "href": "/status"
+      "href": "/status",
+      "alwaysEnabled": true
+    },
+    {
+      "name": "Configuration Promotion",
+      "icon": "pi-cloud-upload",
+      "href": "/promotion",
+      "alwaysEnabled": true
+    },
+    {
+      "name": "Alerting",
+      "icon": "pi-bell",
+      "href": "/alerting",
+      "alwaysEnabled": false
     }
   ],
   "bottom": [
     {
       "name": "Settings",
       "icon": "pi-user",
-      "href": "/settings"
+      "href": "/settings",
+      "alwaysEnabled": false
     }
   ]
 }

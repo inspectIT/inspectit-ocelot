@@ -6,10 +6,14 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import rocks.inspectit.ocelot.IntegrationTestBase;
+import rocks.inspectit.ocelot.file.FileData;
 import rocks.inspectit.ocelot.file.FileInfo;
+import rocks.inspectit.ocelot.file.versioning.model.WorkspaceDiff;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;

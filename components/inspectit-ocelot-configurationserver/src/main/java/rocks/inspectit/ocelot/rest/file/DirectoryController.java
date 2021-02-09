@@ -4,20 +4,15 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.security.access.annotation.Secured;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import rocks.inspectit.ocelot.file.FileInfo;
+import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
 import rocks.inspectit.ocelot.rest.util.RequestUtil;
 import rocks.inspectit.ocelot.security.config.UserRoleConfiguration;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
 
 /**
  * Controller for managing the configurations.
@@ -25,14 +20,21 @@ import java.util.Optional;
 @RestController
 public class DirectoryController extends FileBaseController {
 
-    @ApiOperation(value = "List directory contents", notes = "Can be used to get a list of the contents of a given directory.")
+    @ApiOperation(value = "List directory contents", notes = "Can be used to get a list of the contents of a given directory. In addition, the branch can be specified which will be used as basis for the listing.")
     @ApiImplicitParam(name = "Path", value = "The part of the url after /directories/ define the path to the directory whose contents shall be read.")
     @GetMapping(value = "directories/**")
-    public Collection<FileInfo> listContents(HttpServletRequest request) {
+    public Collection<FileInfo> listContents(@ApiParam("The id of the version which should be listed. If it is empty, the lastest workspace version is used. Can be 'live' fir listing the latest live version.") @RequestParam(value = "version", required = false) String commitId, HttpServletRequest request) {
         String path = RequestUtil.getRequestSubPath(request);
-        return fileManager.getWorkingDirectory().listConfigurationFiles(path);
-    }
 
+        if (commitId == null) {
+            // Is used to display empty directories.
+            return fileManager.getWorkingDirectory().listConfigurationFiles(path);
+        } else if (commitId.equals("live")) {
+            return fileManager.getLiveRevision().listConfigurationFiles(path);
+        } else {
+            return fileManager.getCommitWithId(commitId).listConfigurationFiles(path);
+        }
+    }
 
     @Secured(UserRoleConfiguration.WRITE_ACCESS_ROLE)
     @ApiOperation(value = "Create a directory", notes = "Creates a new, empty directory including its parent folders. Does nothing if the directory already exists.")

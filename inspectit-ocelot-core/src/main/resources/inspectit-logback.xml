@@ -23,7 +23,7 @@
             <pattern>${fileLogPattern}</pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>logDir/agent.%d{yyyy-MM-dd}.%i.zip</fileNamePattern>
+            <fileNamePattern>${logDir}/agent.%d{yyyy-MM-dd}.%i.zip</fileNamePattern>
             <maxHistory>30</maxHistory>
             <maxFileSize>20MB</maxFileSize>
         </rollingPolicy>
