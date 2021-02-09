@@ -15,6 +15,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,28 +25,28 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
 
     static class TestRunnable implements Runnable {
 
-        private final Function<Void, Void> callback;
+        private final Consumer<Void> callback;
 
-        public TestRunnable(Function<Void, Void> callback) {
+        public TestRunnable(Consumer<Void> callback) {
             this.callback = callback;
         }
 
         @Override
         public void run() {
-            callback.apply(null);
+            callback.accept(null);
         }
     }
 
-    static class TestCallable implements Callable {
+    static class TestCallable<T> implements Callable<T> {
 
-        private final Function<Void, Object> callback;
+        private final Function<Void, T> callback;
 
-        public TestCallable(Function<Void, Object> callback) {
+        public TestCallable(Function<Void, T> callback) {
             this.callback = callback;
         }
 
         @Override
-        public Object call() throws Exception {
+        public T call() throws Exception {
             return callback.apply(null);
         }
     }
@@ -115,15 +116,12 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
         }
 
         @Test
-        public void verifyCtxPropagationViaScheduleRunnable_inner() throws Exception {
+        public void verifyCtxPropagationViaScheduleRunnable_named() throws Exception {
             TagKey tagKey = TagKey.create("test-tag-key");
             TagValue tagValue = TagValue.create("test-tag-value");
             AtomicReference<Iterator<Tag>> refTags = new AtomicReference<>();
 
-            Runnable runnable = new TestRunnable(unused -> {
-                refTags.set(InternalUtils.getTags(tagger.getCurrentTagContext()));
-                return null;
-            });
+            Runnable runnable = new TestRunnable(unused -> refTags.set(InternalUtils.getTags(tagger.getCurrentTagContext())));
 
             ScheduledFuture<?> schedule;
             try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
@@ -139,9 +137,9 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
 
     @Nested
     public class Schedule_callable {
-        
+
         @Test
-        public void verifyCtxPropagationViaScheduleCallable() throws Exception {
+        public void verifyCtxPropagationViaScheduleCallable_lambda() throws Exception {
             TagKey tagKey = TagKey.create("test-tag-key");
             TagValue tagValue = TagValue.create("test-tag-value");
 
@@ -157,69 +155,252 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
                     .extracting("key", "value")
                     .contains(tuple(tagKey, tagValue));
         }
-    }
 
-    @Test
-    public void verifyCtxPropagationViaScheduleFixedDelay() throws Exception {
-        int iterations = 5;
-        TagKey tagKey = TagKey.create("test-tag-key");
-        TagValue tagValue = TagValue.create("test-tag-value");
-        CountDownLatch interationCount = new CountDownLatch(iterations);
+        @Test
+        public void verifyCtxPropagationViaScheduleCallable_anonymous() throws Exception {
+            TagKey tagKey = TagKey.create("test-tag-key");
+            TagValue tagValue = TagValue.create("test-tag-value");
 
-        List<Iterator<Tag>> iteratorList = new CopyOnWriteArrayList<>();
+            Callable<Iterator<Tag>> callable = new Callable<Iterator<Tag>>() {
+                @Override
+                public Iterator<Tag> call() throws Exception {
+                    return InternalUtils.getTags(tagger.getCurrentTagContext());
+                }
+            };
 
-        Runnable runnable = () -> {
-            Iterator<Tag> iter = InternalUtils.getTags(tagger.getCurrentTagContext());
-            iteratorList.add(iter);
-            interationCount.countDown();
-        };
+            ScheduledFuture<Iterator<Tag>> future;
+            try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
+                future = executorService.schedule(callable, 1, TimeUnit.MILLISECONDS);
+            }
+            Iterator<Tag> result = future.get();
 
-        ScheduledFuture future;
-        try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
-            future = executorService.scheduleWithFixedDelay(runnable, 0, 1, TimeUnit.MILLISECONDS);
+            assertThat(result).hasSize(1)
+                    .extracting("key", "value")
+                    .contains(tuple(tagKey, tagValue));
         }
 
-        interationCount.await();
+        @Test
+        public void verifyCtxPropagationViaScheduleCallable_named() throws Exception {
+            TagKey tagKey = TagKey.create("test-tag-key");
+            TagValue tagValue = TagValue.create("test-tag-value");
 
-        future.cancel(true);
-        executorService.shutdown();
+            Callable<Iterator<Tag>> callable = new TestCallable<>(unused -> InternalUtils.getTags(tagger.getCurrentTagContext()));
 
-        assertThat(iteratorList).size().isGreaterThanOrEqualTo(iterations);
-        iteratorList.forEach(tagIterator -> assertThat(tagIterator)
-                .hasSize(1)
-                .extracting("key", "value")
-                .contains(tuple(tagKey, tagValue)));
+            ScheduledFuture<Iterator<Tag>> future;
+            try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
+                future = executorService.schedule(callable, 1, TimeUnit.MILLISECONDS);
+            }
+            Iterator<Tag> result = future.get();
+
+            assertThat(result).hasSize(1)
+                    .extracting("key", "value")
+                    .contains(tuple(tagKey, tagValue));
+        }
     }
 
-    @Test
-    public void verifyCtxPropagationViaScheduleFixedRate() throws Exception {
-        int iterations = 5;
-        TagKey tagKey = TagKey.create("test-tag-key");
-        TagValue tagValue = TagValue.create("test-tag-value");
-        CountDownLatch interationCount = new CountDownLatch(iterations);
+    @Nested
+    public class ScheduleWithFixedDelay {
 
-        List<Iterator<Tag>> iteratorList = new CopyOnWriteArrayList<>();
+        @Test
+        public void verifyCtxPropagationViaScheduleFixedDelay_lambda() throws Exception {
+            int iterations = 5;
+            TagKey tagKey = TagKey.create("test-tag-key");
+            TagValue tagValue = TagValue.create("test-tag-value");
+            CountDownLatch interationCount = new CountDownLatch(iterations);
 
-        Runnable runnable = () -> {
-            Iterator<Tag> iter = InternalUtils.getTags(tagger.getCurrentTagContext());
-            iteratorList.add(iter);
-            interationCount.countDown();
-        };
+            List<Iterator<Tag>> iteratorList = new CopyOnWriteArrayList<>();
 
-        ScheduledFuture future;
-        try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
-            future = executorService.scheduleAtFixedRate(runnable, 0, 1, TimeUnit.MILLISECONDS);
+            Runnable runnable = () -> {
+                Iterator<Tag> iter = InternalUtils.getTags(tagger.getCurrentTagContext());
+                iteratorList.add(iter);
+                interationCount.countDown();
+            };
+
+            ScheduledFuture future;
+            try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
+                future = executorService.scheduleWithFixedDelay(runnable, 0, 1, TimeUnit.MILLISECONDS);
+            }
+
+            interationCount.await();
+
+            future.cancel(true);
+            executorService.shutdown();
+
+            assertThat(iteratorList).size().isGreaterThanOrEqualTo(iterations);
+            iteratorList.forEach(tagIterator -> assertThat(tagIterator)
+                    .hasSize(1)
+                    .extracting("key", "value")
+                    .contains(tuple(tagKey, tagValue)));
         }
 
-        interationCount.await();
+        @Test
+        public void verifyCtxPropagationViaScheduleFixedDelay_anonymous() throws Exception {
+            int iterations = 5;
+            TagKey tagKey = TagKey.create("test-tag-key");
+            TagValue tagValue = TagValue.create("test-tag-value");
+            CountDownLatch interationCount = new CountDownLatch(iterations);
 
-        future.cancel(true);
-        executorService.shutdown();
+            List<Iterator<Tag>> iteratorList = new CopyOnWriteArrayList<>();
 
-        assertThat(iteratorList).size().isGreaterThanOrEqualTo(iterations);
-        iteratorList.forEach(tagIterator -> assertThat(tagIterator)
-                .hasSize(1)
-                .extracting("key", "value")
-                .contains(tuple(tagKey, tagValue)));
+            Runnable runnable = new Runnable() {
+                @Override
+                public void run() {
+                    Iterator<Tag> iter = InternalUtils.getTags(tagger.getCurrentTagContext());
+                    iteratorList.add(iter);
+                    interationCount.countDown();
+                }
+            };
+
+            ScheduledFuture future;
+            try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
+                future = executorService.scheduleWithFixedDelay(runnable, 0, 1, TimeUnit.MILLISECONDS);
+            }
+
+            interationCount.await();
+
+            future.cancel(true);
+            executorService.shutdown();
+
+            assertThat(iteratorList).size().isGreaterThanOrEqualTo(iterations);
+            iteratorList.forEach(tagIterator -> assertThat(tagIterator)
+                    .hasSize(1)
+                    .extracting("key", "value")
+                    .contains(tuple(tagKey, tagValue)));
+        }
+
+        @Test
+        public void verifyCtxPropagationViaScheduleFixedDelay_named() throws Exception {
+            int iterations = 5;
+            TagKey tagKey = TagKey.create("test-tag-key");
+            TagValue tagValue = TagValue.create("test-tag-value");
+            CountDownLatch interationCount = new CountDownLatch(iterations);
+
+            List<Iterator<Tag>> iteratorList = new CopyOnWriteArrayList<>();
+
+            Runnable runnable = new TestRunnable(unused -> {
+                Iterator<Tag> iter = InternalUtils.getTags(tagger.getCurrentTagContext());
+                iteratorList.add(iter);
+                interationCount.countDown();
+            });
+
+            ScheduledFuture future;
+            try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
+                future = executorService.scheduleWithFixedDelay(runnable, 0, 1, TimeUnit.MILLISECONDS);
+            }
+
+            interationCount.await();
+
+            future.cancel(true);
+            executorService.shutdown();
+
+            assertThat(iteratorList).size().isGreaterThanOrEqualTo(iterations);
+            iteratorList.forEach(tagIterator -> assertThat(tagIterator)
+                    .hasSize(1)
+                    .extracting("key", "value")
+                    .contains(tuple(tagKey, tagValue)));
+        }
+    }
+
+    @Nested
+    public class ScheduleAtFixedRate {
+
+        @Test
+        public void verifyCtxPropagationViaScheduleFixedRate_lambda() throws Exception {
+            int iterations = 5;
+            TagKey tagKey = TagKey.create("test-tag-key");
+            TagValue tagValue = TagValue.create("test-tag-value");
+            CountDownLatch interationCount = new CountDownLatch(iterations);
+
+            List<Iterator<Tag>> iteratorList = new CopyOnWriteArrayList<>();
+
+            Runnable runnable = () -> {
+                Iterator<Tag> iter = InternalUtils.getTags(tagger.getCurrentTagContext());
+                iteratorList.add(iter);
+                interationCount.countDown();
+            };
+
+            ScheduledFuture future;
+            try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
+                future = executorService.scheduleAtFixedRate(runnable, 0, 1, TimeUnit.MILLISECONDS);
+            }
+
+            interationCount.await();
+
+            future.cancel(true);
+            executorService.shutdown();
+
+            assertThat(iteratorList).size().isGreaterThanOrEqualTo(iterations);
+            iteratorList.forEach(tagIterator -> assertThat(tagIterator)
+                    .hasSize(1)
+                    .extracting("key", "value")
+                    .contains(tuple(tagKey, tagValue)));
+        }
+
+        @Test
+        public void verifyCtxPropagationViaScheduleFixedRate_anonymous() throws Exception {
+            int iterations = 5;
+            TagKey tagKey = TagKey.create("test-tag-key");
+            TagValue tagValue = TagValue.create("test-tag-value");
+            CountDownLatch interationCount = new CountDownLatch(iterations);
+
+            List<Iterator<Tag>> iteratorList = new CopyOnWriteArrayList<>();
+
+            Runnable runnable = new Runnable() {
+                @Override
+                public void run() {
+                    Iterator<Tag> iter = InternalUtils.getTags(tagger.getCurrentTagContext());
+                    iteratorList.add(iter);
+                    interationCount.countDown();
+                }
+            };
+
+            ScheduledFuture future;
+            try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
+                future = executorService.scheduleAtFixedRate(runnable, 0, 1, TimeUnit.MILLISECONDS);
+            }
+
+            interationCount.await();
+
+            future.cancel(true);
+            executorService.shutdown();
+
+            assertThat(iteratorList).size().isGreaterThanOrEqualTo(iterations);
+            iteratorList.forEach(tagIterator -> assertThat(tagIterator)
+                    .hasSize(1)
+                    .extracting("key", "value")
+                    .contains(tuple(tagKey, tagValue)));
+        }
+
+        @Test
+        public void verifyCtxPropagationViaScheduleFixedRate_named() throws Exception {
+            int iterations = 5;
+            TagKey tagKey = TagKey.create("test-tag-key");
+            TagValue tagValue = TagValue.create("test-tag-value");
+            CountDownLatch interationCount = new CountDownLatch(iterations);
+
+            List<Iterator<Tag>> iteratorList = new CopyOnWriteArrayList<>();
+
+            Runnable runnable = new TestRunnable(unused -> {
+                Iterator<Tag> iter = InternalUtils.getTags(tagger.getCurrentTagContext());
+                iteratorList.add(iter);
+                interationCount.countDown();
+            });
+
+            ScheduledFuture future;
+            try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
+                future = executorService.scheduleAtFixedRate(runnable, 0, 1, TimeUnit.MILLISECONDS);
+            }
+
+            interationCount.await();
+
+            future.cancel(true);
+            executorService.shutdown();
+
+            assertThat(iteratorList).size().isGreaterThanOrEqualTo(iterations);
+            iteratorList.forEach(tagIterator -> assertThat(tagIterator)
+                    .hasSize(1)
+                    .extracting("key", "value")
+                    .contains(tuple(tagKey, tagValue)));
+        }
     }
 }

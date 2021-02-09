@@ -10,6 +10,9 @@ import java.util.concurrent.Callable;
  */
 public interface IContextManager {
 
+    boolean enterCorrelation();
+    void exitCorrelation();
+
     void storeContext(Object target, boolean invalidateAfterRestore);
 
     ContextTuple attachContext(Object target);

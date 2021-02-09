@@ -17,6 +17,15 @@ public class NoopContextManager implements IContextManager {
     }
 
     @Override
+    public boolean enterCorrelation() {
+        return false;
+    }
+
+    @Override
+    public void exitCorrelation() {
+    }
+
+    @Override
     public void storeContext(Object target, boolean invalidate) {
     }
 

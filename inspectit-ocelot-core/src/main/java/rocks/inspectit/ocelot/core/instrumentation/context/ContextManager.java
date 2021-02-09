@@ -40,6 +40,9 @@ public class ContextManager implements IContextManager {
 
     private final Cache<Object, InvalidationContext> contextCache = CacheBuilder.newBuilder().weakKeys().build();
 
+    private final ThreadLocal<Boolean> correlationFlag = ThreadLocal.withInitial(() -> false);
+
+
     public ContextManager(CommonTagsManager commonTagsManager, InstrumentationConfigurationResolver configProvider) {
         this.commonTagsManager = commonTagsManager;
         this.configProvider = configProvider;
@@ -99,6 +102,21 @@ public class ContextManager implements IContextManager {
             ContextTupleImpl tuple = (ContextTupleImpl) contextTuple;
             tuple.current.detach(tuple.previous);
         }
+    }
+
+    @Override
+    public boolean enterCorrelation() {
+        if (correlationFlag.get()) {
+            return false;
+        } else {
+            correlationFlag.set(true);
+            return true;
+        }
+    }
+
+    @Override
+    public void exitCorrelation() {
+        correlationFlag.set(false);
     }
 
     @AllArgsConstructor
