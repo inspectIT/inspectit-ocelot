@@ -17,6 +17,7 @@ const defaultState = {
   sources: [],
   attributes: [],
   isNewMapping: null,
+  error: false,
 };
 
 /**
@@ -30,7 +31,22 @@ class EditMappingDialog extends React.Component {
   };
 
   handleChangeAttribute = (newAttributes) => {
-    this.setState({ attributes: newAttributes });
+    const hasInvalidRegexPattern = this.checkRegexPatterns(newAttributes);
+    this.setState({ attributes: newAttributes, error: hasInvalidRegexPattern });
+  };
+
+  checkRegexPatterns = (attributes) => {
+    var error = false;
+    for (const attribute of attributes) {
+      try {
+        new RegExp(attribute.value);
+        delete attribute.error;
+      } catch (e) {
+        error = true;
+        attribute['error'] = true;
+      }
+    }
+    return error;
   };
 
   render() {
@@ -53,7 +69,12 @@ class EditMappingDialog extends React.Component {
           style={{ maxWidth: '1100px', minWidth: '650px' }}
           footer={
             <div>
-              <Button label={isNewMapping ? 'Add' : 'Update'} className="p-button-primary" onClick={this.handleSave} />
+              <Button
+                label={isNewMapping ? 'Add' : 'Update'}
+                className="p-button-primary"
+                onClick={this.handleSave}
+                disabled={this.state.error}
+              />
               <Button label="Cancel" className="p-button-secondary" onClick={this.handleClose} />
             </div>
           }
