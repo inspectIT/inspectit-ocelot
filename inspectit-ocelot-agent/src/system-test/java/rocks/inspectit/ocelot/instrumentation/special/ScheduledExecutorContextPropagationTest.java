@@ -7,6 +7,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import rocks.inspectit.ocelot.instrumentation.InstrumentationSysTestBase;
+import rocks.inspectit.ocelot.instrumentation.special.HelperClasses.TestCallable;
+import rocks.inspectit.ocelot.instrumentation.special.HelperClasses.TestRunnable;
 import rocks.inspectit.ocelot.utils.TestUtils;
 
 import java.util.Arrays;
@@ -22,34 +24,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
 public class ScheduledExecutorContextPropagationTest extends InstrumentationSysTestBase {
-
-    static class TestRunnable implements Runnable {
-
-        private final Consumer<Void> callback;
-
-        public TestRunnable(Consumer<Void> callback) {
-            this.callback = callback;
-        }
-
-        @Override
-        public void run() {
-            callback.accept(null);
-        }
-    }
-
-    static class TestCallable<T> implements Callable<T> {
-
-        private final Function<Void, T> callback;
-
-        public TestCallable(Function<Void, T> callback) {
-            this.callback = callback;
-        }
-
-        @Override
-        public T call() throws Exception {
-            return callback.apply(null);
-        }
-    }
 
     private static final Tagger tagger = Tags.getTagger();
 
@@ -78,7 +52,7 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
             TagValue tagValue = TagValue.create("test-tag-value");
             AtomicReference<Iterator<Tag>> refTags = new AtomicReference<>();
 
-            Runnable runnable = () -> refTags.set(InternalUtils.getTags(tagger.getCurrentTagContext()));
+            Runnable runnable = HelperClasses.getRunnableAsLambda(refTags);
 
             ScheduledFuture<?> schedule;
             try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
@@ -97,12 +71,7 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
             TagValue tagValue = TagValue.create("test-tag-value");
             AtomicReference<Iterator<Tag>> refTags = new AtomicReference<>();
 
-            Runnable runnable = new Runnable() {
-                @Override
-                public void run() {
-                    refTags.set(InternalUtils.getTags(tagger.getCurrentTagContext()));
-                }
-            };
+            Runnable runnable = HelperClasses.getRunnableAsAnonymous(refTags);
 
             ScheduledFuture<?> schedule;
             try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
@@ -121,7 +90,7 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
             TagValue tagValue = TagValue.create("test-tag-value");
             AtomicReference<Iterator<Tag>> refTags = new AtomicReference<>();
 
-            Runnable runnable = new TestRunnable(unused -> refTags.set(InternalUtils.getTags(tagger.getCurrentTagContext())));
+            Runnable runnable = HelperClasses.getRunnableAsNamed(refTags);
 
             ScheduledFuture<?> schedule;
             try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
@@ -143,7 +112,7 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
             TagKey tagKey = TagKey.create("test-tag-key");
             TagValue tagValue = TagValue.create("test-tag-value");
 
-            Callable<Iterator<Tag>> callable = () -> InternalUtils.getTags(tagger.getCurrentTagContext());
+            Callable<Iterator<Tag>> callable = HelperClasses.getCallableAsLambda();
 
             ScheduledFuture<Iterator<Tag>> future;
             try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
@@ -161,12 +130,7 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
             TagKey tagKey = TagKey.create("test-tag-key");
             TagValue tagValue = TagValue.create("test-tag-value");
 
-            Callable<Iterator<Tag>> callable = new Callable<Iterator<Tag>>() {
-                @Override
-                public Iterator<Tag> call() throws Exception {
-                    return InternalUtils.getTags(tagger.getCurrentTagContext());
-                }
-            };
+            Callable<Iterator<Tag>> callable = HelperClasses.getCallableAsAnonymous();
 
             ScheduledFuture<Iterator<Tag>> future;
             try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
@@ -184,7 +148,7 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
             TagKey tagKey = TagKey.create("test-tag-key");
             TagValue tagValue = TagValue.create("test-tag-value");
 
-            Callable<Iterator<Tag>> callable = new TestCallable<>(unused -> InternalUtils.getTags(tagger.getCurrentTagContext()));
+            Callable<Iterator<Tag>> callable = HelperClasses.getCallableAsNamed();
 
             ScheduledFuture<Iterator<Tag>> future;
             try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {

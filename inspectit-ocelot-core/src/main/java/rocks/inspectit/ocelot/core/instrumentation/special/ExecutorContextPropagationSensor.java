@@ -50,7 +50,19 @@ public class ExecutorContextPropagationSensor implements SpecialSensor {
          */
         @Advice.OnMethodEnter
         public static void enter(@Advice.Argument(value = 0, readOnly = false) Runnable runnable) {
-            Instances.contextManager.storeContext(runnable, true);
+            if (Instances.contextManager.enterCorrelation()) {
+                if (runnable.getClass().isAnonymousClass() || runnable.getClass().getName().contains("$$Lambda$")) {
+                    runnable = Instances.logTraceCorrelator.wrap(runnable);
+                    runnable = Instances.contextManager.wrap(runnable);
+                } else {
+                    Instances.contextManager.storeContext(runnable, true);
+                }
+            }
+        }
+
+        @Advice.OnMethodExit
+        public static void onMethodExit() {
+            Instances.contextManager.exitCorrelation();
         }
     }
 }

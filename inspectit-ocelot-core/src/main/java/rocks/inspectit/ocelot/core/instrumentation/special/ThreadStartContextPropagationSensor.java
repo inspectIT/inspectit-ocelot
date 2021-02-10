@@ -46,8 +46,9 @@ public class ThreadStartContextPropagationSensor implements SpecialSensor {
         static final AsmVisitorWrapper.ForDeclaredMethods TARGET = Advice.to(ThreadStartAdvice.class).on(named("start"));
 
         @Advice.OnMethodEnter
-        public static void onMethodEnter(@Advice.This Thread thread) {
-            Instances.contextManager.storeContextForThread(thread);
+        public static void onMethodEnter(@Advice.This Thread thiz) {
+//            Instances.contextManager.storeContextForThread(thread);
+            Instances.contextManager.storeContext(thiz, true);
         }
 
     }
@@ -60,10 +61,14 @@ public class ThreadStartContextPropagationSensor implements SpecialSensor {
         static final AsmVisitorWrapper.ForDeclaredMethods TARGET = Advice.to(ThreadRunAdvice.class).on(named("run"));
 
         @Advice.OnMethodEnter
-        public static void onMethodEnter(@Advice.This Thread thread) {
-            if (Thread.currentThread() == thread) {
-                Instances.contextManager.attachContextToThread(thread);
-                Instances.logTraceCorrelator.applyCorrelationToMDC();
+        public static void onMethodEnter(@Advice.This Thread thiz) {
+            // this prevents context restoring in case the run method is called directly
+            if (Thread.currentThread() == thiz) {
+//                Instances.contextManager.attachContextToThread(thread);
+                // We don't have to remove the context from the thread once finished because a thread cannot be started
+                // twice, thus, we don't care about the context-tuple
+                Instances.contextManager.attachContext(thiz);
+//                Instances.logTraceCorrelator.applyCorrelationToMDC();
             }
         }
 

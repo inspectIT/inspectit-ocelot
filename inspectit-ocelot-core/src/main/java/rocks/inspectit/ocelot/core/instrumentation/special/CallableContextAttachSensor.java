@@ -48,7 +48,6 @@ public class CallableContextAttachSensor implements SpecialSensor {
 
         @Advice.OnMethodEnter
         public static ContextTuple onMethodEnter(@Advice.This Object thiz) {
-//            System.out.println("restore: " + thiz.getClass());
             return Instances.contextManager.attachContext(thiz);
         }
 

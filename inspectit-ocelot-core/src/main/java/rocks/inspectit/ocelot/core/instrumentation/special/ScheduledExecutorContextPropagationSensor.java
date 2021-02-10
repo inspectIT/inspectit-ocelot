@@ -63,19 +63,16 @@ public class ScheduledExecutorContextPropagationSensor implements SpecialSensor 
         public static void onMethodEnter(@Advice.Argument(value = 0, readOnly = false) Runnable runnable) {
             if (Instances.contextManager.enterCorrelation()) {
                 if (runnable.getClass().isAnonymousClass() || runnable.getClass().getName().contains("$$Lambda$")) {
-//                    System.out.println("wrap run: " + runnable.getClass());
                     runnable = Instances.logTraceCorrelator.wrap(runnable);
                     runnable = Instances.contextManager.wrap(runnable);
                 } else {
-//                    System.out.println("instr run: " + runnable.getClass());
                     Instances.contextManager.storeContext(runnable, true);
                 }
             }
         }
 
         @Advice.OnMethodExit
-        public static void onMethodExit(@Advice.This Object thiz) {
-//            System.out.println("exit scheduler - " + thiz);
+        public static void onMethodExit() {
             Instances.contextManager.exitCorrelation();
         }
     }
@@ -88,20 +85,18 @@ public class ScheduledExecutorContextPropagationSensor implements SpecialSensor 
         @Advice.OnMethodEnter
         public static void onMethodEnter(@Advice.Argument(value = 0, readOnly = false) Runnable runnable) {
             if (Instances.contextManager.enterCorrelation()) {
+                System.out.println("sch. exec. rate run");
                 if (runnable.getClass().isAnonymousClass() || runnable.getClass().getName().contains("$$Lambda$")) {
-//                    System.out.println("wrap run: " + runnable.getClass());
                     runnable = Instances.logTraceCorrelator.wrap(runnable);
                     runnable = Instances.contextManager.wrap(runnable);
                 } else {
-//                    System.out.println("instr run cont: " + runnable.getClass());
                     Instances.contextManager.storeContext(runnable, false);
                 }
             }
         }
 
         @Advice.OnMethodExit
-        public static void onMethodExit(@Advice.This Object thiz) {
-//            System.out.println("exit scheduler - " + thiz);
+        public static void onMethodExit() {
             Instances.contextManager.exitCorrelation();
         }
     }
@@ -119,19 +114,16 @@ public class ScheduledExecutorContextPropagationSensor implements SpecialSensor 
         public static void onMethodEnter(@Advice.Argument(value = 0, readOnly = false) Callable callable) {
             if (Instances.contextManager.enterCorrelation()) {
                 if (callable.getClass().isAnonymousClass() || callable.getClass().getName().contains("$$Lambda$")) {
-//                    System.out.println("##### >> wrap call: " + callable.getClass());
                     callable = Instances.logTraceCorrelator.wrap(callable);
                     callable = Instances.contextManager.wrap(callable);
                 } else {
-//                    System.out.println("instr call: " + callable.getClass());
                     Instances.contextManager.storeContext(callable, true);
                 }
             }
         }
 
         @Advice.OnMethodExit
-        public static void onMethodExit(@Advice.This Object thiz) {
-//            System.out.println("exit scheduler - " + thiz);
+        public static void onMethodExit() {
             Instances.contextManager.exitCorrelation();
         }
     }

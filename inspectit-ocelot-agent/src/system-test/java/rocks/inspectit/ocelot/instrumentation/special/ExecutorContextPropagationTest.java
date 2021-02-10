@@ -4,16 +4,21 @@ import io.opencensus.common.Scope;
 import io.opencensus.tags.*;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import rocks.inspectit.ocelot.instrumentation.InstrumentationSysTestBase;
+import rocks.inspectit.ocelot.instrumentation.special.HelperClasses.TestCallable;
 import rocks.inspectit.ocelot.utils.TestUtils;
 
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 
 public class ExecutorContextPropagationTest extends InstrumentationSysTestBase {
 
@@ -34,51 +39,195 @@ public class ExecutorContextPropagationTest extends InstrumentationSysTestBase {
         executorService.submit(Math::random).get();
     }
 
-    @Test
-    public void testContextPropagationAcrossExecutorForRunnables() throws Exception {
-        TagKey keyToPropagate = TagKey.create("propagation/test/tag");
+    @Nested
+    public class Submit_runnable {
 
-        AtomicReference<String> tagValue = new AtomicReference<>(null);
+        @Test
+        public void correlateRunnable_lambda() throws Exception {
+            TagKey tagKey = TagKey.create("tag_key");
+            TagValue tagValue = TagValue.create("tag_value");
+            AtomicReference<Iterator<Tag>> refTags = new AtomicReference<>();
 
-        Future<?> taskFuture;
+            Runnable runnable = HelperClasses.getRunnableAsLambda(refTags);
 
-        try (Scope s = tagger.currentBuilder().putLocal(keyToPropagate, TagValue.create("myval")).buildScoped()) {
-            taskFuture = executorService.submit(() -> {
-                Iterator<Tag> it = InternalUtils.getTags(tagger.getCurrentTagContext());
-                while (it.hasNext()) {
-                    Tag tag = it.next();
-                    if (tag.getKey().equals(keyToPropagate)) {
-                        tagValue.set(tag.getValue().asString());
-                    }
-                }
-            });
-        }
-        taskFuture.get();
+            Future<?> taskFuture;
+            try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
+                taskFuture = executorService.submit(runnable);
+            }
+            taskFuture.get();
 
-        assertThat(tagValue.get()).isEqualTo("myval");
-    }
-
-
-    @Test
-    public void testContextPropagationAcrossExecutorForCallables() throws Exception {
-        TagKey keyToPropagate = TagKey.create("propagation/test/tag");
-
-
-        Future<String> taskFuture;
-        try (Scope s = tagger.currentBuilder().putLocal(keyToPropagate, TagValue.create("myval")).buildScoped()) {
-            taskFuture = executorService.submit(() -> {
-                Iterator<Tag> it = InternalUtils.getTags(tagger.getCurrentTagContext());
-                while (it.hasNext()) {
-                    Tag tag = it.next();
-                    if (tag.getKey().equals(keyToPropagate)) {
-                        return tag.getValue().asString();
-                    }
-                }
-                return null;
-            });
+            assertThat(refTags.get()).hasSize(1)
+                    .extracting("key", "value")
+                    .contains(tuple(tagKey, tagValue));
         }
 
-        assertThat(taskFuture.get()).isEqualTo("myval");
+        @Test
+        public void correlateRunnable_anonymous() throws Exception {
+            TagKey tagKey = TagKey.create("tag_key");
+            TagValue tagValue = TagValue.create("tag_value");
+            AtomicReference<Iterator<Tag>> refTags = new AtomicReference<>();
+
+            Runnable runnable = HelperClasses.getRunnableAsAnonymous(refTags);
+
+            Future<?> taskFuture;
+            try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
+                taskFuture = executorService.submit(runnable);
+            }
+            taskFuture.get();
+
+            assertThat(refTags.get()).hasSize(1)
+                    .extracting("key", "value")
+                    .contains(tuple(tagKey, tagValue));
+        }
+
+        @Test
+        public void correlateRunnable_named() throws Exception {
+            TagKey tagKey = TagKey.create("tag_key");
+            TagValue tagValue = TagValue.create("tag_value");
+            AtomicReference<Iterator<Tag>> refTags = new AtomicReference<>();
+
+            Runnable runnable = HelperClasses.getRunnableAsNamed(refTags);
+
+            Future<?> taskFuture;
+            try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
+                taskFuture = executorService.submit(runnable);
+            }
+            taskFuture.get();
+
+            assertThat(refTags.get()).hasSize(1)
+                    .extracting("key", "value")
+                    .contains(tuple(tagKey, tagValue));
+        }
     }
 
+    @Nested
+    public class Execute_runnable {
+
+        @Test
+        public void correlateRunnable_lambda() throws Exception {
+            TagKey tagKey = TagKey.create("tag_key");
+            TagValue tagValue = TagValue.create("tag_value");
+            AtomicReference<Iterator<Tag>> refTags = new AtomicReference<>();
+            CountDownLatch latch = new CountDownLatch(1);
+
+            Runnable runnable = () -> {
+                refTags.set(InternalUtils.getTags(Tags.getTagger().getCurrentTagContext()));
+                latch.countDown();
+            };
+
+            try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
+                executorService.execute(runnable);
+            }
+
+            latch.await();
+
+            assertThat(refTags.get()).hasSize(1)
+                    .extracting("key", "value")
+                    .contains(tuple(tagKey, tagValue));
+        }
+
+        @Test
+        public void correlateRunnable_anonymous() throws Exception {
+            TagKey tagKey = TagKey.create("tag_key");
+            TagValue tagValue = TagValue.create("tag_value");
+            AtomicReference<Iterator<Tag>> refTags = new AtomicReference<>();
+            CountDownLatch latch = new CountDownLatch(1);
+
+            Runnable runnable = new Runnable() {
+                @Override
+                public void run() {
+                    refTags.set(InternalUtils.getTags(Tags.getTagger().getCurrentTagContext()));
+                    latch.countDown();
+                }
+            };
+
+            try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
+                executorService.execute(runnable);
+            }
+
+            latch.await();
+
+            assertThat(refTags.get()).hasSize(1)
+                    .extracting("key", "value")
+                    .contains(tuple(tagKey, tagValue));
+        }
+
+        @Test
+        public void correlateRunnable_named() throws Exception {
+            TagKey tagKey = TagKey.create("tag_key");
+            TagValue tagValue = TagValue.create("tag_value");
+            AtomicReference<Iterator<Tag>> refTags = new AtomicReference<>();
+            CountDownLatch latch = new CountDownLatch(1);
+
+            Runnable runnable = new HelperClasses.TestRunnable(unused -> {
+                refTags.set(InternalUtils.getTags(Tags.getTagger().getCurrentTagContext()));
+                latch.countDown();
+            });
+
+            try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
+                executorService.execute(runnable);
+            }
+
+            latch.await();
+
+            assertThat(refTags.get()).hasSize(1)
+                    .extracting("key", "value")
+                    .contains(tuple(tagKey, tagValue));
+        }
+    }
+
+    @Nested
+    public class Submit_callable {
+
+        @Test
+        public void submitCallable_lambda() throws Exception {
+            TagKey tagKey = TagKey.create("tag_key");
+            TagValue tagValue = TagValue.create("tag_value");
+
+            Callable<Iterator<Tag>> callable = HelperClasses.getCallableAsLambda();
+
+            Future<Iterator<Tag>> result;
+            try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
+                result = executorService.submit(callable);
+            }
+
+            assertThat(result.get()).hasSize(1)
+                    .extracting("key", "value")
+                    .contains(tuple(tagKey, tagValue));
+        }
+
+        @Test
+        public void submitCallable_anonymous() throws Exception {
+            TagKey tagKey = TagKey.create("tag_key");
+            TagValue tagValue = TagValue.create("tag_value");
+
+            Callable<Iterator<Tag>> callable = HelperClasses.getCallableAsAnonymous();
+
+            Future<Iterator<Tag>> result;
+            try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
+                result = executorService.submit(callable);
+            }
+
+            assertThat(result.get()).hasSize(1)
+                    .extracting("key", "value")
+                    .contains(tuple(tagKey, tagValue));
+        }
+
+        @Test
+        public void submitCallable_named() throws Exception {
+            TagKey tagKey = TagKey.create("tag_key");
+            TagValue tagValue = TagValue.create("tag_value");
+
+            Callable<Iterator<Tag>> callable = HelperClasses.getCallableAsNamed();
+
+            Future<Iterator<Tag>> result;
+            try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
+                result = executorService.submit(callable);
+            }
+
+            assertThat(result.get()).hasSize(1)
+                    .extracting("key", "value")
+                    .contains(tuple(tagKey, tagValue));
+        }
+    }
 }

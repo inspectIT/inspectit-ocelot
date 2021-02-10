@@ -53,6 +53,7 @@ public class LogTraceCorrelatorImpl implements LogTraceCorrelator {
             log.trace("Adding trace correlation information to MDC");
             return mdc.put(traceIdKey, context.getTraceId().toLowerBase16());
         } else {
+
             return mdc.put(traceIdKey, null);
         }
     }
