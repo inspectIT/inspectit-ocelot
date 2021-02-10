@@ -1,6 +1,5 @@
 package rocks.inspectit.ocelot.core.instrumentation.special;
 
-import lombok.val;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.asm.AsmVisitorWrapper;
 import net.bytebuddy.description.type.TypeDescription;
@@ -12,10 +11,15 @@ import rocks.inspectit.ocelot.bootstrap.context.ContextTuple;
 import rocks.inspectit.ocelot.config.model.instrumentation.SpecialSensorSettings;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.InstrumentationConfiguration;
 
-import java.util.concurrent.Callable;
-
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
+/**
+ * Advice for restoring a correlation context and doing log-trace correlation when {@link Runnable}s are used. A context
+ * is stored in a global map when a Runnable is executed using an {@link java.util.concurrent.ExecutorService}. Once the
+ * Runnable is executed, the context stored in the global map, will be restored, thus, spans created during the
+ * Runnable execution will be correlated to the trace which was active when the Runnable has been passed to the
+ * executor service. Once the Runnable is exiting the context is removed and the previous one is restored.
+ */
 @Component
 public class RunnableContextAttachSensor implements SpecialSensor {
 
@@ -43,6 +47,9 @@ public class RunnableContextAttachSensor implements SpecialSensor {
         return builder.visit(RunnableRunAdvice.TARGET);
     }
 
+    /**
+     * Advice for the {@link Runnable#run()} method.
+     */
     private static class RunnableRunAdvice {
 
         static final AsmVisitorWrapper.ForDeclaredMethods TARGET = Advice.to(RunnableRunAdvice.class).on(named("run").and(takesNoArguments()));

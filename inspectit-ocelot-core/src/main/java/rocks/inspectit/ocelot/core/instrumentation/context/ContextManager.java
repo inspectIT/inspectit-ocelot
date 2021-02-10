@@ -37,12 +37,13 @@ public class ContextManager implements IContextManager {
     /**
      * Cache for storing the context objects.
      */
-    private final Cache<Thread, Context> storedContexts = CacheBuilder.newBuilder().weakKeys().build();
-
     private final Cache<Object, InvalidationContext> contextCache = CacheBuilder.newBuilder().weakKeys().build();
 
+    /**
+     * Flag for marking if a context correlation is in progress. See {@link rocks.inspectit.ocelot.core.instrumentation.special.ExecutorContextPropagationSensor}
+     * for more details.
+     */
     private final ThreadLocal<Boolean> correlationFlag = ThreadLocal.withInitial(() -> false);
-
 
     public ContextManager(CommonTagsManager commonTagsManager, InstrumentationConfigurationResolver configProvider) {
         this.commonTagsManager = commonTagsManager;
@@ -125,24 +126,42 @@ public class ContextManager implements IContextManager {
         correlationFlag.set(false);
     }
 
+    /**
+     * Container class for storing contexts in the {@link #contextCache}.
+     */
     @AllArgsConstructor
     private class InvalidationContext {
 
+        /**
+         * Whether the context should be removed from the context cache after it has been restored.
+         */
         private final boolean invalidate;
 
         @NonNull
         private final Context context;
     }
 
+    /**
+     * {@link ContextTuple} implementation used by {@link #detachContext(ContextTuple)} for detaching a context.
+     */
     @AllArgsConstructor
     private class ContextTupleImpl implements ContextTuple {
 
+        /**
+         * The previous context.
+         */
         @NonNull
         private final Context previous;
 
+        /**
+         * The context which has been attached.
+         */
         @NonNull
         private final Context current;
 
+        /**
+         * {@link AutoCloseable} for undoing the trace id injection into the logging MDCs.
+         */
         @NonNull
         private final AutoCloseable undoTraceInjection;
     }

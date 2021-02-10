@@ -8,6 +8,7 @@ import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.matcher.ElementMatcher;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.bootstrap.Instances;
+import rocks.inspectit.ocelot.bootstrap.context.IContextManager;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.InstrumentationConfiguration;
 
 import java.util.concurrent.Callable;
@@ -24,8 +25,27 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
  * <li>{@link ScheduledExecutorService#schedule(Callable, long, TimeUnit)}
  * <li>{@link ScheduledExecutorService#scheduleWithFixedDelay(Runnable, long, long, TimeUnit)}
  * <li>{@link ScheduledExecutorService#scheduleAtFixedRate(Runnable, long, long, TimeUnit)}
- * </ul><p>
+ * </ul>
+ * <p>
+ * In the advices which are injected into the executor methods, the following is done:
+ * <p>
+ * The advice will wrap the {@link java.lang.Runnable} or {@link java.util.concurrent.Callable} for attaching and
+ * detaching the current context and doing log-trace correlation. See also {@link io.grpc.Context#wrap(Runnable)}. This
+ * is only done in case the Runnable is a lambda class.
+ * <p>
+ * If the Runnable's class is a named or anonymous class, the current context is stored in a global cache related to
+ * the Runnable. See also {@link rocks.inspectit.ocelot.bootstrap.context.IContextManager#storeContext(Object, boolean)}.
+ * This is done to prevent any errors when the application requires the Runnable to be in its original class, which
+ * is not given if we wrap it. An example for this would be JBoss custom executor which casts the executed Runnable
+ * into a known class.
+ * <p>
+ * In order to prevent unnecessary context passing (e.g. in case multiple executors are being called via delegation
+ * executors ({@link java.util.concurrent.Executors.FinalizableDelegatedExecutorService})), the method
+ * {@link IContextManager#enterCorrelation()} is called. This is done to set a flag on the current thread in order to
+ * mark that a correlation has been done (wrapping or storing the context) and following executors should not doing
+ * a correlation as well. This flag is cleaned once the executor's method finishes.
  */
+
 @Component
 public class ScheduledExecutorContextPropagationSensor implements SpecialSensor {
 
@@ -51,8 +71,7 @@ public class ScheduledExecutorContextPropagationSensor implements SpecialSensor 
     }
 
     /**
-     * Advice for wrapping the first method argument - which has to be a {@link Runnable} - into a Runnable for attaching
-     * and detaching the current context. See also {@link io.grpc.Context#wrap(Runnable)}.
+     * Advice for the {@link ScheduledExecutorService#schedule(Runnable, long, TimeUnit)} method.
      */
     private static class ScheduledExecutorRunnableAdvice {
 
@@ -63,6 +82,8 @@ public class ScheduledExecutorContextPropagationSensor implements SpecialSensor 
         public static void onMethodEnter(@Advice.Argument(value = 0, readOnly = false) Runnable runnable) {
             if (Instances.contextManager.enterCorrelation()) {
                 if (runnable.getClass().getName().contains("$$Lambda$")) {
+                    // order is important because the log-correlator requires the restored context, thus, have to be
+                    // called after the context wrapper (needs to be nested by it)
                     runnable = Instances.logTraceCorrelator.wrap(runnable);
                     runnable = Instances.contextManager.wrap(runnable);
                 } else {
@@ -77,6 +98,10 @@ public class ScheduledExecutorContextPropagationSensor implements SpecialSensor 
         }
     }
 
+    /**
+     * Advice for the {@link ScheduledExecutorService#scheduleAtFixedRate(Runnable, long, long, TimeUnit)} and
+     * {@link ScheduledExecutorService#scheduleWithFixedDelay(Runnable, long, long, TimeUnit)} methods.
+     */
     private static class ScheduledExecutorRunnableContinuousAdvice {
 
         static final AsmVisitorWrapper.ForDeclaredMethods TARGET = Advice.to(ScheduledExecutorRunnableContinuousAdvice.class)
@@ -86,6 +111,8 @@ public class ScheduledExecutorContextPropagationSensor implements SpecialSensor 
         public static void onMethodEnter(@Advice.Argument(value = 0, readOnly = false) Runnable runnable) {
             if (Instances.contextManager.enterCorrelation()) {
                 if (runnable.getClass().getName().contains("$$Lambda$")) {
+                    // order is important because the log-correlator requires the restored context, thus, have to be
+                    // called after the context wrapper (needs to be nested by it)
                     runnable = Instances.logTraceCorrelator.wrap(runnable);
                     runnable = Instances.contextManager.wrap(runnable);
                 } else {
@@ -101,8 +128,7 @@ public class ScheduledExecutorContextPropagationSensor implements SpecialSensor 
     }
 
     /**
-     * Advice for wrapping the first method argument - which has to be a {@link Callable} - into a Callback for attaching and detaching the current context.
-     * See also {@link io.grpc.Context#wrap(Callable)}
+     * Advice for the {@link ScheduledExecutorService#schedule(Callable, long, TimeUnit)} method.
      */
     private static class ScheduledExecutorCallableAdvice {
 
@@ -113,6 +139,8 @@ public class ScheduledExecutorContextPropagationSensor implements SpecialSensor 
         public static void onMethodEnter(@Advice.Argument(value = 0, readOnly = false) Callable callable) {
             if (Instances.contextManager.enterCorrelation()) {
                 if (callable.getClass().getName().contains("$$Lambda$")) {
+                    // order is important because the log-correlator requires the restored context, thus, have to be
+                    // called after the context wrapper (needs to be nested by it)
                     callable = Instances.logTraceCorrelator.wrap(callable);
                     callable = Instances.contextManager.wrap(callable);
                 } else {

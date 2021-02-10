@@ -15,6 +15,10 @@ import java.util.concurrent.Callable;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
+/**
+ * Advice for restoring a correlation context and doing log-trace correlation when {@link Callable}s are used.
+ * Please see the documentation of {@link RunnableContextAttachSensor} for more details!
+ */
 @Component
 public class CallableContextAttachSensor implements SpecialSensor {
 
@@ -42,6 +46,9 @@ public class CallableContextAttachSensor implements SpecialSensor {
         return builder.visit(CallableCallAdvice.TARGET);
     }
 
+    /**
+     * Advice for the {@link Callable#call()} method.
+     */
     private static class CallableCallAdvice {
 
         static final AsmVisitorWrapper.ForDeclaredMethods TARGET = Advice.to(CallableCallAdvice.class).on(named("call").and(takesNoArguments()));

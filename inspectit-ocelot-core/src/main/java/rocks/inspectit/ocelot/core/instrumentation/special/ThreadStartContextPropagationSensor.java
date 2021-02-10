@@ -1,6 +1,5 @@
 package rocks.inspectit.ocelot.core.instrumentation.special;
 
-import lombok.val;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.asm.AsmVisitorWrapper;
 import net.bytebuddy.description.type.TypeDescription;
@@ -8,6 +7,7 @@ import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.matcher.ElementMatcher;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.bootstrap.Instances;
+import rocks.inspectit.ocelot.bootstrap.context.IContextManager;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.InstrumentationConfiguration;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
@@ -15,6 +15,12 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
 /**
  * Special sensor for passing the sensor to new threads. This sensor will pass the context when directly using the
  * {@link Thread} class or classes extending it.
+ * <p>
+ * When storing the context information, we check whether the thread is started by an executor. This is done using the
+ * method {@link IContextManager#insideCorrelation()}. In case this flag is set, we don't store the current context.
+ * This has been done because executor services might spawn new worker threads. In case we don't prevent the correlation
+ * in this case, the executor's worker thread will receive the current context. This leads to the problem, that each
+ * executor task - with has no context - will be related to the trace context attached to the thread.
  */
 @Component
 public class ThreadStartContextPropagationSensor implements SpecialSensor {
